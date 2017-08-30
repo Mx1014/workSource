@@ -43,6 +43,12 @@ public interface EnterpriseCustomerProvider {
     List<CustomerPatent> listCustomerPatentsByCustomerId(Long customerId);
     Map<Long, Long> listCustomerPatentsByCustomerIds(List<Long> customerIds);
 
+    void createCustomerCertificate(CustomerCertificate certificate);
+    void updateCustomerCertificate(CustomerCertificate certificate);
+    void deleteCustomerCertificate(CustomerCertificate certificate);
+    CustomerCertificate findCustomerCertificateById(Long id);
+    List<CustomerCertificate> listCustomerCertificatesByCustomerId(Long customerId);
+
     void createCustomerApplyProject(CustomerApplyProject project);
     void updateCustomerApplyProject(CustomerApplyProject project);
     void deleteCustomerApplyProject(CustomerApplyProject project);

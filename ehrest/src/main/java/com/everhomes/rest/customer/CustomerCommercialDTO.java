@@ -47,7 +47,7 @@ public class CustomerCommercialDTO {
     private String unifiedSocialCreditCode;
     private String businessScope;
     private Timestamp foundationDate;
-    private Long taxRegistrationDate;
+    private Timestamp taxRegistrationDate;
     private Timestamp validityBeginDate;
     private Timestamp validityEndDate;
     private String registeredAddr;
@@ -220,11 +220,11 @@ public class CustomerCommercialDTO {
         this.shareTypeItemName = shareTypeItemName;
     }
 
-    public Long getTaxRegistrationDate() {
+    public Timestamp getTaxRegistrationDate() {
         return taxRegistrationDate;
     }
 
-    public void setTaxRegistrationDate(Long taxRegistrationDate) {
+    public void setTaxRegistrationDate(Timestamp taxRegistrationDate) {
         this.taxRegistrationDate = taxRegistrationDate;
     }
 

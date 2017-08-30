@@ -499,6 +499,74 @@ public class CustomerController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /customer/createCustomerCertificate</b>
+     * <p>新建企业证书</p>
+     */
+    @RequestMapping("createCustomerCertificate")
+    @RestReturn(value = String.class)
+    public RestResponse createCustomerCertificate(@Valid CreateCustomerCertificateCommand cmd) {
+        customerService.createCustomerCertificate(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/updateCustomerCertificate</b>
+     * <p>修改企业证书</p>
+     */
+    @RequestMapping("updateCustomerCertificate")
+    @RestReturn(value = String.class)
+    public RestResponse updateCustomerCertificate(@Valid UpdateCustomerCertificateCommand cmd) {
+        customerService.updateCustomerCertificate(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/deleteCustomerCertificate</b>
+     * <p>删除企业证书</p>
+     */
+    @RequestMapping("deleteCustomerCertificate")
+    @RestReturn(value = String.class)
+    public RestResponse deleteCustomerCertificate(@Valid DeleteCustomerCertificateCommand cmd) {
+        customerService.deleteCustomerCertificate(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/getCustomerCertificate</b>
+     * <p>查看企业专利</p>
+     */
+    @RequestMapping("getCustomerCertificate")
+    @RestReturn(value = CustomerCertificateDTO.class)
+    public RestResponse getCustomerCertificate(@Valid GetCustomerCertificateCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerCertificate(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/listCustomerCertificates</b>
+     * <p>列出企业专利</p>
+     */
+    @RequestMapping("listCustomerCertificates")
+    @RestReturn(value = CustomerCertificateDTO.class, collection = true)
+    public RestResponse listCustomerCertificates(@Valid ListCustomerCertificatesCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerCertificates(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 //    申报项目
     /**
      * <b>URL: /customer/createCustomerApplyProject</b>

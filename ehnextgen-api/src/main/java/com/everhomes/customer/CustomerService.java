@@ -35,6 +35,12 @@ public interface CustomerService {
     CustomerPatentDTO getCustomerPatent(GetCustomerPatentCommand cmd);
     List<CustomerPatentDTO> listCustomerPatents(ListCustomerPatentsCommand cmd);
 
+    void createCustomerCertificate(CreateCustomerCertificateCommand cmd);
+    void updateCustomerCertificate(UpdateCustomerCertificateCommand cmd);
+    void deleteCustomerCertificate(DeleteCustomerCertificateCommand cmd);
+    CustomerCertificateDTO getCustomerCertificate(GetCustomerCertificateCommand cmd);
+    List<CustomerCertificateDTO> listCustomerCertificates(ListCustomerCertificatesCommand cmd);
+
     void createCustomerApplyProject(CreateCustomerApplyProjectCommand cmd);
     void updateCustomerApplyProject(UpdateCustomerApplyProjectCommand cmd);
     void deleteCustomerApplyProject(DeleteCustomerApplyProjectCommand cmd);

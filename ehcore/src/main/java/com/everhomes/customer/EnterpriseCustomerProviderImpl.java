@@ -798,4 +798,64 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         dao.update(trademark);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTrademarks.class, trademark.getId());
     }
+
+    @Override
+    public void createCustomerCertificate(CustomerCertificate certificate) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerCertificates.class));
+        certificate.setId(id);
+        certificate.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        certificate.setCreateUid(UserContext.current().getUser().getId());
+        certificate.setStatus(CommonStatus.ACTIVE.getCode());
+
+        LOGGER.info("createCustomerCertificate: " + certificate);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerCertificates.class, id));
+        EhCustomerCertificatesDao dao = new EhCustomerCertificatesDao(context.configuration());
+        dao.insert(certificate);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerCertificates.class, null);
+    }
+
+    @Override
+    public void deleteCustomerCertificate(CustomerCertificate certificate) {
+        assert(certificate.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerCertificates.class, certificate.getId()));
+        EhCustomerCertificatesDao dao = new EhCustomerCertificatesDao(context.configuration());
+        dao.delete(certificate);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerCertificates.class, certificate.getId());
+    }
+
+    @Override
+    public CustomerCertificate findCustomerCertificateById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerCertificatesDao dao = new EhCustomerCertificatesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerCertificate.class);
+    }
+
+    @Override
+    public List<CustomerCertificate> listCustomerCertificatesByCustomerId(Long customerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerCertificatesRecord> query = context.selectQuery(Tables.EH_CUSTOMER_CERTIFICATES);
+        query.addConditions(Tables.EH_CUSTOMER_CERTIFICATES.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_CERTIFICATES.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerCertificate> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerCertificate.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public void updateCustomerCertificate(CustomerCertificate certificate) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerCertificates.class, certificate.getId()));
+        EhCustomerCertificatesDao dao = new EhCustomerCertificatesDao(context.configuration());
+
+        certificate.setOperatorUid(UserContext.current().getUser().getId());
+        certificate.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(certificate);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerCertificates.class, certificate.getId());
+    }
 }

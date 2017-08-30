@@ -14,6 +14,7 @@ public interface CustomerErrorCode {
     int ERROR_CUSTOMER_TRADEMARK_NOT_EXIST = 10006;  //客户商标不存在
     int ERROR_CUSTOMER_ECONOMIC_INDICATOR_NOT_EXIST = 10007;  //客户经济指标不存在
     int ERROR_CUSTOMER_INVESTMENT_NOT_EXIST = 10008;  //客户经济指标不存在
+    int ERROR_CUSTOMER_CERTIFICATE_NOT_EXIST = 10009;  //客户证书不存在
     int ERROR_CUSTOMER_NAME_IS_NULL = 10010;  //客户名称为空
     int ERROR_CUSTOMER_CONTACT_IS_NULL = 10011;  //客户联系人为空
     int ERROR_CUSTOMER_CONTACT_MOBILE_IS_NULL = 10012;  //客户联系人手机号为空

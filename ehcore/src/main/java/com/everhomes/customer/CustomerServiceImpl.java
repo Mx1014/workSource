@@ -858,6 +858,61 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public void createCustomerCertificate(CreateCustomerCertificateCommand cmd) {
+        CustomerCertificate certificate = ConvertHelper.convert(cmd, CustomerCertificate.class);
+        if(cmd.getRegisteDate() != null) {
+            certificate.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
+        }
+        enterpriseCustomerProvider.createCustomerCertificate(certificate);
+    }
+
+    @Override
+    public void deleteCustomerCertificate(DeleteCustomerCertificateCommand cmd) {
+        CustomerCertificate certificate = checkCustomerCertificate(cmd.getId(), cmd.getCustomerId());
+        enterpriseCustomerProvider.deleteCustomerCertificate(certificate);
+    }
+
+    private CustomerCertificate checkCustomerCertificate(Long id, Long customerId) {
+        CustomerCertificate certificate = enterpriseCustomerProvider.findCustomerCertificateById(id);
+        if(certificate == null || !certificate.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(certificate.getStatus()))) {
+            LOGGER.error("enterprise customer certificate is not exist or active. id: {}, certificate: {}", id, certificate);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_CERTIFICATE_NOT_EXIST,
+                    "customer certificate is not exist or active");
+        }
+        return certificate;
+    }
+
+    @Override
+    public CustomerCertificateDTO getCustomerCertificate(GetCustomerCertificateCommand cmd) {
+        CustomerCertificate certificate = checkCustomerCertificate(cmd.getId(), cmd.getCustomerId());
+        return ConvertHelper.convert(certificate, CustomerCertificateDTO.class);
+    }
+
+    @Override
+    public List<CustomerCertificateDTO> listCustomerCertificates(ListCustomerCertificatesCommand cmd) {
+        List<CustomerCertificate> certificates = enterpriseCustomerProvider.listCustomerCertificatesByCustomerId(cmd.getCustomerId());
+        if(certificates != null && certificates.size() > 0) {
+            return certificates.stream().map(certificate -> {
+                return ConvertHelper.convert(certificate, CustomerCertificateDTO.class);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public void updateCustomerCertificate(UpdateCustomerCertificateCommand cmd) {
+        CustomerCertificate exist = checkCustomerCertificate(cmd.getId(), cmd.getCustomerId());
+        CustomerCertificate certificate = ConvertHelper.convert(cmd, CustomerCertificate.class);
+        if(cmd.getRegisteDate() != null) {
+            certificate.setRegisteDate(new Timestamp(cmd.getRegisteDate()));
+        }
+        certificate.setCreateTime(exist.getCreateTime());
+        certificate.setCreateUid(exist.getCreateUid());
+        enterpriseCustomerProvider.updateCustomerCertificate(certificate);
+    }
+
+    @Override
     public CustomerIndustryStatisticsResponse listCustomerIndustryStatistics(ListEnterpriseCustomerStatisticsCommand cmd) {
         CustomerIndustryStatisticsResponse response = new CustomerIndustryStatisticsResponse();
         List<CustomerIndustryStatisticsDTO> dtos = new ArrayList<>();
