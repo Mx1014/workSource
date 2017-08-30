@@ -85,7 +85,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		BasicDescriptionDTO description = new BasicDescriptionDTO();
 		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
 		description.setPunchDate(new Timestamp(content.getPunchDate()));
-		description.setPunchIntevalNo(content.getPunchIntevalNo());
+		description.setPunchIntervalNo(content.getPunchIntervalNo());
 		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(approvalRequest.getCreatorUid(), 
 				approvalRequest.getOwnerId(), dateSF.format(new Date(approvalRequest.getLongTag1())));
 		description.setPunchDetail(processPunchDetail(pdl,content));
@@ -117,7 +117,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		ApprovalRequest approvalRequest = super.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
 		approvalRequest.setContentJson(JSON.toJSONString(approvalExceptionContent));
 		approvalRequest.setLongTag1(approvalExceptionContent.getPunchDate()); 
-		PunchExceptionRequest punchExceptionRequest = getPunchExceptionRequest(userId, ownerInfo.getOwnerId(), approvalExceptionContent.getPunchDate(), approvalExceptionContent.getPunchIntevalNo()); 
+		PunchExceptionRequest punchExceptionRequest = getPunchExceptionRequest(userId, ownerInfo.getOwnerId(), approvalExceptionContent.getPunchDate(), approvalExceptionContent.getPunchIntervalNo()); 
 		if (punchExceptionRequest != null) {
 			approvalRequest.setId(punchExceptionRequest.getRequestId());
 			//因为异常申请，再次申请时是同一张单据，所以需要删除之前申请的附件
@@ -133,7 +133,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		ApprovalExceptionContent approvalExceptionContent = JSONObject.parseObject(cmd.getContentJson(), ApprovalExceptionContent.class);
 		//处理考勤
 		//插入一条记录.让用户查看考勤的时候 看到的是查看异常申请而不是添加异常申请
-		PunchExceptionRequest punchExceptionRequest = getPunchExceptionRequest(userId, ownerInfo.getOwnerId(), approvalExceptionContent.getPunchDate(), approvalExceptionContent.getPunchIntevalNo()); 
+		PunchExceptionRequest punchExceptionRequest = getPunchExceptionRequest(userId, ownerInfo.getOwnerId(), approvalExceptionContent.getPunchDate(), approvalExceptionContent.getPunchIntervalNo()); 
 		if (punchExceptionRequest != null) {
 			punchExceptionRequest.setDescription(approvalRequest.getReason());
 			punchProvider.updatePunchExceptionRequest(punchExceptionRequest);
@@ -191,13 +191,13 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		punchExceptionRequest.setOperatorUid(userId);
 		punchExceptionRequest.setViewFlag(ViewFlags.NOTVIEW.getCode());
 		punchExceptionRequest.setRequestId(approvalRequest.getId());
-		punchExceptionRequest.setPunchIntervalNo(approvalExceptionContent.getPunchIntevalNo());
+		punchExceptionRequest.setPunchIntervalNo(approvalExceptionContent.getPunchIntervalNo());
 		punchProvider.createPunchExceptionRequest(punchExceptionRequest);
 	}
 	
-	private PunchExceptionRequest getPunchExceptionRequest(Long userId, Long ownerId, Long punchDate, Integer punchIntevalNo){
+	private PunchExceptionRequest getPunchExceptionRequest(Long userId, Long ownerId, Long punchDate, Integer PunchIntervalNo){
 		//异常申请的重新申请是同一张单据，所以需要检查一下是否之前申请过，如果申请过则更新之前的
-		return punchProvider.findPunchExceptionRequest(userId, ownerId, punchDate, punchIntevalNo);
+		return punchProvider.findPunchExceptionRequest(userId, ownerId, punchDate, PunchIntervalNo);
 	}
 
 	@Override
@@ -218,10 +218,10 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		if (punchExceptionApproval != null) {
 			String statusList = punchExceptionApproval.getApprovalStatusList();
 			if(null == statusList){
-				statusList = createStatusList(punchExceptionApproval.getPunchTimesPerDay(), approvalExceptionContent.getPunchIntevalNo());
+				statusList = createStatusList(punchExceptionApproval.getPunchTimesPerDay(), approvalExceptionContent.getPunchIntervalNo());
 			}else{
 				String[] statusArray = statusList.split(PunchConstants.STATUS_SEPARATOR);
-				statusArray[approvalExceptionContent.getPunchIntevalNo()-1] = String.valueOf(ExceptionStatus.NORMAL.getCode());
+				statusArray[approvalExceptionContent.getPunchIntervalNo()-1] = String.valueOf(ExceptionStatus.NORMAL.getCode());
 				statusList =statusArray[0];
 				for(int i =1;i<punchExceptionApproval.getPunchTimesPerDay()/2;i++) {
 					statusList = statusList + PunchConstants.STATUS_SEPARATOR + statusArray[i];
@@ -233,7 +233,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 			punchProvider.updatePunchExceptionApproval(punchExceptionApproval);
 		}else {
 			punchExceptionApproval = new PunchExceptionApproval();
-			String statusList = createStatusList(punchExceptionApproval.getPunchTimesPerDay(), approvalExceptionContent.getPunchIntevalNo());
+			String statusList = createStatusList(punchExceptionApproval.getPunchTimesPerDay(), approvalExceptionContent.getPunchIntervalNo());
 			punchExceptionApproval.setApprovalStatusList(statusList);
 			punchExceptionApproval.setUserId(approvalRequest.getCreatorUid());
 			punchExceptionApproval.setEnterpriseId(approvalRequest.getOwnerId());
@@ -273,11 +273,11 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		}
 	}
 
-	private String createStatusList(Byte punchTimesPerDay, Integer punchIntevalNo) {
+	private String createStatusList(Byte punchTimesPerDay, Integer PunchIntervalNo) {
 		String statusList = "";
-		for (int i = 0; i < punchIntevalNo / 2; i++) {
+		for (int i = 0; i < PunchIntervalNo / 2; i++) {
 			String status = String.valueOf(ExceptionStatus.EXCEPTION.getCode());
-			if (i == punchIntevalNo - 1)
+			if (i == PunchIntervalNo - 1)
 				status = String.valueOf(ExceptionStatus.NORMAL.getCode());
 
 			if (i == 0)
@@ -295,7 +295,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 			ApprovalExceptionContent approvalExceptionContent = JSONObject.parseObject(a.getContentJson(), ApprovalExceptionContent.class);
 			exceptionRequest.setRequestId(a.getId());
 			exceptionRequest.setPunchDate(new Timestamp(approvalExceptionContent.getPunchDate()));
-			exceptionRequest.setPunchIntevalNo(approvalExceptionContent.getPunchIntevalNo());
+			exceptionRequest.setPunchIntervalNo(approvalExceptionContent.getPunchIntervalNo());
 			exceptionRequest.setNickName(approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()));
 			exceptionRequest.setReason(a.getReason());
 			exceptionRequest.setPunchStatusName(approvalExceptionContent.getPunchStatusName());
@@ -384,11 +384,11 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		map.put("date",processRequestDate(new Date(a.getLongTag1()) ,content));
 		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(new Date(a.getLongTag1())));
 		map.put("punchLog",processPunchDetail(pdl,content)) ;
-//		if(null == content || content.getPunchIntevalNo().equals(PunchIntevalNo.ALL_DAY.getCode()))
+//		if(null == content || content.getPunchIntervalNo().equals(PunchIntervalNo.ALL_DAY.getCode()))
 			map.put("punchStatus", punchService.statusToString(pdl.getStatus()));
-//		else if(content.getPunchIntevalNo().equals(PunchIntevalNo.MORNING.getCode()))
+//		else if(content.getPunchIntervalNo().equals(PunchIntervalNo.MORNING.getCode()))
 //			map.put("punchStatus", punchService.statusToString(pdl.getMorningStatus()) );
-//		else if(content.getPunchIntevalNo().equals(PunchIntevalNo.AFTERNOON.getCode()))
+//		else if(content.getPunchIntervalNo().equals(PunchIntervalNo.AFTERNOON.getCode()))
 //			map.put("punchStatus", punchService.statusToString(pdl.getAfternoonStatus()));
 		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
 		
@@ -417,12 +417,12 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 //		else if(PunchTimesPerDay.FORTH.getCode().equals(pdl.getPunchTimesPerDay())){
 //
 //			if(null != content){
-//				if(content.getPunchIntevalNo().equals(PunchIntevalNo.MORNING.getCode()) && null != pdl.getArriveTime() ){
+//				if(content.getPunchIntervalNo().equals(PunchIntervalNo.MORNING.getCode()) && null != pdl.getArriveTime() ){
 //					punchDetail = minSecSF.format(pdl.getArriveTime());
 //					if(null != pdl.getNoonLeaveTime() )
 //						punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getNoonLeaveTime());
 //					}
-//				else if(content.getPunchIntevalNo().equals(PunchIntevalNo.AFTERNOON.getCode()) &&null != pdl.getAfternoonArriveTime() ){
+//				else if(content.getPunchIntervalNo().equals(PunchIntervalNo.AFTERNOON.getCode()) &&null != pdl.getAfternoonArriveTime() ){
 //					punchDetail = minSecSF.format(pdl.getAfternoonArriveTime());
 //					if(null != pdl.getLeaveTime() )
 //						punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getLeaveTime());
@@ -440,7 +440,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 			ApprovalRequest approvalRequest) { 
 		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
 		result.setPunchDate( content.getPunchDate() );
-		result.setPunchIntevalNo(content.getPunchIntevalNo()); 
+		result.setPunchIntervalNo(content.getPunchIntervalNo()); 
 		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(approvalRequest.getCreatorUid(), 
 				approvalRequest.getOwnerId(), dateSF.format(new Date(approvalRequest.getLongTag1())));
 		result.setPunchDetail(processPunchDetail(pdl,content));

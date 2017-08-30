@@ -7,14 +7,14 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>punchDate: 打卡日期</li>
- * <li>punchIntevalNo: 当天第几个班次</li>
+ * <li>punchIntervalNo: 当天第几个班次</li>
  * <li>punchDetail: 打卡详情</li>
  * <li>punchStatusName: 打卡状态名称</li>
  * </ul>
  */
 public class ApprovalExceptionContent {
 	private Long punchDate;
-	private Integer punchIntevalNo;
+	private Integer punchIntervalNo;
 	private String punchDetail;
 	private String punchStatusName;
 
@@ -47,11 +47,11 @@ public class ApprovalExceptionContent {
 		return StringHelper.toJsonString(this);
 	}
 
-	public Integer getPunchIntevalNo() {
-		return punchIntevalNo;
+	public Integer getPunchIntervalNo() {
+		return punchIntervalNo;
 	}
 
-	public void setPunchIntevalNo(Integer punchIntevalNo) {
-		this.punchIntevalNo = punchIntevalNo;
-	}
+	public void setPunchIntervalNo(Integer punchIntervalNo) {
+		this.punchIntervalNo = punchIntervalNo;
+	} 
 }

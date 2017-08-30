@@ -10,3 +10,9 @@ UPDATE eh_web_menus SET data_type = 'react:/attendance-management/attendance-rec
 SET @id =(SELECT MAX(id) FROM eh_locale_strings); 
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'punch.status','17','zh_CN','非工作日'); 
 UPDATE eh_locale_strings SET TEXT = '缺卡' WHERE scope = 'punch.status' AND  CODE = '17' ;
+
+-- 更改工作流显示
+UPDATE eh_locale_templates SET TEXT = '异常日期：${exceptionDate}
+打卡时间：${punchDetail}' WHERE scope = 'approval.flow.context' AND CODE = 2 ;
+
+UPDATE eh_locale_strings SET TEXT ='打卡时间' WHERE scope ='approval.flow' AND  CODE = 'punchDetail';

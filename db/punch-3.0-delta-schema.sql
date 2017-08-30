@@ -9,7 +9,7 @@ ALTER TABLE `eh_punch_day_logs` ADD COLUMN `punch_organization_id` BIGINT;
 ALTER TABLE `eh_punch_day_logs` ADD COLUMN `rule_type` TINYINT DEFAULT '0' COMMENT '0- 排班制 ; 1- 固定班次';
 ALTER TABLE `eh_punch_day_logs` ADD COLUMN `time_rule_name` VARCHAR(64) COMMENT '排班规则名称';
 ALTER TABLE `eh_punch_day_logs` ADD COLUMN `time_rule_id` BIGINT COMMENT '排班规则id';
-ALTER TABLE `eh_punch_day_logs` ADD COLUMN `approval_status_list` VARCHAR(20) COMMENT 'null 没审批, 0-审批正常';
+ALTER TABLE `eh_punch_day_logs` ADD COLUMN `approval_status_list` VARCHAR(20) COMMENT '1-未审批 0-审批正常 例如:0/1;1/1/0/1';
 
 ALTER TABLE `eh_punch_logs` ADD COLUMN `punch_type` TINYINT DEFAULT '0' COMMENT '0- 上班打卡 ; 1- 下班打卡'; 
 ALTER TABLE `eh_punch_logs` ADD COLUMN `punch_interval_no` INT DEFAULT '1' COMMENT '第几次排班的打卡'; 
@@ -18,7 +18,7 @@ ALTER TABLE `eh_punch_logs` ADD COLUMN `status` TINYINT COMMENT '打卡状态 0-
 
 ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `punch_interval_no` INT DEFAULT '1' COMMENT '第几次排班的打卡'; 
 
-ALTER TABLE `eh_punch_exception_approvals` ADD COLUMN `approval_status_list` VARCHAR(20) COMMENT '0-审批正常';
+ALTER TABLE `eh_punch_exception_approvals` ADD COLUMN `approval_status_list` VARCHAR(20) COMMENT '1-未审批 0-审批正常 例如:0/1;1/1/0/1';
 
 ALTER TABLE `eh_punch_statistics` ADD COLUMN `punch_org_name` VARCHAR(64) COMMENT '所属规则-考勤组';
 ALTER TABLE `eh_punch_statistics` ADD COLUMN `detail_id` BIGINT COMMENT '用户detailId';
