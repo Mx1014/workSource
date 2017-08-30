@@ -1726,13 +1726,19 @@ public class ForumServiceImpl implements ForumService {
             query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
                 Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
-            
-            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
-            if(needTemporary != null && needTemporary.byteValue() == 1){
-            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
-            }else{
-            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+
+//            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
+//            if(needTemporary != null && needTemporary.byteValue() == 1){
+//            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+//            }else{
+//            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+//            }
+
+            Condition temporaryCondition = getTemporaryCondition(needTemporary);
+            if(temporaryCondition != null){
+                query.addConditions(temporaryCondition);
             }
+
             
             if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.UNPUBLISHED){
             	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.gt(timestemp));
@@ -1803,7 +1809,21 @@ public class ForumServiceImpl implements ForumService {
           return dto;  
         }).collect(Collectors.toList());
     }
-    
+
+
+    private Condition getTemporaryCondition(Byte needTemporary){
+
+        Condition condition = null;
+        //新增暂存活动，后台管理员在web端要看到暂存的活动 add by yanjun 20170513
+        if(needTemporary == null || needTemporary.byteValue() == NeedTemporaryType.PUBLISH.getCode()){
+            condition = Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode());
+        }else if(needTemporary.byteValue() == NeedTemporaryType.ALL.getCode()){
+            condition = Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode());
+        }else if(needTemporary.byteValue() == NeedTemporaryType.TEMPORARY.getCode()){
+            condition = Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.WAITING_FOR_CONFIRMATION.getCode());
+        }
+        return  condition;
+    }
     @Override
     public void likeTopic(LikeTopicCommand cmd) {
         User operator = UserContext.current().getUser();
@@ -2735,11 +2755,15 @@ public class ForumServiceImpl implements ForumService {
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId()));
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
             
-            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
-            if(cmd.getNeedTemporary() != null && cmd.getNeedTemporary().byteValue() == 1){
-            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
-            }else{
-            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+//            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
+//            if(cmd.getNeedTemporary() != null && cmd.getNeedTemporary().byteValue() == 1){
+//            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+//            }else{
+//            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+//            }
+            Condition temporaryCondition = getTemporaryCondition(cmd.getNeedTemporary());
+            if(temporaryCondition != null){
+                query.addConditions(temporaryCondition);
             }
 
             //支持按话题、活动、投票来查询数据   add by yanjun 20170612
@@ -2917,11 +2941,15 @@ public class ForumServiceImpl implements ForumService {
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId())); 
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
             
-            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
-            if(cmd.getNeedTemporary() != null && cmd.getNeedTemporary().byteValue() == 1){
-            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
-            }else{
-            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+//            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
+//            if(cmd.getNeedTemporary() != null && cmd.getNeedTemporary().byteValue() == 1){
+//            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+//            }else{
+//            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+//            }
+            Condition temporaryCondition = getTemporaryCondition(cmd.getNeedTemporary());
+            if(temporaryCondition != null){
+                query.addConditions(temporaryCondition);
             }
 
             //支持按话题、活动、投票来查询数据   add by yanjun 20170612

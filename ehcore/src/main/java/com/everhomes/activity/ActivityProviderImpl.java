@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.everhomes.rest.forum.NeedTemporaryType;
 import com.everhomes.server.schema.tables.daos.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -508,10 +509,14 @@ public class ActivityProviderImpl implements ActivityProivider {
         Integer offset =  (int) ((pageOffset - 1 ) * (count-1));
         
         //新增暂存活动，后台管理员在web端要看到暂存的活动 add by yanjun 20170513
-        if(needTemporary != null && needTemporary.byteValue() == 1){
-        	query.addConditions(Tables.EH_ACTIVITIES.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
-        }else{
-        	query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
+        if(needTemporary == null || needTemporary.byteValue() == NeedTemporaryType.PUBLISH.getCode()){
+            query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
+        }else if(needTemporary.byteValue() == NeedTemporaryType.ALL.getCode()){
+            query.addConditions(Tables.EH_ACTIVITIES.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+        }else if(needTemporary.byteValue() == NeedTemporaryType.TEMPORARY.getCode()){
+            query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+        }else {
+            return null;
         }
         
 
