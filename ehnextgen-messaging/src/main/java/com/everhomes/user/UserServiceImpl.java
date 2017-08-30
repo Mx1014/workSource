@@ -2898,8 +2898,13 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setSceneToken(sceneToken);
 
 		sceneDto.setCommunityType(CommunityType.COMMERCIAL.getCode());
-		sceneDto.setStatus(organizationDto.getStatus());
 
+		List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(userId,organizationDto.getId());
+		if(members != null && members.size() > 0){
+			sceneDto.setStatus(members.get(0).getStatus());
+		}else{
+			LOGGER.debug("This OrganizationMember is trouble");
+		}
 
 		return sceneDto;
 	}
