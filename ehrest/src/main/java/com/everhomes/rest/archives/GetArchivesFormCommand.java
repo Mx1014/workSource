@@ -11,6 +11,16 @@ public class GetArchivesFieldCommand {
 
     private Long organizationId;
 
+    private Long formOriginId;
+
+    public Long getFormOriginId() {
+        return formOriginId;
+    }
+
+    public void setFormOriginId(Long formOriginId) {
+        this.formOriginId = formOriginId;
+    }
+
     public GetArchivesFieldCommand() {
     }
 
