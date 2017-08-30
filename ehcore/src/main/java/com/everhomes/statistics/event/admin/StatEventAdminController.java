@@ -74,7 +74,7 @@ public class StatEventAdminController extends ControllerBase {
      * <p>统计任务列表</p>
      */
     @RequestMapping(value = "listEventTask")
-    @RestReturn(value = StatEventTaskLog.class)
+    @RestReturn(value = String.class)
     public RestResponse listEventTask(StatExecuteEventTaskCommand cmd) {
         List<StatEventTaskLog> taskLog = statEventService.listEventTask(cmd);
         RestResponse response = new RestResponse(taskLog);

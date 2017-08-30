@@ -221,7 +221,7 @@ public class StatTerminalServiceImpl implements StatTerminalService {
                 activity.setImeiNumber(String.valueOf(user.getId()));
                 activity.setNamespaceId(user.getNamespaceId());
 
-                long threeDayMill = 5 * 24 * 60 * 60 * 1000 - 1;
+                long threeDayMill = 3 * 24 * 60 * 60 * 1000 - 1;
                 Date date = new Date(user.getCreateTime().getTime());
                 long time = date.getTime();
                 Timestamp minTime = new Timestamp(time - threeDayMill);
