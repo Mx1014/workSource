@@ -85,7 +85,8 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		long tempTime = calendar.getTimeInMillis();
-		String startTime = Utils.dateToStr(new Date(tempTime), Utils.DateStyle.DATE_TIME);
+		Timestamp tempStart = new Timestamp(tempTime);
+		String startTime = Utils.dateToStr(tempStart, Utils.DateStyle.DATE_TIME);
 		Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(tempTime, order.getMonthCount().intValue());
 		String endTime = Utils.dateToStr(tempEnd, Utils.DateStyle.DATE_TIME);
 
@@ -101,6 +102,11 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 		param.put("carColor", "");
 
 		String json = post(param, ADD_MONTH_CARD);
+
+		//将充值信息存入订单
+		order.setErrorDescriptionJson(json);
+		order.setStartPeriod(tempStart);
+		order.setEndPeriod(tempEnd);
 
 		JSONObject jsonObject = JSONObject.parseObject(json);
 		Object obj = jsonObject.get("resCode");
