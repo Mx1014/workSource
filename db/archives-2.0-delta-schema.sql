@@ -38,7 +38,7 @@ CREATE TABLE `eh_general_form_groups` (
 	`owner_type` VARCHAR(64) NOT NULL,
 	`module_id` BIGINT COMMENT 'the module id',
 	`module_type` VARCHAR(64) COMMENT 'the module type',
-	`form_module` VARCHAR(64) NOT NULL COMMENT 'the form template name',
+	`form_module` VARCHAR(64) COMMENT 'the form template name',
 	`form_origin_id` BIGINT DEFAULT 0 COMMENT 'the id of the original form',
 	`form_version` BIGINT DEFAULT 0 COMMENT 'the current using version',
 	`template_type` VARCHAR(128) NOT NULL COMMENT 'the type of template text',
@@ -48,13 +48,9 @@ CREATE TABLE `eh_general_form_groups` (
 	`string_tag1` VARCHAR(128),
 	`string_tag2` VARCHAR(128),
 	`string_tag3` VARCHAR(128),
-	`string_tag4` VARCHAR(128),
-	`string_tag5` VARCHAR(128),
 	`integral_tag1` BIGINT DEFAULT 0,
 	`integral_tag2` BIGINT DEFAULT 0,
 	`integral_tag3` BIGINT DEFAULT 0,
-	`integral_tag5` BIGINT DEFAULT 0,
-	`integral_tag4` BIGINT DEFAULT 0,
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
