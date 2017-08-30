@@ -21,7 +21,7 @@ import java.util.List;
  * <li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
  * <li>categoryId: 活动类型id</li>
  * <li>contentCategoryId: 活动主题分类id</li>
- * <li>needTemporary: 0-不需要， 1-需要，2-仅仅暂存，不填默认0 参考{@link NeedTemporaryType}</li>
+ * <li>needTemporary: 0-已发布， 1-全部，2-仅仅暂存，不填默认0 参考{@link NeedTemporaryType}</li>
  * <li>tag: 标签</li>
  * <li>namespaceId: 域空间id</li>
  * </ul>
