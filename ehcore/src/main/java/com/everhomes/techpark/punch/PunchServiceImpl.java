@@ -4821,7 +4821,7 @@ public class PunchServiceImpl implements PunchService {
 				if (ptr.getPunchRuleId() == null)
 					continue;
 				PunchRule pr = punchProvider.getPunchRuleById(ptr.getPunchRuleId());
-				if (null == pr) {
+				if (null == pr || pr.getRuleType() == null) {
 					continue;
 				}
 
@@ -5913,10 +5913,11 @@ public class PunchServiceImpl implements PunchService {
                     PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
                     "公司没有设置打卡规则");
         //  查询用户对应的wifi mac地址
-        List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId(), pr.getWifiRuleId()) ;
+        List<PunchWifi> wifis = this.punchProvider
+				.listPunchWifsByOwner(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId()) ;
         //  查询用户对应的经纬度信息
         List<PunchGeopoint> punchGeopoints = punchProvider
-                .listPunchGeopointsByRuleId(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId(),pr.getLocationRuleId());
+                .listPunchGeopointsByOwner(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId());
 
         if(wifis != null){
             response.setWifis(wifis.stream().map(r ->{
@@ -6473,6 +6474,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 		PunchLogDTO punchLog = getPunchType(userId,cmd.getEnterpriseId(),punchTime);
 		GetPunchDayStatusResponse response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
+
 		response.setIntervals(new ArrayList<>());
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
 		if (null == pr  )
@@ -6481,7 +6483,6 @@ public class PunchServiceImpl implements PunchService {
 					"公司没有设置打卡规则");
 		Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr, punchTime, userId);
         PunchDayLog pdl = punchProvider.findPunchDayLog(userId, cmd.getEnterpriseId(), new java.sql.Date(cmd.getQueryTime()));
-
 
         List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,cmd.getEnterpriseId(), dateSF.get().format(punchTime),
 				ClockCode.SUCESS.getCode());
@@ -6932,7 +6933,10 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchMonthStatusResponse listPunchMonthStatus(ListPunchMonthStatusCommand cmd) {
 		// TODO Auto-generated method sub
         cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
-        ListPunchMonthStatusResponse response = new ListPunchMonthStatusResponse();
+		if (null == cmd.getQueryTime()) {
+			cmd.setQueryTime(DateHelper.currentGMTTime().getTime());
+		}
+		ListPunchMonthStatusResponse response = new ListPunchMonthStatusResponse();
         response.setDayStatus(new ArrayList<>());
         response.setMonthDate(cmd.getQueryTime());
         Long userId = UserContext.current().getUser().getId();

@@ -21,7 +21,7 @@ public class GetPunchDayStatusResponse {
 	private Long expiryTime;
 	private Byte punchTimesPerDay;
 	private Byte punchType;
-	private Integer punchIntevalNo;
+	private Integer punchIntervalNo;
 	private Long punchNormalTime;
 
 	@ItemType(PunchIntevalLogDTO.class)
@@ -47,14 +47,6 @@ public class GetPunchDayStatusResponse {
 
 	public void setExpiryTime(Long expiryTime) {
 		this.expiryTime = expiryTime;
-	}
-
-	public Integer getPunchIntevalNo() {
-		return punchIntevalNo;
-	}
-
-	public void setPunchIntevalNo(Integer punchIntevalNo) {
-		this.punchIntevalNo = punchIntevalNo;
 	}
 
 	public Byte getPunchTimesPerDay() {
@@ -87,5 +79,13 @@ public class GetPunchDayStatusResponse {
 
 	public void setIntervals(List<PunchIntevalLogDTO> intervals) {
 		this.intervals = intervals;
+	}
+
+	public Integer getPunchIntervalNo() {
+		return punchIntervalNo;
+	}
+
+	public void setPunchIntervalNo(Integer punchIntervalNo) {
+		this.punchIntervalNo = punchIntervalNo;
 	}
 }
