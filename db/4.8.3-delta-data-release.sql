@@ -54,6 +54,9 @@ UPDATE eh_web_menus SET  `name` = '订单管理' where id = 40720;
 SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
     VALUES (@configuration_id:=@configuration_id+1, 'guomao.payserver.url', 'http://pay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/save_payInfo_record', '左邻支付平台地址', 0, NULL);
+-- 修改快递连接地址
+UPDATE eh_launch_pad_items SET action_data = '{"url":"https://core.zuolin.com/deliver/dist/index.html#/home_page#sign_suffix"}' WHERE namespace_id = 999985 AND item_label = '快递';
+
 -- by dengs,2017.08.28 快递2.0 end
 
 -- add by sw 20170828
@@ -77,3 +80,11 @@ INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`
 INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ( 'parking.mybay.pwd', '0306A9', '深圳湾停车充值密码', '0', NULL);
 
 
+-- By lei.lv
+-- 增加蒙版表数据
+delete from eh_namespace_masks;
+INSERT INTO `eh_namespace_masks` VALUES ('1', '999971', '人才公寓', '3', '快速切换至人才市场', 'park_tourist');
+INSERT INTO `eh_namespace_masks` VALUES ('2', '999971', '园区服务', '3', '快速切换至园区主页', 'default');
+
+SET @con_id = (SELECT MAX(id) from eh_configurations);
+INSERT INTO `eh_configurations` VALUES (@con_id + 1, 'mask.key', 0, '默认启用蒙版', 999971, '');

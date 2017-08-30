@@ -286,6 +286,7 @@ public class ParkingServiceImpl implements ParkingService {
 
         	FlowCase flowCase = createFlowCase(parkingCardRequest, flow, user.getId());
 
+			parkingCardRequest.setFlowId(flowId);
     		parkingCardRequest.setFlowCaseId(flowCase.getId());
     		parkingProvider.updateParkingCardRequest(parkingCardRequest);
     		return null;
@@ -883,8 +884,8 @@ public class ParkingServiceImpl implements ParkingService {
 	    		FlowCase flowCase = flowCaseProvider.getFlowCaseById(q.getFlowCaseId());
 	    		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
 	    		stepDTO.setFlowCaseId(q.getFlowCaseId());
-	    		stepDTO.setFlowMainId(q.getFlowId());
-	    		stepDTO.setFlowVersion(q.getFlowVersion());
+	    		stepDTO.setFlowMainId(flowCase.getFlowMainId());
+	    		stepDTO.setFlowVersion(flowCase.getFlowVersion());
 	    		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
 	    		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
 	    		stepDTO.setStepCount(flowCase.getStepCount());
@@ -1360,7 +1361,6 @@ public class ParkingServiceImpl implements ParkingService {
 	    	FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 			
 	    	request.setFlowId(flowCase.getFlowMainId());
-	    	request.setFlowVersion(flowCase.getFlowVersion());
 	    	request.setFlowCaseId(flowCase.getId());
 	    	request.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
 			parkingProvider.updateParkingCardRequest(request);

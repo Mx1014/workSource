@@ -1,5 +1,6 @@
 package com.everhomes.aclink;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -660,5 +663,42 @@ public class AclinkController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+    
+    /**
+     * <b>URL: /aclink/aliTest</b>
+     * <p>alitest 001</p>
+     * @return 
+     */
+    @SuppressDiscover
+    @RequireAuthentication(false)
+    @RequestMapping("aliTest")
+    public String aliTest(HttpServletRequest request, HttpServletResponse response) {
+        String redirectUrl = "https://openauth.alipay.com/oauth2/publicAppAuthorize.htm?app_id=2017072507886723&scope=auth_user&state=testbyzuolin&redirect_uri=";
+        try {
+            redirectUrl += URLEncoder.encode("https://ali.ddns.to/evh/aclink/aliTest2?", "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        try {
+            response.sendRedirect(redirectUrl);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return "";
+    }
+    
+    /**
+     * <b>URL: /aclink/aliTest</b>
+     * <p>alitest 002</p>
+     * @return 
+     */
+    @SuppressDiscover
+    @RequireAuthentication(false)
+    @RequestMapping("aliTest2")
+    public String aliTest2(HttpServletRequest request) {
+        return doorAccessService.aliTest2(request);
     }
 }
