@@ -3609,7 +3609,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			cmd.setAuthType(DoorAuthType.FOREVER.getCode());
 			cmd.setDescription("new user auto created");
 			cmd.setDoorId(doorAccess.getId());
-			cmd.setNamespaceId(identifier.getId());
+			cmd.setNamespaceId(identifier.getNamespaceId());
 			cmd.setPhone(identifier.getIdentifierToken());
 			cmd.setRightOpen((byte)1);
 			cmd.setRightRemote((byte)1);
@@ -3683,7 +3683,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 cmd.setAuthType(DoorAuthType.FOREVER.getCode());
                 cmd.setDescription("new user auto created");
                 cmd.setDoorId(doorAccess.getId());
-                cmd.setNamespaceId(userId);
+                cmd.setNamespaceId(namespaceId);
                 if(userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
                     cmd.setPhone(userInfo.getPhones().get(0));
                 }
