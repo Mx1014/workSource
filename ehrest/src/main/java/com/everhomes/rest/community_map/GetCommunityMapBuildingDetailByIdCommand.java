@@ -11,6 +11,16 @@ public class GetCommunityMapBuildingDetailByIdCommand {
 
     private Long buildingId;
 
+    private String geoType;
+
+    public String getGeoType() {
+        return geoType;
+    }
+
+    public void setGeoType(String geoType) {
+        this.geoType = geoType;
+    }
+
     public String getSceneToken() {
         return sceneToken;
     }

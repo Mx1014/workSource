@@ -15,9 +15,19 @@ public class SearchCommunityMapContentsCommand {
 
     private String contentType;
 
+    private String geoType;
+
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    public String getGeoType() {
+        return geoType;
+    }
+
+    public void setGeoType(String geoType) {
+        this.geoType = geoType;
+    }
 
     public Long getBuildingId() {
         return buildingId;
