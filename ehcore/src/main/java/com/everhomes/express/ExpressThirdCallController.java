@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,6 +39,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -89,7 +91,10 @@ public class ExpressThirdCallController {// extends ControllerBase
     private ConfigurationProvider configProvider;
 	
 	@Autowired
-    private UserActivityProvider userProvider;
+    private UserActivityProvider userActivityProvider;
+	
+	@Autowired
+    private UserProvider userProvider;
     
 	
     
@@ -123,10 +128,14 @@ public class ExpressThirdCallController {// extends ControllerBase
         	}
         	//验证通过了，那么如果没有注册，则注册
         	User user = processUserInfo(namespaceId, params, request, response);
-        	userId = user.getId();
+        	List<User> list= userProvider.findThirdparkUserByTokenAndType(namespaceId, user.getNamespaceUserType(), user.getNamespaceUserToken());
+        	if(list!=null && list.size()>0){
+        		userId = list.get(0).getId();
+        	}
         }
         if(userId == null){
         	 response.sendRedirect(ERROR_REDIRECT_URL+"用户创建失败");
+        	 return ;
         }
         
         updateUserOpenId(userId,params.get(WX_OPENID),response);
@@ -147,7 +156,7 @@ public class ExpressThirdCallController {// extends ControllerBase
 			return ;//没有openId则是app的
 		}
 		LOGGER.info("save uid = {}, openId = {}", userId, openId);
-		userProvider.updateUserProfile(userId, ExpressServiceErrorCode.USER_PROFILE_KEY, openId);
+		userActivityProvider.updateUserProfile(userId, ExpressServiceErrorCode.USER_PROFILE_KEY, openId);
 	}
 
 	/**
