@@ -2,6 +2,8 @@ package com.everhomes.statistics.event;
 
 import com.everhomes.rest.statistics.event.*;
 
+import java.util.List;
+
 /**
  * Created by xq.tian on 2017/7/31.
  */
@@ -31,4 +33,6 @@ public interface StatEventService {
      * 获取事件统计数据
      */
     StatEventStatDTO listEventStat(StatListEventStatCommand cmd);
+
+    List<StatEventTaskLog> listEventTask(StatExecuteEventTaskCommand cmd);
 }

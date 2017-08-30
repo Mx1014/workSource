@@ -15,4 +15,6 @@ public interface StatEventTaskLogProvider {
     List<StatEventTaskLog> findByTaskDate(Date taskDate);
 
     void deleteEventTaskLogByDate(Date date);
+
+    List<StatEventTaskLog> listEventTaskLog(Date startDate, Date endDate);
 }
