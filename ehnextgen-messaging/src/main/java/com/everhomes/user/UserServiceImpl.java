@@ -2694,6 +2694,7 @@ public class UserServiceImpl implements UserService {
 
 		/** 从配置项中查询是否开启 **/
 		Integer switchFlag = this.configurationProvider.getIntValue(namespaceId, "scenes.switchKey", SCENE_SWITCH_DISABLE);
+		LOGGER.debug("switchFlag is" + switchFlag);
 		if(switchFlag == SCENE_SWITCH_ENABLE){
 			/** 查询默认场景 **/
 			Community default_community_one = new Community();
