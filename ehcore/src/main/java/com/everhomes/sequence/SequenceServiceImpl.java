@@ -208,6 +208,7 @@ import com.everhomes.server.schema.tables.pojos.EhOrganizationOwnerCarAttachment
 import com.everhomes.server.schema.tables.pojos.EhOrganizationOwnerCars;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationOwnerOwnerCar;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationOwnerType;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationRoleMap;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationTaskTargets;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
@@ -1956,6 +1957,9 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhCustomerEconomicIndicators.class, Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS.ID.max()).from(Tables.EH_CUSTOMER_ECONOMIC_INDICATORS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhOrganizationOwners.class, Tables.EH_ORGANIZATION_OWNERS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ORGANIZATION_OWNERS.ID.max()).from(Tables.EH_ORGANIZATION_OWNERS).fetchOne().value1();
         });
 
     }
