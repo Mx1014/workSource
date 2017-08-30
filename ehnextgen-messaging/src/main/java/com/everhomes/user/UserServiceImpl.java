@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.asset.AddressIdAndName;
+import com.everhomes.contract.ContractService;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -416,6 +417,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private SmsBlackListProvider smsBlackListProvider;
+
+    @Autowired
+	private ContractService contractService;
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -4505,7 +4509,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public TargetDTO findTargetByNameAndAddress(String targetName, String buildingName, String apartmentName, Long communityId, String tel) {
+	public TargetDTO findTargetByNameAndAddress(String contractNum, String targetName, String buildingName, String apartmentName, Long communityId, String tel) {
+		//确定客户的优先度， 查到合同算查到人，楼栋门牌只是为了填写账单的地址用
         List<AddressIdAndName> addressByPossibleName = addressService.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), communityId, buildingName, apartmentName);
         List<Long> ids = new ArrayList<>();
         for (int i = 0; i < addressByPossibleName.size(); i++){
@@ -4520,6 +4525,8 @@ public class UserServiceImpl implements UserService {
         }else if(organizations.size() == 1 && users.size() == 0) {
             return organizations.get(0);
         }
+		List<Object> customerTypeAndId = contractService.findCustomerByContractNum(contractNum);
+
         return null;
 	}
 

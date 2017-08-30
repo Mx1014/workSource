@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>apartmentName:门牌名称</li>
  * <li>communityId:园区id</li>
  * <li>tel:个人用户电话</li>
+ * <li>contractNum:合同编号</li>
  *</ul>
  */
 public class FindTargetByNameAndAddressCommand {
@@ -22,6 +23,7 @@ public class FindTargetByNameAndAddressCommand {
     private String apartmentName;
     private Long communityId;
     private String tel;
+    private String contractNum;
 
     @Override
     public String toString() {
@@ -38,6 +40,14 @@ public class FindTargetByNameAndAddressCommand {
 
     public void setTargetName(String targetName) {
         this.targetName = targetName;
+    }
+
+    public String getContractNum() {
+        return contractNum;
+    }
+
+    public void setContractNum(String contractNum) {
+        this.contractNum = contractNum;
     }
 
     public String getBuildingName() {

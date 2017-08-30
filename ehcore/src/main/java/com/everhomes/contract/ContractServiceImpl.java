@@ -354,4 +354,9 @@ public class ContractServiceImpl implements ContractService {
 		
 		return new ListContractsResponse(null, resultList);
 	}
+
+	@Override
+	public List<Object> findCustomerByContractNum(String contractNum) {
+		return contractProvider.findCustomerByContractNum(contractNum);
+	}
 }

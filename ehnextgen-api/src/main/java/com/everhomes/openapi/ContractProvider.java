@@ -32,4 +32,5 @@ public interface ContractProvider {
 
 	List<Contract> listContractByOrganizationId(Long organizationId);
 
+    List<Object> findCustomerByContractNum(String contractNum);
 }

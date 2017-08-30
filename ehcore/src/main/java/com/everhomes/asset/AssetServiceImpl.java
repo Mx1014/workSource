@@ -254,15 +254,16 @@ public class AssetServiceImpl implements AssetService {
         if(noticeInfos.size()<1) return;
         List<Long> uids = new ArrayList<>();
         //"{targetName}先生/女士，您好，您的账单已出，应付{amount1}元，待缴{amount2}元，下载"{appName} APP"可及时查看账单并支持在线付款,还可体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。"
+        //短信： 54	物业费催缴	王闻天	{1-> targetName}先生/女士，您好，您的物业账单已出，账期{2 dateStr}，使用"{3 appName} APP"可及时查看账单并支持在线付款。
         for(int i = 0; i<noticeInfos.size(); i++) {
             NoticeInfo noticeInfo = noticeInfos.get(i);
             //收集短信的信息
             List<Tuple<String, Object>> variables = new ArrayList<>();
-            smsProvider.addToTupleList(variables,"1",noticeInfo.getTargetName());
+            smsProvider.addToTupleList(variables,"targetName",noticeInfo.getTargetName());
             //模板改了，所以这个也要改
-            smsProvider.addToTupleList(variables,"2","2017-05");
+            smsProvider.addToTupleList(variables,"dateStr","2017-05");
 //            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
-            smsProvider.addToTupleList(variables,"3",noticeInfo.getAppName());
+            smsProvider.addToTupleList(variables,"appName",noticeInfo.getAppName());
             String phoneNums = noticeInfo.getPhoneNum();
             String templateLocale = UserContext.current().getUser().getLocale();
             smsProvider.sendSms(999971, phoneNums, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);

@@ -139,6 +139,14 @@ public class ContractProviderImpl implements ContractProvider {
 		
 		return new ArrayList<Contract>();
 	}
+
+	@Override
+	public List<Object> findCustomerByContractNum(String contractNum) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhContracts t = Tables.EH_CONTRACTS.as("t");
+        return null;
+    }
+
 	@Override
 	public List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue) {
 		Result<Record> result = getReadOnlyContext().select()
