@@ -12,7 +12,7 @@ import java.util.List;
  */
 
 public class PaymentExpectanciesCommand {
-    private Long namesapceId;
+    private Integer namesapceId;
     private Long ownerId;
     private String ownerType;
     private Long targetId;
@@ -25,9 +25,6 @@ public class PaymentExpectanciesCommand {
     private Integer pageOffset;
     private Integer pageSize;
 
-    public Long getNamesapceId() {
-        return namesapceId;
-    }
 
     @Override
     public String toString() {
@@ -58,7 +55,11 @@ public class PaymentExpectanciesCommand {
         this.pageSize = pageSize;
     }
 
-    public void setNamesapceId(Long namesapceId) {
+    public Integer getNamesapceId() {
+        return namesapceId;
+    }
+
+    public void setNamesapceId(Integer namesapceId) {
         this.namesapceId = namesapceId;
     }
 

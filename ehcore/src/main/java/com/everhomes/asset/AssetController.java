@@ -844,7 +844,7 @@ public class AssetController extends ControllerBase {
     }
 
     /**
-     * <p>测试清单</p>
+     * <p>测试清单产生</p>
      * <b>URL: /asset/xxd</b>
      *
      */
@@ -853,4 +853,20 @@ public class AssetController extends ControllerBase {
     public PaymentExpectanciesResponse hi(@RequestBody PaymentExpectanciesCommand cmd){
         return assetService.paymentExpectancies(cmd);
     }
+    /**
+     * <p>展示预期的费用清单</p>
+     * <b>URL: /asset/listBillExpectanciesOnContract</b>
+     *
+     */
+    @RequestMapping("listBillExpectanciesOnContract")
+    @RestReturn(PaymentExpectanciesResponse.class)
+    public RestResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd){
+        PaymentExpectanciesResponse res = assetService.listBillExpectanciesOnContract(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+
 }

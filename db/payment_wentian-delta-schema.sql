@@ -73,7 +73,9 @@ CREATE TABLE `eh_payment_bill_items` (
   `contract_num` varchar(255) DEFAULT NULL,
   `property_identifer` varchar(255) DEFAULT '' COMMENT '资产标识',
   `address_id` bigint(20) DEFAULT NULL,
-  `date_str` varchar(10) DEFAULT NULL COMMENT '账期',
+  `date_str` varchar(20) DEFAULT NULL COMMENT '账期',
+  `data_str_end` varchar(20) DEFAULT NULL,
+  `date_str_due` varchar(20) DEFAULT NULL,
   `creator_uid` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   `operator_uid` bigint(20) DEFAULT NULL,
@@ -238,7 +240,7 @@ CREATE TABLE `eh_payment_variables` (
 DROP TABLE IF EXISTS `eh_payment_contract_receiver`;
 CREATE TABLE `eh_payment_contract_receiver` (
   `id` bigint(20) NOT NULL,
-  `namespace_id` bigint(20) DEFAULT NULL,
+  `namespace_id` int(11) DEFAULT '0',
   `owner_id` bigint(20) DEFAULT NULL,
   `owner_type` varchar(255) DEFAULT NULL,
   `target_id` bigint(20) DEFAULT NULL,

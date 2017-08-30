@@ -108,4 +108,10 @@ public interface AssetProvider {
     void saveBills(List<EhPaymentBills> billList);
 
     Byte findBillyCycleById(Long chargingStandardId);
+
+    void changeBillStatusOnContractSaved(String contractNum);
+
+    void deleteContractPayment(String contractNum);
+
+    List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize);
 }

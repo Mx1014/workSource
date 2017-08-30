@@ -79,6 +79,20 @@ public class PaymentExpectanciesTest {
         v.add(g);
         v.add(g1);
         feeRules.setVariableIdAndValueList(v);
+        List<ContractProperty> var1 = new ArrayList<>();
+        ContractProperty var2 = new ContractProperty();
+        var2.setAddressId(24010203212183834l);
+        var2.setApartmentName("西太平洋");
+        var2.setBuldingName("波塞冬旋翼载具研发中心");
+        var2.setPropertyName("24010203212183834");
+        ContractProperty var3 = new ContractProperty();
+        var3.setAddressId(null);
+        var3.setApartmentName("古宇宙");
+        var3.setBuldingName("万神墓");
+        var3.setPropertyName("KG28483BX21");
+        var1.add(var2);
+        var1.add(var3);
+        feeRules.setProperties(var1);
 
         list.add(feeRules);
 
@@ -89,8 +103,8 @@ public class PaymentExpectanciesTest {
 
         System.out.println(cmd);
 
-        Map map = convertBean(cmd);
-        System.out.println(map);
+//        Map map = convertBean(cmd);
+//        System.out.println(map);
 
 
     }

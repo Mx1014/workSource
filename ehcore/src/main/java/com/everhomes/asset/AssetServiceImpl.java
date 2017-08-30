@@ -61,6 +61,7 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.sun.org.apache.regexp.internal.RE;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -568,17 +569,18 @@ public class AssetServiceImpl implements AssetService {
                 if(billingCycle==AssetPaymentStrings.CONTRACT_BEGIN_DATE_AS_FIXED_DAY_OF_MONTH){
                     FixedAtContractStartHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
                 }
+                //自然月的计费方式
                 if(billingCycle == AssetPaymentStrings.NATRUAL_MONTH){
                     NaturalMonthHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
                 }
-
+                // redis的这个会rollback吗？不会当然不影响功能
                 long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), dtos2.size());
                 long currentBillItemSeq = nextBillItemBlock - dtos2.size() + 1;
                 if(currentBillItemSeq == 0){
                     currentBillItemSeq = currentBillItemSeq+1;
                     this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()));
                 }
-                for(int g = 0; i< dtos2.size(); g++) {
+                for(int g = 0; g< dtos2.size(); g++) {
                     PaymentExpectancyDTO dto = dtos2.get(g);
                     BillIdentity identity = new BillIdentity();
                     identity.setBillGroupId(groupRule.getBillGroupId());
@@ -608,9 +610,11 @@ public class AssetServiceImpl implements AssetService {
                     item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setCreatorUid(UserContext.currentUserId());
                     item.setDateStr(dto.getDateStrBegin());
+                    item.setDateStrEnd(dto.getDateStrEnd());
+                    item.setDateStrDue(dto.getDueDateStr());
                     item.setId(currentBillItemSeq);
                     currentBillItemSeq += 1;
-                    item.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    item.setNamespaceId(cmd.getNamesapceId());
                     item.setOwnerType(cmd.getOwnerType());
                     item.setOwnerId(cmd.getOwnerId());
                     item.setTargetType(cmd.getTargetType());
@@ -644,6 +648,7 @@ public class AssetServiceImpl implements AssetService {
                             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
                             newBill.setNoticetel(cmd.getNoticeTel());
                             newBill.setOwnerId(cmd.getOwnerId());
+                            newBill.setContractNum(cmd.getContractNum());
                             newBill.setTargetName(cmd.getTargetName());
                             newBill.setOwnerType(cmd.getOwnerType());
                             newBill.setTargetType(cmd.getTargetType());
@@ -653,7 +658,7 @@ public class AssetServiceImpl implements AssetService {
                             newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                             newBill.setNoticeTimes(0);
                             newBill.setStatus((byte)0);
-                            newBill.setSwitch((byte)0);
+                            newBill.setSwitch((byte)3);
                             map.put(identity,newBill);
                         }
                         //if the billing cycle is on quarter or year, just change the way how the billIdentity defines that muliti bills should be merged as one or be independently
@@ -673,7 +678,14 @@ public class AssetServiceImpl implements AssetService {
             PaymentContractReceiver entity = new PaymentContractReceiver();
             StringBuilder addressIds = new StringBuilder();
             for(int l =0 ; l < var1.size(); l++) {
-                addressIds = addressIds.append(var1.get(l).getAddressId());
+                Long addressId = var1.get(l).getAddressId();
+                if(addressId!=null){
+                    if(l == var1.size()-1){
+                        addressIds.append(var1.get(l).getPropertyName());
+                        break;
+                    }
+                    addressIds.append(var1.get(l).getPropertyName()+",");
+                }
             }
 //            entity.setApartmentName(property.getApartmentName());
 //            entity.setBuildingName(property.getBuldingName());
@@ -821,6 +833,35 @@ public class AssetServiceImpl implements AssetService {
 //        String variablesJsonString = m_1.getVariablesJsonString();
 //        String formula = assetProvider.findFormulaByChargingStandardId();
 //        calculateFee()
+    }
+
+    @Override
+    public void upodateBillStatusOnContractStatusChange(String contractNum,String targetStatus) {
+        if(targetStatus.equals(AssetPaymentStrings.CONTRACT_SAVE)){
+            assetProvider.changeBillStatusOnContractSaved(contractNum);
+        }else if(targetStatus.equals(AssetPaymentStrings.CONTRACT_CANCEL)){
+            assetProvider.deleteContractPayment(contractNum);
+        }
+    }
+
+    @Override
+    public PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd) {
+        PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
+        if(cmd.getPageSize()<1||cmd.getPageSize()>Integer.MAX_VALUE){
+            cmd.setPageSize(20);
+        }
+        if(cmd.getPageOffset()<0){
+            cmd.setPageSize(0);
+        }
+        List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize());
+        if(dtos.size() <= cmd.getPageSize()){
+            response.setNextPageOffset(cmd.getPageOffset());
+        }else{
+            response.setNextPageOffset(cmd.getPageOffset()+cmd.getPageSize());
+            dtos.remove(dtos.size()-1);
+        }
+        response.setList(dtos);
+        return response;
     }
 
     private void coverVariables(List<VariableIdAndValue> var1, List<VariableIdAndValue> var2) {
