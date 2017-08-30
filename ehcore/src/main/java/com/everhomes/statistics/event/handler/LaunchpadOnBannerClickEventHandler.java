@@ -25,6 +25,13 @@ public class LaunchpadOnBannerClickEventHandler extends AbstractStatEventPortalI
 
     @Override
     protected String getItemGroup(Map<String, String> paramsToValueMap) {
+        Long bannerId = Long.valueOf(paramsToValueMap.get("id"));
+        Banner banner = bannerProvider.findBannerById(bannerId);
+        if (banner != null) {
+            if (!banner.getBannerGroup().toLowerCase().equals("default")) {
+                return banner.getBannerGroup();
+            }
+        }
         return "Default";
     }
 
