@@ -1,9 +1,12 @@
 package com.everhomes.archives;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.general_approval.CreateApprovalFormCommand;
+import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
@@ -47,6 +50,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     ImportFileService importFileService;
+
+    @Autowired
+    GeneralFormService generalFormService;
 
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
@@ -485,14 +491,38 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public void addArchivesField(AddArchivesFieldCommand cmd) {
+    public void updateArchivesForm(UpdateArchivesFormCommand cmd) {
 
+        //  1.如果无 formOriginId 时则使用的是模板模板，此时需要为该公司新增一份表单
+        //  2.如果有 formOriginId 时则说明已经拥有了表单，此时只需要做修改
+
+        if(cmd.getFormOriginId() == null){
+            //  新增时
+            CreateApprovalFormCommand createCommand = new CreateApprovalFormCommand();
+            createCommand.setOwnerId(cmd.getOrganizationId());
+            createCommand.setOwnerType("organization");
+            createCommand.setOrganizationId(cmd.getOrganizationId());
+            createCommand.setFormName("Archives");
+            createCommand.setFormFields(cmd.getFormFields());
+            createCommand.setFormGroups(cmd.getFormGroups());
+            generalFormService.createGeneralForm(createCommand);
+        }else{
+            //  修改时
+            UpdateApprovalFormCommand updateCommand = new UpdateApprovalFormCommand();
+            updateCommand.setFormOriginId(cmd.getFormOriginId());
+            updateCommand.setOwnerId(cmd.getOrganizationId());
+            updateCommand.setOwnerType("organization");
+            updateCommand.setOrganizationId(cmd.getOrganizationId());
+            updateCommand.setFormFields(cmd.getFormFields());
+            updateCommand.setFormGroups(cmd.getFormGroups());
+            generalFormService.updateGeneralForm(updateCommand);
+        }
     }
 
-    @Override
+/*    @Override
     public void addArchivesFieldGroup(AddArchivesFieldGroupCommand cmd) {
 
-    }
+    }*/
 
     @Override
     public void updateArchivesFieldOrder(UpdateArchivesFieldOrderCommand cmd) {

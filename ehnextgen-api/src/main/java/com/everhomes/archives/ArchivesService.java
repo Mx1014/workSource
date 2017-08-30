@@ -37,9 +37,9 @@ public interface ArchivesService {
 
     void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd);
 
-    void addArchivesField(AddArchivesFieldCommand cmd);
+    void updateArchivesForm(UpdateArchivesFormCommand cmd);
 
-    void addArchivesFieldGroup(AddArchivesFieldGroupCommand cmd);
+//    void addArchivesFieldGroup(AddArchivesFieldGroupCommand cmd);
 
     void updateArchivesFieldOrder(UpdateArchivesFieldOrderCommand cmd);
 

@@ -228,7 +228,7 @@ public class ArchivesController extends ControllerBase{
      */
     @RequestMapping("addArchivesField")
     @RestReturn(value = String.class)
-    public RestResponse addArchivesField(AddArchivesFieldCommand cmd){
+    public RestResponse addArchivesField(UpdateArchivesFormCommand cmd){
         archivesService.addArchivesField(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

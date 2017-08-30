@@ -530,7 +530,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		});
 	}
 
-
+    //  表单控件组的修改
     private void syncGeneralFormGroupFormOriginId(Long formOriginId, Long formVersion, Long fieldGroupId, String fieldGroupName) {
         GeneralFormGroups group = generalFormProvider.findGeneralFormGroupById(fieldGroupId);
         if (group != null) {
@@ -584,12 +584,14 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
 				.getFormOriginId());
 		GeneralFormDTO result = processGeneralFormDTO(form);
+
+        //  获取字段组
 		if(result !=null){
 			ListGeneralFormGroupsCommand groupsCommand = new ListGeneralFormGroupsCommand();
 			groupsCommand.setFormOriginId(cmd.getFormOriginId());
-			groupsCommand.setFormOriginId(result.getOrganizationId());
+			groupsCommand.setOrganizationId(result.getOrganizationId());
 			List<GeneralFormGroupDTO> groups = listGeneralFormGroups(groupsCommand);
-			result.setFormGroups(groups);
+			result. setFormGroups(groups);
 			return result;
 		}
 		return null;
@@ -613,12 +615,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 			group.setFormVersion(cmd.getFormVersion());
 		generalFormProvider.createGeneralFormGroup(group);
 	}
-
-/*	@Override
-	public void updateGeneralFormGroup(CreateGeneralFormGroupCommand cmd){
-
-
-	}*/
 
 	@Override
 	public List<GeneralFormGroupDTO> listGeneralFormGroups(ListGeneralFormGroupsCommand cmd){
