@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component;
 @Component
 public interface SceneProvider {
     SceneTypeInfo findSceneTypeById(long id);
-    List<SceneTypeInfo> findSceneTypeByName(Integer namespaceId, String name);
+    List<SceneTypeInfo>  findSceneTypeByName(Integer namespaceId, String name);
     List<SceneTypeInfo> listSceneTypes(Integer namespaceId);
  }
