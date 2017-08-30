@@ -1,7 +1,7 @@
 -- by dengs,2017.08.28 快递2.0
 update eh_configurations SET `value`='http://pay-beta.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/save_payInfo_record' WHERE `name` = 'guomao.payserver.url' AND namespace_id = 999901;
 set @eh_configurations_id = (select Max(id) from eh_configurations);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id:=@eh_configurations_id+1), 
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id:=@eh_configurations_id+1),
 'debug.flag', 'true', '国贸 debug flag', 0, NULL);
 
 
@@ -169,3 +169,8 @@ INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `
 INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999985, 0, 1, 'Scan', 'Scan', '扫一扫', '扫一扫', 4, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999985, 0, 1, 'MessageBox', 'MessageBox', '消息', '消息', 4, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999985, 0, 1, 'Settings', 'Settings', '设置', '设置', 4, NULL, NULL, NULL, NULL);
+
+
+-- By janson
+-- 更改默认错误提示
+update eh_locale_strings set `text`='应用开小差了' where `text` = '呃，好像哪里出错了';
