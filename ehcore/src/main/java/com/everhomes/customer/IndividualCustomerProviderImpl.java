@@ -46,7 +46,7 @@ public class IndividualCustomerProviderImpl implements IndividualCustomerProvide
         SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_CUSTOMER_TYPE.eq(namespaceType));
-        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"));
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
         List<OrganizationOwner> result = new ArrayList<>();

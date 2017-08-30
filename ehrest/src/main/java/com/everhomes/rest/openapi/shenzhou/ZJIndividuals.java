@@ -8,6 +8,8 @@ import java.util.List;
  * Created by ying.xiong on 2017/8/28.
  */
 public class ZJIndividuals {
+    private String communityIdentifier;
+    private Long communityId;
     private String userIdentifier;
     private String taxpayerIdentity;
     private String name;
@@ -29,6 +31,7 @@ public class ZJIndividuals {
     private String job;
     private String maritalStatus;
     private String source;
+    private Boolean dealed;
     @ItemType(CommunityAddressDTO.class)
     private List<CommunityAddressDTO> addressList;
 
@@ -38,6 +41,30 @@ public class ZJIndividuals {
 
     public void setAddressList(List<CommunityAddressDTO> addressList) {
         this.addressList = addressList;
+    }
+
+    public Boolean getDealed() {
+        return dealed;
+    }
+
+    public void setDealed(Boolean dealed) {
+        this.dealed = dealed;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public String getCommunityIdentifier() {
+        return communityIdentifier;
+    }
+
+    public void setCommunityIdentifier(String communityIdentifier) {
+        this.communityIdentifier = communityIdentifier;
     }
 
     public String getBirthday() {
