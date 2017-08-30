@@ -1867,20 +1867,26 @@ public class ForumServiceImpl implements ForumService {
     }
 
     private void fillVisibleRegionIds(PostDTO dto){
-        if(dto != null && dto.getCloneFlag() != null && dto.getCloneFlag().byteValue() == PostCloneFlag.REAL.getCode()){
+        if(dto == null){
+            return;
+        }
+
+        List<Long> visibleRegionIds = new ArrayList<>();
+        if(dto.getCloneFlag() != null && dto.getCloneFlag().byteValue() == PostCloneFlag.REAL.getCode()){
             List<Post> list= forumProvider.listPostsByRealPostId(dto.getId());
             if (list != null && list.size() >0){
-                List<Long> visibleRegionIds = new ArrayList<>();
                 list.forEach(r->{
                     if(r.getVisibleRegionId() != null){
                         visibleRegionIds.add(r.getVisibleRegionId());
                     }
                 });
-
-                if(visibleRegionIds.size() > 0){
-                    dto.setVisibleRegionIds(visibleRegionIds);
-                }
             }
+        }else if(dto.getVisibleRegionId() != null){
+            visibleRegionIds.add(dto.getVisibleRegionId());
+        }
+
+        if(visibleRegionIds.size() > 0){
+            dto.setVisibleRegionIds(visibleRegionIds);
         }
     }
 
