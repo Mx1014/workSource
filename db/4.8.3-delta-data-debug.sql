@@ -137,3 +137,35 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 SELECT MAX(id) FROM `eh_configurations` INTO @configurations_id;
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
 VALUES ((@configurations_id := @configurations_id + 1), 'biz.queryCommodityDetail.api', 'zl-ec/rest/openapi/commodity/queryCommodityByCommoNos', 'biz commodity detail api', 0, '电商商品详情api');
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 41330, '', 'EhNamespaces', 999985, 2);
+
+SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 41500, '用户行为统计', 'EhNamespaces', 999985, NULL, 2);
+
+--
+-- 上传策略
+--
+SET @stat_event_upload_strategies_id = IFNULL((SELECT MAX(id) FROM `eh_stat_event_upload_strategies`), 1);
+INSERT INTO `eh_stat_event_upload_strategies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `access`, `log_type`, `strategy`, `interval_seconds`, `times_per_day`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_upload_strategies_id := @stat_event_upload_strategies_id + 1), 999985, 'EhNamespaces', 999985, 'WIFI', 1, 2, NULL, NULL, 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_upload_strategies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `access`, `log_type`, `strategy`, `interval_seconds`, `times_per_day`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_upload_strategies_id := @stat_event_upload_strategies_id + 1), 999985, 'EhNamespaces', 999985, 'WIFI', 2, 1, 3600, NULL, 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_upload_strategies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `access`, `log_type`, `strategy`, `interval_seconds`, `times_per_day`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_upload_strategies_id := @stat_event_upload_strategies_id + 1), 999985, 'EhNamespaces', 999985, 'GSM', 1, 1, 3600, NULL, 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_upload_strategies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `access`, `log_type`, `strategy`, `interval_seconds`, `times_per_day`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_upload_strategies_id := @stat_event_upload_strategies_id + 1), 999985, 'EhNamespaces', 999985, 'GSM', 2, 0, NULL, NULL, 2, NULL, NULL, NULL, NULL);
+
+--
+-- 门户配置
+--
+SET @stat_event_portal_configs_id = IFNULL((SELECT MAX(id) FROM `eh_stat_event_portal_configs`), 1);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999985, 0, 2, '首页', '0', '首页', '服务广场', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999985, 0, 2, '资产管理', '1', '资产管理', '资产管理', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999985, 0, 2, 'OE活动', '2', 'OE活动', 'OE活动', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999985, 0, 2, 'OE微商城', '3', 'OE微商城', 'OE微商城', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999985, 0, 2, '我', '4', '我', '个人中心', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999985, 0, 1, 'Address', 'Address', '公司认证', '公司认证', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999985, 0, 1, 'Search', 'Search', '搜索', '搜索', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999985, 0, 1, 'Scan', 'Scan', '扫一扫', '扫一扫', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999985, 0, 1, 'MessageBox', 'MessageBox', '消息', '消息', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 999985, 0, 1, 'Settings', 'Settings', '设置', '设置', 4, NULL, NULL, NULL, NULL);
