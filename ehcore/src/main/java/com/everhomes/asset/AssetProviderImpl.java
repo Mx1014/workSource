@@ -1541,7 +1541,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<PaymentExpectancyDTO> dtos = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        context.select(t.DATE_STR,t.PROPERTY_IDENTIFER,t.DATE_STR_END,t.DATE_STR_DUE,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE)
+        context.select(t.DATE_STR,t.PROPERTY_IDENTIFER,t.DATA_STR_END,t.DATE_STR_DUE,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE)
                 .from(t)
                 .where(t.CONTRACT_NUM.eq(contractNum))
                 .limit(pageOffset,pageSize+1)
@@ -1550,7 +1550,7 @@ public class AssetProviderImpl implements AssetProvider {
                     PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
                     dto.setDateStrEnd(r.getValue(t.DATE_STR));
                     dto.setPropertyIdentifier(r.getValue(t.PROPERTY_IDENTIFER));
-                    dto.setDueDateStr(r.getValue(t.DATE_STR_END));
+                    dto.setDueDateStr(r.getValue(t.DATA_STR_END));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_DUE));
                     dto.setChargingItemName(r.getValue(t.CHARGING_ITEM_NAME));
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));

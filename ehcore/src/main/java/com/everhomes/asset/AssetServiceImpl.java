@@ -610,7 +610,7 @@ public class AssetServiceImpl implements AssetService {
                     item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setCreatorUid(UserContext.currentUserId());
                     item.setDateStr(dto.getDateStrBegin());
-                    item.setDateStrEnd(dto.getDateStrEnd());
+                    item.setDataStrEnd(dto.getDateStrEnd());
                     item.setDateStrDue(dto.getDueDateStr());
                     item.setId(currentBillItemSeq);
                     currentBillItemSeq += 1;
@@ -619,10 +619,11 @@ public class AssetServiceImpl implements AssetService {
                     item.setOwnerId(cmd.getOwnerId());
                     item.setTargetType(cmd.getTargetType());
                     item.setTargetId(cmd.getTargetId());
+                    item.setContractNum(cmd.getContractNum());
                     item.setTargetName(cmd.getTargetName());
                     item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     billItemsList.add(item);
-                    if(billingCycle == AssetPaymentStrings.BALANCE_ON_MONTH) {
+                    if(balanceType == AssetPaymentStrings.BALANCE_ON_MONTH) {
                         // create a new bill or update a bean according to whether the corresponding contract bill exists
                         if(map.containsKey(identity)){
                             PaymentBills bill = map.get(identity);
@@ -662,6 +663,8 @@ public class AssetServiceImpl implements AssetService {
                             map.put(identity,newBill);
                         }
                         //if the billing cycle is on quarter or year, just change the way how the billIdentity defines that muliti bills should be merged as one or be independently
+                    }else{
+                        throw new RuntimeException("暂只支持按月计费，请联系左邻在账单组设置");
                     }
                 }
 
@@ -754,7 +757,8 @@ public class AssetServiceImpl implements AssetService {
         while(c4.compareTo(c2) == -1 || c4.compareTo(c2) == 0) {
             //each month exactly
             duration = 1;
-            c5.setTime(c4.getTime());
+            c5.setTime(c3.getTime());
+            c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
             addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, duration,billDay);
             c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)+1);
             c3.set(Calendar.DAY_OF_MONTH,c3.getActualMinimum(Calendar.DAY_OF_MONTH));

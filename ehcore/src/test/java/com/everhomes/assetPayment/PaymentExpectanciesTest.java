@@ -54,7 +54,7 @@ public class PaymentExpectanciesTest {
         cmd.setOwnerType("community");
         cmd.setOwnerId(240111044331055035l);
         cmd.setNoticeTel("15919770996");
-        cmd.setNamesapceId(999985l);
+        cmd.setNamesapceId(999985);
         List<FeeRules> list = new ArrayList<>();
 
         FeeRules feeRules = new FeeRules();
