@@ -87,20 +87,6 @@ INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`
 INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES ('601', '999971', 'ServiceMarketLayout', '{\"versionCode\":\"2017082007\",\"versionName\":\"4.4.0\",\"layoutName\":\"ServiceMarketLayout\",\"displayName\":\"服务市场\",\"groups\":[{\"groupName\":\"\",\"widget\":\"Banners\",\"instanceConfig\":{\"itemGroup\":\"Default\"},\"style\":\"Default\",\"defaultOrder\":1,\"separatorFlag\":0,\"separatoeparatorHeight\":0},{\"groupName\":\"商家服务\",\"widget\":\"Navigator\",\"instanceConfig\":{\"itemGroup\":\"Bizs\"},\"style\":\"Default\",\"separatorFlag\":1,\"separatorHeight\":1,\"defaultOrder\":5,\"columnCount\":4},{\"groupName\":\"\",\"widget\":\"Bulletins\",\"instanceConfig\":{\"itemGroup\":\"Default\",\"paddingTop\":1},\"style\":\"Default\",\"defaultOrder\":3},{\"groupName\":\"\",\"widget\":\"Navigator\",\"instanceConfig\":{\"itemGroup\":\"EnterpriseServices\",\"cssStyleFlag\":1,\"paddingTop\":20,\"paddingLeft\":20,\"paddingBottom\":40,\"paddingRight\":20,\"lineSpacing\":16,\"columnSpacing\":16,\"backgroundColor\":\"#FFFFFF\"},\"style\":\"Gallery\",\"defaultOrder\":2,\"separatorFlag\":1,\"columnCount\":2},{\"groupName\":\"\",\"widget\":\"NewsFlash\",\"instanceConfig\":{\"timeWidgetStyle\":\"datetime\",\"categoryId\":0,\"itemGroup\":\"Default\",\"newsSize\":3},\"style\":\"Default\",\"defaultOrder\":1}]}', '2017082007', '0', '2', '2017-08-22 10:53:22', 'park_tourist', '0', '0', '0');
 INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES ('602', '999971', 'ServiceMarketLayout', '{\"versionCode\":\"2017082007\",\"versionName\":\"4.4.0\",\"layoutName\":\"ServiceMarketLayout\",\"displayName\":\"服务市场\",\"groups\":[{\"groupName\":\"\",\"widget\":\"Banners\",\"instanceConfig\":{\"itemGroup\":\"Default\"},\"style\":\"Default\",\"defaultOrder\":1,\"separatorFlag\":0,\"separatoeparatorHeight\":0},{\"groupName\":\"商家服务\",\"widget\":\"Navigator\",\"instanceConfig\":{\"itemGroup\":\"Bizs\"},\"style\":\"Default\",\"separatorFlag\":1,\"separatorHeight\":1,\"defaultOrder\":5,\"columnCount\":3},{\"groupName\":\"\",\"widget\":\"Bulletins\",\"instanceConfig\":{\"itemGroup\":\"Default\",\"paddingTop\":1},\"style\":\"Default\",\"defaultOrder\":3},{\"groupName\":\"\",\"widget\":\"Navigator\",\"instanceConfig\":{\"itemGroup\":\"EnterpriseServices\",\"cssStyleFlag\":1,\"paddingTop\":20,\"paddingLeft\":20,\"paddingBottom\":60,\"paddingRight\":20,\"lineSpacing\":16,\"columnSpacing\":16,\"backgroundColor\":\"#FFFFFF\"},\"style\":\"Gallery\",\"defaultOrder\":2,\"separatorFlag\":1,\"columnCount\":2},{\"groupName\":\"\",\"widget\":\"NewsFlash\",\"instanceConfig\":{\"timeWidgetStyle\":\"datetime\",\"categoryId\":0,\"itemGroup\":\"Default\",\"newsSize\":3},\"style\":\"Default\",\"defaultOrder\":1}]}', '2017082007', '0', '2', '2017-08-22 10:53:22', 'default', '0', '0', '0');
 
--- eh_organization_communities数据
-DELETE from eh_organization_communities where organization_id = 1012516;
-SET @oc_id = (SELECT MAX(id) from eh_organization_communities);
-INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+1, '1012516', @eh_communities_id+3);
-INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+2, '1012516', @eh_communities_id+2);
-INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+3, '1012516', @eh_communities_id+1);
-INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+4, '1012516', '240111044331050389');
-INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+5, '1012516', '240111044331050388');
-
--- 测试数据
-INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+6, '1012516', @eh_communities_id+5);
-INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+7, '1012516', @eh_communities_id+4);
--- 测试数据结束
-
 
 -- eh_communities表数据
 DELETE FROM eh_communities where namespace_id = 999971;
@@ -113,6 +99,21 @@ INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `
 -- 测试数据
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`, `area_size`) VALUES (@eh_communities_id+4, '9c63e9e7-6d48-11e7-a008-0242ac110017', '14809', '上海市', '14810', '浦东新区', '天之骄子人才公寓测试地址1号', '人才公寓1号', '上海市浦东新区盛夏路58弄', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '214', '1', NULL, '2', '2017-07-20 12:40:28', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '190570', '190571', '2017-07-20 12:40:28', '999971', NULL);
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`, `area_size`) VALUES (@eh_communities_id+5, '9c63e9e7-6d48-11e7-a008-0242ac1100120', '14809', '上海市', '14810', '浦东新区', '天之骄子人才公寓测试地址2号', '人才公寓2号', '上海市浦东新区盛夏路58弄', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '214', '1', NULL, '2', '2017-07-20 12:40:28', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '190570', '190571', '2017-07-20 12:40:28', '999971', NULL);
+-- 测试数据结束
+
+
+-- eh_organization_communities数据
+DELETE from eh_organization_communities where organization_id = 1012516;
+SET @oc_id = (SELECT MAX(id) from eh_organization_communities);
+INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+1, '1012516', @eh_communities_id+3);
+INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+2, '1012516', @eh_communities_id+2);
+INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+3, '1012516', @eh_communities_id+1);
+INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+4, '1012516', '240111044331050389');
+INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+5, '1012516', '240111044331050388');
+
+-- 测试数据
+INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+6, '1012516', @eh_communities_id+5);
+INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+7, '1012516', @eh_communities_id+4);
 -- 测试数据结束
 
 -- eh_community_geopoints表数据
