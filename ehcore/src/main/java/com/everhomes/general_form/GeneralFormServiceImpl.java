@@ -515,7 +515,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 			    List<Long> groupIds = new ArrayList<>();
 			    for(GeneralFormGroupDTO dto : cmd.getFormGroups()){
 			        if(dto.getFieldGroupId()!=null){
-                        //  若存在的则修改
+                        //  若存在的则同步
                         syncGeneralFormGroupFormOriginId(form.getFormOriginId(),form.getFormVersion(),dto.getFieldGroupId(),dto.getFieldGroupName());
 			            groupIds.add(dto.getFieldGroupId());
                     }else{
@@ -573,15 +573,26 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
 	@Override
 	public void deleteGeneralFormById(GeneralFormIdCommand cmd) {
-		// 删除是状态置为invalid
+		//  删除是状态置为invalid
 		this.generalFormProvider.invalidForms(cmd.getFormOriginId());
+		//  删除与表单相关控件组
+        this.generalFormProvider.deleteGeneralFormGroupsByFormOriginId(cmd.getFormOriginId());
 	}
 
 	@Override
 	public GeneralFormDTO getGeneralForm(GeneralFormIdCommand cmd) {
 		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
 				.getFormOriginId());
-		return processGeneralFormDTO(form);
+		GeneralFormDTO result = processGeneralFormDTO(form);
+		if(result !=null){
+			ListGeneralFormGroupsCommand groupsCommand = new ListGeneralFormGroupsCommand();
+			groupsCommand.setFormOriginId(cmd.getFormOriginId());
+			groupsCommand.setFormOriginId(result.getOrganizationId());
+			List<GeneralFormGroupDTO> groups = listGeneralFormGroups(groupsCommand);
+			result.setFormGroups(groups);
+			return result;
+		}
+		return null;
 	}
 
 	@Override

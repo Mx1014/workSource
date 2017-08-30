@@ -193,6 +193,14 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
                 .and(Tables.EH_GENERAL_FORM_GROUPS.ID.notIn(groupIds));
     }
 
+
+	@Override
+	public void deleteGeneralFormGroupsByFormOriginId(Long formOriginId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_GENERAL_FORM_GROUPS)
+				.where(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId));
+	}
+
 	@Override
 	public GeneralFormGroups findGeneralFormGroupById(Long id){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

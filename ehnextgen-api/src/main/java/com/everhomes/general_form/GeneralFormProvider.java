@@ -7,34 +7,36 @@ import java.util.List;
 
 public interface GeneralFormProvider {
 
-	Long createGeneralForm(GeneralForm obj);
+    Long createGeneralForm(GeneralForm obj);
 
-	void updateGeneralForm(GeneralForm obj);
+    void updateGeneralForm(GeneralForm obj);
 
-	void deleteGeneralForm(GeneralForm obj);
+    void deleteGeneralForm(GeneralForm obj);
 
-	GeneralForm getGeneralFormById(Long id);
+    GeneralForm getGeneralFormById(Long id);
 
-	List<GeneralForm> queryGeneralForms(ListingLocator locator, int count,
+    List<GeneralForm> queryGeneralForms(ListingLocator locator, int count,
                                         ListingQueryBuilderCallback queryBuilderCallback);
- 
 
-	GeneralForm getActiveGeneralFormByOriginId(Long formOriginId);
 
-	void invalidForms(Long formOriginId);
+    GeneralForm getActiveGeneralFormByOriginId(Long formOriginId);
 
-	GeneralForm getActiveGeneralFormByOriginIdAndVersion(Long formOriginId, Long formVersion);
+    void invalidForms(Long formOriginId);
 
-	//	added by R 20170828
-	GeneralFormGroups createGeneralFormGroup(GeneralFormGroups group);
+    GeneralForm getActiveGeneralFormByOriginIdAndVersion(Long formOriginId, Long formVersion);
 
-	void deleteGeneralFormGroupsNotInIds(Long formOriginId, Long organizationId, List<Long> groupIds);
+    //	added by R 20170828
+    GeneralFormGroups createGeneralFormGroup(GeneralFormGroups group);
 
-	GeneralFormGroups findGeneralFormGroupById(Long id);
+    void deleteGeneralFormGroupsNotInIds(Long formOriginId, Long organizationId, List<Long> groupIds);
 
-	GeneralFormGroups findGeneralFormGroupByNameAndOriginId(Long formOriginId, String groupName, Long organizationId);
+    void deleteGeneralFormGroupsByFormOriginId(Long formOriginId);
 
-	void updateGeneralFormGroup(GeneralFormGroups group);
+    GeneralFormGroups findGeneralFormGroupById(Long id);
 
-	List<GeneralFormGroups> listGeneralFormGroups(Integer namespaceId, Long organizationId, Long formOriginId);
+    GeneralFormGroups findGeneralFormGroupByNameAndOriginId(Long formOriginId, String groupName, Long organizationId);
+
+    void updateGeneralFormGroup(GeneralFormGroups group);
+
+    List<GeneralFormGroups> listGeneralFormGroups(Integer namespaceId, Long organizationId, Long formOriginId);
 }
