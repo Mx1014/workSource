@@ -2112,7 +2112,37 @@ UPDATE `eh_launch_pad_items` SET action_type = 33, action_data = CONCAT('{"type"
 -- by dengs,更新图标
 UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveE1ERTRNalJqT1dJNE5qZzJabVJpTjJJM1pHVmtNek0yTm1NNE5EZGhPQQ',item_label='共享汽车' WHERE namespace_id = 999979 AND item_label = '宜步出行';
 
+-- 1 by dengs.严军2017.07.26执行的任务。beta已执行，现在上到线网，修改了icon的连接地址。
+UPDATE eh_launch_pad_items SET more_order = more_order + 1 WHERE namespace_id = 999979 AND item_label IN ('服务热线', '故障报修', '投诉建议', '任务管理', '店铺管理');
+SET @id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+    VALUES (@id:=@id+1, 999979, 0, 0, 0, '/home', 'Bizs', '费用查询', '物业查费', 'cs://1/image/aW1hZ2UvTVRwaFpXVTJNbVJpTTJReVpEUmhPVFEyT1RreU1tTTVaR1psWWpKaFkyRmxOUQ', 1, 1, 14, '{"url":"https://core.gd-we.com/property-bill/index.html?hideNavigationBar=1&name=%e7%89%a9%e4%b8%9a%e6%9f%a5%e8%b4%b9#/verify_account#sign_suffix"}', 2, 0, 1, 0, '1', 0, NULL, NULL, NULL, 1, 'pm_admin', 0, 11, NULL, 7, NULL);
 
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+    VALUES (@id:=@id+1, 999979, 0, 0, 0, '/home', 'Bizs', '费用查询', '物业查费', 'cs://1/image/aW1hZ2UvTVRwaFpXVTJNbVJpTTJReVpEUmhPVFEyT1RreU1tTTVaR1psWWpKaFkyRmxOUQ', 1, 1, 14, '{"url":"https://core.gd-we.com/property-bill/index.html?hideNavigationBar=1&name=%e7%89%a9%e4%b8%9a%e6%9f%a5%e8%b4%b9#/verify_account#sign_suffix"}', 2, 0, 1, 0, '1', 0, NULL, NULL, NULL, 1, 'park_tourist', 0, 11, NULL, 7, NULL);
+
+
+-- 2
+UPDATE eh_launch_pad_items SET item_label = '管理咨询' WHERE namespace_id = 999979 AND item_label = '咨询服务';
+
+-- 3
+UPDATE eh_launch_pad_items SET item_label = '高企申报', icon_uri='cs://1/image/aW1hZ2UvTVRvMU16a3laVGs0TVdFMllqa3dPV1V4TkRZMFlqSTJPREpoWmpNMk1HTmhOZw' WHERE namespace_id = 999979 AND item_label = '卫生许可';
+UPDATE eh_launch_pad_items SET item_label = '场租补贴', icon_uri='cs://1/image/aW1hZ2UvTVRwbFpUZ3dNV1prT1RReVpEQmxPRFJpT1dRNVpUTTNNVGsxTldFM01USXlOQQ' WHERE namespace_id = 999979 AND item_label = '环保审批';
+
+
+-- 4
+DELETE FROM eh_launch_pad_items  WHERE namespace_id = 999979 AND item_label = '软件开发';
+
+-- 5
+UPDATE eh_launch_pad_items SET item_label = '共享汽车', icon_uri='cs://1/image/aW1hZ2UvTVRveE1ERTRNalJqT1dJNE5qZzJabVJpTjJJM1pHVmtNek0yTm1NNE5EZGhPQQ'  WHERE namespace_id = 999979 AND item_label = '宜步出行';
+
+UPDATE eh_launch_pad_items SET default_order = default_order + 1 WHERE namespace_id = 999979 AND item_label IN ('冒泡旅游', '商务出行', '人才公寓', '松山湖酒店', '周边租房', '银行排号', '园区美食', '叫外卖');
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+    VALUES (@id:=@id+1, 999979, 0, 0, 0, '/secondhome', 'peitao', '中港直通车', '中港直通车', 'cs://1/image/aW1hZ2UvTVRwa1pERmlNekUwTTJWbU4yUTRaRGN5T0dabE5UUm1NbUk0T1dWaU5EaGtZUQ', 1, 1, 14, '', 8, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 0, 17, NULL, 0, NULL);
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+    VALUES (@id:=@id+1, 999979, 0, 0, 0, '/secondhome', 'peitao', '中港直通车', '中港直通车', 'cs://1/image/aW1hZ2UvTVRwa1pERmlNekUwTTJWbU4yUTRaRGN5T0dabE5UUm1NbUk0T1dWaU5EaGtZUQ', 1, 1, 14, '', 8, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, 17, NULL, 0, NULL);
 
 
 
