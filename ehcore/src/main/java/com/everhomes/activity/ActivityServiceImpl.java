@@ -4245,122 +4245,123 @@ public class ActivityServiceImpl implements ActivityService {
         }
         List<Activity> activities = this.activityProvider.listActivities(locator, pageSize + 1, condition, orderByCreateTime, needTemporary);
 
-        if(orderByCreateTime) {
-            List<ActivityDTO> activityDtos = activities.stream().map(activity -> {
-                Post post = forumProvider.findPostById(activity.getPostId());
-                if (post == null || post.getStatus() == null || post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
-                    return null;
-                }
+        //我勒个去呀，下面if和else的代码实一样的，先注释一块   edit by yanjun 20170830
+        //if(orderByCreateTime) {
+		List<ActivityDTO> activityDtos = activities.stream().map(activity -> {
+			Post post = forumProvider.findPostById(activity.getPostId());
+			if (post == null || post.getStatus() == null || post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
+				return null;
+			}
 
-                // 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170807
-				if(PostCloneFlag.fromCode(activity.getCloneFlag()) == PostCloneFlag.CLONE){
-					post = forumProvider.findPostById(post.getRealPostId());
-					activity = activityProvider.findSnapshotByPostId(post.getId());
+			// 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170807
+			if(PostCloneFlag.fromCode(activity.getCloneFlag()) == PostCloneFlag.CLONE){
+				post = forumProvider.findPostById(post.getRealPostId());
+				activity = activityProvider.findSnapshotByPostId(post.getId());
+			}
+
+			if (activity.getPosterUri() == null) {
+				this.forumProvider.populatePostAttachments(post);
+				List<Attachment> attachmentList = post.getAttachments();
+				if (attachmentList != null && attachmentList.size() != 0) {
+					for (Attachment attachment : attachmentList) {
+						if (PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+							activity.setPosterUri(attachment.getContentUri());
+						break;
+					}
 				}
-
-                if (activity.getPosterUri() == null) {
-                    this.forumProvider.populatePostAttachments(post);
-                    List<Attachment> attachmentList = post.getAttachments();
-                    if (attachmentList != null && attachmentList.size() != 0) {
-                        for (Attachment attachment : attachmentList) {
-                            if (PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
-                                activity.setPosterUri(attachment.getContentUri());
-                            break;
-                        }
-                    }
-                }
-                ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
-                dto.setActivityId(activity.getId());
-                dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
-                dto.setEnrollUserCount(activity.getSignupAttendeeCount());
-                dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
-                dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
-                dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
-                dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
-                dto.setProcessStatus(getStatus(activity).getCode());
-                dto.setFamilyId(activity.getCreatorFamilyId());
-                dto.setStartTime(activity.getStartTime().toString());
-                dto.setStopTime(activity.getEndTime().toString());
-                dto.setSignupEndTime(getSignupEndTime(activity).toString());
-                dto.setGroupId(activity.getGroupId());
-                dto.setPosterUrl(getActivityPosterUrl(activity));
-                if (user != null) {
-                	List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(user.getId(), UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());
-                    if (favorite == null || favorite.size() == 0) {
-                        dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
-                    } else {
-                        dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
-                    }
-                    //add UserActivityStatus by xiongying 20160628
-                    ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
-                    dto.setUserActivityStatus(getActivityStatus(roster).getCode());
-				}else {
+			}
+			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+			dto.setActivityId(activity.getId());
+			dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+			dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+			dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+			dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+			dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
+			dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
+			dto.setProcessStatus(getStatus(activity).getCode());
+			dto.setFamilyId(activity.getCreatorFamilyId());
+			dto.setStartTime(activity.getStartTime().toString());
+			dto.setStopTime(activity.getEndTime().toString());
+			dto.setSignupEndTime(getSignupEndTime(activity).toString());
+			dto.setGroupId(activity.getGroupId());
+			dto.setPosterUrl(getActivityPosterUrl(activity));
+			if (user != null) {
+				List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(user.getId(), UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());
+				if (favorite == null || favorite.size() == 0) {
 					dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+				} else {
+					dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
 				}
-                fixupVideoInfo(dto);
-                return dto;
-            }).filter(r -> r != null).collect(Collectors.toList());
+				//add UserActivityStatus by xiongying 20160628
+				ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
+				dto.setUserActivityStatus(getActivityStatus(roster).getCode());
+			}else {
+				dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+			}
+			fixupVideoInfo(dto);
+			return dto;
+		}).filter(r -> r != null).collect(Collectors.toList());
 
-            return activityDtos;
-        } else {
-            List<ActivityDTO> activityDtos = activities.stream().map(activity -> {
-                Post post = forumProvider.findPostById(activity.getPostId());
-                if (post == null || post.getStatus() == null || post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
-                    return null;
-                }
+		return activityDtos;
+//        } else {
+//            List<ActivityDTO> activityDtos = activities.stream().map(activity -> {
+//                Post post = forumProvider.findPostById(activity.getPostId());
+//                if (post == null || post.getStatus() == null || post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
+//                    return null;
+//                }
+//
+//				// 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170807
+//				if(PostCloneFlag.fromCode(activity.getCloneFlag()) == PostCloneFlag.CLONE){
+//					post = forumProvider.findPostById(post.getRealPostId());
+//					activity = activityProvider.findSnapshotByPostId(post.getId());
+//				}
+//                if (activity.getPosterUri() == null) {
+//                    this.forumProvider.populatePostAttachments(post);
+//                    List<Attachment> attachmentList = post.getAttachments();
+//                    if (attachmentList != null && attachmentList.size() != 0) {
+//                        for (Attachment attachment : attachmentList) {
+//                            if (PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+//                                activity.setPosterUri(attachment.getContentUri());
+//                            break;
+//                        }
+//                    }
+//                }
+//                ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+//                dto.setActivityId(activity.getId());
+//                dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+//                dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+//                dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+//                dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+//                dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
+//                dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
+//                dto.setProcessStatus(getStatus(activity).getCode());
+//                dto.setFamilyId(activity.getCreatorFamilyId());
+//                dto.setStartTime(activity.getStartTime().toString());
+//                dto.setStopTime(activity.getEndTime().toString());
+//                dto.setSignupEndTime(getSignupEndTime(activity).toString());
+//                dto.setGroupId(activity.getGroupId());
+//                dto.setPosterUrl(getActivityPosterUrl(activity));
+//                if (user != null) {
+//                	List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(user.getId(), UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());
+//                    if (favorite == null || favorite.size() == 0) {
+//                        dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+//                    } else {
+//                        dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
+//                    }
+//                    //add UserActivityStatus by xiongying 20160628
+//                    ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
+//                    dto.setUserActivityStatus(getActivityStatus(roster).getCode());
+//				}else {
+//					dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+//				}
+//                fixupVideoInfo(dto);
+//                return dto;
+//                //全部查速度太慢，先把查出的部分排序 by xiongying20161208
+//             // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+//            })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/filter(r -> r != null).collect(Collectors.toList());
 
-				// 如果是clone帖子，则寻找它的真身帖子和真身活动   add by yanjun 20170807
-				if(PostCloneFlag.fromCode(activity.getCloneFlag()) == PostCloneFlag.CLONE){
-					post = forumProvider.findPostById(post.getRealPostId());
-					activity = activityProvider.findSnapshotByPostId(post.getId());
-				}
-                if (activity.getPosterUri() == null) {
-                    this.forumProvider.populatePostAttachments(post);
-                    List<Attachment> attachmentList = post.getAttachments();
-                    if (attachmentList != null && attachmentList.size() != 0) {
-                        for (Attachment attachment : attachmentList) {
-                            if (PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
-                                activity.setPosterUri(attachment.getContentUri());
-                            break;
-                        }
-                    }
-                }
-                ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
-                dto.setActivityId(activity.getId());
-                dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
-                dto.setEnrollUserCount(activity.getSignupAttendeeCount());
-                dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
-                dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
-                dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
-                dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
-                dto.setProcessStatus(getStatus(activity).getCode());
-                dto.setFamilyId(activity.getCreatorFamilyId());
-                dto.setStartTime(activity.getStartTime().toString());
-                dto.setStopTime(activity.getEndTime().toString());
-                dto.setSignupEndTime(getSignupEndTime(activity).toString());
-                dto.setGroupId(activity.getGroupId());
-                dto.setPosterUrl(getActivityPosterUrl(activity));
-                if (user != null) {
-                	List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(user.getId(), UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());
-                    if (favorite == null || favorite.size() == 0) {
-                        dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
-                    } else {
-                        dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
-                    }
-                    //add UserActivityStatus by xiongying 20160628
-                    ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
-                    dto.setUserActivityStatus(getActivityStatus(roster).getCode());
-				}else {
-					dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
-				}
-                fixupVideoInfo(dto);
-                return dto;
-                //全部查速度太慢，先把查出的部分排序 by xiongying20161208
-             // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
-            })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/filter(r -> r != null).collect(Collectors.toList());
-
-            return activityDtos;
-        }
+//            return activityDtos;
+//        }
     }
 
 	private void processOfficalActivitySceneToken(Long userId, SceneTokenDTO sceneTokenDTO, QueryOrganizationTopicCommand cmd) {

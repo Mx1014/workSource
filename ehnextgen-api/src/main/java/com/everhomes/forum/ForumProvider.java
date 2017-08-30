@@ -285,4 +285,6 @@ public interface ForumProvider {
 
 
     Forum findForumByNamespaceId(Integer namespaceId);
+
+    List<Post> listPostsByRealPostId(Long realPostId);
 }

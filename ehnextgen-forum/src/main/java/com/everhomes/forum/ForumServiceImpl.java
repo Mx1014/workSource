@@ -848,6 +848,7 @@ public class ForumServiceImpl implements ForumService {
                 });
                 
                 this.postSearcher.deleteById(post.getId());
+
                 if(handler != null) {
                     handler.postProcessEmbeddedObject(post);
                 } 
@@ -869,8 +870,15 @@ public class ForumServiceImpl implements ForumService {
                 			}
                 			
                 		}
+
+                        activity.setStatus(PostStatus.INACTIVE.getCode());
+                        activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        activityProvider.updateActivity(activity);
             		}
 				}
+
+                //删除克隆帖子  add by yanjun 20170830
+                deletePostAndActivity(post, userId);
                 
             } catch(Exception e) {
                 LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
@@ -891,6 +899,9 @@ public class ForumServiceImpl implements ForumService {
             		activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             		activityProvider.updateActivity(activity);
                 }
+
+                //删除克隆帖子  add by yanjun 20170830
+                deletePostAndActivity(post, userId);
                 
             } catch(Exception e) {
                 LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
@@ -939,7 +950,31 @@ public class ForumServiceImpl implements ForumService {
         }
         return null;
     }
-    
+
+    private void deletePostAndActivity(Post post, Long userId){
+        //删除克隆帖子  add by yanjun 20170830
+        if(post.getCloneFlag() != null && post.getCloneFlag().byteValue() == PostCloneFlag.REAL.getCode()){
+            List<Post> listClone= forumProvider.listPostsByRealPostId(post.getId());
+
+            if(listClone != null && listClone.size() >0){
+                listClone.forEach(r->{
+                    r.setStatus(PostStatus.INACTIVE.getCode());
+                    r.setDeleterUid(userId);
+                    r.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    this.forumProvider.updatePost(r);
+
+                    this.postSearcher.deleteById(r.getId());
+
+                    //删除活动
+                    Activity r_activity = activityProvider.findSnapshotByPostId(r.getId());
+                    r_activity.setStatus(PostStatus.INACTIVE.getCode());
+                    r_activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    activityProvider.updateActivity(r_activity);
+
+                });
+            }
+        }
+    }
     //当创建者删除活动时发消息通知已报名的人
     private void sendMessageWhenCreatorDeleteActivity(Long activityId, Long userId){
     	Activity activity = activityProivider.findActivityById(activityId);
@@ -1406,7 +1441,10 @@ public class ForumServiceImpl implements ForumService {
         			 populatePosts(operatorId, posts, communityId, false);
          	        
          	        List<PostDTO> postDtoList = posts.stream().map((r) -> {
-         	          return ConvertHelper.convert(r, PostDTO.class);  
+         	          PostDTO dto = ConvertHelper.convert(r, PostDTO.class);
+         	          //填充VisibleRegionIds，用于编辑活动  add by yanjun 20170830
+                      fillVisibleRegionIds(dto);
+         	          return dto;
          	        }).collect(Collectors.toList());
          	        
          	       postResponse.setPosts(postDtoList);
@@ -1780,7 +1818,10 @@ public class ForumServiceImpl implements ForumService {
         	Timestamp s = r.getStartTime();
         	Timestamp e = r.getEndTime();
         	PostDTO dto= ConvertHelper.convert(r, PostDTO.class);
-        	
+
+            //填充VisibleRegionIds，用于编辑活动  add by yanjun 20170830
+            fillVisibleRegionIds(dto);
+
         	if(null != s && null != e){
         		dto.setStartTime(s.getTime());
             	dto.setEndTime(e.getTime());
@@ -1824,6 +1865,25 @@ public class ForumServiceImpl implements ForumService {
         }
         return  condition;
     }
+
+    private void fillVisibleRegionIds(PostDTO dto){
+        if(dto != null && dto.getCloneFlag() != null && dto.getCloneFlag().byteValue() == PostCloneFlag.REAL.getCode()){
+            List<Post> list= forumProvider.listPostsByRealPostId(dto.getId());
+            if (list != null && list.size() >0){
+                List<Long> visibleRegionIds = new ArrayList<>();
+                list.forEach(r->{
+                    if(r.getVisibleRegionId() != null){
+                        visibleRegionIds.add(r.getVisibleRegionId());
+                    }
+                });
+
+                if(visibleRegionIds.size() > 0){
+                    dto.setVisibleRegionIds(visibleRegionIds);
+                }
+            }
+        }
+    }
+
     @Override
     public void likeTopic(LikeTopicCommand cmd) {
         User operator = UserContext.current().getUser();
@@ -5954,24 +6014,37 @@ public class ForumServiceImpl implements ForumService {
 	        		ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "post not found"); 
 		}
 
+        this.dbProvider.execute((status) -> {
 
-        //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609
-        try {
-            postSearcher.feedDoc(post);
+		    //把真身帖子和克隆帖一块发布   edit by yanjun 20170830
+            List<Post> list = new ArrayList<>();
+		    if(post.getCloneFlag() != null && post.getCloneFlag().byteValue() == PostCloneFlag.REAL.getCode()){
+                list= forumProvider.listPostsByRealPostId(post.getId());
+            }
+            list.add(post);
 
-            AddUserPointCommand pointCmd = new AddUserPointCommand(post.getCreatorUid(), PointType.CREATE_TOPIC.name(),
-                    userPointService.getItemPoint(PointType.CREATE_TOPIC), post.getCreatorUid());
-            userPointService.addPoint(pointCmd);
-        } catch (Exception e) {
-            LOGGER.error("Failed to add post to search engine, userId=" + post.getCreatorUid() + ", postId=" + post.getId(), e);
-        }
-		
-		this.dbProvider.execute((status) -> {
-			activity.setStatus(PostStatus.ACTIVE.getCode());
-			post.setStatus(PostStatus.ACTIVE.getCode());
-			activityProvider.updateActivity(activity);
-			forumProvider.updatePost(post);
-			
+		    list.forEach(r ->{
+		        //更新帖子
+                r.setStatus(PostStatus.ACTIVE.getCode());
+                forumProvider.updatePost(r);
+
+                //更新活动
+                Activity r_activity = activityProvider.findSnapshotByPostId(r.getId());
+                r_activity.setStatus(PostStatus.ACTIVE.getCode());
+                activityProvider.updateActivity(r_activity);
+
+                //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609
+                try {
+                    postSearcher.feedDoc(r);
+
+                    AddUserPointCommand pointCmd = new AddUserPointCommand(r.getCreatorUid(), PointType.CREATE_TOPIC.name(),
+                            userPointService.getItemPoint(PointType.CREATE_TOPIC), r.getCreatorUid());
+                    userPointService.addPoint(pointCmd);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to add post to search engine, userId=" + r.getCreatorUid() + ", postId=" + r.getId(), e);
+                }
+            });
+
 			return null;
 		});
 		

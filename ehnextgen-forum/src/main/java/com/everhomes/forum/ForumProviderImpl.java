@@ -1049,5 +1049,19 @@ public class ForumProviderImpl implements ForumProvider {
         }
 	    return null;
     }
+
+
+    @Override
+    public List<Post> listPostsByRealPostId(Long realPostId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Result<Record> result = context.select().from(Tables.EH_FORUM_POSTS)
+                .where(Tables.EH_FORUM_POSTS.REAL_POST_ID.eq(realPostId))
+                .fetch();
+
+        if (result != null && result.isNotEmpty()) {
+            return result.map(r->RecordHelper.convert(r, Post.class));
+        }
+        return new ArrayList<Post>();
+    }
 	
  }
