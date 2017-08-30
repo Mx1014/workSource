@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.everhomes.discover.ItemType;
 
 /**
  * Created by Wentian Wang on 2017/8/22.

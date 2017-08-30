@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>freeCount: 待租总数</li>
  * <li>saledCount: 已售总数</li>
  * <li>unsaleCount: 待售总数</li>
+ * <li>occupiedCount: 被占用总数</li>
  * <li>defaultCount: 其他未知总数</li>
  * </ul>
  */
@@ -28,8 +29,17 @@ public class PropAptStatisticDTO {
 	private Integer defaultCount;
 	private Integer hasOwnerCount;
 	private Integer noOwnerCount;
-    
-    public Integer getHasOwnerCount() {
+	private Integer occupiedCount;
+
+	public Integer getOccupiedCount() {
+		return occupiedCount;
+	}
+
+	public void setOccupiedCount(Integer occupiedCount) {
+		this.occupiedCount = occupiedCount;
+	}
+
+	public Integer getHasOwnerCount() {
 		return hasOwnerCount;
 	}
 	public void setHasOwnerCount(Integer hasOwnerCount) {

@@ -1000,18 +1000,18 @@ public class AssetProviderImpl implements AssetProvider {
                     list1.add(itemDTO);
                     return null;
                 });
-         context.select()
-                 .from(t)
-                 .where(t.BILL_ID.eq(billId))
-                 .fetch()
-                 .map(f -> {
-                     ExemptionItemDTO exemDto = new ExemptionItemDTO();
-                     exemDto.setAmount(f.getValue(t.AMOUNT));
-                     exemDto.setExemptionId(f.getValue(t.ID));
-                     exemDto.setRemark(f.getValue(t.REMARKS));
-                     list2.add(exemDto);
-                     return null;
-                 });
+        context.select()
+                .from(t)
+                .where(t.BILL_ID.eq(billId))
+                .fetch()
+                .map(f -> {
+                    ExemptionItemDTO exemDto = new ExemptionItemDTO();
+                    exemDto.setAmount(f.getValue(t.AMOUNT));
+                    exemDto.setExemptionId(f.getValue(t.ID));
+                    exemDto.setRemark(f.getValue(t.REMARKS));
+                    list2.add(exemDto);
+                    return null;
+                });
 
         dto.setBillItemDTOList(list1);
         dto.setExemptionItemDTOList(list2);
@@ -1304,9 +1304,9 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentExemptionItems t = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t");
         EhPaymentBills t1 = Tables.EH_PAYMENT_BILLS.as("t1");
         dateStr = context.select(t1.DATE_STR)
-                        .from(t1)
-                        .where(t1.ID.eq(billId))
-                        .fetchOne(0,String.class);
+                .from(t1)
+                .where(t1.ID.eq(billId))
+                .fetchOne(0,String.class);
         String finalDateStr = dateStr;
         context.select(t.AMOUNT,t.ID,t.REMARKS)
                 .from(t)

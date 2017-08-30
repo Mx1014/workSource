@@ -9841,17 +9841,18 @@ public class OrganizationServiceImpl implements OrganizationService {
         ContractDTO contractDTO = ConvertHelper.convert(contract, ContractDTO.class);
         contractDTO.setContractNumber(contract.getContractNumber());
         contractDTO.setContractEndDate(contract.getContractEndDate());
-        contractDTO.setOrganizationName(contract.getOrganizationName());
-        contractDTO.setAdminMembers(getAdmins(contract.getOrganizationId()));
-        contractDTO.setSignupCount(getSignupCount(contract.getOrganizationId()));
+        contractDTO.setOrganizationName(contract.getCustomerName());
+        //应该从合同中拿到客户id，根据客户id查客户，从客户表中拿到organizationid by xiongying 201708
+        contractDTO.setAdminMembers(getAdmins(contract.getCustomerId()));
+        contractDTO.setSignupCount(getSignupCount(contract.getCustomerId()));
 
-        OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(contract.getOrganizationId());
+        OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(contract.getCustomerId());
         if (organizationDetail != null) {
             contractDTO.setContract(organizationDetail.getContact());
             contractDTO.setContactor(organizationDetail.getContactor());
             contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
 
-            OrganizationServiceUser user = getServiceUser(contract.getOrganizationId(), organizationDetail.getServiceUserId());
+            OrganizationServiceUser user = getServiceUser(contract.getCustomerId(), organizationDetail.getServiceUserId());
             if (user != null) {
                 contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
                 contractDTO.setServiceUserName(user.getServiceUserName());

@@ -1372,7 +1372,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
-        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"));
 		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
@@ -1603,7 +1603,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_ORGANIZATION_OWNERS)
                 .where(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"))
                 .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
                 .fetchInto(CommunityPmOwner.class);
     }
@@ -1683,7 +1683,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
             query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
         }
         if (communityId != null) {
-            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"));
         }
         if (orgOwnerTypeId != null) {
             query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID.eq(orgOwnerTypeId));
@@ -1899,7 +1899,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
         if (communityId != null) {
-            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"));
         }
         if (orgOwnerTypeIds != null) {
             query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID.in(orgOwnerTypeIds));
@@ -1951,7 +1951,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()));
         if (communityId != null) {
-            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
+            query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"));
         }
         if (orgOwnerTypeIds != null) {
             query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ORG_OWNER_TYPE_ID.in(orgOwnerTypeIds));
@@ -1975,7 +1975,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_ORGANIZATION_OWNERS)
                 .where(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"))
                 .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
                 .and(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken))
                 .fetchOneInto(CommunityPmOwner.class);

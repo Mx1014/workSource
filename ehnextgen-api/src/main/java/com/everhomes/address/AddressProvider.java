@@ -4,9 +4,12 @@ package com.everhomes.address;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.rest.address.ApartmentAbstractDTO;
+
 import com.everhomes.asset.AddressIdAndName;
 import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
 import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
+
 import org.jooq.Record2;
 import org.jooq.Result;
 
@@ -47,13 +50,20 @@ public interface AddressProvider {
     List<AddressDTO> listAddressByBuildingName(Integer namespaceId, Long communityId, String buildingName);
 	Address findAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName);
 	List<Address> listAddressByNamespaceType(Integer namespaceId, Long communityId, String namespaceType);
+	List<Address> listAddressByNamespaceType(Integer namespaceId, String namespaceType);
 	Map<Byte, Integer> countApartmentByLivingStatus(Long communityId);
 	Integer countApartment(Long communityId);
 	void updateOrganizationOwnerAddress(Long id);
 	void updateOrganizationAddress(Long id);
 	void updateOrganizationAddressMapping(Long id);
 
+    Address findAddressByNamespaceTypeAndName(String namespaceType, String namespaceToken);
+
+    List<ApartmentAbstractDTO> listAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName, Byte livingStatus, CrossShardListingLocator locator, int count);
+
+
     List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName);
+
 
     List<GetApartmentNameByBuildingNameDTO> getApartmentNameByBuildingName(String buildingName, Long communityId, Integer currentNamespaceId);
 }

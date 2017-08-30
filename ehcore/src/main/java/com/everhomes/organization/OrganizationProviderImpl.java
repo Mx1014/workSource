@@ -3069,7 +3069,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.setRecord(ConvertHelper.convert(owner, EhOrganizationOwnersRecord.class));
         query.setReturning(Tables.EH_ORGANIZATION_OWNERS.ID);
         query.execute();
-        owner.setId(query.getReturnedRecord().value1());
+        owner.setId(query.getReturnedRecord().getId());
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationTasks.class, null);
     }
@@ -3111,7 +3111,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
         SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
-        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%" +communityId + "%"));
         if (queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 

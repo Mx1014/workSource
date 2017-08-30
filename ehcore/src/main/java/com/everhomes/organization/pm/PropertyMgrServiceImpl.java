@@ -79,6 +79,8 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.ProcessBillModel1;
 import com.everhomes.util.excel.handler.PropMgrBillHandler;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.ScopeFieldItem;
 import net.greghaines.jesque.Job;
 import org.apache.poi.ss.usermodel.*;
 import org.jooq.Record;
@@ -99,6 +101,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.validation.constraints.Null;
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -227,6 +230,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Autowired
     private GroupMemberLogProvider groupMemberLogProvider;
+
+	@Autowired
+	private FieldProvider fieldProvider;
     
     private String queueName = "property-mgr-push";
 
@@ -1930,7 +1936,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setSaledCount(saledCount);
 		int unsaleCount = (temp = result.get(AddressMappingStatus.UNSALE.getCode())) == null ? 0 : temp;
 		dto.setUnsaleCount(unsaleCount);
-		sum = defaultCount + livingCount + rentCount + freeCount + saledCount + unsaleCount;
+		int occupiedCount = (temp = result.get(AddressMappingStatus.OCCUPIED.getCode())) == null ? 0 : temp;
+		dto.setOccupiedCount(occupiedCount);
+		sum = defaultCount + livingCount + rentCount + freeCount + saledCount + unsaleCount + occupiedCount;
 		
 		// 科技园的从address表里统计，其它域空间还是按以前的方式统计
 		if (sum == 0) {
@@ -2068,11 +2076,57 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             address.setApartmentName(cmd.getApartmentName());
             address.setAreaSize(cmd.getAreaSize());
             address.setAddress(building.getName() + "-" + cmd.getApartmentName());
+
+			address.setBuildArea(cmd.getBuildArea());
+			address.setRentArea(cmd.getRentArea());
+			address.setChargeArea(cmd.getChargeArea());
+			address.setSharedArea(cmd.getSharedArea());
+			if(cmd.getCategoryItemId() != null) {
+				address.setCategoryItemId(cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+				if(item != null) {
+					address.setCategoryItemName(item.getItemDisplayName());
+				}
+			}
+
+			if(cmd.getSourceItemId() != null) {
+				address.setSourceItemId(cmd.getSourceItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+				if(item != null) {
+					address.setSourceItemName(item.getItemDisplayName());
+				}
+			}
+
+			address.setDecorateStatus(cmd.getDecorateStatus());
+			address.setOrientation(cmd.getOrientation());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setNamespaceId(community.getNamespaceId());
         	addressProvider.createAddress(address);
 		}else if (AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
 			address.setAreaSize(cmd.getAreaSize());
+
+			address.setBuildArea(cmd.getBuildArea());
+			address.setRentArea(cmd.getRentArea());
+			address.setChargeArea(cmd.getChargeArea());
+			address.setSharedArea(cmd.getSharedArea());
+			if(cmd.getCategoryItemId() != null) {
+				address.setCategoryItemId(cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+				if(item != null) {
+					address.setCategoryItemName(item.getItemDisplayName());
+				}
+			}
+
+			if(cmd.getSourceItemId() != null) {
+				address.setSourceItemId(cmd.getSourceItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+				if(item != null) {
+					address.setSourceItemName(item.getItemDisplayName());
+				}
+			}
+
+			address.setDecorateStatus(cmd.getDecorateStatus());
+			address.setOrientation(cmd.getOrientation());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             addressProvider.updateAddress(address);
 		}else {
@@ -2080,6 +2134,38 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
         
         insertOrganizationAddressMapping(organizationId, community, address, cmd.getStatus());
+
+		//门牌对应的楼栋和园区的sharedArea chargeArea buildArea rentArea都要增加相应的值 by xiongying 20170815
+		if(address.getRentArea() != null) {
+			Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+			building.setRentArea(buildingRentArea + address.getRentArea());
+
+			Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+			community.setRentArea(communityRentArea + address.getRentArea());
+		}
+		if(address.getSharedArea() != null) {
+			Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
+			building.setSharedArea(buildingSharedArea + address.getSharedArea());
+
+			Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
+			community.setSharedArea(communitySharedArea + address.getSharedArea());
+		}
+		if(address.getBuildArea() != null) {
+			Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+			building.setBuildArea(buildingBuildArea + address.getBuildArea());
+
+			Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+			community.setBuildArea(communityBuildArea + address.getBuildArea());
+		}
+		if(address.getChargeArea() != null) {
+			Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+			building.setChargeArea(buildingChargeArea + address.getChargeArea());
+
+			Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+			community.setChargeArea(communityChargeArea + address.getChargeArea());
+		}
+		communityProvider.updateBuilding(building);
+		communityProvider.updateCommunity(community);
 	}
 
     @Override
@@ -2088,8 +2174,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
 		}
+		Community community = checkCommunity(address.getCommunityId());
+		Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
     	if (cmd.getStatus() != null) {
-    		Community community = checkCommunity(address.getCommunityId());
     		Long organizationId = findOrganizationByCommunity(community);
     		CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
     		communityAddressMapping.setLivingStatus(cmd.getStatus());
@@ -2104,8 +2191,59 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	    		address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
 			}else if (cmd.getAreaSize() != null) {
 				address.setAreaSize(cmd.getAreaSize());
+			}else if (cmd.getSharedArea() != null) {
+				Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
+				Double oldAddressSharedArea = address.getSharedArea() == null ? 0.0 : address.getSharedArea();
+				building.setSharedArea(buildingSharedArea - oldAddressSharedArea + cmd.getSharedArea());
+				Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
+				community.setSharedArea(communitySharedArea - oldAddressSharedArea + cmd.getSharedArea());
+
+				address.setSharedArea(cmd.getSharedArea());
+			}else if (cmd.getBuildArea() != null) {
+				Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+				Double oldAddressBuildArea = address.getBuildArea() == null ? 0.0 : address.getBuildArea();
+				building.setBuildArea(buildingBuildArea - oldAddressBuildArea + cmd.getBuildArea());
+				Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+				community.setBuildArea(communityBuildArea - oldAddressBuildArea + cmd.getBuildArea());
+
+				address.setBuildArea(cmd.getBuildArea());
+			}else if (cmd.getRentArea() != null) {
+				Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+				Double oldAddressRentArea = address.getRentArea() == null ? 0.0 : address.getRentArea();
+				building.setRentArea(buildingRentArea - oldAddressRentArea + cmd.getRentArea());
+				Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+				community.setRentArea(communityRentArea - oldAddressRentArea + cmd.getRentArea());
+
+				address.setRentArea(cmd.getRentArea());
+			}else if (cmd.getChargeArea() != null) {
+				Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+				Double oldAddressChargeArea = address.getChargeArea() == null ? 0.0 : address.getChargeArea();
+				building.setChargeArea(buildingChargeArea - oldAddressChargeArea + cmd.getChargeArea());
+				Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+				community.setChargeArea(communityChargeArea - oldAddressChargeArea + cmd.getChargeArea());
+
+				address.setChargeArea(cmd.getChargeArea());
+			}else if (cmd.getCategoryItemId() != null) {
+				address.setCategoryItemId(cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+				if(item != null) {
+					address.setCategoryItemName(item.getItemDisplayName());
+				}
+			}else if (cmd.getSourceItemId() != null) {
+				address.setSourceItemId(cmd.getSourceItemId());
+				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+				if(item != null) {
+					address.setSourceItemName(item.getItemDisplayName());
+				}
+			}else if (cmd.getDecorateStatus() != null) {
+				address.setDecorateStatus(cmd.getDecorateStatus());
+			}else if (cmd.getOrientation() != null) {
+				address.setOrientation(cmd.getOrientation());
 			}
 	    	addressProvider.updateAddress(address);
+
+			communityProvider.updateBuilding(building);
+			communityProvider.updateCommunity(community);
 		}
 	}
 
@@ -2120,9 +2258,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Long organizationId = findOrganizationByCommunity(community);
 		CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
 		
-		response.setBuildingName(address.getBuildingName());
-		response.setApartmentName(address.getApartmentName());
-		response.setAreaSize(address.getAreaSize());
+//		response.setBuildingName(address.getBuildingName());
+//		response.setApartmentName(address.getApartmentName());
+//		response.setAreaSize(address.getAreaSize());
+		response = ConvertHelper.convert(address, GetApartmentDetailResponse.class);
 		if (communityAddressMapping != null) {
 			response.setStatus(communityAddressMapping.getLivingStatus());
 		}else {
@@ -2169,6 +2308,40 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     	addressProvider.updateOrganizationAddressMapping(address.getId());
     	addressProvider.updateOrganizationAddress(address.getId());
     	addressProvider.updateOrganizationOwnerAddress(address.getId());
+
+		//门牌对应的楼栋和园区的sharedArea chargeArea buildArea rentArea都要减去相应的值 by xiongying 20170815
+		Community community = checkCommunity(address.getCommunityId());
+		Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
+		if(address.getRentArea() != null) {
+			Double buildingRentArea = building.getRentArea() == null ? 0.0 : building.getRentArea();
+			building.setRentArea(buildingRentArea - address.getRentArea());
+
+			Double communityRentArea = community.getRentArea() == null ? 0.0 : community.getRentArea();
+			community.setRentArea(communityRentArea - address.getRentArea());
+		}
+		if(address.getSharedArea() != null) {
+			Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
+			building.setSharedArea(buildingSharedArea - address.getSharedArea());
+
+			Double communitySharedArea = community.getSharedArea() == null ? 0.0 : community.getSharedArea();
+			community.setSharedArea(communitySharedArea - address.getSharedArea());
+		}
+		if(address.getBuildArea() != null) {
+			Double buildingBuildArea = building.getBuildArea() == null ? 0.0 : building.getBuildArea();
+			building.setBuildArea(buildingBuildArea - address.getBuildArea());
+
+			Double communityBuildArea = community.getBuildArea() == null ? 0.0 : community.getBuildArea();
+			community.setBuildArea(communityBuildArea - address.getBuildArea());
+		}
+		if(address.getChargeArea() != null) {
+			Double buildingChargeArea = building.getChargeArea() == null ? 0.0 : building.getChargeArea();
+			building.setChargeArea(buildingChargeArea - address.getChargeArea());
+
+			Double communityChargeArea = community.getChargeArea() == null ? 0.0 : community.getChargeArea();
+			community.setChargeArea(communityChargeArea - address.getChargeArea());
+		}
+		communityProvider.updateBuilding(building);
+		communityProvider.updateCommunity(community);
 	}
 
 	private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
@@ -2191,6 +2364,49 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
         }
     }
+
+	@Override
+	public ListApartmentsResponse listApartments(ListApartmentsCommand cmd) {
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if(cmd.getPageAnchor() != null) {
+			locator.setAnchor(cmd.getPageAnchor());
+		}
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		//取得门牌列表
+		List<ApartmentAbstractDTO> aptList = addressProvider.listAddressByBuildingApartmentName(cmd.getNamespaceId(),
+				cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartment(), cmd.getLivingStatus(), locator, pageSize + 1);
+		ListApartmentsResponse response = new ListApartmentsResponse();
+		List<ApartmentAbstractDTO> apartments = new ArrayList<>();
+		LOGGER.info("listApartments aptList: {}", aptList);
+		//设置门牌的入住状态
+		if(aptList != null && aptList.size() > 0) {
+			if(aptList.size() > pageSize) {
+				aptList.remove(aptList.size() - 1);
+				response.setNextPageAnchor(aptList.get(aptList.size() - 1).getId());
+			}
+			//门牌转化成门牌id列表
+			List<Long> aptIdList = aptList.stream().map(a->a.getId()).collect(Collectors.toList());
+			//处理小区地址关联表
+			Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
+			LOGGER.info("listApartments communityAddressMappingMap: {}", communityAddressMappingMap);
+			aptList.forEach(apt -> {
+				if (apt.getLivingStatus() == null) {
+					CommunityAddressMapping mapping = communityAddressMappingMap.get(apt.getId());
+					if(mapping != null){
+						apt.setLivingStatus(mapping.getLivingStatus());
+					}
+					else{
+						apt.setLivingStatus(AddressMappingStatus.LIVING.getCode());
+					}
+				}
+				apartments.add(apt);
+			});
+			response.setApartments(apartments);
+		}
+
+		return response;
+	}
 
 	@Override
 	public ListPropApartmentsResponse listNewPropApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd) {
@@ -2237,7 +2453,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		map.put(AddressMappingStatus.FREE.getCode(), 0);
 		map.put(AddressMappingStatus.SALED.getCode(), 0);
 		map.put(AddressMappingStatus.UNSALE.getCode(), 0);
-		
+		map.put(AddressMappingStatus.OCCUPIED.getCode(), 0);
+
 		for (PropFamilyDTO propFamilyDTO : resultList) {
 			map.put(propFamilyDTO.getLivingStatus(), map.get(propFamilyDTO.getLivingStatus()) + 1);
 			userCount += propFamilyDTO.getMemberCount();
@@ -2249,6 +2466,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		statistics.setFreeCount(map.get(AddressMappingStatus.FREE.getCode()));
 		statistics.setSaledCount(map.get(AddressMappingStatus.SALED.getCode()));
 		statistics.setUnsaleCount(map.get(AddressMappingStatus.UNSALE.getCode()));
+		statistics.setOccupiedCount(map.get(AddressMappingStatus.OCCUPIED.getCode()));
 		statistics.setAptCount(statistics.getDefaultCount() + statistics.getLiveCount() + statistics.getRentCount() + statistics.getFreeCount() + statistics.getSaledCount() + statistics.getUnsaleCount());
 		statistics.setUserCount(userCount);
 		statistics.setHasOwnerCount(statistics.getLiveCount() + statistics.getRentCount() + statistics.getSaledCount());
@@ -4424,7 +4642,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         newPmOwner.setAvatar(memberUser.getAvatar());
         newPmOwner.setOrgOwnerTypeId(8L);// 没想到怎么做比较好, 先写死, 归类为"无"
         newPmOwner.setGender(memberUser.getGender());
-        newPmOwner.setCommunityId(memberUser.getCommunityId());
+        newPmOwner.setCommunityId(memberUser.getCommunityId() == null ? null : memberUser.getCommunityId().toString());
         newPmOwner.setContactType(ContactType.MOBILE.getCode());
         newPmOwner.setContactToken(contactToken);
         newPmOwner.setBirthday(memberUser.getBirthday());
@@ -4566,15 +4784,55 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     @Override
 	public void deletePMPropertyOwnerAddress(DeletePropOwnerAddressCommand cmd) {
 		CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
-		if(owner.getCommunityId() == cmd.getCommunityId()) {
-			this.dbProvider.execute((TransactionStatus status) -> {
-				propertyMgrProvider.deletePropOwner(owner);
-				pmOwnerSearcher.deleteById(owner.getId());
-				//tuichujiating
-				leaveFamily(owner.getAddressId(), owner.getContactToken(), owner.getNamespaceId());
+		String ownerCommunity = owner.getCommunityId();
+		if(ownerCommunity != null) {
+			String[] communityIds = ownerCommunity.split(",");
+			List<String> ownerCommunities = new ArrayList<>();
+			for(String communityId : communityIds) {
+				if(!communityId.equals(cmd.getCommunityId())) {
+					ownerCommunities.add(communityId);
+				}
+			}
 
-				return null;
-			});
+			if(ownerCommunities.size() == 0) {
+				this.dbProvider.execute((TransactionStatus status) -> {
+					propertyMgrProvider.deletePropOwner(owner);
+					pmOwnerSearcher.deleteById(owner.getId());
+					//tuichujiating
+					leaveFamily(owner.getAddressId(), owner.getContactToken(), owner.getNamespaceId());
+
+					return null;
+				});
+			} else {
+				StringBuilder sb = new StringBuilder();
+				ownerCommunities.forEach(community -> {
+					if(sb.length() == 0) {
+						sb.append(community);
+					} else {
+						sb.append(",");
+						sb.append(community);
+					}
+				});
+				this.dbProvider.execute((TransactionStatus status) -> {
+					owner.setCommunityId(sb.toString());
+					propertyMgrProvider.updatePropOwner(owner);
+					pmOwnerSearcher.feedDoc(owner);
+					//tuichujiating
+					leaveFamily(owner.getAddressId(), owner.getContactToken(), owner.getNamespaceId());
+
+					return null;
+				});
+			}
+//		}
+//		if(owner.getCommunityId() == cmd.getCommunityId()) {
+//			this.dbProvider.execute((TransactionStatus status) -> {
+//				propertyMgrProvider.deletePropOwner(owner);
+//				pmOwnerSearcher.deleteById(owner.getId());
+//				//tuichujiating
+//				leaveFamily(owner.getAddressId(), owner.getContactToken(), owner.getNamespaceId());
+//
+//				return null;
+//			});
 		} else {
 			LOGGER.error("deletePMPropertyOwnerAddress: id is not in the community! id = " + cmd.getId() + ", communityId = " + cmd.getCommunityId());
 			throw errorWith(PropertyServiceErrorCode.SCOPE,PropertyServiceErrorCode.ERROR_OWNER_COMMUNITY,
@@ -4588,7 +4846,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Integer namespaceId = currentNamespaceId();
 
 		CommunityPmOwner owner = new CommunityPmOwner();
-		owner.setCommunityId(cmd.getCommunityId());
+		owner.setCommunityId(cmd.getCommunityId() == null ? null : cmd.getCommunityId().toString());
 		owner.setContactName(cmd.getContactName());
 		owner.setContactToken(cmd.getContactToken());
 		owner.setContactType(cmd.getContactType());
@@ -5818,7 +6076,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setNamespaceId(currentNamespaceId());
                 owner.setCreatorUid(userId);
                 owner.setOrganizationId(organizationId);
-                owner.setCommunityId(communityId);
+                owner.setCommunityId(communityId == null ? null : communityId.toString());
                 owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
 
 				long ownerId = propertyMgrProvider.createPropOwner(owner);

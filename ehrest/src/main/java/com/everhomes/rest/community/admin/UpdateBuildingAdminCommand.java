@@ -23,6 +23,9 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
  *  <li>description: 楼栋介绍</li>
  *  <li>posterUri: 标题图</li>
  *  <li>attachments: 附件图</li>
+ *  <li>constructionCompany: 施工单位</li>
+ *  <li>entryDate: 入驻时间</li>
+ *  <li>height: 楼高</li>
  * </ul>
  *
  */
@@ -72,8 +75,36 @@ public class UpdateBuildingAdminCommand {
 	private Long generalFormId;
 	private Byte customFormFlag;
 
+	private String constructionCompany;
+	private Long entryDate;
+	private Double height;
+
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
+
+	public Double getHeight() {
+		return height;
+	}
+
+	public void setHeight(Double height) {
+		this.height = height;
+	}
+
+	public String getConstructionCompany() {
+		return constructionCompany;
+	}
+
+	public void setConstructionCompany(String constructionCompany) {
+		this.constructionCompany = constructionCompany;
+	}
+
+	public Long getEntryDate() {
+		return entryDate;
+	}
+
+	public void setEntryDate(Long entryDate) {
+		this.entryDate = entryDate;
+	}
 
 	public Long getGeneralFormId() {
 		return generalFormId;

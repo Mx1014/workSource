@@ -880,6 +880,9 @@ public class CommunityServiceImpl implements CommunityService {
 			String geohash = GeoHashUtils.encode(latitude, longitude);
 			building.setGeohash(geohash);
 		}
+		if(cmd.getEntryDate() != null) {
+			building.setEntryDate(new Timestamp(cmd.getEntryDate()));
+		}
 		
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
@@ -1204,7 +1207,8 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setCommunityId(communityId);
 				building.setDescription(data.getDescription());
 				building.setTrafficDescription(data.getTrafficDescription());
-				
+				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
+				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
 				if (StringUtils.isNotEmpty(data.getLongitudeLatitude())) {
 					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
 					building.setLongitude(Double.parseDouble(temp[0]));
@@ -1237,13 +1241,14 @@ public class CommunityServiceImpl implements CommunityService {
 					building.setLongitude(Double.parseDouble(temp[0]));
 					building.setLatitude(Double.parseDouble(temp[1]));
 				}
-				
+
+				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
+				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
 				building.setNamespaceId(org.getNamespaceId());
 				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				
 				communityProvider.updateBuilding(building);
 			}
-			
 		}
 		return list;
 	}
@@ -1307,6 +1312,9 @@ public class CommunityServiceImpl implements CommunityService {
 				data.setContactor(trim(r.getG()));
 				data.setPhone(trim(r.getH()));
 				data.setDescription(trim(r.getI()));
+				//加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
+				data.setNamespaceBuildingType(trim(r.getJ()));
+				data.setNamespaceBuildingToken(trim(r.getK()));
 				list.add(data);
 			}
 		}
