@@ -2564,6 +2564,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public void changeTasksStatus(UpdateTasksStatusCommand cmd) {
 		PmTask task = pmTaskProvider.findTaskByOrderId(cmd.getOrderId()).get(0);
+		if(task==null)
+			return;
 		PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
 		Byte state = cmd.getStateId();
 		dbProvider.execute((TransactionStatus status) -> {
