@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *<li>anonymousFlag:匿名标记 0 不匿名,1 匿名</li>
  *<li>multiChoiceFlag:多选标记</li>
  *<li>uuid:投票唯一的标识</li>
+ *<li>wechatPoll: 是否支持微信报名，0-不支持，1-支持 参考   参考{@link com.everhomes.rest.poll.WechatPollFlag }</li>
  *<ul>
  */
 public class PollDTO {
@@ -29,6 +30,7 @@ public class PollDTO {
     private Integer processStatus;
     
     private String uuid;
+    private Byte wechatPoll;
     
     
     public PollDTO() {
@@ -108,6 +110,14 @@ public class PollDTO {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public Byte getWechatPoll() {
+        return wechatPoll;
+    }
+
+    public void setWechatPoll(Byte wechatPoll) {
+        this.wechatPoll = wechatPoll;
     }
 
     @Override

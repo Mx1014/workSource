@@ -95,6 +95,7 @@ public class PollServiceImpl implements PollService {
             // 增加是否支持重复投票，以及重复投票的间隔   add by yanjun 20170825
             poll.setRepeatFlag(cmd.getRepeatFlag());
             poll.setRepeatPeriod(cmd.getRepeatPeriod());
+            poll.setWechatPoll(cmd.getWechatPoll());
 
             pollProvider.createPoll(poll);
             List<PollItem> pollItems = cmd.getItemList().stream().map(r->{
