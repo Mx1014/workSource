@@ -54,6 +54,7 @@ public class ExpressThirdCallController {// extends ControllerBase
     private final static String APPKEY = "appkey";
     private final static String NICK = "nick";
     private final static String MOBILE = "mobile";
+    private final static String WX_OPENID = "openId";
     private final static String UID = "uid";
     private final static String TIMESTAMP = "timestamp";
     private final static String CHECKSUM = "checksum";
@@ -127,7 +128,7 @@ public class ExpressThirdCallController {// extends ControllerBase
 	
 	/**
 	 * <b>URL: /express/callback</b>
-	 * <p>请求国贸授权。</p>
+	 * <p>EMS订单状态回调。</p>
 	 */
 	@RequestMapping("/express/callback")
 	@ResponseBody

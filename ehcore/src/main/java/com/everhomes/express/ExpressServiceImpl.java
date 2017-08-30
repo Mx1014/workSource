@@ -1311,7 +1311,8 @@ public class ExpressServiceImpl implements ExpressService {
 		params.put("randomNum",dto.getRandomNum());
 		params.put("signature",dto.getSignature());
 		if(clientPayType == ExpressClientPayType.OFFICIAL_ACCOUNTS){
-			params.put("userId", "?");
+			params.put("userId", UserContext.current().getUser().getAvatar());
+			params.put("realm", "");
 		}
 		bodyparams.put("body", params);
 		LOGGER.info("request payserver params = {}",bodyparams);
