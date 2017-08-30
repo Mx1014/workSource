@@ -338,12 +338,13 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 
 		KetuoCard cardInfo = getCard(plateNumber);
 		KetuoCardRate ketuoCardRate = null;
+		String cardType = CAR_TYPE;
 		if(null != cardInfo) {
-			String cardType = cardInfo.getCarType();
-			for(KetuoCardRate rate: getCardRule(cardType)) {
-				if(rate.getRuleId().equals(order.getRateToken())) {
-					ketuoCardRate = rate;
-				}
+			cardType = cardInfo.getCarType();
+		}
+		for(KetuoCardRate rate: getCardRule(cardType)) {
+			if(rate.getRuleId().equals(order.getRateToken())) {
+				ketuoCardRate = rate;
 			}
 		}
 		if(null == ketuoCardRate) {
