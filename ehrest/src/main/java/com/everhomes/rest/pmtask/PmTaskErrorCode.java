@@ -31,4 +31,5 @@ public interface PmTaskErrorCode {
     int ERROR_USER_INFO = 10013; //查不到该用户信息！
     int ERROR_APP_KEY = 10014; //查不到对应的app key！
     int ERROR_DOWNLOAD = 10015; //下载错误！
+    int ERROR_ORDER_ID = 10016; //不存在的orderId
 }

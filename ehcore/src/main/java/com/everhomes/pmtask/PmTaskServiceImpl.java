@@ -2565,7 +2565,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public void changeTasksStatus(UpdateTasksStatusCommand cmd) {
 		PmTask task = pmTaskProvider.findTaskByOrderId(cmd.getOrderId()).get(0);
 		if(task==null)
-			return;
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ORDER_ID,
+					"OrderId does not exist.");
 		PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
 		Byte state = cmd.getStateId();
 		dbProvider.execute((TransactionStatus status) -> {
