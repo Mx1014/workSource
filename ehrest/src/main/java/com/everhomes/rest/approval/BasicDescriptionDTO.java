@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>categoryName: 请假类型</li>
  * <li>timeRangeList: 请假时间列表，参考{@link com.everhomes.rest.approval.TimeRange}</li>
  * <li>punchDate: 打卡日期</li>
- * <li>punchIntevalNo: 当天第几个班次</li>
+ * <li>punchIntervalNo: 当天第几个班次</li>
  * <li>punchDetail: 打卡详情</li>
  * <li>punchStatusName: 打卡状态名称</li>
  * <li>hourLength: 时长 -请假</li>  
@@ -27,7 +27,7 @@ public class BasicDescriptionDTO {
 	private List<TimeRange> timeRangeList;
 
 	private Timestamp punchDate;
-	private Integer punchIntevalNo;
+	private Integer punchIntervalNo;
 	private String punchDetail;
 	private String punchStatusName;
 	
@@ -94,11 +94,12 @@ public class BasicDescriptionDTO {
 		return StringHelper.toJsonString(this);
 	}
 
-	public Integer getPunchIntevalNo() {
-		return punchIntevalNo;
+	public Integer getPunchIntervalNo() {
+		return punchIntervalNo;
 	}
 
-	public void setPunchIntevalNo(Integer punchIntevalNo) {
-		this.punchIntevalNo = punchIntevalNo;
+	public void setPunchIntervalNo(Integer punchIntervalNo) {
+		this.punchIntervalNo = punchIntervalNo;
 	}
+ 
 }
