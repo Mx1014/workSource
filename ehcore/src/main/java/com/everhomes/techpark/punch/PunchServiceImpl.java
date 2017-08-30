@@ -4817,58 +4817,63 @@ public class PunchServiceImpl implements PunchService {
         }
         Set<PunchRule> punchRules = new HashSet<>();
         for (PunchTimeRule ptr : timeRules) {
-            if(ptr.getPunchRuleId() ==null)
-                continue;
-            PunchRule pr = punchProvider.getPunchRuleById(ptr.getPunchRuleId());
-            if (null == pr) {
-                continue;
-            }
+			try {
+				if (ptr.getPunchRuleId() == null)
+					continue;
+				PunchRule pr = punchProvider.getPunchRuleById(ptr.getPunchRuleId());
+				if (null == pr) {
+					continue;
+				}
 
-            if (PunchRuleType.GUDING.equals(PunchRuleType.fromCode(pr.getRuleType()))) {
-                //看昨天是否为特殊日期
-                PunchSpecialDay specialDay = punchProvider.findSpecialDayByDateAndOrgId(pr.getPunchOrganizationId(),yesterday.getTime());
-                if(null != specialDay){
-                    if(specialDay.getStatus().equals(NormalFlag.YES.getCode())){
-                        continue;
-                    }else {
-                        //特殊上班工作日,要处理它
-                        punchRules.add(pr);
-                    }
-                }
-                //如果为节假日则返回null  如果是节假调休日,用调休日期代替
-                java.sql.Date punchDate = new java.sql.Date(yesterday.getTime().getTime());
-                punchDate = checkHoliday(pr,punchDate);
-                //看是循环timerule找当天的timeRule
-                Integer openWeek = Integer.parseInt(ptr.getOpenWeekday(), 2);
-                Integer weekDayInt = getWeekDayInt(punchDate);
-                if(weekDayInt.equals(openWeek&weekDayInt)){
-                    //当天上班
-                    punchRules.add(pr);
-                }
-            }else{
-                Calendar schedulingCalendar = Calendar.getInstance();
-                schedulingCalendar = yesterday;
-                if (ptr.getDaySplitTimeLong() < ONE_DAY_MS) {
-                    schedulingCalendar = punCalendar;
-                }
-                final java.sql.Date queryDate = new java.sql.Date(schedulingCalendar.getTimeInMillis());
-                List<PunchScheduling> punchSchedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
-                    @Override
-                    public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-                                                                        SelectQuery<? extends Record> query) {
-                        query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.eq(queryDate));
-                        query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.eq(ptr.getId()));
-                        query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
-                        return null;
-                    }
-                });
-                if (null != punchSchedulings) {
-                    for(PunchScheduling punchScheduling : punchSchedulings){
-                        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(punchScheduling.getTargetId());
-                        refreshDayLogAndMonthStat(memberDetail.getTargetId(), pr.getOwnerId(), schedulingCalendar);
-                    }
-                }
-            }
+				if (PunchRuleType.GUDING.equals(PunchRuleType.fromCode(pr.getRuleType()))) {
+					//看昨天是否为特殊日期
+					PunchSpecialDay specialDay = punchProvider.findSpecialDayByDateAndOrgId(pr.getPunchOrganizationId(), yesterday.getTime());
+					if (null != specialDay) {
+						if (specialDay.getStatus().equals(NormalFlag.YES.getCode())) {
+							continue;
+						} else {
+							//特殊上班工作日,要处理它
+							punchRules.add(pr);
+						}
+					}
+					//如果为节假日则返回null  如果是节假调休日,用调休日期代替
+					java.sql.Date punchDate = new java.sql.Date(yesterday.getTime().getTime());
+					punchDate = checkHoliday(pr, punchDate);
+					//看是循环timerule找当天的timeRule
+					Integer openWeek = Integer.parseInt(ptr.getOpenWeekday(), 2);
+					Integer weekDayInt = getWeekDayInt(punchDate);
+					if (weekDayInt.equals(openWeek & weekDayInt)) {
+						//当天上班
+						punchRules.add(pr);
+					}
+				} else {
+					Calendar schedulingCalendar = Calendar.getInstance();
+					schedulingCalendar = yesterday;
+					if (ptr.getDaySplitTimeLong() < ONE_DAY_MS) {
+						schedulingCalendar = punCalendar;
+					}
+					final java.sql.Date queryDate = new java.sql.Date(schedulingCalendar.getTimeInMillis());
+					List<PunchScheduling> punchSchedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE, new ListingQueryBuilderCallback() {
+						@Override
+						public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+																			SelectQuery<? extends Record> query) {
+							query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.eq(queryDate));
+							query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.eq(ptr.getId()));
+							query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
+							return null;
+						}
+					});
+					if (null != punchSchedulings) {
+						for (PunchScheduling punchScheduling : punchSchedulings) {
+							OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(punchScheduling.getTargetId());
+							refreshDayLogAndMonthStat(memberDetail.getTargetId(), pr.getOwnerId(), schedulingCalendar);
+						}
+					}
+				}
+			}catch (Exception e ){
+				LOGGER.error("this is something wrong with ptr + "+JSON.toJSONString(ptr),e);
+			}
+
         }
         for (PunchRule pr : punchRules) {
             refreshGroupDayLogAndMonthStat(pr, yesterday);
@@ -6764,7 +6769,7 @@ public class PunchServiceImpl implements PunchService {
 		if((punchTimeLong < (ptr.getStartEarlyTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)))) ||
 				(punchTimeLong > (ptr.getStartLateTimeLong()+ptr.getWorkTimeLong()+timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS)))){
 			result.setPunchType(PunchType.NOT_WORKTIME.getCode());
-			result.setPunchIntervalNo(punchIntevalNo); 
+			result.setPunchIntervalNo(punchIntevalNo);
 			return result ;
 		}
 		//如果在在最早上班打卡之后 下午上班之前
@@ -6833,6 +6838,7 @@ public class PunchServiceImpl implements PunchService {
 
 	private PunchLogDTO calculate2timePunchStatus(PunchTimeRule ptr, Long punchTimeLong,
 			List<PunchLog> punchLogs, PunchLogDTO result) {
+		result.setPunchIntervalNo(1);
 		//如果时间在最早上班打卡之后,,如果有上班打卡 
 		if(punchTimeLong > (ptr.getStartEarlyTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)))
 				//在最晚下班打卡之前
@@ -6841,7 +6847,6 @@ public class PunchServiceImpl implements PunchService {
 			// 没有上班打卡  则是上班打卡 
 			if(null == onDutyPunch){
 				result.setPunchType(PunchType.ON_DUTY.getCode());
-				result.setPunchIntervalNo(1);  
 				result.setRuleTime(ptr.getStartEarlyTimeLong());
 				if(punchTimeLong < ptr.getStartLateTimeLong())
 					result.setClockStatus(PunchStatus.NORMAL.getCode());
@@ -6855,20 +6860,17 @@ public class PunchServiceImpl implements PunchService {
 			//没有下班打卡则是下班打卡
 			if(null == offDutyPunch){
 				result.setPunchType(PunchType.OFF_DUTY.getCode());
-				result.setPunchIntervalNo(1);
 				processLastOffDutyPunchLog(result,ptr,punchTimeLong,punchLogs);
 				return result ;
 			}else{ 
 				//否则就是已完成打卡-但是可以更新打卡
 				result.setPunchType(PunchType.FINISH.getCode());
-				result.setPunchIntervalNo(1); 
 				return result ;
 			}
 		}else{
 			//不在时间范围内无法打卡
 			result.setPunchType(PunchType.NOT_WORKTIME.getCode());
-			result.setPunchIntervalNo(1); 
-			return result ; 
+			return result ;
 		}
 	}
 
