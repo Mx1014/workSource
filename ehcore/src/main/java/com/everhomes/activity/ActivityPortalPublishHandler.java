@@ -3,6 +3,7 @@ package com.everhomes.activity;
 
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.rest.activity.*;
+import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 * @param instanceConfig 具体模块配置的参数
 	 * @return
 	 */
+	@Override
 	public String publish(Integer namespaceId, String instanceConfig){
 
 		LOGGER.info("ActivityPortalPublishHandler publish start namespaceId = {}, instanceConfig = {}", namespaceId, instanceConfig);
@@ -55,6 +57,17 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		//删除内容分类
 		deleteContentCategory(config, namespaceId);
 
+		//如果没有则增加默认分类
+		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() ==0){
+			List<ActivityCategoryDTO> listDto = new ArrayList<>();
+			ActivityCategoryDTO newDto = new ActivityCategoryDTO();
+			newDto.setAllFlag(AllFlagType.YES.getCode());
+			newDto.setName("all");
+			listDto.add(newDto);
+			config.setCategoryDTOList(listDto);
+
+		}
+
 		//新增、更新内容分类
 		updateContentCategory(config, activityCategory,  maxEntryId, namespaceId);
 
@@ -70,6 +83,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 * @param instanceConfig
 	 * @return
 	 */
+	@Override
 	public String getItemActionData(Integer namespaceId, String instanceConfig){
 
 		LOGGER.info("ActivityPortalPublishHandler getItemActionData start namespaceId = {}, instanceConfig = {}", namespaceId, instanceConfig);
@@ -94,6 +108,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 * @param actionData
 	 * @return
 	 */
+	@Override
 	public String getAppInstanceConfig(Integer namespaceId, String actionData){
 
 		LOGGER.info("ActivityPortalPublishHandler getAppInstanceConfig start namespaceId = {}, actionData = {}", namespaceId, actionData);
@@ -198,7 +213,9 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 					newCategory.setStatus((byte)2);
 					newCategory.setCreatorUid(1L);
 					newCategory.setNamespaceId(namespaceId);
-					newCategory.setAllFlag((byte)0);
+					if(newCategory.getAllFlag() == null){
+						newCategory.setAllFlag((byte)0);
+					}
 					activityProvider.createActivityCategories(newCategory);
 
 					dto.setId(newCategory.getId());
