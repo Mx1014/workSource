@@ -1288,8 +1288,14 @@ public class ExpressServiceImpl implements ExpressService {
 		LOGGER.info("payserver url = {}", url);
 		String result = Utils.post(url, JSONObject.parseObject(StringHelper.toJsonString(params)),null,StandardCharsets.UTF_8);
 		PayResponse<Map<String,String>> payresponse = JSONObject.parseObject(result, new TypeReference<PayResponse<Map<String,String>>>(){});
-		if(payresponse.getSuccess()){
-			return payresponse.getData();
+		if(clientPayType == ExpressClientPayType.APP || clientPayType == null){
+			if(payresponse.getSuccess()){
+				return payresponse.getData();
+			}
+		}else if(clientPayType == ExpressClientPayType.OFFICIAL_ACCOUNTS){
+			if(payresponse.getResult()){
+				return payresponse.getBody();
+			}
 		}
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "prePayFailed, payresponse = "+result);
 	}
