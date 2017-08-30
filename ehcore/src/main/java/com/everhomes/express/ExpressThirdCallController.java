@@ -144,7 +144,7 @@ public class ExpressThirdCallController {// extends ControllerBase
 	
 	private void updateUserOpenId(Long userId, String openId, HttpServletResponse response) throws Exception {
 		if(openId == null){
-			response.sendRedirect(ERROR_REDIRECT_URL+"openId为空");
+			return ;//没有openId则是app的
 		}
 		LOGGER.info("save uid = {}, openId = {}", userId, openId);
 		userProvider.updateUserProfile(userId, ExpressServiceErrorCode.USER_PROFILE_KEY, openId);
@@ -366,6 +366,7 @@ public class ExpressThirdCallController {// extends ControllerBase
 		 params.put("timestamp",System.currentTimeMillis()/1000+"");
 		 params.put("avatar","core.zuolin.com");
 		 params.put("community","240111044331050363");
+		 params.put("openId","openId");
 		 MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("MD5");
