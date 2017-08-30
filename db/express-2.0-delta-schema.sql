@@ -79,20 +79,3 @@ ALTER TABLE `eh_express_orders`	ADD COLUMN `quantity_and_weight` VARCHAR(128) CO
 
 --
 ALTER TABLE `eh_express_orders` ADD COLUMN `status_desc` TEXT COMMENT '状态描述信息，国贸ems使用' AFTER `status`;
-
--- 国贸微信支付，需要保存openid做支付，而user中的namespace_user_token被国贸的uid占用，所以先建立一个表搞，add by dengs, 20170830
--- DROP TABLE IF EXISTS `eh_express_wx_openids`;
-CREATE TABLE `eh_express_wx_openids` (
-  `user_id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `namespace_user_token` VARCHAR(2048) NOT NULL DEFAULT '',
-  `namespace_user_type` VARCHAR(128) COMMENT 'the type of user',
-  `open_id` VARCHAR(2048) NOT NULL,
-  `status` TINYINT NOT NULL COMMENT '0. inactive, 1. waiting for approval, 2. active',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `update_time` DATETIME,
-  `operator_uid` BIGINT,
-  
-  PRIMARY KEY (`user_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

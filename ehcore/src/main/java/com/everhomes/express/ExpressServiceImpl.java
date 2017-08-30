@@ -109,7 +109,6 @@ import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
 import com.everhomes.rest.express.PayExpressOrderCommand;
 import com.everhomes.rest.express.PrePayExpressOrderCommand;
-import com.everhomes.rest.express.PrePayExpressOrderResponse;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
 import com.everhomes.rest.express.UpdateExpressBusinessNoteCommand;
 import com.everhomes.rest.express.UpdateExpressHotlineFlagCommand;
@@ -121,7 +120,9 @@ import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProfile;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -187,6 +188,9 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	@Autowired
     private ConfigurationProvider configProvider;
+	
+	@Autowired
+    private UserActivityProvider userProvider;
 	
 	@Override
 	public ListServiceAddressResponse listServiceAddress(ListServiceAddressCommand cmd) {
@@ -1311,8 +1315,13 @@ public class ExpressServiceImpl implements ExpressService {
 		params.put("randomNum",dto.getRandomNum());
 		params.put("signature",dto.getSignature());
 		if(clientPayType == ExpressClientPayType.OFFICIAL_ACCOUNTS){
-			params.put("userId", UserContext.current().getUser().getAvatar());
-			params.put("realm", "");
+			//这里获取用户的微信的openid，在国贸认证的过程中，存在user_profile中的，参考 ExpressThirdCallController.authReq()
+			UserProfile userProfile = userProvider.findUserProfileBySpecialKey(UserContext.current().getUser().getId(), ExpressServiceErrorCode.USER_PROFILE_KEY);
+			if(userProfile == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not find user openId");
+			}
+			params.put("userId", userProfile.getItemValue());
+			params.put("realm", "Wechat_Public_Guomao");
 		}
 		bodyparams.put("body", params);
 		LOGGER.info("request payserver params = {}",bodyparams);

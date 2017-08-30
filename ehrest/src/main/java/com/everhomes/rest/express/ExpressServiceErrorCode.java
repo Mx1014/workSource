@@ -10,4 +10,6 @@ public interface ExpressServiceErrorCode {
 	
 	public static final String PAYSERVER_URL ="guomao.payserver.url";
 	public static final String OFFICIAL_ACCOUNTS_PAYSERVER_URL ="guomao.official.accounts.payserver.url";//公众号支付
+	
+    public final static String USER_PROFILE_KEY = "expressGuomaoUser";
 }
