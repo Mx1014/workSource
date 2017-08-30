@@ -2701,11 +2701,12 @@ public class UserServiceImpl implements UserService {
 				//如果园区场景为0，通过小区查询默认园区
 				default_community_one = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
 				LOGGER.debug("如果园区场景为0，通过小区查询默认园区");
-			} else if (commercial_sceneList.size() == 1 && commercial_sceneList.get(0).getSceneType() == SceneType.PM_ADMIN.getCode()){
-				//如果园区场景有且只有一个，通过小区查询默认园区
-				default_community_one = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
-				LOGGER.debug("如果园区场景有且只有一个，通过小区查询默认园区");
 			}
+//			else if (commercial_sceneList.size() == 1 && commercial_sceneList.get(0).getSceneType() == SceneType.PM_ADMIN.getCode()){
+//				//如果园区场景有且只有一个，通过小区查询默认园区
+//				default_community_one = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
+//				LOGGER.debug("如果园区场景有且只有一个，通过小区查询默认园区");
+//			}
 
 			if(default_community_one != null && default_community_one.getId() != null){
 				sceneList.add(convertCommunityToScene(namespaceId,userId,default_community_one));
@@ -2860,7 +2861,7 @@ public class UserServiceImpl implements UserService {
 	}
 
     public static void main(String[] args) {
-        System.out.println(GeoHashUtils.encode(22.322272, 114.043532));
+        System.out.println(GeoHashUtils.encode(121.643166, 31.223298));
     }
 
 	@Override
