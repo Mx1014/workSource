@@ -2477,7 +2477,7 @@ public class PunchServiceImpl implements PunchService {
         }
         return  isNormal;
     }
-	
+
 
 	@Override
 	public ListMonthPunchLogsCommandResponse listMonthPunchLogs(
@@ -5908,10 +5908,10 @@ public class PunchServiceImpl implements PunchService {
                     PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
                     "公司没有设置打卡规则");
         //  查询用户对应的wifi mac地址
-        List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), pr.getWifiRuleId()) ;
+        List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId(), pr.getWifiRuleId()) ;
         //  查询用户对应的经纬度信息
         List<PunchGeopoint> punchGeopoints = punchProvider
-                .listPunchGeopointsByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(),pr.getLocationRuleId());
+                .listPunchGeopointsByRuleId(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId(),pr.getLocationRuleId());
 
         if(wifis != null){
             response.setWifis(wifis.stream().map(r ->{
@@ -6463,6 +6463,9 @@ public class PunchServiceImpl implements PunchService {
 		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
 		Long userId = UserContext.current().getUser().getId();
 		Date punchTime = new Date();
+		if (null == cmd.getQueryTime()) {
+			cmd.setQueryTime(punchTime.getTime());
+		}
 		PunchLogDTO punchLog = getPunchType(userId,cmd.getEnterpriseId(),punchTime);
 		GetPunchDayStatusResponse response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
 		response.setIntervals(new ArrayList<>());
@@ -6483,15 +6486,23 @@ public class PunchServiceImpl implements PunchService {
 			if(null != pdl){
 				response.setStatusList(pdl.getStatusList());
 				if(null!=pdl.getStatusList()){
+					String[] approvalStatus =null;
+					if(null!=pdl.getApprovalStatusList())
+						approvalStatus = pdl.getApprovalStatusList().split(PunchConstants.STATUS_SEPARATOR);
 					statusList = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
-					if (statusList.length < ptr.getPunchTimesPerDay()) {
+					if (statusList.length < ptr.getPunchTimesPerDay()/2) {
 						if(statusList.length == 1){
-							statusList = new String[ptr.getPunchTimesPerDay()];
-							for(int i =0;i< ptr.getPunchTimesPerDay();i++){
+							statusList = new String[ptr.getPunchTimesPerDay()/2];
+							for(int i =0;i< ptr.getPunchTimesPerDay()/2;i++){
 								statusList[i] = pdl.getStatusList();
 							}
 						}else
 							statusList = null;
+					}
+					for(int i =0;i< ptr.getPunchTimesPerDay()/2;i++){
+						if (approvalStatus[i].equals(ExceptionStatus.NORMAL.getCode())) {
+							statusList[i] = PunchStatus.NORMAL.getCode()+"";
+						}
 					}
 				}
 			}
