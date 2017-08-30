@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId: 公司 id</li>
  * </ul>
  */
-public class GetArchivesFieldCommand {
+public class GetArchivesFormCommand {
 
     private Long organizationId;
 
@@ -21,7 +21,7 @@ public class GetArchivesFieldCommand {
         this.formOriginId = formOriginId;
     }
 
-    public GetArchivesFieldCommand() {
+    public GetArchivesFormCommand() {
     }
 
     public Long getOrganizationId() {

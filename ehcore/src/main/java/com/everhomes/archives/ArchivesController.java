@@ -223,23 +223,23 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /archives/addArchivesField</b>
+     * <b>URL: /archives/updateArchivesForm</b>
      * <p>11-1.增加、修改档案字段</p>
      */
-    @RequestMapping("addArchivesField")
+    @RequestMapping("updateArchivesForm")
     @RestReturn(value = String.class)
-    public RestResponse addArchivesField(UpdateArchivesFormCommand cmd){
-        archivesService.addArchivesField(cmd);
+    public RestResponse updateArchivesForm(UpdateArchivesFormCommand cmd){
+        archivesService.updateArchivesForm(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
 
-    /**
+/*    *//**
      * <b>URL: /archives/addArchivesFieldGroup</b>
      * <p>11-2.添加档案字段分组</p>
-     */
+     *//*
     @RequestMapping("addArchivesFieldGroup")
     @RestReturn(value = String.class)
     public RestResponse addArchivesFieldGroup(AddArchivesFieldGroupCommand cmd){
@@ -248,12 +248,12 @@ public class ArchivesController extends ControllerBase{
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
-    /**
+/*    *//**
      * <b>URL: /archives/updateArchivesFieldOrder</b>
      * <p>11-3.批量调整档案字段</p>
-     */
+     *//*
     @RequestMapping("updateArchivesFieldOrder")
     @RestReturn(value = String.class)
     public RestResponse updateArchivesFieldOrder(UpdateArchivesFieldOrderCommand cmd){
@@ -262,16 +262,16 @@ public class ArchivesController extends ControllerBase{
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     /**
-     * <b>URL: /archives/getArchivesField</b>
-     * <p>11-4.获取档案字段</p>
+     * <b>URL: /archives/getArchivesForm</b>
+     * <p>11-2.获取档案字段</p>
      */
-    @RequestMapping("getArchivesField")
+    @RequestMapping("getArchivesForm")
     @RestReturn(value = String.class)
-    public RestResponse getArchivesField(GetArchivesFieldCommand cmd){
-        GetArchivesFieldResponse res = archivesService.getArchivesField(cmd);
+    public RestResponse getArchivesForm(GetArchivesFormCommand cmd){
+        GetArchivesFieldResponse res = archivesService.getArchivesForm(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

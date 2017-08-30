@@ -26,17 +26,20 @@ public interface GeneralFormProvider {
     GeneralForm getActiveGeneralFormByOriginIdAndVersion(Long formOriginId, Long formVersion);
 
     //	added by R 20170828
-    GeneralFormGroups createGeneralFormGroup(GeneralFormGroups group);
+    GeneralFormGroup createGeneralFormGroup(GeneralFormGroup group);
 
     void deleteGeneralFormGroupsNotInIds(Long formOriginId, Long organizationId, List<Long> groupIds);
 
     void deleteGeneralFormGroupsByFormOriginId(Long formOriginId);
 
-    GeneralFormGroups findGeneralFormGroupById(Long id);
+    GeneralFormGroup findGeneralFormGroupById(Long id);
 
-    GeneralFormGroups findGeneralFormGroupByNameAndOriginId(Long formOriginId, String groupName, Long organizationId);
+    GeneralFormGroup findGeneralFormGroupByNameAndOriginId(Long formOriginId, Long organizationId);
 
-    void updateGeneralFormGroup(GeneralFormGroups group);
+    void updateGeneralFormGroup(GeneralFormGroup group);
 
-    List<GeneralFormGroups> listGeneralFormGroups(Integer namespaceId, Long organizationId, Long formOriginId);
+    List<GeneralFormGroup> listGeneralFormGroups(Integer namespaceId, Long organizationId, Long formOriginId);
+
+    GeneralFormTemplate getActiveFormTemplateByName(String formModule, String formName);
+
 }

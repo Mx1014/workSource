@@ -15,6 +15,7 @@ import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormGroups;
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
 import com.everhomes.server.schema.tables.records.EhGeneralFormGroupsRecord;
+import com.everhomes.server.schema.tables.records.EhGeneralFormTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
@@ -171,7 +172,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public GeneralFormGroups createGeneralFormGroup(GeneralFormGroups group){
+	public GeneralFormGroup createGeneralFormGroup(GeneralFormGroup group){
 		Long id = this.sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhGeneralFormGroups.class));
 		group.setId(id);
@@ -202,25 +203,24 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public GeneralFormGroups findGeneralFormGroupById(Long id){
+	public GeneralFormGroup findGeneralFormGroupById(Long id){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhGeneralFormGroupsDao dao = new EhGeneralFormGroupsDao(context.configuration());
 		EhGeneralFormGroups group = dao.findById(id);
-		return ConvertHelper.convert(group, GeneralFormGroups.class);
+		return ConvertHelper.convert(group, GeneralFormGroup.class);
 	}
 
     @Override
-    public GeneralFormGroups findGeneralFormGroupByNameAndOriginId(Long formOriginId, String groupName, Long organizationId){
+    public GeneralFormGroup findGeneralFormGroupByNameAndOriginId(Long formOriginId, Long organizationId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhGeneralFormGroupsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_GROUPS);
         query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId));
-        query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.GROUP_NAME.eq(groupName));
         query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.ORGANIZATION_ID.eq(organizationId));
-        return query.fetchOneInto(GeneralFormGroups.class);
+        return query.fetchOneInto(GeneralFormGroup.class);
     }
 
 	@Override
-	public void updateGeneralFormGroup(GeneralFormGroups group){
+	public void updateGeneralFormGroup(GeneralFormGroup group){
 		group.setOperatorUid(UserContext.currentUserId());
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -230,15 +230,15 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public List<GeneralFormGroups> listGeneralFormGroups(Integer namespaceId, Long organizationId, Long formOriginId){
+	public List<GeneralFormGroup> listGeneralFormGroups(Integer namespaceId, Long organizationId, Long formOriginId){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhGeneralFormGroupsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_GROUPS);
 		query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.ORGANIZATION_ID.eq(organizationId));
 		query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId));
-		List<GeneralFormGroups> results = new ArrayList<>();
+		List<GeneralFormGroup> results = new ArrayList<>();
 		query.fetch().map(r -> {
-			results.add(ConvertHelper.convert(r,GeneralFormGroups.class));
+			results.add(ConvertHelper.convert(r,GeneralFormGroup.class));
 			return null;
 		});
 		if (null != results && 0 != results.size()) {
@@ -246,16 +246,13 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		}
 		return null;
 	}
-	/*		        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesContactsSticky.class));
-        archivesContactsSticky.setId(id);
-        archivesContactsSticky.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        archivesContactsSticky.setOperatorUid(UserContext.current().getUser().getId());
-        archivesContactsSticky.setUpdateTime(archivesContactsSticky.getCreateTime());
 
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhArchivesContactsStickyDao dao = new EhArchivesContactsStickyDao(context.configuration());
-        dao.insert(archivesContactsSticky);
-
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesContactsSticky.class, null);
-    */
+	@Override
+	public GeneralFormTemplate getActiveFormTemplateByName(String formModule, String formName){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhGeneralFormTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_TEMPLATES);
+		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.FORM_MODULE.eq(formModule));
+		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.FORM_NAME.eq(formName));
+		return query.fetchOneInto(GeneralFormTemplate.class);
+	}
 }

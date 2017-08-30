@@ -43,7 +43,7 @@ public interface ArchivesService {
 
     void updateArchivesFieldOrder(UpdateArchivesFieldOrderCommand cmd);
 
-    GetArchivesFieldResponse getArchivesField(GetArchivesFieldCommand cmd);
+    GetArchivesFieldResponse getArchivesForm(GetArchivesFormCommand cmd);
 
     ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesEmployeesCommand cmd);
 

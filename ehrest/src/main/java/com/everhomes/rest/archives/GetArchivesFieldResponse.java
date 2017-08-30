@@ -1,39 +1,24 @@
 package com.everhomes.rest.archives;
 
-import com.everhomes.discover.ItemType;
-
-import java.util.List;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
 
 /**
  * <ul>
- * <li>fieldGroups: (List)所有字段组对象</li>
- * <li>fields: (List)所有字段对象</li>
+ * <li>form: 表单对象 {@link com.everhomes.rest.general_approval.GeneralFormDTO}</li>
  * </ul>
  */
 public class GetArchivesFieldResponse {
 
-    @ItemType(String.class)
-    private List<String> fieldGroups;
-
-    @ItemType(String.class)
-    private List<String> fields;
+    private GeneralFormDTO form;
 
     public GetArchivesFieldResponse() {
     }
 
-    public List<String> getFieldGroups() {
-        return fieldGroups;
+    public GeneralFormDTO getForm() {
+        return form;
     }
 
-    public void setFieldGroups(List<String> fieldGroups) {
-        this.fieldGroups = fieldGroups;
-    }
-
-    public List<String> getFields() {
-        return fields;
-    }
-
-    public void setFields(List<String> fields) {
-        this.fields = fields;
+    public void setForm(GeneralFormDTO form) {
+        this.form = form;
     }
 }

@@ -530,7 +530,14 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public GetArchivesFieldResponse getArchivesField(GetArchivesFieldCommand cmd) {
+    public GetArchivesFieldResponse getArchivesForm(GetArchivesFormCommand cmd) {
+
+        //  此处有两种情况，一是调用模板表单(此时 formOriginId 为0)
+        //  二是已经建立公司对应的表单(此时已有 formOriginId )
+        if(cmd.getFormOriginId() == 0){
+
+        }
+
         return null;
     }
 
