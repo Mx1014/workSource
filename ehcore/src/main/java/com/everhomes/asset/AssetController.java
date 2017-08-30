@@ -15,6 +15,7 @@ import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -841,4 +842,31 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+
+    /**
+     * <p>测试清单产生</p>
+     * <b>URL: /asset/xxd</b>
+     *
+     */
+    @RequestMapping("doctor!")
+    @RestReturn(PaymentExpectanciesResponse.class)
+    public PaymentExpectanciesResponse hi(@RequestBody PaymentExpectanciesCommand cmd){
+        return assetService.paymentExpectancies(cmd);
+    }
+    /**
+     * <p>展示预期的费用清单</p>
+     * <b>URL: /asset/listBillExpectanciesOnContract</b>
+     *
+     */
+    @RequestMapping("listBillExpectanciesOnContract")
+    @RestReturn(PaymentExpectanciesResponse.class)
+    public RestResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd){
+        PaymentExpectanciesResponse res = assetService.listBillExpectanciesOnContract(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+
 }

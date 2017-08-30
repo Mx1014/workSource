@@ -71,8 +71,11 @@ CREATE TABLE `eh_payment_bill_items` (
   `target_id` bigint(20) DEFAULT NULL,
   `target_name` varchar(32) DEFAULT NULL COMMENT '客户名称，客户没有在系统中时填写',
   `contract_num` varchar(255) DEFAULT NULL,
+  `property_identifer` varchar(255) DEFAULT '' COMMENT '资产标识',
   `address_id` bigint(20) DEFAULT NULL,
-  `date_str` varchar(10) DEFAULT NULL COMMENT '账期',
+  `date_str` varchar(20) DEFAULT NULL COMMENT '账期',
+  `data_str_end` varchar(20) DEFAULT NULL,
+  `date_str_due` varchar(20) DEFAULT NULL,
   `creator_uid` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   `operator_uid` bigint(20) DEFAULT NULL,
@@ -237,7 +240,7 @@ CREATE TABLE `eh_payment_variables` (
 DROP TABLE IF EXISTS `eh_payment_contract_receiver`;
 CREATE TABLE `eh_payment_contract_receiver` (
   `id` bigint(20) NOT NULL,
-  `namespace_id` bigint(20) DEFAULT NULL,
+  `namespace_id` int(11) DEFAULT '0',
   `owner_id` bigint(20) DEFAULT NULL,
   `owner_type` varchar(255) DEFAULT NULL,
   `target_id` bigint(20) DEFAULT NULL,
@@ -248,8 +251,7 @@ CREATE TABLE `eh_payment_contract_receiver` (
   `contract_num` varchar(255) DEFAULT NULL,
   `target_name` varchar(255) DEFAULT NULL,
   `notice_tel` varchar(255) DEFAULT NULL,
-  `building_name` varchar(255) DEFAULT NULL,
-  `apartment_name` varchar(255) DEFAULT NULL,
   `status` tinyint(4) DEFAULT '0' COMMENT '1:有效；0：无效',
+  `address_ids_json` varchar(2048) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

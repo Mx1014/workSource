@@ -5189,20 +5189,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<TargetDTO> list = new ArrayList<>();
         com.everhomes.server.schema.tables.EhOrganizations r = Tables.EH_ORGANIZATIONS.as("r");
+        com.everhomes.server.schema.tables.EhOrganizationAddresses t = Tables.EH_ORGANIZATION_ADDRESSES.as("t");
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(r.ID);
         query.addSelect(r.NAME);
         query.addSelect(r.ID);
-        query.addFrom(r);
+        query.addFrom(r,t);
         query.addConditions(r.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        query.addConditions(r.ID.eq(t.ORGANIZATION_ID));
+        query.addConditions(t.STATUS.eq((byte)2));
         if(targetName!=null){
             query.addConditions(r.NAME.eq(targetName));
         }
         if(ids.size() == 1){
-            query.addConditions(r.ADDRESS_ID.eq(ids.get(0)));
+            query.addConditions(t.ADDRESS_ID.eq(ids.get(0)));
         }
         if(ids.size() > 1){
-            query.addConditions(r.ADDRESS_ID.in(ids));
+            query.addConditions(t.ADDRESS_ID.in(ids));
         }
         query.fetch()
                 .map(f -> {

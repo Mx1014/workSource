@@ -12,6 +12,7 @@ import java.math.BigDecimal;
  * <li>billItemName:收费项目名称</li>
  * <li>amountReceivable:应收金额</li>
  * <li>description:描述</li>
+ * <li>dateStr:账期</li>
  *</ul>
  */
 public class BillItemDTO {
@@ -19,10 +20,19 @@ public class BillItemDTO {
     private String billItemName;
     private BigDecimal amountReceivable;
     private String description;
+    private String dateStr;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getDateStr() {
+        return dateStr;
+    }
+
+    public void setDateStr(String dateStr) {
+        this.dateStr = dateStr;
     }
 
     public Long getBillItemId() {

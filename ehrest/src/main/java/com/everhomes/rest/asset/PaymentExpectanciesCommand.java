@@ -2,6 +2,7 @@
 package com.everhomes.rest.asset;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  */
 
 public class PaymentExpectanciesCommand {
-    private Long namesapceId;
+    private Integer namesapceId;
     private Long ownerId;
     private String ownerType;
     private Long targetId;
@@ -21,13 +22,13 @@ public class PaymentExpectanciesCommand {
     private List<FeeRules> feesRules;
     private String contractNum;
     private String noticeTel;
-    private String buldingName;
-    private String apartmentName;
     private Integer pageOffset;
     private Integer pageSize;
 
-    public Long getNamesapceId() {
-        return namesapceId;
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 
     public Integer getPageOffset() {
@@ -54,7 +55,11 @@ public class PaymentExpectanciesCommand {
         this.pageSize = pageSize;
     }
 
-    public void setNamesapceId(Long namesapceId) {
+    public Integer getNamesapceId() {
+        return namesapceId;
+    }
+
+    public void setNamesapceId(Integer namesapceId) {
         this.namesapceId = namesapceId;
     }
 
@@ -107,21 +112,6 @@ public class PaymentExpectanciesCommand {
         this.noticeTel = noticeTel;
     }
 
-    public String getBuldingName() {
-        return buldingName;
-    }
-
-    public void setBuldingName(String buldingName) {
-        this.buldingName = buldingName;
-    }
-
-    public String getApartmentName() {
-        return apartmentName;
-    }
-
-    public void setApartmentName(String apartmentName) {
-        this.apartmentName = apartmentName;
-    }
 
     public List<FeeRules> getFeesRules() {
         return feesRules;

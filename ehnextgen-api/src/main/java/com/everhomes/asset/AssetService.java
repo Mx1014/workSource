@@ -77,5 +77,9 @@ public interface AssetService {
 
     void generateBillsOnContractSigned(String contractNum);
 
+    void upodateBillStatusOnContractStatusChange(String contractNum,String targetStatus);
+
+    PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd);
+
 //    void synchronizeZJGKBill();
 }
