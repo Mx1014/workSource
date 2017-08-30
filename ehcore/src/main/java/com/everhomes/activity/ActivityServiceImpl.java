@@ -2375,7 +2375,7 @@ public class ActivityServiceImpl implements ActivityService {
         if(activity==null){
             return null;
         }
-        List<ActivityRoster> rosterList = activityProvider.listRosters(activity.getId());
+        List<ActivityRoster> rosterList = activityProvider.listRosters(activity.getId(), ActivityRosterStatus.NORMAL);
         ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), UserContext
                 .current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
         ActivityListResponse response = new ActivityListResponse();

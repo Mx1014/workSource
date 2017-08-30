@@ -551,6 +551,7 @@ public class BusinessServiceImpl implements BusinessService {
 		}
 		
 		Community community = communityProvider.findCommunityById(communityId);
+		LOGGER.debug("process communityId is :" + communityId);
 		
 		if(community == null){
 			LOGGER.error("Invalid paramter communityId,community is not exists.,communityId=" + communityId);
