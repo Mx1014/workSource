@@ -125,6 +125,9 @@ public class PortalItemGroupProviderImpl1 implements PortalItemGroupProvider {
     @Override
     public PortalItemGroup findPortalItemGroup(Long layoutId, String widgetName, String itemGroup) {
         LaunchPadLayout layout = launchPadProvider.findLaunchPadLayoutById(layoutId);
+        if (layout == null || itemGroup == null) {
+            return null;
+        }
 
         String layoutJson = layout.getLayoutJson();
 
