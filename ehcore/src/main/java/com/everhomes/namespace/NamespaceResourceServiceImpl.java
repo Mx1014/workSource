@@ -119,7 +119,7 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
             detailDto.setAuthPopupConfig(communityAuthPopupConfig.getStatus());
         }
         
-		//读取蒙版的配置项
+		//读取蒙版的配置项 默认打开
 		Integer maskFlag = this.configurationProvider.getIntValue(namespaceId, "mask.key", MASK_ENABLE);
 		detailDto.setMaskFlag(maskFlag);
 
