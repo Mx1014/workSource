@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS `eh_archives_contacts_sticky`;
 CREATE TABLE `eh_archives_contacts_sticky` (
-	`id` BIGINT NOT NULL COMMENT 'id',
+	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
 	`organization_id` BIGINT NOT NULL COMMENT 'organizationId',
 	`detail_id` BIGINT NOT NULL COMMENT 'the id of member in eh_organization_member_details',
@@ -12,7 +12,7 @@ CREATE TABLE `eh_archives_contacts_sticky` (
 
 DROP TABLE IF EXISTS `eh_archives_dismiss_employees`;
 CREATE TABLE `eh_archives_dismiss_employees` (
-	`id` BIGINT NOT NULL COMMENT 'id',
+	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
 	`organization_id` BIGINT NOT NULL COMMENT 'organizationId',
 	`contact_name` VARCHAR (32) COMMENT 'the name of the employee',
@@ -31,7 +31,7 @@ CREATE TABLE `eh_archives_dismiss_employees` (
 
 DROP TABLE IF EXISTS `eh_general_form_groups`;
 CREATE TABLE `eh_general_form_groups` (
-	`id` BIGINT NOT NULL COMMENT 'id',
+	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
 	`organization_id` BIGINT NOT NULL DEFAULT 0,
 	`owner_id` BIGINT NOT NULL,
@@ -44,6 +44,7 @@ CREATE TABLE `eh_general_form_groups` (
 	`create_time` DATETIME COMMENT 'the time of data creating',
 	`operator_uid` BIGINT COMMENT 'the id of the operator',
 	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
 DROP TABLE IF EXISTS `eh_general_form_templates`;
 CREATE TABLE `eh_general_form_templates` (
@@ -71,7 +72,7 @@ CREATE TABLE `eh_general_form_templates` (
   `integral_tag5` BIGINT DEFAULT 0,
   `integral_tag4` BIGINT DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
 ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE;
 ALTER TABLE eh_organization_member_details ADD COLUMN procreative DATE COMMENT '生育状况';
