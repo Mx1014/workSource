@@ -5,7 +5,10 @@ import com.everhomes.organization.*;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -357,13 +360,27 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd) {
+        if (StringUtils.isEmpty(cmd.getPassword())) {
+            LOGGER.error("Password is null ");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         //  TODO: 校验密码
-        //   校验有误时抛出异常
-/*        if(member != null){
-            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PHONE_ALREADY_EXIST,
-                    "phone number already exists.");
-                    }*/
+        User user = UserContext.current().getUser();
+        if (user == null) {
+            LOGGER.error("Unable to find owner user,  namespaceId={}", namespaceId);
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+        }
+
+        if (UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User acount has not been activated yet");
+
+        if (!EncryptionUtils.validateHashPassword(cmd.getPassword(), user.getSalt(), user.getPasswordHash())) {
+            LOGGER.error("Password does not match for " + user.getIdentifierToken());
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
+        }
     }
+
 
     @Override
     public ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd) {
