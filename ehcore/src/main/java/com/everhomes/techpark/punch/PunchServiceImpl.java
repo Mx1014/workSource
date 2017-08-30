@@ -843,17 +843,30 @@ public class PunchServiceImpl implements PunchService {
 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
 					"have no punch rule"); 
 		//获取当天的排班
-		PunchTimeRule punchTimeRule = getPunchTimeRuleByRuleIdAndDate(pr,logDay.getTime(),userId);
-		//没有规则就是没有排班,就是非工作日
-		if (null == punchTimeRule){
+		Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr,logDay.getTime(),userId);
+
+
+		if (null != ptrId   || ptrId == 0L){
+
+			if(null != ptrId  ) {
+				punchDayLog.setTimeRuleId(ptrId);
+				punchDayLog.setTimeRuleName("休息");
+			}
+			else
+				punchDayLog.setTimeRuleId(null);
 			pdl.setStatusList(PunchStatus.NOTWORKDAY.getCode()+"");
 			pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
 			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
-			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode()); 
+			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 			return pdl;
 		}
+
+		PunchTimeRule punchTimeRule = punchProvider.getPunchTimeRuleById(ptrId);
+		punchDayLog.setTimeRuleName(punchTimeRule.getName());
+
+		//没有规则就是没有排班,就是非工作日
 		pdl.setTimeRuleId(punchTimeRule.getId());
 		pdl.setTimeRuleName(punchTimeRule.getName());
 		pdl.setPunchOrganizationId(pr.getPunchOrganizationId());
