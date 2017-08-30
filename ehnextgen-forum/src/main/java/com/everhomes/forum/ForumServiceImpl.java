@@ -536,11 +536,15 @@ public class ForumServiceImpl implements ForumService {
             userId = user.getId();
         }
         
-        Long forumId = cmd.getForumId();
-        checkForumParameter(userId, forumId, "getTopic");
-        
         Long postId = cmd.getTopicId();
-        Post post = checkPostParameter(userId, forumId, postId, "getTopic");
+        Post post = checkPostParameter(userId, null, postId, "getTopic");
+        cmd.setForumId(post.getForumId());
+        cmd.setCommunityId(post.getCommunityId());
+
+        //先查帖子再查论坛，可能没有forumId  edit by yanjun 20170830
+        checkForumParameter(userId, cmd.getForumId(), "getTopic");
+
+
         if(post != null) {
             try {
                 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
@@ -608,7 +612,7 @@ public class ForumServiceImpl implements ForumService {
 //            
 //            return ConvertHelper.convert(post, PostDTO.class);
         } else {
-            LOGGER.error("Forum post not found, userId=" + userId + ", forumId=" + forumId 
+            LOGGER.error("Forum post not found, userId=" + userId + ", forumId=" + cmd.getForumId()
                 + ", postId=" + postId);
             throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
                 ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
