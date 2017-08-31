@@ -575,7 +575,10 @@ public class ForumServiceImpl implements ForumService {
                 LOGGER.error("Failed to update the view count of post, userId=" + userId + ", postId=" + postId, e);
             }
             PostDTO postDto =  getTopicById(postId, cmd.getCommunityId(), true, true);
-            
+
+            //填充VisibleRegionIds，用于编辑活动  add by yanjun 20170830
+            fillVisibleRegionIds(postDto);
+
             /*根据客户端的要求 控制任务操作*/
             if(null != postDto && null != postDto.getEmbeddedAppId()){
             	if(postDto.getEmbeddedAppId().equals(AppConstants.APPID_ORGTASK)){
