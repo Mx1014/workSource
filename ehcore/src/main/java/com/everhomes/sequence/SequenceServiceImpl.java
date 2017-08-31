@@ -1467,8 +1467,8 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_RENTALV2_PRICE_RULES.ID.max()).from(Tables.EH_RENTALV2_PRICE_RULES).fetchOne().value1();
         });
         
-        syncTableSequence(null, EhExpressCompanies.class, Tables.EH_EXPRESS_COMPANIES.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_EXPRESS_COMPANIES.ID.max()).from(Tables.EH_EXPRESS_COMPANIES).fetchOne().value1();
+        syncTableSequence(null, EhExpressParamSettings.class, Tables.EH_EXPRESS_PARAM_SETTINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EXPRESS_PARAM_SETTINGS.ID.max()).from(Tables.EH_EXPRESS_PARAM_SETTINGS).fetchOne().value1();
         });
         
         syncTableSequence(null, EhExpressCompanyBusinesses.class, Tables.EH_EXPRESS_COMPANY_BUSINESSES.getName(), (dbContext) -> {
