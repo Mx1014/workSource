@@ -57,8 +57,9 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 	private static final String SER_KIND = "6";
 	//查询方标识(必选项)
 	//每个客户提供一个经过认证的标识码
-	private static final String SER_SIGN = "83b6fe9b4cbb442d";
-	
+//	private static final String SER_SIGN = "83b6fe9b4cbb442d"; // 测试版本
+	private static final String SER_SIGN = "e78f5135ca804b08";//上线版本
+
 	//java8新加的格式化时间类，是线程安全的
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.systemDefault());
 
