@@ -2729,7 +2729,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.debug("找不到默认小区场景");
 			}
 		}
-
+		Collections.reverse(sceneList);
 		return sceneList;
 	}
 
@@ -4447,7 +4447,7 @@ public class UserServiceImpl implements UserService {
 				sceneList.add(default_communityScene);
 			}
 		}
-
+		Collections.reverse(sceneList);
 		return sceneList;
 	}
 
