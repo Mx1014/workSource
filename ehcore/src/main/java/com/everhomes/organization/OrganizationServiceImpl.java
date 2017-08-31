@@ -1203,7 +1203,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void updateEnterprise(UpdateEnterpriseCommand cmd) {
         updateEnterprise(cmd, true);
     }
-
+    @Override
     public void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress) {
         //先判断，后台管理员才能创建。状态直接设为正常
         Organization organization = checkOrganization(cmd.getId());

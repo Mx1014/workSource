@@ -10,12 +10,13 @@ import com.everhomes.openapi.ZJGKOpenServiceImpl;
 import com.everhomes.organization.ExecuteImportTaskCallback;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.customer.*;
-import com.everhomes.rest.organization.ImportFileResultLog;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.ModuleName;
 import com.everhomes.rest.warehouse.ImportWarehouseMaterialDataDTO;
@@ -74,6 +75,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     private ZJGKOpenServiceImpl zjgkOpenService;
 
+    @Autowired
+    private OrganizationService organizationService;
+
     @Override
     public void createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
@@ -83,7 +87,26 @@ public class CustomerServiceImpl implements CustomerService {
         }
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
+        OrganizationDTO organizationDTO = createOrganization(customer);
+        customer.setOrganizationId(organizationDTO.getId());
+        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
+    }
+
+    private OrganizationDTO createOrganization(EnterpriseCustomer customer) {
+        CreateEnterpriseCommand command = new CreateEnterpriseCommand();
+        command.setName(customer.getName());
+        command.setDisplayName(customer.getNickName());
+        command.setNamespaceId(customer.getNamespaceId());
+        command.setAvatar(customer.getCorpLogoUri());
+        command.setDescription(customer.getCorpDescription());
+        command.setCommunityId(customer.getCommunityId());
+        command.setMemberCount(customer.getCorpEmployeeAmount() == null ? 0 : customer.getCorpEmployeeAmount() + 0L);
+        command.setContactor(customer.getContactName());
+        command.setContactsPhone(customer.getContactPhone());
+        command.setEntries(customer.getContactMobile());
+        command.setAddress(customer.getContactAddress());
+        return organizationService.createEnterprise(command);
     }
 
     @Override
@@ -97,17 +120,42 @@ public class CustomerServiceImpl implements CustomerService {
         if(cmd.getCorpEntryDate() != null) {
             updateCustomer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
+        updateCustomer.setStatus(CommonStatus.ACTIVE.getCode());
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
-
         enterpriseCustomerSearcher.feedDoc(customer);
+
+        if(customer.getOrganizationId() != null) {
+            UpdateEnterpriseCommand command = new UpdateEnterpriseCommand();
+            command.setId(customer.getOrganizationId());
+            command.setName(customer.getName());
+            command.setDisplayName(customer.getNickName());
+            command.setNamespaceId(customer.getNamespaceId());
+            command.setAvatar(customer.getCorpLogoUri());
+            command.setDescription(customer.getCorpDescription());
+            command.setCommunityId(customer.getCommunityId());
+            command.setMemberCount(customer.getCorpEmployeeAmount() == null ? 0 : customer.getCorpEmployeeAmount() + 0L);
+            command.setContactor(customer.getContactName());
+            command.setContactsPhone(customer.getContactPhone());
+            command.setEntries(customer.getContactMobile());
+            command.setAddress(customer.getContactAddress());
+            organizationService.updateEnterprise(command, false);
+        }
+
     }
 
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
-        enterpriseCustomerProvider.deleteEnterpriseCustomer(customer);
-
+        customer.setStatus(CommonStatus.INACTIVE.getCode());
+        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
+
+        if(customer.getOrganizationId() != null) {
+            DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
+            command.setId(customer.getOrganizationId());
+            organizationService.deleteEnterpriseById(command);
+        }
+
     }
 
     @Override
@@ -212,6 +260,10 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setNamespaceId(cmd.getNamespaceId());
             customer.setCreatorUid(userId);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
+
+            OrganizationDTO organizationDTO = createOrganization(customer);
+            customer.setOrganizationId(organizationDTO.getId());
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
         }
         return errorDataLogs;
