@@ -1059,9 +1059,9 @@ public class PunchServiceImpl implements PunchService {
 		}
 		for(PunchLog log : efficientLogs){
 			if(null == pdl.getStatusList()){
-				pdl.setStatusList(statusToString(log.getPunchStatus())+"");
+				pdl.setStatusList(log.getPunchStatus()+"");
 			}else{
-				pdl.setStatusList(pdl.getStatusList()+PunchConstants.STATUS_SEPARATOR+statusToString(log.getPunchStatus()));
+				pdl.setStatusList(pdl.getStatusList()+PunchConstants.STATUS_SEPARATOR+log.getPunchStatus());
 			}
 		}
 		makeExceptionForDayList(userId, companyId, logDay, pdl);
@@ -6896,6 +6896,7 @@ public class PunchServiceImpl implements PunchService {
 			}else{ 
 				//否则就是已完成打卡-但是可以更新打卡
 				result.setPunchType(PunchType.FINISH.getCode());
+				processLastOffDutyPunchLog(result,ptr,punchTimeLong,punchLogs);
 				return result ;
 			}
 		}else{
