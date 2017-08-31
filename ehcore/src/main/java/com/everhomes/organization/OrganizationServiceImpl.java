@@ -5530,12 +5530,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         String keywords = cmd.getKeywords();
-        String checkInTime = cmd.getCheckInTime();//入职日期
-        String employmentTime = cmd.getEmploymentTime();//转正日期
-        String contractEndTime = cmd.getContractEndTime();//合同结束日期
-        Byte employeeStatus = cmd.getEmployeeStatus();//员工状态
-        Long contractPartyId = cmd.getContractPartyId();//合同主体
-        Long workPlaceId = cmd.getWorkPlaceId();//工作地点
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         Long startTime2 = System.currentTimeMillis();
