@@ -5942,6 +5942,7 @@ public class PunchServiceImpl implements PunchService {
         if(punchGeopoints != null){
             response.setGeoPoints(punchGeopoints.stream().map(r ->{
                 PunchGeoPointDTO dto = ConvertHelper.convert(r,PunchGeoPointDTO.class);
+				dto.setDistance(r.getDistance());
                 return dto;
             }).collect(Collectors.toList()));
         }
@@ -6047,6 +6048,7 @@ public class PunchServiceImpl implements PunchService {
         		if(timeRule.getPunchTimeIntervals() == null || timeRule.getPunchTimeIntervals().size() == 0)
         			continue;
         		PunchTimeRule ptr =ConvertHelper.convert(timeRule, PunchTimeRule.class);
+				ptr.setRuleType(pr.getRuleType());
                 ptr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
                 ptr.setOwnerId(punchOrgId);  
         		ptr.setPunchTimesPerDay((byte) (timeRule.getPunchTimeIntervals().size()*2));
@@ -6441,7 +6443,6 @@ public class PunchServiceImpl implements PunchService {
 	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd) {
 		//
 		if(cmd.getRuleType() == null)
-
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid rule type parameter in the command");
@@ -6486,6 +6487,8 @@ public class PunchServiceImpl implements PunchService {
 			cmd.setQueryTime(punchTime.getTime());
 		}
 		PunchLogDTO punchLog = getPunchType(userId,cmd.getEnterpriseId(),punchTime);
+		punchLog.setExpiryTime(process24hourTimeToGMTTime(punchTime,punchLog.getExpiryTime()));
+		punchLog.setRuleTime(process24hourTimeToGMTTime(punchTime,punchLog.getRuleTime()));
 		GetPunchDayStatusResponse response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
 
 		response.setIntervals(new ArrayList<>());
@@ -6575,6 +6578,16 @@ public class PunchServiceImpl implements PunchService {
 			}
 		}
 		return response;
+	}
+
+	private long process24hourTimeToGMTTime(Date punchTime, long ruleTime) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(punchTime);
+		calendar.set(Calendar.HOUR_OF_DAY,0);
+		calendar.set(Calendar.MINUTE,0);
+		calendar.set(Calendar.SECOND,0);
+		calendar.set(Calendar.MILLISECOND,0);
+		return calendar.getTimeInMillis()+ruleTime;
 	}
 
 	private long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
