@@ -2,6 +2,12 @@ package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>organizationId: 公司 id</li>
+ * <li>departmentId: 部门 id</li>
+ * </ul>
+ */
 public class ImportArchivesContactsCommand {
 
     private Long organizationId;

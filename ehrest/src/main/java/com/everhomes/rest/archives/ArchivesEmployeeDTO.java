@@ -12,7 +12,7 @@ import java.util.List;
  * <li>contactName: 姓名</li>
  * <li>employeeStatus: 成员状态: 0-试用, 1-正式</li>
  * <li>jobPositions: 职务</li>
- * <li>departments: 部门 {@link OrganizationDTO}</li>
+ * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>contactToken: 手机号</li>
  * <li>email: 邮箱</li>
  * <li>employmentTime: 转正日期</li>

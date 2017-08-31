@@ -1,7 +1,6 @@
 package com.everhomes.archives;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.archives.*;
@@ -532,9 +531,9 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public GetArchivesFieldResponse getArchivesForm(GetArchivesFormCommand cmd) {
+    public GetArchivesFormResponse getArchivesForm(GetArchivesFormCommand cmd) {
 
-        GetArchivesFieldResponse response = new GetArchivesFieldResponse();
+        GetArchivesFormResponse response = new GetArchivesFormResponse();
         //  此处有两种情况，一是调用模板表单(此时 formOriginId 为0)
         //  二是已经建立公司对应的表单(此时已有 formOriginId )
         if(cmd.getFormOriginId() == 0L){

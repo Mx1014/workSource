@@ -29,6 +29,8 @@ public interface ArchivesService {
 
     ArchivesEmployeeDTO addArchivesEmployee(AddArchivesEmployeeCommand cmd);
 
+        GetArchivesEmployeeResponse getArchivesEmployee( GetArchivesEmployeeCommand cmd);
+
     ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd);
 
     void employArchivesEmployees(EmployArchivesEmployeesCommand cmd);
@@ -43,7 +45,9 @@ public interface ArchivesService {
 
     void updateArchivesFieldOrder(UpdateArchivesFieldOrderCommand cmd);
 
-    GetArchivesFieldResponse getArchivesForm(GetArchivesFormCommand cmd);
+    GetArchivesFormResponse getArchivesForm(GetArchivesFormCommand cmd);
+
+    Long identifyArchivesForm(IdentifyArchivesFormCommand cmd);
 
     ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesEmployeesCommand cmd);
 

@@ -11,8 +11,8 @@ import java.sql.Date;
  * <li>dismissTimeEnd: 离职结束日期</li>
  * <li>checkInTimeStart: 入职起始日期</li>
  * <li>checkInTimeEnd: 入职结束日期</li>
- * <li>dismissType: 离职类型： 1-辞职 2-解雇 3-其他 参考{@link DismissType}</li>
- * <li>dismissReason: 离职原因</li>
+ * <li>dismissType: 离职类型： 1-辞职 2-解雇 3-其他 参考{@link com.everhomes.rest.archives.DismissType}</li>
+ * <li>dismissReason: 离职原因 参考{@link com.everhomes.rest.archives.DismissReason}</li>
  * <li>contactName: 姓名</li>
  * <li>pageOffset: 页码(不能为null)</li>
  * <li>pageSize: 每页大小</li>

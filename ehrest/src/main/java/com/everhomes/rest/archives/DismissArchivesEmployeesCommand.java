@@ -9,8 +9,8 @@ import java.util.List;
 /**
  * <ul>
  * <li>detailIds: (List)员工detailId</li>
- * <li>dismissType: 离职类型: 1-辞职,2-解雇,3-其他 参考{@link DismissType}</li>
- * <li>dismissReason: 离职原因 参考{@link DismissReason}</li>
+ * <li>dismissType: 离职类型: 1-辞职,2-解雇,3-其他 参考{@link com.everhomes.rest.archives.DismissType}</li>
+ * <li>dismissReason: 离职原因 参考{@link com.everhomes.rest.archives.DismissReason}</li>
  * <li>dismissTime: 离职日期</li>
  * <li>dismissRemark: 离职备注</li>
  * </ul>

@@ -2,8 +2,26 @@ package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
-import java.sql.Date;
 
+/**
+ * <ul>
+ * <li>organizationId: 公司 id</li>
+ * <li>contactName: 员工姓名</li>
+ * <li>checkInTime: 入职日期</li>
+ * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣</li>
+ * <li>employeeStatus: 工状态, 0: 试用 1: 在职 2: 离职 </li>
+ * <li>employmentTime: 转正时间</li>
+ * <li>departmentId: 部门 id</li>
+ * <li>jobPositionId: 职务</li>
+ * <li>employeeNo: 工号</li>
+ * <li>contactShortToken: 手机短号</li>
+ * <li>email: 工作邮箱</li>
+ * <li>workingPlace: 工作地点</li>
+ * <li>contractId: 合同主体</li>
+ * <li>areaCode: 手机区号</li>
+ * <li>contactToken: 手机号</li>
+ * </ul>
+ */
 public class AddArchivesEmployeeCommand {
 
     private Long organizationId;
@@ -20,7 +38,7 @@ public class AddArchivesEmployeeCommand {
 
     private Long departmentId;
 
-    private Long jobPositionId;
+    private String jobPosition;
 
     private String employeeNo;
 
@@ -30,7 +48,7 @@ public class AddArchivesEmployeeCommand {
 
     private String workingPlace;
 
-    private Long contractParty;
+    private Long contractId;
 
     private String areaCode;
 
@@ -87,12 +105,12 @@ public class AddArchivesEmployeeCommand {
         this.departmentId = departmentId;
     }
 
-    public Long getJobPositionId() {
-        return jobPositionId;
+    public String getJobPosition() {
+        return jobPosition;
     }
 
-    public void setJobPositionId(Long jobPositionId) {
-        this.jobPositionId = jobPositionId;
+    public void setJobPosition(String jobPosition) {
+        this.jobPosition = jobPosition;
     }
 
     public String getEmployeeNo() {
@@ -127,12 +145,12 @@ public class AddArchivesEmployeeCommand {
         this.workingPlace = workingPlace;
     }
 
-    public Long getContractParty() {
-        return contractParty;
+    public Long getContractId() {
+        return contractId;
     }
 
-    public void setContractParty(Long contractParty) {
-        this.contractParty = contractParty;
+    public void setContractId(Long contractId) {
+        this.contractId = contractId;
     }
 
     public Long getOrganizationId() {

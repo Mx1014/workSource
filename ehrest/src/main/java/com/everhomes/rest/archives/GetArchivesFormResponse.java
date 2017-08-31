@@ -7,11 +7,11 @@ import com.everhomes.rest.general_approval.GeneralFormDTO;
  * <li>form: 表单对象 {@link com.everhomes.rest.general_approval.GeneralFormDTO}</li>
  * </ul>
  */
-public class GetArchivesFieldResponse {
+public class GetArchivesFormResponse {
 
     private GeneralFormDTO form;
 
-    public GetArchivesFieldResponse() {
+    public GetArchivesFormResponse() {
     }
 
     public GeneralFormDTO getForm() {

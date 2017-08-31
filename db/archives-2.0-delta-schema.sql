@@ -29,67 +29,40 @@ CREATE TABLE `eh_archives_dismiss_employees` (
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
-DROP TABLE IF EXISTS `eh_archives_organization_places`;
+/*DROP TABLE IF EXISTS `eh_archives_organization_places`;
 CREATE TABLE `eh_archives_organization_places` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
 	`organization_id` BIGINT NOT NULL COMMENT 'organizationId',
-
 	`detail_id` BIGINT NOT NULL COMMENT 'the id of member in eh_organization_member_details',
 	`update_time` DATETIME COMMENT 'the time of data creating',
 	`operator_uid` BIGINT COMMENT 'the id of the operator',
 	PRIMARY KEY (`id`)
-) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;*/
 
 DROP TABLE IF EXISTS `eh_general_form_groups`;
 CREATE TABLE `eh_general_form_groups` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
-	`organization_id` BIGINT NOT NULL DEFAULT 0,
-	`owner_id` BIGINT NOT NULL,
-	`owner_type` VARCHAR(64) NOT NULL,
-	`module_id` BIGINT COMMENT 'the module id',
-	`module_type` VARCHAR(64) COMMENT 'the module type from temp',
-	`form_template_id`BIGINT COMMENT 'the id of form template',
 	`form_origin_id` BIGINT DEFAULT 0 COMMENT 'the id of the original form',
 	`form_version` BIGINT DEFAULT 0 COMMENT 'the current using version',
 	`template_type` VARCHAR(128) NOT NULL COMMENT 'the type of template text',
 	`template_text` TEXT COMMENT 'json 存放表单字段组',
+	`update_time` DATETIME COMMENT 'last update time',
 	`create_time` DATETIME COMMENT 'the time of data creating',
 	`operator_uid` BIGINT COMMENT 'the id of the operator',
-	`string_tag1` VARCHAR(128),
-	`string_tag2` VARCHAR(128),
-	`string_tag3` VARCHAR(128),
-	`integral_tag1` BIGINT DEFAULT 0,
-	`integral_tag2` BIGINT DEFAULT 0,
-	`integral_tag3` BIGINT DEFAULT 0,
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
-DROP TABLE IF EXISTS `eh_general_form_templates`;
-CREATE TABLE `eh_general_form_templates` (
+DROP TABLE IF EXISTS `eh_archives_forms`;
+CREATE TABLE `eh_archives_forms` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-	`form_module` VARCHAR(64) NOT NULL COMMENT 'the form template name',
+	`organization_id` BIGINT NOT NULL COMMENT'the id of organization',
   `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the original form',
   `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current using version',
-	`form_name` VARCHAR(64) NOT NULL COMMENT 'the unique name of the form',
-	`form_display_name` VARCHAR(64) COMMENT 'the name of the form',
-  `template_type` VARCHAR(128) NOT NULL COMMENT 'the type of template text',
-  `template_text` TEXT COMMENT 'json 存放表单字段',
   `status` TINYINT NOT NULL COMMENT 'invalid, config, running',
   `update_time` DATETIME COMMENT 'last update time',
-  `create_time` DATETIME COMMENT 'record create time',
-  `string_tag1` VARCHAR(128),
-  `string_tag2` VARCHAR(128),
-  `string_tag3` VARCHAR(128),
-  `string_tag4` VARCHAR(128),
-  `string_tag5` VARCHAR(128),
-  `integral_tag1` BIGINT DEFAULT 0,
-  `integral_tag2` BIGINT DEFAULT 0,
-  `integral_tag3` BIGINT DEFAULT 0,
-  `integral_tag5` BIGINT DEFAULT 0,
-  `integral_tag4` BIGINT DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
