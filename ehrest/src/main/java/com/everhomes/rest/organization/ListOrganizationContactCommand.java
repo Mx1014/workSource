@@ -193,35 +193,35 @@ public class ListOrganizationContactCommand {
         this.checkInTimeEnd = checkInTimeEnd;
     }
 
-    public String getEmploymentTimeStart() {
+    public Timestamp getEmploymentTimeStart() {
         return employmentTimeStart;
     }
 
-    public void setEmploymentTimeStart(String employmentTimeStart) {
+    public void setEmploymentTimeStart(Timestamp employmentTimeStart) {
         this.employmentTimeStart = employmentTimeStart;
     }
 
-    public String getEmploymentTimeEnd() {
+    public Timestamp getEmploymentTimeEnd() {
         return employmentTimeEnd;
     }
 
-    public void setEmploymentTimeEnd(String employmentTimeEnd) {
+    public void setEmploymentTimeEnd(Timestamp employmentTimeEnd) {
         this.employmentTimeEnd = employmentTimeEnd;
     }
 
-    public String getContractEndTimeStart() {
+    public Timestamp getContractEndTimeStart() {
         return contractEndTimeStart;
     }
 
-    public void setContractEndTimeStart(String contractEndTimeStart) {
+    public void setContractEndTimeStart(Timestamp contractEndTimeStart) {
         this.contractEndTimeStart = contractEndTimeStart;
     }
 
-    public String getContractEndTimeEnd() {
+    public Timestamp getContractEndTimeEnd() {
         return contractEndTimeEnd;
     }
 
-    public void setContractEndTimeEnd(String contractEndTimeEnd) {
+    public void setContractEndTimeEnd(Timestamp contractEndTimeEnd) {
         this.contractEndTimeEnd = contractEndTimeEnd;
     }
 }
