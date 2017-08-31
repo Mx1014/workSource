@@ -1911,7 +1911,24 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		//工作地点
+		if(listCommand.getWorkPlaceId() != null){
+			cond = cond.and(t2.field("work_place").eq(listCommand.getWorkPlaceId()));
+		}
 
+		//入职日期
+		if(listCommand.getCheckInTimeStart() != null && listCommand.getCheckInTimeEnd() != null){
+			cond = cond.and(t2.field("check_in_time").between(listCommand.getCheckInTimeStart(), listCommand.getCheckInTimeEnd()));
+		}
+
+		//转正日期
+		if(listCommand.getEmploymentTimeStart() != null && listCommand.getEmploymentTimeEnd() != null){
+			cond = cond.and(t2.field("employment_time").between(listCommand.getEmploymentTimeStart(), listCommand.getEmploymentTimeEnd()));
+		}
+
+		//合同结束日期
+		if(listCommand.getContractEndTimeStart() != null && listCommand.getContractEndTimeStart() != null){
+			cond = cond.and(t2.field("contract_end_time").between(listCommand.getContractEndTimeStart(), listCommand.getContractEndTimeStart()));
+		}
 
         condition = condition.and(cond);
         if (null != locator && null != locator.getAnchor())

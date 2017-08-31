@@ -48,11 +48,11 @@ public class ListOrganizationContactCommand {
     private List<String> filterScopeTypes;
 
     private Timestamp checkInTimeStart;//入职日期
-    private Timestamp checkInTimeEnd;//入职日期
-    private String employmentTimeStart;//转正日期
-    private String employmentTimeEnd;//转正日期
-    private String contractEndTimeStart;//合同结束日期
-    private String contractEndTimeEnd;//合同结束日期
+    private Timestamp checkInTimeEnd;
+    private Timestamp employmentTimeStart;//转正日期
+    private Timestamp employmentTimeEnd;
+    private Timestamp contractEndTimeStart;//合同结束日期
+    private Timestamp contractEndTimeEnd;
     private Byte employeeStatus;//员工状态
     private Long contractPartyId;//合同主体
     private Long workPlaceId;//工作地点
