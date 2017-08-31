@@ -194,6 +194,8 @@ INSERT INTO `eh_namespace_masks` VALUES ('2', '999971', '园区服务', '3', '�
 
 -- 删除原有的门牌
 DELETE from eh_addresses WHERE namespace_id = 999971 AND community_id = 240111044331050388;
+-- 删除原有的楼栋
+DELETE from eh_buildings WHERE namespace_id = 999971 AND community_id = 240111044331050388;
 -- By janson
 -- 更改默认错误提示
 update eh_locale_strings set `text`='应用开小差了' where `text` = '呃，好像哪里出错了';
