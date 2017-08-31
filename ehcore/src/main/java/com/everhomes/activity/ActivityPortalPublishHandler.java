@@ -39,13 +39,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 		ActivityEntryConfigulation config = ConvertHelper.convert(instanceConfig, ActivityEntryConfigulation.class);
 
-		//新增、更新入口
-		Long maxEntryId = activityProvider.findActivityCategoriesMaxEntryId(namespaceId);
-		if(maxEntryId == null){
-			maxEntryId = 1L;
-		}
-		ActivityCategories activityCategory = updateEntry(config, maxEntryId, namespaceId);
-
+		ActivityCategories activityCategory = saveEntry(config, namespaceId);
 
 		//将值组装到config中，用于后面返回服务广场
 		config.setId(activityCategory.getId());
@@ -71,7 +65,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		}
 
 		//新增、更新内容分类
-		updateContentCategory(config, activityCategory,  maxEntryId, namespaceId);
+		updateContentCategory(config, activityCategory, namespaceId);
 
 		LOGGER.info("ActivityPortalPublishHandler publish end instanceConfig = {}", StringHelper.toJsonString(config));
 
@@ -120,21 +114,10 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(actionData, ActivityEntryConfigulation.class);
 
 		config.setName(actionDataObj.getTitle());
+		config.setEntryId(actionDataObj.getCategoryId());
 
-		//之前没有categoryId的设置为1
-		if(actionDataObj.getCategoryId() == null){
-			config.setEntryId(1L);
-		}else {
-			config.setEntryId(actionDataObj.getCategoryId());
-		}
-
-		ActivityCategories entryCategory = activityProvider.findActivityCategoriesByEntryId(config.getEntryId(), namespaceId);
-		if(entryCategory != null){
-			config.setId(entryCategory.getId());
-		}
-
-		//防止老数据可能没有ActivityCategories，先更新一下
-		ActivityCategories activityCategory = updateEntry(config, 0L, namespaceId);
+		//防止老数据可能没有ActivityCategories，先更新保存一下
+		ActivityCategories activityCategory = saveEntry(config, namespaceId);
 
 		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, activityCategory.getId());
 
@@ -167,44 +150,58 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	/**
 	 * 新增或者更新活动入口
 	 * @param config
-	 * @param maxEntryId
 	 * @param namespaceId
 	 * @return
 	 */
-	private ActivityCategories updateEntry(ActivityEntryConfigulation config, Long maxEntryId, Integer namespaceId){
+	private ActivityCategories saveEntry(ActivityEntryConfigulation config, Integer namespaceId){
 
-		ActivityCategories activityCategory;
+		ActivityCategories entryCategory = null;
 
 		if(config.getEntryId() != null) {
-			activityCategory = activityProvider.findActivityCategoriesById(config.getId());
-
-			activityCategory.setName(config.getName());
-
-			activityProvider.updateActivityCategories(activityCategory);
+			entryCategory = activityProvider.findActivityCategoriesByEntryId(config.getEntryId(), namespaceId);
 		}else {
-
-			activityCategory = new ActivityCategories();
-			activityCategory.setOwnerId(0L);
-			activityCategory.setParentId(-1L);
-			activityCategory.setName(config.getName());
-			activityCategory.setDefaultOrder(0);
-			activityCategory.setStatus((byte)2);
-			activityCategory.setCreatorUid(1L);
-			activityCategory.setNamespaceId(namespaceId);
-			activityCategory.setAllFlag((byte)0);
-			activityCategory.setEnabled((byte)1);
-			activityCategory.setEntryId(++maxEntryId);
-			activityCategory.setPath("/" + maxEntryId);
-			activityProvider.createActivityCategories(activityCategory);
-
+			//新增、更新入口
+			Long maxEntryId = activityProvider.findActivityCategoriesMaxEntryId(namespaceId);
+			if(maxEntryId == null){
+				maxEntryId = 1L;
+			}
+			config.setEntryId(++maxEntryId);
 		}
 
-		return  activityCategory;
+		if(entryCategory != null){
+			entryCategory.setName(config.getName());
+			activityProvider.updateActivityCategories(entryCategory);
+		}else {
+
+			entryCategory = new ActivityCategories();
+			entryCategory.setOwnerId(0L);
+			entryCategory.setParentId(-1L);
+			entryCategory.setName(config.getName());
+			entryCategory.setDefaultOrder(0);
+			entryCategory.setStatus((byte)2);
+			entryCategory.setCreatorUid(1L);
+			entryCategory.setNamespaceId(namespaceId);
+			entryCategory.setAllFlag((byte)0);
+			entryCategory.setEnabled((byte)1);
+			entryCategory.setEntryId(config.getEntryId());
+			entryCategory.setPath("/" + config.getEntryId());
+			activityProvider.createActivityCategories(entryCategory);
+
+		}
+		config.setId(entryCategory.getId());
+		return  entryCategory;
 	}
 
 
-	private void updateContentCategory(ActivityEntryConfigulation config, ActivityCategories activityCategory, Long maxEntryId, Integer namespaceId){
+	private void updateContentCategory(ActivityEntryConfigulation config, ActivityCategories parentCategory, Integer namespaceId){
+
 		if(config.getCategoryDTOList() != null && config.getCategoryDTOList().size() > 0){
+
+			//新增、更新入口
+			Long maxEntryId = activityProvider.findActivityCategoriesMaxEntryId(namespaceId);
+			if(maxEntryId == null){
+				maxEntryId = 1L;
+			}
 
 			for(int i=0; i<config.getCategoryDTOList().size(); i++){
 				ActivityCategoryDTO dto = config.getCategoryDTOList().get(i);
@@ -219,8 +216,8 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 				}else {
 					maxEntryId++;
 					ActivityCategories newCategory = ConvertHelper.convert(dto, ActivityCategories.class);
-					newCategory.setParentId(maxEntryId);
-					newCategory.setPath(activityCategory.getPath() + "/" + maxEntryId);
+					newCategory.setParentId(parentCategory.getEntryId());
+					newCategory.setPath(parentCategory.getPath() + "/" + maxEntryId);
 					newCategory.setOwnerId(0L);
 					newCategory.setDefaultOrder(0);
 					newCategory.setStatus((byte)2);
