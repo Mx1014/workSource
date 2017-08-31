@@ -853,3 +853,6 @@ insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) values(21050,'参数配置',21000,'/20000/21000/21050','1','3','2','0',NOW(), '1', '1'); -- 定义模块下的权限分类，parentId代表分类的所属模块
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) values(21052,'工作流设置',21000,'/20000/21000/21050/21052','1','4','2','0',NOW(), '1', '1'); -- 定义模块下的权限分类，parentId代表分类的所属模块
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `creator_uid`, `operator_uid`) values(21054,'参数配置',21000,'/20000/21000/21050/21054','1','4','2','0',NOW(), '1', '1'); -- 定义模块下的权限分类，parentId代表分类的所属模块
+
+-- 代韦晟敢添加 by lqs 20170829
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('1617', 'aclink.qr_timeout', '1200', 'timeout in second for qr', '999990', NULL);

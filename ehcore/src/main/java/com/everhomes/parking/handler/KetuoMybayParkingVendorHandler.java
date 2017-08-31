@@ -47,24 +47,6 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 	@Autowired
 	private ContentServerService contentServerService;
 
-	static String url = "http://szdas.iok.la:17508";
-
-	//支持开卡，返回true
-	public boolean getOpenCardFlag() {
-		return true;
-	}
-
-//	@Override
-//	public KetuoCard getCard(String plateNumber) {
-//		KetuoCard card = super.getCard(plateNumber);
-//
-//		//深圳湾月卡没有对接免费金额,设置成0
-//		if (null != card) {
-//			card.setFreeMoney(0);
-//		}
-//		return card;
-//	}
-
 	@Override
 	public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
 		if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode())) {
@@ -85,7 +67,8 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		long tempTime = calendar.getTimeInMillis();
-		String startTime = Utils.dateToStr(new Date(tempTime), Utils.DateStyle.DATE_TIME);
+		Timestamp tempStart = new Timestamp(tempTime);
+		String startTime = Utils.dateToStr(tempStart, Utils.DateStyle.DATE_TIME);
 		Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(tempTime, order.getMonthCount().intValue());
 		String endTime = Utils.dateToStr(tempEnd, Utils.DateStyle.DATE_TIME);
 
@@ -101,6 +84,11 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 		param.put("carColor", "");
 
 		String json = post(param, ADD_MONTH_CARD);
+
+		//将充值信息存入订单
+		order.setErrorDescriptionJson(json);
+		order.setStartPeriod(tempStart);
+		order.setEndPeriod(tempEnd);
 
 		JSONObject jsonObject = JSONObject.parseObject(json);
 		Object obj = jsonObject.get("resCode");
@@ -147,6 +135,8 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 	}
 
 	private DashiCarLocation getDashiCarLocation(String plateNumber) {
+
+		String url = configProvider.getValue("parking.mybay.searchCar.url", "");
 		TreeMap<String, String> param = new TreeMap<>();
 		param.put("CarNo", plateNumber);
 		String json = Utils.post(url + GET_CAR_LOCATION, createRequestParam(param));
@@ -186,6 +176,9 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 	}
 
 	private DashiCarLocation getDashiParkingInfo(String spaceNo) {
+
+		String url = configProvider.getValue("parking.mybay.searchCar.url", "");
+
 		TreeMap<String, String> param = new TreeMap<>();
 		param.put("SpaceCode", spaceNo);
 		String json = Utils.post(url + GET_PARKING_INFO, createRequestParam(param));
@@ -204,6 +197,9 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 	}
 
 	private List<DashiEmptyPlaceFloorInfo> getDashiEmptyPlaceFloorInfos() {
+
+		String url = configProvider.getValue("parking.mybay.searchCar.url", "");
+
 		String json = Utils.post(url + GET_EMPTY_PLACE, createRequestParam(new TreeMap<>()));
 
 		DashiJsonEntity<DashiEmptyPlaceInfo> entity = JSONObject.parseObject(json, new TypeReference<DashiJsonEntity<DashiEmptyPlaceInfo>>(){});

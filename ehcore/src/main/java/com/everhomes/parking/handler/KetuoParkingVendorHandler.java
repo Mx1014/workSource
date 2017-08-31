@@ -338,12 +338,13 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 
 		KetuoCard cardInfo = getCard(plateNumber);
 		KetuoCardRate ketuoCardRate = null;
+		String cardType = CAR_TYPE;
 		if(null != cardInfo) {
-			String cardType = cardInfo.getCarType();
-			for(KetuoCardRate rate: getCardRule(cardType)) {
-				if(rate.getRuleId().equals(order.getRateToken())) {
-					ketuoCardRate = rate;
-				}
+			cardType = cardInfo.getCarType();
+		}
+		for(KetuoCardRate rate: getCardRule(cardType)) {
+			if(rate.getRuleId().equals(order.getRateToken())) {
+				ketuoCardRate = rate;
 			}
 		}
 		if(null == ketuoCardRate) {
@@ -399,8 +400,8 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), 
 				cmd.getParkingLotId(), flowCase.getFlowMainId());
 
-		Integer requestMonthCount = 2;
-		Byte requestRechargeType = ParkingCardExpiredRechargeType.ACTUAL.getCode();
+		Integer requestMonthCount = REQUEST_MONTH_COUNT;
+		Byte requestRechargeType = REQUEST_RECHARGE_TYPE;
 		
 		if(null != parkingFlow) {
 			requestMonthCount = parkingFlow.getRequestMonthCount();

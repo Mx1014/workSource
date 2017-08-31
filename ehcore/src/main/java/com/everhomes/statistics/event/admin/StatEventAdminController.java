@@ -9,9 +9,12 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.statistics.event.*;
 import com.everhomes.statistics.event.StatEventJobService;
 import com.everhomes.statistics.event.StatEventService;
+import com.everhomes.statistics.event.StatEventTaskLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestDoc(value = "Stat event admin controller")
 @RestController
@@ -61,6 +64,20 @@ public class StatEventAdminController extends ControllerBase {
     public RestResponse executeEventTask(StatExecuteEventTaskCommand cmd) {
         statEventJobService.executeTask(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /stat/event/admin/listEventTask</b>
+     * <p>统计任务列表</p>
+     */
+    @RequestMapping(value = "listEventTask")
+    @RestReturn(value = String.class)
+    public RestResponse listEventTask(StatExecuteEventTaskCommand cmd) {
+        List<StatEventTaskLog> taskLog = statEventService.listEventTask(cmd);
+        RestResponse response = new RestResponse(taskLog);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

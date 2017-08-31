@@ -17,7 +17,7 @@ CREATE TABLE `eh_express_company_businesses` (
   `create_time` DATETIME,
   `update_time` DATETIME,
   `operator_uid` BIGINT,
-  
+
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -35,7 +35,7 @@ CREATE TABLE `eh_express_hotlines` (
   `create_time` DATETIME,
   `update_time` DATETIME,
   `operator_uid` BIGINT,
-  
+
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -59,7 +59,7 @@ CREATE TABLE `eh_express_param_settings` (
   `create_time` DATETIME,
   `update_time` DATETIME,
   `operator_uid` BIGINT,
-  
+
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -381,7 +381,7 @@ CREATE TABLE `eh_stat_event_task_logs` (
 
 -- By lei.lv
 -- 关系表建表脚本
-DROP TABLE IF EXISTS `eh_community_default`;
+-- DROP TABLE IF EXISTS `eh_community_default`;
 CREATE TABLE `eh_community_default` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL,
@@ -393,7 +393,7 @@ CREATE TABLE `eh_community_default` (
 -- ----------------------------
 -- Table structure for eh_namespace_masks
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_namespace_masks`;
+-- DROP TABLE IF EXISTS `eh_namespace_masks`;
 CREATE TABLE `eh_namespace_masks` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL,
@@ -403,3 +403,32 @@ CREATE TABLE `eh_namespace_masks` (
   `scene_type` varchar(64) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- added by janson 20170830
+#
+# Global table for relationship of owner 1<-->n door_auth
+#
+-- DROP TABLE IF EXISTS `eh_door_auth_level`;
+CREATE TABLE `eh_door_auth_level` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+    `door_id` BIGINT NOT NULL,
+    `level_id` BIGINT NOT NULL,
+    `level_type` TINYINT NOT NULL COMMENT '0:community, 1:enterprise, 2: family, 3: user',
+    `operator_id` BIGINT NOT NULL DEFAULT 0,
+
+    `owner_type` TINYINT NOT NULL COMMENT '0:community, 1:enterprise, 2: family, 3: user',
+    `owner_id` BIGINT NOT NULL,
+
+    `right_open` TINYINT NOT NULL DEFAULT 1,
+    `right_visitor` TINYINT NOT NULL DEFAULT 0,
+    `right_remote` TINYINT NOT NULL DEFAULT 0,
+
+    `description` VARCHAR(1024),
+
+    `create_time` DATETIME,
+    `status` TINYINT NOT NULL,
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

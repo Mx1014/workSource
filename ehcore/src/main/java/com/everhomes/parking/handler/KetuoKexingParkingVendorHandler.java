@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -41,22 +42,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	private static final String GET_CAR_LOCATION = "/api/find/GetCarLocInfo";
 	private static final String ADD_MONTH_CARD = "/api/card/AddMonthCarCardNo_KX";
 	//科兴的需求，充值过期的月卡时，需要计算费率，标记为自定义custom的费率，其他停车场不建议做这样的功能。
-	static final String EXPIRE_CUSTOM_RATE_TOKEN = "custom";
-
-	String appId = "1";
-	String appkey = "b20887292a374637b4a9d6e9f940b1e6";
-	String url = "http://220.160.111.114:8099";
-	Integer parkingId = 1;
-
-//	//支持开卡，返回true
-//	public boolean getOpenCardFlag() {
-//		return true;
-//	}
-//
-//	//是否支持过期缴费, 目前只支持科兴过期缴费，科兴的过期月卡缴费规则，比较复杂，而且依赖第三方停车系统，不建议这样做
-//	protected boolean getExpiredRechargeFlag() {
-//		return true;
-//	}
+	private static final String EXPIRE_CUSTOM_RATE_TOKEN = "custom";
 
 	public KetuoRequestConfig getKetuoRequestConfig() {
 
@@ -166,11 +152,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 					}
 
 					ketuoCardRate.setRuleId(EXPIRE_CUSTOM_RATE_TOKEN);
-//    				rate.setCarType(carType);
 					ketuoCardRate.setRuleAmount(String.valueOf(parkingLot.getExpiredRechargeMonthCount()));
-//    				rate.setRuleName(ruleName);
-//    				rate.setRuleType(ruleType);
-//    				rate.setTypeName(typeName);
 				}
 			}
 		}
@@ -186,7 +168,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		}else {
 			KetuoCard cardInfo = getCard(plateNumber);
 			KetuoCardRate ketuoCardRate = null;
-			String cardType = null;
+			String cardType = CAR_TYPE;
 			Integer freeMoney = 0;
 			if(null != cardInfo) {
 				cardType = cardInfo.getCarType();
@@ -204,8 +186,8 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			}
 			order.setRateName(ketuoCardRate.getRuleName());
 
-			order.setPrice(new BigDecimal(order.getPrice().intValue() - (freeMoney / 100 * order.getMonthCount().intValue() )));
-
+			order.setPrice(new BigDecimal(order.getPrice().intValue() * 100 - (freeMoney * order.getMonthCount().intValue()))
+							.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 		}
 
 	}
@@ -374,6 +356,9 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 	private KexingFreeSpaceNum getKexingFreeSpaceNum() {
 
+		String parkingId = configProvider.getValue("parking.kexing.searchCar.parkId", "");
+		String url = configProvider.getValue("parking.kexing.searchCar.url", "");
+
 		LinkedHashMap<String, Object> param = new LinkedHashMap<>();
 		param.put("parkId", parkingId);
 
@@ -392,6 +377,10 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	}
 
 	private JSONObject createRequestParam(LinkedHashMap<String, Object> param) {
+
+		String appkey = configProvider.getValue("parking.kexing.searchCar.appkey", "");
+		String appId = configProvider.getValue("parking.kexing.searchCar.appId", "");
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 
 		StringBuilder sb = new StringBuilder();
@@ -404,7 +393,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		String key = Utils.md5(str);
 
 		JSONObject params = new JSONObject();
-		params.put("appId", appId );
+		params.put("appId", appId);
 		params.put("key", key );
 
 		for (Map.Entry entry: entries) {
@@ -415,6 +404,10 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	}
 
 	private List<KetuoParking> getKetuoParkings() {
+
+		String appkey = configProvider.getValue("parking.kexing.searchCar.appkey", "");
+		String appId = configProvider.getValue("parking.kexing.searchCar.appId", "");
+		String url = configProvider.getValue("parking.kexing.searchCar.url", "");
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 
@@ -470,6 +463,10 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	}
 
 	private KetuoCarLocation getCarLocation(String plateNumber) {
+
+		String parkingId = configProvider.getValue("parking.kexing.searchCar.parkId", "");
+		String url = configProvider.getValue("parking.kexing.searchCar.url", "");
+
 		LinkedHashMap<String, Object> param = new LinkedHashMap<>();
 		param.put("parkId", parkingId);
 		param.put("plateNo", plateNumber);

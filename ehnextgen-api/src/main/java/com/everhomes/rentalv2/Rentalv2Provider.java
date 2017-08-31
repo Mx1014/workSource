@@ -291,4 +291,6 @@ public interface Rentalv2Provider {
 	boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell,
 			List<Rentalv2PriceRule> priceRules);
 
+	RentalResourceType findRentalResourceTypeById (Long resoureceTypeId);
+
 }

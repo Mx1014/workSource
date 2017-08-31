@@ -73,7 +73,12 @@ abstract public class AbstractStatEventPortalItemGroupHandler extends AbstractSt
             // 去映射表里拿到门户配置的layoutId => 去portalItemGroup里拿到portalItemGroup => 去portalStatistic里拿到统计记录的id => 保存数据
             PortalLaunchPadMapping mapping = portalLaunchPadMappingProvider.findPortalLaunchPadMapping(EhPortalLayouts.class.getSimpleName(), layoutId);
 
-            PortalItemGroup portalItemGroup = portalItemGroupProvider.findPortalItemGroup(mapping.getPortalContentId(), getWidget().getCode(), getItemGroup(map));
+            String itemGroup = getItemGroup(map);
+            if (itemGroup == null) {
+                continue;
+            }
+
+            PortalItemGroup portalItemGroup = portalItemGroupProvider.findPortalItemGroup(mapping.getPortalContentId(), getWidget().getCode(), itemGroup);
             if (portalItemGroup == null) {
                 continue;
             }

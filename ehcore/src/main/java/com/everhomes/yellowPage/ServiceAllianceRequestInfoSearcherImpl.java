@@ -196,6 +196,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
             request.setJumpType(2L);
             request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            if(lists!=null && lists.size()>0) {
+                request.setCreateTime(lists.get(0).getCreateTime());
+            }
             request.setCreatorName(user.getNickName());
             if(organizationVal!= null && organizationVal.getFieldValue() != null){
                 PostApprovalFormTextValue organizationvalue = JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class);
@@ -932,7 +935,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             try {
 				Date date=format.parse(d);
 				b.field("createDate", date.getTime());
-			} catch (ParseException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
             

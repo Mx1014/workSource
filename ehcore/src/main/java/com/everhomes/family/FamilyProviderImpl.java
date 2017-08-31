@@ -48,6 +48,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.mysql.jdbc.log.Log;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -282,7 +283,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 				family.setCommunityType(community.getCommunityType());
 				family.setDefaultForumId(community.getDefaultForumId());
 				family.setFeedbackForumId(community.getFeedbackForumId());
-				
+				LOGGER.debug("community is :" + community.getName());
 			}
 			if(group.getCreatorUid().longValue() == userId.longValue())
 				family.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
@@ -317,6 +318,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 	// @Cacheable(value="FamiliesOfUser", key="#userId", unless="#result.size() == 0")
 	@Override
 	public List<FamilyDTO> getUserFamiliesByUserId(long userId) {
+		LOGGER.debug("userId :" + userId);
 
 		List<UserGroup> list = this.userProvider.listUserGroups(userId, GroupDiscriminator.FAMILY.getCode());
 
@@ -328,6 +330,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 			GroupMember groupMember = this.groupProvider.findGroupMemberByMemberInfo(u.getGroupId(), EntityType.USER.getCode(), userId);
 			if(groupMember != null){
 				familyIds.add(u.getGroupId());
+				LOGGER.debug("groupId is :" + u.getGroupId());
 			}
 		}
 		LOGGER.info("Get user families by userId,familyIds size=" + familyIds.size());
