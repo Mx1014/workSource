@@ -2701,7 +2701,7 @@ public class UserServiceImpl implements UserService {
 			if(commercial_sceneList.size() == 0){
 				//如果园区场景为0，通过小区查询默认园区
 				default_community_one = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
-				LOGGER.debug("如果园区场景为0，通过小区查询默认园区");
+				LOGGER.debug("If the park scene is 0, query the default park");
 			}
 //			else if (commercial_sceneList.size() == 1 && commercial_sceneList.get(0).getSceneType() == SceneType.PM_ADMIN.getCode()){
 //				//如果园区场景有且只有一个，通过小区查询默认园区
@@ -2712,7 +2712,7 @@ public class UserServiceImpl implements UserService {
 			if(default_community_one != null && default_community_one.getId() != null){
 				sceneList.add(convertCommunityToScene(namespaceId,userId,default_community_one));
 			}else{
-				LOGGER.debug("找不到默认园区场景");
+				LOGGER.debug("The default park scene was not found");
 			}
 
 
@@ -2720,13 +2720,13 @@ public class UserServiceImpl implements UserService {
 			if(residential_sceneList.size() == 0){
 				//如果小区场景为0，通过园区查询默认小区
 				default_community_two = findDefaultCommunity(namespaceId,userId,commercial_sceneList,CommunityType.RESIDENTIAL.getCode());
-				LOGGER.debug("如果小区场景为0，通过园区查询默认小区");
+				LOGGER.debug("If the cell scene is 0, check the default cell through the park");
 			}
 
 			if(default_community_two != null && default_community_two.getId() != null){
 				sceneList.add(convertCommunityToScene(namespaceId,userId,default_community_two));
 			}else{
-				LOGGER.debug("找不到默认小区场景");
+				LOGGER.debug("The default scene was not found");
 			}
 		}
 		Collections.reverse(sceneList);
