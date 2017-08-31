@@ -89,7 +89,11 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 		}
 		MailTtServiceGn service = new MailTtServiceGn(wsdlURL, MailTtServiceGn.SERVICE);
 		MailTtServiceGnPortType port = service.getMailTtServiceGnHttpPort();
-		ArrayOfMail arrayOfMail = port.getMails(SER_KIND, SER_SIGN, billNo);
+		String auth_sign = expressCompany.getAuthorization();
+		if(auth_sign == null || auth_sign.length() == 0){
+			auth_sign = SER_SIGN;
+		}
+		ArrayOfMail arrayOfMail = port.getMails(SER_KIND, auth_sign, billNo);
 		List<Mail> maillist = arrayOfMail.getMail();
 		if(maillist == null || maillist.size() == 0){
 			return null;
