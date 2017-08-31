@@ -6526,8 +6526,12 @@ public class PunchServiceImpl implements PunchService {
 							statusList = null;
 					}
 					for(int i =0;i< ptr.getPunchTimesPerDay()/2;i++){
-						if (approvalStatus[i].equals(ExceptionStatus.NORMAL.getCode())) {
-							statusList[i] = PunchStatus.NORMAL.getCode()+"";
+						try{
+							if (approvalStatus!= null && approvalStatus[i].equals(ExceptionStatus.NORMAL.getCode())) {
+									statusList[i] = PunchStatus.NORMAL.getCode()+"";
+								}
+						}catch(Exception e){
+							LOGGER.error("approval status error",e);
 						}
 					}
 				}
@@ -6893,7 +6897,7 @@ public class PunchServiceImpl implements PunchService {
 				result.setPunchType(PunchType.OFF_DUTY.getCode());
 			}else{ 
 				//否则就是已完成打卡-但是可以更新打卡
-				result.setPunchType(PunchType.FINISH.getCode()); 
+				result.setPunchType(PunchType.FINISH.getCode());
 			}
 			processLastOffDutyPunchLog(result,ptr,punchTimeLong,punchLogs);
 			return result ;
