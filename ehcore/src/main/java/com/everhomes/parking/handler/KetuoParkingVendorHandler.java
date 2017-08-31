@@ -25,7 +25,7 @@ import com.everhomes.rest.organization.VendorType;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
- * 科兴 正中会 停车对接
+ * 停车对接
  */
 @Component
 public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler implements ParkingVendorHandler {
