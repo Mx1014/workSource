@@ -69,9 +69,8 @@ public class UserUiController extends ControllerBase {
      */
     @RequestMapping("listUserRelatedScenes")
     @RestReturn(value=SceneDTO.class, collection=true)
-    public RestResponse listUserRelatedScenes() {
-        List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes();
-        
+    public RestResponse listUserRelatedScenes(ListUserRelatedScenesCommand cmd) {
+        List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes(cmd);
         RestResponse response = new RestResponse(sceneDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

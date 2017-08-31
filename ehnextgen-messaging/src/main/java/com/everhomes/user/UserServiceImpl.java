@@ -168,6 +168,8 @@ public class UserServiceImpl implements UserService {
 	//推荐场景转换启用参数
 	private final static Integer SCENE_SWITCH_ENABLE = 0;
 	private final static Integer SCENE_SWITCH_DISABLE = 1;
+	private final static Integer SCENE_SWITCH_DEFAULT_FLAG_ENABLE = 1;
+	private final static Integer SCENE_SWITCH_DEFAULT_FLAG_DISABLE = 0;
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
@@ -2685,6 +2687,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<SceneDTO> listUserRelatedScenes() {
+		return listUserRelatedScenes(null);
+	}
+
+	@Override
+	public List<SceneDTO> listUserRelatedScenes(ListUserRelatedScenesCommand cmd) {
+		Integer defaultFlag = SCENE_SWITCH_DEFAULT_FLAG_DISABLE;
+		if(cmd != null){
+			defaultFlag = cmd.getDefaultFlag();
+		}
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long userId = UserContext.current().getUser().getId();
 
@@ -2706,13 +2717,13 @@ public class UserServiceImpl implements UserService {
 		/** 从配置项中查询是否开启 **/
 		Integer switchFlag = this.configurationProvider.getIntValue(namespaceId, "scenes.switchKey", SCENE_SWITCH_DISABLE);
 		LOGGER.debug("switchFlag is" + switchFlag);
-		if(switchFlag == SCENE_SWITCH_ENABLE){
+		if(defaultFlag == SCENE_SWITCH_DEFAULT_FLAG_ENABLE && switchFlag == SCENE_SWITCH_ENABLE){
 			/** 查询默认场景 **/
 			Community default_community_one = new Community();
 			if(commercial_sceneList.size() == 0){
 				//如果园区场景为0，通过小区查询默认园区
 				default_community_one = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
-				LOGGER.debug("如果园区场景为0，通过小区查询默认园区");
+				LOGGER.debug("If the park scene is 0, query the default park");
 			}
 //			else if (commercial_sceneList.size() == 1 && commercial_sceneList.get(0).getSceneType() == SceneType.PM_ADMIN.getCode()){
 //				//如果园区场景有且只有一个，通过小区查询默认园区
@@ -2723,7 +2734,7 @@ public class UserServiceImpl implements UserService {
 			if(default_community_one != null && default_community_one.getId() != null){
 				sceneList.add(convertCommunityToScene(namespaceId,userId,default_community_one));
 			}else{
-				LOGGER.debug("找不到默认园区场景");
+				LOGGER.debug("The default park scene was not found");
 			}
 
 
@@ -2731,16 +2742,23 @@ public class UserServiceImpl implements UserService {
 			if(residential_sceneList.size() == 0){
 				//如果小区场景为0，通过园区查询默认小区
 				default_community_two = findDefaultCommunity(namespaceId,userId,commercial_sceneList,CommunityType.RESIDENTIAL.getCode());
-				LOGGER.debug("如果小区场景为0，通过园区查询默认小区");
+				LOGGER.debug("If the cell scene is 0, check the default cell through the park");
 			}
 
 			if(default_community_two != null && default_community_two.getId() != null){
 				sceneList.add(convertCommunityToScene(namespaceId,userId,default_community_two));
 			}else{
-				LOGGER.debug("找不到默认小区场景");
+				LOGGER.debug("The default scene was not found");
+			}
+		}else{
+			// 当用户既没有选择家庭、也没有在某个公司内时，他有可能选过某个小区/园区，此时也把对应域空间下所选的小区作为场景 by lqs 2010416
+			if(sceneList.size() == 0) {
+				SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
+				if(communityScene != null) {
+					sceneList.add(communityScene);
+				}
 			}
 		}
-		Collections.reverse(sceneList);
 		return sceneList;
 	}
 
@@ -3037,7 +3055,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		// 为了避免用户每次都需要选择一个小区，需要调用原来的设置小区流程 by lqs 20160416
-		setUserCurrentCommunity(cmd.getCommunityId());
+//		setUserCurrentCommunity(cmd.getCommunityId());
 
 		// 把下面代码移到listUserRelatedScenes()里做为通用流程，即列场景时按统一条件列小区场景 by lqs 20160416 
 		//        CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);

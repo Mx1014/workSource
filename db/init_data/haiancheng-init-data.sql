@@ -5315,3 +5315,8 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 
 -- #13415 add by xq.tian  2017/08/03
 UPDATE `eh_launch_pad_items` SET `action_type` = 56, `item_name` = 'FLOW_TASK' WHERE `action_type` = 51 AND `item_name` = 'PM_TASK' AND `namespace_id` = 999993 AND `item_group` = 'Bizs';
+
+-- by dengs,20180831 #14760
+SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+VALUES ((@eh_launch_pad_items_id :=@eh_launch_pad_items_id+1), 999993, '0', '0', '0', '/home', 'Bizs', '综合维修', '综合维修', 'cs://1/image/aW1hZ2UvTVRvM05tRmlNR0V3TjJZMU1qZzNPVEl5WXpGa05UYzNNMlV4TVdKaFkyVmxOQQ', '1', '1', '60', '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=203242&displayName=综合维修"}', '10', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1', NULL, NULL, '0', NULL, NULL);
