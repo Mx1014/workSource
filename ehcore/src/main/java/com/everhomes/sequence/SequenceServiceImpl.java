@@ -1466,6 +1466,18 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhRentalv2PriceRules.class, Tables.EH_RENTALV2_PRICE_RULES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_RENTALV2_PRICE_RULES.ID.max()).from(Tables.EH_RENTALV2_PRICE_RULES).fetchOne().value1();
         });
+        
+        syncTableSequence(null, EhExpressCompanies.class, Tables.EH_EXPRESS_COMPANIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EXPRESS_COMPANIES.ID.max()).from(Tables.EH_EXPRESS_COMPANIES).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhExpressCompanyBusinesses.class, Tables.EH_EXPRESS_COMPANY_BUSINESSES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EXPRESS_COMPANY_BUSINESSES.ID.max()).from(Tables.EH_EXPRESS_COMPANY_BUSINESSES).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhExpressHotlines.class, Tables.EH_EXPRESS_HOTLINES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_EXPRESS_HOTLINES.ID.max()).from(Tables.EH_EXPRESS_HOTLINES).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
