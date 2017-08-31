@@ -668,7 +668,7 @@ public class ForumServiceImpl implements ForumService {
         if(topicId != null) {
         	Post post = this.forumProvider.findPostById(topicId);
 	        if(post != null) {
-	            if(PostStatus.ACTIVE != PostStatus.fromCode(post.getStatus())) {
+	            if(PostStatus.ACTIVE != PostStatus.fromCode(post.getStatus()) && PostStatus.WAITING_FOR_CONFIRMATION != PostStatus.fromCode(post.getStatus())) {
 	            	
 	            	//查我发的贴&&当前用户=发帖人 && 发帖人=删帖人时 可以看到该帖 modified by xiongying 20160617
 	            	if(getByOwnerId && post.getCreatorUid().equals(userId) && post.getCreatorUid().equals(post.getDeleterUid())) {
