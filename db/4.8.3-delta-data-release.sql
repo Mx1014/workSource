@@ -97,6 +97,8 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.accessKeyId', 'zuolintest', NULL, '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.accessKeyValue', 'd1913cbeacd1de1783b804e6ee084aa7', NULL, '0', NULL);
 
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.types.10011', '[{"typeId":"02", "typeName":"VIP月卡"}]', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.types.10012', '[{"typeId":"11", "typeName":"VIP月卡"},{"typeId":"5", "typeName":"普通月卡"}]', NULL, '0', NULL);
 
 -- By lei.lv
 -- layout数据

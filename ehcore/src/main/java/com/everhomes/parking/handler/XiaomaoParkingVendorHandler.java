@@ -1,5 +1,6 @@
 package com.everhomes.parking.handler;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -261,20 +262,28 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         List<ParkingCardType> cardTypes = new ArrayList<>();
 
         if (parkingId == 10011L) {
-            ParkingCardType type = new ParkingCardType();
-            type.setTypeId("02");
-            type.setTypeName("VIP月卡");
-            cardTypes.add(type);
+            String json = configProvider.getValue("parking.xiaomao.types." + parkingId, "");
+            List<ParkingCardType> types = JSONArray.parseArray(json, ParkingCardType.class);
+            cardTypes.addAll(types);
+
+//            ParkingCardType type = new ParkingCardType();
+//            type.setTypeId("02");
+//            type.setTypeName("VIP月卡");
+//            cardTypes.add(type);
 
         }else if(parkingId == 10012L) {
-            ParkingCardType type = new ParkingCardType();
-            type.setTypeId("11");
-            type.setTypeName("VIP月卡");
-            cardTypes.add(type);
-            type = new ParkingCardType();
-            type.setTypeId("5");
-            type.setTypeName("普通月卡");
-            cardTypes.add(type);
+            String json = configProvider.getValue("parking.xiaomao.types." + parkingId, "");
+            List<ParkingCardType> types = JSONArray.parseArray(json, ParkingCardType.class);
+            cardTypes.addAll(types);
+
+//            ParkingCardType type = new ParkingCardType();
+//            type.setTypeId("11");
+//            type.setTypeName("VIP月卡");
+//            cardTypes.add(type);
+//            type = new ParkingCardType();
+//            type.setTypeId("5");
+//            type.setTypeName("普通月卡");
+//            cardTypes.add(type);
         }
 
         return cardTypes;
