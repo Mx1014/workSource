@@ -502,7 +502,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public void updateArchivesForm(UpdateArchivesFormCommand cmd) {
+    public GeneralFormDTO updateArchivesForm(UpdateArchivesFormCommand cmd) {
 
         //  1.如果无 formOriginId 时则使用的是模板，此时在组织结构新增一份表单，同时业务表单组新增记录
         //  2.如果有 formOriginId 时则说明已经拥有了表单，此时在组织架构做修改，同时业务表单组同步记录
@@ -520,7 +520,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
             //  在业务表单组新增记录
             createArchivesForm(form);
-
+            return form;
         }else{
             //  修改时，在组织架构修改表单
             UpdateApprovalFormCommand updateCommand = new UpdateApprovalFormCommand();
@@ -533,10 +533,12 @@ public class ArchivesServiceImpl implements ArchivesService {
             GeneralFormDTO form = generalFormService.updateGeneralForm(updateCommand);
 
             //  在业务表单同步记录
-            ArchivesFroms archivesFroms = archivesProvider.findArchivesFormOriginId(UserContext.getCurrentNamespaceId(), cmd.getFormOriginId());
+            ArchivesFroms archivesFroms = archivesProvider.findArchivesFormOriginId(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId());
             archivesFroms.setFormOriginId(form.getFormOriginId());
             archivesFroms.setFormVersion(form.getFormVersion());
             archivesProvider.updateArchivesForm(archivesFroms);
+
+            return form;
         }
     }
 

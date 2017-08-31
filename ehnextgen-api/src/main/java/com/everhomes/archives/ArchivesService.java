@@ -1,6 +1,7 @@
 package com.everhomes.archives;
 
 import com.everhomes.rest.archives.*;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,7 +40,7 @@ public interface ArchivesService {
 
     void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd);
 
-    void updateArchivesForm(UpdateArchivesFormCommand cmd);
+    GeneralFormDTO updateArchivesForm(UpdateArchivesFormCommand cmd);
 
     GetArchivesFormResponse getArchivesForm(GetArchivesFormCommand cmd);
 

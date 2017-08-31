@@ -175,6 +175,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 				.getSequenceDomainFromTablePojo(EhGeneralFormGroups.class));
 		group.setId(id);
 		group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		group.setUpdateTime(group.getCreateTime());
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhGeneralFormGroupsDao dao = new EhGeneralFormGroupsDao(context.configuration());
 		dao.insert(group);
@@ -184,19 +185,12 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public void deleteGeneralFormGroupsByFormOriginId(Long formOriginId){
+	public void deleteGeneralFormGroupsByFormOriginId(Long formOriginId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		context.delete(Tables.EH_GENERAL_FORM_GROUPS)
-				.where(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId));
+				.where(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId))
+				.execute();
 	}
-
-/*	@Override
-	public GeneralFormGroup findGeneralFormGroupById(Long id){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		EhGeneralFormGroupsDao dao = new EhGeneralFormGroupsDao(context.configuration());
-		EhGeneralFormGroups group = dao.findById(id);
-		return ConvertHelper.convert(group, GeneralFormGroup.class);
-	}*/
 
     @Override
     public GeneralFormGroup findGeneralFormGroupByFormOriginId(Long formOriginId){
@@ -209,7 +203,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	@Override
 	public void updateGeneralFormGroup(GeneralFormGroup group){
 		group.setOperatorUid(UserContext.currentUserId());
-
+		group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhGeneralFormGroupsDao dao = new EhGeneralFormGroupsDao(context.configuration());
 		dao.update(group);

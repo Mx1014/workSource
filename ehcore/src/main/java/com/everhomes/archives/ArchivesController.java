@@ -5,6 +5,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.archives.*;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -241,10 +242,10 @@ public class ArchivesController extends ControllerBase{
      * <p>13-1.增加、修改档案字段</p>
      */
     @RequestMapping("updateArchivesForm")
-    @RestReturn(value = String.class)
+    @RestReturn(value = GeneralFormDTO.class)
     public RestResponse updateArchivesForm(UpdateArchivesFormCommand cmd){
-        archivesService.updateArchivesForm(cmd);
-        RestResponse response = new RestResponse();
+        GeneralFormDTO res = archivesService.updateArchivesForm(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

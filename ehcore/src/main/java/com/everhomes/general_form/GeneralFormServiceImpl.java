@@ -573,15 +573,18 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 	}
 
     //  表单控件组的新增(与表单绑定故作为私有方法)
-    private GeneralFormGroup createGeneralFormGroup(GeneralForm form, List<GeneralFormGroupDTO> groupDTOS){
-        GeneralFormGroup group = new GeneralFormGroup();
-        group.setNamespaceId(UserContext.getCurrentNamespaceId());
-        group.setFormOriginId(form.getFormOriginId());
-        group.setFormVersion(form.getFormVersion());
-        group.setTemplateType(GeneralFormTemplateType.DEFAULT_JSON.getCode());
-        group.setTemplateText(JSON.toJSONString(groupDTOS));
-        generalFormProvider.createGeneralFormGroup(group);
-        return group;
+    private GeneralFormGroup createGeneralFormGroup(GeneralForm form, List<GeneralFormGroupDTO> groupDTOS) {
+        if (groupDTOS != null) {
+            GeneralFormGroup group = new GeneralFormGroup();
+            group.setNamespaceId(UserContext.getCurrentNamespaceId());
+            group.setFormOriginId(form.getFormOriginId());
+            group.setFormVersion(form.getFormVersion());
+            group.setTemplateType(GeneralFormTemplateType.DEFAULT_JSON.getCode());
+            group.setTemplateText(JSON.toJSONString(groupDTOS));
+            generalFormProvider.createGeneralFormGroup(group);
+            return group;
+        }
+        return null;
     }
 
     //  表单控件组的修改(与表单绑定故作为私有方法)
