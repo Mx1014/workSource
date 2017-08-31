@@ -116,10 +116,6 @@ INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`, `area_size`) VALUES (@eh_communities_id+1, '9c63e9e7-6d48-11e7-a008-0242ac110018', '14809', '上海市', '14810', '浦东新区', '领袖之都(东块、股份)', '领袖之都(东块、股份)', '张东路1387号', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '214', '1', NULL, '2', '2017-07-20 12:40:28', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '190570', '190571', '2017-07-20 12:40:28', '999971', NULL);
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`, `area_size`) VALUES (@eh_communities_id+2, '9c63e9e7-6d48-11e7-a008-0242ac110019', '14809', '上海市', '14810', '浦东新区', '领袖之都(东块、集电)', '领袖之都(东块、集电)', '张东路1387号', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '214', '1', NULL, '2', '2017-07-20 12:40:28', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '190570', '190571', '2017-07-20 12:40:28', '999971', NULL);
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`, `area_size`) VALUES (@eh_communities_id+3, '9c63e9e7-6d48-11e7-a008-0242ac110020', '14809', '上海市', '14810', '浦东新区', '领袖之都(西块、集电)', '领袖之都(西块、集电)', '张东路1388号', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '214', '1', NULL, '2', '2017-07-20 12:40:28', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '190570', '190571', '2017-07-20 12:40:28', '999971', NULL);
--- 测试数据
-INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`, `area_size`) VALUES (@eh_communities_id+4, '9c63e9e7-6d48-11e7-a008-0242ac110017', '14809', '上海市', '14810', '浦东新区', '天之骄子人才公寓测试地址1号', '人才公寓1号', '上海市浦东新区盛夏路58弄', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '214', '1', NULL, '2', '2017-07-20 12:40:28', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '190570', '190571', '2017-07-20 12:40:28', '999971', NULL);
-INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`, `area_size`) VALUES (@eh_communities_id+5, '9c63e9e7-6d48-11e7-a008-0242ac1100120', '14809', '上海市', '14810', '浦东新区', '天之骄子人才公寓测试地址2号', '人才公寓2号', '上海市浦东新区盛夏路58弄', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '214', '1', NULL, '2', '2017-07-20 12:40:28', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '190570', '190571', '2017-07-20 12:40:28', '999971', NULL);
--- 测试数据结束
 
 
 -- eh_organization_communities数据
@@ -131,10 +127,6 @@ INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_i
 INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+4, '1012516', '240111044331050389');
 INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+5, '1012516', '240111044331050388');
 
--- 测试数据
-INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+6, '1012516', @eh_communities_id+5);
-INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@oc_id+7, '1012516', @eh_communities_id+4);
--- 测试数据结束
 
 -- eh_community_geopoints表数据
 DELETE FROM eh_community_geopoints WHERE community_id in (240111044331050388,240111044331050389,@eh_communities_id+1,@eh_communities_id+2,@eh_communities_id+3,@eh_communities_id+4,@eh_communities_id+5);
@@ -144,11 +136,6 @@ INSERT INTO `eh_community_geopoints` (`id`, `community_id`, `description`, `long
 INSERT INTO `eh_community_geopoints` (`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) VALUES (@coge_id+3, @eh_communities_id+1, '', '121.643166', '31.223298', 'uxypyxbpgxfr');
 INSERT INTO `eh_community_geopoints` (`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) VALUES (@coge_id+4, '240111044331050389', '', '0', '0', '7zzzzzzzzzzz');
 INSERT INTO `eh_community_geopoints` (`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) VALUES (@coge_id+5, '240111044331050388', '', '0', '0', '7zzzzzzzzzzz');
-
--- 测试数据
-INSERT INTO `eh_community_geopoints` (`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) VALUES (@coge_id+6, @eh_communities_id+5, '', '121.642243', '31.224285', 's00000000000');
-INSERT INTO `eh_community_geopoints` (`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) VALUES (@coge_id+7, @eh_communities_id+4, '', '121.642243', '31.224285', 's00000000000');
--- 测试数据结束
 
 -- eh_organization_community_requests 数据
 DELETE FROM eh_organization_community_requests WHERE id = 1143623;
@@ -197,10 +184,6 @@ INSERT INTO `eh_namespace_resources` (`id`, `namespace_id`, `resource_type`, `re
 INSERT INTO `eh_namespace_resources` (`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) VALUES ('19930', '999971', 'COMMUNITY', @eh_communities_id+1, '2017-08-29 09:52:46');
 INSERT INTO `eh_namespace_resources` (`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) VALUES ('19931', '999971', 'COMMUNITY', @eh_communities_id+2, '2017-08-29 09:52:46');
 INSERT INTO `eh_namespace_resources` (`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) VALUES ('19932', '999971', 'COMMUNITY', @eh_communities_id+3, '2017-08-29 09:52:47');
--- 测试数据
-INSERT INTO `eh_namespace_resources` (`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) VALUES ('19933', '999971', 'COMMUNITY', @eh_communities_id+4, '2017-08-29 09:52:47');
-INSERT INTO `eh_namespace_resources` (`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) VALUES ('19934', '999971', 'COMMUNITY', @eh_communities_id+5, '2017-08-29 09:52:48');
--- 测试数据结束
 
 -- 增加蒙版配置项
 delete from eh_configurations where 'name' in ('mask.key','scenes.switchKey');
