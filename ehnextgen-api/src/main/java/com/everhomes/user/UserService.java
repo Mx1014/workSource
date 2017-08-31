@@ -82,7 +82,7 @@ public interface UserService {
 	List<UserInfo> listUserInfoByIdentifier(String identifier);
 	
 
-	List<SceneDTO> listUserRelatedScenes();
+	List<SceneDTO> listUserRelatedScenes(ListUserRelatedScenesCommand cmd);
 	void toFamilySceneDTO(Integer namespaceId, Long userId, List<SceneDTO> sceneList, List<FamilyDTO> familyDtoList);
 	SceneDTO toFamilySceneDTO(Integer namespaceId, Long userId, FamilyDTO familyDto);
 	SceneTokenDTO toSceneTokenDTO(Integer namespaceId, Long userId, FamilyDTO familyDto, SceneType sceneType);

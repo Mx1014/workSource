@@ -168,6 +168,8 @@ public class UserServiceImpl implements UserService {
 	//推荐场景转换启用参数
 	private final static Integer SCENE_SWITCH_ENABLE = 0;
 	private final static Integer SCENE_SWITCH_DISABLE = 1;
+	private final static Integer SCENE_SWITCH_DEFAULT_FLAG_ENABLE = 1;
+	private final static Integer SCENE_SWITCH_DEFAULT_FLAG_DISABLE = 0;
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
@@ -2673,7 +2675,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<SceneDTO> listUserRelatedScenes() {
+	public List<SceneDTO> listUserRelatedScenes(ListUserRelatedScenesCommand cmd) {
+		Integer defaultFlag = SCENE_SWITCH_DEFAULT_FLAG_DISABLE;
+		if(cmd != null){
+			defaultFlag = cmd.getDefaultFlag();
+		}
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long userId = UserContext.current().getUser().getId();
 
@@ -2695,7 +2701,7 @@ public class UserServiceImpl implements UserService {
 		/** 从配置项中查询是否开启 **/
 		Integer switchFlag = this.configurationProvider.getIntValue(namespaceId, "scenes.switchKey", SCENE_SWITCH_DISABLE);
 		LOGGER.debug("switchFlag is" + switchFlag);
-		if(switchFlag == SCENE_SWITCH_ENABLE){
+		if(defaultFlag == SCENE_SWITCH_DEFAULT_FLAG_ENABLE && switchFlag == SCENE_SWITCH_ENABLE){
 			/** 查询默认场景 **/
 			Community default_community_one = new Community();
 			if(commercial_sceneList.size() == 0){
