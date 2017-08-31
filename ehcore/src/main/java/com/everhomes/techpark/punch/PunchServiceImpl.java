@@ -6483,20 +6483,23 @@ public class PunchServiceImpl implements PunchService {
 		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
 		Long userId = UserContext.current().getUser().getId();
 		Date punchTime = new Date();
+		GetPunchDayStatusResponse response = new GetPunchDayStatusResponse();
 		if (null == cmd.getQueryTime()) {
 			cmd.setQueryTime(punchTime.getTime());
+			PunchLogDTO punchLog = getPunchType(userId,cmd.getEnterpriseId(),punchTime);
+			if(null!=punchLog){
+				punchLog.setExpiryTime(process24hourTimeToGMTTime(punchTime,punchLog.getExpiryTime()));
+				punchLog.setRuleTime(process24hourTimeToGMTTime(punchTime,punchLog.getRuleTime()));
+				response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
+			}
 		}
-		PunchLogDTO punchLog = getPunchType(userId,cmd.getEnterpriseId(),punchTime);
-		punchLog.setExpiryTime(process24hourTimeToGMTTime(punchTime,punchLog.getExpiryTime()));
-		punchLog.setRuleTime(process24hourTimeToGMTTime(punchTime,punchLog.getRuleTime()));
-		GetPunchDayStatusResponse response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
-
-		response.setIntervals(new ArrayList<>());
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
-		if (null == pr  )
+		response.setIntervals(new ArrayList<>());
+		if (null == pr  ) {
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
-					"公司没有设置打卡规则");
+						PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+						"公司没有设置打卡规则");
+		}
 		Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr, punchTime, userId);
         PunchDayLog pdl = punchProvider.findPunchDayLog(userId, cmd.getEnterpriseId(), new java.sql.Date(cmd.getQueryTime()));
 
