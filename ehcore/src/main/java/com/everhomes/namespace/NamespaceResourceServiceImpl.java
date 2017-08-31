@@ -120,7 +120,7 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
         }
         
 		//读取蒙版的配置项 默认打开
-		Integer maskFlag = this.configurationProvider.getIntValue(namespaceId, "mask.key", MASK_ENABLE);
+		Integer maskFlag = this.configurationProvider.getIntValue(namespaceId, "mask.key", MASK_DISABLE);
 		detailDto.setMaskFlag(maskFlag);
 
 		if(maskFlag == 0){
