@@ -259,7 +259,7 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
             //如果是同一个field下多个值，则全部加入到同一个field下
             if(owner.getCommunityId() != null) {
                 String[] communities = owner.getCommunityId().split(",");
-                if(null != communities && communities.length > 1) {
+                if(null != communities && communities.length > 0) {
                     b.array("communityId", communities);
                 }
             }
