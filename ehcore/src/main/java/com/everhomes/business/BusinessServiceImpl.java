@@ -1708,6 +1708,7 @@ public class BusinessServiceImpl implements BusinessService {
 		UserAddressDTO dto = new UserAddressDTO();
 		Long userId = cmd.getUserId();
 		List<UserServiceAddress> serviceAddresses = userActivityProvider.findUserRelateServiceAddresses(userId);
+		List<UserServiceAddressDTO> userServiceAddressDTOs = new ArrayList<>();
 		for (UserServiceAddress userServiceAddress: serviceAddresses) {
 			UserServiceAddressDTO userServiceAddressDTO = ConvertHelper.convert(userServiceAddress, UserServiceAddressDTO.class);
 			Address addr = this.addressProvider.findAddressById(userServiceAddress.getAddressId());
@@ -1735,8 +1736,9 @@ public class BusinessServiceImpl implements BusinessService {
 			}
 			userServiceAddressDTO.setUserName(userServiceAddress.getContactName());
 			userServiceAddressDTO.setCallPhone(userServiceAddress.getContactToken());
+			userServiceAddressDTOs.add(userServiceAddressDTO);
 		}
-
+		dto.setServiceAddresses(userServiceAddressDTOs);
 		List<FamilyAddressDTO> familyAddresses = listUserFamilyAddresses(userId);
 		dto.setFamilyAddresses(familyAddresses);
 
