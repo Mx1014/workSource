@@ -86,13 +86,11 @@ import java.util.stream.Collectors;
 /**
  * Created by ying.xiong on 2017/8/7.
  */
-@Component
 public class ZJGKOpenServiceImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ZJGKOpenServiceImpl.class);
     private CloseableHttpClient httpclient = null;
 
-    @Autowired
     private ExecutorService queueThreadPool = Executors.newFixedThreadPool(1);
 
     private static ThreadLocal<SimpleDateFormat> simpleDateSF = new ThreadLocal<SimpleDateFormat>(){
