@@ -2675,6 +2675,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<SceneDTO> listUserRelatedScenes() {
+		return listUserRelatedScenes(null);
+	}
+
+	@Override
 	public List<SceneDTO> listUserRelatedScenes(ListUserRelatedScenesCommand cmd) {
 		Integer defaultFlag = SCENE_SWITCH_DEFAULT_FLAG_DISABLE;
 		if(cmd != null){
