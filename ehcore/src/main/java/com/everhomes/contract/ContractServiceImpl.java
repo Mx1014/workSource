@@ -442,7 +442,6 @@ public class ContractServiceImpl implements ContractService {
 	public List<Object> findCustomerByContractNum(String contractNum) {
 		return contractProvider.findCustomerByContractNum(contractNum);
 	}
-
 	private void checkContractNumberUnique(Integer namespaceId, String contractNumber) {
 		Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, contractNumber);
 		if(contract != null) {
