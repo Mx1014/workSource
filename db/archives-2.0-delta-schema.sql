@@ -29,6 +29,18 @@ CREATE TABLE `eh_archives_dismiss_employees` (
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
+DROP TABLE IF EXISTS `eh_archives_organization_places`;
+CREATE TABLE `eh_archives_organization_places` (
+	`id` BIGINT NOT NULL COMMENT 'id of the record',
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
+	`organization_id` BIGINT NOT NULL COMMENT 'organizationId',
+
+	`detail_id` BIGINT NOT NULL COMMENT 'the id of member in eh_organization_member_details',
+	`update_time` DATETIME COMMENT 'the time of data creating',
+	`operator_uid` BIGINT COMMENT 'the id of the operator',
+	PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+
 DROP TABLE IF EXISTS `eh_general_form_groups`;
 CREATE TABLE `eh_general_form_groups` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -37,8 +49,8 @@ CREATE TABLE `eh_general_form_groups` (
 	`owner_id` BIGINT NOT NULL,
 	`owner_type` VARCHAR(64) NOT NULL,
 	`module_id` BIGINT COMMENT 'the module id',
-	`module_type` VARCHAR(64) COMMENT 'the module type',
-	`form_module` VARCHAR(64) COMMENT 'the form template name',
+	`module_type` VARCHAR(64) COMMENT 'the module type from temp',
+	`form_template_id`BIGINT COMMENT 'the id of form template',
 	`form_origin_id` BIGINT DEFAULT 0 COMMENT 'the id of the original form',
 	`form_version` BIGINT DEFAULT 0 COMMENT 'the current using version',
 	`template_type` VARCHAR(128) NOT NULL COMMENT 'the type of template text',
@@ -58,13 +70,11 @@ DROP TABLE IF EXISTS `eh_general_form_templates`;
 CREATE TABLE `eh_general_form_templates` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `organization_id` BIGINT NOT NULL DEFAULT 0,
-  `owner_id` BIGINT NOT NULL,
-  `owner_type` VARCHAR(64) NOT NULL,
-  `form_name` VARCHAR(64) NOT NULL,
 	`form_module` VARCHAR(64) NOT NULL COMMENT 'the form template name',
   `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the original form',
   `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current using version',
+	`form_name` VARCHAR(64) NOT NULL COMMENT 'the unique name of the form',
+	`form_display_name` VARCHAR(64) COMMENT 'the name of the form',
   `template_type` VARCHAR(128) NOT NULL COMMENT 'the type of template text',
   `template_text` TEXT COMMENT 'json 存放表单字段',
   `status` TINYINT NOT NULL COMMENT 'invalid, config, running',
@@ -98,7 +108,7 @@ ALTER TABLE eh_organization_member_details ADD COLUMN job_position VARCHAR(256) 
 ALTER TABLE eh_organization_member_details ADD COLUMN report_target VARCHAR(128) COMMENT '汇报对象';
 ALTER TABLE eh_organization_member_details ADD COLUMN contact_short_token VARCHAR(128) COMMENT '短号';
 ALTER TABLE eh_organization_member_details ADD COLUMN work_place BIGINT COMMENT '工作地点';
-ALTER TABLE eh_organization_member_details ADD COLUMN contract_party BIGINT COMMENT '合同主体';
+ALTER TABLE eh_organization_member_details ADD COLUMN contract_id BIGINT COMMENT '合同主体';
 ALTER TABLE eh_organization_member_details ADD COLUMN work_start_time DATE COMMENT '参加工作日期';
 ALTER TABLE eh_organization_member_details ADD COLUMN contract_start_time DATE COMMENT '合同开始日期';
 ALTER TABLE eh_organization_member_details ADD COLUMN contract_end_time DATE COMMENT '合同终止日期';
