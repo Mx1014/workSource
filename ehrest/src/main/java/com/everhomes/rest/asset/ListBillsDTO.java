@@ -34,6 +34,7 @@ public class ListBillsDTO {
     private String billGroupName;
     private String targetName;
     private Long targetId;
+    private String contractNum;
     private String targetType;
     private String buildingName;
     private String apartmentName;
@@ -53,6 +54,14 @@ public class ListBillsDTO {
 
     public String getBuildingName() {
         return buildingName;
+    }
+
+    public String getContractNum() {
+        return contractNum;
+    }
+
+    public void setContractNum(String contractNum) {
+        this.contractNum = contractNum;
     }
 
     public void setBuildingName(String buildingName) {

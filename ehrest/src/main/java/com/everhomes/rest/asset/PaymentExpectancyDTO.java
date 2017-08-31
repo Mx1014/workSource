@@ -9,6 +9,16 @@ import java.math.BigDecimal;
  * Created by Wentian Wang on 2017/8/22.
  */
 
+/**
+ *<ul>
+ * <li>propertyIdentifier:资产编号</li>
+ * <li>chargingItemName:收费项目名称</li>
+ * <li>dateStrBegin:开始日期</li>
+ * <li>dateStrEnd:计费结束日期</li>
+ * <li>amountReceivable:应收金额</li>
+ * <li>dueDateStr:付款日期</li>
+ *</ul>
+ */
 public class PaymentExpectancyDTO {
     private String propertyIdentifier;
     private String chargingItemName;

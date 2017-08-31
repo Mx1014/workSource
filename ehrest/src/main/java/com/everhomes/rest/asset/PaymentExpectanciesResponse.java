@@ -12,9 +12,15 @@ import com.everhomes.discover.ItemType;
  * Created by Wentian Wang on 2017/8/22.
  */
 
+/**
+ *<ul>
+ * <li>nextPageOffset:下一次offset</li>
+ * <li>list:明细列表，参考{@link com.everhomes.rest.asset.PaymentExpectancyDTO}</li>
+ *</ul>
+ */
 public class PaymentExpectanciesResponse {
     @ItemType(PaymentExpectancyDTO.class)
-    List<PaymentExpectancyDTO> list = new ArrayList<>();
+    List<PaymentExpectancyDTO>  list;
     private Integer nextPageOffset;
 
     public List<PaymentExpectancyDTO> getList() {

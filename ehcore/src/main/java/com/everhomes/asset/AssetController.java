@@ -868,5 +868,19 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
+    // this is for 导出租金模板       4
+    /**
+     * <p>导出租金模板</p>
+     * <b>URL: /asset/exportRentalExcelTemplate</b>
+     */
+    @RequestMapping("exportRentalExcelTemplate")
+    public HttpServletResponse exportRentalExcelTemplate(HttpServletResponse response) {
+        assetService.exportRentalExcelTemplate(response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
+
 
 }

@@ -4509,24 +4509,36 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public TargetDTO findTargetByNameAndAddress(String contractNum, String targetName, String buildingName, String apartmentName, Long communityId, String tel) {
-		//确定客户的优先度， 查到合同算查到人，楼栋门牌只是为了填写账单的地址用
-        List<AddressIdAndName> addressByPossibleName = addressService.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), communityId, buildingName, apartmentName);
-        List<Long> ids = new ArrayList<>();
-        for (int i = 0; i < addressByPossibleName.size(); i++){
-            ids.add(addressByPossibleName.get(i).getAddressId());
+	public TargetDTO findTargetByNameAndAddress(String contractNum, String targetName, String buildingName, String apartmentName, Long communityId, String tel,String ownerType) {
+        if(contractNum!=null) {
+            List<Object> typeIdNameAndTel = contractService.findCustomerByContractNum(contractNum,communityId,ownerType);
+            if(typeIdNameAndTel!=null && typeIdNameAndTel.size()>0){
+                TargetDTO dto = new TargetDTO();
+                dto.setTargetType((String)typeIdNameAndTel.get(0));
+                dto.setTargetId((Long)typeIdNameAndTel.get(1));
+                dto.setTargetName((String)typeIdNameAndTel.get(2));
+                dto.setUserIdentifier((String)typeIdNameAndTel.get(3));
+                return dto;
+            }else{
+                throw new RuntimeException("找不到该合同");
+            }
+        }else{
+            //确定客户的优先度， 查到合同算查到人，楼栋门牌只是为了填写账单的地址用
+            List<AddressIdAndName> addressByPossibleName = addressService.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), communityId, buildingName, apartmentName);
+            List<Long> ids = new ArrayList<>();
+            for (int i = 0; i < addressByPossibleName.size(); i++){
+                ids.add(addressByPossibleName.get(i).getAddressId());
+            }
+            //想在eh_user中找
+            List<TargetDTO> users = userProvider.findUesrIdByNameAndAddressId(targetName,ids,tel);
+            //再在eh_organization中找
+            List<TargetDTO> organizations = organizationProvider.findOrganizationIdByNameAndAddressId(targetName,ids);
+            if(users.size() == 1 && organizations.size() == 0) {
+                return users.get(0);
+            }else if(organizations.size() == 1 && users.size() == 0) {
+                return organizations.get(0);
+            }
         }
-        //想在eh_user中找
-        List<TargetDTO> users = userProvider.findUesrIdByNameAndAddressId(targetName,ids,tel);
-		//再在eh_organization中找
-        List<TargetDTO> organizations = organizationProvider.findOrganizationIdByNameAndAddressId(targetName,ids);
-        if(users.size() == 1 && organizations.size() == 0) {
-            return users.get(0);
-        }else if(organizations.size() == 1 && users.size() == 0) {
-            return organizations.get(0);
-        }
-		List<Object> customerTypeAndId = contractService.findCustomerByContractNum(contractNum);
-
         return null;
 	}
 

@@ -358,7 +358,7 @@ public class AssetServiceImpl implements AssetService {
             throw new RuntimeException("保存账单不在一个园区");
         }
 //        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
-        return assetProvider.creatPropertyBill(cmd.getAddressId(),cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getBuildingName(),cmd.getApartmentName());
+        return assetProvider.creatPropertyBill(cmd.getAddressId(),cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getContractNum());
     }
 
     @Override
@@ -867,6 +867,27 @@ public class AssetServiceImpl implements AssetService {
         }
         response.setList(dtos);
         return response;
+    }
+
+    @Override
+    public void exportRentalExcelTemplate(HttpServletResponse response) {
+        String[] propertyNames = {"dateStr","buildingName","apartmentName","targetType","targetName","contractNum","noticeTel","amountReceivable","amountReceived","amountOwed","exemption","exemptionRemark","supplement","supplementRemark"};
+//        Field[] declaredFields = ListBillsDTO.class.getDeclaredFields();
+//        String[] propertyNames = new String[declaredFields.length];
+        String[] titleName ={"账期","楼栋","门牌","客户类型","客户名称","合同编号","催缴电话","应收(元)","已收(元)","欠收(元)","减免金额（元）","减免备注","增收金额（元）","增收备注"};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20,20};
+//        for(int i = 0; i < declaredFields.length; i++){
+//            propertyNames[i] = declaredFields[i].getName();
+//        }
+        List<RentalExcelTemplate> list = new ArrayList<>();
+        RentalExcelTemplate data = new RentalExcelTemplate();
+        data.setDateStr("2018-02");
+        data.setTargetType("个人客户/企业客户");
+        data.setTargetName("李四/xx公司");
+        list.add(data);
+        ExcelUtils excel = new ExcelUtils(response,"租金账单模板","sheet1");
+        excel.writeExcel(propertyNames,titleName,titleSize,list);
+
     }
 
     private void coverVariables(List<VariableIdAndValue> var1, List<VariableIdAndValue> var2) {
