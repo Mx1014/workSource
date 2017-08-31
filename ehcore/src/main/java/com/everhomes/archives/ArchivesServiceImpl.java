@@ -498,7 +498,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  1.如果无 formOriginId 时则使用的是模板模板，此时需要为该公司新增一份表单
         //  2.如果有 formOriginId 时则说明已经拥有了表单，此时只需要做修改
 
-        if(cmd.getFormOriginId() == null){
+        if(cmd.getFormOriginId() == 0L){
             //  新增时
             CreateApprovalFormCommand createCommand = new CreateApprovalFormCommand();
             createCommand.setOwnerId(cmd.getOrganizationId());
