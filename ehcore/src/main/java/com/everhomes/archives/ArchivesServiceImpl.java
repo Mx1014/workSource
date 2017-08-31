@@ -1,12 +1,12 @@
 package com.everhomes.archives;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.general_approval.CreateApprovalFormCommand;
-import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
@@ -38,6 +38,8 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 public class ArchivesServiceImpl implements ArchivesService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchivesServiceImpl.class);
+
+    private static final String ARCHIVES = "archives_information";
 
     @Autowired
     ArchivesProvider archivesProvider;
@@ -502,7 +504,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             createCommand.setOwnerId(cmd.getOrganizationId());
             createCommand.setOwnerType("organization");
             createCommand.setOrganizationId(cmd.getOrganizationId());
-            createCommand.setFormName("Archives");
+            createCommand.setFormName(ARCHIVES);
             createCommand.setFormFields(cmd.getFormFields());
             createCommand.setFormGroups(cmd.getFormGroups());
             generalFormService.createGeneralForm(createCommand);
@@ -532,13 +534,22 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public GetArchivesFieldResponse getArchivesForm(GetArchivesFormCommand cmd) {
 
+        GetArchivesFieldResponse response = new GetArchivesFieldResponse();
         //  此处有两种情况，一是调用模板表单(此时 formOriginId 为0)
         //  二是已经建立公司对应的表单(此时已有 formOriginId )
-        if(cmd.getFormOriginId() == 0){
-
+        if(cmd.getFormOriginId() == 0L){
+            GeneralFormTemplateCommand formTemplateCommand = new GeneralFormTemplateCommand();
+            formTemplateCommand.setFormModule(GeneralFormModuleType.ARCHIVES.getCode());
+            formTemplateCommand.setFormName(ARCHIVES);
+            GeneralFormDTO form = generalFormService.getGeneralFormTemplate(formTemplateCommand);
+            response.setForm(form);
+        }else{
+            GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
+            formCommand.setFormOriginId(cmd.getFormOriginId());
+            GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
+            response.setForm(form);
         }
-
-        return null;
+        return response;
     }
 
     @Override

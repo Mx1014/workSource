@@ -17,7 +17,6 @@ import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -472,17 +471,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         return dto;
     }
 
-/*	private void createGeneralFormGroup(GeneralForm form, GeneralFormGroupDTO dto, Long ownerId, String ownerType, Long organizationId){
-        CreateGeneralFormGroupCommand createCommand = new CreateGeneralFormGroupCommand();
-        createCommand.setFormOriginId(form.getFormOriginId());
-        createCommand.setFormVersion(form.getFormVersion());
-        createCommand.setGroupName(dto.getFieldGroupName());
-        createCommand.setOwnerId(ownerId);
-        createCommand.setOwnerType(ownerType);
-        createCommand.setOrganizationId(organizationId);
-        createGeneralFormGroup(createCommand);
-    }*/
-
 	@Override
 	public GeneralFormDTO updateGeneralForm(UpdateApprovalFormCommand cmd) {
 		return this.dbProvider.execute((TransactionStatus status) -> {
@@ -515,7 +503,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 			}
 
 			//  对字段组进行修改
-            GeneralFormGroup group = generalFormProvider.findGeneralFormGroupByNameAndOriginId(form.getFormOriginId(),form.getOrganizationId());
+            GeneralFormGroup group = generalFormProvider.findGeneralFormGroupByFormOriginId(form.getFormOriginId(),form.getOrganizationId());
 			if(group == null){
 			    //  若为空说明之前的表单建立并未建字段组
                 createGeneralFormGroup(form,cmd.getFormGroups());
@@ -523,12 +511,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 			    //  不为空则说明之前的表单建立过字段组
                 updateGeneralFormGroupFormOriginId(group,form,cmd.getFormGroups());
             }
-//  TODO:字段组的编辑
 			return processGeneralFormDTO(form,group);
 		});
 	}
-
-
 
 	/**
 	 * 取状态不为失效的form
@@ -582,7 +567,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 				.getFormOriginId());
 
         //  added by R 20170830, 获取字段组
-        GeneralFormGroup group = generalFormProvider.findGeneralFormGroupByNameAndOriginId(form.getFormOriginId(),form.getOrganizationId());
+        GeneralFormGroup group = generalFormProvider.findGeneralFormGroupByFormOriginId(form.getFormOriginId(),form.getOrganizationId());
 		GeneralFormDTO result = processGeneralFormDTO(form,group);
 		return result;
 	}
@@ -610,50 +595,18 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         generalFormProvider.updateGeneralFormGroup(group);
     }
 
-/*	@Override
-	private List<GeneralFormGroupDTO> listGeneralFormGroups(ListGeneralFormGroupsCommand cmd){
-		List<GeneralFormGroupDTO> results = new ArrayList<>();
-		List<GeneralFormGroup> groups = generalFormProvider.listGeneralFormGroups(UserContext.getCurrentNamespaceId(),cmd.getOrganizationId(),cmd.getFormOriginId());
-		if(groups !=null){
-			groups.forEach(r ->{
-				GeneralFormGroupDTO dto = new GeneralFormGroupDTO();
-				dto.setFieldGroupId(r.getId());
-				dto.setFieldGroupName(r.getGroupName());
-				results.add(dto);
-			});
-		}
-		return results;
-	}*/
-
-	/*	public GeneralFormDTO getGeneralForm(GeneralFormIdCommand cmd) {
-		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
-				.getFormOriginId());
-		GeneralFormDTO result = processGeneralFormDTO(form);
-
-        //  获取字段组
-		if(result !=null){
-			ListGeneralFormGroupsCommand groupsCommand = new ListGeneralFormGroupsCommand();
-			groupsCommand.setFormOriginId(cmd.getFormOriginId());
-			groupsCommand.setOrganizationId(result.getOrganizationId());
-			List<GeneralFormGroupDTO> groups = listGeneralFormGroups(groupsCommand);
-			result. setFormGroups(groups);
-			return result;
-		}
-		return null;
-	}*/
 	@Override
     public GeneralFormDTO getGeneralFormTemplate(GeneralFormTemplateCommand cmd){
-        GeneralFormTemplate form = generalFormProvider.getActiveFormTemplateByName(cmd.getFormModule(),cmd.getFormName());
-        GeneralFormDTO result = convertToGeneralFormDTO(form);
-
-        //  获取模板对应的字段组
+        //  获取模板字段
+        GeneralFormTemplate formTemplate = generalFormProvider.findActiveFormTemplateByName(cmd.getFormModule(),cmd.getFormName());
+        //  获取模板字段组
+        GeneralFormGroup group = generalFormProvider.findGeneralFormGroupTemplateById(formTemplate.getId());
+        //  输出字段
+        if(formTemplate!=null){
+            GeneralForm form = ConvertHelper.convert(formTemplate,GeneralForm.class);
+            GeneralFormDTO result = processGeneralFormDTO(form, group);
+            return result;
+        }
         return null;
-    }
-
-    private GeneralFormDTO convertToGeneralFormDTO(GeneralFormTemplate form) {
-        GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
-        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-        dto.setFormFields(fieldDTOs);
-        return dto;
     }
 }

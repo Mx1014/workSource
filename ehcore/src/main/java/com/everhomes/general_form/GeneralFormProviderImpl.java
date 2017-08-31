@@ -186,16 +186,6 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-    public void deleteGeneralFormGroupsNotInIds(Long formOriginId, Long organizationId, List<Long> groupIds){
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        context.delete(Tables.EH_GENERAL_FORM_GROUPS)
-                .where(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId))
-                .and(Tables.EH_GENERAL_FORM_GROUPS.ORGANIZATION_ID.eq(organizationId))
-                .and(Tables.EH_GENERAL_FORM_GROUPS.ID.notIn(groupIds));
-    }
-
-
-	@Override
 	public void deleteGeneralFormGroupsByFormOriginId(Long formOriginId){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		context.delete(Tables.EH_GENERAL_FORM_GROUPS)
@@ -211,7 +201,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
     @Override
-    public GeneralFormGroup findGeneralFormGroupByNameAndOriginId(Long formOriginId, Long organizationId){
+    public GeneralFormGroup findGeneralFormGroupByFormOriginId(Long formOriginId, Long organizationId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhGeneralFormGroupsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_GROUPS);
         query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId));
@@ -230,29 +220,21 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public List<GeneralFormGroup> listGeneralFormGroups(Integer namespaceId, Long organizationId, Long formOriginId){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectQuery<EhGeneralFormGroupsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_GROUPS);
-		query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.NAMESPACE_ID.eq(namespaceId));
-		query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.ORGANIZATION_ID.eq(organizationId));
-		query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId));
-		List<GeneralFormGroup> results = new ArrayList<>();
-		query.fetch().map(r -> {
-			results.add(ConvertHelper.convert(r,GeneralFormGroup.class));
-			return null;
-		});
-		if (null != results && 0 != results.size()) {
-			return results;
-		}
-		return null;
-	}
-
-	@Override
-	public GeneralFormTemplate getActiveFormTemplateByName(String formModule, String formName){
+	public GeneralFormTemplate findActiveFormTemplateByName(String formModule, String formName){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhGeneralFormTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_TEMPLATES);
 		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.FORM_MODULE.eq(formModule));
 		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.FORM_NAME.eq(formName));
+		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
 		return query.fetchOneInto(GeneralFormTemplate.class);
 	}
+
+	@Override
+    public GeneralFormGroup findGeneralFormGroupTemplateById(Long formTemplateId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralFormGroupsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_GROUPS);
+        query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.FORM_TEMPLATE_ID.eq(formTemplateId));
+        return query.fetchOneInto(GeneralFormGroup.class);
+    }
+
 }

@@ -28,18 +28,16 @@ public interface GeneralFormProvider {
     //	added by R 20170828
     GeneralFormGroup createGeneralFormGroup(GeneralFormGroup group);
 
-    void deleteGeneralFormGroupsNotInIds(Long formOriginId, Long organizationId, List<Long> groupIds);
-
     void deleteGeneralFormGroupsByFormOriginId(Long formOriginId);
 
     GeneralFormGroup findGeneralFormGroupById(Long id);
 
-    GeneralFormGroup findGeneralFormGroupByNameAndOriginId(Long formOriginId, Long organizationId);
+    GeneralFormGroup findGeneralFormGroupByFormOriginId(Long formOriginId, Long organizationId);
 
     void updateGeneralFormGroup(GeneralFormGroup group);
 
-    List<GeneralFormGroup> listGeneralFormGroups(Integer namespaceId, Long organizationId, Long formOriginId);
+    GeneralFormTemplate findActiveFormTemplateByName(String formModule, String formName);
 
-    GeneralFormTemplate getActiveFormTemplateByName(String formModule, String formName);
+    GeneralFormGroup findGeneralFormGroupTemplateById(Long templateId);
 
 }

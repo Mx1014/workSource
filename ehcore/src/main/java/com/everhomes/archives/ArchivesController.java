@@ -269,10 +269,10 @@ public class ArchivesController extends ControllerBase{
      * <p>11-2.获取档案字段</p>
      */
     @RequestMapping("getArchivesForm")
-    @RestReturn(value = String.class)
+    @RestReturn(value = GetArchivesFieldResponse.class)
     public RestResponse getArchivesForm(GetArchivesFormCommand cmd){
         GetArchivesFieldResponse res = archivesService.getArchivesForm(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

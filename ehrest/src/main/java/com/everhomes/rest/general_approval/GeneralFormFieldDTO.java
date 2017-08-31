@@ -24,7 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>dataSourceType: 数据源类型 {@link GeneralFormDataSourceType}</li>
  * <li>renderType: 渲染类型，{@link GeneralFormRenderType}</li>
  * <li>fieldValue: 字段值（查询详情时才会有值）</li>
- * <li>fieldGroupId: 字段组 id</li>
+ * <li>fieldGroupName: 字段组名称</li>
  * </ul>
  * @author janson
  *
@@ -42,11 +42,10 @@ public class GeneralFormFieldDTO {
 	private String dataSourceType;
 	private String validatorType;
 	private String fieldExtra;
+	private String fieldValue;
 
 	//	added by R 20170825
 	private String fieldGroupName;
-
-	private String fieldValue;
 
 	public String getFieldName() {
 		return fieldName;
