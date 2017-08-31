@@ -183,14 +183,17 @@ INSERT INTO `eh_namespace_resources` (`id`, `namespace_id`, `resource_type`, `re
 -- 测试数据结束
 
 -- 增加蒙版配置项
-SET @con_id = (SELECT MAX(id) from eh_configurations);
 delete from eh_configurations where 'value' in ('mask.key','scenes.switchKey');
+SET @con_id = (SELECT MAX(id) from eh_configurations);
 INSERT INTO `eh_configurations` VALUES (@con_id + 1, 'mask.key', 0, '默认启用蒙版', 999971, '');
 INSERT INTO `eh_configurations` VALUES (@con_id + 2, 'scenes.switchKey', 0, '默认启用蒙版', 999971, '');
 -- 增加蒙版表数据
 delete from eh_namespace_masks;
 INSERT INTO `eh_namespace_masks` VALUES ('1', '999971', '人才公寓', '3', '快速切换至人才市场', 'park_tourist');
 INSERT INTO `eh_namespace_masks` VALUES ('2', '999971', '园区服务', '3', '快速切换至园区主页', 'default');
+
+-- 删除原有的门牌
+DELETE from eh_addresses WHERE namespace_id = 999971 AND community_id = 240111044331050388;
 -- By janson
 -- 更改默认错误提示
 update eh_locale_strings set `text`='应用开小差了' where `text` = '呃，好像哪里出错了';
