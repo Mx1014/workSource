@@ -209,7 +209,8 @@ update eh_express_companies SET order_url = 'http://60.205.8.187:8001/api/gatewa
 update eh_apps SET app_key = '24e4f946-a195-4165-b690-8498eb10a24b',secret_key = 'tz0itFqwTGsQ8tT9QYC06i03T8SEBrof8p3+U2C4lXdbCl/FO6gfQ40y9hdJ86cfGj0AwUKpi4btFcq0uuoOvQ==' WHERE `NAME` = 'guomao' AND description='guomao app key';
 UPDATE eh_app_namespace_mappings SET app_key = '24e4f946-a195-4165-b690-8498eb10a24b' WHERE namespace_id = 999968;
 
--- todo 更新国贸邮政的参数
+--  更新国贸邮政的参数
+update eh_express_companies SET order_url = 'http://202.85.222.43:6677/', app_key = 'fa6dc8e050ef8de738cd1010f256a157', app_secret = 'FC480127D90D26DE382506EE5D409F46' WHERE id = 3;
 -- end by dengs
 
 -- 删除奇怪的数据  add by xq.tian  2017/08/31
