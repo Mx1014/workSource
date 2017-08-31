@@ -28,10 +28,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
-import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
-import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
-import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
-import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
+import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.scene.SceneService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -1292,4 +1289,46 @@ public class UserController extends ControllerBase {
 		resp.setErrorDescription("OK");
 		return resp;
 	}
+
+	/**
+	 * <b>URL: /user/VerificationCodeForBindPhoneCommand</b>
+	 * <p>搜索用户</p>
+	 */
+	@RequestMapping("VerificationCodeForBindPhoneCommand")
+	@RestReturn(value = String.class)
+	public RestResponse verificationCodeForBindPhone(@Valid VerificationCodeForBindPhoneCommand cmd) {
+		userService.verificationCodeForBindPhone(cmd);
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+
+	/**
+	 * <b>URL: /user/bindPhone</b>
+	 * <p>验证并登录</p>
+	 * @return {@link LogonCommandResponse}
+	 */
+	@RequestMapping("bindPhone")
+	@RestReturn(String.class)
+	public RestResponse bindPhone(@Valid BindPhoneCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+		UserLogin login = this.userService.bindPhone(cmd);
+		if(login != null){
+			LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+			String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
+			setCookieInResponse("token", tokenString, request, response);
+		}
+
+
+//		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
+//		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
+//		cmdResponse.setContentServer(contentServerService.getContentServer());
+
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
 }

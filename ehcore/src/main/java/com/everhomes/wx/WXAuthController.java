@@ -20,8 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserLogin;
+import com.everhomes.user.*;
 import org.apache.http.Consts;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
@@ -63,8 +62,6 @@ import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.NamespaceUserType;
 import com.everhomes.rest.user.UserGender;
-import com.everhomes.user.User;
-import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SimpleConvertHelper;
@@ -234,6 +231,16 @@ public class WXAuthController {// extends ControllerBase
             if(!userService.isValid(loginToken) || !checkUserNamespaceId(namespaceId)) {
                 // 如果是微信授权回调请求，则通过该请求来获取到用户信息并登录
                 processUserInfo(namespaceId, request, response);
+            }
+
+            //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
+            loginToken = userService.getLoginToken(request);
+            UserIdentifier identifier = userService.getUserIdentifier(loginToken.getUserId());
+            if( identifier == null || identifier.getIdentifierToken() == null){
+                String homeUrl = configurationProvider.getValue(namespaceId, "home.url", "");
+                String bindPhoneUrl = configurationProvider.getValue(WeChatConstant.WX_BIND_PHONE_URL, "");
+                LOGGER.info("checkUserIdentifier fail redirect to bind phone Url, url={}", bindPhoneUrl);
+                redirectByWx(response, homeUrl + bindPhoneUrl);
             }
 
             String sourceUrl = params.get(KEY_SOURCE_URL);
@@ -417,7 +424,7 @@ public class WXAuthController {// extends ControllerBase
         
         userService.signupByThirdparkUser(wxUser, request);
         userService.logonBythirdPartUser(wxUser.getNamespaceId(), wxUser.getNamespaceUserType(), wxUser.getNamespaceUserToken(), request, response);
-        
+
         long endTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(userinfo calculate), elspse={}, endTime={}", (endTime - startTime), endTime);

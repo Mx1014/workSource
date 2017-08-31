@@ -15,5 +15,6 @@ public interface WeChatConstant {
 
     public static String WX_OFFICAL_ACCOUNT_APPID = "wx.offical.account.appid";
     public static String WX_OFFICAL_ACCOUNT_SECRET = "wx.offical.account.secret";
+    String WX_BIND_PHONE_URL = "wx.bind.phone.url";
 
 }

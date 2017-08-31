@@ -226,4 +226,10 @@ public interface UserService {
     ListAuthFormsResponse listAuthForms();
 
 	GetFamilyButtonStatusResponse getFamilyButtonStatus();
+
+    UserIdentifier getUserIdentifier(Long userId);
+
+    void verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
+
+    UserLogin bindPhone(BindPhoneCommand cmd);
 }

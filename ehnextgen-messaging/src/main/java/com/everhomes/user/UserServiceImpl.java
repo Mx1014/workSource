@@ -4389,4 +4389,102 @@ public class UserServiceImpl implements UserService {
 		}
 		return response;
 	}
+
+	@Override
+	public UserIdentifier getUserIdentifier(Long userId) {
+		if(userId == null){
+			return null;
+		}
+		return userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+	}
+
+	@Override
+	public void verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd){
+		verifySmsTimes("verificationCodeForWechat", cmd.getPhone(), "");
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		//查看该手机是否已经注册
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
+
+		//查看该用户是否已经发送过验证码
+		if(userIdentifier == null){
+			userIdentifier = this.userProvider.findIdentifierByOwnerAndTypeAndClaimStatus(user.getId(), IdentifierType.MOBILE.getCode(), IdentifierClaimStatus.VERIFYING.getCode());
+		}
+
+		String verificationCode = RandomGenerator.getRandomDigitalString(6);
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
+
+		//手机没注册并且用户没发送过验证码的，新建一条验证状态的userIdentifier
+		if(userIdentifier == null){
+			userIdentifier = new UserIdentifier();
+			userIdentifier.setOwnerUid(user.getId());
+			userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+			userIdentifier.setIdentifierToken(cmd.getPhone());
+			userIdentifier.setNamespaceId(namespaceId);
+
+			userIdentifier.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
+			userIdentifier.setVerificationCode(verificationCode);
+			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			userIdentifier.setRegionCode(cmd.getRegionCode());
+			userProvider.createIdentifier(userIdentifier);
+		}else{
+			//手机注册过的或者发过验证码的，更新验证码
+			userIdentifier.setVerificationCode(verificationCode);
+			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			userProvider.updateIdentifier(userIdentifier);
+		}
+		smsProvider.sendSms(namespaceId, cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.VERIFICATION_CODE, user.getLocale(), variables);
+	}
+
+	@Override
+	public UserLogin bindPhone(BindPhoneCommand cmd){
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		//查看该手机是否已经注册
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
+
+		//如果手机已经注册过，则校验验证码，更新微信信息(昵称、头像、性别)到该手机用户
+		if(userIdentifier != null && userIdentifier.getVerificationCode().equals(cmd.getVerificationCode())){
+			User existUser = userProvider.findUserById(userIdentifier.getOwnerUid());
+			existUser.setNickName(user.getNickName());
+			existUser.setAvatar(user.getAvatar());
+			existUser.setGender(user.getGender());
+			user.setStatus(UserStatus.INACTIVE.getCode());
+
+			userProvider.updateUser(user);
+			userProvider.updateUser(existUser);
+
+			UserLogin login = createLogin(namespaceId, existUser, null, null);
+			login.setStatus(UserLoginStatus.LOGGED_IN);
+
+			return login;
+		}
+
+		//校验新验证码，更新状态正式启用绑定该手机号码
+		userIdentifier = this.userProvider.findIdentifierByOwnerAndTypeAndClaimStatus(user.getId(), IdentifierType.MOBILE.getCode(), IdentifierClaimStatus.VERIFYING.getCode());
+		if(userIdentifier != null && userIdentifier.getVerificationCode().equals(cmd.getVerificationCode())) {
+			userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+			user = userProvider.findUserById(user.getId());
+			String salt=EncryptionUtils.createRandomSalt();
+			user.setSalt(salt);
+			try {
+				String randomCode = RandomGenerator.getRandomDigitalString(6);
+				user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s",randomCode,salt)));
+			} catch (Exception e) {
+				LOGGER.error("encode password failed", e);
+				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+
+			}
+
+			userProvider.updateUser(user);
+			userProvider.updateIdentifier(userIdentifier);
+			return null;
+		}
+
+		return null;
+	}
 }
