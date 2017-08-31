@@ -701,4 +701,18 @@ public class AclinkController extends ControllerBase {
     public String aliTest2(HttpServletRequest request) {
         return doorAccessService.aliTest2(request);
     }
+    
+    /**
+     * 
+     * <b>URL: /aclink/v</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("doorTest3")
+    @RequireAuthentication(false)
+    public Object doorTest3(HttpServletRequest request) {
+        Map<String,Long> m = new HashMap<String,Long>();
+        m.put("result", 0l);
+        return m;
+    }
 }

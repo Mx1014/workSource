@@ -140,4 +140,6 @@ public interface YellowPageProvider {
 	void createServiceAllianceSkipRule(ServiceAllianceSkipRule serviceAllianceSkipRule);
 
 	void deleteServiceAllianceSkipRule(Long id);
+
+	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId, Integer namespaceId);
 }

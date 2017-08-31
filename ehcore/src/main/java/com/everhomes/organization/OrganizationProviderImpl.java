@@ -3177,8 +3177,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         List<Organization> result = new ArrayList<Organization>();
         SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 
-        query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.ENTERPRISE.getCode())
-                .or(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.PM.getCode())));
+        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 
         if (namespaceId != null) {
@@ -5200,6 +5199,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 					list.add(ConvertHelper.convert(r,EhOrganizationMembers.class));
 					return null;
 				});
+		return list;
+	}
+
+	@Override
+	public List listUserOrganizationByUserId(Long userId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<UserOrganizations> list = new ArrayList<>();
+		context.select().from(Tables.EH_USER_ORGANIZATIONS)
+				.where(Tables.EH_USER_ORGANIZATIONS.USER_ID.eq(userId).and(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.ACTIVE.getCode())))
+				.fetch().map(r->{
+			list.add(ConvertHelper.convert(r,UserOrganizations.class));
+			return null;
+		});
 		return list;
 	}
 }

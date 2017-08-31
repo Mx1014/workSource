@@ -459,4 +459,6 @@ public interface OrganizationProvider {
 	List listOrganizationMemberByToken(String token);
 
 	List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId);
+
+	List<UserOrganizations> listUserOrganizationByUserId(Long userId);
 }

@@ -316,6 +316,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				stepDTO.setFlowCaseId(flowCase.getId());
 				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
 				stepDTO.setAutoStepType(FlowStepType.END_STEP.getCode());
+                FlowSubject subject = ctx.getCurrentEvent().getSubject();
+                if (subject != null) {
+                    stepDTO.setSubjectId(subject.getId());
+                }
 				flowService.processAutoStep(stepDTO);
 				ctx.setContinueStep(false);
 

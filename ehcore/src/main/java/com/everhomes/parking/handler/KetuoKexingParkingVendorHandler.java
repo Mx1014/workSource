@@ -171,8 +171,12 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			String cardType = CAR_TYPE;
 			Integer freeMoney = 0;
 			if(null != cardInfo) {
-				cardType = cardInfo.getCarType();
-				freeMoney = cardInfo.getFreeMoney();
+				long expireTime = strToLong(cardInfo.getValidTo());
+				ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
+				if (!checkExpireTime(parkingLot, expireTime)) {
+					cardType = cardInfo.getCarType();
+					freeMoney = cardInfo.getFreeMoney();
+				}
 			}
 			for(KetuoCardRate rate: getCardRule(cardType)) {
 				if(rate.getRuleId().equals(order.getRateToken())) {
@@ -214,7 +218,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 					"Rate not found.");
 		}
 
-		Integer payMoney = order.getPrice().intValue() * 100 - Integer.parseInt(ketuoCardRate.getRuleMoney())
+		Integer payMoney = (order.getPrice().multiply(new BigDecimal(100))).intValue() - Integer.parseInt(ketuoCardRate.getRuleMoney())
 				* (order.getMonthCount().intValue() - 1);
 
 		if(addMonthCard(order.getPlateNumber(), payMoney)) {
@@ -225,7 +229,8 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			if(count > 1) {
 				ParkingRechargeOrder tempOrder = ConvertHelper.convert(order, ParkingRechargeOrder.class);
 				tempOrder.setMonthCount(new BigDecimal(count -1) );
-				tempOrder.setPrice(new BigDecimal((tempOrder.getPrice().intValue() * 100 - payMoney) / 100));
+				tempOrder.setPrice(new BigDecimal(((tempOrder.getPrice().multiply(new BigDecimal(100))).intValue() - payMoney))
+						.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 				if(rechargeMonthlyCard(order, tempOrder)) {
 					updateFlowStatus(order);
 					return true;
@@ -279,7 +284,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		param.put("ruleType", RULE_TYPE);
 		param.put("ruleAmount", String.valueOf(tempOrder.getMonthCount().intValue()));
 		// 支付金额（分）
-		param.put("payMoney", tempOrder.getPrice().intValue() * 100);
+		param.put("payMoney", (tempOrder.getPrice().multiply(new BigDecimal(100))).intValue());
 		//续费开始时间 yyyy-MM-dd HH:mm:ss 每月第一天的 0点0分0秒
 		param.put("startTime", validStart);
 		//续费结束时间 yyyy-MM-dd HH:mm:ss 每月最后一天的23点59分59秒

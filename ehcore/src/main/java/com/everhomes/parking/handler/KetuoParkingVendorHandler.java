@@ -25,7 +25,7 @@ import com.everhomes.rest.organization.VendorType;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
- * 科兴 正中会 停车对接
+ * 停车对接
  */
 @Component
 public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler implements ParkingVendorHandler {
@@ -242,7 +242,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 
 		JSONObject param = new JSONObject();
 		param.put("orderNo", order.getOrderToken());
-		param.put("amount", order.getPrice().intValue() * 100);
+		param.put("amount", (order.getPrice().multiply(new BigDecimal(100))).intValue());
 	    param.put("discount", 0);
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?4:5);
 		String json = post(param, PAY_TEMP_FEE);
@@ -278,7 +278,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		param.put("ruleType", RULE_TYPE);
 		param.put("ruleAmount", String.valueOf(order.getMonthCount().intValue()));
 		// 支付金额（分）
-		param.put("payMoney", order.getPrice().intValue() * 100);
+		param.put("payMoney", (order.getPrice().multiply(new BigDecimal(100))).intValue());
 		//续费开始时间 yyyy-MM-dd HH:mm:ss 每月第一天的 0点0分0秒
 		param.put("startTime", validStart);
 		//续费结束时间 yyyy-MM-dd HH:mm:ss 每月最后一天的23点59分59秒
@@ -339,8 +339,13 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		KetuoCard cardInfo = getCard(plateNumber);
 		KetuoCardRate ketuoCardRate = null;
 		String cardType = CAR_TYPE;
+
 		if(null != cardInfo) {
-			cardType = cardInfo.getCarType();
+			long expireTime = strToLong(cardInfo.getValidTo());
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
+			if (!checkExpireTime(parkingLot, expireTime)) {
+				cardType = cardInfo.getCarType();
+			}
 		}
 		for(KetuoCardRate rate: getCardRule(cardType)) {
 			if(rate.getRuleId().equals(order.getRateToken())) {

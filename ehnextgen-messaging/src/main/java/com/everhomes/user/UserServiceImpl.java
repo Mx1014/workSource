@@ -168,6 +168,8 @@ public class UserServiceImpl implements UserService {
 	//推荐场景转换启用参数
 	private final static Integer SCENE_SWITCH_ENABLE = 0;
 	private final static Integer SCENE_SWITCH_DISABLE = 1;
+	private final static Integer SCENE_SWITCH_DEFAULT_FLAG_ENABLE = 1;
+	private final static Integer SCENE_SWITCH_DEFAULT_FLAG_DISABLE = 0;
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
@@ -681,7 +683,14 @@ public class UserServiceImpl implements UserService {
 
 		String verificationCode = cmd.getVerificationCode();
 		String deviceIdentifier = cmd.getDeviceIdentifier();
-		int namespaceId = cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+//		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, signupToken.getIdentifierToken());
+//
+//		if(null != userIdentifier){
+//			LOGGER.error("The identify token has been registered, signupToken = {}, cmd = {}", signupToken, cmd);
+//			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFY_TOKEN_REGISTERED, "The identify token has been registered");
+//		}
 
 		UserIdentifier identifier = this.findIdentifierByToken(namespaceId, signupToken);
 		if(identifier == null) {
@@ -729,7 +738,11 @@ public class UserServiceImpl implements UserService {
 
 				UserLogin login = createLogin(namespaceId, user, deviceIdentifier, cmd.getPusherIdentify());
 				login.setStatus(UserLoginStatus.LOGGED_IN);
-
+				UserIdentifier uIdentifier = userProvider.findClaimedIdentifierByTokenAndNotUserId(namespaceId, identifier.getIdentifierToken(), identifier.getOwnerUid());
+//				if(null != uIdentifier){
+//					LOGGER.error("The identify token has been registered, signupToken = {}, cmd = {}", signupToken, cmd);
+//					throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFY_TOKEN_REGISTERED, "The identify token has been registered");
+//				}
 				return login;
 			});
 
@@ -2674,62 +2687,75 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<SceneDTO> listUserRelatedScenes() {
+		return listUserRelatedScenes(null);
+	}
+
+	@Override
+	public List<SceneDTO> listUserRelatedScenes(ListUserRelatedScenesCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long userId = UserContext.current().getUser().getId();
 
 		List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
-		List<SceneDTO> residential_sceneList = new ArrayList<SceneDTO>();
-		List<SceneDTO> commercial_sceneList = new ArrayList<SceneDTO>();
 
-
-
-		// 处于小区场景
+		// 处于家庭对应的场景
 		// 列出用户有效家庭 mod by xiongying 20160523
-		addFamilySceneToList(userId, namespaceId, residential_sceneList);
-		sceneList.addAll(residential_sceneList);
+		List<FamilyDTO> familyList = this.familyProvider.getUserFamiliesByUserId(userId);
+		toFamilySceneDTO(namespaceId, userId, sceneList, familyList);
+
 		// 处于某个公司对应的场景
-		addOrganizationSceneToList(userId, namespaceId, commercial_sceneList);
-		sceneList.addAll(commercial_sceneList);
-
-
-		/** 从配置项中查询是否开启 **/
-		Integer switchFlag = this.configurationProvider.getIntValue(namespaceId, "scenes.switchKey", SCENE_SWITCH_DISABLE);
-		LOGGER.debug("switchFlag is" + switchFlag);
-		if(switchFlag == SCENE_SWITCH_ENABLE){
-			/** 查询默认场景 **/
-			Community default_community_one = new Community();
-			if(commercial_sceneList.size() == 0){
-				//如果园区场景为0，通过小区查询默认园区
-				default_community_one = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
-				LOGGER.debug("如果园区场景为0，通过小区查询默认园区");
+		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
+		//toOrganizationSceneDTO(sceneList, enterpriseList);
+		for(OrganizationDTO orgDto : organizationList) {
+			String orgType = orgDto.getOrganizationType();
+			// 在园区通用版和左邻小区版合并后，改为按域空间判断，0域空间不只列物业公司场景 by lqs 20160517
+			//if(isCmntyScene) { // 小区版只列物业公司的场景，园区版则列所有公司的场景  by lqs 20160510
+			//	        if(OrganizationType.isGovAgencyOrganization(orgType)) {
+			//	            SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, SceneType.PM_ADMIN);
+			//	            if(sceneDto != null) {
+			//	                sceneList.add(sceneDto);
+			//	            }
+			//	        } else {
+			//	            if(LOGGER.isDebugEnabled()) {
+			//	                LOGGER.debug("Ignore the organization for it is not govagency type, userId=" + userId
+			//	                    + ", organizationId=" + orgDto.getId() + ", orgType=" + orgType);
+			//	            }
+			//	        } else {
+			//                SceneType sceneType = SceneType.PARK_PM_ADMIN;
+			//                if(!OrganizationType.isGovAgencyOrganization(orgType)) {
+			//                    if(OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
+			//                        sceneType = SceneType.PARK_ENTERPRISE;
+			//                    } else {
+			//                        sceneType = SceneType.PARK_ENTERPRISE_NOAUTH;
+			//                    }
+			//                }
+			//                SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, sceneType);
+			//                if(sceneDto != null) {
+			//                    sceneList.add(sceneDto);
+			//                }
+			//	        }
+			SceneType sceneType = SceneType.PM_ADMIN;
+			if(!OrganizationType.isGovAgencyOrganization(orgType)) {
+				if(OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
+					sceneType = SceneType.ENTERPRISE;
+				} else {
+					sceneType = SceneType.ENTERPRISE_NOAUTH;
+				}
 			}
-//			else if (commercial_sceneList.size() == 1 && commercial_sceneList.get(0).getSceneType() == SceneType.PM_ADMIN.getCode()){
-//				//如果园区场景有且只有一个，通过小区查询默认园区
-//				default_community_one = findDefaultCommunity(namespaceId,userId,residential_sceneList,CommunityType.COMMERCIAL.getCode());
-//				LOGGER.debug("如果园区场景有且只有一个，通过小区查询默认园区");
-//			}
-
-			if(default_community_one != null && default_community_one.getId() != null){
-				sceneList.add(convertCommunityToScene(namespaceId,userId,default_community_one));
-			}else{
-				LOGGER.debug("找不到默认园区场景");
-			}
-
-
-			Community default_community_two = new Community();
-			if(residential_sceneList.size() == 0){
-				//如果小区场景为0，通过园区查询默认小区
-				default_community_two = findDefaultCommunity(namespaceId,userId,commercial_sceneList,CommunityType.RESIDENTIAL.getCode());
-				LOGGER.debug("如果小区场景为0，通过园区查询默认小区");
-			}
-
-			if(default_community_two != null && default_community_two.getId() != null){
-				sceneList.add(convertCommunityToScene(namespaceId,userId,default_community_two));
-			}else{
-				LOGGER.debug("找不到默认小区场景");
+			SceneDTO sceneDto = toOrganizationSceneDTO(namespaceId, userId, orgDto, sceneType);
+			if(sceneDto != null) {
+				sceneList.add(sceneDto);
 			}
 		}
-		Collections.reverse(sceneList);
+
+		// 当用户既没有选择家庭、也没有在某个公司内时，他有可能选过某个小区/园区，此时也把对应域空间下所选的小区作为场景 by lqs 2010416
+		if(sceneList.size() == 0) {
+			SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
+			if(communityScene != null) {
+				sceneList.add(communityScene);
+			}
+		}
+
 		return sceneList;
 	}
 
@@ -4446,6 +4472,10 @@ public class UserServiceImpl implements UserService {
 				default_communityScene.setStatus(SCENE_EXAMPLE);
 				sceneList.add(default_communityScene);
 			}
+		}
+		if(sceneList == null && sceneList.size() == 0){
+			LOGGER.debug("There is no enable switch Scene");
+			return null;
 		}
 		Collections.reverse(sceneList);
 		return sceneList;

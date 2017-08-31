@@ -1,6 +1,8 @@
 package com.everhomes.parking.handler;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleTemplateService;
@@ -37,7 +39,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         List<ParkingCardDTO> resultList = new ArrayList<>();
 
-        XiaomaoCard card = getCard(plateNumber);
+        XiaomaoCard card = getCard(plateNumber, parkingLot.getId());
 
         if(null != card){
             Date expireDate = card.getEndTime();
@@ -71,10 +73,10 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         return resultList;
     }
 
-    private XiaomaoCard getCard(String plateNumber){
+    private XiaomaoCard getCard(String plateNumber, Long parkingId){
         JSONObject param = new JSONObject();
 
-        String parkId = configProvider.getValue("parking.xiaomao.parkId", "");
+        String parkId = configProvider.getValue("parking.xiaomao.parkId." + parkingId, "");
 
         param.put("parkId", parkId);
         param.put("licenseNumber",plateNumber);
@@ -89,7 +91,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
     private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
 
-        XiaomaoCard card = getCard(order.getPlateNumber());
+        XiaomaoCard card = getCard(order.getPlateNumber(), order.getParkingLotId());
 
         if (null != card) {
 
@@ -208,7 +210,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         String validStart = sdf.format(timestampStart);
         String validEnd = sdf.format(timestampEnd);
 
-        String parkId = configProvider.getValue("parking.xiaomao.parkId", "");
+        String parkId = configProvider.getValue("parking.xiaomao.parkId." + order.getParkingLotId(), "");
 
         JSONObject param = new JSONObject();
         param.put("parkId", parkId);
@@ -261,20 +263,28 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         List<ParkingCardType> cardTypes = new ArrayList<>();
 
         if (parkingId == 10011L) {
-            ParkingCardType type = new ParkingCardType();
-            type.setTypeId("02");
-            type.setTypeName("VIP月卡");
-            cardTypes.add(type);
+            String json = configProvider.getValue("parking.xiaomao.types." + parkingId, "");
+            List<ParkingCardType> types = JSONArray.parseArray(json, ParkingCardType.class);
+            cardTypes.addAll(types);
+
+//            ParkingCardType type = new ParkingCardType();
+//            type.setTypeId("02");
+//            type.setTypeName("VIP月卡");
+//            cardTypes.add(type);
 
         }else if(parkingId == 10012L) {
-            ParkingCardType type = new ParkingCardType();
-            type.setTypeId("11");
-            type.setTypeName("VIP月卡");
-            cardTypes.add(type);
-            type = new ParkingCardType();
-            type.setTypeId("5");
-            type.setTypeName("普通月卡");
-            cardTypes.add(type);
+            String json = configProvider.getValue("parking.xiaomao.types." + parkingId, "");
+            List<ParkingCardType> types = JSONArray.parseArray(json, ParkingCardType.class);
+            cardTypes.addAll(types);
+
+//            ParkingCardType type = new ParkingCardType();
+//            type.setTypeId("11");
+//            type.setTypeName("VIP月卡");
+//            cardTypes.add(type);
+//            type = new ParkingCardType();
+//            type.setTypeId("5");
+//            type.setTypeName("普通月卡");
+//            cardTypes.add(type);
         }
 
         return cardTypes;
@@ -286,28 +296,16 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     }
 
     @Override
-    public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
-        return null;
+    public ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd) {
+        String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
+        ParkingVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "Mybay");
+        return handler.getFreeSpaceNum(cmd);
     }
 
     @Override
-    public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
-        return null;
+    public ParkingCarLocationDTO getCarLocation(ParkingLot parkingLot, GetCarLocationCommand cmd) {
+        String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
+        ParkingVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "Mybay");
+        return handler.getCarLocation(parkingLot, cmd);
     }
-
-    @Override
-    public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
-        return null;
-    }
-
-    @Override
-    public void lockParkingCar(LockParkingCarCommand cmd) {
-
-    }
-
-    @Override
-    public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
-        return null;
-    }
-
 }
