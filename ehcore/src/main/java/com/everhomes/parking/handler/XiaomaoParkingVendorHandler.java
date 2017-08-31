@@ -2,6 +2,7 @@ package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleTemplateService;
@@ -295,28 +296,16 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     }
 
     @Override
-    public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
-        return null;
+    public ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd) {
+        String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
+        ParkingVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "Mybay");
+        return handler.getFreeSpaceNum(cmd);
     }
 
     @Override
-    public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
-        return null;
+    public ParkingCarLocationDTO getCarLocation(ParkingLot parkingLot, GetCarLocationCommand cmd) {
+        String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
+        ParkingVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "Mybay");
+        return handler.getCarLocation(parkingLot, cmd);
     }
-
-    @Override
-    public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
-        return null;
-    }
-
-    @Override
-    public void lockParkingCar(LockParkingCarCommand cmd) {
-
-    }
-
-    @Override
-    public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
-        return null;
-    }
-
 }
