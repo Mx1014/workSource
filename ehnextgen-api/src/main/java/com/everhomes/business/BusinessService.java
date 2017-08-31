@@ -100,4 +100,6 @@ public interface BusinessService {
     void testTransaction();
 
 	UserAddressDTO getUserAddress(GetUserDefaultAddressCommand cmd);
+
+	List<OrganizationDTO> getUserOrganizations(GetUserDefaultAddressCommand cmd);
 }

@@ -4447,6 +4447,10 @@ public class UserServiceImpl implements UserService {
 				sceneList.add(default_communityScene);
 			}
 		}
+		if(sceneList == null && sceneList.size() == 0){
+			LOGGER.debug("There is no enable switch Scene");
+			return null;
+		}
 		Collections.reverse(sceneList);
 		return sceneList;
 	}

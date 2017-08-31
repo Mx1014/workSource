@@ -92,7 +92,8 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 	VALUES ('parking.kexing.searchCar.appId', '1', NULL, '0', NULL);
 
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.url', 'http://52.80.84.86:6060', NULL, '0', NULL);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.parkId', '135603499041432778216', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.parkId.10011', '135603499041432778216', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.parkId.10012', '135603499041432778216', NULL, '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.accessKeyId', 'zuolintest', NULL, '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.accessKeyValue', 'd1913cbeacd1de1783b804e6ee084aa7', NULL, '0', NULL);
 

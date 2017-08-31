@@ -1139,3 +1139,6 @@ insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- 更换人人试验连接 by dengs, 20170831
+UPDATE eh_launch_pad_items SET action_data='{"url": "http://www.renrenlab.com"}'  WHERE item_label = '人人实验' AND namespace_id = 999969;

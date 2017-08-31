@@ -1623,6 +1623,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhSiyinPrintSettings.class, Tables.EH_SIYIN_PRINT_SETTINGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_SIYIN_PRINT_RECORDS.ID.max()).from(Tables.EH_SIYIN_PRINT_SETTINGS).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhActivityCategories.class, Tables.EH_ACTIVITY_CATEGORIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ACTIVITY_CATEGORIES.ID.max()).from(Tables.EH_ACTIVITY_CATEGORIES).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
