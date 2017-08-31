@@ -101,7 +101,7 @@ public class ParkingServiceImpl implements ParkingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
 
     private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    
+
     @Autowired
     private ParkingProvider parkingProvider;
     @Autowired
@@ -197,9 +197,9 @@ public class ParkingServiceImpl implements ParkingService {
         ParkingVendorHandler handler = null;
         
         if(vendorName != null && vendorName.length() > 0) {
-            String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
-            handler = PlatformContext.getComponent(handlerPrefix + vendorName);
-        }
+			String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
+			handler = PlatformContext.getComponent(handlerPrefix + vendorName);
+		}
         
         return handler;
     }
@@ -286,6 +286,7 @@ public class ParkingServiceImpl implements ParkingService {
 
         	FlowCase flowCase = createFlowCase(parkingCardRequest, flow, user.getId());
 
+			parkingCardRequest.setFlowId(flowId);
     		parkingCardRequest.setFlowCaseId(flowCase.getId());
     		parkingProvider.updateParkingCardRequest(parkingCardRequest);
     		return null;
@@ -883,8 +884,8 @@ public class ParkingServiceImpl implements ParkingService {
 	    		FlowCase flowCase = flowCaseProvider.getFlowCaseById(q.getFlowCaseId());
 	    		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
 	    		stepDTO.setFlowCaseId(q.getFlowCaseId());
-	    		stepDTO.setFlowMainId(q.getFlowId());
-	    		stepDTO.setFlowVersion(q.getFlowVersion());
+	    		stepDTO.setFlowMainId(flowCase.getFlowMainId());
+	    		stepDTO.setFlowVersion(flowCase.getFlowVersion());
 	    		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
 	    		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
 	    		stepDTO.setStepCount(flowCase.getStepCount());
@@ -1202,13 +1203,23 @@ public class ParkingServiceImpl implements ParkingService {
         }
 		
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), parkingLot.getId(), flowId);
-		
-		ParkingRequestCardConfigDTO dto = ConvertHelper.convert(parkingFlow, ParkingRequestCardConfigDTO.class);
-		
-		String host =  configProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
 
+		ParkingRequestCardConfigDTO dto = null;
 		if(null != parkingFlow) {
+			dto = ConvertHelper.convert(parkingFlow, ParkingRequestCardConfigDTO.class);
+		
+			String host =  configProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
+
+
 			dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?configId=" + parkingFlow.getId());
+		}else {
+			dto = ConvertHelper.convert(cmd, ParkingRequestCardConfigDTO.class);
+			dto.setCardAgreementFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+			dto.setCardRequestTipFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+			dto.setMaxIssueNumFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+			dto.setMaxRequestNumFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+			dto.setRequestMonthCount(ParkingVendorHandler.REQUEST_MONTH_COUNT);
+			dto.setRequestRechargeType(ParkingVendorHandler.REQUEST_RECHARGE_TYPE);
 		}
 		return dto;
 	}
@@ -1360,7 +1371,6 @@ public class ParkingServiceImpl implements ParkingService {
 	    	FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 			
 	    	request.setFlowId(flowCase.getFlowMainId());
-	    	request.setFlowVersion(flowCase.getFlowVersion());
 	    	request.setFlowCaseId(flowCase.getId());
 	    	request.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
 			parkingProvider.updateParkingCardRequest(request);

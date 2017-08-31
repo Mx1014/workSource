@@ -3271,7 +3271,7 @@ public class FlowServiceImpl implements FlowService {
         int code = 0;
         if (nextStatus == FlowCaseStatus.FINISHED) {
             //到终止节点
-            if (fromStep == FlowStepType.APPROVE_STEP) {
+            if (fromStep == FlowStepType.APPROVE_STEP || fromStep == FlowStepType.END_STEP) {
                 code = FlowTemplateCode.NEXT_STEP_DONE;
             } else if (fromStep == FlowStepType.ABSORT_STEP) {
                 if (flowUserType == FlowUserType.PROCESSOR) {

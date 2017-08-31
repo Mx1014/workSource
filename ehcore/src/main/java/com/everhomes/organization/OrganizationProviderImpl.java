@@ -3695,6 +3695,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
         query.addLimit(pageSize);
+		LOGGER.debug("sql:"+query.getSQL());
+		LOGGER.debug("sql parm:"+query.getParams());
         query.fetch().map((r) -> {
             OrganizationMember member = RecordHelper.convert(r, OrganizationMember.class);
             member.setOrganizationName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));

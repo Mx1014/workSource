@@ -44,7 +44,7 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
     @Autowired
     private FlowProvider flowProvider;
     @Autowired
-    private FlowCaseProvider flowCaseProvider;
+    FlowCaseProvider flowCaseProvider;
     @Autowired
     private DbProvider dbProvider;
 
@@ -134,7 +134,9 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
         dbProvider.execute((TransactionStatus transactionStatus) -> {
             ParkingCardRequest parkingCardRequest = null;
             for(ParkingCardRequest p: list) {
-                Flow flow = flowProvider.findSnapshotFlow(p.getFlowId(), p.getFlowVersion());
+                FlowCase flowCase = flowCaseProvider.getFlowCaseById(p.getFlowCaseId());
+
+                Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
                 String tag1 = flow.getStringTag1();
                 if(null == tag1) {
                     LOGGER.error("Flow tag is null, flow={}", flow);
@@ -151,8 +153,8 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
 
                 FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
                 stepDTO.setFlowCaseId(parkingCardRequest.getFlowCaseId());
-                stepDTO.setFlowMainId(parkingCardRequest.getFlowId());
-                stepDTO.setFlowVersion(parkingCardRequest.getFlowVersion());
+                stepDTO.setFlowMainId(flowCase.getFlowMainId());
+                stepDTO.setFlowVersion(flowCase.getFlowVersion());
                 stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
                 stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
                 stepDTO.setStepCount(flowCase.getStepCount());

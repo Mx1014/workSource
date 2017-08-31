@@ -2375,7 +2375,7 @@ public class ActivityServiceImpl implements ActivityService {
         if(activity==null){
             return null;
         }
-        List<ActivityRoster> rosterList = activityProvider.listRosters(activity.getId());
+        List<ActivityRoster> rosterList = activityProvider.listRosters(activity.getId(), ActivityRosterStatus.NORMAL);
         ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), UserContext
                 .current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
         ActivityListResponse response = new ActivityListResponse();
@@ -3536,9 +3536,11 @@ public class ActivityServiceImpl implements ActivityService {
             }
             break;
 	    case PM_ADMIN:
-	        ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
-	        execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
-	        resp = listOrgNearbyActivities(execOrgCmd);
+			ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
+			execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
+			//resp = listOrgNearbyActivities(execOrgCmd);
+			execOrgCmd.setSceneToken(cmd.getSceneToken());
+			resp = listOrgActivitiesByScope(execOrgCmd);
 	        break;
 	    default:
 	        LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDto);
@@ -3553,14 +3555,24 @@ public class ActivityServiceImpl implements ActivityService {
 	    
 	    return resp;
 	}
-	
+
 	//华润要求只能看到当前小区的活动，因此增加一种位置范围-COMMUNITY。根据传来的范围参数，如果是小区使用新的方法，否则使用老方法。
-	private ListActivitiesReponse listActivitiesByScope(SceneTokenDTO sceneTokenDto, ListNearbyActivitiesBySceneCommand cmd, 
-	        int geoCharCount, Long communityId, ActivityLocationScope scope){
+	private ListActivitiesReponse listActivitiesByScope(SceneTokenDTO sceneTokenDto, ListNearbyActivitiesBySceneCommand cmd,
+														int geoCharCount, Long communityId, ActivityLocationScope scope){
 		if(scope.getCode() == ActivityLocationScope.COMMUNITY.getCode()){
-			return listCommunityActivities(sceneTokenDto, cmd, communityId);
+			return listOfficialActivitiesByScene(cmd);
 		}else{
 			return listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, communityId);
+		}
+	}
+
+	//华润要求只能看到当前小区的活动，因此增加一种位置范围-COMMUNITY。根据传来的范围参数，如果是小区使用新的方法，否则使用老方法。
+	private  ListActivitiesReponse listOrgActivitiesByScope(ListOrgNearbyActivitiesCommand execOrgCmd){
+		if(execOrgCmd.getScope() == ActivityLocationScope.COMMUNITY.getCode()){
+			ListNearbyActivitiesBySceneCommand command = ConvertHelper.convert(execOrgCmd, ListNearbyActivitiesBySceneCommand.class);
+			return listOfficialActivitiesByScene(command);
+		}else{
+			return listOrgNearbyActivities(execOrgCmd);
 		}
 	}
 	

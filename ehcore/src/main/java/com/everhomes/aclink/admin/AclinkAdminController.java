@@ -509,6 +509,52 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/createAuthLevel</b>
+     * <p>创建不同层级的授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("createAuthLevel")
+    @RestReturn(value=DoorAuthLevelDTO.class)
+    public RestResponse createDoorAuthLevel(@Valid CreateDoorAuthLevelCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.createDoorAuthLevel(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/listDoorAuthLevel</b>
+     * <p>显示门禁下的公司授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("listDoorAuthLevel")
+    @RestReturn(value=ListDoorAuthLevelResponse.class)
+    public RestResponse getDoorAuthLevel(@Valid ListDoorAuthLevelCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listDoorAuthLevel(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/deleteDoorAuthLevel</b>
+     * <p>删除某个公司的授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("deleteDoorAuthLevel")
+    @RestReturn(value=String.class)
+    public RestResponse getDoorAuthLevel(@Valid DeleteDoorAuthLevelCommand cmd) {
+        doorAccessService.deleteDoorAuthLevel(cmd.getId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
 
 
 }

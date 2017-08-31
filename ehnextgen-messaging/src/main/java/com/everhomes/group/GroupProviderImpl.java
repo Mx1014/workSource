@@ -423,6 +423,7 @@ public class GroupProviderImpl implements GroupProvider {
     
     @Cacheable(value = "GroupMemberByInfo", key="{#groupId, #memberType, #memberId}", unless="#result == null")
     public GroupMember findGroupMemberByMemberInfo(final long groupId, final String memberType, final long memberId) {
+        LOGGER.debug("findGroupMemberByMemberInfo, userId :" + memberId);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, groupId));
         EhGroupMembersRecord record = (EhGroupMembersRecord)context.select().from(EH_GROUP_MEMBERS)
             .where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId))
