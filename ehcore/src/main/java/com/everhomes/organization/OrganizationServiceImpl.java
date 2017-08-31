@@ -5534,78 +5534,91 @@ public class OrganizationServiceImpl implements OrganizationService {
         locator.setAnchor(cmd.getPageAnchor());
         Long startTime2 = System.currentTimeMillis();
 
-        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembers(locator, pageSize, new ListingQueryBuilderCallback() {
-            @Override
-            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+        //组装参数
+        Organization orgCommoand = new Organization();
+        orgCommoand.setId(org.getId());
+        orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+        VisibleFlag visibleFlag = VisibleFlag.SHOW;
+        if (VisibleFlag.ALL == VisibleFlag.fromCode(cmd.getVisibleFlag())) {
+            visibleFlag = null;
+        } else if (null != VisibleFlag.fromCode(cmd.getVisibleFlag())) {
+            visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
+        }
 
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
-                List<String> groupTypes = new ArrayList<>();
-                if (null != cmd.getFilterScopeTypes() && cmd.getFilterScopeTypes().size() > 0) {
-                    Condition cond = null;
-                    if (cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CURRENT.getCode())) {
-                        /**当前节点是企业**/
-                        if (org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
-                            //寻找隶属企业的直属隐藏部门
-                            Organization underDirectOrg = organizationProvider.findUnderOrganizationByParentOrgId(org.getId());
-                            if (underDirectOrg == null) {//没有添加过直属人员
-                                cond = (Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.lt(0L));//确保查询不到
-                            } else {
-                                cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(underDirectOrg.getId());
-                                cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
-                            }
-
-                        } else {/**当前节点不是企业**/
-                            cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(org.getId());
-                        }
-                    }
-                    if (cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode())) {
-                        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-                    }
-
-                    if (cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode())) {
-                        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-                    }
-
-                    if (cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CHILD_GROUP.getCode())) {
-                        groupTypes.add(OrganizationGroupType.GROUP.getCode());
-                    }
-
-                    //多条件查询中选择了本结点且选择了其他group条件
-                    if (groupTypes.size() > 0 && null != cond) {
-                        cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "%");
-                        cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
-					}else if(groupTypes.size() > 0){
-                        cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "/%");
-                        cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
-                    }
-                    if (null != cond)
-                        query.addConditions(cond);
-                } else {
-                    groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-                    groupTypes.add(OrganizationGroupType.GROUP.getCode());
-                    groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
-                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "%"));
-                }
-
-                if (null != cmd.getTargetTypes() && cmd.getTargetTypes().size() > 0) {
-                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.in(cmd.getTargetTypes()));
-                }
-
-                if (null != cmd.getIsSignedup() && cmd.getIsSignedup() == ContactSignUpStatus.SIGNEDUP.getCode()) {
-                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L));
-                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
-                }
-
-                if (!StringUtils.isEmpty(keywords)) {
-                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords).or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + keywords + "%")));
-                }
-
-                query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
-                query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
-                return query;
-            }
-        });
+        // 换个provider
+        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(keywords, orgCommoand, cmd.getIsSignedup(), visibleFlag, locator, pageSize, cmd);
+//        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembers(locator, pageSize, new ListingQueryBuilderCallback() {
+//            @Override
+//            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+//
+//                query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+//                List<String> groupTypes = new ArrayList<>();
+//                if (null != cmd.getFilterScopeTypes() && cmd.getFilterScopeTypes().size() > 0) {
+//                    Condition cond = null;
+//                    if (cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CURRENT.getCode())) {
+//                        /**当前节点是企业**/
+//                        if (org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
+//                            //寻找隶属企业的直属隐藏部门
+//                            Organization underDirectOrg = organizationProvider.findUnderOrganizationByParentOrgId(org.getId());
+//                            if (underDirectOrg == null) {//没有添加过直属人员
+//                                cond = (Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.lt(0L));//确保查询不到
+//                            } else {
+//                                cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(underDirectOrg.getId());
+//                                cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
+//                            }
+//
+//                        } else {/**当前节点不是企业**/
+//                            cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(org.getId());
+//                        }
+//                    }
+//                    if (cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode())) {
+//                        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+//                    }
+//
+//                    if (cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode())) {
+//                        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+//                    }
+//
+//                    if (cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CHILD_GROUP.getCode())) {
+//                        groupTypes.add(OrganizationGroupType.GROUP.getCode());
+//                    }
+//
+//                    //多条件查询中选择了本结点且选择了其他group条件
+//                    if (groupTypes.size() > 0 && null != cond) {
+//                        cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "%");
+//                        cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+//					}else if(groupTypes.size() > 0){
+//                        cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "/%");
+//                        cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+//                    }
+//                    if (null != cond)
+//                        query.addConditions(cond);
+//                } else {
+//                    groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+//                    groupTypes.add(OrganizationGroupType.GROUP.getCode());
+//                    groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+//                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+//                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "%"));
+//                }
+//
+//                if (null != cmd.getTargetTypes() && cmd.getTargetTypes().size() > 0) {
+//                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.in(cmd.getTargetTypes()));
+//                }
+//
+//                if (null != cmd.getIsSignedup() && cmd.getIsSignedup() == ContactSignUpStatus.SIGNEDUP.getCode()) {
+//                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L));
+//                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
+//                }
+//
+//                if (!StringUtils.isEmpty(keywords)) {
+//                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords).or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + keywords + "%")));
+//                }
+//
+//                query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+//                query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+//                return query;
+//            }
+//        });
 
         Long endTime2 = System.currentTimeMillis();
         if (pinyinFlag) {
