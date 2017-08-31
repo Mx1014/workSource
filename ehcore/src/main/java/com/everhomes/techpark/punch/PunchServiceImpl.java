@@ -6891,14 +6891,12 @@ public class PunchServiceImpl implements PunchService {
 			//没有下班打卡则是下班打卡
 			if(null == offDutyPunch){
 				result.setPunchType(PunchType.OFF_DUTY.getCode());
-				processLastOffDutyPunchLog(result,ptr,punchTimeLong,punchLogs);
-				return result ;
 			}else{ 
 				//否则就是已完成打卡-但是可以更新打卡
-				result.setPunchType(PunchType.FINISH.getCode());
-				processLastOffDutyPunchLog(result,ptr,punchTimeLong,punchLogs);
-				return result ;
+				result.setPunchType(PunchType.FINISH.getCode()); 
 			}
+			processLastOffDutyPunchLog(result,ptr,punchTimeLong,punchLogs);
+			return result ;
 		}else{
 			//不在时间范围内无法打卡
 			result.setPunchType(PunchType.NOT_WORKTIME.getCode());
