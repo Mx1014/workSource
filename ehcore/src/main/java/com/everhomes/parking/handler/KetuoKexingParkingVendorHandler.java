@@ -171,8 +171,12 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			String cardType = CAR_TYPE;
 			Integer freeMoney = 0;
 			if(null != cardInfo) {
-				cardType = cardInfo.getCarType();
-				freeMoney = cardInfo.getFreeMoney();
+				long expireTime = strToLong(cardInfo.getValidTo());
+				ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
+				if (!checkExpireTime(parkingLot, expireTime)) {
+					cardType = cardInfo.getCarType();
+					freeMoney = cardInfo.getFreeMoney();
+				}
 			}
 			for(KetuoCardRate rate: getCardRule(cardType)) {
 				if(rate.getRuleId().equals(order.getRateToken())) {

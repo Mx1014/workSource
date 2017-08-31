@@ -339,8 +339,13 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		KetuoCard cardInfo = getCard(plateNumber);
 		KetuoCardRate ketuoCardRate = null;
 		String cardType = CAR_TYPE;
+
 		if(null != cardInfo) {
-			cardType = cardInfo.getCarType();
+			long expireTime = strToLong(cardInfo.getValidTo());
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
+			if (!checkExpireTime(parkingLot, expireTime)) {
+				cardType = cardInfo.getCarType();
+			}
 		}
 		for(KetuoCardRate rate: getCardRule(cardType)) {
 			if(rate.getRuleId().equals(order.getRateToken())) {
