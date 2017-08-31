@@ -11,6 +11,7 @@ import com.everhomes.contract.ContractParam;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.EhContractParamsDao;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
 import com.everhomes.server.schema.tables.records.EhContractParamsRecord;
@@ -170,8 +171,61 @@ public class ContractProviderImpl implements ContractProvider {
 
 	@Override
 	public List<Object> findCustomerByContractNum(String contractNum) {
+        List<Object> list = new ArrayList<>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhContracts t = Tables.EH_CONTRACTS.as("t");
+        EhEnterpriseCustomers t1 = Tables.EH_ENTERPRISE_CUSTOMERS.as("t1");
+        EhOrganizationOwners t2 = Tables.EH_ORGANIZATION_OWNERS.as("t2");
+        EhUserIdentifiers t3 = Tables.EH_USER_IDENTIFIERS.as("t3");
+        EhUsers t4 = Tables.EH_USERS.as("t4");
+        EhOrganizations t5 = Tables.EH_ORGANIZATIONS.as("t5");
+        final Byte[] customerType = new Byte[1];
+        final Long[] customerId = new Long[1];
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(t.CUSTOMER_TYPE,t.CUSTOMER_ID);
+        query.addFrom(t);
+        query.addConditions(t.CONTRACT_NUMBER.eq(contractNum));
+        query.fetch()
+                .map(r -> {
+                    customerType[0] = r.getValue(t.CUSTOMER_TYPE);
+                    customerId[0] = r.getValue(t.CUSTOMER_ID);
+                    return null;
+                });
+        if(customerType[0] == 0){
+            Long organizationId = context.select(t1.ORGANIZATION_ID)
+                    .from(t1)
+                    .where(t1.ID.eq(customerId[0]))
+                    .fetchOne(0, Long.class);
+            String organizationName = context.select(t5.NAME)
+                    .from(t5)
+                    .where(t5.ID.eq(organizationId))
+                    .fetchOne(0, String.class);
+            list.add("eh_organization");
+            list.add(organizationId);
+            list.add(organizationName);
+            list.add("");
+        }else if(customerType[0] == 1){
+            final Long[] userId = new Long[1];
+            final String[] userIdentifer = new String[1];
+            context.select(t3.OWNER_UID,t3.IDENTIFIER_TOKEN)
+                .from(t2, t3)
+                .where(t2.CONTACT_TOKEN.eq(t3.IDENTIFIER_TOKEN))
+                .and(t2.ID.eq(customerId[0]))
+                .fetch()
+                .map(r -> {
+                        userId[0] = r.getValue(t3.OWNER_UID);
+                    userIdentifer[0] = r.getValue(t3.IDENTIFIER_TOKEN);
+                        return null;
+                    });
+            String userName = context.select(t4.NICK_NAME)
+                    .from(t4)
+                    .where(t4.ID.eq(userId[0]))
+                    .fetchOne(0, String.class);
+            list.add("eh_user");
+            list.add(userId[0]);
+            list.add(userName);
+            list.add(userIdentifer[0]);
+        }
         return null;
     }
 
