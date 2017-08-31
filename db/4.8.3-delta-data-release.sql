@@ -200,4 +200,11 @@ DELETE from eh_buildings WHERE namespace_id = 999971 AND community_id = 24011104
 -- 更改默认错误提示
 update eh_locale_strings set `text`='应用开小差了' where `text` = '呃，好像哪里出错了';
 
+-- 更新国贸EMS的连接参数 by dengs
+update eh_express_companies SET order_url = 'http://60.205.8.187:8001/api/gateway', logistics_url = 'http://60.205.8.187:8001/api/gateway', app_key = '17fce6ceff30e93cdc1d7699b18f4b84', app_secret = 'b00538c1a497f926f7432d127221de29',authorization = 'de0c4c6f15813f3ff12436e81a4529ef' WHERE id = 2;
+-- 提供给国贸的参数更新
+update eh_apps SET app_key = '24e4f946-a195-4165-b690-8498eb10a24b',secret_key = 'tz0itFqwTGsQ8tT9QYC06i03T8SEBrof8p3+U2C4lXdbCl/FO6gfQ40y9hdJ86cfGj0AwUKpi4btFcq0uuoOvQ==' WHERE `NAME` = 'guomao' AND description='guomao app key';
+UPDATE eh_app_namespace_mappings SET app_key = '24e4f946-a195-4165-b690-8498eb10a24b' WHERE namespace_id = 999968;
 
+-- todo 更新国贸邮政的参数
+-- end by dengs
