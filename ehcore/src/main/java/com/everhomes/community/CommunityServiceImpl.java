@@ -615,7 +615,7 @@ public class CommunityServiceImpl implements CommunityService {
         Long nextPageAnchor = null;
         if(buildings.size() > pageSize) {
         	buildings.remove(buildings.size() - 1);
-            nextPageAnchor = buildings.get(buildings.size() - 1).getId();
+            nextPageAnchor = buildings.get(buildings.size() - 1).getDefaultOrder();
         }
         
         populateBuildings(buildings);

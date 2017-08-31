@@ -17,7 +17,12 @@ import org.springframework.stereotype.Service;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Date;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -45,6 +50,9 @@ public class StatEventServiceImpl implements StatEventService {
 
     @Autowired
     private StatEventStatisticProvider statEventStatisticProvider;
+
+    @Autowired
+    private StatEventTaskLogProvider statEventTaskLogProvider;
 
     @Override
     public void postLog(StatPostLogCommand cmd) {
@@ -209,6 +217,13 @@ public class StatEventServiceImpl implements StatEventService {
         }
         dto.setItems(items);
         return dto;
+    }
+
+    @Override
+    public List<StatEventTaskLog> listEventTask(StatExecuteEventTaskCommand cmd) {
+        LocalDate startDate = LocalDate.parse(cmd.getStartDate(), DateTimeFormatter.BASIC_ISO_DATE);
+        LocalDate endDate = LocalDate.parse(cmd.getEndDate(), DateTimeFormatter.BASIC_ISO_DATE);
+        return statEventTaskLogProvider.listEventTaskLog(Date.valueOf(startDate), Date.valueOf(endDate));
     }
 
     private StatLogUploadStrategyEnvironmentDTO toStatLogUploadStrategyEnvironmentDTO(StatEventUploadStrategy statEventUploadStrategy) {

@@ -71,6 +71,13 @@ public class StatEventTaskLogProviderImpl implements StatEventTaskLogProvider {
                 .execute();
     }
 
+    @Override
+    public List<StatEventTaskLog> listEventTaskLog(Date startDate, Date endDate) {
+        return context().selectFrom(Tables.EH_STAT_EVENT_TASK_LOGS)
+                .where(Tables.EH_STAT_EVENT_TASK_LOGS.TASK_DATE.between(startDate, endDate))
+                .fetchInto(StatEventTaskLog.class);
+    }
+
     private EhStatEventTaskLogsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhStatEventTaskLogsDao(context.configuration());

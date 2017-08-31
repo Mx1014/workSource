@@ -38,7 +38,10 @@ public class PortalLayoutProviderImpl1 implements PortalLayoutProvider {
             Map<String, String> map = (Map<String, String>) StringHelper.fromJsonString(layout.getLayoutJson(), HashMap.class);
 
             portalLayout.setName(layout.getName());
-            portalLayout.setLabel(map.get("displayName"));
+            String displayName = map.get("displayName");
+            displayName = processDisplayName(displayName, layout);
+
+            portalLayout.setLabel(displayName);
             portalLayout.setDescription(layout.getName());
 
             portalLayout.setId(layout.getId());
@@ -47,6 +50,24 @@ public class PortalLayoutProviderImpl1 implements PortalLayoutProvider {
             portalLayoutList.add(portalLayout);
         }
         return portalLayoutList;
+    }
+
+    // 1：普通公司场景
+    // 2：个人用户场景
+    // 3：物业公司场景
+    private String processDisplayName(String displayName, LaunchPadLayoutDTO layout) {
+        switch (layout.getSceneType().toLowerCase()) {
+            case "park_tourist":
+                displayName += "1";
+                break;
+            case "default":
+                displayName += "2";
+                break;
+            case "pm_admin":
+                displayName += "3";
+                break;
+        }
+        return displayName;
     }
 
     @Override

@@ -133,4 +133,11 @@ public interface YellowPageProvider {
 	 */
 	void updateServiceAlliancesDisplayFlag(Long id, Byte showFlag);
 
+	void createServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories);
+
+	void updateServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories);
+
+	void createServiceAllianceSkipRule(ServiceAllianceSkipRule serviceAllianceSkipRule);
+
+	void deleteServiceAllianceSkipRule(Long id);
 }
