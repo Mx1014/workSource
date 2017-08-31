@@ -533,7 +533,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             GeneralFormDTO form = generalFormService.updateGeneralForm(updateCommand);
 
             //  在业务表单同步记录
-            ArchivesFroms archivesFroms = archivesProvider.findArchivesFormOriginId(cmd.getFormOriginId());
+            ArchivesFroms archivesFroms = archivesProvider.findArchivesFormOriginId(UserContext.getCurrentNamespaceId(), cmd.getFormOriginId());
             archivesFroms.setFormOriginId(form.getFormOriginId());
             archivesFroms.setFormVersion(form.getFormVersion());
             archivesProvider.updateArchivesForm(archivesFroms);
@@ -572,11 +572,17 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public Long identifyArchivesForm(IdentifyArchivesFormCommand cmd) {
-        ArchivesFroms form = archivesProvider.findArchivesFormOriginId(cmd.getOrganizationId());
-        if(form !=null)
-            return form.getFormOriginId();
-        return 0L;
+    public ArchivesFromsDTO identifyArchivesForm(IdentifyArchivesFormCommand cmd) {
+        ArchivesFroms form = archivesProvider.findArchivesFormOriginId(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId());
+        ArchivesFromsDTO dto = new ArchivesFromsDTO();
+        if(form !=null){
+            dto.setFormOriginId(form.getFormOriginId());
+            dto.setFormVersion(form.getFormVersion());
+        }else{
+            dto.setFormOriginId(0L);
+            dto.setFormVersion(0L);
+        }
+        return dto;
     }
 
     @Override

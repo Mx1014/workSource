@@ -43,7 +43,7 @@ public interface ArchivesService {
 
     GetArchivesFormResponse getArchivesForm(GetArchivesFormCommand cmd);
 
-    Long identifyArchivesForm(IdentifyArchivesFormCommand cmd);
+    ArchivesFromsDTO identifyArchivesForm(IdentifyArchivesFormCommand cmd);
 
     ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesEmployeesCommand cmd);
 

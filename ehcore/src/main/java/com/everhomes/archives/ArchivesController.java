@@ -269,9 +269,9 @@ public class ArchivesController extends ControllerBase{
      * <p>13-3.识别档案表单id</p>
      */
     @RequestMapping("identifyArchivesForm")
-    @RestReturn(value = Long.class)
+    @RestReturn(value = ArchivesFromsDTO.class)
     public RestResponse identifyArchivesForm(IdentifyArchivesFormCommand cmd){
-        Long res = archivesService.identifyArchivesForm(cmd);
+        ArchivesFromsDTO res = archivesService.identifyArchivesForm(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

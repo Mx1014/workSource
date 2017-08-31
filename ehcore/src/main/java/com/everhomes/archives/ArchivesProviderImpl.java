@@ -164,9 +164,10 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public ArchivesFroms findArchivesFormOriginId(Long organizationId){
+    public ArchivesFroms findArchivesFormOriginId(Integer namespaceId, Long organizationId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesFormsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_FORMS);
+        query.addConditions(Tables.EH_ARCHIVES_FORMS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ARCHIVES_FORMS.ORGANIZATION_ID.eq(organizationId));
         return query.fetchOneInto(ArchivesFroms.class);
     }
