@@ -37,7 +37,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         List<ParkingCardDTO> resultList = new ArrayList<>();
 
-        XiaomaoCard card = getCard(plateNumber);
+        XiaomaoCard card = getCard(plateNumber, parkingLot.getId());
 
         if(null != card){
             Date expireDate = card.getEndTime();
@@ -71,10 +71,10 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         return resultList;
     }
 
-    private XiaomaoCard getCard(String plateNumber){
+    private XiaomaoCard getCard(String plateNumber, Long parkingId){
         JSONObject param = new JSONObject();
 
-        String parkId = configProvider.getValue("parking.xiaomao.parkId", "");
+        String parkId = configProvider.getValue("parking.xiaomao.parkId." + parkingId, "");
 
         param.put("parkId", parkId);
         param.put("licenseNumber",plateNumber);
@@ -89,7 +89,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
     private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
 
-        XiaomaoCard card = getCard(order.getPlateNumber());
+        XiaomaoCard card = getCard(order.getPlateNumber(), order.getParkingLotId());
 
         if (null != card) {
 
@@ -208,7 +208,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         String validStart = sdf.format(timestampStart);
         String validEnd = sdf.format(timestampEnd);
 
-        String parkId = configProvider.getValue("parking.xiaomao.parkId", "");
+        String parkId = configProvider.getValue("parking.xiaomao.parkId." + order.getParkingLotId(), "");
 
         JSONObject param = new JSONObject();
         param.put("parkId", parkId);
