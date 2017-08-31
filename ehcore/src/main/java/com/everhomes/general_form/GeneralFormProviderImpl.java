@@ -15,7 +15,6 @@ import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormGroups;
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
 import com.everhomes.server.schema.tables.records.EhGeneralFormGroupsRecord;
-import com.everhomes.server.schema.tables.records.EhGeneralFormTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
@@ -27,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -192,20 +190,19 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 				.where(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId));
 	}
 
-	@Override
+/*	@Override
 	public GeneralFormGroup findGeneralFormGroupById(Long id){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhGeneralFormGroupsDao dao = new EhGeneralFormGroupsDao(context.configuration());
 		EhGeneralFormGroups group = dao.findById(id);
 		return ConvertHelper.convert(group, GeneralFormGroup.class);
-	}
+	}*/
 
     @Override
-    public GeneralFormGroup findGeneralFormGroupByFormOriginId(Long formOriginId, Long organizationId){
+    public GeneralFormGroup findGeneralFormGroupByFormOriginId(Long formOriginId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhGeneralFormGroupsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_GROUPS);
         query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId));
-        query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.ORGANIZATION_ID.eq(organizationId));
         return query.fetchOneInto(GeneralFormGroup.class);
     }
 
@@ -218,23 +215,5 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		dao.update(group);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralFormGroups.class, group.getId());
 	}
-
-	@Override
-	public GeneralFormTemplate findActiveFormTemplateByName(String formModule, String formName){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectQuery<EhGeneralFormTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_TEMPLATES);
-		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.FORM_MODULE.eq(formModule));
-		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.FORM_NAME.eq(formName));
-		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
-		return query.fetchOneInto(GeneralFormTemplate.class);
-	}
-
-	@Override
-    public GeneralFormGroup findGeneralFormGroupTemplateById(Long formTemplateId){
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhGeneralFormGroupsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_GROUPS);
-        query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.FORM_TEMPLATE_ID.eq(formTemplateId));
-        return query.fetchOneInto(GeneralFormGroup.class);
-    }
 
 }

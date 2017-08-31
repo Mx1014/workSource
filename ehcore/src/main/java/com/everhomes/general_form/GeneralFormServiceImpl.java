@@ -503,7 +503,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 			}
 
 			//  对字段组进行修改
-            GeneralFormGroup group = generalFormProvider.findGeneralFormGroupByFormOriginId(form.getFormOriginId(),form.getOrganizationId());
+            GeneralFormGroup group = generalFormProvider.findGeneralFormGroupByFormOriginId(form.getFormOriginId());
 			if(group == null){
 			    //  若为空说明之前的表单建立并未建字段组
                 createGeneralFormGroup(form,cmd.getFormGroups());
@@ -567,7 +567,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 				.getFormOriginId());
 
         //  added by R 20170830, 获取字段组
-        GeneralFormGroup group = generalFormProvider.findGeneralFormGroupByFormOriginId(form.getFormOriginId(),form.getOrganizationId());
+        GeneralFormGroup group = generalFormProvider.findGeneralFormGroupByFormOriginId(form.getFormOriginId());
 		GeneralFormDTO result = processGeneralFormDTO(form,group);
 		return result;
 	}
@@ -576,9 +576,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     private GeneralFormGroup createGeneralFormGroup(GeneralForm form, List<GeneralFormGroupDTO> groupDTOS){
         GeneralFormGroup group = new GeneralFormGroup();
         group.setNamespaceId(UserContext.getCurrentNamespaceId());
-        group.setOrganizationId(form.getOrganizationId());
-        group.setOwnerId(form.getOwnerId());
-        group.setOwnerType(form.getOwnerType());
         group.setFormOriginId(form.getFormOriginId());
         group.setFormVersion(form.getFormVersion());
         group.setTemplateType(GeneralFormTemplateType.DEFAULT_JSON.getCode());
@@ -593,20 +590,5 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         group.setFormVersion(form.getFormVersion());
         group.setTemplateText(JSON.toJSONString(groupDTOS));
         generalFormProvider.updateGeneralFormGroup(group);
-    }
-
-	@Override
-    public GeneralFormDTO getGeneralFormTemplate(GeneralFormTemplateCommand cmd){
-        //  获取模板字段
-        GeneralFormTemplate formTemplate = generalFormProvider.findActiveFormTemplateByName(cmd.getFormModule(),cmd.getFormName());
-        //  获取模板字段组
-        GeneralFormGroup group = generalFormProvider.findGeneralFormGroupTemplateById(formTemplate.getId());
-        //  输出字段
-        if(formTemplate!=null){
-            GeneralForm form = ConvertHelper.convert(formTemplate,GeneralForm.class);
-            GeneralFormDTO result = processGeneralFormDTO(form, group);
-            return result;
-        }
-        return null;
     }
 }

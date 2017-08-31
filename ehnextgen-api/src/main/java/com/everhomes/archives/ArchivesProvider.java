@@ -22,4 +22,9 @@ public interface ArchivesProvider {
 
     List<ArchivesDismissEmployees> listArchivesDismissEmployees(Integer offset, Integer count, Integer namespaceId, Condition condition);
 
+    void createArchivesForm(ArchivesFroms form);
+
+    void updateArchivesForm(ArchivesFroms form);
+
+    ArchivesFroms findArchivesFormOriginId(Long organizationId);
 }

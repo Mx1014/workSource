@@ -41,10 +41,6 @@ public interface ArchivesService {
 
     void updateArchivesForm(UpdateArchivesFormCommand cmd);
 
-//    void addArchivesFieldGroup(AddArchivesFieldGroupCommand cmd);
-
-    void updateArchivesFieldOrder(UpdateArchivesFieldOrderCommand cmd);
-
     GetArchivesFormResponse getArchivesForm(GetArchivesFormCommand cmd);
 
     Long identifyArchivesForm(IdentifyArchivesFormCommand cmd);

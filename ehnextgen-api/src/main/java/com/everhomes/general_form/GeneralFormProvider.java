@@ -30,14 +30,8 @@ public interface GeneralFormProvider {
 
     void deleteGeneralFormGroupsByFormOriginId(Long formOriginId);
 
-    GeneralFormGroup findGeneralFormGroupById(Long id);
-
-    GeneralFormGroup findGeneralFormGroupByFormOriginId(Long formOriginId, Long organizationId);
+    GeneralFormGroup findGeneralFormGroupByFormOriginId(Long formOriginId);
 
     void updateGeneralFormGroup(GeneralFormGroup group);
-
-    GeneralFormTemplate findActiveFormTemplateByName(String formModule, String formName);
-
-    GeneralFormGroup findGeneralFormGroupTemplateById(Long templateId);
 
 }

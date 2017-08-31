@@ -42,5 +42,5 @@ public interface GeneralFormService {
 //
 //	List<GeneralFormGroupDTO> listGeneralFormGroups(ListGeneralFormGroupsCommand cmd);
 
-	GeneralFormDTO getGeneralFormTemplate(GeneralFormTemplateCommand cmd);
+//	GeneralFormDTO getGeneralFormTemplate(GeneralFormTemplateCommand cmd);
 }

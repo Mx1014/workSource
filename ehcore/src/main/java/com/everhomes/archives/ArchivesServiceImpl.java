@@ -1,6 +1,8 @@
 package com.everhomes.archives;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.archives.*;
@@ -54,6 +56,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     GeneralFormService generalFormService;
+
+    @Autowired
+    ConfigurationProvider configurationProvider;
 
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
@@ -421,6 +426,11 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
+    public GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd) {
+        return null;
+    }
+
+    @Override
     public ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListArchivesDismissEmployeesResponse response = new ListArchivesDismissEmployeesResponse();
@@ -494,11 +504,11 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void updateArchivesForm(UpdateArchivesFormCommand cmd) {
 
-        //  1.如果无 formOriginId 时则使用的是模板模板，此时需要为该公司新增一份表单
-        //  2.如果有 formOriginId 时则说明已经拥有了表单，此时只需要做修改
+        //  1.如果无 formOriginId 时则使用的是模板，此时在组织结构新增一份表单，同时业务表单组新增记录
+        //  2.如果有 formOriginId 时则说明已经拥有了表单，此时在组织架构做修改，同时业务表单组同步记录
 
         if(cmd.getFormOriginId() == 0L){
-            //  新增时
+            //  新增时，在组织架构增加表单
             CreateApprovalFormCommand createCommand = new CreateApprovalFormCommand();
             createCommand.setOwnerId(cmd.getOrganizationId());
             createCommand.setOwnerType("organization");
@@ -506,9 +516,13 @@ public class ArchivesServiceImpl implements ArchivesService {
             createCommand.setFormName(ARCHIVES);
             createCommand.setFormFields(cmd.getFormFields());
             createCommand.setFormGroups(cmd.getFormGroups());
-            generalFormService.createGeneralForm(createCommand);
+            GeneralFormDTO form = generalFormService.createGeneralForm(createCommand);
+
+            //  在业务表单组新增记录
+            createArchivesForm(form);
+
         }else{
-            //  修改时
+            //  修改时，在组织架构修改表单
             UpdateApprovalFormCommand updateCommand = new UpdateApprovalFormCommand();
             updateCommand.setFormOriginId(cmd.getFormOriginId());
             updateCommand.setOwnerId(cmd.getOrganizationId());
@@ -516,39 +530,53 @@ public class ArchivesServiceImpl implements ArchivesService {
             updateCommand.setOrganizationId(cmd.getOrganizationId());
             updateCommand.setFormFields(cmd.getFormFields());
             updateCommand.setFormGroups(cmd.getFormGroups());
-            generalFormService.updateGeneralForm(updateCommand);
+            GeneralFormDTO form = generalFormService.updateGeneralForm(updateCommand);
+
+            //  在业务表单同步记录
+            ArchivesFroms archivesFroms = archivesProvider.findArchivesFormOriginId(cmd.getFormOriginId());
+            archivesFroms.setFormOriginId(form.getFormOriginId());
+            archivesFroms.setFormVersion(form.getFormVersion());
+            archivesProvider.updateArchivesForm(archivesFroms);
         }
     }
 
-/*    @Override
-    public void addArchivesFieldGroup(AddArchivesFieldGroupCommand cmd) {
-
-    }*/
-
-    @Override
-    public void updateArchivesFieldOrder(UpdateArchivesFieldOrderCommand cmd) {
-
+    private void createArchivesForm(GeneralFormDTO form){
+        ArchivesFroms archivesFrom = new ArchivesFroms();
+        archivesFrom.setNamespaceId(form.getNamespaceId());
+        archivesFrom.setOrganizationId(form.getOrganizationId());
+        archivesFrom.setFormOriginId(form.getFormOriginId());
+        archivesFrom.setFormVersion(form.getFormVersion());
+        archivesFrom.setStatus(form.getStatus());
+        archivesProvider.createArchivesForm(archivesFrom);
     }
 
     @Override
     public GetArchivesFormResponse getArchivesForm(GetArchivesFormCommand cmd) {
 
         GetArchivesFormResponse response = new GetArchivesFormResponse();
-        //  此处有两种情况，一是调用模板表单(此时 formOriginId 为0)
-        //  二是已经建立公司对应的表单(此时已有 formOriginId )
-        if(cmd.getFormOriginId() == 0L){
-            GeneralFormTemplateCommand formTemplateCommand = new GeneralFormTemplateCommand();
-            formTemplateCommand.setFormModule(GeneralFormModuleType.ARCHIVES.getCode());
-            formTemplateCommand.setFormName(ARCHIVES);
-            GeneralFormDTO form = generalFormService.getGeneralFormTemplate(formTemplateCommand);
-            response.setForm(form);
-        }else{
-            GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
-            formCommand.setFormOriginId(cmd.getFormOriginId());
-            GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
-            response.setForm(form);
+        //  此处有两种情况
+        //  1.调用模板表单(此时前端传参 formOriginId 为0)
+        //  2.已经建立公司对应的表单(此时已有 formOriginId )
+
+        Long formOriginId = cmd.getFormOriginId();
+        if (cmd.getFormOriginId() == 0L) {
+            //  当没有表单 id 的时候则去获取模板表单的id
+            String value = configurationProvider.getValue("archives.form.origin.id", "");
+            formOriginId = Long.valueOf(value);
         }
+        GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
+        formCommand.setFormOriginId(formOriginId);
+        GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
+        response.setForm(form);
         return response;
+    }
+
+    @Override
+    public Long identifyArchivesForm(IdentifyArchivesFormCommand cmd) {
+        ArchivesFroms form = archivesProvider.findArchivesFormOriginId(cmd.getOrganizationId());
+        if(form !=null)
+            return form.getFormOriginId();
+        return 0L;
     }
 
     @Override
@@ -565,5 +593,6 @@ public class ArchivesServiceImpl implements ArchivesService {
     public void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd) {
 
     }
+
 
 }

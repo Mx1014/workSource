@@ -9,10 +9,13 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhArchivesContactsStickyDao;
 import com.everhomes.server.schema.tables.daos.EhArchivesDismissEmployeesDao;
+import com.everhomes.server.schema.tables.daos.EhArchivesFormsDao;
 import com.everhomes.server.schema.tables.pojos.EhArchivesContactsSticky;
 import com.everhomes.server.schema.tables.pojos.EhArchivesDismissEmployees;
+import com.everhomes.server.schema.tables.pojos.EhArchivesForms;
 import com.everhomes.server.schema.tables.records.EhArchivesContactsStickyRecord;
 import com.everhomes.server.schema.tables.records.EhArchivesDismissEmployeesRecord;
+import com.everhomes.server.schema.tables.records.EhArchivesFormsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -135,5 +138,36 @@ public class ArchivesProviderImpl implements ArchivesProvider {
             return results;
         }
         return null;
+    }
+
+    @Override
+    public void createArchivesForm(ArchivesFroms form){
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesForms.class));
+        form.setId(id);
+        form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhArchivesFormsDao dao = new EhArchivesFormsDao(context.configuration());
+        dao.insert(form);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesForms.class, null);
+    }
+
+    @Override
+    public void updateArchivesForm(ArchivesFroms form){
+        form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhArchivesFormsDao dao = new EhArchivesFormsDao(context.configuration());
+        dao.update(form);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesForms.class, form.getId());
+
+    }
+
+    @Override
+    public ArchivesFroms findArchivesFormOriginId(Long organizationId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesFormsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_FORMS);
+        query.addConditions(Tables.EH_ARCHIVES_FORMS.ORGANIZATION_ID.eq(organizationId));
+        return query.fetchOneInto(ArchivesFroms.class);
     }
 }
