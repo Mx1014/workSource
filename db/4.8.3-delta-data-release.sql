@@ -188,7 +188,7 @@ INSERT INTO `eh_namespace_resources` (`id`, `namespace_id`, `resource_type`, `re
 -- 增加蒙版配置项
 delete from eh_configurations where 'name' in ('mask.key','scenes.switchKey');
 SET @con_id = (SELECT MAX(id) from eh_configurations);
-INSERT INTO `eh_configurations` VALUES (@con_id + 1, 'mask.key', 0, '默认启用蒙版', 999971, '');
+INSERT INTO `eh_configurations` VALUES (@con_id + 1, 'mask.key', 1, '默认启用蒙版', 999971, '');
 INSERT INTO `eh_configurations` VALUES (@con_id + 2, 'scenes.switchKey', 0, '默认启用切换场景', 999971, '');
 -- 增加蒙版表数据
 delete from eh_namespace_masks;
