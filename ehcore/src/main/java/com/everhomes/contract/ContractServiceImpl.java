@@ -16,7 +16,9 @@ import java.util.stream.Collectors;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.AssetPaymentStrings;
 import com.everhomes.asset.AssetProvider;
+import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.customer.EnterpriseCustomer;
@@ -31,7 +33,7 @@ import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.asset.PaymentVariable;
+import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -40,11 +42,10 @@ import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.repeat.RangeDTO;
+import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.*;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
@@ -76,7 +77,6 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.util.Tuple;
 
 import javax.annotation.PostConstruct;
 
@@ -147,6 +147,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private AssetProvider assetProvider;
+
+	@Autowired
+	private AssetService assetService;
 
 	@Autowired
 	private PropertyMgrProvider propertyMgrProvider;
@@ -487,6 +490,17 @@ public class ContractServiceImpl implements ContractService {
 		contract.setStatus(ContractStatus.DRAFT.getCode()); //存草稿状态
 		contractProvider.createContract(contract);
 
+		//调用计算明细
+		if(cmd.getChargingItems() != null && cmd.getChargingItems().size() > 0) {
+			ExecutorUtil.submit(new Runnable() {
+				@Override
+				public void run() {
+					generatePaymentExpectancies(contract, cmd.getChargingItems());
+				}
+			});
+
+		}
+
 		//计算总的租赁面积
 		Double totalSize = dealContractApartments(contract, cmd.getApartments());
 		dealContractChargingItems(contract, cmd.getChargingItems());
@@ -504,6 +518,49 @@ public class ContractServiceImpl implements ContractService {
 		command.setPartyAId(contract.getPartyAId());
 		ContractDetailDTO contractDetailDTO = findContract(command);
 		return contractDetailDTO;
+	}
+
+	private void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems) {
+		PaymentExpectanciesCommand command = new PaymentExpectanciesCommand();
+		command.setContractNum(contract.getContractNumber());
+		List<FeeRules> feeRules = new ArrayList<>();
+		Gson gson = new Gson();
+		chargingItems.forEach(chargingItem -> {
+			FeeRules feeRule = new FeeRules();
+			feeRule.setChargingItemId(chargingItem.getChargingItemId());
+			feeRule.setChargingStandardId(chargingItem.getChargingStandardId());
+			feeRule.setDateStrBegin(new Date(chargingItem.getChargingStartTime()));
+			feeRule.setDateStrEnd(new Date(chargingItem.getChargingExpiredTime()));
+			List<ContractProperty> contractProperties = new ArrayList<>();
+			if(chargingItem.getApartments() != null && chargingItem.getApartments().size() > 0) {
+				chargingItem.getApartments().forEach(apartment -> {
+					ContractProperty cp = new ContractProperty();
+					cp.setApartmentName(apartment.getApartmentName());
+					cp.setBuldingName(apartment.getBuildingName());
+					cp.setAddressId(apartment.getAddressId());
+					Address address = addressProvider.findAddressById(apartment.getAddressId());
+					cp.setPropertyName(address.getNamespaceAddressToken());
+					contractProperties.add(cp);
+				});
+			}
+			feeRule.setProperties(contractProperties);
+
+			ChargingVariablesDTO chargingVariables = gson.fromJson(chargingItem.getChargingVariables(), new TypeToken<ChargingVariablesDTO>() {}.getType());
+			List<PaymentVariable> pvs = chargingVariables.getChargingVariables();
+			List<VariableIdAndValue> vv = new ArrayList<>();
+			if(pvs != null && pvs.size() > 0) {
+				pvs.forEach(pv -> {
+					VariableIdAndValue variableIdAndValue = new VariableIdAndValue();
+					variableIdAndValue.setVariableId(pv.getVariableIdentifier());
+					variableIdAndValue.setVariableValue(pv.getVariableValue());
+					vv.add(variableIdAndValue);
+				});
+			}
+			feeRule.setVariableIdAndValueList(vv);
+			feeRules.add(feeRule);
+		});
+
+		assetService.paymentExpectancies(command);
 	}
 
 	private void addToFlowCase(Contract contract) {
@@ -752,10 +809,9 @@ public class ContractServiceImpl implements ContractService {
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
 			addToFlowCase(contract);
+			assetService.upodateBillStatusOnContractStatusChange(contract.getContractNumber(), AssetPaymentStrings.CONTRACT_SAVE);
 		}
 		contractSearcher.feedDoc(contract);
-
-
 	}
 
 	@Override
