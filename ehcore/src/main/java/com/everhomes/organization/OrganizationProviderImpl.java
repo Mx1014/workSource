@@ -5202,4 +5202,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				});
 		return list;
 	}
+
+	@Override
+	public List listUserOrganizationByUserId(Long userId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<UserOrganizations> list = new ArrayList<>();
+		context.select().from(Tables.EH_USER_ORGANIZATIONS)
+				.where(Tables.EH_USER_ORGANIZATIONS.USER_ID.eq(userId).and(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.ACTIVE.getCode())))
+				.fetch().map(r->{
+			list.add(ConvertHelper.convert(r,UserOrganizations.class));
+			return null;
+		});
+		return list;
+	}
 }
