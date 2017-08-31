@@ -258,7 +258,22 @@ public class UserProviderImpl implements UserProvider {
             });
         return identifiers;
     }
-    
+
+    @Override
+    public UserIdentifier findUserIdentifiersOfUser(long userId, Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userId));
+        List<UserIdentifier> identifiers = context.select().from(EH_USER_IDENTIFIERS)
+                .where(EH_USER_IDENTIFIERS.OWNER_UID.eq(userId))
+                .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                .fetch().map((Record record) -> {
+                    return ConvertHelper.convert(record, UserIdentifier.class);
+                });
+        if(identifiers == null || identifiers.size() == 0) {
+            return null;
+        }
+        return identifiers.get(0);
+    }
+
     @Caching(evict={@CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid")})
     @Override
     public void createIdentifier(UserIdentifier userIdentifier) {

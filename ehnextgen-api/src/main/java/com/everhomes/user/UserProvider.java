@@ -22,6 +22,7 @@ public interface UserProvider {
     List<User> queryUsers(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
     
     List<UserIdentifier> listUserIdentifiersOfUser(long userId);
+    UserIdentifier findUserIdentifiersOfUser(long userId, Integer namespaceId);
 
     void createIdentifier(UserIdentifier userIdentifier);
     void updateIdentifier(UserIdentifier userIdentifier);

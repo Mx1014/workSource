@@ -17,4 +17,5 @@ public interface IndividualCustomerProvider {
     List<OrganizationOwnerAddress> listOrganizationOwnerAddressByOwnerId(Long ownerId);
     void deleteOrganizationOwnerAddress(OrganizationOwnerAddress address);
     void createOrganizationOwnerAddress(OrganizationOwnerAddress address);
+    OrganizationOwner findOrganizationOwnerById(Long id);
 }

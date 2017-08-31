@@ -1,9 +1,12 @@
 package com.everhomes.customer;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.openapi.ZJGKOpenServiceImpl;
 import com.everhomes.organization.ExecuteImportTaskCallback;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
@@ -65,6 +68,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private FieldProvider fieldProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
+
+    @Autowired
+    private ZJGKOpenServiceImpl zjgkOpenService;
 
     @Override
     public void createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
@@ -1069,5 +1078,35 @@ public class CustomerServiceImpl implements CustomerService {
         });
 
         return dto;
+    }
+
+    @Override
+    public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
+        if(cmd.getNamespaceId() == 999971) {
+            if(cmd.getCommunityId() == null) {
+                zjgkOpenService.syncEnterprises("0", null);
+            } else {
+                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                if(community != null) {
+                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
+                }
+
+            }
+        }
+
+    }
+
+    @Override
+    public void syncIndividualCustomers(SyncCustomersCommand cmd) {
+        if(cmd.getNamespaceId() == 999971) {
+            if(cmd.getCommunityId() == null) {
+                zjgkOpenService.syncIndividuals("0", null);
+            } else {
+                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                if(community != null) {
+                    zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken());
+                }
+            }
+        }
     }
 }

@@ -920,4 +920,33 @@ public class CustomerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /customer/syncEnterpriseCustomers</b>
+     * <p>同步企业客户</p>
+     */
+    @RequestMapping("syncEnterpriseCustomers")
+    @RestReturn(value = String.class)
+    public RestResponse syncEnterpriseCustomers(@Valid SyncCustomersCommand cmd) {
+        customerService.syncEnterpriseCustomers(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /customer/syncIndividualCustomers</b>
+     * <p>同步个人客户</p>
+     */
+    @RequestMapping("syncIndividualCustomers")
+    @RestReturn(value = String.class)
+    public RestResponse syncIndividualCustomers(@Valid SyncCustomersCommand cmd) {
+        customerService.syncIndividualCustomers(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }
