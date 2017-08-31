@@ -64,6 +64,7 @@ import com.everhomes.rest.user.*;
 import com.everhomes.server.schema.tables.pojos.EhBusinessPromotions;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
+import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -1690,6 +1691,11 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Override
 	public UserAddressDTO getUserAddress(GetUserDefaultAddressCommand cmd) {
+		if(null == cmd.getUserId()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter userId null.");
+		}
+
 		UserAddressDTO dto = new UserAddressDTO();
 		Long userId = cmd.getUserId();
 		List<UserServiceAddress> serviceAddresses = userActivityProvider.findUserRelateServiceAddresses(userId);
@@ -1704,6 +1710,23 @@ public class BusinessServiceImpl implements BusinessService {
 		dto.setOrganizationAddresses(orgAddresses);
 
 		return dto;
+	}
+
+	@Override
+	public List<OrganizationDTO> getUserOrganizations(GetUserDefaultAddressCommand cmd) {
+		if(null == cmd.getUserId()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter userId null.");
+		}
+		List<OrganizationDTO> dtos = new ArrayList<>();
+		List<UserOrganizations> userOrganizations = organizationProvider.listUserOrganizationByUserId(cmd.getUserId());
+		for (UserOrganizations userOrganization: userOrganizations) {
+			Organization organizaiton = organizationProvider.findOrganizationById(userOrganization.getOrganizationId());
+			if(null != organizaiton && OrganizationStatus.fromCode(organizaiton.getStatus()) == OrganizationStatus.ACTIVE){
+				dtos.add(ConvertHelper.convert(organizaiton, OrganizationDTO.class));
+			}
+		}
+		return dtos;
 	}
 
 	@Override
