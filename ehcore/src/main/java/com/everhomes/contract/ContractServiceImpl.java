@@ -893,7 +893,7 @@ public class ContractServiceImpl implements ContractService {
 		} else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(dto.getCustomerType()))) {
 			OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(dto.getCustomerId());
 			if(owner != null) {
-				dto.setCustomerName(owner.getName());
+				dto.setCustomerName(owner.getContactName());
 			}
 
 		}
