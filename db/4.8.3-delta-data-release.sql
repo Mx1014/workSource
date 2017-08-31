@@ -228,3 +228,7 @@ UPDATE eh_app_namespace_mappings SET app_key = '24e4f946-a195-4165-b690-8498eb10
 
 -- todo 更新国贸邮政的参数
 -- end by dengs
+
+-- 删除奇怪的数据  add by xq.tian  2017/08/31
+DELETE FROM eh_terminal_app_version_cumulatives
+WHERE namespace_id = 999983 AND imei_number NOT IN (SELECT concat('', id, '') FROM eh_users WHERE namespace_id = 999983);

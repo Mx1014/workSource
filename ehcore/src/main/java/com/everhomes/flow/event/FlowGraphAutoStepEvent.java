@@ -138,8 +138,12 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 		case ABSORT_STEP:
 			tracker = new FlowEventLog();
 			if(ctx.getOperator() != null) {
-				templateMap.put("applierName", ctx.getOperator().getNickName());	
-			}
+                if (ctx.getOperator().getId() == User.SYSTEM_UID) {
+                    templateMap.put("applierName", "系统");
+                } else {
+                    templateMap.put("applierName", ctx.getOperator().getNickName());
+                }
+            }
 			next = ctx.getFlowGraph().getNodes().get(ctx.getFlowGraph().getNodes().size()-1);
 			
 			tracker.setLogContent(flowService.getStepMessageTemplate(nextStep, next.getExpectStatus(), ctx.getCurrentEvent().getUserType(), templateMap));
