@@ -1597,6 +1597,15 @@ public class BusinessServiceImpl implements BusinessService {
 		if(null != area){
 			dto.setAreaName(area.getName());
 		}
+		Community community = this.communityProvider.findCommunityById(address.getCommunityId());
+		if(community != null){
+			dto.setCommunityName(community.getName());
+		}
+
+		Region province = regionProvider.findRegionById(city.getParentId());
+		if(null != province){
+			dto.setProvinceName(province.getName());
+		}
 		return dto;
 	}
 
@@ -1699,9 +1708,34 @@ public class BusinessServiceImpl implements BusinessService {
 		UserAddressDTO dto = new UserAddressDTO();
 		Long userId = cmd.getUserId();
 		List<UserServiceAddress> serviceAddresses = userActivityProvider.findUserRelateServiceAddresses(userId);
-		dto.setServiceAddresses(serviceAddresses.stream().map(r ->{
-			return ConvertHelper.convert(r, UserServiceAddressDTO.class);
-		}).collect(Collectors.toList()));
+		for (UserServiceAddress userServiceAddress: serviceAddresses) {
+			UserServiceAddressDTO userServiceAddressDTO = ConvertHelper.convert(userServiceAddress, UserServiceAddressDTO.class);
+			Address addr = this.addressProvider.findAddressById(userServiceAddress.getAddressId());
+			if(addr == null){
+				LOGGER.error("getUserAddress-error=Address is not found,addressId = {}", userServiceAddress.getAddressId());
+				continue;
+			}
+			Region city = this.regionProvider.findRegionById(addr.getCityId());
+			if(city != null){
+				Region province = this.regionProvider.findRegionById(city.getParentId());
+				if(province != null)
+					userServiceAddressDTO.setProvince(province.getName());
+			}
+			userServiceAddressDTO.setAddressType(AddressType.SERVICE_ADDRESS.getCode());
+			userServiceAddressDTO.setId(addr.getId());
+			userServiceAddressDTO.setCity(addr.getCityName());
+			userServiceAddressDTO.setArea(addr.getAreaName());
+			userServiceAddressDTO.setAddress(addr.getAddress());
+			if(addr.getCommunityId() != null){
+				Community com = this.communityProvider.findCommunityById(addr.getCommunityId());
+				if(com != null){
+					userServiceAddressDTO.setCommunityId(addr.getCommunityId());
+					userServiceAddressDTO.setCommunityName(com.getName());
+				}
+			}
+			userServiceAddressDTO.setUserName(userServiceAddress.getContactName());
+			userServiceAddressDTO.setCallPhone(userServiceAddress.getContactToken());
+		}
 
 		List<FamilyAddressDTO> familyAddresses = listUserFamilyAddresses(userId);
 		dto.setFamilyAddresses(familyAddresses);

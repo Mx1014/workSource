@@ -53,7 +53,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
     @Override
     public String getAppInstanceConfig(Integer namespaceId, String actionData) {
         ServiceAllianceActionData serviceAllianceActionData = (ServiceAllianceActionData)StringHelper.fromJsonString(actionData, ServiceAllianceActionData.class);
-        ServiceAllianceSkipRule rule = yellowPageProvider.getCateorySkipRule(Long.valueOf(serviceAllianceActionData.getType()));
+        ServiceAllianceSkipRule rule = yellowPageProvider.getCateorySkipRule(serviceAllianceActionData.getParentId(), namespaceId);
         ServiceAllianceInstanceConfig serviceAllianceInstanceConfig = new ServiceAllianceInstanceConfig();
         serviceAllianceInstanceConfig.setType(serviceAllianceActionData.getParentId());
         serviceAllianceInstanceConfig.setDisplayType(serviceAllianceActionData.getDisplayType());
