@@ -137,12 +137,23 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		ActivityCategories activityCategory = updateEntry(config, 0L, namespaceId);
 
 		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, activityCategory.getId());
+
 		List<ActivityCategoryDTO> categoryDTOList = new ArrayList<>();
-		if(oldContentCategories != null){
+		config.setCategoryFlag((byte)0);
+		if(oldContentCategories != null && oldContentCategories.size() > 0){
+			config.setCategoryFlag((byte)1);
 			oldContentCategories.forEach(r -> {
 				ActivityCategoryDTO dto = ConvertHelper.convert(r, ActivityCategoryDTO.class);
 				categoryDTOList.add(dto);
 			});
+		}
+
+		//如果没有则增加默认分类
+		if(categoryDTOList.size() ==0){
+			ActivityCategoryDTO newDto = new ActivityCategoryDTO();
+			newDto.setAllFlag(AllFlagType.YES.getCode());
+			newDto.setName("all");
+			categoryDTOList.add(newDto);
 		}
 
 		config.setCategoryDTOList(categoryDTOList);
