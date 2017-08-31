@@ -1042,7 +1042,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 				Condition standardCon = null;
 				for(StandardAndStatus standardAndStatus : standards) {
 					Condition con = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.eq(standardAndStatus.getStandardId());
-					con = con.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(standardAndStatus.getTaskStatus()));
+					con = con.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(standardAndStatus.getTaskStatus()));
 
 					if(standardCon == null) {
 						standardCon = con;

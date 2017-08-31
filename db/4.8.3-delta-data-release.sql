@@ -79,6 +79,23 @@ INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`
 INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ( 'parking.mybay.user', 'ktapi', '深圳湾停车充值用户名', '0', NULL);
 INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ( 'parking.mybay.pwd', '0306A9', '深圳湾停车充值密码', '0', NULL);
 
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('parking.mybay.searchCar.url', 'http://szdas.iok.la:17508', NULL, '0', NULL);
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('parking.kexing.searchCar.parkId', '1', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('parking.kexing.searchCar.url', 'http://220.160.111.114:8099', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('parking.kexing.searchCar.appkey', 'b20887292a374637b4a9d6e9f940b1e6', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('parking.kexing.searchCar.appId', '1', NULL, '0', NULL);
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.url', 'http://52.80.84.86:6060', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.parkId', '135603499041432778216', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.accessKeyId', 'zuolintest', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.xiaomao.accessKeyValue', 'd1913cbeacd1de1783b804e6ee084aa7', NULL, '0', NULL);
+
 
 -- By lei.lv
 -- layout数据

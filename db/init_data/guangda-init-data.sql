@@ -2144,7 +2144,11 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
     VALUES (@id:=@id+1, 999979, 0, 0, 0, '/secondhome', 'peitao', '中港直通车', '中港直通车', 'cs://1/image/aW1hZ2UvTVRwa1pERmlNekUwTTJWbU4yUTRaRGN5T0dabE5UUm1NbUk0T1dWaU5EaGtZUQ', 1, 1, 14, '', 8, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, 17, NULL, 0, NULL);
 
-
+-- 光大资源预约 会议室-删除， 场地预约修改为会议室 by dengs,已在线网执行。
+SET @resourceType_id = select id from eh_rentalv2_resource_types WHERE namespace_id = 999979 AND `NAME` = '场地预约';
+UPDATE eh_launch_pad_items SET action_data = CONCAT('{"resourceTypeId":',@resourceType_id,',"pageType":0,"payMode":1}') WHERE item_group = 'TabGroup' AND item_label = '会议室';
+DELETE FROM eh_rentalv2_resource_types WHERE namespace_id = 999979 AND `NAME` = '会议室';
+UPDATE eh_rentalv2_resource_types SET `name` = '会议室' WHERE namespace_id = 999979 AND `NAME` = '场地预约';
 
 
 
