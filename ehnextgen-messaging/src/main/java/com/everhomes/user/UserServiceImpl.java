@@ -2739,8 +2739,15 @@ public class UserServiceImpl implements UserService {
 			}else{
 				LOGGER.debug("The default scene was not found");
 			}
+		}else{
+			// 当用户既没有选择家庭、也没有在某个公司内时，他有可能选过某个小区/园区，此时也把对应域空间下所选的小区作为场景 by lqs 2010416
+			if(sceneList.size() == 0) {
+				SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
+				if(communityScene != null) {
+					sceneList.add(communityScene);
+				}
+			}
 		}
-		Collections.reverse(sceneList);
 		return sceneList;
 	}
 
@@ -3037,7 +3044,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		// 为了避免用户每次都需要选择一个小区，需要调用原来的设置小区流程 by lqs 20160416
-		setUserCurrentCommunity(cmd.getCommunityId());
+//		setUserCurrentCommunity(cmd.getCommunityId());
 
 		// 把下面代码移到listUserRelatedScenes()里做为通用流程，即列场景时按统一条件列小区场景 by lqs 20160416 
 		//        CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
