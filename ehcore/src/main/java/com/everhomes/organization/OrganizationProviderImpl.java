@@ -1873,7 +1873,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      * modify cause member_detail by lei lv
      **/
     @Override
-    public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback) {
+    public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         pageSize = pageSize + 1;
         List<OrganizationMember> result = new ArrayList<>();
@@ -1899,6 +1899,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (null != visibleFlag) {
             cond = cond.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
         }
+
+		// 员工状态
+		if(listCommand.getEmployeeStatus() != null){
+			cond = cond.and(t2.field("employee_status").eq(listCommand.getEmployeeStatus()));
+		}
+
+		// 合同主体
+		if(listCommand.getContractPartyId() != null){
+			cond = cond.and(t2.field("contract_id").eq(listCommand.getContractPartyId()));
+		}
+
+		//工作地点
+
 
         condition = condition.and(cond);
         if (null != locator && null != locator.getAnchor())
