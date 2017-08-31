@@ -846,7 +846,7 @@ public class PunchServiceImpl implements PunchService {
 		Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr,logDay.getTime(),userId);
 
 
-		if (null != ptrId   || ptrId == 0L){
+		if (null == ptrId || ptrId == 0L){
 
 			if(null != ptrId  ) {
 				punchDayLog.setTimeRuleId(ptrId);
