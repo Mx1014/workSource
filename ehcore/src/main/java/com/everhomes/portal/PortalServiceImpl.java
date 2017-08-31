@@ -37,6 +37,7 @@ import com.everhomes.rest.portal.LaunchPadLayoutJson;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.widget.*;
+import com.everhomes.rest.widget.NewsInstanceConfig;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.Tables;
@@ -1576,7 +1577,7 @@ public class PortalServiceImpl implements PortalService {
 			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
 			item.setActionType(moduleApp.getActionType());
 			if(null != handler){
-				String instanceConfig = handler.publish(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig());
+				String instanceConfig = handler.publish(moduleApp.getNamespaceId(), moduleApp.getInstanceConfig(), item.getItemLabel());
 				moduleApp.setInstanceConfig(instanceConfig);
 				serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
 				item.setActionData(handler.getItemActionData(moduleApp.getNamespaceId(), instanceConfig));
@@ -1743,27 +1744,33 @@ public class PortalServiceImpl implements PortalService {
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.OPPUSH){
 						OPPushInstanceConfig instanceConfig = (OPPushInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), OPPushInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
-						Long moduleId = null;
-						if(OPPushWidgetStyle.LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
-							moduleId = 10600L;
-						}else if(OPPushWidgetStyle.LARGE_IMAGE_LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
-							moduleId = 40500L;
-						}
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						List<LaunchPadItem> padItems = launchPadProvider.listLaunchPadItemsByItemGroup(padLayout.getNamespaceId(), "/home", instanceConfig.getItemGroup());
 						if(padItems.size() > 0){
 							config.setTitleFlag(TitleFlag.TRUE.getCode());
 							config.setTitle(padItems.get(0).getItemLabel());
-							UrlActionData urlData = (UrlActionData)StringHelper.fromJsonString(padItems.get(0).getActionData(), UrlActionData.class);
-							config.setBizUrl(urlData.getUrl());
-						}
-						if(null != moduleId){
-							List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(padLayout.getNamespaceId(), moduleId);
-							if(moduleApps.size() > 0){
-								config.setModuleAppId(moduleApps.get(0).getId());
+
+							Long moduleId = null;
+							if(OPPushWidgetStyle.LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
+								moduleId = 10600L;
+								itemGroup.setContentType(EntityType.ACTIVITY.getCode());
+							}else if(OPPushWidgetStyle.LARGE_IMAGE_LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
+								moduleId = 40500L;
+								itemGroup.setContentType(EntityType.SERVICE_ALLIANCE.getCode());
+							}else{
+								UrlActionData urlData = (UrlActionData)StringHelper.fromJsonString(padItems.get(0).getActionData(), UrlActionData.class);
+								config.setBizUrl(urlData.getUrl());
+								itemGroup.setContentType(EntityType.BIZ.getCode());
 							}
+
+							if(null != moduleId){
+								LaunchPadItem padItem = padItems.get(0);
+								ServiceModuleApp moduleApp = syncServiceModuleApp(itemGroup.getNamespaceId(), padItem.getActionData(), padItem.getActionType(), padItem.getItemLabel());
+								config.setModuleAppId(moduleApp.getId());
+							}
+							itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
 						}
-						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
+
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.TAB){
 						TabInstanceConfig instanceConfig = (TabInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), TabInstanceConfig.class);
@@ -1773,24 +1780,24 @@ public class PortalServiceImpl implements PortalService {
 						syncItem(itemGroup.getNamespaceId(), location, itemGroup.getName(), itemGroup.getId());
 
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NEWS){
+						Long moduleId = 10800L;
+						ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(moduleId);
 						NewsInstanceConfig instanceConfig = (NewsInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), NewsInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
-						Long moduleId = 10900L;
-						List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(padLayout.getNamespaceId(), moduleId);
-						if(moduleApps.size() > 0){
-							config.setModuleAppId(moduleApps.get(0).getId());
-						}
+						ServiceModuleApp moduleApp = syncServiceModuleApp(itemGroup.getNamespaceId(), StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), serviceModule.getActionType(), itemGroup.getName());
+						config.setModuleAppId(moduleApp.getId());
+						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NEWS_FLASH){
 						NewsFlashInstanceConfig instanceConfig = (NewsFlashInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), NewsFlashInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
-						Long moduleId = 10900L;
-						List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(padLayout.getNamespaceId(), moduleId);
-						if(moduleApps.size() > 0){
-							config.setModuleAppId(moduleApps.get(0).getId());
-						}
+						Long moduleId = 10800L;
+						ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(moduleId);
+						ServiceModuleApp moduleApp = syncServiceModuleApp(itemGroup.getNamespaceId(), StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), serviceModule.getActionType(), itemGroup.getName());
+						config.setModuleAppId(moduleApp.getId());
+						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 					}
 				}
@@ -1886,7 +1893,7 @@ public class PortalServiceImpl implements PortalService {
 				}else{
 					item.setActionType(PortalItemActionType.MODULEAPP.getCode());
 					ModuleAppActionData actionData = new ModuleAppActionData();
-					ServiceModuleApp moduleApp= syncServiceModuleApp(padItem);
+					ServiceModuleApp moduleApp= syncServiceModuleApp(padItem.getNamespaceId(), padItem.getActionData(), padItem.getActionType(), padItem.getItemLabel());
 					actionData.setModuleAppId(moduleApp.getId());
 					item.setActionData(StringHelper.toJsonString(actionData));
 				}
@@ -1907,29 +1914,29 @@ public class PortalServiceImpl implements PortalService {
 		}
 	}
 
-	private ServiceModuleApp syncServiceModuleApp(LaunchPadItem padItem){
+	private ServiceModuleApp syncServiceModuleApp(Integer namespaceId, String actionData, Byte actionType, String itemLabel){
 		User user = UserContext.current().getUser();
 		ServiceModuleApp moduleApp = new ServiceModuleApp();
-		moduleApp.setInstanceConfig(padItem.getActionData());
-		moduleApp.setActionType(padItem.getActionType());
-		moduleApp.setName(padItem.getItemLabel());
-		moduleApp.setNamespaceId(padItem.getNamespaceId());
+		moduleApp.setInstanceConfig(actionData);
+		moduleApp.setActionType(actionType);
+		moduleApp.setName(itemLabel);
+		moduleApp.setNamespaceId(namespaceId);
 		moduleApp.setStatus(ServiceModuleAppStatus.ACTIVE.getCode());
 		moduleApp.setCreatorUid(user.getId());
 		moduleApp.setOperatorUid(user.getId());
-		List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(padItem.getActionType());
-		if(serviceModules.size() == 0 || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(padItem.getActionType())
-				|| ActionType.ROUTER  == ActionType.fromCode(padItem.getActionType())){
+		List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(actionType);
+		if(serviceModules.size() == 0 || ActionType.OFFLINE_WEBAPP  == ActionType.fromCode(actionType)
+				|| ActionType.ROUTER  == ActionType.fromCode(actionType)){
 
 		}else{
 			ServiceModule serviceModule = serviceModules.get(0);
 			moduleApp.setModuleId(serviceModule.getId());
 			if(MultipleFlag.fromCode(serviceModule.getMultipleFlag()) == MultipleFlag.YES){
 				PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
-//				if(null != handler){
-//					String instanceConfig = handler.getAppInstanceConfig(padItem.getActionData());
-//					moduleApp.setInstanceConfig(instanceConfig);
-//				}
+				if(null != handler){
+					String instanceConfig = handler.getAppInstanceConfig(namespaceId, actionData);
+					moduleApp.setInstanceConfig(instanceConfig);
+				}
 			}
 		}
 		serviceModuleAppProvider.createServiceModuleApp(moduleApp);

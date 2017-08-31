@@ -3,14 +3,17 @@ package com.everhomes.activity;
 
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.rest.activity.*;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + ServiceModuleConstants.ACTIVITY_MODULE)
 public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
     private static final Logger LOGGER=LoggerFactory.getLogger(ActivityPortalPublishHandler.class);
@@ -29,7 +32,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 * @param instanceConfig 具体模块配置的参数
 	 * @return
 	 */
-	public String publish(Integer namespaceId, String instanceConfig){
+	public String publish(Integer namespaceId, String instanceConfig, String itemLabel){
 
 		LOGGER.info("ActivityPortalPublishHandler publish start namespaceId = {}, instanceConfig = {}", namespaceId, instanceConfig);
 
