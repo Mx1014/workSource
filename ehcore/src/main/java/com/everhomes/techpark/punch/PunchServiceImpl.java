@@ -965,29 +965,28 @@ public class PunchServiceImpl implements PunchService {
 				}
 			}
 //			 
-//			
-			/**最早上班时间*/
-			Calendar startMinTime = Calendar.getInstance();
-			/**最晚上班时间*/
-			Calendar startMaxTime = Calendar.getInstance();
+//
+			long realWorkTime = leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis();
+			if(null != punchTimeRule.getNoonLeaveTimeLong()) {
+				/**最早上班时间*/
+				Calendar startMinTime = Calendar.getInstance();
+				/**最晚上班时间*/
+				Calendar startMaxTime = Calendar.getInstance();
 //			Calendar workTime = Calendar.getInstance();
-			startMinTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime()+ punchTimeRule.getStartEarlyTimeLong()); 
-			startMaxTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime()+ punchTimeRule.getStartLateTimeLong());
+				startMinTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getStartEarlyTimeLong());
+				startMaxTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getStartLateTimeLong());
 //			workTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getWorkTimeLong()); 
-			Calendar AfternoonArriveCalendar = Calendar.getInstance();
-			AfternoonArriveCalendar.setTimeInMillis((punchLogs.get(0).getPunchDate().getTime()+
-					(punchTimeRule.getAfternoonArriveTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getAfternoonArriveTime()):punchTimeRule.getAfternoonArriveTimeLong())));
-			Calendar NoonLeaveTimeCalendar = Calendar.getInstance();
-			NoonLeaveTimeCalendar.setTimeInMillis((punchLogs.get(0).getPunchDate().getTime()+
-					(punchTimeRule.getNoonLeaveTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getNoonLeaveTime()):punchTimeRule.getNoonLeaveTimeLong())));
-			 
-			long realWorkTime = 0L;  
-			if(leaveCalendar.after(AfternoonArriveCalendar)&&arriveCalendar.before(NoonLeaveTimeCalendar)){ 
-				realWorkTime = leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis()
-					- punchTimeRule.getAfternoonArriveTime().getTime() + punchTimeRule.getNoonLeaveTime().getTime();
-			}else {
-				realWorkTime = leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis();
-						
+				Calendar AfternoonArriveCalendar = Calendar.getInstance();
+				AfternoonArriveCalendar.setTimeInMillis((punchLogs.get(0).getPunchDate().getTime() +
+						punchTimeRule.getAfternoonArriveTimeLong()));
+				Calendar NoonLeaveTimeCalendar = Calendar.getInstance();
+				NoonLeaveTimeCalendar.setTimeInMillis((punchLogs.get(0).getPunchDate().getTime() +
+						punchTimeRule.getNoonLeaveTimeLong()));
+
+				if (leaveCalendar.after(AfternoonArriveCalendar) && arriveCalendar.before(NoonLeaveTimeCalendar)) {
+					realWorkTime = leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis()
+							- punchTimeRule.getAfternoonArriveTime().getTime() + punchTimeRule.getNoonLeaveTime().getTime();
+				}
 			}
 			punchDayLog.setWorkTime( convertTime(realWorkTime) );
 		}
@@ -4816,6 +4815,7 @@ public class PunchServiceImpl implements PunchService {
         punCalendar.setTime(runDate);
         Long timeLong = getTimeLong(punCalendar);
         Calendar yesterday = Calendar.getInstance();
+		yesterday.setTime(runDate);
         yesterday.add(Calendar.DAY_OF_MONTH, -1);
         //找今天刷新的(当前时间点前15分钟 到当前时间点之间split的
         List<PunchTimeRule> timeRules = punchProvider.listPunchTimeRulesBySplitTime(timeLong - refreshGap * 60 * 1000,
