@@ -885,10 +885,19 @@ public class ContractServiceImpl implements ContractService {
 			dto.setCreatorName(creator.getNickName());
 		}
 
-		EnterpriseCustomer customer = enterpriseCustomerProvider.findById(dto.getCustomerId());
-		if(customer != null) {
-			dto.setCustomerName(customer.getName());
+		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(dto.getCustomerType()))) {
+			EnterpriseCustomer customer = enterpriseCustomerProvider.findById(dto.getCustomerId());
+			if(customer != null) {
+				dto.setCustomerName(customer.getName());
+			}
+		} else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(dto.getCustomerType()))) {
+			OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(dto.getCustomerId());
+			if(owner != null) {
+				dto.setCustomerName(owner.getName());
+			}
+
 		}
+
 		if(contract.getParentId() != null) {
 			Contract parentContract = contractProvider.findContractById(contract.getParentId());
 			if(parentContract != null) {
