@@ -26,6 +26,9 @@ public class CommunityMapBuildingDetailDTO {
 
     private String description;
 
+    private Double centerLongitude;
+    private Double centerLatitude;
+
     @ItemType(BuildingAttachmentDTO.class)
     private List<BuildingAttachmentDTO> attachments;
 
@@ -37,6 +40,22 @@ public class CommunityMapBuildingDetailDTO {
 
     @ItemType(CommunityMapShopDTO.class)
     private List<CommunityMapShopDTO> shops;
+
+    public Double getCenterLongitude() {
+        return centerLongitude;
+    }
+
+    public void setCenterLongitude(Double centerLongitude) {
+        this.centerLongitude = centerLongitude;
+    }
+
+    public Double getCenterLatitude() {
+        return centerLatitude;
+    }
+
+    public void setCenterLatitude(Double centerLatitude) {
+        this.centerLatitude = centerLatitude;
+    }
 
     public String getDescription() {
         return description;
