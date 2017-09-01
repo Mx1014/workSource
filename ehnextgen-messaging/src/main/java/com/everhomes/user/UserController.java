@@ -1291,10 +1291,10 @@ public class UserController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /user/VerificationCodeForBindPhoneCommand</b>
+	 * <b>URL: /user/verificationCodeForBindPhone</b>
 	 * <p>发送验证码</p>
 	 */
-	@RequestMapping("VerificationCodeForBindPhoneCommand")
+	@RequestMapping("verificationCodeForBindPhone")
 	@RestReturn(value = VerificationCodeForBindPhoneResponse.class)
 	public RestResponse verificationCodeForBindPhone(@Valid VerificationCodeForBindPhoneCommand cmd) {
 		VerificationCodeForBindPhoneResponse response = userService.verificationCodeForBindPhone(cmd);
