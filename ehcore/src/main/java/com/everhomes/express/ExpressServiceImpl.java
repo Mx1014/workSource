@@ -528,11 +528,12 @@ public class ExpressServiceImpl implements ExpressService {
 		UserContext.current().setUser(new User(1L));
 		Long orderId = Long.valueOf(cmd.getOrderNo());
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + orderId).enter(() -> {
+			//为什么用id，我也不知道。参考下单用的id
 			ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(orderId);
 			if (expressOrder == null) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists order, orderId="+orderId);
 			}
-			if (!expressOrder.getPaySummary().equals(new BigDecimal(cmd.getPayAmount()))) {
+			if (0!=expressOrder.getPaySummary().compareTo(new BigDecimal(cmd.getPayAmount()))) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "order money error, paySummary="+expressOrder.getPaySummary()+", payAmout="+cmd.getPayAmount());
 			}
 			//modify by dengs,20170817,支付需要干什么，各个快递公司流程不一样
