@@ -675,7 +675,7 @@ public class AssetServiceImpl implements AssetService {
             Map<String,String> variableMap = new HashMap<>();
             for(int k = 0; k< variableIdAndValueList.size(); k++){
                 VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
-                variableMap.put((String)variableIdAndValue.getVariableId(),(String)variableIdAndValue.getVariableValue());
+                variableMap.put((String)variableIdAndValue.getVariableId(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
             }
             json = gson.toJson(variableMap, Map.class);
             PaymentContractReceiver entity = new PaymentContractReceiver();
