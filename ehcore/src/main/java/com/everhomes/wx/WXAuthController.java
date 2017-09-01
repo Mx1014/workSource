@@ -182,7 +182,7 @@ public class WXAuthController {// extends ControllerBase
 
         //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
         checkRedirectUserIdentifier(request, response, namespaceId);
-        
+
         // 登录成功则跳转到原来访问的链接
         LOGGER.info("Process weixin auth request, loginToken={}", loginToken);
         String sourceUrl = params.get(KEY_SOURCE_URL);
@@ -256,7 +256,7 @@ public class WXAuthController {// extends ControllerBase
         UserIdentifier identifier = userService.getUserIdentifier(loginToken.getUserId());
         if( identifier == null || identifier.getIdentifierToken() == null){
             String homeUrl = configurationProvider.getValue(namespaceId, "home.url", "");
-            String bindPhoneUrl = configurationProvider.getValue(WeChatConstant.WX_BIND_PHONE_URL, "");
+            String bindPhoneUrl = configurationProvider.getValue(namespaceId, WeChatConstant.WX_BIND_PHONE_URL, "");
             LOGGER.info("checkUserIdentifier fail redirect to bind phone Url, url={}", bindPhoneUrl);
             redirectByWx(response, homeUrl + bindPhoneUrl);
         }
