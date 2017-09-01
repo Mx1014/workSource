@@ -1728,6 +1728,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Override
     public ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(SearchEnterpriseCommunityCommand cmd) {
+        if(cmd.getCommunityType() == null){
+            LOGGER.debug("CommunityType Is Invalid" + cmd.getCommunityType());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
+
+        }
         return null;
     }
 
