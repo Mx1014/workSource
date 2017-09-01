@@ -807,7 +807,7 @@ public class PunchServiceImpl implements PunchService {
 			if (arrStatus.equals(String.valueOf(PunchStatus.BELATE.getCode()))) {
 				status = String.valueOf(PunchStatus.BLANDLE.getCode());
 			} else if (arrStatus.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
-				status = String.valueOf(PunchStatus.BELATE.getCode());
+				status = String.valueOf(PunchStatus.LEAVEEARLY.getCode());
 			}
 		} else if (leaveStatus.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
 			status = arrStatus ;
