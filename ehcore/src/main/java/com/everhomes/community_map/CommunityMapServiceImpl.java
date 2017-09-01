@@ -169,6 +169,18 @@ public class CommunityMapServiceImpl implements CommunityMapService {
 
         List<CommunityMapBuildingDTO> dtos = buildings.stream().map(r -> {
             CommunityMapBuildingDTO dto = ConvertHelper.convert(r, CommunityMapBuildingDTO.class);
+
+            List<CommunityBuildingGeo> geos = communityMapProvider.listCommunityBuildingGeos(r.getId());
+
+            if (!geos.isEmpty()) {
+                CommunityBuildingGeo centerGeo = geos.get(geos.size() - 1);
+                geos.remove(centerGeo);
+                dto.setCenterLatitude(centerGeo.getLatitude());
+                dto.setCenterLongitude(centerGeo.getLongitude());
+                dto.setGeos(geos.stream().map(g -> ConvertHelper.convert(g, CommunityMapBuildingGeoDTO.class))
+                        .collect(Collectors.toList()));
+            }
+
             return  dto;
         }).collect(Collectors.toList());
         response.setBuildings(dtos);
@@ -246,6 +258,18 @@ public class CommunityMapServiceImpl implements CommunityMapService {
             if (null != building) {
                 CommunityMapBuildingDTO buildingDTO = ConvertHelper.convert(building, CommunityMapBuildingDTO.class);
                 buildingDTO.setApartments(temp.get(r));
+
+                List<CommunityBuildingGeo> geos = communityMapProvider.listCommunityBuildingGeos(building.getId());
+
+                if (!geos.isEmpty()) {
+                    CommunityBuildingGeo centerGeo = geos.get(geos.size() - 1);
+                    geos.remove(centerGeo);
+                    buildingDTO.setCenterLatitude(centerGeo.getLatitude());
+                    buildingDTO.setCenterLongitude(centerGeo.getLongitude());
+                    buildingDTO.setGeos(geos.stream().map(g -> ConvertHelper.convert(g, CommunityMapBuildingGeoDTO.class))
+                            .collect(Collectors.toList()));
+                }
+
                 buildings.add(buildingDTO);
             }
         });
@@ -269,6 +293,16 @@ public class CommunityMapServiceImpl implements CommunityMapService {
 
         dto.setOrganizations(orgResponse.getOrganizations());
         dto.setShops(shopResponse.getShops());
+
+        List<CommunityBuildingGeo> geos = communityMapProvider.listCommunityBuildingGeos(cmd.getBuildingId());
+
+        if (!geos.isEmpty()) {
+
+            CommunityBuildingGeo centerGeo = geos.get(geos.size() - 1);
+            dto.setCenterLatitude(centerGeo.getLatitude());
+            dto.setCenterLongitude(centerGeo.getLongitude());
+
+        }
         return dto;
     }
 
