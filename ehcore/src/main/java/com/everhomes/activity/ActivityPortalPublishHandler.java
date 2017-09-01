@@ -45,22 +45,17 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		config.setId(activityCategory.getId());
 		config.setEntryId(activityCategory.getEntryId());
 
-		//如果categoryFlag为否，则删掉category
-		if(config.getCategoryFlag() == null && config.getCategoryFlag() == 0){
-			config.setCategoryDTOList(null);
-		}
-
 		//删除内容分类
 		deleteContentCategory(config, namespaceId);
 
 		//如果没有则增加默认分类
 		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() ==0){
-			List<ActivityCategoryDTO> listDto = new ArrayList<>();
-			ActivityCategoryDTO newDto = new ActivityCategoryDTO();
-			newDto.setAllFlag(AllFlagType.YES.getCode());
-			newDto.setName("all");
-			listDto.add(newDto);
-			config.setCategoryDTOList(listDto);
+				List<ActivityCategoryDTO> listDto = new ArrayList<>();
+				ActivityCategoryDTO newDto = new ActivityCategoryDTO();
+				newDto.setAllFlag(AllFlagType.YES.getCode());
+				newDto.setName("all");
+				listDto.add(newDto);
+				config.setCategoryDTOList(listDto);
 
 		}
 
@@ -195,7 +190,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 	private void updateContentCategory(ActivityEntryConfigulation config, ActivityCategories parentCategory, Integer namespaceId){
 
-		if(config.getCategoryDTOList() != null && config.getCategoryDTOList().size() > 0){
+		if(config.getCategoryFlag() == 1){
 
 			//新增、更新入口
 			Long maxEntryId = activityProvider.findActivityCategoriesMaxEntryId(namespaceId);
@@ -248,7 +243,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		}
 
 		//新发布的没有则删除全部，如果有则一个个对比
-		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
+		if(config.getCategoryFlag() == 0 || config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
 			for(int i=0; i<oldContentCategories.size(); i++){
 				activityProvider.deleteActivityCategories(oldContentCategories.get(i).getId());
 			}
