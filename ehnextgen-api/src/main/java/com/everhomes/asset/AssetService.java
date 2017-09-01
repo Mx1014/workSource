@@ -81,5 +81,9 @@ public interface AssetService {
 
     PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd);
 
+    void exportRentalExcelTemplate(HttpServletResponse response);
+
+    FindUserInfoForPaymentDTO findUserInfoForPayment(FindUserInfoForPaymentCommand cmd);
+
 //    void synchronizeZJGKBill();
 }

@@ -13,7 +13,6 @@ public class ListBillDetailVO {
     private Long billId;
     private Long billGroupId;
     private String dateStr;
-    private String contractNO;
     private String noticeTel;
     private String targetName;
     private String targetType;
@@ -22,6 +21,7 @@ public class ListBillDetailVO {
     private Long targetId;
     @ItemType(BillGroupDTO.class)
     private BillGroupDTO billGroupDTO;
+    private String contractNum;
 
     public String getDateStr() {
         return dateStr;
@@ -39,6 +39,14 @@ public class ListBillDetailVO {
         this.buildingName = buildingName;
     }
 
+    public String getContractNum() {
+        return contractNum;
+    }
+
+    public void setContractNum(String contractNum) {
+        this.contractNum = contractNum;
+    }
+
     public String getApartmentName() {
         return apartmentName;
     }
@@ -47,9 +55,6 @@ public class ListBillDetailVO {
         this.apartmentName = apartmentName;
     }
 
-    public String getContractNO() {
-        return contractNO;
-    }
 
     public Long getBillGroupId() {
         return billGroupId;
@@ -67,9 +72,6 @@ public class ListBillDetailVO {
         this.billId = billId;
     }
 
-    public void setContractNO(String contractNO) {
-        this.contractNO = contractNO;
-    }
 
     public String getNoticeTel() {
         return noticeTel;

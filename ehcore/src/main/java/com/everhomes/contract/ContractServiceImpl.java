@@ -19,7 +19,10 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.AssetPaymentStrings;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.AssetVendor;
+import com.everhomes.asset.AssetVendorHandler;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
@@ -28,6 +31,8 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.pm.CommunityAddressMapping;
@@ -40,6 +45,7 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.repeat.RangeDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
@@ -440,6 +446,17 @@ public class ContractServiceImpl implements ContractService {
 		
 		return new ListContractsResponse(null, resultList);
 	}
+
+
+	@Override
+	public List<Object> findCustomerByContractNum(String contractNum,Long ownerId,String ownerType) {
+		if(UserContext.getCurrentNamespaceId()== 999971){
+			//找张江高科
+//			return null;
+		}
+		return contractProvider.findCustomerByContractNum(contractNum);
+	}
+
 
 	private void checkContractNumberUnique(Integer namespaceId, String contractNumber) {
 		Contract contract = contractProvider.findActiveContractByContractNumber(namespaceId, contractNumber);

@@ -18,6 +18,7 @@ import java.util.List;
  * <li>dateStr:账期</li>
  * <li>targetType:客户类别</li>
  * <li>targetId:客户id</li>
+ * <li>contractNum:合同编号</li>
  * <li>noticeTel:催缴电话</li>
  * <li>targetName:客户名称</li>
  * <li>billGroupDTO:账单组数据，参考{@link com.everhomes.rest.asset.BillGroupDTO}</li>
@@ -34,6 +35,7 @@ public class CreateBillCommand {
     private String targetName;
     private String targetType;
     private Long targetId;
+    private String contractNum;
     private String dateStr;
     @ItemType(BillGroupDTO.class)
     private BillGroupDTO billGroupDTO;
@@ -45,6 +47,14 @@ public class CreateBillCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getContractNum() {
+        return contractNum;
+    }
+
+    public void setContractNum(String contractNum) {
+        this.contractNum = contractNum;
     }
 
     public String getOwnerType() {

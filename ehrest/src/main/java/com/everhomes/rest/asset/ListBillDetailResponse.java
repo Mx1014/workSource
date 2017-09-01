@@ -11,7 +11,7 @@ import java.util.List;
  *<ul>
  * <li>billId:账单id</li>
  * <li>dateStr:账期</li>
- * <li>contractNO:合同号</li>
+ * <li>contractNum:合同编号</li>
  * <li>buildingName: 楼栋名称</li>
  * <li>apartmentName: 门牌名称</li>
  * <li>noticeTel:催缴电话</li>
@@ -25,7 +25,6 @@ public class ListBillDetailResponse {
     private Long billId;
     private Long billGroupId;
     private String dateStr;
-    private String contractNO;
     private String buildingName;
     private String apartmentName;
     private String noticeTel;
@@ -34,6 +33,7 @@ public class ListBillDetailResponse {
     private Long targetId;
     @ItemType(BillGroupDTO.class)
     private BillGroupDTO billGroupDTO;
+    private String contractNum;
 
 
     @Override
@@ -43,6 +43,14 @@ public class ListBillDetailResponse {
 
     public String getDateStr() {
         return dateStr;
+    }
+
+    public String getContractNum() {
+        return contractNum;
+    }
+
+    public void setContractNum(String contractNum) {
+        this.contractNum = contractNum;
     }
 
     public Long getBillGroupId() {
@@ -81,14 +89,6 @@ public class ListBillDetailResponse {
         this.targetId = targetId;
     }
 
-    public String getContractNO() {
-        return contractNO;
-
-    }
-
-    public void setContractNO(String contractNO) {
-        this.contractNO = contractNO;
-    }
 
     public String getBuildingName() {
         return buildingName;

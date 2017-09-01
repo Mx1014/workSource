@@ -24,7 +24,7 @@ public interface AssetVendorHandler {
 
     List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds);
 
-    ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOnlyOwedBill);
+    ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOnlyOwedBill,String contractNum);
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 

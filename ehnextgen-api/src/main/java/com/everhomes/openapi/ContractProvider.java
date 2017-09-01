@@ -42,8 +42,12 @@ public interface ContractProvider {
 
 	Contract findActiveContractByContractNumber(Integer namespaceId, String contractNumber);
 
+
+    List<Object> findCustomerByContractNum(String contractNum);
+
 	void createContractParam(ContractParam param);
 	void updateContractParam(ContractParam param);
 	ContractParam findContractParamByCommunityId(Long communityId);
 	Map<Long, List<Contract>> listContractGroupByCommunity();
+
 }

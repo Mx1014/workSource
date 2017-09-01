@@ -55,7 +55,7 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
     private OrganizationProvider organizationProvider;
 
     @Override
-    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill) {
+    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
         Map<String,String> map = new HashMap<>();
         String payFlag = "";
         Community communityById = new Community();

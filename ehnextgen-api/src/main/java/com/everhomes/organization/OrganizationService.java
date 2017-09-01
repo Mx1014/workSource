@@ -529,5 +529,4 @@ public interface OrganizationService {
 
 	ListOrganizationMemberCommandResponse syncOrganizationMemberStatus();
 
-    List<ListAddressIdsByOrganizationIdDTO> listAddressIdsByOrganizationId(Long organizationId);
 }
