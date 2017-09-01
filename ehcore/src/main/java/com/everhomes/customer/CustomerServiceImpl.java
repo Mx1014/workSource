@@ -79,7 +79,7 @@ public class CustomerServiceImpl implements CustomerService {
     private OrganizationService organizationService;
 
     @Override
-    public void createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
+    public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setNamespaceId(UserContext.getCurrentNamespaceId());
         if(cmd.getCorpEntryDate() != null) {
@@ -91,6 +91,8 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setOrganizationId(organizationDTO.getId());
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
+
+        return ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
     }
 
     private OrganizationDTO createOrganization(EnterpriseCustomer customer) {
@@ -110,7 +112,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd) {
+    public EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         updateCustomer.setNamespaceId(customer.getNamespaceId());
@@ -141,6 +143,7 @@ public class CustomerServiceImpl implements CustomerService {
             organizationService.updateEnterprise(command, false);
         }
 
+        return ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
     }
 
     @Override

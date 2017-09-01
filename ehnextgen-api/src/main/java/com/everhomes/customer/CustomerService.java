@@ -10,8 +10,8 @@ import java.util.List;
  * Created by ying.xiong on 2017/8/15.
  */
 public interface CustomerService {
-    void createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd);
-    void updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd);
+    EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd);
+    EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd);
     void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd);
     SearchEnterpriseCustomerResponse searchEnterpriseCustomer(SearchEnterpriseCustomerCommand cmd);
     ImportFileTaskDTO importEnterpriseCustomer(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId);
