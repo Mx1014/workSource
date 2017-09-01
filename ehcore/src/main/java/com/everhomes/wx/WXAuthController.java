@@ -179,6 +179,9 @@ public class WXAuthController {// extends ControllerBase
             sendAuthRequestToWeixin(namespaceId, sessionId, params, response);
             return;
         }
+
+        //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
+        checkRedirectUserIdentifier(request, response, namespaceId);
         
         // 登录成功则跳转到原来访问的链接
         LOGGER.info("Process weixin auth request, loginToken={}", loginToken);
@@ -234,14 +237,7 @@ public class WXAuthController {// extends ControllerBase
             }
 
             //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
-            loginToken = userService.getLoginToken(request);
-            UserIdentifier identifier = userService.getUserIdentifier(loginToken.getUserId());
-            if( identifier == null || identifier.getIdentifierToken() == null){
-                String homeUrl = configurationProvider.getValue(namespaceId, "home.url", "");
-                String bindPhoneUrl = configurationProvider.getValue(WeChatConstant.WX_BIND_PHONE_URL, "");
-                LOGGER.info("checkUserIdentifier fail redirect to bind phone Url, url={}", bindPhoneUrl);
-                redirectByWx(response, homeUrl + bindPhoneUrl);
-            }
+            checkRedirectUserIdentifier(request, response, namespaceId);
 
             String sourceUrl = params.get(KEY_SOURCE_URL);
             redirectByWx(response, sourceUrl);
@@ -253,6 +249,19 @@ public class WXAuthController {// extends ControllerBase
             LOGGER.info("Process weixin auth request(callback calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
 	}
+
+	private void checkRedirectUserIdentifier(HttpServletRequest request, HttpServletResponse response, Integer namespaceId){
+        //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
+        LoginToken loginToken = userService.getLoginToken(request);
+        UserIdentifier identifier = userService.getUserIdentifier(loginToken.getUserId());
+        if( identifier == null || identifier.getIdentifierToken() == null){
+            String homeUrl = configurationProvider.getValue(namespaceId, "home.url", "");
+            String bindPhoneUrl = configurationProvider.getValue(WeChatConstant.WX_BIND_PHONE_URL, "");
+            LOGGER.info("checkUserIdentifier fail redirect to bind phone Url, url={}", bindPhoneUrl);
+            redirectByWx(response, homeUrl + bindPhoneUrl);
+        }
+
+    }
 	
 	private Map<String, String> getRequestParams(HttpServletRequest request) {
 	    Map<String, String> params = new HashMap<String, String>();
