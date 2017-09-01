@@ -7004,6 +7004,7 @@ public class PunchServiceImpl implements PunchService {
 			MonthDayStatusDTO dto = new MonthDayStatusDTO();
 			if(null!=log){
 				dto = ConvertHelper.convert(log, MonthDayStatusDTO.class);
+				dto.setPunchDate(log.getPunchDate().getTime());
 				if (null == log.getStatusList()) {
 					dto.setExceptionStatus(log.getStatus().equals(PunchStatus.NORMAL.getCode()) ?
 							ExceptionStatus.NORMAL.getCode() : ExceptionStatus.EXCEPTION.getCode());
