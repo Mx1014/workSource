@@ -381,6 +381,7 @@ public class PortalServiceImpl implements PortalService {
 		portalItemGroup.setInstanceConfig(cmd.getInstanceConfig());
 		portalItemGroup.setOperatorUid(user.getId());
 		portalItemGroup.setDescription(cmd.getDescription());
+		portalItemGroup.setContentType(cmd.getContentType());
 		portalItemGroupProvider.updatePortalItemGroup(portalItemGroup);
 		return processPortalItemGroupDTO(portalItemGroup);
 	}
@@ -1339,7 +1340,7 @@ public class PortalServiceImpl implements PortalService {
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.BIZ){
 					itemGroup.setName("OPPushBiz");
 				}
-				publishOPPushItem(itemGroup);
+				publishOPPushItem(itemGroup, layout.getLocation());
 				config.setItemGroup(itemGroup.getName());
 //				group.setInstanceConfig(StringHelper.toJsonString(config));
 				group.setInstanceConfig(config);
@@ -1432,10 +1433,11 @@ public class PortalServiceImpl implements PortalService {
 		}
 	}
 
-	private void publishOPPushItem(PortalItemGroup itemGroup){
+	private void publishOPPushItem(PortalItemGroup itemGroup, String location){
 		PortalLayout layout = portalLayoutProvider.findPortalLayoutById(itemGroup.getLayoutId());
 		LaunchPadItem item = new LaunchPadItem();
 		ItemGroupInstanceConfig instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
+		item.setNamespaceId(itemGroup.getNamespaceId());
 		item.setAppId(AppConstants.APPID_DEFAULT);
 		item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
 		item.setMinVersion(1L);
@@ -2008,5 +2010,7 @@ public class PortalServiceImpl implements PortalService {
 //		for (PortalItemGroupJson json: jsons) {
 			System.out.println(GeoHashUtils.encode(113.952532, 22.550182));
 //		}
+
+
 	}
 }
