@@ -1292,7 +1292,7 @@ public class UserController extends ControllerBase {
 
 	/**
 	 * <b>URL: /user/VerificationCodeForBindPhoneCommand</b>
-	 * <p>搜索用户</p>
+	 * <p>发送验证码</p>
 	 */
 	@RequestMapping("VerificationCodeForBindPhoneCommand")
 	@RestReturn(value = VerificationCodeForBindPhoneResponse.class)

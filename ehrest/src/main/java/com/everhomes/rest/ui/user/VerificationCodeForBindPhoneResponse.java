@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>bindPhoneType: 绑定方式 0-微信用户绑定到已有手机用户，1-手机绑定到微信用户，2-微信用户已经和手机绑定过将更新手机  参考{@link BindPhoneType}</li>
- *     <li>oldPhone: 已绑定的手机</li>
+ *     <li>oldPhone: 已绑定的手机，如果bindPhoneType=2则返回之前的手机</li>
  * </ul>
  */
 public class VerificationCodeForBindPhoneResponse {

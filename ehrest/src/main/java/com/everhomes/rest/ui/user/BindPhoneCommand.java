@@ -6,8 +6,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>phone: phone</li>
  *     <li>verificationCode: verificationCode</li>
- *     <li>bindPhoneType: 绑定方式 0-手机绑定到微信用户，1-微信用户绑定到已有手机用户  参考{@link BindPhoneType}</li>
- *     <li>password: password</li>
+ *     <li>bindPhoneType: 绑定方式 0-微信用户绑定到已有手机用户，1-手机绑定到微信用户，2-微信用户已经和手机绑定过将更新手机  参考{@link BindPhoneType}</li>
+ *     <li>password: password，不填则后台随机生成一个</li>
  *     <li>oldPhone: oldPhone</li>
  * </ul>
  */
