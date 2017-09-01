@@ -29,6 +29,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.techpark.punch.*;
+import com.everhomes.rest.uniongroup.*;
 import com.everhomes.util.*;
 import com.google.zxing.WriterException;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -151,11 +152,6 @@ import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UserMonthLogsDTO;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
-import com.everhomes.rest.uniongroup.GetUniongroupConfiguresCommand;
-import com.everhomes.rest.uniongroup.SaveUniongroupConfiguresCommand;
-import com.everhomes.rest.uniongroup.UniongroupConfiguresDTO;
-import com.everhomes.rest.uniongroup.UniongroupTarget;
-import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.scheduler.RunningFlag;
@@ -6258,8 +6254,18 @@ public class PunchServiceImpl implements PunchService {
 		PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
 		dto.setGroupName(r.getName());
 		dto.setId(pr.getPunchOrganizationId());
-		Integer totalCount = uniongroupConfigureProvider.countUnionGroupMemberDetailsByGroupId(r.getNamespaceId(),r.getId());
-		dto.setEmployeeCount(totalCount);
+		List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(r.getId());
+		dto.setEmployeeCount(employees == null ? 0: employees.size());
+		if (null != employees) {
+			dto.setEmployees(new ArrayList<>());
+			for (UniongroupMemberDetail detail : employees) {
+				UniongroupTarget target = new UniongroupTarget();
+				target.setName(detail.getContactName());
+				target.setId(detail.getId());
+				target.setType(UniongroupTargetType.MEMBERDETAIL.getCode());
+				dto.getEmployees().add(target);
+			}
+		}
 		// 关联 人员和机构
 		GetUniongroupConfiguresCommand cmd1 = new GetUniongroupConfiguresCommand();
 		cmd1.setGroupId(r.getId());
@@ -6490,7 +6496,8 @@ public class PunchServiceImpl implements PunchService {
 			cmd.setQueryTime(punchTime.getTime());
 			PunchLogDTO punchLog = getPunchType(userId,cmd.getEnterpriseId(),punchTime);
 			if(null!=punchLog){
-				punchLog.setExpiryTime(process24hourTimeToGMTTime(punchTime,punchLog.getExpiryTime()));
+				if(null != punchLog.getExpiryTime())
+					punchLog.setExpiryTime(process24hourTimeToGMTTime(punchTime,punchLog.getExpiryTime()));
 				punchLog.setRuleTime(process24hourTimeToGMTTime(punchTime,punchLog.getRuleTime()));
 				response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
 			}

@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId：所属对象id</li>
  * <li>groupName：规则名(考勤组名)</li>
  * <li>targets：考勤组关联对象</li> 
+ * <li>employees：考勤组下的所有人员</li>
  * <li>ruleType: 0- 排班制 ; 1- 固定班次</li>
  * <li>punchGeoPoints: 地点规则 {@link com.everhomes.rest.techpark.punch.PunchGeoPointDTO}</li>
  * <li>wifis: wifi规则{@link com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO}</li>
@@ -43,8 +44,11 @@ public class PunchGroupDTO {
 	private String groupName;
 	
 	@ItemType(UniongroupTarget.class)
-	private List<UniongroupTarget> targets; 
-	
+	private List<UniongroupTarget> targets;
+
+	@ItemType(UniongroupTarget.class)
+	private List<UniongroupTarget> employees;
+
 	private Byte ruleType ;
 
 	@ItemType(PunchGeoPointDTO.class)
@@ -221,6 +225,13 @@ public class PunchGroupDTO {
 	public void setOperateTime(Long operateTime) {
 		this.operateTime = operateTime;
 	}
- 
- 
+
+
+	public List<UniongroupTarget> getEmployees() {
+		return employees;
+	}
+
+	public void setEmployees(List<UniongroupTarget> employees) {
+		this.employees = employees;
+	}
 }
