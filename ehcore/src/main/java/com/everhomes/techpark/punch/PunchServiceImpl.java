@@ -6503,7 +6503,7 @@ public class PunchServiceImpl implements PunchService {
 				response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
 			}
 		}
-		
+
 		punchTime = new Date(cmd.getQueryTime());
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
 		response.setIntervals(new ArrayList<>());
@@ -7085,7 +7085,7 @@ public class PunchServiceImpl implements PunchService {
 //			e.printStackTrace();
 //		}
 
-		return result;
+		return Base64.getEncoder().encodeToString(result.getBytes());
 	}
 	public HttpServletResponse downloadPng(ByteArrayOutputStream out, HttpServletResponse response) {
 		try {
