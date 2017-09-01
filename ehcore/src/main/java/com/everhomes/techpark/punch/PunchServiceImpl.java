@@ -840,7 +840,9 @@ public class PunchServiceImpl implements PunchService {
 		if(null == pr)
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
-					"have no punch rule"); 
+					"have no punch rule");
+		punchDayLog.setRuleType(pr.getRuleType());
+		punchDayLog.setPunchOrganizationId(pr.getPunchOrganizationId());
 		//获取当天的排班
 		Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr,logDay.getTime(),userId);
 
@@ -864,6 +866,7 @@ public class PunchServiceImpl implements PunchService {
 
 		PunchTimeRule punchTimeRule = punchProvider.getPunchTimeRuleById(ptrId);
 		punchDayLog.setTimeRuleName(punchTimeRule.getName());
+		punchDayLog.setTimeRuleId(punchTimeRule.getId());
 
 		//没有规则就是没有排班,就是非工作日
 		pdl.setTimeRuleId(punchTimeRule.getId());
