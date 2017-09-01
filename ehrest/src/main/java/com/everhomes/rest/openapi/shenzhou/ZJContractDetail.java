@@ -1,5 +1,7 @@
 package com.everhomes.rest.openapi.shenzhou;
 
+import com.everhomes.discover.ItemType;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -19,6 +21,7 @@ public class ZJContractDetail {
     private BigDecimal rent;
     private BigDecimal propertyFeeUnit;
     private BigDecimal deposit;
+    @ItemType(CommunityAddressDTO.class)
     private List<CommunityAddressDTO> apartments;
 
     public List<CommunityAddressDTO> getApartments() {

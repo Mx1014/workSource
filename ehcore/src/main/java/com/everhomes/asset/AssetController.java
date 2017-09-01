@@ -843,16 +843,16 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <p>测试清单产生</p>
-     * <b>URL: /asset/xxd</b>
-     *
-     */
-    @RequestMapping("doctor!")
-    @RestReturn(PaymentExpectanciesResponse.class)
-    public PaymentExpectanciesResponse hi(@RequestBody PaymentExpectanciesCommand cmd){
-        return assetService.paymentExpectancies(cmd);
-    }
+//    /**
+//     * <p>测试清单产生</p>
+//     * <b>URL: /asset/xxd</b>
+//     *
+//     */
+//    @RequestMapping("doctor!")
+//    @RestReturn(PaymentExpectanciesResponse.class)
+//    public PaymentExpectanciesResponse hi(@RequestBody PaymentExpectanciesCommand cmd){
+//        return assetService.paymentExpectancies(cmd);
+//    }
     /**
      * <p>展示预期的费用清单</p>
      * <b>URL: /asset/listBillExpectanciesOnContract</b>
