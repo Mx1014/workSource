@@ -6311,7 +6311,7 @@ public class PunchServiceImpl implements PunchService {
 			Calendar end = Calendar.getInstance();
 			end.add(Calendar.MONTH, 1);
 			Integer linkedCount = punchSchedulingProvider.countSchedulingUser(pr.getId(),new java.sql.Date(start.getTimeInMillis()),new java.sql.Date(end.getTimeInMillis()));
-			dto.setUnSchedulingCount(totalCount - linkedCount);
+			dto.setUnSchedulingCount(dto.getEmployeeCount() - linkedCount);
 			//排班
 			List<PunchSchedulingDTO> schedulings = processschedulings(pr,new java.sql.Date(start.getTimeInMillis()),new java.sql.Date(end.getTimeInMillis()));
 			dto.setSchedulings(schedulings);
