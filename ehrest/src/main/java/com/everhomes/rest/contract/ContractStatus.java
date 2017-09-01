@@ -34,10 +34,12 @@ public enum ContractStatus {
         return code;
     }
 
-    public static ContractStatus fromStatus(byte code) {
-        for(ContractStatus v : ContractStatus.values()) {
-            if(v.getCode() == code)
-                return v;
+    public static ContractStatus fromStatus(Byte code) {
+        if(code != null) {
+            for(ContractStatus v : ContractStatus.values()) {
+                if(v.getCode() == code)
+                    return v;
+            }
         }
         return null;
     }

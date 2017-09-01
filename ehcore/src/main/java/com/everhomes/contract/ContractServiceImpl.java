@@ -831,7 +831,6 @@ public class ContractServiceImpl implements ContractService {
 			contractProvider.updateContract(contract);
 			addToFlowCase(contract);
 			contractSearcher.feedDoc(contract);
-			assetService.upodateBillStatusOnContractStatusChange(contract.getContractNumber(), AssetPaymentStrings.CONTRACT_SAVE);
 		}
 
 	}
@@ -848,6 +847,7 @@ public class ContractServiceImpl implements ContractService {
 
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
+		assetService.upodateBillStatusOnContractStatusChange(contract.getContractNumber(), AssetPaymentStrings.CONTRACT_SAVE);
 		if(contract.getParentId() != null) {
 			Contract parentContract = contractProvider.findContractById(contract.getParentId());
 			if(parentContract != null) {
@@ -995,7 +995,12 @@ public class ContractServiceImpl implements ContractService {
 
 		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getEnterpriseCustomerId(), CustomerType.ENTERPRISE.getCode());
 		if(contracts != null && contracts.size() > 0) {
-			return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
+			return contracts.stream().map(contract -> {
+				ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
+				dto.setOrganizationName(contract.getCustomerName());
+				return dto;
+			}).collect(Collectors.toList());
+
 		}
 		return null;
 	}
@@ -1005,9 +1010,11 @@ public class ContractServiceImpl implements ContractService {
 		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		if(namespaceId == 999971) {
 			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
-			OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(cmd.getIndividualCustomerId());
-			if(owner != null) {
-				cmd.setContactToken(owner.getContactToken());
+			if(cmd.getIndividualCustomerId() != null) {
+				OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(cmd.getIndividualCustomerId());
+				if(owner != null) {
+					cmd.setContactToken(owner.getContactToken());
+				}
 			}
 			List<ContractDTO> response = handler.listIndividualCustomerContracts(cmd);
 			return response;
