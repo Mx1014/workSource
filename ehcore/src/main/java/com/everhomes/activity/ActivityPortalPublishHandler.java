@@ -37,7 +37,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 		LOGGER.info("ActivityPortalPublishHandler publish start namespaceId = {}, instanceConfig = {}, itemLabel = {}", namespaceId, instanceConfig, itemLabel);
 
-		ActivityEntryConfigulation config = ConvertHelper.convert(instanceConfig, ActivityEntryConfigulation.class);
+		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(instanceConfig, ActivityEntryConfigulation.class);
 
 		ActivityCategories activityCategory = saveEntry(config, namespaceId, itemLabel);
 
