@@ -168,6 +168,8 @@ public class UserServiceImpl implements UserService {
 	//推荐场景转换启用参数
 	private final static Integer SCENE_SWITCH_ENABLE = 0;
 	private final static Integer SCENE_SWITCH_DISABLE = 1;
+	private final static Integer SCENE_SWITCH_DEFAULT_FLAG_ENABLE = 1;
+	private final static Integer SCENE_SWITCH_DEFAULT_FLAG_DISABLE = 0;
 
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
@@ -681,7 +683,14 @@ public class UserServiceImpl implements UserService {
 
 		String verificationCode = cmd.getVerificationCode();
 		String deviceIdentifier = cmd.getDeviceIdentifier();
-		int namespaceId = cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+//		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, signupToken.getIdentifierToken());
+//
+//		if(null != userIdentifier){
+//			LOGGER.error("The identify token has been registered, signupToken = {}, cmd = {}", signupToken, cmd);
+//			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFY_TOKEN_REGISTERED, "The identify token has been registered");
+//		}
 
 		UserIdentifier identifier = this.findIdentifierByToken(namespaceId, signupToken);
 		if(identifier == null) {
@@ -729,7 +738,11 @@ public class UserServiceImpl implements UserService {
 
 				UserLogin login = createLogin(namespaceId, user, deviceIdentifier, cmd.getPusherIdentify());
 				login.setStatus(UserLoginStatus.LOGGED_IN);
-
+				UserIdentifier uIdentifier = userProvider.findClaimedIdentifierByTokenAndNotUserId(namespaceId, identifier.getIdentifierToken(), identifier.getOwnerUid());
+//				if(null != uIdentifier){
+//					LOGGER.error("The identify token has been registered, signupToken = {}, cmd = {}", signupToken, cmd);
+//					throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFY_TOKEN_REGISTERED, "The identify token has been registered");
+//				}
 				return login;
 			});
 
@@ -2674,6 +2687,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<SceneDTO> listUserRelatedScenes() {
+		return listUserRelatedScenes(null);
+	}
+
+	@Override
+	public List<SceneDTO> listUserRelatedScenes(ListUserRelatedScenesCommand cmd) {
+		Integer defaultFlag = SCENE_SWITCH_DEFAULT_FLAG_DISABLE;
+		if(cmd != null){
+			defaultFlag = cmd.getDefaultFlag();
+		}
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long userId = UserContext.current().getUser().getId();
 
@@ -2695,7 +2717,7 @@ public class UserServiceImpl implements UserService {
 		/** 从配置项中查询是否开启 **/
 		Integer switchFlag = this.configurationProvider.getIntValue(namespaceId, "scenes.switchKey", SCENE_SWITCH_DISABLE);
 		LOGGER.debug("switchFlag is" + switchFlag);
-		if(switchFlag == SCENE_SWITCH_ENABLE){
+		if(defaultFlag == SCENE_SWITCH_DEFAULT_FLAG_ENABLE && switchFlag == SCENE_SWITCH_ENABLE){
 			/** 查询默认场景 **/
 			Community default_community_one = new Community();
 			if(commercial_sceneList.size() == 0){
@@ -2728,8 +2750,25 @@ public class UserServiceImpl implements UserService {
 			}else{
 				LOGGER.debug("The default scene was not found");
 			}
+
+			// set方法进入
+			// 当用户既没有选择家庭、也没有在某个公司内时，他有可能选过某个小区/园区，此时也把对应域空间下所选的小区作为场景 by lqs 2010416
+			if(sceneList.size() == 0) {
+				SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
+				if(communityScene != null) {
+					sceneList.add(communityScene);
+				}
+			}
+
+		}else{
+			// 当用户既没有选择家庭、也没有在某个公司内时，他有可能选过某个小区/园区，此时也把对应域空间下所选的小区作为场景 by lqs 2010416
+			if(sceneList.size() == 0) {
+				SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
+				if(communityScene != null) {
+					sceneList.add(communityScene);
+				}
+			}
 		}
-		Collections.reverse(sceneList);
 		return sceneList;
 	}
 

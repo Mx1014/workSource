@@ -430,7 +430,7 @@ public class BusinessOpenController extends ControllerBase {
 	@RequestMapping("getUserOrganizations")
 	@RestReturn(value=OrganizationDTO.class, collection = true)
 	public RestResponse getUserOrganizations(@Valid GetUserDefaultAddressCommand cmd) {
-		RestResponse response =  new RestResponse(businessService.getUserAddress(cmd));
+		RestResponse response =  new RestResponse(businessService.getUserOrganizations(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

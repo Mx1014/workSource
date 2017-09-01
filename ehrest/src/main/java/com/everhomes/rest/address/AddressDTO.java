@@ -46,6 +46,10 @@ public class AddressDTO {
 
     private String cityName;
 
+    private String communityName;
+
+    private String provinceName;
+
     public Double getAreaSize() {
         return areaSize;
     }
@@ -232,6 +236,22 @@ public class AddressDTO {
 
     public void setCityName(String cityName) {
         this.cityName = cityName;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
+    public String getProvinceName() {
+        return provinceName;
+    }
+
+    public void setProvinceName(String provinceName) {
+        this.provinceName = provinceName;
     }
 
     @Override

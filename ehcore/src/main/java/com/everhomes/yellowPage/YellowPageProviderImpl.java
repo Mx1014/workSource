@@ -953,9 +953,9 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public ServiceAllianceSkipRule getCateorySkipRule(Long categoryId) {
+	public ServiceAllianceSkipRule getCateorySkipRule(Long categoryId, Integer namespaceId) {
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceAllianceSkipRuleRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE);
 		query.addConditions(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.SERVICE_ALLIANCE_CATEGORY_ID.in(categoryId,0L));
@@ -969,6 +969,11 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		if(result.size()==0)
 			return null;
 		return result.get(0);
+	}
+
+	@Override
+	public ServiceAllianceSkipRule getCateorySkipRule(Long categoryId) {
+		return getCateorySkipRule(categoryId, null);
 	}
 
 	@Override
