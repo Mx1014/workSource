@@ -639,7 +639,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill) {
+    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
         List<BillDetailDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
@@ -650,6 +650,9 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t.TARGET_TYPE.eq(targetType));
         query.addConditions(t.TARGET_ID.eq(targetId));
         query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
+        if(contractNum!=null){
+            query.addConditions(t.CONTRACT_NUM.eq(contractNum));
+        }
         if(isOwedBill==1){
             query.addConditions(t.STATUS.eq((byte)0));
         }
@@ -1546,9 +1549,12 @@ public class AssetProviderImpl implements AssetProvider {
         List<PaymentExpectancyDTO> dtos = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        context.select(t.DATE_STR,t.PROPERTY_IDENTIFER,t.DATA_STR_END,t.DATE_STR_DUE,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE)
+        EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
+        context.select(t.DATE_STR,t.PROPERTY_IDENTIFER,t.DATA_STR_END,t.DATE_STR_DUE,t.CHARGING_ITEMS_ID,t.AMOUNT_RECEIVABLE)
                 .from(t)
-                .where(t.CONTRACT_NUM.eq(contractNum))
+                .leftOuterJoin(t1)
+                .on(t.CONTRACT_NUM.eq(contractNum))
+                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
                 .limit(pageOffset,pageSize+1)
                 .fetch()
                 .map(r -> {
@@ -1557,8 +1563,8 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setPropertyIdentifier(r.getValue(t.PROPERTY_IDENTIFER));
                     dto.setDueDateStr(r.getValue(t.DATA_STR_END));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_DUE));
-                    dto.setChargingItemName(r.getValue(t.CHARGING_ITEM_NAME));
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setChargingItemName(r.getValue(t1.NAME));
                     dtos.add(dto);
                     return null;
                 });

@@ -49,7 +49,7 @@ public interface AssetProvider {
 
     List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds);
 
-    List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill);
+    List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum);
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 

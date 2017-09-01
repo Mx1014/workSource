@@ -5155,27 +5155,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<ListAddressIdsByOrganizationIdDTO> listAddressIdsByOrganizationId(Long organizationId) {
-		List<ListAddressIdsByOrganizationIdDTO> dtos = new ArrayList<>();
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		com.everhomes.server.schema.tables.EhAddresses t = Tables.EH_ADDRESSES.as("t");
-        com.everhomes.server.schema.tables.EhOrganizationAddresses t1 = Tables.EH_ORGANIZATION_ADDRESSES.as("t1");
-        context.select(t.ID,t.ADDRESS,t.AREA_SIZE)
-				.from(t,t1)
-				.where(t.ID.eq(t1.ADDRESS_ID))
-				.and(t1.ORGANIZATION_ID.eq(organizationId))
-				.fetch()
-				.map(r -> {
-					ListAddressIdsByOrganizationIdDTO dto = new ListAddressIdsByOrganizationIdDTO();
-					dto.setAddressId(r.getValue(t.ID));
-					dto.setAddressName(r.getValue(t.ADDRESS));
-					dto.setAreaSize(r.getValue(t.AREA_SIZE));
-					dtos.add(dto);
-					return null;});
-		return dtos;
-	}
-
-	@Override
 	public String getOrganizationNameById(Long targetId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.select(Tables.EH_ORGANIZATIONS.NAME)

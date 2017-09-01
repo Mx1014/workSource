@@ -10,6 +10,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -32,6 +33,10 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ListCustomerContractsCommand;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -155,6 +160,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+
+    @Autowired
+    private ContractService contractService;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -320,7 +328,7 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-        return handler.showBillForClient(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill());
+        return handler.showBillForClient(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill(),cmd.getContractNum());
     }
 
     @Override
@@ -676,7 +684,7 @@ public class AssetServiceImpl implements AssetService {
             Map<String,String> variableMap = new HashMap<>();
             for(int k = 0; k< variableIdAndValueList.size(); k++){
                 VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
-                variableMap.put((String)variableIdAndValue.getVariableId(),(String)variableIdAndValue.getVariableValue());
+                variableMap.put((String)variableIdAndValue.getVariableId(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
             }
             json = gson.toJson(variableMap, Map.class);
             PaymentContractReceiver entity = new PaymentContractReceiver();
@@ -852,10 +860,10 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd) {
         PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
-        if(cmd.getPageSize()<1||cmd.getPageSize()>Integer.MAX_VALUE){
+        if(cmd.getPageSize()==null ||cmd.getPageSize()<1||cmd.getPageSize()>Integer.MAX_VALUE){
             cmd.setPageSize(20);
         }
-        if(cmd.getPageOffset()<0){
+        if(cmd.getPageOffset()==null||cmd.getPageOffset()<0){
             cmd.setPageSize(0);
         }
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize());
@@ -888,6 +896,50 @@ public class AssetServiceImpl implements AssetService {
         ExcelUtils excel = new ExcelUtils(response,"租金账单模板","sheet1");
         excel.writeExcel(propertyNames,titleName,titleSize,list);
 
+    }
+
+    @Override
+    public FindUserInfoForPaymentDTO findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
+        FindUserInfoForPaymentDTO response = new FindUserInfoForPaymentDTO();
+        String targeType = cmd.getTargeType();
+        ListCustomerContractsCommand cmd1 = new ListCustomerContractsCommand();
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        cmd1.setTargetId(cmd.getTargetId());
+        if(targeType.equals(AssetPaymentStrings.EH_USER)){
+            cmd1.setTargetId(UserContext.currentUserId());
+            cmd1.setTargetType(CustomerType.INDIVIDUAL.getCode());
+        }else if(targeType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+            cmd1.setCommunityId(cmd.getTargetId());
+            cmd1.setTargetType(CustomerType.ENTERPRISE.getCode());
+        }else{
+            throw new RuntimeException("用户类型错误");
+        }
+        List<ContractDTO> dtos = contractService.listCustomerContracts(cmd1);
+        if(dtos!= null && dtos.size() > 0){
+            ContractDTO dto = dtos.get(0);
+            if(dtos.size()>1){
+                response.setHasMoreContract((byte)1);
+            }else{
+                response.setHasMoreContract((byte)0);
+            }
+            List<BuildingApartmentDTO> buildings = dto.getBuildings();
+            List<String> addressNames = new ArrayList<>();
+            Double areaSizeSum = 0d;
+            if(buildings!=null){
+                for(int i = 0; i < buildings.size(); i++){
+                    String addressName;
+                    BuildingApartmentDTO building = buildings.get(i);
+                    addressName = building.getBuildingName()+building.getApartmentName();
+                    addressNames.add(addressName);
+                    areaSizeSum += building.getAreaSize();
+                }
+                response.setAddressNames(addressNames);
+                response.setAreaSizesSum(areaSizeSum);
+            }
+            response.setContractNum(dto.getContractNumber());
+            response.setTargetName(dto.getOrganizationName());
+        }
+        return response;
     }
 
     private void coverVariables(List<VariableIdAndValue> var1, List<VariableIdAndValue> var2) {
@@ -928,7 +980,7 @@ public class AssetServiceImpl implements AssetService {
         HashMap<String,String> map = new HashMap();
         for(int i = 0; i < variableIdAndValueList.size(); i++){
             VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
-            map.put((String)variableIdAndValue.getVariableId(),(String)variableIdAndValue.getVariableValue());
+            map.put((String)variableIdAndValue.getVariableId(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
         }
         for(Map.Entry<String,String> entry : map.entrySet()){
             formula = formula.replace(entry.getKey(),entry.getValue());

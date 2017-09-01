@@ -13,4 +13,6 @@ public interface AssetPaymentStrings {
     public static final Byte BALANCE_ON_YEAR = 4;
     public static final String CONTRACT_SAVE = "CONTRACT_SAVE";
     public static final String CONTRACT_CANCEL = "CONTRACT_CONCEL";
+    public static final String EH_USER = "eh_user";
+    public static final String EH_ORGANIZATION = "eh_organization";
 }
