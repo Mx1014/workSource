@@ -212,6 +212,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 					maxEntryId++;
 					ActivityCategories newCategory = ConvertHelper.convert(dto, ActivityCategories.class);
 					newCategory.setParentId(parentCategory.getEntryId());
+					newCategory.setEntryId(maxEntryId);
 					newCategory.setPath(parentCategory.getPath() + "/" + maxEntryId);
 					newCategory.setOwnerId(0L);
 					newCategory.setDefaultOrder(0);
