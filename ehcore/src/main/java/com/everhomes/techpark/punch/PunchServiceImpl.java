@@ -6490,18 +6490,21 @@ public class PunchServiceImpl implements PunchService {
 		// 
 		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
 		Long userId = UserContext.current().getUser().getId();
-		Date punchTime = new Date();
 		GetPunchDayStatusResponse response = new GetPunchDayStatusResponse();
+		Date punchTime = new Date();
 		if (null == cmd.getQueryTime()) {
 			cmd.setQueryTime(punchTime.getTime());
 			PunchLogDTO punchLog = getPunchType(userId,cmd.getEnterpriseId(),punchTime);
 			if(null!=punchLog){
-				if(null != punchLog.getExpiryTime())
+				if(null != punchLog.getExpiryTime()) {
 					punchLog.setExpiryTime(process24hourTimeToGMTTime(punchTime,punchLog.getExpiryTime()));
+				}
 				punchLog.setRuleTime(process24hourTimeToGMTTime(punchTime,punchLog.getRuleTime()));
 				response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
 			}
 		}
+		
+		punchTime = new Date(cmd.getQueryTime());
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
 		response.setIntervals(new ArrayList<>());
 		if (null == pr  ) {
