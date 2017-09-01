@@ -35,7 +35,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 */
 	public String publish(Integer namespaceId, String instanceConfig, String itemLabel){
 
-		LOGGER.info("ActivityPortalPublishHandler publish start namespaceId = {}, instanceConfig = {}", namespaceId, instanceConfig);
+		LOGGER.info("ActivityPortalPublishHandler publish start namespaceId = {}, instanceConfig = {}, itemLabel = {}", namespaceId, instanceConfig, itemLabel);
 
 		ActivityEntryConfigulation config = ConvertHelper.convert(instanceConfig, ActivityEntryConfigulation.class);
 
