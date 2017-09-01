@@ -206,29 +206,33 @@ public class ArchivesServiceImpl implements ArchivesService {
     public ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListArchivesContactsResponse response = new ListArchivesContactsResponse();
-        final Integer stickCount = 40;  //  置顶数为40
+        //  置顶数为40
+        final Integer stickCount = 40;
+        //  保存置顶人员
+        List<Long> detailIds = archivesProvider.listArchivesContactsStickyIds(namespaceId, cmd.getOrganizationId(), stickCount);
 
         //  没有查询时显示主体
         if (StringUtils.isEmpty(cmd.getKeywords())) {
+            if (StringUtils.isEmpty(cmd.getPageAnchor())) {
+                //  没有页码说明第一次读取，则从置顶列表读取人员
 
-            //  TODO: 确定加载更多的时候还是否需要将置顶放在前面
+                //  2.读取置顶人员，确定置顶个数
+                List<ArchivesContactDTO> contacts = new ArrayList<>();
+                for (Long detailId : detailIds) {
+                    ArchivesContactDTO stickDTO = getArchivesContact(new ArchivesIdCommand(detailId));
+                    if (stickDTO != null)
+                        contacts.add(stickDTO);
+                }
+                //  3.获取其余人员
+                Integer pageSize = cmd.getPageSize() - detailIds.size();
+                contacts.addAll(listArchivesContacts(cmd.getOrganizationId(), cmd.getPageAnchor(), pageSize, response));
+                response.setContacts(contacts);
+            }else{
+                //  若已经读取了置顶的人则直接往下继续读
 
-            //  1.首先从置顶的表读取置顶人员
-            List<Long> detailIds = archivesProvider.listArchivesContactsStickyIds(namespaceId,cmd.getOrganizationId(),stickCount);
-            //  2.读取置顶人员，确定置顶个数
-            List<ArchivesContactDTO> contacts = new ArrayList<>();
-            for(Long detailId : detailIds){
-                ArchivesContactDTO stickDTO  = getArchivesContact(new ArchivesIdCommand(detailId));
-                if(stickDTO !=null)
-                    contacts.add(stickDTO);
             }
-            //  3.获取其余人员
-            Integer pageSize = cmd.getPageSize()-detailIds.size();
-            contacts.addAll(listArchivesContacts(cmd.getOrganizationId(),cmd.getPageAnchor(),pageSize,response));
-//            response.setNextPageAnchor(members.getNextPageAnchor());
-            response.setContacts(contacts);
         } else {
-            //  查询则显示特定人员
+            //  有查询的时候已经不需要置顶了，直接查询对应人员
 
         }
         return response;
