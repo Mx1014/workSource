@@ -127,9 +127,14 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
             yellowPageProvider.updateServiceAllianceCategory(serviceAllianceCategories);
 
             ServiceAlliances serviceAlliances = yellowPageProvider.queryServiceAllianceTopic("community", community.getId(), type);
-            serviceAlliances.setName(name);
-            serviceAlliances.setDisplayName(name);
-            yellowPageProvider.updateServiceAlliances(serviceAlliances);
+            if(null != serviceAlliances){
+                serviceAlliances.setName(name);
+                serviceAlliances.setDisplayName(name);
+                yellowPageProvider.updateServiceAlliances(serviceAlliances);
+            }else{
+                LOGGER.error("serviceAlliances is null. communityId = {}, type = {}", community.getId(), type);
+            }
+
             ServiceAllianceSkipRule rule = yellowPageProvider.getCateorySkipRule(type);
             if(DetailFlag.fromCode(detailFlag) == DetailFlag.YES){
                 if(null == rule){
