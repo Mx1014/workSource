@@ -557,8 +557,8 @@ public class PunchServiceImpl implements PunchService {
 			return null;
 		}
 		newPunchDayLog.setStatusList(pdl.getStatusList());
-		newPunchDayLog.setArriveTime(convertTime(pdl.getArriveTime()));
-		newPunchDayLog.setLeaveTime(convertTime(pdl.getLeaveTime()));
+		newPunchDayLog.setArriveTime(new Time(pdl.getArriveTime()));
+		newPunchDayLog.setLeaveTime(new Time(pdl.getLeaveTime()));
 		newPunchDayLog.setPunchCount(pdl.getPunchCount());
 		newPunchDayLog.setUserId(userId);
 		newPunchDayLog.setEnterpriseId(companyId);
