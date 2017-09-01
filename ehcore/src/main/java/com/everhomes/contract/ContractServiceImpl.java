@@ -578,7 +578,6 @@ public class ContractServiceImpl implements ContractService {
 				command.setTargetName(owner.getContactName());
 				command.setNoticeTel(owner.getContactToken());
 			}
-
 		}
 
 		assetService.paymentExpectancies(command);

@@ -62,10 +62,9 @@ public class CustomerController extends ControllerBase {
      * <p>创建企业客户</p>
      */
     @RequestMapping("createEnterpriseCustomer")
-    @RestReturn(value = String.class)
+    @RestReturn(value = EnterpriseCustomerDTO.class)
     public RestResponse createEnterpriseCustomer(@Valid CreateEnterpriseCustomerCommand cmd) {
-        customerService.createEnterpriseCustomer(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.createEnterpriseCustomer(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -76,10 +75,9 @@ public class CustomerController extends ControllerBase {
      * <p>修改企业客户</p>
      */
     @RequestMapping("updateEnterpriseCustomer")
-    @RestReturn(value = String.class)
+    @RestReturn(value = EnterpriseCustomerDTO.class)
     public RestResponse updateEnterpriseCustomer(@Valid UpdateEnterpriseCustomerCommand cmd) {
-        customerService.updateEnterpriseCustomer(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.updateEnterpriseCustomer(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
