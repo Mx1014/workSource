@@ -240,7 +240,7 @@ public class WXAuthController {// extends ControllerBase
                 String homeUrl = configurationProvider.getValue(namespaceId, "home.url", "");
                 String bindPhoneUrl = configurationProvider.getValue(WeChatConstant.WX_BIND_PHONE_URL, "");
                 LOGGER.info("checkUserIdentifier fail redirect to bind phone Url, url={}", bindPhoneUrl);
-                redirectByWx(response, homeUrl + contextPath + bindPhoneUrl);
+                redirectByWx(response, homeUrl + bindPhoneUrl);
             }
 
             String sourceUrl = params.get(KEY_SOURCE_URL);
