@@ -4453,7 +4453,8 @@ public class UserServiceImpl implements UserService {
 
 		if (DEFAULT == SceneType.fromCode(cmd.getSceneType()) || FAMILY == SceneType.fromCode(cmd.getSceneType())) {
 			// 当前是家庭场景，列出有效园区场景
-			addTouristSceneToList(userId, namespaceId, sceneList);
+			addOrganizationSceneToList(userId, namespaceId, sceneList);
+			//addTouristSceneToList(userId, namespaceId, sceneList);
 		} else if (PARK_TOURIST == SceneType.fromCode(cmd.getSceneType()) || ENTERPRISE == SceneType.fromCode(cmd.getSceneType()) || ENTERPRISE_NOAUTH == SceneType.fromCode(cmd.getSceneType())) {
 			// 当前是园区场景，列出有效家庭场景
 			addFamilySceneToList(userId, namespaceId, sceneList);
