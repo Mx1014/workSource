@@ -7032,6 +7032,7 @@ public class PunchServiceImpl implements PunchService {
 				//获取当天的排班
 				Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr,startCalendar.getTime(),userId);
 				if(null != ptrId){
+					dto.setTimeRuleId(ptrId);
 					if(ptrId == 0){
 						dto.setTimeRuleName("休息");
 					}else{
