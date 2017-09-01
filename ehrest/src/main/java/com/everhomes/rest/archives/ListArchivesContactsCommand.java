@@ -14,6 +14,10 @@ public class ListArchivesContactsCommand {
 
     private String keywords;
 
+    private Long pageAnchor;
+
+    private Integer pageSize;
+
     public ListArchivesContactsCommand() {
     }
 
@@ -31,6 +35,22 @@ public class ListArchivesContactsCommand {
 
     public void setKeywords(String keywords) {
         this.keywords = keywords;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
     @Override

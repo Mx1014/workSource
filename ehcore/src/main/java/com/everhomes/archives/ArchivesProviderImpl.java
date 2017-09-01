@@ -81,13 +81,14 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public List<Long> listArchivesContactsStickyIds(Integer namespaceId, Long organizationId) {
+    public List<Long> listArchivesContactsStickyIds(Integer namespaceId, Long organizationId, Integer stickCount) {
         List<Long> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select(Tables.EH_ARCHIVES_CONTACTS_STICKY.DETAIL_ID)
                 .from(Tables.EH_ARCHIVES_CONTACTS_STICKY)
                 .where(Tables.EH_ARCHIVES_CONTACTS_STICKY.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ARCHIVES_CONTACTS_STICKY.ORGANIZATION_ID.eq(organizationId))
+                .limit(stickCount)
                 .fetchInto(Long.class);
     }
 

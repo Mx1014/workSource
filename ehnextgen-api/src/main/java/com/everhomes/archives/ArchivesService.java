@@ -17,6 +17,8 @@ public interface ArchivesService {
 
     void stickArchivesContact(StickArchivesContactCommand cmd);
 
+    ArchivesContactDTO getArchivesContact(ArchivesIdCommand cmd);
+
     ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd);
 
     ImportFileTaskDTO importArchivesContacts(

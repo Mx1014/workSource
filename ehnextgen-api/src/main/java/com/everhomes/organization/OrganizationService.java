@@ -444,7 +444,7 @@ public interface OrganizationService {
 	 */
 	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
 
-    /****** new interface ******/
+    /****** new interfac for archives-1.0  START******/
 
     ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd);
 
@@ -502,6 +502,10 @@ public interface OrganizationService {
     Byte getOrganizationMemberVisibleFlag(String contactToken, Long organizationId);
 
     void exportOrganizationPersonnelFiles(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
+
+	/****** new interfac for archives-1.0 END******/
+
+
 
 	ImportFileTaskDTO importEnterpriseData(ImportEnterpriseDataCommand cmd, MultipartFile multipartFile, Long userId);
 	void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response);

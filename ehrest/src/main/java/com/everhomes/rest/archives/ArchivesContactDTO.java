@@ -9,8 +9,11 @@ import java.util.List;
 /**
  * <ul>
  * <li>detailId: 成员 detailId</li>
+ * <li>organizationId: 公司或部门 id</li>
+ * <li>targetId: 用户id</li>
+ * <li>targetType: 用户类型</li>
  * <li>contactName: 姓名</li>
- * <li>jobPositions: 职务 </li>
+ * <li>jobPositions: 职务</li>
  * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>contactToken: 手机号</li>
  * <li>email: 邮箱</li>
@@ -20,6 +23,12 @@ import java.util.List;
 public class ArchivesContactDTO {
 
     private Long detailId;
+
+    private Long organizationId;
+
+    private Long targetId;
+
+    private String targetType;
 
     private String contactName;
 
@@ -43,6 +52,30 @@ public class ArchivesContactDTO {
 
     public void setDetailId(Long detailId) {
         this.detailId = detailId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
     }
 
     public String getContactName() {

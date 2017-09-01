@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>detailIds: 成员 detailId 列表</li>
- * <li>departmentId: 部门 id</li>
+ * <li>departmentId: 部门 id 列表</li>
  * </ul>
  */
 public class TransferArchivesContactsCommand {
@@ -16,7 +16,7 @@ public class TransferArchivesContactsCommand {
     @ItemType(Long.class)
     private List<Long> detailIds;
 
-    private Long departmentId;
+    private List<Long> departmentIds;
 
     public TransferArchivesContactsCommand() {
     }
@@ -29,12 +29,12 @@ public class TransferArchivesContactsCommand {
         this.detailIds = detailIds;
     }
 
-    public Long getDepartmentId() {
-        return departmentId;
+    public List<Long> getDepartmentIds() {
+        return departmentIds;
     }
 
-    public void setDepartmentId(Long departmentId) {
-        this.departmentId = departmentId;
+    public void setDepartmentIds(List<Long> departmentIds) {
+        this.departmentIds = departmentIds;
     }
 
     @Override

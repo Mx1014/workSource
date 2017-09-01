@@ -2,7 +2,6 @@ package com.everhomes.archives;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.archives.*;
@@ -114,9 +113,11 @@ public class ArchivesServiceImpl implements ArchivesService {
     public void transferArchivesContacts(TransferArchivesContactsCommand cmd) {
         if(cmd.getDetailIds() != null){
             //  TODO: 根据提供的方法获取部门名称
-            for(Long detailId : cmd.getDetailIds()){
+            TransferArchivesEmployeesCommand transferCommand = new TransferArchivesEmployeesCommand();
+            transferCommand.setDetailIds(cmd.getDetailIds());
+            transferCommand.setDepartmentIds(cmd.getDepartmentIds());
+            organizationService.transferOrganizationPersonels(transferCommand);
                 // TODO: 循环添加档案记录
-            }
         }
     }
 
@@ -166,21 +167,96 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
+    public ArchivesContactDTO getArchivesContact(ArchivesIdCommand cmd){
+        ArchivesContactDTO dto = new ArchivesContactDTO();
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+
+        if(detail == null)
+            return null;
+        dto.setDetailId(detail.getId());
+        dto.setOrganizationId(detail.getOrganizationId());
+        dto.setContactName(detail.getContactName());
+        dto.setContactToken(detail.getContactToken());
+        dto.setEmail(detail.getEmail());
+        dto.setTargetId(detail.getTargetId());
+        dto.setTargetType(detail.getTargetType());
+        //  TODO: 职位的获取待确定后在修改
+        dto.setJobPositions(detail.getJobPosition());
+
+        //  查询部门
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        Organization directlyEnterprise = organizationProvider.findOrganizationById(detail.getOrganizationId());
+        dto.setDepartments(organizationService.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath()));
+
+/*        //  查询职位
+        List<OrganizationDTO> positions = organizationService.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath());
+        String jobPositions = "";
+        if(positions!=null){
+            for(OrganizationDTO : positions)
+        }*/
+
+        //  设置置顶
+        dto.setStick("1");
+
+        return dto;
+    }
+
+    @Override
     public ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+        ListArchivesContactsResponse response = new ListArchivesContactsResponse();
+        final Integer stickCount = 40;  //  置顶数为40
 
         //  没有查询时显示主体
         if (StringUtils.isEmpty(cmd.getKeywords())) {
-            //  1.首先从置顶的表读取置顶人员
-            List<Long> detailIds = archivesProvider.listArchivesContactsStickyIds(namespaceId,cmd.getOrganizationId());
-            //  TODO: 2.从组织架构读取对应人员，确定置顶个数
-            //  TODO: 3.获取其余人员
 
+            //  TODO: 确定加载更多的时候还是否需要将置顶放在前面
+
+            //  1.首先从置顶的表读取置顶人员
+            List<Long> detailIds = archivesProvider.listArchivesContactsStickyIds(namespaceId,cmd.getOrganizationId(),stickCount);
+            //  2.读取置顶人员，确定置顶个数
+            List<ArchivesContactDTO> contacts = new ArrayList<>();
+            for(Long detailId : detailIds){
+                ArchivesContactDTO stickDTO  = getArchivesContact(new ArchivesIdCommand(detailId));
+                if(stickDTO !=null)
+                    contacts.add(stickDTO);
+            }
+            //  3.获取其余人员
+            Integer pageSize = cmd.getPageSize()-detailIds.size();
+            contacts.addAll(listArchivesContacts(cmd.getOrganizationId(),cmd.getPageAnchor(),pageSize,response));
+//            response.setNextPageAnchor(members.getNextPageAnchor());
+            response.setContacts(contacts);
         } else {
             //  查询则显示特定人员
 
         }
-        return null;
+        return response;
+    }
+
+    private List<ArchivesContactDTO> listArchivesContacts(Long organizationId, Long pageAnchor, Integer pageSize, ListArchivesContactsResponse response){
+        List<ArchivesContactDTO> contacts = new ArrayList<>();
+        ListOrganizationContactCommand orgCommand = new ListOrganizationContactCommand();
+        orgCommand.setOrganizationId(organizationId);
+        orgCommand.setPageAnchor(pageAnchor);
+        orgCommand.setPageSize(pageSize);
+        ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnels(orgCommand,false);
+        members.getMembers().forEach(r ->{
+            ArchivesContactDTO dto = new ArchivesContactDTO();
+            dto.setDetailId(r.getDetailId());
+            dto.setOrganizationId(r.getOrganizationId());
+            dto.setTargetId(r.getTargetId());
+            dto.setTargetType(r.getTargetType());
+            dto.setContactName(r.getContactName());
+            dto.setDepartments(r.getDepartments());
+            dto.setContactToken(r.getContactToken());
+            //  TODO:组织架构list接口多返回邮箱
+//                dto.setEmail(r.getEmail);
+            dto.setStick("0");
+            contacts.add(dto);
+        });
+        response.setNextPageAnchor(members.getNextPageAnchor());
+        return contacts;
     }
 
     //  数字转换(1-A,2-B...)

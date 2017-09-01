@@ -14,7 +14,7 @@ public interface ArchivesProvider {
 
     ArchivesContactsSticky findArchivesContactsStickyById(Long id);
 
-    List<Long> listArchivesContactsStickyIds(Integer namespaceId, Long organizationId);
+    List<Long> listArchivesContactsStickyIds(Integer namespaceId, Long organizationId, Integer stickCount);
 
     ArchivesContactsSticky findArchivesContactsStickyByDetailIdAndOrganizationId(Integer namespaceId, Long organizationId, Long detailId);
 
