@@ -906,7 +906,7 @@ public class AssetServiceImpl implements AssetService {
         HashMap<String,String> map = new HashMap();
         for(int i = 0; i < variableIdAndValueList.size(); i++){
             VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
-            map.put((String)variableIdAndValue.getVariableId(),(String)variableIdAndValue.getVariableValue());
+            map.put((String)variableIdAndValue.getVariableId(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
         }
         for(Map.Entry<String,String> entry : map.entrySet()){
             formula = formula.replace(entry.getKey(),entry.getValue());
