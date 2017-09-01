@@ -12,6 +12,8 @@ import com.everhomes.sms.DateUtil;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.*;
+import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -604,5 +606,48 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
         }
         query.addConditions(Tables.EH_TERMINAL_STATISTICS_TASKS.TASK_NO.between(startDate, endDate));
         query.execute();
+    }
+
+    // DELETE FROM eh_terminal_app_version_cumulatives
+    // WHERE namespace_id = 999983 AND imei_number NOT IN (SELECT concat('', id, '') FROM eh_users WHERE namespace_id = 999983);
+    @Override
+    public void cleanTerminalAppVersionCumulativeByCondition(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        SelectConditionStep<Record1<String>> userIdList = context
+                .select(DSL.cast(Tables.EH_USERS.ID, SQLDataType.VARCHAR))
+                .from(Tables.EH_USERS)
+                .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+
+        context.delete(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES)
+                .where(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.IMEI_NUMBER.notIn(userIdList))
+                .execute();
+
+        context.delete(Tables.EH_TERMINAL_APP_VERSION_ACTIVES)
+                .where(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER.notIn(userIdList))
+                .execute();
+    }
+
+    @Override
+    public AppVersion findLastAppVersion(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAppVersionRecord> query = context.selectQuery(Tables.EH_APP_VERSION);
+        if (null != namespaceId) {
+            query.addConditions(Tables.EH_APP_VERSION.NAMESPACE_ID.eq(namespaceId));
+        }
+        query.addOrderBy(Tables.EH_APP_VERSION.ID.desc());
+        query.addLimit(1);
+        return query.fetchAnyInto(AppVersion.class);
+    }
+
+    @Override
+    public void cleanUserActivitiesWithNullAppVersion(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_USER_ACTIVITIES)
+                .where(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_USER_ACTIVITIES.APP_VERSION_NAME.isNull())
+                .execute();
     }
 }

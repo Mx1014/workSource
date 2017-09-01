@@ -62,4 +62,10 @@ public interface StatTerminalProvider {
 	AppVersion findAppVersion(Integer namespaceId, String name, String type);
 
     void deleteTerminalStatTask(Integer namespaceId, String startDate, String endDate);
+
+    void cleanTerminalAppVersionCumulativeByCondition(Integer namespaceId);
+
+    AppVersion findLastAppVersion(Integer namespaceId);
+
+    void cleanUserActivitiesWithNullAppVersion(Integer namespaceId);
 }
