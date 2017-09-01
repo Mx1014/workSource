@@ -229,7 +229,7 @@ public interface UserService {
 
     UserIdentifier getUserIdentifier(Long userId);
 
-    void verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
+    VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
 
     UserLogin bindPhone(BindPhoneCommand cmd);
 }

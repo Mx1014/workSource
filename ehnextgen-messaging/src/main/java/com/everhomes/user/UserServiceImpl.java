@@ -4399,42 +4399,63 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd){
+	public VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd){
+
 		verifySmsTimes("verificationCodeForWechat", cmd.getPhone(), "");
+		VerificationCodeForBindPhoneResponse response = new VerificationCodeForBindPhoneResponse();
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-
-		//查看该手机是否已经注册
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
-
-		//查看该用户是否已经发送过验证码
-		if(userIdentifier == null){
-			userIdentifier = this.userProvider.findIdentifierByOwnerAndTypeAndClaimStatus(user.getId(), IdentifierType.MOBILE.getCode(), IdentifierClaimStatus.VERIFYING.getCode());
-		}
 
 		String verificationCode = RandomGenerator.getRandomDigitalString(6);
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
 
-		//手机没注册并且用户没发送过验证码的，新建一条验证状态的userIdentifier
-		if(userIdentifier == null){
-			userIdentifier = new UserIdentifier();
-			userIdentifier.setOwnerUid(user.getId());
-			userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
-			userIdentifier.setIdentifierToken(cmd.getPhone());
-			userIdentifier.setNamespaceId(namespaceId);
-
-			userIdentifier.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
-			userIdentifier.setVerificationCode(verificationCode);
-			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			userIdentifier.setRegionCode(cmd.getRegionCode());
-			userProvider.createIdentifier(userIdentifier);
-		}else{
+		//查看该手机是否已经注册
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
+		if(userIdentifier != null){
 			//手机注册过的或者发过验证码的，更新验证码
+			response.setBindPhoneType(BindPhoneType.WECHATTOPHONE.getCode());
 			userIdentifier.setVerificationCode(verificationCode);
 			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			userProvider.updateIdentifier(userIdentifier);
+		}else {
+
+			//查看该用户是否已绑定手机
+			userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+			if (userIdentifier != null) {
+				response.setBindPhoneType(BindPhoneType.ALREADYBIND.getCode());
+				response.setOldPhone(userIdentifier.getIdentifierToken());
+				userIdentifier.setVerificationCode(verificationCode);
+				userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				userProvider.updateIdentifier(userIdentifier);
+			}else {
+				response.setBindPhoneType(BindPhoneType.PHONETOWECHAT.getCode());
+				//该用户是否已经发过短信
+				userIdentifier = this.userProvider.findIdentifierByOwnerAndTypeAndClaimStatus(user.getId(), IdentifierType.MOBILE.getCode(), IdentifierClaimStatus.VERIFYING.getCode());
+				if (userIdentifier == null) {
+					//用户没发送过验证码的，新建一条验证状态的userIdentifier
+					userIdentifier = new UserIdentifier();
+					userIdentifier.setOwnerUid(user.getId());
+					userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+					userIdentifier.setIdentifierToken(cmd.getPhone());
+					userIdentifier.setNamespaceId(namespaceId);
+
+					userIdentifier.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
+					userIdentifier.setVerificationCode(verificationCode);
+					userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					userIdentifier.setRegionCode(cmd.getRegionCode());
+					userProvider.createIdentifier(userIdentifier);
+				} else {
+					//该用户发送过验证，更新验证码和时间
+					response.setBindPhoneType(BindPhoneType.WECHATTOPHONE.getCode());
+					userIdentifier.setVerificationCode(verificationCode);
+					userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					userProvider.updateIdentifier(userIdentifier);
+				}
+			}
 		}
 		smsProvider.sendSms(namespaceId, cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.VERIFICATION_CODE, user.getLocale(), variables);
+
+		return response;
 	}
 
 	@Override
@@ -4443,28 +4464,51 @@ public class UserServiceImpl implements UserService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 		//查看该手机是否已经注册
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
+		if(cmd.getBindPhoneType().byteValue() == BindPhoneType.WECHATTOPHONE.getCode()){
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
 
-		//如果手机已经注册过，则校验验证码，更新微信信息(昵称、头像、性别)到该手机用户
-		if(userIdentifier != null && userIdentifier.getVerificationCode().equals(cmd.getVerificationCode())){
+			//如果手机已经注册过，则校验验证码，更新微信信息(昵称、头像、性别)到该手机用户
+
+			verificationCode(userIdentifier, cmd.getVerificationCode());
+
 			User existUser = userProvider.findUserById(userIdentifier.getOwnerUid());
 			existUser.setNickName(user.getNickName());
 			existUser.setAvatar(user.getAvatar());
 			existUser.setGender(user.getGender());
-			user.setStatus(UserStatus.INACTIVE.getCode());
 
-			userProvider.updateUser(user);
 			userProvider.updateUser(existUser);
+			//防止自己将自己绑定，被设置成无效
+			if(user.getId() != existUser.getId()){
+				user.setStatus(UserStatus.INACTIVE.getCode());
+				userProvider.updateUser(user);
+			}
 
 			UserLogin login = createLogin(namespaceId, existUser, null, null);
 			login.setStatus(UserLoginStatus.LOGGED_IN);
 
 			return login;
-		}
+		}else if(cmd.getBindPhoneType().byteValue() == BindPhoneType.ALREADYBIND.getCode()) {
+			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 
-		//校验新验证码，更新状态正式启用绑定该手机号码
-		userIdentifier = this.userProvider.findIdentifierByOwnerAndTypeAndClaimStatus(user.getId(), IdentifierType.MOBILE.getCode(), IdentifierClaimStatus.VERIFYING.getCode());
-		if(userIdentifier != null && userIdentifier.getVerificationCode().equals(cmd.getVerificationCode())) {
+			verificationCode(userIdentifier, cmd.getVerificationCode());
+
+			if(userIdentifier.getIdentifierToken() != cmd.getOldPhone()){
+				LOGGER.error("encode password failed");
+				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS, "old phone param error");
+			}
+
+			userIdentifier.setIdentifierToken(cmd.getPhone());
+			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			userProvider.updateIdentifier(userIdentifier);
+
+			return null;
+
+		}else{
+			//校验新验证码，更新状态正式启用绑定该手机号码
+			UserIdentifier userIdentifier = this.userProvider.findIdentifierByOwnerAndTypeAndClaimStatus(user.getId(), IdentifierType.MOBILE.getCode(), IdentifierClaimStatus.VERIFYING.getCode());
+
+			verificationCode(userIdentifier, cmd.getVerificationCode());
+
 			userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
 			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
@@ -4473,6 +4517,9 @@ public class UserServiceImpl implements UserService {
 			user.setSalt(salt);
 			try {
 				String randomCode = RandomGenerator.getRandomDigitalString(6);
+				if(cmd.getPassword() != null && cmd.getPassword().length() > 0){
+					randomCode = cmd.getPassword();
+				}
 				user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s",randomCode,salt)));
 			} catch (Exception e) {
 				LOGGER.error("encode password failed", e);
@@ -4485,6 +4532,11 @@ public class UserServiceImpl implements UserService {
 			return null;
 		}
 
-		return null;
+	}
+
+	private void verificationCode(UserIdentifier userIdentifier, String code){
+		if(userIdentifier == null || code == null || userIdentifier.getVerificationCode() == null || !userIdentifier.getVerificationCode().equals(code)){
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE, "Invalid verification code or state");
+		}
 	}
 }

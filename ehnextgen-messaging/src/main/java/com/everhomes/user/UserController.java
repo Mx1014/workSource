@@ -1295,10 +1295,10 @@ public class UserController extends ControllerBase {
 	 * <p>搜索用户</p>
 	 */
 	@RequestMapping("VerificationCodeForBindPhoneCommand")
-	@RestReturn(value = String.class)
+	@RestReturn(value = VerificationCodeForBindPhoneResponse.class)
 	public RestResponse verificationCodeForBindPhone(@Valid VerificationCodeForBindPhoneCommand cmd) {
-		userService.verificationCodeForBindPhone(cmd);
-		RestResponse resp = new RestResponse();
+		VerificationCodeForBindPhoneResponse response = userService.verificationCodeForBindPhone(cmd);
+		RestResponse resp = new RestResponse(response);
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");
 		return resp;
@@ -1308,7 +1308,7 @@ public class UserController extends ControllerBase {
 	/**
 	 * <b>URL: /user/bindPhone</b>
 	 * <p>验证并登录</p>
-	 * @return {@link LogonCommandResponse}
+	 * @return
 	 */
 	@RequestMapping("bindPhone")
 	@RestReturn(String.class)
