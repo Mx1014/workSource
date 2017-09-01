@@ -251,15 +251,24 @@ public class WXAuthController {// extends ControllerBase
 	}
 
 	private void checkRedirectUserIdentifier(HttpServletRequest request, HttpServletResponse response, Integer namespaceId){
+        LOGGER.info("checkUserIdentifier start");
+
         //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
-        LoginToken loginToken = userService.getLoginToken(request);
-        UserIdentifier identifier = userService.getUserIdentifier(loginToken.getUserId());
+        User user = UserContext.current().getUser();
+        if(user == null){
+            LOGGER.error("checkUserIdentifier exception, it should be in logon status, but it is logoff");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "Failed to get usercontent");
+        }
+        UserIdentifier identifier = userService.getUserIdentifier(user.getId());
         if( identifier == null || identifier.getIdentifierToken() == null){
             String homeUrl = configurationProvider.getValue(namespaceId, "home.url", "");
             String bindPhoneUrl = configurationProvider.getValue(namespaceId, WeChatConstant.WX_BIND_PHONE_URL, "");
-            LOGGER.info("checkUserIdentifier fail redirect to bind phone Url, url={}", bindPhoneUrl);
+            LOGGER.info("checkUserIdentifier fail redirect to bind phone Url, homeUrl={}, url={}", homeUrl, bindPhoneUrl);
             redirectByWx(response, homeUrl + bindPhoneUrl);
         }
+
+        LOGGER.info("checkUserIdentifier success");
 
     }
 	
