@@ -559,6 +559,27 @@ public class ContractServiceImpl implements ContractService {
 			feeRule.setVariableIdAndValueList(vv);
 			feeRules.add(feeRule);
 		});
+		command.setFeesRules(feeRules);
+		command.setNamesapceId(contract.getNamespaceId());
+		command.setOwnerId(contract.getCommunityId());
+		command.setOwnerType("community");
+		command.setTargetId(contract.getCustomerId());
+		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+			command.setTargetType("eh_organization");
+			EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+			if(customer != null) {
+				command.setTargetName(customer.getName());
+				command.setNoticeTel(customer.getContactMobile());
+			}
+		} else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+			command.setTargetType("eh_user");
+			OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(contract.getCustomerId());
+			if(owner != null) {
+				command.setTargetName(owner.getContactName());
+				command.setNoticeTel(owner.getContactToken());
+			}
+
+		}
 
 		assetService.paymentExpectancies(command);
 	}
@@ -804,14 +825,16 @@ public class ContractServiceImpl implements ContractService {
 			contract.setInvalidUid(UserContext.currentUserId());
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
+			contractSearcher.feedDoc(contract);
 		}
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getResult())) && ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
 			addToFlowCase(contract);
+			contractSearcher.feedDoc(contract);
 			assetService.upodateBillStatusOnContractStatusChange(contract.getContractNumber(), AssetPaymentStrings.CONTRACT_SAVE);
 		}
-		contractSearcher.feedDoc(contract);
+
 	}
 
 	@Override
