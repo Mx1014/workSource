@@ -52,7 +52,7 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
         query.addConditions(Tables.EH_LEASE_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_LEASE_BUILDINGS.COMMUNITY_ID.eq(communityId));
         query.addConditions(Tables.EH_LEASE_BUILDINGS.STATUS.eq(LeaseBulidingStatus.ACTIVE.getCode()));
-        query.addOrderBy(Tables.EH_LEASE_BUILDINGS.DEFAULT_ORDER.asc());
+        query.addOrderBy(Tables.EH_LEASE_BUILDINGS.DEFAULT_ORDER.desc());
 
         if (null != pageSize) {
             query.addLimit(pageSize);
