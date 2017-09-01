@@ -39,7 +39,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 		ActivityEntryConfigulation config = ConvertHelper.convert(instanceConfig, ActivityEntryConfigulation.class);
 
-		ActivityCategories activityCategory = saveEntry(config, namespaceId);
+		ActivityCategories activityCategory = saveEntry(config, namespaceId, itemLabel);
 
 		//将值组装到config中，用于后面返回服务广场
 		config.setId(activityCategory.getId());
@@ -117,7 +117,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		config.setEntryId(actionDataObj.getCategoryId());
 
 		//防止老数据可能没有ActivityCategories，先更新保存一下
-		ActivityCategories activityCategory = saveEntry(config, namespaceId);
+		ActivityCategories activityCategory = saveEntry(config, namespaceId, config.getName());
 
 		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, activityCategory.getId());
 
@@ -153,7 +153,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 * @param namespaceId
 	 * @return
 	 */
-	private ActivityCategories saveEntry(ActivityEntryConfigulation config, Integer namespaceId){
+	private ActivityCategories saveEntry(ActivityEntryConfigulation config, Integer namespaceId, String name){
 
 		ActivityCategories entryCategory = null;
 
@@ -169,14 +169,14 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		}
 
 		if(entryCategory != null){
-			entryCategory.setName(config.getName());
+			entryCategory.setName(name);
 			activityProvider.updateActivityCategories(entryCategory);
 		}else {
 
 			entryCategory = new ActivityCategories();
 			entryCategory.setOwnerId(0L);
 			entryCategory.setParentId(-1L);
-			entryCategory.setName(config.getName());
+			entryCategory.setName(name);
 			entryCategory.setDefaultOrder(0);
 			entryCategory.setStatus((byte)2);
 			entryCategory.setCreatorUid(1L);
