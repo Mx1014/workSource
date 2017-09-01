@@ -928,12 +928,12 @@ public class PunchServiceImpl implements PunchService {
 			PunchLog onDutyLog = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), 1);
 			if(onDutyLog == null){
 				onDutyLog = new PunchLog();
-				onDutyLog.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+				onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
 			PunchLog offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), 1);
 			if(offDutyLog == null){
 				offDutyLog = new PunchLog();
-				offDutyLog.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+				offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
 			efficientLogs.add(onDutyLog);
 			efficientLogs.add(offDutyLog);  
@@ -993,13 +993,13 @@ public class PunchServiceImpl implements PunchService {
 			PunchLog onDutyLog = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), 1);
 			if(onDutyLog == null){
 				onDutyLog = new PunchLog(); 
-				onDutyLog.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+				onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
 			efficientLogs.add(onDutyLog);
 			PunchLog offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), 1);
 			if(offDutyLog == null){
 				offDutyLog = new PunchLog();
-				offDutyLog.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+				offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
 			efficientLogs.add(offDutyLog);
 			if(onDutyLog.getPunchTime() != null && offDutyLog.getPunchTime()!=null){
@@ -1009,13 +1009,13 @@ public class PunchServiceImpl implements PunchService {
 			onDutyLog = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), 2);
 			if(onDutyLog == null){
 				onDutyLog = new PunchLog();
-				onDutyLog.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+				onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
 			efficientLogs.add(onDutyLog);
 			offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), 2);
 			if(offDutyLog == null){
 				offDutyLog = new PunchLog();
-				offDutyLog.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+				offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 			}
 			efficientLogs.add(offDutyLog);
 
@@ -1037,13 +1037,13 @@ public class PunchServiceImpl implements PunchService {
 				PunchLog onDutyLog = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), punchIntervalNo);
 				if(onDutyLog == null){
 					onDutyLog = new PunchLog(); 
-					onDutyLog.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+					onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 				}
 				efficientLogs.add(onDutyLog);
 				PunchLog offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), punchIntervalNo);
 				if(offDutyLog == null){
 					offDutyLog = new PunchLog();
-					offDutyLog.setPunchStatus(PunchStatus.UNPUNCH.getCode());
+					offDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
 				}
 				efficientLogs.add(offDutyLog);
 				
