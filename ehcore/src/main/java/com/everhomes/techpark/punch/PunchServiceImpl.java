@@ -821,9 +821,8 @@ public class PunchServiceImpl implements PunchService {
 
 	private PunchLogsDay calculateDayLogByeverypunch(Long userId, Long companyId,
                 Calendar logDay, PunchLogsDay pdl, PunchDayLog punchDayLog) throws ParseException {
-            List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
-				companyId, dateSF.get().format(logDay.getTime()),
-				ClockCode.SUCESS.getCode());
+		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
+			companyId, dateSF.get().format(logDay.getTime()), ClockCode.SUCESS.getCode());
 		if(null != punchLogs){
 			pdl.setPunchCount(punchLogs.size());
 			for (PunchLog log : punchLogs){
@@ -6983,31 +6982,64 @@ public class PunchServiceImpl implements PunchService {
         List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(userId,
                 cmd.getEnterpriseId(), dateSF.get().format(startCalendar.getTime()),
                 dateSF.get().format(endCalendar.getTime()) );
-        if (null != dayLogList) {
-            for (PunchDayLog log : dayLogList) {
-                MonthDayStatusDTO dto = ConvertHelper.convert(log, MonthDayStatusDTO.class);
-                response.getDayStatus().add(dto);
-                if (null == log.getStatusList()) {
-                    dto.setExceptionStatus(log.getStatus().equals(PunchStatus.NORMAL.getCode())?
-                            ExceptionStatus.NORMAL.getCode():ExceptionStatus.EXCEPTION.getCode());
-                }else {
-                    String[] status = log.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
-                    dto.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-                    if(status ==null )
-                        continue;
-                    else{
-                        for (String s1 : status) {
-                            if (!s1.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
-                                dto.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
+		for(;startCalendar.before(endCalendar);startCalendar.add(Calendar.DAY_OF_MONTH,1)){
+			PunchDayLog log = findPunchDayLogByDate(startCalendar.getTime(),dayLogList);
+			MonthDayStatusDTO dto = new MonthDayStatusDTO();
+			if(null!=log){
+				dto = ConvertHelper.convert(log, MonthDayStatusDTO.class);
+				if (null == log.getStatusList()) {
+					dto.setExceptionStatus(log.getStatus().equals(PunchStatus.NORMAL.getCode()) ?
+							ExceptionStatus.NORMAL.getCode() : ExceptionStatus.EXCEPTION.getCode());
+				} else {
+					String[] status = log.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+					dto.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+					if (status == null) {
+						continue;
+					}
+					else {
+						for (String s1 : status) {
+							if (!s1.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+								dto.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+							}
+						}
+					}
+				}
+			}else{
+				//当天没有打卡也么有计算规则
+				dto.setPunchDate(startCalendar.getTime().getTime());
+				PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(),cmd.getEnterpriseId(), userId );
+				if(null == pr)
+					continue;
+				dto.setRuleType(pr.getRuleType());
+				//获取当天的排班
+				Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr,startCalendar.getTime(),userId);
+				if(null != ptrId){
+					if(ptrId == 0){
+						dto.setTimeRuleName("休息");
+					}else{
+						PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(ptrId);
+						if (null != ptr) {
+							dto.setTimeRuleName(ptr.getName());
+						}
+					}
+				}
+			}
+			response.getDayStatus().add(dto);
+		}
         return response;
     }
+
+	private PunchDayLog findPunchDayLogByDate(Date time, List<PunchDayLog> dayLogList) {
+		String time1=dateSF.get().format(time);
+		for (PunchDayLog log : dayLogList) {
+			String time2 = dateSF.get().format(log.getPunchDate());
+			if (time1.equals(time2)) {
+				return log;
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public String getPunchQRCode(GetPunchQRCodeCommand cmd,
 			HttpServletResponse response) {
