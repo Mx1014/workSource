@@ -1057,9 +1057,9 @@ public class PunchServiceImpl implements PunchService {
 		}
 		for(PunchLog log : efficientLogs){
 			if(null == pdl.getStatusList()){
-				pdl.setStatusList(log.getPunchStatus()+"");
+				pdl.setStatusList(log.getStatus()+"");
 			}else{
-				pdl.setStatusList(pdl.getStatusList()+PunchConstants.STATUS_SEPARATOR+log.getPunchStatus());
+				pdl.setStatusList(pdl.getStatusList()+PunchConstants.STATUS_SEPARATOR+log.getStatus());
 			}
 		}
 		makeExceptionForDayList(userId, companyId, logDay, pdl);
