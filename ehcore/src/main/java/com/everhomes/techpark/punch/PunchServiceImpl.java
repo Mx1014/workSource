@@ -6548,7 +6548,7 @@ public class PunchServiceImpl implements PunchService {
 					dto1.setPunchIntervalNo(punchIntervalNo);
 					dto1.setRuleTime(findRuleTime(ptr,dto1.getPunchType(),punchIntervalNo));
 				}else{
-					dto1 = ConvertHelper.convert(pl, PunchLogDTO.class);
+					dto1 = convertPunchLog2DTO(pl);
 				}
 				intervalDTO.getPunchLogs().add(dto1);
 
@@ -6561,7 +6561,7 @@ public class PunchServiceImpl implements PunchService {
 					dto2.setPunchIntervalNo(punchIntervalNo);
 					dto2.setRuleTime(findRuleTime(ptr,dto2.getPunchType(),punchIntervalNo));
 				}else{
-					dto2 = ConvertHelper.convert(pl, PunchLogDTO.class);
+					dto2 = convertPunchLog2DTO(pl);
 				}
 				intervalDTO.getPunchLogs().add(dto2);
 				if (null == statusList) {
@@ -6584,6 +6584,13 @@ public class PunchServiceImpl implements PunchService {
 			}
 		}
 		return response;
+	}
+
+	private PunchLogDTO convertPunchLog2DTO(PunchLog pl) {
+		PunchLogDTO dto1 = ConvertHelper.convert(pl, PunchLogDTO.class);
+		dto1.setPunchTime(pl.getPunchTime().getTime());
+		dto1.setClockStatus(pl.getStatus());
+		return dto1;
 	}
 
 	private long process24hourTimeToGMTTime(Date punchTime, long ruleTime) {
