@@ -212,6 +212,13 @@ public class StatTerminalServiceImpl implements StatTerminalService {
 
         List<Long> userIdList = new ArrayList<>();
         for (Namespace namespace : namespaces) {
+            // step 1
+            statTerminalProvider.cleanTerminalAppVersionCumulativeByCondition(namespace.getId());
+
+            // step 2
+            statTerminalProvider.cleanUserActivitiesWithNullAppVersion(namespace.getId());
+
+            // step 3
             List<User> users = userActivityProvider.listNotInUserActivityUsers(namespace.getId());
             for (User user : users) {
                 userIdList.add(user.getId());

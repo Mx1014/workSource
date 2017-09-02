@@ -186,9 +186,9 @@ INSERT INTO `eh_namespace_resources` (`id`, `namespace_id`, `resource_type`, `re
 INSERT INTO `eh_namespace_resources` (`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) VALUES ('19932', '999971', 'COMMUNITY', @eh_communities_id+3, '2017-08-29 09:52:47');
 
 -- 增加蒙版配置项
-delete from eh_configurations where 'name' in ('mask.key','scenes.switchKey');
+delete from eh_configurations where name in ('mask.key','scenes.switchKey');
 SET @con_id = (SELECT MAX(id) from eh_configurations);
-INSERT INTO `eh_configurations` VALUES (@con_id + 1, 'mask.key', 0, '默认启用蒙版', 999971, '');
+INSERT INTO `eh_configurations` VALUES (@con_id + 1, 'mask.key', 1, '默认启用蒙版', 999971, '');
 INSERT INTO `eh_configurations` VALUES (@con_id + 2, 'scenes.switchKey', 0, '默认启用切换场景', 999971, '');
 -- 增加蒙版表数据
 delete from eh_namespace_masks;
@@ -221,3 +221,6 @@ WHERE namespace_id = 999983 AND imei_number NOT IN (SELECT concat('', id, '') FR
 UPDATE eh_launch_pad_items SET item_label = '园区团购', action_data = '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%3fclientrecommend%3d1%23%2frecommend%2f2%2flist%3f_k%3dzlbiz#sign_suffix"}' WHERE namespace_id = 1 AND item_group = 'OPPushBiz' AND item_location = '/home';
 UPDATE eh_launch_pad_layouts SET version_code = '20170831001', layout_json='{"versionCode":"20170831001","versionName":"4.8.3","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":10,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":20,"separatorFlag":1,"separatorHeight":16},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":30,"separatorFlag":1,"separatorHeight":16,"columnCount":4},{"groupName":"","widget":"OPPush","instanceConfig":{"itemGroup":"OPPushActivity","entityCount":3,"subjectHeight":1,"descriptionHeight":0},"style":"ListView","defaultOrder":40,"separatorFlag":1,"separatorHeight":16,"columnCount":1},{"groupName":"","widget":"Navigator","instanceConfig":{"cssStyleFlag":1,"itemGroup":"Bizs1","paddingTop":20,"paddingLeft":20,"paddingBottom":20,"paddingRight":20,"lineSpacing":16,"columnSpacing":16,"backgroundColor":"#FFFFFF"},"style":"Gallery","defaultOrder":50,"columnCount":2,"separatorFlag":1,"separatorHeight":16},{"groupName":"","widget":"OPPush","instanceConfig":{"itemGroup":"OPPushBiz","entityCount":6,"subjectHeight":1,"descriptionHeight":0,"recommendType":2},"style":"HorizontalScrollView","defaultOrder":60,"separatorFlag":0,"separatorHeight":0,"columnCount":0}]}'
 WHERE namespace_id = 1 AND name = 'ServiceMarketLayout';
+-- by dengs, 20170901 左邻域报错，修改
+SET @id = (SELECT MAX(id) FROM `eh_namespace_details`);
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) VALUES ((@id := @id + 1), '0', 'community_residential', NOW());

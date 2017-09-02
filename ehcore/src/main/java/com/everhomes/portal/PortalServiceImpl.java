@@ -381,6 +381,7 @@ public class PortalServiceImpl implements PortalService {
 		portalItemGroup.setInstanceConfig(cmd.getInstanceConfig());
 		portalItemGroup.setOperatorUid(user.getId());
 		portalItemGroup.setDescription(cmd.getDescription());
+		portalItemGroup.setContentType(cmd.getContentType());
 		portalItemGroupProvider.updatePortalItemGroup(portalItemGroup);
 		return processPortalItemGroupDTO(portalItemGroup);
 	}
@@ -1339,7 +1340,7 @@ public class PortalServiceImpl implements PortalService {
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.BIZ){
 					itemGroup.setName("OPPushBiz");
 				}
-				publishOPPushItem(itemGroup);
+				publishOPPushItem(itemGroup, layout.getLocation());
 				config.setItemGroup(itemGroup.getName());
 //				group.setInstanceConfig(StringHelper.toJsonString(config));
 				group.setInstanceConfig(config);
@@ -1432,10 +1433,11 @@ public class PortalServiceImpl implements PortalService {
 		}
 	}
 
-	private void publishOPPushItem(PortalItemGroup itemGroup){
+	private void publishOPPushItem(PortalItemGroup itemGroup, String location){
 		PortalLayout layout = portalLayoutProvider.findPortalLayoutById(itemGroup.getLayoutId());
 		LaunchPadItem item = new LaunchPadItem();
 		ItemGroupInstanceConfig instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
+		item.setNamespaceId(itemGroup.getNamespaceId());
 		item.setAppId(AppConstants.APPID_DEFAULT);
 		item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
 		item.setMinVersion(1L);
@@ -1490,6 +1492,15 @@ public class PortalServiceImpl implements PortalService {
 				List<PortalContentScope> contentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM.getCode(), portalItem.getId());
 				for (PortalContentScope scope: contentScopes) {
 					LaunchPadItem item = ConvertHelper.convert(portalItem, LaunchPadItem.class);
+					item.setAppId(AppConstants.APPID_DEFAULT);
+					item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
+					item.setMinVersion(1L);
+					item.setItemGroup(portalItem.getGroupName());
+					item.setItemLabel(portalItem.getLabel());
+					item.setItemName(portalItem.getName());
+					item.setDeleteFlag(DeleteFlagType.YES.getCode());
+					item.setScaleType(ScaleType.TAILOR.getCode());
+					item.setCategryName(categoryIdMap.get(portalItem.getItemCategoryId()));
 					if(PortalScopeType.RESIDENTIAL == PortalScopeType.fromCode(scope.getScopeType())){
 						item.setScopeCode(ScopeType.RESIDENTIAL.getCode());
 						item.setSceneType(SceneType.DEFAULT.getCode());
@@ -1526,16 +1537,6 @@ public class PortalServiceImpl implements PortalService {
 						actionData.setItemGroup(portalItem.getGroupName());
 						item.setActionData(StringHelper.toJsonString(actionData));
 					}
-
-					item.setAppId(AppConstants.APPID_DEFAULT);
-					item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
-					item.setMinVersion(1L);
-					item.setItemGroup(portalItem.getGroupName());
-					item.setItemLabel(portalItem.getLabel());
-					item.setItemName(portalItem.getName());
-					item.setDeleteFlag(DeleteFlagType.YES.getCode());
-					item.setScaleType(ScaleType.TAILOR.getCode());
-					item.setCategryName(categoryIdMap.get(portalItem.getItemCategoryId()));
 					launchPadProvider.createLaunchPadItem(item);
 
 					PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
@@ -2009,5 +2010,7 @@ public class PortalServiceImpl implements PortalService {
 //		for (PortalItemGroupJson json: jsons) {
 			System.out.println(GeoHashUtils.encode(113.952532, 22.550182));
 //		}
+
+
 	}
 }

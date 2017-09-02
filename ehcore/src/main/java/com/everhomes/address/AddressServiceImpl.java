@@ -41,6 +41,7 @@ import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.enterprise.SearchEnterpriseCommunityCommand;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
@@ -1723,6 +1724,16 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
             return resp;
         }
+    }
+
+    @Override
+    public ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(SearchEnterpriseCommunityCommand cmd) {
+        if(cmd.getCommunityType() == null){
+            LOGGER.debug("CommunityType Is Invalid" + cmd.getCommunityType());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
+
+        }
+        return null;
     }
 
     private List<ImportFileResultLog<ImportApartmentDataDTO>> importApartment(List<ImportApartmentDataDTO> datas,

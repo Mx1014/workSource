@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.rest.address.*;
 
+import com.everhomes.rest.enterprise.SearchEnterpriseCommunityCommand;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
@@ -62,4 +63,7 @@ public interface AddressService {
 	Object importParkAddressData(ImportAddressCommand cmd, MultipartFile file);
 
     ListNearbyMixCommunitiesCommandV2Response listNearbyMixCommunitiesV2(ListNearbyMixCommunitiesCommand cmd);
+
+    //获取注册中、已注册、关联最多的社区
+    ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(SearchEnterpriseCommunityCommand cmd);
 }
