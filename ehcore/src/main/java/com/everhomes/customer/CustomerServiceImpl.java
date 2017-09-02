@@ -239,6 +239,15 @@ public class CustomerServiceImpl implements CustomerService {
                 errorDataLogs.add(log);
                 continue;
             }
+            List<EnterpriseCustomer> enterpriseCustomers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(cmd.getNamespaceId(), str.getName());
+            if(enterpriseCustomers != null && enterpriseCustomers.size() > 0) {
+                LOGGER.error("enterpirse customer name is already exist, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("enterpirse customer name is already exist");
+                log.setCode(CustomerErrorCode.ERROR_CUSTOMER_NAME_IS_EXIST);
+                errorDataLogs.add(log);
+                continue;
+            }
             customer.setName(str.getName());
 
             if(StringUtils.isBlank(str.getContactName())){
