@@ -3742,10 +3742,10 @@ public class PunchServiceImpl implements PunchService {
 	/**找到用户的打卡规则*/
 	@Override
 	public PunchRule getPunchRule(String ownerType, Long ownerId,Long userId){
-		Organization punchOrg = findPunchGroupByUser(userId, ownerId);
-		if (null == punchOrg)
+		UniongroupMemberDetail detail = findUserMemberDetail(userId, ownerId);
+		if (null == detail)
 			return null;
-		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(punchOrg.getId());
+		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(detail.getGroupId());
 		return pr;
 		
 	}
@@ -6487,7 +6487,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public GetPunchDayStatusResponse getPunchDayStatus(GetPunchDayStatusCommand cmd) {
-		// 
+		//
 		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
 		Long userId = UserContext.current().getUser().getId();
 		GetPunchDayStatusResponse response = new GetPunchDayStatusResponse();
