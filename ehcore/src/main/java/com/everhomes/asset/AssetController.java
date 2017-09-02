@@ -15,7 +15,6 @@ import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -847,6 +846,7 @@ public class AssetController extends ControllerBase {
 //     * <p>测试清单产生</p>
 //     * <b>URL: /asset/xxd</b>
 //     *
+//     * 这个会自动生成一个错误的doctor！restresponse，因为我写的@RequestBody？下次测试下
 //     */
 //    @RequestMapping("doctor!")
 //    @RestReturn(PaymentExpectanciesResponse.class)
@@ -868,5 +868,32 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
+    // this is for 导出租金模板       4
+    /**
+     * <p>导出租金模板</p>
+     * <b>URL: /asset/exportRentalExcelTemplate</b>
+     */
+    @RequestMapping("exportRentalExcelTemplate")
+    public HttpServletResponse exportRentalExcelTemplate(HttpServletResponse response) {
+        assetService.exportRentalExcelTemplate(response);
+        RestResponse restResponse = new RestResponse();
+        restResponse.setErrorDescription("OK");
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        return null;
+    }
+
+    /**
+     * <b>URL: /asset/findUserInfoForPayment</b>
+     * <p>展示用户名称，合同，门牌楼栋和面积和</p>
+     */
+    @RequestMapping("findUserInfoForPayment")
+    @RestReturn(value=FindUserInfoForPaymentDTO.class,collection = true)
+    public RestResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
+        FindUserInfoForPaymentDTO dto = this.assetService.findUserInfoForPayment(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

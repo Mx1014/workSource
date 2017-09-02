@@ -10,6 +10,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -32,6 +33,10 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ListCustomerContractsCommand;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -156,6 +161,9 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private SequenceProvider sequenceProvider;
 
+    @Autowired
+    private ContractService contractService;
+
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -254,15 +262,16 @@ public class AssetServiceImpl implements AssetService {
         if(noticeInfos.size()<1) return;
         List<Long> uids = new ArrayList<>();
         //"{targetName}先生/女士，您好，您的账单已出，应付{amount1}元，待缴{amount2}元，下载"{appName} APP"可及时查看账单并支持在线付款,还可体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。"
+        //短信： 54	物业费催缴	王闻天	{1-> targetName}先生/女士，您好，您的物业账单已出，账期{2 dateStr}，使用"{3 appName} APP"可及时查看账单并支持在线付款。
         for(int i = 0; i<noticeInfos.size(); i++) {
             NoticeInfo noticeInfo = noticeInfos.get(i);
             //收集短信的信息
             List<Tuple<String, Object>> variables = new ArrayList<>();
-            smsProvider.addToTupleList(variables,"1",noticeInfo.getTargetName());
+            smsProvider.addToTupleList(variables,"targetName",noticeInfo.getTargetName());
             //模板改了，所以这个也要改
-            smsProvider.addToTupleList(variables,"2","2017-05");
+            smsProvider.addToTupleList(variables,"dateStr","2017-05");
 //            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
-            smsProvider.addToTupleList(variables,"3",noticeInfo.getAppName());
+            smsProvider.addToTupleList(variables,"appName",noticeInfo.getAppName());
             String phoneNums = noticeInfo.getPhoneNum();
             String templateLocale = UserContext.current().getUser().getLocale();
             smsProvider.sendSms(999971, phoneNums, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
@@ -319,7 +328,7 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-        return handler.showBillForClient(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill());
+        return handler.showBillForClient(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill(),cmd.getContractNum());
     }
 
     @Override
@@ -357,7 +366,7 @@ public class AssetServiceImpl implements AssetService {
             throw new RuntimeException("保存账单不在一个园区");
         }
 //        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
-        return assetProvider.creatPropertyBill(cmd.getAddressId(),cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getBuildingName(),cmd.getApartmentName());
+        return assetProvider.creatPropertyBill(cmd.getAddressId(),cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getContractNum());
     }
 
     @Override
@@ -851,10 +860,10 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd) {
         PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
-        if(cmd.getPageSize()<1||cmd.getPageSize()>Integer.MAX_VALUE){
+        if(cmd.getPageSize()==null ||cmd.getPageSize()<1||cmd.getPageSize()>Integer.MAX_VALUE){
             cmd.setPageSize(20);
         }
-        if(cmd.getPageOffset()<0){
+        if(cmd.getPageOffset()==null||cmd.getPageOffset()<0){
             cmd.setPageSize(0);
         }
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize());
@@ -865,6 +874,71 @@ public class AssetServiceImpl implements AssetService {
             dtos.remove(dtos.size()-1);
         }
         response.setList(dtos);
+        return response;
+    }
+
+    @Override
+    public void exportRentalExcelTemplate(HttpServletResponse response) {
+        String[] propertyNames = {"dateStr","buildingName","apartmentName","targetType","targetName","contractNum","noticeTel","amountReceivable","amountReceived","amountOwed","exemption","exemptionRemark","supplement","supplementRemark"};
+//        Field[] declaredFields = ListBillsDTO.class.getDeclaredFields();
+//        String[] propertyNames = new String[declaredFields.length];
+        String[] titleName ={"账期","楼栋","门牌","客户类型","客户名称","合同编号","催缴电话","应收(元)","已收(元)","欠收(元)","减免金额（元）","减免备注","增收金额（元）","增收备注"};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20,20};
+//        for(int i = 0; i < declaredFields.length; i++){
+//            propertyNames[i] = declaredFields[i].getName();
+//        }
+        List<RentalExcelTemplate> list = new ArrayList<>();
+        RentalExcelTemplate data = new RentalExcelTemplate();
+        data.setDateStr("2018-02");
+        data.setTargetType("个人客户/企业客户");
+        data.setTargetName("李四/xx公司");
+        list.add(data);
+        ExcelUtils excel = new ExcelUtils(response,"租金账单模板","sheet1");
+        excel.writeExcel(propertyNames,titleName,titleSize,list);
+
+    }
+
+    @Override
+    public FindUserInfoForPaymentDTO findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
+        FindUserInfoForPaymentDTO response = new FindUserInfoForPaymentDTO();
+        String targeType = cmd.getTargeType();
+        ListCustomerContractsCommand cmd1 = new ListCustomerContractsCommand();
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        cmd1.setTargetId(cmd.getTargetId());
+        if(targeType.equals(AssetPaymentStrings.EH_USER)){
+            cmd1.setTargetId(UserContext.currentUserId());
+            cmd1.setTargetType(CustomerType.INDIVIDUAL.getCode());
+        }else if(targeType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+            cmd1.setCommunityId(cmd.getTargetId());
+            cmd1.setTargetType(CustomerType.ENTERPRISE.getCode());
+        }else{
+            throw new RuntimeException("用户类型错误");
+        }
+        List<ContractDTO> dtos = contractService.listCustomerContracts(cmd1);
+        if(dtos!= null && dtos.size() > 0){
+            ContractDTO dto = dtos.get(0);
+            if(dtos.size()>1){
+                response.setHasMoreContract((byte)1);
+            }else{
+                response.setHasMoreContract((byte)0);
+            }
+            List<BuildingApartmentDTO> buildings = dto.getBuildings();
+            List<String> addressNames = new ArrayList<>();
+            Double areaSizeSum = 0d;
+            if(buildings!=null){
+                for(int i = 0; i < buildings.size(); i++){
+                    String addressName;
+                    BuildingApartmentDTO building = buildings.get(i);
+                    addressName = building.getBuildingName()+building.getApartmentName();
+                    addressNames.add(addressName);
+                    areaSizeSum += building.getAreaSize();
+                }
+                response.setAddressNames(addressNames);
+                response.setAreaSizesSum(areaSizeSum);
+            }
+            response.setContractNum(dto.getContractNumber());
+            response.setTargetName(dto.getOrganizationName());
+        }
         return response;
     }
 

@@ -5,6 +5,8 @@ import com.everhomes.rest.contract.*;
 
 import java.util.List;
 
+import java.util.List;
+
 public interface ContractService {
 
 
@@ -13,6 +15,9 @@ public interface ContractService {
 	void contractSchedule();
 
 	ListContractsResponse listContractsByOraganizationId(ListContractsByOraganizationIdCommand cmd);
+
+
+    List<Object> findCustomerByContractNum(String contractNum,Long ownerId,String ownerType);
 
 	ContractDetailDTO createContract(CreateContractCommand cmd);
 	ContractDTO updateContract(UpdateContractCommand cmd);
@@ -29,5 +34,6 @@ public interface ContractService {
 
 	void setContractParam(SetContractParamCommand cmd);
 	ContractParamDTO getContractParam(GetContractParamCommand cmd);
+
 
 }

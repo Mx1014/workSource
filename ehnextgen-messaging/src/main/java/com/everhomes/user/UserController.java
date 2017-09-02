@@ -1301,7 +1301,7 @@ public class UserController extends ControllerBase {
 	@RequestMapping(value = "findTargetByNameAndAddress")
 	@RestReturn(value = TargetDTO.class)
 	public RestResponse findTargetByNameAndAddress(FindTargetByNameAndAddressCommand cmd) {
-		RestResponse resp = new RestResponse(userService.findTargetByNameAndAddress(cmd.getTargetName(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getCommunityId(),cmd.getTel()));
+		RestResponse resp = new RestResponse(userService.findTargetByNameAndAddress(cmd.getContractNum(),cmd.getTargetName(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getOwnerId(),cmd.getTel(),cmd.getOwnerType()));
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");
 		return resp;

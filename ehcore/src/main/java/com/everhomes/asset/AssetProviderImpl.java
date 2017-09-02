@@ -536,6 +536,7 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setTargetType(r.getTargetType());
             dto.setOwnerId(r.getOwnerId());
             dto.setOwnerType(r.getOwnerType());
+            dto.setContractNum(r.getContractNum());
             list.add(dto);
             return null;});
 //        for(int i = 0; i < billAddresses.size(); i++) {
@@ -638,7 +639,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill) {
+    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
         List<BillDetailDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
@@ -649,6 +650,9 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t.TARGET_TYPE.eq(targetType));
         query.addConditions(t.TARGET_ID.eq(targetId));
         query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
+        if(contractNum!=null){
+            query.addConditions(t.CONTRACT_NUM.eq(contractNum));
+        }
         if(isOwedBill==1){
             query.addConditions(t.STATUS.eq((byte)0));
         }
@@ -754,6 +758,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        // 多个账期账单，总待缴从账单里拿，这里有减免项也许，还是？
         try {
             dslContext.select(t.AMOUNT_RECEIVABLE, t.CHARGING_ITEM_NAME, t.DATE_STR, t.AMOUNT_OWED, t.AMOUNT_RECEIVABLE)
                     .from(t)
@@ -783,7 +788,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public ListBillsDTO creatPropertyBill(Long addressId, BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String buildingName,String apartmentName) {
+    public ListBillsDTO creatPropertyBill(Long addressId, BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String buildingName,String apartmentName,String contractNum) {
         final ListBillsDTO[] response = {new ListBillsDTO()};
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -891,6 +896,7 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setNamespaceId(UserContext.getCurrentNamespaceId());
                     item.setOwnerType(ownerType);
                     item.setOwnerId(ownerId);
+                    item.setContractNum(contractNum);
                     if(targetType!=null){
                         item.setTargetType(targetType);
                     }
@@ -943,6 +949,7 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setNoticeTimes(0);
             newBill.setStatus(billStatus);
             newBill.setSwitch(isSettled);
+            newBill.setContractNum(contractNum);
             EhPaymentBillsDao billsDao = new EhPaymentBillsDao(context.configuration());
             billsDao.insert(newBill);
             response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);
@@ -969,7 +976,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
 
-        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.BUILDING_NAME,r.APARTMENT_NAME)
+        context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.DATE_STR,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.BUILDING_NAME,r.APARTMENT_NAME,r.CONTRACT_NUM)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .fetch()
@@ -983,6 +990,7 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setTargetType(f.getValue(r.TARGET_TYPE));
                     vo.setBuildingName(f.getValue(r.BUILDING_NAME));
                     vo.setApartmentName(f.getValue(r.APARTMENT_NAME));
+                    vo.setContractNum(f.getValue(r.CONTRACT_NUM));
                     return null;
                 });
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE)
@@ -1541,9 +1549,12 @@ public class AssetProviderImpl implements AssetProvider {
         List<PaymentExpectancyDTO> dtos = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        context.select(t.DATE_STR,t.PROPERTY_IDENTIFER,t.DATA_STR_END,t.DATE_STR_DUE,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE)
+        EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
+        context.select(t.DATE_STR,t.PROPERTY_IDENTIFER,t.DATA_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                 .from(t)
-                .where(t.CONTRACT_NUM.eq(contractNum))
+                .leftOuterJoin(t1)
+                .on(t.CONTRACT_NUM.eq(contractNum))
+                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
                 .limit(pageOffset,pageSize+1)
                 .fetch()
                 .map(r -> {
@@ -1552,8 +1563,8 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setPropertyIdentifier(r.getValue(t.PROPERTY_IDENTIFER));
                     dto.setDueDateStr(r.getValue(t.DATA_STR_END));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_DUE));
-                    dto.setChargingItemName(r.getValue(t.CHARGING_ITEM_NAME));
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setChargingItemName(r.getValue(t1.NAME));
                     dtos.add(dto);
                     return null;
                 });

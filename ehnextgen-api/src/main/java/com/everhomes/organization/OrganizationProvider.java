@@ -452,8 +452,6 @@ public interface OrganizationProvider {
 
 	List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId);
 
-	List<ListAddressIdsByOrganizationIdDTO> listAddressIdsByOrganizationId(Long organizationId);
-
     String getOrganizationNameById(Long targetId);
 
 	List<TargetDTO> findOrganizationIdByNameAndAddressId(String targetName, List<Long> ids);

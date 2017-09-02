@@ -135,8 +135,8 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String ownerType1, Long targetId, Long billGroupId,Byte isOwedBill) {
-        return zuolinAssetVendorHandler.showBillForClient( ownerId,  ownerType,  ownerType1,  targetId,  billGroupId, isOwedBill);
+    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String ownerType1, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
+        return zuolinAssetVendorHandler.showBillForClient( ownerId,  ownerType,  ownerType1,  targetId,  billGroupId, isOwedBill,contractNum);
     }
 
     @Override

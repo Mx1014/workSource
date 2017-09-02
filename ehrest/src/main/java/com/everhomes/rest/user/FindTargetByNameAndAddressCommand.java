@@ -10,18 +10,24 @@ import com.everhomes.util.StringHelper;
 /**
  *<ul>
  * <li>targetName:客户名称</li>
+ * <li>targetType:客户类型</li>
  * <li>buildingName:楼栋名称</li>
  * <li>apartmentName:门牌名称</li>
- * <li>communityId:园区id</li>
+ * <li>ownerId:园区id</li>
+ * <li>ownerType:类型，园区为community</li>
  * <li>tel:个人用户电话</li>
+ * <li>contractNum:合同编号</li>
  *</ul>
  */
 public class FindTargetByNameAndAddressCommand {
     private String targetName;
+    private String targetType;
     private String buildingName;
     private String apartmentName;
-    private Long communityId;
+    private Long ownerId;
+    private String ownerType;
     private String tel;
+    private String contractNum;
 
     @Override
     public String toString() {
@@ -40,6 +46,22 @@ public class FindTargetByNameAndAddressCommand {
         this.targetName = targetName;
     }
 
+    public String getContractNum() {
+        return contractNum;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
+
+    public void setContractNum(String contractNum) {
+        this.contractNum = contractNum;
+    }
+
     public String getBuildingName() {
         return buildingName;
     }
@@ -56,12 +78,20 @@ public class FindTargetByNameAndAddressCommand {
         this.apartmentName = apartmentName;
     }
 
-    public Long getCommunityId() {
-        return communityId;
+    public Long getOwnerId() {
+        return ownerId;
     }
 
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 
     public String getTel() {
