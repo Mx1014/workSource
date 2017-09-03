@@ -90,6 +90,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("namespaceId", contract.getNamespaceId());
             builder.field("name", contract.getName());
             builder.field("contractNumber", contract.getContractNumber());
+            builder.field("customerName", contract.getCustomerName());
             builder.field("status", contract.getStatus());
             builder.field("contractType", contract.getContractType());
             builder.field("categoryItemId", contract.getCategoryItemId());
@@ -141,11 +142,13 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeywords())
-                    .field("name", 1.2f);
+                    .field("name", 1.2f)
+                    .field("customerName", 1.2f)
+                    .field("contractNumber", 1.2f);
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("name");
+            builder.addHighlightedField("name").addHighlightedField("customerName").addHighlightedField("contractNumber");
         }
 
         FilterBuilder fb = null;

@@ -21,11 +21,14 @@ public enum ContractType {
         return code;
     }
 
-    public static ContractType fromStatus(byte code) {
-        for(ContractType v : ContractType.values()) {
-            if(v.getCode() == code)
-                return v;
+    public static ContractType fromStatus(Byte code) {
+        if(code != null) {
+            for(ContractType v : ContractType.values()) {
+                if(v.getCode() == code)
+                    return v;
+            }
         }
+
         return null;
     }
 

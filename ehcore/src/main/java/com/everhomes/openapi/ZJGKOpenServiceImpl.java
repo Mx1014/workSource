@@ -67,6 +67,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import java.io.IOException;
@@ -105,9 +106,10 @@ public class ZJGKOpenServiceImpl {
     private static final String SYNC_COMMUNITIES = "/openapi/asset/syncCommunities";
     private static final String SYNC_BUILDINGS = "/openapi/asset/syncBuildings";
     private static final String SYNC_APARTMENTS = "/openapi/asset/syncApartments";
-    private static final String SYNC_ENTERPRISES = "/openapi/asset/syncEnterprises";
-    private static final String SYNC_INDIVIDUALS = "/openapi/asset/syncIndividualCustomer";
-    private static final String SYNC_APARTMENTS_LIVING_STATUS = "/openapi/asset/syncApartmentLivingStatus";
+    private static final String SYNC_ENTERPRISES = "/openapi/customer/syncEnterpriseCustomers";
+    private static final String SYNC_INDIVIDUALS = "/openapi/customer/syncUserCustomers";
+    private static final String SYNC_USER_APARTMENTS_LIVING_STATUS = "/openapi/asset/syncUserApartmentLivingStatus";
+    private static final String SYNC_ENTERPRISE_APARTMENTS_LIVING_STATUS = "/openapi/asset/syncEnterpriseApartmentLivingStatus";
 
     DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
@@ -186,7 +188,7 @@ public class ZJGKOpenServiceImpl {
         ShenzhouJsonEntity<List<ZJCommunity>> entity = JSONObject.parseObject(communities, new TypeReference<ShenzhouJsonEntity<List<ZJCommunity>>>(){});
 
         if(SUCCESS_CODE.equals(entity.getErrorCode())) {
-            List<ZJCommunity> dtos = entity.getData();
+            List<ZJCommunity> dtos = entity.getResponse();
             if(dtos != null && dtos.size() > 0) {
                 syncData(entity, DataType.COMMUNITY.getCode(), null);
 
@@ -210,7 +212,7 @@ public class ZJGKOpenServiceImpl {
         ShenzhouJsonEntity<List<ZJBuilding>> entity = JSONObject.parseObject(buildings, new TypeReference<ShenzhouJsonEntity<List<ZJBuilding>>>(){});
 
         if(SUCCESS_CODE.equals(entity.getErrorCode())) {
-            List<ZJBuilding> dtos = entity.getData();
+            List<ZJBuilding> dtos = entity.getResponse();
             if(dtos != null && dtos.size() > 0) {
                 syncData(entity, DataType.BUILDING.getCode(), null);
 
@@ -234,7 +236,7 @@ public class ZJGKOpenServiceImpl {
         ShenzhouJsonEntity<List<ZJApartment>> entity = JSONObject.parseObject(apartments, new TypeReference<ShenzhouJsonEntity<List<ZJApartment>>>(){});
 
         if(SUCCESS_CODE.equals(entity.getErrorCode())) {
-            List<ZJApartment> dtos = entity.getData();
+            List<ZJApartment> dtos = entity.getResponse();
             if(dtos != null && dtos.size() > 0) {
                 syncData(entity, DataType.APARTMENT.getCode(), null);
 
@@ -253,20 +255,50 @@ public class ZJGKOpenServiceImpl {
 
     //每天凌晨一点更新
     @Scheduled(cron = "0 0 1 * * ?")
-    public void syncApartmentsLivingStatus(String pageOffset) {
+    public void syncApartmentsLivingStatus() {
+        syncEnterpriseApartmentsLivingStatus("0");
+        syncUserApartmentsLivingStatus("0");
+
+    }
+
+    private void syncEnterpriseApartmentsLivingStatus(String pageOffset) {
         Map<String, String> params = generateParams(pageOffset);
-        String apartments = postToShenzhou(params, SYNC_APARTMENTS_LIVING_STATUS, null);
+        String apartments = postToShenzhou(params, SYNC_ENTERPRISE_APARTMENTS_LIVING_STATUS, null);
 
         ShenzhouJsonEntity<List<ApartmentStatusDTO>> entity = JSONObject.parseObject(apartments, new TypeReference<ShenzhouJsonEntity<List<ApartmentStatusDTO>>>(){});
 
         if(SUCCESS_CODE.equals(entity.getErrorCode())) {
-            List<ApartmentStatusDTO> dtos = entity.getData();
+            List<ApartmentStatusDTO> dtos = entity.getResponse();
             if(dtos != null && dtos.size() > 0) {
                 syncData(entity, DataType.APARTMENT_LIVING_STATUS.getCode(), null);
 
                 //数据有下一页则继续请求
                 if(entity.getNextPageOffset() != null) {
-                    syncApartmentsLivingStatus(entity.getNextPageOffset().toString());
+                    syncEnterpriseApartmentsLivingStatus(entity.getNextPageOffset().toString());
+                }
+            }
+
+            //如果到最后一页了，则开始更新到我们数据库中
+            if(entity.getNextPageOffset() == null) {
+                syncDataToDb(DataType.APARTMENT_LIVING_STATUS.getCode(), SyncFlag.ALL.getCode());
+            }
+        }
+    }
+
+    private void syncUserApartmentsLivingStatus(String pageOffset) {
+        Map<String, String> params = generateParams(pageOffset);
+        String apartments = postToShenzhou(params, SYNC_USER_APARTMENTS_LIVING_STATUS, null);
+
+        ShenzhouJsonEntity<List<ApartmentStatusDTO>> entity = JSONObject.parseObject(apartments, new TypeReference<ShenzhouJsonEntity<List<ApartmentStatusDTO>>>(){});
+
+        if(SUCCESS_CODE.equals(entity.getErrorCode())) {
+            List<ApartmentStatusDTO> dtos = entity.getResponse();
+            if(dtos != null && dtos.size() > 0) {
+                syncData(entity, DataType.APARTMENT_LIVING_STATUS.getCode(), null);
+
+                //数据有下一页则继续请求
+                if(entity.getNextPageOffset() != null) {
+                    syncUserApartmentsLivingStatus(entity.getNextPageOffset().toString());
                 }
             }
 
@@ -297,7 +329,7 @@ public class ZJGKOpenServiceImpl {
         ShenzhouJsonEntity<List<ZJEnterprise>> entity = JSONObject.parseObject(enterprises, new TypeReference<ShenzhouJsonEntity<List<ZJEnterprise>>>(){});
 
         if(SUCCESS_CODE.equals(entity.getErrorCode())) {
-            List<ZJEnterprise> dtos = entity.getData();
+            List<ZJEnterprise> dtos = entity.getResponse();
             if(dtos != null && dtos.size() > 0) {
                 syncData(entity, DataType.ENTERPRISE.getCode(), communityIdentifier);
 
@@ -338,7 +370,7 @@ public class ZJGKOpenServiceImpl {
         ShenzhouJsonEntity<List<ZJIndividuals>> entity = JSONObject.parseObject(individuals, new TypeReference<ShenzhouJsonEntity<List<ZJIndividuals>>>(){});
 
         if(SUCCESS_CODE.equals(entity.getErrorCode())) {
-            List<ZJIndividuals> dtos = entity.getData();
+            List<ZJIndividuals> dtos = entity.getResponse();
             if(dtos != null && dtos.size() > 0) {
                 syncData(entity, DataType.INDIVIDUAL.getCode(), communityIdentifier);
 
@@ -380,7 +412,7 @@ public class ZJGKOpenServiceImpl {
         backup.setNamespaceId(NAMESPACE_ID);
         backup.setDataType(dataType);
         backup.setNextPageOffset(entity.getNextPageOffset());
-        backup.setData(entity.getData().toString());
+        backup.setData(entity.getResponse().toString());
         backup.setStatus(CommonStatus.ACTIVE.getCode());
         backup.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         backup.setCreatorUid(1L);

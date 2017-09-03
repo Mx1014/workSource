@@ -5,15 +5,26 @@ package com.everhomes.rest.contract;
  *     <li>namespaceId: 域空间id</li>
  *     <li>communityId: 园区id</li>
  *     <li>individualCustomerId: 个人客户id</li>
+ *     <li>contactToken: 手机号</li>
  * </ul>
  * Created by ying.xiong on 2017/8/26.
  */
 public class ListIndividualCustomerContractsCommand {
     private Long individualCustomerId;
 
+    private String contactToken;
+
     private Long communityId;
 
     private Integer namespaceId;
+
+    public String getContactToken() {
+        return contactToken;
+    }
+
+    public void setContactToken(String contactToken) {
+        this.contactToken = contactToken;
+    }
 
     public Long getCommunityId() {
         return communityId;

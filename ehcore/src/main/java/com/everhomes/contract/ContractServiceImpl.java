@@ -16,12 +16,19 @@ import java.util.stream.Collectors;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.asset.*;
+
+import com.everhomes.asset.AssetPaymentStrings;
+import com.everhomes.asset.AssetProvider;
+import com.everhomes.asset.AssetService;
+import com.everhomes.asset.AssetVendor;
+import com.everhomes.asset.AssetVendorHandler;
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.customer.IndividualCustomerProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
@@ -29,10 +36,11 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.asset.PaymentVariable;
+import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -42,11 +50,10 @@ import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.repeat.RangeDTO;
+import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.search.ContractSearcher;
-import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
@@ -78,10 +85,6 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.OSType;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.Tuple;
 
 import javax.annotation.PostConstruct;
 
@@ -154,10 +157,13 @@ public class ContractServiceImpl implements ContractService {
 	private AssetProvider assetProvider;
 
 	@Autowired
+	private AssetService assetService;
+
+	@Autowired
 	private PropertyMgrProvider propertyMgrProvider;
 
 	@Autowired
-	private AssetService assetService;
+	private IndividualCustomerProvider individualCustomerProvider;
 
 	@PostConstruct
 	public void setup(){
@@ -504,6 +510,17 @@ public class ContractServiceImpl implements ContractService {
 		contract.setStatus(ContractStatus.DRAFT.getCode()); //存草稿状态
 		contractProvider.createContract(contract);
 
+		//调用计算明细
+		if(cmd.getChargingItems() != null && cmd.getChargingItems().size() > 0) {
+			ExecutorUtil.submit(new Runnable() {
+				@Override
+				public void run() {
+					generatePaymentExpectancies(contract, cmd.getChargingItems());
+				}
+			});
+
+		}
+
 		//计算总的租赁面积
 		Double totalSize = dealContractApartments(contract, cmd.getApartments());
 		dealContractChargingItems(contract, cmd.getChargingItems());
@@ -521,6 +538,69 @@ public class ContractServiceImpl implements ContractService {
 		command.setPartyAId(contract.getPartyAId());
 		ContractDetailDTO contractDetailDTO = findContract(command);
 		return contractDetailDTO;
+	}
+
+	private void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems) {
+		PaymentExpectanciesCommand command = new PaymentExpectanciesCommand();
+		command.setContractNum(contract.getContractNumber());
+		List<FeeRules> feeRules = new ArrayList<>();
+		Gson gson = new Gson();
+		chargingItems.forEach(chargingItem -> {
+			FeeRules feeRule = new FeeRules();
+			feeRule.setChargingItemId(chargingItem.getChargingItemId());
+			feeRule.setChargingStandardId(chargingItem.getChargingStandardId());
+			feeRule.setDateStrBegin(new Date(chargingItem.getChargingStartTime()));
+			feeRule.setDateStrEnd(new Date(chargingItem.getChargingExpiredTime()));
+			List<ContractProperty> contractProperties = new ArrayList<>();
+			if(chargingItem.getApartments() != null && chargingItem.getApartments().size() > 0) {
+				chargingItem.getApartments().forEach(apartment -> {
+					ContractProperty cp = new ContractProperty();
+					cp.setApartmentName(apartment.getApartmentName());
+					cp.setBuldingName(apartment.getBuildingName());
+					cp.setAddressId(apartment.getAddressId());
+					Address address = addressProvider.findAddressById(apartment.getAddressId());
+					cp.setPropertyName(address.getNamespaceAddressToken());
+					contractProperties.add(cp);
+				});
+			}
+			feeRule.setProperties(contractProperties);
+
+			ChargingVariablesDTO chargingVariables = gson.fromJson(chargingItem.getChargingVariables(), new TypeToken<ChargingVariablesDTO>() {}.getType());
+			List<PaymentVariable> pvs = chargingVariables.getChargingVariables();
+			List<VariableIdAndValue> vv = new ArrayList<>();
+			if(pvs != null && pvs.size() > 0) {
+				pvs.forEach(pv -> {
+					VariableIdAndValue variableIdAndValue = new VariableIdAndValue();
+					variableIdAndValue.setVariableId(pv.getVariableIdentifier());
+					variableIdAndValue.setVariableValue(pv.getVariableValue());
+					vv.add(variableIdAndValue);
+				});
+			}
+			feeRule.setVariableIdAndValueList(vv);
+			feeRules.add(feeRule);
+		});
+		command.setFeesRules(feeRules);
+		command.setNamesapceId(contract.getNamespaceId());
+		command.setOwnerId(contract.getCommunityId());
+		command.setOwnerType("community");
+		command.setTargetId(contract.getCustomerId());
+		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+			command.setTargetType("eh_organization");
+			EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+			if(customer != null) {
+				command.setTargetName(customer.getName());
+				command.setNoticeTel(customer.getContactMobile());
+			}
+		} else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+			command.setTargetType("eh_user");
+			OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(contract.getCustomerId());
+			if(owner != null) {
+				command.setTargetName(owner.getContactName());
+				command.setNoticeTel(owner.getContactToken());
+			}
+		}
+
+		assetService.paymentExpectancies(command);
 	}
 
 	private void addToFlowCase(Contract contract) {
@@ -764,14 +844,28 @@ public class ContractServiceImpl implements ContractService {
 			contract.setInvalidUid(UserContext.currentUserId());
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
+			contractSearcher.feedDoc(contract);
+
+			//作废合同关联资产释放
+			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+			if(contractApartments != null && contractApartments.size() > 0) {
+				contractApartments.forEach(contractApartment -> {
+					contractApartment.setStatus(CommonStatus.INACTIVE.getCode());
+					contractBuildingMappingProvider.updateContractBuildingMapping(contractApartment);
+
+					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
+					addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+					propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+				});
+			}
+
 		}
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getResult())) && ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
 			addToFlowCase(contract);
+			contractSearcher.feedDoc(contract);
 		}
-		contractSearcher.feedDoc(contract);
-
 
 	}
 
@@ -787,8 +881,15 @@ public class ContractServiceImpl implements ContractService {
 
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
-		//将合同产生的账单明细正常化--added by wentian
 		assetService.upodateBillStatusOnContractStatusChange(contract.getContractNumber(), AssetPaymentStrings.CONTRACT_SAVE);
+		if(contract.getParentId() != null) {
+			Contract parentContract = contractProvider.findContractById(contract.getParentId());
+			if(parentContract != null) {
+				parentContract.setStatus(ContractStatus.HISTORY.getCode());
+				contractProvider.updateContract(parentContract);
+				contractSearcher.feedDoc(parentContract);
+			}
+		}
 	}
 
 	@Override
@@ -827,6 +928,12 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public ContractDetailDTO findContract(FindContractCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		if(namespaceId == 999971) {
+			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+			ContractDetailDTO response = handler.findContract(cmd);
+			return response;
+		}
 		Contract contract = checkContract(cmd.getId());
 		ContractDetailDTO dto = ConvertHelper.convert(contract, ContractDetailDTO.class);
 		User creator = userProvider.findUserById(dto.getCreateUid());
@@ -834,10 +941,19 @@ public class ContractServiceImpl implements ContractService {
 			dto.setCreatorName(creator.getNickName());
 		}
 
-		EnterpriseCustomer customer = enterpriseCustomerProvider.findById(dto.getCustomerId());
-		if(customer != null) {
-			dto.setCustomerName(customer.getName());
+		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(dto.getCustomerType()))) {
+			EnterpriseCustomer customer = enterpriseCustomerProvider.findById(dto.getCustomerId());
+			if(customer != null) {
+				dto.setCustomerName(customer.getName());
+			}
+		} else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(dto.getCustomerType()))) {
+			OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(dto.getCustomerId());
+			if(owner != null) {
+				dto.setCustomerName(owner.getContactName());
+			}
+
 		}
+
 		if(contract.getParentId() != null) {
 			Contract parentContract = contractProvider.findContractById(contract.getParentId());
 			if(parentContract != null) {
@@ -861,14 +977,42 @@ public class ContractServiceImpl implements ContractService {
 		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
 			EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(cmd.getTargetId());
 			if(customer != null) {
-				List<Contract> contracts = contractProvider.listContractByOrganizationId(cmd.getNamespaceId(), customer.getId());
-				if(contracts != null && contracts.size() > 0) {
-					return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
-				}
+				ListEnterpriseCustomerContractsCommand command = new ListEnterpriseCustomerContractsCommand();
+				command.setNamespaceId(cmd.getNamespaceId());
+				command.setCommunityId(cmd.getCommunityId());
+				command.setEnterpriseCustomerId(customer.getId());
+				return listEnterpriseCustomerContracts(command);
 			}
 
 		} else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
-			//暂无个人合同
+			UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(cmd.getTargetId(), cmd.getNamespaceId());
+			if(userIdentifier != null) {
+				Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+				if(namespaceId == 999971) {
+					ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+					ListIndividualCustomerContractsCommand command = new ListIndividualCustomerContractsCommand();
+					command.setNamespaceId(cmd.getNamespaceId());
+					command.setCommunityId(cmd.getCommunityId());
+					command.setContactToken(userIdentifier.getIdentifierToken());
+					List<ContractDTO> response = handler.listIndividualCustomerContracts(command);
+					return response;
+				}
+				List<OrganizationOwner> owners = organizationProvider.findOrganizationOwnerByTokenOrNamespaceId(userIdentifier.getIdentifierToken(), cmd.getNamespaceId());
+				if(owners != null && owners.size() > 0) {
+					List<ContractDTO> contracts = new ArrayList<>();
+					for(OrganizationOwner owner : owners) {
+						ListIndividualCustomerContractsCommand command = new ListIndividualCustomerContractsCommand();
+						command.setNamespaceId(cmd.getNamespaceId());
+						command.setCommunityId(cmd.getCommunityId());
+						command.setIndividualCustomerId(owner.getId());
+						List<ContractDTO> dtos = listIndividualCustomerContracts(command);
+						if(dtos != null && dtos.size() > 0) {
+							contracts.addAll(dtos);
+						}
+					}
+					return contracts;
+				}
+			}
 		}
 
 		return null;
@@ -876,15 +1020,40 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public List<ContractDTO> listEnterpriseCustomerContracts(ListEnterpriseCustomerContractsCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		if(namespaceId == 999971) {
+			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+			List<ContractDTO> response = handler.listEnterpriseCustomerContracts(cmd);
+			return response;
+		}
+
 		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getEnterpriseCustomerId(), CustomerType.ENTERPRISE.getCode());
 		if(contracts != null && contracts.size() > 0) {
-			return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());
+			return contracts.stream().map(contract -> {
+				ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
+				dto.setOrganizationName(contract.getCustomerName());
+				return dto;
+			}).collect(Collectors.toList());
+
 		}
 		return null;
 	}
 
 	@Override
 	public List<ContractDTO> listIndividualCustomerContracts(ListIndividualCustomerContractsCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		if(namespaceId == 999971) {
+			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+			if(cmd.getIndividualCustomerId() != null) {
+				OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(cmd.getIndividualCustomerId());
+				if(owner != null) {
+					cmd.setContactToken(owner.getContactToken());
+				}
+			}
+			List<ContractDTO> response = handler.listIndividualCustomerContracts(cmd);
+			return response;
+		}
+
 		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getIndividualCustomerId(), CustomerType.INDIVIDUAL.getCode());
 		if(contracts != null && contracts.size() > 0) {
 			return contracts.stream().map(contract -> ConvertHelper.convert(contract, ContractDTO.class)).collect(Collectors.toList());

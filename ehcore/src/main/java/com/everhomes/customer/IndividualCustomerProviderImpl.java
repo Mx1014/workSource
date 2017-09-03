@@ -11,6 +11,7 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationOwnerAddressDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationOwnerAddress;
 import com.everhomes.server.schema.tables.records.EhOrganizationOwnerAddressRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
@@ -56,6 +57,13 @@ public class IndividualCustomerProviderImpl implements IndividualCustomerProvide
         });
 
         return result;
+    }
+
+    @Override
+    public OrganizationOwner findOrganizationOwnerById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhOrganizationOwnersDao dao = new EhOrganizationOwnersDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), OrganizationOwner.class);
     }
 
     @Override

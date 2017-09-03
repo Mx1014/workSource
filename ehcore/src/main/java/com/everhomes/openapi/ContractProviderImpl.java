@@ -126,7 +126,7 @@ public class ContractProviderImpl implements ContractProvider {
 		Record result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+//				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber))
 				.fetchAny();
 

@@ -18,6 +18,7 @@ import java.util.List;
  *     <li>contractNumber: 合同编码</li>
  *     <li>contractStartDate: 合同开始日期</li>
  *     <li>contractEndDate: 合同结束日期</li>
+ *     <li>rentCycle: 租赁周期</li>
  *     <li>name: 合同名称</li>
  *     <li>partyAType: 甲方类型 0: organization; 1: individual</li>
  *     <li>partyAId: 甲方id</li>
@@ -70,6 +71,7 @@ public class ContractDetailDTO {
     private String contractNumber;
     private Timestamp contractEndDate;
     private Timestamp contractStartDate;
+    private Integer rentCycle;
     private String name;
     private Byte contractType;
     private Byte partyAType;
@@ -127,6 +129,14 @@ public class ContractDetailDTO {
 
     @ItemType(ContractAttachmentDTO.class)
     private List<ContractAttachmentDTO> attachments;
+
+    public Integer getRentCycle() {
+        return rentCycle;
+    }
+
+    public void setRentCycle(Integer rentCycle) {
+        this.rentCycle = rentCycle;
+    }
 
     public Long getCreateUid() {
         return createUid;

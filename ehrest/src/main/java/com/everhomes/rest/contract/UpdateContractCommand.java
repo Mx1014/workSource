@@ -19,6 +19,7 @@ import java.util.List;
  *     <li>contractNumber: 合同编码</li>
  *     <li>contractStartDate: 合同开始日期 时间戳</li>
  *     <li>contractEndDate: 合同结束日期 时间戳</li>
+ *     <li>rentCycle: 租赁周期</li>
  *     <li>name: 合同名称</li>
  *     <li>partyAType: 甲方类型 0: organization; 1: individual</li>
  *     <li>partyAId: 甲方id</li>
@@ -63,6 +64,7 @@ public class UpdateContractCommand {
     private String contractNumber;
     private Long contractEndDate;
     private Long contractStartDate;
+    private Integer rentCycle;
     private String name;
     private Byte contractType;
     private Byte partyAType;
@@ -100,6 +102,14 @@ public class UpdateContractCommand {
 
     @ItemType(ContractAttachmentDTO.class)
     private List<ContractAttachmentDTO> attachments;
+
+    public Integer getRentCycle() {
+        return rentCycle;
+    }
+
+    public void setRentCycle(Integer rentCycle) {
+        this.rentCycle = rentCycle;
+    }
 
     private Byte status;
 

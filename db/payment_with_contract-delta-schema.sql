@@ -238,6 +238,7 @@ ALTER TABLE `eh_organization_owners` CHANGE `community_id` `community_id` VARCHA
 ALTER TABLE `eh_contracts` CHANGE `contract_end_date` `contract_end_date` DATETIME COMMENT '合同结束日期';
 ALTER TABLE `eh_contracts` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
 ALTER TABLE `eh_contracts` ADD COLUMN `contract_start_date` DATETIME COMMENT '合同开始日期';
+ALTER TABLE `eh_contracts` ADD COLUMN `rent_cycle` INTEGER COMMENT '租赁周期';
 ALTER TABLE `eh_contracts` ADD COLUMN `name` VARCHAR(128) COMMENT '合同名称';
 ALTER TABLE `eh_contracts` ADD COLUMN `contract_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0:新签合同、1:续约合同、2:变更合同、3:退约合同';
 ALTER TABLE `eh_contracts` ADD COLUMN `create_uid` BIGINT COMMENT '经办人id';

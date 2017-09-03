@@ -5332,7 +5332,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             ExcelUtils excelUtils = new ExcelUtils(response, fileName, "客户信息");
             String[] propertyNames = {"contactName", "gender", "orgOwnerType", "contactToken", "birthday", "maritalStatus", "job", "company",
                     "idCardNumber", "registeredResidence"};
-            String[] titleNames = {"姓名", "性别", "客户类型", "手机", "生日", "婚姻状况", "职业", "工作单位", "证件号码", "户口所在地"};
+            String[] titleNames = {"姓名", "性别", "客户类型", "手机号码", "生日", "婚姻状况", "职业", "工作单位", "证件号码", "户口所在地"};
             int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40, 30};
             excelUtils.writeExcel(propertyNames, titleNames, titleSizes, ownerDTOs);
         } else {
@@ -5360,6 +5360,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
         if (owner.getBirthday() != null) {
             dto.setBirthday(owner.getBirthday().getTime());
+			dto.setBirthdayDate(DateUtil.dateToStr(new Date(dto.getBirthday()), DateUtil.YMR_SLASH));
         }
         return dto;
     }

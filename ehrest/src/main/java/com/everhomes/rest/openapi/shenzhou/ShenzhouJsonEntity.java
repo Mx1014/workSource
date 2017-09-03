@@ -19,14 +19,14 @@ public class ShenzhouJsonEntity<T> {
 
     private Integer nextPageOffset;
 
-    private T data;
+    private T response;
 
-    public T getData() {
-        return data;
+    public T getResponse() {
+        return response;
     }
 
-    public void setData(T data) {
-        this.data = data;
+    public void setResponse(T response) {
+        this.response = response;
     }
 
     public Integer getErrorCode() {
