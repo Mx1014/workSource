@@ -15,6 +15,7 @@ import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestDoc(value = "Asset Controller", site = "core")
@@ -842,16 +844,25 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-//    /**
-//     * <p>测试清单产生</p>
-//     * <b>URL: /asset/xxd</b>
-//     * 这个会自动生成一个错误的doctor！restresponse，因为我写的@RequestBody？下次测试下
-//     */
-//    @RequestMapping("doctor!")
-//    @RestReturn(PaymentExpectanciesResponse.class)
-//    public PaymentExpectanciesResponse hi(@RequestBody PaymentExpectanciesCommand cmd){
-//        return assetService.paymentExpectancies(cmd);
-//    }
+    /**
+     * <p>测试清单产生</p>
+     * <b>URL: /asset/xxd</b>
+     * 这个会自动生成一个错误的doctor！restresponse，因为我写的@RequestBody？下次测试下
+     */
+    @RequestMapping("doctor!")
+    @RestReturn(PaymentExpectanciesResponse.class)
+    public PaymentExpectanciesResponse hi(@RequestBody PaymentExpectanciesCommand cmd){
+        List<FeeRules> feesRules = cmd.getFeesRules();
+        for(int i = 0; i < feesRules.size(); i++) {
+            List<VariableIdAndValue> list = feesRules.get(i).getVariableIdAndValueList();
+            for(int j = 0; j < list.size(); j++){
+                Integer variableValue = (Integer)list.get(j).getVariableValue();
+                BigDecimal c = new BigDecimal(variableValue);
+                list.get(j).setVariableValue(c);
+            }
+        }
+        return assetService.paymentExpectancies(cmd);
+    }
     /**
      * <p>展示预期的费用清单</p>
      * <b>URL: /asset/listBillExpectanciesOnContract</b>

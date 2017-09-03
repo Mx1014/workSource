@@ -1507,7 +1507,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentContractReceiver t1 = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t1");
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-            context.update(Tables.EH_PAYMENT_BILLS)
+            context.update(t)
                     .set(t.SWITCH,(byte)0)
                     .where(t.CONTRACT_NUM.eq(contractNum))
                     .and(t.SWITCH.eq((byte)3))
@@ -1550,10 +1550,9 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
-        context.select(t.DATE_STR,t.PROPERTY_IDENTIFER,t.DATA_STR_END,t.DATE_STR_DUE,t.CHARGING_ITEMS_ID,t.AMOUNT_RECEIVABLE)
-                .from(t)
-                .leftOuterJoin(t1)
-                .on(t.CONTRACT_NUM.eq(contractNum))
+        context.select(t.DATE_STR,t.PROPERTY_IDENTIFER,t.DATA_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
+                .from(t,t1)
+                .where(t.CONTRACT_NUM.eq(contractNum))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
                 .limit(pageOffset,pageSize+1)
                 .fetch()

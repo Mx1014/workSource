@@ -16,9 +16,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.asset.AssetProvider;
-import com.everhomes.asset.AssetVendor;
-import com.everhomes.asset.AssetVendorHandler;
+import com.everhomes.asset.*;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -157,6 +155,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private PropertyMgrProvider propertyMgrProvider;
+
+	@Autowired
+	private AssetService assetService;
 
 	@PostConstruct
 	public void setup(){
@@ -786,6 +787,8 @@ public class ContractServiceImpl implements ContractService {
 
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
+		//将合同产生的账单明细正常化--added by wentian
+		assetService.upodateBillStatusOnContractStatusChange(contract.getContractNumber(), AssetPaymentStrings.CONTRACT_SAVE);
 	}
 
 	@Override
