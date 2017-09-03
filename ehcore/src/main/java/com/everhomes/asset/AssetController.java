@@ -688,7 +688,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 展示已出账单的收费项       4
+    // this is for 展示账单的收费项       4
     /**
      * <p>展示已出账单的收费项</p>
      * <b>URL: /asset/listBillItems</b>

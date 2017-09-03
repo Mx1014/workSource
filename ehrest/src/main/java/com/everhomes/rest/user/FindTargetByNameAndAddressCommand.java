@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  *<ul>
  * <li>targetName:客户名称</li>
- * <li>targetType:客户类型</li>
+ * <li>targetType:客户类型,eh_user个人;eh_organization企业</li>
  * <li>buildingName:楼栋名称</li>
  * <li>apartmentName:门牌名称</li>
  * <li>ownerId:园区id</li>

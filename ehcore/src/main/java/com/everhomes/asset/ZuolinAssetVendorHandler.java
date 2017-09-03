@@ -261,7 +261,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public List<ListBillsDTO> listBills(Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status) {
-        List<ListBillsDTO> list = assetProvider.listBills(currentNamespaceId,ownerId,ownerType,buildingName,apartmentName, addressId, billGroupName,billGroupId,billStatus,dateStrBegin,dateStrEnd,pageOffSet,pageSize,targetName,status);
+        List<ListBillsDTO> list = assetProvider.listBills(currentNamespaceId,ownerId,ownerType, billGroupName,billGroupId,billStatus,dateStrBegin,dateStrEnd,pageOffSet,pageSize,targetName,status);
         return list;
     }
 

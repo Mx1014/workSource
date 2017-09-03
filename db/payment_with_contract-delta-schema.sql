@@ -665,6 +665,8 @@ CREATE TABLE `eh_payment_bill_items` (
   `contract_num` varchar(255) DEFAULT NULL,
   `property_identifer` varchar(255) DEFAULT '' COMMENT '资产标识',
   `address_id` bigint(20) DEFAULT NULL,
+  `building_name` varchar(255) DEFAULT NULL,
+  `apartment_name` varchar(255) DEFAULT NULL,
   `date_str` varchar(20) DEFAULT NULL COMMENT '账期',
   `date_str_begin` varchar(20) DEFAULT NULL,
   `date_str_end` varchar(20) DEFAULT NULL,

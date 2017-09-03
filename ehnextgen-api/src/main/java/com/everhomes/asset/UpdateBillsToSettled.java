@@ -7,7 +7,7 @@ package com.everhomes.asset;
 
 /**
  *<ul>
- * <li>contractId:合同编号</li>
+ * <li>contractId:合同id</li>
  * <li>ownerType:所属者类型，一般为园区community</li>
  * <li>ownerId:所属者id，一般为园区id</li>
  *</ul>
