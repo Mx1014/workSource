@@ -56,7 +56,7 @@ public class ZJContractHandler implements ContractHandler{
     private static final String LIST_CONTRACTS_BY_ENTERPRISE = "/openapi/contract/listContractsByEnterprise";
     private static final String LIST_CONTRACTS_BY_USER = "/openapi/contract/listContractsByUser";
     private static final String GET_ENTERPRISE_CONTRACT_DETAIL = "/openapi/contract/getEnterpriseContractDetail";
-    private static final String GET_USER_CONTRACT_DETAIL = "/openapi/contract/getUserContractDetai";
+    private static final String GET_USER_CONTRACT_DETAIL = "/openapi/contract/getUserContractDetail";
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     @Autowired
@@ -122,8 +122,8 @@ public class ZJContractHandler implements ContractHandler{
             params.put("timestamp", ""+System.currentTimeMillis());
             params.put("nonce", ""+(long)(Math.random()*100000));
             params.put("crypto", "sssss");
-            params.put("contractNum", "T1716170622");
-//            params.put("contractNum", cmd.getContractNumber());
+//            params.put("contractNum", "T1716170622");
+            params.put("contractNum", cmd.getContractNumber());
             String signature = SignatureHelper.computeSignature(params, secretKey);
             params.put("signature", signature);
             ZJContractDetail zjContract = null;

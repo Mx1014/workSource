@@ -92,7 +92,21 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
 
-        return ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+        return convertToDTO(customer);
+    }
+
+    private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
+        EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
+        if(categoryItem != null) {
+            dto.setCategoryItemName(categoryItem.getItemDisplayName());
+        }
+        ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
+        if(levelItem != null) {
+            dto.setLevelItemName(levelItem.getItemDisplayName());
+        }
+
+        return dto;
     }
 
     private OrganizationDTO createOrganization(EnterpriseCustomer customer) {
@@ -142,8 +156,7 @@ public class CustomerServiceImpl implements CustomerService {
             command.setAddress(customer.getContactAddress());
             organizationService.updateEnterprise(command, false);
         }
-
-        return ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+        return convertToDTO(customer);
     }
 
     @Override
@@ -223,6 +236,15 @@ public class CustomerServiceImpl implements CustomerService {
                 log.setData(str);
                 log.setErrorLog("enterpirse customer name is null");
                 log.setCode(CustomerErrorCode.ERROR_CUSTOMER_NAME_IS_NULL);
+                errorDataLogs.add(log);
+                continue;
+            }
+            List<EnterpriseCustomer> enterpriseCustomers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(cmd.getNamespaceId(), str.getName());
+            if(enterpriseCustomers != null && enterpriseCustomers.size() > 0) {
+                LOGGER.error("enterpirse customer name is already exist, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("enterpirse customer name is already exist");
+                log.setCode(CustomerErrorCode.ERROR_CUSTOMER_NAME_IS_EXIST);
                 errorDataLogs.add(log);
                 continue;
             }
@@ -350,7 +372,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public EnterpriseCustomerDTO getEnterpriseCustomer(GetEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
-        EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+        EnterpriseCustomerDTO dto = convertToDTO(customer);
         popularCustomerUrl(dto);
         return dto;
     }

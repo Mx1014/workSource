@@ -842,6 +842,20 @@ public class ContractServiceImpl implements ContractService {
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
 			contractSearcher.feedDoc(contract);
+
+			//作废合同关联资产释放
+			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+			if(contractApartments != null && contractApartments.size() > 0) {
+				contractApartments.forEach(contractApartment -> {
+					contractApartment.setStatus(CommonStatus.INACTIVE.getCode());
+					contractBuildingMappingProvider.updateContractBuildingMapping(contractApartment);
+
+					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
+					addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+					propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+				});
+			}
+
 		}
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getResult())) && ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			contract.setStatus(cmd.getResult());
