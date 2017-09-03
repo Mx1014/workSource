@@ -656,7 +656,7 @@ public class AssetServiceImpl implements AssetService {
                             // identity中最小的那个设置为datestr
                             newBill.setDateStr(item.getDateStr());
                             newBill.setId(nextBillId);
-                            newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
+                            newBill.setNamespaceId(cmd.getNamesapceId());
                             newBill.setNoticetel(cmd.getNoticeTel());
                             newBill.setOwnerId(cmd.getOwnerId());
                             newBill.setContractNum(cmd.getContractNum());
