@@ -661,7 +661,7 @@ CREATE TABLE `eh_payment_bill_items` (
   `target_type` varchar(32) DEFAULT NULL,
   `target_id` bigint(20) DEFAULT NULL,
   `target_name` varchar(32) DEFAULT NULL COMMENT '客户名称，客户没有在系统中时填写',
-  `contract_id` varchar(20) DEFAULT NULL,
+  `contract_id` bigint(20) DEFAULT NULL,
   `contract_num` varchar(255) DEFAULT NULL,
   `property_identifer` varchar(255) DEFAULT '' COMMENT '资产标识',
   `address_id` bigint(20) DEFAULT NULL,

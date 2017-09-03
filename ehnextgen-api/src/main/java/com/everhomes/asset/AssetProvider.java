@@ -109,11 +109,11 @@ public interface AssetProvider {
 
     Byte findBillyCycleById(Long chargingStandardId);
 
-    void changeBillStatusOnContractSaved(String contractNum);
+    void changeBillStatusOnContractSaved(Long contractId);
 
-    void deleteContractPayment(String contractNum);
+    void deleteContractPayment(Long contractId);
 
     List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize);
 
-    void updateBillsToSettled(String contractId, String ownerType, Long ownerId);
+    void updateBillsToSettled(Long contractId, String ownerType, Long ownerId);
 }

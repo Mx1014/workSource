@@ -13,16 +13,16 @@ package com.everhomes.asset;
  *</ul>
  */
 public class UpdateBillsToSettled {
-    private String contractId;
+    private Long contractId;
     private String ownerType;
     private Long ownerId;
 
 
-    public String getContractId() {
+    public Long getContractId() {
         return contractId;
     }
 
-    public void setContractId(String contractId) {
+    public void setContractId(Long contractId) {
         this.contractId = contractId;
     }
 

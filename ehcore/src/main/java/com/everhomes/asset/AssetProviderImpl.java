@@ -1502,33 +1502,33 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void changeBillStatusOnContractSaved(String contractNum) {
+    public void changeBillStatusOnContractSaved(Long contractId) {
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         EhPaymentContractReceiver t1 = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t1");
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
             context.update(t)
                     .set(t.SWITCH,(byte)0)
-                    .where(t.CONTRACT_NUM.eq(contractNum))
+                    .where(t.CONTRACT_ID.eq(contractId))
                     .and(t.SWITCH.eq((byte)3))
                     .execute();
             context.update(t1)
                     .set(t1.STATUS,(byte)1)
-                    .where(t1.CONTRACT_NUM.eq(contractNum))
+                    .where(t1.CONTRACT_ID.eq(contractId))
                     .execute();
             return null;
         });
     }
 
     @Override
-    public void deleteContractPayment(String contractNum) {
+    public void deleteContractPayment(Long contractId) {
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         EhPaymentContractReceiver t1 = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t1");
         EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
             List<Long> billIds = context.select(t.ID)
-                    .where(t.CONTRACT_NUM.eq(contractNum))
+                    .where(t.CONTRACT_ID.eq(contractId))
                     .and(t.SWITCH.eq((byte) 3))
                     .fetch(t.ID);
             context.delete(t)
@@ -1538,7 +1538,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .where(t2.BILL_ID.in(billIds))
                     .execute();
             context.delete(t1)
-                    .where(t1.CONTRACT_NUM.eq(contractNum))
+                    .where(t1.CONTRACT_ID.eq(contractId))
                     .execute();
             return null;
         });
@@ -1573,12 +1573,16 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void updateBillsToSettled(String contractId, String ownerType, Long ownerId) {
+    public void updateBillsToSettled(Long contractId, String ownerType, Long ownerId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         com.everhomes.server.schema.tables.EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-//        context.update(t)
-//                .set(t.SWITCH,(byte)1)
-//                .where(t.C)
+        context.update(t)
+                .set(t.SWITCH,(byte)1)
+                .where(t.CONTRACT_ID.eq(contractId))
+                .and(t.OWNER_TYPE.eq(ownerType))
+                .and(t.OWNER_ID.eq(ownerId))
+                .and(t.SWITCH.eq((byte)0))
+                .execute();
     }
 
 }

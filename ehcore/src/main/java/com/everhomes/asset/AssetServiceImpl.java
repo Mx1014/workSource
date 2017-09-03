@@ -631,6 +631,7 @@ public class AssetServiceImpl implements AssetService {
                     item.setOwnerId(cmd.getOwnerId());
                     item.setTargetType(cmd.getTargetType());
                     item.setTargetId(cmd.getTargetId());
+                    item.setContractId(cmd.getContractId());
                     item.setContractNum(cmd.getContractNum());
                     item.setTargetName(cmd.getTargetName());
                     item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -661,6 +662,7 @@ public class AssetServiceImpl implements AssetService {
                             newBill.setNamespaceId(cmd.getNamesapceId());
                             newBill.setNoticetel(cmd.getNoticeTel());
                             newBill.setOwnerId(cmd.getOwnerId());
+                            newBill.setContractId(cmd.getContractId());
                             newBill.setContractNum(cmd.getContractNum());
                             newBill.setTargetName(cmd.getTargetName());
                             newBill.setOwnerType(cmd.getOwnerType());
@@ -705,6 +707,7 @@ public class AssetServiceImpl implements AssetService {
 //            entity.setApartmentName(property.getApartmentName());
 //            entity.setBuildingName(property.getBuldingName());
             entity.setAddressIdsJson(addressIds.toString());
+            entity.setContractId(cmd.getContractId());
             entity.setContractNum(cmd.getContractNum());
             entity.setEhPaymentChargingItemId(rule.getChargingItemId());
             entity.setEhPaymentChargingStandardId(rule.getChargingStandardId());
@@ -854,11 +857,11 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public void upodateBillStatusOnContractStatusChange(String contractNum,String targetStatus) {
+    public void upodateBillStatusOnContractStatusChange(Long contractId,String targetStatus) {
         if(targetStatus.equals(AssetPaymentStrings.CONTRACT_SAVE)){
-            assetProvider.changeBillStatusOnContractSaved(contractNum);
+            assetProvider.changeBillStatusOnContractSaved(contractId);
         }else if(targetStatus.equals(AssetPaymentStrings.CONTRACT_CANCEL)){
-            assetProvider.deleteContractPayment(contractNum);
+            assetProvider.deleteContractPayment(contractId);
         }
     }
 
