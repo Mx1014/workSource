@@ -1572,4 +1572,13 @@ public class AssetProviderImpl implements AssetProvider {
         return dtos;
     }
 
+    @Override
+    public void updateBillsToSettled(String contractId, String ownerType, Long ownerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+//        context.update(t)
+//                .set(t.SWITCH,(byte)1)
+//                .where(t.C)
+    }
+
 }

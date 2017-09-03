@@ -13,6 +13,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
@@ -71,6 +72,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.DSLContext;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -656,7 +658,7 @@ public class AssetServiceImpl implements AssetService {
                             // identity中最小的那个设置为datestr
                             newBill.setDateStr(item.getDateStr());
                             newBill.setId(nextBillId);
-                            newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
+                            newBill.setNamespaceId(cmd.getNamesapceId());
                             newBill.setNoticetel(cmd.getNoticeTel());
                             newBill.setOwnerId(cmd.getOwnerId());
                             newBill.setContractNum(cmd.getContractNum());
@@ -943,6 +945,11 @@ public class AssetServiceImpl implements AssetService {
             response.setTargetName(dto.getOrganizationName());
         }
         return response;
+    }
+
+    @Override
+    public void updateBillsToSettled(UpdateBillsToSettled cmd) {
+        assetProvider.updateBillsToSettled(cmd.getContractId(),cmd.getOwnerType(),cmd.getOwnerId());
     }
 
     private void coverVariables(List<VariableIdAndValue> var1, List<VariableIdAndValue> var2) {

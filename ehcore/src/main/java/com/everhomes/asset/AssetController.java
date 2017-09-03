@@ -907,4 +907,18 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /asset/updateBillsToSettled</b>
+     * <p>将未出账单转为已出账单</p>
+     */
+    @RequestMapping("updateBillsToSettled")
+    @RestReturn(String.class)
+    public RestResponse updateBillsToSettled(UpdateBillsToSettled cmd) {
+        this.assetService.updateBillsToSettled(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

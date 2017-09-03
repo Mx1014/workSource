@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by Administrator on 2017/2/20.
+ * Created by Wentian on 2017/2/20.
  */
 public interface AssetProvider {
 
@@ -114,4 +114,6 @@ public interface AssetProvider {
     void deleteContractPayment(String contractNum);
 
     List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize);
+
+    void updateBillsToSettled(String contractId, String ownerType, Long ownerId);
 }

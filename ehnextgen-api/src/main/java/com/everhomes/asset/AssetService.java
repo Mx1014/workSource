@@ -85,5 +85,7 @@ public interface AssetService {
 
     FindUserInfoForPaymentDTO findUserInfoForPayment(FindUserInfoForPaymentCommand cmd);
 
+    void updateBillsToSettled(UpdateBillsToSettled cmd);
+
 //    void synchronizeZJGKBill();
 }
