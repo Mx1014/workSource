@@ -455,7 +455,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListBillsDTO> listBills(Integer currentNamespaceId, Long ownerId, String ownerType,  String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status) {
+    public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType,  String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType) {
         List<ListBillsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
@@ -474,6 +474,12 @@ public class AssetProviderImpl implements AssetProvider {
         }
         if(!org.springframework.util.StringUtils.isEmpty(targetName)) {
             query.addConditions(t.TARGET_NAME.like("%"+targetName+"%"));
+        }
+        if(targetType!=null){
+            query.addConditions(t.TARGET_TYPE.eq(targetType));
+        }
+        if(contractNum!=null){
+            query.addConditions(t.CONTRACT_NUM.eq(contractNum));
         }
         if(status!=null && status == 1){
             query.addOrderBy(t.STATUS);

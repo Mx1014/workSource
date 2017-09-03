@@ -43,7 +43,7 @@ public interface AssetProvider {
 
     AssetBill findAssetBill(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr, Long tenantId, String tenantType, Long addressId);
 
-    List<ListBillsDTO> listBills(Integer currentNamespaceId, Long ownerId, String ownerType, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status);
+    List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType);
 
     List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize);
 
