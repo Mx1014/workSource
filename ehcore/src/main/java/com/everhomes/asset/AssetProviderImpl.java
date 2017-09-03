@@ -724,7 +724,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public ListBillsDTO creatPropertyBill( BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum) {
+    public ListBillsDTO creatPropertyBill( BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId) {
         final ListBillsDTO[] response = {new ListBillsDTO()};
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -834,6 +834,7 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setNamespaceId(UserContext.getCurrentNamespaceId());
                     item.setOwnerType(ownerType);
                     item.setOwnerId(ownerId);
+                    item.setContractId(contractId);
                     item.setContractNum(contractNum);
                     if(targetType!=null){
                         item.setTargetType(targetType);
@@ -884,6 +885,7 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setNoticeTimes(0);
             newBill.setStatus(billStatus);
             newBill.setSwitch(isSettled);
+            newBill.setContractId(contractId);
             newBill.setContractNum(contractNum);
             EhPaymentBillsDao billsDao = new EhPaymentBillsDao(context.configuration());
             billsDao.insert(newBill);

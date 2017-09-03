@@ -59,7 +59,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr);
 
-    ListBillsDTO creatPropertyBill(BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum);
+    ListBillsDTO creatPropertyBill(BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId);
 
     ListBillDetailVO listBillDetail(Long billId);
 

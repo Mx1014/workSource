@@ -4518,6 +4518,7 @@ public class UserServiceImpl implements UserService {
                 dto.setTargetId((Long)typeIdNameAndTel.get(1));
                 dto.setTargetName((String)typeIdNameAndTel.get(2));
                 dto.setUserIdentifier((String)typeIdNameAndTel.get(3));
+                dto.setContractId((Long)typeIdNameAndTel.get(4));
                 return dto;
             }else{
                 throw new RuntimeException("找不到该合同");
