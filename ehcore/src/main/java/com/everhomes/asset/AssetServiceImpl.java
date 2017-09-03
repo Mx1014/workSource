@@ -597,14 +597,12 @@ public class AssetServiceImpl implements AssetService {
                     identity.setDateStr(dateStr);
                     // define a billId for billItem and bill to set
                     long nextBillId = 0l;
-                    if(balanceType == AssetPaymentStrings.BALANCE_ON_MONTH){
-                        if(map.containsKey(identity)){
-                            nextBillId = map.get(identity).getId();
-                        }else{
+                    if(map.containsKey(identity)){
+                        nextBillId = map.get(identity).getId();
+                    }else{
+                        nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
+                        if(nextBillId == 0){
                             nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-                            if(nextBillId == 0){
-                                nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-                            }
                         }
                     }
                     // build a billItem
@@ -728,9 +726,6 @@ public class AssetServiceImpl implements AssetService {
             billList.add((PaymentBills)entry.getValue());
         }
         this.dbProvider.execute((TransactionStatus status) -> {
-            if(billList.size()==0){
-                throw new RuntimeException("产生账单失败");
-            }
             assetProvider.saveBillItems(billItemsList);
             assetProvider.saveBills(billList);
             assetProvider.saveContractVariables(contractDateList);
@@ -770,7 +765,6 @@ public class AssetServiceImpl implements AssetService {
         c3.set(Calendar.DAY_OF_MONTH,c3.getActualMinimum(Calendar.DAY_OF_MONTH));
         Calendar c4 = Calendar.getInstance();
         c4.setTime(c3.getTime());
-        c4.set(Calendar.MONTH,c4.get(Calendar.MONTH)+1);
 
         while(c4.compareTo(c2) == -1 || c4.compareTo(c2) == 0) {
             //each month exactly
@@ -971,9 +965,8 @@ public class AssetServiceImpl implements AssetService {
         BigDecimal amountReceivable = calculateFee(variableIdAndValueList,formula,duration);
         dto.setAmountReceivable(amountReceivable);
         dto.setChargingItemName(chargingItemName);
-        SimpleDateFormat sdfNoDay = new SimpleDateFormat("yyyyMM");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        dto.setDateStrBegin(sdfNoDay.format(c3.getTime()));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        dto.setDateStrBegin(sdf.format(c3.getTime()));
 //        dto.setDateStrEnd(sdf.format(c2.getTime()));
         Calendar c6 = Calendar.getInstance();
         c6.setTime(c3.getTime());
