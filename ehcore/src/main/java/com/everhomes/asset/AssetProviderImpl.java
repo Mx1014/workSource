@@ -1507,7 +1507,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentContractReceiver t1 = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t1");
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-            context.update(Tables.EH_PAYMENT_BILLS)
+            context.update(t)
                     .set(t.SWITCH,(byte)0)
                     .where(t.CONTRACT_NUM.eq(contractNum))
                     .and(t.SWITCH.eq((byte)3))
@@ -1550,18 +1550,20 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
-        context.select(t.DATE_STR,t.PROPERTY_IDENTIFER,t.DATA_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
+        context.select(t.DATE_STR,t.PROPERTY_IDENTIFER,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                 .from(t,t1)
                 .where(t.CONTRACT_NUM.eq(contractNum))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                .orderBy(t.DATE_STR)
                 .limit(pageOffset,pageSize+1)
                 .fetch()
                 .map(r -> {
                     PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
                     dto.setDateStrEnd(r.getValue(t.DATE_STR));
                     dto.setPropertyIdentifier(r.getValue(t.PROPERTY_IDENTIFER));
-                    dto.setDueDateStr(r.getValue(t.DATA_STR_END));
-                    dto.setDateStrBegin(r.getValue(t.DATE_STR_DUE));
+                    dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
+                    dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+                    dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
                     dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dto.setChargingItemName(r.getValue(t1.NAME));
                     dtos.add(dto);

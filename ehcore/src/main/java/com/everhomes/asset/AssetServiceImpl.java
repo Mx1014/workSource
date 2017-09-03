@@ -570,7 +570,6 @@ public class AssetServiceImpl implements AssetService {
             Byte balanceType = (Byte)billConf.get(1);
             PaymentBillGroupRule groupRule = assetProvider.getBillGroupRule(rule.getChargingStandardId(),rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
             Long billGroupId = groupRule.getBillGroupId();
-            String billItemName = groupRule.getChargingItemName();
             for(int j = 0; j < var1.size(); j ++){
                 List<PaymentExpectancyDTO> dtos2 = new ArrayList<>();
                 ContractProperty property = var1.get(j);
@@ -594,7 +593,8 @@ public class AssetServiceImpl implements AssetService {
                     BillIdentity identity = new BillIdentity();
                     identity.setBillGroupId(groupRule.getBillGroupId());
                     identity.setContract(cmd.getContractNum());
-                    identity.setDateStr(dto.getDateStrBegin());
+                    String dateStr = dto.getDateStrBegin().substring(0,dto.getDateStrBegin().lastIndexOf("-"));
+                    identity.setDateStr(dateStr);
                     // define a billId for billItem and bill to set
                     long nextBillId = 0l;
                     if(balanceType == AssetPaymentStrings.BALANCE_ON_MONTH){
@@ -620,8 +620,9 @@ public class AssetServiceImpl implements AssetService {
                     item.setChargingItemsId(rule.getChargingItemId());
                     item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setCreatorUid(UserContext.currentUserId());
-                    item.setDateStr(dto.getDateStrBegin());
-                    item.setDataStrEnd(dto.getDateStrEnd());
+                    item.setDateStr(dateStr);
+                    item.setDateStrBegin(dto.getDateStrBegin());
+                    item.setDateStrEnd(dto.getDateStrEnd());
                     item.setDateStrDue(dto.getDueDateStr());
                     item.setId(currentBillItemSeq);
                     currentBillItemSeq += 1;
@@ -757,15 +758,16 @@ public class AssetServiceImpl implements AssetService {
         //define the end of the date the calculation should take as multiply
         Calendar c5 = Calendar.getInstance();
         //calculate the per cent of month from c1 to the end of the month c1 is at
-
-        if(c1.get(Calendar.DAY_OF_MONTH)!=c1.getActualMinimum(Calendar.DAY_OF_MONTH)){
-            duration = (c1.getActualMaximum(Calendar.DAY_OF_MONTH) - c1.get(Calendar.DAY_OF_MONTH))/c1.getActualMaximum(Calendar.DAY_OF_MONTH);
+        duration = ((float)c1.getActualMaximum(Calendar.DAY_OF_MONTH) - (float)c1.get(Calendar.DAY_OF_MONTH))/(float)c1.getActualMaximum(Calendar.DAY_OF_MONTH);
+        BigDecimal tempDuration = new BigDecimal(duration);
+        tempDuration = tempDuration.setScale(2,BigDecimal.ROUND_CEILING);
+        if(duration != 0){
             c5.setTime(c3.getTime());
             c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
-            addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, duration,billDay);
-            c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)+1);
-            c3.set(Calendar.DAY_OF_MONTH,c3.getActualMinimum(Calendar.DAY_OF_MONTH));
+            addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, tempDuration.floatValue(),billDay);
         }
+        c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)+1);
+        c3.set(Calendar.DAY_OF_MONTH,c3.getActualMinimum(Calendar.DAY_OF_MONTH));
         Calendar c4 = Calendar.getInstance();
         c4.setTime(c3.getTime());
         c4.set(Calendar.MONTH,c4.get(Calendar.MONTH)+1);

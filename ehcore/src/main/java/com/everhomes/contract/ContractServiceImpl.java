@@ -16,11 +16,13 @@ import java.util.stream.Collectors;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+
 import com.everhomes.asset.AssetPaymentStrings;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.asset.AssetVendor;
 import com.everhomes.asset.AssetVendorHandler;
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -162,6 +164,7 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private IndividualCustomerProvider individualCustomerProvider;
+
 	@PostConstruct
 	public void setup(){
 		String triggerName = ContractScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
