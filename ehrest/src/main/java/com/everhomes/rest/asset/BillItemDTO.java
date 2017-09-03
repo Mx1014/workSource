@@ -13,6 +13,9 @@ import java.math.BigDecimal;
  * <li>amountReceivable:应收金额</li>
  * <li>description:描述</li>
  * <li>dateStr:账期</li>
+ * <li>addressId:地址id</li>
+ * <li>apartmentName:楼栋</li>
+ * <li>buildingName:门牌</li>
  *</ul>
  */
 public class BillItemDTO {
@@ -21,10 +24,21 @@ public class BillItemDTO {
     private BigDecimal amountReceivable;
     private String description;
     private String dateStr;
+    private Long addressId;
+    private String apartmentName;
+    private String buildingName;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
     }
 
     public String getDateStr() {
@@ -33,6 +47,22 @@ public class BillItemDTO {
 
     public void setDateStr(String dateStr) {
         this.dateStr = dateStr;
+    }
+
+    public String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
     }
 
     public Long getBillItemId() {

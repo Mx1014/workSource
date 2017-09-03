@@ -182,7 +182,8 @@ public class ContractProviderImpl implements ContractProvider {
         final Byte[] customerType = new Byte[1];
         final Long[] customerId = new Long[1];
         final String[] customerName = new String[1];
-        context.select(t.CUSTOMER_TYPE,t.CUSTOMER_ID,t.CUSTOMER_NAME)
+		final Long[] contractId = new Long[1];
+        context.select(t.CUSTOMER_TYPE,t.CUSTOMER_ID,t.CUSTOMER_NAME,t.ID)
                 .from(t)
                 .where(t.CONTRACT_NUMBER.eq(contractNum))
                 .fetch()
@@ -190,6 +191,7 @@ public class ContractProviderImpl implements ContractProvider {
                     customerType[0] = r.getValue(t.CUSTOMER_TYPE);
                     customerId[0] = r.getValue(t.CUSTOMER_ID);
                     customerName[0] = r.getValue(t.CUSTOMER_NAME);
+                    contractId[0] = r.getValue(t.ID);
                     return null;
                 });
         if(customerType[0] != null && customerType[0]==0) {
@@ -201,6 +203,7 @@ public class ContractProviderImpl implements ContractProvider {
             list.add(organizationId);
             list.add(customerName[0]);
             list.add("");
+            list.add(contractId[0]);
         }else if(customerType[0]!=null && customerType[0] == 1){
             String userIdentifier = context.select(t2.CONTACT_TOKEN)
                     .from(t2)
@@ -214,6 +217,7 @@ public class ContractProviderImpl implements ContractProvider {
             list.add(userId);
             list.add(customerName[0]);
             list.add(userIdentifier);
+            list.add(contractId[0]);
         }
 
         return list;

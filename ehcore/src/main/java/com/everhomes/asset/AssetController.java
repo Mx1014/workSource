@@ -688,7 +688,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 展示已出账单的收费项       4
+    // this is for 展示账单的收费项       4
     /**
      * <p>展示已出账单的收费项</p>
      * <b>URL: /asset/listBillItems</b>
@@ -902,6 +902,20 @@ public class AssetController extends ControllerBase {
     public RestResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
         FindUserInfoForPaymentDTO dto = this.assetService.findUserInfoForPayment(cmd);
         RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /asset/updateBillsToSettled</b>
+     * <p>将未出账单转为已出账单</p>
+     */
+    @RequestMapping("updateBillsToSettled")
+    @RestReturn(String.class)
+    public RestResponse updateBillsToSettled(UpdateBillsToSettled cmd) {
+        this.assetService.updateBillsToSettled(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

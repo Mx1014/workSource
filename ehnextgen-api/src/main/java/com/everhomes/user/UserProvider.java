@@ -131,4 +131,6 @@ public interface UserProvider {
     long createUserNotificationSetting(UserNotificationSetting setting);
 
     List<TargetDTO> findUesrIdByNameAndAddressId(String targetName, List<Long> ids, String tel);
+
+    TargetDTO findUserByTokenAndName(String tel, String targetName);
 }

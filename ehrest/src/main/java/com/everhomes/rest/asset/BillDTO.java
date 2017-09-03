@@ -14,7 +14,8 @@ import java.math.BigDecimal;
  * <li>targetName:客户名称</li>
  * <li>targetId:客户id</li>
  * <li>targetType:客户类型</li>
- * <li>addressName:楼栋门牌</li>
+ * <li>buildingName:楼栋</li>
+ * <li>apartmentName:门牌</li>
  * <li>amountReceivable:应收金额</li>
  * <li>amountReceived:实收金额</li>
  * <li>amountOwed:欠收金额</li>
@@ -29,7 +30,8 @@ public class BillDTO {
     private String targetName;
     private String targetId;
     private Long targetType;
-    private String addressName;
+    private String buildingName;
+    private String apartmentName;
     private BigDecimal amountReceivable;
     private BigDecimal amountReceived;
     private BigDecimal amountOwed;
@@ -48,12 +50,20 @@ public class BillDTO {
         this.billItemId = billItemId;
     }
 
-    public String getAddressName() {
-        return addressName;
+    public String getBuildingName() {
+        return buildingName;
     }
 
-    public void setAddressName(String addressName) {
-        this.addressName = addressName;
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
+    public String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
     }
 
     public Integer getDefaultOrder() {

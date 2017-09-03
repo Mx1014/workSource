@@ -584,6 +584,7 @@ public class ContractServiceImpl implements ContractService {
 		command.setOwnerId(contract.getCommunityId());
 		command.setOwnerType("community");
 		command.setTargetId(contract.getCustomerId());
+		command.setContractId(contract.getId());
 		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
 			command.setTargetType("eh_organization");
 			EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
@@ -599,7 +600,6 @@ public class ContractServiceImpl implements ContractService {
 				command.setNoticeTel(owner.getContactToken());
 			}
 		}
-
 		assetService.paymentExpectancies(command);
 	}
 
@@ -881,7 +881,7 @@ public class ContractServiceImpl implements ContractService {
 
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
-		assetService.upodateBillStatusOnContractStatusChange(contract.getContractNumber(), AssetPaymentStrings.CONTRACT_SAVE);
+		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_SAVE);
 		if(contract.getParentId() != null) {
 			Contract parentContract = contractProvider.findContractById(contract.getParentId());
 			if(parentContract != null) {

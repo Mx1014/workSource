@@ -1296,12 +1296,12 @@ public class UserController extends ControllerBase {
 
 	/**
 	 * <b>URL: /user/findTargetByNameAndAddress</b>
-	 * <p>根据楼栋名称，门牌名称，个人用户电话，客户名称，来确认唯一用户，若无法定位到改域空间下指定园区的唯一用户，则返回null</p>
+	 * <p>根据个人用户电话，客户名称，合同号，来确认唯一用户，若无法定位到改域空间下指定园区的唯一用户，则返回null</p>
 	 */
 	@RequestMapping(value = "findTargetByNameAndAddress")
 	@RestReturn(value = TargetDTO.class)
 	public RestResponse findTargetByNameAndAddress(FindTargetByNameAndAddressCommand cmd) {
-		RestResponse resp = new RestResponse(userService.findTargetByNameAndAddress(cmd.getContractNum(),cmd.getTargetName(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getOwnerId(),cmd.getTel(),cmd.getOwnerType()));
+		RestResponse resp = new RestResponse(userService.findTargetByNameAndAddress(cmd.getContractNum(),cmd.getTargetName(),cmd.getOwnerId(),cmd.getTel(),cmd.getOwnerType(),cmd.getTargetType()));
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");
 		return resp;

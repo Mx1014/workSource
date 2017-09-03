@@ -24,6 +24,8 @@ import java.util.Date;
  * <li>buildingName:楼栋名称</li>
  * <li>apartmentName:门牌名称</li>
  * <li>status:账单属性，0:未出账单;1:已出账单</li>
+ * <li>contractNum:合同编号</li>
+ * <li>targetType:客户类型，个人eh_user;企业：eh_organization</li>
  *</ul>
  */
 public class OneKeyNoticeCommand {
@@ -44,6 +46,8 @@ public class OneKeyNoticeCommand {
     private String buildingName;
     private String apartmentName;
     private Byte status;
+    private String contractNum;
+    private String targetType;
 
     public Long getBillGroupId() {
         return billGroupId;
@@ -51,6 +55,22 @@ public class OneKeyNoticeCommand {
 
     public String getBuildingName() {
         return buildingName;
+    }
+
+    public String getContractNum() {
+        return contractNum;
+    }
+
+    public void setContractNum(String contractNum) {
+        this.contractNum = contractNum;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
     }
 
     public void setBuildingName(String buildingName) {

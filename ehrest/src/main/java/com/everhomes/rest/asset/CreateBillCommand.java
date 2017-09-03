@@ -12,12 +12,10 @@ import java.util.List;
  *<ul>
  * <li>ownerType:所属者type</li>
  * <li>ownerId:所属者id</li>
- * <li>buildingName:楼栋名称</li>
- * <li>apartmentName:门牌名称</li>
- * <li>addressId:地址id</li>
  * <li>dateStr:账期</li>
  * <li>targetType:客户类别</li>
  * <li>targetId:客户id</li>
+ * <li>contractId:合同id</li>
  * <li>contractNum:合同编号</li>
  * <li>noticeTel:催缴电话</li>
  * <li>targetName:客户名称</li>
@@ -28,13 +26,11 @@ import java.util.List;
 public class CreateBillCommand {
     private String ownerType;
     private Long ownerId;
-    private String buildingName;
-    private String apartmentName;
-    private Long addressId;
     private String noticeTel;
     private String targetName;
     private String targetType;
     private Long targetId;
+    private Long contractId;
     private String contractNum;
     private String dateStr;
     @ItemType(BillGroupDTO.class)
@@ -47,6 +43,14 @@ public class CreateBillCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getContractId() {
+        return contractId;
+    }
+
+    public void setContractId(Long contractId) {
+        this.contractId = contractId;
     }
 
     public String getContractNum() {
@@ -71,14 +75,6 @@ public class CreateBillCommand {
 
     public Byte getIsSettled() {
         return isSettled;
-    }
-
-    public Long getAddressId() {
-        return addressId;
-    }
-
-    public void setAddressId(Long addressId) {
-        this.addressId = addressId;
     }
 
     public void setIsSettled(Byte isSettled) {
@@ -111,22 +107,6 @@ public class CreateBillCommand {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
-    }
-
-    public String getBuildingName() {
-        return buildingName;
-    }
-
-    public void setBuildingName(String buildingName) {
-        this.buildingName = buildingName;
-    }
-
-    public String getApartmentName() {
-        return apartmentName;
-    }
-
-    public void setApartmentName(String apartmentName) {
-        this.apartmentName = apartmentName;
     }
 
     public BillGroupDTO getBillGroupDTO() {
