@@ -593,7 +593,8 @@ public class AssetServiceImpl implements AssetService {
                     BillIdentity identity = new BillIdentity();
                     identity.setBillGroupId(groupRule.getBillGroupId());
                     identity.setContract(cmd.getContractNum());
-                    identity.setDateStr(dto.getDateStrBegin());
+                    String dateStr = dto.getDateStrBegin().substring(0,dto.getDateStrBegin().lastIndexOf("-"));
+                    identity.setDateStr(dateStr);
                     // define a billId for billItem and bill to set
                     long nextBillId = 0l;
                     if(map.containsKey(identity)){
@@ -617,8 +618,9 @@ public class AssetServiceImpl implements AssetService {
                     item.setChargingItemsId(rule.getChargingItemId());
                     item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setCreatorUid(UserContext.currentUserId());
-                    item.setDateStr(dto.getDateStrBegin());
-                    item.setDataStrEnd(dto.getDateStrEnd());
+                    item.setDateStr(dateStr);
+                    item.setDateStrBegin(dto.getDateStrBegin());
+                    item.setDateStrEnd(dto.getDateStrEnd());
                     item.setDateStrDue(dto.getDueDateStr());
                     item.setId(currentBillItemSeq);
                     currentBillItemSeq += 1;
