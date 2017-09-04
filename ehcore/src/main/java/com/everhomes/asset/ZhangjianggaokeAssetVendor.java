@@ -59,6 +59,18 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
 
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
+        String url;
+        if(targetType.equals("eh_organization")){
+            url=ZjgkUrls.ENTERPRISE_BILLS;
+        }else if(targetType.equals("eh_user")){
+            url = ZjgkUrls.USER_BILLS;
+        }else{
+            throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
+        }
+        ShowBillForClientDTO sortedBills = new ShowBillForClientDTO();
+
+
+
         Map<String,String> map = new HashMap<>();
         String payFlag = "";
         Community communityById = new Community();
@@ -71,7 +83,6 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
         if (communityName == ""){
             return null;
         }
-        ShowBillForClientDTO sortedBills = new ShowBillForClientDTO();
         if(targetType == "eh_user") {
             //个人用户，查询门牌
             List<String[]> list = userService.listBuildingAndApartmentById(UserContext.currentUserId());

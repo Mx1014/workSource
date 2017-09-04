@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId:所属者id</li>
  * <li>targetType:客户类型,sceneType为default，family时，类型为eh_user即个人，当sceneType为pm_admin屏蔽，当sceneType为其他，则类型为eh_organization即企业</li>
  * <li>targetId:客户id，客户类型为企业时，targetId为企业id</li>
- * <li>contractNum:合同编号</li>
+ * <li>contractId:合同id</li>
  * <li>billGroupId:账单组id</li>
  * <li>isOnlyOwedBill:是否只显示待缴账单1:是;0：不是</li>
  *</ul>
@@ -20,7 +20,7 @@ public class ClientIdentityCommand {
     private Long ownerId;
     private String targetType;
     private Long targetId;
-    private String contractNum;
+    private String contractId;
     private Long billGroupId;
     private Byte isOnlyOwedBill;
 
@@ -33,12 +33,12 @@ public class ClientIdentityCommand {
         return ownerType;
     }
 
-    public String getContractNum() {
-        return contractNum;
+    public String getContractId() {
+        return contractId;
     }
 
-    public void setContractNum(String contractNum) {
-        this.contractNum = contractNum;
+    public void setContractId(String contractId) {
+        this.contractId = contractId;
     }
 
     public Byte getIsOnlyOwedBill() {
