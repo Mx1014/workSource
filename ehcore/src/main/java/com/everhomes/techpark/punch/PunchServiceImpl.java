@@ -6069,6 +6069,8 @@ public class PunchServiceImpl implements PunchService {
         			}
         		}
         		if(timeRule.getPunchTimeIntervals().size()==1){
+                    ptr.setNoonLeaveTimeLong(timeRule.getNoonLeaveTime());
+                    ptr.setAfternoonArriveTimeLong(timeRule.getAfternoonArriveTime());
         			ptr.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
         			ptr.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
         			ptr.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
@@ -6285,6 +6287,8 @@ public class PunchServiceImpl implements PunchService {
 		if(null != timeRules && timeRules.size() > 0)
 			dto.setTimeRules(timeRules.stream().map(r1 -> {
 				PunchTimeRuleDTO dto1 = convertPunchTimeRule2DTO(r1) ;
+                dto1.setAfternoonArriveTime(r1.getAfternoonArriveTimeLong());
+                dto1.setNoonLeaveTime(r1.getNoonLeaveTimeLong());
 	            return dto1;
 	        }).collect(Collectors.toList()));
 
