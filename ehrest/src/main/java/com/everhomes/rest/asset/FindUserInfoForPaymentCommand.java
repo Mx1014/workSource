@@ -14,6 +14,7 @@ package com.everhomes.rest.asset;
 public class FindUserInfoForPaymentCommand {
     private String targeType;
     private Long targetId;
+    private Long communityId;
 
     public String getTargeType() {
         return targeType;
@@ -25,6 +26,14 @@ public class FindUserInfoForPaymentCommand {
 
     public Long getTargetId() {
         return targetId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public void setTargetId(Long targetId) {

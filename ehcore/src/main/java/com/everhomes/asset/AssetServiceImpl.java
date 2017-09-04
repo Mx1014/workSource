@@ -920,12 +920,12 @@ public class AssetServiceImpl implements AssetService {
         String targeType = cmd.getTargeType();
         ListCustomerContractsCommand cmd1 = new ListCustomerContractsCommand();
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-        cmd1.setTargetId(cmd.getTargetId());
+        cmd1.setCommunityId(cmd.getCommunityId());
         if(targeType.equals(AssetPaymentStrings.EH_USER)){
             cmd1.setTargetId(UserContext.currentUserId());
             cmd1.setTargetType(CustomerType.INDIVIDUAL.getCode());
         }else if(targeType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
-            cmd1.setCommunityId(cmd.getTargetId());
+            cmd1.setTargetId(cmd.getTargetId());
             cmd1.setTargetType(CustomerType.ENTERPRISE.getCode());
         }else{
             throw new RuntimeException("用户类型错误");
