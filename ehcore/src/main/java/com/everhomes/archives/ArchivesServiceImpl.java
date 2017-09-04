@@ -27,9 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -507,7 +505,70 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd) {
+
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        Map<String,String> valueMap = new HashMap<>();
+
         return null;
+    }
+
+    private Map<String,String> handleEmployeeMap(OrganizationMemberDetails employee){
+        Map<String,String> valueMap = new HashMap<>();
+        valueMap.put("contactName",employee.getContactName());
+        valueMap.put("enName",employee.getEnName());
+        //  TODO:性别处理,婚姻状况
+//        valueMap.put("gender",employee.getGender());
+        valueMap.put("birthday",String.valueOf(employee.getBirthday()));
+//        valueMap.put("enName",employee.getMaritalFlag());
+        valueMap.put("procreative",String.valueOf(employee.getProcreative()));
+        valueMap.put("ethnicity",employee.getEthnicity());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+        valueMap.put("enName",employee.getEnName());
+return  null;
     }
 
     @Override
@@ -636,21 +697,26 @@ public class ArchivesServiceImpl implements ArchivesService {
     public GetArchivesFormResponse getArchivesForm(GetArchivesFormCommand cmd) {
 
         GetArchivesFormResponse response = new GetArchivesFormResponse();
+        GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
+        formCommand.setFormOriginId(getRealFormOriginId(cmd.getFormOriginId()));
+        GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
+        response.setForm(form);
+        return response;
+    }
+
+    private Long getRealFormOriginId(Long id){
+
         //  此处有两种情况
         //  1.调用模板表单(此时前端传参 formOriginId 为0)
         //  2.已经建立公司对应的表单(此时已有 formOriginId )
 
-        Long formOriginId = cmd.getFormOriginId();
-        if (cmd.getFormOriginId() == 0L) {
+        Long formOriginId = id;
+        if (id == 0L) {
             //  当没有表单 id 的时候则去获取模板表单的id
             String value = configurationProvider.getValue("archives.form.origin.id", "");
             formOriginId = Long.valueOf(value);
         }
-        GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
-        formCommand.setFormOriginId(formOriginId);
-        GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
-        response.setForm(form);
-        return response;
+        return formOriginId;
     }
 
     @Override
