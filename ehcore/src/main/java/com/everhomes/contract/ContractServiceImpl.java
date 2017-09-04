@@ -556,8 +556,8 @@ public class ContractServiceImpl implements ContractService {
 					cp.setApartmentName(apartment.getApartmentName());
 					cp.setBuldingName(apartment.getBuildingName());
 					cp.setAddressId(apartment.getAddressId());
-					Address address = addressProvider.findAddressById(apartment.getAddressId());
-					cp.setPropertyName(address.getNamespaceAddressToken());
+//					Address address = addressProvider.findAddressById(apartment.getAddressId());
+//					cp.setPropertyName(address.getNamespaceAddressToken());
 					contractProperties.add(cp);
 				});
 			}
