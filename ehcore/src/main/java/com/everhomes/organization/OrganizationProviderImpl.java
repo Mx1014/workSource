@@ -130,7 +130,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, department.getId());
 	}
 
-
+	@CacheEvict(value="OrganizationById", key="#id")
 	@Override
 	public void deleteOrganizationById(Long id){
 
@@ -141,7 +141,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, id);
 	}
 
-
+	@Cacheable(value="OrganizationById", key="#id")
 	@Override
 	public Organization findOrganizationById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -5142,7 +5142,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		Organization org = findOrganizationById(listCommand.getOrganizationId());
 
 
-		Condition cond = t1.field("group_path").like(org.getPath()+"%").and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode());
+		Condition cond = t1.field("group_path").like(org.getPath()+"%").and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
 
 		if (!StringUtils.isEmpty(keywords)) {
 			Condition cond1 = t2.field("contact_token").eq(keywords);
@@ -5209,6 +5209,40 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			result.remove(result.size() - 1);
 			locator.setAnchor(result.get(result.size() - 1).getId());
 		}
+		return result;
+	}
+
+	@Override
+	public List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, List<String> tokens) {
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+
+		//path一定不能为空 add by sfyan 20170428
+		if(StringUtils.isEmpty(path)){
+			return result;
+		}
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
+		if(null != groupTypes){
+			if(groupTypes.size() > 0){
+				query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+			}
+		}
+
+		if(null != tokens && tokens.size() > 0){
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.in(tokens));
+		}
+
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+
 		return result;
 	}
 }

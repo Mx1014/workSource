@@ -5358,7 +5358,64 @@ public class OrganizationServiceImpl implements OrganizationService {
         response.setNextPageAnchor(locator.getAnchor());
 
         Long startTime3 = System.currentTimeMillis();
-        response.setMembers(this.convertDTO(organizationMembers, org));
+
+        // 开始聚合
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypes.add(OrganizationGroupType.GROUP.getCode());
+        groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
+        groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
+        List<String> tokens = organizationMembers.stream().map(r ->{return r.getContactToken();}).collect(Collectors.toList());
+        List<OrganizationMember> origins = organizationProvider.listOrganizationMemberByPath(org.getPath(),groupTypes,tokens);
+
+        Map<String, OrganizationMemberDTO> target_map = new HashMap();
+
+        origins.forEach(r->{
+            OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
+            switch (OrganizationGroupType.fromCode(r.getGroupType())) {
+                case DIRECT_UNDER_ENTERPRISE:
+                case DEPARTMENT:
+                case GROUP:
+                    Organization org_now = organizationProvider.findOrganizationById(r.getOrganizationId());
+                    if (org_now != null) {
+                        OrganizationDTO orgDTO_now = ConvertHelper.convert(org_now, OrganizationDTO.class);
+                        OrganizationMemberDTO orgDto_target = target_map.get(r.getContactToken());
+                        if (orgDto_target == null) {
+                            dto.setDepartments(Collections.singletonList(orgDTO_now));
+                            target_map.put(dto.getContactToken(), dto);
+                        } else {
+                            orgDto_target.getDepartments().add(orgDTO_now);
+                        }
+                    }
+                    break;
+                case JOB_POSITION:
+                    Organization position_now = organizationProvider.findOrganizationById(r.getOrganizationId());
+                    if (position_now != null) {
+                        OrganizationDTO positionDTO_now = ConvertHelper.convert(position_now, OrganizationDTO.class);
+                        OrganizationMemberDTO orgDto_target = target_map.get(r.getContactToken());
+                        if (orgDto_target == null) {
+                            dto.setJobPositions(Collections.singletonList(positionDTO_now));
+                            target_map.put(dto.getContactToken(), dto);
+                        } else {
+                            orgDto_target.getJobPositions().add(positionDTO_now);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        List<OrganizationMemberDTO> members = new ArrayList<>();
+        target_map.values().stream().map(r ->{
+            members.add(r);
+            return null;
+        }).collect(Collectors.toList());
+
+
+        response.setMembers(members);
         Long endTime = System.currentTimeMillis();
 
         if (LOGGER.isDebugEnabled()) {
@@ -7141,11 +7198,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                     return r;
                 }).collect(Collectors.toList());
                 dto.setDepartments(departments);
-            } else if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP) {
-                List<OrganizationDTO> groups = new ArrayList<>();
-                groups.add(orgDTO);
-                groups.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), directlyEnterprise.getPath()));
-                dto.setGroups(groups);
             }
             Long endTime1_1 = System.currentTimeMillis();
 
@@ -12792,5 +12844,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
     }
+
 }
 
