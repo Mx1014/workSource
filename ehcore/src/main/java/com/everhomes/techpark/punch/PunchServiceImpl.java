@@ -6527,6 +6527,8 @@ public class PunchServiceImpl implements PunchService {
 				ClockCode.SUCESS.getCode());
 		if (null != ptrId) {
 			PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(ptrId);
+            if(null == ptr)
+                return response;
 			response.setPunchTimesPerDay(ptr.getPunchTimesPerDay());
 			String[] statusList =null;
 			if(null != pdl){
