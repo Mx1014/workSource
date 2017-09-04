@@ -3,6 +3,8 @@ package com.everhomes.rest.portal;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * 
  * <ul>
@@ -18,6 +20,8 @@ public class ServiceAllianceInstanceConfig {
 	private String displayType;
 
 	private Byte detailFlag;
+
+	private List<ServiceAllianceJump> jumps;
 
 	public Long getType() {
 		return type;
@@ -41,6 +45,14 @@ public class ServiceAllianceInstanceConfig {
 
 	public void setDisplayType(String displayType) {
 		this.displayType = displayType;
+	}
+
+	public List<ServiceAllianceJump> getJumps() {
+		return jumps;
+	}
+
+	public void setJumps(List<ServiceAllianceJump> jumps) {
+		this.jumps = jumps;
 	}
 
 	@Override
