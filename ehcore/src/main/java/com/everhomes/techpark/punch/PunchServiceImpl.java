@@ -6970,7 +6970,7 @@ public class PunchServiceImpl implements PunchService {
 			return result ;
 		}
 	}
-
+    //获取离开时间 --对于4次打卡弹性时间,要根据上班打卡时间决定
 	private void processLastOffDutyPunchLog(PunchLogDTO result, PunchTimeRule ptr, Long punchTimeLong, List<PunchLog> punchLogs) {
 		long leaveTime = getLeaveTime(ptr, findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(), 1));
 		result.setRuleTime(ptr.getStartEarlyTimeLong()+ptr.getWorkTimeLong());
@@ -6986,7 +6986,9 @@ public class PunchServiceImpl implements PunchService {
 	private long getLeaveTime (PunchTimeRule ptr,PunchLog onDutyPunch) {
 
 		long leaveTime = ptr.getStartEarlyTimeLong()+ptr.getWorkTimeLong();
-		if(ptr.getHommizationType().equals(HommizationType.LATEARRIVE.getCode())){
+		if(null == onDutyPunch)
+            return leaveTime;
+        if(ptr.getHommizationType().equals(HommizationType.LATEARRIVE.getCode())){
 
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(onDutyPunch.getPunchTime());
