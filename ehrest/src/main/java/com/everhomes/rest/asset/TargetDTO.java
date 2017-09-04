@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>targetType:客户的类型，eh_user为认证的个人，eh_organization为认证的企业</li>
  * <li>targetName:客户名称</li>
  * <li>userIdentifier:个人客户的登录手机号</li>
+ * <li>contractId:合同id</li>
  *</ul>
  */
 public class TargetDTO {
@@ -20,6 +21,7 @@ public class TargetDTO {
     private String targetType;
     private String targetName;
     private String userIdentifier;
+    private Long contractId;
 
     public String getTargetName() {
         return targetName;
@@ -28,6 +30,14 @@ public class TargetDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getContractId() {
+        return contractId;
+    }
+
+    public void setContractId(Long contractId) {
+        this.contractId = contractId;
     }
 
     public TargetDTO() {

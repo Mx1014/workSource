@@ -15,6 +15,8 @@ import java.math.BigDecimal;
  * <li>targetName:客户名称</li>
  * <li>targetId:客户id</li>
  * <li>targetType:客户类型</li>
+ * <li>contractId:合同id</li>
+ * <li>contractNum:合同编号</li>
  * <li>buildingName:楼栋门牌</li>
  * <li>apartmentName:楼栋门牌</li>
  * <li>noticeTel:催缴联系号码</li>
@@ -34,6 +36,7 @@ public class ListBillsDTO {
     private String billGroupName;
     private String targetName;
     private Long targetId;
+    private Long contractId;
     private String contractNum;
     private String targetType;
     private String buildingName;
@@ -50,6 +53,14 @@ public class ListBillsDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getContractId() {
+        return contractId;
+    }
+
+    public void setContractId(Long contractId) {
+        this.contractId = contractId;
     }
 
     public String getBuildingName() {

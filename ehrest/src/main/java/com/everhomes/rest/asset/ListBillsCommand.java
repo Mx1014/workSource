@@ -23,6 +23,8 @@ import javax.validation.constraints.NotNull;
  * <li>buildingName:楼栋名称</li>
  * <li>apartmentName:门牌名称</li>
  * <li>status:账单属性，0:未出账单;1:已出账单</li>
+ * <li>targetType:客户属性；eh_user个人；eh_organization：企业</li>
+ * <li>contractNum:合同编号</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -43,6 +45,8 @@ public class ListBillsCommand {
     private String buildingName;
     private String apartmentName;
     private Byte status;
+    private String targetType;
+    private String contractNum;
 
     public Long getBillGroupId() {
         return billGroupId;
@@ -50,6 +54,22 @@ public class ListBillsCommand {
 
     public String getBuildingName() {
         return buildingName;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public String getContractNum() {
+        return contractNum;
+    }
+
+    public void setContractNum(String contractNum) {
+        this.contractNum = contractNum;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
     }
 
     public void setBuildingName(String buildingName) {

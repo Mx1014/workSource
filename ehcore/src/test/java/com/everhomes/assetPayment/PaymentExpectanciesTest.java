@@ -47,7 +47,7 @@ public class PaymentExpectanciesTest {
 
         PaymentExpectanciesCommand cmd = new PaymentExpectanciesCommand();
         cmd.setTargetType("eh_organization");
-        cmd.setTargetName("波塞冬集团");
+        cmd.setTargetName("闻天的测试");
         cmd.setTargetId(null);
         cmd.setPageSize(20);
         cmd.setPageOffset(0);
@@ -60,24 +60,23 @@ public class PaymentExpectanciesTest {
         FeeRules feeRules = new FeeRules();
         feeRules.setChargingItemId(1l);
         feeRules.setChargingStandardId(1l);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-        Date begin = sdf.parse("2017-01");
-        Date end = sdf.parse("2017-10");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date begin = sdf.parse("2017-09-03");
+        Date end = sdf.parse("2018-09-03");
         feeRules.setDateStrBegin(begin);
         feeRules.setDateStrEnd(end);
-        List<String> props = new ArrayList<>();
-        props.add("240102032121838343934");
-        props.add("KG28483BX21");
+
 //        feeRules.setPropertyName(props);
         List<VariableIdAndValue> v = new ArrayList<>();
         VariableIdAndValue g = new VariableIdAndValue();
         g.setVariableId("ydj");
-        g.setVariableValue("80");
+        g.setVariableValue(new BigDecimal("80"));
         VariableIdAndValue g1 = new VariableIdAndValue();
         g1.setVariableId("mj");
-        g1.setVariableValue("100");
+        g1.setVariableValue(new BigDecimal("10"));
         v.add(g);
         v.add(g1);
+
         feeRules.setVariableIdAndValueList(v);
         List<ContractProperty> var1 = new ArrayList<>();
         ContractProperty var2 = new ContractProperty();
@@ -97,7 +96,7 @@ public class PaymentExpectanciesTest {
         list.add(feeRules);
 
         cmd.setFeesRules(list);
-        cmd.setContractNum("KK2086");
+        cmd.setContractNum("KG-2017222");
 //        cmd.setBuldingName("西太平洋03号standalone");
 //        cmd.setApartmentName("旋翼载具研究所811");
 

@@ -21,6 +21,7 @@ public class PaymentExpectanciesCommand {
     @ItemType(FeeRules.class)
     private List<FeeRules> feesRules;
     private String contractNum;
+    private Long contractId;
     private String noticeTel;
     private Integer pageOffset;
     private Integer pageSize;
@@ -33,6 +34,14 @@ public class PaymentExpectanciesCommand {
 
     public Integer getPageOffset() {
         return pageOffset;
+    }
+
+    public Long getContractId() {
+        return contractId;
+    }
+
+    public void setContractId(Long contractId) {
+        this.contractId = contractId;
     }
 
     public String getTargetName() {

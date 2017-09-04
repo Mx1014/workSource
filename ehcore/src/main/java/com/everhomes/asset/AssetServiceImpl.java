@@ -13,6 +13,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
@@ -71,6 +72,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.DSLContext;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -164,6 +166,9 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private ContractService contractService;
 
+    @Autowired
+    private UserService userService;
+
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -217,7 +222,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(20);
         }
         int pageOffSet = cmd.getPageAnchor().intValue();
-        List<ListBillsDTO> list = handler.listBills(UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus());
+        List<ListBillsDTO> list = handler.listBills(cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType());
         if(list.size() <= cmd.getPageSize()){
             response.setNextPageAnchor(null);
         }else{
@@ -365,8 +370,13 @@ public class AssetServiceImpl implements AssetService {
         if(!cmd.getOwnerType().equals("community")){
             throw new RuntimeException("保存账单不在一个园区");
         }
+        TargetDTO targetDto = userService.findTargetByNameAndAddress(cmd.getContractNum(), cmd.getTargetName(), cmd.getOwnerId(), cmd.getNoticeTel(), cmd.getOwnerType(), cmd.getTargetType());
+        if(targetDto!=null){
+            cmd.setContractId(targetDto.getContractId());
+            cmd.setTargetId(targetDto.getTargetId());
+        }
 //        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
-        return assetProvider.creatPropertyBill(cmd.getAddressId(),cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getContractNum());
+        return assetProvider.creatPropertyBill(cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getContractNum(),cmd.getContractId());
     }
 
     @Override
@@ -570,7 +580,6 @@ public class AssetServiceImpl implements AssetService {
             Byte balanceType = (Byte)billConf.get(1);
             PaymentBillGroupRule groupRule = assetProvider.getBillGroupRule(rule.getChargingStandardId(),rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
             Long billGroupId = groupRule.getBillGroupId();
-            String billItemName = groupRule.getChargingItemName();
             for(int j = 0; j < var1.size(); j ++){
                 List<PaymentExpectancyDTO> dtos2 = new ArrayList<>();
                 ContractProperty property = var1.get(j);
@@ -594,7 +603,8 @@ public class AssetServiceImpl implements AssetService {
                     BillIdentity identity = new BillIdentity();
                     identity.setBillGroupId(groupRule.getBillGroupId());
                     identity.setContract(cmd.getContractNum());
-                    identity.setDateStr(dto.getDateStrBegin());
+                    String dateStr = dto.getDateStrBegin().substring(0,dto.getDateStrBegin().lastIndexOf("-"));
+                    identity.setDateStr(dateStr);
                     // define a billId for billItem and bill to set
                     long nextBillId = 0l;
                     if(map.containsKey(identity)){
@@ -618,8 +628,9 @@ public class AssetServiceImpl implements AssetService {
                     item.setChargingItemsId(rule.getChargingItemId());
                     item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setCreatorUid(UserContext.currentUserId());
-                    item.setDateStr(dto.getDateStrBegin());
-                    item.setDataStrEnd(dto.getDateStrEnd());
+                    item.setDateStr(dateStr);
+                    item.setDateStrBegin(dto.getDateStrBegin());
+                    item.setDateStrEnd(dto.getDateStrEnd());
                     item.setDateStrDue(dto.getDueDateStr());
                     item.setId(currentBillItemSeq);
                     currentBillItemSeq += 1;
@@ -628,6 +639,7 @@ public class AssetServiceImpl implements AssetService {
                     item.setOwnerId(cmd.getOwnerId());
                     item.setTargetType(cmd.getTargetType());
                     item.setTargetId(cmd.getTargetId());
+                    item.setContractId(cmd.getContractId());
                     item.setContractNum(cmd.getContractNum());
                     item.setTargetName(cmd.getTargetName());
                     item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -655,9 +667,10 @@ public class AssetServiceImpl implements AssetService {
                             // identity中最小的那个设置为datestr
                             newBill.setDateStr(item.getDateStr());
                             newBill.setId(nextBillId);
-                            newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
+                            newBill.setNamespaceId(cmd.getNamesapceId());
                             newBill.setNoticetel(cmd.getNoticeTel());
                             newBill.setOwnerId(cmd.getOwnerId());
+                            newBill.setContractId(cmd.getContractId());
                             newBill.setContractNum(cmd.getContractNum());
                             newBill.setTargetName(cmd.getTargetName());
                             newBill.setOwnerType(cmd.getOwnerType());
@@ -702,6 +715,7 @@ public class AssetServiceImpl implements AssetService {
 //            entity.setApartmentName(property.getApartmentName());
 //            entity.setBuildingName(property.getBuldingName());
             entity.setAddressIdsJson(addressIds.toString());
+            entity.setContractId(cmd.getContractId());
             entity.setContractNum(cmd.getContractNum());
             entity.setEhPaymentChargingItemId(rule.getChargingItemId());
             entity.setEhPaymentChargingStandardId(rule.getChargingStandardId());
@@ -752,14 +766,16 @@ public class AssetServiceImpl implements AssetService {
         //define the end of the date the calculation should take as multiply
         Calendar c5 = Calendar.getInstance();
         //calculate the per cent of month from c1 to the end of the month c1 is at
-        duration = (c1.getActualMaximum(Calendar.DAY_OF_MONTH) - c1.get(Calendar.DAY_OF_MONTH))/c1.getActualMaximum(Calendar.DAY_OF_MONTH);
+        duration = ((float)c1.getActualMaximum(Calendar.DAY_OF_MONTH) - (float)c1.get(Calendar.DAY_OF_MONTH))/(float)c1.getActualMaximum(Calendar.DAY_OF_MONTH);
+        BigDecimal tempDuration = new BigDecimal(duration);
+        tempDuration = tempDuration.setScale(2,BigDecimal.ROUND_CEILING);
         if(duration != 0){
             c5.setTime(c3.getTime());
             c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
-            addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, duration,billDay);
+            addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, tempDuration.floatValue(),billDay);
         }
         c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)+1);
-        c3.set(Calendar.DAY_OF_MONTH,c3.getActualMaximum(Calendar.DAY_OF_MONTH));
+        c3.set(Calendar.DAY_OF_MONTH,c3.getActualMinimum(Calendar.DAY_OF_MONTH));
         Calendar c4 = Calendar.getInstance();
         c4.setTime(c3.getTime());
 
@@ -849,11 +865,11 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public void upodateBillStatusOnContractStatusChange(String contractNum,String targetStatus) {
+    public void upodateBillStatusOnContractStatusChange(Long contractId,String targetStatus) {
         if(targetStatus.equals(AssetPaymentStrings.CONTRACT_SAVE)){
-            assetProvider.changeBillStatusOnContractSaved(contractNum);
+            assetProvider.changeBillStatusOnContractSaved(contractId);
         }else if(targetStatus.equals(AssetPaymentStrings.CONTRACT_CANCEL)){
-            assetProvider.deleteContractPayment(contractNum);
+            assetProvider.deleteContractPayment(contractId);
         }
     }
 
@@ -940,6 +956,11 @@ public class AssetServiceImpl implements AssetService {
             response.setTargetName(dto.getOrganizationName());
         }
         return response;
+    }
+
+    @Override
+    public void updateBillsToSettled(UpdateBillsToSettled cmd) {
+        assetProvider.updateBillsToSettled(cmd.getContractId(),cmd.getOwnerType(),cmd.getOwnerId());
     }
 
     private void coverVariables(List<VariableIdAndValue> var1, List<VariableIdAndValue> var2) {

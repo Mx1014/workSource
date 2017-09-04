@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by Administrator on 2017/2/20.
+ * Created by Wentian on 2017/2/20.
  */
 public interface AssetProvider {
 
@@ -43,7 +43,7 @@ public interface AssetProvider {
 
     AssetBill findAssetBill(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr, Long tenantId, String tenantType, Long addressId);
 
-    List<ListBillsDTO> listBills(Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status);
+    List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType);
 
     List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize);
 
@@ -59,7 +59,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr);
 
-    ListBillsDTO creatPropertyBill(Long addressId, BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String buildingName,String apartmentName,String contractNum);
+    ListBillsDTO creatPropertyBill(BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId);
 
     ListBillDetailVO listBillDetail(Long billId);
 
@@ -109,9 +109,11 @@ public interface AssetProvider {
 
     Byte findBillyCycleById(Long chargingStandardId);
 
-    void changeBillStatusOnContractSaved(String contractNum);
+    void changeBillStatusOnContractSaved(Long contractId);
 
-    void deleteContractPayment(String contractNum);
+    void deleteContractPayment(Long contractId);
 
     List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize);
+
+    void updateBillsToSettled(Long contractId, String ownerType, Long ownerId);
 }

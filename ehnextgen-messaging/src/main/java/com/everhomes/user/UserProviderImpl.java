@@ -1559,4 +1559,58 @@ public class UserProviderImpl implements UserProvider {
                 });
         return list;
     }
+
+    @Override
+    public TargetDTO findUserByTokenAndName(String tel, String targetName) {
+        TargetDTO dto = new TargetDTO();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhUserIdentifiers t = Tables.EH_USER_IDENTIFIERS.as("t");
+        com.everhomes.server.schema.tables.EhUsers t1 = Tables.EH_USERS.as("t1");
+        Long userId;
+        if(tel!=null){
+            userId = context.select(t.OWNER_UID)
+                    .from(t)
+                    .where(t.IDENTIFIER_TOKEN.eq(tel))
+                    .fetchOne(0,Long.class);
+            if(userId==null){
+                return null;
+            }
+            String nameFound = context.select(t1.NICK_NAME)
+                    .from(t1)
+                    .where(t1.ID.eq(userId))
+                    .fetchOne(0, String.class);
+            if(targetName!=null){
+                if(!nameFound.equals(targetName)){
+                    return null;
+                }
+            }else{
+                dto.setUserIdentifier(tel);
+                dto.setTargetId(userId);
+                dto.setTargetType("eh_user");
+                dto.setTargetName(nameFound);
+            }
+        }else if(targetName!=null){
+            List<TargetDTO> dtos = new ArrayList<>();
+            context.select(t.IDENTIFIER_TOKEN,t1.ID,t1.NICK_NAME)
+                    .from(t1,t)
+                    .where(t1.ID.eq(t.OWNER_UID))
+                    .and(t1.NICK_NAME.eq(targetName))
+                    .fetch()
+                    .map(r ->{
+                        TargetDTO d = new TargetDTO();
+                        d.setTargetName(r.getValue(t1.NICK_NAME));
+                        d.setTargetType("eh_user");
+                        d.setTargetId(r.getValue(t1.ID));
+                        d.setUserIdentifier(r.getValue(t.IDENTIFIER_TOKEN));
+                        dtos.add(d);
+                        return null;
+                    });
+            if(dtos.size()!=1){
+                return null;
+            }else{
+                return dtos.get(0);
+            }
+        }
+        return null;
+    }
 }
