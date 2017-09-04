@@ -193,6 +193,7 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
     public void lockParkingCar(LockParkingCarCommand cmd) {
 
     }
+
     @Override
     public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
         return null;
@@ -223,12 +224,4 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
         return null;
     }
 
-//    //是否支持开卡，对接时由项目需求定义
-//    protected boolean getOpenCardFlag() {
-//        return false;
-//    }
-//    //是否支持过期缴费, 目前只支持科兴过期缴费，科兴的过期月卡缴费规则，比较复杂，而且依赖第三方停车系统，不建议这样做
-//    protected boolean getExpiredRechargeFlag() {
-//        return false;
-//    }
 }
