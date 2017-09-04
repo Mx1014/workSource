@@ -35,5 +35,7 @@ public interface ContractService {
 	void setContractParam(SetContractParamCommand cmd);
 	ContractParamDTO getContractParam(GetContractParamCommand cmd);
 
+	String generateContractNumber();
+
 
 }
