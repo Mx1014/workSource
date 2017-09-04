@@ -3,18 +3,21 @@ package com.everhomes.asset;
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.oauth2client.HttpResponseEntity;
 import com.everhomes.oauth2client.handler.RestCallTemplate;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.asset.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
+import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.*;
 
 import static com.everhomes.util.SignatureHelper.computeSignature;
@@ -253,7 +256,41 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
 
     @Override
     public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType) {
+        Map<String, String> params=new HashMap<String, String> ();
+        params.put("customerName", targetName);
+        params.put("communityIdentifer", String.valueOf(ownerId));
+        params.put("buildingIdentifier", String.valueOf(buildingName));
+        params.put("apartmentIdentifier", String.valueOf(apartmentName));
+        params.put("payFlag", String.valueOf(status));
+        params.put("sdateFrom",dateStrBegin);
+        params.put("sdateTo",dateStrEnd);
+        params.put("pageOffset",String.valueOf(pageOffSet));
+        params.put("pageSize",String.valueOf(pageSize));
+        String json = generateJson(params);
+        String url;
+        if(targetType.equals("eh_organization")){
+            url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
+        }else if(targetType.equals("eh_user")){
+            url = ZjgkUrls.SEARCH_USER_BILLS;
+        }else{
+            throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
+        }
+        try {
+                HttpUtils.postJson(url,json,120);
+        } catch (IOException e) {
+            LOGGER.error("调用张江高科searchEnterpriseBills失败"+e);
+            throw new RuntimeException("调用张江高科searchEnterpriseBills失败"+e);
+        }
+
         return null;
+    }
+    private String generateJson(Map<String,String> params){
+        params.put("appKey", "ee4c8905-9aa4-4d45-973c-ede4cbb3cf21");
+        params.put("nonce", "54256");
+        params.put("timestamp", "1498097655000");
+        params.put("crypto", "sssss");
+        String SECRET_KEY = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
+        return StringHelper.toJsonString(params);
     }
 
     @Override

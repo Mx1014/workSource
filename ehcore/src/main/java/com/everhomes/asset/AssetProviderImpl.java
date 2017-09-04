@@ -795,9 +795,9 @@ public class AssetProviderImpl implements AssetProvider {
                         amountSupplement = amountSupplement.add(amount);
                     }
                 }
-                //应收是否应该计算减免项
-                amountReceivable = amountReceivable.subtract(amountExemption);
-                amountReceivable = amountReceivable.add(amountSupplement);
+                //应收否应该计算减免项
+//                amountReceivable = amountReceivable.subtract(amountExemption);
+//                amountReceivable = amountReceivable.add(amountSupplement);
                 amountOwed = amountOwed.subtract(amountExemption);
                 amountOwed = amountOwed.add(amountSupplement);
                 EhPaymentExemptionItemsDao exemptionItemsDao = new EhPaymentExemptionItemsDao(context.configuration());
@@ -1088,7 +1088,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
         EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
         SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t.ID);
+        query.addSelect(t.ID,t.NAME);
         query.addSelect(t.NAME);
         query.addFrom(t);
         query.addFrom(t1);

@@ -4520,8 +4520,6 @@ public class UserServiceImpl implements UserService {
                 dto.setUserIdentifier((String)typeIdNameAndTel.get(3));
                 dto.setContractId((Long)typeIdNameAndTel.get(4));
                 return dto;
-            }else{
-                throw new RuntimeException("找不到该合同");
             }
         }else{
             //确定客户的优先度， 查到合同算查到人，楼栋门牌只是为了填写账单的地址用
