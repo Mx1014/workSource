@@ -88,10 +88,10 @@ ALTER TABLE eh_organization_member_details ADD COLUMN contract_start_time DATE C
 ALTER TABLE eh_organization_member_details ADD COLUMN contract_end_time DATE COMMENT '合同终止日期';
 ALTER TABLE eh_organization_member_details ADD COLUMN salary_card_bank VARCHAR(64) COMMENT '开户行';
 ALTER TABLE eh_organization_member_details ADD COLUMN reg_residence_type VARCHAR(64) COMMENT '户籍类型';
-ALTER TABLE eh_organization_member_details ADD COLUMN id_photo VARCHAR(2048) COMMENT '身份证照片';
-ALTER TABLE eh_organization_member_details ADD COLUMN visa_photo VARCHAR(2048) COMMENT '一寸免冠照';
-ALTER TABLE eh_organization_member_details ADD COLUMN life_photo VARCHAR(2048) COMMENT '生活照';
-ALTER TABLE eh_organization_member_details ADD COLUMN entry_form VARCHAR(2048) COMMENT '入职登记表';
-ALTER TABLE eh_organization_member_details ADD COLUMN graduation_certificate VARCHAR(2048) COMMENT '毕业证书';
-ALTER TABLE eh_organization_member_details ADD COLUMN degree_certificate VARCHAR(2048) COMMENT '学位证书';
-ALTER TABLE eh_organization_member_details ADD COLUMN contract_certificate VARCHAR(2048) COMMENT '劳动合同';
+ALTER TABLE eh_organization_member_details ADD COLUMN id_photo TEXT COMMENT '身份证照片';
+ALTER TABLE eh_organization_member_details ADD COLUMN visa_photo TEXT COMMENT '一寸免冠照';
+ALTER TABLE eh_organization_member_details ADD COLUMN life_photo TEXT COMMENT '生活照';
+ALTER TABLE eh_organization_member_details ADD COLUMN entry_form TEXT COMMENT '入职登记表';
+ALTER TABLE eh_organization_member_details ADD COLUMN graduation_certificate TEXT COMMENT '毕业证书';
+ALTER TABLE eh_organization_member_details ADD COLUMN degree_certificate TEXT COMMENT '学位证书';
+ALTER TABLE eh_organization_member_details ADD COLUMN contract_certificate TEXT COMMENT '劳动合同';
