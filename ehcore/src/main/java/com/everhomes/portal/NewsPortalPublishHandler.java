@@ -28,6 +28,7 @@ public class NewsPortalPublishHandler implements PortalPublishHandler{
 
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
+        LOGGER.error("publish news. instanceConfig = {}, itemLabel = {}", instanceConfig, itemLabel);
         NewsInstanceConfig newsInstanceConfig = (NewsInstanceConfig)StringHelper.fromJsonString(instanceConfig, NewsInstanceConfig.class);
         if(null == newsInstanceConfig.getCategoryId()){
             NewsCategory newsCategory = createNewsCategory(namespaceId, itemLabel);
