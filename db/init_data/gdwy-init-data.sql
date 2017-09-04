@@ -2143,6 +2143,8 @@ DELETE from eh_launch_pad_items where id in (117889, 117891, 117892, 117894) and
 -- “发现”改成“论坛”
 UPDATE eh_launch_pad_items set item_name = '论坛', item_label = '论坛' where id in (118974, 118976) and namespace_id = 999970;
 
-
-
+-- 物业缴费模块缺少数据  add by yanjun 20170904
+SET @asset_vendor_id = (SELECT MAX(id) FROM `eh_asset_vendor`);
+INSERT INTO `eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`)
+    VALUES ((@asset_vendor_id := @asset_vendor_id + 1), 'community', '240111044331050367', '互联网产业园物业缴费', 'ZUOLIN', '2', '999970');
 
