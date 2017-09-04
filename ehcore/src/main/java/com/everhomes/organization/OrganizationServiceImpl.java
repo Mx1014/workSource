@@ -5324,7 +5324,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public ListOrganizationMemberCommandResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd) {
-        Long startTime1 = System.currentTimeMillis();
+        Long enterpriseId = getTopOrganizationId(cmd.getOrganizationId());
+        Organization enterprise = this.checkOrganization(enterpriseId);
+
         ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
         Organization org = this.checkOrganization(cmd.getOrganizationId());
         if (null == org)
@@ -5334,7 +5336,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         String keywords = cmd.getKeywords();
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        Long startTime2 = System.currentTimeMillis();
 
         //组装参数
         Organization orgCommoand = new Organization();
@@ -5357,7 +5358,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         response.setNextPageAnchor(locator.getAnchor());
 
-        Long startTime3 = System.currentTimeMillis();
 
         // 开始聚合
         List<String> groupTypes = new ArrayList<>();
@@ -5366,27 +5366,40 @@ public class OrganizationServiceImpl implements OrganizationService {
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.GROUP.getCode());
         groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
-        groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
-        List<String> tokens = organizationMembers.stream().map(r ->{return r.getContactToken();}).collect(Collectors.toList());
-        List<OrganizationMember> origins = organizationProvider.listOrganizationMemberByPath(org.getPath(),groupTypes,tokens);
+//        groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
+        List<String> tokens = organizationMembers.stream().map(r -> {
+            return r.getContactToken();
+        }).collect(Collectors.toList());
+        List<OrganizationMember> origins = organizationProvider.listOrganizationMemberByPath(enterprise.getPath(), groupTypes, tokens);
 
         Map<String, OrganizationMemberDTO> target_map = new HashMap();
 
-        origins.forEach(r->{
+        origins.forEach(r -> {
             OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
             switch (OrganizationGroupType.fromCode(r.getGroupType())) {
                 case DIRECT_UNDER_ENTERPRISE:
                 case DEPARTMENT:
                 case GROUP:
                     Organization org_now = organizationProvider.findOrganizationById(r.getOrganizationId());
-                    if (org_now != null) {
+                    List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>();
+                    if (org_now != null ) {
                         OrganizationDTO orgDTO_now = ConvertHelper.convert(org_now, OrganizationDTO.class);
                         OrganizationMemberDTO orgDto_target = target_map.get(r.getContactToken());
                         if (orgDto_target == null) {
-                            dto.setDepartments(Collections.singletonList(orgDTO_now));
+                            departments.add(orgDTO_now);
+                            dto.setDepartments(departments);
                             target_map.put(dto.getContactToken(), dto);
                         } else {
-                            orgDto_target.getDepartments().add(orgDTO_now);
+                            if(orgDto_target.getDepartments() == null){
+                                departments.add(orgDTO_now);
+                                orgDto_target.setDepartments(departments);
+                            }else{
+                                orgDto_target.getDepartments().add(orgDTO_now);
+//                                departments = orgDto_target.getDepartments();
+//                                departments.add(orgDTO_now);
+//                                orgDto_target.setDepartments(departments);
+                            }
+
                         }
                     }
                     break;
@@ -5394,12 +5407,22 @@ public class OrganizationServiceImpl implements OrganizationService {
                     Organization position_now = organizationProvider.findOrganizationById(r.getOrganizationId());
                     if (position_now != null) {
                         OrganizationDTO positionDTO_now = ConvertHelper.convert(position_now, OrganizationDTO.class);
+                        List<OrganizationDTO> jobPositions = new ArrayList<OrganizationDTO>();
                         OrganizationMemberDTO orgDto_target = target_map.get(r.getContactToken());
                         if (orgDto_target == null) {
-                            dto.setJobPositions(Collections.singletonList(positionDTO_now));
+                            jobPositions.add(positionDTO_now);
+                            dto.setJobPositions(jobPositions);
                             target_map.put(dto.getContactToken(), dto);
                         } else {
-                            orgDto_target.getJobPositions().add(positionDTO_now);
+                            if(orgDto_target.getJobPositions() == null){
+                                jobPositions.add(positionDTO_now);
+                                orgDto_target.setJobPositions(jobPositions);
+                            }else{
+                                orgDto_target.getJobPositions().add(positionDTO_now);
+//                                jobPositions = orgDto_target.getJobPositions();
+//                                jobPositions.add(positionDTO_now);
+//                                orgDto_target.setJobPositions(jobPositions);
+                            }
                         }
                     }
                     break;
@@ -5409,7 +5432,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         });
 
         List<OrganizationMemberDTO> members = new ArrayList<>();
-        target_map.values().stream().map(r ->{
+        target_map.values().stream().map(r -> {
             members.add(r);
             return null;
         }).collect(Collectors.toList());
@@ -5417,10 +5440,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         response.setMembers(members);
         Long endTime = System.currentTimeMillis();
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Track: listOrganizationPersonnels: get organization member elapse:{}, convert elapse:{}, total elapse:{}", endTime2 - startTime2, endTime - startTime3, endTime - startTime1);
-        }
         return response;
     }
 
@@ -10702,6 +10721,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListPersonnelsV2CommandResponse response = new ListPersonnelsV2CommandResponse();
         if(cmd.getPageSize() == null)
             cmd.setPageSize(20);
+//        ListOrganizationMemberCommandResponse originResponse = this.listOrganizationPersonnelsWithDownStream(ConvertHelper.convert(cmd, ListOrganizationContactCommand.class));
         ListOrganizationMemberCommandResponse originResponse = this.listOrganizationPersonnels(ConvertHelper.convert(cmd, ListOrganizationContactCommand.class), false);
         if (originResponse.getMembers() == null || originResponse.getMembers().isEmpty()) {
             return response;
