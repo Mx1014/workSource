@@ -2329,7 +2329,7 @@ public class BusinessServiceImpl implements BusinessService {
     	
         Map<String, Object> param = new HashMap<>();
         param.put("namespaceId", namespaceId);
-        param.put("keyword", String.valueOf(cmd.getKeyword()));
+        param.put("keyword", cmd.getKeyword()==null?"":cmd.getKeyword());
 //        param.put("shopNo", String.valueOf(searchShopsCommand.getShopNo()));
 //        param.put("shopName", String.valueOf(searchShopsCommand.getShopName()));
         Integer pageNo = cmd.getPageAnchor() == null ? 1 : cmd.getPageAnchor().intValue();
