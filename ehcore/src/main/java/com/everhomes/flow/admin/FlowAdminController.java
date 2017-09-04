@@ -493,4 +493,30 @@ public class FlowAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/flow/createFlowGraph</b>
+     * <p>保存工作流流程图</p>
+     */
+    @RequestMapping("createFlowGraph")
+    @RestReturn(value=String.class)
+    public RestResponse createFlowGraph(@Valid CreateFlowGraphCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/getFlowGraph</b>
+     * <p>获取工作流流程图</p>
+     */
+    @RequestMapping("getFlowGraph")
+    @RestReturn(value=FlowGraphDTO.class)
+    public RestResponse getFlowGraph(@Valid GetFlowGraphCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
