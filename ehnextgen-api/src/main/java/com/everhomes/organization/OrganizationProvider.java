@@ -452,4 +452,7 @@ public interface OrganizationProvider {
 	List listOrganizationMemberByToken(String token);
 
 	List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId);
+
+	// 通讯录查询最新方法
+	List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand);
 }
