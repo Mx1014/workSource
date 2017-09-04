@@ -6673,7 +6673,7 @@ public class PunchServiceImpl implements PunchService {
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
  				"公司没有设置打卡规则");
 		Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr, punchTime, userId);
-		if(null == ptrId){
+		if(null == ptrId || ptrId.equals(0)){
 			if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
 				result.setPunchType(PunchType.NOT_WORKDAY.getCode());
 			}else{
