@@ -535,4 +535,7 @@ public interface OrganizationService {
 
 	/**组织架构批量调整**/
 	void transferOrganizationPersonels(TransferArchivesEmployeesCommand cmd);
+
+	/**通讯录查询接口**/
+	ListOrganizationMemberCommandResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd);
 }
