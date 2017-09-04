@@ -943,7 +943,7 @@ public class AssetServiceImpl implements AssetService {
         if(dtos.size()>0){
             ContractDTO contractDTO = dtos.get(0);
             FindContractCommand cmd2 = new FindContractCommand();
-            cmd2.setCommunityId(contractDTO.getId());
+            cmd2.setId(contractDTO.getId());
             cmd2.setContractNumber(contractDTO.getContractNumber());
             cmd2.setCommunityId(cmd.getCommunityId());
             cmd2.setPartyAId(contractDTO.getPartyAId());
