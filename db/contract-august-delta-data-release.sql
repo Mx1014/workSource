@@ -1,3 +1,20 @@
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10001', 'zh_CN', '客户不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10002', 'zh_CN', '客户人才不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10003', 'zh_CN', '客户申报项目不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10004', 'zh_CN', '客户工商信息不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10005', 'zh_CN', '客户专利不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10006', 'zh_CN', '客户商标不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10007', 'zh_CN', '客户经济指标不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10008', 'zh_CN', '客户投融资情况不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10009', 'zh_CN', '客户证书不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10010', 'zh_CN', '客户名称为空');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10011', 'zh_CN', '客户联系人为空');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10012', 'zh_CN', '客户联系人手机号为空');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10013', 'zh_CN', '客户名称已存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10014', 'zh_CN', '客户类型不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10015', 'zh_CN', '客户级别不存在');
+
+
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
 VALUES (21100, '客户管理', 20000, NULL, '', 1, 2, '/20000/21100', 'park', 390);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
