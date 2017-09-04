@@ -6,6 +6,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
@@ -898,9 +899,22 @@ public class AssetController extends ControllerBase {
      * <p>展示用户名称，合同，门牌楼栋和面积和</p>
      */
     @RequestMapping("findUserInfoForPayment")
-    @RestReturn(value=FindUserInfoForPaymentDTO.class,collection = true)
+    @RestReturn(value=FindUserInfoForPaymentResponse.class)
     public RestResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
-        FindUserInfoForPaymentDTO dto = this.assetService.findUserInfoForPayment(cmd);
+        FindUserInfoForPaymentResponse res = this.assetService.findUserInfoForPayment(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /asset/getAreaAndAddressByContract</b>
+     * <p>根据合同的id获取合同下的楼栋门牌和面积</p>
+     */
+    @RequestMapping("getAreaAndAddressByContract")
+    @RestReturn(value=FindUserInfoForPaymentDTO.class,collection=true)
+    public RestResponse getAreaAndAddressByContract(FindContractCommand cmd) {
+        GetAreaAndAddressByContractDTO dto = this.assetService.getAreaAndAddressByContract(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
