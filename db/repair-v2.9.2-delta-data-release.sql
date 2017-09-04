@@ -13,3 +13,6 @@ set @menu_scope_id = (select max(id) from eh_web_menu_scopes);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@menu_scope_id  + 1, '20225', '', 'EhNamespaces', '999983', '2');
 
 update eh_launch_pad_items set action_data='{"url":"zl://propertyrepair/create?type=user&taskCategoryId=1&displayName=报修"}',action_type=60 where namespace_id=999983 and item_label = '报修';
+
+-- 修改owner_type by st.zheng
+update eh_service_alliances set owner_id=(select organization_id from eh_organization_communities where eh_service_alliances.owner_id = community_id limit 0,1),owner_type = 'organaization' where owner_type = 'community';

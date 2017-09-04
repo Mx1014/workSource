@@ -663,7 +663,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 //			return null;
 //		}
 //		populateYellowPage(yellowPage);
-		
+		if (cmd.getOwnerType().equals(ServiceAllianceBelongType.COMMUNITY.getCode())){
+			cmd.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
+			List<Organization> organizationList= this.organizationProvider.findOrganizationByCommunityId(cmd.getOwnerId());
+			cmd.setOwnerId(organizationList.get(0).getId());
+		}
 		ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getType());
 		if (null == sa)
 			{
@@ -761,18 +765,18 @@ public class YellowPageServiceImpl implements YellowPageService {
         	
         }else{
 			Condition conditionOR = null;
-			if (cmd.getOwnerType().equals(ServiceAllianceBelongType.ORGANAIZATION.getCode())) {
-				List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
-				for (OrganizationCommunity organizationCommunity : communityList) {
-					Condition condition = Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(organizationCommunity.getCommunityId())
-							.and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
-					if (conditionOR == null) {
-						conditionOR = condition;
-					} else {
-						conditionOR = conditionOR.or(condition);
-					}
-				}
-			}
+//			if (cmd.getOwnerType().equals(ServiceAllianceBelongType.ORGANAIZATION.getCode())) {
+//				List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+//				for (OrganizationCommunity organizationCommunity : communityList) {
+//					Condition condition = Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(organizationCommunity.getCommunityId())
+//							.and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
+//					if (conditionOR == null) {
+//						conditionOR = condition;
+//					} else {
+//						conditionOR = conditionOR.or(condition);
+//					}
+//				}
+//			}
         	sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
  	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords(),conditionOR);
 

@@ -236,7 +236,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
         SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
 
-        if (condition == null) {
+        if (ownerType.equals(ServiceAllianceBelongType.COMMUNITY.getCode())) {
 			query.addConditions(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+ownerId+"%").or(Tables.EH_SERVICE_ALLIANCES.RANGE.
 					eq("all")));
 		}else{
