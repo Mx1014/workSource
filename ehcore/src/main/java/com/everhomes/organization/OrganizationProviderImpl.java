@@ -5142,7 +5142,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		Organization org = findOrganizationById(listCommand.getOrganizationId());
 
 
-		Condition cond = t1.field("group_path").like(org.getPath()+"%").and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode());
+		Condition cond = t1.field("group_path").like(org.getPath()+"%").and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
 
 		if (!StringUtils.isEmpty(keywords)) {
 			Condition cond1 = t2.field("contact_token").eq(keywords);
