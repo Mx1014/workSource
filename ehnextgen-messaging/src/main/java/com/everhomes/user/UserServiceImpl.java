@@ -4471,6 +4471,7 @@ public class UserServiceImpl implements UserService {
 					case FAMILY:
 						default_community = findDefaultCommunity(namespaceId,userId,sceneList,CommunityType.COMMERCIAL.getCode());
 						break;
+					case PM_ADMIN:
 					case PARK_TOURIST:
 					case ENTERPRISE:
 					case ENTERPRISE_NOAUTH:

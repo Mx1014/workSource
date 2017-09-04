@@ -1435,6 +1435,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         query.addConditions(Tables.EH_COMMUNITY_DEFAULT.ORIGIN_COMMUNITY_ID.eq(originId));
         query.addOrderBy(Tables.EH_COMMUNITY_DEFAULT.ID.desc());
         query.addLimit(1);
+        LOGGER.debug("findDefaultCommunityByCommunityId sql :" + query.getSQL());
         EhCommunityDefaultRecord record = query.fetchAny();
         if (record != null) {
             return record.getTargetCommunityId();
