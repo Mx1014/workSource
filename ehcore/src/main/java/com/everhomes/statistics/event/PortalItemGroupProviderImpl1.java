@@ -50,6 +50,7 @@ public class PortalItemGroupProviderImpl1 implements PortalItemGroupProvider {
             pig.setName(itemGroup);
             pig.setStatus(status);
             pig.setDefaultOrder(group.defaultOrder);
+            pig.setSceneType(layout.getSceneType());
 
             portalItemGroupList.add(pig);
         }
