@@ -1,11 +1,11 @@
 package com.everhomes.flow;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 public interface FlowCaseProvider {
 
@@ -35,4 +35,7 @@ public interface FlowCaseProvider {
 
 	Long createFlowCaseHasId(FlowCase obj);
 
+    List<FlowCase> findFlowCaseByNode(Long originalNodeId, Long convergenceNodeId);
+
+    List<FlowCase> listFlowCaseByParentId(Long parentId);
 }

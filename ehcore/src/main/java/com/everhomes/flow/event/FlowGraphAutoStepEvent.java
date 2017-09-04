@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FlowGraphAutoStepEvent implements FlowGraphEvent {
+public class FlowGraphAutoStepEvent extends AbstractFlowGraphEvent {
 	FlowAutoStepDTO stepDTO;
 	private Long firedUserId;
     private FlowSubject subject;

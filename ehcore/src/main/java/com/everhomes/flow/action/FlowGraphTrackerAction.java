@@ -6,11 +6,12 @@ import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow.FlowStepType;
 
 public class FlowGraphTrackerAction extends FlowGraphAction {
-	FlowStepType stepType;
+
+    private FlowStepType stepType;
 	private FlowService flowService;
 	private FlowEventLogProvider flowEventLogProvider;
 
-	FlowGraphTrackerAction() {
+	public FlowGraphTrackerAction() {
 		this(null);
 	}
 	
@@ -37,7 +38,7 @@ public class FlowGraphTrackerAction extends FlowGraphAction {
 		log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
 		log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
 		log.setFlowNodeId(ctx.getCurrentNode().getFlowNode().getId());
-		log.setParentId(0l);
+		log.setParentId(0L);
 		log.setFlowCaseId(ctx.getFlowCase().getId());
 		log.setFlowUserId(ctx.getOperator().getId());
 		log.setFlowUserName(ctx.getOperator().getNickName());
@@ -54,11 +55,10 @@ public class FlowGraphTrackerAction extends FlowGraphAction {
 			if(subject != null && subject.getContent() != null && !subject.getContent().isEmpty()) {
 				log.setSubjectId(subject.getId());	
 			} else {
-				log.setSubjectId(0l);
+				log.setSubjectId(0L);
 			}
 		}
 		
 		ctx.getLogs().add(log);
 	}
-
 }

@@ -2,19 +2,20 @@
 package com.everhomes.activity;
 
 import com.everhomes.portal.PortalPublishHandler;
-import com.everhomes.rest.activity.*;
-import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.activity.ActivityActionData;
+import com.everhomes.rest.activity.ActivityCategoryDTO;
+import com.everhomes.rest.activity.ActivityEntryConfigulation;
 import com.everhomes.rest.common.AllFlagType;
-import com.everhomes.util.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + ServiceModuleConstants.ACTIVITY_MODULE)
+// @Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + ServiceModuleConstants.ACTIVITY_MODULE)
 public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
     private static final Logger LOGGER=LoggerFactory.getLogger(ActivityPortalPublishHandler.class);

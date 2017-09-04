@@ -105,7 +105,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/enableFlow</b>
      * <p> 启用某一个业务模块下的工作流，会自动把之前的工作流禁用 </p>
-     * @return
      */
     @RequestMapping("enableFlow")
     @RestReturn(value=String.class)
@@ -120,7 +119,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/disableFlow</b>
      * <p> 禁用某一个业务模块下的工作流 </p>
-     * @return
      */
     @RequestMapping("disableFlow")
     @RestReturn(value=String.class)
@@ -135,7 +133,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/deleteFlow</b>
      * <p> 删除某一个工作流 </p>
-     * @return
      */
     @RequestMapping("deleteFlow")
     @RestReturn(value=String.class)
@@ -149,8 +146,7 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/updateFlowName</b>
-     * <p> 修改工作流的名字 </p>
-     * @return
+     * <p> 修改工作流的属性 </p>
      */
     @RequestMapping("updateFlowName")
     @RestReturn(value=FlowDTO.class)
@@ -192,7 +188,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/listFlowNodes</b>
      * <p> 显示工作流下的所有节点 </p>
-     * @return
      */
     @RequestMapping("listFlowNodes")
     @RestReturn(value=ListBriefFlowNodeResponse.class)
@@ -206,7 +201,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/updateNodePriority</b>
      * <p> 重新修改工作流下的优先级 </p>
-     * @return
      */
     @RequestMapping("updateFlowNodePriority")
     @RestReturn(value=ListBriefFlowNodeResponse.class)
@@ -219,8 +213,7 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/updateFlowNode</b>
-     * <p> 修改工作节点的名字 </p>
-     * @return
+     * <p>修改节点设置属性</p>
      */
     @RequestMapping("updateFlowNode")
     @RestReturn(value=FlowNodeDTO.class)
@@ -344,7 +337,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/updateFlowButton</b>
      * <p> 修改节点按钮信息 </p>
-     * @return
      */
     @RequestMapping("updateFlowButton")
     @RestReturn(value=FlowButtonDetailDTO.class)
@@ -356,9 +348,8 @@ public class FlowAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/flow/disableFlowButton</b>
-     * <p> 禁用节点中的某一个按钮应用 </p>
-     * @return
+     * <b>URL: /admin/flow/enableFlowButton</b>
+     * <p> 启用节点中的某一个按钮应用 </p>
      */
     @RequestMapping("enableFlowButton")
     @RestReturn(value=FlowButtonDTO.class)
@@ -372,7 +363,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/disableFlowButton</b>
      * <p> 禁用节点中的某一个按钮应用 </p>
-     * @return
      */
     @RequestMapping("disableFlowButton")
     @RestReturn(value=FlowButtonDTO.class)
@@ -386,7 +376,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/listVariables</b>
      * <p> 显示某个位置的变量 </p>
-     * @return
      */
     @RequestMapping("listVariables")
     @RestReturn(value=FlowVariableResponse.class)
@@ -442,7 +431,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/getFlowEvaluate</b>
      * <p> 获取工作流的评分信息 </p>
-     * @return
      */
     @RequestMapping("getFlowEvaluate")
     @RestReturn(value=FlowEvaluateDetailDTO.class)
@@ -456,7 +444,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/listScripts</b>
      * <p> 获取工作流的评分信息 </p>
-     * @return
      */
     @RequestMapping("listScripts")
     @RestReturn(value=ListScriptsResponse.class)
@@ -483,7 +470,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/resolveUsers</b>
      * <p> 获取工作流的评分信息 </p>
-     * @return
      */
     @RequestMapping("resolveUsers")
     @RestReturn(value=FlowResolveUsersResponse.class)
@@ -495,13 +481,14 @@ public class FlowAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/flow/createFlowGraph</b>
-     * <p>保存工作流流程图</p>
+     * <b>URL: /admin/flow/createOrUpdateFlowGraph</b>
+     * <p>保存或修改流程图</p>
      */
-    @RequestMapping("createFlowGraph")
-    @RestReturn(value=String.class)
-    public RestResponse createFlowGraph(@Valid CreateFlowGraphCommand cmd) {
-        RestResponse response = new RestResponse();
+    @RequestMapping("createOrUpdateFlowGraph")
+    @RestReturn(value=FlowGraphDTO.class)
+    public RestResponse createOrUpdateFlowGraph(@Valid CreateFlowGraphCommand cmd) {
+        FlowGraphDTO flowGraphDTO = flowService.createOrUpdateFlowGraph(cmd);
+        RestResponse response = new RestResponse(flowGraphDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -513,8 +500,66 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("getFlowGraph")
     @RestReturn(value=FlowGraphDTO.class)
-    public RestResponse getFlowGraph(@Valid GetFlowGraphCommand cmd) {
+    public RestResponse getFlowGraph(@Valid FlowIdCommand cmd) {
+        // String str = "{\"flowId\":1,\"nodes\":[{\"id\":1,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":1,\"nodeName\":\"nodeName\",\"autoStepType\":\"autoStepType\",\"nodeType\":\"start\",\"flowLaneId\":1},{\"id\":2,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":2,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"normal\",\"flowLaneId\":2,\"needAllProcessorComplete\":1,\"processors\":[{\"id\":1,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"organizationId\":1,\"selectType\":\"selectType\",\"sourceIdA\":1,\"sourceTypeA\":\"sourceTypeA\",\"sourceIdB\":1,\"sourceTypeB\":\"sourceTypeB\",\"belongTo\":1,\"belongEntity\":\"belongEntity\",\"belongType\":\"belongType\",\"status\":1,\"selectionName\":\"selectionName\"}]},{\"id\":3,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":3,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"condition_front\",\"branchDecider\":\"condition\",\"flowLaneId\":3,\"needAllProcessorComplete\":1,\"conditions\":[{\"id\":1,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"flowNodeId\":1,\"nodeLevel\":1,\"displayName\":\"displayName\",\"gotoNodeId\":1,\"gotoNodeLevel\":1,\"expressions\":[{\"id\":1,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"flowNodeId\":1,\"nodeLevel\":1,\"flowNodeConditionId\":1,\"logicOperator\":\"&&\",\"relationalOperator\":\">=\",\"variableType1\":1,\"variable1\":\"${pa1}\",\"variableType2\":1,\"variable2\":\"${pa2}\",\"expression\":\"if请假天数>=4\"}]}]},{\"id\":4,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":4,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"normal\",\"branchDecider\":\"branchDecider\",\"flowLaneId\":3,\"needAllProcessorComplete\":1},{\"id\":5,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":5,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"normal\",\"branchDecider\":\"branchDecider\",\"flowLaneId\":3,\"needAllProcessorComplete\":1},{\"id\":6,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":6,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"normal\",\"branchDecider\":\"branchDecider\",\"flowLaneId\":3,\"needAllProcessorComplete\":1},{\"id\":7,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":7,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"condition_front\",\"branchDecider\":\"processor\",\"flowLaneId\":3,\"needAllProcessorComplete\":1},{\"id\":8,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":8,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"normal\",\"branchDecider\":\"branchDecider\",\"flowLaneId\":3,\"needAllProcessorComplete\":1},{\"id\":9,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":9,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"normal\",\"branchDecider\":\"branchDecider\",\"flowLaneId\":3,\"needAllProcessorComplete\":1},{\"id\":10,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":10,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"normal\",\"branchDecider\":\"branchDecider\",\"flowLaneId\":3,\"needAllProcessorComplete\":1},{\"id\":11,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":11,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"condition_back\",\"branchDecider\":\"branchDecider\",\"flowLaneId\":3,\"needAllProcessorComplete\":1},{\"id\":12,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":12,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"normal\",\"branchDecider\":\"branchDecider\",\"flowLaneId\":3,\"needAllProcessorComplete\":1},{\"id\":13,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":13,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"condition_back\",\"branchDecider\":\"branchDecider\",\"flowLaneId\":3,\"needAllProcessorComplete\":1},{\"id\":14,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":14,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"normal\",\"branchDecider\":\"branchDecider\",\"flowLaneId\":4,\"needAllProcessorComplete\":1},{\"id\":15,\"namespaceId\":1,\"status\":1,\"flowMainId\":1,\"flowVersion\":1,\"description\":\"description\",\"nodeLevel\":15,\"nodeName\":\"nodeName\",\"allowTimeoutAction\":1,\"autoStepType\":\"autoStepType\",\"allowApplierUpdate\":1,\"autoStepMinute\":1,\"params\":\"params\",\"nodeType\":\"end\",\"branchDecider\":\"branchDecider\",\"flowLaneId\":5,\"needAllProcessorComplete\":1}],\"links\":[{\"id\":1,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":1,\"toNodeId\":2,\"fromNodeLevel\":1,\"toNodeLevel\":2},{\"id\":2,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":2,\"toNodeId\":3,\"fromNodeLevel\":2,\"toNodeLevel\":3},{\"id\":3,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":3,\"toNodeId\":4,\"fromNodeLevel\":3,\"toNodeLevel\":4},{\"id\":4,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":3,\"toNodeId\":5,\"fromNodeLevel\":3,\"toNodeLevel\":5},{\"id\":5,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":4,\"toNodeId\":6,\"fromNodeLevel\":4,\"toNodeLevel\":6},{\"id\":6,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":6,\"toNodeId\":7,\"fromNodeLevel\":6,\"toNodeLevel\":7},{\"id\":7,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":7,\"toNodeId\":8,\"fromNodeLevel\":7,\"toNodeLevel\":8},{\"id\":8,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":7,\"toNodeId\":9,\"fromNodeLevel\":7,\"toNodeLevel\":9},{\"id\":9,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":8,\"toNodeId\":10,\"fromNodeLevel\":8,\"toNodeLevel\":10},{\"id\":10,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":10,\"toNodeId\":11,\"fromNodeLevel\":10,\"toNodeLevel\":11},{\"id\":11,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":9,\"toNodeId\":11,\"fromNodeLevel\":9,\"toNodeLevel\":11},{\"id\":12,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":11,\"toNodeId\":12,\"fromNodeLevel\":11,\"toNodeLevel\":12},{\"id\":13,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":12,\"toNodeId\":13,\"fromNodeLevel\":12,\"toNodeLevel\":13},{\"id\":14,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":5,\"toNodeId\":13,\"fromNodeLevel\":5,\"toNodeLevel\":13},{\"id\":15,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":13,\"toNodeId\":14,\"fromNodeLevel\":13,\"toNodeLevel\":14},{\"id\":16,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"fromNodeId\":14,\"toNodeId\":15,\"fromNodeLevel\":14,\"toNodeLevel\":15}],\"lanes\":[{\"id\":1,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"laneLevel\":1},{\"id\":2,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"laneLevel\":2},{\"id\":3,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"laneLevel\":3},{\"id\":4,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"laneLevel\":4},{\"id\":5,\"namespaceId\":1,\"flowMainId\":1,\"flowVersion\":1,\"displayName\":\"displayName\",\"laneLevel\":5}]}";
+        FlowGraphDTO flowGraphDTO = flowService.getFlowGraphNew(cmd);
+        RestResponse response = new RestResponse(flowGraphDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/createFlowButton</b>
+     * <p>新增按钮</p>
+     */
+    @RequestMapping("createFlowButton")
+    @RestReturn(value=FlowButtonDTO.class)
+    public RestResponse createFlowButton(@Valid CreateFlowButtonCommand cmd) {
+        FlowButtonDTO buttonDTO = flowService.createFlowButton(cmd);
+        RestResponse response = new RestResponse(buttonDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/updateFlowButtonOrder</b>
+     * <p>调整按钮的顺序</p>
+     */
+    @RequestMapping("updateFlowButtonOrder")
+    @RestReturn(value=String.class)
+    public RestResponse updateFlowButtonOrder(@Valid UpdateFlowButtonOrderCommand cmd) {
+        flowService.updateFlowButtonOrder(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/updateFlowLane</b>
+     * <p>修改泳道属性</p>
+     */
+    @RequestMapping("updateFlowLane")
+    @RestReturn(value=FlowLaneDTO.class)
+    public RestResponse updateFlowLane(@Valid UpdateFlowLaneCommand cmd) {
+        FlowLaneDTO laneDTO = flowService.updateFlowLane(cmd);
+        RestResponse response = new RestResponse(laneDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/listPredefinedParam</b>
+     * <p>预定义的参数列表</p>
+     */
+    @RequestMapping("listPredefinedParam")
+    @RestReturn(value=ListFlowPredefinedParamResponse.class)
+    public RestResponse listPredefinedParam(@Valid ListPredefinedParamCommand cmd) {
+        ListFlowPredefinedParamResponse resp = flowService.listPredefinedParam(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

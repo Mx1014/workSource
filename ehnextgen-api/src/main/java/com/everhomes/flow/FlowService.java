@@ -415,4 +415,18 @@ public interface FlowService {
      * 删除flowCase
      */
     void deleteFlowCase(DeleteFlowCaseCommand cmd);
+
+    ListFlowPredefinedParamResponse listPredefinedParam(ListPredefinedParamCommand cmd);
+
+    void updateFlowButtonOrder(UpdateFlowButtonOrderCommand cmd);
+
+    FlowLaneDTO updateFlowLane(UpdateFlowLaneCommand cmd);
+
+    FlowButtonDTO createFlowButton(CreateFlowButtonCommand cmd);
+
+    FlowGraphDTO getFlowGraphNew(FlowIdCommand cmd);
+
+    FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphCommand cmd);
+
+    FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphJsonCommand cmd);
 }

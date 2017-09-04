@@ -375,7 +375,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
 		FlowSingleUserSelectionCommand singCmd = new FlowSingleUserSelectionCommand();
 		singCmd.setFlowUserSelectionType(FlowUserSelectionType.VARIABLE.getCode());
-		singCmd.setSourceIdA(resp.getDtos().get(resp.getDtos().size()-1).getId());
+		singCmd.setSourceIdA(resp.getFlowVars().get(resp.getFlowVars().size()-1).getId());
 		singCmd.setSourceTypeA(FlowUserSourceType.SOURCE_VARIABLE.getCode());
 		action.getUserSelections().getSelections().add(singCmd);
     }
@@ -1103,7 +1103,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	cmd.setEntityType(FlowEntityType.FLOW.getCode());
     	
     	FlowVariableResponse resp = flowService.listFlowVariables(cmd);
-    	Assert.assertTrue(resp.getDtos() != null && resp.getDtos().get(0).getLabel() != null);
+    	Assert.assertTrue(resp.getFlowVars() != null && resp.getFlowVars().get(0).getLabel() != null);
     }
     
     @Test

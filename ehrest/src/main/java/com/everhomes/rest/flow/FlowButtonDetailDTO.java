@@ -9,29 +9,31 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>id: id</li>
- * <li>status: 状态</li>
- * <li>gotoLevel: 跳转节点</li>
- * <li>gotoNodeId: 跳转节点id</li>
- * <li>flowNodeId: 节点id</li>
- * <li>flowMainId: flowId</li>
- * <li>flowVersion: 工作流版本</li>
- * <li>namespaceId: 域空间id</li>
- * <li>flowStepType: 动作类型</li>
- * <li>buttonName: 按钮名称</li>
- * <li>needProcessor: 是否需要处理人{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
- * <li>needSubject: 是否需要填写内容{@link com.everhomes.rest.approval.TrueOrFalseFlag}, needProcessor + needSubject 有任何一个就要跳到下个界面</li>
- * <li>subjectRequiredFlag: 填写内容是否必填{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
- * <li>remindCount: ??</li>
- * <li>description: 描述</li>
- * <li>pushMessage: 发消息动作{@link com.everhomes.rest.flow.FlowActionDTO}</li>
- * <li>pushSms: 发短信动作{@link com.everhomes.rest.flow.FlowActionDTO}</li>
- * <li>enterScripts: 内置脚本列表{@link com.everhomes.rest.flow.FlowActionDTO}</li>
+ *     <li>id: id</li>
+ *     <li>status: 状态</li>
+ *     <li>gotoLevel: 跳转节点</li>
+ *     <li>flowNodeId: 节点id</li>
+ *     <li>flowMainId: flowId</li>
+ *     <li>gotoNodeId: 跳转节点id</li>
+ *     <li>createTime: createTime</li>
+ *     <li>namespaceId: 域空间id</li>
+ *     <li>flowStepType: 动作类型</li>
+ *     <li>flowVersion: 工作流版本</li>
+ *     <li>buttonName: 按钮名称</li>
+ *     <li>needProcessor: 是否需要处理人{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ *     <li>needSubject: 是否需要填写内容{@link com.everhomes.rest.approval.TrueOrFalseFlag}, needProcessor + needSubject 有任何一个就要跳到下个界面</li>
+ *     <li>subjectRequiredFlag: 填写内容是否必填{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ *     <li>remindCount: ??</li>
+ *     <li>description: 描述</li>
+ *     <li>param: 按钮参数</li>
+ *     <li>pushMessage: 发消息动作{@link com.everhomes.rest.flow.FlowActionDTO}</li>
+ *     <li>pushSms: 发短信动作{@link com.everhomes.rest.flow.FlowActionDTO}</li>
+ *     <li>tracker: 跟踪日志 {@link com.everhomes.rest.flow.FlowActionDTO}</li>
+ *     <li>enterScripts: 内置脚本列表{@link com.everhomes.rest.flow.FlowActionDTO}</li>
  * </ul>
- * @author janson
- *
  */
 public class FlowButtonDetailDTO {
+
     private Long id;
     private Byte status;
     private Integer gotoLevel;
@@ -48,9 +50,11 @@ public class FlowButtonDetailDTO {
     private Byte subjectRequiredFlag;
     private Integer remindCount;
     private String description;
+    private String param;
 
     private FlowActionDTO pushMessage;
     private FlowActionDTO pushSms;
+    private FlowActionDTO tracker;
 
     @ItemType(FlowActionDTO.class)
     private List<FlowActionDTO> enterScripts;
@@ -205,6 +209,22 @@ public class FlowButtonDetailDTO {
 
     public void setGotoNodeId(Long gotoNodeId) {
         this.gotoNodeId = gotoNodeId;
+    }
+
+    public String getParam() {
+        return param;
+    }
+
+    public void setParam(String param) {
+        this.param = param;
+    }
+
+    public FlowActionDTO getTracker() {
+        return tracker;
+    }
+
+    public void setTracker(FlowActionDTO tracker) {
+        this.tracker = tracker;
     }
 
     @Override

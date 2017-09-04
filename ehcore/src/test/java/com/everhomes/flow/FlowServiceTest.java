@@ -491,7 +491,7 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	ListFlowVariablesCommand cmd = new ListFlowVariablesCommand();
     	cmd.setFlowVariableType(FlowVariableType.TEXT.getCode());
     	FlowVariableResponse resp = flowService.listFlowVariables(cmd);
-    	Assert.assertTrue(resp.getDtos().size() == 4);
+    	Assert.assertTrue(resp.getFlowVars().size() == 4);
     }
     
     private void setTestContext(Long userId) {

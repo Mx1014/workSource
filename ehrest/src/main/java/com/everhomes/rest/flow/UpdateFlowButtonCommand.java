@@ -18,6 +18,8 @@ import java.util.List;
  *     <li>remindCount: ??</li>
  *     <li>messageAction: 消息信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
  *     <li>smsAction: 短信信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
+ *     <li>tracker: 跟踪 {@link com.everhomes.rest.flow.FlowActionInfo}</li>
+ *     <li>param: 按钮参数</li>
  *     <li>enterScriptIds: 前置脚本id列表</li>
  * </ul>
  */
@@ -34,6 +36,9 @@ public class UpdateFlowButtonCommand {
 
     private FlowActionInfo messageAction;
     private FlowActionInfo smsAction;
+    private FlowActionInfo tracker;
+
+    private String param;
 
     @ItemType(Long.class)
     private List<Long> enterScriptIds;
@@ -124,6 +129,22 @@ public class UpdateFlowButtonCommand {
 
     public void setSubjectRequiredFlag(Byte subjectRequiredFlag) {
         this.subjectRequiredFlag = subjectRequiredFlag;
+    }
+
+    public FlowActionInfo getTracker() {
+        return tracker;
+    }
+
+    public void setTracker(FlowActionInfo tracker) {
+        this.tracker = tracker;
+    }
+
+    public String getParam() {
+        return param;
+    }
+
+    public void setParam(String param) {
+        this.param = param;
     }
 
     @Override

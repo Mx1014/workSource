@@ -248,7 +248,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     @Override
     public FlowEventLog getValidEnterStep(Long userId, FlowCase flowCase) {
     	ListingLocator locator = new ListingLocator();
-    	List<FlowEventLog> objs = this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+    	List<FlowEventLog> objs = this.queryFlowEventLogs(locator, 1000, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(
 					ListingLocator locator, SelectQuery<? extends Record> query) {
@@ -345,7 +345,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     @Override
     public List<FlowEventLog> findStepEventLogs(Long caseId) {
     	ListingLocator locator = new ListingLocator();
-    	return this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+    	return this.queryFlowEventLogs(locator, 200, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(
 					ListingLocator locator, SelectQuery<? extends Record> query) {

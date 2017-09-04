@@ -1,10 +1,9 @@
-package com.everhomes.flow;
+package com.everhomes.flow.node;
 
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowLogType;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.user.UserInfo;
+import com.everhomes.flow.*;
+
+import java.util.List;
 
 public class FlowGraphNodeEnd extends FlowGraphNode {
 	private FlowStateProcessor flowStateProcessor;
@@ -24,7 +23,7 @@ public class FlowGraphNodeEnd extends FlowGraphNode {
 	}
 
 	@Override
-	public void stepLeave(FlowCaseState ctx, FlowGraphNode to)
+	public void stepLeave(FlowCaseState ctx, List<FlowGraphNode> to)
 			throws FlowStepErrorException {
 	}
 

@@ -60,6 +60,25 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     }
 
     @Override
+    public List<FlowCase> findFlowCaseByNode(Long originalNodeId, Long convergenceNodeId) {
+        return this.queryFlowCases(new ListingLocator(), 100, (locator, query) -> {
+            com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+            query.addConditions(t.START_NODE_ID.eq(originalNodeId));
+            query.addConditions(t.END_NODE_ID.eq(convergenceNodeId));
+            return query;
+        });
+    }
+
+    @Override
+    public List<FlowCase> listFlowCaseByParentId(Long parentId) {
+        return this.queryFlowCases(new ListingLocator(), 100, (locator, query) -> {
+            com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+            query.addConditions(t.PARENT_ID.eq(parentId));
+            return query;
+        });
+    }
+
+    @Override
     public void updateFlowCase(FlowCase obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowCases.class));
         EhFlowCasesDao dao = new EhFlowCasesDao(context.configuration());

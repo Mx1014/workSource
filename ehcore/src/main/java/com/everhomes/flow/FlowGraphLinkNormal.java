@@ -1,0 +1,16 @@
+package com.everhomes.flow;
+
+/**
+ * Created by xq.tian on 2017/9/19.
+ */
+public class FlowGraphLinkNormal extends FlowGraphLink {
+
+    public FlowGraphNode enterLink(FlowCaseState ctx, FlowGraphEvent event) throws FlowStepErrorException {
+        return ctx.getFlowGraph().getGraphNode(flowLink.getToNodeId());
+    }
+
+    @Override
+    public FlowGraphNode reverseLink(FlowCaseState ctx, FlowGraphEvent event) throws FlowStepErrorException {
+        return ctx.getFlowGraph().getGraphNode(flowLink.getFromNodeId());
+    }
+}

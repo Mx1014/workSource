@@ -87,6 +87,7 @@ public enum CoordinationLocks {
 	SALARY_GROUP_LOCK("salary.group"),
 
     EVENT_STAT_SCHEDULE("event.stat.schedule"),
+    FLOW_LANE("flow.lane"),
     ;
 
     private String code;

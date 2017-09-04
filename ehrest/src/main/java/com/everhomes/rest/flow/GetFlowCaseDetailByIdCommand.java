@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class GetFlowCaseDetailByIdCommand {
+
 	private Long flowCaseId;
 	private String flowUserType;
 

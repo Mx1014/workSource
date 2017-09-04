@@ -5,6 +5,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.flow.*;
+import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
@@ -321,7 +322,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
                     stepDTO.setSubjectId(subject.getId());
                 }
 				flowService.processAutoStep(stepDTO);
-				ctx.setContinueStep(false);
+				// ctx.setContinueStep(false);
 
 				PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));

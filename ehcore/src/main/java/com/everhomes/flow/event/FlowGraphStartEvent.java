@@ -1,7 +1,6 @@
 package com.everhomes.flow.event;
 
 import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowGraphEvent;
 import com.everhomes.flow.FlowGraphNode;
 import com.everhomes.flow.FlowSubject;
 import com.everhomes.rest.flow.*;
@@ -9,7 +8,7 @@ import com.everhomes.rest.flow.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FlowGraphStartEvent implements FlowGraphEvent {
+public class FlowGraphStartEvent extends AbstractFlowGraphEvent {
 	private Long firedUserId;
 	
 	@Override

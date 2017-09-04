@@ -3,6 +3,11 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *     <li>flowId: flowId</li>
+ * </ul>
+ */
 public class GetFlowGraphCommand {
 
     private Long flowId;

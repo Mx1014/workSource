@@ -6,6 +6,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.Tuple;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 业务模块必须实现的接口
@@ -97,4 +98,11 @@ public interface FlowModuleListener {
      * @param messageDto
      */
     default void onFlowMessageSend(FlowCaseState ctx, MessageDTO messageDto) { }
+
+    /**
+     * 预定义参数格式化
+     * @param vars  变量名称，比如：${amount}
+     * @return  参数名称对应的参数的值，比如：key=${amount}, value=100
+     */
+    default Map<String, String> onFlowPredefinedVariableRender(FlowCaseState ctx, List<String> vars) { return null;}
 }

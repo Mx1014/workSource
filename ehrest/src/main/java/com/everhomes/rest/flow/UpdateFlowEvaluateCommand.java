@@ -13,6 +13,7 @@ import java.util.List;
  *     <li>evaluateStart: 评价区间开始</li>
  *     <li>evaluateEnd: 评价区间结束</li>
  *     <li>evaluateStep: 评价完成后的动作</li>
+ *     <li>allowFlowCaseEndEvaluate: 允许结束后评价开关</li>
  *     <li>messageAction: 消息信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
  *     <li>smsAction: 短信信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
  *     <li>items: 评价项列表{@link com.everhomes.rest.flow.FlowEvaluateItemDTO}</li>
@@ -20,65 +21,67 @@ import java.util.List;
  */
 public class UpdateFlowEvaluateCommand {
 
-	private Long flowId;
-	private Byte needEvaluate;
-	private Long evaluateStart;
-	private Long evaluateEnd;
-	private String evaluateStep;
-	
-	private FlowActionInfo messageAction;
-	private FlowActionInfo smsAction;
-	
-	@ItemType(FlowEvaluateItemDTO.class)
-	private List<FlowEvaluateItemDTO> items;
+    private Long flowId;
+    private Byte needEvaluate;
+    private Long evaluateStart;
+    private Long evaluateEnd;
+    private String evaluateStep;
 
-	public Byte getNeedEvaluate() {
-		return needEvaluate;
-	}
+    private Byte allowFlowCaseEndEvaluate;
 
-	public void setNeedEvaluate(Byte needEvaluate) {
-		this.needEvaluate = needEvaluate;
-	}
+    private FlowActionInfo messageAction;
+    private FlowActionInfo smsAction;
 
-	public Long getEvaluateStart() {
-		return evaluateStart;
-	}
+    @ItemType(FlowEvaluateItemDTO.class)
+    private List<FlowEvaluateItemDTO> items;
 
-	public void setEvaluateStart(Long evaluateStart) {
-		this.evaluateStart = evaluateStart;
-	}
+    public Byte getNeedEvaluate() {
+        return needEvaluate;
+    }
 
-	public Long getEvaluateEnd() {
-		return evaluateEnd;
-	}
+    public void setNeedEvaluate(Byte needEvaluate) {
+        this.needEvaluate = needEvaluate;
+    }
 
-	public void setEvaluateEnd(Long evaluateEnd) {
-		this.evaluateEnd = evaluateEnd;
-	}
+    public Long getEvaluateStart() {
+        return evaluateStart;
+    }
 
-	public String getEvaluateStep() {
-		return evaluateStep;
-	}
+    public void setEvaluateStart(Long evaluateStart) {
+        this.evaluateStart = evaluateStart;
+    }
 
-	public void setEvaluateStep(String evaluateStep) {
-		this.evaluateStep = evaluateStep;
-	}
+    public Long getEvaluateEnd() {
+        return evaluateEnd;
+    }
 
-	public FlowActionInfo getMessageAction() {
-		return messageAction;
-	}
+    public void setEvaluateEnd(Long evaluateEnd) {
+        this.evaluateEnd = evaluateEnd;
+    }
 
-	public void setMessageAction(FlowActionInfo messageAction) {
-		this.messageAction = messageAction;
-	}
+    public String getEvaluateStep() {
+        return evaluateStep;
+    }
 
-	public FlowActionInfo getSmsAction() {
-		return smsAction;
-	}
+    public void setEvaluateStep(String evaluateStep) {
+        this.evaluateStep = evaluateStep;
+    }
 
-	public void setSmsAction(FlowActionInfo smsAction) {
-		this.smsAction = smsAction;
-	}
+    public FlowActionInfo getMessageAction() {
+        return messageAction;
+    }
+
+    public void setMessageAction(FlowActionInfo messageAction) {
+        this.messageAction = messageAction;
+    }
+
+    public FlowActionInfo getSmsAction() {
+        return smsAction;
+    }
+
+    public void setSmsAction(FlowActionInfo smsAction) {
+        this.smsAction = smsAction;
+    }
 
     public List<FlowEvaluateItemDTO> getItems() {
         return items;
@@ -89,14 +92,22 @@ public class UpdateFlowEvaluateCommand {
     }
 
     public Long getFlowId() {
-		return flowId;
-	}
+        return flowId;
+    }
 
-	public void setFlowId(Long flowId) {
-		this.flowId = flowId;
-	}
+    public void setFlowId(Long flowId) {
+        this.flowId = flowId;
+    }
 
-	@Override
+    public Byte getAllowFlowCaseEndEvaluate() {
+        return allowFlowCaseEndEvaluate;
+    }
+
+    public void setAllowFlowCaseEndEvaluate(Byte allowFlowCaseEndEvaluate) {
+        this.allowFlowCaseEndEvaluate = allowFlowCaseEndEvaluate;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

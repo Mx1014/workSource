@@ -6,6 +6,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.Tuple;
 
 import java.util.List;
+import java.util.Map;
 
 public interface FlowListenerManager {
 
@@ -70,7 +71,7 @@ public interface FlowListenerManager {
 	 */
 	void onFlowButtonFired(FlowCaseState ctx);
 
-	FlowModuleInfo getModule(String module);
+	FlowModuleInfo getModule(Long module);
 	
 	List<FlowModuleInfo> getModules();
 
@@ -83,4 +84,6 @@ public interface FlowListenerManager {
 	void onFlowSMSVariableRender(FlowCaseState ctx, int templateId, List<Tuple<String, Object>> variables);
 
     void onFlowMessageSend(FlowCaseState ctx, MessageDTO messageDto);
+
+    Map<String,String> onFlowPredefinedVariableRender(FlowCaseState ctx, List<String> vars);
 }

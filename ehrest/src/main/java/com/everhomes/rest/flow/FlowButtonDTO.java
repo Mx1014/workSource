@@ -22,9 +22,9 @@ import java.sql.Timestamp;
  * <li>subjectRequiredFlag: 填写内容是否必填{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>remindCount: ??</li>
  * <li>description: 描述</li>
+ * <li>params: 参数</li>
+ * <li>needSelectBranch: 下一个节点是判断节点并且是需要用户选择分支为1，否则为0{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * </ul>
- * @author janson
- *
  */
 public class FlowButtonDTO {
 
@@ -44,6 +44,17 @@ public class FlowButtonDTO {
     private Byte subjectRequiredFlag;
     private Integer remindCount;
     private String description;
+    private String params;
+
+    private Byte needSelectBranch;
+
+    public Byte getNeedSelectBranch() {
+        return needSelectBranch;
+    }
+
+    public void setNeedSelectBranch(Byte needSelectBranch) {
+        this.needSelectBranch = needSelectBranch;
+    }
 
     public Byte getNeedProcessor() {
         return needProcessor;
@@ -171,6 +182,14 @@ public class FlowButtonDTO {
 
     public void setSubjectRequiredFlag(Byte subjectRequiredFlag) {
         this.subjectRequiredFlag = subjectRequiredFlag;
+    }
+
+    public String getParams() {
+        return params;
+    }
+
+    public void setParams(String params) {
+        this.params = params;
     }
 
     @Override

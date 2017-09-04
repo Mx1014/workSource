@@ -1,0 +1,56 @@
+package com.everhomes.rest.flow;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ *     <li>userId: 用户ID，为空则为当前用户</li>
+ *     <li>serviceType: 业务类别</li>
+ *     <li>keyword: 搜索关键字</li>
+ *     <li>pageAnchor: pageAnchor</li>
+ * </ul>
+ */
+public class SearchFlowOperateLogsCommand {
+
+    private Long userId;
+    private String serviceType;
+    private String keyword;
+    private Long pageAnchor;
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}
