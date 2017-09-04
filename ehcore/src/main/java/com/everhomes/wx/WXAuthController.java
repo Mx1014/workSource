@@ -181,7 +181,7 @@ public class WXAuthController {// extends ControllerBase
         }
 
         //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
-        checkRedirectUserIdentifier(request, response, namespaceId);
+        checkRedirectUserIdentifier(request, response, namespaceId, params);
 
         // 登录成功则跳转到原来访问的链接
         LOGGER.info("Process weixin auth request, loginToken={}", loginToken);
@@ -237,7 +237,7 @@ public class WXAuthController {// extends ControllerBase
             }
 
             //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
-            checkRedirectUserIdentifier(request, response, namespaceId);
+            checkRedirectUserIdentifier(request, response, namespaceId, params);
 
             String sourceUrl = params.get(KEY_SOURCE_URL);
             redirectByWx(response, sourceUrl);
@@ -250,7 +250,7 @@ public class WXAuthController {// extends ControllerBase
         }
 	}
 
-	private void checkRedirectUserIdentifier(HttpServletRequest request, HttpServletResponse response, Integer namespaceId){
+	private void checkRedirectUserIdentifier(HttpServletRequest request, HttpServletResponse response, Integer namespaceId, Map<String, String> params){
         LOGGER.info("checkUserIdentifier start");
 
         //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
@@ -265,7 +265,14 @@ public class WXAuthController {// extends ControllerBase
             String homeUrl = configurationProvider.getValue(namespaceId, "home.url", "");
             String bindPhoneUrl = configurationProvider.getValue(namespaceId, WeChatConstant.WX_BIND_PHONE_URL, "");
             LOGGER.info("checkUserIdentifier fail redirect to bind phone Url, homeUrl={}, url={}", homeUrl, bindPhoneUrl);
-            redirectByWx(response, homeUrl + bindPhoneUrl);
+            String url =homeUrl + bindPhoneUrl;
+            try{
+                url = appendParamToUrl(url, params);
+            }catch (Exception ex){
+                LOGGER.error("checkUserIdentifier exception, append param to url error");
+            }
+
+            redirectByWx(response, url);
         }
 
         LOGGER.info("checkUserIdentifier success");
