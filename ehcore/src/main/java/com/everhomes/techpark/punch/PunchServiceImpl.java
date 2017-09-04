@@ -6673,7 +6673,8 @@ public class PunchServiceImpl implements PunchService {
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
  				"公司没有设置打卡规则");
 		Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr, punchTime, userId);
-		if(null == ptrId || ptrId.equals(0)){
+
+		if(null == ptrId ){
 			if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
 				result.setPunchType(PunchType.NOT_WORKDAY.getCode());
 			}else{
@@ -6683,6 +6684,14 @@ public class PunchServiceImpl implements PunchService {
 			result.setPunchIntervalNo(0);
 			return result;
 		}
+
+        PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(ptrId);
+        if(null == ptr){
+            //当排班为休息时候 ptrId为0找不到ptr(或者ptr被删除也会走这里)
+            result.setPunchType(PunchType.NOT_WORKDAY.getCode());
+            result.setPunchIntervalNo(0);
+            return result;
+        }
 		Calendar punCalendar = Calendar.getInstance();
 		punCalendar.setTime(punchTime);
 		//把当天的时分秒转换成Long型
@@ -6690,7 +6699,6 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,enterpriseId, dateSF.get().format(punchTime),
 				ClockCode.SUCESS.getCode());
 		int PunchIntervalNo = 1;
-		PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(ptrId);
 		if(ptr.getPunchTimesPerDay().equals((byte)2)){
 			//对于2次打卡:
 			return calculate2timePunchStatus(ptr,punchTimeLong,punchLogs,result);
