@@ -4549,6 +4549,17 @@ public class PunchServiceImpl implements PunchService {
 		// modify by wh 2017年6月22日 现在都是挂总公司下,用户未必都能通过这种方式查到
 //			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId() );
 
+
+        List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(r.getUserId(),r.getEnterpriseId(), dateSF.get().format(r.getPunchDate()),
+                ClockCode.SUCESS.getCode());
+        if(null!=punchLogs){
+            dto.setPunchLogs(new ArrayList<>());
+            for (PunchLog pl : punchLogs) {
+                PunchLogDTO plDTO = convertPunchLog2DTO(pl);
+                dto.getPunchLogs().add(plDTO);
+            }
+        }
+
 		List<OrganizationMember> organizationMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId("/"+r.getEnterpriseId(),dto.getUserId() );
 		if (null != organizationMembers && organizationMembers.size() >0) {
 			dto.setUserName(organizationMembers.get(0).getContactName());
@@ -4919,7 +4930,11 @@ public class PunchServiceImpl implements PunchService {
 		try {
 			LOGGER.debug("refresh day log stat "+ member.toString());
 			//刷新 daylog
-			this.refreshPunchDayLog(member.getTargetId(), orgId, punCalendar);
+            PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(member.getTargetId(), orgId,
+                    dateSF.get().format(punCalendar.getTime()));
+            if (null == punchDayLog) {
+			    this.refreshPunchDayLog(member.getTargetId(), orgId, punCalendar);
+            }
 			//刷月报
 
 

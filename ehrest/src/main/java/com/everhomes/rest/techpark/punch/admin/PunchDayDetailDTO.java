@@ -2,7 +2,10 @@ package com.everhomes.rest.techpark.punch.admin;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.techpark.punch.PunchLogDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -26,7 +29,8 @@ import com.everhomes.util.StringHelper;
  * <li>exceptionStatus：状态{@link com.everhomes.rest.techpark.punch.ExceptionStatus}</li>
  * <li>punchTimesPerDay：打卡状态</li> 
  * <li>deviceChangeFlag：设备改变  0-没变 1-改变标红</li> 
- * <li>statuString：状态文字</li> 
+ * <li>statuString：状态文字</li>
+ * <li>punchLogs：打卡记录列表 参照{@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
  * </ul>
  */
 public class PunchDayDetailDTO {
@@ -53,6 +57,8 @@ public class PunchDayDetailDTO {
     private Byte exceptionStatus ;
     private Byte deviceChangeFlag;
     private String statuString;
+	@ItemType(PunchLogDTO.class)
+	private List<PunchLogDTO> punchLogs;
 	public java.lang.Byte getMorningApprovalStatus() {
 		return morningApprovalStatus;
 	}
@@ -243,6 +249,13 @@ public class PunchDayDetailDTO {
 	public void setPunchCount(Integer punchCount) {
 		this.punchCount = punchCount;
 	}
- 
 
+
+	public List<PunchLogDTO> getPunchLogs() {
+		return punchLogs;
+	}
+
+	public void setPunchLogs(List<PunchLogDTO> punchLogs) {
+		this.punchLogs = punchLogs;
+	}
 }
