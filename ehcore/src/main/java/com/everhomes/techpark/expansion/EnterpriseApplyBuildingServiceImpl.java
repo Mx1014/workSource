@@ -277,7 +277,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 				cmd.getCommunityId(), null, null);
 
 		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, Integer.MAX_VALUE,
-				cmd.getCommunityId(), cmd.getNamespaceId());
+				cmd.getCommunityId(), cmd.getNamespaceId(), null);
 
 		List<LeaseBuilding> leaseBuildings = buildings.stream().filter(r ->
 			existLeaseBuildings.stream().noneMatch(e -> e.getBuildingId().equals(r.getId()))
