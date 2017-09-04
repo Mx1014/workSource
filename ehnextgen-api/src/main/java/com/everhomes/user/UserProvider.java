@@ -127,4 +127,13 @@ public interface UserProvider {
      * @return  返回该记录的id
      */
     long createUserNotificationSetting(UserNotificationSetting setting);
+
+    /**
+     * 查询非当前userId的正常用户数据
+     * @param namespaceId
+     * @param identifierToken
+     * @param userId
+     * @return
+     */
+    UserIdentifier findClaimedIdentifierByTokenAndNotUserId(Integer namespaceId, String identifierToken, Long userId);
 }

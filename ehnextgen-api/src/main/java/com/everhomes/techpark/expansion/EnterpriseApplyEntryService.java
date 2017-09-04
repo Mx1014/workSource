@@ -19,9 +19,9 @@ public interface EnterpriseApplyEntryService {
 	
 	ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd);
 
-	BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd);
+	BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd, Byte adminFlag);
 
-	BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd);
+	BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd, Byte adminFlag);
 	
 	BuildingForRentDTO findLeasePromotionById(Long id);
 	

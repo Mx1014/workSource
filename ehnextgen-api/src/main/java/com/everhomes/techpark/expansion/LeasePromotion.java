@@ -9,14 +9,21 @@ public class LeasePromotion extends EhLeasePromotions {
 
 	private static final long serialVersionUID = -5199936376319201329L;
 
-	private String   posterUrl;
-
-	private String buildingName;
+	private Long communityId;
+	private String posterUrl;
 
 	private BigDecimal startRentArea;
 	private BigDecimal endRentArea;
 	private BigDecimal startRentAmount;
 	private BigDecimal endRentAmount;
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
 
 	public java.lang.String getPosterUrl() {
 		return posterUrl;
@@ -25,15 +32,6 @@ public class LeasePromotion extends EhLeasePromotions {
 	public void setPosterUrl(java.lang.String posterUrl) {
 		this.posterUrl = posterUrl;
 	}
-
-	public String getBuildingName() {
-		return buildingName;
-	}
-
-	public void setBuildingName(String buildingName) {
-		this.buildingName = buildingName;
-	}
-
 
 	public BigDecimal getStartRentArea() {
 		return startRentArea;

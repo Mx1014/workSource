@@ -118,7 +118,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	    		user = userProvider.findUserById(stepDTO.getOperatorId());
     			UserContext.current().setUser(user);
     			UserContext.current().setNamespaceId(flowCase.getNamespaceId());
-	    	} else if(UserContext.current().getUser() != null) {
+	    	} else if(UserContext.current().getUser() != null && UserContext.current().getUser().getId() != User.ANNONYMOUS_UID) {
 	    		user = UserContext.current().getUser();
 	    	} else {
 	    		user = userProvider.findUserById(User.SYSTEM_UID);
@@ -142,6 +142,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			ctx.setOperator(userInfo);
 			FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
 			event.setFiredUserId(user.getId());
+            if (stepDTO.getSubjectId() != null) {
+                event.setSubject(flowSubjectProvider.getFlowSubjectById(stepDTO.getSubjectId()));
+            }
 			ctx.setCurrentEvent(event);
 			
 			FlowStepType stepType = FlowStepType.fromCode(stepDTO.getAutoStepType());
@@ -201,8 +204,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(user.getId());
 		ctx.setOperator(userInfo);
 		FlowGraphNoStepEvent event = new FlowGraphNoStepEvent(stepDTO);
-		ctx.setCurrentEvent(event);
-		ctx.setStepType(FlowStepType.NO_STEP);	
+        ctx.setCurrentEvent(event);
+		ctx.setStepType(FlowStepType.NO_STEP);
 		
 		return ctx;	
 	}
@@ -432,6 +435,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			stepDTO.setStepCount(ctx.getFlowCase().getStepCount());
 			stepDTO.setFlowNodeId(curr.getFlowNode().getId());
 			stepDTO.setAutoStepType(curr.getFlowNode().getAutoStepType());
+			stepDTO.setOperatorId(User.SYSTEM_UID);
 			ft.setJson(stepDTO.toString());
 			
 			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute() * 60 * 1000L;
@@ -499,6 +503,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		case NO_STEP:
 			break;
 		case APPROVE_STEP:
+			case END_STEP:
 			ctx.getFlowCase().setStatus(FlowCaseStatus.FINISHED.getCode());
 			break;
 		case EVALUATE_STEP:

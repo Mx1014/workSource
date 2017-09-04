@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>keyword: 关键字</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
+ * <li>sendType: 寄件类型</li>
  * </ul>
  */
 public class ListExpressOrderCondition {
@@ -39,6 +40,8 @@ public class ListExpressOrderCondition {
 	private Long pageAnchor;
 
 	private Integer pageSize;
+	
+	private Byte sendType;
 
 	public Long getUserId() {
 		return userId;
@@ -118,6 +121,14 @@ public class ListExpressOrderCondition {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Byte getSendType() {
+		return sendType;
+	}
+
+	public void setSendType(Byte sendType) {
+		this.sendType = sendType;
 	}
 
 	@Override

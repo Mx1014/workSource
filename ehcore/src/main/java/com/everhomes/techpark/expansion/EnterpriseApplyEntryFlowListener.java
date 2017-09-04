@@ -12,27 +12,23 @@ import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationAddress;
-import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
 import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
 import com.everhomes.rest.techpark.expansion.ExpansionConst;
-import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
+import com.everhomes.rest.techpark.expansion.ApplyEntryErrorCodes;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -44,6 +40,9 @@ import com.everhomes.util.Tuple;
 import com.everhomes.yellowPage.YellowPage;
 import com.everhomes.yellowPage.YellowPageProvider;
 
+import org.apache.commons.lang.StringUtils;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +83,10 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     private UserProvider userProvider;
     @Autowired
     private GeneralFormService generalFormService;
-
+    @Autowired
+    private EnterpriseApplyBuildingProvider enterpriseApplyBuildingProvider;
+    @Autowired
+    private EnterpriseOpRequestBuildingProvider enterpriseOpRequestBuildingProvider;
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
 
@@ -176,12 +178,18 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             
             String jsonStr;
 
-            jsonStr = localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.FLOW_DETAIL_CONTENT_CODE, locale, map, "[]");
+            jsonStr = localeTemplateService.getLocaleTemplateString(ApplyEntryErrorCodes.SCOPE, ApplyEntryErrorCodes.FLOW_DETAIL_CONTENT_CODE, locale, map, "[]");
 
             GetGeneralFormValuesCommand cmd2 = new GetGeneralFormValuesCommand();
             cmd2.setSourceType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
             cmd2.setSourceId(dto.getId());
             List<FlowCaseEntity> formEntities = generalFormService.getGeneralFormFlowEntities(cmd2);
+
+            formEntities.forEach(r -> {
+                if (StringUtils.isBlank(r.getValue())) {
+                    r.setValue("无");
+                }
+            });
 
             FlowCaseEntityList result = (FlowCaseEntityList) StringHelper.fromJsonString(jsonStr, FlowCaseEntityList.class);
             result.addAll(result.size() - 1, formEntities);
@@ -222,28 +230,34 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
                 buildingName = sb.toString();
             }else {
-                Building building = communityProvider.findBuildingById(applyEntry.getBuildingId());
-                if (null != building) {
-                    buildingName = building.getName();
-                }
+//                LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(applyEntry.getBuildingId());
+//                if (null != leaseBuilding) {
+//                    buildingName = leaseBuilding.getName();
+//                }
+                buildingName = getBuildingName(applyEntry.getId());
             }
 
 		}else if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
 			//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
-			Building building = communityProvider.findBuildingById(applyEntry.getSourceId());
-			if(null != building){
-                buildingName = building.getName();
+            LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(applyEntry.getSourceId());
+			if(null != leaseBuilding){
+                buildingName = leaseBuilding.getName();
             }
 		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType())||
 				ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(applyEntry.getSourceType())){
 
             LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
 
-            buildingName = leasePromotion.getRentPosition();
-            com.everhomes.building.Building building = buildingProvider.findBuildingById(applyEntry.getBuildingId());
-            if (null != building) {
-                buildingName = building.getName();
+            if (leasePromotion.getBuildingId() == 0L) {
+
+                buildingName = leasePromotion.getBuildingName();
+            }else {
+                LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(leasePromotion.getBuildingId());
+                if (null != leaseBuilding) {
+                    buildingName = leaseBuilding.getName();
+                }
             }
+
             Address address = addressProvider.findAddressById(applyEntry.getAddressId());
 
             if (null != address) {
@@ -254,15 +268,43 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 			YellowPage yellowPage = yellowPageProvider.getYellowPageById(applyEntry.getSourceId());
 			if(null != yellowPage){
                 if (null != yellowPage.getBuildingId()) {
-                    Building building = communityProvider.findBuildingById(yellowPage.getBuildingId());
-                    if(null != building){
-                        buildingName = building.getName();
+                    LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(yellowPage.getBuildingId());
+                    if(null != leaseBuilding){
+                        buildingName = leaseBuilding.getName();
                     }
                 }
 			}
 		}
 
         return buildingName;
+    }
+
+    private String getBuildingName(Long applyEntryId) {
+        EnterpriseOpRequestBuilding enterpriseOpRequestBuilding = getEnterpriseOpRequestBuildingByRequestId(applyEntryId);
+        if (null != enterpriseOpRequestBuilding) {
+            LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(enterpriseOpRequestBuilding.getBuildingId());
+            if(null != leaseBuilding){
+                return leaseBuilding.getName();
+            }
+        }
+        return "";
+    }
+
+    private EnterpriseOpRequestBuilding getEnterpriseOpRequestBuildingByRequestId(Long requestId) {
+        List<EnterpriseOpRequestBuilding> opRequestBuildings = this.enterpriseOpRequestBuildingProvider.queryEnterpriseOpRequestBuildings(
+                new ListingQueryBuilderCallback() {
+                    @Override
+                    public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                                                                        SelectQuery<? extends Record> query) {
+                        query.addConditions(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS.ENTERPRISE_OP_REQUESTS_ID.eq(requestId));
+                        return query;
+                    }
+                });
+        if (opRequestBuildings.isEmpty()) {
+            return null;
+        }else {
+            return opRequestBuildings.get(0);
+        }
     }
 
     @Override

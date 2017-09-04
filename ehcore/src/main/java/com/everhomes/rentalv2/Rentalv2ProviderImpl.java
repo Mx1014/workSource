@@ -2172,8 +2172,14 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, RentalResourceType.class,resourceType.getId());
 	}
-	
-	
+
+	@Override
+	public RentalResourceType findRentalResourceTypeById (Long resoureceTypeId) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhRentalv2ResourceTypesDao dao = new EhRentalv2ResourceTypesDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(resoureceTypeId), RentalResourceType.class);
+	}
 
 	@Override
 	public List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, Byte status, ListingLocator locator) {

@@ -67,6 +67,7 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments();
 	
 	List<EquipmentInspectionTasks> listTasksByEquipmentId(Long equipmentId, List<Long> standardIds, Timestamp startDate, Timestamp endDate, CrossShardListingLocator locator, Integer pageSize, List<Byte> taskStatus);
+	List<EquipmentInspectionTasks> listTasksByEquipmentIdAndStandards(Long equipmentId, List<StandardAndStatus> standards, Timestamp startDate, Timestamp endDate, CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listTasksByStandardId(Long standardId, CrossShardListingLocator locator, Integer pageSize);
 
 	List<Long> listStandardIdsByType(Byte type);
@@ -95,6 +96,7 @@ public interface EquipmentProvider {
 	void updateEquipmentStandardMap(EquipmentStandardMap map);
 	EquipmentStandardMap findEquipmentStandardMapById(Long id);
 	EquipmentStandardMap findEquipmentStandardMap(Long id, Long standardId, Long targetId, String targetType);
+	List<EquipmentStandardMap> findEquipmentStandardMap( Long standardId, Long targetId, String targetType);
 
 	void createEquipmentInspectionItemResults(EquipmentInspectionItemResults result);
 	List<EquipmentInspectionItemResults> findEquipmentInspectionItemResultsByLogId(Long logId);

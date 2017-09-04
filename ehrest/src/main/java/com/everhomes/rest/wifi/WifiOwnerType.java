@@ -8,7 +8,7 @@ package com.everhomes.rest.wifi;
  * </ul>
  */
 public enum WifiOwnerType {
-    COMMUNITY("community");
+    COMMUNITY("community"),ORGAMIZATION("EhOrganizations");
     
     private String code;
     private WifiOwnerType(String code) {

@@ -4,11 +4,14 @@ package com.everhomes.poll;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.poll.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -26,13 +29,6 @@ import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
 import com.everhomes.poll.PollService;
 import com.everhomes.rest.forum.PostContentType;
-import com.everhomes.rest.poll.PollDTO;
-import com.everhomes.rest.poll.PollItemDTO;
-import com.everhomes.rest.poll.PollPostCommand;
-import com.everhomes.rest.poll.PollServiceErrorCode;
-import com.everhomes.rest.poll.PollShowResultCommand;
-import com.everhomes.rest.poll.PollShowResultResponse;
-import com.everhomes.rest.poll.PollVoteCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -96,6 +92,10 @@ public class PollServiceImpl implements PollService {
             // 添加tag标签   add by yanjun 20170613
             poll.setTag(cmd.getTag());
 
+            // 增加是否支持重复投票，以及重复投票的间隔   add by yanjun 20170825
+            poll.setRepeatFlag(cmd.getRepeatFlag());
+            poll.setRepeatPeriod(cmd.getRepeatPeriod());
+
             pollProvider.createPoll(poll);
             List<PollItem> pollItems = cmd.getItemList().stream().map(r->{
                 PollItem item=ConvertHelper.convert(r, PollItem.class);
@@ -135,11 +135,14 @@ public class PollServiceImpl implements PollService {
             LOGGER.error("cannot find any match item.{}", cmd.getItemIds());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_INVALID_POLL_IMTE, "invalid poll item.item="+cmd.getItemIds());
         }
-        PollVote voteResult = pollProvider.findPollVoteByUidAndPollId(user.getId(), cmd.getPollId());
-        if (voteResult!=null) {
-            LOGGER.error("can not vote again.pollId={}", cmd.getPollId());
+
+        //检查是否重复投票，1、不支持重复投票，2、支持重复投票，时间间隔未过
+        boolean repeat = checkRepeatPoll(poll, user.getId());
+        if(repeat){
+            LOGGER.error("can not vote again.pollId={}", poll.getId());
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_DUPLICATE_VOTE, "cannot vote again");
         }
+
         List<PollVote> votes=new ArrayList<PollVote>();
         //do transaction
         if(Selector.fromCode(poll.getMultiSelectFlag()).equals(Selector.MUTIL_SELECT)){
@@ -220,6 +223,36 @@ public class PollServiceImpl implements PollService {
         dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
         dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
         return dto;
+    }
+
+
+    //检查是否能够投票，1、不支持重复投票，2、支持重复投票，时间间隔未过
+    private boolean checkRepeatPoll(Poll poll, Long userId){
+        PollVote voteResult = pollProvider.findPollVoteByUidAndPollId(userId, poll.getId());
+
+        //投过票
+        if (voteResult!=null) {
+
+            //1、不支持重复投票
+            if (poll.getRepeatFlag() == null || poll.getRepeatFlag().byteValue() == RepeatFlag.NO.getCode()) {
+                return true;
+            }
+
+            //2、支持重复投票
+            if(poll.getRepeatFlag().byteValue() == RepeatFlag.YES.getCode() && poll.getRepeatPeriod() != null && voteResult.getCreateTime() !=null){
+
+                java.sql.Date now = new java.sql.Date(System.currentTimeMillis());
+
+                java.sql.Date voteDate = new java.sql.Date(voteResult.getCreateTime().getTime());
+
+                //如果当前日期在下次投票日期之前则报异常
+                if(now.toLocalDate().isBefore(voteDate.toLocalDate().plusDays(poll.getRepeatPeriod()))){
+                    return true;
+                }
+            }
+
+        }
+        return false;
     }
     
     
@@ -318,7 +351,7 @@ public class PollServiceImpl implements PollService {
             //skip
         }
         User user=UserContext.current().getUser();
-        PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
+        //PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
         if(poll.getStartTime() != null)
         	dto.setStartTime(poll.getStartTime().toString());
         
@@ -327,11 +360,16 @@ public class PollServiceImpl implements PollService {
         
         dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
         dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
-        dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setPollId(poll.getId());
-        if(votes==null){
+
+        //检查是否重复投票  edit by yanjun 20170825
+        boolean repeat = checkRepeatPoll(poll, user.getId());
+        if(repeat){
+            dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
+        }else {
             dto.setPollVoterStatus(VotedStatus.UNVOTED.getCode());
         }
+
         dto.setProcessStatus(getStatus(poll).getCode());
         response.setPoll(dto);
         return response;
@@ -360,7 +398,7 @@ public class PollServiceImpl implements PollService {
             //skip
         }
         User user=UserContext.current().getUser();
-        PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
+        //PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
         if(poll.getStartTime() != null) {
             dto.setStartTime(fommat.format(new Date(poll.getStartTime().getTime())).toString());
         }
@@ -369,9 +407,15 @@ public class PollServiceImpl implements PollService {
         }
         dto.setAnonymousFlag(poll.getAnonymousFlag() == null ? 0 : poll.getAnonymousFlag().intValue());
         dto.setMultiChoiceFlag(poll.getMultiSelectFlag() == null ? 0 : poll.getMultiSelectFlag().intValue());
-        dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
+        //dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setPollId(poll.getId());
-        if(votes==null){
+
+
+        //检查是否重复投票  edit by yanjun 20170825
+        boolean repeat = checkRepeatPoll(poll, user.getId());
+        if(repeat){
+            dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
+        }else {
             dto.setPollVoterStatus(VotedStatus.UNVOTED.getCode());
         }
         dto.setProcessStatus(getStatus(poll).getCode());

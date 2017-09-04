@@ -110,4 +110,12 @@ public interface CommunityProvider {
 
     Map<Long, Community> listCommunitiesByIds(List<Long> ids);
     List<Community> listCommunityByNamespaceIdAndName(Integer namespaceId, String communityName);
+    List<Community> listCommunities(Integer namespaceId, ListingLocator locator, Integer pageSize,
+                                    ListingQueryBuilderCallback queryBuilderCallback);
+									
+									    //默认园区/小区
+    Community findFirstCommunityByNameSpaceIdAndType(Integer namespaceId, Byte type);
+
+    //获取对应的目标communityId
+    Long findDefaultCommunityByCommunityId(Integer namespaceId, Long originId);
 }

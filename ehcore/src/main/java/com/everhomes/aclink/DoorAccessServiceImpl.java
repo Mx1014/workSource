@@ -1,5 +1,15 @@
 package com.everhomes.aclink;
 
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.internal.util.AlipayLogger;
+import com.alipay.api.request.AlipayOpenAuthTokenAppQueryRequest;
+import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
+import com.alipay.api.request.AlipaySystemOauthTokenRequest;
+import com.alipay.api.response.AlipayOpenAuthTokenAppQueryResponse;
+import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
+import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.atomikos.util.FastDateFormat;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.huarun.*;
@@ -76,6 +86,7 @@ import org.springframework.util.StringUtils;
 import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.ByteArrayOutputStream;
@@ -195,6 +206,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Autowired
     private LocaleTemplateProvider localeTemplateProvider;
     
+    @Autowired
+    private DoorAuthLevelProvider doorAuthLevelProvider;
+    
+    AlipayClient alipayClient;
+    
     final Pattern npattern = Pattern.compile("\\d+");
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -218,6 +234,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         Security.addProvider(new BouncyCastleProvider());
         String subcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhUserIdentifiers.class, null);
         localBus.subscribe(subcribeKey, this);
+        
+        String URL = "https://openapi.alipay.com/gateway.do";
+        String APP_ID = "2017072507886723";
+        String APP_PRIVATE_KEY = "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCPhrLtvxkqtQ+30XXwp/7U3xhJJRJJjwGbFRQC2W0UDOVoKqi6bPaL34AP9L2NPhGgq5K5YIMAzt1BBc4OAvml0v8/RLKqUmlTf3iYDnVdua98gLy4tztHco7A8tjy1hqkdQ8kAbFnxsW6pHNL1XByA8itmICHzhMBdNk2/Z87r+n2otr11ebKOYTSfNO9SSsBvZQz0wxDpgoLgbosNWaLxaOPbFtDHAKsNOVttuQfWUMSuGvX9xxu0wi7WxFXvKb8z31szmd3WcXbtCTpPPCx5euI0IuOKGKF4P6NX0iy0TokIrzmt4jvn5xG/Bq5/VvJJS686Kc/bxqXdjtFH0dRAgMBAAECggEAKePupWV5OvXNuKDyA2OFBSx4MiEXzVBn75OfW5WKOKfq7RRGWuMisoBxKDcOfAL5siNhl6mLktjNywSet4g2xSdoSFcMrpmPFEfIMtlFeC2SAoywiFkyfA/7imVW3MmQzR89ZAz6coeZfngxDpklUKG6GLDCEuEauvoXy+0KZKjpkCNywKbwvWnUZaPiLIE9Px8kqy9ZyPMUu79r8DZf080Yg6nQRzxsSjFuik9c5eCD2UuFLV4mIW0e50mwnFtZnOxK++SCydL9KLd5HeA1IN82AObvevG+5LEwCWmDFpIncVBZfVulH1+yxZCePQNN56m871Ba/4uQISbnhZHlYQKBgQDm/EKjog64fPt3xb5abBPJ0w0BoHhKoLof1Qa3AumvDcAyZwtmeWlKWr4WrZ9WeZyz10So7gIoDpmzGIhdIjV/xkb34Sd9m+M41xDTZIPNpUe6h9XoZGAE7o+nY5scWq91nPFW4grPqcRdn1tyP2dOljFEIhD6dX6iJAihiI/aYwKBgQCfEcG3btf40QJIX2WcG/MwI+yWSrVgahw70H76Yvl85ZjsmOBQiACeUbVuxGcdlX8vtAT3XYvETtXdIBW635szvIDrywsKNtJtz8qWgX5Q95MSRhQ4tljGpVezhzdRfu1wHKm0oxEe1xVaot8HKKiJCYWuhokpvRxECA06692LuwKBgE3U5JOEsNcjbgyeuhR35HcWQYSx0La8z9qYCmoydhGBXajeJe5CrOLcDr9Pg6g81DuZJs6RXHKo8MtzUceoFkTWx+UQniDqHTdy6H2CmhL6RWAqEz76S4x94jPyETsNp5/G4V94TVJKDxvI7aRijunhG/qsS/JJEwGJiMr9XBOnAoGADFDBoMQSMI9uD9Bi+40mbOm7HX+3Pzm36eGgkx4qlsLn7hl/9HwzIA7Pbz4BhcbXTAgyAjzZ318DK9WaGRfK2lyT1q2nsyi/bgUSeEiaUQZ5+oY2dpWXlfmjKqEjZUngdDej4/pkDvE0FApcHh/FvKZiFTsRT4v2rkW5UICGbJUCgYAaBHuMw1X4A1Zi0EtVzO7f58lZ8lfwapNbVqdwZsTCzjVMEPK6HefHDmxN1ylRNOJh8wVcpOTYuGNtySHBN5ZDC3KaUnbmwyDfJZoe+esGxbkDhvzEJ4fB/FiE+P6k9sado0Dh2ry2rsKPpf88drscUZhmvPUTaFYN8msjlJF69A==";
+        String FORMAT = "json";
+        String CHARSET = "UTF-8";
+        String ALIPAY_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAphmpO+yCACAtcE724TRl9n1WGKSeXN3iaXGR5s1L72MSS0hZdS6yQaM3ZCYCEUZT0d6awCnovXrNzudzOAZ7pFW+n1WU7tgIg/1n8lv99rgFCzjm8R2qOxeI6j7k3UsS8cUHLsRnj37dr+lQyTHMLGlOS0VBe4EqwfRgq7UQS++zINcwQI05orUuv38mKwR6Eth6BOL4E+1YiAmIS35YX2KawLmeYfnOVWZ9q2l6KKQ9faIVDTdw0C8uX6yYn9ltdiB9sZJJ2Ir/Uxf8q4mk74yRjNc32k+iOg7tBwpqJdvd0ktbdKjKxoNvXKwbZiNQaKw7NuH9ql9d9Kr2gXVYFQIDAQAB";
+        String SIGN_TYPE = "RSA2";
+        AlipayLogger.setNeedEnableLogger(true);
+        alipayClient = new DefaultAlipayClient(URL, APP_ID, APP_PRIVATE_KEY, FORMAT, CHARSET, ALIPAY_PUBLIC_KEY, SIGN_TYPE);
     }
     
     private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
@@ -389,6 +415,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
         }else if(null != cmd.getOrganizationId()){
             users = doorAuthProvider.listDoorAuthByOrganizationId(cmd.getOrganizationId(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize);
+        } else if(null != cmd.getCommunityId() && !StringUtils.isEmpty(cmd.getBuildingName())) {
+            users = doorAuthProvider.listDoorAuthByBuildingName(cmd.getCommunityId(), cmd.getBuildingName(), locator, pageSize);
         }else{
             users = doorAuthProvider.listDoorAuthByIsAuth(cmd.getIsAuth(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize, namespaceId);
         }
@@ -2085,7 +2113,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
                     continue;
                 }
-                
+                //这个时间才是有效的二维码超时时间， dto 里面的时间是为了兼容过去的 app 版本。
             	resp.setQrTimeout(this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_TIMEOUTS, 4*24*60));
                 doLinglingQRKey(user, doorAccess, auth, qrKeys);
             } else if(auth.getDriver().equals(DoorAccessDriverType.HUARUN_ANGUAN.getCode())){
@@ -3607,7 +3635,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			cmd.setAuthType(DoorAuthType.FOREVER.getCode());
 			cmd.setDescription("new user auto created");
 			cmd.setDoorId(doorAccess.getId());
-			cmd.setNamespaceId(identifier.getId());
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 			cmd.setPhone(identifier.getIdentifierToken());
 			cmd.setRightOpen((byte)1);
 			cmd.setRightRemote((byte)1);
@@ -3620,8 +3648,41 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		}
 	}
 	
+	private void joinCompanyAutoAuthLevel(Integer namespaceId, Long orgId, Long userId) {
+	    List<DoorAuthLevel> lvls = doorAuthLevelProvider.findAuthLevels(orgId, DoorAccessOwnerType.ENTERPRISE.getCode());
+	    if(lvls != null && lvls.size() > 0) {
+	        UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(userId);
+	        
+	        for(DoorAuthLevel lv : lvls) {
+	            if(userInfo != null){
+	                CreateDoorAuthCommand cmd = new CreateDoorAuthCommand();
+	                cmd.setApproveUserId(User.SYSTEM_UID);
+	                cmd.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());
+	                cmd.setAuthType(DoorAuthType.FOREVER.getCode());
+	                cmd.setDescription("new user auto created");
+	                cmd.setDoorId(lv.getDoorId());
+	                cmd.setNamespaceId(namespaceId);
+	                if(userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
+	                    cmd.setPhone(userInfo.getPhones().get(0));
+	                }
+	                cmd.setRightOpen((byte)1);
+	                cmd.setRightRemote((byte)1);
+	                cmd.setUserId(userId);
+	                createDoorAuth(cmd);
+	            }
+	        }
+	    }
+	}
+	
 	@Override
 	public void joinCompanyAutoAuth(Integer namespaceId, Long orgId, Long userId) {
+        //检测userId是否合法
+        if(userId == null || userId == 0){
+            return;
+        }
+        
+        joinCompanyAutoAuthLevel(namespaceId, orgId, userId);
+
 		String info = this.configProvider.getValue(namespaceId, AclinkConstant.ACLINK_JOIN_COMPANY_AUTO_AUTH, "");
 		if(info == null || info.isEmpty()) {
 			if(LOGGER.isInfoEnabled()) {
@@ -3676,7 +3737,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 cmd.setAuthType(DoorAuthType.FOREVER.getCode());
                 cmd.setDescription("new user auto created");
                 cmd.setDoorId(doorAccess.getId());
-                cmd.setNamespaceId(userId);
+                cmd.setNamespaceId(namespaceId);
                 if(userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
                     cmd.setPhone(userInfo.getPhones().get(0));
                 }
@@ -3728,79 +3789,143 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, "访客授权");
         excelUtils.writeExcel(propertyNames, titleNames, columnSizes, voList);
     }
-
-    public static class DoorAuthExportVo {
-        private String nickName;
-        private String phone;
-        private String organization;
-        private String goDoor;
-        private String description;
-        private String availableTime;
-        private String approveUserName;
-        private String authTime;
-
-        public String getNickName() {
-            return nickName;
+    
+    public void aliTest(HttpServletRequest r) {
+        
+    }
+    
+    public String aliTest2(HttpServletRequest r) {
+        LOGGER.info("" + r.getParameterMap());
+        LOGGER.info("auth_code=" + r.getParameter("auth_code"));  
+        
+        AlipaySystemOauthTokenRequest request = new AlipaySystemOauthTokenRequest();
+        request.setCode(r.getParameter("auth_code"));
+        request.setGrantType("authorization_code");
+        try {
+            AlipaySystemOauthTokenResponse oauthTokenResponse = alipayClient.execute(request);
+            LOGGER.info("accessToken=" + oauthTokenResponse.getAccessToken() + " userId=" + oauthTokenResponse.getAlipayUserId() + " body=" + oauthTokenResponse.getBody());
+            
+            String doorMAC = "EC:14:CD:C6:9A:EB";
+            String phone = "15889660710";
+            User user = userService.findUserByIndentifier(1000000, phone);
+            
+            DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(doorMAC.toUpperCase());
+            if(doorAccess == null) {
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+            }
+            
+            DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthByDoorIdAndUserId(doorAccess.getId(), user.getId(), (byte)1);
+            if(doorAuth == null) {
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "DoorAuth error");
+            }
+            
+            remoteOpenDoor(doorAuth.getId());
+            
+            return "door " + doorMAC + " open, userId=" + oauthTokenResponse.getAlipayUserId(); 
+        } catch (AlipayApiException e) {
+            //处理异常
+            e.printStackTrace();
         }
 
-        public void setNickName(String nickName) {
-            this.nickName = nickName;
-        }
+        return "failed!";
+    }
+    
+    private void aliTest001(HttpServletRequest r) {
+        LOGGER.info("" + r.getParameterMap());
+        LOGGER.info("app_auth_code=" + r.getParameter("app_auth_code"));
+        AlipayOpenAuthTokenAppRequest request = new AlipayOpenAuthTokenAppRequest();
+        request.setBizContent(String.format("{\"grant_type\":\"authorization_code\",\"code\":\"%s\"}", r.getParameter("app_auth_code")));
+        try {
+            AlipayOpenAuthTokenAppResponse openAuthResponse = alipayClient.execute(request);
+            LOGGER.info("accessToken=" + openAuthResponse.getAppAuthToken() + "refreshToken" + openAuthResponse.getAppRefreshToken());
+            
+            //request.putOtherTextParam("app_auth_token", "201611BB888ae9acd6e44fec9940d09201abfE16");
+            AlipayOpenAuthTokenAppQueryRequest request2 = new AlipayOpenAuthTokenAppQueryRequest();
+            request2.setBizContent("{" +
+            "    \"app_auth_token\":\""+openAuthResponse.getAppAuthToken()+"\"" +
+            "  }");
+            AlipayOpenAuthTokenAppQueryResponse apiListResponse = alipayClient.execute(request2);
+            LOGGER.info("apiListResponse=" + apiListResponse.getBody());
 
-        public String getPhone() {
-            return phone;
-        }
-
-        public void setPhone(String phone) {
-            this.phone = phone;
-        }
-
-        public String getOrganization() {
-            return organization;
-        }
-
-        public void setOrganization(String organization) {
-            this.organization = organization;
-        }
-
-        public String getGoDoor() {
-            return goDoor;
-        }
-
-        public void setGoDoor(String goDoor) {
-            this.goDoor = goDoor;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        public String getAvailableTime() {
-            return availableTime;
-        }
-
-        public void setAvailableTime(String availableTime) {
-            this.availableTime = availableTime;
-        }
-
-        public String getApproveUserName() {
-            return approveUserName;
-        }
-
-        public void setApproveUserName(String approveUserName) {
-            this.approveUserName = approveUserName;
-        }
-
-        public String getAuthTime() {
-            return authTime;
-        }
-
-        public void setAuthTime(String authTime) {
-            this.authTime = authTime;
+            
+        } catch (AlipayApiException e) {
+            //处理异常
+            e.printStackTrace();
         }
     }
+
+    @Override
+    public DoorAuthLevelDTO createDoorAuthLevel(CreateDoorAuthLevelCommand cmd) {
+        DoorAuthLevel obj = ConvertHelper.convert(cmd, DoorAuthLevel.class);
+        DoorAccess da = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        if (da == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "door access not found");
+        }
+        
+        if(cmd.getRightOpen() == null) {
+            cmd.setRightOpen((byte)0);
+        }
+        if(cmd.getRightRemote() == null) {
+            cmd.setRightRemote((byte)0);
+        }
+        if(cmd.getRightVisitor() == null) {
+            cmd.setRightVisitor((byte)0);
+        }
+        
+        DoorAuthLevel obj2 = doorAuthLevelProvider.findAuthLevel(cmd.getLevelId(), cmd.getLevelType(), cmd.getDoorId());
+        if(obj2 != null && 
+                cmd.getRightOpen().equals((byte)0) && 
+                cmd.getRightRemote().equals((byte)0) &&
+                cmd.getRightVisitor().equals((byte)0) ) {
+            doorAuthLevelProvider.deleteDoorAuthLevel(obj2);
+            obj = obj2;
+            cmd.setRightOpen((byte)0);
+            cmd.setRightRemote((byte)0);
+            cmd.setRightVisitor((byte)0);
+        } else if(obj2 != null) {
+            obj = obj2;
+            obj.setRightOpen((byte)1);
+            obj.setRightRemote(cmd.getRightRemote());
+            obj.setRightVisitor(cmd.getRightVisitor());
+            doorAuthLevelProvider.updateDoorAuthLevel(obj);
+        } else {
+            obj.setRightOpen((byte)1);
+            obj.setOwnerId(da.getOwnerId());
+            obj.setOwnerType(da.getOwnerType());
+            obj.setNamespaceId(UserContext.getCurrentNamespaceId());
+            obj.setOperatorId(UserContext.currentUserId());
+            
+            doorAuthLevelProvider.createDoorAuthLevel(obj);    
+        }
+        
+        return ConvertHelper.convert(obj, DoorAuthLevelDTO.class);
+    }
+    
+    @Override
+    public ListDoorAuthLevelResponse listDoorAuthLevel(ListDoorAuthLevelCommand cmd) {
+        //update count if the count is null
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        cmd.setPageSize(count);
+        ListDoorAuthLevelResponse resp = doorAuthLevelProvider.findAuthLevels(cmd);
+        if(resp.getDtos() != null && resp.getDtos().size() > 0) {
+            for(DoorAuthLevelDTO dto : resp.getDtos()) {
+                Organization org = organizationProvider.findOrganizationById(dto.getLevelId());
+                if(org != null) {
+                    dto.setOrgName(org.getName());    
+                } 
+            }      
+        }
+        
+        return resp;
+    }
+    
+    @Override
+    public void deleteDoorAuthLevel(Long id) {
+        DoorAuthLevel lvl = doorAuthLevelProvider.getDoorAuthLevelById(id);
+        if(lvl != null) {
+            lvl.setStatus(DoorAuthStatus.INVALID.getCode());
+            doorAuthLevelProvider.updateDoorAuthLevel(lvl);
+        }
+    }
+    
 }

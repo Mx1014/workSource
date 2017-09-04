@@ -48,12 +48,15 @@ public class SmsServiceImpl implements SmsService {
                 body = body + line;
             }
 
-            // LOGGER.debug("--------------> YZX sms report body: {} <--------------", body);
+            if (LOGGER.isDebugEnabled()) {
+                body = body.replaceAll("\\s+", "").replaceAll("\\n", "");
+                LOGGER.debug("YZX sms report body: {}", body);
+            }
 
             YzxSmsReport report = xmlToBean(body, YzxSmsReport.class);
             String smsId = report.getSmsId();
             if (smsId == null) {
-                LOGGER.error("YZX sms report smsId is null, report = {}", reader);
+                LOGGER.error("YZX sms report smsId is null, report = {}", report);
                 return;
             }
             YzxSmsLog log = yzxSmsLogProvider.findBySmsId(smsId);
@@ -85,7 +88,8 @@ public class SmsServiceImpl implements SmsService {
     public YzxListSmsReportLogResponse yzxListReportLogs(YzxListReportLogCommand cmd) {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<YzxSmsLog> logList = yzxSmsLogProvider.listReportLogs(cmd.getNamespaceId(), cmd.getMobile(), cmd.getStatus(), cmd.getFailure(), locator, cmd.getPageSize());
+        int pageSize = cmd.getPageSize() != null ? cmd.getPageSize() : 20;
+        List<YzxSmsLog> logList = yzxSmsLogProvider.listReportLogs(cmd.getNamespaceId(), cmd.getMobile(), cmd.getStatus(), cmd.getFailure(), locator, pageSize);
         List<YzxSmsLogDTO> dtoList = new ArrayList<>();
         if (logList != null) {
             dtoList = logList.stream().map(this::toYzxReportLogDTO).collect(Collectors.toList());

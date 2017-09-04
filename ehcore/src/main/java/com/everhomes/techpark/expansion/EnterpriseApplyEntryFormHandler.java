@@ -35,7 +35,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
     public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
 
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASEPROMOTION.getCode());
+                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASE_PROMOTION.getCode());
 
         Long requestFormId = null;
         if (null == request) {
@@ -43,7 +43,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
             BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
                     GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
 
-            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
+            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASE_PROMOTION.getCode());
             requestFormId = form.getFormOriginId();
         }else {
             requestFormId = request.getSourceId();
@@ -122,7 +122,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASEPROMOTION.getCode());
+                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASE_PROMOTION.getCode());
 
         GeneralFormDTO dto = null;
         if (null != request) {
@@ -136,7 +136,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
             BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
                     GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
 
-            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
+            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASE_PROMOTION.getCode());
             List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 
             fieldDTOs.addAll(temp);
@@ -146,7 +146,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
             BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
                     GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
 
-            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
+            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASE_PROMOTION.getCode());
 
             dto = ConvertHelper.convert(form, GeneralFormDTO.class);
             List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);

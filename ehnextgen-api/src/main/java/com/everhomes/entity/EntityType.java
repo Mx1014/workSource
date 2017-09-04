@@ -58,12 +58,20 @@ public enum EntityType {
     AUTHORIZATION_RELATION(EhAuthorizationRelations.class.getSimpleName()),
     ZUOLIN_ADMIN("EhZuolinAdmins"),
     ALL("EhAll"),
-    LEASEPROMOTION(EhLeasePromotions.class.getSimpleName()),
+    LEASE_PROMOTION(EhLeasePromotions.class.getSimpleName()),
     WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
+    PORTAL_ITEM(EhPortalItems.class.getSimpleName()),
+    PORTAL_ITEM_CATEGORY(EhPortalItemCategories.class.getSimpleName()),
+    PORTAL_LAYOUT(EhPortalLayouts.class.getSimpleName()),
+    PORTAL_ITEM_GROUP(EhPortalItemGroups.class.getSimpleName()),
+    SERVICE_MODULE_APP(EhServiceModuleApps.class.getSimpleName()),
+    SERVICE_ALLIANCE(EhServiceAlliances.class.getSimpleName()),
+    BIZ("EhBizs"),
     ORGANIZATION_FILE("EhOrganizationFiles"),
     COMMUNITY_APPROVE(EhCommunityApprove.class.getSimpleName()),
 	TALENT_REQUEST(EhTalentRequests.class.getSimpleName()),
-    CHILD_PROJECT("child_project");
+    CHILD_PROJECT("child_project"),
+    LEASE_BUILDING(EhLeaseBuildings.class.getSimpleName());
 
     private String code;
     

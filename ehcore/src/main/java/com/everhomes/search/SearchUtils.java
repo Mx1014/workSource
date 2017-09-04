@@ -67,6 +67,8 @@ public class SearchUtils {
 
     public static final String WAREHOUSE_REQUEST_MATERIAL= "warehouseRequestMaterial";
 
+    public static final String UNIONGROUP_DETAILS= "uniongroupDetails";
+
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";

@@ -48,6 +48,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.mysql.jdbc.log.Log;
 import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,11 +186,14 @@ public class FamilyProviderImpl implements FamilyProvider {
 								family.setCreatorUid(newCreator.getMemberId());
 							}
 						}
-						//删除正常家庭成员，成员数-1
-	                    if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()){
-                            long memberCount = family.getMemberCount() - 1;
-                            family.setMemberCount(memberCount >= 0 ? memberCount : 0);
-	                    }
+
+						//上面的this.groupProvider.deleteGroupMember(m);已经减过人数啦，这里不能再减啦 [大哭]   edit by yanjun 20170808
+//						//删除正常家庭成员，成员数-1
+//	                    if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()){
+//                            long memberCount = family.getMemberCount() - 1;
+//                            family.setMemberCount(memberCount >= 0 ? memberCount : 0);
+//	                    }
+
 						this.groupProvider.updateGroup(family);
 					}
 				}
@@ -279,7 +283,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 				family.setCommunityType(community.getCommunityType());
 				family.setDefaultForumId(community.getDefaultForumId());
 				family.setFeedbackForumId(community.getFeedbackForumId());
-				
+				LOGGER.debug("community is :" + community.getName());
 			}
 			if(group.getCreatorUid().longValue() == userId.longValue())
 				family.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
@@ -314,6 +318,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 	// @Cacheable(value="FamiliesOfUser", key="#userId", unless="#result.size() == 0")
 	@Override
 	public List<FamilyDTO> getUserFamiliesByUserId(long userId) {
+		LOGGER.debug("userId :" + userId);
 
 		List<UserGroup> list = this.userProvider.listUserGroups(userId, GroupDiscriminator.FAMILY.getCode());
 
@@ -325,6 +330,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 			GroupMember groupMember = this.groupProvider.findGroupMemberByMemberInfo(u.getGroupId(), EntityType.USER.getCode(), userId);
 			if(groupMember != null){
 				familyIds.add(u.getGroupId());
+				LOGGER.debug("groupId is :" + u.getGroupId());
 			}
 		}
 		LOGGER.info("Get user families by userId,familyIds size=" + familyIds.size());
