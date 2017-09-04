@@ -2423,7 +2423,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	private void processPunchListCount(List<PunchDayLog> list,
 			PunchStatistic statistic) {
-        statistic.setWorkDayCount(0.0);
+        statistic.setWorkDayCount(1);
 		statistic.setWorkCount(0.0);
 		statistic.setUnpunchCount(0.0);
 		statistic.setSickCount(0.0);
