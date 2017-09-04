@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.parking.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sms.SmsProvider;
@@ -29,18 +30,9 @@ import com.everhomes.flow.FlowNode;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.parking.ParkingAttachmentDTO;
-import com.everhomes.rest.parking.ParkingAttachmentType;
-import com.everhomes.rest.parking.ParkingCardRequestDTO;
-import com.everhomes.rest.parking.ParkingCardRequestStatus;
-import com.everhomes.rest.parking.ParkingErrorCode;
-import com.everhomes.rest.parking.ParkingFlowConstant;
-import com.everhomes.rest.parking.ParkingRequestFlowType;
-import com.everhomes.rest.parking.ParkingSupportRequestConfigStatus;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
@@ -232,7 +224,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId, 
 						ParkingCardRequestStatus.SUCCEED.getCode(), null);
 				
-				if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingSupportRequestConfigStatus.SUPPORT.getCode()) {
+				if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
 					Integer totalCount = parkingFlow.getMaxIssueNum();
 					Integer surplusCount = totalCount - issuedCount;
 					if(surplusCount <= 0) {
@@ -261,7 +253,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId, 
 						ParkingCardRequestStatus.SUCCEED.getCode(), null);
 				
-				if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingSupportRequestConfigStatus.SUPPORT.getCode()) {
+				if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
 					Integer totalCount = parkingFlow.getMaxIssueNum();
 					Integer surplusCount = totalCount - issuedCount;
 					if(surplusCount <= 0) {

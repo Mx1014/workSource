@@ -29,6 +29,7 @@ import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
 
+import com.everhomes.parking.jinyi.JinyiClearance;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.parking.handler.JinyiParkingVendorHandler;
-import com.everhomes.parking.jinyi.JinyiClearance;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.parking.jinyi.JinyiJsonEntity;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -618,11 +619,14 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         ParkingActualClearanceLogDTO dto = new ParkingActualClearanceLogDTO();
-        LocalDateTime entryTime = LocalDateTime.parse(jinyiClearance.getEntrytime(), dtf);
-        LocalDateTime exitTime = LocalDateTime.parse(jinyiClearance.getExittime(), dtf);
-
-        dto.setEntryTime(Timestamp.valueOf(entryTime));
-        dto.setExitTime(Timestamp.valueOf(exitTime));
+        if (null != jinyiClearance.getEntrytime()) {
+            LocalDateTime entryTime = LocalDateTime.parse(jinyiClearance.getEntrytime(), dtf);
+            dto.setEntryTime(Timestamp.valueOf(entryTime));
+        }
+        if (null != jinyiClearance.getExittime()) {
+            LocalDateTime exitTime = LocalDateTime.parse(jinyiClearance.getExittime(), dtf);
+            dto.setExitTime(Timestamp.valueOf(exitTime));
+        }
 
         return dto;
     }

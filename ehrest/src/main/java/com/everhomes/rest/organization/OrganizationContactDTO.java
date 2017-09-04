@@ -194,5 +194,4 @@ public class OrganizationContactDTO {
         return StringHelper.toJsonString(this);
     }
 
-
 }

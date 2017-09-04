@@ -154,6 +154,8 @@ public class FamilyServiceImpl implements FamilyService {
     	if(null == u){
     		u = UserContext.current().getUser();
     	}
+
+
     	
     	final User user = u;
         long uid = user.getId();
@@ -179,7 +181,13 @@ public class FamilyServiceImpl implements FamilyService {
                 family = this.dbProvider.execute((TransactionStatus status) -> {
                     Family f = new Family();
                     f.setName(address.getAddress());
-                    f.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+
+                    //生成的域空间原来是使用Namespace.DEFAULT_NAMESPACE，但是这查询的时候根据当前域空间查询查不出来，此处使用当前域空间  edit by yanjun 20170731
+                    Integer namespaceId = UserContext.getCurrentNamespaceId();
+                    if(namespaceId == null){
+                        namespaceId = Namespace.DEFAULT_NAMESPACE;
+                    }
+                    f.setNamespaceId(namespaceId);
                     f.setDiscriminator(GroupDiscriminator.FAMILY.getCode());
                     f.setAddressId(address.getId());
                     f.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
@@ -402,7 +410,7 @@ public class FamilyServiceImpl implements FamilyService {
         }
     }
 
-    private void sendFamilyNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message) {
+    private void sendFamilyNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message, Map<String, String> meta) {
         if(message == null || message.isEmpty()) {
             return;
         }
@@ -418,6 +426,10 @@ public class FamilyServiceImpl implements FamilyService {
             messageDto.setBodyType(MessageBodyType.TEXT.getCode());
             messageDto.setBody(message);
             messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+
+            if(meta != null){
+                messageDto.setMeta(meta);
+            }
 
             includeList.stream().distinct().forEach(targetId -> {
                 messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
@@ -856,7 +868,7 @@ public class FamilyServiceImpl implements FamilyService {
 
     private void addGroupMemberLog(GroupMember member, Group group) {
         GroupMemberLog memberLog = ConvertHelper.convert(member, GroupMemberLog.class);
-        memberLog.setNamespaceId(UserContext.getCurrentNamespaceId());
+        memberLog.setNamespaceId(group.getNamespaceId());
         memberLog.setMemberStatus(member.getMemberStatus());
         memberLog.setOperatorUid(UserContext.currentUserId());
         memberLog.setApproveTime(DateUtils.currentTimestamp());
@@ -1075,6 +1087,11 @@ public class FamilyServiceImpl implements FamilyService {
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_APPROVE_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+
+            //给客户端发一条通知
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.FAMILY_AGREE_TO_JOIN.getCode());
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, meta);
             
             //send notification to operator
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_MEMBER_APPROVE_FOR_OPERATOR;
@@ -1106,7 +1123,14 @@ public class FamilyServiceImpl implements FamilyService {
             String scope = FamilyNotificationTemplateCode.SCOPE;
             int code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_APPROVE_FOR_APPLICANT;
             String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+            //给用户发一条
             sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+
+            //给客户端发一条通知
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.FAMILY_AGREE_TO_JOIN.getCode());
+            sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant, meta);
             
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_ADMIN_APPROVE_FOR_OTHER;
@@ -2006,7 +2030,14 @@ public class FamilyServiceImpl implements FamilyService {
         List<Long> includeList = new ArrayList<Long>();
         includeList.add(userId);
         // sendFamilyNotification(groupId, includeList, null, message, null, null);
-        sendFamilyNotificationUseSystemUser(includeList, null, message);
+        sendFamilyNotificationUseSystemUser(includeList, null, message, null);
+    }
+
+    private void sendFamilyNotificationToIncludeUser(Long groupId, Long userId, String message, Map<String, String> meta) {
+        List<Long> includeList = new ArrayList<Long>();
+        includeList.add(userId);
+        // sendFamilyNotification(groupId, includeList, null, message, null, null);
+        sendFamilyNotificationUseSystemUser(includeList, null, message, meta);
     }
     
     private List<Long> getFamilyIncludeList(Long groupId, Long operatorId, Long targetId) {

@@ -1,45 +1,37 @@
 package com.everhomes.pmtask;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.flow.*;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowEntitySel;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.parking.ParkingErrorCode;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class PmtaskFlowModuleListener implements FlowModuleListener {
-	
-    private static final Logger LOGGER = LoggerFactory.getLogger(PmtaskFlowModuleListener.class);
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(PmtaskFlowModuleListener.class);
 	@Autowired
 	private FlowService flowService;
 	@Autowired
@@ -51,7 +43,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
 	@Autowired
-    private FlowUserSelectionProvider flowUserSelectionProvider;
+	private FlowUserSelectionProvider flowUserSelectionProvider;
 	@Autowired
 	private SmsProvider smsProvider;
 	@Autowired
@@ -60,7 +52,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private UserProvider userProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
-	
+
 	@Override
 	public FlowModuleInfo initModule() {
 		FlowModuleInfo module = new FlowModuleInfo();
@@ -73,12 +65,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCaseStart(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onFlowCaseAbsorted(FlowCaseState ctx) {
-		
+
 	}
 
 	//状态改变之后
@@ -146,10 +138,16 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 			}else if ("PROCESSING".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
 				pmTaskProvider.updateTask(task);
 			}else if ("COMPLETED".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
+			}else if ("HANDOVER".equals(nodeType)) {
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				pmTaskProvider.updateTask(task);
+				//通知第三方 config表中配置api请求地址
+				pmTaskCommonService.handoverTaskToTrd(task);
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 
@@ -159,7 +157,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		//elasticsearch更新
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
-		
+
 	}
 
 	@Override
@@ -179,7 +177,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-		
+
 		GetTaskDetailCommand cmd = new GetTaskDetailCommand();
 		cmd.setId(flowCase.getReferId());
 		cmd.setOwnerId(flowCase.getProjectId());
@@ -199,10 +197,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		}
 
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));
-		
+
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey("服务内容");
@@ -232,13 +230,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			e.setValue(dto.getCategoryName());
 			entities.add(e);
 		}
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("发起人");
 		e.setValue(dto.getRequestorName());
 		entities.add(e);
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("联系电话");
@@ -286,31 +284,69 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		LOGGER.debug("update pmtask request, stepType={}, nodeType={}", stepType, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 			if ("ASSIGNING".equals(nodeType)) {
-					FlowGraphEvent evt = ctx.getCurrentEvent();
-					if(evt != null) {
-						for(FlowEntitySel es : evt.getEntitySel()) {
-							//update by janson
-							if(!FlowEntityType.FLOW_SELECTION.getCode().equals(es.getFlowEntityType())) {
-								continue;
-							}
-							PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-							FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(es.getEntityId());
-							Long targetId = sel.getSourceIdA();
-
-							PmTaskLog pmTaskLog = new PmTaskLog();
-							pmTaskLog.setNamespaceId(task.getNamespaceId());
-							pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
-							pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
-							pmTaskLog.setOwnerId(task.getOwnerId());
-							pmTaskLog.setOwnerType(task.getOwnerType());
-							pmTaskLog.setStatus(task.getStatus());
-							pmTaskLog.setTargetId(targetId);
-							pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
-							pmTaskLog.setTaskId(task.getId());
-							pmTaskProvider.createTaskLog(pmTaskLog);							
+				FlowGraphEvent evt = ctx.getCurrentEvent();
+				if(evt != null) {
+					for(FlowEntitySel es : evt.getEntitySel()) {
+						//update by janson
+						if(!FlowEntityType.FLOW_SELECTION.getCode().equals(es.getFlowEntityType())) {
+							continue;
 						}
+						PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+						FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(es.getEntityId());
+						Long targetId = sel.getSourceIdA();
 
+						PmTaskLog pmTaskLog = new PmTaskLog();
+						pmTaskLog.setNamespaceId(task.getNamespaceId());
+						pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
+						pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
+						pmTaskLog.setOwnerId(task.getOwnerId());
+						pmTaskLog.setOwnerType(task.getOwnerType());
+						pmTaskLog.setStatus(task.getStatus());
+						pmTaskLog.setTargetId(targetId);
+						pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
+						pmTaskLog.setTaskId(task.getId());
+						pmTaskProvider.createTaskLog(pmTaskLog);
 					}
+
+				}
+			}
+		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
+			PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+			//TODO:为科兴与一碑对接
+			if(task.getNamespaceId() == 999983 &&
+					task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+				CancelTaskCommand command = new CancelTaskCommand();
+				command.setId(task.getId());
+				command.setOwnerId(task.getOwnerId());
+				command.setOwnerType(task.getOwnerType());
+				handler.cancelTask(command);
+
+				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+				stepDTO.setFlowCaseId(flowCase.getId());
+				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+				stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+				flowService.processAutoStep(stepDTO);
+				ctx.setContinueStep(false);
+
+			}else
+			if ("ASSIGNING".equals(nodeType)) {
+				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+				stepDTO.setFlowCaseId(flowCase.getId());
+				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+				stepDTO.setAutoStepType(FlowStepType.END_STEP.getCode());
+                FlowSubject subject = ctx.getCurrentEvent().getSubject();
+                if (subject != null) {
+                    stepDTO.setSubjectId(subject.getId());
+                }
+				flowService.processAutoStep(stepDTO);
+				ctx.setContinueStep(false);
+
+				
+//				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+				pmTaskProvider.updateTask(task);
+				pmTaskSearch.feedDoc(task);
 			}
 		}
 
@@ -325,10 +361,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			handler.pushToQueque(task.getId() + "," + targetId + "," + organizationId);
 		}
 	}
-	
+
 	@Override
 	public void onFlowCreating(Flow flow) {
-		
+
 
 	}
 
@@ -344,7 +380,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
-			List<Tuple<String, Object>> variables) {
+										List<Tuple<String, Object>> variables) {
 		FlowCase flowCase = ctx.getFlowCase();
 		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
 		Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());

@@ -98,4 +98,8 @@ public interface BusinessService {
     SearchContentsBySceneReponse searchShops(SearchContentsBySceneCommand cmd);
 
     void testTransaction();
+
+	UserAddressDTO getUserAddress(GetUserDefaultAddressCommand cmd);
+
+	List<OrganizationDTO> getUserOrganizations(GetUserDefaultAddressCommand cmd);
 }

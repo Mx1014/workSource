@@ -2,6 +2,7 @@ package com.everhomes.yellowPage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,12 +10,27 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSON;
+import com.everhomes.flow.FlowCaseDetail;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.common.EntityType;
+import com.everhomes.rest.energy.util.EnumType;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.quality.OwnerType;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.yellowPage.*;
+import com.everhomes.user.*;
+import com.everhomes.util.DateHelper;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -50,31 +66,14 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.payment.util.DownloadUtil;
-import com.everhomes.rest.flow.FlowCaseDetailDTO;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowCaseFileDTO;
-import com.everhomes.rest.flow.FlowCaseFileValue;
-import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.user.FieldContentType;
 import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.wifi.WifiOwnerType;
-import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
-import com.everhomes.rest.yellowPage.JumpType;
-import com.everhomes.rest.yellowPage.RequestInfoDTO;
-import com.everhomes.rest.yellowPage.SearchOneselfRequestInfoCommand;
-import com.everhomes.rest.yellowPage.SearchOrgRequestInfoCommand;
-import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
-import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
-import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.CustomRequestConstants;
-import com.everhomes.user.UserActivityService;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -99,13 +98,22 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	
 	@Autowired
 	private FlowService flowService;
+
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
 	
 	@Autowired
 	private GeneralApprovalValProvider generalApprovalValProvider;
 	
 	@Autowired
 	private GeneralFormProvider generalFormProvider;
-	
+
+    @Autowired
+    protected GeneralApprovalProvider generalApprovalProvider;
+
+    @Autowired
+    private UserProvider userProvider;
+
 	private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	
 	@Override
@@ -124,8 +132,96 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         syncFromSettleRequestInfoSearcherDb(pageSize);
         syncFromServiceAllianceApartmentRequestsDb(pageSize);
         syncFromServiceAllianceInvestRequestsDb(pageSize);
+        syncFromServiceAllianceFlowCasesDb(pageSize);//同步通过工作流审批的申请记录。
 
 	}
+
+    private void syncFromServiceAllianceFlowCasesDb(int pageSize) {
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        SearchFlowCaseCommand cmd = new SearchFlowCaseCommand();
+        cmd.setFlowCaseSearchType(FlowCaseSearchType.APPLIER.getCode());
+        cmd.setModuleId(ServiceAllianceFlowModuleListener.MODULE_ID);
+        for(;;) {
+            List<FlowCaseDetail> details = flowCaseProvider.listFlowCasesByModuleId(locator, pageSize, cmd);
+
+            if(details.size() > 0) {
+                this.bulkUpdateServiceAllianceFlowCaseRequests(details);
+            }
+
+            if(locator.getAnchor() == null) {
+                break;
+            }
+        }
+
+        LOGGER.info("sync for service alliance flowcase request ok");
+
+    }
+
+    protected PostApprovalFormItem getFormFieldDTO(String string, List<PostApprovalFormItem> values) {
+        for (PostApprovalFormItem val : values) {
+            if (val.getFieldName().equals(string))
+                return val;
+        }
+        return null;
+    }
+
+    private void bulkUpdateServiceAllianceFlowCaseRequests(List<FlowCaseDetail> details){
+        for (FlowCaseDetail flowCase : details) {
+            // 服务联盟的审批拼接工作流 content字符串
+            ServiceAllianceRequestInfo request = new ServiceAllianceRequestInfo();
+            List<GeneralApprovalVal> lists = generalApprovalValProvider.queryGeneralApprovalValsByFlowCaseId(flowCase.getId());
+            List<PostApprovalFormItem> values = lists.stream().map(r -> {
+                PostApprovalFormItem value = new PostApprovalFormItem();
+//                value.setFieldDisplayName(r.get);
+                value.setFieldName(r.getFieldName());
+                value.setFieldType(r.getFieldType());
+                value.setFieldValue(r.getFieldStr3());
+                return value;
+            }).collect(Collectors.toList());
+            PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
+            Long yellowPageId = 0l;
+            if(null != sourceVal){
+                yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
+                ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
+                ServiceAllianceCategories  parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
+                request.setServiceAllianceId(yellowPageId);
+                request.setType(yellowPage.getParentId());
+
+            }
+            //服务联盟加一个申请
+            PostApprovalFormItem organizationVal = getFormFieldDTO(GeneralFormDataSourceType.ORGANIZATION_ID.getCode(),values);
+
+            User user = this.userProvider.findUserById(flowCase.getApplyUserId());
+            UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+            request.setJumpType(2L);
+            request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            if(lists!=null && lists.size()>0) {
+                request.setCreateTime(lists.get(0).getCreateTime());
+            }
+            request.setCreatorName(user.getNickName());
+            if(organizationVal!= null && organizationVal.getFieldValue() != null){
+                PostApprovalFormTextValue organizationvalue = JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class);
+                if(organizationvalue != null) {
+                    request.setCreatorOrganizationId(Long.valueOf(organizationvalue.getText()));
+                }
+            }
+            request.setCreatorMobile(identifier.getIdentifierToken());
+            if (OwnerType.COMMUNITY.getCode().equals(flowCase.getProjectType())){
+                request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+                List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
+                request.setOwnerId(communityList.get(0).getId());
+            }else{
+                request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+                request.setOwnerId(request.getCreatorOrganizationId());
+            }
+            request.setFlowCaseId(flowCase.getId());
+            request.setId(flowCase.getId());
+            request.setCreatorUid(user.getId());
+            request.setTemplateType("flowCase");
+            feedDoc(request);
+        }
+    }
 
     private void syncFromServiceAllianceInvestRequestsDb(int pageSize) {
 
@@ -342,16 +438,18 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
                     .field("creatorName", 1.2f)
+                    .field("serviceOrganization", 1.1f)
                     .field("creatorOrganization", 1.0f);
             
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("creatorName").addHighlightedField("creatorOrganization");
+            builder.addHighlightedField("creatorName").addHighlightedField("serviceOrganization").addHighlightedField("creatorOrganization");
             
         }
         
-        FilterBuilder fb = FilterBuilders.termFilter("ownerType", WifiOwnerType.fromCode(cmd.getOwnerType()).getCode());
+        FilterBuilder fb = FilterBuilders.termFilter("ownerType", cmd.getOwnerType());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+
         if(cmd.getCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("type", cmd.getCategoryId()));
         
@@ -817,8 +915,16 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             b.field("jumpType", request.getJumpType());
             b.field("templateType", request.getTemplateType());
             b.field("type", request.getType());
-            b.field("ownerType", request.getOwnerType());
-            b.field("ownerId", request.getOwnerId());
+            if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(request.getOwnerType())){
+                b.field("ownerType", EntityType.ORGANIZATIONS.getCode());
+                List <Organization> organizations = organizationProvider.findOrganizationByCommunityId(request.getOwnerId());
+                if(organizations!=null && organizations.size()>0) {
+                    b.field("ownerId", organizations.get(0).getId());
+                }
+            }else{
+                b.field("ownerType", request.getOwnerType());
+                b.field("ownerId", request.getOwnerId());
+            }
             b.field("creatorName", request.getCreatorName());
             b.field("creatorOrganizationId", request.getCreatorOrganizationId());
             b.field("creatorMobile", request.getCreatorMobile());
@@ -829,7 +935,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             try {
 				Date date=format.parse(d);
 				b.field("createDate", date.getTime());
-			} catch (ParseException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
             

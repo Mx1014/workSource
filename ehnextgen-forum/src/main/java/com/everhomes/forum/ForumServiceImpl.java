@@ -51,7 +51,6 @@ import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
 import com.everhomes.rest.common.ActivityDetailActionData;
-import com.everhomes.rest.common.PortalType;
 import com.everhomes.rest.common.PostDetailActionData;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
@@ -284,7 +283,8 @@ public class ForumServiceImpl implements ForumService {
         populatePost(creatorUid, post, communityId, false);
 
         //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609
-        if(PostStatus.fromCode(post.getStatus()) == PostStatus.ACTIVE) {
+        //客户端传来的status可能为空，edit by yanjun
+        if(PostStatus.fromCode(post.getStatus()) == PostStatus.ACTIVE || PostStatus.fromCode(post.getStatus()) == null) {
             try {
                 postSearcher.feedDoc(post);
 
@@ -814,7 +814,7 @@ public class ForumServiceImpl implements ForumService {
                 if (embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
                 	Activity activity = activityProivider.findActivityById(post.getEmbeddedId());
                 	if (activity != null) {
-                		List<ActivityRoster> activityRosters = activityProivider.listRosters(activity.getId());
+                		List<ActivityRoster> activityRosters = activityProivider.listRosters(activity.getId(), ActivityRosterStatus.NORMAL);
                 		for( int i=0; i< activityRosters.size(); i++){
                 			//如果有退款，先退款再取消订单
                 			ActivityRoster tempRoster = activityRosters.get(i);
@@ -904,7 +904,7 @@ public class ForumServiceImpl implements ForumService {
     	if (activity == null) {
 			return ;
 		}
-    	List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId);
+    	List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId, ActivityRosterStatus.NORMAL);
     	String scope = ActivityNotificationTemplateCode.SCOPE;
 		int code = ActivityNotificationTemplateCode.CREATOR_DELETE_ACTIVITY;
 		Map<String, Object> map = new HashMap<>();
@@ -3708,9 +3708,9 @@ public class ForumServiceImpl implements ForumService {
                         if(activity != null && activity.getWechatSignup() != null){
                             wechatSignup = activity.getWechatSignup();
                         }
-                        post.setShareUrl(homeUrl.replace("http://", "https://") + relativeUrl + "?ns=" + post.getNamespaceId()+"&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
+                        post.setShareUrl(homeUrl + relativeUrl + "?ns=" + post.getNamespaceId()+"&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
                 	} else {
-                		post.setShareUrl(homeUrl.replace("http://", "https://") + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                		post.setShareUrl(homeUrl + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
                 	}
                 }
             } catch(Exception e) {
@@ -5566,8 +5566,20 @@ public class ForumServiceImpl implements ForumService {
 	private SearchContentsBySceneReponse analyzeSearchResponse(SearchResponse rsp, int pageSize, Long anchor, String searchContentType) {
     	SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
     	
-    	SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(UserContext.getCurrentNamespaceId(), searchContentType);
     	List<ContentBriefDTO> dtos  = new ArrayList<ContentBriefDTO>();
+
+        SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(UserContext.getCurrentNamespaceId(), searchContentType);
+        //找不到就找0域空间的
+        if(searchType == null){
+            searchType = userActivityProvider.findByContentAndNamespaceId(0, searchContentType);
+        }
+
+        //找不到直接返回，没有searchType客户端会报错的。 add by yanjun 20170816
+        if(searchType == null){
+            response.setDtos(dtos);
+            return response;
+        }
+
     	SearchHit[] docs = rsp.getHits().getHits();
     	
         for (SearchHit sd : docs) {

@@ -28,6 +28,7 @@ import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.*;
 import com.everhomes.organization.*;
+import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -36,6 +37,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.admin.*;
@@ -53,6 +55,8 @@ import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.servicehotline.ServiceConfiguration;
+import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
 import com.everhomes.user.*;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.*;
@@ -159,6 +163,9 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Autowired
     private GroupMemberLogProvider groupMemberLogProvider;
+
+    @Autowired
+    private ServiceConfigurationsProvider serviceConfigurationsProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -585,7 +592,7 @@ public class CommunityServiceImpl implements CommunityService {
         Long nextPageAnchor = null;
         if(buildings.size() > pageSize) {
         	buildings.remove(buildings.size() - 1);
-            nextPageAnchor = buildings.get(buildings.size() - 1).getId();
+            nextPageAnchor = buildings.get(buildings.size() - 1).getDefaultOrder();
         }
 
         List<BuildingDTO> dtoList = buildings.stream().map((r) -> {
@@ -596,8 +603,16 @@ public class CommunityServiceImpl implements CommunityService {
 
         	return dto;
         }).collect(Collectors.toList());
-        
-        
+        //增加公共区域
+        if (UserContext.getCurrentNamespaceId()==999983){
+            //if (cmd.getNamespaceId()==999983) {
+            BuildingDTO buildingDTO = new BuildingDTO();
+            buildingDTO.setName(EbeiBuildingType.publicArea);
+            buildingDTO.setBuildingName(EbeiBuildingType.publicArea);
+            buildingDTO.setId(0l);
+            dtoList.add(buildingDTO);
+        }
+
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
 	}
 
@@ -1386,7 +1401,7 @@ public class CommunityServiceImpl implements CommunityService {
             if (null != locator.getAnchor()) {
                 query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
             }
-            query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
+            query.addOrderBy(Tables.EH_GROUP_MEMBERS.ID.desc());
             return query;
         });
         memberDTOList = groupMembers.stream().map(this::toGroupMemberDTO).collect(Collectors.toList());
@@ -1920,7 +1935,7 @@ public class CommunityServiceImpl implements CommunityService {
 				List<OrganizationMember> ms = new ArrayList<>();
 				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
 				for (OrganizationMember member : members) {
-					if (member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode()) && member.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
+					if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
 						dto.setOrganizationMemberName(member.getContactName());
 						ms.add(member);
 						dto.setIsAuth(AuthFlag.YES.getCode());
@@ -1977,14 +1992,16 @@ public class CommunityServiceImpl implements CommunityService {
 			Row tempRow = sheet.createRow(i + 1);
 			CommunityUserDto dto = dtos.get(i);
 			List<OrganizationDetailDTO> organizations = dto.getOrganizations();
-			StringBuilder enterprises = new StringBuilder();
 
-			for (int k = 0,l = organizations.size(); k < l; k++) {
-				if (k == l-1)
-					enterprises.append(organizations.get(k).getDisplayName());
-				else
-					enterprises.append(organizations.get(k).getDisplayName()).append(",");
-			}
+			StringBuilder enterprises = new StringBuilder();
+            if (organizations != null) {
+                for (int k = 0,l = organizations.size(); k < l; k++) {
+                    if (k == l-1)
+                        enterprises.append(organizations.get(k).getDisplayName());
+                    else
+                        enterprises.append(organizations.get(k).getDisplayName()).append(",");
+                }
+            }
 
 			tempRow.createCell(0).setCellValue(dto.getUserName());
 			tempRow.createCell(1).setCellValue(UserGender.fromCode(dto.getGender()).getText());
@@ -2716,13 +2733,15 @@ public class CommunityServiceImpl implements CommunityService {
         List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
         List<OrganizationCommunityRequest> orgs = this.organizationProvider.listOrganizationCommunityRequests(communityIds);
         if (null == orgs || orgs.size() == 0) {
-            return response;
+			LOGGER.debug("orgs is null");
+			return response;
         }
 
 		List<Long> orgIds = new ArrayList<>();
 		for(OrganizationCommunityRequest org : orgs) {
 			orgIds.add(org.getMemberId());
 		}
+		LOGGER.debug("orgIds is：" + orgIds);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2740,6 +2759,7 @@ public class CommunityServiceImpl implements CommunityService {
                             if (list != null && list.size() > 0) {
                                 list = list.stream()
                                         .filter(member -> OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.ENTERPRISE)
+                                        .filter(member -> OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER)
                                         // .limit(1)
                                         .map(member -> {
                                             member.setOperatorUid(r.getOperatorUid());
@@ -2761,6 +2781,8 @@ public class CommunityServiceImpl implements CommunityService {
         } else {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(
                     cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
+			LOGGER.debug("wait approve organizationMembers cmd:" + cmd);
+			LOGGER.debug("wait approve organizationMembers size " + organizationMembers.size());
         }
 
 		if(organizationMembers == null || organizationMembers.size() == 0) {
@@ -3312,4 +3334,51 @@ public class CommunityServiceImpl implements CommunityService {
 			return null;
 		});
 	}
+
+    @Override
+    public CommunityAuthPopupConfigDTO getCommunityAuthPopupConfig(GetCommunityAuthPopupConfigCommand cmd) {
+        Integer namespaceId = cmd.getNamespaceId();
+        if (namespaceId == null) {
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
+        ServiceConfiguration conf = serviceConfigurationsProvider.getServiceConfiguration(
+                namespaceId, EntityType.NAMESPACE.getCode(), namespaceId.longValue(), ServiceConfiguration.COMMUNITY_AUTH_POPUP);
+
+        if (conf == null) {
+            conf = new ServiceConfiguration();
+            conf.setNamespaceId(namespaceId);
+            conf.setValue(String.valueOf(TrueOrFalseFlag.TRUE.getCode()));
+            conf.setOwnerType(EntityType.NAMESPACE.getCode());
+            conf.setOwnerId(namespaceId.longValue());
+            conf.setName(ServiceConfiguration.COMMUNITY_AUTH_POPUP);
+            serviceConfigurationsProvider.createServiceConfiguration(conf);
+        }
+        return new CommunityAuthPopupConfigDTO(Byte.valueOf(conf.getValue()));
+    }
+
+    @Override
+    public CommunityAuthPopupConfigDTO updateCommunityAuthPopupConfig(UpdateCommunityAuthPopupConfigCommand cmd) {
+        Integer namespaceId = cmd.getNamespaceId();
+        if (namespaceId == null) {
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
+        ServiceConfiguration conf = serviceConfigurationsProvider.getServiceConfiguration(
+                namespaceId, EntityType.NAMESPACE.getCode(), namespaceId.longValue(), ServiceConfiguration.COMMUNITY_AUTH_POPUP);
+
+        TrueOrFalseFlag status = TrueOrFalseFlag.fromCode(cmd.getStatus());
+        String value = String.valueOf(status != null ? status.getCode() : TrueOrFalseFlag.TRUE.getCode());
+        if (conf == null) {
+            conf = new ServiceConfiguration();
+            conf.setNamespaceId(namespaceId);
+            conf.setValue(value);
+            conf.setOwnerType(EntityType.NAMESPACE.getCode());
+            conf.setOwnerId(namespaceId.longValue());
+            conf.setName(ServiceConfiguration.COMMUNITY_AUTH_POPUP);
+            serviceConfigurationsProvider.createServiceConfiguration(conf);
+        } else {
+            conf.setValue(value);
+            serviceConfigurationsProvider.updateServiceConfiguration(conf);
+        }
+        return new CommunityAuthPopupConfigDTO(Byte.valueOf(conf.getValue()));
+    }
 }

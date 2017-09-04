@@ -5,6 +5,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategory;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.db.QueryBuilder;
 import com.everhomes.entity.EntityType;
@@ -188,6 +189,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public void createRole(CreateRoleCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
 		User user = UserContext.current().getUser();
 		//创建角色
 		Role role = new Role();
@@ -254,7 +256,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public void updateRolePrivileges(UpdateRolePrivilegesCommand cmd) {
-
 		checkRole(cmd.getRoleId());
 
 		User user = UserContext.current().getUser();
@@ -270,21 +271,37 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			deleteAcls(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.ROLE.getCode(), cmd.getRoleId());
 
 			//重新添加角色和权限的关系
-			List<Long> privilegeIds = cmd.getPrivilegeIds();
-			if(null != privilegeIds && 0 != privilegeIds.size()){
-				Acl acl = new Acl();
-				acl.setGrantType((byte) 1);
-				acl.setOwnerType(cmd.getOwnerType());
-				acl.setOwnerId(cmd.getOwnerId());
-				acl.setOrderSeq(0);
-				acl.setRoleType(EntityType.ROLE.getCode());
-				acl.setRoleId(cmd.getRoleId());
-				acl.setCreatorUid(user.getId());
-				acl.setCreateTime(time);
-				for (Long privilegeId : privilegeIds) {
-					acl.setPrivilegeId(privilegeId);
-					aclProvider.createAcl(acl);
+			Acl acl = new Acl();
+			acl.setGrantType((byte) 1);
+			acl.setOwnerType(cmd.getOwnerType());
+			acl.setOwnerId(cmd.getOwnerId());
+			acl.setOrderSeq(0);
+			acl.setRoleType(EntityType.ROLE.getCode());
+			acl.setRoleId(cmd.getRoleId());
+			acl.setCreatorUid(user.getId());
+			acl.setCreateTime(time);
+			if(AllFlagType.YES != AllFlagType.fromCode(cmd.getAllFlag())){
+				if(null == cmd.getRolePrivileges() || cmd.getRolePrivileges().size() == 0){
+					LOGGER.error("params RolePrivileges error, cmd="+ cmd);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"params RolePrivileges error.");
 				}
+
+				for (RolePrivilege rolePrivilege: cmd.getRolePrivileges()) {
+					if(ServiceModuleTreeVType.fromCode(rolePrivilege.getType()) == ServiceModuleTreeVType.SERVICE_MODULE){
+						List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(rolePrivilege.getId(), ServiceModulePrivilegeType.SUPER);
+						if(modulePrivileges.size() > 0){
+							acl.setPrivilegeId(modulePrivileges.get(0).getPrivilegeId());
+							aclProvider.createAcl(acl);
+						}
+					}else{
+						acl.setPrivilegeId(rolePrivilege.getId());
+						aclProvider.createAcl(acl);
+					}
+				}
+			}else{
+				acl.setPrivilegeId(PrivilegeConstants.ALL_SERVICE_MODULE);
+				aclProvider.createAcl(acl);
 			}
 
 			return null;
@@ -337,11 +354,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public List<RoleDTO> listRoles(ListRolesCommand cmd) {
+	public ListRolesResponse listRoles(ListRolesCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		List<Role> roles = privilegeProvider.getRolesByOwnerAndKeywords(namespaceId, AppConstants.APPID_PARK_ADMIN, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getKeywords());
-
-		return roles.stream().map(r->{
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<Role> roles = privilegeProvider.listRolesByOwnerAndKeywords(locator,pageSize,namespaceId, AppConstants.APPID_PARK_ADMIN, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getKeywords());
+		ListRolesResponse response = new ListRolesResponse();
+		response.setDtos(roles.stream().map(r->{
 			RoleDTO role = ConvertHelper.convert(r, RoleDTO.class);
 			if(r.getCreateTime() != null) {
 				role.setCreateTime(r.getCreateTime().getTime());
@@ -352,8 +372,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					role.setCreatorUName(user.getNickName());
 				}
 			}
-			return ConvertHelper.convert(r, RoleDTO.class);
-		}).collect(Collectors.toList());
+			return role;
+		}).collect(Collectors.toList()));
+		response.setNextPageAnchor(locator.getAnchor());
+		return response;
 	}
 
 	@Override
@@ -366,6 +388,40 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return acls.stream().map(r->{
 			return r.getPrivilegeId();
 		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public GetPrivilegeByRoleIdResponse getPrivilegeByRoleId(ListPrivilegesByRoleIdCommand cmd){
+		checkRole(cmd.getRoleId());
+		GetPrivilegeByRoleIdResponse response = new GetPrivilegeByRoleIdResponse();
+		List<RolePrivilege> rolePrivileges = getPrivilegeByRoleId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getRoleId());
+		for (RolePrivilege rolePrivilege: rolePrivileges) {
+			if(ServiceModuleTreeVType.PRIVILEGE == ServiceModuleTreeVType.fromCode(rolePrivilege.getType()) && rolePrivilege.getId() == PrivilegeConstants.ALL_SERVICE_MODULE){
+				response.setAllFlag(AllFlagType.YES.getCode());
+				return response;
+			}
+		}
+		response.setPrivileges(rolePrivileges);
+		return response;
+	}
+
+
+	private List<RolePrivilege> getPrivilegeByRoleId(String ownerType, Long ownerId, Long roleId){
+		List<RolePrivilege> rolePrivileges = new ArrayList<>();
+		List<Acl> acls = aclProvider.getResourceAclByRole(ownerType, ownerId, new AclRoleDescriptor(EntityType.ROLE.getCode(), roleId));
+		for (Acl acl: acls) {
+			List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(acl.getPrivilegeId(), ServiceModulePrivilegeType.SUPER);
+			RolePrivilege rolePrivilege = new RolePrivilege();
+			if(modulePrivileges.size() > 0){
+				rolePrivilege.setType(ServiceModuleTreeVType.SERVICE_MODULE.getCode());
+				rolePrivilege.setId(modulePrivileges.get(0).getModuleId());
+			}else{
+				rolePrivilege.setType(ServiceModuleTreeVType.PRIVILEGE.getCode());
+				rolePrivilege.setId(acl.getPrivilegeId());
+			}
+			rolePrivileges.add(rolePrivilege);
+		}
+		return rolePrivileges;
 	}
 
 	//added by janson
@@ -403,24 +459,30 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public void createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd){
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		User user = UserContext.current().getUser();
 
 		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		Long roleId = RoleConstants.PM_SUPER_ADMIN;
 
 		CreateOrganizationAccountCommand command = new CreateOrganizationAccountCommand();
 		command.setOrganizationId(org.getId());
 		command.setAccountName(cmd.getContactName());
 		command.setAccountPhone(cmd.getContactToken());
-		organizationService.createOrganizationAccount(command, roleId);
 
-		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
+		dbProvider.execute((TransactionStatus status) -> {
+			OrganizationMember member = organizationService.createOrganiztionMemberWithDetailAndUserOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken());
+
+			if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+
+				//分配权限
+				this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
 
 
-		/**
-		 * 分配权限
-		 */
-		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),userIdentifier.getOwnerUid(),"admin",PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+				//分配公司管理员角色
+				assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), org.getId(), EntityType.USER.getCode(), member.getTargetId(), namespaceId, UserContext.current().getUser().getId(), RoleConstants.PM_SUPER_ADMIN);
+
+			}
+
+			return null;
+		});
 
 	}
 
@@ -1395,24 +1457,27 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId){
 		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		Long roleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
-
+		User user = UserContext.current().getUser();
 		CreateOrganizationAccountCommand command = new CreateOrganizationAccountCommand();
 		command.setOrganizationId(org.getId());
 		command.setAccountName(cmd.getContactName());
 		command.setAccountPhone(cmd.getContactToken());
 
-		//创建管理员不再返回member
-		organizationService.createOrganizationAccount(command, roleId, namespaceId);
+		dbProvider.execute((TransactionStatus status) -> {
 
+			//创建机构账号，包括注册、把用户添加到公司
+			OrganizationMember member = organizationService.createOrganiztionMemberWithDetailAndUserOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken());
 
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(org.getNamespaceId(), cmd.getContactToken());
+			if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+				//分配具体公司管理员权限
+				assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",PrivilegeConstants.ORGANIZATION_ADMIN);
 
+				//分配公司管理员角色
+				assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), org.getId(), EntityType.USER.getCode(), member.getTargetId(), namespaceId, user.getId(), RoleConstants.ENTERPRISE_SUPER_ADMIN);
+			}
+			return null;
+		});
 
-		/**
-		 * 分配权限
-		 */
-		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),userIdentifier.getOwnerUid(),"admin",PrivilegeConstants.ORGANIZATION_ADMIN);
 	}
 
 	@Override
@@ -2426,7 +2491,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 			List<Role> roles = getRoleManageByTarget(cmd.getOwnerType(), cmd.getOwnerId(), dto.getTargetType(), dto.getTargetId(), EntityType.ROLE.getCode(), null);
 
-			if(roles.size() > 0){
+			if(null != roles && roles.size() > 0){
 				dto.setRoles(roles.stream().map((r) ->{
 					return ConvertHelper.convert(r, RoleDTO.class);
 				}).collect(Collectors.toList()));
@@ -2955,7 +3020,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 	}
 
-	private void assignmentAclRole(String ownerType, Long ownerId, String targetType, Long targetId, Integer namespaceId, Long creatorUid, Long roleId){
+	@Override
+	public void assignmentAclRole(String ownerType, Long ownerId, String targetType, Long targetId, Integer namespaceId, Long creatorUid, Long roleId){
+
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(ownerType, ownerId, targetType, targetId);
+		if (null != roleAssignments && 0 < roleAssignments.size()) {
+			for (RoleAssignment assignment : roleAssignments) {
+				if (assignment.getRoleId().equals(roleId)) {
+					LOGGER.debug("target role already exists. targetType = {}, targetId= {}, roleId = {}", targetType, targetId, roleId);
+					return;
+				}
+			}
+		}
+
 		RoleAssignment roleAssignment = new RoleAssignment();
 		roleAssignment.setOwnerType(ownerType);
 		roleAssignment.setOwnerId(ownerId);
@@ -2967,10 +3044,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		aclProvider.createRoleAssignment(roleAssignment);
 	}
 
+
+
 	private List<Role> getRoleManageByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId){
 		List<Authorization> authorizations =  authorizationProvider.listManageAuthorizationsByTarget(ownerType, ownerId, targetType, targetId , authType, authId);
 		List<Role> roles = new ArrayList<>();
-		if(null == authorizations){
+		if(null == authorizations || authorizations.size() == 0){
 			return null;
 		}
 		for (Authorization authorization: authorizations) {

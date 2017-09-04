@@ -924,25 +924,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if(eqStandardMap != null && eqStandardMap.size() > 0) {
 
 				for(EquipmentStandardMapDTO dto : eqStandardMap) {
-					if(dto.getId() == null) {
-						EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
-						map.setTargetId(equipment.getId());
-						map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-						map.setReviewerUid(0L);
-						map.setReviewTime(null);
-						map.setReviewResult(ReviewResult.NONE.getCode());
-						map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
-						map.setCreatorUid(user.getId());
-						
-						equipmentProvider.createEquipmentStandardMap(map);
-						equipmentStandardMapSearcher.feedDoc(map);
-						
-						updateStandardIds.add(map.getStandardId());
-					} else {
-						EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMap(dto.getId(), dto.getStandardId(),
-								 dto.getEquipmentId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
-						if(map == null) {
-							map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
+					List<EquipmentStandardMap> maps = equipmentProvider.findEquipmentStandardMap(dto.getStandardId(),
+							equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
+					LOGGER.debug("equipment standard maps: {}", maps);
+					if(maps == null || maps.size() == 0) {
+						if(dto.getId() == null) {
+							EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
 							map.setTargetId(equipment.getId());
 							map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
 							map.setReviewerUid(0L);
@@ -953,11 +940,46 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 							equipmentProvider.createEquipmentStandardMap(map);
 							equipmentStandardMapSearcher.feedDoc(map);
-						}
 
-						updateStandardIds.add(map.getStandardId());
+							updateStandardIds.add(map.getStandardId());
+
+						} else {
+							EquipmentStandardMap map = equipmentProvider.findEquipmentStandardMap(dto.getId(), dto.getStandardId(),
+									dto.getEquipmentId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
+							if(map == null) {
+								map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
+								map.setTargetId(equipment.getId());
+								map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
+								map.setReviewerUid(0L);
+								map.setReviewTime(null);
+								map.setReviewResult(ReviewResult.NONE.getCode());
+								map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
+								map.setCreatorUid(user.getId());
+
+								equipmentProvider.createEquipmentStandardMap(map);
+								equipmentStandardMapSearcher.feedDoc(map);
+							}
+
+							updateStandardIds.add(map.getStandardId());
+						}
 					}
+					else if(maps.size() > 1) {
+						//删除设备多次重复绑定的标准,仅保留最早绑的那个
+						updateStandardIds.add(maps.get(0).getStandardId());
+						maps.remove(0);
+						LOGGER.debug("equipment standard maps after remove: {}", maps);
+						maps.forEach(map -> {
+							map.setStatus(Status.INACTIVE.getCode());
+							map.setDeleterUid(user.getId());
+							map.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+							equipmentProvider.updateEquipmentStandardMap(map);
+							equipmentStandardMapSearcher.feedDoc(map);
+						});
+					}
+
 				}
+
+
 				
 			}
 
@@ -2782,7 +2804,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		List<EquipmentInspectionTasks> allTasks = null;
 
-		Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
+//		Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
 //		List<Long> ownerIds = new ArrayList<>();
 //
 //		if(organization != null) {
@@ -3612,7 +3634,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 		}
 		
-		
+
 		if(isAdmin) {
 			List<Byte> taskStatus = new ArrayList<Byte>();
 	        taskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
@@ -3621,10 +3643,31 @@ public class EquipmentServiceImpl implements EquipmentService {
 			tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, null, null, locator, pageSize+1, taskStatus);
 			
 		} else {
-				List<Byte> taskStatus = new ArrayList<Byte>();
-		        taskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
-		        taskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
-				tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, null, null, locator, pageSize+1, taskStatus);
+			//扫码任务做权限控制 只能扫出设备下有执行权限的任务
+			List<StandardAndStatus> standards = new ArrayList<>();
+			List<Byte> executeTaskStatus = new ArrayList<Byte>();
+			executeTaskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+			executeTaskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
+
+			List<Byte> reviewTaskStatus = new ArrayList<Byte>();
+			reviewTaskStatus.add(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
+
+			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
+			List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
+			if (maps != null && maps.size() > 0) {
+				for (EquipmentInspectionStandardGroupMap r : maps) {
+					StandardAndStatus standardAndStatus = new StandardAndStatus();
+					standardAndStatus.setStandardId(r.getStandardId());
+					if (QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+						standardAndStatus.setTaskStatus(reviewTaskStatus);
+					}
+					if (QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+						standardAndStatus.setTaskStatus(executeTaskStatus);
+					}
+					standards.add(standardAndStatus);
+				}
+			}
+			tasks = equipmentProvider.listTasksByEquipmentIdAndStandards(equipment.getId(), standards, null, null, locator, pageSize+1);
 		}
         
 		if(tasks.size() > pageSize) {
@@ -3792,6 +3835,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			command.setNamespaceId(dto.getNamespaceId());
 			command.setOsType(OSType.Android.getCode());
 			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug("app logo url : {}", appUrlDTO.getLogoUrl());
+			}
 			if(appUrlDTO.getLogoUrl() != null) {
 				dataMap.put("shenyeLogo", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
 			}

@@ -16,6 +16,8 @@ import java.util.Map;
 public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 	FlowAutoStepDTO stepDTO;
 	private Long firedUserId;
+    private FlowSubject subject;
+
 	private FlowEventLogProvider flowEventLogProvider;
 	private FlowButtonProvider flowButtonProvider;
 	private UserService userService;
@@ -77,7 +79,7 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 		//current state change to next step
 		FlowGraphNode current = ctx.getCurrentNode();
 		FlowGraphNode next = null;
-		FlowSubject subject = null;
+		// FlowSubject subject = null;
 		
 		UserInfo applier = userService.getUserSnapshotInfo(flowCase.getApplyUserId());
 		Map<String, Object> templateMap = new HashMap<String, Object>();
@@ -132,11 +134,16 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 			flowCase.setRejectCount(flowCase.getRejectCount() + 1);
 			flowCase.setStepCount(flowCase.getStepCount() + 1l);
 			break;
+		case END_STEP:
 		case ABSORT_STEP:
 			tracker = new FlowEventLog();
 			if(ctx.getOperator() != null) {
-				templateMap.put("applierName", ctx.getOperator().getNickName());	
-			}
+                if (ctx.getOperator().getId() == User.SYSTEM_UID) {
+                    templateMap.put("applierName", "系统");
+                } else {
+                    templateMap.put("applierName", ctx.getOperator().getNickName());
+                }
+            }
 			next = ctx.getFlowGraph().getNodes().get(ctx.getFlowGraph().getNodes().size()-1);
 			
 			tracker.setLogContent(flowService.getStepMessageTemplate(nextStep, next.getExpectStatus(), ctx.getCurrentEvent().getUserType(), templateMap));
@@ -194,8 +201,10 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 
 	@Override
 	public FlowSubject getSubject() {
-		// TODO Auto-generated method stub
-		return null;
+		return subject;
 	}
 
+    public void setSubject(FlowSubject subject) {
+        this.subject = subject;
+    }
 }
