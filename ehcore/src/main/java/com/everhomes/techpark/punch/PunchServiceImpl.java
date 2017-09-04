@@ -2368,13 +2368,13 @@ public class PunchServiceImpl implements PunchService {
 			statistic.setUserId(member.getTargetId());
             statistic.setDetailId(member.getDetailId());
             //应上班天数
-			Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, statistic );
+//			Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, statistic );
 
 			statistic.setUserName(member.getContactName());
 			OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());
 			statistic.setDeptId(dept.getId());
 			statistic.setDeptName(dept.getName());
-			statistic.setWorkDayCount(workDayCount);
+//			statistic.setWorkDayCount(workDayCount);
 
 	 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
 							dateSF.get().format(endCalendar.getTime()) );
@@ -2423,6 +2423,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	private void processPunchListCount(List<PunchDayLog> list,
 			PunchStatistic statistic) {
+        statistic.setWorkDayCount(0.0);
 		statistic.setWorkCount(0.0);
 		statistic.setUnpunchCount(0.0);
 		statistic.setSickCount(0.0);
@@ -2435,6 +2436,9 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setOverTimeSum(0L);
 		statistic.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 		for (PunchDayLog pdl : list) {
+            if (pdl.getTimeRuleId() != null && pdl.getTimeRuleId().longValue() != 0L) {
+                statistic.setWorkDayCount(statistic.getWorkDayCount() + 1);
+            }
             if(pdl.getStatusList()!=null){
                 Byte isNormal = NormalFlag.YES.getCode();
                 if (pdl.getStatusList().contains(PunchConstants.STATUS_SEPARATOR)) {
@@ -6054,7 +6058,6 @@ public class PunchServiceImpl implements PunchService {
 		punchProvider.deletePunchTimeRuleByPunchOrgId(punchOrgId);
 		punchProvider.deletePunchSpecialDaysByPunchOrgId(punchOrgId);
 		punchProvider.deletePunchTimeIntervalByPunchRuleId(pr.getId());
-		punchSchedulingProvider.deletePunchSchedulingByPunchRuleId(pr.getId());
         List<PunchTimeRule> ptrs = new ArrayList<>();
         if(null != punchGroupDTO.getTimeRules()){
         	for(PunchTimeRuleDTO timeRule:punchGroupDTO.getTimeRules()){
@@ -6173,7 +6176,12 @@ public class PunchServiceImpl implements PunchService {
 			calendar.set(Calendar.DAY_OF_MONTH, i);
 			PunchScheduling ps = ConvertHelper.convert(pr, PunchScheduling.class);
 			ps.setPunchRuleId(pr.getId());
+
 			ps.setRuleDate(new java.sql.Date(calendar.getTimeInMillis()));
+            if(ps.getRuleDate().before(new java.sql.Date(new Date().getTime()))){
+                //今天之前continue
+                continue;
+            }
 			if(null != ptr){
 				ps.setTimeRuleId(ptr.getId());
 			}else{
@@ -6181,6 +6189,9 @@ public class PunchServiceImpl implements PunchService {
 			}
 			ps.setTargetType(PunchTargetType.USER.getCode());
 			ps.setTargetId(r.getUserId());
+
+            punchSchedulingProvider.deletePunchSchedulingByPunchRuleId(pr.getId(),ps.getRuleDate(),
+                    ps.getOwnerId(),ps.getTargetId());
 			punchSchedulingProvider.createPunchScheduling(ps);
 
 			i++;

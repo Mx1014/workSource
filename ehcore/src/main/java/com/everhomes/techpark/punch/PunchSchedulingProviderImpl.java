@@ -199,4 +199,18 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 		else 
 			return results.get(0);
 	}
+
+	@Override
+	public void deletePunchSchedulingByPunchRuleId(Long prId, Date ruleDate, Long ownerId, Long targetId) {
+
+		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchSchedulingsRecord> step = context.delete(Tables.EH_PUNCH_SCHEDULINGS);
+		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.equal(targetId)
+				.and(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.equal(ownerId))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.eq(new java.sql.Date(ruleDate.getTime())))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(prId)) ;
+		step.where(condition);
+		LOGGER.debug(step.toString());
+		step.execute();
+	}
 }
