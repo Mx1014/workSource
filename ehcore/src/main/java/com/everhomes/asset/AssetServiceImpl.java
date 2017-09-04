@@ -971,7 +971,9 @@ public class AssetServiceImpl implements AssetService {
             String addressName;
             addressName = building.getBuildingName()+building.getApartmentName();
             addressNames.add(addressName);
-            areaSize += building.getAreaSize();
+            if(building.getAreaSize()!=null){
+                areaSize += building.getAreaSize();
+            }
         }
         dto.setAddressNames(addressNames);
         dto.setAreaSizesSum(String.valueOf(areaSize));
