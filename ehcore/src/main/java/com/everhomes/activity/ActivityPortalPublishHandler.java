@@ -190,7 +190,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 	private void updateContentCategory(ActivityEntryConfigulation config, ActivityCategories parentCategory, Integer namespaceId){
 
-		if(config.getCategoryFlag() == 1){
+		if(null != config.getCategoryFlag() && config.getCategoryFlag() == 1){
 
 			//新增、更新入口
 			Long maxEntryId = activityProvider.findActivityCategoriesMaxEntryId(namespaceId);

@@ -69,7 +69,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
     public String getItemActionData(Integer namespaceId, String instanceConfig) {
         ServiceAllianceInstanceConfig serviceAllianceInstanceConfig = (ServiceAllianceInstanceConfig)StringHelper.fromJsonString(instanceConfig, ServiceAllianceInstanceConfig.class);
         ServiceAllianceActionData serviceAllianceActionData = new ServiceAllianceActionData();
-        serviceAllianceActionData.setType(serviceAllianceInstanceConfig.getType().byteValue());
+        serviceAllianceActionData.setType(serviceAllianceInstanceConfig.getType());
         serviceAllianceActionData.setParentId(serviceAllianceInstanceConfig.getType());
         serviceAllianceActionData.setDisplayType(serviceAllianceInstanceConfig.getDisplayType());
         return StringHelper.toJsonString(serviceAllianceActionData);
