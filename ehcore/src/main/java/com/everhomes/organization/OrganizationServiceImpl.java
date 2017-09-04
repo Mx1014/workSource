@@ -722,7 +722,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<AddressDTO> addresses = organizationAddresses.stream().map(r->{
 			OrganizationAddressDTO address = ConvertHelper.convert(r,OrganizationAddressDTO.class);
             Address addr = addressProvider.findAddressById(address.getAddressId());
-            return ConvertHelper.convert(addr, AddressDTO.class);
+
+            AddressDTO addressDTO = ConvertHelper.convert(addr, AddressDTO.class);
+
+            Building building = communityProvider.findBuildingByCommunityIdAndName(addr.getCommunityId(), addr.getBuildingName());
+            addressDTO.setBuildingId(building.getId());
+            return addressDTO;
         }).collect(Collectors.toList());
 
         dto.setAddresses(addresses);
