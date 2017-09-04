@@ -52,8 +52,6 @@ import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.openapi.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
@@ -66,8 +64,8 @@ import com.everhomes.rest.user.*;
 import com.everhomes.server.schema.tables.pojos.EhBusinessPromotions;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
+import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.*;
-import com.google.gson.annotations.SerializedName;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.DistanceUtils;
@@ -554,6 +552,7 @@ public class BusinessServiceImpl implements BusinessService {
 		}
 		
 		Community community = communityProvider.findCommunityById(communityId);
+		LOGGER.debug("process communityId is :" + communityId);
 		
 		if(community == null){
 			LOGGER.error("Invalid paramter communityId,community is not exists.,communityId=" + communityId);
@@ -1598,6 +1597,15 @@ public class BusinessServiceImpl implements BusinessService {
 		if(null != area){
 			dto.setAreaName(area.getName());
 		}
+		Community community = this.communityProvider.findCommunityById(address.getCommunityId());
+		if(community != null){
+			dto.setCommunityName(community.getName());
+		}
+
+		Region province = regionProvider.findRegionById(city.getParentId());
+		if(null != province){
+			dto.setProvinceName(province.getName());
+		}
 		return dto;
 	}
 
@@ -1692,13 +1700,45 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Override
 	public UserAddressDTO getUserAddress(GetUserDefaultAddressCommand cmd) {
+		if(null == cmd.getUserId()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter userId null.");
+		}
+
 		UserAddressDTO dto = new UserAddressDTO();
 		Long userId = cmd.getUserId();
 		List<UserServiceAddress> serviceAddresses = userActivityProvider.findUserRelateServiceAddresses(userId);
-		dto.setServiceAddresses(serviceAddresses.stream().map(r ->{
-			return ConvertHelper.convert(r, UserServiceAddressDTO.class);
-		}).collect(Collectors.toList()));
-
+		List<UserServiceAddressDTO> userServiceAddressDTOs = new ArrayList<>();
+		for (UserServiceAddress userServiceAddress: serviceAddresses) {
+			UserServiceAddressDTO userServiceAddressDTO = ConvertHelper.convert(userServiceAddress, UserServiceAddressDTO.class);
+			Address addr = this.addressProvider.findAddressById(userServiceAddress.getAddressId());
+			if(addr == null){
+				LOGGER.error("getUserAddress-error=Address is not found,addressId = {}", userServiceAddress.getAddressId());
+				continue;
+			}
+			Region city = this.regionProvider.findRegionById(addr.getCityId());
+			if(city != null){
+				Region province = this.regionProvider.findRegionById(city.getParentId());
+				if(province != null)
+					userServiceAddressDTO.setProvince(province.getName());
+			}
+			userServiceAddressDTO.setAddressType(AddressType.SERVICE_ADDRESS.getCode());
+			userServiceAddressDTO.setId(addr.getId());
+			userServiceAddressDTO.setCity(addr.getCityName());
+			userServiceAddressDTO.setArea(addr.getAreaName());
+			userServiceAddressDTO.setAddress(addr.getAddress());
+			if(addr.getCommunityId() != null){
+				Community com = this.communityProvider.findCommunityById(addr.getCommunityId());
+				if(com != null){
+					userServiceAddressDTO.setCommunityId(addr.getCommunityId());
+					userServiceAddressDTO.setCommunityName(com.getName());
+				}
+			}
+			userServiceAddressDTO.setUserName(userServiceAddress.getContactName());
+			userServiceAddressDTO.setCallPhone(userServiceAddress.getContactToken());
+			userServiceAddressDTOs.add(userServiceAddressDTO);
+		}
+		dto.setServiceAddresses(userServiceAddressDTOs);
 		List<FamilyAddressDTO> familyAddresses = listUserFamilyAddresses(userId);
 		dto.setFamilyAddresses(familyAddresses);
 
@@ -1706,6 +1746,23 @@ public class BusinessServiceImpl implements BusinessService {
 		dto.setOrganizationAddresses(orgAddresses);
 
 		return dto;
+	}
+
+	@Override
+	public List<OrganizationDTO> getUserOrganizations(GetUserDefaultAddressCommand cmd) {
+		if(null == cmd.getUserId()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter userId null.");
+		}
+		List<OrganizationDTO> dtos = new ArrayList<>();
+		List<UserOrganizations> userOrganizations = organizationProvider.listUserOrganizationByUserId(cmd.getUserId());
+		for (UserOrganizations userOrganization: userOrganizations) {
+			Organization organizaiton = organizationProvider.findOrganizationById(userOrganization.getOrganizationId());
+			if(null != organizaiton && OrganizationStatus.fromCode(organizaiton.getStatus()) == OrganizationStatus.ACTIVE){
+				dtos.add(ConvertHelper.convert(organizaiton, OrganizationDTO.class));
+			}
+		}
+		return dtos;
 	}
 
 	@Override
@@ -2257,7 +2314,7 @@ public class BusinessServiceImpl implements BusinessService {
             LOGGER.debug("list business promotion namespaceId={}", namespaceId);
 
         if ("biz".equals(source)) {// 从电商服务器获取数据
-            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, pageSize);
+            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, pageSize, cmd.getRecommendType());
         }
         // 从数据库获取数据
         else {
@@ -2274,36 +2331,7 @@ public class BusinessServiceImpl implements BusinessService {
         }
     }
 
-    /*// 商品对象
-    private static class Commodity {
-        private String id;// 商品id
-        private String commoNo;// 商品编号
-        private String commoName;// 商品名称
-        private String defaultPic;// 商品图片
-        private BigDecimal price;// 商品价格
-        private String shopNo;// 店铺编号
-        private String uri;// 商品详情链接
-
-        @Override
-        public String toString() {
-            return StringHelper.toJsonString(this);
-        }
-    }*/
-
-    // 电商服务器响应对象
-    private static class Resp {
-        private String version;
-        private Integer errorCode;
-        @SerializedName("response")
-        private List<ModulePromotionEntityDTO> response = new ArrayList<>();
-
-        @Override
-        public String toString() {
-            return StringHelper.toJsonString(this);
-        }
-    }
-
-    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize) {
+    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize, Byte recommendType) {
         String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "zl-ec/rest/openapi/commodity/listRecommend");
 
         String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
@@ -2317,13 +2345,16 @@ public class BusinessServiceImpl implements BusinessService {
         Map<String, String> param = new HashMap<>();
         param.put("namespaceId", String.valueOf(namespaceId));
         param.put("pageSize", String.valueOf(pageSize));
+        if (recommendType != null) {
+            param.put("recommendType", String.valueOf(recommendType));
+        }
 
         ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
         try {
             String jsonStr = HttpUtils.postJson((bizServer + bizApi), StringHelper.toJsonString(param), 10, "UTF-8");
-            Resp resp = (Resp) StringHelper.fromJsonString(jsonStr, Resp.class);
+            CommodityRespDTO resp = (CommodityRespDTO) StringHelper.fromJsonString(jsonStr, CommodityRespDTO.class);
             if (resp != null) {
-                reponse.setEntities(resp.response);
+                reponse.setEntities(resp.getResponse());
             }
             return reponse;
         } catch (Exception e) {

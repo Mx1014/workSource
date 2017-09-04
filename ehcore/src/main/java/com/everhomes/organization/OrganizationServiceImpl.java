@@ -705,6 +705,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         dto.setCommunityId(organizationDTO.getCommunityId());
         dto.setCommunityName(organizationDTO.getCommunityName());
         dto.setAvatarUri(org.getAvatar());
+        if(!StringUtils.isEmpty(org.getDisplayName())){
+            dto.setDisplayName(org.getDisplayName());
+        }
 		if(null != org.getCheckinDate())
             dto.setCheckinDate(org.getCheckinDate().getTime());
 		if(!StringUtils.isEmpty(org.getAvatar()))

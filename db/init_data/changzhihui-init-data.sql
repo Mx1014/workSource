@@ -1024,6 +1024,13 @@ VALUES ((@organization_details_id := @organization_details_id + 1), 1035719, NUL
 -- NEW END--- 08/04 17:59
 DELETE FROM eh_version_realm WHERE namespace_id = 999969;
 
+SELECT MAX(id) FROM `eh_app_urls` INTO @app_urls_id;
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
+  VALUES ((@app_urls_id := @app_urls_id + 1), 999969, '昌智慧', 1, '', 'cs://1/image/aW1hZ2UvTVRveFltSmlNV0ptT1dKaU1UQTFOekZrWldOa09XWmpOVEppT0RKaFpUVTJOQQ', '移动平台聚合服务，助力园区效能提升');
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
+  VALUES ((@app_urls_id := @app_urls_id + 1), 999969, '昌智慧', 2, '', 'cs://1/image/aW1hZ2UvTVRveFltSmlNV0ptT1dKaU1UQTFOekZrWldOa09XWmpOVEppT0RKaFpUVTJOQQ', '移动平台聚合服务，助力园区效能提升');
+
+
 SELECT max(id) FROM `eh_version_realm` INTO @ver_rea_id;
 SELECT max(id) FROM `eh_version_upgrade_rules` INTO @ver_upg_id;
 
@@ -1034,11 +1041,6 @@ VALUES ((@ver_upg_id := @ver_upg_id + 1), @ver_rea_id, '-0.1','1048576','0','1.0
 INSERT INTO `eh_version_realm` VALUES ((@ver_rea_id := @ver_rea_id + 1), 'IOS_ChangZhiHui', null, UTC_TIMESTAMP(), 999969);
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`)
 VALUES ((@ver_upg_id := @ver_upg_id + 1), @ver_rea_id, '-0.1','1048576','0','1.0.0', 0, NOW(), 999969);
-
-
-SET FOREIGN_KEY_CHECKS = 1;
-
-
 
 
 -- 【昌智汇】服务联盟配置 add by sfyan 20170822
@@ -1134,3 +1136,9 @@ INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alli
 insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','InterCommu','国际交流','cs://1/image/aW1hZ2UvTVRveFpHRXhNelV4T0Rka01XWTVNV1ZpTlRNek9HWTVZamN6T1dRME1XUTJZZw','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'10','0','1','0',NULL,'0',NULL,NULL,NULL,'1','park_tourist','1',NULL,NULL,'31',NULL);
 
 insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),@namespace_id,'0','0','0','/home','Bizs','InterCommu','国际交流','cs://1/image/aW1hZ2UvTVRveFpHRXhNelV4T0Rka01XWTVNV1ZpTlRNek9HWTVZamN6T1dRME1XUTJZZw','1','1','33',CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}'),'10','0','1','0',NULL,'0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'31',NULL);
+
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- 更换人人试验连接 by dengs, 20170831
+UPDATE eh_launch_pad_items SET action_data='{"url": "http://www.renrenlab.com"}'  WHERE item_label = '人人实验' AND namespace_id = 999969;

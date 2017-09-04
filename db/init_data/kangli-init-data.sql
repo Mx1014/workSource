@@ -2341,3 +2341,6 @@ insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),'999978','0','0','0','/EhPortalLayouts170','EhPortalItemGroups433','EhPortalItems17100','学习天地','cs://1/image/aW1hZ2UvTVRvMk0yWTJNVEV4TnpWaU1HTXhaV0V3T0daa01qTXhaakF6WXpWaFptWXdZUQ','1','1','13','{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}','4','0','1','1',NULL,'0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'4',NULL);
 
 update `eh_launch_pad_items` elpi set categry_name = (select name from eh_item_service_categries where id = elpi.service_categry_id) where namespace_id = 999978;
+
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`)
+VALUES(1151, 999978, 'community_commercial', UTC_TIMESTAMP());

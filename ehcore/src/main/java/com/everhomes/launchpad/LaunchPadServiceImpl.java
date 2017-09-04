@@ -436,6 +436,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	   //检查游客是否能继续访问此场景 by sfyan 20161009
 	   userService.checkUserScene(sceneType);
+	   LOGGER.debug("Scene type is" + sceneType);
 
        switch(sceneType) {
        case DEFAULT:

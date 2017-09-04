@@ -69,9 +69,8 @@ public class UserUiController extends ControllerBase {
      */
     @RequestMapping("listUserRelatedScenes")
     @RestReturn(value=SceneDTO.class, collection=true)
-    public RestResponse listUserRelatedScenes() {
-        List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes();
-        
+    public RestResponse listUserRelatedScenes(ListUserRelatedScenesCommand cmd) {
+        List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes(cmd);
         RestResponse response = new RestResponse(sceneDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -343,6 +342,21 @@ public class UserUiController extends ControllerBase {
 	public RestResponse getFamilyButtonStatus() {
 		GetFamilyButtonStatusResponse getFamilyButtonStatusResponse = userService.getFamilyButtonStatus();
 		RestResponse response = new RestResponse(getFamilyButtonStatusResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /ui/user/listUserRelatedScenesByCurrentType</b>
+	 * <p>列出用户当前域空间下的相关场景。</p>
+	 * <p>必须在请求的Header中提供域空间。</p>
+	 */
+	@RequestMapping("listUserRelatedScenesByCurrentType")
+	@RestReturn(value=SceneDTO.class, collection=true)
+	public RestResponse listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd) {
+		List<SceneDTO> sceneDtoList = userService.listUserRelatedScenesByCurrentType(cmd);
+		RestResponse response = new RestResponse(sceneDtoList);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

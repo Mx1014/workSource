@@ -8,6 +8,9 @@ import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
 import com.everhomes.rest.ui.user.SceneType;
 
+import java.util.List;
+import java.util.Map;
+
 public interface LaunchPadProvider {
     void createLaunchPadItem(LaunchPadItem item);
     void updateLaunchPadItem(LaunchPadItem item);
@@ -37,9 +40,12 @@ public interface LaunchPadProvider {
 	LaunchPadItem findLaunchPadItemByTargetAndScopeAndSence(String targetType, long targetId,Byte scopeCode, long scopeId,Integer namesapceId, SceneType sceneType);
     List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId, String itemLocation, String itemGroup, ListingQueryBuilderCallback callback);
     void createItemServiceCategry(ItemServiceCategry itemServiceCategry);
+
+    List<LaunchPadItem> listLaunchPadItemsByNamespaceId(Integer namespaceId);
     void deleteItemServiceCategryById(Long id);
     List<LaunchPadItem> listLaunchPadItemsByItemGroup(Integer namespaceId, String itemLocation,String itemGroup);
     List<LaunchPadLayout> getLaunchPadLayouts(String name, Integer namespaceId);
     List<LaunchPadItem> listLaunchPadItemsByScopeType(Integer namespaceId, String itemLocation,String itemGroup, Byte applyPolicy, ListingQueryBuilderCallback queryBuilderCallback);
     List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId);
+	LaunchPadItem searchLaunchPadItemsByItemName(Integer namespaceId, String sceneType, String itemName);
 }

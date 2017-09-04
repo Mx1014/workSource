@@ -12,6 +12,8 @@ import com.everhomes.sms.DateUtil;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.*;
+import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,25 +88,28 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
     }
 
     @Override
-    public void deleteTerminalDayStatistics(String date) {
+    public void deleteTerminalDayStatistics(Integer namespaceId, String date) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhTerminalDayStatisticsRecord> delete = context.deleteQuery(Tables.EH_TERMINAL_DAY_STATISTICS);
+        delete.addConditions(Tables.EH_TERMINAL_DAY_STATISTICS.NAMESPACE_ID.eq(namespaceId));
         delete.addConditions(Tables.EH_TERMINAL_DAY_STATISTICS.DATE.eq(date));
         delete.execute();
     }
 
     @Override
-    public void deleteTerminalHourStatistics(String date) {
+    public void deleteTerminalHourStatistics(Integer namespaceId, String date) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhTerminalHourStatisticsRecord> delete = context.deleteQuery(Tables.EH_TERMINAL_HOUR_STATISTICS);
+        delete.addConditions(Tables.EH_TERMINAL_HOUR_STATISTICS.NAMESPACE_ID.eq(namespaceId));
         delete.addConditions(Tables.EH_TERMINAL_HOUR_STATISTICS.DATE.eq(date));
         delete.execute();
     }
 
     @Override
-    public void deleteTerminalAppVersionStatistics(String date) {
+    public void deleteTerminalAppVersionStatistics(Integer namespaceId, String date) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhTerminalAppVersionStatisticsRecord> delete = context.deleteQuery(Tables.EH_TERMINAL_APP_VERSION_STATISTICS);
+        delete.addConditions(Tables.EH_TERMINAL_APP_VERSION_STATISTICS.NAMESPACE_ID.eq(namespaceId));
         delete.addConditions(Tables.EH_TERMINAL_APP_VERSION_STATISTICS.DATE.eq(date));
         delete.execute();
     }
@@ -176,16 +181,16 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
     public TerminalDayStatistics getTerminalDayStatisticsByDay(String date, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhTerminalDayStatisticsRecord> query = context.selectQuery(Tables.EH_TERMINAL_DAY_STATISTICS);
-        query.addConditions(Tables.EH_TERMINAL_DAY_STATISTICS.DATE.eq(date));
         query.addConditions(Tables.EH_TERMINAL_DAY_STATISTICS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_TERMINAL_DAY_STATISTICS.DATE.eq(date));
         return query.fetchAnyInto(TerminalDayStatistics.class);
     }
 
     @Override
-    public TerminalStatisticsTask getTerminalStatisticsTaskByTaskNo(String taskNo) {
-        List<TerminalStatisticsTask> resules = new ArrayList<>();
+    public TerminalStatisticsTask getTerminalStatisticsTaskByTaskNo(Integer namespaceId, String taskNo) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhTerminalStatisticsTasksRecord> query = context.selectQuery(Tables.EH_TERMINAL_STATISTICS_TASKS);
+        query.addConditions(Tables.EH_TERMINAL_STATISTICS_TASKS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_TERMINAL_STATISTICS_TASKS.TASK_NO.eq(taskNo));
         return query.fetchAnyInto(TerminalStatisticsTask.class);
     }
@@ -273,7 +278,6 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct())
                 .from(Tables.EH_USER_ACTIVITIES)
                 .where(condition);
-        LOGGER.debug("statistical start number and active user number sql:{}", selectConditionStep1.getSQL());
         Record2<Integer, Integer> fetchAny = selectConditionStep1.fetchAny();
         if(null == fetchAny){
             statistics.setStartNumber(0L);
@@ -308,7 +312,6 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                                 .where(condition1)
 
                 ));
-        LOGGER.debug("statistical new user number sql:{}", selectConditionStep2.getSQL());
         Record1<Integer> fetchAny1 = selectConditionStep2.fetchAny();
         if(null == fetchAny1){
             statistics.setNewUserNumber(0L);
@@ -319,20 +322,61 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
             });
         }
 
-        Condition condition2 = Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
+        long previousTimestamp = time1 - mill;
+        String previousTime = DateUtil.dateToStr(new Date(previousTimestamp), "yyyyMMdd");
+
+        Table tb;
+        Field fd;
+        Condition condition2;
+        if (hour != null) {
+            int hourInt = Integer.parseInt(hour);
+            String hourStr;
+            if (hourInt <= 1) {
+                long yesterdayTime = previousTimestamp - mill - mill;
+                previousTime = DateUtil.dateToStr(new Date(yesterdayTime), "yyyyMMdd");
+                hourStr = "24";
+            } else {
+                int h = hourInt - 1;
+                if (h < 10) {
+                    hourStr = "0" + h;
+                } else {
+                    hourStr = String.valueOf(h);
+                }
+            }
+
+            tb = Tables.EH_TERMINAL_HOUR_STATISTICS;
+            fd = Tables.EH_TERMINAL_HOUR_STATISTICS.CUMULATIVE_USER_NUMBER;
+            condition2 = Tables.EH_TERMINAL_HOUR_STATISTICS.NAMESPACE_ID.eq(namespaceId);
+            condition2 = condition2.and(Tables.EH_TERMINAL_HOUR_STATISTICS.DATE.eq(previousTime));
+
+            condition2 = condition2.and(Tables.EH_TERMINAL_HOUR_STATISTICS.HOUR.eq(hourStr));
+        } else {
+            tb = Tables.EH_TERMINAL_DAY_STATISTICS;
+            fd = Tables.EH_TERMINAL_DAY_STATISTICS.CUMULATIVE_USER_NUMBER;
+            condition2 = Tables.EH_TERMINAL_DAY_STATISTICS.NAMESPACE_ID.eq(namespaceId);
+            condition2 = condition2.and(Tables.EH_TERMINAL_DAY_STATISTICS.DATE.eq(previousTime));
+        }
+
+        Record record = context.select(fd).from(tb).where(condition2).fetchAny();
+        if (record != null) {
+            statistics.setCumulativeUserNumber(Long.valueOf(record.getValue(0).toString()) + statistics.getNewUserNumber());
+        } else {
+            statistics.setCumulativeUserNumber(0L);
+        }
+
+        /*Condition condition2 = Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
         condition2 = condition2.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull());
         condition2 = condition2.and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""));
 
         condition2 = condition2.and(Tables.EH_USER_ACTIVITIES.CREATE_TIME.le(minTime));
         // Condition condition2 = Tables.EH_USER_ACTIVITIES.CREATE_TIME.substring(1,startingPosition).le(date);
-       /* if(null != namespaceId){
+       *//* if(null != namespaceId){
             condition2 = condition2.and(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
-        }*/
+        }*//*
         SelectConditionStep<Record1<Integer>> selectConditionStep3 = context.select(
                 Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct())
                 .from(Tables.EH_USER_ACTIVITIES)
                 .where(condition2);
-        LOGGER.debug("statistical cumulative user number sql:{}", selectConditionStep3.getSQL());
         Record1<Integer> fetchAny2 = selectConditionStep3.fetchAny();
         if(null == fetchAny2){
             statistics.setCumulativeUserNumber(0L);
@@ -341,7 +385,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 statistics.setCumulativeUserNumber(Long.valueOf(r.getValue(0).toString()));
                 return null;
             });
-        }
+        }*/
 
         return statistics;
     }
@@ -376,7 +420,6 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.countDistinct())
                 .from(Tables.EH_USER_ACTIVITIES)
                 .where(condition);
-        LOGGER.debug("statistical active user number sql:{}", step.getSQL());
         Record1<Integer> fetchAny = step.fetchAny();
         if(null == fetchAny){
             return 0L;
@@ -493,7 +536,6 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 Tables.EH_USER_ACTIVITIES.ID.count())
                 .from(Tables.EH_USER_ACTIVITIES)
                 .where(condition);
-        LOGGER.debug("statistical start number and active user number sql:{}", step.getSQL());
         Record1<Integer> fetchAny = step.fetchAny();
         if(null == fetchAny){
             return 0L;
@@ -553,5 +595,59 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
             return resules.get(0);
         }
         return null;
+    }
+
+    @Override
+    public void deleteTerminalStatTask(Integer namespaceId, String startDate, String endDate) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhTerminalStatisticsTasksRecord> query = context.deleteQuery(Tables.EH_TERMINAL_STATISTICS_TASKS);
+        if (namespaceId != null) {
+            query.addConditions(Tables.EH_TERMINAL_STATISTICS_TASKS.NAMESPACE_ID.eq(namespaceId));
+        }
+        query.addConditions(Tables.EH_TERMINAL_STATISTICS_TASKS.TASK_NO.between(startDate, endDate));
+        query.execute();
+    }
+
+    // DELETE FROM eh_terminal_app_version_cumulatives
+    // WHERE namespace_id = 999983 AND imei_number NOT IN (SELECT concat('', id, '') FROM eh_users WHERE namespace_id = 999983);
+    @Override
+    public void cleanTerminalAppVersionCumulativeByCondition(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        SelectConditionStep<Record1<String>> userIdList = context
+                .select(DSL.cast(Tables.EH_USERS.ID, SQLDataType.VARCHAR))
+                .from(Tables.EH_USERS)
+                .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+
+        context.delete(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES)
+                .where(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.IMEI_NUMBER.notIn(userIdList))
+                .execute();
+
+        context.delete(Tables.EH_TERMINAL_APP_VERSION_ACTIVES)
+                .where(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.IMEI_NUMBER.notIn(userIdList))
+                .execute();
+    }
+
+    @Override
+    public AppVersion findLastAppVersion(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAppVersionRecord> query = context.selectQuery(Tables.EH_APP_VERSION);
+        if (null != namespaceId) {
+            query.addConditions(Tables.EH_APP_VERSION.NAMESPACE_ID.eq(namespaceId));
+        }
+        query.addOrderBy(Tables.EH_APP_VERSION.ID.desc());
+        query.addLimit(1);
+        return query.fetchAnyInto(AppVersion.class);
+    }
+
+    @Override
+    public void cleanUserActivitiesWithNullAppVersion(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_USER_ACTIVITIES)
+                .where(Tables.EH_USER_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_USER_ACTIVITIES.APP_VERSION_NAME.isNull())
+                .execute();
     }
 }

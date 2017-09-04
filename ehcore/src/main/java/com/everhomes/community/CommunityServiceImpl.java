@@ -30,6 +30,7 @@ import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.*;
 import com.everhomes.organization.*;
+import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -614,7 +615,7 @@ public class CommunityServiceImpl implements CommunityService {
         Long nextPageAnchor = null;
         if(buildings.size() > pageSize) {
         	buildings.remove(buildings.size() - 1);
-            nextPageAnchor = buildings.get(buildings.size() - 1).getId();
+            nextPageAnchor = buildings.get(buildings.size() - 1).getDefaultOrder();
         }
         
         populateBuildings(buildings);
@@ -643,8 +644,8 @@ public class CommunityServiceImpl implements CommunityService {
         	
         	return dto;
         }).collect(Collectors.toList());
-        
-        
+
+
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
 	}
 
@@ -2856,13 +2857,15 @@ public class CommunityServiceImpl implements CommunityService {
         List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
         List<OrganizationCommunityRequest> orgs = this.organizationProvider.listOrganizationCommunityRequests(communityIds);
         if (null == orgs || orgs.size() == 0) {
-            return response;
+			LOGGER.debug("orgs is null");
+			return response;
         }
 
 		List<Long> orgIds = new ArrayList<>();
 		for(OrganizationCommunityRequest org : orgs) {
 			orgIds.add(org.getMemberId());
 		}
+		LOGGER.debug("orgIds is：" + orgIds);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2902,6 +2905,8 @@ public class CommunityServiceImpl implements CommunityService {
         } else {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(
                     cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
+			LOGGER.debug("wait approve organizationMembers cmd:" + cmd);
+			LOGGER.debug("wait approve organizationMembers size " + organizationMembers.size());
         }
 
 		if(organizationMembers == null || organizationMembers.size() == 0) {
