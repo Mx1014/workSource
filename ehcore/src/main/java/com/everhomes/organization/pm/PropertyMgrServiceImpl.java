@@ -798,7 +798,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		this.checkCommunity(cmd.getCommunityId());
 		Tuple<Integer, List<BuildingDTO>> tuple = addressService.listBuildingsByKeyword(cmd);
-
+		//增加公共区域
+		List list = tuple.second();
+		BuildingDTO buildingDTO = new BuildingDTO();
+		buildingDTO.setBuildingName(EbeiBuildingType.publicArea);
+		buildingDTO.setCommunityId(cmd.getCommunityId());
+		list.add(buildingDTO);
 		return tuple;
 	}
 
