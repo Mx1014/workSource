@@ -40,6 +40,7 @@ import com.everhomes.util.Tuple;
 import com.everhomes.yellowPage.YellowPage;
 import com.everhomes.yellowPage.YellowPageProvider;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -183,6 +184,12 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             cmd2.setSourceType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
             cmd2.setSourceId(dto.getId());
             List<FlowCaseEntity> formEntities = generalFormService.getGeneralFormFlowEntities(cmd2);
+
+            formEntities.forEach(r -> {
+                if (StringUtils.isBlank(r.getValue())) {
+                    r.setValue("无");
+                }
+            });
 
             FlowCaseEntityList result = (FlowCaseEntityList) StringHelper.fromJsonString(jsonStr, FlowCaseEntityList.class);
             result.addAll(result.size() - 1, formEntities);

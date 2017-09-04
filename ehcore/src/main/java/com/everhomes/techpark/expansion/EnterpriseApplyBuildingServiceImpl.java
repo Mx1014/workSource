@@ -284,13 +284,13 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			).map(r -> {
 			long id = sequenceProvider.getNextSequence(NameMapper
 					.getSequenceDomainFromTablePojo(EhLeaseBuildings.class));
-			LeaseBuilding building = ConvertHelper.convert(r, LeaseBuilding.class);
-			building.setId(id);
-			building.setBuildingId(r.getId());
-			building.setManagerContact(r.getContact());
-			building.setDeleteFlag((byte)0);
-			building.setDefaultOrder(id);
-			return building;
+			LeaseBuilding leaseBuilding = ConvertHelper.convert(r, LeaseBuilding.class);
+			leaseBuilding.setId(id);
+			leaseBuilding.setBuildingId(r.getId());
+			leaseBuilding.setManagerContact(r.getContact());
+			leaseBuilding.setDeleteFlag((byte)0);
+			leaseBuilding.setDefaultOrder(id);
+			return leaseBuilding;
 		}).collect(Collectors.toList());
 
 		enterpriseApplyBuildingProvider.createLeaseBuildings(leaseBuildings);

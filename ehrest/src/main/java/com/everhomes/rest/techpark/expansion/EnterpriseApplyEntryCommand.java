@@ -60,7 +60,6 @@ public class EnterpriseApplyEntryCommand {
 	private Long contractId;
 
 	private Long addressId;
-//	private Long buildingId;
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
@@ -90,14 +89,6 @@ public class EnterpriseApplyEntryCommand {
 	public void setAddressId(Long addressId) {
 		this.addressId = addressId;
 	}
-
-//	public Long getBuildingId() {
-//		return buildingId;
-//	}
-//
-//	public void setBuildingId(Long buildingId) {
-//		this.buildingId = buildingId;
-//	}
 
 	public String getSourceType() {
 		return sourceType;

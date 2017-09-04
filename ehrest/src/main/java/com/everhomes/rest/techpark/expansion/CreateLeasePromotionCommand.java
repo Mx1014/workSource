@@ -33,8 +33,6 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateLeasePromotionCommand {
-	
-	private Integer namespaceId;
 
 	//兼容app业主发招租, 现在发招租有范围用下面的communityIds add by sw 20170804
 	@NotNull
@@ -177,13 +175,7 @@ public class CreateLeasePromotionCommand {
 	public void setRentAmount(BigDecimal rentAmount) {
 		this.rentAmount = rentAmount;
 	}
-	
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
+
 	public Long getCommunityId() {
 		return communityId;
 	}

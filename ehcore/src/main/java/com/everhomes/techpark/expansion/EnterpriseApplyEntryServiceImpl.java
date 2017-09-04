@@ -425,10 +425,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					Building building = communityProvider.findBuildingByCommunityIdAndName(request.getCommunityId(), address.getBuildingName());
 					if (null != building) {
 						LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(building.getId());
-						opRequestBuilding.setBuildingId(leaseBuilding.getId());
-						enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
+						if (null != leaseBuilding) {
+							opRequestBuilding.setBuildingId(leaseBuilding.getId());
+							enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
 
-						request.setAddressId(address.getId());
+							request.setAddressId(address.getId());
+						}
 					}
 				}
 			}
@@ -445,12 +447,27 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		}else if (request.getSourceType().equals(ApplyEntrySourceType.BUILDING.getCode())){
 			//3. 园区介绍直接就是楼栋的地址
-			opRequestBuilding.setBuildingId(request.getSourceId());
-			enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
 
 			LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(request.getSourceId());
-			if (leaseBuilding.getBuildingId() != 0L) {
+			if (null != leaseBuilding && leaseBuilding.getBuildingId() != 0L) {
 				resourceCategories[0] = communityProvider.findResourceCategoryAssignment(leaseBuilding.getBuildingId(),
+						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
+			}else {
+
+				opRequestBuilding.setBuildingId(request.getSourceId());
+				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
+				//数据不一致时，将项目管理中的楼栋同步到 招租管理楼栋
+				Building building = communityProvider.findBuildingById(request.getSourceId());
+
+				leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByName(building.getCommunityId(), building.getName());
+				if (null == leaseBuilding) {
+					leaseBuilding = ConvertHelper.convert(building, LeaseBuilding.class);
+					leaseBuilding.setBuildingId(building.getId());
+					leaseBuilding.setManagerContact(building.getContact());
+					leaseBuilding.setDeleteFlag((byte)0);
+					enterpriseApplyBuildingProvider.createLeaseBuilding(leaseBuilding);
+				}
+				resourceCategories[0] = communityProvider.findResourceCategoryAssignment(request.getSourceId(),
 						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 			}
 
@@ -556,10 +573,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			for (Long id: buildingIds) {
 
 				LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(id);
-				if (n == buildingIds.size()) {
-					sb.append(leaseBuilding.getName());
-				}else {
-					sb.append(leaseBuilding.getName()).append(",");
+				if (null != leaseBuilding) {
+					if (n == buildingIds.size()) {
+						sb.append(leaseBuilding.getName());
+					}else {
+						sb.append(leaseBuilding.getName()).append(",");
+					}
 				}
 				n++;
 			}
@@ -801,7 +820,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		cmd.setBuildingId(processBuildingId(cmd.getBuildingId(), adminFlag));
 
 		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
-
+		leasePromotion.setNamespaceId(UserContext.getCurrentNamespaceId());
 		if (null != cmd.getEnterTime()) {
 			leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
 		}
@@ -919,14 +938,16 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			enterpriseApplyEntryProvider.deleteLeasePromotionAttachment(EntityType.LEASE_PROMOTION.getCode(), leasePromotion.getId());
 			addAttachments(cmd.getAttachments(), leasePromotion);
 
-			enterpriseApplyBuildingProvider.deleteLeasePromotionCommunity(leasePromotion.getId());
-			if (null != cmd.getCommunityIds()) {
-				cmd.getCommunityIds().forEach(m -> {
-					LeasePromotionCommunity leasePromotionCommunity = new LeasePromotionCommunity();
-					leasePromotionCommunity.setLeasePromotionId(leasePromotion.getId());
-					leasePromotionCommunity.setCommunityId(m);
-					enterpriseApplyBuildingProvider.createLeasePromotionCommunity(leasePromotionCommunity);
-				});
+			if (leasePromotion.getIssuerType().equals(LeaseIssuerType.ORGANIZATION.getCode())) {
+				enterpriseApplyBuildingProvider.deleteLeasePromotionCommunity(leasePromotion.getId());
+				if (null != cmd.getCommunityIds()) {
+					cmd.getCommunityIds().forEach(m -> {
+						LeasePromotionCommunity leasePromotionCommunity = new LeasePromotionCommunity();
+						leasePromotionCommunity.setLeasePromotionId(leasePromotion.getId());
+						leasePromotionCommunity.setCommunityId(m);
+						enterpriseApplyBuildingProvider.createLeasePromotionCommunity(leasePromotionCommunity);
+					});
+				}
 			}
 
 			BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);

@@ -51,6 +51,7 @@ public class BuildingForRentDTO {
 	private String buildingName;
 	private String   rentPosition;
 	private String   rentType;
+	private String   posterUri;
 	private String   posterUrl;
 	private String   rentAreas;
 	private String   contacts;
@@ -89,6 +90,14 @@ public class BuildingForRentDTO {
 
 //	private Long requestFormId;
 
+
+	public String getPosterUri() {
+		return posterUri;
+	}
+
+	public void setPosterUri(String posterUri) {
+		this.posterUri = posterUri;
+	}
 
 	public List<ProjectDTO> getProjectDTOS() {
 		return projectDTOS;

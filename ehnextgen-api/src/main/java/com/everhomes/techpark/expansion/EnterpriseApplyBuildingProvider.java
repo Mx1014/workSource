@@ -17,6 +17,8 @@ public interface EnterpriseApplyBuildingProvider {
 
     LeaseBuilding findLeaseBuildingByBuildingId(Long buildingId);
 
+    LeaseBuilding findLeaseBuildingByName(Long communityId, String name);
+
     void createLeasePromotionCommunity(LeasePromotionCommunity leasePromotionCommunity);
 
     List<Long> listLeasePromotionCommunities(Long id);
