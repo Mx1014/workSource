@@ -775,10 +775,14 @@ public class AssetServiceImpl implements AssetService {
             c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
             addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, tempDuration.floatValue(),billDay);
         }
-        c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)+1);
+        //C3 即账期前进一个月
+        c3.add(Calendar.MONTH,1);
         c3.set(Calendar.DAY_OF_MONTH,c3.getActualMinimum(Calendar.DAY_OF_MONTH));
         Calendar c4 = Calendar.getInstance();
         c4.setTime(c3.getTime());
+        //c4 must be ahead of c3 for one month
+        c4.add(Calendar.MONTH,1);
+
 
         while(c4.compareTo(c2) == -1 || c4.compareTo(c2) == 0) {
             //each month exactly
@@ -786,12 +790,12 @@ public class AssetServiceImpl implements AssetService {
             c5.setTime(c3.getTime());
             c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
             addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, duration,billDay);
-            c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)+1);
+            c3.add(Calendar.MONTH,1);
             c3.set(Calendar.DAY_OF_MONTH,c3.getActualMinimum(Calendar.DAY_OF_MONTH));
-            c4.set(Calendar.MONTH,c4.get(Calendar.MONTH)+1);
+            c4.add(Calendar.MONTH,1);
             c4.set(Calendar.DAY_OF_MONTH,c4.getActualMinimum(Calendar.DAY_OF_MONTH));
         }
-        if(c2.compareTo(c4) < 0){
+        if(c2.compareTo(c4) < 0 && c3.compareTo(c2) < 0){
             //less than one month
             duration = ((float)c2.get(Calendar.DAY_OF_MONTH)-(float)c2.getActualMinimum(Calendar.DAY_OF_MONTH))/(float)c2.getActualMaximum(Calendar.DAY_OF_MONTH);
             addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c2, c3, duration,billDay);
@@ -812,17 +816,21 @@ public class AssetServiceImpl implements AssetService {
         Calendar c3 = Calendar.getInstance();
         // c3 starts as the begin of the contract
         c3.setTime(dateStrBegin);
+        int day = c3.get(Calendar.DAY_OF_MONTH);
 
-        c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)-1);
         Calendar c4 = Calendar.getInstance();
         c4.setTime(c3.getTime());
-        c4.set(Calendar.MONTH,c4.get(Calendar.MONTH)+1);
+        c4.add(Calendar.MONTH,1);
+        if(c4.getActualMaximum(Calendar.DAY_OF_MONTH)<day){
+            c4.set(Calendar.DAY_OF_MONTH,c4.getActualMaximum(Calendar.DAY_OF_MONTH));
+        }else{
+            c4.set(Calendar.DAY_OF_MONTH,day);
+        }
 
         if(c4.compareTo(c2) == 0){
             // one month
             // get dto and add to dtos
             float duration = 1;
-            c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)-1);
             addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c2, c3, duration,billDay);
         }else{
             while(c4.compareTo(c2) != 1) {
@@ -830,12 +838,26 @@ public class AssetServiceImpl implements AssetService {
                 float duration = 1;
                 Calendar c5 = Calendar.getInstance();
                 c5.setTime(c3.getTime());
-                c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
+                if(c5.getActualMaximum(Calendar.DAY_OF_MONTH)<day){
+                    c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
+                }else{
+                    c5.set(Calendar.DAY_OF_MONTH,day);
+                }
                 addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, duration,billDay);
-                c3.set(Calendar.MONTH,c3.get(Calendar.MONTH)+1);
-                c4.set(Calendar.MONTH,c4.get(Calendar.MONTH)+1);
+                c3.add(Calendar.MONTH,1);
+                if(c3.getActualMaximum(Calendar.DAY_OF_MONTH)<day){
+                    c3.set(Calendar.DAY_OF_MONTH,c3.getActualMaximum(Calendar.DAY_OF_MONTH));
+                }else{
+                    c3.set(Calendar.DAY_OF_MONTH,day);
+                }
+                c4.add(Calendar.MONTH,1);
+                if(c4.getActualMaximum(Calendar.DAY_OF_MONTH)<day){
+                    c4.set(Calendar.DAY_OF_MONTH,c4.getActualMaximum(Calendar.DAY_OF_MONTH));
+                }else{
+                    c4.set(Calendar.DAY_OF_MONTH,day);
+                }
             }
-            if(c4.compareTo(c2) != 0){
+            if(c4.compareTo(c2) == 1 && c2.compareTo(c3) == 1){
                 //less than one month
                 int c2day = c2.get(Calendar.DAY_OF_MONTH);
                 int c3day = c3.get(Calendar.DAY_OF_MONTH);
@@ -1008,7 +1030,7 @@ public class AssetServiceImpl implements AssetService {
 //        dto.setDateStrEnd(sdf.format(c2.getTime()));
         Calendar c6 = Calendar.getInstance();
         c6.setTime(c3.getTime());
-        c6.set(Calendar.MONTH,c3.get(Calendar.MONTH)+1);
+        c6.add(Calendar.MONTH,1);
         c6.set(Calendar.DAY_OF_MONTH,billDay);
         dto.setDueDateStr(sdf.format(c6.getTime()));
         dto.setDateStrEnd(sdf.format(c5.getTime()));
