@@ -16,14 +16,6 @@ ALTER TABLE eh_enterprise_op_requests DROP COLUMN building_id;
 ALTER TABLE `eh_lease_promotion_attachments` ADD COLUMN `owner_type` VARCHAR(128) NOT NULL AFTER `id`;
 ALTER TABLE `eh_lease_promotion_attachments` CHANGE COLUMN `lease_id` `owner_id` BIGINT NOT NULL AFTER `id`;
 
-ALTER TABLE `eh_lease_promotions` DROP COLUMN community_id;
-ALTER TABLE `eh_lease_promotions` ADD COLUMN `building_name` VARCHAR(512) DEFAULT NULL AFTER `building_id`;
-ALTER TABLE `eh_lease_promotions` DROP COLUMN `subject`;
-ALTER TABLE `eh_lease_promotions` DROP COLUMN `rent_position`;
-ALTER TABLE `eh_lease_promotions` ADD COLUMN `update_uid` bigint(20) DEFAULT NULL AFTER `update_time`;
-ALTER TABLE `eh_lease_promotions` ADD COLUMN `apartment_name` varchar(128) DEFAULT NULL AFTER `address_id`;
-
-
 CREATE TABLE `eh_lease_promotion_communities` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `lease_promotion_id` bigint(20) NOT NULL COMMENT 'lease promotion id',
@@ -32,6 +24,19 @@ CREATE TABLE `eh_lease_promotion_communities` (
   `create_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET @id = (SELECT IFNULL(MAX(id),1) FROM `eh_lease_promotion_communities`);
+INSERT INTO `eh_lease_promotion_communities` (`id`, `lease_promotion_id`, `community_id`, `creator_uid`, `create_time`)
+	SELECT (@id := @id + 1), id, community_id, create_uid, NOW() from eh_lease_promotions;
+
+ALTER TABLE `eh_lease_promotions` DROP COLUMN community_id;
+ALTER TABLE `eh_lease_promotions` DROP COLUMN `subject`;
+ALTER TABLE `eh_lease_promotions` DROP COLUMN `rent_position`;
+
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `building_name` VARCHAR(512) DEFAULT NULL AFTER `building_id`;
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `update_uid` bigint(20) DEFAULT NULL AFTER `update_time`;
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `apartment_name` varchar(128) DEFAULT NULL AFTER `address_id`;
+
 
 CREATE TABLE `eh_lease_buildings` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
