@@ -89,8 +89,6 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApplyEntryServiceImpl.class);
 
-    private static final long OTHER_BUILDING_ID = 0;
-
 	private SmsProvider smsProvider;
 	private ContractProvider contractProvider;
 	private BuildingProvider buildingProvider;
@@ -224,8 +222,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 		response.setNextPageAnchor(locator.getAnchor());
 
-		List<EnterpriseApplyEntryDTO> dtos = enterpriseOpRequests.stream().map(
-			this::populateEnterpriseApplyEntryDTO).collect(Collectors.toList());
+		List<EnterpriseApplyEntryDTO> dtos = enterpriseOpRequests.stream().map(this::populateEnterpriseApplyEntryDTO)
+				.collect(Collectors.toList());
 
 		response.setEntrys(dtos);
 		return response;
@@ -237,15 +235,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		//对于有合同的(一定是续租)
 		if(null != enterpriseOpRequest.getContractId()){
 			Contract contract = contractProvider.findContractById(enterpriseOpRequest.getContractId());
-			if(null != contract)
+			if(null != contract) {
 				dto.setContract(organizationService.processContract(contract));
-		}
-
-		//填充楼栋门牌
-		if (null != enterpriseOpRequest.getAddressId()){
-			Address address = addressProvider.findAddressById(enterpriseOpRequest.getAddressId());
-			if (null != address){
-				dto.setApartmentName(address.getApartmentName());
 			}
 		}
 
@@ -273,12 +264,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if(dto.getApplyType() == ApplyEntryApplyType.RENEW.getCode()){
 
 		}else if(ApplyEntrySourceType.BUILDING.getCode().equals(dto.getSourceType())){
-			//园区介绍处的申请
-//			LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(dto.getSourceId());
-//			if(null != leaseBuilding){
-//				buildings.add(processBuildingDTO(leaseBuilding));
-//			}
-
 			GetGeneralFormValuesCommand cmd2 = new GetGeneralFormValuesCommand();
 			cmd2.setSourceType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
 			cmd2.setSourceId(dto.getId());
@@ -287,6 +272,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(dto.getSourceType())){
 			//虚位以待处的申请
 			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(dto.getSourceId());
+
+			dto.setApartmentName(leasePromotion.getApartmentName());
+
 			//当招租信息的buildingId是0的时候，表示是手填的楼栋信息，返回手填的楼栋信息
 			if(leasePromotion.getBuildingId() == 0L){
 				LeaseBuilding leaseBuilding = new LeaseBuilding();
@@ -300,18 +288,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd2);
 			dto.setFormValues(formValues);
 		}else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(dto.getSourceType())){
-			//创客入驻处的申请
-//			YellowPage yellowPage = yellowPageProvider.getYellowPageById(dto.getSourceId());
-//			if(null != yellowPage){
-//				if(yellowPage.getBuildingId()!=null){
-//					LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(yellowPage.getBuildingId());
-//
-//					if (null != leaseBuilding) {
-//						buildings.add(processBuildingDTO(leaseBuilding));
-//					}
-//				}
-//			}
+
 		}
+
+		//填充楼栋门牌
+		if (null != enterpriseOpRequest.getAddressId()){
+			Address address = addressProvider.findAddressById(enterpriseOpRequest.getAddressId());
+			if (null != address){
+				dto.setApartmentName(address.getApartmentName());
+			}
+		}
+
 		dto.setBuildings(buildings);
 
 		return dto;
@@ -350,11 +337,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			String projectType = EntityType.COMMUNITY.getCode();
 			Long projectId = cmd.getCommunityId();
 
-			Set<Long> buildingIds = new HashSet<>();
 			ResourceCategoryAssignment[] resourceCategories = new ResourceCategoryAssignment[1];
 
 			//添加楼栋关联关系
-			String buildingName = addEnterpriseOpRequestBuildings(request, buildingIds, resourceCategories);
+			String buildingName = addEnterpriseOpRequestBuildings(request, resourceCategories);
 
 			if(null != resourceCategories[0] && null!= resourceCategories[0].getResourceCategryId()) {
 				projectId = resourceCategories[0].getResourceCategryId();
@@ -363,7 +349,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 			FlowCase flowCase1 = null;
     		if (LeaseIssuerType.ORGANIZATION.getCode().equals(request.getIssuerType())) {
-				flowCase1 = this.createFlowCase(request, projectId, projectType, buildingIds, buildingName);
+				flowCase1 = this.createFlowCase(request, projectId, projectType, buildingName);
                 request.setFlowcaseId(flowCase1.getId());
             }
 			enterpriseApplyEntryProvider.updateApplyEntry(request);
@@ -379,11 +365,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return resp;
 	}
 
-	private String addEnterpriseOpRequestBuildings(EnterpriseOpRequest request, Set<Long> buildingIds,
-			ResourceCategoryAssignment[] resourceCategories) {
+	private String addEnterpriseOpRequestBuildings(EnterpriseOpRequest request, ResourceCategoryAssignment[] resourceCategories) {
 
 		String issuerType = LeaseIssuerType.ORGANIZATION.getCode();
 		String buildingName = null;
+		Set<Long> buildingIds = new HashSet<>();
 
 		EnterpriseOpRequestBuilding opRequestBuilding = new EnterpriseOpRequestBuilding();
 		opRequestBuilding.setEnterpriseOpRequestsId(request.getId());
@@ -434,7 +420,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 						if (null != leaseBuilding) {
 							opRequestBuilding.setBuildingId(leaseBuilding.getId());
 							enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
-
+							//设置门牌地址
 							request.setAddressId(address.getId());
 						}
 					}
@@ -455,26 +441,39 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			//3. 园区介绍直接就是楼栋的地址
 
 			LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(request.getSourceId());
-			if (null != leaseBuilding && leaseBuilding.getBuildingId() != 0L) {
-				resourceCategories[0] = communityProvider.findResourceCategoryAssignment(leaseBuilding.getBuildingId(),
-						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
-			}else {
+			if (null != leaseBuilding) {
 
 				opRequestBuilding.setBuildingId(request.getSourceId());
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
-				//数据不一致时，将项目管理中的楼栋同步到 招租管理楼栋
-				Building building = communityProvider.findBuildingById(request.getSourceId());
 
-				leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByName(building.getCommunityId(), building.getName());
-				if (null == leaseBuilding) {
-					leaseBuilding = ConvertHelper.convert(building, LeaseBuilding.class);
-					leaseBuilding.setBuildingId(building.getId());
-					leaseBuilding.setManagerContact(building.getContact());
-					leaseBuilding.setDeleteFlag((byte)0);
-					enterpriseApplyBuildingProvider.createLeaseBuilding(leaseBuilding);
+				if (leaseBuilding.getBuildingId() != 0L) {
+					resourceCategories[0] = communityProvider.findResourceCategoryAssignment(leaseBuilding.getBuildingId(),
+							EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				}
-				resourceCategories[0] = communityProvider.findResourceCategoryAssignment(request.getSourceId(),
-						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
+			}else {
+				leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(request.getSourceId());
+				if (null != leaseBuilding) {
+					opRequestBuilding.setBuildingId(leaseBuilding.getId());
+					enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
+
+					//数据不一致时，将项目管理中的楼栋同步到 招租管理楼栋
+					Building building = communityProvider.findBuildingById(request.getSourceId());
+
+					if (null != building) {
+						leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByName(building.getCommunityId(), building.getName());
+						if (null == leaseBuilding) {
+							leaseBuilding = ConvertHelper.convert(building, LeaseBuilding.class);
+							leaseBuilding.setBuildingId(building.getId());
+							leaseBuilding.setManagerContact(building.getContact());
+							leaseBuilding.setDeleteFlag((byte)0);
+							enterpriseApplyBuildingProvider.createLeaseBuilding(leaseBuilding);
+						}
+						resourceCategories[0] = communityProvider.findResourceCategoryAssignment(request.getSourceId(),
+								EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
+					}
+					//更新sourceId为 转换之后的leaseBuildingId
+					request.setSourceId(leaseBuilding.getId());
+				}
 			}
 
 		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(request.getSourceType())){
@@ -482,6 +481,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(request.getSourceId());
 			//兼容老版本app，默认设置为管理公司发布，如果是招租信息的申请，这里取当前招租信息的发布类型
 			issuerType = leasePromotion.getIssuerType();
+
+			//设置门牌地址
+			request.setAddressId(leasePromotion.getAddressId());
 
 			opRequestBuilding.setBuildingId(leasePromotion.getBuildingId());
 			enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
@@ -502,6 +504,29 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 		//从招租信息获取发布人信息，填充到申请信息中
 		request.setIssuerType(issuerType);
+
+		return parseBuildingName(buildingIds, buildingName);
+	}
+
+	private String parseBuildingName(Set<Long> buildingIds, String buildingName) {
+
+		if (buildingName == null) {
+			StringBuilder sb = new StringBuilder();
+			int n = 1;
+			for (Long id: buildingIds) {
+
+				LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(id);
+				if (null != leaseBuilding) {
+					if (n == buildingIds.size()) {
+						sb.append(leaseBuilding.getName());
+					}else {
+						sb.append(leaseBuilding.getName()).append(",");
+					}
+				}
+				n++;
+			}
+			buildingName = defaultIfNull(sb.toString(),"").toString();
+		}
 
 		return buildingName;
 	}
@@ -528,7 +553,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return 0;
 	}
 
-    private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId, String projectType, Set<Long> buildingIds, String buildingName) {
+    private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId, String projectType, String buildingName) {
 
 		String tempOwnerId = String.valueOf(request.getCommunityId()) + convertSourceType(request.getSourceType());
 
@@ -550,7 +575,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         flowCaseCmd.setApplyUserId(request.getApplyUserId());
         flowCaseCmd.setReferId(request.getId());
         // flowCase摘要内容
-        flowCaseCmd.setContent(this.getBriefContent(request, buildingIds, buildingName));
+        flowCaseCmd.setContent(this.getBriefContent(request, buildingName));
         flowCaseCmd.setReferType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
         flowCaseCmd.setProjectId(projectId);
         
@@ -568,27 +593,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
     }
 
-    private String getBriefContent(EnterpriseOpRequest request, Set<Long> buildingIds, String buildingName) {
+    private String getBriefContent(EnterpriseOpRequest request, String buildingName) {
         String locale = UserContext.current().getUser().getLocale();
         Map<String, Object> map = new HashMap<>();
-
-        if (buildingName == null) {
-			StringBuilder sb = new StringBuilder();
-			int n = 1;
-			for (Long id: buildingIds) {
-
-				LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(id);
-				if (null != leaseBuilding) {
-					if (n == buildingIds.size()) {
-						sb.append(leaseBuilding.getName());
-					}else {
-						sb.append(leaseBuilding.getName()).append(",");
-					}
-				}
-				n++;
-			}
-			buildingName = defaultIfNull(sb.toString(),"").toString();
-		}
 
         map.put("buildingName", buildingName);
 
