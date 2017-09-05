@@ -1495,8 +1495,8 @@ public class SequenceServiceImpl implements SequenceService {
         	return dbContext.select(Tables.EH_YZX_SMS_LOGS.ID.max()).from(Tables.EH_YZX_SMS_LOGS).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhArchivesContactsSticky.class, Tables.EH_ARCHIVES_CONTACTS_STICKY.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_ARCHIVES_CONTACTS_STICKY.ID.max()).from(Tables.EH_ARCHIVES_CONTACTS_STICKY).fetchOne().value1();
+        syncTableSequence(null, EhArchivesStickyContacts.class, Tables.EH_ARCHIVES_STICKY_CONTACTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ARCHIVES_STICKY_CONTACTS.ID.max()).from(Tables.EH_ARCHIVES_STICKY_CONTACTS).fetchOne().value1();
         });
 
         syncTableSequence(null, EhArchivesDismissEmployees.class, Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.getName(), (dbContext) -> {

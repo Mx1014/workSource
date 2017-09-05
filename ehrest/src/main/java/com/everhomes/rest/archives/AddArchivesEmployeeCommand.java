@@ -8,17 +8,17 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId: 公司 id</li>
  * <li>contactName: 员工姓名</li>
  * <li>checkInTime: 入职日期</li>
- * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣</li>
- * <li>employeeStatus: 工状态, 0: 试用 1: 在职 2: 离职 </li>
+ * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣 {@link com.everhomes.rest.organization.EmployeeType}</li>
+ * <li>employeeStatus: 工状态, 0: 试用 1: 在职 2: 离职 {@link com.everhomes.rest.organization.EmployeeStatus}</li>
  * <li>employmentTime: 转正时间</li>
  * <li>departmentId: 部门 id</li>
  * <li>jobPositionId: 职务</li>
  * <li>employeeNo: 工号</li>
  * <li>contactShortToken: 手机短号</li>
- * <li>email: 工作邮箱</li>
+ * <li>workEmail: 工作邮箱</li>
  * <li>workingPlace: 工作地点</li>
  * <li>contractId: 合同主体</li>
- * <li>areaCode: 手机区号</li>
+ * <li>regionCode: 手机区号</li>
  * <li>contactToken: 手机号</li>
  * </ul>
  */
@@ -48,13 +48,13 @@ public class AddArchivesEmployeeCommand {
 
     private String contactShortToken;
 
-    private String email;
+    private String workEmail;
 
-    private String workingPlace;
+    private Long workingPlace;
 
     private Long contractId;
 
-    private String areaCode;
+    private String regionCode;
 
     private String contactToken;
 
@@ -149,19 +149,19 @@ public class AddArchivesEmployeeCommand {
         this.contactShortToken = contactShortToken;
     }
 
-    public String getEmail() {
-        return email;
+    public String getWorkEmail() {
+        return workEmail;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setWorkEmail(String workEmail) {
+        this.workEmail = workEmail;
     }
 
-    public String getWorkingPlace() {
+    public Long getWorkingPlace() {
         return workingPlace;
     }
 
-    public void setWorkingPlace(String workingPlace) {
+    public void setWorkingPlace(Long workingPlace) {
         this.workingPlace = workingPlace;
     }
 
@@ -181,12 +181,12 @@ public class AddArchivesEmployeeCommand {
         this.organizationId = organizationId;
     }
 
-    public String getAreaCode() {
-        return areaCode;
+    public String getRegionCode() {
+        return regionCode;
     }
 
-    public void setAreaCode(String areaCode) {
-        this.areaCode = areaCode;
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
     }
 
     public String getContactToken() {

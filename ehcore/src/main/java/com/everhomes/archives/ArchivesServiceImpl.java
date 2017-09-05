@@ -82,7 +82,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             memberDetail.setContactShortToken(cmd.getContactShortToken());
             memberDetail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
             memberDetail.setJobPosition(cmd.getJobPosition());
-            memberDetail.setEmail(cmd.getEmail());
+            memberDetail.setWorkEmail(cmd.getWorkEmail());
             organizationProvider.updateOrganizationMemberDetails(memberDetail,memberDetail.getId());
             dto.setDetailId(detailId);
             dto.setContactName(memberDetail.getContactName());
@@ -310,9 +310,8 @@ public class ArchivesServiceImpl implements ArchivesService {
                     datas.remove(0);
                 }
 
-                //  开始导入
+                //  开始导入，同时设置导入结果
                 importArchivesContactsFiles(datas, response);
-//List<ImportFileResultLog<ImportArchivesContactsDTO>> result =
                 //  设置导入结果
 /*                response.setTotalCount((long) datas.size());
                 response.setFailCount((long) result.size());*/
@@ -480,26 +479,43 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public ArchivesEmployeeDTO addArchivesEmployee(AddArchivesEmployeeCommand cmd) {
 
+        ArchivesEmployeeDTO dto = new ArchivesEmployeeDTO();
+
         //  1.组织架构添加人员
         AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
         addCommand.setOrganizationId(cmd.getOrganizationId());
         addCommand.setContactName(cmd.getContactName());
+        addCommand.setGender(cmd.getGender());
         addCommand.setCheckInTime(cmd.getCheckInTime());
         addCommand.setEmployeeType(cmd.getEmployeeType());
         addCommand.setEmployeeStatus(cmd.getEmployeeStatus());
         addCommand.setEmploymentTime(cmd.getEmploymentTime());
-//        addCommand.setGender(cmd.getGender());
+        addCommand.setDepartmentIds(Arrays.asList(cmd.getDepartmentId()));
         addCommand.setContactToken(cmd.getContactToken());
-//        addCommand.setDepartmentIds(cmd.getDepartmentId());
-//        addCommand.setJobPositionIds(cmd.getJobPositionId());
         if(cmd.getEmployeeNo() != null)
             addCommand.setEmployeeNo(cmd.getEmployeeNo());
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 
         //  2.获得 detailId 然后处理其它信息
-        OrganizationMemberDetails result = organizationProvider.findOrganizationMemberDetailsByDetailId(memberDTO.getDetailId());
-
-        return null;
+        Long detailId = null;
+        if (memberDTO != null)
+            detailId = memberDTO.getDetailId();
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        if(memberDetail!=null) {
+            memberDetail.setEnName(cmd.getEnName());
+            memberDetail.setJobPosition(cmd.getJobPosition());
+            memberDetail.setDepartment(getDepartmentName(Arrays.asList(cmd.getDepartmentId())));
+            memberDetail.setContactShortToken(cmd.getContactShortToken());
+            memberDetail.setWorkEmail(cmd.getWorkEmail());
+            memberDetail.setWorkPlace(cmd.getWorkingPlace());
+            memberDetail.setContractId(cmd.getContractId());
+            memberDetail.setRegionCode(cmd.getRegionCode());
+            organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
+            dto.setDetailId(detailId);
+            dto.setContactName(memberDetail.getContactName());
+            dto.setContactToken(memberDetail.getContactToken());
+        }
+        return dto;
     }
 
     @Override

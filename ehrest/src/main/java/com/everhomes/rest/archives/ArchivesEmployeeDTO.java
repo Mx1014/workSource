@@ -14,7 +14,7 @@ import java.util.List;
  * <li>jobPositions: 职务</li>
  * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>contactToken: 手机号</li>
- * <li>email: 邮箱</li>
+ * <li>workEmail: 邮箱</li>
  * <li>employmentTime: 转正日期</li>
  * <li>contractTime: 合同日期</li>
  * </ul>
@@ -22,6 +22,10 @@ import java.util.List;
 public class ArchivesEmployeeDTO {
 
     private Long detailId;
+
+    private Long targetId;
+
+    private String targetType;
 
     private String contactName;
 
@@ -34,7 +38,7 @@ public class ArchivesEmployeeDTO {
 
     private String contactToken;
 
-    private String email;
+    private String workEmail;
 
     private String employmentTime;
 
@@ -91,12 +95,12 @@ public class ArchivesEmployeeDTO {
         this.contactToken = contactToken;
     }
 
-    public String getEmail() {
-        return email;
+    public String getWorkEmail() {
+        return workEmail;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setWorkEmail(String workEmail) {
+        this.workEmail = workEmail;
     }
 
     public String getEmploymentTime() {

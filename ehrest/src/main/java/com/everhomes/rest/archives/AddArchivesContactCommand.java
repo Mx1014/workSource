@@ -14,7 +14,7 @@ import java.util.List;
  * <li>regionCode: 区号</li>
  * <li>contactToken: 联系号码</li>
  * <li>contactShortToken: 手机短号</li>
- * <li>email: 成员邮箱</li>
+ * <li>workEmail: 工作邮箱</li>
  * <li>departmentIds: 选择的部门</li>
  * <li>jobPosition: 填写职位</li>
  * <li>visibleFlag: 隐私设置: 0-显示, 1-隐藏</li>
@@ -36,7 +36,7 @@ public class AddArchivesContactCommand {
 
     private String contactShortToken;
 
-    private String email;
+    private String workEmail;
 
     @ItemType(Long.class)
     private List<Long> departmentIds;
@@ -104,12 +104,12 @@ public class AddArchivesContactCommand {
         this.contactShortToken = contactShortToken;
     }
 
-    public String getEmail() {
-        return email;
+    public String getWorkEmail() {
+        return workEmail;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setWorkEmail(String workEmail) {
+        this.workEmail = workEmail;
     }
 
     public List<Long> getDepartmentIds() {

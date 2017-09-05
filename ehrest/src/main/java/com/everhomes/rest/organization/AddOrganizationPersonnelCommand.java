@@ -31,11 +31,11 @@ import com.everhomes.util.StringHelper;
 public class AddOrganizationPersonnelCommand {
 	
     @NotNull
-    private Long   organizationId;
+    private Long organizationId;
    
 	private String targetType;
 	
-	private Long   targetId;
+	private Long targetId;
 	
 	private String contactName;
 	
