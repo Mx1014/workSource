@@ -1771,7 +1771,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             List<CommunityDTO> dtos = new ArrayList<>();
             dtos.addAll(sortMap.values());
             if(pageSize < dtos.size()){
-                dtos = dtos.subList(0, pageSize);
+                dtos = dtos.subList(0, pageSize - 1);
             }
             response.setDtos(dtos);
             return response;

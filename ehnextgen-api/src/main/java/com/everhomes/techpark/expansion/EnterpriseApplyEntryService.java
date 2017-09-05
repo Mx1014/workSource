@@ -8,7 +8,9 @@ import java.util.List;
 
 
 public interface EnterpriseApplyEntryService {
-	
+
+	long OTHER_BUILDING_ID = 0L;
+
 	GetEnterpriseDetailByIdResponse getEnterpriseDetailById(GetEnterpriseDetailByIdCommand cmd);
 	
 	ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd);

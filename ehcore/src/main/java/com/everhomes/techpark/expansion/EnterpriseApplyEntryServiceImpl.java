@@ -89,8 +89,6 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApplyEntryServiceImpl.class);
 
-    private static final long OTHER_BUILDING_ID = 0;
-
 	private SmsProvider smsProvider;
 	private ContractProvider contractProvider;
 	private BuildingProvider buildingProvider;
@@ -457,6 +455,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				if (null != leaseBuilding) {
 					opRequestBuilding.setBuildingId(leaseBuilding.getId());
 					enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
+
 					//数据不一致时，将项目管理中的楼栋同步到 招租管理楼栋
 					Building building = communityProvider.findBuildingById(request.getSourceId());
 
@@ -472,6 +471,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 						resourceCategories[0] = communityProvider.findResourceCategoryAssignment(request.getSourceId(),
 								EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 					}
+					//更新sourceId为 转换之后的leaseBuildingId
+					request.setSourceId(leaseBuilding.getId());
 				}
 			}
 
