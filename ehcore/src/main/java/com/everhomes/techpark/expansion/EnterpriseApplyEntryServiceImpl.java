@@ -275,7 +275,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			//虚位以待处的申请
 			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(dto.getSourceId());
 
-			dto.setApartmentName(leasePromotion.getAddress());
+			dto.setApartmentName(leasePromotion.getApartmentName());
 
 			//当招租信息的buildingId是0的时候，表示是手填的楼栋信息，返回手填的楼栋信息
 			if(leasePromotion.getBuildingId() == 0L){
