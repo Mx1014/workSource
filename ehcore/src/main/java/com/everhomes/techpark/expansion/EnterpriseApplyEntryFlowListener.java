@@ -230,10 +230,6 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
                 buildingName = sb.toString();
             }else {
-//                LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(applyEntry.getBuildingId());
-//                if (null != leaseBuilding) {
-//                    buildingName = leaseBuilding.getName();
-//                }
                 buildingName = getBuildingName(applyEntry.getId());
             }
 
@@ -243,12 +239,11 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 			if(null != leaseBuilding){
                 buildingName = leaseBuilding.getName();
             }
-		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType())||
-				ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(applyEntry.getSourceType())){
+		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType())){
 
             LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
 
-            if (leasePromotion.getBuildingId() == 0L) {
+            if (leasePromotion.getBuildingId() == EnterpriseApplyEntryService.OTHER_BUILDING_ID) {
 
                 buildingName = leasePromotion.getBuildingName();
             }else {

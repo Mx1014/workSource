@@ -89,8 +89,6 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApplyEntryServiceImpl.class);
 
-    private static final long OTHER_BUILDING_ID = 0;
-
 	private SmsProvider smsProvider;
 	private ContractProvider contractProvider;
 	private BuildingProvider buildingProvider;
