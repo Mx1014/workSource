@@ -239,7 +239,11 @@ update eh_service_modules set instance_config = '{"displayType":"grid","detailFl
 update eh_service_modules set multiple_flag = 0 where id = 10100;
 update eh_service_modules set multiple_flag = 0 where id = 20100;
 
-
+update eh_service_modules set action_type = 46 where id = 50400;
+update eh_service_modules set action_type = 54 where id = 52000;
+update eh_service_modules set action_type = 56 where id = 70100;
+update eh_service_modules set action_type = 62 where id = 10100;
+update eh_service_modules set action_type = 65 where id = 52000;
 
 
 
