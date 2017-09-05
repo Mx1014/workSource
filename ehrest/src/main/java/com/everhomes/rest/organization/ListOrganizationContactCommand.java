@@ -57,6 +57,7 @@ public class ListOrganizationContactCommand {
     private Long contractPartyId;//合同主体
     private Long workPlaceId;//工作地点
 
+    @ItemType(Long.class)
     private List<Long> exceptIds;
 
     public ListOrganizationContactCommand() {
