@@ -376,13 +376,7 @@ public class ActivityServiceImpl implements ActivityService {
     	
     	//先删除已经过期未支付的活动 add by yanjun 20170417
     	this.cancelExpireRosters(cmd.getActivityId());
-    	
-    	LOGGER.debug("Before  enter.");
-    	this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
-    		LOGGER.debug("Enter Success.");
-    		return null;
-    	});
-    	LOGGER.debug("Exit Enter.");
+
     	// 把锁放在查询语句的外面，update by tt, 20170210
     	return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
@@ -395,6 +389,15 @@ public class ActivityServiceImpl implements ActivityService {
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 		        }
+
+				LOGGER.warn("------signup start userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
+				try {
+					Random random = new Random();
+					Thread.sleep(random.nextInt(1000));
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
         
 		        Post post = forumProvider.findPostById(activity.getPostId());
 		        if (post == null) {
@@ -415,6 +418,8 @@ public class ActivityServiceImpl implements ActivityService {
 
 		        	//add by yanjun 20170512
 		        	dto.setUserRosterId(oldRoster.getId());
+
+					LOGGER.warn("------ already sign  signup end userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
 
 		        	return dto;
 		        }
@@ -540,7 +545,10 @@ public class ActivityServiceImpl implements ActivityService {
 	            long signupStatEndTime = System.currentTimeMillis();
 	            LOGGER.debug("Signup success, totalElapse={}, rosterElapse={}, cmd={}", (signupStatEndTime - signupStatStartTime), 
 	            		(signupStatEndTime - rosterStatStartTime), cmd);
-	            return dto;
+
+				LOGGER.warn("------signup end userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
+				return dto;
 	        });
         }).first();
 	 }
@@ -1678,8 +1686,17 @@ public class ActivityServiceImpl implements ActivityService {
 	                 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 	                         ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 	             }
-	             
-	             //手动取消 要检查过期时间  add by yanjun 20170519
+
+				LOGGER.warn("------cancelSignup start userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
+				try {
+					Random random = new Random();
+					Thread.sleep(random.nextInt(1000));
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+				//手动取消 要检查过期时间  add by yanjun 20170519
 	             if(cmd.getCancelType() == null || cmd.getCancelType().byteValue()== ActivityCancelType.HAND.getCode()){
 	            	 if(activity.getSignupEndTime() != null && activity.getSignupEndTime().getTime() < DateHelper.currentGMTTime().getTime()){
 	            		 LOGGER.error("handle activity error, Can not cancel cause after signupEndTime. id={}", cmd.getActivityId());
@@ -1736,6 +1753,9 @@ public class ActivityServiceImpl implements ActivityService {
 	             sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_CANCEL_TO_CREATOR, null);
 	             long cancelEndTime = System.currentTimeMillis();
 	             LOGGER.debug("Canel the activity signup, elapse={}, cmd={}", (cancelEndTime - cancelStartTime), cmd);
+
+				LOGGER.warn("------cancelSignup end userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 	             return dto;
 	        	
 	        });
