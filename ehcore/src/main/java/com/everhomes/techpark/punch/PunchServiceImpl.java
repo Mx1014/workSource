@@ -6586,7 +6586,7 @@ public class PunchServiceImpl implements PunchService {
         }
         if(null != ptr){
             response.setPunchTimesPerDay(ptr.getPunchTimesPerDay());
-            for(Integer punchIntervalNo= 1;punchIntervalNo <= pdl.getPunchTimesPerDay()/2;punchIntervalNo++) {
+            for(Integer punchIntervalNo= 1;punchIntervalNo <= ptr.getPunchTimesPerDay()/2;punchIntervalNo++) {
                 PunchLogDTO dto1 = null;
                 PunchIntevalLogDTO intervalDTO = new PunchIntevalLogDTO();
                 intervalDTO.setPunchIntervalNo(punchIntervalNo);
