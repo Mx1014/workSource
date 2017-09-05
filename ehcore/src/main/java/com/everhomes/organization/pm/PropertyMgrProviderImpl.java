@@ -1272,6 +1272,19 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
+	public List<CommunityAddressMapping> listCommunityAddressMappingByAddressIds(List<Long> addressIds) {
+		List<CommunityAddressMapping> result = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		context.select().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+				.where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.in(addressIds))
+				.fetch().map(r->{
+			result.add(ConvertHelper.convert(r, CommunityAddressMapping.class));
+			return null;
+		});
+		return result;
+	}
+
+	@Override
 	public List<CommunityAddressMapping> listAddressMappingsByOrgId(Long orgId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 

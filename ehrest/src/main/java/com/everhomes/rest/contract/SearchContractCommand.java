@@ -5,6 +5,7 @@ package com.everhomes.rest.contract;
  * <li>namespaceId: 域空间id</li>
  * <li>communityId: 园区id</li>
  * <li>keywords: 查询关键词 合同名称/合同编号/客户名称</li>
+ * <li>customerCategoryId: 客户类型</li>
  * <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  * <li>contractType: 合同属性 参考{@link com.everhomes.rest.contract.ContractType}</li>
  * <li>categoryItemId: 合同类型</li>
@@ -18,6 +19,8 @@ public class SearchContractCommand {
 
     private Long communityId;
 
+    private Long customerCategoryId;
+
     private String keywords;
 
     private Long categoryItemId;
@@ -29,6 +32,14 @@ public class SearchContractCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    public Long getCustomerCategoryId() {
+        return customerCategoryId;
+    }
+
+    public void setCustomerCategoryId(Long customerCategoryId) {
+        this.customerCategoryId = customerCategoryId;
+    }
 
     public Long getCategoryItemId() {
         return categoryItemId;

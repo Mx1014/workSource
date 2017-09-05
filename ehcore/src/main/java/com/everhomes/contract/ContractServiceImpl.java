@@ -584,12 +584,12 @@ public class ContractServiceImpl implements ContractService {
 		command.setNamesapceId(contract.getNamespaceId());
 		command.setOwnerId(contract.getCommunityId());
 		command.setOwnerType("community");
-		command.setTargetId(contract.getCustomerId());
 		command.setContractId(contract.getId());
 		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
 			command.setTargetType("eh_organization");
 			EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
 			if(customer != null) {
+				command.setTargetId(customer.getOrganizationId());
 				command.setTargetName(customer.getName());
 				command.setNoticeTel(customer.getContactMobile());
 			}
@@ -599,6 +599,10 @@ public class ContractServiceImpl implements ContractService {
 			if(owner != null) {
 				command.setTargetName(owner.getContactName());
 				command.setNoticeTel(owner.getContactToken());
+				UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(owner.getNamespaceId(), owner.getContactToken());
+				if(identifier != null) {
+					command.setTargetId(identifier.getOwnerUid());
+				}
 			}
 		}
 		assetService.paymentExpectancies(command);
@@ -851,9 +855,6 @@ public class ContractServiceImpl implements ContractService {
 			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 			if(contractApartments != null && contractApartments.size() > 0) {
 				contractApartments.forEach(contractApartment -> {
-					contractApartment.setStatus(CommonStatus.INACTIVE.getCode());
-					contractBuildingMappingProvider.updateContractBuildingMapping(contractApartment);
-
 					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
 					addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
 					propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
@@ -869,6 +870,26 @@ public class ContractServiceImpl implements ContractService {
 			contractProvider.updateContract(contract);
 			addToFlowCase(contract);
 			contractSearcher.feedDoc(contract);
+
+			//发起审批要把门牌状态置为被占用
+			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+			if(contractApartments != null && contractApartments.size() > 0) {
+				List<Long> addressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+				List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
+				boolean allfree = true;
+				if(mappings != null && mappings.size() > 0) {
+					for(CommunityAddressMapping mapping : mappings) {
+						if(!AddressMappingStatus.FREE.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
+							allfree = false;
+							break;
+						}
+					}
+				}
+				if(!allfree) {
+//					throw
+				}
+			}
+
 		}
 
 	}
