@@ -151,7 +151,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		if (LeasePromotionFlag.ENABLED.getCode() == dto.getCustomFormFlag()) {
 
 			GetGeneralFormValuesCommand cmdValues = new GetGeneralFormValuesCommand();
-			cmdValues.setSourceType(EntityType.BUILDING.getCode());
+			cmdValues.setSourceType(EntityType.LEASE_BUILDING.getCode());
 			cmdValues.setSourceId(dto.getId());
 			cmdValues.setOriginFieldFlag(NormalFlag.NEED.getCode());
 			List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmdValues);
