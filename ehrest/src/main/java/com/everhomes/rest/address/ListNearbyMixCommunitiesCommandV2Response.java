@@ -18,7 +18,6 @@ public class ListNearbyMixCommunitiesCommandV2Response {
     private List<CommunityDTO> resudentials;
     @ItemType(CommunityDTO.class)
     private List<CommunityDTO> commercials;
-    @ItemType(CommunityDTO.class)
     private List<CommunityDTO> dtos;
 
     private Long nextPageAnchor;

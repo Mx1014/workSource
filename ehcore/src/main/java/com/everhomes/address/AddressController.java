@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.address.*;
+import com.everhomes.rest.enterprise.SearchEnterpriseCommunityCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -342,6 +343,20 @@ public class AddressController extends ControllerBase {
     @RestReturn(value=ListNearbyMixCommunitiesCommandV2Response.class)
     public RestResponse listNearbyMixCommunitiesV2(@Valid ListNearbyMixCommunitiesCommand cmd) {
         ListNearbyMixCommunitiesCommandV2Response res = addressService.listNearbyMixCommunitiesV2(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /address/listPopularCommunitiesWithType</b>
+     * <p>选择热门社区列表</p>
+     */
+    @RequestMapping("listPopularCommunitiesWithType")
+    @RestReturn(value=ListNearbyMixCommunitiesCommandV2Response.class)
+    public RestResponse listPopularCommunitiesWithType(@Valid ListNearbyMixCommunitiesCommand cmd) {
+        ListNearbyMixCommunitiesCommandV2Response res = addressService.listPopularCommunitiesWithType(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
