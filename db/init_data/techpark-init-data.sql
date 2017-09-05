@@ -1044,3 +1044,7 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1), 40220,'', 'EhNamespaces', 1000000 , 0);
 
 -- end by dengs,
+
+-- by R,2017.09.05 #14916 增加配置“用户行为统计分析”的菜单
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41330,'', 'EhNamespaces', 1000000,2);
