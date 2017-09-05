@@ -1435,6 +1435,10 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 	private void publishOPPushItem(PortalItemGroup itemGroup, String location){
+		List<LaunchPadItem> items = launchPadProvider.findLaunchPadItem(itemGroup.getNamespaceId(), itemGroup.getName(), location);
+		for (LaunchPadItem item: items) {
+			launchPadProvider.deleteLaunchPadItem(item.getId());
+		}
 		PortalLayout layout = portalLayoutProvider.findPortalLayoutById(itemGroup.getLayoutId());
 		LaunchPadItem item = new LaunchPadItem();
 		ItemGroupInstanceConfig instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
@@ -1443,6 +1447,7 @@ public class PortalServiceImpl implements PortalService {
 		item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
 		item.setMinVersion(1L);
 		item.setItemGroup(itemGroup.getName());
+		item.setItemLocation(location);
 		item.setItemLabel(instanceConfig.getTitle());
 		item.setItemName(instanceConfig.getTitle());
 		item.setDeleteFlag(DeleteFlagType.YES.getCode());

@@ -511,25 +511,42 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
     }
 	@Override
 	public List<LaunchPadItem> findLaunchPadItem(Integer nameSpaceId,String itemGroup,String itemName, Byte scopeCode, long scopeId) {
-		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
-        SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
+        return findLaunchPadItem(nameSpaceId, itemGroup, null, itemName, scopeCode, scopeId);
+	}
 
-        Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(itemGroup).and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME.eq(itemName));
-        if(nameSpaceId!=null)
-        	condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(nameSpaceId));
-        if(scopeCode != null){
-            condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode));
-            if(scopeId != 0)
-                condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
-        }
-       
-        step.where(condition).fetch().map(r ->{
-            items.add(ConvertHelper.convert(r, LaunchPadItem.class));
-            return null;
-        });
-        
-        return items;
+	@Override
+	public List<LaunchPadItem> findLaunchPadItem(Integer namespaceId,String itemGroup,String location) {
+		return findLaunchPadItem(namespaceId, itemGroup, location, null, null, null);
+	}
+
+	@Override
+	public List<LaunchPadItem> findLaunchPadItem(Integer namespaceId,String itemGroup, String location, String itemName, Byte scopeCode, Long scopeId) {
+		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
+
+		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(itemGroup);
+
+		if(!StringUtils.isEmpty(location)){
+			condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LOCATION.eq(location));
+		}
+		if(!StringUtils.isEmpty(itemName)){
+			condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME.eq(itemName));
+		}
+		if(namespaceId!=null)
+			condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId));
+		if(scopeCode != null){
+			condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode));
+			if(scopeId != 0)
+				condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
+		}
+
+		step.where(condition).fetch().map(r ->{
+			items.add(ConvertHelper.convert(r, LaunchPadItem.class));
+			return null;
+		});
+
+		return items;
 	}
 	
 	@Override
