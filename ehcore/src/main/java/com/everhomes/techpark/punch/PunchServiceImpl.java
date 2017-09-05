@@ -6553,9 +6553,9 @@ public class PunchServiceImpl implements PunchService {
         if (null != pr  ) {
             ptr = getPunchTimeRuleByRuleIdAndDate(pr, punchTime, userId);
         }
-        response.setPunchTimesPerDay(pdl.getPunchTimesPerDay());
         String[] statusList =null;
         if(null != pdl){
+            response.setPunchTimesPerDay(pdl.getPunchTimesPerDay());
             response.setStatusList(pdl.getStatusList());
             if(null!=pdl.getStatusList()){
                 String[] approvalStatus =null;
@@ -6581,55 +6581,55 @@ public class PunchServiceImpl implements PunchService {
                     }
                 }
             }
-        }
-        for(Integer punchIntervalNo= 1;punchIntervalNo <= pdl.getPunchTimesPerDay()/2;punchIntervalNo++) {
-            PunchLogDTO dto1 = null;
-            PunchIntevalLogDTO intervalDTO = new PunchIntevalLogDTO();
-            intervalDTO.setPunchIntervalNo(punchIntervalNo);
-            intervalDTO.setPunchLogs(new ArrayList<>());
-            PunchLog pl = findPunchLog(punchLogs,PunchType.ON_DUTY.getCode(),punchIntervalNo);
-            if(null == pl){
-                dto1 = new PunchLogDTO();
-                dto1.setClockStatus(PunchStatus.UNPUNCH.getCode());
-                dto1.setPunchType(PunchType.ON_DUTY.getCode());
-                dto1.setPunchIntervalNo(punchIntervalNo);
-                if(null != ptr)
-                    dto1.setRuleTime(findRuleTime(ptr,dto1.getPunchType(),punchIntervalNo));
-            }else{
-                dto1 = convertPunchLog2DTO(pl);
-            }
-            intervalDTO.getPunchLogs().add(dto1);
+            for(Integer punchIntervalNo= 1;punchIntervalNo <= pdl.getPunchTimesPerDay()/2;punchIntervalNo++) {
+                PunchLogDTO dto1 = null;
+                PunchIntevalLogDTO intervalDTO = new PunchIntevalLogDTO();
+                intervalDTO.setPunchIntervalNo(punchIntervalNo);
+                intervalDTO.setPunchLogs(new ArrayList<>());
+                PunchLog pl = findPunchLog(punchLogs,PunchType.ON_DUTY.getCode(),punchIntervalNo);
+                if(null == pl){
+                    dto1 = new PunchLogDTO();
+                    dto1.setClockStatus(PunchStatus.UNPUNCH.getCode());
+                    dto1.setPunchType(PunchType.ON_DUTY.getCode());
+                    dto1.setPunchIntervalNo(punchIntervalNo);
+                    if(null != ptr)
+                        dto1.setRuleTime(findRuleTime(ptr,dto1.getPunchType(),punchIntervalNo));
+                }else{
+                    dto1 = convertPunchLog2DTO(pl);
+                }
+                intervalDTO.getPunchLogs().add(dto1);
 
-            PunchLogDTO dto2 = null;
-            pl = findPunchLog(punchLogs,PunchType.OFF_DUTY.getCode(),punchIntervalNo);
-            if(null == pl){
-                dto2 = new PunchLogDTO();
-                dto2.setClockStatus(PunchStatus.UNPUNCH.getCode());
-                dto2.setPunchType(PunchType.OFF_DUTY.getCode());
-                dto2.setPunchIntervalNo(punchIntervalNo);
-                if(null != ptr)
-                    dto2.setRuleTime(findRuleTime(ptr,dto2.getPunchType(),punchIntervalNo));
-            }else{
-                dto2 = convertPunchLog2DTO(pl);
+                PunchLogDTO dto2 = null;
+                pl = findPunchLog(punchLogs,PunchType.OFF_DUTY.getCode(),punchIntervalNo);
+                if(null == pl){
+                    dto2 = new PunchLogDTO();
+                    dto2.setClockStatus(PunchStatus.UNPUNCH.getCode());
+                    dto2.setPunchType(PunchType.OFF_DUTY.getCode());
+                    dto2.setPunchIntervalNo(punchIntervalNo);
+                    if(null != ptr)
+                        dto2.setRuleTime(findRuleTime(ptr,dto2.getPunchType(),punchIntervalNo));
+                }else{
+                    dto2 = convertPunchLog2DTO(pl);
+                }
+                intervalDTO.getPunchLogs().add(dto2);
+                if (null == statusList) {
+                    intervalDTO.setStatus(processIntevalStatus(String.valueOf(dto1.getClockStatus()),String.valueOf(dto2.getClockStatus())));
+                }else{
+                    intervalDTO.setStatus(statusList[punchIntervalNo-1]);
+                }
+                PunchExceptionRequest exceptionRequest = punchProvider.findPunchExceptionRequest(userId, cmd.getEnterpriseId(),
+                        cmd.getQueryTime(), punchIntervalNo);
+                if(null != exceptionRequest) {
+                    FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getRequestId(),
+                            ApprovalRequestDefaultHandler.REFER_TYPE, PunchConstants.PUNCH_MODULE_ID);
+                    if (null != flowCase)
+                        intervalDTO.setRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(),
+                                FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
+                    else
+                        intervalDTO.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+                }
+                response.getIntervals().add(intervalDTO);
             }
-            intervalDTO.getPunchLogs().add(dto2);
-            if (null == statusList) {
-                intervalDTO.setStatus(processIntevalStatus(String.valueOf(dto1.getClockStatus()),String.valueOf(dto2.getClockStatus())));
-            }else{
-                intervalDTO.setStatus(statusList[punchIntervalNo-1]);
-            }
-            PunchExceptionRequest exceptionRequest = punchProvider.findPunchExceptionRequest(userId, cmd.getEnterpriseId(),
-                    cmd.getQueryTime(), punchIntervalNo);
-            if(null != exceptionRequest) {
-                FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getRequestId(),
-                        ApprovalRequestDefaultHandler.REFER_TYPE, PunchConstants.PUNCH_MODULE_ID);
-                if (null != flowCase)
-                    intervalDTO.setRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(),
-                            FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
-                else
-                    intervalDTO.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
-            }
-            response.getIntervals().add(intervalDTO);
         }
 //		}
 		return response;
