@@ -242,14 +242,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			}
 		}
 
-		//填充楼栋门牌
-		if (null != enterpriseOpRequest.getAddressId()){
-			Address address = addressProvider.findAddressById(enterpriseOpRequest.getAddressId());
-			if (null != address){
-				dto.setApartmentName(address.getApartmentName());
-			}
-		}
-
 		List<BuildingDTO> buildings = new ArrayList<>();
 
 		List<EnterpriseOpRequestBuilding> opBuildings = enterpriseOpRequestBuildingProvider.queryEnterpriseOpRequestBuildings(new ListingQueryBuilderCallback() {
@@ -282,6 +274,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(dto.getSourceType())){
 			//虚位以待处的申请
 			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(dto.getSourceId());
+
+			dto.setApartmentName(leasePromotion.getAddress());
+
 			//当招租信息的buildingId是0的时候，表示是手填的楼栋信息，返回手填的楼栋信息
 			if(leasePromotion.getBuildingId() == 0L){
 				LeaseBuilding leaseBuilding = new LeaseBuilding();
@@ -297,6 +292,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(dto.getSourceType())){
 
 		}
+
+		//填充楼栋门牌
+		if (null != enterpriseOpRequest.getAddressId()){
+			Address address = addressProvider.findAddressById(enterpriseOpRequest.getAddressId());
+			if (null != address){
+				dto.setApartmentName(address.getApartmentName());
+			}
+		}
+
 		dto.setBuildings(buildings);
 
 		return dto;
@@ -418,7 +422,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 						if (null != leaseBuilding) {
 							opRequestBuilding.setBuildingId(leaseBuilding.getId());
 							enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
-
+							//设置门牌地址
 							request.setAddressId(address.getId());
 						}
 					}
@@ -476,6 +480,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(request.getSourceId());
 			//兼容老版本app，默认设置为管理公司发布，如果是招租信息的申请，这里取当前招租信息的发布类型
 			issuerType = leasePromotion.getIssuerType();
+
+			//设置门牌地址
+			request.setAddressId(leasePromotion.getAddressId());
 
 			opRequestBuilding.setBuildingId(leasePromotion.getBuildingId());
 			enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
