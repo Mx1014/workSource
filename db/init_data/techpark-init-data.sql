@@ -1019,7 +1019,23 @@ INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`
 -- 新增一个自己的菜单，data_type为forum_activity/x，x为入口的entry_id
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`,`level`,`condition_type`,`category`)
 		VALUES (10990, '创客活动', 10000, null, 'forum_activity/2', 0, 2, '/10000/10990', 'park', 600, 10990, 2, 'project', 'module');
+-- 设置菜单权限
+set @eh_acl_privileges_id = (select max(id) from eh_acl_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
+VALUES ((@eh_acl_privileges_id := @eh_acl_privileges_id+1), 0, '创客活动', '创客活动 全部权限', NULL);
 
+-- 角色对应的菜单权限
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 1000000, 'EhOrganizations', NULL, 1, @eh_acl_privileges_id, 1001, 'EhAclRoles', 0, 1, NOW());
+
+-- 菜单对应的权限
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 10990, '创客活动', 1, 1, '创客活动  全部权限', 499);
+--
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1), 10990,'', 'EhNamespaces', 1000000 , 2);
+-- end 设置菜单权限
 
 SET @id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
@@ -1040,10 +1056,9 @@ UPDATE `eh_launch_pad_items` SET delete_flag = '1' WHERE item_label = '园区党
 
 
 SET @id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1), 10990,'', 'EhNamespaces', 1000000 , 0);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1), 40200,'', 'EhNamespaces', 1000000 , 0);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1), 40210,'', 'EhNamespaces', 1000000 , 0);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1), 40220,'', 'EhNamespaces', 1000000 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1), 40200,'', 'EhNamespaces', 1000000 , 2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1), 40210,'', 'EhNamespaces', 1000000 , 2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1), 40220,'', 'EhNamespaces', 1000000 , 2);
 
 -- 科技园部分item的顺序不允许用户定制
 select * FROM eh_user_launch_pad_items WHERE item_id in (select id FROM eh_launch_pad_items WHERE item_label in ('创客分享','创客活动','任务管理','园区企业','VIP车位','班车','俱乐部','视频会议','更多') AND namespace_id = 1000000);
