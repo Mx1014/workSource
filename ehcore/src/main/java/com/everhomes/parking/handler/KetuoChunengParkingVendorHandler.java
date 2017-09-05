@@ -19,17 +19,6 @@ public class KetuoChunengParkingVendorHandler extends KetuoParkingVendorHandler 
 	@Autowired
     private ConfigurationProvider configProvider;
 
-//	@Override
-//	public KetuoCard getCard(String plateNumber) {
-//		KetuoCard card = super.getCard(plateNumber);
-//
-//		//储能月卡没有对接免费金额,设置成0
-//		if (null != card) {
-//			card.setFreeMoney(0);
-//		}
-//		return card;
-//	}
-
 	protected KetuoRequestConfig getKetuoRequestConfig() {
 
 		String url = configProvider.getValue("parking.chuneng.url", "");

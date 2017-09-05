@@ -114,7 +114,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		//防止老数据可能没有ActivityCategories，先更新保存一下
 		ActivityCategories activityCategory = saveEntry(config, namespaceId, config.getName());
 
-		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, activityCategory.getId());
+		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, activityCategory.getEntryId());
 
 		List<ActivityCategoryDTO> categoryDTOList = new ArrayList<>();
 		config.setCategoryFlag((byte)0);
