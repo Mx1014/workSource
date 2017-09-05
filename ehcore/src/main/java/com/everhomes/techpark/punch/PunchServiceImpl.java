@@ -6554,33 +6554,38 @@ public class PunchServiceImpl implements PunchService {
             ptr = getPunchTimeRuleByRuleIdAndDate(pr, punchTime, userId);
         }
         String[] statusList =null;
-        if(null != pdl){
-            response.setPunchTimesPerDay(pdl.getPunchTimesPerDay());
+        if(null != pdl) {
+            if(pdl.getTimeRuleId()>0L){
+                ptr = punchProvider.getPunchTimeRuleById(pdl.getTimeRuleId());
+            }
             response.setStatusList(pdl.getStatusList());
-            if(null!=pdl.getStatusList()){
-                String[] approvalStatus =null;
-                if(null!=pdl.getApprovalStatusList())
+            if (null != pdl.getStatusList()) {
+                String[] approvalStatus = null;
+                if (null != pdl.getApprovalStatusList())
                     approvalStatus = pdl.getApprovalStatusList().split(PunchConstants.STATUS_SEPARATOR);
                 statusList = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
-                if (statusList.length < pdl.getPunchTimesPerDay()/2) {
-                    if(statusList.length == 1){
-                        statusList = new String[pdl.getPunchTimesPerDay()/2];
-                        for(int i =0;i< pdl.getPunchTimesPerDay()/2;i++){
+                if (statusList.length < pdl.getPunchTimesPerDay() / 2) {
+                    if (statusList.length == 1) {
+                        statusList = new String[pdl.getPunchTimesPerDay() / 2];
+                        for (int i = 0; i < pdl.getPunchTimesPerDay() / 2; i++) {
                             statusList[i] = pdl.getStatusList();
                         }
-                    }else
+                    } else
                         statusList = null;
                 }
-                for(int i =0;i< pdl.getPunchTimesPerDay()/2;i++){
-                    try{
-                        if (approvalStatus!= null && approvalStatus[i].equals(ExceptionStatus.NORMAL.getCode())) {
-                                statusList[i] = PunchStatus.NORMAL.getCode()+"";
-                            }
-                    }catch(Exception e){
-                        LOGGER.error("approval status error",e);
+                for (int i = 0; i < pdl.getPunchTimesPerDay() / 2; i++) {
+                    try {
+                        if (approvalStatus != null && approvalStatus[i].equals(ExceptionStatus.NORMAL.getCode())) {
+                            statusList[i] = PunchStatus.NORMAL.getCode() + "";
+                        }
+                    } catch (Exception e) {
+                        LOGGER.error("approval status error", e);
                     }
                 }
             }
+        }
+        if(null != ptr){
+            response.setPunchTimesPerDay(ptr.getPunchTimesPerDay());
             for(Integer punchIntervalNo= 1;punchIntervalNo <= pdl.getPunchTimesPerDay()/2;punchIntervalNo++) {
                 PunchLogDTO dto1 = null;
                 PunchIntevalLogDTO intervalDTO = new PunchIntevalLogDTO();
