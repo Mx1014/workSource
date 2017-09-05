@@ -1306,17 +1306,22 @@ public class PortalServiceImpl implements PortalService {
 				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS){
 				String instanceConf = setItemModuleAppActionData(itemGroup.getLabel(), instanceConfig.getModuleAppId());
-				NewsInstanceConfig config = (NewsInstanceConfig)StringHelper.fromJsonString(instanceConf, NewsInstanceConfig.class);
-				config.setItemGroup(itemGroup.getName());
-				config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
-				group.setInstanceConfig(config);
+				if(null != instanceConf){
+					NewsInstanceConfig config = (NewsInstanceConfig)StringHelper.fromJsonString(instanceConf, NewsInstanceConfig.class);
+					config.setItemGroup(itemGroup.getName());
+					config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
+					group.setInstanceConfig(config);
+				}
 			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS_FLASH){
 				String instanceConf = setItemModuleAppActionData(itemGroup.getLabel(), instanceConfig.getModuleAppId());
-				NewsFlashInstanceConfig config = (NewsFlashInstanceConfig)StringHelper.fromJsonString(instanceConf, NewsInstanceConfig.class);
-				config.setItemGroup(itemGroup.getName());
-				config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
-				config.setNewsSize(instanceConfig.getNewsSize());
-				group.setInstanceConfig(config);
+				if(null != instanceConf){
+					NewsFlashInstanceConfig config = (NewsFlashInstanceConfig)StringHelper.fromJsonString(instanceConf, NewsFlashInstanceConfig.class);
+					config.setItemGroup(itemGroup.getName());
+					config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
+					config.setNewsSize(instanceConfig.getNewsSize());
+					group.setInstanceConfig(config);
+				}
+
 			}else if(Widget.fromCode(group.getWidget()) == Widget.BULLETINS){
 				BulletinsInstanceConfig config = new BulletinsInstanceConfig();
 				config.setItemGroup(itemGroup.getName());
