@@ -996,7 +996,7 @@ UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvMFpUbGtNV1
 UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvek56YzVOVEUzT0dFd1pUaGlaVEU0TjJSaE56SXlPVGhrTURreU1ERXdOQQ', default_order = 7 WHERE item_label = '电子屏' AND `namespace_id` = 1000000;
 UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvNVltVmtOall6Wm1OaU9HRTNZMk0xTTJVd01UVmlPRFprWVRSa01EWXdaUQ', default_order = 8 WHERE item_label = '能量加油站' AND `namespace_id` = 1000000;
 UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvM01EUXhNbUZrTkRNelptSXdNVGRtTm1Rd05tVmtZemhpTkdVeU5USTRaZw', default_order = 9 WHERE item_label = '园区党建' AND `namespace_id` = 1000000;
-UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwallUTTNNVEpsTkRBM056SXlZVEU1WTJJM1l6TmhPRGd4TXpkbU56ZzJNUQ', default_order = 10 WHERE item_label = '更多' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwallUTTNNVEpsTkRBM056SXlZVEU1WTJJM1l6TmhPRGd4TXpkbU56ZzJNUQ', default_order = 10000 WHERE item_label = '更多' AND `namespace_id` = 1000000;
 
 UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveE1qbG1Oek5sWm1ReU1UQXhNREF6WkRKaE9HWmhPR0ZrTTJGaVkyVTFaQQ', item_group = 'Integrated', default_order = 1 WHERE item_label = '创客分享' AND `namespace_id` = 1000000;
 UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveFpEWmtaakpqTmpRNE1UZzRZV1EzWlRSbU5tTXhNRFJoWmprMk56TTFaQQ', item_group = 'Integrated', default_order = 2 WHERE item_label = '创客活动' AND `namespace_id` = 1000000;
