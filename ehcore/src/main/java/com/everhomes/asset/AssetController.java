@@ -912,7 +912,7 @@ public class AssetController extends ControllerBase {
      * <p>根据合同的id获取合同下的楼栋门牌和面积</p>
      */
     @RequestMapping("getAreaAndAddressByContract")
-    @RestReturn(value=FindUserInfoForPaymentDTO.class,collection=true)
+    @RestReturn(value=GetAreaAndAddressByContractDTO.class,collection=true)
     public RestResponse getAreaAndAddressByContract(FindContractCommand cmd) {
         GetAreaAndAddressByContractDTO dto = this.assetService.getAreaAndAddressByContract(cmd);
         RestResponse response = new RestResponse(dto);
