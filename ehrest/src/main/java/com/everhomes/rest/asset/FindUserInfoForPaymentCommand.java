@@ -9,11 +9,13 @@ package com.everhomes.rest.asset;
  *<ul>
  * <li>targeType:客户的类型，个人:eh_user----default; 企业:eh_organization---park_tourist</li>
  * <li>targetId:客户id</li>
+ * <li>communityId:园区id</li>
  *</ul>
  */
 public class FindUserInfoForPaymentCommand {
     private String targeType;
     private Long targetId;
+    private Long communityId;
 
     public String getTargeType() {
         return targeType;
@@ -25,6 +27,14 @@ public class FindUserInfoForPaymentCommand {
 
     public Long getTargetId() {
         return targetId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public void setTargetId(Long targetId) {

@@ -83,7 +83,7 @@ public interface AssetService {
 
     void exportRentalExcelTemplate(HttpServletResponse response);
 
-    FindUserInfoForPaymentDTO findUserInfoForPayment(FindUserInfoForPaymentCommand cmd);
+    FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd);
 
     void updateBillsToSettled(UpdateBillsToSettled cmd);
 

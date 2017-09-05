@@ -36,6 +36,7 @@ import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.ListCustomerContractsCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -915,47 +916,45 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public FindUserInfoForPaymentDTO findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
-        FindUserInfoForPaymentDTO response = new FindUserInfoForPaymentDTO();
+    public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
+        FindUserInfoForPaymentResponse res = new FindUserInfoForPaymentResponse();
+        List<FindUserInfoForPaymentDTO> list = new ArrayList<>();
         String targeType = cmd.getTargeType();
         ListCustomerContractsCommand cmd1 = new ListCustomerContractsCommand();
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-        cmd1.setTargetId(cmd.getTargetId());
+        cmd1.setCommunityId(cmd.getCommunityId());
         if(targeType.equals(AssetPaymentStrings.EH_USER)){
             cmd1.setTargetId(UserContext.currentUserId());
             cmd1.setTargetType(CustomerType.INDIVIDUAL.getCode());
+            res.setCustomerName(UserContext.current().getUser().getNickName());
         }else if(targeType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
-            cmd1.setCommunityId(cmd.getTargetId());
+            cmd1.setTargetId(cmd.getTargetId());
             cmd1.setTargetType(CustomerType.ENTERPRISE.getCode());
+            OrganizationDTO organizationById = organizationService.getOrganizationById(cmd.getTargetId());
+            res.setCustomerName(organizationById.getName());
         }else{
             throw new RuntimeException("用户类型错误");
         }
         List<ContractDTO> dtos = contractService.listCustomerContracts(cmd1);
-        if(dtos!= null && dtos.size() > 0){
-            ContractDTO dto = dtos.get(0);
-            if(dtos.size()>1){
-                response.setHasMoreContract((byte)1);
-            }else{
-                response.setHasMoreContract((byte)0);
-            }
-            List<BuildingApartmentDTO> buildings = dto.getBuildings();
-            List<String> addressNames = new ArrayList<>();
-            Double areaSizeSum = 0d;
-            if(buildings!=null){
-                for(int i = 0; i < buildings.size(); i++){
-                    String addressName;
-                    BuildingApartmentDTO building = buildings.get(i);
-                    addressName = building.getBuildingName()+building.getApartmentName();
-                    addressNames.add(addressName);
-                    areaSizeSum += building.getAreaSize();
-                }
-                response.setAddressNames(addressNames);
-                response.setAreaSizesSum(areaSizeSum);
-            }
-            response.setContractNum(dto.getContractNumber());
-            response.setTargetName(dto.getOrganizationName());
+        for(int i = 0; i < dtos.size(); i++){
+            FindUserInfoForPaymentDTO dto = new FindUserInfoForPaymentDTO();
+            dto.setContractNum(dtos.get(i).getContractNumber());
+            dto.setContractId(dtos.get(i).getId());
+            list.add(dto);
         }
-        return response;
+        res.setContractList(list);
+        if(dtos.size()>0){
+            ContractDTO contractDTO = dtos.get(0);
+            FindContractCommand cmd2 = new FindContractCommand();
+            cmd2.setId(contractDTO.getId());
+            cmd2.setContractNumber(contractDTO.getContractNumber());
+            cmd2.setCommunityId(cmd.getCommunityId());
+            cmd2.setPartyAId(contractDTO.getPartyAId());
+            GetAreaAndAddressByContractDTO areaAndAddressByContract = getAreaAndAddressByContract(cmd2);
+            res.setAddressNames(areaAndAddressByContract.getAddressNames());
+            res.setAreaSizesSum(areaAndAddressByContract.getAreaSizesSum());
+        }
+        return res;
     }
 
     @Override
