@@ -117,24 +117,12 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("categoryItemId", contract.getCategoryItemId());
             builder.field("contractStartDate", contract.getContractStartDate());
             builder.field("contractEndDate", contract.getContractEndDate());
+            builder.field("customerType", contract.getCustomerType());
             if(contract.getRent() != null) {
                 builder.field("amount", contract.getRent());
             } else {
                 builder.field("amount", "");
             }
-
-            if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
-                OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(contract.getCustomerId());
-                if(owner != null) {
-                    builder.field("ownerTypeId", owner.getOrgOwnerTypeId());
-                }
-            } else if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
-                EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
-                if(customer != null) {
-                    builder.field("customerCategoryItemId", customer.getCategoryItemId());
-                }
-            }
-
 
             builder.endObject();
             return builder;
@@ -199,16 +187,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(cmd.getContractType() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("contractType", cmd.getContractType()));
 
-        if(cmd.getCustomerCategoryId() != null) {
-            FilterBuilder customerfb = FilterBuilders.termFilter("customerCategoryItemId", cmd.getCustomerCategoryId());
-            ScopeField scopeField = fieldProvider.findScopeField(cmd.getNamespaceId(), cmd.getCustomerCategoryId());
-            if(scopeField != null) {
-                OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(scopeField.getFieldDisplayName());
-                if(ownerType != null) {
-                    customerfb = FilterBuilders.orFilter(customerfb, FilterBuilders.termFilter("ownerTypeId", ownerType.getId()));
-                }
-            }
-            fb = FilterBuilders.andFilter(fb, customerfb);
+        if(cmd.getCustomerType() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("customerType", cmd.getCustomerType()));
         }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -238,6 +218,18 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(contracts != null && contracts.size() > 0) {
             contracts.forEach(contract -> {
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
+                if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                    EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+                    if(customer != null) {
+                        dto.setCustomerName(customer.getName());
+                    }
+                } else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                    OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(contract.getCustomerId());
+                    if(owner != null) {
+                        dto.setCustomerName(owner.getContactName());
+                    }
+
+                }
                 processContractApartments(dto);
                 dtos.add(dto);
             });
