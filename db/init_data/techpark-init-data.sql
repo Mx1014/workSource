@@ -1044,8 +1044,11 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1), 40220,'', 'EhNamespaces', 1000000 , 0);
 
 -- 科技园部分item的顺序不允许用户定制
-
 select * FROM eh_user_launch_pad_items WHERE item_id in (select id FROM eh_launch_pad_items WHERE item_label in ('创客分享','创客活动','任务管理','园区企业','VIP车位','班车','俱乐部','视频会议','更多') AND namespace_id = 1000000);
 DELETE FROM eh_user_launch_pad_items WHERE item_id in (select id FROM eh_launch_pad_items WHERE item_label in ('创客分享','创客活动','任务管理','园区企业','VIP车位','班车','俱乐部','视频会议','更多') AND namespace_id = 1000000);
-
 -- end by dengs,
+
+-- by R,2017.09.05 #14916 增加配置“用户行为统计分析”的菜单
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41330,'', 'EhNamespaces', 1000000,2);
+

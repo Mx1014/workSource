@@ -342,7 +342,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				flowService.processAutoStep(stepDTO);
 				ctx.setContinueStep(false);
 
-				
+
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
 				pmTaskProvider.updateTask(task);
