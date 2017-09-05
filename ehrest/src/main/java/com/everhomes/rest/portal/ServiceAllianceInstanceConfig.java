@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.portal;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class ServiceAllianceInstanceConfig {
 
 	private Byte detailFlag;
 
+	@ItemType(ServiceAllianceJump.class)
 	private List<ServiceAllianceJump> jumps;
 
 	public Long getType() {
