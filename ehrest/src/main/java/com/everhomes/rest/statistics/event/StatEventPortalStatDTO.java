@@ -12,7 +12,8 @@ import com.everhomes.util.StringHelper;
  *     <li>ownerType: ownerType</li>
  *     <li>ownerId: ownerId</li>
  *     <li>widget: widget {@link com.everhomes.rest.launchpad.Widget}</li>
- *     <li>contentType: 只有类型是OPPush时才有这个值</li>
+ *     <li>contentType: 只有widget是OPPush时才有这个值</li>
+ *     <li>sceneType: 场景类型 {@link com.everhomes.rest.ui.user.SceneType}</li>
  * </ul>
  */
 public class StatEventPortalStatDTO {
@@ -25,6 +26,7 @@ public class StatEventPortalStatDTO {
     private Long ownerId;
     private String widget;
     private String contentType;
+    private String sceneType;
 
     public Long getId() {
         return id;
@@ -88,6 +90,14 @@ public class StatEventPortalStatDTO {
 
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    public String getSceneType() {
+        return sceneType;
+    }
+
+    public void setSceneType(String sceneType) {
+        this.sceneType = sceneType;
     }
 
     @Override

@@ -1,11 +1,13 @@
 package com.everhomes.express;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,12 +32,14 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.openapi.AppNamespaceMapping;
 import com.everhomes.openapi.AppNamespaceMappingProvider;
-import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.express.ExpressServiceErrorCode;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.NamespaceUserType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -54,6 +58,7 @@ public class ExpressThirdCallController {// extends ControllerBase
     private final static String APPKEY = "appkey";
     private final static String NICK = "nick";
     private final static String MOBILE = "mobile";
+    private final static String WX_OPENID = "openId";
     private final static String UID = "uid";
     private final static String TIMESTAMP = "timestamp";
     private final static String CHECKSUM = "checksum";
@@ -84,7 +89,14 @@ public class ExpressThirdCallController {// extends ControllerBase
 	
 	@Autowired
     private ConfigurationProvider configProvider;
+	
+	@Autowired
+    private UserActivityProvider userActivityProvider;
+	
+	@Autowired
+    private UserProvider userProvider;
     
+	
     
 	/**
 	 * <b>URL: /expressauth/authReq</b>
@@ -100,6 +112,10 @@ public class ExpressThirdCallController {// extends ControllerBase
         // 域空间，检查登录
         Integer namespaceId = parseNamespace(params.get(NS));
         LoginToken loginToken = userService.getLoginToken(request);
+        Long userId = null;
+        if(loginToken!=null){
+        	userId = loginToken.getUserId();
+        }
         //根据cookie中的token，如果token验证失败，或者namespace验证失败
         //重新登录
         if(!userService.isValid(loginToken) || !checkUserNamespaceId(namespaceId)) {
@@ -111,8 +127,18 @@ public class ExpressThirdCallController {// extends ControllerBase
         		 return ;
         	}
         	//验证通过了，那么如果没有注册，则注册
-        	 processUserInfo(namespaceId, params, request, response);
+        	User user = processUserInfo(namespaceId, params, request, response);
+        	List<User> list= userProvider.findThirdparkUserByTokenAndType(namespaceId, user.getNamespaceUserType(), user.getNamespaceUserToken());
+        	if(list!=null && list.size()>0){
+        		userId = list.get(0).getId();
+        	}
         }
+        if(userId == null){
+        	 response.sendRedirect(ERROR_REDIRECT_URL+"用户创建失败");
+        	 return ;
+        }
+        
+        updateUserOpenId(userId,params.get(WX_OPENID),response);
         
         // 登录成功则跳转到原来访问的链接
         LOGGER.info("Process express auth request, loginToken={}", loginToken);
@@ -120,14 +146,22 @@ public class ExpressThirdCallController {// extends ControllerBase
         //重定向到快递的地址。
         response.sendRedirect(SUCCESS_REDIRECT_URL);
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.info("Process weixin auth request(req calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
+            LOGGER.info("Process express auth request(req calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
         return ;
 	}
 	
+	private void updateUserOpenId(Long userId, String openId, HttpServletResponse response) throws Exception {
+		if(openId == null){
+			return ;//没有openId则是app的
+		}
+		LOGGER.info("save uid = {}, openId = {}", userId, openId);
+		userActivityProvider.updateUserProfile(userId, ExpressServiceErrorCode.USER_PROFILE_KEY, openId);
+	}
+
 	/**
 	 * <b>URL: /express/callback</b>
-	 * <p>请求国贸授权。</p>
+	 * <p>EMS订单状态回调。</p>
 	 */
 	@RequestMapping("/express/callback")
 	@ResponseBody
@@ -255,7 +289,7 @@ public class ExpressThirdCallController {// extends ControllerBase
         return namespaceId;
     }
     
-    private void processUserInfo(Integer namespaceId, Map<String, String> params, HttpServletRequest request, HttpServletResponse response) {
+    private User processUserInfo(Integer namespaceId, Map<String, String> params, HttpServletRequest request, HttpServletResponse response) {
         long startTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process express auth request(userinfo calculate), startTime={}", startTime);
@@ -278,6 +312,7 @@ public class ExpressThirdCallController {// extends ControllerBase
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process express auth request(userinfo calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
+        return guoMaoUser;
     }
     
     //检出当前登录用户域空间和需要登录的域空间是否相同，不同则登出    add by yanjun 20170620
@@ -340,6 +375,7 @@ public class ExpressThirdCallController {// extends ControllerBase
 		 params.put("timestamp",System.currentTimeMillis()/1000+"");
 		 params.put("avatar","core.zuolin.com");
 		 params.put("community","240111044331050363");
+		 params.put("openId","openId");
 		 MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("MD5");

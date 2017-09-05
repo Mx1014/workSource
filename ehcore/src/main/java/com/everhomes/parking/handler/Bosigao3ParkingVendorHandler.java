@@ -2,6 +2,7 @@
 package com.everhomes.parking.handler;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -296,13 +297,12 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 			dto.setPlateNumber(plateNumber);
 			long entranceDate = strToLong(tempFee.getEntranceDate());
 			dto.setEntryTime(entranceDate);
-	//		dto.setPayTime(tempFee.getPayTime());
 			long payTime = strToLong(tempFee.getPayDate());
 
 			dto.setPayTime(payTime);
 			dto.setParkingTime((int)((tempFee.getPayTime() - entranceDate) / (1000 * 60)));
 			dto.setDelayTime(tempFee.getOutTime());
-			dto.setPrice(pkorder.getAmount().divide(new BigDecimal(100)));
+			dto.setPrice(pkorder.getAmount().divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 			dto.setOrderToken(pkorder.getOrderID());
 		}else if (tempFee.getResult() == 2 || tempFee.getResult() == 10) {
 			dto.setPlateNumber(plateNumber);

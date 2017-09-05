@@ -6,6 +6,7 @@ import com.everhomes.rest.common.ServiceAllianceActionData;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.portal.DetailFlag;
 import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
+import com.everhomes.rest.portal.ServiceAllianceJump;
 import com.everhomes.rest.yellowPage.DisplayFlagType;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.user.User;
@@ -114,7 +115,6 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
             LOGGER.error("namespace not community. namespaceId = {}", namespaceId);
         }
 
-
         return serviceAllianceCategories;
     }
 
@@ -151,5 +151,9 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
             LOGGER.error("namespace not community or service alliance category is null. namespaceId = {}, type = {}", namespaceId, type);
         }
         return serviceAllianceCategories;
+    }
+
+    private void updateJumps(Integer namespaceId, List<ServiceAllianceJump> jumps){
+        //暂时不做
     }
 }
