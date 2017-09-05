@@ -6,17 +6,17 @@ import java.util.List;
 
 public interface ArchivesProvider {
 
-    void createArchivesContactsSticky(ArchivesContactsSticky archivesContactsSticky);
+    void createArchivesContactsSticky(ArchivesStickyContacts archivesContactsSticky);
 
-    void updateArchivesContactsSticky(ArchivesContactsSticky archivesContactsSticky);
+    void updateArchivesContactsSticky(ArchivesStickyContacts archivesContactsSticky);
 
-    void deleteArchivesContactsSticky(ArchivesContactsSticky archivesContactsSticky);
+    void deleteArchivesContactsSticky(ArchivesStickyContacts archivesContactsSticky);
 
-    ArchivesContactsSticky findArchivesContactsStickyById(Long id);
+    ArchivesStickyContacts findArchivesContactsStickyById(Long id);
 
     List<Long> listArchivesContactsStickyIds(Integer namespaceId, Long organizationId, Integer stickCount);
 
-    ArchivesContactsSticky findArchivesContactsStickyByDetailIdAndOrganizationId(Integer namespaceId, Long organizationId, Long detailId);
+    ArchivesStickyContacts findArchivesContactsStickyByDetailIdAndOrganizationId(Integer namespaceId, Long organizationId, Long detailId);
 
     void createArchivesDismissEmployee(ArchivesDismissEmployees archivesDismissEmployee);
 

@@ -1,10 +1,10 @@
 // @formatter:off
 package com.everhomes.archives;
 
-import com.everhomes.server.schema.tables.pojos.EhArchivesContactsSticky;
+import com.everhomes.server.schema.tables.pojos.EhArchivesStickyContacts;
 import com.everhomes.util.StringHelper;
 
-public class ArchivesContactsSticky extends EhArchivesContactsSticky {
+public class ArchivesStickyContacts extends EhArchivesStickyContacts {
 
     @Override
     public String toString() {

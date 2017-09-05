@@ -142,7 +142,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  状态码为 0 时删除
         if (cmd.getStick().equals("0")) {
-            ArchivesContactsSticky result = archivesProvider.findArchivesContactsStickyByDetailIdAndOrganizationId(
+            ArchivesStickyContacts result = archivesProvider.findArchivesContactsStickyByDetailIdAndOrganizationId(
                     user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
             if (result != null)
                 archivesProvider.deleteArchivesContactsSticky(result);
@@ -150,9 +150,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  状态码为 1 时新增置顶
         if (cmd.getStick().equals("1")) {
-            ArchivesContactsSticky result = archivesProvider.findArchivesContactsStickyByDetailIdAndOrganizationId(user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
+            ArchivesStickyContacts result = archivesProvider.findArchivesContactsStickyByDetailIdAndOrganizationId(user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
             if (result == null) {
-                ArchivesContactsSticky contactsSticky = new ArchivesContactsSticky();
+                ArchivesStickyContacts contactsSticky = new ArchivesStickyContacts();
                 contactsSticky.setNamespaceId(user.getNamespaceId());
                 contactsSticky.setOrganizationId(cmd.getOrganizationId());
                 contactsSticky.setDetailId(cmd.getDetailId());
