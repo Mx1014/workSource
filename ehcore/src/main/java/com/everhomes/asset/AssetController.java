@@ -596,7 +596,7 @@ public class AssetController extends ControllerBase {
         if(result.equals("OK")){
             response.setErrorDescription("OK");
         }else{
-            response.setErrorDescription(result|);
+            response.setErrorDescription(result);
         }
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -615,7 +615,7 @@ public class AssetController extends ControllerBase {
         if(result.equals("OK")){
             response.setErrorDescription("OK");
         }else{
-            response.setErrorDescription(result|);
+            response.setErrorDescription(result);
         }
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -634,7 +634,7 @@ public class AssetController extends ControllerBase {
         if(result.equals("OK")){
             response.setErrorDescription("OK");
         }else{
-            response.setErrorDescription(result|);
+            response.setErrorDescription(result);
         }
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;

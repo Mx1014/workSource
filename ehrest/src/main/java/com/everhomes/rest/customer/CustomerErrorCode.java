@@ -19,4 +19,6 @@ public interface CustomerErrorCode {
     int ERROR_CUSTOMER_CONTACT_IS_NULL = 10011;  //客户联系人为空
     int ERROR_CUSTOMER_CONTACT_MOBILE_IS_NULL = 10012;  //客户联系人手机号为空
     int ERROR_CUSTOMER_NAME_IS_EXIST = 10013;  //客户名称已存在
+    int ERROR_CUSTOMER_CATEGORY_IS_NULL = 10014;  //客户类型不存在
+    int ERROR_CUSTOMER_LEVEL_IS_NULL = 10015;  //客户级别不存在
 }

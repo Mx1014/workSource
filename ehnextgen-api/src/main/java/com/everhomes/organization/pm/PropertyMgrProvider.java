@@ -491,4 +491,6 @@ public interface PropertyMgrProvider {
 	public Map<Long, CommunityPmBill> mapNewestBillByAddressIds(List<Long> addressIds);
 
 	public OrganizationOwner findOrganizationOwnerById(Long organizationOwnerId);
+
+	List<CommunityAddressMapping> listCommunityAddressMappingByAddressIds(List<Long> addressIds);
 }
