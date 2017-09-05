@@ -581,7 +581,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
+    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,Long contractId) {
         List<BillDetailDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
@@ -592,8 +592,8 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t.TARGET_TYPE.eq(targetType));
         query.addConditions(t.TARGET_ID.eq(targetId));
         query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
-        if(contractNum!=null){
-            query.addConditions(t.CONTRACT_NUM.eq(contractNum));
+        if(contractId!=null){
+            query.addConditions(t.CONTRACT_ID.eq(contractId));
         }
         if(isOwedBill==1){
             query.addConditions(t.STATUS.eq((byte)0));
@@ -1417,11 +1417,13 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public PaymentBillGroupRule getBillGroupRule(Long chargingStandardId, Long chargingStandardId1, String ownerType, Long ownerId) {
+    public PaymentBillGroupRule getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         List<PaymentBillGroupRule> rules = context.select()
                 .from(t)
+                .where(t.CHARGING_ITEM_ID.eq(chargingItemId))
+                .and(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
                 .fetch()
                 .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
         return rules.get(0);
@@ -1499,7 +1501,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
-        context.select(t.DATE_STR,t.PROPERTY_IDENTIFER,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
+        context.select(t.DATE_STR,t.ADDRESS_ID,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                 .from(t,t1)
                 .where(t.CONTRACT_NUM.eq(contractNum))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
