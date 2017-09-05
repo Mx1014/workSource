@@ -1035,6 +1035,7 @@ INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 10990, '创客活动', 1, 1, '创客活动  全部权限', 499);
 --
 DELETE from eh_web_menu_scopes WHERE menu_id = 10990 AND owner_id = 1000000;
+SET @id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1), 10990,'', 'EhNamespaces', 1000000 , 2);
 -- end 设置菜单权限
 
