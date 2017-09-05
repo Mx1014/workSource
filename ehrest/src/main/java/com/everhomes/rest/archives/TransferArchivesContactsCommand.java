@@ -16,6 +16,7 @@ public class TransferArchivesContactsCommand {
     @ItemType(Long.class)
     private List<Long> detailIds;
 
+    @ItemType(Long.class)
     private List<Long> departmentIds;
 
     public TransferArchivesContactsCommand() {
