@@ -807,7 +807,6 @@ public class ContractServiceImpl implements ContractService {
 			contract.setDownpaymentTime(new Timestamp(cmd.getDownpaymentTime()));
 		}
 		contract.setCreateTime(exist.getCreateTime());
-		contract.setCreateUid(exist.getCreateUid());
 		contractProvider.updateContract(contract);
 
 		dealContractApartments(contract, cmd.getApartments());
