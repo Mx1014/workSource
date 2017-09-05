@@ -1417,11 +1417,13 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public PaymentBillGroupRule getBillGroupRule(Long chargingStandardId, Long chargingStandardId1, String ownerType, Long ownerId) {
+    public PaymentBillGroupRule getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         List<PaymentBillGroupRule> rules = context.select()
                 .from(t)
+                .where(t.CHARGING_ITEM_ID.eq(chargingItemId))
+                .and(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
                 .fetch()
                 .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
         return rules.get(0);

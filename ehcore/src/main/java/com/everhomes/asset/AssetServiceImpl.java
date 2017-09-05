@@ -576,7 +576,7 @@ public class AssetServiceImpl implements AssetService {
             List<Object> billConf = assetProvider.getBillDayAndCycleByChargingItemId(rule.getChargingStandardId(),rule.getChargingItemId(),cmd.getOwnerType(),cmd.getOwnerId());
             Integer billDay = (Integer)billConf.get(0);
             Byte balanceType = (Byte)billConf.get(1);
-            PaymentBillGroupRule groupRule = assetProvider.getBillGroupRule(rule.getChargingStandardId(),rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
+            PaymentBillGroupRule groupRule = assetProvider.getBillGroupRule(rule.getChargingItemId(),rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
             Long billGroupId = groupRule.getBillGroupId();
             for(int j = 0; j < var1.size(); j ++){
                 List<PaymentExpectancyDTO> dtos2 = new ArrayList<>();
