@@ -1596,6 +1596,8 @@ update eh_launch_pad_items set item_label = '投诉与需求' where namespace_id
 
 
 
-
+-- by R,2017.09.05 #14916 增加配置“用户行为统计分析”的菜单
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41330,'', 'EhNamespaces', 999983,2);
 
 

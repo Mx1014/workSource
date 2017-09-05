@@ -2072,7 +2072,17 @@ public class ActivityServiceImpl implements ActivityService {
     		
     		//在锁内部重新活动信息  add by yanjun 20170522
     		ActivityRoster item = activityProvider.findRosterById(cmd.getRosterId());
-    		Activity activity = activityProvider.findActivityById(item.getActivityId());
+
+    		//在锁的内部重新校验报名信息，防止报名取消了之后再发起确认操作  add by yanjun 20170905
+			if (item == null || item.getStatus() == null || item.getStatus().byteValue() != ActivityRosterStatus.NORMAL.getCode()) {
+				LOGGER.error("cannnot find roster record in database");
+				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+						ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER,
+						"cannnot find roster record in database id=" + cmd.getRosterId());
+			}
+
+
+			Activity activity = activityProvider.findActivityById(item.getActivityId());
     		if (activity == null) {
     			LOGGER.error("cannnot find activity record in database");
     			// TODO

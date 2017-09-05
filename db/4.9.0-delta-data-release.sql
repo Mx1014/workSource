@@ -4,13 +4,16 @@ INSERT INTO `eh_apps` (`id`, `creator_uid`, `app_key`, `secret_key`, `name`, `de
 
 -- 添加服务录入菜单 by st.zheng
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `category`) VALUES (20225, '服务录入', '20200', 'task_management_service_entry', '0', '2', '/20000/20200/20225', 'park', '420', '20100', '3', 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `category`) VALUES (20226, '工作流设置', '20200', 'react:/working-flow/flow-list/property-service/20100?moduleType=repair', '0', '2', '/20000/20200/20226', 'park', '420', '20100', '3', 'module');
 
-set @privilege_id = (select privilege_id from eh_web_menu_privileges where menu_id=20220 );
+set @privilege_id = (select distinct privilege_id from eh_web_menu_privileges where name='物业报修' );
 set @eh_web_menu_privilege_id = (select max(id) from eh_web_menu_privileges);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) VALUES (@eh_web_menu_privilege_id+1, @privilege_id, '20225', '物业报修', '1', '1', '物业报修 管理员权限', '720');
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) VALUES (@eh_web_menu_privilege_id+2, @privilege_id, '20226', '物业报修', '1', '1', '物业报修 管理员权限', '720');
 
 set @menu_scope_id = (select max(id) from eh_web_menu_scopes);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@menu_scope_id  + 1, '20225', '', 'EhNamespaces', '999983', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@menu_scope_id  + 2, '20226', '', 'EhNamespaces', '999983', '2');
 
 update eh_launch_pad_items set action_data='{"url":"zl://propertyrepair/create?type=user&taskCategoryId=1&displayName=报修"}',action_type=60 where namespace_id=999983 and item_label = '报修';
 
@@ -36,4 +39,7 @@ UPDATE eh_web_menus set `name` = '申请记录' where id = 40120;
 update eh_lease_promotion_attachments set owner_type = 'EhLeasePromotions';
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('expansion', '7', 'zh_CN', '你要添加的楼栋已存在！');
 
+--园区地图 add by sw
+INSERT INTO `eh_community_map_infos` (`id`, `namespace_id`, `community_id`, `map_uri`, `map_name`, `version`, `center_longitude`, `center_latitude`, `north_east_longitude`, `north_east_latitude`, `south_west_longitude`, `south_west_latitude`, `longitude_delta`, `latitude_delta`, `status`, `creator_uid`, `create_time`)
+  VALUES ('1', '999981', '240111044331056041', 'cs://1/image/aW1hZ2UvTVRvd01XSmpabVkyWkRSa05qWXpOMkV4WmpkalpETTFPRGt6TVRKaE9EVmhaUQ', NULL, '1.0', '121.57425299921417', '31.176432503695498', '121.577029', '31.179732', '121.573704', '31.173716', '0.005241036325429604', '0.007979148321588525', '2', '1', '2017-08-21 14:55:01');
 

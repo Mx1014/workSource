@@ -5332,5 +5332,8 @@ SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
 VALUES ((@eh_launch_pad_items_id :=@eh_launch_pad_items_id+1), 999993, '0', '0', '0', '/home', 'Bizs', '综合维修', '综合维修', 'cs://1/image/aW1hZ2UvTVRvM05tRmlNR0V3TjJZMU1qZzNPVEl5WXpGa05UYzNNMlV4TVdKaFkyVmxOQQ', '1', '1', '60', '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=203242&displayName=综合维修"}', '10', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1', NULL, NULL, '0', NULL, NULL);
 
-
+-- by R,2017.09.05 #14870 后台“招租管理”、“资源预订”缺少工作流设置菜单
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40130,'', 'EhNamespaces', 999993,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40450,'', 'EhNamespaces', 999993,2);
 
