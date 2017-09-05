@@ -1511,6 +1511,10 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_ARCHIVES_FORMS.ID.max()).from(Tables.EH_ARCHIVES_FORMS).fetchOne().value1();
         });
 
+        syncTableSequence(null, EhArchivesWorkingPlaces.class, Tables.EH_ARCHIVES_WORKING_PLACES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ARCHIVES_WORKING_PLACES.ID.max()).from(Tables.EH_ARCHIVES_WORKING_PLACES).fetchOne().value1();
+        });
+
     }
 
     @SuppressWarnings("rawtypes")

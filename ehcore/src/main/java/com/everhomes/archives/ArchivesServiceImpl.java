@@ -81,6 +81,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             memberDetail.setRegionCode(cmd.getRegionCode());
             memberDetail.setContactShortToken(cmd.getContactShortToken());
             memberDetail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
+            //  TODO:职位有可能修改
             memberDetail.setJobPosition(cmd.getJobPosition());
             memberDetail.setWorkEmail(cmd.getWorkEmail());
             organizationProvider.updateOrganizationMemberDetails(memberDetail,memberDetail.getId());
@@ -202,17 +203,18 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd) {
+
+        /* Steps：
+           1.If the keywords is not null, just pass the key and get the corresponding employee back.
+           2.If the keywords is null, then judged by the "pageAnchor"
+           3.If the pageAnchor is null, we should get stick employees first.
+           4.if the pageAnchor is not null, means we should get the next page of employees, so ignore those stick employees.*/
+
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListArchivesContactsResponse response = new ListArchivesContactsResponse();
         final Integer stickCount = 10;  //  置顶数为10,表示一页最多显示10个置顶人员
+
         List<Long> detailIds = archivesProvider.listArchivesContactsStickyIds(namespaceId, cmd.getOrganizationId(), stickCount);    //  保存置顶人员
-
-        // Steps：
-        // 1.If the keywords is not null, just pass the key and get the corresponding employee back.
-        // 2.If the keywords is null, then judged by the "pageAnchor"
-        // 3.If the pageAnchor is null, we should get stick employees first.
-        // 4.if the pageAnchor is not null, means we should get the next page of employees, so ignore those stick employees.
-
         if (!StringUtils.isEmpty(cmd.getKeywords())) {
             //  有查询的时候已经不需要置顶了，直接查询对应人员
             List<ArchivesContactDTO> contacts = new ArrayList<>();
@@ -258,6 +260,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             dto.setTargetType(r.getTargetType());
             dto.setContactName(r.getContactName());
             dto.setDepartments(r.getDepartments());
+            //  TODO: 区号的添加
             dto.setContactToken(r.getContactToken());
             //  TODO:组织架构list接口多返回邮箱
 //                dto.setEmail(r.getEmail);
@@ -503,12 +506,13 @@ public class ArchivesServiceImpl implements ArchivesService {
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         if(memberDetail!=null) {
             memberDetail.setEnName(cmd.getEnName());
+            //  TODO:职位有可能修改
             memberDetail.setJobPosition(cmd.getJobPosition());
             memberDetail.setDepartment(getDepartmentName(Arrays.asList(cmd.getDepartmentId())));
             memberDetail.setContactShortToken(cmd.getContactShortToken());
             memberDetail.setWorkEmail(cmd.getWorkEmail());
-            memberDetail.setWorkPlace(cmd.getWorkingPlace());
-            memberDetail.setContractId(cmd.getContractId());
+            memberDetail.setWorkPlaceId(cmd.getWorkingPlaceId());
+            memberDetail.setContractPartyId(cmd.getContractId());
             memberDetail.setRegionCode(cmd.getRegionCode());
             organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
             dto.setDetailId(detailId);
@@ -521,7 +525,49 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd) {
 
-        return null;
+        ListArchivesEmployeesResponse response = new ListArchivesEmployeesResponse();
+
+        ListOrganizationContactCommand orgCommand = new ListOrganizationContactCommand();
+        orgCommand.setOrganizationId(cmd.getOrganizationId());
+        orgCommand.setCheckInTimeStart(ArchivesDateUtil.dateToTimestamp(cmd.getCheckInTimeStart()));
+        orgCommand.setCheckInTimeEnd(ArchivesDateUtil.dateToTimestamp(cmd.getCheckInTimeEnd()));
+        orgCommand.setEmploymentTimeStart(ArchivesDateUtil.dateToTimestamp(cmd.getEmploymentTimeStart()));
+        orgCommand.setEmploymentTimeEnd(ArchivesDateUtil.dateToTimestamp(cmd.getEmploymentTimeEnd()));
+        orgCommand.setContractEndTimeStart(ArchivesDateUtil.dateToTimestamp(cmd.getCheckInTimeStart()));
+        orgCommand.setContractEndTimeEnd(ArchivesDateUtil.dateToTimestamp(cmd.getContractTimeEnd()));
+        orgCommand.setEmployeeStatus(cmd.getEmployeeStatus());
+        orgCommand.setContractPartyId(cmd.getContractPartyId());
+        //  TODO:查询文字的确定
+        orgCommand.setKeywords(cmd.getContactName());
+        if (cmd.getDepartmentId() != null)
+            orgCommand.setOrganizationId(cmd.getDepartmentId());
+        orgCommand.setWorkPlaceId(cmd.getWorkingPlaceId());
+
+        orgCommand.setPageAnchor(cmd.getPageAnchor());
+        if (cmd.getPageSize() != null)
+            orgCommand.setPageSize(cmd.getPageSize());
+        else
+            orgCommand.setPageSize(20);
+        ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
+
+        response.setArchivesEmployees(members.getMembers().stream().map(r -> {
+            ArchivesEmployeeDTO dto = new ArchivesEmployeeDTO();
+            dto.setDetailId(r.getDetailId());
+            dto.setTargetId(r.getTargetId());
+            dto.setTargetType(r.getTargetType());
+            dto.setContactName(r.getContactName());
+            dto.setEmployeeStatus(r.getEmployeeStatus());
+            //  TODO: 岗位的确定
+            dto.setDepartments(r.getDepartments());
+            //  TODO: 区号的添加,工作邮箱的读取,合同时间的读取
+            dto.setContactToken(r.getContactToken());
+//            dto.setWorkEmail(r.getEmail());
+            dto.setEmploymentTime(r.getEmploymentTime());
+//            dto.setContractTime(r.getcontr);
+            return dto;
+        }).collect(Collectors.toList()));
+        response.setNextPageAnchor(members.getNextPageAnchor());
+        return response;
     }
 
     @Override

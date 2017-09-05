@@ -6,6 +6,7 @@ import java.sql.Date;
 
 /**
  * <ul>
+ * <li>organizationId: 公司 id</li>
  * <li>checkInTimeStart: 入职起始日期</li>
  * <li>checkInTimeEnd: 入职结束日期</li>
  * <li>employmentTimeStart: 转正起始日期</li>
@@ -13,13 +14,17 @@ import java.sql.Date;
  * <li>contractTimeStart: 合同开始日期</li>
  * <li>contractTimeEnd: 合同结束日期</li>
  * <li>employeeStatus: 员工状态</li>
- * <li>organizationId: 合同主体 id</li>
+ * <li>contractPartyId: 合同主体 id</li>
  * <li>contactName: 姓名</li>
  * <li>departmentId: 部门 id</li>
- * <li>workingPlace: 工作地点</li>
+ * <li>workingPlaceId: 工作地点 id</li>
+ * <li>pageAnchor: 锚点值</li>
+ * <li>pageSize: 页大小</li>
  * </ul>
  */
 public class ListArchivesEmployeesCommand {
+
+    private Long organizationId;
 
     private Date checkInTimeStart;
 
@@ -35,13 +40,17 @@ public class ListArchivesEmployeesCommand {
 
     private Byte employeeStatus;
 
-    private Long organizationId;
+    private Long contractPartyId;
 
     private String contactName;
 
     private Long departmentId;
 
-    private String workingPlace;
+    private Long workingPlaceId;
+
+    private Long pageAnchor;
+
+    private Integer pageSize;
 
     public ListArchivesEmployeesCommand() {
     }
@@ -110,6 +119,14 @@ public class ListArchivesEmployeesCommand {
         this.organizationId = organizationId;
     }
 
+    public Long getContractPartyId() {
+        return contractPartyId;
+    }
+
+    public void setContractPartyId(Long contractPartyId) {
+        this.contractPartyId = contractPartyId;
+    }
+
     public String getContactName() {
         return contactName;
     }
@@ -126,12 +143,28 @@ public class ListArchivesEmployeesCommand {
         this.departmentId = departmentId;
     }
 
-    public String getWorkingPlace() {
-        return workingPlace;
+    public Long getWorkingPlaceId() {
+        return workingPlaceId;
     }
 
-    public void setWorkingPlace(String workingPlace) {
-        this.workingPlace = workingPlace;
+    public void setWorkingPlaceId(Long workingPlaceId) {
+        this.workingPlaceId = workingPlaceId;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
     @Override

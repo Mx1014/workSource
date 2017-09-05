@@ -1,5 +1,6 @@
 package com.everhomes.rest.archives;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
 public class ArchivesDateUtil {
@@ -17,4 +18,10 @@ public class ArchivesDateUtil {
         return date;
     }
 
+    public static Timestamp dateToTimestamp(java.sql.Date date) {
+        if (date != null)
+            return new Timestamp(date.getTime());
+        else
+            return null;
+    }
 }

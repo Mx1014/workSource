@@ -50,7 +50,7 @@ public class AddArchivesEmployeeCommand {
 
     private String workEmail;
 
-    private Long workingPlace;
+    private Long workingPlaceId;
 
     private Long contractId;
 
@@ -157,12 +157,12 @@ public class AddArchivesEmployeeCommand {
         this.workEmail = workEmail;
     }
 
-    public Long getWorkingPlace() {
-        return workingPlace;
+    public Long getWorkingPlaceId() {
+        return workingPlaceId;
     }
 
-    public void setWorkingPlace(Long workingPlace) {
-        this.workingPlace = workingPlace;
+    public void setWorkingPlaceId(Long workingPlaceId) {
+        this.workingPlaceId = workingPlaceId;
     }
 
     public Long getContractId() {
