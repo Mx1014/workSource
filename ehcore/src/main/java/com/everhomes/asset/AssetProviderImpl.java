@@ -500,18 +500,18 @@ public class AssetProviderImpl implements AssetProvider {
                 String billGroupNameFound = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME).from(Tables.EH_PAYMENT_BILL_GROUPS).where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(r.getValue(t.BILL_GROUP_ID))).fetchOne(0,String.class);
                 dto.setBillGroupName(billGroupNameFound);
             }
-            dto.setBillId(r.getValue(t.ID));
+            dto.setBillId(String.valueOf(r.getValue(t.ID)));
             dto.setBillStatus(r.getValue(t.STATUS));
             dto.setNoticeTel(r.getValue(t.NOTICETEL));
             dto.setNoticeTimes(r.getNoticeTimes());
             dto.setDateStr(r.getDateStr());
             dto.setTargetName(r.getTargetName());
-            dto.setTargetId(r.getTargetId());
+            dto.setTargetId(String.valueOf(r.getTargetId()));
             dto.setTargetType(r.getTargetType());
-            dto.setOwnerId(r.getOwnerId());
+            dto.setOwnerId(String.valueOf(r.getOwnerId()));
             dto.setOwnerType(r.getOwnerType());
             dto.setContractNum(r.getContractNum());
-            dto.setContractId(r.getContractId());
+            dto.setContractId(String.valueOf(r.getContractId()));
             list.add(dto);
             return null;});
         return list;
@@ -897,11 +897,11 @@ public class AssetProviderImpl implements AssetProvider {
             billsDao.insert(newBill);
             response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);
             response[0].setBillGroupName(billGroupDTO.getBillGroupName());
-            response[0].setBillId(nextBillId);
+            response[0].setBillId(String.valueOf(nextBillId));
             response[0].setNoticeTel(noticeTel);
             response[0].setBillStatus(billStatus);
             response[0].setTargetType(targetType);
-            response[0].setTargetId(targetId);
+            response[0].setTargetId(String.valueOf(targetId));
             return null;
         });
         return response[0];
@@ -1499,7 +1499,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
-        context.select(t.DATE_STR,t.PROPERTY_IDENTIFER,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
+        context.select(t.DATE_STR,t.ADDRESS_ID,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                 .from(t,t1)
                 .where(t.CONTRACT_NUM.eq(contractNum))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))

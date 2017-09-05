@@ -1,6 +1,9 @@
 //@formatter:off
 package com.everhomes.asset;
 
+import com.everhomes.asset.zjgkVOs.CommunityAddressDTO;
+import com.everhomes.asset.zjgkVOs.SearchBillsResponse;
+import com.everhomes.asset.zjgkVOs.SearchEnterpriseBillsDTO;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.http.HttpUtils;
@@ -18,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 
 import static com.everhomes.util.SignatureHelper.computeSignature;
@@ -266,17 +270,20 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType) {
+    public List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse carrier) {
+        List<ListBillsDTO> list = new ArrayList<>();
+        String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
-        params.put("customerName", targetName);
-        params.put("communityIdentifer", String.valueOf(ownerId));
-        params.put("buildingIdentifier", String.valueOf(buildingName));
-        params.put("apartmentIdentifier", String.valueOf(apartmentName));
-        params.put("payFlag", String.valueOf(status));
-        params.put("sdateFrom",dateStrBegin);
-        params.put("sdateTo",dateStrEnd);
-        params.put("pageOffset",String.valueOf(pageOffSet));
-        params.put("pageSize",String.valueOf(pageSize));
+        params.put("customerName", targetName==null?"":targetName);
+        //通过ownerId来找这个communityIdentifier就不会有两个ownerId的问题了
+        params.put("communityIdentifer", communityIdentifier==null?"":communityIdentifier);
+        params.put("buildingIdentifier", String.valueOf(buildingName)==null?"":String.valueOf(buildingName));
+        params.put("apartmentIdentifier", String.valueOf(apartmentName)==null?"":String.valueOf(apartmentName));
+        params.put("payFlag", String.valueOf(billStatus)==null?"":String.valueOf(billStatus));
+        params.put("sdateFrom",dateStrBegin==null?"":dateStrBegin);
+        params.put("sdateTo",dateStrEnd==null?"":dateStrEnd);
+        params.put("pageOffset",String.valueOf(pageOffSet)==null?"":String.valueOf(pageOffSet));
+        params.put("pageSize",String.valueOf(pageSize)==null?"":String.valueOf(pageSize));
         String json = generateJson(params);
         String url;
         if(targetType.equals("eh_organization")){
@@ -287,13 +294,38 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
             throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
         }
         try {
-                HttpUtils.postJson(url,json,120);
+            postJson = HttpUtils.postJson(url, json, 120);
         } catch (IOException e) {
             LOGGER.error("调用张江高科searchEnterpriseBills失败"+e);
             throw new RuntimeException("调用张江高科searchEnterpriseBills失败"+e);
         }
-
-        return null;
+        if(postJson!=null&&postJson.trim().length()>0){
+            SearchBillsResponse response = (SearchBillsResponse)StringHelper.fromJsonString(postJson, SearchBillsResponse.class);
+            if(response.getErrorCode()==200){
+                List<SearchEnterpriseBillsDTO> res = response.getResponse();
+                Integer nextPageOffset = response.getNextPageOffset();
+                carrier.setNextPageAnchor(nextPageOffset.longValue());
+                for(int i = 0 ; i < res.size(); i++){
+                    SearchEnterpriseBillsDTO sourceDto = res.get(i);
+                    ListBillsDTO dto = new ListBillsDTO();
+//                    dto.setContractId(sourceDto.getCont);
+//                    dto.setContractNum();
+                    dto.setTargetId(sourceDto.getCustomerIdentifier());
+                    dto.setTargetType(targetType);
+                    dto.setBillStatus(sourceDto.getPayFlag());
+                    dto.setNoticeTel(sourceDto.getNoticeTels().split(",")[0]);
+                    dto.setBillId(sourceDto.getBillID());
+                    dto.setBillGroupName(sourceDto.getFeeName());
+                    dto.setAmountOwed(new BigDecimal(sourceDto.getAmountOwed()));
+                    dto.setAmountReceivable(new BigDecimal(sourceDto.getAmountReceivable()));
+                    dto.setAmountReceived(new BigDecimal(sourceDto.getAmountReceived()));
+                    list.add(dto);
+                }
+            }else{
+                LOGGER.error("调用张江高科searchEnterpriseBills失败"+response.getErrorDescription()+","+response.getErrorDetails());
+            }
+        }
+        return list;
     }
     private String generateJson(Map<String,String> params){
         params.put("appKey", "ee4c8905-9aa4-4d45-973c-ede4cbb3cf21");

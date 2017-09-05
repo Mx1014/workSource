@@ -221,18 +221,24 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillsResponse response = new ListBillsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
-            cmd.setPageAnchor(0l);
+            if(UserContext.getCurrentNamespaceId()!=999971){
+                cmd.setPageAnchor(0l);
+            }else{
+                cmd.setPageAnchor(1l);
+            }
         }
         if(cmd.getPageSize() == null || cmd.getPageSize() < 1 || cmd.getPageSize() > Integer.MAX_VALUE/10){
             cmd.setPageSize(20);
         }
         int pageOffSet = cmd.getPageAnchor().intValue();
-        List<ListBillsDTO> list = handler.listBills(cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType());
-        if(list.size() <= cmd.getPageSize()){
-            response.setNextPageAnchor(null);
-        }else{
-            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
-            list.remove(list.size()-1);
+        List<ListBillsDTO> list = handler.listBills(cmd.getCommunityIdentifier(),cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
+        if(UserContext.getCurrentNamespaceId()!=999971){
+            if(list.size() <= cmd.getPageSize()){
+                response.setNextPageAnchor(null);
+            }else{
+                response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+                list.remove(list.size()-1);
+            }
         }
         response.setListBillsDTOS(list);
         return response;
@@ -397,13 +403,13 @@ public class AssetServiceImpl implements AssetService {
         for(int i = 0; i < listBillsDTOS.size(); i ++) {
             ListBillsDTO convertedDto = listBillsDTOS.get(i);
             OwnerEntity entity = new OwnerEntity();
-            entity.setOwnerId(convertedDto.getOwnerId());
+            entity.setOwnerId(Long.parseLong(convertedDto.getOwnerId()));
             entity.setOwnerType(convertedDto.getOwnerType());
             if(noticeObjects.containsKey(entity)){
-                noticeObjects.get(entity).add(convertedDto.getBillId());
+                noticeObjects.get(entity).add(Long.parseLong(convertedDto.getBillId()));
             }else{
                 List<Long> ids = new ArrayList<>();
-                ids.add(convertedDto.getBillId());
+                ids.add(Long.parseLong(convertedDto.getBillId()));
                 noticeObjects.put(entity,ids);
             }
         }
@@ -744,6 +750,9 @@ public class AssetServiceImpl implements AssetService {
             billList.add((PaymentBills)entry.getValue());
         }
         this.dbProvider.execute((TransactionStatus status) -> {
+            if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
+                return null;
+            }
             assetProvider.saveBillItems(billItemsList);
             assetProvider.saveBills(billList);
             assetProvider.saveContractVariables(contractDateList);
@@ -795,9 +804,9 @@ public class AssetServiceImpl implements AssetService {
             c4.set(Calendar.MONTH,c4.get(Calendar.MONTH)+1);
             c4.set(Calendar.DAY_OF_MONTH,c4.getActualMinimum(Calendar.DAY_OF_MONTH));
         }
-        if(c4.compareTo(c2) < 0){
+        if(c2.compareTo(c4) < 0){
             //less than one month
-            duration = c2.get(Calendar.DAY_OF_MONTH)-c2.getActualMinimum(Calendar.DAY_OF_MONTH)/c2.getActualMaximum(Calendar.DAY_OF_MONTH);
+            duration = ((float)c2.get(Calendar.DAY_OF_MONTH)-(float)c2.getActualMinimum(Calendar.DAY_OF_MONTH))/(float)c2.getActualMaximum(Calendar.DAY_OF_MONTH);
             addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c2, c3, duration,billDay);
         }
         dtos1.addAll(dtos2);
@@ -849,7 +858,7 @@ public class AssetServiceImpl implements AssetService {
                 }else{
                     distance = c3.getActualMaximum(Calendar.DAY_OF_MONTH)-c2day+c2day;
                 }
-                float duration = distance/c4.getActualMaximum(Calendar.DAY_OF_MONTH);
+                float duration = (float)distance/(float)c4.getActualMaximum(Calendar.DAY_OF_MONTH);
                 addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c2, c3, duration,billDay);
             }
         }
