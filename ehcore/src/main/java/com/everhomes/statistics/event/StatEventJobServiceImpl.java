@@ -2,6 +2,7 @@
 package com.everhomes.statistics.event;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.statistics.event.StatEventStatTimeInterval;
 import com.everhomes.rest.statistics.event.StatExecuteEventTaskCommand;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -170,8 +171,10 @@ public class StatEventJobServiceImpl implements StatEventJobService, Application
             endDate = tmp;
         }
 
+        boolean manuallyExecute = cmd.getDeleteOld() != null && cmd.getDeleteOld().equals(TrueOrFalseFlag.TRUE.getCode());
+
         do {
-            StatEventTaskExecution taskExecution = getTaskExecution(startDate, true);
+            StatEventTaskExecution taskExecution = getTaskExecution(startDate, manuallyExecute);
             executeTask(taskExecution);
             startDate = startDate.plusDays(1);
         } while (startDate.isBefore(endDate));
