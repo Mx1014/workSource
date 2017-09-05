@@ -1003,6 +1003,10 @@ public class PortalServiceImpl implements PortalService {
 		if(null != rank.getItems() && rank.getItems().size() > 0){
 			for (PortalItemReorder item: rank.getItems()) {
 				PortalItem portalItem = checkPortalItem(item.getItemId());
+				//更多全部不进行分类
+				if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
+					continue;
+				}
 				portalItem.setOperatorUid(user.getId());
 				portalItem.setItemCategoryId(portalItemCategory.getId());
 				if(null != ItemDisplayFlag.fromCode(item.getDisplayFlag()))
@@ -1518,7 +1522,12 @@ public class PortalServiceImpl implements PortalService {
 					item.setItemName(portalItem.getName());
 					item.setDeleteFlag(DeleteFlagType.YES.getCode());
 					item.setScaleType(ScaleType.TAILOR.getCode());
-					item.setCategryName(categoryIdMap.get(portalItem.getItemCategoryId()));
+
+					//更多全部不进行分类
+					if(PortalItemActionType.fromCode(portalItem.getActionType()) != PortalItemActionType.ALLORMORE){
+						item.setCategryName(categoryIdMap.get(portalItem.getItemCategoryId()));
+					}
+
 					if(PortalScopeType.RESIDENTIAL == PortalScopeType.fromCode(scope.getScopeType())){
 						item.setScopeCode(ScopeType.RESIDENTIAL.getCode());
 						item.setSceneType(SceneType.DEFAULT.getCode());
@@ -1859,7 +1868,7 @@ public class PortalServiceImpl implements PortalService {
 				// 添加item 分类
 				portalItemCategoryProvider.createPortalItemCategory(portalItemCategory);
 			}
-			syncContentScope(user, namespaceId, EntityType.PORTAL_ITEM.getCode(), portalItemCategory.getId(), ScopeType.ALL.getCode(), 0L, category.getSceneType());
+			syncContentScope(user, namespaceId, EntityType.PORTAL_ITEM_CATEGORY.getCode(), portalItemCategory.getId(), ScopeType.ALL.getCode(), 0L, category.getSceneType());
 
 			PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
 			mapping.setLaunchPadContentId(category.getId());
