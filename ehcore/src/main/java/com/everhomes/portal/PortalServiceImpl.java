@@ -1297,6 +1297,13 @@ public class PortalServiceImpl implements PortalService {
 				if(Style.fromCode(group.getStyle()) == Style.GALLERY){
 					config.setCssStyleFlag(CssStyleFlagType.YES.getCode());
 				}
+				if(null == instanceConfig.getPadding()){
+					instanceConfig.setPadding(1);
+				}
+
+				if(null == instanceConfig.getMargin()){
+					instanceConfig.setPadding(1);
+				}
 				config.setPaddingBottom(instanceConfig.getPadding());
 				config.setPaddingLeft(instanceConfig.getPadding());
 				config.setPaddingRight(instanceConfig.getPadding());
@@ -1736,7 +1743,7 @@ public class PortalServiceImpl implements PortalService {
 					itemGroup.setCreatorUid(user.getId());
 					itemGroup.setOperatorUid(user.getId());
 					if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NAVIGATOR){
-						NavigatorInstanceConfig instanceConfig = (NavigatorInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BulletinsInstanceConfig.class)), NavigatorInstanceConfig.class);
+						NavigatorInstanceConfig instanceConfig = (NavigatorInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), NavigatorInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						if(Style.fromCode(padLayoutGroup.getStyle()) == Style.GALLERY){
@@ -1755,13 +1762,13 @@ public class PortalServiceImpl implements PortalService {
 							syncItemCategory(itemGroup.getNamespaceId(),itemGroup.getId());
 						syncItem(itemGroup.getNamespaceId(), location, itemGroup.getName(), itemGroup.getId());
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.BANNERS){
-						BannersInstanceConfig instanceConfig = (BannersInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BannersInstanceConfig.class)), BannersInstanceConfig.class);
+						BannersInstanceConfig instanceConfig = (BannersInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BannersInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.BULLETINS){
-						BulletinsInstanceConfig instanceConfig = (BulletinsInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BulletinsInstanceConfig.class)), BulletinsInstanceConfig.class);
+						BulletinsInstanceConfig instanceConfig = (BulletinsInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BulletinsInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
