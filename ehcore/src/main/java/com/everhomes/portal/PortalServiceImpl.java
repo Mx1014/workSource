@@ -250,6 +250,11 @@ public class PortalServiceImpl implements PortalService {
 		if(null != moduleApp.getModuleId() && moduleApp.getModuleId() != 0){
 			ServiceModule serviceModule = checkServiceModule(moduleApp.getModuleId());
 			dto.setModuleName(serviceModule.getName());
+
+			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
+			if(null != handler){
+				handler.processInstanceConfig(dto.getInstanceConfig());
+			}
 		}
 		return dto;
 	}
