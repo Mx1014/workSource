@@ -549,18 +549,36 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public void deleteBill(BillIdCommand cmd) {
+    public String deleteBill(BillIdCommand cmd) {
+        String result = "OK";
+        if(UserContext.getCurrentNamespaceId()==999971){
+            result = "张江高科项目暂不支持删除账单功能";
+            return result;
+        }
         assetProvider.deleteBill(cmd.getBillId());
+        return result;
     }
 
     @Override
-    public void deleteBillItem(BillItemIdCommand cmd) {
+    public String deleteBillItem(BillItemIdCommand cmd) {
+        String result = "OK";
+        if(UserContext.getCurrentNamespaceId()==999971){
+            result = "张江高科项目暂不支持删除收费项目功能";
+            return result;
+        }
         assetProvider.deleteBillItem(cmd.getBillItemId());
+        return result;
     }
 
     @Override
-    public void deletExemptionItem(ExemptionItemIdCommand cmd) {
+    public String deletExemptionItem(ExemptionItemIdCommand cmd) {
+        String result = "OK";
+        if(UserContext.getCurrentNamespaceId()==999971){
+            result = "张江高科项目暂不支持删除加减免项功能";
+            return result;
+        }
         assetProvider.deletExemptionItem(cmd.getExemptionItemId());
+        return result;
     }
 
     @Override

@@ -68,11 +68,11 @@ public interface AssetService {
 
     ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd);
 
-    void deleteBill(BillIdCommand cmd);
+    String deleteBill(BillIdCommand cmd);
 
-    void deleteBillItem(BillItemIdCommand cmd);
+    String deleteBillItem(BillItemIdCommand cmd);
 
-    void deletExemptionItem(ExemptionItemIdCommand cmd);
+    String deletExemptionItem(ExemptionItemIdCommand cmd);
 
     PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd);
 

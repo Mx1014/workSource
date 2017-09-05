@@ -14,6 +14,7 @@ import com.everhomes.rest.asset.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.StringHelper;
+import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -294,7 +295,8 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
             throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
         }
         try {
-            postJson = HttpUtils.postJson(url, json, 120);
+
+            postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
         } catch (IOException e) {
             LOGGER.error("调用张江高科searchEnterpriseBills失败"+e);
             throw new RuntimeException("调用张江高科searchEnterpriseBills失败"+e);
@@ -304,7 +306,7 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
             if(response.getErrorCode()==200){
                 List<SearchEnterpriseBillsDTO> res = response.getResponse();
                 Integer nextPageOffset = response.getNextPageOffset();
-                carrier.setNextPageAnchor(nextPageOffset.longValue());
+                carrier.setNextPageAnchor(nextPageOffset==null?pageOffSet:nextPageOffset.longValue());
                 for(int i = 0 ; i < res.size(); i++){
                     SearchEnterpriseBillsDTO sourceDto = res.get(i);
                     ListBillsDTO dto = new ListBillsDTO();
@@ -313,7 +315,14 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
                     dto.setTargetId(sourceDto.getCustomerIdentifier());
                     dto.setTargetType(targetType);
                     dto.setBillStatus(sourceDto.getPayFlag());
-                    dto.setNoticeTel(sourceDto.getNoticeTels().split(",")[0]);
+                    String noticeTel = "";
+                    String noticeTels = sourceDto.getNoticeTels();
+                    if(noticeTels!=null && sourceDto.getNoticeTels().split(",").length>1){
+                        noticeTel = sourceDto.getNoticeTels().split(",")[0];
+                    }else if(noticeTels!=null){
+                        noticeTel = sourceDto.getNoticeTels();
+                        dto.setNoticeTel(noticeTel);
+                    }
                     dto.setBillId(sourceDto.getBillID());
                     dto.setBillGroupName(sourceDto.getFeeName());
                     dto.setAmountOwed(new BigDecimal(sourceDto.getAmountOwed()));
@@ -333,6 +342,7 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
         params.put("timestamp", "1498097655000");
         params.put("crypto", "sssss");
         String SECRET_KEY = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
+        params.put("signature",computeSignature(params,SECRET_KEY));
         return StringHelper.toJsonString(params);
     }
 

@@ -24,5 +24,7 @@ public class SearchBill{
         List<ListBillsDTO> dtos = v.listBills("", "", namespaceId, ownerId, "", "", "", null, null, null
                 , (byte) 0, "", "", 1, pageSize, null, null, "eh_user", response);
         System.out.println(dtos.size());
+        System.out.println("--------------------------");
+        System.out.println(dtos);
     }
 }
