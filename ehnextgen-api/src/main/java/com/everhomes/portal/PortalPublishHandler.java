@@ -30,4 +30,6 @@ public interface PortalPublishHandler {
      * @return
      */
     String getAppInstanceConfig(Integer namespaceId, String actionData);
+
+    String processInstanceConfig(String instanceConfig);
 }

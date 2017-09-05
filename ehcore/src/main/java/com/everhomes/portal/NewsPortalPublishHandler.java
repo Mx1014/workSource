@@ -74,4 +74,9 @@ public class NewsPortalPublishHandler implements PortalPublishHandler{
         }
         return newsCategory;
     }
+
+    @Override
+    public String processInstanceConfig(String instanceConfig) {
+        return instanceConfig;
+    }
 }

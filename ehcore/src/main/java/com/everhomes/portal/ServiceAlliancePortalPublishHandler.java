@@ -156,4 +156,9 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
     private void updateJumps(Integer namespaceId, List<ServiceAllianceJump> jumps){
         //暂时不做
     }
+
+    @Override
+    public String processInstanceConfig(String instanceConfig) {
+        return instanceConfig;
+    }
 }
