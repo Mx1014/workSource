@@ -943,7 +943,7 @@ public class AssetServiceImpl implements AssetService {
         if(dtos.size()>0){
             ContractDTO contractDTO = dtos.get(0);
             FindContractCommand cmd2 = new FindContractCommand();
-            cmd2.setCommunityId(contractDTO.getId());
+            cmd2.setId(contractDTO.getId());
             cmd2.setContractNumber(contractDTO.getContractNumber());
             cmd2.setCommunityId(cmd.getCommunityId());
             cmd2.setPartyAId(contractDTO.getPartyAId());
@@ -971,7 +971,9 @@ public class AssetServiceImpl implements AssetService {
             String addressName;
             addressName = building.getBuildingName()+building.getApartmentName();
             addressNames.add(addressName);
-            areaSize += building.getAreaSize();
+            if(building.getAreaSize()!=null){
+                areaSize += building.getAreaSize();
+            }
         }
         dto.setAddressNames(addressNames);
         dto.setAreaSizesSum(String.valueOf(areaSize));
@@ -1023,7 +1025,7 @@ public class AssetServiceImpl implements AssetService {
             formula += "*"+duration;
         }
         BigDecimal response = CalculatorUtil.arithmetic(formula);
-        response.setScale(2);
+        response.setScale(2,BigDecimal.ROUND_CEILING);
         return response;
     }
 //    @Scheduled(cron = "0 0 23 * * ?")

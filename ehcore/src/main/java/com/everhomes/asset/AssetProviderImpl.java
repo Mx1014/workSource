@@ -1509,7 +1509,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .map(r -> {
                     PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
                     dto.setDateStrEnd(r.getValue(t.DATE_STR));
-                    dto.setPropertyIdentifier(r.getValue(t.PROPERTY_IDENTIFER));
+                    dto.setPropertyIdentifier(String.valueOf(r.getValue(t.ADDRESS_ID)));
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
