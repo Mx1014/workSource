@@ -5642,7 +5642,8 @@ public class PunchServiceImpl implements PunchService {
 	private void createPunchSchedulingsBookSheetHead(Sheet sheet, Long queryTime) {
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int cellNum =0 ;
-		SimpleDateFormat sf= new SimpleDateFormat("dd日 EEE");
+		SimpleDateFormat sf= new SimpleDateFormat("dd日 EEE",Locale.SIMPLIFIED_CHINESE);
+
 		Calendar startCalendar = Calendar.getInstance();
 		Calendar endCalendar = Calendar.getInstance();
 		startCalendar.setTime(new Date(queryTime));
