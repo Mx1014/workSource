@@ -89,6 +89,8 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApplyEntryServiceImpl.class);
 
+    private static final long OTHER_BUILDING_ID = 0;
+
 	private SmsProvider smsProvider;
 	private ContractProvider contractProvider;
 	private BuildingProvider buildingProvider;
@@ -401,29 +403,33 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			Long firstBuildingId = null;
 			for(BuildingApartmentDTO buildingApartmentDTO: buildings){
 				Building building = communityProvider.findBuildingByCommunityIdAndName(request.getCommunityId(), buildingApartmentDTO.getBuildingName());
-				if(building !=null){
+				if(building != null){
+					//转换楼栋id
 					LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(building.getId());
-					buildingIds.add(leaseBuilding.getId());
+
 					opRequestBuilding.setBuildingId(leaseBuilding.getId());
-
 					enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
-
-					firstBuildingId = building.getId();
+					//记录楼栋id，创建工作流时使用
+					buildingIds.add(leaseBuilding.getId());
+					//默认取第一个楼栋id，创建工作流时使用
+					if (null == firstBuildingId) {
+						firstBuildingId = building.getId();
+						resourceCategories[0] = communityProvider.findResourceCategoryAssignment(firstBuildingId,
+								EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
+					}
 				}
 			}
-			if (null != firstBuildingId) {
-				resourceCategories[0] = communityProvider.findResourceCategoryAssignment(firstBuildingId,
-						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
-			}
 		}else if (request.getApplyType().equals(ApplyEntryApplyType.RENEW.getCode())){
-			//兼容
+			//新app 续租也是sourceType，兼容老app（老app是申请类型是续租）
 			request.setSourceType(ApplyEntrySourceType.RENEW.getCode());
 			List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByOrganizationId(request.getEnterpriseId());
 			if (!addresses.isEmpty()) {
+				//续租时，默认取公司第一个地址
 				Address address = addressProvider.findAddressById(addresses.get(0).getAddressId());
 				if (null != address) {
 					Building building = communityProvider.findBuildingByCommunityIdAndName(request.getCommunityId(), address.getBuildingName());
 					if (null != building) {
+						//转换楼栋id
 						LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(building.getId());
 						if (null != leaseBuilding) {
 							opRequestBuilding.setBuildingId(leaseBuilding.getId());
@@ -437,7 +443,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}else if (request.getSourceType().equals(ApplyEntrySourceType.MARKET_ZONE.getCode())){
 			//2. 创客空间带的地址
 			YellowPage yellowPage = yellowPageProvider.getYellowPageById(request.getSourceId());
-
+			//转换楼栋id
 			LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(yellowPage.getBuildingId());
 			opRequestBuilding.setBuildingId(leaseBuilding.getId());
 			enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
@@ -474,13 +480,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(request.getSourceType())){
 			//4. 虚位以待的楼栋地址
 			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(request.getSourceId());
-
+			//兼容老版本app，默认设置为管理公司发布，如果是招租信息的申请，这里取当前招租信息的发布类型
 			issuerType = leasePromotion.getIssuerType();
 
 			opRequestBuilding.setBuildingId(leasePromotion.getBuildingId());
 			enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
 
-			if (leasePromotion.getBuildingId() != 0L) {
+			if (leasePromotion.getBuildingId() != OTHER_BUILDING_ID) {
 				LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(leasePromotion.getBuildingId());
 				if (leaseBuilding.getBuildingId() != 0L) {
 					resourceCategories[0] = communityProvider.findResourceCategoryAssignment(leaseBuilding.getBuildingId(),
@@ -489,7 +495,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			}else {
 				buildingName = leasePromotion.getBuildingName();
 			}
-
 		}
 
 		if (null != opRequestBuilding.getBuildingId()) {
@@ -816,8 +821,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if (null == cmd.getRentType()) {
 			cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
 		}
-		//兼容app业主发布招租，后台楼栋从EhLeaseBuildings查询，app业主发布招租取的楼栋信息是以前的项目管理楼栋信息
-		cmd.setBuildingId(processBuildingId(cmd.getBuildingId(), adminFlag));
+
+		if (null == cmd.getBuildingId()) {
+			cmd.setBuildingId(OTHER_BUILDING_ID);
+		}else{
+			//兼容app业主发布招租，后台楼栋从EhLeaseBuildings查询，app业主发布招租取的楼栋信息是以前的项目管理楼栋信息
+			cmd.setBuildingId(processBuildingId(cmd.getBuildingId(), adminFlag));
+		}
 
 		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
 		leasePromotion.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -888,7 +898,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd, Byte adminFlag){
 
-		cmd.setBuildingId(processBuildingId(cmd.getBuildingId(), adminFlag));
+		if (null == cmd.getBuildingId()) {
+			cmd.setBuildingId(OTHER_BUILDING_ID);
+		}else{
+			//兼容app业主发布招租，后台楼栋从EhLeaseBuildings查询，app业主发布招租取的楼栋信息是以前的项目管理楼栋信息
+			cmd.setBuildingId(processBuildingId(cmd.getBuildingId(), adminFlag));
+		}
 
 		return dbProvider.execute((TransactionStatus status) -> {
 
@@ -1411,6 +1426,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				request.setSourceId(cmd.getSourceId());
 				enterpriseApplyEntryProvider.updateLeaseRequestForm(request);
 			}else {
+				//当没有sourced的时候表示没有设置表单，即删除关联关系
 				enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
 			}
 		}
