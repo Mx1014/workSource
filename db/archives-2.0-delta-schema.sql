@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS `eh_archives_contacts_sticky`;
-CREATE TABLE `eh_archives_contacts_sticky` (
+DROP TABLE IF EXISTS `eh_archives_sticky_contacts`;
+CREATE TABLE `eh_archives_sticky_contacts` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
 	`organization_id` BIGINT NOT NULL COMMENT 'organizationId',
@@ -63,6 +63,17 @@ CREATE TABLE `eh_archives_forms` (
   `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current using version',
   `status` TINYINT NOT NULL COMMENT 'invalid, config, running',
   `update_time` DATETIME COMMENT 'last update time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
+
+DROP TABLE IF EXISTS `eh_archives_working_places`;
+CREATE TABLE `eh_archives_working_places` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+	`organization_id` BIGINT NOT NULL COMMENT'the id of organization',
+  `working_place` VARCHAR(256) NOT NULL DEFAULT 0 COMMENT 'company address',
+  `create_time` DATETIME COMMENT 'the time of data creating',
+  `operator_uid` BIGINT COMMENT 'the id of the operator',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
