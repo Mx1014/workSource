@@ -1032,7 +1032,7 @@ public class AssetServiceImpl implements AssetService {
             formula += "*"+duration;
         }
         BigDecimal response = CalculatorUtil.arithmetic(formula);
-        response.setScale(2);
+        response.setScale(2,BigDecimal.ROUND_CEILING);
         return response;
     }
 //    @Scheduled(cron = "0 0 23 * * ?")
