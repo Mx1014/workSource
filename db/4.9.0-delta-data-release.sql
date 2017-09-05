@@ -30,9 +30,13 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), '40105', '', 'EhNamespaces', '1000000', '2');
 
 UPDATE eh_enterprise_op_request_buildings lp JOIN eh_lease_buildings lb ON lb.building_id = lp.building_id set lp.building_id = lb.id;
-UPDATE eh_enterprise_op_requests lp JOIN eh_lease_buildings lb ON lb.building_id = lp.building_id set lp.building_id = lb.id;
-UPDATE eh_enterprise_op_requests lp JOIN eh_lease_buildings lb ON lb.building_id = lp.building_id set lp.source_id = lb.id where source_type = 'building';
+
 UPDATE eh_lease_promotions lp JOIN eh_lease_buildings lb ON lb.building_id = lp.building_id set lp.building_id = lb.id;
+
+UPDATE eh_web_menus set `name` = '房源招租' where id = 40110;
+UPDATE eh_web_menus set `name` = '申请记录' where id = 40120;
+
+update eh_lease_promotion_attachments set owner_type = 'EhLeasePromotions';
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('expansion', '7', 'zh_CN', '你要添加的楼栋已存在！');
 
 

@@ -1,7 +1,10 @@
 // @formatter:off
 package com.everhomes.rest.portal;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * 
@@ -18,6 +21,9 @@ public class ServiceAllianceInstanceConfig {
 	private String displayType;
 
 	private Byte detailFlag;
+
+	@ItemType(ServiceAllianceJump.class)
+	private List<ServiceAllianceJump> jumps;
 
 	public Long getType() {
 		return type;
@@ -41,6 +47,14 @@ public class ServiceAllianceInstanceConfig {
 
 	public void setDisplayType(String displayType) {
 		this.displayType = displayType;
+	}
+
+	public List<ServiceAllianceJump> getJumps() {
+		return jumps;
+	}
+
+	public void setJumps(List<ServiceAllianceJump> jumps) {
+		this.jumps = jumps;
 	}
 
 	@Override

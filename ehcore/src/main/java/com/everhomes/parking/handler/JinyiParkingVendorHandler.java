@@ -271,6 +271,9 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 		return cardType;
 	}
 
+	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+		//什么都不做, 金溢对接，
+	}
     @Override
     public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
     	
