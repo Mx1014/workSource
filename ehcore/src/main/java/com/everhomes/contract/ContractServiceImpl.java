@@ -470,7 +470,8 @@ public class ContractServiceImpl implements ContractService {
 		}
 	}
 
-	private String generateContractNumber() {
+	@Override
+	public String generateContractNumber() {
 		String num = "HT_" + DateHelper.currentGMTTime().getTime() + RandomUtils.nextInt(10);
 		return num;
 	}
@@ -558,8 +559,8 @@ public class ContractServiceImpl implements ContractService {
 					cp.setApartmentName(apartment.getApartmentName());
 					cp.setBuldingName(apartment.getBuildingName());
 					cp.setAddressId(apartment.getAddressId());
-					Address address = addressProvider.findAddressById(apartment.getAddressId());
-					cp.setPropertyName(address.getNamespaceAddressToken());
+//					Address address = addressProvider.findAddressById(apartment.getAddressId());
+//					cp.setPropertyName(address.getNamespaceAddressToken());
 					contractProperties.add(cp);
 				});
 			}
@@ -860,7 +861,10 @@ public class ContractServiceImpl implements ContractService {
 			}
 
 		}
-		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getResult())) && ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+		//待发起的和审批不通过的能发起审批
+		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getResult())) &&
+				(ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus()))
+				 || ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus())))) {
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
 			addToFlowCase(contract);

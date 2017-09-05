@@ -12,27 +12,14 @@ import java.util.List;
 
 /**
  *<ul>
- * <li>targetName:客户名称</li>
+ * <li>contractId:合同id</li>
  * <li>contractNum:合同编号</li>
- * <li>hasMoreContract:是否有更多合同，1：是；0：否</li>
- * <li>addressNames:选定合同的地址名称集合</li>
- * <li>areaSizesSum:选定合同下的资产的面积和</li>
  *</ul>
  */
 public class FindUserInfoForPaymentDTO {
-    private String targetName;
+    private Long contractId;
     private String contractNum;
-    private Byte hasMoreContract;
-    private List<String> addressNames;
-    private Double areaSizesSum;
 
-    public String getTargetName() {
-        return targetName;
-    }
-
-    public void setTargetName(String targetName) {
-        this.targetName = targetName;
-    }
 
     public String getContractNum() {
         return contractNum;
@@ -42,27 +29,12 @@ public class FindUserInfoForPaymentDTO {
         this.contractNum = contractNum;
     }
 
-    public Byte getHasMoreContract() {
-        return hasMoreContract;
+    public Long getContractId() {
+
+        return contractId;
     }
 
-    public void setHasMoreContract(Byte hasMoreContract) {
-        this.hasMoreContract = hasMoreContract;
-    }
-
-    public List<String> getAddressNames() {
-        return addressNames;
-    }
-
-    public void setAddressNames(List<String> addressNames) {
-        this.addressNames = addressNames;
-    }
-
-    public Double getAreaSizesSum() {
-        return areaSizesSum;
-    }
-
-    public void setAreaSizesSum(Double areaSizesSum) {
-        this.areaSizesSum = areaSizesSum;
+    public void setContractId(Long contractId) {
+        this.contractId = contractId;
     }
 }

@@ -34,10 +34,14 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
+
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.contract.ListCustomerContractsCommand;
+
+import com.everhomes.rest.contract.*;
+
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -96,7 +100,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Created by Administrator on 2017/2/20.
+ * Created by Wentian on 2017/2/20.
  */
 @Component
 public class AssetServiceImpl implements AssetService {
@@ -960,6 +964,27 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void updateBillsToSettled(UpdateBillsToSettled cmd) {
         assetProvider.updateBillsToSettled(cmd.getContractId(),cmd.getOwnerType(),cmd.getOwnerId());
+    }
+
+    @Override
+    public GetAreaAndAddressByContractDTO getAreaAndAddressByContract(FindContractCommand cmd) {
+        GetAreaAndAddressByContractDTO dto = new GetAreaAndAddressByContractDTO();
+        List<String> addressNames = new ArrayList<>();
+        Double areaSize = 0d;
+        ContractDetailDTO contract = contractService.findContract(cmd);
+        List<BuildingApartmentDTO> apartments = contract.getApartments();
+        for(int i = 0; i < apartments.size(); i++) {
+            BuildingApartmentDTO building = apartments.get(i);
+            String addressName;
+            addressName = building.getBuildingName()+building.getApartmentName();
+            addressNames.add(addressName);
+            if(building.getAreaSize()!=null){
+                areaSize += building.getAreaSize();
+            }
+        }
+        dto.setAddressNames(addressNames);
+        dto.setAreaSizesSum(String.valueOf(areaSize));
+        return dto;
     }
 
     private void coverVariables(List<VariableIdAndValue> var1, List<VariableIdAndValue> var2) {

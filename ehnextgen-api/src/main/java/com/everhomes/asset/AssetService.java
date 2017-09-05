@@ -1,6 +1,7 @@
 package com.everhomes.asset;
 
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -86,6 +87,8 @@ public interface AssetService {
     FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd);
 
     void updateBillsToSettled(UpdateBillsToSettled cmd);
+
+    GetAreaAndAddressByContractDTO getAreaAndAddressByContract(FindContractCommand cmd);
 
 //    void synchronizeZJGKBill();
 }

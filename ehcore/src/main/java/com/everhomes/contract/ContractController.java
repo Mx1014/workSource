@@ -63,6 +63,16 @@ public class ContractController extends ControllerBase {
 	}
 
 	/**
+	 * <p>生成合同编号</p>
+	 * <b>URL: /contract/generateContractNumber</b>
+	 */
+	@RequestMapping("generateContractNumber")
+	@RestReturn(String.class)
+	public RestResponse generateContractNumber(){
+		return new RestResponse(contractService.generateContractNumber());
+	}
+
+	/**
 	 * <p>创建合同</p>
 	 * <b>URL: /contract/createContract</b>
 	 */
