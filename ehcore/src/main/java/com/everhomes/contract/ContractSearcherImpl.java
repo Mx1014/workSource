@@ -125,10 +125,14 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
             if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
                 OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(contract.getCustomerId());
-                builder.field("ownerTypeId", owner.getOrgOwnerTypeId());
+                if(owner != null) {
+                    builder.field("ownerTypeId", owner.getOrgOwnerTypeId());
+                }
             } else if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
                 EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
-                builder.field("customerCategoryItemId", customer.getCategoryItemId());
+                if(customer != null) {
+                    builder.field("customerCategoryItemId", customer.getCategoryItemId());
+                }
             }
 
 

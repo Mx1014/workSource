@@ -103,7 +103,6 @@ public class ContractFlowModuleListener implements FlowModuleListener {
             contract.setStatus(ContractStatus.APPROVE_QUALITIED.getCode());
             contractProvider.updateContract(contract);
             contractSearcher.feedDoc(contract);
-            dealAddressLivingStatus(contract, AddressMappingStatus.RENT.getCode());
         } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
             dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
         }

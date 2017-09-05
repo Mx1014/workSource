@@ -866,30 +866,32 @@ public class ContractServiceImpl implements ContractService {
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getResult())) &&
 				(ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus()))
 				 || ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus())))) {
-			contract.setStatus(cmd.getResult());
-			contractProvider.updateContract(contract);
-			addToFlowCase(contract);
-			contractSearcher.feedDoc(contract);
-
 			//发起审批要把门牌状态置为被占用
 			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 			if(contractApartments != null && contractApartments.size() > 0) {
 				List<Long> addressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
 				List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
-				boolean allfree = true;
 				if(mappings != null && mappings.size() > 0) {
+					//先检查是否全是待租的，不是的话报错
 					for(CommunityAddressMapping mapping : mappings) {
 						if(!AddressMappingStatus.FREE.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
-							allfree = false;
-							break;
+							LOGGER.error("contract apartment is not all free! mapping: {}", mapping);
+							throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_APARTMENT_IS_NOT_FREE,
+									"contract apartment is not all free!");
 						}
 					}
-				}
-				if(!allfree) {
-//					throw
+
+					mappings.forEach(mapping -> {
+						mapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+						propertyMgrProvider.updateOrganizationAddressMapping(mapping);
+					});
 				}
 			}
 
+			contract.setStatus(cmd.getResult());
+			contractProvider.updateContract(contract);
+			addToFlowCase(contract);
+			contractSearcher.feedDoc(contract);
 		}
 
 	}
@@ -903,9 +905,20 @@ public class ContractServiceImpl implements ContractService {
 					"contract is not approve qualitied!");
 		}
 		contract.setStatus(ContractStatus.ACTIVE.getCode());
-
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
+		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+		if(contractApartments != null && contractApartments.size() > 0) {
+			List<Long> addressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+			List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
+			if(mappings != null && mappings.size() > 0) {
+				mappings.forEach(mapping -> {
+					mapping.setLivingStatus(AddressMappingStatus.RENT.getCode());
+					propertyMgrProvider.updateOrganizationAddressMapping(mapping);
+				});
+			}
+		}
+
 		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_SAVE);
 		if(contract.getParentId() != null) {
 			Contract parentContract = contractProvider.findContractById(contract.getParentId());
@@ -913,6 +926,18 @@ public class ContractServiceImpl implements ContractService {
 				parentContract.setStatus(ContractStatus.HISTORY.getCode());
 				contractProvider.updateContract(parentContract);
 				contractSearcher.feedDoc(parentContract);
+
+				List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+				if(parentContractApartments != null && parentContractApartments.size() > 0) {
+					List<Long> addressIds = parentContractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+					List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
+					if(mappings != null && mappings.size() > 0) {
+						mappings.forEach(mapping -> {
+							mapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+							propertyMgrProvider.updateOrganizationAddressMapping(mapping);
+						});
+					}
+				}
 			}
 		}
 	}
