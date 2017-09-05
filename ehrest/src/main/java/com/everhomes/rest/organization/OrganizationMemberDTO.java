@@ -118,6 +118,7 @@ public class OrganizationMemberDTO {
     private Long approveTime;
     private String operatorName;
     private String operatorPhone;
+    private String email;
 
     public OrganizationMemberDTO() {
     }
@@ -483,5 +484,13 @@ public class OrganizationMemberDTO {
 
     public void setSalaryGroupId(Long salaryGroupId) {
         this.salaryGroupId = salaryGroupId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

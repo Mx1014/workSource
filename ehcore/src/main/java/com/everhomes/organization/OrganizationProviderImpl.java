@@ -5159,6 +5159,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			cond = cond.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
 		}
 
+
 		if(listCommand != null){
 			// 员工状态
 			if(listCommand.getEmployeeStatus() != null){
@@ -5188,6 +5189,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			//合同结束日期
 			if(listCommand.getContractEndTimeStart() != null && listCommand.getContractEndTimeStart() != null){
 				cond = cond.and(t2.field("contract_end_time").between(listCommand.getContractEndTimeStart(), listCommand.getContractEndTimeStart()));
+			}
+
+			if(listCommand.getExceptIds() != null){
+				cond = cond.and(t2.field("id").notIn(listCommand.getExceptIds()));
 			}
 		}
 

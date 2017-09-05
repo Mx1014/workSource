@@ -57,6 +57,8 @@ public class ListOrganizationContactCommand {
     private Long contractPartyId;//合同主体
     private Long workPlaceId;//工作地点
 
+    private List<Long> exceptIds;
+
     public ListOrganizationContactCommand() {
     }
 
@@ -223,5 +225,13 @@ public class ListOrganizationContactCommand {
 
     public void setContractEndTimeEnd(Timestamp contractEndTimeEnd) {
         this.contractEndTimeEnd = contractEndTimeEnd;
+    }
+
+    public List<Long> getExceptIds() {
+        return exceptIds;
+    }
+
+    public void setExceptIds(List<Long> exceptIds) {
+        this.exceptIds = exceptIds;
     }
 }
