@@ -6023,6 +6023,7 @@ public class PunchServiceImpl implements PunchService {
 	        pr.setName(cmd.getGroupName());
 	        pr.setRuleType(cmd.getRuleType());
 	        pr.setPunchOrganizationId( punchOrg.getId());
+			pr.setStatus(PunchRuleStatus.NEW.getCode());
 	        punchProvider.createPunchRule(pr);
 	        //打卡时间
 			savePunchTimeRule(ConvertHelper.convert(cmd, PunchGroupDTO.class),pr);
@@ -6057,9 +6058,10 @@ public class PunchServiceImpl implements PunchService {
 	 * */
 	private void savePunchTimeRule(PunchGroupDTO punchGroupDTO, PunchRule pr) {
 		Long punchOrgId = pr.getPunchOrganizationId();
-		punchProvider.deletePunchTimeRuleByPunchOrgId(punchOrgId);
+		//timeRules 不删除,等第二天早上刷新到删除状态
+//		punchProvider.deletePunchTimeRuleByPunchOrgId(punchOrgId);
 		punchProvider.deletePunchSpecialDaysByPunchOrgId(punchOrgId);
-		punchProvider.deletePunchTimeIntervalByPunchRuleId(pr.getId());
+//		punchProvider.deletePunchTimeIntervalByPunchRuleId(pr.getId());
         List<PunchTimeRule> ptrs = new ArrayList<>();
         if(null != punchGroupDTO.getTimeRules()){
         	for(PunchTimeRuleDTO timeRule:punchGroupDTO.getTimeRules()){
@@ -6072,6 +6074,7 @@ public class PunchServiceImpl implements PunchService {
         		ptr.setPunchTimesPerDay((byte) (timeRule.getPunchTimeIntervals().size()*2));
         		ptr.setPunchRuleId(pr.getId());
         		ptr.setPunchOrganizationId(punchOrgId);
+				ptr.setStatus(pr.getStatus());
         		ptr.setFlexTimeLong(timeRule.getFlexTime());
         		ptrs.add(ptr);
         		if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
@@ -6088,32 +6091,7 @@ public class PunchServiceImpl implements PunchService {
 	        					+timeRule.getEndPunchTime());
         			}
         		}
-        		if(timeRule.getPunchTimeIntervals().size()==1){
-                    ptr.setNoonLeaveTimeLong(timeRule.getNoonLeaveTime());
-                    ptr.setAfternoonArriveTimeLong(timeRule.getAfternoonArriveTime());
-        			ptr.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
-        			ptr.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
-        			ptr.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
-        			punchProvider.createPunchTimeRule(ptr);
-        		}else if(timeRule.getPunchTimeIntervals().size()==2){
-        			ptr.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
-        			ptr.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
-        			ptr.setNoonLeaveTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime());
-        			ptr.setAfternoonArriveTimeLong(timeRule.getPunchTimeIntervals().get(1).getArriveTime());
-        			ptr.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(1).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
-        			punchProvider.createPunchTimeRule(ptr);
-        		}else{
-        			punchProvider.createPunchTimeRule(ptr);
-        			for(PunchTimeIntervalDTO interval:timeRule.getPunchTimeIntervals()){
-        				PunchTimeInterval ptInterval = ConvertHelper.convert(ptr, PunchTimeInterval.class);
-        				ptInterval.setArriveTimeLong(interval.getArriveTime());
-        				ptInterval.setLeaveTimeLong(interval.getLeaveTime());
-        				ptInterval.setPunchRuleId(pr.getId());
-        				ptInterval.setTimeRuleId(ptr.getId());
-        				punchProvider.createPunchTimeInterval(ptInterval);
-
-        			}
-        		}
+				saveTimerRuleIntervals(timeRule,ptr);
         	}
         }
 
@@ -6131,30 +6109,31 @@ public class PunchServiceImpl implements PunchService {
 					PunchTimeRule ptr2 =ConvertHelper.convert(timeRule, PunchTimeRule.class);
 	        		ptr2.setPunchTimesPerDay((byte) (timeRule.getPunchTimeIntervals().size()*2));
 	        		ptr2.setFlexTimeLong(timeRule.getFlexTime());
-	        		if(timeRule.getPunchTimeIntervals().size()==1){
-	        			ptr2.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
-	        			ptr2.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
-	        			ptr2.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
-	        			punchProvider.createPunchTimeRule(ptr2);
-	        		}else if(timeRule.getPunchTimeIntervals().size()==2){
-	        			ptr2.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
-	        			ptr2.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
-	        			ptr2.setNoonLeaveTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime());
-	        			ptr2.setAfternoonArriveTimeLong(timeRule.getPunchTimeIntervals().get(1).getArriveTime());
-	        			ptr2.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(1).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
-	        			punchProvider.createPunchTimeRule(ptr2);
-	        		}else{
-	        			punchProvider.createPunchTimeRule(ptr2);
-	        			for(PunchTimeIntervalDTO interval:timeRule.getPunchTimeIntervals()){
-	        				PunchTimeInterval ptInterval = ConvertHelper.convert(ptr2, PunchTimeInterval.class);
-	        				ptInterval.setArriveTimeLong(interval.getArriveTime());
-	        				ptInterval.setLeaveTimeLong(interval.getLeaveTime());
-	        				ptInterval.setPunchRuleId(pr.getId());
-	        				ptInterval.setTimeRuleId(ptr2.getId());
-	        				punchProvider.createPunchTimeInterval(ptInterval);
-
-	        			}
-	        		}
+					saveTimerRuleIntervals(timeRule,ptr2);
+//	        		if(timeRule.getPunchTimeIntervals().size()==1){
+//	        			ptr2.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+//	        			ptr2.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
+//	        			ptr2.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+//	        			punchProvider.createPunchTimeRule(ptr2);
+//	        		}else if(timeRule.getPunchTimeIntervals().size()==2){
+//	        			ptr2.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+//	        			ptr2.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
+//	        			ptr2.setNoonLeaveTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime());
+//	        			ptr2.setAfternoonArriveTimeLong(timeRule.getPunchTimeIntervals().get(1).getArriveTime());
+//	        			ptr2.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(1).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+//	        			punchProvider.createPunchTimeRule(ptr2);
+//	        		}else{
+//	        			punchProvider.createPunchTimeRule(ptr2);
+//	        			for(PunchTimeIntervalDTO interval:timeRule.getPunchTimeIntervals()){
+//	        				PunchTimeInterval ptInterval = ConvertHelper.convert(ptr2, PunchTimeInterval.class);
+//	        				ptInterval.setArriveTimeLong(interval.getArriveTime());
+//	        				ptInterval.setLeaveTimeLong(interval.getLeaveTime());
+//	        				ptInterval.setPunchRuleId(pr.getId());
+//	        				ptInterval.setTimeRuleId(ptr2.getId());
+//	        				punchProvider.createPunchTimeInterval(ptInterval);
+//
+//	        			}
+//	        		}
 	        		psd.setTimeRuleId(ptr2.getId());
 				}
 				punchProvider.createPunchSpecialDay(psd);
@@ -6169,6 +6148,38 @@ public class PunchServiceImpl implements PunchService {
         	}
         }
 	}
+
+	private void saveTimerRuleIntervals(PunchTimeRuleDTO timeRule, PunchTimeRule ptr) {
+
+		if(timeRule.getPunchTimeIntervals().size()==1){
+			ptr.setNoonLeaveTimeLong(timeRule.getNoonLeaveTime());
+			ptr.setAfternoonArriveTimeLong(timeRule.getAfternoonArriveTime());
+			ptr.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+			ptr.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
+			ptr.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+			punchProvider.createPunchTimeRule(ptr);
+		}else if(timeRule.getPunchTimeIntervals().size()==2){
+			ptr.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+			ptr.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
+			ptr.setNoonLeaveTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime());
+			ptr.setAfternoonArriveTimeLong(timeRule.getPunchTimeIntervals().get(1).getArriveTime());
+			ptr.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(1).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
+			punchProvider.createPunchTimeRule(ptr);
+		}else{
+			punchProvider.createPunchTimeRule(ptr);
+			for(PunchTimeIntervalDTO interval:timeRule.getPunchTimeIntervals()){
+				PunchTimeInterval ptInterval = ConvertHelper.convert(ptr, PunchTimeInterval.class);
+				ptInterval.setArriveTimeLong(interval.getArriveTime());
+				ptInterval.setLeaveTimeLong(interval.getLeaveTime());
+				ptInterval.setPunchRuleId(ptr.getPunchRuleId());
+				ptInterval.setTimeRuleId(ptr.getId());
+				punchProvider.createPunchTimeInterval(ptInterval);
+
+			}
+		}
+
+	}
+
 	private void saveEmployeeScheduling(PunchSchedulingEmployeeDTO r, Long month, PunchRule pr, List<PunchTimeRule> ptrs) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(month);
@@ -6516,7 +6527,11 @@ public class PunchServiceImpl implements PunchService {
         pr.setName(cmd.getGroupName());
         pr.setRuleType(cmd.getRuleType());
         pr.setPunchOrganizationId( punchOrg.getId());
-        punchProvider.updatePunchRule(pr);
+		pr.setStatus(PunchRuleStatus.MODIFYED.getCode());
+		// 新增一条修改状态的规则
+		//删除
+        punchProvider.createPunchRule(pr);
+//		punchProvider.deletePunchTimeRuleByRuleId(pr.getId());
 
         savePunchTimeRule(cmd, pr);
 		return null;

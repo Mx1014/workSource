@@ -2733,6 +2733,15 @@ long id = sequenceProvider.getNextSequence(key);
 		return result;
 	}
 
+	@Override
+	public void deletePunchTimeRuleByRuleId(Long id) {
+		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchTimeRulesRecord> step = context.delete(Tables.EH_PUNCH_TIME_RULES);
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.PUNCH_RULE_ID.eq(id);
+		step.where(condition);
+		step.execute();
+	}
+
 
 }
 

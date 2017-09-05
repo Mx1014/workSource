@@ -328,4 +328,6 @@ public interface PunchProvider {
 
 
 	List<PunchTimeRule> listPunchTimeRulesBySplitTime(long beginTime, long endTime);
+
+	void deletePunchTimeRuleByRuleId(Long id);
 }
