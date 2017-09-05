@@ -204,45 +204,52 @@ public class ArchivesServiceImpl implements ArchivesService {
     public ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListArchivesContactsResponse response = new ListArchivesContactsResponse();
-        //  置顶数为40
-        final Integer stickCount = 40;
-        //  保存置顶人员
-        List<Long> detailIds = archivesProvider.listArchivesContactsStickyIds(namespaceId, cmd.getOrganizationId(), stickCount);
+        final Integer stickCount = 10;  //  置顶数为10,表示一页最多显示10个置顶人员
+        List<Long> detailIds = archivesProvider.listArchivesContactsStickyIds(namespaceId, cmd.getOrganizationId(), stickCount);    //  保存置顶人员
 
-        //  没有查询时显示主体
-        if (StringUtils.isEmpty(cmd.getKeywords())) {
+        // Steps：
+        // 1.If the keywords is not null, just pass the key and get the corresponding employee back.
+        // 2.If the keywords is null, then judged by the "pageAnchor"
+        // 3.If the pageAnchor is null, we should get stick employees first.
+        // 4.if the pageAnchor is not null, means we should get the next page of employees, so ignore those stick employees.
+
+        if (!StringUtils.isEmpty(cmd.getKeywords())) {
+            //  有查询的时候已经不需要置顶了，直接查询对应人员
+            List<ArchivesContactDTO> contacts = new ArrayList<>();
+            contacts.addAll(listArchivesContacts(cmd,response));
+            response.setContacts(contacts);
+        } else {
             if (StringUtils.isEmpty(cmd.getPageAnchor())) {
-                //  没有页码说明第一次读取，则从置顶列表读取人员
-
-                //  2.读取置顶人员，确定置顶个数
                 List<ArchivesContactDTO> contacts = new ArrayList<>();
+                //  读取置顶人员
                 for (Long detailId : detailIds) {
                     ArchivesContactDTO stickDTO = getArchivesContact(new ArchivesIdCommand(detailId));
                     if (stickDTO != null)
                         contacts.add(stickDTO);
                 }
-                //  3.获取其余人员
-                Integer pageSize = cmd.getPageSize() - detailIds.size();
-                contacts.addAll(listArchivesContacts(cmd.getOrganizationId(), cmd.getPageAnchor(), pageSize, response));
+                //  获取其余人员
+                cmd.setPageSize(cmd.getPageSize() - detailIds.size());
+                contacts.addAll(listArchivesContacts(cmd, response));
                 response.setContacts(contacts);
             }else{
                 //  若已经读取了置顶的人则直接往下继续读
-
+                List<ArchivesContactDTO> contacts = new ArrayList<>();
+                contacts.addAll(listArchivesContacts(cmd, response));
+                response.setContacts(contacts);
             }
-        } else {
-            //  有查询的时候已经不需要置顶了，直接查询对应人员
-
         }
         return response;
     }
 
-    private List<ArchivesContactDTO> listArchivesContacts(Long organizationId, Long pageAnchor, Integer pageSize, ListArchivesContactsResponse response){
+    private List<ArchivesContactDTO> listArchivesContacts(ListArchivesContactsCommand cmd, ListArchivesContactsResponse response){
         List<ArchivesContactDTO> contacts = new ArrayList<>();
         ListOrganizationContactCommand orgCommand = new ListOrganizationContactCommand();
-        orgCommand.setOrganizationId(organizationId);
-        orgCommand.setPageAnchor(pageAnchor);
-        orgCommand.setPageSize(pageSize);
-        ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnels(orgCommand,false);
+        orgCommand.setOrganizationId(cmd.getOrganizationId());
+        orgCommand.setPageAnchor(cmd.getPageAnchor());
+        orgCommand.setPageSize(cmd.getPageSize());
+        if(!StringUtils.isEmpty(cmd.getKeywords()))
+            orgCommand.setKeywords(cmd.getKeywords());
+        ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
         members.getMembers().forEach(r ->{
             ArchivesContactDTO dto = new ArchivesContactDTO();
             dto.setDetailId(r.getDetailId());

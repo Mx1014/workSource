@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * <ul>
- * <li>DEFAULT("DEFAULT"): 默认字段(不可删除与修改名称)</li>
+ * <li>DEFAULT("DEFAULT"): 默认字段组(不可删除与修改名称)</li>
  * </ul>
  */
 public enum GeneralFormFieldAttributeType {

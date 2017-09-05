@@ -88,6 +88,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
                 .from(Tables.EH_ARCHIVES_CONTACTS_STICKY)
                 .where(Tables.EH_ARCHIVES_CONTACTS_STICKY.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ARCHIVES_CONTACTS_STICKY.ORGANIZATION_ID.eq(organizationId))
+                .orderBy(Tables.EH_ARCHIVES_CONTACTS_STICKY.UPDATE_TIME)
                 .limit(stickCount)
                 .fetchInto(Long.class);
     }
