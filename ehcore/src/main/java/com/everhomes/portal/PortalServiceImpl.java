@@ -250,6 +250,11 @@ public class PortalServiceImpl implements PortalService {
 		if(null != moduleApp.getModuleId() && moduleApp.getModuleId() != 0){
 			ServiceModule serviceModule = checkServiceModule(moduleApp.getModuleId());
 			dto.setModuleName(serviceModule.getName());
+
+			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
+			if(null != handler){
+				dto.setInstanceConfig(handler.processInstanceConfig(dto.getInstanceConfig()));
+			}
 		}
 		return dto;
 	}
@@ -998,6 +1003,10 @@ public class PortalServiceImpl implements PortalService {
 		if(null != rank.getItems() && rank.getItems().size() > 0){
 			for (PortalItemReorder item: rank.getItems()) {
 				PortalItem portalItem = checkPortalItem(item.getItemId());
+				//更多全部不进行分类
+				if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.ALLORMORE){
+					continue;
+				}
 				portalItem.setOperatorUid(user.getId());
 				portalItem.setItemCategoryId(portalItemCategory.getId());
 				if(null != ItemDisplayFlag.fromCode(item.getDisplayFlag()))
@@ -1292,6 +1301,13 @@ public class PortalServiceImpl implements PortalService {
 				if(Style.fromCode(group.getStyle()) == Style.GALLERY){
 					config.setCssStyleFlag(CssStyleFlagType.YES.getCode());
 				}
+				if(null == instanceConfig.getPadding()){
+					instanceConfig.setPadding(1);
+				}
+
+				if(null == instanceConfig.getMargin()){
+					instanceConfig.setPadding(1);
+				}
 				config.setPaddingBottom(instanceConfig.getPadding());
 				config.setPaddingLeft(instanceConfig.getPadding());
 				config.setPaddingRight(instanceConfig.getPadding());
@@ -1506,7 +1522,12 @@ public class PortalServiceImpl implements PortalService {
 					item.setItemName(portalItem.getName());
 					item.setDeleteFlag(DeleteFlagType.YES.getCode());
 					item.setScaleType(ScaleType.TAILOR.getCode());
-					item.setCategryName(categoryIdMap.get(portalItem.getItemCategoryId()));
+
+					//更多全部不进行分类
+					if(PortalItemActionType.fromCode(portalItem.getActionType()) != PortalItemActionType.ALLORMORE){
+						item.setCategryName(categoryIdMap.get(portalItem.getItemCategoryId()));
+					}
+
 					if(PortalScopeType.RESIDENTIAL == PortalScopeType.fromCode(scope.getScopeType())){
 						item.setScopeCode(ScopeType.RESIDENTIAL.getCode());
 						item.setSceneType(SceneType.DEFAULT.getCode());
@@ -1731,7 +1752,7 @@ public class PortalServiceImpl implements PortalService {
 					itemGroup.setCreatorUid(user.getId());
 					itemGroup.setOperatorUid(user.getId());
 					if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NAVIGATOR){
-						NavigatorInstanceConfig instanceConfig = (NavigatorInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BulletinsInstanceConfig.class)), NavigatorInstanceConfig.class);
+						NavigatorInstanceConfig instanceConfig = (NavigatorInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), NavigatorInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						if(Style.fromCode(padLayoutGroup.getStyle()) == Style.GALLERY){
@@ -1746,18 +1767,17 @@ public class PortalServiceImpl implements PortalService {
 						config.setColumnCount(padLayoutGroup.getColumnCount());
 						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
-
-						syncItem(itemGroup.getNamespaceId(), location, itemGroup.getName(), itemGroup.getId());
 						if(name.equals("ServiceMarketLayout"))
 							syncItemCategory(itemGroup.getNamespaceId(),itemGroup.getId());
+						syncItem(itemGroup.getNamespaceId(), location, itemGroup.getName(), itemGroup.getId());
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.BANNERS){
-						BannersInstanceConfig instanceConfig = (BannersInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BannersInstanceConfig.class)), BannersInstanceConfig.class);
+						BannersInstanceConfig instanceConfig = (BannersInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BannersInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
 						portalItemGroupProvider.createPortalItemGroup(itemGroup);
 					}else if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.BULLETINS){
-						BulletinsInstanceConfig instanceConfig = (BulletinsInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BulletinsInstanceConfig.class)), BulletinsInstanceConfig.class);
+						BulletinsInstanceConfig instanceConfig = (BulletinsInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), BulletinsInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));
@@ -1848,7 +1868,7 @@ public class PortalServiceImpl implements PortalService {
 				// 添加item 分类
 				portalItemCategoryProvider.createPortalItemCategory(portalItemCategory);
 			}
-			syncContentScope(user, namespaceId, EntityType.PORTAL_ITEM.getCode(), portalItemCategory.getId(), ScopeType.ALL.getCode(), 0L, category.getSceneType());
+			syncContentScope(user, namespaceId, EntityType.PORTAL_ITEM_CATEGORY.getCode(), portalItemCategory.getId(), ScopeType.ALL.getCode(), 0L, category.getSceneType());
 
 			PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
 			mapping.setLaunchPadContentId(category.getId());
@@ -1877,6 +1897,10 @@ public class PortalServiceImpl implements PortalService {
 				item.setStatus(PortalItemStatus.ACTIVE.getCode());
 				item.setCreatorUid(user.getId());
 				item.setOperatorUid(user.getId());
+				PortalItemCategory category = portalItemCategoryProvider.getPortalItemCategoryByName(namespaceId, itemGroupId, padItem.getCategryName());
+				if(null != category){
+					item.setItemCategoryId(category.getId());
+				}
 				if(ActionType.NONE == ActionType.fromCode(padItem.getActionType())){
 					item.setActionType(PortalItemActionType.NONE.getCode());
 				}else if(ActionType.MORE_BUTTON == ActionType.fromCode(padItem.getActionType())){

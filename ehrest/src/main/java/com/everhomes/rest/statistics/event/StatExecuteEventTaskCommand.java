@@ -13,6 +13,7 @@ public class StatExecuteEventTaskCommand {
 
     private String startDate;
     private String endDate;
+    private Byte deleteOld;
 
     public String getStartDate() {
         return startDate;
@@ -28,6 +29,14 @@ public class StatExecuteEventTaskCommand {
 
     public void setEndDate(String endDate) {
         this.endDate = endDate;
+    }
+
+    public Byte getDeleteOld() {
+        return deleteOld;
+    }
+
+    public void setDeleteOld(Byte deleteOld) {
+        this.deleteOld = deleteOld;
     }
 
     @Override
