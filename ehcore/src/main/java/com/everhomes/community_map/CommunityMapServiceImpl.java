@@ -137,6 +137,29 @@ public class CommunityMapServiceImpl implements CommunityMapService {
             response.setNextPageAnchor(resp.getNextPageAnchor());
             response.getShops().addAll(resp.getShopDTOs().stream().map(r -> {
                 CommunityMapShopDTO shop = ConvertHelper.convert(r, CommunityMapShopDTO.class);
+
+                if (StringUtils.isNotBlank(r.getBuildingId())) {
+                    List<CommunityMapBuildingDTO> buildings = new ArrayList<>();
+
+                    Building building = communityProvider.findBuildingById(Long.valueOf(r.getBuildingId()));
+                    if (null != building) {
+                        CommunityMapBuildingDTO dto = ConvertHelper.convert(r, CommunityMapBuildingDTO.class);
+
+                        List<CommunityBuildingGeo> geos = communityMapProvider.listCommunityBuildingGeos(building.getId());
+
+                        if (!geos.isEmpty()) {
+                            CommunityBuildingGeo centerGeo = geos.get(geos.size() - 1);
+                            geos.remove(centerGeo);
+                            dto.setCenterLatitude(centerGeo.getLatitude());
+                            dto.setCenterLongitude(centerGeo.getLongitude());
+                            dto.setGeos(geos.stream().map(g -> ConvertHelper.convert(g, CommunityMapBuildingGeoDTO.class))
+                                    .collect(Collectors.toList()));
+                        }
+                        buildings.add(dto);
+                        shop.setBuildings(buildings);
+                    }
+                }
+
                 return shop;
             }).collect(Collectors.toList()));
         }

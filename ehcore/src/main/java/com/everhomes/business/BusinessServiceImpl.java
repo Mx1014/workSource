@@ -2489,7 +2489,7 @@ public class BusinessServiceImpl implements BusinessService {
             	response.setShopDTOs(searchShopsResponse.getBody().getRows());
             	
             	if(searchShopsResponse.getBody().getHasNext())
-            	response.setNextPageAnchor(cmd.getPageAnchor() + 1);
+            	response.setNextPageAnchor(cmd.getPageAnchor()==null ? 2: cmd.getPageAnchor() + 1);
             }
 //            if (resp != null) {
 //                List<ModulePromotionEntityDTO> dtoList = new ArrayList<>();
