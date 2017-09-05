@@ -462,7 +462,6 @@ public class ArchivesServiceImpl implements ArchivesService {
             throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
         }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        //  TODO: 校验密码
         User user = UserContext.current().getUser();
         if (user == null) {
             LOGGER.error("Unable to find owner user,  namespaceId={}", namespaceId);
@@ -476,13 +475,6 @@ public class ArchivesServiceImpl implements ArchivesService {
             LOGGER.error("Password does not match for " + user.getIdentifierToken());
             throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
         }
-    }
-
-
-    @Override
-    public ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd) {
-
-        return null;
     }
 
     @Override
@@ -504,8 +496,14 @@ public class ArchivesServiceImpl implements ArchivesService {
             addCommand.setEmployeeNo(cmd.getEmployeeNo());
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 
-        //  2.修改其余的信息
+        //  2.获得 detailId 然后处理其它信息
         OrganizationMemberDetails result = organizationProvider.findOrganizationMemberDetailsByDetailId(memberDTO.getDetailId());
+
+        return null;
+    }
+
+    @Override
+    public ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd) {
 
         return null;
     }

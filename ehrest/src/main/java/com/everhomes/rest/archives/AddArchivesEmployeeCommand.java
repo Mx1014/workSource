@@ -28,6 +28,10 @@ public class AddArchivesEmployeeCommand {
 
     private String contactName;
 
+    private String enName;
+
+    private Byte gender;
+
     private String checkInTime;
 
     private Byte employeeType;
@@ -63,6 +67,22 @@ public class AddArchivesEmployeeCommand {
 
     public void setContactName(String contactName) {
         this.contactName = contactName;
+    }
+
+    public String getEnName() {
+        return enName;
+    }
+
+    public void setEnName(String enName) {
+        this.enName = enName;
+    }
+
+    public Byte getGender() {
+        return gender;
+    }
+
+    public void setGender(Byte gender) {
+        this.gender = gender;
     }
 
     public String getCheckInTime() {
