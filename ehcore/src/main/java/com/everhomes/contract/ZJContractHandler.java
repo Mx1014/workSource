@@ -161,6 +161,8 @@ public class ZJContractHandler implements ContractHandler{
         pv.setVariableName("物业费单价");
         pv.setVariableValue(zjContract.getPropertyFeeUnit());
         item.setChargingVariables(pv.toString());
+        items.add(item);
+        dto.setChargingItems(items);
         if(zjContract.getApartments() != null && zjContract.getApartments().size() > 0) {
             List<BuildingApartmentDTO> apartments = new ArrayList<>();
             zjContract.getApartments().forEach(apartment -> {
@@ -169,7 +171,7 @@ public class ZJContractHandler implements ContractHandler{
                 buildingApartmentDTO.setBuildingName(apartment.getBuildingName());
                 apartments.add(buildingApartmentDTO);
             });
-
+            dto.setApartments(apartments);
         }
         return dto;
     }

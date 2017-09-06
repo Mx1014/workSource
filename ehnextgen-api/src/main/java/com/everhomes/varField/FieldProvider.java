@@ -17,4 +17,5 @@ public interface FieldProvider {
     List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId);
     ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long itemId);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, String moduleName, String displayName);
+    ScopeField findScopeField(Integer namespaceId, Long fieldId);
 }

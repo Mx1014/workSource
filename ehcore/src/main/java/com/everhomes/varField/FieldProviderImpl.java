@@ -79,6 +79,23 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
+    public ScopeField findScopeField(Integer namespaceId, Long fieldId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<ScopeField> fields = context.select().from(Tables.EH_VAR_FIELD_SCOPES)
+                .where(Tables.EH_VAR_FIELD_SCOPES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_VAR_FIELD_SCOPES.FIELD_ID.eq(fieldId))
+                .fetch().map((record)-> {
+                    return ConvertHelper.convert(record, ScopeField.class);
+                });
+
+        if(fields == null || fields.size() == 0) {
+            return null;
+        }
+        return fields.get(0);
+    }
+
+    @Override
     public List<Field> listFields(List<Long> ids) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 

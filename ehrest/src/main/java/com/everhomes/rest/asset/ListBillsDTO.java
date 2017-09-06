@@ -32,11 +32,11 @@ import java.math.BigDecimal;
 public class ListBillsDTO {
     private Integer defaultOrder;
     private String dateStr;
-    private Long billId;
+    private String billId;
     private String billGroupName;
     private String targetName;
-    private Long targetId;
-    private Long contractId;
+    private String targetId;
+    private String contractId;
     private String contractNum;
     private String targetType;
     private String buildingName;
@@ -47,7 +47,7 @@ public class ListBillsDTO {
     private BigDecimal amountOwed;
     private Byte billStatus;
     private Integer noticeTimes;
-    private Long ownerId;
+    private String ownerId;
     private String ownerType;
 
     @Override
@@ -55,12 +55,36 @@ public class ListBillsDTO {
         return StringHelper.toJsonString(this);
     }
 
-    public Long getContractId() {
+    public String getBillId() {
+        return billId;
+    }
+
+    public void setBillId(String billId) {
+        this.billId = billId;
+    }
+
+    public String getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(String targetId) {
+        this.targetId = targetId;
+    }
+
+    public String getContractId() {
         return contractId;
     }
 
-    public void setContractId(Long contractId) {
+    public void setContractId(String contractId) {
         this.contractId = contractId;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
     }
 
     public String getBuildingName() {
@@ -103,13 +127,7 @@ public class ListBillsDTO {
         this.dateStr = dateStr;
     }
 
-    public Long getBillId() {
-        return billId;
-    }
 
-    public void setBillId(Long billId) {
-        this.billId = billId;
-    }
 
     public String getBillGroupName() {
         return billGroupName;
@@ -143,13 +161,7 @@ public class ListBillsDTO {
         this.targetName = targetName;
     }
 
-    public Long getTargetId() {
-        return targetId;
-    }
 
-    public void setTargetId(Long targetId) {
-        this.targetId = targetId;
-    }
 
     public String getTargetType() {
         return targetType;
@@ -192,14 +204,6 @@ public class ListBillsDTO {
     public void setAmountOwed(BigDecimal amountOwed) {
         amountOwed = amountOwed.setScale(2,BigDecimal.ROUND_CEILING);
         this.amountOwed = amountOwed;
-    }
-
-    public Long getOwnerId() {
-        return ownerId;
-    }
-
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
     }
 
     public String getOwnerType() {

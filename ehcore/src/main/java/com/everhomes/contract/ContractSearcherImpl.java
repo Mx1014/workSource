@@ -1,18 +1,27 @@
 package com.everhomes.contract;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.customer.IndividualCustomerProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.organization.OrganizationOwner;
+import com.everhomes.organization.pm.OrganizationOwnerType;
+import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.contract.*;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.ScopeField;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -49,6 +58,18 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
     @Autowired
     private ConfigurationProvider configProvider;
+
+    @Autowired
+    private IndividualCustomerProvider individualCustomerProvider;
+
+    @Autowired
+    private EnterpriseCustomerProvider enterpriseCustomerProvider;
+
+    @Autowired
+    private FieldProvider fieldProvider;
+
+    @Autowired
+    private PropertyMgrProvider propertyMgrProvider;
 
     @Override
     public String getIndexType() {
@@ -96,12 +117,12 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("categoryItemId", contract.getCategoryItemId());
             builder.field("contractStartDate", contract.getContractStartDate());
             builder.field("contractEndDate", contract.getContractEndDate());
+            builder.field("customerType", contract.getCustomerType());
             if(contract.getRent() != null) {
                 builder.field("amount", contract.getRent());
             } else {
                 builder.field("amount", "");
             }
-
 
             builder.endObject();
             return builder;
@@ -166,6 +187,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(cmd.getContractType() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("contractType", cmd.getContractType()));
 
+        if(cmd.getCustomerType() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("customerType", cmd.getCustomerType()));
+        }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -194,6 +218,18 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(contracts != null && contracts.size() > 0) {
             contracts.forEach(contract -> {
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
+                if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                    EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+                    if(customer != null) {
+                        dto.setCustomerName(customer.getName());
+                    }
+                } else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+                    OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(contract.getCustomerId());
+                    if(owner != null) {
+                        dto.setCustomerName(owner.getContactName());
+                    }
+
+                }
                 processContractApartments(dto);
                 dtos.add(dto);
             });

@@ -271,15 +271,35 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setContactMobile(str.getContactMobile());
             customer.setContactPhone(str.getContactPhone());
             customer.setContactAddress(str.getContactAddress());
-
+    //产品期望改为不存在的导入失败 by xiongying20170904
             ScopeFieldItem scopeCategoryFieldItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getCategoryItemName());
-            if(scopeCategoryFieldItem != null) {
-                customer.setCategoryItemId(scopeCategoryFieldItem.getItemId());
+            if(scopeCategoryFieldItem == null) {
+                LOGGER.error("enterpirse customer category is null, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("enterpirse customer category is null");
+                log.setCode(CustomerErrorCode.ERROR_CUSTOMER_CATEGORY_IS_NULL);
+                errorDataLogs.add(log);
+                continue;
             }
+            customer.setCategoryItemId(scopeCategoryFieldItem.getItemId());
             ScopeFieldItem scopeLevelFieldItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getLevelItemName());
-            if(scopeLevelFieldItem != null) {
-                customer.setLevelItemId(scopeLevelFieldItem.getItemId());
+            if(scopeLevelFieldItem == null) {
+                LOGGER.error("enterpirse customer level is null, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("enterpirse customer level is null");
+                log.setCode(CustomerErrorCode.ERROR_CUSTOMER_LEVEL_IS_NULL);
+                errorDataLogs.add(log);
+                continue;
             }
+            customer.setLevelItemId(scopeLevelFieldItem.getItemId());
+//            ScopeFieldItem scopeCategoryFieldItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getCategoryItemName());
+//            if(scopeCategoryFieldItem != null) {
+//                customer.setCategoryItemId(scopeCategoryFieldItem.getItemId());
+//            }
+//            ScopeFieldItem scopeLevelFieldItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getLevelItemName());
+//            if(scopeLevelFieldItem != null) {
+//                customer.setLevelItemId(scopeLevelFieldItem.getItemId());
+//            }
 
             customer.setCommunityId(cmd.getCommunityId());
             customer.setNamespaceId(cmd.getNamespaceId());

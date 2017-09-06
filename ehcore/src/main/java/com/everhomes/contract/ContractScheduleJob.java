@@ -1,9 +1,14 @@
 package com.everhomes.contract;
 
 import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMapping;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.organization.pm.CommunityAddressMapping;
+import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.contract.PeriodUnit;
+import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.util.DateHelper;
@@ -43,6 +48,12 @@ public class ContractScheduleJob extends QuartzJobBean {
     @Autowired
     private ContractSearcher contractSearcher;
 
+    @Autowired
+    private ContractBuildingMappingProvider contractBuildingMappingProvider;
+
+    @Autowired
+    private PropertyMgrProvider propertyMgrProvider;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
@@ -58,6 +69,7 @@ public class ContractScheduleJob extends QuartzJobBean {
                                 contract.setStatus(ContractStatus.EXPIRED.getCode());
                                 contractProvider.updateContract(contract);
                                 contractSearcher.feedDoc(contract);
+                                dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
                             } else {
                                 if(ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))) {
                                     //正常合同转即将过期
@@ -76,9 +88,9 @@ public class ContractScheduleJob extends QuartzJobBean {
                                             contract.setStatus(ContractStatus.EXPIRED.getCode());
                                             contractProvider.updateContract(contract);
                                             contractSearcher.feedDoc(contract);
+                                            dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
                                         }
                                     }
-
                                 }
                             }
                         });
@@ -86,7 +98,15 @@ public class ContractScheduleJob extends QuartzJobBean {
                 }
             });
         }
+    }
 
+    private void dealAddressLivingStatus(Contract contract, byte livingStatus) {
+        List<ContractBuildingMapping> mappings = contractBuildingMappingProvider.listByContract(contract.getId());
+        mappings.forEach(mapping -> {
+            CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(mapping.getAddressId());
+            addressMapping.setLivingStatus(livingStatus);
+            propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+        });
     }
 
     private Timestamp addPeriod(Timestamp startTime, int period, Byte unit) {

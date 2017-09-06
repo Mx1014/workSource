@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>contractStartDate: 合同开始日期</li>
  * <li>contractEndDate: 合同到期日期</li>
  * <li>organizationName: 客户名称</li>
+ * <li>customerName: 客户名称</li>
  * <li>adminMembers: 管理员列表</li>
  * <li>contactor: 业务联系人名称</li>
  * <li>contract: 业务联系人电话</li>
@@ -46,6 +47,8 @@ public class ContractDTO {
 	private Timestamp contractEndDate;
 
 	private String organizationName;
+
+	private String customerName;
 	
 	@ItemType(OrganizationContactDTO.class)
 	private List<OrganizationContactDTO> adminMembers;
@@ -68,6 +71,14 @@ public class ContractDTO {
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> buildings;
 	private BigDecimal rent;
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
 
 	public Long getPartyAId() {
 		return partyAId;

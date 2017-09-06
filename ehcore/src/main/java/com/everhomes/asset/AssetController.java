@@ -591,9 +591,13 @@ public class AssetController extends ControllerBase {
     @RequestMapping("deletBill")
     @RestReturn(value = String.class)
     public RestResponse deletBill(BillIdCommand cmd) {
-        assetService.deleteBill(cmd);
+        String result = assetService.deleteBill(cmd);
         RestResponse response = new RestResponse();
-        response.setErrorDescription("OK");
+        if(result.equals("OK")){
+            response.setErrorDescription("OK");
+        }else{
+            response.setErrorDescription(result);
+        }
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
@@ -606,9 +610,13 @@ public class AssetController extends ControllerBase {
     @RequestMapping("deletBillItem")
     @RestReturn(value = String.class)
     public RestResponse deletBillItem(BillItemIdCommand cmd) {
-        assetService.deleteBillItem(cmd);
+        String result = assetService.deleteBillItem(cmd);
         RestResponse response = new RestResponse();
-        response.setErrorDescription("OK");
+        if(result.equals("OK")){
+            response.setErrorDescription("OK");
+        }else{
+            response.setErrorDescription(result);
+        }
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
@@ -621,9 +629,13 @@ public class AssetController extends ControllerBase {
     @RequestMapping("deletExemptionItem")
     @RestReturn(value = String.class)
     public RestResponse deletExemptionItem(ExemptionItemIdCommand cmd) {
-        assetService.deletExemptionItem(cmd);
+        String result = assetService.deletExemptionItem(cmd);
         RestResponse response = new RestResponse();
-        response.setErrorDescription("OK");
+        if(result.equals("OK")){
+            response.setErrorDescription("OK");
+        }else{
+            response.setErrorDescription(result);
+        }
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }

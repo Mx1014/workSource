@@ -500,18 +500,18 @@ public class AssetProviderImpl implements AssetProvider {
                 String billGroupNameFound = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME).from(Tables.EH_PAYMENT_BILL_GROUPS).where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(r.getValue(t.BILL_GROUP_ID))).fetchOne(0,String.class);
                 dto.setBillGroupName(billGroupNameFound);
             }
-            dto.setBillId(r.getValue(t.ID));
+            dto.setBillId(String.valueOf(r.getValue(t.ID)));
             dto.setBillStatus(r.getValue(t.STATUS));
             dto.setNoticeTel(r.getValue(t.NOTICETEL));
             dto.setNoticeTimes(r.getNoticeTimes());
             dto.setDateStr(r.getDateStr());
             dto.setTargetName(r.getTargetName());
-            dto.setTargetId(r.getTargetId());
+            dto.setTargetId(String.valueOf(r.getTargetId()));
             dto.setTargetType(r.getTargetType());
-            dto.setOwnerId(r.getOwnerId());
+            dto.setOwnerId(String.valueOf(r.getOwnerId()));
             dto.setOwnerType(r.getOwnerType());
             dto.setContractNum(r.getContractNum());
-            dto.setContractId(r.getContractId());
+            dto.setContractId(String.valueOf(r.getContractId()));
             list.add(dto);
             return null;});
         return list;
@@ -897,11 +897,11 @@ public class AssetProviderImpl implements AssetProvider {
             billsDao.insert(newBill);
             response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);
             response[0].setBillGroupName(billGroupDTO.getBillGroupName());
-            response[0].setBillId(nextBillId);
+            response[0].setBillId(String.valueOf(nextBillId));
             response[0].setNoticeTel(noticeTel);
             response[0].setBillStatus(billStatus);
             response[0].setTargetType(targetType);
-            response[0].setTargetId(targetId);
+            response[0].setTargetId(String.valueOf(targetId));
             return null;
         });
         return response[0];
@@ -1417,11 +1417,13 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public PaymentBillGroupRule getBillGroupRule(Long chargingStandardId, Long chargingStandardId1, String ownerType, Long ownerId) {
+    public PaymentBillGroupRule getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         List<PaymentBillGroupRule> rules = context.select()
                 .from(t)
+                .where(t.CHARGING_ITEM_ID.eq(chargingItemId))
+                .and(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
                 .fetch()
                 .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
         return rules.get(0);
@@ -1499,7 +1501,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
-        context.select(t.DATE_STR,t.PROPERTY_IDENTIFER,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
+        context.select(t.DATE_STR,t.BUILDING_NAME,t.APARTMENT_NAME,t.DATE_STR_BEGIN,t.DATE_STR_END,t.DATE_STR_DUE,t.AMOUNT_RECEIVABLE,t1.NAME)
                 .from(t,t1)
                 .where(t.CONTRACT_NUM.eq(contractNum))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
@@ -1509,7 +1511,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .map(r -> {
                     PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
                     dto.setDateStrEnd(r.getValue(t.DATE_STR));
-                    dto.setPropertyIdentifier(String.valueOf(r.getValue(t.PROPERTY_IDENTIFER)));
+                    dto.setPropertyIdentifier(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
                     dto.setDueDateStr(r.getValue(t.DATE_STR_DUE));
                     dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
                     dto.setDateStrEnd(r.getValue(t.DATE_STR_END));

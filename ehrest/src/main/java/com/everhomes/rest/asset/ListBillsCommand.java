@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 /**
  *<ul>
  * <li>ownerId: 所属者id</li>
+ * <li>communityIdentifier: 园区识别符</li>
  * <li>ownerType: 所属者type</li>
  * <li>addressId: 楼栋门牌id</li>
  * <li>pageSize: 显示数量</li>
@@ -30,6 +31,7 @@ import javax.validation.constraints.NotNull;
 public class ListBillsCommand {
     @NotNull
     private Long ownerId;
+    private String communityIdentifier;
     private Long addressId;
     @NotNull
     private String ownerType;
@@ -50,6 +52,14 @@ public class ListBillsCommand {
 
     public Long getBillGroupId() {
         return billGroupId;
+    }
+
+    public String getCommunityIdentifier() {
+        return communityIdentifier;
+    }
+
+    public void setCommunityIdentifier(String communityIdentifier) {
+        this.communityIdentifier = communityIdentifier;
     }
 
     public String getBuildingName() {

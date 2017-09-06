@@ -93,6 +93,7 @@ public class UpdateContractCommand {
     private String signedPurpose;
     private String denunciationReason;
     private String remark;
+    private Long createUid;
 
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
@@ -102,6 +103,14 @@ public class UpdateContractCommand {
 
     @ItemType(ContractAttachmentDTO.class)
     private List<ContractAttachmentDTO> attachments;
+
+    public Long getCreateUid() {
+        return createUid;
+    }
+
+    public void setCreateUid(Long createUid) {
+        this.createUid = createUid;
+    }
 
     public Integer getRentCycle() {
         return rentCycle;
