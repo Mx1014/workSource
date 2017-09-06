@@ -2346,7 +2346,10 @@ public class PunchServiceImpl implements PunchService {
 					"have no punch rule");
 		PunchStatistic statistic = new PunchStatistic();
 		try {
-
+			Organization punchOrg = organizationProvider.findOrganizationById(pr.getPunchOrganizationId());
+			if (null != punchOrg) {
+				statistic.setPunchOrgName(punchOrg.getName());
+			}
 			//对于已离职和未入职的判断
 			statistic.setUserStatus(PunchUserStatus.NORMAL.getCode());
 			if(!member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
