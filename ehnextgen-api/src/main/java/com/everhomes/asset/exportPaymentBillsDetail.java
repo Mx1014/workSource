@@ -17,9 +17,18 @@ public class exportPaymentBillsDetail {
     private String amountOwed;
     private String status;
     private String noticeTimes;
+    private String contractNum;
 
     public String getDateStr() {
         return dateStr;
+    }
+
+    public String getContractNum() {
+        return contractNum;
+    }
+
+    public void setContractNum(String contractNum) {
+        this.contractNum = contractNum;
     }
 
     public void setDateStr(String dateStr) {

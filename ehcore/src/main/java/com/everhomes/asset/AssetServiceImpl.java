@@ -481,9 +481,10 @@ public class AssetServiceImpl implements AssetService {
             detail.setAmountOwed(dto.getAmountOwed().toString());
             detail.setAmountReceivable(dto.getAmountReceivable().toString());
             detail.setAmountReceived(dto.getAmountReceived().toString());
-            detail.setApartmentName(dto.getApartmentName());
+//            detail.setApartmentName(dto.getApartmentName());
+//            detail.setBuildingName(dto.getBuildingName());
+            detail.setContractNum(dto.getContractNum());
             detail.setBillGroupName(dto.getBillGroupName());
-            detail.setBuildingName(dto.getBuildingName());
             detail.setNoticeTel(dto.getNoticeTel());
             detail.setNoticeTimes(String.valueOf(dto.getNoticeTimes()));
             detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
@@ -491,11 +492,12 @@ public class AssetServiceImpl implements AssetService {
             detail.setDateStr(dto.getDateStr());
             dataList.add(detail);
         }
-        String[] propertyNames = {"dateStr","billGroupName","targetName","buildingName","apartmentName","noticeTel","amountReceivable","amountReceived","amountOwed","status","noticeTimes"};
+//        String[] propertyNames = {"dateStr","billGroupName","targetName","buildingName","apartmentName","noticeTel","amountReceivable","amountReceived","amountOwed","status","noticeTimes"};
+        String[] propertyNames = {"dateStr","billGroupName","targetName","contractNum","noticeTel","amountReceivable","amountReceived","amountOwed","status","noticeTimes"};
 //        Field[] declaredFields = ListBillsDTO.class.getDeclaredFields();
 //        String[] propertyNames = new String[declaredFields.length];
-        String[] titleName ={"账期","账单组","客户名称","楼栋","门牌","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"};
-        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20};
+        String[] titleName ={"账期","账单组","客户名称","合同编号","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20};
 //        for(int i = 0; i < declaredFields.length; i++){
 //            propertyNames[i] = declaredFields[i].getName();
 //        }
@@ -647,6 +649,8 @@ public class AssetServiceImpl implements AssetService {
                     // build a billItem
                     PaymentBillItems item = new PaymentBillItems();
                     item.setAddressId(property.getAddressId());
+                    item.setBuildingName(property.getBuldingName());
+                    item.setApartmentName(property.getApartmentName());
                     item.setPropertyIdentifer(property.getPropertyName());
                     item.setAmountOwed(dto.getAmountReceivable());
                     item.setAmountReceivable(dto.getAmountReceivable());

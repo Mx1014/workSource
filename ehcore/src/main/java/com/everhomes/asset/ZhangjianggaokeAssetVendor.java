@@ -45,8 +45,6 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
     @Autowired
     private CommunityProvider communityProvider;
 
-//    String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
-//    String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
     @Autowired
     private static final String secretKey = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
 
