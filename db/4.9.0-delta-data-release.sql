@@ -3,7 +3,7 @@ SET @id = (SELECT MAX(id) FROM eh_apps);
 INSERT INTO `eh_apps` (`id`, `creator_uid`, `app_key`, `secret_key`, `name`, `description`, `status`, `create_time`) VALUES (@id:=@id+1, '1', 'c9620212-8877-11e7-b08e-0050569605f3', 'OmnSTXMJPqvCxW8n5AmkT1xSGnJ2sWZSyWcDUi32HAD7htoLLxuzGaZUPgRN9bew6mOBW55WliSbcXRV3laC3g==', 'yibei sign', 'yibei.app', '1', now());
 
 -- 添加服务录入菜单 by st.zheng
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `category`) VALUES (20225, '服务录入', '20200', 'task_management_service_entry', '0', '2', '/20000/20200/20225', 'park', '420', '20100', '3', 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `category`) VALUES (20225, '服务录入', '20200', 'task_management_service_entry/property', '0', '2', '/20000/20200/20225', 'park', '420', '20100', '3', 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `category`) VALUES (20226, '工作流设置', '20200', 'react:/working-flow/flow-list/property-service/20100?moduleType=repair', '0', '2', '/20000/20200/20226', 'park', '420', '20100', '3', 'module');
 
 set @privilege_id = (select distinct privilege_id from eh_web_menu_privileges where name='物业报修' );
