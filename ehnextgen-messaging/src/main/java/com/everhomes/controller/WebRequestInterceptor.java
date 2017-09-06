@@ -626,6 +626,24 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         response.addCookie(cookie);
     }
 
+    //微信公众号的accessToken过期时间是7200秒，需要设置cookie小于7200。防止用户在coreserver处于登录状态而accessToken已过期，重新登录之后会刷新accessToken
+    public static void setCookieInResponse(String name, String value, HttpServletRequest request,
+                                           HttpServletResponse response, int age) {
+
+        Cookie cookie = findCookieInRequest(name, request);
+        if (cookie == null)
+            cookie = new Cookie(name, value);
+        else
+            cookie.setValue(value);
+        cookie.setPath("/");
+        //微信
+        cookie.setMaxAge(age);
+        if (value == null || value.isEmpty())
+            cookie.setMaxAge(0);
+
+        response.addCookie(cookie);
+    }
+
     private static Cookie findCookieInRequest(String name, HttpServletRequest request) {
         List<Cookie> matchedCookies = new ArrayList<>();
 
