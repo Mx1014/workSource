@@ -31,6 +31,7 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
@@ -114,6 +115,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	private GeneralFormValProvider generalFormValProvider;
 	private GeneralFormProvider generalFormProvider;
 	private EnterpriseApplyBuildingProvider enterpriseApplyBuildingProvider;
+	private LocaleStringService localeStringService;
 
 	@Override
 	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(GetEnterpriseDetailByIdCommand cmd) {
@@ -222,16 +224,24 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 		response.setNextPageAnchor(locator.getAnchor());
 
-		List<EnterpriseApplyEntryDTO> dtos = enterpriseOpRequests.stream().map(this::populateEnterpriseApplyEntryDTO)
+		String locale = UserContext.current().getUser().getLocale();
+		String defaultValue = localeStringService.getLocalizedString(ApplyEntryErrorCodes.SCOPE, String.valueOf(ApplyEntryErrorCodes.WU), locale, "");
+
+		List<EnterpriseApplyEntryDTO> dtos = enterpriseOpRequests.stream().map(r -> populateEnterpriseApplyEntryDTO(r, defaultValue))
 				.collect(Collectors.toList());
 
 		response.setEntrys(dtos);
 		return response;
 	}
 
-	private EnterpriseApplyEntryDTO populateEnterpriseApplyEntryDTO(EnterpriseOpRequest enterpriseOpRequest) {
+	private EnterpriseApplyEntryDTO populateEnterpriseApplyEntryDTO(EnterpriseOpRequest enterpriseOpRequest, String defaultValue) {
 
 		EnterpriseApplyEntryDTO dto = ConvertHelper.convert(enterpriseOpRequest, EnterpriseApplyEntryDTO.class);
+
+		if (StringUtils.isEmpty(dto.getDescription())) {
+			dto.setDescription(defaultValue);
+		}
+
 		//对于有合同的(一定是续租)
 		if(null != enterpriseOpRequest.getContractId()){
 			Contract contract = contractProvider.findContractById(enterpriseOpRequest.getContractId());
@@ -1208,13 +1218,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
                 if (null != leaseIssuer) {
                     LOGGER.error("LeaseIssuer exist, cmd={}", cmd);
-                    throw errorWith(ApplyEntryErrorCodes.SCOPE_APPLY_TYPE, ApplyEntryErrorCodes.LEASE_ISSUER_EXIST,
+                    throw errorWith(ApplyEntryErrorCodes.SCOPE, ApplyEntryErrorCodes.LEASE_ISSUER_EXIST,
                             "LeaseIssuer exist.");
                 }
 
                 if (null == cmd.getAddressIds()) {
                     LOGGER.error("Invalid addressIds param, cmd={}", cmd);
-                    throw errorWith(ApplyEntryErrorCodes.SCOPE_APPLY_TYPE, ApplyEntryErrorCodes.LEASE_ISSUER_EXIST,
+                    throw errorWith(ApplyEntryErrorCodes.SCOPE, ApplyEntryErrorCodes.LEASE_ISSUER_EXIST,
                             "Invalid addressIds param.");
                 }
 
@@ -1523,7 +1533,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		LocaleTemplateService localeTemplateService, EnterpriseLeaseIssuerProvider enterpriseLeaseIssuerProvider,
 		AddressProvider addressProvider, RolePrivilegeService rolePrivilegeService, GeneralFormService generalFormService,
 		GeneralFormValProvider generalFormValProvider, GeneralFormProvider generalFormProvider,
-		EnterpriseApplyBuildingProvider enterpriseApplyBuildingProvider) {
+		EnterpriseApplyBuildingProvider enterpriseApplyBuildingProvider, LocaleStringService localeStringService) {
 		this.smsProvider = smsProvider;
 		this.contractProvider = contractProvider;
 		this.buildingProvider = buildingProvider;
@@ -1549,5 +1559,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		this.generalFormValProvider = generalFormValProvider;
 		this.generalFormProvider = generalFormProvider;
 		this.enterpriseApplyBuildingProvider = enterpriseApplyBuildingProvider;
+		this.localeStringService = localeStringService;
 	}
 }
