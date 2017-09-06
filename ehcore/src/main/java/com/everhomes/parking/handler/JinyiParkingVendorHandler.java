@@ -62,7 +62,7 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 		if(null != card){
 			//格式yyyy-MM-dd
-			String expiredate = card.getExpiredate() + " 23:59:59";
+			String expiredate = card.getMaxuseddate() + " 23:59:59";
 			LocalDateTime time = LocalDateTime.parse(expiredate, dtf2);
 			Long endTime = Timestamp.valueOf(time).getTime();
 
