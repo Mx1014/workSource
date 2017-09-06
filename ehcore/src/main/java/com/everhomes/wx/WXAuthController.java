@@ -21,6 +21,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.wx.CheckAuthCommand;
+import com.everhomes.rest.wx.CheckAuthResponse;
 import com.everhomes.user.*;
 import org.apache.http.Consts;
 import org.apache.http.HeaderElement;
@@ -197,34 +199,28 @@ public class WXAuthController {// extends ControllerBase
 
     /**
      * <b>URL: /wxauth/checkAuth</b>
-     * <p>检查是否已经登录，没有登录则发起授权。authReq接口会重定向到src_url，此接口如果已经登录会直接返回，没有登录会调用authReq进行授权</p>
+     * <p>检查用户是否已经登录，由于公众号是公用的，此处要带上ns</p>
      */
     @RequestMapping("checkAuth")
-    @RestReturn(String.class)
+    @RestReturn(CheckAuthResponse.class)
     @RequireAuthentication(false)
-    public RestResponse checkAuth(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public RestResponse checkAuth(CheckAuthCommand cmd, HttpServletRequest request) throws Exception {
 
-        Map<String, String> params = getRequestParams(request);
-
-        // 记录域空间
-        String ns = params.get(KEY_NAMESPACE);
-        Integer namespaceId = parseNamespace(ns);
+        CheckAuthResponse checkAuthResponse = new CheckAuthResponse();
+        checkAuthResponse.setStatus((byte)1);
 
         LoginToken loginToken = userService.getLoginToken(request);
-        // 没有登录，则请求微信授权
-        // 因为公众号有一对多的情况，需要增加检查域空间checkUserNamespaceId，当域空间不一致时用户登出，并且需要重新走授权登录流程。   add by yanjun 20170620
-        if(!userService.isValid(loginToken) || !checkUserNamespaceId(namespaceId)) {
-            //此处会重定向
-            authReq(request, response);
+        if(!userService.isValid(loginToken) || !checkUserNamespaceId(cmd.getNs())) {
+            checkAuthResponse.setStatus((byte)0);
         }
 
-        RestResponse res = new RestResponse();
+        RestResponse res = new RestResponse(checkAuthResponse);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;
     }
 	/**
-	 * <b>URL: /wx/authCallback</b>
+	 * <b>URL: /wxauth/authCallback</b>
 	 * <p>微信授权后回调，回调包含了code，通过code可换取access_token，通过access_token可获取用户信息。</p>
 	 */
 	@RequestMapping("authCallback")
