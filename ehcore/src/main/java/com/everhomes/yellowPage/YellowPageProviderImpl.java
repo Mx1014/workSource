@@ -230,7 +230,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	@Override
 	public List<ServiceAlliances> queryServiceAlliance(
 			CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, Long parentId, Long categoryId, String keywords,Condition condition) {
+			Long ownerId, Long parentId, Long categoryId, String keywords) {
 		List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
@@ -240,9 +240,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 			query.addConditions(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+ownerId+"%").or(Tables.EH_SERVICE_ALLIANCES.RANGE.
 					eq("all")));
 		}else{
-        	condition = condition.or(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType).
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType).
 					and(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId)));
-        	query.addConditions(condition);
 		}
 
         if(locator.getAnchor() != null) {
