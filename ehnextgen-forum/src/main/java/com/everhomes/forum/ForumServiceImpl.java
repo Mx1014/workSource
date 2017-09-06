@@ -1556,7 +1556,8 @@ public class ForumServiceImpl implements ForumService {
                     forumIds.add(communityDTO.getDefaultForumId());
                 }
             }
-        }else if(namespaceId != null){
+        }else if(namespaceId != null && namespaceId != 0){
+            //0域空间有25万园区，直接会把系统搞挂了  add by yanjun 20170906
             ListingLocator locator = new CrossShardListingLocator();
             locator.setAnchor(null);
             List<Community> communities = communityProvider.listCommunitiesByKeyWord(locator, 1000000, null, namespaceId, null);
