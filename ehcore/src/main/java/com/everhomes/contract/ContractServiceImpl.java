@@ -817,6 +817,9 @@ public class ContractServiceImpl implements ContractService {
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			addToFlowCase(contract);
 		}
+
+		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_CANCEL);
+
 		return ConvertHelper.convert(contract, ContractDTO.class);
 	}
 

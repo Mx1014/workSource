@@ -314,7 +314,7 @@ public class ZJContractHandler implements ContractHandler{
         if(contractStatus != null) {
             switch (contractStatus) {
                 case ACTIVE: return "执行中";
-                case WAITING_FOR_APPROVAL: return "审批中";
+                case WAITING_FOR_APPROVAL: return "审核中";
                 case EXPIRED: return "已到期";
                 case HISTORY: return "终止";
                 case DENUNCIATION: return "退租完成";
