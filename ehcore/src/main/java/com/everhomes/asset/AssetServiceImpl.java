@@ -214,8 +214,6 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
-        String dateStrBegin = cmd.getDateStrBegin();
-        String dateStrEnd = cmd.getDateStrEnd();
         AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -568,7 +566,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void deleteBill(PaymentExemptionItems exemItem) {
-        this.assetProvider.updatePaymentBill(exemItem.getBillId(),new BigDecimal("0"),new BigDecimal("0"),exemItem.getAmount());
+        this.assetProvider.updatePaymentBillByExemItemChanges(exemItem.getBillId(),exemItem.getAmount());
     }
 
     @Override

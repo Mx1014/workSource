@@ -9,8 +9,6 @@ public class exportPaymentBillsDetail {
     private String dateStr;
     private String billGroupName;
     private String targetName;
-    private String buildingName;
-    private String apartmentName;
     private String noticeTel;
     private String amountReceivable;
     private String amountReceived;
@@ -49,22 +47,6 @@ public class exportPaymentBillsDetail {
 
     public void setTargetName(String targetName) {
         this.targetName = targetName;
-    }
-
-    public String getBuildingName() {
-        return buildingName;
-    }
-
-    public void setBuildingName(String buildingName) {
-        this.buildingName = buildingName;
-    }
-
-    public String getApartmentName() {
-        return apartmentName;
-    }
-
-    public void setApartmentName(String apartmentName) {
-        this.apartmentName = apartmentName;
     }
 
     public String getNoticeTel() {

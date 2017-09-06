@@ -463,22 +463,22 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
         query.addConditions(t.OWNER_ID.eq(ownerId));
         query.addConditions(t.OWNER_TYPE.eq(ownerType));
-        if(status!=null){
+        if(!org.springframework.util.StringUtils.isEmpty(status)){
             query.addConditions(t.SWITCH.eq(status));
         }
-        if(billGroupId!=null) {
+        if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }
-        if(billStatus!=null) {
+        if(!org.springframework.util.StringUtils.isEmpty(billStatus)) {
             query.addConditions(t.STATUS.eq(billStatus));
         }
         if(!org.springframework.util.StringUtils.isEmpty(targetName)) {
             query.addConditions(t.TARGET_NAME.like("%"+targetName+"%"));
         }
-        if(targetType!=null){
+        if(!org.springframework.util.StringUtils.isEmpty(targetType)){
             query.addConditions(t.TARGET_TYPE.eq(targetType));
         }
-        if(contractNum!=null){
+        if(!org.springframework.util.StringUtils.isEmpty(contractNum)){
             query.addConditions(t.CONTRACT_NUM.eq(contractNum));
         }
         if(status!=null && status == 1){
@@ -1178,7 +1178,6 @@ public class AssetProviderImpl implements AssetProvider {
             Long billGroupId = billGroupDTO.getBillGroupId();
             List<BillItemDTO> list1 = billGroupDTO.getBillItemDTOList();
             List<ExemptionItemDTO> list2 = billGroupDTO.getExemptionItemDTOList();
-
             //需要组装的信息
             BigDecimal amountExemption = new BigDecimal("0");
             BigDecimal amountSupplement = new BigDecimal("0");
@@ -1189,14 +1188,14 @@ public class AssetProviderImpl implements AssetProvider {
             for(int i = 0; i < list1.size() ; i++) {
                 BillItemDTO dto = list1.get(i);
                 context.update(t1)
-                        .set(t1.AMOUNT_RECEIVABLE,dto.getAmountReceivable())
-                        .set(t1.AMOUNT_OWED,dto.getAmountReceivable())
+                        .set(t1.AMOUNT_RECEIVABLE,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
+                        .set(t1.AMOUNT_OWED,dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable())
                         .set(t1.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
                         .set(t1.OPERATOR_UID,UserContext.currentUserId())
                         .where(t1.BILL_ID.in(billId))
                         .and(t1.ID.eq(dto.getBillItemId()))
                         .execute();
-                amountReceivable = amountReceivable.add(dto.getAmountReceivable());
+                amountReceivable = amountReceivable.add(dto.getAmountReceivable()==null?new BigDecimal("0"):dto.getAmountReceivable());
             }
             //bill exemption
             List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
@@ -1204,7 +1203,7 @@ public class AssetProviderImpl implements AssetProvider {
                 ExemptionItemDTO exemptionItemDTO = list2.get(i);
                 if(exemptionItemDTO.getExemptionId()!=null){
                     context.update(t2)
-                            .set(t2.AMOUNT,exemptionItemDTO.getAmount())
+                            .set(t2.AMOUNT,exemptionItemDTO.getAmount()==null?new BigDecimal("0"):exemptionItemDTO.getAmount())
                             .set(t2.REMARKS,exemptionItemDTO.getRemark())
                             .set(t2.UPDATE_TIME,new Timestamp(DateHelper.currentGMTTime().getTime()))
                             .set(t2.OPERATOR_UID,UserContext.currentUserId())
@@ -1229,9 +1228,9 @@ public class AssetProviderImpl implements AssetProvider {
                     exemptionItems.add(exemptionItem);
                 }
 
-                if(exemptionItemDTO.getAmount().compareTo(zero)==-1){
+                if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==-1){
                     amountExemption = amountExemption.add(exemptionItemDTO.getAmount());
-                }else if(exemptionItemDTO.getAmount().compareTo(zero)==1){
+                }else if(exemptionItemDTO.getAmount()!=null&&exemptionItemDTO.getAmount().compareTo(zero)==1){
                     amountSupplement = amountSupplement.add(exemptionItemDTO.getAmount());
                 }
             }
@@ -1563,6 +1562,24 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
                 .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.ID.eq(exemptionItemId))
                 .fetchOneInto(PaymentExemptionItems.class);
+    }
+
+    @Override
+    public void updatePaymentBillByExemItemChanges(Long billId, BigDecimal amount) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        context.update(t)
+                .set(t.AMOUNT_OWED,t.AMOUNT_OWED.sub(amount))
+                .execute();
+        if(amount.compareTo(new BigDecimal("0"))<0){
+            context.update(t)
+                    .set(t.AMOUNT_EXEMPTION,t.AMOUNT_EXEMPTION.add(amount))
+                    .execute();
+        }else{
+            context.update(t)
+                    .set(t.AMOUNT_SUPPLEMENT,t.AMOUNT_SUPPLEMENT.sub(amount))
+                    .execute();
+        }
     }
 
 }

@@ -122,4 +122,6 @@ public interface AssetProvider {
     PaymentBillItems findBillItemById(Long billItemId);
 
     PaymentExemptionItems findExemptionItemById(Long exemptionItemId);
+
+    void updatePaymentBillByExemItemChanges(Long billId, BigDecimal amount);
 }
