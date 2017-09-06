@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.everhomes.rest.RestResponse;
 import com.everhomes.user.*;
 import org.apache.http.Consts;
 import org.apache.http.HeaderElement;
@@ -192,6 +193,36 @@ public class WXAuthController {// extends ControllerBase
             LOGGER.info("Process weixin auth request(req calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
 	}
+
+
+    /**
+     * <b>URL: /wxauth/checkAuth</b>
+     * <p>检查是否已经登录，没有登录则发起授权。此接口与authReq接口的区别是此接口检查授权过后是直接返回的，而authReq是重定向到src_url的</p>
+     */
+    @RequestMapping("checkAuth")
+    @RestReturn(String.class)
+    @RequireAuthentication(false)
+    public RestResponse checkAuth(HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+        Map<String, String> params = getRequestParams(request);
+
+        // 记录域空间
+        String ns = params.get(KEY_NAMESPACE);
+        Integer namespaceId = parseNamespace(ns);
+
+        LoginToken loginToken = userService.getLoginToken(request);
+        // 没有登录，则请求微信授权
+        // 因为公众号有一对多的情况，需要增加检查域空间checkUserNamespaceId，当域空间不一致时用户登出，并且需要重新走授权登录流程。   add by yanjun 20170620
+        if(!userService.isValid(loginToken) || !checkUserNamespaceId(namespaceId)) {
+            //此处会重定向
+            authReq(request, response);
+        }
+
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
 	/**
 	 * <b>URL: /wx/authCallback</b>
 	 * <p>微信授权后回调，回调包含了code，通过code可换取access_token，通过access_token可获取用户信息。</p>
