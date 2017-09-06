@@ -217,11 +217,12 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
             		.field("name", 1.2f)
+            		.field("customNumber", 1.2f)
                     .field("standardName", 1.0f);
             
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("name").addHighlightedField("standardName");
+            builder.addHighlightedField("name").addHighlightedField("customNumber").addHighlightedField("standardName");
         }
 
         FilterBuilder fb = null;
@@ -307,6 +308,7 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
             b.field("status", equipment.getStatus());
             b.field("categoryId", equipment.getCategoryId());
             b.field("name", equipment.getName());
+            b.field("customNumber", equipment.getCustomNumber());
             b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
 //            b.field("reviewResult", equipment.getReviewResult());
 //            b.field("reviewStatus", equipment.getReviewStatus());

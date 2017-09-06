@@ -69,7 +69,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Autowired
 	private SequenceProvider sequenceProvider;
 
-    @Override
+	@Override
     public void createOrganization(Organization organization) {
         // eh_organizations表是global表，不能使用key table表的方式来获取id  modify by lqs 20160722
         // long id = shardingProvider.allocShardableContentId(EhOrganizations.class).second();
@@ -298,14 +298,28 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
+	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String keywords, String organizationType, CrossShardListingLocator locator, Integer pageSize) {
+		return listEnterpriseByNamespaceIds(namespaceId, organizationType, null, keywords, locator, pageSize);
+	}
+
+	@Override
 	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,
 														   Byte setAdminFlag, CrossShardListingLocator locator, int pageSize) {
+		return listEnterpriseByNamespaceIds(namespaceId, organizationType, setAdminFlag, locator, pageSize);
+	}
+
+	@Override
+	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,
+														   Byte setAdminFlag, String keywords, CrossShardListingLocator locator, int pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
 		List<Organization> result  = new ArrayList<Organization>();
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 		if(null != namespaceId){
 			query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		}
+		if(!StringUtils.isEmpty(keywords)){
+			query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keywords + "%"));
 		}
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0l));
@@ -3163,8 +3177,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         List<Organization> result = new ArrayList<Organization>();
         SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 
-        query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.ENTERPRISE.getCode())
-                .or(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.PM.getCode())));
+        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 
         if (namespaceId != null) {
@@ -3681,6 +3694,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
         query.addLimit(pageSize);
+		LOGGER.debug("sql:"+query.getSQL());
+		LOGGER.debug("sql parm:"+query.getParams());
         query.fetch().map((r) -> {
             OrganizationMember member = RecordHelper.convert(r, OrganizationMember.class);
             member.setOrganizationName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
@@ -3697,6 +3712,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }
 
+	@Override
     public void createOrganizationJobPositionMap(OrganizationJobPositionMap organizationJobPositionMap){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationJobPositionMapsDao dao = new EhOrganizationJobPositionMapsDao(context.configuration());
@@ -5183,6 +5199,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 					list.add(ConvertHelper.convert(r,EhOrganizationMembers.class));
 					return null;
 				});
+		return list;
+	}
+
+	@Override
+	public List listUserOrganizationByUserId(Long userId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<UserOrganizations> list = new ArrayList<>();
+		context.select().from(Tables.EH_USER_ORGANIZATIONS)
+				.where(Tables.EH_USER_ORGANIZATIONS.USER_ID.eq(userId).and(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.ACTIVE.getCode())))
+				.fetch().map(r->{
+			list.add(ConvertHelper.convert(r,UserOrganizations.class));
+			return null;
+		});
 		return list;
 	}
 }

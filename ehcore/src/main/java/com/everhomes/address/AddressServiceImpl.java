@@ -41,6 +41,7 @@ import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.enterprise.SearchEnterpriseCommunityCommand;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
@@ -1703,7 +1704,60 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
 	}
 
-	private List<ImportFileResultLog<ImportApartmentDataDTO>> importApartment(List<ImportApartmentDataDTO> datas,
+    @Override
+    public ListNearbyMixCommunitiesCommandV2Response listNearbyMixCommunitiesV2(ListNearbyMixCommunitiesCommand cmd) {
+        ListNearbyMixCommunitiesCommandV2Response resp = new ListNearbyMixCommunitiesCommandV2Response();
+
+        if (cmd.getLatigtue() == null || cmd.getLongitude() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter, latitude and longitude have to be both specified or neigher");
+
+
+        if (cmd.getPageAnchor() == null)
+            cmd.setPageAnchor(0L);
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+
+        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+        if (namespaceId == 0) {
+            ListNearbyMixCommunitiesCommandResponse resp_1 = listMixCommunitiesByDistance(cmd, locator, pageSize);
+            resp.setDtos(resp_1.getDtos());
+            return resp;
+        } else {
+            List<CommunityDTO> dots = new ArrayList<>();
+            List<CommunityDTO> resudentials = new ArrayList<>();
+            List<CommunityDTO> commercials = new ArrayList<>();
+            if(cmd.getCommunityType() != null){
+                dots = this.communityProvider.listCommunitiesByNamespaceId(cmd.getCommunityType(), namespaceId, locator, pageSize);
+            }else{
+                resudentials = this.communityProvider.listCommunitiesByNamespaceId(CommunityType.RESIDENTIAL.getCode(), namespaceId, locator, pageSize);
+                commercials = this.communityProvider.listCommunitiesByNamespaceId(CommunityType.COMMERCIAL.getCode(), namespaceId, locator, pageSize);
+            }
+
+            if (dots != null)
+                resp.setDtos(dots);
+            if (resudentials != null)
+                resp.setResudentials(resudentials);
+            if (commercials != null)
+                resp.setCommercials(commercials);
+
+            return resp;
+        }
+    }
+
+    @Override
+    public ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(SearchEnterpriseCommunityCommand cmd) {
+        if(cmd.getCommunityType() == null){
+            LOGGER.debug("CommunityType Is Invalid" + cmd.getCommunityType());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
+
+        }
+        return null;
+    }
+
+    private List<ImportFileResultLog<ImportApartmentDataDTO>> importApartment(List<ImportApartmentDataDTO> datas,
 			Long userId, ImportAddressCommand cmd) {
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 

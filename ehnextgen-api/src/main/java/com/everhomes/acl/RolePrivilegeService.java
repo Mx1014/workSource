@@ -72,7 +72,7 @@ public interface RolePrivilegeService {
 	 * @param cmd
 	 * @return
 	 */
-	List<RoleDTO> listRoles(ListRolesCommand cmd);
+	ListRolesResponse listRoles(ListRolesCommand cmd);
 	
 	/**
 	 * 判断是否是系统管理员
@@ -80,6 +80,8 @@ public interface RolePrivilegeService {
 	 * @return
 	 */
 	boolean checkAdministrators(Long organizationId);
+
+	GetPrivilegeByRoleIdResponse getPrivilegeByRoleId(ListPrivilegesByRoleIdCommand cmd);
 	
 	/**
 	 * 校验是否有权限

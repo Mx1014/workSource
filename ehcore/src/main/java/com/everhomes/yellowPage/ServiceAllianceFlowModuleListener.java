@@ -64,7 +64,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAllianceFlowModuleListener.class);
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher serviceAllianceRequestInfoSearcher;
-	private static final long MODULE_ID = 40500;
+	public static final long MODULE_ID = 40500;
 			
     @Autowired
     private YellowPageProvider yellowPageProvider;

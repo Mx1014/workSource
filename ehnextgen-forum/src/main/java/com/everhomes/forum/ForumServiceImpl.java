@@ -51,7 +51,6 @@ import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
 import com.everhomes.rest.common.ActivityDetailActionData;
-import com.everhomes.rest.common.PortalType;
 import com.everhomes.rest.common.PostDetailActionData;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
@@ -815,7 +814,7 @@ public class ForumServiceImpl implements ForumService {
                 if (embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
                 	Activity activity = activityProivider.findActivityById(post.getEmbeddedId());
                 	if (activity != null) {
-                		List<ActivityRoster> activityRosters = activityProivider.listRosters(activity.getId());
+                		List<ActivityRoster> activityRosters = activityProivider.listRosters(activity.getId(), ActivityRosterStatus.NORMAL);
                 		for( int i=0; i< activityRosters.size(); i++){
                 			//如果有退款，先退款再取消订单
                 			ActivityRoster tempRoster = activityRosters.get(i);
@@ -905,7 +904,7 @@ public class ForumServiceImpl implements ForumService {
     	if (activity == null) {
 			return ;
 		}
-    	List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId);
+    	List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId, ActivityRosterStatus.NORMAL);
     	String scope = ActivityNotificationTemplateCode.SCOPE;
 		int code = ActivityNotificationTemplateCode.CREATOR_DELETE_ACTIVITY;
 		Map<String, Object> map = new HashMap<>();

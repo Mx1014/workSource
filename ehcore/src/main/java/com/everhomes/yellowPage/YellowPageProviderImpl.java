@@ -592,6 +592,40 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		
 	}
 
+	@Override
+	public void createServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceCategories.class));
+		serviceAllianceCategories.setId(id);
+		serviceAllianceCategories.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhServiceAllianceCategoriesDao dao = new EhServiceAllianceCategoriesDao(context.configuration());
+		dao.insert(serviceAllianceCategories);
+
+	}
+
+	@Override
+	public void createServiceAllianceSkipRule(ServiceAllianceSkipRule serviceAllianceSkipRule) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceSkipRule.class));
+		serviceAllianceSkipRule.setId(id);
+		EhServiceAllianceSkipRuleDao dao = new EhServiceAllianceSkipRuleDao(context.configuration());
+		dao.insert(serviceAllianceSkipRule);
+
+	}
+
+	@Override
+	public void deleteServiceAllianceSkipRule(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceAllianceSkipRule.class));
+		EhServiceAllianceSkipRuleDao dao = new EhServiceAllianceSkipRuleDao(context.configuration());
+		dao.deleteById(id);
+	}
+
+	@Override
+	public void updateServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceCategoriesDao dao = new EhServiceAllianceCategoriesDao(context.configuration());
+		dao.update(serviceAllianceCategories);
+	}
 
 	@Override
 	public void updateNotifyTarget(ServiceAllianceNotifyTargets target) {
@@ -919,9 +953,9 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public ServiceAllianceSkipRule getCateorySkipRule(Long categoryId) {
+	public ServiceAllianceSkipRule getCateorySkipRule(Long categoryId, Integer namespaceId) {
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceAllianceSkipRuleRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE);
 		query.addConditions(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.SERVICE_ALLIANCE_CATEGORY_ID.in(categoryId,0L));
@@ -935,6 +969,11 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		if(result.size()==0)
 			return null;
 		return result.get(0);
+	}
+
+	@Override
+	public ServiceAllianceSkipRule getCateorySkipRule(Long categoryId) {
+		return getCateorySkipRule(categoryId, null);
 	}
 
 	@Override

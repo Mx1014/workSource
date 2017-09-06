@@ -1,12 +1,25 @@
 package com.everhomes.rest.statistics.terminal;
 
 /**
- * Created by sfyan on 2016/12/1.
+ * <ul>
+ *     <li>startDate: startDate</li>
+ *     <li>endDate: endDate</li>
+ *     <li>namespaceId: namespaceId</li>
+ * </ul>
  */
 public class ExecuteTaskCommand {
-    private String startDate;
 
+    private String startDate;
     private String endDate;
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public String getStartDate() {
         return startDate;

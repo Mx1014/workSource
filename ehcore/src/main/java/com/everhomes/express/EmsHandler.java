@@ -12,6 +12,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,7 +38,7 @@ import com.everhomes.rest.express.TrackBillResponse;
 import com.everhomes.util.MD5Utils;
 import com.everhomes.util.RuntimeErrorException;
 
-//后面的1为表eh_express_companies中父id为0的行的id
+//后面的1为表eh_express_companies中父id为0的行的id, 华润 EMS
 @Component(ExpressHandler.EXPRESS_HANDLER_PREFIX+"1")
 public class EmsHandler implements ExpressHandler {
 
@@ -347,8 +348,22 @@ public class EmsHandler implements ExpressHandler {
 	private String uncapFirst(String string) {
 		return string.substring(0, 1).toLowerCase() + string.substring(1);
 	}
-	
-	
-	
-	
+
+	@Override
+	public void createOrder(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+	}
+
+	@Override
+	public void updateOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+		
+	}
+
+	@Override
+	public void getOrderStatus(ExpressOrder expressOrder, ExpressCompany expressCompany) {
+		
+	}
+
+	@Override
+	public void orderStatusCallback(ExpressOrder expressOrder, ExpressCompany expressCompany, Map<String,String> params) {
+	}
 }

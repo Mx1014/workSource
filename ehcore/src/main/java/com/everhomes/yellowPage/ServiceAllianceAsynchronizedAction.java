@@ -104,7 +104,7 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 		this.userId = Long.valueOf(userId);
 		this.contents = contents;
 	}
-	
+
 	private void changeContentsToObject(String contents) {
 		user = this.userProvider.findUserById(userId);
 		PostApprovalFormCommand cmd = JSONObject.parseObject(contents, PostApprovalFormCommand.class);
@@ -130,10 +130,11 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public void run() {
 		//获取对象
+		System.out.println("ServiceAllianceAsynchronizedAction run.");
 		changeContentsToObject(contents);
 		
 		if(ga == null || form == null || serviceOrg == null 
@@ -164,7 +165,9 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 		notifyMap.put("categoryName", categoryName);
 		notifyMap.put("creatorName", creatorName);
 		notifyMap.put("creatorMobile", creatorMobile);
-		notifyMap.put("note", changeRequestToHtml(fieldDTOs,values)); 
+		notifyMap.put("note", changeRequestToHtml(fieldDTOs,values));
+
+		LOGGER.info(""+notifyMap.get("note"));
 		
 		notifyMap.put("creatorOrganization", getTextFieldValue(userCompanyItem.getFieldName(), values));
 		String title = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
@@ -211,27 +214,28 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 		if(fieldList != null && fieldList.size() > 0) {
 			StringBuilder sb = new StringBuilder();
 			for(GeneralFormFieldDTO field : fieldList) {
-				sb.append("<p>");
-				sb.append(field.getFieldDisplayName());
 				GeneralFormFieldType generalFormFieldType = GeneralFormFieldType.fromCode(field.getFieldType());
 				if(generalFormFieldType == GeneralFormFieldType.INTEGER_TEXT ||
 						generalFormFieldType == GeneralFormFieldType.MULTI_LINE_TEXT ||
-						generalFormFieldType == GeneralFormFieldType.SINGLE_LINE_TEXT){
-					sb.append(" : ");
-					sb.append(getTextFieldValue(field.getFieldName(), values));
-					sb.append("</p>");
+						generalFormFieldType == GeneralFormFieldType.SINGLE_LINE_TEXT ||
+						generalFormFieldType == GeneralFormFieldType.DROP_BOX ||
+						generalFormFieldType == GeneralFormFieldType.DATE ||
+						generalFormFieldType == GeneralFormFieldType.NUMBER_TEXT){
+					sb.append("<p>").append(field.getFieldDisplayName()).append(" : ").append(getTextFieldValue(field.getFieldName(), values)).append("</p>");
 				}else if(generalFormFieldType == GeneralFormFieldType.IMAGE ){
-					sb.append(" : </p>");
+					sb.append("<p>").append(field.getFieldDisplayName()).append(" : </p>");
 					List<String> urlLists = getImageFieldValue(field.getFieldName(), values);
 					for (int i = 0; i < urlLists.size(); i++) {
 						sb.append("<img height=\"200px\" width=\"200px\" style=\"margin-right:8px;\" src=\"");
 						sb.append(urlLists.get(i));
 						sb.append("\">");
 					}
+				}else if(generalFormFieldType == GeneralFormFieldType.SUBFORM){
+					sb.append(getSubformValues(field.getFieldName(), values));
 				}else{
 					String seeMailAttements = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
 							ServiceAllianceRequestNotificationTemplateCode.SEE_MAIL_ATTACHMENT, user.getLocale(), "");
-					sb.append(" : ");
+					sb.append("<p>").append(field.getFieldDisplayName()).append(" : ");
 					sb.append(seeMailAttements);
 					sb.append("</p>");
 				}
@@ -259,7 +263,56 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 		}
 		return urlLists;
 	}
-	
+
+	/**
+	 *
+	 */
+	private String getSubformValues(String columname,List<PostApprovalFormItem> values){
+		String stringSubform = getFieldValue(columname, values);
+		StringBuilder sb = new StringBuilder();
+		PostApprovalFormSubformValue subFormValue = JSON.parseObject(stringSubform, PostApprovalFormSubformValue.class);
+		int formCount = 1;
+		//循环取出每一个子表单值
+		for (PostApprovalFormSubformItemValue subForm1 : subFormValue.getForms()) {
+			List<PostApprovalFormItem> values1= subForm1.getValues();
+			sb.append("<p>").append("子表单").append(formCount).append("</p>");
+			formCount++;
+			for (PostApprovalFormItem item: values1){
+				sb.append("<p>");
+				sb.append(item.getFieldName());
+				GeneralFormFieldType generalFormFieldType = GeneralFormFieldType.fromCode(item.getFieldType());
+				if(generalFormFieldType == GeneralFormFieldType.INTEGER_TEXT ||
+						generalFormFieldType == GeneralFormFieldType.MULTI_LINE_TEXT ||
+						generalFormFieldType == GeneralFormFieldType.SINGLE_LINE_TEXT ||
+						generalFormFieldType == GeneralFormFieldType.DROP_BOX ||
+						generalFormFieldType == GeneralFormFieldType.DATE ||
+						generalFormFieldType == GeneralFormFieldType.NUMBER_TEXT){
+					sb.append(" : ");
+					sb.append(getTextFieldValue(item.getFieldName(), values1));
+					sb.append("</p>");
+				}else if(generalFormFieldType == GeneralFormFieldType.IMAGE ){
+					sb.append(" : </p>");
+					List<String> urlLists = getImageFieldValue(item.getFieldName(), values1);
+					for (int i = 0; i < urlLists.size(); i++) {
+						sb.append("<img height=\"200px\" width=\"200px\" style=\"margin-right:8px;\" src=\"");
+						sb.append(urlLists.get(i));
+						sb.append("\">");
+					}
+				}else if(generalFormFieldType == GeneralFormFieldType.SUBFORM){
+					sb.append(getSubformValues(item.getFieldName(), values1));
+
+				}else{
+					String seeMailAttements = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE,
+							ServiceAllianceRequestNotificationTemplateCode.SEE_MAIL_ATTACHMENT, user.getLocale(), "");
+					sb.append(" : ");
+					sb.append(seeMailAttements);
+					sb.append("</p>");
+				}
+			}
+		}
+		return sb.toString();
+	}
+
 	/**
 	 * 文件json，转URL
 	 * <b>URL:/</b>
@@ -287,9 +340,12 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 		String stringTexts = getFieldValue(columname, values);
 		if(!"".equals(stringTexts)){
 			PostApprovalFormTextValue texts = JSONObject.parseObject(stringTexts, PostApprovalFormTextValue.class);
+			if(texts.getText()==null || texts.getText().length()==0){
+				return "无";
+			}
 			return texts.getText();
 		}
-		return "";
+		return "无";
 	}
 	
 	/**
@@ -495,7 +551,10 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 						}
 					}else if(generalFormFieldType == GeneralFormFieldType.MULTI_LINE_TEXT
 							|| generalFormFieldType == GeneralFormFieldType.INTEGER_TEXT
-							|| generalFormFieldType == GeneralFormFieldType.SINGLE_LINE_TEXT){
+							|| generalFormFieldType == GeneralFormFieldType.SINGLE_LINE_TEXT||
+							generalFormFieldType == GeneralFormFieldType.DROP_BOX ||
+							generalFormFieldType == GeneralFormFieldType.DATE ||
+							generalFormFieldType == GeneralFormFieldType.NUMBER_TEXT){
 						returnList.add(new Object[]{GeneralFormFieldType.SINGLE_LINE_TEXT,field.getFieldDisplayName()+" : "+ getTextFieldValue(field.getFieldName(),values)});
 					}else if(generalFormFieldType == GeneralFormFieldType.FILE){
 						List<String[]> urlLists = getFileFieldValue(field.getFieldName(), values);
@@ -505,6 +564,48 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 						for (String[] strings : urlLists) {
 							Object[] objects = new Object[]{GeneralFormFieldType.FILE,strings[0],strings[1]}; 
 							returnList.add(objects);
+						}
+					}else if (generalFormFieldType == GeneralFormFieldType.SUBFORM){
+						String stringSubform = getFieldValue(field.getFieldName(), values);
+						PostApprovalFormSubformValue subFormValue = JSON.parseObject(stringSubform, PostApprovalFormSubformValue.class);
+						if(subFormValue == null ||subFormValue.getForms()==null){
+							continue;
+						}
+
+						for (int i = 0; i < subFormValue.getForms().size(); i++) {
+							PostApprovalFormSubformItemValue forms = subFormValue.getForms().get(i);
+							if(forms ==null ||forms.getValues() == null){
+								continue;
+							}
+							returnList.add(new Object[]{GeneralFormFieldType.FILE, "子表单"+(i+1)+""});
+							for (int j = 0; j <forms.getValues().size() ; j++) {
+								PostApprovalFormItem item = forms.getValues().get(j);
+								GeneralFormFieldType ftype = GeneralFormFieldType.fromCode(item.getFieldType());
+								if (ftype == GeneralFormFieldType.FILE) {
+									List<String[]> urlLists = getFileFieldValue(item.getFieldName(), forms.getValues());
+									String seeMailAttements = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE,
+											ServiceAllianceRequestNotificationTemplateCode.SEE_MAIL_ATTACHMENT, user.getLocale(), "");
+									returnList.add(new Object[]{GeneralFormFieldType.SINGLE_LINE_TEXT, item.getFieldName() + " : " + seeMailAttements});
+									for (String[] strings : urlLists) {
+										Object[] objects = new Object[]{GeneralFormFieldType.FILE, strings[0], strings[1]};
+										returnList.add(objects);
+									}
+								} else if (ftype == GeneralFormFieldType.IMAGE) {
+									returnList.add(new Object[]{GeneralFormFieldType.SINGLE_LINE_TEXT, item.getFieldName() + " : "});
+									List<String> urlLists = getImageFieldValue(item.getFieldName(), forms.getValues());
+									for (String string : urlLists) {
+										Object[] objects = new Object[]{GeneralFormFieldType.IMAGE, string};
+										returnList.add(objects);
+									}
+								} else if (ftype == GeneralFormFieldType.MULTI_LINE_TEXT
+										|| ftype == GeneralFormFieldType.INTEGER_TEXT
+										|| ftype == GeneralFormFieldType.SINGLE_LINE_TEXT ||
+										ftype == GeneralFormFieldType.DROP_BOX ||
+										ftype == GeneralFormFieldType.DATE ||
+										ftype == GeneralFormFieldType.NUMBER_TEXT) {
+									returnList.add(new Object[]{GeneralFormFieldType.SINGLE_LINE_TEXT, item.getFieldName() + " : " + getTextFieldValue(field.getFieldName(), forms.getValues())});
+								}
+							}
 						}
 					}
 				}

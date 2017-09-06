@@ -705,6 +705,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         dto.setCommunityId(organizationDTO.getCommunityId());
         dto.setCommunityName(organizationDTO.getCommunityName());
         dto.setAvatarUri(org.getAvatar());
+        if(!StringUtils.isEmpty(org.getDisplayName())){
+            dto.setDisplayName(org.getDisplayName());
+        }
 		if(null != org.getCheckinDate())
             dto.setCheckinDate(org.getCheckinDate().getTime());
 		if(!StringUtils.isEmpty(org.getAvatar()))
@@ -6140,6 +6143,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setContactName(contactName);
             member.setContactToken(contactToken);
             member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
+            member.setOrganizationId(organizationId);
             if(null != userIdentifier){
                 member.setTargetType(OrganizationMemberTargetType.USER.getCode());
                 member.setTargetId(userIdentifier.getOwnerUid());
@@ -9504,6 +9508,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     desOrgMember.setGroupType(organizationMember.getGroupType());
                     desOrgMember.setGroupPath(organizationMember.getGroupPath());
                     desOrgMember.setContactName(organizationMember.getContactName());
+                    desOrgMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
                     organizationProvider.updateOrganizationMember(desOrgMember);
                     //保存当前企业关联的detailId,用于多个返回值时进行比对
 //                    if (enterpriseId.equals(org.getId())) {
@@ -11607,6 +11612,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setErrorLog("Organization member contactName is null");
             log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTNAME_ISNULL);
             return log;
+        }else{
+            if(data.getContactName().length() > 40){
+                LOGGER.warn("Organization member contactName format wrong. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member contactName format wrong");
+                log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTNAME_FORMAT_WRONG);
+                return log;
+            }
         }
 
         if (StringUtils.isEmpty(data.getGender())) {
@@ -11615,6 +11628,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setErrorLog("Organization member gender is null");
             log.setCode(OrganizationServiceErrorCode.ERROR_GENDER_ISNULL);
             return log;
+        }else{
+            if(!data.getGender().equals("男") && !data.getGender().equals("女")){
+                LOGGER.warn("Organization member gender format wrong. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member gender format wrong");
+                log.setCode(OrganizationServiceErrorCode.ERROR_GENDER_FORMAT_WRONG);
+                return log;
+            }
         }
 
         if (StringUtils.isEmpty(data.getContactToken())) {
