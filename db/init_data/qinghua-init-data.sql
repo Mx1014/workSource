@@ -3005,3 +3005,10 @@ VALUES ((@configurations_id := @configurations_id + 1), 'biz.queryCommodityDetai
 DELETE FROM eh_launch_pad_items WHERE namespace_id = 999984 AND item_label = '放行任务';
 -- 清华信息港 更多始终在其他icon之后的配置 清华信息港的线网执行
 update eh_launch_pad_items SET default_order = 10000 WHERE namespace_id = 999984 AND item_label = '更多';
+
+-- add by sw 20170906
+DELETE from eh_web_menus where path like '%20900%';
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('20900', '车辆放行', '20000', NULL, 'parking_clearance', '1', '2', '/20000/20900', 'park', '300', '20900', '2', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('20910', '权限设置', '20900', NULL, 'vehicle_setting', '0', '2', '/20000/20900/20910', 'park', '301', '20900', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('20920', '放行记录', '20900', NULL, 'release_record', '0', '2', '/20000/20900/20920', 'park', '302', '20900', '3', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('20930', '工作流设置', '20900', NULL, 'react:/working-flow/flow-list/vehicle-release/20900', '0', '2', '/20000/20900/20930', 'park', '303', '20900', '3', NULL, 'module');
