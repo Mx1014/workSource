@@ -606,6 +606,7 @@ public class NewsServiceImpl implements NewsService {
 				.getUser().getId()));
 		}
 		newsDTO.setNewsUrl(getNewsUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
+		newsDTO.setNewsWebShareUrl(getNewsWebUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
 		newsDTO.setLikeFlag(getUserLikeFlag(userId, news.getId()).getCode());// 未登录用户id为0
 
 		Boolean commentForbiddenFlag = newsProvider.getCommentForbiddenFlag(news.getCategoryId(), news.getNamespaceId());
@@ -626,6 +627,18 @@ public class NewsServiceImpl implements NewsService {
 					NewsServiceErrorCode.ERROR_NEWS_CONTENT_URL_INVALID, "Invalid home url or content url");
 		} else {
 			return homeUrl + contentUrl  + newsToken;
+		}
+	}
+
+	private String getNewsWebUrl(Integer namespaceId, String newsToken) {
+		String homeUrl = configurationProvider.getValue(namespaceId, ConfigConstants.HOME_URL, "");
+		String contenWebtUrl = configurationProvider.getValue(namespaceId, ConfigConstants.NEWS_WEB_PAGE_URL, "/park-news-web/build/index.html?widget=News&timeWidgetStyle=time/#/newsDetail?newsToken=");
+		if (homeUrl.length() == 0 || contenWebtUrl.length() == 0) {
+			LOGGER.error("Invalid home url or news page url, homeUrl=" + homeUrl + ", contentUrl=" + contenWebtUrl);
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_CONTENT_URL_INVALID, "Invalid home url or content url");
+		} else {
+			return homeUrl + contenWebtUrl  + newsToken;
 		}
 	}
 

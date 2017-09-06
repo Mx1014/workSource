@@ -724,9 +724,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             Address addr = addressProvider.findAddressById(address.getAddressId());
 
             AddressDTO addressDTO = ConvertHelper.convert(addr, AddressDTO.class);
-
-            Building building = communityProvider.findBuildingByCommunityIdAndName(addr.getCommunityId(), addr.getBuildingName());
-            addressDTO.setBuildingId(building.getId());
+            if (null != addr) {
+                Building building = communityProvider.findBuildingByCommunityIdAndName(addr.getCommunityId(), addr.getBuildingName());
+                addressDTO.setBuildingId(building.getId());
+            }
             return addressDTO;
         }).collect(Collectors.toList());
 

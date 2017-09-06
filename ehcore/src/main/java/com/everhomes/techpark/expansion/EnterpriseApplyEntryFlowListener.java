@@ -12,6 +12,7 @@ import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
@@ -60,17 +61,15 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     @Autowired
     private LocaleTemplateService localeTemplateService;
     @Autowired
+    private LocaleStringService localeStringService;
+    @Autowired
     private EnterpriseApplyEntryService enterpriseApplyEntryService;
     @Autowired
     private YellowPageProvider yellowPageProvider;
     @Autowired
     private FlowService flowService;
     @Autowired
-    private CommunityProvider communityProvider;
-    @Autowired
     private AddressProvider addressProvider;
-    @Autowired
-    private BuildingProvider buildingProvider;
     @Autowired
     private ContractProvider contractProvider;
     @Autowired
@@ -185,9 +184,11 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             cmd2.setSourceId(dto.getId());
             List<FlowCaseEntity> formEntities = generalFormService.getGeneralFormFlowEntities(cmd2);
 
+            String defaultValue = localeStringService.getLocalizedString(ApplyEntryErrorCodes.SCOPE, String.valueOf(ApplyEntryErrorCodes.WU), locale, "");
+
             formEntities.forEach(r -> {
                 if (StringUtils.isBlank(r.getValue())) {
-                    r.setValue("无");
+                    r.setValue(defaultValue);
                 }
             });
 

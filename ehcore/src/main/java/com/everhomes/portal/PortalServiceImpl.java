@@ -837,7 +837,7 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public PortalItemCategoryDTO updatePortalItemCategory(UpdatePortalItemCategoryCommand cmd) {
 		PortalItemCategory portalItemCategory = checkPortalItemCategory(cmd.getId());
-		portalItemCategory.setName(cmd.getName());
+		portalItemCategory.setLabel(cmd.getName());
 		portalItemCategory.setOperatorUid(UserContext.current().getUser().getId());
 		portalItemCategory.setIconUri(cmd.getIconUri());
 		this.dbProvider.execute((status) -> {
@@ -1460,7 +1460,7 @@ public class PortalServiceImpl implements PortalService {
 		ItemGroupInstanceConfig instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
 		item.setNamespaceId(itemGroup.getNamespaceId());
 		item.setAppId(AppConstants.APPID_DEFAULT);
-		item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
+		item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
 		item.setMinVersion(1L);
 		item.setItemGroup(itemGroup.getName());
 		item.setItemLocation(location);

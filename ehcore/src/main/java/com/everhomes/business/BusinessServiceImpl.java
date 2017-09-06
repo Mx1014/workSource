@@ -2449,8 +2449,14 @@ public class BusinessServiceImpl implements BusinessService {
 	public SearchContentsBySceneReponse searchShops(SearchContentsBySceneCommand cmd) {
 		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
 		Integer namespaceId = sceneTokenDto.getNamespaceId();;
-		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.SHOP.getCode());
-		
+		SearchTypes tempSearchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.SHOP.getCode());
+
+		if (null == tempSearchType) {
+			tempSearchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.SHOP.getCode());
+		}
+
+		final SearchTypes searchType = tempSearchType;
+
 		String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_SEARCH_SHOPS_API, "");
 
         String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
@@ -2489,7 +2495,7 @@ public class BusinessServiceImpl implements BusinessService {
             	response.setShopDTOs(searchShopsResponse.getBody().getRows());
             	
             	if(searchShopsResponse.getBody().getHasNext())
-            	response.setNextPageAnchor(cmd.getPageAnchor() + 1);
+            	response.setNextPageAnchor(cmd.getPageAnchor()==null ? 2: cmd.getPageAnchor() + 1);
             }
 //            if (resp != null) {
 //                List<ModulePromotionEntityDTO> dtoList = new ArrayList<>();
