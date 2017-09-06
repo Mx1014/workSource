@@ -6219,7 +6219,8 @@ public class PunchServiceImpl implements PunchService {
 			ps.setRuleDate(new java.sql.Date(calendar.getTimeInMillis()));
             if(ps.getRuleDate().before(new java.sql.Date(new Date().getTime()))){
                 //今天之前continue
-                continue;
+				i++;
+				continue;
             }
 			if(null != ptr){
 				ps.setTimeRuleId(ptr.getId());
