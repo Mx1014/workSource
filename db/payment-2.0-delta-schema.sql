@@ -1,18 +1,3 @@
--- 用途:请求左邻支付系统接口,需要使用到如下4个字段
--- 支付分配的账号信息,accountId/systemId/appKey/secretKey
--- system_id园区系统填1,电商系统填2
-DROP TABLE IF EXISTS `eh_payment_accounts`;
-CREATE TABLE `eh_payment_accounts` (
-	`id` BIGINT NOT NULL,
-	`name` VARCHAR(128) DEFAULT NULL,
-	`account_id` BIGINT DEFAULT NULL,
-	`system_id` INTEGER DEFAULT NULL,
-	`app_key` VARCHAR(256) DEFAULT NULL,
-	`secret_key` VARCHAR(1024) DEFAULT NULL,
-	`create_time` datetime NOT NULL,
-	PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 -- 用途:为每个owner生成一个唯一的id,作为暴露给支付系统的用户id,用户创建会员
 -- ownerType为普通用户/企业/商家等,ownerId填对应的owner编号
 -- id为支付系统的会员bizUserId,paymentUserId为支付系统User表的id
@@ -27,6 +12,21 @@ CREATE TABLE `eh_payment_users` (
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `i_owner_type_owner_id` (`owner_type`,`owner_id`),
 	UNIQUE KEY `i_payment_user_type_payment_user_id` (`payment_user_type`,`payment_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 用途:请求左邻支付系统接口,需要使用到如下4个字段
+-- 支付分配的账号信息,accountId/systemId/appKey/secretKey
+-- system_id园区系统填1,电商系统填2
+DROP TABLE IF EXISTS `eh_payment_accounts`;
+CREATE TABLE `eh_payment_accounts` (
+	`id` BIGINT NOT NULL,
+	`name` VARCHAR(128) DEFAULT NULL,
+	`account_id` BIGINT DEFAULT NULL,
+	`system_id` INTEGER DEFAULT NULL,
+	`app_key` VARCHAR(256) DEFAULT NULL,
+	`secret_key` VARCHAR(1024) DEFAULT NULL,
+	`create_time` datetime NOT NULL,
+	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 用途:根据业务需求,设置不同分账规则
