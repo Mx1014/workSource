@@ -562,13 +562,28 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
+    public void deleteBill(PaymentBillItems billItem) {
+        this.assetProvider.updatePaymentBill(billItem.getBillId(),billItem.getAmountReceivable(),billItem.getAmountReceived(),billItem.getAmountOwed());
+    }
+
+    @Override
+    public void deleteBill(PaymentExemptionItems exemItem) {
+        this.assetProvider.updatePaymentBill(exemItem.getBillId(),new BigDecimal("0"),new BigDecimal("0"),exemItem.getAmount());
+    }
+
+    @Override
     public String deleteBillItem(BillItemIdCommand cmd) {
         String result = "OK";
         if(UserContext.getCurrentNamespaceId()==999971){
             result = "张江高科项目暂不支持删除收费项目功能";
             return result;
         }
-        assetProvider.deleteBillItem(cmd.getBillItemId());
+        this.dbProvider.execute((TransactionStatus status) ->{
+            PaymentBillItems billItem = findBillItemById(cmd.getBillItemId());
+            deleteBill(billItem);
+            assetProvider.deleteBillItem(cmd.getBillItemId());
+            return null;
+        });
         return result;
     }
 
@@ -579,7 +594,13 @@ public class AssetServiceImpl implements AssetService {
             result = "张江高科项目暂不支持删除加减免项功能";
             return result;
         }
-        assetProvider.deletExemptionItem(cmd.getExemptionItemId());
+        this.dbProvider.execute((TransactionStatus status) ->{
+            PaymentExemptionItems exemItem = findExemptionItemById(cmd.getExemptionItemId());
+            deleteBill(exemItem);
+            assetProvider.deletExemptionItem(cmd.getExemptionItemId());
+            return null;
+        });
+
         return result;
     }
 
@@ -594,11 +615,9 @@ public class AssetServiceImpl implements AssetService {
         List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
         List<EhPaymentBills> billList = new ArrayList<>();
         List<EhPaymentContractReceiver> contractDateList = new ArrayList<>();
-        //查一下出账单日
         for(int i = 0; i < feesRules.size(); i++) {
             List<PaymentExpectancyDTO> dtos1 = new ArrayList<>();
             FeeRules rule = feesRules.get(i);
-//            List<String> var1 = rule.getPropertyName();
             List<ContractProperty> var1 = rule.getProperties();
             List<VariableIdAndValue> variableIdAndValueList = assetProvider.findPreInjectedVariablesForCal(rule.getChargingStandardId());
             List<VariableIdAndValue> var2 = rule.getVariableIdAndValueList();
@@ -619,10 +638,11 @@ public class AssetServiceImpl implements AssetService {
                     FixedAtContractStartHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
                 }
                 //自然月的计费方式
-                if(billingCycle == AssetPaymentStrings.NATRUAL_MONTH){
+                else if(billingCycle == AssetPaymentStrings.NATRUAL_MONTH){
                     NaturalMonthHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
+                }else{
+                    throw new RuntimeException("创建账单失败，暂不支持自然月自费周期以外的方式");
                 }
-                // redis的这个会rollback吗？不会当然不影响功能
                 long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), dtos2.size());
                 long currentBillItemSeq = nextBillItemBlock - dtos2.size() + 1;
                 if(currentBillItemSeq == 0){
@@ -801,8 +821,20 @@ public class AssetServiceImpl implements AssetService {
         float duration = 0;
         //define the end of the date the calculation should take as multiply
         Calendar c5 = Calendar.getInstance();
-        //calculate the per cent of month from c1 to the end of the month c1 is at
-        duration = ((float)c1.getActualMaximum(Calendar.DAY_OF_MONTH) - (float)c1.get(Calendar.DAY_OF_MONTH)+1f)/(float)c1.getActualMaximum(Calendar.DAY_OF_MONTH);
+        //first to check if the whole period is less than one month
+        Calendar c7 = Calendar.getInstance();
+        Calendar c8 = Calendar.getInstance();
+        c7.setTime(c1.getTime());
+        c8.setTime(c8.getTime());
+        if(c1.get(Calendar.YEAR)==c2.get(Calendar.YEAR)&&c1.get(Calendar.MONTH)==c2.get(Calendar.MONTH)){
+            duration = ((float)c2.get(Calendar.DAY_OF_MONTH)-(float)c1.get(Calendar.DAY_OF_MONTH)+1f)/(float)c1.getActualMaximum(Calendar.DAY_OF_MONTH);
+            if(duration <= 0){
+                throw new RuntimeException("日期错误,结束日期需要大于开始日期");
+            }
+        }else{
+            //calculate the per cent of month from c1 to the end of the month c1 is at
+            duration = ((float)c1.getActualMaximum(Calendar.DAY_OF_MONTH) - (float)c1.get(Calendar.DAY_OF_MONTH)+1f)/(float)c1.getActualMaximum(Calendar.DAY_OF_MONTH);
+        }
         BigDecimal tempDuration = new BigDecimal(duration);
         tempDuration = tempDuration.setScale(2,BigDecimal.ROUND_CEILING);
         if(duration != 0){
@@ -839,6 +871,9 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private void FixedAtContractStartHandler(List<PaymentExpectancyDTO> dtos1, FeeRules rule, List<VariableIdAndValue> variableIdAndValueList, String formula, String chargingItemName, Integer billDay, List<PaymentExpectancyDTO> dtos2, ContractProperty property) {
+        if(true){
+            throw new RuntimeException("暂不支持按照固定日期进行账单结算的模式");
+        }
         String propertyName = property.getPropertyName();
         Date dateStrBegin = rule.getDateStrBegin();
         Date dateStrEnd = rule.getDateStrEnd();
@@ -1038,6 +1073,16 @@ public class AssetServiceImpl implements AssetService {
         dto.setAddressNames(addressNames);
         dto.setAreaSizesSum(String.valueOf(areaSize));
         return dto;
+    }
+
+    @Override
+    public PaymentBillItems findBillItemById(Long billItemId) {
+        return assetProvider.findBillItemById(billItemId);
+    }
+
+    @Override
+    public PaymentExemptionItems findExemptionItemById(Long ExemptionItemId) {
+        return assetProvider.findExemptionItemById(ExemptionItemId);
     }
 
     private void coverVariables(List<VariableIdAndValue> var1, List<VariableIdAndValue> var2) {

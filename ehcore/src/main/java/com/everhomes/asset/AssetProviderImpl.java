@@ -1536,4 +1536,33 @@ public class AssetProviderImpl implements AssetProvider {
                 .execute();
     }
 
+    @Override
+    public void updatePaymentBill(Long billId, BigDecimal amountReceivable, BigDecimal amountReceived, BigDecimal amountOwed) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        context.update(t)
+                .set(t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVABLE.sub(amountReceivable))
+                .set(t.AMOUNT_RECEIVED,t.AMOUNT_RECEIVED.sub(amountReceived))
+                .set(t.AMOUNT_OWED,t.AMOUNT_OWED.sub(amountOwed))
+                .execute();
+    }
+
+    @Override
+    public PaymentBillItems findBillItemById(Long billItemId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select()
+                .from(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.ID.eq(billItemId))
+                .fetchOneInto(PaymentBillItems.class);
+    }
+
+    @Override
+    public PaymentExemptionItems findExemptionItemById(Long exemptionItemId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select()
+                .from(Tables.EH_PAYMENT_EXEMPTION_ITEMS)
+                .where(Tables.EH_PAYMENT_EXEMPTION_ITEMS.ID.eq(exemptionItemId))
+                .fetchOneInto(PaymentExemptionItems.class);
+    }
+
 }
