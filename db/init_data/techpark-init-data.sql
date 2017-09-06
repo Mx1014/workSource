@@ -981,7 +981,7 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 
 -- by dengs, 20170901 新版ui已经部分活动添加，已在alpha，beta执行过了。
 UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwaFlXTmxNbVV3WmpRelpEWXdZbUl6Wmpka01qbGhOV0kwTVdKbFkyTmxOdw' WHERE item_label = '交流大厅' AND `namespace_id` = 1000000;
-UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvNVpEVTJPV0V3TnpKa05EQmxPVEJsTkRReU1XWmhNbVl5TTJVNFlqUmhNZw', action_data = '{"url":"http://beta.zuolin.com/station-booking/index.html?hideNavigationBar=1#/station_booking#sign_suffix"}',action_type = '13' WHERE item_label = '创客空间' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvNVpEVTJPV0V3TnpKa05EQmxPVEJsTkRReU1XWmhNbVl5TTJVNFlqUmhNZw', action_data = '{"url":"https://core.zuolin.com/station-booking/index.html?hideNavigationBar=1#/station_booking#sign_suffix"}',action_type = '13' WHERE item_label = '创客空间' AND `namespace_id` = 1000000;
 UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveE9Ea3dNMkk0TURFM01USXdObU13TkROa01XTTBaalJqWWpFeE0ySXdZUQ' WHERE item_label = '园区入驻' AND `namespace_id` = 1000000;
 UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvM016UmpNREEyTlROa1pEQTVaR1kxWW1GbE1qUTBZamt3TnpRd1lXUTNZdw' WHERE item_label = '服务联盟' AND `namespace_id` = 1000000;
 
@@ -1053,7 +1053,6 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 		VALUES ((@id := @id  + 1 ), '1000000', '0', '0', '0', '/home', 'Bizs', '园区党建', '园区党建', 'cs://1/image/aW1hZ2UvTVRvM01EUXhNbUZrTkRNelptSXdNVGRtTm1Rd05tVmtZemhpTkdVeU5USTRaZw', '1', '1', '62', '{"tag":"园区党建"}', 9, '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL, '0', NULL, NULL);
 
 -- 科技园部分item的顺序不允许用户定制
-select * FROM eh_user_launch_pad_items WHERE item_id in (select id FROM eh_launch_pad_items WHERE item_label in ('创客分享','创客活动','任务管理','园区企业','VIP车位','班车','俱乐部','视频会议','更多') AND namespace_id = 1000000);
 DELETE FROM eh_user_launch_pad_items WHERE item_id in (select id FROM eh_launch_pad_items WHERE item_label in ('创客分享','创客活动','任务管理','园区企业','VIP车位','班车','俱乐部','视频会议','更多') AND namespace_id = 1000000);
 -- end by dengs,
 -- by dengs,beta uibug修复
@@ -1073,7 +1072,7 @@ INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`
 
 UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvMFpUbGtNV1ZrT1RWbE1qUTFaV0ZpWlRKaU1HRTFNVGcwT1dGaE5UTTBOUQ', default_order = 6, item_name = '会议室' WHERE item_label = '会议室' AND `namespace_id` = 1000000;
 UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwak4yUXhNMkV4Wm1NeFptTmxaVGcwTUdaaFpURXlOV0k0T1RRNU5tUmlZUQ', default_order = 3, item_name = '打卡考勤' WHERE item_label = '打卡考勤' AND `namespace_id` = 1000000;
-select * FROM eh_user_launch_pad_items WHERE item_id in (select id FROM eh_launch_pad_items WHERE namespace_id = 1000000);
 DELETE FROM eh_user_launch_pad_items WHERE item_id in (select id FROM eh_launch_pad_items WHERE namespace_id = 1000000);
 
+DELETE FROM eh_launch_pad_items WHERE item_label = '左邻会议室' And namespace_id = 1000000;
 -- end by dengs,beta uibug修复
