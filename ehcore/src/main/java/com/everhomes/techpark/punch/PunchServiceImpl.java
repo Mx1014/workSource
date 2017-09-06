@@ -6910,7 +6910,7 @@ public class PunchServiceImpl implements PunchService {
 			result.setClockStatus(PunchStatus.NORMAL.getCode());
 		result.setPunchNormalTime(intervals.get(PunchIntervalNo-1).getArriveTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)));
 		if(PunchIntervalNo.equals(intervals.size())){
-			result.setExpiryTime(findSmallOne(intervals.get(PunchIntervalNo - 1).getLeaveTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS),ptr.getDaySplitTimeLong());
+			result.setExpiryTime(findSmallOne(intervals.get(PunchIntervalNo - 1).getLeaveTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS),ptr.getDaySplitTimeLong()));
 		}else{
 			result.setExpiryTime(intervals.get(0).getArriveTimeLong());
 		}
