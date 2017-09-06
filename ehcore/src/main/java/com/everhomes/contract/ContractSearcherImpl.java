@@ -33,6 +33,7 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -200,6 +201,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
+        if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
+            builder.addSort("contractEndDate", SortOrder.DESC);
+        }
         SearchResponse rsp = builder.execute().actionGet();
 
         if(LOGGER.isDebugEnabled())

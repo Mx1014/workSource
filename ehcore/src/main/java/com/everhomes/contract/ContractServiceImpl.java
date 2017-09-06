@@ -982,6 +982,16 @@ public class ContractServiceImpl implements ContractService {
 
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
+
+		//释放资源状态
+		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+		if(contractApartments != null && contractApartments.size() > 0) {
+			contractApartments.forEach(contractApartment -> {
+				CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
+				addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+				propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+			});
+		}
 	}
 
 	@Override
