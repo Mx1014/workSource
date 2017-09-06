@@ -197,7 +197,7 @@ public class WXAuthController {// extends ControllerBase
 
     /**
      * <b>URL: /wxauth/checkAuth</b>
-     * <p>检查是否已经登录，没有登录则发起授权。此接口与authReq接口的区别是此接口检查授权过后是直接返回的，而authReq是重定向到src_url的</p>
+     * <p>检查是否已经登录，没有登录则发起授权。authReq接口会重定向到src_url，此接口如果已经登录会直接返回，没有登录会调用authReq进行授权</p>
      */
     @RequestMapping("checkAuth")
     @RestReturn(String.class)
