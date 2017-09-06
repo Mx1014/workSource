@@ -31,7 +31,6 @@ import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.util.*;
-import com.google.zxing.WriterException;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -2271,7 +2270,7 @@ public class PunchServiceImpl implements PunchService {
             java.sql.Date punchDate = new java.sql.Date(date.getTime());
             punchDate = checkHoliday(pr,punchDate);
 			//看是循环timerule找当天的timeRule
-			List<PunchTimeRule> timeRules = punchProvider.listPunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId());
+			List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId());
 			if(null != timeRules)
 				for(PunchTimeRule timeRule :  timeRules){
 					Integer openWeek = Integer.parseInt(timeRule.getOpenWeekday(), 2);
@@ -6060,6 +6059,7 @@ public class PunchServiceImpl implements PunchService {
 		Long punchOrgId = pr.getPunchOrganizationId();
 		//timeRules 不删除,等第二天早上刷新到删除状态
 //		punchProvider.deletePunchTimeRuleByPunchOrgId(punchOrgId);
+		deletePunchTimeRules(punchOrgId);
 		punchProvider.deletePunchSpecialDaysByPunchOrgId(punchOrgId);
 //		punchProvider.deletePunchTimeIntervalByPunchRuleId(pr.getId());
         List<PunchTimeRule> ptrs = new ArrayList<>();
@@ -6147,6 +6147,16 @@ public class PunchServiceImpl implements PunchService {
         		}
         	}
         }
+	}
+
+	private void deletePunchTimeRules(Long punchOrgId) {
+		List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(), punchOrgId);
+		if (null != timeRules) {
+			for (PunchTimeRule timeRule : timeRules) {
+				timeRule.setStatus(PunchRuleStatus.DELETED.getCode());
+				punchProvider.updatePunchTimeRule(timeRule);
+			}
+		}
 	}
 
 	private void saveTimerRuleIntervals(PunchTimeRuleDTO timeRule, PunchTimeRule ptr) {
@@ -6322,7 +6332,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 		}
 		//打卡时间
-		List<PunchTimeRule> timeRules = punchProvider.listPunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),r.getId());
+		List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),r.getId());
 		if(null != timeRules && timeRules.size() > 0)
 			dto.setTimeRules(timeRules.stream().map(r1 -> {
 				PunchTimeRuleDTO dto1 = convertPunchTimeRule2DTO(r1) ;
@@ -6529,8 +6539,8 @@ public class PunchServiceImpl implements PunchService {
         pr.setPunchOrganizationId( punchOrg.getId());
 		pr.setStatus(PunchRuleStatus.MODIFYED.getCode());
 		// 新增一条修改状态的规则
-		//删除
-        punchProvider.createPunchRule(pr);
+		//TODO:删除
+        punchProvider.updatePunchRule(pr);
 //		punchProvider.deletePunchTimeRuleByRuleId(pr.getId());
 
         savePunchTimeRule(cmd, pr);

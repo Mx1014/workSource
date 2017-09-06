@@ -311,7 +311,7 @@ public interface PunchProvider {
 
 	public void deletePunchTimeIntervalByPunchRuleId(Long id);
 
-	public List<PunchTimeRule> listPunchTimeRuleByOwner(String ownerType, Long ownerId);
+	public List<PunchTimeRule> listActivePunchTimeRuleByOwner(String ownerType, Long ownerId);
 
 	public List<PunchTimeInterval> listPunchTimeIntervalByTimeRuleId(Long timeRuleId);
 

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.techpark.punch.*;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -35,14 +36,6 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.ExceptionRequestType;
 import com.everhomes.rest.approval.ListTargetType;
-import com.everhomes.rest.techpark.punch.DateStatus;
-import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
-import com.everhomes.rest.techpark.punch.PunchOwnerType;
-import com.everhomes.rest.techpark.punch.PunchRquestType;
-import com.everhomes.rest.techpark.punch.PunchStatus;
-import com.everhomes.rest.techpark.punch.TimeCompareFlag;
-import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
-import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPunchDayLogsDao;
@@ -2602,12 +2595,13 @@ long id = sequenceProvider.getNextSequence(key);
 	}
 
 	@Override
-	public List<PunchTimeRule> listPunchTimeRuleByOwner(String ownerType, Long ownerId) {
+	public List<PunchTimeRule> listActivePunchTimeRuleByOwner(String ownerType, Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_TIME_RULES);
 		Condition condition = Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType)
-				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(ownerId)); 
+				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(ownerId))
+				.and(Tables.EH_PUNCH_TIME_RULES.STATUS.ne(PunchRuleStatus.DELETED.getCode()));
 		step.where(condition);
 		List<PunchTimeRule> result = step
 				.orderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc()).fetch()
