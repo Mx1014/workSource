@@ -351,8 +351,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             
         }
         
-        FilterBuilder fb = FilterBuilders.termFilter("ownerType", WifiOwnerType.fromCode(cmd.getOwnerType()).getCode());
+        FilterBuilder fb = FilterBuilders.termFilter("ownerType", cmd.getOwnerType());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+
         if(cmd.getCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("type", cmd.getCategoryId()));
         

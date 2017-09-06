@@ -95,13 +95,14 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 	private ContentServerService contentServerService;
 	
 	@Override
-	public void addCustomRequest(AddRequestCommand cmd) {
+	public Long addCustomRequest(AddRequestCommand cmd) {
 		SettleRequests request = GsonUtil.fromJson(cmd.getRequestJson(), SettleRequests.class);
 		
 		request.setNamespaceId(UserContext.getCurrentNamespaceId());
 
-		request.setOwnerType(cmd.getOwnerType());
-		request.setOwnerId(cmd.getOwnerId());
+		request.setOwnerType(com.everhomes.rest.common.EntityType.ORGANIZATIONS.getCode());
+		List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(cmd.getOwnerId());
+		request.setOwnerId(communityList.get(0).getId());
 		request.setType(cmd.getType());
 		request.setCategoryId(cmd.getCategoryId());
 		request.setCreatorOrganizationId(cmd.getCreatorOrganizationId());
@@ -116,7 +117,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 			request.setCreatorMobile(identifier.getIdentifierToken());
 		
 		LOGGER.info("SettleCustomRequestHandler addCustomRequest request:" + request);
-		yellowPageProvider.createSettleRequests(request);
+		Long id = yellowPageProvider.createSettleRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
 		requestInfo.setTemplateType(cmd.getTemplateType());
 		requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
@@ -218,8 +219,15 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		}
 		//删除生成的pdf文件，附件
 		attementList.stream().forEach(file->{file.delete();});
+		return id;
 	}
 	
+
+	private String deleteSignal(String s){
+		s = s.replaceAll("<p>","");
+		s = s.replaceAll("</p>","\n");
+		return s;
+	}
 
 	private String getNote(SettleRequests request) {
 		List<RequestFieldDTO> fieldList = toFieldDTOList(request);
@@ -249,7 +257,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-        messageDto.setBody(content);
+        messageDto.setBody(deleteSignal(content));
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
         
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 

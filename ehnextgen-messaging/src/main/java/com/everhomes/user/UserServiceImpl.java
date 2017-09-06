@@ -1,61 +1,13 @@
 // @formatter:off
 package com.everhomes.user;
 
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.geo.GeoHashUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
-
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.PortalRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
-import com.everhomes.authorization.AuthorizationErrorCode;
-import com.everhomes.authorization.AuthorizationThirdPartyButton;
-import com.everhomes.authorization.AuthorizationThirdPartyButtonProvider;
-import com.everhomes.authorization.AuthorizationThirdPartyForm;
-import com.everhomes.authorization.AuthorizationThirdPartyFormProvider;
+import com.everhomes.authorization.*;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -72,6 +24,7 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -92,6 +45,7 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.forum.ForumService;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.group.GroupService;
 import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -110,8 +64,7 @@ import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
-import com.everhomes.organization.*; 
-import com.everhomes.organization.OrganizationMember; 
+import com.everhomes.organization.*;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
@@ -128,15 +81,11 @@ import com.everhomes.rest.family.FamilyMemberFullDTO;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.group.GroupLocalStringCode;
+import com.everhomes.rest.group.GroupNameEmptyFlag;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagePopupFlag;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.UserMessageType;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
@@ -446,6 +395,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private SmsBlackListProvider smsBlackListProvider;
+
+	@Autowired
+	private GroupService groupService;
+
+    @Autowired
+    private CommunityService communityService;
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -3471,68 +3426,54 @@ public class UserServiceImpl implements UserService {
 			response.setLaunchPadItemDtos(itemDtos);
 			response.setShopDTOs(shopDtos);
 
-			SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.ACTIVITY.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.ACTIVITY.getCode());
-			}
+			//活动
+			SearchTypes searchType  = getSearchTypes(namespaceId, SearchContentType.ACTIVITY.getCode());
 			if(searchType != null) {
-				if(forumService.searchContents(cmd, SearchContentType.ACTIVITY) != null 
-						&& forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos() != null) {
-					response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos());	
+				SearchContentsBySceneReponse res = forumService.searchContents(cmd, SearchContentType.ACTIVITY);
+				if(res != null && res.getDtos() != null) {
+					response.getDtos().addAll(res.getDtos());
 				}
 			}
 
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.POLL.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.POLL.getCode());
-			}
+			//投票
+			searchType  = getSearchTypes(namespaceId, SearchContentType.POLL.getCode());
 			if(searchType != null) {
-				if(forumService.searchContents(cmd, SearchContentType.POLL) != null 
-						&& forumService.searchContents(cmd, SearchContentType.POLL).getDtos() != null) {
-					response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.POLL).getDtos());	
-				}
-			}
-			
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.TOPIC.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.TOPIC.getCode());
-			}
-			if(searchType != null) {
-				if(forumService.searchContents(cmd, SearchContentType.TOPIC) != null 
-						&& forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos() != null) {
-					response.getDtos().addAll(forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos());	
+				SearchContentsBySceneReponse res = forumService.searchContents(cmd, SearchContentType.POLL);
+				if(res != null && res != null) {
+					response.getDtos().addAll(res.getDtos());
 				}
 			}
 
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.NEWS.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.NEWS.getCode());
-			}
+			//话题
+			searchType  = getSearchTypes(namespaceId, SearchContentType.TOPIC.getCode());
 			if(searchType != null) {
-				if(newsService.searchNewsByScene(cmd) != null 
-						&& newsService.searchNewsByScene(cmd).getDtos() != null) {
-					response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
+				SearchContentsBySceneReponse res = forumService.searchContents(cmd, SearchContentType.TOPIC);
+				if(res != null
+						&& res.getDtos() != null) {
+					response.getDtos().addAll(res.getDtos());
+				}
+			}
+
+			//新闻
+			searchType  = getSearchTypes(namespaceId, SearchContentType.NEWS.getCode());
+			if(searchType != null) {
+				SearchContentsBySceneReponse res = newsService.searchNewsByScene(cmd);
+				if(res != null && res.getDtos() != null) {
+					response.getDtos().addAll(res.getDtos());
 				}
 			}
 			
 			//查询应用 add by yanjun 20170419
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.LAUNCHPADITEM.getCode());
-			}
+			searchType  = getSearchTypes(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
 			if(searchType != null) {
 				 SearchContentsBySceneReponse tempResp = launchPadService.searchLaunchPadItemByScene(cmd);
-				if( tempResp != null 
-						&& tempResp.getLaunchPadItemDtos() != null) {
+				if( tempResp != null  && tempResp.getLaunchPadItemDtos() != null) {
 					response.getLaunchPadItemDtos().addAll(tempResp.getLaunchPadItemDtos());
 				}
 			}
 			
 			//查询电商店铺 add by yanjun 20170419
-			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.SHOP.getCode());
-			if(searchType == null){
-				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.SHOP.getCode());
-			}
+			searchType  = getSearchTypes(namespaceId, SearchContentType.SHOP.getCode());
 			if(searchType != null) {
 				SearchContentsBySceneReponse tempResp = businessService.searchShops(cmd);
 				if(tempResp != null 
@@ -3540,7 +3481,6 @@ public class UserServiceImpl implements UserService {
 					response.getShopDTOs().addAll(tempResp.getShopDTOs());
 				}
 			}
-			
 
 			break;
 
@@ -3555,6 +3495,16 @@ public class UserServiceImpl implements UserService {
 					userId, namespaceId, (endTime - startTime), cmd);
 		}
 		return response;
+	}
+
+	private SearchTypes getSearchTypes(Integer namespaceId, String searchContentType){
+		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, searchContentType);
+		//找不到就找0域空间的
+		if(searchType == null){
+			searchType = userActivityProvider.findByContentAndNamespaceId(0, searchContentType);
+		}
+
+		return searchType;
 	}
 
 	@Override
@@ -3995,6 +3945,16 @@ public class UserServiceImpl implements UserService {
                         name = organization.getName();
                     }
                     dto.setName(name);
+
+					//群聊名称为空时填充群聊别名  edit by yanjun 20170724
+					if(name == null || "".equals(name)){
+						String alias = groupService.getGroupAlias(group.getId());
+						dto.setAlias(alias);
+						String defaultName = localeStringService.getLocalizedString(GroupLocalStringCode.SCOPE, String.valueOf(GroupLocalStringCode.GROUP_DEFAULT_NAME), UserContext.current().getUser().getLocale(), "");
+						dto.setName(defaultName);
+						dto.setIsNameEmptyBefore(GroupNameEmptyFlag.EMPTY.getCode());
+					}
+
                     dto.setMessageType(UserMessageType.MESSAGE.getCode());
                     String avatar = parseUri(group.getAvatar(), com.everhomes.rest.common.EntityType.GROUP.getCode(), group.getId());
                     dto.setAvatar(avatar);
@@ -4440,7 +4400,7 @@ public class UserServiceImpl implements UserService {
         List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(user.getId(), organizationId);
 //		OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByTargetId(user.getId(), organizationId);
 
-		if (members == null)
+		if (members == null || members.size() == 0)
 			return null;
 		else {
 		    OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(members.get(0).getDetailId());
@@ -4493,8 +4453,23 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
-	
-	@Override
+
+    @Override
+    public SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd) {
+        // 1.通过 userId 与 organizationId 去找到 detailId
+        // 2.根据 detailId 调用之前的获取信息接口
+        List<OrganizationMember> members = this.organizationProvider.findOrganizationMembersByOrgIdAndUId(cmd.getUserId(), cmd.getOrganizationId());
+        GetRelevantContactInfoCommand command = new GetRelevantContactInfoCommand();
+        command.setDetailId(members.get(0).getDetailId());
+        command.setOrganizationId(cmd.getOrganizationId());
+        SceneContactV2DTO dto = this.getRelevantContactInfo(command);
+        if (dto != null)
+            return dto;
+        else
+            return null;
+    }
+
+    @Override
 	public GetFamilyButtonStatusResponse getFamilyButtonStatus(){
 		int namespaceId = UserContext.getCurrentNamespaceId();
 		AuthorizationThirdPartyButton buttonstatus = authorizationThirdPartyButtonProvider.getButtonStatusByOwner(EntityType.NAMESPACE.getCode(),Long.valueOf(namespaceId));

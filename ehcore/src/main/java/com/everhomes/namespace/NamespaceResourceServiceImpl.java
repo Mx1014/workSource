@@ -1,34 +1,27 @@
 // @formatter:off
 package com.everhomes.namespace;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-
-import org.elasticsearch.common.util.concurrent.ThreadFactoryBuilder;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.community.CommunityAuthPopupConfigDTO;
+import com.everhomes.rest.community.GetCommunityAuthPopupConfigCommand;
+import com.everhomes.rest.namespace.*;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.db.DbProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.namespace.GetNamespaceDetailCommand;
-import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
-import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
-import com.everhomes.rest.namespace.NamespaceCommunityType;
-import com.everhomes.rest.namespace.NamespaceDetailDTO;
-import com.everhomes.rest.namespace.NamespaceResourceType;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Component
 public class NamespaceResourceServiceImpl implements NamespaceResourceService {
@@ -45,8 +38,11 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
-	
-	@Override
+
+    @Autowired
+    private CommunityService communityService;
+
+    @Override
     public ListCommunityByNamespaceCommandResponse listCommunityByNamespace(ListCommunityByNamespaceCommand cmd) {
 	    ListCommunityByNamespaceCommandResponse response = new ListCommunityByNamespaceCommandResponse();
 	    
@@ -101,8 +97,13 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	    NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(cmd.getNamespaceId());
         if(namespaceDetail != null) {
             detailDto = ConvertHelper.convert(namespaceDetail, NamespaceDetailDTO.class);
+
+            // 用户认证弹窗设置 add by xq.tian  2017/08/09
+            GetCommunityAuthPopupConfigCommand cmd1 = new GetCommunityAuthPopupConfigCommand();
+            cmd1.setNamespaceId(cmd.getNamespaceId());
+            CommunityAuthPopupConfigDTO communityAuthPopupConfig = communityService.getCommunityAuthPopupConfig(cmd1);
+            detailDto.setAuthPopupConfig(communityAuthPopupConfig.getStatus());
         }
-        
         return detailDto;
 	}
 }
