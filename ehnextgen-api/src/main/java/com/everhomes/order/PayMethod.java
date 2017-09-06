@@ -13,7 +13,7 @@ public class PayMethod {
     private Integer paymentType;
     private String paymentName;
     private String paymentLogo;
-    private Map<String,String> paymentParams;
+    private PaymentParamsDTO paymentParams;
     private paymentExtendInfo paymentExtendInfo;
 
     public Integer getPaymentType() {
@@ -40,11 +40,11 @@ public class PayMethod {
         this.paymentLogo = paymentLogo;
     }
 
-    public Map<String, String> getPaymentParams() {
+    public PaymentParamsDTO getPaymentParams() {
         return paymentParams;
     }
 
-    public void setPaymentParams(Map<String, String> paymentParams) {
+    public void setPaymentParams(PaymentParamsDTO paymentParams) {
         this.paymentParams = paymentParams;
     }
 

@@ -30,8 +30,11 @@ public class PreOrderMessage {
     private Long resourceId;
     private String openid;
     private String summary;
-    private Timestamp expiration;
+    private Long expiration;
     private String extendInfo;
+    private Integer paymentType;
+    //支付微信公众号必填
+    private PaymentParamsDTO paymentParams;
 
     public String getClientAppName() {
         return clientAppName;
@@ -129,12 +132,28 @@ public class PreOrderMessage {
         this.summary = summary;
     }
 
-    public Timestamp getExpiration() {
+    public Long getExpiration() {
         return expiration;
     }
 
-    public void setExpiration(Timestamp expiration) {
+    public void setExpiration(Long expiration) {
         this.expiration = expiration;
+    }
+
+    public Integer getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(Integer paymentType) {
+        this.paymentType = paymentType;
+    }
+
+    public PaymentParamsDTO getPaymentParams() {
+        return paymentParams;
+    }
+
+    public void setPaymentParams(PaymentParamsDTO paymentParams) {
+        this.paymentParams = paymentParams;
     }
 
     public String getExtendInfo() {

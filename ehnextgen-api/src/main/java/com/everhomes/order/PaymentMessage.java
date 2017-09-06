@@ -7,6 +7,11 @@ import java.util.Map;
  * Created by Wentian Wang on 2017/9/6.
  */
 
+/**
+ *<ul>
+ * <li>paymentStatus:支付状态，详见{@link com.everhomes.order.OrderPaymentStatus}</li>
+ *</ul>
+ */
 public class PaymentMessage {
 
     private Long orderId;
