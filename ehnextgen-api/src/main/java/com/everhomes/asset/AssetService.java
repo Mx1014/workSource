@@ -70,6 +70,10 @@ public interface AssetService {
 
     String deleteBill(BillIdCommand cmd);
 
+    void deleteBill(PaymentBillItems billItem);
+
+    void deleteBill(PaymentExemptionItems exemItem);
+
     String deleteBillItem(BillItemIdCommand cmd);
 
     String deletExemptionItem(ExemptionItemIdCommand cmd);
@@ -89,6 +93,10 @@ public interface AssetService {
     void updateBillsToSettled(UpdateBillsToSettled cmd);
 
     GetAreaAndAddressByContractDTO getAreaAndAddressByContract(FindContractCommand cmd);
+
+    PaymentBillItems findBillItemById(Long billItemId);
+
+    PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
 
 //    void synchronizeZJGKBill();
 }

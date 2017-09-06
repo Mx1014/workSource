@@ -116,4 +116,10 @@ public interface AssetProvider {
     List<PaymentExpectancyDTO> listBillExpectanciesOnContract(String contractNum, Integer pageOffset, Integer pageSize);
 
     void updateBillsToSettled(Long contractId, String ownerType, Long ownerId);
+
+    void updatePaymentBill(Long billId, BigDecimal amountReceivable, BigDecimal amountReceived, BigDecimal amountOwed);
+
+    PaymentBillItems findBillItemById(Long billItemId);
+
+    PaymentExemptionItems findExemptionItemById(Long exemptionItemId);
 }
