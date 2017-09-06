@@ -1284,6 +1284,7 @@ public class PunchServiceImpl implements PunchService {
 
 		return response;
 	}
+
 	/** 当前时间点 应该算哪一天 */
 	private java.sql.Date calculatePunchDate(Calendar punCalendar, Long enterpriseId, Long userId) {
 
@@ -6884,11 +6885,15 @@ public class PunchServiceImpl implements PunchService {
 			result.setClockStatus(PunchStatus.NORMAL.getCode());
 		result.setPunchNormalTime(result.getRuleTime());
 		if(PunchIntervalNo.equals(intervals.size())){
-			result.setExpiryTime(intervals.get(PunchIntervalNo - 1).getLeaveTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS));
+			result.setExpiryTime(findSmallOne(intervals.get(PunchIntervalNo - 1).getLeaveTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS),ptr.getDaySplitTimeLong()));
 		}else{
 			result.setExpiryTime(intervals.get(0).getArriveTimeLong());
 		}
 		return result ;
+	}
+
+	private Long findSmallOne(long l, Long l2) {
+		return l < l2 ? l : l2;
 	}
 
 	private PunchLogDTO processOndutyPunchLog(PunchTimeRule ptr, List<PunchTimeInterval> intervals, PunchLogDTO result, Integer PunchIntervalNo, Long punchTimeLong) {
@@ -6905,7 +6910,7 @@ public class PunchServiceImpl implements PunchService {
 			result.setClockStatus(PunchStatus.NORMAL.getCode());
 		result.setPunchNormalTime(intervals.get(PunchIntervalNo-1).getArriveTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)));
 		if(PunchIntervalNo.equals(intervals.size())){
-			result.setExpiryTime(intervals.get(PunchIntervalNo - 1).getLeaveTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS));
+			result.setExpiryTime(findSmallOne(intervals.get(PunchIntervalNo - 1).getLeaveTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS),ptr.getDaySplitTimeLong());
 		}else{
 			result.setExpiryTime(intervals.get(0).getArriveTimeLong());
 		}
@@ -7002,7 +7007,7 @@ public class PunchServiceImpl implements PunchService {
 					result.setClockStatus(PunchStatus.NORMAL.getCode());
 				else
 					result.setClockStatus(PunchStatus.BELATE.getCode());
-				result.setExpiryTime(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS));
+				result.setExpiryTime(findSmallOne(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS),ptr.getDaySplitTimeLong()));
 				result.setPunchNormalTime(ptr.getStartLateTimeLong());
 				return result ;
 			}
@@ -7031,7 +7036,7 @@ public class PunchServiceImpl implements PunchService {
 		}else{
 			result.setClockStatus(PunchStatus.NORMAL.getCode());
 		}
-		result.setExpiryTime(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS));
+		result.setExpiryTime(findSmallOne(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS),ptr.getDaySplitTimeLong()));
 		result.setPunchNormalTime(leaveTime);
 	}
 
