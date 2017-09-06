@@ -89,6 +89,6 @@ CREATE TABLE `eh_payment_users` (
   `payment_user_id` bigint(20) NOT NULL,
   `create_time` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `i_owner_type_owner_id` (`owner_type`,`owner_id`),
-  UNIQUE KEY `i_payment_user_type_payment_user_id` (`payment_user_type`,`payment_user_id`)
+  UNIQUE KEY `i_owner` (`owner_type`,`owner_id`),
+  UNIQUE KEY `i_payment_user` (`payment_user_type`,`payment_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
