@@ -2,6 +2,7 @@
 package com.everhomes.rest.organization;
 
 import java.sql.Date;
+import java.sql.Time;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -119,6 +120,9 @@ public class OrganizationMemberDTO {
     private String operatorName;
     private String operatorPhone;
     private String email;
+    private String workEmail;
+    private String regionCode;
+    private Timestamp contractEndTime;
 
     public OrganizationMemberDTO() {
     }
@@ -492,5 +496,29 @@ public class OrganizationMemberDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getWorkEmail() {
+        return workEmail;
+    }
+
+    public void setWorkEmail(String workEmail) {
+        this.workEmail = workEmail;
+    }
+
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
+    }
+
+    public Timestamp getContractEndTime() {
+        return contractEndTime;
+    }
+
+    public void setContractEndTime(Timestamp contractEndTime) {
+        this.contractEndTime = contractEndTime;
     }
 }
