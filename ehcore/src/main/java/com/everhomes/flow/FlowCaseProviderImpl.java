@@ -195,7 +195,9 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 			if(locator.getAnchor() == null) {
 				locator.setAnchor(cmd.getPageAnchor());
 			}
-
+			if(locator.getAnchor() != null) {
+				cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
+			}
 			FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
 			if(searchType.equals(FlowCaseSearchType.APPLIER)) {
 				cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));

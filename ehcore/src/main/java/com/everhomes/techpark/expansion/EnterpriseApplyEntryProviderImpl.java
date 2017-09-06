@@ -148,6 +148,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 		List<LeasePromotion> leasePromotions = query
 				.where(cond)
+				.groupBy(Tables.EH_LEASE_PROMOTIONS.ID)
 				.orderBy(Tables.EH_LEASE_PROMOTIONS.DEFAULT_ORDER.desc())
 				.limit(pageSize)
 				.fetchInto(LeasePromotion.class);
