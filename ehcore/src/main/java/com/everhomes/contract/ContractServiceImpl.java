@@ -542,6 +542,7 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	private void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems) {
+		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_CANCEL);
 		PaymentExpectanciesCommand command = new PaymentExpectanciesCommand();
 		command.setContractNum(contract.getContractNumber());
 		List<FeeRules> feeRules = new ArrayList<>();
@@ -818,7 +819,12 @@ public class ContractServiceImpl implements ContractService {
 			addToFlowCase(contract);
 		}
 
-		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_CANCEL);
+		ExecutorUtil.submit(new Runnable() {
+			@Override
+			public void run() {
+				generatePaymentExpectancies(contract, cmd.getChargingItems());
+			}
+		});
 
 		return ConvertHelper.convert(contract, ContractDTO.class);
 	}

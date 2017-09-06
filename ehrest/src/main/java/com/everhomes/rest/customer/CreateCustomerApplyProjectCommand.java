@@ -13,6 +13,7 @@ import java.math.BigDecimal;
  *     <li>projectAmount: 获批项目金额 万元为单位</li>
  *     <li>projectEstablishDate: 立项日期 时间戳</li>
  *     <li>projectCompleteDate: 完成日期 时间戳</li>
+ *     <li>status: 状态</li>
  * </ul>
  * Created by ying.xiong on 2017/8/19.
  */
@@ -25,6 +26,15 @@ public class CreateCustomerApplyProjectCommand {
     private Long projectEstablishDate;
     private Long projectCompleteDate;
     private BigDecimal projectAmount;
+    private Byte status;
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;
