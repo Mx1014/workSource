@@ -12,6 +12,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.device.DeviceProvider;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
@@ -1317,7 +1318,10 @@ public class UserController extends ControllerBase {
 		if(login != null){
 			LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
 			String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
-			setCookieInResponse("token", tokenString, request, response);
+			
+			//微信公众号的accessToken过期时间是7200秒，需要设置cookie小于7200。
+			//防止用户在coreserver处于登录状态而accessToken已过期，重新登录之后会刷新accessToken   add by yanjun 20170906
+			WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response, 7000);
 		}
 
 
