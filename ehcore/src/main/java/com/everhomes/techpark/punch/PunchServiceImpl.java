@@ -1230,32 +1230,7 @@ public class PunchServiceImpl implements PunchService {
 		punchLog.setUserId(userId);
 		punchLog.setPunchTime(Timestamp.valueOf(punchTime));
 		Calendar punCalendar = Calendar.getInstance();
-		PunchLogDTO punchType = getPunchType(userId,cmd.getEnterpriseId(),punchLog.getPunchTime());
-        response.setClockStatus(punchType.getClockStatus());
-		punchLog.setRuleTime(punchType.getRuleTime());
-		punchLog.setStatus(punchType.getClockStatus());
-		//如果是下班之后打卡当做下班打卡
-		if(punchType.getPunchType().equals(PunchType.FINISH.getCode())){
-			punchType.setPunchType(PunchType.OFF_DUTY.getCode());
-		}
 
-		punchLog.setPunchIntervalNo(punchType.getPunchIntervalNo());
-		if(null ==cmd.getPunchType()){
-			punchLog.setPunchType(punchType.getPunchType());
-		}else{
-			switch(PunchType.fromCode(punchType.getPunchType())){
-			case NOT_WORKDAY:
-			case MEIPAIBAN:
-				punchLog.setPunchStatus(ClockCode.FAIL.getCode());
-				break;
-			default:
-				if(!punchLog.getPunchType().equals(punchType.getPunchType())){
-					throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-		 					PunchServiceErrorCode.ERROR_PUNCH_TYPE,"重新获取上下班类型");
-				}
-				break;
-			}
-		}
 
 		try {
 			punCalendar.setTime(datetimeSF.get().parse(punchTime));
@@ -1307,6 +1282,35 @@ public class PunchServiceImpl implements PunchService {
 
 		punchLog.setPunchDate(java.sql.Date.valueOf(dateSF.get().format(punCalendar
 				.getTime())));
+
+		PunchLogDTO punchType = getPunchType(userId,cmd.getEnterpriseId(),punchLog.getPunchTime(),punchLog.getPunchDate());
+		response.setClockStatus(punchType.getClockStatus());
+		punchLog.setRuleTime(punchType.getRuleTime());
+		punchLog.setStatus(punchType.getClockStatus());
+		//如果是下班之后打卡当做下班打卡
+		if(punchType.getPunchType().equals(PunchType.FINISH.getCode())){
+			punchType.setPunchType(PunchType.OFF_DUTY.getCode());
+		}
+
+		punchLog.setPunchIntervalNo(punchType.getPunchIntervalNo());
+		if(null ==cmd.getPunchType()){
+			punchLog.setPunchType(punchType.getPunchType());
+		}else{
+			switch(PunchType.fromCode(punchType.getPunchType())){
+				case NOT_WORKDAY:
+				case MEIPAIBAN:
+					punchLog.setPunchStatus(ClockCode.FAIL.getCode());
+					break;
+				default:
+					if(!punchLog.getPunchType().equals(punchType.getPunchType())){
+						throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+								PunchServiceErrorCode.ERROR_PUNCH_TYPE,"重新获取上下班类型");
+					}
+					break;
+			}
+		}
+
+
 		response.setPunchCode(punchCode);
 		punchLog.setPunchStatus(punchCode);
 		punchProvider.createPunchLog(punchLog);
@@ -4825,7 +4829,7 @@ public class PunchServiceImpl implements PunchService {
 		//刷新前一天的
 		Calendar punCalendar = Calendar.getInstance();
         punCalendar.setTime(runDate);
-        Long timeLong = getTimeLong(punCalendar);
+        Long timeLong = getTimeLong(punCalendar, null);
         Calendar yesterday = Calendar.getInstance();
 		yesterday.setTime(runDate);
         yesterday.add(Calendar.DAY_OF_MONTH, -1);
@@ -6557,7 +6561,8 @@ public class PunchServiceImpl implements PunchService {
 		if (null == cmd.getQueryTime()) {
 			cmd.setQueryTime(punchTime.getTime());
             if(null != pr) {
-                PunchLogDTO punchLog = getPunchType(userId, cmd.getEnterpriseId(), punchTime);
+                PunchLogDTO punchLog = getPunchType(userId, cmd.getEnterpriseId(), punchTime,
+						new java.sql.Date(cmd.getQueryTime()));
                 if (null != punchLog) {
                     if (null != punchLog.getExpiryTime()) {
                         punchLog.setExpiryTime(process24hourTimeToGMTTime(punchTime, punchLog.getExpiryTime()));
@@ -6722,7 +6727,7 @@ public class PunchServiceImpl implements PunchService {
 	 * 获取打卡状态:
 	 * list: 元素0 : 上班打卡/下班打卡/不用打卡 元素1:第几次排班的打卡
 	 * */
-	private PunchLogDTO getPunchType(Long userId, Long enterpriseId, Date punchTime) {
+	private PunchLogDTO getPunchType(Long userId, Long enterpriseId, Date punchTime, java.sql.Date punchDate) {
 		PunchLogDTO result = new PunchLogDTO();
 		// 获取打卡规则->timerule
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, userId);
@@ -6730,7 +6735,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
  				"公司没有设置打卡规则");
-		Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr, punchTime, userId);
+		Long ptrId = getPunchTimeRuleIdByRuleIdAndDate(pr, punchDate, userId);
 
 		if(null == ptrId ){
 			if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
@@ -6753,7 +6758,7 @@ public class PunchServiceImpl implements PunchService {
 		Calendar punCalendar = Calendar.getInstance();
 		punCalendar.setTime(punchTime);
 		//把当天的时分秒转换成Long型
-		Long punchTimeLong = getTimeLong(punCalendar);
+		Long punchTimeLong = getTimeLong(punCalendar,punchDate);
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,enterpriseId, dateSF.get().format(punchTime),
 				ClockCode.SUCESS.getCode());
 		int PunchIntervalNo = 1;
@@ -6768,12 +6773,24 @@ public class PunchServiceImpl implements PunchService {
 		}
 	}
 
-    private Long getTimeLong(Calendar punCalendar) {
+    private Long getTimeLong(Calendar punCalendar, java.sql.Date punchDate) {
 
         Long punchTimeLong = punCalendar.get(Calendar.HOUR_OF_DAY)*3600*1000L; //hour
         punchTimeLong += punCalendar.get(Calendar.MINUTE)*60*1000L; //min
         punchTimeLong += punCalendar.get(Calendar.SECOND)*1000L;//second
-        return punchTimeLong;
+		if(null != punchDate) {
+			SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMDD");
+			Integer punchTimeInt = Integer.valueOf(sdf.format(punCalendar.getTime()));
+			Integer punchDateInt = Integer.valueOf(sdf.format(punchDate));
+			if (punchTimeInt < punchDateInt) {
+				//打明天的卡, 打卡时间-1天
+				punchTimeLong -= ONE_DAY_MS;
+			} else if (punchTimeInt > punchDateInt) {
+				//打前一天的卡, 打卡时间+1天
+				punchTimeLong += ONE_DAY_MS;
+			}
+		}
+		return punchTimeLong;
     }
 
     private PunchLogDTO calculateMoretimePunchStatus(PunchTimeRule ptr, Long punchTimeLong,
