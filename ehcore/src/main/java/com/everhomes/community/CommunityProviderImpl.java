@@ -698,8 +698,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId, String keyword) {
-		assert(locator.getEntityId() != 0);
-		namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
+
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, locator.getEntityId()));
 		List<Building> buildings = new ArrayList<Building>();
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
@@ -714,8 +713,9 @@ public class CommunityProviderImpl implements CommunityProvider {
         if (!StringUtils.isBlank(keyword)) {
             query.addConditions(Tables.EH_BUILDINGS.NAME.like("%" + keyword + "%"));
         }
-        query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
-        query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
+        if (null != namespaceId) {
+            query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
+        }
         query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
         query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
         query.addLimit(count);

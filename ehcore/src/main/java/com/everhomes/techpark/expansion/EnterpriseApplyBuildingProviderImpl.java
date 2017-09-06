@@ -49,8 +49,12 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
             query.addConditions(Tables.EH_LEASE_BUILDINGS.ID.gt(pageAnchor));
         }
 
-        query.addConditions(Tables.EH_LEASE_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_LEASE_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        if (null != namespaceId) {
+            query.addConditions(Tables.EH_LEASE_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
+        }
+        if (null != communityId) {
+            query.addConditions(Tables.EH_LEASE_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        }
         query.addConditions(Tables.EH_LEASE_BUILDINGS.STATUS.eq(LeaseBulidingStatus.ACTIVE.getCode()));
         query.addOrderBy(Tables.EH_LEASE_BUILDINGS.DEFAULT_ORDER.desc());
 

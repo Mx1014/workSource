@@ -27,7 +27,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
  SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-	VALUES ((@menu_scope_id := @menu_scope_id + 1), '40105', '', 'EhNamespaces', '1000000', '2');
+	SELECT (@menu_scope_id := @menu_scope_id + 1), '40105', '', 'EhNamespaces', owner_id, '2' from eh_web_menu_scopes where menu_id = 40100 and owner_type = 'EhNamespaces';
 
 UPDATE eh_enterprise_op_request_buildings lp JOIN eh_lease_buildings lb ON lb.building_id = lp.building_id set lp.building_id = lb.id;
 
@@ -41,7 +41,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text` ) VALUES ('ex
 
 DELETE from eh_lease_form_requests where source_type in ('EhLeasePromotions', 'EhBuildings');
 
-UPDATE eh_locale_strings set scope = 'expansion' where scope = 'expansion.applyType'
+UPDATE eh_locale_strings set scope = 'expansion' where scope = 'expansion.applyType';
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('expansion', '8', 'zh_CN', '无');
 DELETE from eh_locale_strings where scope = 'expansion' and code in ('1', '2', '3', '4');
 
