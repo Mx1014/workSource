@@ -16,7 +16,7 @@ import java.sql.Timestamp;
  * <li>createTime：创建时间</li>
  * <li>jobPosition: 岗位</li>
  * <li>detailId: 用户档案id</li>
- * <li>visibleFlag: 隐藏性: 0-显示 1-隐藏 参考{@link com.everhomes.rest.organization.VisibleFlag} </li>
+ * <li>visibleFlag: 隐私保护: 0-显示(不受保护) 1-隐藏(保护) 参考{@link com.everhomes.rest.organization.VisibleFlag} </li>
  * </ul>
  */
 public class OrganizationContactDTO {
