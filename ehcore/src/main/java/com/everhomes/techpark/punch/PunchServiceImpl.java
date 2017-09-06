@@ -1230,58 +1230,8 @@ public class PunchServiceImpl implements PunchService {
 		punchLog.setUserId(userId);
 		punchLog.setPunchTime(Timestamp.valueOf(punchTime));
 		Calendar punCalendar = Calendar.getInstance();
-
-
-		try {
-			punCalendar.setTime(datetimeSF.get().parse(punchTime));
-		} catch (ParseException e) {
-            LOGGER.error("parse punchTime error punch Time = " + punchTime,e);
-		}
-		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
-		if (null == pr  )
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
- 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
- 				"公司没有设置打卡规则");
-		//把当天的时分秒转换成Long型
-		Long punchTimeLong = punCalendar.get(Calendar.HOUR_OF_DAY)*3600*1000L; //hour
-		punchTimeLong += punCalendar.get(Calendar.MINUTE)*60*1000L; //min
-		punchTimeLong += punCalendar.get(Calendar.SECOND)*1000L;//second
-
-//				punchProvider.getPunchTimeRuleById(pr.getTimeRuleId());
-		PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr,punCalendar.getTime(),userId);
-
-		Calendar yesterday = Calendar.getInstance();
-		yesterday.setTime(punCalendar.getTime());
-		yesterday.add(Calendar.DATE, -1);
-		PunchTimeRule yesterdayPtr = getPunchTimeRuleByRuleIdAndDate(pr,yesterday.getTime(),userId);
-		//默认分界点是次日5点,如果timerule有设置就用设置的
-		Long splitTime = 86400000+5*3600*1000L;
-		Long yesterdaySplitTime = 86400000+ 5*3600*1000L;
-
-
-		if(null != ptr && null != ptr.getDaySplitTimeLong())
-			splitTime = ptr.getDaySplitTimeLong();
-		else if(null != ptr && null != ptr.getDaySplitTime())
-			splitTime = convertTimeToGMTMillisecond(ptr.getDaySplitTime());
-
-
-		if(null != yesterdayPtr && null != yesterdayPtr.getDaySplitTimeLong())
-			yesterdaySplitTime = yesterdayPtr.getDaySplitTimeLong();
-		else if(null != yesterdayPtr && null != yesterdayPtr.getDaySplitTime())
-			yesterdaySplitTime = convertTimeToGMTMillisecond(yesterdayPtr.getDaySplitTime());
-        //TODO: 用日期来处理
-		if ( punchTimeLong+86400000 < yesterdaySplitTime) {
-			//取前一天的ptr,如果周期分界点>打卡时间+86400000 则算前一天
-			punCalendar.setTime(yesterday.getTime());
-		}
-		else if (punchTimeLong.compareTo(splitTime)>0) {
-			//取今天的ptr,如果周期分界点<打卡时间 则算后一天
-			punCalendar.add(Calendar.DATE, 1);
-		}
-		//其它算当天
-
-		punchLog.setPunchDate(java.sql.Date.valueOf(dateSF.get().format(punCalendar
-				.getTime())));
+		punCalendar.setTime(punchLog.getPunchTime());
+		punchLog.setPunchDate(calculatePunchDate(punCalendar,cmd.getEnterpriseId(), userId));
 
 		PunchLogDTO punchType = getPunchType(userId,cmd.getEnterpriseId(),punchLog.getPunchTime(),punchLog.getPunchDate());
 		response.setClockStatus(punchType.getClockStatus());
@@ -1334,6 +1284,59 @@ public class PunchServiceImpl implements PunchService {
 
 		return response;
 	}
+	/** 当前时间点 应该算哪一天 */
+	private java.sql.Date calculatePunchDate(Calendar punCalendar, Long enterpriseId, Long userId) {
+
+//		try {
+//			punCalendar.setTime(datetimeSF.get().parse(punchTime));
+//		} catch (ParseException e) {
+//			LOGGER.error("parse punchTime error punch Time = " + punchTime,e);
+//		}
+		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, userId);
+		if (null == pr  )
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+					"公司没有设置打卡规则");
+		//把当天的时分秒转换成Long型
+		Long punchTimeLong = getTimeLong(punCalendar, null);
+
+//				punchProvider.getPunchTimeRuleById(pr.getTimeRuleId());
+		PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr,punCalendar.getTime(),userId);
+
+		Calendar yesterday = Calendar.getInstance();
+		yesterday.setTime(punCalendar.getTime());
+		yesterday.add(Calendar.DATE, -1);
+		PunchTimeRule yesterdayPtr = getPunchTimeRuleByRuleIdAndDate(pr,yesterday.getTime(),userId);
+		//默认分界点是次日5点,如果timerule有设置就用设置的
+		Long splitTime = 86400000+5*3600*1000L;
+		Long yesterdaySplitTime = 86400000+ 5*3600*1000L;
+
+
+		if(null != ptr && null != ptr.getDaySplitTimeLong())
+			splitTime = ptr.getDaySplitTimeLong();
+		else if(null != ptr && null != ptr.getDaySplitTime())
+			splitTime = convertTimeToGMTMillisecond(ptr.getDaySplitTime());
+
+
+		if(null != yesterdayPtr && null != yesterdayPtr.getDaySplitTimeLong())
+			yesterdaySplitTime = yesterdayPtr.getDaySplitTimeLong();
+		else if(null != yesterdayPtr && null != yesterdayPtr.getDaySplitTime())
+			yesterdaySplitTime = convertTimeToGMTMillisecond(yesterdayPtr.getDaySplitTime());
+		//TODO: 用日期来处理
+		if ( punchTimeLong+86400000 < yesterdaySplitTime) {
+			//取前一天的ptr,如果周期分界点>打卡时间+86400000 则算前一天
+			punCalendar.setTime(yesterday.getTime());
+		}
+		else if (punchTimeLong.compareTo(splitTime)>0) {
+			//取今天的ptr,如果周期分界点<打卡时间 则算后一天
+			punCalendar.add(Calendar.DATE, 1);
+		}
+		//其它算当天
+
+		return java.sql.Date.valueOf(dateSF.get().format(punCalendar
+				.getTime()));
+	}
+
 	private ClockCode verifyPunchClock(PunchClockCommand cmd) {
 		//获取打卡规则
 //		ClockCode code = ClockCode.SUCESS;
@@ -6561,8 +6564,10 @@ public class PunchServiceImpl implements PunchService {
 		if (null == cmd.getQueryTime()) {
 			cmd.setQueryTime(punchTime.getTime());
             if(null != pr) {
+				Calendar punCalendar = Calendar.getInstance();
+				punCalendar.setTime(punchTime);
                 PunchLogDTO punchLog = getPunchType(userId, cmd.getEnterpriseId(), punchTime,
-						new java.sql.Date(cmd.getQueryTime()));
+						calculatePunchDate(punCalendar,cmd.getEnterpriseId(),userId));
                 if (null != punchLog) {
                     if (null != punchLog.getExpiryTime()) {
                         punchLog.setExpiryTime(process24hourTimeToGMTTime(punchTime, punchLog.getExpiryTime()));
