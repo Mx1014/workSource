@@ -4548,7 +4548,8 @@ public class PunchServiceImpl implements PunchService {
 
 		if(null!= r.getWorkTime())
 			dto.setWorkTime( convertTimeToGMTMillisecond( r.getWorkTime()));
-
+		else
+			dto.setWorkTime(0L);
 		if(null!= r.getNoonLeaveTime())
 			dto.setNoonLeaveTime(  convertTimeToGMTMillisecond(r.getNoonLeaveTime()));
 
@@ -4570,11 +4571,11 @@ public class PunchServiceImpl implements PunchService {
                 dto.getPunchLogs().add(plDTO);
             }
         }
+		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId());
 
-		List<OrganizationMember> organizationMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId("/"+r.getEnterpriseId(),dto.getUserId() );
-		if (null != organizationMembers && organizationMembers.size() >0) {
-			dto.setUserName(organizationMembers.get(0).getContactName());
-			OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), organizationMembers.get(0).getOrganizationId());
+		if (null != member) {
+			dto.setUserName( member.getContactName());
+			OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());
 			if(null != dept){
 				dto.setDeptName(dept.getName());
 			}
@@ -6031,6 +6032,10 @@ public class PunchServiceImpl implements PunchService {
 	        pr.setRuleType(cmd.getRuleType());
 	        pr.setPunchOrganizationId( punchOrg.getId());
 			pr.setStatus(PunchRuleStatus.NEW.getCode());
+			pr.setCreatorUid(UserContext.current().getUser().getId());
+			pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			pr.setOperatorUid(UserContext.current().getUser().getId());
+			pr.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	        punchProvider.createPunchRule(pr);
 	        //打卡时间
 			savePunchTimeRule(ConvertHelper.convert(cmd, PunchGroupDTO.class),pr);
@@ -6312,6 +6317,16 @@ public class PunchServiceImpl implements PunchService {
 			return null;
 		PunchGroupDTO dto = ConvertHelper.convert(pr, PunchGroupDTO.class);
 		dto.setGroupName(r.getName());
+		if(null != pr.getOperateTime())
+			dto.setOperateTime(pr.getOperateTime().getTime());
+		if (null != pr.getOperatorUid()) {
+			Organization org = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
+			OrganizationMember member = findOrganizationMemberByOrgIdAndUId(pr.getOperatorUid(), org.getPath());
+			if (null != member) {
+				dto.setOperatorName(member.getContactName());
+			}
+			dto.setOperatorUid(pr.getOperatorUid());
+		}
 		dto.setId(pr.getPunchOrganizationId());
 		List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(r.getId());
 		dto.setEmployeeCount(employees == null ? 0: employees.size());
@@ -6546,6 +6561,8 @@ public class PunchServiceImpl implements PunchService {
         pr.setRuleType(cmd.getRuleType());
         pr.setPunchOrganizationId( punchOrg.getId());
 		pr.setStatus(PunchRuleStatus.MODIFYED.getCode());
+		pr.setOperatorUid(UserContext.current().getUser().getId());
+		pr.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		// 新增一条修改状态的规则
 		//TODO:删除
         punchProvider.updatePunchRule(pr);
