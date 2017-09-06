@@ -1,6 +1,3 @@
--- 用途:为每个owner生成一个唯一的id,作为暴露给支付系统的用户id,用户创建会员
--- ownerType为普通用户/企业/商家等,ownerId填对应的owner编号
--- id为支付系统的会员bizUserId,paymentUserId为支付系统User表的id
 DROP TABLE IF EXISTS `eh_payment_users`;
 CREATE TABLE `eh_payment_users` (
 	`id` BIGINT NOT NULL,
@@ -14,9 +11,6 @@ CREATE TABLE `eh_payment_users` (
 	UNIQUE KEY `i_payment_user_type_payment_user_id` (`payment_user_type`,`payment_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 用途:请求左邻支付系统接口,需要使用到如下4个字段
--- 支付分配的账号信息,accountId/systemId/appKey/secretKey
--- system_id园区系统填1,电商系统填2
 DROP TABLE IF EXISTS `eh_payment_accounts`;
 CREATE TABLE `eh_payment_accounts` (
 	`id` BIGINT NOT NULL,
@@ -29,9 +23,6 @@ CREATE TABLE `eh_payment_accounts` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 用途:根据业务需求,设置不同分账规则
--- 将id传给支付系统的createOrder接口的orderRemark1参数,后续根据业务需求查账单数据用到
--- 按namespaceId/owner/resource三个维度,满足不同业务需求设置不同分账规则
 DROP TABLE IF EXISTS `eh_payment_service_configs`;
 CREATE TABLE `eh_payment_service_configs` (
 	`id` BIGINT NOT NULL,
@@ -50,9 +41,6 @@ CREATE TABLE `eh_payment_service_configs` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 用途:记录业务订单/业务类型/支付单关联关系,便于支付成功回调接口通过支付单号找到业务订单及后续特定业务订单处理
--- 记录这4个参数值,用于重新支付:order_commit_url,order_commit_token,order_commit_nonce,order_commit_timestamp
--- 记录微信公众号支付,扫码支付等支付信息: pay_info
 DROP TABLE IF EXISTS `eh_payment_order_records`;
 CREATE TABLE `eh_payment_order_records` (
 	`id` BIGINT NOT NULL,
