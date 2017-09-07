@@ -1367,3 +1367,8 @@ INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `fi
 INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@item_scopes_id := @item_scopes_id + 1), '999974', 'enterprise_customer', '6', '194', '中介', '3', '2', '1', '2017-08-18 02:24:42', NULL, NULL);
 INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@item_scopes_id := @item_scopes_id + 1), '999974', 'enterprise_customer', '6', '195', '网站', '4', '2', '1', '2017-08-18 02:24:42', NULL, NULL);
 INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@item_scopes_id := @item_scopes_id + 1), '999974', 'enterprise_customer', '6', '196', '活动', '5', '2', '1', '2017-08-18 02:24:42', NULL, NULL);
+
+
+-- 左邻后台管理的配置项
+set @domain_id = IFNULL((SELECT MAX(id) FROM `eh_domains`), 1);
+insert into `eh_domains` (`id`, `namespace_id`, `portal_type`, `portal_id`, `domain`, `create_uid`, `create_time`) values((@domain_id := @domain_id + 1),'0','EhZuolinAdmins',0, 'opv2.zuolin.com', 0, now());
