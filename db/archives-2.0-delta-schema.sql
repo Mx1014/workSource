@@ -29,17 +29,6 @@ CREATE TABLE `eh_archives_dismiss_employees` (
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
-/*DROP TABLE IF EXISTS `eh_archives_organization_places`;
-CREATE TABLE `eh_archives_organization_places` (
-	`id` BIGINT NOT NULL COMMENT 'id of the record',
-	`namespace_id` INTEGER NOT NULL DEFAULT 0,
-	`organization_id` BIGINT NOT NULL COMMENT 'organizationId',
-	`detail_id` BIGINT NOT NULL COMMENT 'the id of member in eh_organization_member_details',
-	`update_time` DATETIME COMMENT 'the time of data creating',
-	`operator_uid` BIGINT COMMENT 'the id of the operator',
-	PRIMARY KEY (`id`)
-) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;*/
-
 DROP TABLE IF EXISTS `eh_general_form_groups`;
 CREATE TABLE `eh_general_form_groups` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -77,6 +66,7 @@ CREATE TABLE `eh_archives_working_places` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
+-- eh_organization_member_details 表的字段添加
 ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE;
 ALTER TABLE eh_organization_member_details ADD COLUMN procreative DATE COMMENT '生育状况';
 ALTER TABLE eh_organization_member_details ADD COLUMN ethnicity VARCHAR(128) COMMENT '民族';
@@ -106,3 +96,10 @@ ALTER TABLE eh_organization_member_details ADD COLUMN entry_form TEXT COMMENT '�
 ALTER TABLE eh_organization_member_details ADD COLUMN graduation_certificate TEXT COMMENT '毕业证书';
 ALTER TABLE eh_organization_member_details ADD COLUMN degree_certificate TEXT COMMENT '学位证书';
 ALTER TABLE eh_organization_member_details ADD COLUMN contract_certificate TEXT COMMENT '劳动合同';
+
+-- 菜单的修改与添加
+INSERT INTO `ehcore`.`eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES (50450, '员工档案', '50000', NULL, 'react:/employee-record/employee-list/1', '0', '2', '/50000/50450', 'park', '539', NULL, '2', NULL, 'module');
+SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` VALUES(@scope_id := @scope_id + 1,50450,'','EhNamespaces',1,2);
+
+UPDATE `ehcore`.`eh_web_menus` SET `data_type`='react:/address-book/address-list', `sort_num`='538' WHERE `name` like '%人员管理%';

@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>organizationId: 公司 id</li>
+ * <li>organizationId: 公司 id(必须得传)</li>
  * <li>contactName: 成员姓名</li>
  * <li>contactEnName: 成员英文名</li>
  * <li>gender: 成员性别</li>
