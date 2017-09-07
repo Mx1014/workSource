@@ -254,7 +254,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         orgCommand.setOrganizationId(cmd.getOrganizationId());
         orgCommand.setPageAnchor(cmd.getPageAnchor());
         orgCommand.setPageSize(cmd.getPageSize());
-        if (detailIds != null)
+        if (detailIds!=null && detailIds.size() >0)
             orgCommand.setExceptIds(detailIds);
         if (!StringUtils.isEmpty(cmd.getKeywords()))
             orgCommand.setKeywords(cmd.getKeywords());
