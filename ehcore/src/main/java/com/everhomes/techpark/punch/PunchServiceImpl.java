@@ -4182,7 +4182,8 @@ public class PunchServiceImpl implements PunchService {
 		cmd.setPageSize(Integer.MAX_VALUE-1);
 		ListPunchDetailsResponse resp = listPunchDetails(cmd);
 
-		String filePath = "PunchDetails" + System.currentTimeMillis() + ".xlsx";
+		String filePath = "(" + dateSF.get().format(new Date(cmd.getStartDay())) + "-"
+				+ dateSF.get().format(new Date(cmd.getEndDay())) + ").xlsx";
 		//新建了一个文件
 
 		Workbook wb = createPunchDetailsBook(resp.getPunchDayDetails(),cmd);
@@ -4647,7 +4648,8 @@ public class PunchServiceImpl implements PunchService {
 //		File file = new File(filePath);
 //		if(!file.exists())
 //			file.mkdirs();
-		String fileName =  "PunchStatistics"+System.currentTimeMillis()+".xlsx";
+		String fileName =  "(" + dateSF.get().format(new Date(cmd.getStartDay())) + "-"
+				+ dateSF.get().format(new Date(cmd.getEndDay())) + ").xlsx";
 		//新建了一个文件
 
 		Workbook wb = createPunchStatisticsBook(resp.getPunchCountList());
