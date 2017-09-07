@@ -1201,7 +1201,7 @@ INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `modu
 VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 1000000, 41500, '用户行为统计', 'EhNamespaces', 1000000, NULL, 2);
 
 
--- added by R 20170906. 能量加油站icon的添加
+-- added by R 20170906. 能量加油站美年大健康的专属添加
 SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `service_categry_id`)
-    VALUES ((@item_id := @item_id + 1), 1000000, '0', '4', '1025011', '/home', 'Bizs', '能量加油站', '能量加油站', 'cs://1/image/aW1hZ2UvTVRwbU4yRXhNek0xTldVek1EaGhPV1ZrT0RVM1pEUmtPR1kzWXpKbU5qUXlOZw', '1', '1', 13,CONCAT('{"url":https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1999999&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%23%2fstore%2fdetails%2f15006168178665087805%3F_k%3Dzlbiz#sign_suffix'), 4, '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '');
+    VALUES ((@item_id := @item_id + 1), 1000000, '0', '4', '1035937', '/home', 'Bizs', '能量加油站', '能量加油站', 'cs://1/image/aW1hZ2UvTVRwbU4yRXhNek0xTldVek1EaGhPV1ZrT0RVM1pEUmtPR1kzWXpKbU5qUXlOZw', '1', '1', 13,'{"url":https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1999999&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%23%2fstore%2fdetails%2f15006168178665087805%3F_k%3Dzlbiz#sign_suffix}', 8, '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '');
