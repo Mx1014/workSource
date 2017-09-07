@@ -4182,7 +4182,7 @@ public class PunchServiceImpl implements PunchService {
 		cmd.setPageSize(Integer.MAX_VALUE-1);
 		ListPunchDetailsResponse resp = listPunchDetails(cmd);
 
-		String filePath = "(" + dateSF.get().format(new Date(cmd.getStartDay())) + "-"
+		String filePath = "(" + dateSF.get().format(new Date(cmd.getStartDay())) + " ~ "
 				+ dateSF.get().format(new Date(cmd.getEndDay())) + ").xlsx";
 		//新建了一个文件
 
@@ -4648,7 +4648,7 @@ public class PunchServiceImpl implements PunchService {
 //		File file = new File(filePath);
 //		if(!file.exists())
 //			file.mkdirs();
-		String fileName =  "(" + dateSF.get().format(new Date(cmd.getStartDay())) + "-"
+		String fileName =  "(" + dateSF.get().format(new Date(cmd.getStartDay())) + " ~ "
 				+ dateSF.get().format(new Date(cmd.getEndDay())) + ").xlsx";
 		//新建了一个文件
 
