@@ -227,7 +227,7 @@ public class ContractProviderImpl implements ContractProvider {
 		Result<Record> result = getReadOnlyContext().select()
 				.from(Tables.EH_CONTRACTS)
 				.where(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(customerId))
-				.and(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId))
+//				.and(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId))
 				.and(Tables.EH_CONTRACTS.CUSTOMER_TYPE.eq(customerType))
 				.and(Tables.EH_CONTRACTS.STATUS.ne(ContractStatus.INACTIVE.getCode()))
 				.fetch();

@@ -1340,7 +1340,8 @@ public class CommunityProviderImpl implements CommunityProvider {
 			cond = cond.and(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.RESOURCE_CATEGRY_ID.eq(categoryId));
 		}
 		if(!StringUtils.isEmpty(keyword)){
-			cond = cond.and(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%')));
+			cond = cond.and(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%'))
+            .or(Tables.EH_COMMUNITIES.ADDRESS.like('%'+keyword+'%')));
 		}
 		query.orderBy(Tables.EH_COMMUNITIES.ID.asc());
 		if(null != pageSize)

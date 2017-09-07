@@ -32,6 +32,8 @@ import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.ResultHolder;
@@ -45,6 +47,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.family.*;
 import com.everhomes.rest.forum.*;
@@ -63,6 +66,7 @@ import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.OrganizationOwnerCarSearcher;
 import com.everhomes.search.PMOwnerSearcher;
 import com.everhomes.server.schema.Tables;
@@ -233,6 +237,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Autowired
 	private FieldProvider fieldProvider;
+
+	@Autowired
+	private ContractSearcher contractSearcher;
+
+	@Autowired
+	private ContractProvider contractProvider;
     
     private String queueName = "property-mgr-push";
 
@@ -4589,7 +4599,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     public OrganizationOwnerDTO updateOrganizationOwner(UpdateOrganizationOwnerCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
         Tuple<CommunityPmOwner, Boolean> tuple =
                 coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ORGANIZATION_OWNER.getCode() + cmd.getId()).enter(() -> {
             CommunityPmOwner owner = propertyMgrProvider.findPropOwnerById(cmd.getId());
@@ -4599,6 +4608,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                         "Organization owner are not exist, id = %s", cmd.getId());
             }
             boolean needUpdateDoc = false;
+			Boolean flag = false;
+			if(cmd.getContactName() != null && !owner.getContactName().equals(cmd.getContactName())) {
+				flag = true;
+			}
             if (cmd.getContactName() != null) {
                 owner.setContactName(cmd.getContactName());
                 needUpdateDoc = true;
@@ -4627,8 +4640,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             if (needUpdateDoc) {
                 pmOwnerSearcher.feedDoc(owner);
             }
+			//修改了客户名称则要同步修改合同里面的客户名称
+			if(flag) {
+				List<Contract> contracts = contractProvider.listContractByCustomerId(null, owner.getId(), CustomerType.INDIVIDUAL.getCode());
+				if(contracts != null && contracts.size() > 0) {
+					contracts.forEach(contract -> {
+						contract.setCustomerName(owner.getContactName());
+						contractProvider.updateContract(contract);
+						contractSearcher.feedDoc(contract);
+					});
+				}
+			}
             return owner;
         });
+
         return convertOwnerToDTO(tuple.first());
     }
 
