@@ -60,3 +60,4 @@ pom.properties
 
 *.xml.bak
 *rebel.xml
+rebel-*.xml

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.address;
 
+import com.everhomes.asset.AddressIdAndName;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.community.*;
@@ -1678,6 +1679,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 	}
 
     @Override
+    public List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName) {
+        return addressProvider.findAddressByPossibleName( currentNamespaceId,  ownerId,  buildingName,  apartmentName);
+    }
+
+    @Override
+    public List<GetApartmentNameByBuildingNameDTO> getApartmentNameByBuildingName(GetApartmentNameByBuildingNameCommand cmd) {
+        return addressProvider.getApartmentNameByBuildingName(cmd.getBuildingName(), cmd.getCommunityId(), UserContext.getCurrentNamespaceId());
+    }
+    @Override
     public ListNearbyMixCommunitiesCommandV2Response listNearbyMixCommunitiesV2(ListNearbyMixCommunitiesCommand cmd) {
         ListNearbyMixCommunitiesCommandV2Response resp = new ListNearbyMixCommunitiesCommandV2Response();
 
@@ -1855,11 +1865,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setApartmentName(data.getApartmentName());
             address.setAreaSize(areaSize);
             address.setAddress(building.getName() + "-" + data.getApartmentName());
+            address.setNamespaceAddressType(data.getNamespaceAddressType());
+            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setNamespaceId(community.getNamespaceId());
         	addressProvider.createAddress(address);
 		}else {
 			address.setAreaSize(areaSize);
+            address.setNamespaceAddressType(data.getNamespaceAddressType());
+            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             addressProvider.updateAddress(address);
 		}
@@ -1878,6 +1892,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				data.setApartmentName(trim(r.getB()));
 				data.setStatus(trim(r.getC()));
 				data.setAreaSize(trim(r.getD()));
+                //加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
+                data.setNamespaceAddressType(trim(r.getE()));
+                data.setNamespaceAddressToken(trim(r.getF()));
 				list.add(data);
 			}
 		}

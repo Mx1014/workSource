@@ -1,11 +1,8 @@
 package com.everhomes.asset;
 
-import com.everhomes.rest.asset.AssetBillStatDTO;
-import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
-import com.everhomes.rest.asset.GetAssetBillStatCommand;
-import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
+import com.everhomes.rest.asset.*;
 
-import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Created by ying.xiong on 2017/4/11.
@@ -21,4 +18,15 @@ public interface AssetVendorHandler {
 
     AssetBillStatDTO getAssetBillStat(String tenantType, Long tenantId, Long addressId);
 
+    List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType,String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse response);
+
+    List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize);
+
+    List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds);
+
+    ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOnlyOwedBill,String contractId);
+
+    ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
+
+    ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId);
 }

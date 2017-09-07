@@ -970,9 +970,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 						LOGGER.debug("equipment standard maps after remove: {}", maps);
 						if(maps.size() > 0) {
 							maps.forEach(map -> {
-								map.setStatus(Status.INACTIVE.getCode());
-								map.setDeleterUid(user.getId());
-								map.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+								map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
 								equipmentProvider.updateEquipmentStandardMap(map);
 								equipmentStandardMapSearcher.feedDoc(map);
 							});
@@ -989,9 +987,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
 			for(EquipmentStandardMap map : maps) {
 				if(!updateStandardIds.contains(map.getStandardId())) {
-					map.setStatus(Status.INACTIVE.getCode());
-					map.setDeleterUid(user.getId());
-					map.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					map.setReviewStatus(EquipmentReviewStatus.INACTIVE.getCode());
 					equipmentProvider.updateEquipmentStandardMap(map);
 					equipmentStandardMapSearcher.feedDoc(map);
 

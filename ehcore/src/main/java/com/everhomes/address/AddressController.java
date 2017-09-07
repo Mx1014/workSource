@@ -7,7 +7,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.address.*;
+
 import com.everhomes.rest.enterprise.SearchEnterpriseCommunityCommand;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -330,6 +332,20 @@ public class AddressController extends ControllerBase {
             resp.setResponseObject(result);
         }
 
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /address/getApartmentNameByBuildingName</b>
+     * <p>根据域名，小区id，楼栋名查询门牌名和地址id的集合</p>
+     */
+    @RequestMapping("getApartmentNameByBuildingName")
+    @RestReturn(value = GetApartmentNameByBuildingNameDTO.class,collection = true)
+    public RestResponse getApartmentNameByBuildingName(GetApartmentNameByBuildingNameCommand cmd){
+        List<GetApartmentNameByBuildingNameDTO> result = this.addressService.getApartmentNameByBuildingName(cmd);
+        RestResponse resp = new RestResponse(result);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;

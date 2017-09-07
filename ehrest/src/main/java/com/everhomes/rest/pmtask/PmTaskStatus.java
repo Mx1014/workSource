@@ -12,7 +12,7 @@ package com.everhomes.rest.pmtask;
  * </ul>
  */
 public enum PmTaskStatus {
-	INACTIVE((byte)0), UNPROCESSED((byte)1), PROCESSING((byte)2), PROCESSED((byte)3), CLOSED((byte)4), REVISITED((byte)5);
+	INACTIVE((byte)6), UNPROCESSED((byte)1), PROCESSING((byte)2), PROCESSED((byte)3), CLOSED((byte)4), REVISITED((byte)5);
     
     private byte code;
     private PmTaskStatus(byte code) {

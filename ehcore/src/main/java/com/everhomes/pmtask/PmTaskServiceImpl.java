@@ -2573,7 +2573,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Byte state = cmd.getStateId();
 		dbProvider.execute((TransactionStatus status) -> {
 
-			task.setStatus(state > PmTaskStatus.PROCESSED.getCode() ? PmTaskStatus.PROCESSED.getCode() : state);
+			task.setStatus(state > PmTaskStatus.PROCESSED.getCode() &&  state<PmTaskStatus.INACTIVE.getCode()
+					? PmTaskStatus.PROCESSED.getCode(): state );
 			pmTaskProvider.updateTask(task);
 			dto.setStatus(task.getStatus());
 
@@ -2581,7 +2582,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
 
 			if (FlowCaseStatus.INVALID.getCode() != flowCase.getStatus()) {
-				Byte flowCaseStatus = state >= PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
+				Byte flowCaseStatus = state >= PmTaskStatus.PROCESSED.getCode() &&  state<PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.FINISHED.getCode() :
 						(state == PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.ABSORTED.getCode() :
 								FlowCaseStatus.PROCESS.getCode());
 
