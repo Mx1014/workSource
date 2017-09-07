@@ -147,7 +147,7 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
                 dto = generalFormService.getTemplateByFormId(cmd2);
                 fieldDTOs.addAll(dto.getFormFields());
             }catch (Exception e) {
-                LOGGER.error("get Template By SourceId, cmd={}", cmd, e);
+                LOGGER.error("get Template By SourceId failed, cmd={}", cmd);
                 dto = ConvertHelper.convert(form, GeneralFormDTO.class);
             }
 
