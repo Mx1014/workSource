@@ -36,4 +36,6 @@ public interface RegionProvider {
     void updateRegionCode(RegionCodes regionCode);
     List<RegionCodes> listRegionCodes(String name, Integer code);
     RegionCodes findRegionCodeById(Long id);
+
+    Region findRegionByName(Integer namespaceId, String name);
 }

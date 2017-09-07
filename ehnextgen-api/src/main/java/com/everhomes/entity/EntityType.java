@@ -60,6 +60,8 @@ public enum EntityType {
     ALL("EhAll"),
     LEASE_PROMOTION(EhLeasePromotions.class.getSimpleName()),
     WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
+    CONTRACT(EhContracts.class.getSimpleName()),
+    ENTERPRISE_CUSTOMER(EhEnterpriseCustomers.class.getSimpleName()),
     PORTAL_ITEM(EhPortalItems.class.getSimpleName()),
     PORTAL_ITEM_CATEGORY(EhPortalItemCategories.class.getSimpleName()),
     PORTAL_LAYOUT(EhPortalLayouts.class.getSimpleName()),
@@ -72,6 +74,7 @@ public enum EntityType {
 	TALENT_REQUEST(EhTalentRequests.class.getSimpleName()),
     CHILD_PROJECT("child_project"),
     LEASE_BUILDING(EhLeaseBuildings.class.getSimpleName());
+
 
     private String code;
     

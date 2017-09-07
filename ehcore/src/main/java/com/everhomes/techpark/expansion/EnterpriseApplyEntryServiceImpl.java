@@ -283,13 +283,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			//虚位以待处的申请
 			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(dto.getSourceId());
 
-			dto.setApartmentName(leasePromotion.getApartmentName());
+			if (null != leasePromotion) {
+				dto.setApartmentName(leasePromotion.getApartmentName());
 
-			//当招租信息的buildingId是0的时候，表示是手填的楼栋信息，返回手填的楼栋信息
-			if(leasePromotion.getBuildingId() == 0L){
-				LeaseBuilding leaseBuilding = new LeaseBuilding();
-				leaseBuilding.setName(leasePromotion.getBuildingName());
-				buildings.add(processBuildingDTO(leaseBuilding));
+				//当招租信息的buildingId是0的时候，表示是手填的楼栋信息，返回手填的楼栋信息
+				if(leasePromotion.getBuildingId() == 0L){
+					LeaseBuilding leaseBuilding = new LeaseBuilding();
+					leaseBuilding.setName(leasePromotion.getBuildingName());
+					buildings.add(processBuildingDTO(leaseBuilding));
+				}
 			}
 
 			GetGeneralFormValuesCommand cmd2 = new GetGeneralFormValuesCommand();
@@ -306,6 +308,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			Address address = addressProvider.findAddressById(enterpriseOpRequest.getAddressId());
 			if (null != address){
 				dto.setApartmentName(address.getApartmentName());
+				dto.setBuildingName(address.getBuildingName());
 			}
 		}
 

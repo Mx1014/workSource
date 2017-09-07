@@ -3244,3 +3244,6 @@ insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 update eh_launch_pad_items set scope_code = 5 where namespace_id = 1 and scope_id = 1023080;
 
+-- added by R 20170907. 增加管理员菜单
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),604000,'', 'EhNamespaces', 1,2);
