@@ -234,9 +234,9 @@ public class AssetServiceImpl implements AssetService {
         List<ListBillsDTO> list = handler.listBills(cmd.getCommunityIdentifier(),cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
         if(UserContext.getCurrentNamespaceId()!=999971){
             if(list.size() <= cmd.getPageSize()){
-                response.setNextPageAnchor(null);
+//                response.setNextPageAnchor(null);
             }else{
-//                response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+                response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
                 list.remove(list.size()-1);
             }
         }
@@ -259,9 +259,9 @@ public class AssetServiceImpl implements AssetService {
         int pageOffSet = cmd.getPageAnchor().intValue();
         List<BillDTO> billDTOS = handler.listBillItems(cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         if(billDTOS.size() <= cmd.getPageSize()) {
-            response.setNextPageAnchor(null);
+//            response.setNextPageAnchor(null);
         }else{
-//            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
             billDTOS.remove(billDTOS.size()-1);
         }
         response.setBillDTOS(billDTOS);
@@ -541,9 +541,9 @@ public class AssetServiceImpl implements AssetService {
             }
         }
         if(list.size() <= cmd.getPageSize()) {
-            response.setNextPageAnchor(0l);
+//            response.setNextPageAnchor(0l);
         }else{
-//            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
             list.remove(list.size()-1);
         }
         response.setBillDTOS(list);
@@ -977,9 +977,9 @@ public class AssetServiceImpl implements AssetService {
         }
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize());
         if(dtos.size() <= cmd.getPageSize()){
-            response.setNextPageOffset(cmd.getPageOffset());
+//            response.setNextPageOffset(cmd.getPageOffset());
         }else{
-//            response.setNextPageOffset(cmd.getPageOffset()+cmd.getPageSize());
+            response.setNextPageOffset(cmd.getPageOffset()+cmd.getPageSize());
             dtos.remove(dtos.size()-1);
         }
         response.setList(dtos);
