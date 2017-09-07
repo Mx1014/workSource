@@ -3,9 +3,12 @@ package com.everhomes.customer;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.openapi.ZJGKOpenServiceImpl;
 import com.everhomes.organization.ExecuteImportTaskCallback;
 import com.everhomes.organization.ImportFileService;
@@ -13,6 +16,8 @@ import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
@@ -20,6 +25,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.ModuleName;
 import com.everhomes.rest.warehouse.ImportWarehouseMaterialDataDTO;
+import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -79,6 +85,12 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private OrganizationService organizationService;
 
+    @Autowired
+    private ContractSearcher contractSearcher;
+
+    @Autowired
+    private ContractProvider contractProvider;
+
     @Override
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
@@ -131,6 +143,7 @@ public class CustomerServiceImpl implements CustomerService {
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         updateCustomer.setNamespaceId(customer.getNamespaceId());
+        updateCustomer.setCommunityId(customer.getCommunityId());
         updateCustomer.setOrganizationId(customer.getOrganizationId());
         updateCustomer.setCreateTime(customer.getCreateTime());
         updateCustomer.setCreatorUid(customer.getCreatorUid());
@@ -143,19 +156,31 @@ public class CustomerServiceImpl implements CustomerService {
 
         if(customer.getOrganizationId() != null) {
             UpdateEnterpriseCommand command = new UpdateEnterpriseCommand();
-            command.setId(customer.getOrganizationId());
-            command.setName(customer.getName());
-            command.setDisplayName(customer.getNickName());
-            command.setNamespaceId(customer.getNamespaceId());
-            command.setAvatar(customer.getCorpLogoUri());
-            command.setDescription(customer.getCorpDescription());
-            command.setCommunityId(customer.getCommunityId());
-            command.setMemberCount(customer.getCorpEmployeeAmount() == null ? 0 : customer.getCorpEmployeeAmount() + 0L);
-            command.setContactor(customer.getContactName());
-            command.setContactsPhone(customer.getContactPhone());
-            command.setEntries(customer.getContactMobile());
-            command.setAddress(customer.getContactAddress());
+            command.setId(updateCustomer.getOrganizationId());
+            command.setName(updateCustomer.getName());
+            command.setDisplayName(updateCustomer.getNickName());
+            command.setNamespaceId(updateCustomer.getNamespaceId());
+            command.setAvatar(updateCustomer.getCorpLogoUri());
+            command.setDescription(updateCustomer.getCorpDescription());
+            command.setCommunityId(updateCustomer.getCommunityId());
+            command.setMemberCount(updateCustomer.getCorpEmployeeAmount() == null ? 0 : updateCustomer.getCorpEmployeeAmount() + 0L);
+            command.setContactor(updateCustomer.getContactName());
+            command.setContactsPhone(updateCustomer.getContactPhone());
+            command.setEntries(updateCustomer.getContactMobile());
+            command.setAddress(updateCustomer.getContactAddress());
             organizationService.updateEnterprise(command, false);
+        }
+
+        //修改了客户名称则要同步修改合同里面的客户名称
+        if(!customer.getName().equals(cmd.getName())) {
+            List<Contract> contracts = contractProvider.listContractByCustomerId(updateCustomer.getCommunityId(), updateCustomer.getId(), CustomerType.ENTERPRISE.getCode());
+            if(contracts != null && contracts.size() > 0) {
+                contracts.forEach(contract -> {
+                    contract.setCustomerName(updateCustomer.getName());
+                    contractProvider.updateContract(contract);
+                    contractSearcher.feedDoc(contract);
+                });
+            }
         }
         return convertToDTO(customer);
     }
