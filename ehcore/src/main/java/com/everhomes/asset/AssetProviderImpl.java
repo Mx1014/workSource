@@ -1532,6 +1532,7 @@ public class AssetProviderImpl implements AssetProvider {
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
             List<Long> billIds = context.select(t.ID)
+                    .from(t)
                     .where(t.CONTRACT_ID.eq(contractId))
                     .and(t.SWITCH.eq((byte) 3))
                     .fetch(t.ID);
