@@ -72,7 +72,7 @@ CREATE TABLE `eh_payment_order_records` (
 DROP TABLE IF EXISTS `eh_payment_types`;
 CREATE TABLE `eh_payment_types` (
 	`id` BIGINT NOT NULL,
-	`order_type` VARCHAR(64) NOT NULL COMMENT '服务类型,填parking/rentalOrder等',
+	`order_type` VARCHAR(64) DEFAULT NULL COMMENT '服务类型,填parking/rentalOrder等',
 	`namespace_id` INTEGER DEFAULT NULL,
 	`owner_type` VARCHAR(64)DEFAULT NULL,
 	`owner_id` BIGINT DEFAULT NULL,
