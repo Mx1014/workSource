@@ -5372,7 +5372,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }).collect(Collectors.toList());
         List<OrganizationMember> origins = organizationProvider.listOrganizationMemberByPath(enterprise.getPath(), groupTypes, tokens);
 
-        Map<String, OrganizationMemberDTO> target_map = new HashMap();
+        Map<String, OrganizationMemberDTO> target_map = new HashMap<>();
 
         origins.forEach(r -> {
             OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
@@ -5437,9 +5437,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
         }).collect(Collectors.toList());
 
+        Collections.sort(members, new Comparator<OrganizationMemberDTO>() {
+            @Override
+            public int compare(OrganizationMemberDTO o1, OrganizationMemberDTO o2) {
+                return o2.getDetailId().compareTo(o1.getDetailId());
+            }
+        });
 
         response.setMembers(members);
-        Long endTime = System.currentTimeMillis();
         return response;
     }
 
