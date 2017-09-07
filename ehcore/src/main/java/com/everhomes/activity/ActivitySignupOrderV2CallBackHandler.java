@@ -56,8 +56,7 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode() + roster.getId()).enter(()-> {
 			roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
 			roster.setPayTime(new Timestamp(Long.valueOf(cmd.getPayDateTime())));
-			//TODO check Long to BigDecimal
-			roster.setPayAmount(new BigDecimal(cmd.getAmount().doubleValue()/100));
+			roster.setPayAmount(new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100)));
 			roster.setVendorType(String.valueOf(cmd.getPaymentType()));
 			roster.setOrderType(cmd.getOrderType());
 			activityProvider.updateRoster(roster);
@@ -88,7 +87,7 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 	
 	
 	private void checkPayAmount(Long payAmount, BigDecimal chargePrice) {
-		if(payAmount == null || chargePrice == null || payAmount.longValue() != chargePrice.longValue() * 100){
+		if(payAmount == null || chargePrice == null || payAmount.longValue() != chargePrice.multiply(new BigDecimal(100)).longValue()){
 			LOGGER.error("payAmount and chargePrice is not equal.");
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_PAYAMOUNT_ERROR,
 					"payAmount and chargePrice is not equal.");

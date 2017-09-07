@@ -727,8 +727,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 		preOrderMessage.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
 		preOrderMessage.setOrderId(roster.getOrderNo());
-		//TODO bigDecimal  to long
-		preOrderMessage.setAmount(activity.getChargePrice().longValue() * 100);
+		preOrderMessage.setAmount(activity.getChargePrice().multiply(new BigDecimal(100)).longValue());
 
 		preOrderMessage.setPayerId(roster.getUid());
 		preOrderMessage.setNamespaceId(activity.getNamespaceId());
