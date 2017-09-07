@@ -963,18 +963,21 @@ public class EquipmentServiceImpl implements EquipmentService {
 							updateStandardIds.add(map.getStandardId());
 						}
 					}
-					else if(maps.size() > 1) {
+					else if(maps.size() > 0) {
 						//删除设备多次重复绑定的标准,仅保留最早绑的那个
 						updateStandardIds.add(maps.get(0).getStandardId());
 						maps.remove(0);
 						LOGGER.debug("equipment standard maps after remove: {}", maps);
-						maps.forEach(map -> {
-							map.setStatus(Status.INACTIVE.getCode());
-							map.setDeleterUid(user.getId());
-							map.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-							equipmentProvider.updateEquipmentStandardMap(map);
-							equipmentStandardMapSearcher.feedDoc(map);
-						});
+						if(maps.size() > 0) {
+							maps.forEach(map -> {
+								map.setStatus(Status.INACTIVE.getCode());
+								map.setDeleterUid(user.getId());
+								map.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+								equipmentProvider.updateEquipmentStandardMap(map);
+								equipmentStandardMapSearcher.feedDoc(map);
+							});
+						}
+
 					}
 
 				}
