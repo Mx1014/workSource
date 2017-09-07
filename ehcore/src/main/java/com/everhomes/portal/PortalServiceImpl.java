@@ -1563,6 +1563,7 @@ public class PortalServiceImpl implements PortalService {
 						actionData.setItemLocation(portalItem.getItemLocation());
 						actionData.setItemGroup(portalItem.getGroupName());
 						item.setActionData(StringHelper.toJsonString(actionData));
+						item.setDeleteFlag(DeleteFlagType.NO.getCode());
 					}
 					launchPadProvider.createLaunchPadItem(item);
 
