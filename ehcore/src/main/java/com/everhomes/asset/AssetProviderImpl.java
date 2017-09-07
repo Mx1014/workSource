@@ -482,10 +482,10 @@ public class AssetProviderImpl implements AssetProvider {
         if(status!=null && status == 1){
             query.addOrderBy(t.STATUS);
         }
-        if(dateStrBegin!=null){
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)){
             query.addConditions(t.DATE_STR.greaterOrEqual(dateStrBegin));
         }
-        if(dateStrEnd!=null){
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)){
             query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
         }
         query.addOrderBy(t.DATE_STR.desc());
