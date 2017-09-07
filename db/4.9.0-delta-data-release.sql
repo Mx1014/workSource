@@ -1371,3 +1371,10 @@ INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `fi
 -- 左邻后台管理的配置项 by sfyan 20170907
 set @domain_id = IFNULL((SELECT MAX(id) FROM `eh_domains`), 1);
 insert into `eh_domains` (`id`, `namespace_id`, `portal_type`, `portal_id`, `domain`, `create_uid`, `create_time`) values((@domain_id := @domain_id + 1),'0','EhZuolinAdmins',0, 'opv2.zuolin.com', 0, now());
+
+-- 去掉银行账号和税务信息的tab页 by xiongying20170907
+delete from eh_var_field_group_scopes where group_id in(2,3);
+
+-- 科技园增加创客空间 by R 20170907
+SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
+INSERT eh_web_menu_scopes VALUES(@scope_id := @scope_id+1, '40600', '', 'EhNamespaces', '1000000',2);
