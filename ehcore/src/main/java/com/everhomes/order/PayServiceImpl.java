@@ -28,7 +28,7 @@ public class PayServiceImpl implements PayService {
             preOrderCallBack = ConvertHelper.convert(orderRecord,PreOrderCallBack.class);
             preOrderCallBack.setAmount(message.getAmount());
             preOrderCallBack.setExtendInfo(message.getExtendInfo());
-            preOrderCallBack.setPayMethod(message.get);
+//            preOrderCallBack.setPayMethod(message.get);
         }
         //查account表，获取account信息
         //查收款方，如果收款方是会员，则continue；否则，交易不予进行

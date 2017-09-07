@@ -78,11 +78,11 @@ public class PreOrderCallBack {
         this.extendInfo = extendInfo;
     }
 
-    public PayMethod getPayMethod() {
+    public List<PayMethod> getPayMethod() {
         return payMethod;
     }
 
-    public void setPayMethod(PayMethod payMethod) {
+    public void setPayMethod(List<PayMethod> payMethod) {
         this.payMethod = payMethod;
     }
 }
