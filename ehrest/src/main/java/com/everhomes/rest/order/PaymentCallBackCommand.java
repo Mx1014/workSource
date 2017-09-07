@@ -1,22 +1,16 @@
 //@formatter:off
-package com.everhomes.order;
-
-import com.everhomes.rest.order.PaymentParamsDTO;
+package com.everhomes.rest.order;
 
 import java.util.Map;
 
 /**
- * Created by Wentian Wang on 2017/9/6.
+ * Created by Wentian Wang on 2017/9/7.
  */
 
-/**
- *<ul>
- * <li>paymentStatus:支付状态，详见{@link com.everhomes.order.OrderPaymentStatus}</li>
- *</ul>
- */
-public class PaymentMessage {
+public class PaymentCallBackCommand {
 
     private Long orderId;
+    private String orderType;
     private String bizOrderNum;
     private Integer paymentType;
     private PaymentParamsDTO paymentParams;
@@ -29,9 +23,8 @@ public class PaymentMessage {
     private Integer paymentStatus;
     private String paymentErrorCode;
     private String paymentMessage;
-    private String signatur;
 
-    public PaymentMessage() {
+    public PaymentCallBackCommand() {
     }
 
     public Long getOrderId() {
@@ -41,6 +34,14 @@ public class PaymentMessage {
 
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
+    }
+
+    public String getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(String orderType) {
+        this.orderType = orderType;
     }
 
     public String getBizOrderNum() {
@@ -137,13 +138,5 @@ public class PaymentMessage {
 
     public void setPaymentMessage(String paymentMessage) {
         this.paymentMessage = paymentMessage;
-    }
-
-    public String getSignatur() {
-        return signatur;
-    }
-
-    public void setSignatur(String signatur) {
-        this.signatur = signatur;
     }
 }

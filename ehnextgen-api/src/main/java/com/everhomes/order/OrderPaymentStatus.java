@@ -20,4 +20,5 @@ public enum OrderPaymentStatus {
         }
         return null;
     }
+    public Integer getCode(){return code;}
 }

@@ -2,8 +2,10 @@
 package com.everhomes.order;
 
 
+import com.everhomes.rest.order.PaymentParamsDTO;
+
 import javax.validation.constraints.NotNull;
-import java.sql.Timestamp;
+
 
 /**
  * Created by Wentian Wang on 2017/9/6.

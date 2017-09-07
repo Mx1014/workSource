@@ -1,7 +1,7 @@
 //@formatter:off
 package com.everhomes.order;
 
-import java.util.Map;
+import com.everhomes.rest.order.PaymentParamsDTO;
 
 /**
  * Created by Wentian Wang on 2017/9/6.

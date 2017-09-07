@@ -9,4 +9,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class PayProviderImpl implements PayProvider {
+    @Override
+    public PaymentOrderRecord findOrderRecordById(Long orderId) {
+        return null;
+    }
 }

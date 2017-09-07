@@ -1,11 +1,10 @@
 //@formatter:off
-package com.everhomes.order;
+package com.everhomes.rest.order;
 
 import javax.validation.constraints.NotNull;
-import java.util.Map;
 
 /**
- * Created by Wentian Wang on 2017/9/6.
+ * Created by Wentian Wang on 2017/9/7.
  */
 
 public class PaymentParamsDTO {

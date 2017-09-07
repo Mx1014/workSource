@@ -1,7 +1,15 @@
 //@formatter:off
 package com.everhomes.order;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PaymentCallBackCommand;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +23,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PayServiceImpl implements PayService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
 
     @Autowired
     private PayProvider payProvider;
@@ -37,9 +47,40 @@ public class PayServiceImpl implements PayService {
         //存储一份预订单record
         return null;
     }
-
     @Override
     public PaymentResult paymentNotify(PaymentMessage message) {
         return null;
+    }
+
+    @Override
+    public void paymentCallBack(PaymentCallBackCommand cmd) {
+        if(cmd.getOrderId()==null||cmd.getPaymentStatus()==null||cmd.getOrderType()==null){
+            LOGGER.error("Invalid parameter,orderId,orderType or paymentStatus is null");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter,orderId,orderType or paymentStatus is null");
+        }
+        PaymentCallBackHandler handler = this.getOrderHandler(cmd.getOrderType());
+        LOGGER.debug("PaymentCallBackHandler="+handler.getClass().getName());
+        if(cmd.getPaymentStatus()==OrderPaymentStatus.SUCCESS.getCode()){
+            handler.paySuccess(cmd);
+        }
+        if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+            handler.payFail(cmd);
+        }
+    }
+
+    private PaymentCallBackHandler getOrderHandler(String orderType) {
+        return PlatformContext.getComponent(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX+this.getOrderTypeCode(orderType));
+    }
+
+    private String getOrderTypeCode(String orderType) {
+        Integer code = OrderType.OrderTypeEnum.getCodeByPyCode(orderType);
+        if(code==null){
+            LOGGER.error("Invalid parameter,orderType not found in OrderType.orderType="+orderType);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter,orderType not found in OrderType");
+        }
+        LOGGER.debug("orderTypeCode="+code);
+        return String.valueOf(code);
     }
 }
