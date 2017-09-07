@@ -154,7 +154,7 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         enterpriseCustomerSearcher.feedDoc(customer);
 
-        if(customer.getOrganizationId() != null) {
+        if(customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             UpdateEnterpriseCommand command = new UpdateEnterpriseCommand();
             command.setId(updateCustomer.getOrganizationId());
             command.setName(updateCustomer.getName());
