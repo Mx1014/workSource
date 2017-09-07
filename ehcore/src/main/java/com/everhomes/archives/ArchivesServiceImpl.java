@@ -111,12 +111,18 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void transferArchivesContacts(TransferArchivesContactsCommand cmd) {
         if (cmd.getDetailIds() != null) {
-            //  TODO: 根据提供的方法获取部门名称
             TransferArchivesEmployeesCommand transferCommand = new TransferArchivesEmployeesCommand();
             transferCommand.setOrganizationId(cmd.getOrganizationId());
             transferCommand.setDetailIds(cmd.getDetailIds());
             transferCommand.setDepartmentIds(cmd.getDepartmentIds());
             organizationService.transferOrganizationPersonels(transferCommand);
+
+            //  同步部门名称
+            for (Long detailId : cmd.getDetailIds()) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                detail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
+                organizationProvider.updateOrganizationMemberDetails(detail,detail.getId());
+            }
             // TODO: 循环添加档案记录
         }
     }
