@@ -940,8 +940,9 @@ public class ContractServiceImpl implements ContractService {
 
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
-			addToFlowCase(contract);
 			contractSearcher.feedDoc(contract);
+			addToFlowCase(contract);
+
 		}
 
 	}
