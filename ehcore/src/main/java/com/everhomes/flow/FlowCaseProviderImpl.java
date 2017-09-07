@@ -202,21 +202,17 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 			if(searchType.equals(FlowCaseSearchType.APPLIER)) {
 				cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
 
-				List<EhFlowCasesRecord> records = context.select().from(Tables.EH_FLOW_CASES)
+				List<FlowCaseDetail> records = context.select().from(Tables.EH_FLOW_CASES)
 						.where(cond).orderBy(Tables.EH_FLOW_CASES.ID.desc())
-						.limit(count).fetch().map(new FlowCaseRecordMapper());
+						.limit(count).fetch().map(r->ConvertHelper.convert(r, FlowCaseDetail.class));
 
-				List<FlowCaseDetail> objs = records.stream().map((r) -> {
-					return ConvertHelper.convert(r, FlowCaseDetail.class);
-				}).collect(Collectors.toList());
-
-				if(objs.size() >= count) {
-					locator.setAnchor(objs.get(objs.size() - 1).getId());
+				if(records.size() >= count) {
+					locator.setAnchor(records.get(records.size() - 1).getId());
 				} else {
 					locator.setAnchor(null);
 				}
 
-				return objs;
+				return records;
 
 			} else {
 				return null;

@@ -984,7 +984,7 @@ public class AssetServiceImpl implements AssetService {
         if(dtos.size() <= cmd.getPageSize()){
             response.setNextPageOffset(cmd.getPageOffset());
         }else{
-//            response.setNextPageOffset(cmd.getPageOffset()+cmd.getPageSize());
+
             dtos.remove(dtos.size()-1);
         }
         response.setList(dtos);
