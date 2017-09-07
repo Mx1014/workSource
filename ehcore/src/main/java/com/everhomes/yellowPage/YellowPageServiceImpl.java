@@ -770,7 +770,6 @@ public class YellowPageServiceImpl implements YellowPageService {
         	 }
         	
         }else{
-			Condition conditionOR = null;
 //			if (cmd.getOwnerType().equals(ServiceAllianceBelongType.ORGANAIZATION.getCode())) {
 //				List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
 //				for (OrganizationCommunity organizationCommunity : communityList) {
@@ -784,7 +783,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 //				}
 //			}
         	sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
- 	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords(),conditionOR);
+ 	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
 
         }
 
