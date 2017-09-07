@@ -55,6 +55,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserNotificationTemplateCode;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.sequence.SequenceProvider;
@@ -82,6 +83,7 @@ import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -1131,15 +1133,25 @@ public class AssetServiceImpl implements AssetService {
         response.setScale(2,BigDecimal.ROUND_CEILING);
         return response;
     }
-//    @Scheduled(cron = "0 0 23 * * ?")
-//    @Override
-//    public void synchronizeZJGKBill() {
-//        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE){
-//            coordinationProvider.getNamedLock(CoordinationLocks.BILL_SYNC.getCode()).tryEnter(() ->{
-//                //调取张江高科的接口获取菜单，可是为什么要同步呢？
-//            });
-//        }
-//    }
+    @Scheduled(cron = "0 0 23 * * ?")
+    @Override
+    public void updateBillSwitchOnTime() {
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE){
+            coordinationProvider.getNamedLock(CoordinationLocks.BILL_STATUS_UPDATE.getCode()).tryEnter(() ->{
+                List<PaymentBillGroup> list = assetProvider.listAllBillGroups();
+                //获取当前时间，如果是5号，则将之前的账单的switch装为1
+                for(int i = 0; i < list.size(); i++){
+                    PaymentBillGroup paymentBillGroup = list.get(i);
+                    Calendar c = Calendar.getInstance();
+                    if(c.get(Calendar.DAY_OF_MONTH)==paymentBillGroup.getBillsDay()){
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                        String billDateStr = sdf.format(c.getTime());
+                        assetProvider.updateBillSwitchOnTime(billDateStr);
+                    }
+                }
+            });
+        }
+    }
 
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
         CacheAccessor accessor = cacheProvider.getCacheAccessor(null);

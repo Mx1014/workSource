@@ -98,5 +98,5 @@ public interface AssetService {
 
     PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
 
-//    void synchronizeZJGKBill();
+    void updateBillSwitchOnTime();
 }

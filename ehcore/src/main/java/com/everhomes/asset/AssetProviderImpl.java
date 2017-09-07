@@ -1636,4 +1636,31 @@ public class AssetProviderImpl implements AssetProvider {
         }
     }
 
+    @Override
+    public List<PaymentBillGroup> listAllBillGroups() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        EhPaymentBillGroupsRules t1 = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t1");
+        List<PaymentBillGroup> list = new ArrayList<>();
+        context.select()
+                .from(t)
+                .fetch()
+                .map(r -> {
+                    list.add(ConvertHelper.convert(r, PaymentBillGroup.class));
+                    return null;
+                });
+        return list;
+    }
+
+    @Override
+    public void updateBillSwitchOnTime(String billDateStr) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        context.update(t)
+                .set(t.SWITCH,(byte)1)
+                .where(t.DATE_STR.lessThan(billDateStr))
+                .and(t.SWITCH.eq((byte)0))
+                .execute();
+    }
+
 }

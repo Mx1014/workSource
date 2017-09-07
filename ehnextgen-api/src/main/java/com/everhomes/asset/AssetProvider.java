@@ -124,4 +124,8 @@ public interface AssetProvider {
     PaymentExemptionItems findExemptionItemById(Long exemptionItemId);
 
     void updatePaymentBillByExemItemChanges(Long billId, BigDecimal amount);
+
+    List<PaymentBillGroup> listAllBillGroups();
+
+    void updateBillSwitchOnTime(String billDateStr);
 }
