@@ -5377,6 +5377,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         origins.forEach(r -> {
             OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
             switch (OrganizationGroupType.fromCode(r.getGroupType())) {
+                case ENTERPRISE:
+                    target_map.put(dto.getContactToken(), dto);
+                    break;
                 case DIRECT_UNDER_ENTERPRISE:
                 case DEPARTMENT:
                 case GROUP:
