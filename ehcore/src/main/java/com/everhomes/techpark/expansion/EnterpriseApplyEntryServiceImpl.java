@@ -810,6 +810,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 //				dto.setRequestFormId(request.getSourceId());
 //			}
 		}
+
+		dto.setProjectDTOS(getProjectDTOs(dto.getId()));
+
 	}
 
     private void processDetailUrl(BuildingForRentDTO dto) {
@@ -1021,8 +1024,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		dto.setLeasePromotionFormId(leasePromotion.getGeneralFormId());
 
 		populateRentDTO(dto, leasePromotion);
-
-		dto.setProjectDTOS(getProjectDTOs(id));
 
 		return dto;
 	}

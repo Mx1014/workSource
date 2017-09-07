@@ -12,6 +12,7 @@ import java.util.List;
 public class UpdateLeaseBuildingCommand {
 
     private Long id;
+    private String name;
     private String aliasName;
     private String managerName;
     private String managerContact;
@@ -56,6 +57,13 @@ public class UpdateLeaseBuildingCommand {
         this.id = id;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getAliasName() {
         return aliasName;
