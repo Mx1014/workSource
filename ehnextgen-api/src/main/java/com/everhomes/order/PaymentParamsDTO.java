@@ -11,5 +11,4 @@ import java.util.Map;
 public class PaymentParamsDTO {
     @NotNull
     private String payType;
-    private Map<String,String> paymentParams;
 }

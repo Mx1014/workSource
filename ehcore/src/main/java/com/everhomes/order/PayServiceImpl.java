@@ -1,6 +1,7 @@
 //@formatter:off
 package com.everhomes.order;
 
+import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +15,19 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PayServiceImpl implements PayService {
+
     @Autowired
     private PayProvider payProvider;
+
     @Override
     public PreOrderCallBack createPreOrder(PreOrderMessage message) {
+        PreOrderCallBack preOrderCallBack = new PreOrderCallBack();
         //查order表，如果order已经存在，则返回已有的合同，交易停止；否则，继续
-
+        PaymentOrderRecord orderRecord = payProvider.findOrderRecordById(message.getOrderId());
+        if(orderRecord!=null){
+            preOrderCallBack = ConvertHelper.convert(orderRecord,PreOrderCallBack.class);
+            preOrderCallBack.setAmount(message.getAmount());
+        }
         //查account表，获取account信息
         //查收款方，如果收款方是会员，则continue；否则，交易不予进行
         //查付款方，如果付款方是会员，则继续；否则，如果付款方为个人，则创建一个会员，如果付款方为不为个人，则交易不予进行
