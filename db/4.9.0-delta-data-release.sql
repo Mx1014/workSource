@@ -45,9 +45,10 @@ UPDATE eh_locale_strings set scope = 'expansion' where scope = 'expansion.applyT
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('expansion', '8', 'zh_CN', '无');
 DELETE from eh_locale_strings where scope = 'expansion' and code in ('1', '2', '3', '4');
 
+
 --园区地图 add by sw
 INSERT INTO `eh_community_map_infos` (`id`, `namespace_id`, `community_id`, `map_uri`, `map_name`, `version`, `center_longitude`, `center_latitude`, `north_east_longitude`, `north_east_latitude`, `south_west_longitude`, `south_west_latitude`, `longitude_delta`, `latitude_delta`, `status`, `creator_uid`, `create_time`)
-  VALUES ('1', '999981', '240111044331056041', 'cs://1/image/aW1hZ2UvTVRvd01XSmpabVkyWkRSa05qWXpOMkV4WmpkalpETTFPRGt6TVRKaE9EVmhaUQ', NULL, '1.0', '121.57425299921417', '31.176432503695498', '121.577029', '31.179732', '121.573704', '31.173716', '0.005241036325429604', '0.007979148321588525', '2', '1', '2017-08-21 14:55:01');
+  VALUES ('1', '999981', '240111044331056041', 'cs://1/image/aW1hZ2UvTVRvMU5UYzRNVFU1TVRWbFpXWXlOelZrWXpnMVlXSXlaamcyWVdaaU9HTTNPQQ', NULL, '1.0', '121.57425299921417', '31.176432503695498', '121.577029', '31.179732', '121.573704', '31.173716', '0.005241036325429604', '0.007979148321588525', '2', '1', '2017-08-21 14:55:01');
 INSERT INTO `eh_community_map_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('1', '999981', '', '0', '楼栋', 'building', '1', NULL, NULL, '1');
 INSERT INTO `eh_community_map_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('2', '999981', '', '0', '企业', 'organization', '1', NULL, NULL, '2');
 INSERT INTO `eh_community_map_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('3', '999981', '', '0', '商户', 'shop', '1', NULL, NULL, '3');

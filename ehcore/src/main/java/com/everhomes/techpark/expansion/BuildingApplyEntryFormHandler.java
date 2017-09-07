@@ -19,6 +19,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,8 @@ import java.util.List;
 
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "EhBuildings")
 public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BuildingApplyEntryFormHandler.class);
 
     @Autowired
     private EnterpriseApplyEntryService enterpriseApplyEntryService;
@@ -129,32 +133,30 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
 
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
+                cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType());
 
-        GeneralFormDTO dto = new GeneralFormDTO();
+        GeneralFormDTO dto;
+
+        GeneralForm form = getDefaultGeneralForm(cmd.getSourceType());
+        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 
         if (null != request) {
-            GetTemplateByFormIdCommand cmd2 = new GetTemplateByFormIdCommand();
-            cmd2.setFormId(request.getSourceId());
+            try{
+                GetTemplateByFormIdCommand cmd2 = new GetTemplateByFormIdCommand();
+                cmd2.setFormId(request.getSourceId());
+                dto = generalFormService.getTemplateByFormId(cmd2);
+                fieldDTOs.addAll(dto.getFormFields());
+            }catch (Exception e) {
+                LOGGER.error("get Template By SourceId, cmd={}", cmd, e);
+                dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+            }
 
-            dto = generalFormService.getTemplateByFormId(cmd2);
-            List<GeneralFormFieldDTO> temp = dto.getFormFields();
-
-            GeneralForm form = getDefaultGeneralForm(EntityType.BUILDING.getCode());
-            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-
-            fieldDTOs.addAll(temp);
-            dto.setFormFields(fieldDTOs);
         } else {
             //查询初始默认数据
-            GeneralForm form = getDefaultGeneralForm(EntityType.BUILDING.getCode());
-
             dto = ConvertHelper.convert(form, GeneralFormDTO.class);
-            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-
-            dto.setFormFields(fieldDTOs);
         }
 
+        dto.setFormFields(fieldDTOs);
 
         return dto;
     }
