@@ -117,6 +117,7 @@ public class UserUiController extends ControllerBase {
 					//增加岗位显示与 detailId added by R 20120713
 					dto.setJobPosition(r.getJobPosition());
 					dto.setDetailId(r.getDetailId());
+					dto.setVisibleFlag(r.getVisibleFlag());
 					return dto;
 				}).collect(Collectors.toList());
 			}

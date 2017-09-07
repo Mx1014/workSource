@@ -23,6 +23,7 @@ import com.everhomes.util.StringHelper;
  * <li>organizationPath: 机构path 路径，含层次关系，如/父亲id/第一层孩子id/第二层孩子id/...</li>
  * <li>jobPosition: 用户岗位</li>
  * <li>detailId: 用户档案id</li>
+ * <li>visibleFlag: 隐私保护: 0-显示(不受保护) 1-隐藏(保护) 参考{@link com.everhomes.rest.organization.VisibleFlag} </li>
  * </ul>
  */
 public class SceneContactDTO {
@@ -49,6 +50,7 @@ public class SceneContactDTO {
     //added by R 20120713
     private String jobPosition;
     private Long detailId;
+    private Byte visibleFlag;
 
     public String getSceneType() {
         return sceneType;
@@ -197,6 +199,14 @@ public class SceneContactDTO {
 
     public void setDetailId(Long detailId) {
         this.detailId = detailId;
+    }
+
+    public Byte getVisibleFlag() {
+        return visibleFlag;
+    }
+
+    public void setVisibleFlag(Byte visibleFlag) {
+        this.visibleFlag = visibleFlag;
     }
 
     @Override
