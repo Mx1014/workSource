@@ -113,6 +113,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (cmd.getDetailIds() != null) {
             //  TODO: 根据提供的方法获取部门名称
             TransferArchivesEmployeesCommand transferCommand = new TransferArchivesEmployeesCommand();
+            transferCommand.setOrganizationId(cmd.getOrganizationId());
             transferCommand.setDetailIds(cmd.getDetailIds());
             transferCommand.setDepartmentIds(cmd.getDepartmentIds());
             organizationService.transferOrganizationPersonels(transferCommand);
