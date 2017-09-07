@@ -220,6 +220,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             request.setCreatorUid(user.getId());
             request.setTemplateType("flowCase");
             feedDoc(request);
+            LOGGER.debug("request = "+request);
         }
     }
 
