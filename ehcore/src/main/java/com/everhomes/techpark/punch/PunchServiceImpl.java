@@ -5602,7 +5602,8 @@ public class PunchServiceImpl implements PunchService {
 
     }
 
-    private XSSFWorkbook createPunchSchedulingTemplateBook(Long queryTime, List<PunchTimeRuleDTO> timeRules) {
+
+	private XSSFWorkbook createPunchSchedulingTemplateBook(Long queryTime, List<PunchTimeRuleDTO> timeRules) {
 
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet("sheet1");
@@ -7279,7 +7280,7 @@ public class PunchServiceImpl implements PunchService {
 		// TODO Auto-generated method stub
         DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
         RestResponse response =  new RestResponse();
-        String key = cmd.getQrToken().trim();
+		String key = cmd.getQrToken().trim();
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         String value = valueOperations.get(key);
         if(null == value){
@@ -7337,6 +7338,12 @@ public class PunchServiceImpl implements PunchService {
             }
         },"subscriberPrint"));
     }
+
+	@Override
+	public void invalidPunchQRCode(GetPunchQRCodeCommand cmd) {
+		String key = cmd.getQrToken().trim();
+		deleteValueOperations(key);
+	}
 	/**
 	 * 获取key在redis操作的valueOperations
 	 */

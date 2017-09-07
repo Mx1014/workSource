@@ -984,15 +984,29 @@ public class PunchAdminController extends ControllerBase {
 		String resp = punchService.getPunchQRCode(cmd, response );
 		return new RestResponse(resp);
 	}
-	
-	 /**
-	  * <b>URL: /siyinprint/getPunchQRCodeResult</b>
-	  * <p>web调用,长轮询得到扫码结果</p>
-	  */
-	 @RequestMapping("getPunchQRCodeResult")
-	 @RestReturn(value=String.class)
-	 @RequireAuthentication(false)
-	 public DeferredResult<RestResponse> getPunchQRCodeResult(@Valid GetPunchQRCodeCommand cmd){
-		 return punchService.getPunchQRCodeResult(cmd);
-	 }
+
+	/**
+	 * <b>URL: punch/getPunchQRCodeResult</b>
+	 * <p>web调用,长轮询得到扫码结果</p>
+	 */
+	@RequestMapping("getPunchQRCodeResult")
+	@RestReturn(value=String.class)
+	@RequireAuthentication(false)
+	public DeferredResult<RestResponse> getPunchQRCodeResult(@Valid GetPunchQRCodeCommand cmd){
+		return punchService.getPunchQRCodeResult(cmd);
+	}
+
+
+	/**
+	 * <b>URL: punch/invalidPunchQRCode</b>
+	 * <p>web调用,让二维码过期</p>
+	 */
+	@RequestMapping("invalidPunchQRCode")
+	@RestReturn(value=String.class)
+	@RequireAuthentication(false)
+	public RestResponse invalidPunchQRCode(@Valid GetPunchQRCodeCommand cmd){
+		punchService.invalidPunchQRCode(cmd);
+		return new RestResponse();
+	}
+
 }
