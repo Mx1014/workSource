@@ -82,19 +82,19 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('con
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('contract', '10007', 'zh_CN', '合同关联的资产不是待租状态');
 
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
-VALUES (21100, '客户管理', 20000, NULL, '', 1, 2, '/20000/21100', 'park', 390);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
-VALUES (21110, '客户列表', 21100, NULL, 'react:/customer-management/customer-list', 0, 2, '/20000/21100/21110', 'park', 490);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
-VALUES (21120, '统计分析', 21100, NULL, 'react:/customer-management/statistics', 0, 2, '/20000/21100/21120', 'park', 490);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+VALUES (21100, '客户管理', 20000, NULL, '', 1, 2, '/20000/21100', 'park', 390, 21100, 3, NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+VALUES (21110, '客户列表', 21100, NULL, 'react:/customer-management/customer-list', 0, 2, '/20000/21100/21110', 'park', 490, 21100, 3, NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+VALUES (21120, '统计分析', 21100, NULL, 'react:/customer-management/statistics', 0, 2, '/20000/21100/21120', 'park', 490, 21100, 3, NULL, 'module');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
-VALUES (21200, '合同管理', 20000, NULL, '', 1, 2, '/20000/21200', 'park', 390);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
-VALUES (21210, '合同列表', 21200, NULL, 'react:/contract-management/contract-list', 0, 2, '/20000/21200/21210', 'park', 490);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
-VALUES (21220, '合同基础参数配置', 21200, NULL, 'react:/contract-management/params-config', 0, 2, '/20000/21200/21220', 'park', 490);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+VALUES (21200, '合同管理', 20000, NULL, '', 1, 2, '/20000/21200', 'park', 390, 21200, 3, NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+VALUES (21210, '合同列表', 21200, NULL, 'react:/contract-management/contract-list', 0, 2, '/20000/21200/21210', 'park', 490, 21200, 3, NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+VALUES (21220, '合同基础参数配置', 21200, NULL, 'react:/contract-management/params-config', 0, 2, '/20000/21200/21220', 'park', 490, 21200, 3, NULL, 'module');
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
