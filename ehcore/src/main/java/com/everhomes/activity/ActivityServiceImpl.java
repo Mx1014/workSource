@@ -34,8 +34,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespacesProvider;
-import com.everhomes.order.OrderEmbeddedHandler;
-import com.everhomes.order.OrderUtil;
+import com.everhomes.order.*;
 import com.everhomes.organization.*;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
@@ -257,7 +256,9 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	@Autowired
 	private RosterPayTimeoutService rosterPayTimeoutService;
-	
+
+	@Autowired
+	private PayService payService;
 	
 	
     @PostConstruct
@@ -689,6 +690,82 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 		
 		return dto;
+	}
+
+	@Override
+	public PreOrderCallBack createSignupOrderV2(CreateSignupOrderV2Command cmd) {
+
+		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+		if(roster == null){
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+					"no roster.");
+		}
+		Activity activity = activityProvider.findActivityById(roster.getActivityId());
+		if(activity == null){
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+					"no activity.");
+		}
+
+
+		PreOrderMessage preOrderMessage = new PreOrderMessage();
+		preOrderMessage.setClientAppName(cmd.getClientAppName());
+		preOrderMessage.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+		preOrderMessage.setOrderId(roster.getOrderNo());
+		//TODO bigDecimal  to long
+		preOrderMessage.setAmount(activity.getChargePrice().longValue() * 100);
+
+		preOrderMessage.setPayerId(roster.getUid());
+		preOrderMessage.setNamespaceId(activity.getNamespaceId());
+
+		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
+				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_FEE),
+				UserContext.current().getUser().getLocale(),
+				"activity roster pay");
+		preOrderMessage.setSummary(temple);
+
+
+		GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
+		timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
+		Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
+
+		preOrderMessage.setExpiration(expiredTime);
+
+		preOrderMessage.setPaymentType(PaymentType.APLIPAY.getCode());
+
+		PreOrderCallBack callBack = payService.createPreOrder(preOrderMessage);
+//
+//
+//		//设置过期时间
+//		GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
+//		timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+//		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
+//		Map<String, Long> bodyMap = new HashMap<String, Long>();
+//		Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
+//		bodyMap.put("expiredTime", expiredTime);
+//
+//		//调用统一处理订单接口，返回统一订单格式
+//		CommonOrderCommand orderCmd = new CommonOrderCommand();
+//		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
+//				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_FEE),
+//				UserContext.current().getUser().getLocale(),
+//				"activity roster pay");
+//
+//		orderCmd.setBody(bodyMap.toString());
+//		orderCmd.setOrderNo(roster.getOrderNo().toString());
+//		orderCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+//		orderCmd.setSubject(temple);
+//		orderCmd.setTotalFee(activity.getChargePrice());
+//		CommonOrderDTO dto = null;
+//		try {
+//			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
+//		} catch (Exception e) {
+//			LOGGER.error("convertToCommonOrder is fail.",e);
+//			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_CONVERT_TO_COMMON_ORDER_FAIL,
+//					"convertToCommonOrder is fail.");
+//		}
+
+		return callBack;
 	}
 
 	@Override
