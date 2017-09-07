@@ -580,7 +580,6 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				leasePromotion.setNamespaceId(namespaceId);
 				leasePromotion.setCommunityId(communityId);
 				leasePromotion.setRentType(LeasePromotionType.ORDINARY.getCode());
-				leasePromotion.setSubject(apartmentName);
 				leasePromotion.setRentAreas(String.valueOf(rentArea));
 				leasePromotion.setCreateUid(1L);
 				leasePromotion.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -592,7 +591,6 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				}else {
 					leasePromotion.setBuildingId(0L);
 				}
-				leasePromotion.setRentPosition(buildingName);
 				leasePromotion.setEnterTime(leasePromotion.getCreateTime());
 				leasePromotion.setNamespaceType(namespaceType);
 				leasePromotion.setNamespaceToken(namespaceToken);

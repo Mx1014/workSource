@@ -1066,8 +1066,8 @@ public class AssetServiceImpl implements AssetService {
             String addressName;
             addressName = building.getBuildingName()+building.getApartmentName();
             addressNames.add(addressName);
-            if(building.getAreaSize()!=null){
-                areaSize += building.getAreaSize();
+            if(building.getChargeArea()!=null){
+                areaSize += building.getChargeArea();
             }
         }
         dto.setAddressNames(addressNames);

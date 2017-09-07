@@ -7,7 +7,7 @@ CREATE TABLE `eh_zj_syncdata_backup` (
   `all_flag` tinyint(4) NOT NULL COMMENT '1: all data, 0: special community',
   `update_community` VARCHAR(64) COMMENT 'if all flag is 0, the special community identifier',
   `next_page_offset` INTEGER COMMENT 'next page offset',
-  `name` VARCHAR(64) NOT NULL,
+  `name` VARCHAR(64),
   `data` LONGTEXT COMMENT 'data list',
   `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
   `create_time` DATETIME,
@@ -20,7 +20,7 @@ CREATE TABLE `eh_zj_syncdata_backup` (
 -- DROP TABLE IF EXISTS `eh_thirdpart_configurations`;
 CREATE TABLE `eh_thirdpart_configurations` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-  `name` VARCHAR(64) NOT NULL,
+  `name` VARCHAR(64),
   `value` VARCHAR(512) NOT NULL,
   `description` VARCHAR(256),
   `namespace_id` INTEGER NOT NULL DEFAULT 0,

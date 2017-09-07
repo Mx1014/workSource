@@ -19,35 +19,35 @@ import java.util.List;
 
 @Component
 @Scope("prototype")
-public class StatTerminalScheduleJob extends QuartzJobBean{
+public class StatTerminalScheduleJob extends QuartzJobBean {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(StatTerminalScheduleJob.class);
-	
-	public static final String SCHEDELE_NAME = "stat-terminal-";
-	
-	public static String CRON_EXPRESSION = "0 0 2 * * ?";
+    private static final Logger LOGGER = LoggerFactory.getLogger(StatTerminalScheduleJob.class);
 
-	public static String STAT_CRON_EXPRESSION = "terminal.statistics.cron.expression";
-	
-	@Autowired
-	private StatTerminalService statTerminalService;
+    public static final String SCHEDELE_NAME = "stat-terminal-";
 
-	@Autowired
-	private ScheduleProvider scheduleProvider;
-	
-	@Override
-	protected void executeInternal(JobExecutionContext context)
-			throws JobExecutionException {
-		
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.DAY_OF_MONTH, -1);
-		
-		LOGGER.debug("start schedele job, excute task date = {}", calendar.getTime());
-		
-		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
-			//执行任务区
-			List<TerminalStatisticsTaskDTO> tasks =  statTerminalService.executeStatTask(DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH),DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH));
-			LOGGER.debug("schedele job result: {}", StringHelper.toJsonString(tasks));
-		}
-	}
+    public static String CRON_EXPRESSION = "0 0 2 * * ?";
+
+    public static String STAT_CRON_EXPRESSION = "terminal.statistics.cron.expression";
+
+    @Autowired
+    private StatTerminalService statTerminalService;
+
+    @Autowired
+    private ScheduleProvider scheduleProvider;
+
+    @Override
+    protected void executeInternal(JobExecutionContext context)
+            throws JobExecutionException {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+
+        LOGGER.debug("start schedele job, excute task date = {}", calendar.getTime());
+
+        if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            //执行任务区
+            List<TerminalStatisticsTaskDTO> tasks = statTerminalService.executeStatTask(null, DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH), DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH));
+            LOGGER.debug("schedele job result: {}", StringHelper.toJsonString(tasks));
+        }
+    }
 }

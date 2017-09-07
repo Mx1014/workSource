@@ -40,6 +40,26 @@ public class AddressDTO {
     private Byte memberStatus;
     private Double areaSize;
 
+    private Long buildingId;
+
+    private Long areaId;
+
+    private String areaName;
+
+    private String cityName;
+
+    private String communityName;
+
+    private String provinceName;
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
+
     public Double getAreaSize() {
         return areaSize;
     }
@@ -203,6 +223,46 @@ public class AddressDTO {
 	public void setMemberStatus(Byte memberStatus) {
 		this.memberStatus = memberStatus;
 	}
+
+    public Long getAreaId() {
+        return areaId;
+    }
+
+    public void setAreaId(Long areaId) {
+        this.areaId = areaId;
+    }
+
+    public String getAreaName() {
+        return areaName;
+    }
+
+    public void setAreaName(String areaName) {
+        this.areaName = areaName;
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
+    public String getProvinceName() {
+        return provinceName;
+    }
+
+    public void setProvinceName(String provinceName) {
+        this.provinceName = provinceName;
+    }
 
     @Override
     public String toString(){

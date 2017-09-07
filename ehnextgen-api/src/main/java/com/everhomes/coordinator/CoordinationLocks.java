@@ -77,16 +77,21 @@ public enum CoordinationLocks {
     UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update"),
 
     FLOW_CASE_UPDATE("flowCase.update"),
+    FLOW_NODE_UPDATE("flowNode.update"),
     PUNCH_DAY_SCHEDULE("punch.day.schedule"),
 
     PRINT_ORDER_LOCK_FLAG("print.order.lock.flag"),
     PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
 
     USER_APPEAL_LOG("user.appeal.log"),
-
 	SALARY_GROUP_LOCK("salary.group"),
 
-    BILL_STATUS_UPDATE("bill.status.update");
+
+
+    BILL_STATUS_UPDATE("bill.status.update"),
+
+    EVENT_STAT_SCHEDULE("event.stat.schedule");
+
 
     private String code;
     private CoordinationLocks(String code) {

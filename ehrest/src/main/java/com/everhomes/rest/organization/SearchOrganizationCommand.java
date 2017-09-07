@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  *  <li>namespaceId : 域</li>
  *  <li>setAdminFlag : 是否设置了管理员</li>
  *  <li>keyword: 内容关键字</li>
- *  <li>organizationType : 机构类型 ，详情{@link com.everhomes.rest.organization.organizationType}</li>
+ *  <li>organizationType : 机构类型 ，详情{@link com.everhomes.rest.organization.OrganizationType}</li>
  *  <li>pageAnchor: 本页开始锚点</li>
  *  <li>pageSize: 每页的数量</li>
  *  <li>buildingName: 楼栋名称</li>
@@ -26,7 +26,17 @@ public class SearchOrganizationCommand {
     
     private String organizationType;
     private String buildingName;
-    
+
+    private Byte existAddressFlag;
+
+    public Byte getExistAddressFlag() {
+        return existAddressFlag;
+    }
+
+    public void setExistAddressFlag(Byte existAddressFlag) {
+        this.existAddressFlag = existAddressFlag;
+    }
+
     public String getBuildingName() {
 		return buildingName;
 	}

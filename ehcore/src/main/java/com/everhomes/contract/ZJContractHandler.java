@@ -18,6 +18,7 @@ import com.everhomes.rest.openapi.shenzhou.ZJContractDetail;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
 import org.apache.http.HttpEntity;
@@ -26,6 +27,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,11 +78,13 @@ public class ZJContractHandler implements ContractHandler{
         String contractStatus  = convertContractStatus(cmd.getStatus());
         String contractAttribute = convertContractAttribute(cmd.getContractType());
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-        String communityName = community == null ? "" : community.getName();
+        String communityIdentifier = community == null ? "" : community.getNamespaceCommunityToken();
+        String pageOffset = cmd.getPageAnchor() == null ? "" : cmd.getPageAnchor().toString();
+        String pageSize = cmd.getPageSize() == null ? "" : cmd.getPageSize().toString();
 
         ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCategoryItemId());
         String categoryName = item == null ? "" : item.getItemDisplayName();
-        Map<String, String> params = generateParams(communityName, contractStatus, contractAttribute, categoryName, cmd.getKeywords());
+        Map<String, String> params = generateParams(communityIdentifier, contractStatus, contractAttribute, categoryName, cmd.getKeywords(), pageOffset, pageSize);
         StringBuilder sb = new StringBuilder();
         if(community != null && CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
             sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
@@ -183,6 +187,14 @@ public class ZJContractHandler implements ContractHandler{
         dto.setContractStartDate(zjContract.getContractStartDate());
         dto.setContractEndDate(zjContract.getContractExpireDate());
         dto.setRent(zjContract.getRent());
+        if(zjContract.getApartments() != null && zjContract.getApartments().size() > 0) {
+            List<BuildingApartmentDTO> buildings = new ArrayList<>();
+            zjContract.getApartments().forEach(apartment -> {
+                buildings.add(ConvertHelper.convert(apartment, BuildingApartmentDTO.class));
+            });
+            dto.setBuildings(buildings);
+        }
+
         List<ContractChargingItemDTO> items = new ArrayList<>();
         ContractChargingItemDTO item = new ContractChargingItemDTO();
         item.setChargingItemName("物业费");
@@ -220,9 +232,14 @@ public class ZJContractHandler implements ContractHandler{
             String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
             Map<String, String> params= new HashMap<String,String>();
             params.put("appKey", appKey);
-            params.put("timestamp", ""+System.currentTimeMillis());
-            params.put("nonce", ""+(long)(Math.random()*100000));
+//            params.put("timestamp", ""+System.currentTimeMillis());
+//            params.put("nonce", ""+(long)(Math.random()*100000));
+//            params.put("crypto", "sssss");
+            params.put("timestamp", "1504681998261");
+            params.put("nonce", "57903");
             params.put("crypto", "sssss");
+            params.put("pageOffset", "0");
+            params.put("pageSize", "");
             params.put("enterpriseIdentifier", enterpriseCustomer.getNamespaceCustomerToken());
             String signature = SignatureHelper.computeSignature(params, secretKey);
             params.put("signature", signature);
@@ -267,8 +284,8 @@ public class ZJContractHandler implements ContractHandler{
         return null;
     }
 
-    private Map<String, String> generateParams(String communityName, String contractStatus, String contractAttribute,
-                                               String category, String customerName) {
+    private Map<String, String> generateParams(String communityIdentifier, String contractStatus, String contractAttribute,
+                                               String category, String customerName, String pageOffset, String pageSize) {
         String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
         String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
         Map<String, String> params= new HashMap<String,String>();
@@ -276,11 +293,14 @@ public class ZJContractHandler implements ContractHandler{
         params.put("timestamp", ""+System.currentTimeMillis());
         params.put("nonce", ""+(long)(Math.random()*100000));
         params.put("crypto", "sssss");
-        params.put("communityName", communityName);
+        params.put("contractNum", "");
+        params.put("communityIdentifier", communityIdentifier);
         params.put("contractStatus", contractStatus);
         params.put("contractAttribute", contractAttribute);
         params.put("category", category);
         params.put("customerName", customerName);
+        params.put("pageOffset", pageOffset);
+        params.put("pageSize", pageSize);
         String signature = SignatureHelper.computeSignature(params, secretKey);
         params.put("signature", signature);
 
@@ -294,10 +314,10 @@ public class ZJContractHandler implements ContractHandler{
                 case NEW: return "新签合同";
                 case RENEW: return "续约合同";
                 case CHANGE: return "变更合同";
-                default: return null;
+                default: return "";
             }
         }
-        return null;
+        return "";
     }
 
     private Byte convertToContractAttribute(String type) {
@@ -314,15 +334,15 @@ public class ZJContractHandler implements ContractHandler{
         if(contractStatus != null) {
             switch (contractStatus) {
                 case ACTIVE: return "执行中";
-                case WAITING_FOR_APPROVAL: return "审批中";
+                case WAITING_FOR_APPROVAL: return "审核中";
                 case EXPIRED: return "已到期";
                 case HISTORY: return "终止";
                 case DENUNCIATION: return "退租完成";
                 case DRAFT: return "草稿";
-                default: return null;
+                default: return "";
             }
         }
-        return null;
+        return "";
     }
 
     private Byte convertToContractStatus(String status) {
@@ -357,7 +377,7 @@ public class ZJContractHandler implements ContractHandler{
         String json = null;
 
         try {
-            json = HttpUtils.post(shenzhouUrl + method, params);
+            json = HttpUtils.postJson(shenzhouUrl + method, StringHelper.toJsonString(params), 30, HTTP.UTF_8);
 //            StringEntity stringEntity = new StringEntity(params.toString(), "utf8");
 //            httpPost.setEntity(stringEntity);
 //

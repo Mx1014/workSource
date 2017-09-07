@@ -25,6 +25,7 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
 
+            builder.field("id", customer.getId());
             builder.field("communityId", customer.getCommunityId());
             builder.field("namespaceId", customer.getNamespaceId());
             builder.field("name", customer.getName());
@@ -167,6 +169,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
+        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
+            builder.addSort("id", SortOrder.DESC);
+        }
         SearchResponse rsp = builder.execute().actionGet();
 
         if(LOGGER.isDebugEnabled())

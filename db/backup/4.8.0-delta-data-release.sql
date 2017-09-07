@@ -58,6 +58,24 @@ SET eom.detail_id = (
     AND eomd.contact_token = eom.contact_token
 );
 
+-- 数据修复脚本
+UPDATE eh_organization_member_details md
+INNER JOIN (
+	SELECT
+		m.target_id,
+		m.target_type,
+		m.contact_name,
+		m.contact_type,
+		m.detail_id
+	FROM
+		eh_organization_members m
+	INNER JOIN eh_organization_member_details d 
+	ON
+		d.id = m.detail_id
+	AND m.`status` = '3' 
+) AS t1 ON t1.detail_id = md.id
+SET md.target_id = t1.target_id, md.target_type = t1.target_type;
+
 -- 同步user_organization脚本
 DELETE
 FROM

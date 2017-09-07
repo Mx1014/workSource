@@ -172,6 +172,9 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
+
+		LOGGER.debug("------------------- flowCase={}, flowUserType={}", flowCase, flowUserType);
+
 		List<FlowCaseEntity> entities = new ArrayList<>();
 
 		RentalOrder order = rentalv2Provider.findRentalBillById(flowCase.getReferId());

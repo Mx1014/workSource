@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>buildingName: 楼栋</li>
  * <li>apartmentName: 门牌</li>
  * <li>addressId: 门牌id</li>
- * <li>areaSize: 面积</li>
+ * <li>chargeArea: 收费面积</li>
  * </ul>
  */
 public class BuildingApartmentDTO {
@@ -18,7 +18,7 @@ public class BuildingApartmentDTO {
 	private Long addressId;
 	private String buildingName;
 	private String apartmentName;
-	private Double areaSize;
+	private Double chargeArea;
 
 	public Long getId() {
 		return id;
@@ -28,12 +28,12 @@ public class BuildingApartmentDTO {
 		this.id = id;
 	}
 
-	public Double getAreaSize() {
-		return areaSize;
+	public Double getChargeArea() {
+		return chargeArea;
 	}
 
-	public void setAreaSize(Double areaSize) {
-		this.areaSize = areaSize;
+	public void setChargeArea(Double chargeArea) {
+		this.chargeArea = chargeArea;
 	}
 
 	public Long getAddressId() {

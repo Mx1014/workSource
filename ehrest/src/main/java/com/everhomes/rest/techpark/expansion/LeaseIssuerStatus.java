@@ -2,7 +2,7 @@ package com.everhomes.rest.techpark.expansion;
 
 /**
  *
- * INACTIVE(1):已删除
+ * INACTIVE(0):无效
  * ACTIVE(2): 正常
  * */
 public enum LeaseIssuerStatus {

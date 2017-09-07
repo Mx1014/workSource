@@ -1021,6 +1021,72 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
+	public List<EquipmentInspectionTasks> listTasksByEquipmentIdAndStandards(Long equipmentId, List<StandardAndStatus> standards, Timestamp startDate, Timestamp endDate, CrossShardListingLocator locator, Integer pageSize) {
+		List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
+
+		if (locator.getShardIterator() == null) {
+			AccessSpec accessSpec = AccessSpec.readOnlyWith(EhEquipmentInspectionTasks.class);
+			ShardIterator shardIterator = new ShardIterator(accessSpec);
+			locator.setShardIterator(shardIterator);
+		}
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+			SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+
+			if(locator.getAnchor() != null && locator.getAnchor() != 0L){
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
+			}
+
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EQUIPMENT_ID.eq(equipmentId));
+
+			if(standards != null && standards.size() > 0) {
+				Condition standardCon = null;
+				for(StandardAndStatus standardAndStatus : standards) {
+					Condition con = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.eq(standardAndStatus.getStandardId());
+					con = con.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(standardAndStatus.getTaskStatus()));
+
+					if(standardCon == null) {
+						standardCon = con;
+					} else {
+						standardCon = standardCon.or(con);
+					}
+				}
+				query.addConditions(standardCon);
+			}
+
+			if(startDate != null && !"".equals(startDate)) {
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(startDate));
+			}
+
+			if(endDate != null && !"".equals(endDate)) {
+				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.le(endDate));
+			}
+			query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
+			query.addLimit(pageSize - tasks.size());
+
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug("listTasksByEquipmentId, sql=" + query.getSQL());
+				LOGGER.debug("listTasksByEquipmentId, bindValues=" + query.getBindValues());
+			}
+
+			query.fetch().map((r) -> {
+
+				tasks.add(ConvertHelper.convert(r, EquipmentInspectionTasks.class));
+				return null;
+			});
+
+			if (tasks.size() >= pageSize) {
+				locator.setAnchor(tasks.get(tasks.size() - 1).getId());
+				return AfterAction.done;
+			} else {
+				locator.setAnchor(null);
+			}
+			return AfterAction.next;
+		});
+
+		return tasks;
+	}
+
+	@Override
 	public List<Long> listStandardIdsByType(Byte type) {
 		List<Long> standardIds = new ArrayList<Long>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

@@ -80,11 +80,6 @@ public interface UserProvider {
 	
 	/**
 	 * Added by Janson
-	 * @param namespaceId
-	 * @param organizationId
-	 * @param buildingId
-	 * @param isAuth
-	 * @param keyword
 	 * @param locator
 	 * @param pageSize
 	 * @return
@@ -130,7 +125,18 @@ public interface UserProvider {
      */
     long createUserNotificationSetting(UserNotificationSetting setting);
 
+
     List<TargetDTO> findUesrIdByNameAndAddressId(String targetName, List<Long> ids, String tel);
 
     TargetDTO findUserByTokenAndName(String tel, String targetName);
+
+    /**
+     * 查询非当前userId的正常用户数据
+     * @param namespaceId
+     * @param identifierToken
+     * @param userId
+     * @return
+     */
+    UserIdentifier findClaimedIdentifierByTokenAndNotUserId(Integer namespaceId, String identifierToken, Long userId);
+
 }

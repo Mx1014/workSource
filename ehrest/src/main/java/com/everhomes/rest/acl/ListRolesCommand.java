@@ -19,6 +19,10 @@ public class ListRolesCommand {
 	
     private String keywords;
 
+	private Long pageAnchor;
+
+	private Integer pageSize;
+
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -49,6 +53,22 @@ public class ListRolesCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
 
 	@Override

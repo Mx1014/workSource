@@ -1,0 +1,152 @@
+package com.everhomes.rest.community_map;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.community.BuildingAttachmentDTO;
+import com.everhomes.util.StringHelper;
+
+import java.util.List;
+
+/**
+ * @author sw on 2017/8/14.
+ */
+public class CommunityMapBuildingDetailDTO {
+
+    private Long id;
+
+    private String name;
+
+    private String aliasName;
+
+    private String address;
+
+    private String posterUri;
+
+    private String posterUrl;
+
+    private String description;
+
+    private Double centerLongitude;
+    private Double centerLatitude;
+
+    @ItemType(BuildingAttachmentDTO.class)
+    private List<BuildingAttachmentDTO> attachments;
+
+    @ItemType(ApartmentDTO.class)
+    private List<ApartmentDTO> apartments;
+
+    @ItemType(CommunityMapOrganizationDTO.class)
+    private List<CommunityMapOrganizationDTO> organizations;
+
+    @ItemType(CommunityMapShopDTO.class)
+    private List<CommunityMapShopDTO> shops;
+
+    public Double getCenterLongitude() {
+        return centerLongitude;
+    }
+
+    public void setCenterLongitude(Double centerLongitude) {
+        this.centerLongitude = centerLongitude;
+    }
+
+    public Double getCenterLatitude() {
+        return centerLatitude;
+    }
+
+    public void setCenterLatitude(Double centerLatitude) {
+        this.centerLatitude = centerLatitude;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<ApartmentDTO> getApartments() {
+        return apartments;
+    }
+
+    public void setApartments(List<ApartmentDTO> apartments) {
+        this.apartments = apartments;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPosterUri() {
+        return posterUri;
+    }
+
+    public void setPosterUri(String posterUri) {
+        this.posterUri = posterUri;
+    }
+
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+
+    public List<BuildingAttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<BuildingAttachmentDTO> attachments) {
+        this.attachments = attachments;
+    }
+
+    public List<CommunityMapOrganizationDTO> getOrganizations() {
+        return organizations;
+    }
+
+    public void setOrganizations(List<CommunityMapOrganizationDTO> organizations) {
+        this.organizations = organizations;
+    }
+
+    public List<CommunityMapShopDTO> getShops() {
+        return shops;
+    }
+
+    public void setShops(List<CommunityMapShopDTO> shops) {
+        this.shops = shops;
+    }
+
+    public String getAliasName() {
+        return aliasName;
+    }
+
+    public void setAliasName(String aliasName) {
+        this.aliasName = aliasName;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

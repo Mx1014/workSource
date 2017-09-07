@@ -31,5 +31,12 @@ public interface ServiceModuleService {
 
 	Byte checkModuleManage(CheckModuleManageCommand cmd);
 
+	ServiceModuleDTO createServiceModule(CreateServiceModuleCommand cmd);
+
+	ServiceModuleDTO updateServiceModule(UpdateServiceModuleCommand cmd);
+
+	void deleteServiceModule(DeleteServiceModuleCommand cmd);
+
+	ListServiceModulesResponse listAllServiceModules(ListServiceModulesCommand cmd);
 	List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId);
 }

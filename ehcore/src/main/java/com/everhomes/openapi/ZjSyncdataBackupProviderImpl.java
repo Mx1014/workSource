@@ -16,6 +16,7 @@ import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import java.util.List;
 /**
  * Created by ying.xiong on 2017/8/8.
  */
+@Component
 public class ZjSyncdataBackupProviderImpl implements ZjSyncdataBackupProvider {
 
     @Autowired

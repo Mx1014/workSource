@@ -542,6 +542,7 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	private void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems) {
+		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_CANCEL);
 		PaymentExpectanciesCommand command = new PaymentExpectanciesCommand();
 		command.setContractNum(contract.getContractNumber());
 		List<FeeRules> feeRules = new ArrayList<>();
@@ -645,7 +646,7 @@ public class ContractServiceImpl implements ContractService {
 		Double totalSize = 0.0;
 		if(buildingApartments != null && buildingApartments.size() > 0) {
 			for(BuildingApartmentDTO buildingApartment : buildingApartments) {
-				Double size = buildingApartment.getAreaSize() == null ? 0.0 : buildingApartment.getAreaSize();
+				Double size = buildingApartment.getChargeArea() == null ? 0.0 : buildingApartment.getChargeArea();
 				totalSize = totalSize + size;
 				if(buildingApartment.getId() == null) {
 					ContractBuildingMapping mapping = ConvertHelper.convert(buildingApartment, ContractBuildingMapping.class);
@@ -817,6 +818,14 @@ public class ContractServiceImpl implements ContractService {
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			addToFlowCase(contract);
 		}
+
+		ExecutorUtil.submit(new Runnable() {
+			@Override
+			public void run() {
+				generatePaymentExpectancies(contract, cmd.getChargingItems());
+			}
+		});
+
 		return ConvertHelper.convert(contract, ContractDTO.class);
 	}
 
@@ -969,10 +978,29 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public void deleteContract(DeleteContractCommand cmd) {
 		Contract contract = checkContract(cmd.getId());
+		Boolean flag = false;
+		if(ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus())) || ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))
+				|| ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))  || ContractStatus.APPROVE_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))
+				|| ContractStatus.EXPIRING.equals(ContractStatus.fromStatus(contract.getStatus()))  || ContractStatus.DRAFT.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+			flag = true;
+		}
 		contract.setStatus(ContractStatus.INACTIVE.getCode());
 
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
+
+
+		//释放资源状态
+		if(flag) {
+			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+			if(contractApartments != null && contractApartments.size() > 0) {
+				contractApartments.forEach(contractApartment -> {
+					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(contractApartment.getAddressId());
+					addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+					propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+				});
+			}
+		}
 	}
 
 	@Override

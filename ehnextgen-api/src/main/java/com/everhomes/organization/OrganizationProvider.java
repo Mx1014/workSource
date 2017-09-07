@@ -12,6 +12,8 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.*;
+
+import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.userOrganization.UserOrganizations;
 import org.jooq.Condition;
@@ -133,6 +135,10 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
 
+
+	Integer countOrganizationPersonnels(Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag);
+	
+
 	OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone);
 
 	/**
@@ -181,6 +187,8 @@ public interface OrganizationProvider {
 	OrganizationCommunityRequest getOrganizationCommunityRequestByOrganizationId(Long organizationId);
 	List<OrganizationAddress> listOrganizationAddressByBuildingId(Long buildingId, Integer pageSize, CrossShardListingLocator locator);
 	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String organizationType,CrossShardListingLocator locator,Integer pageSize);
+	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,
+													Byte setAdminFlag, String keywords, CrossShardListingLocator locator, int pageSize);
 	List<OrganizationMember> listOrganizationMembersByPhone(String phone);
 	List<OrganizationAddress> listOrganizationAddressByBuildingName(String buildingName);
 	Organization getOrganizationByGoupId(Long groupId);
@@ -302,9 +310,13 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizationByGroupType(Long parentId, OrganizationGroupType groupType);
 
 	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
+	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
+	Integer countOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, Byte contactSignedupStatus, VisibleFlag visibleFlag);
+
 
 	List<Organization> listOrganizationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
 															 int pageSize);
+
 	List<Organization> listOrganizationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
 	List<CommunityAddressMapping> listCsthomerelByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
 	List<CommunityAddressMapping> listCsthomerelByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
@@ -405,6 +417,7 @@ public interface OrganizationProvider {
 	List<OrganizationAddress> findOrganizationAddressByOrganizationIdAndBuildingId(
 			Long organizationId, Long buildId);
 
+	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String keywords, String organizationType,CrossShardListingLocator locator,Integer pageSize);
 	List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId);
 
 	List<OrganizationMemberLog> listOrganizationMemberLogs(List<Long> organizationIds, String userInfoKeyword, String keywords, CrossShardListingLocator locator, int pageSize);
@@ -452,7 +465,11 @@ public interface OrganizationProvider {
 
 	List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId);
 
+
     String getOrganizationNameById(Long targetId);
 
 	List<TargetDTO> findOrganizationIdByNameAndAddressId(String targetName, List<Long> ids);
+
+	List<UserOrganizations> listUserOrganizationByUserId(Long userId);
+
 }
