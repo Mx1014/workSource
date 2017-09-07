@@ -36,6 +36,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 UPDATE eh_enterprise_op_request_buildings lp JOIN eh_lease_buildings lb ON lb.building_id = lp.building_id set lp.building_id = lb.id;
 
 UPDATE eh_lease_promotions lp JOIN eh_lease_buildings lb ON lb.building_id = lp.building_id set lp.building_id = lb.id;
+UPDATE eh_enterprise_op_requests a JOIN eh_lease_buildings b ON b.building_id = a.source_id set a.source_id = b.id where a.source_type = 'building';
 
 UPDATE eh_web_menus set `name` = '房源招租' where id = 40110;
 UPDATE eh_web_menus set `name` = '申请记录' where id = 40120;

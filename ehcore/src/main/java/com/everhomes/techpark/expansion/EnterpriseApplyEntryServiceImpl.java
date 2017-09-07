@@ -308,6 +308,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			Address address = addressProvider.findAddressById(enterpriseOpRequest.getAddressId());
 			if (null != address){
 				dto.setApartmentName(address.getApartmentName());
+				dto.setBuildingName(address.getBuildingName());
 			}
 		}
 
