@@ -875,7 +875,7 @@ public class ContractServiceImpl implements ContractService {
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(cmd.getResult())) &&
 				(ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus()))
 				 || ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus())))) {
-			//发起审批要把门牌状态置为被占用
+			//发起审批要把门牌状态置为被占用 续约和变更的继承原合同的不用
 			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 			if(contractApartments != null && contractApartments.size() > 0) {
 				List<Long> addressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
@@ -917,9 +917,10 @@ public class ContractServiceImpl implements ContractService {
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
 		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+		List<Long> contractAddressIds = new ArrayList<>();
 		if(contractApartments != null && contractApartments.size() > 0) {
-			List<Long> addressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
-			List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
+			contractAddressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+			List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(contractAddressIds);
 			if(mappings != null && mappings.size() > 0) {
 				mappings.forEach(mapping -> {
 					mapping.setLivingStatus(AddressMappingStatus.RENT.getCode());
@@ -936,9 +937,13 @@ public class ContractServiceImpl implements ContractService {
 				contractProvider.updateContract(parentContract);
 				contractSearcher.feedDoc(parentContract);
 
-				List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+				List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(parentContract.getId());
 				if(parentContractApartments != null && parentContractApartments.size() > 0) {
 					List<Long> addressIds = parentContractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+					//去掉已被继承的门牌
+					contractAddressIds.forEach(contractAddressId -> {
+						addressIds.remove(contractAddressId);
+					});
 					List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
 					if(mappings != null && mappings.size() > 0) {
 						mappings.forEach(mapping -> {
