@@ -979,9 +979,9 @@ public class ContractServiceImpl implements ContractService {
 	public void deleteContract(DeleteContractCommand cmd) {
 		Contract contract = checkContract(cmd.getId());
 		Boolean flag = false;
-		if(ContractStatus.WAITING_FOR_LAUNCH.equals(contract.getStatus()) || ContractStatus.ACTIVE.equals(contract.getStatus())
-				|| ContractStatus.WAITING_FOR_APPROVAL.equals(contract.getStatus())  || ContractStatus.APPROVE_QUALITIED.equals(contract.getStatus())
-				|| ContractStatus.EXPIRING.equals(contract.getStatus())  || ContractStatus.DRAFT.equals(contract.getStatus())) {
+		if(ContractStatus.WAITING_FOR_LAUNCH.equals(ContractStatus.fromStatus(contract.getStatus())) || ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))
+				|| ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))  || ContractStatus.APPROVE_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))
+				|| ContractStatus.EXPIRING.equals(ContractStatus.fromStatus(contract.getStatus()))  || ContractStatus.DRAFT.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			flag = true;
 		}
 		contract.setStatus(ContractStatus.INACTIVE.getCode());
