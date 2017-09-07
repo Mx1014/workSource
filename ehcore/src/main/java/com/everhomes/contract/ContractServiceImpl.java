@@ -646,7 +646,7 @@ public class ContractServiceImpl implements ContractService {
 		Double totalSize = 0.0;
 		if(buildingApartments != null && buildingApartments.size() > 0) {
 			for(BuildingApartmentDTO buildingApartment : buildingApartments) {
-				Double size = buildingApartment.getAreaSize() == null ? 0.0 : buildingApartment.getAreaSize();
+				Double size = buildingApartment.getChargeArea() == null ? 0.0 : buildingApartment.getChargeArea();
 				totalSize = totalSize + size;
 				if(buildingApartment.getId() == null) {
 					ContractBuildingMapping mapping = ConvertHelper.convert(buildingApartment, ContractBuildingMapping.class);
