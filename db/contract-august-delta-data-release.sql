@@ -153,22 +153,22 @@ VALUES (@eh_web_menus_id_payb := @eh_web_menus_id_payb+1, '账单统计', 20700,
 
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_paym, '', 'EhNamespaces', 999985, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_payb, '', 'EhNamespaces', 999985, 2);
 -- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
--- VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_paym, '', 'EhNamespaces', 999985, 2);
+-- VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_paym, '', 'EhNamespaces', 999971, 2);
 -- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
--- VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_payb, '', 'EhNamespaces', 999985, 2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_paym, '', 'EhNamespaces', 999971, 2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_payb, '', 'EhNamespaces', 999971, 2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_paym, '', 'EhNamespaces', 999973, 2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_payb, '', 'EhNamespaces', 999973, 2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_paym, '', 'EhNamespaces', 999974, 2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_payb, '', 'EhNamespaces', 999974, 2);
+-- VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_payb, '', 'EhNamespaces', 999971, 2);
+-- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+-- VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_paym, '', 'EhNamespaces', 999973, 2);
+-- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+-- VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_payb, '', 'EhNamespaces', 999973, 2);
+-- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+-- VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_paym, '', 'EhNamespaces', 999974, 2);
+-- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+-- VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_payb, '', 'EhNamespaces', 999974, 2);
 
 
 
@@ -212,22 +212,22 @@ VALUES (@eh_web_menus_id_payb, '账单统计', '20700', '/20000/20700/', '0', '2
 
 
 SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单管理', 'EhNamespaces', 999985, NULL, 2);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单统计', 'EhNamespaces', 999985, NULL, 2);
 -- INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
--- VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单管理', 'EhNamespaces', 999985, NULL, 2);
+-- VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单管理', 'EhNamespaces', 999971, NULL, 2);
 -- INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
--- VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单统计', 'EhNamespaces', 999985, NULL, 2);
-INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
-VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单管理', 'EhNamespaces', 999971, NULL, 2);
-INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
-VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单统计', 'EhNamespaces', 999971, NULL, 2);
-INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
-VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单管理', 'EhNamespaces', 999973, NULL, 2);
-INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
-VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单统计', 'EhNamespaces', 999973, NULL, 2);
-INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
-VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单管理', 'EhNamespaces', 999974, NULL, 2);
-INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
-VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单统计', 'EhNamespaces', 999974, NULL, 2);
+-- VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单统计', 'EhNamespaces', 999971, NULL, 2);
+-- INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+-- VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单管理', 'EhNamespaces', 999973, NULL, 2);
+-- INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+-- VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单统计', 'EhNamespaces', 999973, NULL, 2);
+-- INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+-- VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单管理', 'EhNamespaces', 999974, NULL, 2);
+-- INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+-- VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999985, 20700, '账单统计', 'EhNamespaces', 999974, NULL, 2);
 
 
 INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ('1', 'enterprise_customer', '0', '/1', '基本信息', 'basicInfo', '0', NULL, '2', '1', '2017-08-18 02:24:19', NULL, NULL);
