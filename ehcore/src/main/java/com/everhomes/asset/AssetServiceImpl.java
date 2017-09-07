@@ -1132,8 +1132,8 @@ public class AssetServiceImpl implements AssetService {
         }
         for(Map.Entry<String,String> entry : map.entrySet()){
             formula = formula.replace(entry.getKey(),entry.getValue());
-            formula += "*"+duration;
         }
+        formula += "*"+duration;
         BigDecimal response = CalculatorUtil.arithmetic(formula);
         response.setScale(2,BigDecimal.ROUND_CEILING);
         return response;
