@@ -29,6 +29,7 @@ import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
 
+import com.alibaba.fastjson.JSONArray;
 import com.everhomes.parking.jinyi.JinyiClearance;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -269,7 +270,13 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
                     String vendorName = parkingLot.getVendorName();
                     JinyiParkingVendorHandler handler = getParkingVendorHandler(vendorName);
                     List<JinyiClearance> actualLogs = handler.getTempCardLogs(r);
-                    clearanceLogProvider.updateClearanceLog(r);
+
+                    if (null != actualLogs) {
+                        List<ParkingActualClearanceLogDTO> result = actualLogs.stream().map(this::convertActualClearanceLogDTO).collect(Collectors.toList());
+                        r.setLogJson(JSONArray.toJSONString(result));
+                        clearanceLogProvider.updateClearanceLog(r);
+                    }
+
                 });
 
             });
