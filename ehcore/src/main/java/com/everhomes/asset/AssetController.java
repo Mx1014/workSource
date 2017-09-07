@@ -554,35 +554,6 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 展示一个未出账单的收费项详情       4
-//    /**
-//     * <p>展示一个未出账单的收费项详情</p>
-//     * <b>URL: /asset/listNotSettledBillItems</b>
-//     */
-//    @RequestMapping("listNotSettledBillItems")
-//    @RestReturn(value = ListBillItemsResponse.class)
-//    public RestResponse listNotSettledBillItems(ListBillItemsCommand cmd) {
-//        ListBillItemsResponse res = assetService.listBillItems(cmd);
-//        RestResponse response = new RestResponse();
-//        response.setErrorDescription("OK");
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        return response;
-//    }
-
-//    // this is for 展示一个未出账单的减免项列表           2
-//    /**
-//     * <p>展示一个未出账单的减免项列表</p>
-//     * <b>URL: /asset/listNotSettledBillExemptionItems</b>
-//     */
-//    @RequestMapping("listNotSettledBillExemptionItems")
-//    @RestReturn(value = ListBillExemptionItemsResponse.class)
-//    public RestResponse listNotSettledBillExemptionItems(ListBillItemsCommand cmd) {
-//        RestResponse response = new RestResponse();
-//        response.setErrorDescription("OK");
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        return response;
-//    }
-
     // this is for 删除一个账单         2
     /**
      * <p>删除一个账单</p>

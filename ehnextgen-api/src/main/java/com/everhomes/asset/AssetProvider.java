@@ -57,7 +57,7 @@ public interface AssetProvider {
 
     ShowCreateBillDTO showCreateBill(Long billGroupId);
 
-    ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr);
+    ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId);
 
     ListBillsDTO creatPropertyBill(BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId);
 
@@ -65,9 +65,9 @@ public interface AssetProvider {
 
     List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType);
 
-    List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId);
+    List<BillStaticsDTO> listBillStaticsByChargingItems(String ownerType, Long ownerId,String beginLimit, String endLimit);
 
-    List<BillStaticsDTO> listBillStaticsByCommunities(Integer currentNamespaceId);
+    List<BillStaticsDTO> listBillStaticsByCommunities(String dateStrBegin,String dateStrEnd,Integer currentNamespaceId);
 
     void modifyBillStatus(Long billId);
 

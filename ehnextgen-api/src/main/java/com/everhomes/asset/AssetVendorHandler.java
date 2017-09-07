@@ -28,5 +28,5 @@ public interface AssetVendorHandler {
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 
-    ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr);
+    ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId);
 }

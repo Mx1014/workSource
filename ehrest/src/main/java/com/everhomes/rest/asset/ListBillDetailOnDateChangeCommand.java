@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>OwnerType:所属者类型</li>
  * <li>targetType:客户类型</li>
  * <li>targetId:客户id</li>
+ * <li>contractId:合同ID</li>
  *</ul>
  */
 public class ListBillDetailOnDateChangeCommand {
@@ -22,6 +23,7 @@ public class ListBillDetailOnDateChangeCommand {
     private String OwnerType;
     private String targetType;
     private Long targetId;
+    private String contractId;
 
     public ListBillDetailOnDateChangeCommand() {
     }
@@ -33,6 +35,14 @@ public class ListBillDetailOnDateChangeCommand {
 
     public String getDateStr() {
         return dateStr;
+    }
+
+    public String getContractId() {
+        return contractId;
+    }
+
+    public void setContractId(String contractId) {
+        this.contractId = contractId;
     }
 
     public void setDateStr(String dateStr) {

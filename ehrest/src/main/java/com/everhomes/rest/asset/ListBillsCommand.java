@@ -13,8 +13,8 @@ import javax.validation.constraints.NotNull;
  * <li>addressId: 楼栋门牌id</li>
  * <li>pageSize: 显示数量</li>
  * <li>pageAnchor: 下页锚点</li>
- * <li>begin: 账期开始</li>
- * <li>end: 账期结束</li>
+ * <li>dateStrBegin: 账期开始</li>
+ * <li>dateStrEnd: 账期结束</li>
  * <li>targetName: 客户名称</li>
  * <li>billGroupName: 账单名称</li>
  * <li>billStatus: 账单状态,0:未缴;1:已缴</li>

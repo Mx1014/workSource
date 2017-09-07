@@ -145,8 +145,8 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr) {
-        return zuolinAssetVendorHandler.listBillDetailOnDateChange( ownerId,  ownerType,  targetType,  targetId,  dateStr);
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr, String contractId) {
+        return zuolinAssetVendorHandler.listBillDetailOnDateChange( ownerId,  ownerType,  targetType,  targetId,  dateStr,  contractId);
     }
 
     private Timestamp covertStrToTimestamp(String str) {

@@ -223,7 +223,7 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
     }
 
     @Override
-    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr) {
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId) {
         return null;
     }
     private String getUrlBody4GetApartmentBill(String communityName,String buildingName,String apartmentName,String payFlag){

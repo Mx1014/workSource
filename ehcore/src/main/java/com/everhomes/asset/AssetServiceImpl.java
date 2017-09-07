@@ -371,7 +371,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getTargetType().equals("eh_user")) {
             cmd.setTargetId(UserContext.currentUserId());
         }
-        return handler.listBillDetailOnDateChange(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getDateStr());
+        return handler.listBillDetailOnDateChange(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getDateStr(),cmd.getContractId());
     }
 
     @Override
@@ -444,9 +444,9 @@ public class AssetServiceImpl implements AssetService {
         if(dimension==1){
             list = assetProvider.listBillStaticsByDateStrs(cmd.getBeginLimit(),cmd.getEndLimit(),cmd.getOwnerId(),cmd.getOwnerType());
         }else if(dimension==2){
-            list = assetProvider.listBillStaticsByChargingItems(cmd.getOwnerType(),cmd.getOwnerId());
+            list = assetProvider.listBillStaticsByChargingItems(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginLimit(),cmd.getEndLimit());
         }else if(dimension==3){
-            list = assetProvider.listBillStaticsByCommunities(UserContext.getCurrentNamespaceId());
+            list = assetProvider.listBillStaticsByCommunities(cmd.getBeginLimit(),cmd.getEndLimit(),UserContext.getCurrentNamespaceId());
         }
         return list;
     }

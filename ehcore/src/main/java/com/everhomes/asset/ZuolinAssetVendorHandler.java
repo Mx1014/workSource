@@ -306,9 +306,10 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr) {
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
-        response =  assetProvider.getBillDetailByDateStr(ownerId,ownerType,targetId,targetType,dateStr);
+        Long conId = Long.parseLong(contractId);
+        response =  assetProvider.getBillDetailByDateStr(ownerId,ownerType,targetId,targetType,dateStr,conId);
         return response;
     }
 
