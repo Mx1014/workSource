@@ -344,14 +344,14 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<Contract> listContractsByIds(List<Long> ids) {
+	public Map<Long, Contract> listContractsByIds(List<Long> ids) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
 		query.addConditions(Tables.EH_CONTRACTS.ID.in(ids));
 
-		List<Contract> result = new ArrayList<>();
+		Map<Long, Contract> result = new HashMap<>();
 		query.fetch().map((r) -> {
-			result.add(ConvertHelper.convert(r, Contract.class));
+			result.put(r.getId(), ConvertHelper.convert(r, Contract.class));
 			return null;
 		});
 

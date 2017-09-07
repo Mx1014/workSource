@@ -183,14 +183,14 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public List<EnterpriseCustomer> listEnterpriseCustomersByIds(List<Long> ids) {
+    public Map<Long, EnterpriseCustomer> listEnterpriseCustomersByIds(List<Long> ids) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ID.in(ids));
 
-        List<EnterpriseCustomer> result = new ArrayList<>();
+        Map<Long, EnterpriseCustomer> result = new HashMap<>();
         query.fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            result.put(r.getId(),ConvertHelper.convert(r, EnterpriseCustomer.class));
             return null;
         });
 

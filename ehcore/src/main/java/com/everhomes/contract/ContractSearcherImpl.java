@@ -42,6 +42,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -218,9 +219,11 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         }
 
         List<ContractDTO> dtos = new ArrayList<ContractDTO>();
-        List<Contract> contracts = contractProvider.listContractsByIds(ids);
+        Map<Long, Contract> contracts = contractProvider.listContractsByIds(ids);
         if(contracts != null && contracts.size() > 0) {
-            contracts.forEach(contract -> {
+            //一把取出来的列表顺序和搜索引擎中得到的ids的顺序不一定一样 以搜索引擎的为准 by xiongying 20170907
+            ids.forEach(id -> {
+                Contract contract = contracts.get(id);
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
                 if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
                     EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());

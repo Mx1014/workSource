@@ -18,7 +18,7 @@ public interface EnterpriseCustomerProvider {
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndName(Integer namespaceId, String name);
     List<EnterpriseCustomer> listEnterpriseCustomers(CrossShardListingLocator locator, Integer pageSize);
-    List<EnterpriseCustomer> listEnterpriseCustomersByIds(List<Long> ids);
+    Map<Long, EnterpriseCustomer> listEnterpriseCustomersByIds(List<Long> ids);
     Map<Long, Long> listEnterpriseCustomerSourceByCommunityId(Long communityId);
     Map<Long, Long> listEnterpriseCustomerIndustryByCommunityId(Long communityId);
 
