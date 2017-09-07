@@ -979,7 +979,7 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41330,'', 'EhNamespaces', 1000000,2);
 
--- by dengs, 20170901 新版ui已经部分活动添加，已在alpha，beta执行过了。
+-- by dengs, 20170901 新版ui已经部分活动添加，已在alpha，beta，线网执行过了。
 UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwaFlXTmxNbVV3WmpRelpEWXdZbUl6Wmpka01qbGhOV0kwTVdKbFkyTmxOdw' WHERE item_label = '交流大厅' AND `namespace_id` = 1000000;
 UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvNVpEVTJPV0V3TnpKa05EQmxPVEJsTkRReU1XWmhNbVl5TTJVNFlqUmhNZw', action_data = '{"url":"https://core.zuolin.com/station-booking/index.html?hideNavigationBar=1#/station_booking#sign_suffix"}',action_type = '13' WHERE item_label = '创客空间' AND `namespace_id` = 1000000;
 UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveE9Ea3dNMkk0TURFM01USXdObU13TkROa01XTTBaalJqWWpFeE0ySXdZUQ' WHERE item_label = '园区入驻' AND `namespace_id` = 1000000;
