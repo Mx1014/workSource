@@ -20,6 +20,10 @@ update eh_launch_pad_items set action_data='{"url":"zl://propertyrepair/create?t
 -- 修改owner_type by st.zheng
 update eh_service_alliances set owner_id=(select organization_id from eh_organization_communities where eh_service_alliances.owner_id = community_id limit 0,1),owner_type = 'organaization' where owner_type = 'community';
 
+-- 解决服务联盟首页 type重复问题 by st.zheng
+update eh_service_alliances set type = 201192 where  owner_id=1012516 and parent_id=0 and name = '租赁指南';
+
+
 -- 园区入驻3.5 add by sw 20170904
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 	VALUES ('40105', '项目介绍', '40100', NULL, 'projects_introduce', '0', '2', '/40000/40100/40105', 'park', '412', '40100', '3', NULL, 'module');

@@ -16,3 +16,6 @@ update eh_launch_pad_items set action_data='{"url":"zl://propertyrepair/create?t
 
 -- 修改owner_type by st.zheng
 update eh_service_alliances set owner_id=(select organization_id from eh_organization_communities where eh_service_alliances.owner_id = community_id limit 0,1),owner_type = 'organaization' where owner_type = 'community';
+
+-- 解决服务联盟首页 type重复问题 by st.zheng
+update eh_service_alliances set type = 201192 where  owner_id=1012516 and parent_id=0 and name = '租赁指南';
