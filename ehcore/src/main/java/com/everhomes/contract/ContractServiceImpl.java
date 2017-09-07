@@ -808,12 +808,13 @@ public class ContractServiceImpl implements ContractService {
 			contract.setDownpaymentTime(new Timestamp(cmd.getDownpaymentTime()));
 		}
 		contract.setCreateTime(exist.getCreateTime());
+
+		Double rentSize = dealContractApartments(contract, cmd.getApartments());
+		contract.setRentSize(rentSize);
 		contractProvider.updateContract(contract);
 
-		dealContractApartments(contract, cmd.getApartments());
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
-
 		contractSearcher.feedDoc(contract);
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			addToFlowCase(contract);
