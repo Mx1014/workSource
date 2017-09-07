@@ -8,8 +8,8 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  *     <li>activityId: 活动ID</li>
- *     <li>clientAppName: Realm值</li>
- *     <li>openid: openid，微信公众号需要穿openid</li>
+ *     <li>clientAppName: Realm值，app客户端必传</li>
+ *     <li>paymentType: 支付方式，微信公众号支付方式必填，9-公众号支付 参考{@link com.everhomes.order.PaymentType}</li>
  * </ul>
  */
 public class CreateSignupOrderV2Command {
@@ -18,7 +18,7 @@ public class CreateSignupOrderV2Command {
 
 	private String clientAppName;
 
-	private String openid;
+	private Integer paymentType;
 
 	public Long getActivityId() {
 		return activityId;
@@ -36,12 +36,12 @@ public class CreateSignupOrderV2Command {
 		this.clientAppName = clientAppName;
 	}
 
-	public String getOpenid() {
-		return openid;
+	public Integer getPaymentType() {
+		return paymentType;
 	}
 
-	public void setOpenid(String openid) {
-		this.openid = openid;
+	public void setPaymentType(Integer paymentType) {
+		this.paymentType = paymentType;
 	}
 
 	@Override

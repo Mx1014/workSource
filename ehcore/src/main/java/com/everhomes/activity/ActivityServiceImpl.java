@@ -708,7 +708,23 @@ public class ActivityServiceImpl implements ActivityService {
 
 
 		PreOrderMessage preOrderMessage = new PreOrderMessage();
+
 		preOrderMessage.setClientAppName(cmd.getClientAppName());
+
+		//微信公众号支付，重新设置ClientName，设置支付方式和参数
+		if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS.getCode()){
+
+			if(preOrderMessage.getClientAppName() == null){
+				Integer namespaceId = UserContext.getCurrentNamespaceId();
+				preOrderMessage.setClientAppName("wechat_" + namespaceId);
+			}
+			preOrderMessage.setPaymentType(PaymentType.WECHAT_JS.getCode());
+			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+			paymentParamsDTO.setPayType("no_credit");
+			User user = UserContext.current().getUser();
+			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+		}
+
 		preOrderMessage.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
 		preOrderMessage.setOrderId(roster.getOrderNo());
 		//TODO bigDecimal  to long
@@ -723,7 +739,6 @@ public class ActivityServiceImpl implements ActivityService {
 				"activity roster pay");
 		preOrderMessage.setSummary(temple);
 
-
 		GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
 		timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
@@ -731,39 +746,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 		preOrderMessage.setExpiration(expiredTime);
 
-		preOrderMessage.setPaymentType(PaymentType.APLIPAY.getCode());
-
 		PreOrderCallBack callBack = payService.createPreOrder(preOrderMessage);
-//
-//
-//		//设置过期时间
-//		GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
-//		timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-//		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
-//		Map<String, Long> bodyMap = new HashMap<String, Long>();
-//		Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
-//		bodyMap.put("expiredTime", expiredTime);
-//
-//		//调用统一处理订单接口，返回统一订单格式
-//		CommonOrderCommand orderCmd = new CommonOrderCommand();
-//		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
-//				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_FEE),
-//				UserContext.current().getUser().getLocale(),
-//				"activity roster pay");
-//
-//		orderCmd.setBody(bodyMap.toString());
-//		orderCmd.setOrderNo(roster.getOrderNo().toString());
-//		orderCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
-//		orderCmd.setSubject(temple);
-//		orderCmd.setTotalFee(activity.getChargePrice());
-//		CommonOrderDTO dto = null;
-//		try {
-//			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
-//		} catch (Exception e) {
-//			LOGGER.error("convertToCommonOrder is fail.",e);
-//			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_CONVERT_TO_COMMON_ORDER_FAIL,
-//					"convertToCommonOrder is fail.");
-//		}
 
 		return callBack;
 	}

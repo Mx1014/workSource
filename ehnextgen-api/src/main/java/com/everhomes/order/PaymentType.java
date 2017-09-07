@@ -2,11 +2,14 @@
 package com.everhomes.order;
 
 /**
- * Created by Wentian Wang on 2017/9/6.
+ * <ul>
+ *     <li>WECHAT_APP(1): WECHAT_APP</li>
+ *     <li>ALI_PAY(8): ALI_PAY</li>
+ *     <li>WECHAT_JS(9): WECHAT_JS</li>
+ * </ul>
  */
-
 public enum PaymentType {
-    WEICHAT_APP(1),APLIPAY(8);
+    WECHAT_APP(1), ALI_PAY(8), WECHAT_JS(9);
     private Integer code;
 
     PaymentType(Integer code) {
