@@ -843,11 +843,7 @@ public class AssetServiceImpl implements AssetService {
         tempDuration = tempDuration.setScale(2,BigDecimal.ROUND_CEILING);
         if(duration != 0){
             if(c5.compareTo(c3)==0){
-<<<<<<< HEAD
             }else{
-=======
-            } else{
->>>>>>> d41b8cc86b8f0650ab6365bdd6cfe59c27cf49d0
                 addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, tempDuration.floatValue(),billDay);
             }
         }
