@@ -34,6 +34,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ying.xiong on 2017/8/17.
@@ -186,9 +187,11 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
 
         List<EnterpriseCustomerDTO> dtos = new ArrayList<>();
-        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomersByIds(ids);
+        Map<Long, EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomersByIds(ids);
         if(customers != null && customers.size() > 0) {
-            customers.forEach(customer -> {
+            //一把取出来的列表顺序和搜索引擎中得到的ids的顺序不一定一样 以搜索引擎的为准 by xiongying 20170907
+            ids.forEach(id -> {
+                EnterpriseCustomer customer = customers.get(id);
                 EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
                 ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
                 if(categoryItem != null) {
