@@ -1541,6 +1541,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .execute();
             context.delete(t2)
                     .where(t2.BILL_ID.in(billIds))
+                    .or(t2.CONTRACT_ID.eq(contractId))
                     .execute();
             context.delete(t1)
                     .where(t1.CONTRACT_ID.eq(contractId))
