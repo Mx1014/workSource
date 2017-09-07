@@ -381,6 +381,8 @@ public class ActivityServiceImpl implements ActivityService {
     	return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
 
+				LOGGER.warn("------signup start ");
+
 	        	long signupStatStartTime = System.currentTimeMillis();
 		        User user = UserContext.current().getUser();
 		        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
@@ -390,7 +392,7 @@ public class ActivityServiceImpl implements ActivityService {
 		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 		        }
 
-				LOGGER.warn("------signup start userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+				LOGGER.warn("------ userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
 
 				try {
 					Random random = new Random();
@@ -495,8 +497,18 @@ public class ActivityServiceImpl implements ActivityService {
 	            if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode() && activity.getConfirmFlag() == 0){
 	            	rosterPayTimeoutService.pushTimeout(roster);
 	            }
-	            
+
+				Activity temp = activityProvider.findActivityById(activity.getId());
+
+				LOGGER.warn("***************************************************** tempcount: " + temp.getSignupAttendeeCount() + "activitycount: " + activity.getSignupAttendeeCount());
+
 	            activityProvider.updateActivity(activity);
+
+
+				Activity temp1 = activityProvider.findActivityById(activity.getId());
+
+				LOGGER.warn("***************************************************** tempcount: " + temp1.getSignupAttendeeCount());
+
 //	            return status;
 	            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
 	            
@@ -547,6 +559,16 @@ public class ActivityServiceImpl implements ActivityService {
 	            		(signupStatEndTime - rosterStatStartTime), cmd);
 
 				LOGGER.warn("------signup end userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
+				Activity temp2 = activityProvider.findActivityById(activity.getId());
+
+				LOGGER.warn("***************************************************** tempcount: " + temp2.getSignupAttendeeCount());
+
+				if(temp2.getSignupAttendeeCount().byteValue() != activity.getSignupAttendeeCount()){
+					for(int i=0; i<5; i++){
+						LOGGER.warn("***************************************************** signupAttendeeCount: " + activity.getSignupAttendeeCount());
+					}
+				}
 
 				return dto;
 	        });
@@ -638,7 +660,7 @@ public class ActivityServiceImpl implements ActivityService {
     	long startTime = System.currentTimeMillis();
     	Activity activity = activityProvider.findActivityById(activityId);
     	if(activity == null || activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() != ActivityChargeFlag.CHARGE.getCode()){
-    		LOGGER.warn("No need to cancel expire rosters, activityId={}, activity={}", activityId, activity);
+    		LOGGER.warn("No need to cancel expire rosters, activityId={}, activity={}, count ={}", activityId, activity, activity.getSignupAttendeeCount());
     		return;
     	}
     	
@@ -1672,6 +1694,7 @@ public class ActivityServiceImpl implements ActivityService {
 		
 		return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
+				LOGGER.warn("------- cancelSignup start ");
 	        	long cancelStartTime = System.currentTimeMillis();
 	        	//cmd中用户Id，该字段当前仅用于定时取消订单时无法从UserContext.current中获取用户
 	        	User user = null;
@@ -1687,7 +1710,7 @@ public class ActivityServiceImpl implements ActivityService {
 	                         ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 	             }
 
-				LOGGER.warn("------cancelSignup start userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+				LOGGER.warn("------ userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
 
 				try {
 					Random random = new Random();
@@ -1755,6 +1778,17 @@ public class ActivityServiceImpl implements ActivityService {
 	             LOGGER.debug("Canel the activity signup, elapse={}, cmd={}", (cancelEndTime - cancelStartTime), cmd);
 
 				LOGGER.warn("------cancelSignup end userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
+
+				Activity temp = activityProvider.findActivityById(activity.getId());
+
+				LOGGER.warn("***************************************************** tempcount: " + temp.getSignupAttendeeCount());
+
+				if(temp.getSignupAttendeeCount().byteValue() != activity.getSignupAttendeeCount()){
+					for(int i=0; i<5; i++){
+						LOGGER.warn("***************************************************** signupAttendeeCount: " + activity.getSignupAttendeeCount());
+					}
+				}
 
 	             return dto;
 	        	

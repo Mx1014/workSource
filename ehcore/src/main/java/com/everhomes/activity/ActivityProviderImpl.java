@@ -165,7 +165,24 @@ public class ActivityProviderImpl implements ActivityProivider {
 	 	                activity.setSignupFamilyCount(activity.getSignupFamilyCount() - 1);
 	            }
 	            ActivityProivider self = PlatformContext.getComponent(ActivityProivider.class);
-	            self.updateActivity(activity);
+
+            Activity temp = findActivityById(activity.getId());
+
+            LOGGER.warn("***************************************************** tempcount: " + temp.getSignupAttendeeCount() + "activitycount: " + activity.getSignupAttendeeCount());
+
+
+            self.updateActivity(activity);
+
+            Activity temp2 = findActivityById(activity.getId());
+
+            LOGGER.warn("***************************************************** tempcount: " + temp2.getSignupAttendeeCount());
+
+            if(temp2.getSignupAttendeeCount() != activity.getSignupAttendeeCount()){
+                for(int i=0; i<5; i++){
+                    LOGGER.warn("***************************************************** signupAttendeeCount: " + activity.getSignupAttendeeCount());
+                }
+            }
+
 	            // update dao and push event
 	            DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivities.class, activity.getId());
 	            
