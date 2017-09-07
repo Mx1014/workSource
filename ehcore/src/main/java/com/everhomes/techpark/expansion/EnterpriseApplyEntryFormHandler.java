@@ -31,7 +31,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
     @Autowired
     private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
     @Autowired
-    private GeneralFormService generalFormService;
+    private GeneralFormProvider generalFormProvider;
 
     @Override
     public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
@@ -39,16 +39,21 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
                 cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASE_PROMOTION.getCode());
 
-        Long requestFormId = null;
+        BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
+                GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
+        Long requestFormId;
         if (null == request) {
             //查询初始默认数据
-            BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
-                    GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
-
             GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASE_PROMOTION.getCode());
             requestFormId = form.getFormOriginId();
         }else {
-            requestFormId = request.getSourceId();
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(request.getSourceId());
+            if (form == null) {
+                GeneralForm defaultForm = handler.getDefaultGeneralForm(EntityType.LEASE_PROMOTION.getCode());
+                requestFormId = defaultForm.getFormOriginId();
+            }else {
+                requestFormId = request.getSourceId();
+            }
         }
         List<PostApprovalFormItem> values = cmd.getValues();
 

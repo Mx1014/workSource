@@ -47,16 +47,22 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
                 cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
 
-        Long requestFormId = null;
+        BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
+                GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
+
+        Long requestFormId;
         if (null == request) {
             //查询初始默认数据
-            BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
-                    GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
-
-            GeneralForm form = handler.getDefaultGeneralForm(EntityType.BUILDING.getCode());
-            requestFormId = form.getFormOriginId();
+            GeneralForm defaultForm = handler.getDefaultGeneralForm(EntityType.BUILDING.getCode());
+            requestFormId = defaultForm.getFormOriginId();
         }else {
-            requestFormId = request.getSourceId();
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(request.getSourceId());
+            if (form == null) {
+                GeneralForm defaultForm = handler.getDefaultGeneralForm(EntityType.BUILDING.getCode());
+                requestFormId = defaultForm.getFormOriginId();
+            }else {
+                requestFormId = request.getSourceId();
+            }
         }
 
         List<PostApprovalFormItem> values = cmd.getValues();
@@ -146,7 +152,7 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
                 cmd2.setFormId(request.getSourceId());
                 dto = generalFormService.getTemplateByFormId(cmd2);
                 fieldDTOs.addAll(dto.getFormFields());
-            }catch (Exception e) {
+            }catch (RuntimeErrorException e) {
                 LOGGER.error("get Template By SourceId failed, cmd={}", cmd);
                 dto = ConvertHelper.convert(form, GeneralFormDTO.class);
             }
