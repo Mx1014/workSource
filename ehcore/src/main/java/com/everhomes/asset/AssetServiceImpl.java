@@ -1136,7 +1136,7 @@ public class AssetServiceImpl implements AssetService {
     @Scheduled(cron = "0 0 23 * * ?")
     @Override
     public void updateBillSwitchOnTime() {
-        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE){
+//        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE){
             coordinationProvider.getNamedLock(CoordinationLocks.BILL_STATUS_UPDATE.getCode()).tryEnter(() ->{
                 List<PaymentBillGroup> list = assetProvider.listAllBillGroups();
                 //获取当前时间，如果是5号，则将之前的账单的switch装为1
@@ -1150,7 +1150,6 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }
             });
-        }
     }
 
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
