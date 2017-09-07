@@ -656,21 +656,11 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
             EbeiPmTaskDTO ebeiPmTask = getTaskDetail(task);
 
             Integer state = ebeiPmTask.getState();
-            task.setStatus(state.byteValue() > PmTaskStatus.PROCESSED.getCode() ? PmTaskStatus.PROCESSED.getCode(): state.byteValue() );
+            task.setStatus(state.byteValue() > PmTaskStatus.PROCESSED.getCode() &&  state.byteValue()<PmTaskStatus.INACTIVE.getCode()
+                    ? PmTaskStatus.PROCESSED.getCode(): state.byteValue() );
             //pmTaskProvider.updateTask(task);
             dto.setStatus(task.getStatus());
 
-            //更新工作流case状态
-            FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
-
-            if (FlowCaseStatus.INVALID.getCode() != flowCase.getStatus()) {
-                Byte flowCaseStatus = state.byteValue() >= PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
-                        (state.byteValue() == PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.ABSORTED.getCode() :
-                                FlowCaseStatus.PROCESS.getCode());
-                flowCase.setStatus(flowCaseStatus);
-                //flowCaseProvider.updateFlowCase(flowCase);
-
-            }
 
             CategoryDTO taskCategory = createCategoryDTO();
             dto.setTaskCategoryName(taskCategory.getName());
@@ -710,10 +700,6 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 
             return null;
         });
-
-        //elasticsearch更新
-        //pmTaskSearch.deleteById(task.getId());
-        //pmTaskSearch.feedDoc(task);
 
         return dto;
     }
