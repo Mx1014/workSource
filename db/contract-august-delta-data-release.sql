@@ -13,7 +13,13 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('cus
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10013', 'zh_CN', '客户名称已存在');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10014', 'zh_CN', '客户类型不存在');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('customer', '10015', 'zh_CN', '客户级别不存在');
-
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('contract', '10001', 'zh_CN', '合同不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('contract', '10002', 'zh_CN', '合同编号已存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('contract', '10003', 'zh_CN', '请启用工作流');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('contract', '10004', 'zh_CN', '合同没有审批通过');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('contract', '10005', 'zh_CN', '合同参数已存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('contract', '10006', 'zh_CN', '只有待发起的合同可以发起');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('contract', '10007', 'zh_CN', '合同关联的资产不是待租状态');
 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
 VALUES (21100, '客户管理', 20000, NULL, '', 1, 2, '/20000/21100', 'park', 390);
