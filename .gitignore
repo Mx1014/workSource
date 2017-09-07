@@ -46,6 +46,7 @@ ehtest-integration/src/test/config/ehcore.properties
 
 ehborder/pom.xml
 ehcore/pom.xml
+ehcore/pom.xml.template
 ehcore-persist/pom.xml
 ehnextgen-api/pom.xml
 ehnextgen-forum/pom.xml

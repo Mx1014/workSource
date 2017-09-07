@@ -47,10 +47,10 @@ public interface ParkingProvider {
     
     List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
                                                        String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate,
-                                                       Timestamp endDate, Byte status, String carBrand, String carSerieName, String plateOwnerEntperiseName,
+                                                       Timestamp endDate, Byte status, String carBrand, String carSeriesName, String plateOwnerEnterpriseName,
                                                        Long flowId, SortField order, Long pageAnchor, Integer pageSize);
     
-    void setParkingLotConfig(ParkingLot parkingLot);
+    void updateParkingLot(ParkingLot parkingLot);
     
     ParkingCardRequest findParkingCardRequestById(Long id);
     

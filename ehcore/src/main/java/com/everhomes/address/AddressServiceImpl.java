@@ -25,10 +25,11 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.organization.ExecuteImportTaskCallback;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmContact;
@@ -46,15 +47,9 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.organization.ImportFileResultLog;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.ImportFileTaskType;
-import com.everhomes.rest.organization.ImportOrganizationContactDataDTO;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
-import com.everhomes.rest.organization.pm.PmAddressMappingStatus;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.region.RegionServiceErrorCode;
@@ -1690,7 +1685,108 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Override
     public List<GetApartmentNameByBuildingNameDTO> getApartmentNameByBuildingName(GetApartmentNameByBuildingNameCommand cmd) {
-        return addressProvider.getApartmentNameByBuildingName(cmd.getBuildingName(),cmd.getCommunityId(),UserContext.getCurrentNamespaceId());
+        return addressProvider.getApartmentNameByBuildingName(cmd.getBuildingName(), cmd.getCommunityId(), UserContext.getCurrentNamespaceId());
+    }
+    @Override
+    public ListNearbyMixCommunitiesCommandV2Response listNearbyMixCommunitiesV2(ListNearbyMixCommunitiesCommand cmd) {
+        ListNearbyMixCommunitiesCommandV2Response resp = new ListNearbyMixCommunitiesCommandV2Response();
+
+        if (cmd.getLatigtue() == null || cmd.getLongitude() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter, latitude and longitude have to be both specified or neigher");
+
+
+        if (cmd.getPageAnchor() == null)
+            cmd.setPageAnchor(0L);
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+
+        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+        if (namespaceId == 0) {
+            ListNearbyMixCommunitiesCommandResponse resp_1 = listMixCommunitiesByDistance(cmd, locator, pageSize);
+            resp.setDtos(resp_1.getDtos());
+            return resp;
+        } else {
+            List<CommunityDTO> dots = new ArrayList<>();
+            List<CommunityDTO> resudentials = new ArrayList<>();
+            List<CommunityDTO> commercials = new ArrayList<>();
+            if(cmd.getCommunityType() != null){
+                dots = this.communityProvider.listCommunitiesByNamespaceId(cmd.getCommunityType(), namespaceId, locator, pageSize);
+            }else{
+                resudentials = this.communityProvider.listCommunitiesByNamespaceId(CommunityType.RESIDENTIAL.getCode(), namespaceId, locator, pageSize);
+                commercials = this.communityProvider.listCommunitiesByNamespaceId(CommunityType.COMMERCIAL.getCode(), namespaceId, locator, pageSize);
+            }
+
+            if (dots != null)
+                resp.setDtos(dots);
+            if (resudentials != null)
+                resp.setResudentials(resudentials);
+            if (commercials != null)
+                resp.setCommercials(commercials);
+
+            return resp;
+        }
+    }
+
+    @Override
+    public ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(ListNearbyMixCommunitiesCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        ListingLocator locator = new ListingLocator();
+        Integer pageSize = 20;
+        if (cmd.getPageSize() != null) {
+            pageSize = cmd.getPageSize();
+        }
+        List<Community> communities = new ArrayList<>();
+        if (null != cmd.getCommunityType()) {
+            communities = communityProvider.listCommunities(namespaceId, locator, 1000, new ListingQueryBuilderCallback() {
+                @Override
+                public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                    query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(cmd.getCommunityType()));
+                    return query;
+                }
+            });
+        } else {
+            communities = communityProvider.listCommunities(namespaceId, locator, 1000, null);
+        }
+
+        Map<Integer, CommunityDTO> sortMap = new TreeMap<Integer, CommunityDTO>(new Comparator<Integer>() {
+            public int compare(Integer o1, Integer o2) {
+                //降序
+                return o2.compareTo(o1);
+            }
+        });
+        communities.forEach(r -> {
+            List<OrganizationCommunityRequest> organizationCommunityRequests = this.organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, r.getId(), 1000, null);
+            Integer communityUserCount = organizationProvider.countUserOrganization(namespaceId, r.getId(), null);
+            sortMap.put(communityUserCount, ConvertHelper.convert(r, CommunityDTO.class));
+//            if(organizationCommunityRequests != null && organizationCommunityRequests.size() > 0){
+//                organizationCommunityRequests.forEach(x -> {
+////                Organization org = this.organizationProvider.findOrganizationById(x.getMemberId());
+////                if(org.getGroupType() ==  OrganizationGroupType.ENTERPRISE.getCode()){
+////                    Integer communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
+////                }
+//                    Integer communityUserCount = organizationProvider.countUserOrganization(namespaceId, x.getCommunityId(), null);
+//                    Community community = this.communityProvider.findCommunityById(x.getCommunityId());
+//                    sortMap.put(communityUserCount, ConvertHelper.convert(community, CommunityDTO.class));
+//                });
+//            }else{
+//                sortMap.put(0, ConvertHelper.convert(r, CommunityDTO.class));
+//            }
+        });
+
+        if (sortMap != null) {
+            ListNearbyMixCommunitiesCommandV2Response response = new ListNearbyMixCommunitiesCommandV2Response();
+            List<CommunityDTO> dtos = new ArrayList<>();
+            dtos.addAll(sortMap.values());
+            if(pageSize < dtos.size()){
+                dtos = dtos.subList(0, pageSize - 1);
+            }
+            response.setDtos(dtos);
+            return response;
+        }
+        return null;
     }
 
     private List<ImportFileResultLog<ImportApartmentDataDTO>> importApartment(List<ImportApartmentDataDTO> datas,

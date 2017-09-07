@@ -14,17 +14,21 @@ import java.io.Serializable;
 public class ServiceAllianceActionData implements Serializable{
     private static final long serialVersionUID = -742724365939053762L;
     
-    private Byte type;
+    private Long type;
     
     private Long parentId;
 
     private String displayType;
 
-    public Byte getType() {
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public Long getType() {
         return type;
     }
 
-    public void setType(Byte type) {
+    public void setType(Long type) {
         this.type = type;
     }
 

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.rest.parking.*;
 import com.everhomes.server.schema.tables.daos.*;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
@@ -19,9 +21,6 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.parking.ParkingOrderDeleteFlag;
-import com.everhomes.rest.parking.ParkingCardRequestStatus;
-import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhParkingAttachments;
@@ -62,7 +61,12 @@ public class ParkingProviderImpl implements ParkingProvider {
     public ParkingLot findParkingLotById(Long id) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingLots.class));
         EhParkingLotsDao dao = new EhParkingLotsDao(context.configuration());
-        return ConvertHelper.convert(dao.findById(id), ParkingLot.class);
+
+		ParkingLot parkingLot = ConvertHelper.convert(dao.findById(id), ParkingLot.class);
+
+		populateParkingConfigInfo(parkingLot);
+
+        return parkingLot;
     }
     
     @Override
@@ -92,9 +96,36 @@ public class ParkingProviderImpl implements ParkingProvider {
         if(null != ownerId)
         	query.addConditions(Tables.EH_PARKING_LOTS.OWNER_ID.eq(ownerId));
         
-        return query.fetch().map(r -> ConvertHelper.convert(r, ParkingLot.class));
+        return query.fetch().map(r -> {
+			ParkingLot parkingLot = ConvertHelper.convert(r, ParkingLot.class);
+			populateParkingConfigInfo(parkingLot);
+
+			return parkingLot;
+		});
     }
-    
+
+    private void populateParkingConfigInfo(ParkingLot parkingLot) {
+		String configJson = parkingLot.getConfigJson();
+		ParkingLot temp = JSONObject.parseObject(configJson, ParkingLot.class);
+		parkingLot.setTempfeeFlag(temp.getTempfeeFlag());
+		parkingLot.setRateFlag(temp.getRateFlag());
+		parkingLot.setLockCarFlag(temp.getLockCarFlag());
+		parkingLot.setSearchCarFlag(temp.getSearchCarFlag());
+		parkingLot.setCurrentInfoType(temp.getCurrentInfoType());
+		parkingLot.setContact(temp.getContact());
+
+		String expiredRechargeJson = parkingLot.getExpiredRechargeJson();
+		if (null != expiredRechargeJson) {
+			ParkingExpiredRechargeConfig config = JSONObject.parseObject(expiredRechargeJson, ParkingExpiredRechargeConfig.class);
+			parkingLot.setExpiredRechargeFlag(config.getExpiredRechargeFlag());
+			parkingLot.setExpiredRechargeMonthCount(config.getExpiredRechargeMonthCount());
+			parkingLot.setExpiredRechargeType(config.getExpiredRechargeType());
+			parkingLot.setMaxExpiredDay(config.getMaxExpiredDay());
+		}else{
+			parkingLot.setExpiredRechargeFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+		}
+	}
+
     @Override
     public List<ParkingRechargeRate> listParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,
     		String cardType) {
@@ -213,7 +244,6 @@ public class ParkingProviderImpl implements ParkingProvider {
         	
         	p.setFlowCaseId(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.FLOW_CASE_ID));
         	p.setFlowId(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.FLOW_ID));
-        	p.setFlowVersion(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.FLOW_VERSION));
         	return p;
         }).collect(Collectors.toList());
         
@@ -416,7 +446,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
                                                               String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate, Timestamp endDate,
-                                                              Byte status, String carBrand, String carSerieName, String plateOwnerEntperiseName, Long flowId,
+                                                              Byte status, String carBrand, String carSeriesName, String plateOwnerEnterpriseName, Long flowId,
                                                               SortField order, Long pageAnchor, Integer pageSize){
 
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -436,14 +466,14 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.eq(plateNumber));
         if(StringUtils.isNotBlank(plateOwnerName))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_NAME.eq(plateOwnerName));
-        if(StringUtils.isNotBlank(plateOwnerEntperiseName))
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_ENTPERISE_NAME.eq(plateOwnerEntperiseName));
+        if(StringUtils.isNotBlank(plateOwnerEnterpriseName))
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_ENTPERISE_NAME.eq(plateOwnerEnterpriseName));
         if(StringUtils.isNotBlank(plateOwnerPhone))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_PHONE.eq(plateOwnerPhone));
         if(StringUtils.isNotBlank(carBrand))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CAR_BRAND.eq(carBrand));
-        if(StringUtils.isNotBlank(carSerieName))
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CAR_SERIE_NAME.eq(carSerieName));
+        if(StringUtils.isNotBlank(carSeriesName))
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CAR_SERIE_NAME.eq(carSeriesName));
         if(null != status)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(status));
         if(null != startDate)
@@ -463,7 +493,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
     
 	@Override
-	public void setParkingLotConfig(ParkingLot parkingLot) {
+	public void updateParkingLot(ParkingLot parkingLot) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhParkingLotsDao dao = new EhParkingLotsDao(context.configuration());
 		dao.update(parkingLot);

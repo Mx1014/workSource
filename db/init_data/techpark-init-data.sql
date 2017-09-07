@@ -974,3 +974,234 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 --  by sfyan 20160712
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( (@menu_scope_id := @menu_scope_id + 1), 43600,'', 'EhNamespaces', 1000000 , 0);
+
+-- by R,2017.09.05 #14916 增加配置“用户行为统计分析”的菜单
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41330,'', 'EhNamespaces', 1000000,2);
+
+-- by dengs, 20170901 新版ui已经部分活动添加，已在alpha，beta，线网执行过了。
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwaFlXTmxNbVV3WmpRelpEWXdZbUl6Wmpka01qbGhOV0kwTVdKbFkyTmxOdw' WHERE item_label = '交流大厅' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvNVpEVTJPV0V3TnpKa05EQmxPVEJsTkRReU1XWmhNbVl5TTJVNFlqUmhNZw', action_data = '{"url":"https://core.zuolin.com/station-booking/index.html?hideNavigationBar=1#/station_booking#sign_suffix"}',action_type = '13' WHERE item_label = '创客空间' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveE9Ea3dNMkk0TURFM01USXdObU13TkROa01XTTBaalJqWWpFeE0ySXdZUQ' WHERE item_label = '园区入驻' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvM016UmpNREEyTlROa1pEQTVaR1kxWW1GbE1qUTBZamt3TnpRd1lXUTNZdw' WHERE item_label = '服务联盟' AND `namespace_id` = 1000000;
+
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvM05EUXpPVEF5Tm1SallqRTVZelV3TkdVNU5HWmpOMkprTkRVek4yTXdOQQ', default_order = 1 WHERE item_label = '物业报修' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwbU56QTVOMlF4TnpZNU1qQXlNMlF5WkRBd1pqZ3pNRGM1WVdKbVpEVmpPUQ', default_order = 2 WHERE item_label = '停车充值' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvNE0ySmtOVGMzTVdJNVkyRm1NalF4TnpjM01ERTFOakl5WmpNM1ptUmlOZw', default_order = 4 WHERE item_label = '门禁' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwalpEUXpOV0l6TW1OaVptWTFaVE00TkdVMU5qQTBPREk1T1RneU9EWXhOZw', default_order = 5 WHERE item_label = '通讯录' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvMFpUbGtNV1ZrT1RWbE1qUTFaV0ZpWlRKaU1HRTFNVGcwT1dGaE5UTTBOUQ', default_order = 6, item_name = '会议室' WHERE item_label = '会议室' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvek56YzVOVEUzT0dFd1pUaGlaVEU0TjJSaE56SXlPVGhrTURreU1ERXdOQQ', default_order = 7 WHERE item_label = '电子屏' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvNVltVmtOall6Wm1OaU9HRTNZMk0xTTJVd01UVmlPRFprWVRSa01EWXdaUQ', default_order = 8 WHERE item_label = '能量加油站' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvM01EUXhNbUZrTkRNelptSXdNVGRtTm1Rd05tVmtZemhpTkdVeU5USTRaZw', default_order = 9 WHERE item_label = '园区党建' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwallUTTNNVEpsTkRBM056SXlZVEU1WTJJM1l6TmhPRGd4TXpkbU56ZzJNUQ', default_order = 10000 WHERE item_label = '更多' AND `namespace_id` = 1000000;
+
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveE1qbG1Oek5sWm1ReU1UQXhNREF6WkRKaE9HWmhPR0ZrTTJGaVkyVTFaQQ', item_group = 'Integrated', default_order = 1 WHERE item_label = '创客分享' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveFpEWmtaakpqTmpRNE1UZzRZV1EzWlRSbU5tTXhNRFJoWmprMk56TTFaQQ', item_group = 'Integrated', default_order = 2 WHERE item_label = '创客活动' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE1UTm1aR014WlRSaU1qazVOelkwTWpjNE56ZzVaREJqTVRoaE5qTm1aQQ', item_group = 'Integrated', default_order = 3 WHERE item_label = '任务管理' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwak9EbGtabVExTmpBME56SXlPV0V5WW1NMVlUSTRNamM0WVRJeE1tSXdOQQ', item_group = 'Integrated', default_order = 4 WHERE item_label = '园区企业' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvM1pEQmxabVF6TnpNME1Ea3hOV1kyTTJFNVlUazBZV1pqWmpObVlUUmpaUQ', item_group = 'Integrated', default_order = 5 WHERE item_label = 'VIP车位' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvd05URXhNV1l4WmpWbU9HTTJZekZrWlRZd09URTVPRGt5WW1Fek1XWXpZUQ', item_group = 'Integrated', default_order = 6 WHERE item_label = '班车' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvMFpUQmpNMkl4TkRVeE9UUTFOamxrTTJNNVkyTmpNMkkwTkRsbE16UTJOdw', item_group = 'Integrated', default_order = 7 WHERE item_label = '俱乐部' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvME4yTTROMlptWWpaa09HUTJZVFl6WWpkaFptVTBaVGcxTTJJM05XUm1OZw', item_group = 'Integrated', default_order = 8 WHERE item_label = '视频会议' AND `namespace_id` = 1000000;
+
+-- 新增活动入口
+-- 增加入口，parent_id为-1
+INSERT INTO `eh_activity_categories`(`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`)
+		VALUES(41001,'','0','2','-1','创客活动','/2','0','2','1', now(),'0',NULL,1000000,'0','1','cs://1/image/aW1hZ2UvTVRvMVlXSTNOalEyTWpaa01XUTRPRGRrWXpJell6YzBNalk0TkdFNVlXWTBaQQ',NULL,NULL,'0');
+
+-- 给入口增加一个默认的分类-“全部”，parent_id为入口的entry_id
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`)
+		VALUES (41002, '', '0', '1002', 2, 'all', '/2/41002', '0', '2', '1', now(), '0', NULL, 1000000, '0', '1', 'cs://1/image/aW1hZ2UvTVRvM09HWmxNRFptWldNM1lqQm1aakEyWVdRMVpEZ3dNelEzTVRrMk1XRmpPUQ', 'cs://1/image/aW1hZ2UvTVRvd016YzVZVE5tT1dFeU9XUTRPRGcxTkdNME5HUTFabVE1T0RBd00yWmpZdw', NULL, '1');
+
+-- 新增一个自己的菜单，data_type为forum_activity/x，x为入口的entry_id
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`,`level`,`condition_type`,`category`)
+		VALUES (10990, '创客活动', 10000, null, 'forum_activity/2', 0, 2, '/10000/10990', 'park', 600, 10990, 2, 'project', 'module');
+-- 设置菜单权限
+set @eh_acl_privileges_id = (select max(id) from eh_acl_privileges);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
+VALUES ((@eh_acl_privileges_id := @eh_acl_privileges_id+1), 0, '创客活动', '创客活动 全部权限', NULL);
+
+-- 角色对应的菜单权限
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 1000000, 'EhOrganizations', NULL, 1, @eh_acl_privileges_id, 1001, 'EhAclRoles', 0, 1, NOW());
+
+-- 菜单对应的权限
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 10990, '创客活动', 1, 1, '创客活动  全部权限', 499);
+--
+DELETE from eh_web_menu_scopes WHERE menu_id = 10990 AND owner_id = 1000000;
+SET @id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1), 10990,'', 'EhNamespaces', 1000000 , 2);
+-- end 设置菜单权限
+
+SET @id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+		VALUES ((@id := @id  + 1 ), '1000000', '0', '0', '0', '/home', 'Integrated', '创客活动', '创客活动', 'cs://1/image/aW1hZ2UvTVRveFpEWmtaakpqTmpRNE1UZzRZV1EzWlRSbU5tTXhNRFJoWmprMk56TTFaQQ', '1', '1', '61', '{"categoryId":2,"publishPrivilege":1,"livePrivilege":2,"listStyle":2,"scope":3,"style":4}', 2, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '0', NULL, NULL, '0', NULL, NULL);
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+		VALUES ((@id := @id  + 1 ), '1000000', '0', '0', '0', '/home', 'Integrated', '创客分享', '创客分享', 'cs://1/image/aW1hZ2UvTVRveE1qbG1Oek5sWm1ReU1UQXhNREF6WkRKaE9HWmhPR0ZrTTJGaVkyVTFaQQ', '1', '1', '62', '{"tag":"创客分享"}', 1, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '0', NULL, NULL, '0', NULL, NULL);-- 发现多个icon展现
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+		VALUES ((@id := @id  + 1 ), '1000000', '0', '0', '0', '/home', 'Bizs', '园区党建', '园区党建', 'cs://1/image/aW1hZ2UvTVRvM01EUXhNbUZrTkRNelptSXdNVGRtTm1Rd05tVmtZemhpTkdVeU5USTRaZw', '1', '1', '62', '{"tag":"园区党建"}', 9, '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', NULL, NULL, '0', NULL, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+		VALUES ((@id := @id  + 1 ), '1000000', '0', '0', '0', '/home', 'Integrated', '创客活动', '创客活动', 'cs://1/image/aW1hZ2UvTVRveFpEWmtaakpqTmpRNE1UZzRZV1EzWlRSbU5tTXhNRFJoWmprMk56TTFaQQ', '1', '1', '61', '{"categoryId":2,"publishPrivilege":1,"livePrivilege":2,"listStyle":2,"scope":3,"style":4}', 2, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '0', NULL, NULL, '0', NULL, NULL);
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+		VALUES ((@id := @id  + 1 ), '1000000', '0', '0', '0', '/home', 'Integrated', '创客分享', '创客分享', 'cs://1/image/aW1hZ2UvTVRveE1qbG1Oek5sWm1ReU1UQXhNREF6WkRKaE9HWmhPR0ZrTTJGaVkyVTFaQQ', '1', '1', '62', '{"tag":"创客分享"}', 1, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '0', NULL, NULL, '0', NULL, NULL);-- 发现多个icon展现
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+		VALUES ((@id := @id  + 1 ), '1000000', '0', '0', '0', '/home', 'Bizs', '园区党建', '园区党建', 'cs://1/image/aW1hZ2UvTVRvM01EUXhNbUZrTkRNelptSXdNVGRtTm1Rd05tVmtZemhpTkdVeU5USTRaZw', '1', '1', '62', '{"tag":"园区党建"}', 9, '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL, '0', NULL, NULL);
+
+-- 科技园部分item的顺序不允许用户定制
+DELETE FROM eh_user_launch_pad_items WHERE item_id in (select id FROM eh_launch_pad_items WHERE item_label in ('创客分享','创客活动','任务管理','园区企业','VIP车位','班车','俱乐部','视频会议','更多') AND namespace_id = 1000000);
+-- end by dengs,
+-- by dengs,beta uibug修复
+UPDATE `eh_launch_pad_items` SET delete_flag = '1' WHERE item_label = '园区党建' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwallUTTNNVEpsTkRBM056SXlZVEU1WTJJM1l6TmhPRGd4TXpkbU56ZzJNUQ', default_order = 10000 WHERE item_label = '更多' AND `namespace_id` = 1000000;
+
+DELETE FROM eh_web_menu_scopes WHERE menu_id in(40600,40200,40210,40220) AND owner_id = 1000000;
+SET @menu_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_id:=@menu_id+1), 40200,'', 'EhNamespaces', 1000000 , 2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_id:=@menu_id+1), 40210,'', 'EhNamespaces', 1000000 , 2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_id:=@menu_id+1), 40220,'', 'EhNamespaces', 1000000 , 2);
+
+DELETE FROM eh_launch_pad_layouts WHERE namespace_id = 1000000;
+SET @layout_id = (SELECT MAX(id) FROM `eh_launch_pad_layouts`);
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES ((@layout_id := @layout_id + 1), '1000000', 'ServiceMarketLayout', '{"versionCode":"2017090602","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies","cssStyleFlag":1,"paddingLeft":30,"paddingTop":30,"paddingRight":30,"paddingBottom":30,"lineSpacing":20,"columnSpacing":20,"backgroundColor":"FFFFFF"},"style":"Gallery","defaultOrder":2,"separatorFlag":1,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":16},{"title":"热门服务","iconUrl":"https://content-1.zuolin.com:443/image/aW1hZ2UvTVRveE1qSTVZVE5tWkRaa1pUWm1aVE0xWVdaaVpqUmhZV00xWVRrellUTTBOQQ?token=XlYdOjlDVEVb4XyQO4_dd5RI37zTkV3jCKm_-XbRyLIGVUorWGnyRCwLAgMGV86baX30BnQW4nqzF9nlXGe4M0DbZxWBVTqnL019xazIDuhE6A0OXiMQwRqGX84_1HHv","groupName":"热门服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":16,"columnCount":5},{"title":"综合服务","iconUrl":"https://content-1.zuolin.com:443/image/aW1hZ2UvTVRveE1qSTVZVE5tWkRaa1pUWm1aVE0xWVdaaVpqUmhZV00xWVRrellUTTBOQQ?token=XlYdOjlDVEVb4XyQO4_dd5RI37zTkV3jCKm_-XbRyLIGVUorWGnyRCwLAgMGV86baX30BnQW4nqzF9nlXGe4M0DbZxWBVTqnL019xazIDuhE6A0OXiMQwRqGX84_1HHv","groupName":"综合服务","widget":"Navigator","instanceConfig":{"itemGroup":"Integrated","cssStyleFlag":1,"paddingLeft":0,"paddingTop":0,"paddingRight":0,"paddingBottom":0,"lineSpacing":0,"columnSpacing":0,"backgroundColor":"EFEFF4"},"style":"Gallery","defaultOrder":5,"separatorFlag":0,"columnCount":2}]}','2017090602', '0', '2', NOW(), 'pm_admin', '0', '0', '0');
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES ((@layout_id := @layout_id + 1), '1000000', 'ServiceMarketLayout', '{"versionCode":"2017090602","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies","cssStyleFlag":1,"paddingLeft":30,"paddingTop":30,"paddingRight":30,"paddingBottom":30,"lineSpacing":20,"columnSpacing":20,"backgroundColor":"FFFFFF"},"style":"Gallery","defaultOrder":2,"separatorFlag":1,"columnCount":4},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":16},{"title":"热门服务","iconUrl":"https://content-1.zuolin.com:443/image/aW1hZ2UvTVRveE1qSTVZVE5tWkRaa1pUWm1aVE0xWVdaaVpqUmhZV00xWVRrellUTTBOQQ?token=XlYdOjlDVEVb4XyQO4_dd5RI37zTkV3jCKm_-XbRyLIGVUorWGnyRCwLAgMGV86baX30BnQW4nqzF9nlXGe4M0DbZxWBVTqnL019xazIDuhE6A0OXiMQwRqGX84_1HHv","groupName":"热门服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":4,"separatorFlag":1,"separatorHeight":16,"columnCount":5},{"title":"综合服务","iconUrl":"https://content-1.zuolin.com:443/image/aW1hZ2UvTVRveE1qSTVZVE5tWkRaa1pUWm1aVE0xWVdaaVpqUmhZV00xWVRrellUTTBOQQ?token=XlYdOjlDVEVb4XyQO4_dd5RI37zTkV3jCKm_-XbRyLIGVUorWGnyRCwLAgMGV86baX30BnQW4nqzF9nlXGe4M0DbZxWBVTqnL019xazIDuhE6A0OXiMQwRqGX84_1HHv","groupName":"综合服务","widget":"Navigator","instanceConfig":{"itemGroup":"Integrated","cssStyleFlag":1,"paddingLeft":0,"paddingTop":0,"paddingRight":0,"paddingBottom":0,"lineSpacing":0,"columnSpacing":0,"backgroundColor":"EFEFF4"},"style":"Gallery","defaultOrder":5,"separatorFlag":0,"columnCount":2}]}','2017090602', '0', '2', NOW(), 'park_tourist', '0', '0', '0');
+
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvMFpUbGtNV1ZrT1RWbE1qUTFaV0ZpWlRKaU1HRTFNVGcwT1dGaE5UTTBOUQ', default_order = 6, item_name = '会议室' WHERE item_label = '会议室' AND `namespace_id` = 1000000;
+UPDATE `eh_launch_pad_items` SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwak4yUXhNMkV4Wm1NeFptTmxaVGcwTUdaaFpURXlOV0k0T1RRNU5tUmlZUQ', default_order = 3, item_name = '打卡考勤' WHERE item_label = '打卡考勤' AND `namespace_id` = 1000000;
+DELETE FROM eh_user_launch_pad_items WHERE item_id in (select id FROM eh_launch_pad_items WHERE namespace_id = 1000000);
+
+DELETE FROM eh_launch_pad_items WHERE item_label = '左邻会议室' And namespace_id = 1000000;
+-- end by dengs,beta uibug修复
+
+
+-- by R,2017.09.05 #14916 增加配置“用户行为统计分析”的菜单
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+VALUES (41330, '用户行为统计', 41300, NULL, 'react:/statistics-management/user-behavior', 0, 2, '/40000/41300/41330', 'park', 500, 41300, 3, NULL, 'module');
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
+VALUES (20074, 0, '用户行为统计', '用户行为统计 全部权限', NULL);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 20074, 41330, '用户行为统计', 1, 1, '用户行为统计  全部权限', 202);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, 20074, 1001, 'EhAclRoles', 0, 1, NOW());
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 41330, '', 'EhNamespaces', 1000000, 2);
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`)
+VALUES (41330, '用户行为统计', '41300', '/40000/41300/41330', '0', '2', '2', '0', UTC_TIMESTAMP(), 0, 0);
+
+SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), 41330, '1', '100135', NULL, '0', UTC_TIMESTAMP());
+
+SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 1000000, 41500, '用户行为统计', 'EhNamespaces', 1000000, NULL, 2);
+
+--
+-- 事件
+--
+SET @stat_events_id = IFNULL((SELECT MAX(id) FROM `eh_stat_events`), 1);
+INSERT INTO `eh_stat_events` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_name`, `event_version`, `event_display_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_events_id := @stat_events_id + 1), 0, 1, 1, 'portal_on_bottom_navigation_click', '1.0', '底部导航栏点击事件', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_events` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_name`, `event_version`, `event_display_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_events_id := @stat_events_id + 1), 0, 1, 1, 'portal_on_navigation_click', '1.0', '顶部导航栏（工具栏）点击事件', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_events` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_name`, `event_version`, `event_display_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_events_id := @stat_events_id + 1), 0, 1, 1, 'launchpad_on_banner_click', '1.0', 'Banner点击事件', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_events` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_name`, `event_version`, `event_display_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_events_id := @stat_events_id + 1), 0, 1, 1, 'launchpad_on_bulletin_click', '1.0', '公告栏点击事件', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_events` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_name`, `event_version`, `event_display_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_events_id := @stat_events_id + 1), 0, 1, 1, 'launchpad_on_launch_pad_item_click', '1.0', 'item点击事件', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_events` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_name`, `event_version`, `event_display_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_events_id := @stat_events_id + 1), 0, 1, 1, 'launchpad_on_oppush_activity_item_click', '1.0', '活动运营点击事件', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_events` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_name`, `event_version`, `event_display_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_events_id := @stat_events_id + 1), 0, 1, 1, 'launchpad_on_news_item_click', '1.0', '新闻快讯News点击事件', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_events` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_name`, `event_version`, `event_display_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_events_id := @stat_events_id + 1), 0, 1, 1, 'launchpad_on_news_flash_item_click', '1.0', '新闻快讯NewsFlash点击事件', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_events` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_name`, `event_version`, `event_display_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_events_id := @stat_events_id + 1), 0, 1, 1, 'launchpad_on_oppush_biz_item_click', '1.0', '电商运营点击事件', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_events` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_name`, `event_version`, `event_display_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_events_id := @stat_events_id + 1), 0, 1, 1, 'launchpad_on_oppush_service_alliance_item_click', '1.0', '服务联盟运营点击事件', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_events` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_name`, `event_version`, `event_display_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_events_id := @stat_events_id + 1), 0, 1, 1, 'system_on_app_startup', '1.0', 'App启动事件', 2, NULL, NULL, NULL, NULL);
+
+
+--
+-- 事件参数
+--
+SET @stat_event_params_id = IFNULL((SELECT MAX(id) FROM `eh_stat_event_params`), 1);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'portal_on_bottom_navigation_click', 1, 'identifier', 'identifier', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'portal_on_bottom_navigation_click', 1, 'position', 'position', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'portal_on_navigation_click', 1, 'identifier', 'identifier', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'portal_on_navigation_click', 1, 'position', 'position', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_banner_click', 1, 'id', 'id', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_banner_click', 1, 'layoutId', 'layoutId', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_banner_click', 1, 'location', 'location', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_bulletin_click', 1, 'layoutId', 'layoutId', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_bulletin_click', 1, 'location', 'location', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_launch_pad_item_click', 1, 'id', 'id', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_launch_pad_item_click', 1, 'layoutId', 'layoutId', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_launch_pad_item_click', 1, 'location', 'location', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_oppush_biz_item_click', 1, 'id', 'id', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_oppush_biz_item_click', 1, 'layoutId', 'layoutId', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_oppush_activity_item_click', 1, 'topicId', 'topicId', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_oppush_activity_item_click', 1, 'forumId', 'forumId', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_oppush_activity_item_click', 1, 'layoutId', 'layoutId', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_news_item_click', 1, 'newsToken', 'newsToken', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_news_item_click', 1, 'layoutId', 'layoutId', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_news_flash_item_click', 1, 'newsToken', 'newsToken', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_news_flash_item_click', 1, 'layoutId', 'layoutId', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_oppush_service_alliance_item_click', 1, 'id', 'id', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_params` (`id`, `namespace_id`, `event_scope`, `event_type`, `event_version`, `multiple`, `event_name`, `param_type`, `param_key`, `param_name`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_params_id := @stat_event_params_id + 1), 0, 1, 1, '1.0', 1, 'launchpad_on_oppush_service_alliance_item_click', 1, 'layoutId', 'layoutId', 2, NULL, NULL, NULL, NULL);
+
+--
+-- 上传策略
+--
+SET @stat_event_upload_strategies_id = IFNULL((SELECT MAX(id) FROM `eh_stat_event_upload_strategies`), 1);
+INSERT INTO `eh_stat_event_upload_strategies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `access`, `log_type`, `strategy`, `interval_seconds`, `times_per_day`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_upload_strategies_id := @stat_event_upload_strategies_id + 1), 1000000, 'EhNamespaces', 1000000, 'WIFI', 1, 2, NULL, NULL, 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_upload_strategies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `access`, `log_type`, `strategy`, `interval_seconds`, `times_per_day`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_upload_strategies_id := @stat_event_upload_strategies_id + 1), 1000000, 'EhNamespaces', 1000000, 'WIFI', 2, 1, 3600, NULL, 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_upload_strategies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `access`, `log_type`, `strategy`, `interval_seconds`, `times_per_day`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_upload_strategies_id := @stat_event_upload_strategies_id + 1), 1000000, 'EhNamespaces', 1000000, 'GSM', 1, 1, 3600, NULL, 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_upload_strategies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `access`, `log_type`, `strategy`, `interval_seconds`, `times_per_day`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_upload_strategies_id := @stat_event_upload_strategies_id + 1), 1000000, 'EhNamespaces', 1000000, 'GSM', 2, 0, NULL, NULL, 2, NULL, NULL, NULL, NULL);
+
+--
+-- 门户配置
+--
+SET @stat_event_portal_configs_id = IFNULL((SELECT MAX(id) FROM `eh_stat_event_portal_configs`), 1);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 1000000, 0, 2, '主页', '0', '主页', '服务广场', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 1000000, 0, 2, '活动', '1', '活动', '活动', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 1000000, 0, 2, '论坛', '2', '论坛', '论坛', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 1000000, 0, 2, '我', '3', '我', '个人中心', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 1000000, 0, 1, 'Address', 'Address', '公司认证', '公司认证', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 1000000, 0, 1, 'Search', 'Search', '搜索', '搜索', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 1000000, 0, 1, 'Scan', 'Scan', '扫一扫', '扫一扫', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 1000000, 0, 1, 'MessageBox', 'MessageBox', '消息', '消息', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), 1000000, 0, 1, 'Settings', 'Settings', '设置', '设置', 4, NULL, NULL, NULL, NULL);
+
+--
+-- 字符串模板
+--
+SELECT MAX(id) FROM `eh_locale_strings` INTO @locale_strings_id;
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'stat.event', '1', 'zh_CN', 'Banner');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'stat.event', '2', 'zh_CN', '公告栏');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'stat.event', '3', 'zh_CN', '新闻快讯');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'stat.event', '4', 'zh_CN', '电商运营');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'stat.event', '5', 'zh_CN', '活动运营');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'stat.event', '6', 'zh_CN', '服务联盟运营');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'stat.event', '7', 'zh_CN', '业务应用组');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@locale_strings_id := @locale_strings_id + 1), 'stat.event', '8', 'zh_CN', '标签栏');
+
+SELECT MAX(id) FROM `eh_configurations` INTO @configurations_id;
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+VALUES ((@configurations_id := @configurations_id + 1), 'biz.queryCommodityDetail.api', 'zl-ec/rest/openapi/commodity/queryCommodityByCommoNos', 'biz commodity detail api', 0, '电商商品详情api');
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41330,'', 'EhNamespaces', 1000000,2);
+
+SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 1000000, 41500, '用户行为统计', 'EhNamespaces', 1000000, NULL, 2);
+
+
+-- added by R 20170906. 能量加油站美年大健康的专属添加
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `service_categry_id`)
+    VALUES ((@item_id := @item_id + 1), 1000000, '0', '4', '1035937', '/home', 'Bizs', '能量加油站', '能量加油站', 'cs://1/image/aW1hZ2UvTVRwbU4yRXhNek0xTldVek1EaGhPV1ZrT0RVM1pEUmtPR1kzWXpKbU5qUXlOZw', '1', '1', 13,'{"url":https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1999999&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%23%2fstore%2fdetails%2f15006168178665087805%3F_k%3Dzlbiz#sign_suffix}', 8, '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '');

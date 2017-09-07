@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
+import com.everhomes.rest.community_map.SearchCommunityMapContentsResponse;
 import com.everhomes.rest.organization.*;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -306,7 +308,6 @@ public interface OrganizationService {
 
 	/**
 	 * 获取最顶级部门
-	 * @param organizationGroupType
 	 * @param token
 	 * @param organizationId
      * @return
@@ -528,5 +529,9 @@ public interface OrganizationService {
 	void leaveTheJob(LeaveTheJobCommand cmd);
 
 	ListOrganizationMemberCommandResponse syncOrganizationMemberStatus();
+
+	OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd);
+
+	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken);
 
 }

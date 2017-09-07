@@ -23,10 +23,19 @@ public class JinyiCard {
     private BigDecimal discount;
     private BigDecimal paidin;
     private BigDecimal receivable;
+    private String maxuseddate;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getMaxuseddate() {
+        return maxuseddate;
+    }
+
+    public void setMaxuseddate(String maxuseddate) {
+        this.maxuseddate = maxuseddate;
     }
 
     public String getCalcid() {

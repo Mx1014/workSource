@@ -1,0 +1,129 @@
+// @formatter:off
+package com.everhomes.statistics.event.handler;
+
+import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.launchpad.Widget;
+import com.everhomes.rest.statistics.event.StatEventPortalStatType;
+import com.everhomes.rest.statistics.event.StatEventStatTimeInterval;
+import com.everhomes.server.schema.tables.EhPortalItemGroups;
+import com.everhomes.server.schema.tables.EhPortalLayouts;
+import com.everhomes.statistics.event.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ * Created by xq.tian on 2017/8/7.
+ */
+abstract public class AbstractStatEventPortalItemGroupHandler extends AbstractStatEventHandler {
+
+    @Autowired
+    protected StatEventPortalStatisticProvider statEventPortalStatisticProvider;
+
+    @Autowired
+    protected StatEventParamProvider statEventParamProvider;
+
+    @Autowired
+    protected StatEventParamLogProvider statEventParamLogProvider;
+
+    @Autowired
+    @Qualifier("PortalLaunchPadMappingProvider-LaunchPad")
+    protected PortalLaunchPadMappingProvider portalLaunchPadMappingProvider;
+
+    @Autowired
+    @Qualifier("PortalItemGroupProvider-LaunchPad")
+    protected PortalItemGroupProvider portalItemGroupProvider;
+
+    @Override
+    public List<StatEventStatistic> process(Namespace namespace, StatEvent statEvent, LocalDate statDate, StatEventStatTimeInterval interval) {
+        Timestamp minTime = Timestamp.valueOf(LocalDateTime.of(statDate, LocalTime.MIN));
+        Timestamp maxTime = Timestamp.valueOf(LocalDateTime.of(statDate, LocalTime.MAX));
+        Date date = Date.valueOf(statDate);
+
+        List<StatEventParam> params = statEventParamProvider.listParam(statEvent.getEventName(), statEvent.getEventVersion());
+
+        List<StatEventParam> processedParams = getParams(params);
+        if (processedParams == null) {
+            throw new RuntimeException("processedParams not found");
+        }
+
+        List<String> keys = processedParams.stream().map(StatEventParam::getParamKey).collect(Collectors.toList());
+
+        Map<Map<String, String>, StatEventCountDTO> identifierParamValueToCountMap = statEventParamLogProvider.countParamLogs(
+                namespace.getId(), statEvent.getEventName(), statEvent.getEventVersion(), keys, minTime, maxTime);
+
+        List<StatEventStatistic> statList = new ArrayList<>();
+        // map: {参数值:次数}
+        for (Map.Entry<Map<String, String>, StatEventCountDTO> entry : identifierParamValueToCountMap.entrySet()) {
+
+            Map<String, String> map = entry.getKey();
+            StatEventCountDTO count = entry.getValue();
+
+            Long layoutId = Long.valueOf(map.get("layoutId"));
+
+            // 去映射表里拿到门户配置的layoutId => 去portalItemGroup里拿到portalItemGroup => 去portalStatistic里拿到统计记录的id => 保存数据
+            PortalLaunchPadMapping mapping = portalLaunchPadMappingProvider.findPortalLaunchPadMapping(EhPortalLayouts.class.getSimpleName(), layoutId);
+
+            String itemGroup = getItemGroup(map);
+            if (itemGroup == null) {
+                continue;
+            }
+
+            PortalItemGroup portalItemGroup = portalItemGroupProvider.findPortalItemGroup(mapping.getPortalContentId(), getWidget().getCode(), itemGroup);
+            if (portalItemGroup == null) {
+                continue;
+            }
+
+            StatEventPortalStatistic portalStat = statEventPortalStatisticProvider.findStatEventPortalStatistic(
+                    namespace.getId(), StatEventPortalStatType.PORTAL_ITEM_GROUP.getCode(), EhPortalItemGroups.class.getSimpleName(),
+                    portalItemGroup.getId(), date);
+            if (portalStat == null) {
+                continue;
+            }
+
+            StatEventStatistic eventStat = getEventStat(map);
+            if (eventStat == null) {
+                continue;
+            }
+
+            eventStat.setStatDate(date);
+            eventStat.setNamespaceId(namespace.getId());
+
+            eventStat.setTotalCount(count.getTotalCount().longValue());
+            eventStat.setUniqueUsers(count.getUniqueUsers().longValue());
+            eventStat.setCompletedSessions(count.getCompletedSessions().longValue());
+
+            eventStat.setEventName(statEvent.getEventName());
+            eventStat.setEventPortalStatId(portalStat.getId());
+            eventStat.setEventDisplayName(statEvent.getEventDisplayName());
+
+            eventStat.setEventType(statEvent.getEventType());
+            eventStat.setEventVersion(statEvent.getEventVersion());
+            eventStat.setTimeInterval(interval.getCode());
+
+            eventStat.setEventName(statEvent.getEventName());
+
+            statList.add(eventStat);
+        }
+        return statList;
+    }
+
+    protected abstract String getItemGroup(Map<String, String> paramsToValueMap);
+
+    abstract protected Widget getWidget();
+
+    abstract protected StatEventStatistic getEventStat(Map<String, String> paramsToValueMap);
+
+    protected List<StatEventParam> getParams(List<StatEventParam> params) {
+        return params;
+    }
+}

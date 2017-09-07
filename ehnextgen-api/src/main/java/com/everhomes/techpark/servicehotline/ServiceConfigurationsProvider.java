@@ -1,9 +1,9 @@
 package com.everhomes.techpark.servicehotline;
 
-import java.util.List;
-
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+
+import java.util.List;
 
 public interface ServiceConfigurationsProvider {
 
@@ -21,4 +21,5 @@ public interface ServiceConfigurationsProvider {
 
 	void deleteServiceConfiguration(Long id);
 
+    ServiceConfiguration getServiceConfiguration(Integer namespaceId, String ownerType, Long ownerId, String confName);
 }

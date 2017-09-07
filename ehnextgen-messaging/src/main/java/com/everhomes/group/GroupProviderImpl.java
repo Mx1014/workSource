@@ -423,6 +423,7 @@ public class GroupProviderImpl implements GroupProvider {
     
     @Cacheable(value = "GroupMemberByInfo", key="{#groupId, #memberType, #memberId}", unless="#result == null")
     public GroupMember findGroupMemberByMemberInfo(final long groupId, final String memberType, final long memberId) {
+        LOGGER.debug("findGroupMemberByMemberInfo, userId :" + memberId);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, groupId));
         EhGroupMembersRecord record = (EhGroupMembersRecord)context.select().from(EH_GROUP_MEMBERS)
             .where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId))
@@ -464,8 +465,8 @@ public class GroupProviderImpl implements GroupProvider {
             queryBuilderCallback.buildCondition(locator, query);
             
         if(locator.getAnchor() != null)
-            query.addConditions(Tables.EH_GROUP_MEMBERS.ID.lt(locator.getAnchor()));
-        query.addOrderBy(Tables.EH_GROUP_MEMBERS.ID.desc());
+            query.addConditions(Tables.EH_GROUP_MEMBERS.ID.gt(locator.getAnchor()));
+        query.addOrderBy(Tables.EH_GROUP_MEMBERS.ID.asc());
         query.addLimit(count);
         
         query.fetch().map((r) -> {

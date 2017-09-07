@@ -445,6 +445,23 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /org/getOrganizationDetailById</b>
+     * <p>根据Id查询对应的企业详情信息</p>
+     */
+    //checked
+    @RequestMapping("getOrganizationDetailById")
+    @RestReturn(OrganizationDetailDTO.class)
+    public RestResponse getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd){
+
+        OrganizationDetailDTO org = organizationService.getOrganizationDetailById(cmd);
+        RestResponse response = new RestResponse(org);
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /org/rejectOrganization</b>
      */
     //checked
