@@ -20,6 +20,10 @@ update eh_launch_pad_items set action_data='{"url":"zl://propertyrepair/create?t
 -- 修改owner_type by st.zheng
 update eh_service_alliances set owner_id=(select organization_id from eh_organization_communities where eh_service_alliances.owner_id = community_id limit 0,1),owner_type = 'organaization' where owner_type = 'community';
 
+-- 解决服务联盟首页 type重复问题 by st.zheng
+update eh_service_alliances set type = 201192 where  owner_id=1012516 and parent_id=0 and name = '租赁指南';
+
+
 -- 园区入驻3.5 add by sw 20170904
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
 	VALUES ('40105', '项目介绍', '40100', NULL, 'projects_introduce', '0', '2', '/40000/40100/40105', 'park', '412', '40100', '3', NULL, 'module');
@@ -45,9 +49,10 @@ UPDATE eh_locale_strings set scope = 'expansion' where scope = 'expansion.applyT
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('expansion', '8', 'zh_CN', '无');
 DELETE from eh_locale_strings where scope = 'expansion' and code in ('1', '2', '3', '4');
 
+
 --园区地图 add by sw
 INSERT INTO `eh_community_map_infos` (`id`, `namespace_id`, `community_id`, `map_uri`, `map_name`, `version`, `center_longitude`, `center_latitude`, `north_east_longitude`, `north_east_latitude`, `south_west_longitude`, `south_west_latitude`, `longitude_delta`, `latitude_delta`, `status`, `creator_uid`, `create_time`)
-  VALUES ('1', '999981', '240111044331056041', 'cs://1/image/aW1hZ2UvTVRvd01XSmpabVkyWkRSa05qWXpOMkV4WmpkalpETTFPRGt6TVRKaE9EVmhaUQ', NULL, '1.0', '121.57425299921417', '31.176432503695498', '121.577029', '31.179732', '121.573704', '31.173716', '0.005241036325429604', '0.007979148321588525', '2', '1', '2017-08-21 14:55:01');
+  VALUES ('1', '999981', '240111044331056041', 'cs://1/image/aW1hZ2UvTVRvMU5UYzRNVFU1TVRWbFpXWXlOelZrWXpnMVlXSXlaamcyWVdaaU9HTTNPQQ', NULL, '1.0', '121.57425299921417', '31.176432503695498', '121.577029', '31.179732', '121.573704', '31.173716', '0.005241036325429604', '0.007979148321588525', '2', '1', '2017-08-21 14:55:01');
 INSERT INTO `eh_community_map_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('1', '999981', '', '0', '楼栋', 'building', '1', NULL, NULL, '1');
 INSERT INTO `eh_community_map_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('2', '999981', '', '0', '企业', 'organization', '1', NULL, NULL, '2');
 INSERT INTO `eh_community_map_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('3', '999981', '', '0', '商户', 'shop', '1', NULL, NULL, '3');
