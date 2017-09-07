@@ -1191,6 +1191,7 @@ public class PortalServiceImpl implements PortalService {
 			command.setOrganizationType(oType.getCode());
 			command.setPageAnchor(cmd.getAnchor());
 			command.setPageSize(pageSize);
+			command.setKeyword(cmd.getKeywords());
 			OrganizationQueryResult result = organizationSearcher.queryOrganization(command);
 			response.setDtos(result.getDtos().stream().map(r ->{
 				return ConvertHelper.convert(r, ScopeDTO.class);
