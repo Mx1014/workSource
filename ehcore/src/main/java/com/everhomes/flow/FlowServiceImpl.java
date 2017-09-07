@@ -2260,8 +2260,10 @@ public class FlowServiceImpl implements FlowService {
             return new FlowCaseDetailDTO();
         }
         Flow snapshotFlow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+        LOGGER.debug("start rental getFlowCaseDetail  flowCase={}, flowUserType={}, inst={}", flowCase, flowUserType);
 
         List<FlowCaseEntity> entities = flowListenerManager.onFlowCaseDetailRender(flowCase, flowUserType);
+        LOGGER.debug("end rental onFlowCaseDetailRender flowCase={}, flowUserType={}, inst={}", flowCase, flowUserType);
 
         FlowCaseDetailDTO dto = ConvertHelper.convert(flowCase, FlowCaseDetailDTO.class);
         dto.setEntities(entities);
