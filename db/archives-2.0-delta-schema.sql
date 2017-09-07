@@ -68,6 +68,7 @@ CREATE TABLE `eh_archives_working_places` (
 
 -- eh_organization_member_details 表的字段添加
 ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE;
+ALTER TABLE eh_organization_member_details CHANGE political_status political_flag VARCHAR(128);
 ALTER TABLE eh_organization_member_details ADD COLUMN procreative DATE COMMENT '生育状况';
 ALTER TABLE eh_organization_member_details ADD COLUMN ethnicity VARCHAR(128) COMMENT '民族';
 ALTER TABLE eh_organization_member_details ADD COLUMN id_type VARCHAR(64) COMMENT '证件类型';
