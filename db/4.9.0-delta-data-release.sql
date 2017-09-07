@@ -216,10 +216,10 @@ VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
 VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1005, 'EhAclRoles', 0, 1, NOW());
 
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
-VALUES ('21100', '客户管理', '20000', '/20000/21100', '0', '2', '2', '0', UTC_TIMESTAMP());
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
-VALUES ('21200', '合同管理', '20000', '/20000/21200', '0', '2', '2', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`)
+VALUES ('21100', '客户管理', '20000', '/20000/21100', '0', '2', '2', '0', UTC_TIMESTAMP(),1,1);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`)
+VALUES ('21200', '合同管理', '20000', '/20000/21200', '0', '2', '2', '0', UTC_TIMESTAMP(),1,1);
 
 
 -- 缴费，闻天
