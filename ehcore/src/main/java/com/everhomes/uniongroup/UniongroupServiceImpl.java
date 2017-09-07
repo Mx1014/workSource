@@ -139,7 +139,9 @@ public class UniongroupServiceImpl implements UniongroupService {
 //                                "memberIds is not found。");
                     }
                     //去掉配置表中单独勾选的人员id
-                    memberIds.removeAll(old_detail_ids);
+                    if (null != old_detail_ids) {
+                        memberIds.removeAll(old_detail_ids);
+                    }
 
                     detailIds.addAll(memberIds);
                 }
