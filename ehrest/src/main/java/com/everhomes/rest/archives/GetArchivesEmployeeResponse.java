@@ -1,28 +1,42 @@
 package com.everhomes.rest.archives;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
- * <li>form: 包含个人信息的表单 {@link com.everhomes.rest.general_approval.GeneralFormDTO}</li>
- * <li>others: (具体实现可能会加字段)</li>
+ * <li>form: form表单 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
  * </ul>
  */
 public class GetArchivesEmployeeResponse {
 
-    private GeneralFormDTO form;
+//    private GeneralFormDTO form;
+
+    @ItemType(PostApprovalFormItem.class)
+    List<PostApprovalFormItem> form;
 
     public GetArchivesEmployeeResponse() {
     }
 
-    public GeneralFormDTO getForm() {
+    public List<PostApprovalFormItem> getForm() {
+        return form;
+    }
+
+    public void setForm(List<PostApprovalFormItem> form) {
+        this.form = form;
+    }
+
+    /*    public GeneralFormDTO getForm() {
         return form;
     }
 
     public void setForm(GeneralFormDTO form) {
         this.form = form;
-    }
+    }*/
 
     @Override
     public String toString() {
