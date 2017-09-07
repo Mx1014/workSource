@@ -14,6 +14,7 @@ import com.everhomes.rest.asset.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -276,13 +277,14 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
         params.put("customerName", targetName==null?"":targetName);
         //通过ownerId来找这个communityIdentifier就不会有两个ownerId的问题了
         params.put("communityIdentifer", communityIdentifier==null?"":communityIdentifier);
-        params.put("buildingIdentifier", String.valueOf(buildingName)==null?"":String.valueOf(buildingName));
-        params.put("apartmentIdentifier", String.valueOf(apartmentName)==null?"":String.valueOf(apartmentName));
-        params.put("payFlag", String.valueOf(billStatus)==null?"":String.valueOf(billStatus));
+        params.put("buildingIdentifier", buildingName==null?"":String.valueOf(buildingName));
+        params.put("apartmentIdentifier", apartmentName==null?"":String.valueOf(apartmentName));
+        params.put("payFlag", billStatus==null?"":String.valueOf(billStatus));
         params.put("sdateFrom",dateStrBegin==null?"":dateStrBegin);
         params.put("sdateTo",dateStrEnd==null?"":dateStrEnd);
         params.put("pageOffset",String.valueOf(pageOffSet)==null?"":String.valueOf(pageOffSet));
-        params.put("pageSize",String.valueOf(pageSize)==null?"":String.valueOf(pageSize));
+        params.put("pageSize",pageSize==null?"":String.valueOf(pageSize));
+        params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
         String json = generateJson(params);
         String url;
         if(targetType.equals("eh_organization")){
@@ -309,7 +311,7 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
                     SearchEnterpriseBillsDTO sourceDto = res.get(i);
                     ListBillsDTO dto = new ListBillsDTO();
 //                    dto.setContractId(sourceDto.getCont);
-//                    dto.setContractNum();
+                    dto.setContractNum(sourceDto.getContractNum());
                     dto.setTargetId(sourceDto.getCustomerIdentifier());
                     dto.setTargetType(targetType);
                     dto.setBillStatus(sourceDto.getPayFlag());
