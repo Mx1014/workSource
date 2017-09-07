@@ -2,6 +2,7 @@ package com.everhomes.activity;
 
 import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
+import com.everhomes.order.PreOrderCallBack;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -30,6 +31,8 @@ public interface ActivityService {
     ActivityDTO signup(ActivitySignupCommand cmd);
 
     CommonOrderDTO createSignupOrder(CreateSignupOrderCommand cmd);
+
+	PreOrderCallBack createSignupOrderV2(CreateSignupOrderV2Command cmd);
 
 	CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd);
 
