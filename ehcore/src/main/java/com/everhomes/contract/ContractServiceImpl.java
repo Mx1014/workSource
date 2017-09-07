@@ -621,7 +621,7 @@ public class ContractServiceImpl implements ContractService {
 		}
 		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
 		createFlowCaseCommand.setCurrentOrganizationId(contract.getPartyAId());
-		createFlowCaseCommand.setTitle("合同申请");
+		createFlowCaseCommand.setTitle(contract.getName() + "合同申请");
 		createFlowCaseCommand.setApplyUserId(contract.getCreateUid());
 		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
@@ -643,6 +643,24 @@ public class ContractServiceImpl implements ContractService {
 				map.put(apartment.getId(), apartment);
 			});
 		}
+
+		//续约和变更的继承原合同的不用改状态
+		List<Long> parentAddressIds = new ArrayList<>();
+		if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))
+				|| ContractType.RENEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+			if (contract.getParentId() != null) {
+				Contract parentContract = contractProvider.findContractById(contract.getParentId());
+				if(parentContract != null && ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(parentContract.getStatus()))) {
+					List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(parentContract.getId());
+					if (parentContractApartments != null && parentContractApartments.size() > 0) {
+						parentAddressIds = parentContractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+
+					}
+				}
+
+
+			}
+		}
 		Double totalSize = 0.0;
 		if(buildingApartments != null && buildingApartments.size() > 0) {
 			for(BuildingApartmentDTO buildingApartment : buildingApartments) {
@@ -658,21 +676,26 @@ public class ContractServiceImpl implements ContractService {
 					mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					contractBuildingMappingProvider.createContractBuildingMapping(mapping);
 
-					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
-					addressMapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
-					propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+					if(!parentAddressIds.contains(buildingApartment.getAddressId())) {
+						CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
+						addressMapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+						propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+					}
 				} else {
 					map.remove(buildingApartment.getId());
 				}
 			}
 		}
 		if(map.size() > 0) {
+			List<Long> finalParents = parentAddressIds;
 			map.forEach((id, apartment) -> {
 				contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
 
-				CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(apartment.getAddressId());
-				addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
-				propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+				if(!finalParents.contains(apartment.getAddressId())) {
+					CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(apartment.getAddressId());
+					addressMapping.setLivingStatus(AddressMappingStatus.FREE.getCode());
+					propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+				}
 			});
 		}
 
@@ -879,6 +902,24 @@ public class ContractServiceImpl implements ContractService {
 			List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 			if(contractApartments != null && contractApartments.size() > 0) {
 				List<Long> addressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+				//续约和变更的继承原合同的不用检查也不用改状态
+				if(ContractType.CHANGE.equals(ContractType.fromStatus(contract.getContractType()))
+						|| ContractType.RENEW.equals(ContractType.fromStatus(contract.getContractType()))) {
+					if(contract.getParentId() != null) {
+						Contract parentContract = contractProvider.findContractById(contract.getParentId());
+						if(parentContract != null && ContractStatus.ACTIVE.equals(ContractStatus.fromStatus(parentContract.getStatus()))) {
+							List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(parentContract.getId());
+							if(parentContractApartments != null && parentContractApartments.size() > 0) {
+								List<Long> parentAddressIds = parentContractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+								//去掉已被继承的门牌
+								parentAddressIds.forEach(parentAddressId -> {
+									addressIds.remove(parentAddressId);
+								});
+							}
+						}
+					}
+				}
+
 				List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
 				if(mappings != null && mappings.size() > 0) {
 					//先检查是否全是待租的，不是的话报错
@@ -917,9 +958,10 @@ public class ContractServiceImpl implements ContractService {
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);
 		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+		List<Long> contractAddressIds = new ArrayList<>();
 		if(contractApartments != null && contractApartments.size() > 0) {
-			List<Long> addressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
-			List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
+			contractAddressIds = contractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+			List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(contractAddressIds);
 			if(mappings != null && mappings.size() > 0) {
 				mappings.forEach(mapping -> {
 					mapping.setLivingStatus(AddressMappingStatus.RENT.getCode());
@@ -936,9 +978,13 @@ public class ContractServiceImpl implements ContractService {
 				contractProvider.updateContract(parentContract);
 				contractSearcher.feedDoc(parentContract);
 
-				List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
+				List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(parentContract.getId());
 				if(parentContractApartments != null && parentContractApartments.size() > 0) {
 					List<Long> addressIds = parentContractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
+					//去掉已被继承的门牌
+					contractAddressIds.forEach(contractAddressId -> {
+						addressIds.remove(contractAddressId);
+					});
 					List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
 					if(mappings != null && mappings.size() > 0) {
 						mappings.forEach(mapping -> {
