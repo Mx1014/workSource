@@ -1560,7 +1560,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(t,t1)
                 .where(t.CONTRACT_NUM.eq(contractNum))
                 .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
-                .orderBy(t.DATE_STR)
+                .orderBy(t1.NAME,t.DATE_STR)
                 .limit(pageOffset,pageSize+1)
                 .fetch()
                 .map(r -> {
