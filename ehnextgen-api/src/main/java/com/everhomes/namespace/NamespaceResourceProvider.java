@@ -20,4 +20,7 @@ public interface NamespaceResourceProvider {
     NamespaceDetail findNamespaceDetailByNamespaceId(Integer namespaceId);
 
 	void createNamespaceResource(NamespaceResource resource);
+	void deleteNamespaceResource(NamespaceResource resource);
+
+    List<NamespaceResource> listResourceByNamespace(Integer namespaceId, NamespaceResourceType type, Long resourceId);
 }

@@ -57,8 +57,9 @@ public class ScheduleProviderImpl implements ScheduleProvider {
 	@Autowired
 	private SchedulerFactoryBean schedulerFactory;
 
-    @Value("${schedule.running.flag}")
-    private volatile byte localRunningFlag;
+//    @Value("${schedule.running.flag}")
+//    private volatile byte localRunningFlag;
+    private volatile byte localRunningFlag = 0;
 
     private volatile byte runningFlag;
 

@@ -23,6 +23,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
@@ -1288,6 +1289,19 @@ public class UserController extends ControllerBase {
 	@RestReturn(value = SearchUsersResponse.class)
 	public RestResponse searchUsers(@Valid SearchUsersCommand cmd) {
 		RestResponse resp = new RestResponse(userService.searchUsers(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+	/**
+	 * <b>URL: /user/findTargetByNameAndAddress</b>
+	 * <p>根据个人用户电话，客户名称，合同号，来确认唯一用户，若无法定位到改域空间下指定园区的唯一用户，则返回null</p>
+	 */
+	@RequestMapping(value = "findTargetByNameAndAddress")
+	@RestReturn(value = TargetDTO.class)
+	public RestResponse findTargetByNameAndAddress(FindTargetByNameAndAddressCommand cmd) {
+		RestResponse resp = new RestResponse(userService.findTargetByNameAndAddress(cmd.getContractNum(),cmd.getTargetName(),cmd.getOwnerId(),cmd.getTel(),cmd.getOwnerType(),cmd.getTargetType()));
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");
 		return resp;

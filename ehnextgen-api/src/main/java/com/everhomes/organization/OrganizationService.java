@@ -170,6 +170,7 @@ public interface OrganizationService {
 	void updateChildrenOrganization(UpdateOrganizationsCommand cmd);
 	void setAclRoleAssignmentRole(SetAclRoleAssignmentCommand cmd, EntityType entityType);
 	void updateEnterprise(UpdateEnterpriseCommand cmd);
+	void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress);
 	void deleteEnterpriseById(DeleteOrganizationIdCommand cmd);
 	
 	ListOrganizationMemberCommandResponse listOrgAuthPersonnels(ListOrganizationContactCommand cmd);
@@ -307,7 +308,6 @@ public interface OrganizationService {
 
 	/**
 	 * 获取最顶级部门
-	 * @param organizationGroupType
 	 * @param token
 	 * @param organizationId
      * @return
