@@ -4425,6 +4425,7 @@ public class UserServiceImpl implements UserService {
 				return null;
 			else {
 				SceneContactV2DTO dto = new SceneContactV2DTO();
+				dto.setOrganizationId(detail.getOrganizationId());
 				dto.setUserId(detail.getTargetId());
 				dto.setTargetType(detail.getTargetType());
 				dto.setDetailId(detail.getId());
@@ -4437,7 +4438,7 @@ public class UserServiceImpl implements UserService {
 				dto.setContactToken(detail.getContactToken());
 				if (!StringUtils.isEmpty(detail.getEmail()))
 					dto.setEmail(detail.getEmail());
-				getRelevantContactEnterpriseWithAvatar(dto, detail.getOrganizationId());
+				getRelevantContactMoreInfo(dto, detail.getOrganizationId());
 				return dto;
 			}
 		}
@@ -4462,7 +4463,7 @@ public class UserServiceImpl implements UserService {
 		}
 	} 
 
-    private void getRelevantContactEnterpriseWithAvatar(SceneContactV2DTO dto, Long organizationId) {
+    private void getRelevantContactMoreInfo(SceneContactV2DTO dto, Long organizationId) {
 
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
@@ -4500,6 +4501,10 @@ public class UserServiceImpl implements UserService {
                 dto.setContactAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
             }
         }
+
+        //	设置隐私保护值
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(),dto.getOrganizationId());
+        dto.setVisibleFlag(member.getVisibleFlag());
     }
 
     @Override

@@ -23,9 +23,12 @@ import java.util.Map;
  * <li>departments: 联系人部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>contactToken: 联系人号码</li>
  * <li>email: 联系人邮箱</li>
+ * <li>visibleFlag: 隐私保护: 0-显示(不受保护) 1-隐藏(保护) 参考{@link com.everhomes.rest.organization.VisibleFlag} </li>
  * </ul>
  */
 public class SceneContactV2DTO {
+
+    private Long organizationId;
 
     private Long userId;
 
@@ -53,8 +56,17 @@ public class SceneContactV2DTO {
 
     private String email;
 
+    private Byte visibleFlag;
 
     public SceneContactV2DTO() {
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public Long getUserId() {
@@ -153,6 +165,13 @@ public class SceneContactV2DTO {
         this.email = email;
     }
 
+    public Byte getVisibleFlag() {
+        return visibleFlag;
+    }
+
+    public void setVisibleFlag(Byte visibleFlag) {
+        this.visibleFlag = visibleFlag;
+    }
 
     @Override
     public String toString() {
