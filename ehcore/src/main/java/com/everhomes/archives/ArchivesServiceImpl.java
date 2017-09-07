@@ -223,7 +223,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (!StringUtils.isEmpty(cmd.getKeywords())) {
             //  有查询的时候已经不需要置顶了，直接查询对应人员
             List<ArchivesContactDTO> contacts = new ArrayList<>();
-            contacts.addAll(listArchivesContacts(cmd, response));
+            contacts.addAll(listArchivesContacts(cmd, response, null));
             response.setContacts(contacts);
         } else {
             if (StringUtils.isEmpty(cmd.getPageAnchor())) {
@@ -236,24 +236,26 @@ public class ArchivesServiceImpl implements ArchivesService {
                 }
                 //  获取其余人员
                 cmd.setPageSize(cmd.getPageSize() - detailIds.size());
-                contacts.addAll(listArchivesContacts(cmd, response));
+                contacts.addAll(listArchivesContacts(cmd, response, detailIds));
                 response.setContacts(contacts);
             } else {
                 //  若已经读取了置顶的人则直接往下继续读
                 List<ArchivesContactDTO> contacts = new ArrayList<>();
-                contacts.addAll(listArchivesContacts(cmd, response));
+                contacts.addAll(listArchivesContacts(cmd, response, detailIds));
                 response.setContacts(contacts);
             }
         }
         return response;
     }
 
-    private List<ArchivesContactDTO> listArchivesContacts(ListArchivesContactsCommand cmd, ListArchivesContactsResponse response) {
+    private List<ArchivesContactDTO> listArchivesContacts(ListArchivesContactsCommand cmd, ListArchivesContactsResponse response, List<Long> detailIds) {
         List<ArchivesContactDTO> contacts = new ArrayList<>();
         ListOrganizationContactCommand orgCommand = new ListOrganizationContactCommand();
         orgCommand.setOrganizationId(cmd.getOrganizationId());
         orgCommand.setPageAnchor(cmd.getPageAnchor());
         orgCommand.setPageSize(cmd.getPageSize());
+        if (detailIds != null)
+            orgCommand.setExceptIds(detailIds);
         if (!StringUtils.isEmpty(cmd.getKeywords()))
             orgCommand.setKeywords(cmd.getKeywords());
         ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
