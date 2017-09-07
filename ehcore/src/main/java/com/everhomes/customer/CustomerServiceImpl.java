@@ -73,6 +73,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private CommunityProvider communityProvider;
 
+    @Autowired
     private ZJGKOpenServiceImpl zjgkOpenService;
 
     @Autowired

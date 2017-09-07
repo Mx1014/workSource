@@ -9,6 +9,7 @@ import com.everhomes.util.ConvertHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
 /**
  * Created by ying.xiong on 2017/8/12.
  */
+@Component
 public class ThirdpartConfigurationProviderImpl implements ThirdpartConfigurationProvider {
 
     @Autowired

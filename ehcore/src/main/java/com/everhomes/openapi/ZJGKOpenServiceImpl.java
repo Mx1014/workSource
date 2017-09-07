@@ -54,13 +54,16 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.slf4j.Logger;
@@ -86,6 +89,7 @@ import java.util.stream.Collectors;
 /**
  * Created by ying.xiong on 2017/8/7.
  */
+@Component
 public class ZJGKOpenServiceImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ZJGKOpenServiceImpl.class);
@@ -100,7 +104,7 @@ public class ZJGKOpenServiceImpl {
     };
 
     private static final String PAGE_SIZE = "20";
-    private static final String SUCCESS_CODE = "200";
+    private static final Integer SUCCESS_CODE = 200;
     private static final Integer NAMESPACE_ID = 999971;
 
     private static final String SYNC_COMMUNITIES = "/openapi/asset/syncCommunities";
@@ -256,15 +260,17 @@ public class ZJGKOpenServiceImpl {
     //每天凌晨一点更新
     @Scheduled(cron = "0 0 1 * * ?")
     public void syncApartmentsLivingStatus() {
-        syncEnterpriseApartmentsLivingStatus("0");
+//        syncEnterpriseApartmentsLivingStatus("0");
         syncUserApartmentsLivingStatus("0");
 
     }
 
     private void syncEnterpriseApartmentsLivingStatus(String pageOffset) {
         Map<String, String> params = generateParams(pageOffset);
+        Long begin = DateHelper.currentGMTTime().getTime();
         String apartments = postToShenzhou(params, SYNC_ENTERPRISE_APARTMENTS_LIVING_STATUS, null);
-
+        Long end = DateHelper.currentGMTTime().getTime();
+        Long els = end-begin;
         ShenzhouJsonEntity<List<ApartmentStatusDTO>> entity = JSONObject.parseObject(apartments, new TypeReference<ShenzhouJsonEntity<List<ApartmentStatusDTO>>>(){});
 
         if(SUCCESS_CODE.equals(entity.getErrorCode())) {
@@ -287,8 +293,10 @@ public class ZJGKOpenServiceImpl {
 
     private void syncUserApartmentsLivingStatus(String pageOffset) {
         Map<String, String> params = generateParams(pageOffset);
+        Long begin = DateHelper.currentGMTTime().getTime();
         String apartments = postToShenzhou(params, SYNC_USER_APARTMENTS_LIVING_STATUS, null);
-
+        Long end = DateHelper.currentGMTTime().getTime();
+        Long els = end-begin;
         ShenzhouJsonEntity<List<ApartmentStatusDTO>> entity = JSONObject.parseObject(apartments, new TypeReference<ShenzhouJsonEntity<List<ApartmentStatusDTO>>>(){});
 
         if(SUCCESS_CODE.equals(entity.getErrorCode())) {
@@ -317,8 +325,13 @@ public class ZJGKOpenServiceImpl {
         params.put("appKey", appKey);
         params.put("timestamp", ""+System.currentTimeMillis());
         params.put("nonce", ""+(long)(Math.random()*100000));
-        if(communityIdentifier != null) {
-            params.put("communityIdentifier", communityIdentifier);
+        params.put("crypto", "sssss");
+        if(communityIdentifier == null) {
+            communityIdentifier = "";
+        }
+        params.put("communityIdentifier", communityIdentifier);
+        if(pageOffset == null || "".equals(pageOffset)) {
+            pageOffset = "0";
         }
         params.put("pageOffset", pageOffset);
         params.put("pageSize", PAGE_SIZE);
@@ -358,10 +371,12 @@ public class ZJGKOpenServiceImpl {
         params.put("appKey", appKey);
         params.put("timestamp", ""+System.currentTimeMillis());
         params.put("nonce", ""+(long)(Math.random()*100000));
+        params.put("crypto", "sssss");
         if(communityIdentifier != null) {
             params.put("communityIdentifier", communityIdentifier);
         }
-        params.put("pageOffset", pageOffset);
+        params.put("pageOffset", "0");
+//        params.put("pageOffset", pageOffset);
         params.put("pageSize", PAGE_SIZE);
         String signature = SignatureHelper.computeSignature(params, secretKey);
         params.put("signature", signature);
@@ -399,6 +414,7 @@ public class ZJGKOpenServiceImpl {
         params.put("appKey", appKey);
         params.put("timestamp", ""+System.currentTimeMillis());
         params.put("nonce", ""+(long)(Math.random()*100000));
+        params.put("crypto", "sssss");
         params.put("pageOffset", pageOffset);
         params.put("pageSize", PAGE_SIZE);
         String signature = SignatureHelper.computeSignature(params, secretKey);
@@ -452,44 +468,16 @@ public class ZJGKOpenServiceImpl {
     }
 
     private String postToShenzhou(Map<String, String> params, String method, Map<String, String> headers) {
-
         String shenzhouUrl = configurationProvider.getValue(NAMESPACE_ID, "shenzhou.host.url", "");
-        HttpPost httpPost = new HttpPost(shenzhouUrl + method);
-        CloseableHttpResponse response = null;
-
         String json = null;
+
         try {
-            StringEntity stringEntity = new StringEntity(params.toString(), "utf8");
-            httpPost.setEntity(stringEntity);
-
-            response = httpclient.execute(httpPost);
-
-            int status = response.getStatusLine().getStatusCode();
-            if(status == HttpStatus.SC_OK) {
-                HttpEntity entity = response.getEntity();
-
-                if (entity != null) {
-                    json = EntityUtils.toString(entity, "utf8");
-                }
-            }
-
+            json = HttpUtils.postJson(shenzhouUrl + method, StringHelper.toJsonString(params), 30, HTTP.UTF_8);
         } catch (Exception e) {
             LOGGER.error("sync from shenzhou request error, param={}", params, e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "sync from shenzhou request error.");
-        } finally {
-            if (null != response) {
-                try {
-                    response.close();
-                } catch (IOException e) {
-                    LOGGER.error("sync from shenzhou close instream, response error, param={}", params, e);
-                }
-            }
         }
-
-        if(LOGGER.isDebugEnabled())
-            LOGGER.debug("Data from shenzhou, param={}, json={}", params, json);
-
         return json;
     }
 
