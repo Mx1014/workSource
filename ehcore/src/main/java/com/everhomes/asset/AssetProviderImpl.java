@@ -489,7 +489,7 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
         }
         query.addOrderBy(t.DATE_STR.desc());
-        query.addGroupBy(t.TARGET_NAME);
+//        query.addGroupBy(t.TARGET_NAME);
         query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(r -> {
             ListBillsDTO dto = new ListBillsDTO();

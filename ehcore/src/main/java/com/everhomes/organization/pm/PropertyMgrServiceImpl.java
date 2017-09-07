@@ -5363,7 +5363,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
             String fileName = String.format("客户信息_%s_%s", community.getName(), DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
             ExcelUtils excelUtils = new ExcelUtils(response, fileName, "客户信息");
-            String[] propertyNames = {"contactName", "gender", "orgOwnerType", "contactToken", "birthday", "maritalStatus", "job", "company",
+            String[] propertyNames = {"contactName", "gender", "orgOwnerType", "contactToken", "birthdayDate", "maritalStatus", "job", "company",
                     "idCardNumber", "registeredResidence"};
             String[] titleNames = {"姓名", "性别", "客户类型", "手机号码", "生日", "婚姻状况", "职业", "工作单位", "证件号码", "户口所在地"};
             int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40, 30};

@@ -822,25 +822,25 @@ public class AssetServiceImpl implements AssetService {
         //define the end of the date the calculation should take as multiply
         Calendar c5 = Calendar.getInstance();
         //first to check if the whole period is less than one month
-        Calendar c7 = Calendar.getInstance();
-        Calendar c8 = Calendar.getInstance();
-        c7.setTime(c1.getTime());
-        c8.setTime(c8.getTime());
         if(c1.get(Calendar.YEAR)==c2.get(Calendar.YEAR)&&c1.get(Calendar.MONTH)==c2.get(Calendar.MONTH)){
             duration = ((float)c2.get(Calendar.DAY_OF_MONTH)-(float)c1.get(Calendar.DAY_OF_MONTH)+1f)/(float)c1.getActualMaximum(Calendar.DAY_OF_MONTH);
+            c5.setTime(c2.getTime());
             if(duration <= 0){
                 throw new RuntimeException("日期错误,结束日期需要大于开始日期");
             }
         }else{
             //calculate the per cent of month from c1 to the end of the month c1 is at
             duration = ((float)c1.getActualMaximum(Calendar.DAY_OF_MONTH) - (float)c1.get(Calendar.DAY_OF_MONTH)+1f)/(float)c1.getActualMaximum(Calendar.DAY_OF_MONTH);
+            c5.setTime(c3.getTime());
+            c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
         }
         BigDecimal tempDuration = new BigDecimal(duration);
         tempDuration = tempDuration.setScale(2,BigDecimal.ROUND_CEILING);
         if(duration != 0){
-            c5.setTime(c3.getTime());
-            c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
-            addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, tempDuration.floatValue(),billDay);
+            if(c5.compareTo(c3)==0){
+            }else{
+                addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, tempDuration.floatValue(),billDay);
+            }
         }
         //C3 即账期前进一个月
         c3.add(Calendar.MONTH,1);

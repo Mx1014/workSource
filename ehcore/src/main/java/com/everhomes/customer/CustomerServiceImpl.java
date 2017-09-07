@@ -182,7 +182,7 @@ public class CustomerServiceImpl implements CustomerService {
                 });
             }
         }
-        return convertToDTO(customer);
+        return convertToDTO(updateCustomer);
     }
 
     @Override
