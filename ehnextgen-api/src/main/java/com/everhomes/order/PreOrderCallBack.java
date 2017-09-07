@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.order;
 
+import java.util.List;
+
 /**
  * Created by Wentian Wang on 2017/9/6.
  */
@@ -14,7 +16,7 @@ public class PreOrderCallBack {
     private String orderCommitTimestamp;
     private String payInfo;
     private String extendInfo;
-    private PayMethod payMethod;
+    private List<PayMethod> payMethod;
 
     public PreOrderCallBack() {
     }
