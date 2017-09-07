@@ -11398,6 +11398,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             removeRepeat(organizationIds);
             // 重新把成员添加到公司多个部门
             for (Long oId : organizationIds) {
+                if (null == oId) {
+                    continue;
+                }
                 //排除掉上面已添加的公司机构成员
                 if (!enterpriseIds.contains(oId)) {
                     Organization group = checkOrganization(oId);

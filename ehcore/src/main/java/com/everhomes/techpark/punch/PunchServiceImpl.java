@@ -1285,7 +1285,10 @@ public class PunchServiceImpl implements PunchService {
 		return response;
 	}
 
-	/** 当前时间点 应该算哪一天 */
+	/** 当前时间点 应该算哪一天
+	 * 1.看昨天的刷新时间
+	 * 2.看今天的刷新时间
+	 * 3.如果今天没排班,看明天的最早上班*/
 	private java.sql.Date calculatePunchDate(Calendar punCalendar, Long enterpriseId, Long userId) {
 
 //		try {
@@ -1308,23 +1311,35 @@ public class PunchServiceImpl implements PunchService {
 		yesterday.setTime(punCalendar.getTime());
 		yesterday.add(Calendar.DATE, -1);
 		PunchTimeRule yesterdayPtr = getPunchTimeRuleByRuleIdAndDate(pr,yesterday.getTime(),userId);
-		//默认分界点是次日5点,如果timerule有设置就用设置的
-		Long splitTime = 86400000+5*3600*1000L;
-		Long yesterdaySplitTime = 86400000+ 5*3600*1000L;
+		//默认分界点是次日4点,如果timerule有设置就用设置的
+		Long splitTime = ONE_DAY_MS+4*3600*1000L;
+		Long yesterdaySplitTime = ONE_DAY_MS+ 4*3600*1000L;
 
 
 		if(null != ptr && null != ptr.getDaySplitTimeLong())
 			splitTime = ptr.getDaySplitTimeLong();
 		else if(null != ptr && null != ptr.getDaySplitTime())
 			splitTime = convertTimeToGMTMillisecond(ptr.getDaySplitTime());
+		else if(null == ptr){
 
+			Calendar tomorrow = Calendar.getInstance();
+			tomorrow.setTime(punCalendar.getTime());
+			tomorrow.add(Calendar.DATE, 1);
+
+			PunchTimeRule tomorrowPtr = getPunchTimeRuleByRuleIdAndDate(pr,tomorrow.getTime(),userId);
+			if(null != tomorrowPtr){
+				PunchTimeRuleDTO ptrDTO = convertPunchTimeRule2DTO(tomorrowPtr);
+				splitTime = ONE_DAY_MS + ptrDTO.getPunchTimeIntervals().get(0).getArriveTime()
+						- timeIsNull(ptrDTO.getBeginPunchTime(), 4 * 3600 * 1000L);
+			}
+		}
 
 		if(null != yesterdayPtr && null != yesterdayPtr.getDaySplitTimeLong())
 			yesterdaySplitTime = yesterdayPtr.getDaySplitTimeLong();
 		else if(null != yesterdayPtr && null != yesterdayPtr.getDaySplitTime())
 			yesterdaySplitTime = convertTimeToGMTMillisecond(yesterdayPtr.getDaySplitTime());
 		//TODO: 用日期来处理
-		if ( punchTimeLong+86400000 < yesterdaySplitTime) {
+		if ( punchTimeLong+ONE_DAY_MS < yesterdaySplitTime) {
 			//取前一天的ptr,如果周期分界点>打卡时间+86400000 则算前一天
 			punCalendar.setTime(yesterday.getTime());
 		}
