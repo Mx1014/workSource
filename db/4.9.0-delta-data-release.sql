@@ -187,18 +187,18 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 VALUES ('21200', '合同管理', '20000', '/20000/21200', '0', '2', '2', '0', UTC_TIMESTAMP());
 
 
--- payment_wentian
+-- 缴费，闻天
 SET @eh_locale_templates_id = (SELECT max(id) FROM `eh_locale_templates`);
-INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'user.notification', '3', 'zh_CN', '物业账单通知用户', '尊敬的${targetName}先生/女士,您的账单已出，请在app内查询', '999985');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'user.notification', '3', 'zh_CN', '物业账单通知用户', '尊敬的${targetName}先生/女士,您的账单已出，请在app内查询', '999985');
 SET @eh_locale_templates_id = (SELECT max(id) FROM `eh_locale_templates`);
-INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'sms.default.yzx', '54', 'zh_CN', '物业费催缴', '119704', '999971');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'sms.default.yzx', '54', 'zh_CN', '物业费催缴', '119704', '999971');
 SET @eh_locale_templates_id = (SELECT max(id) FROM `eh_locale_templates`);
-INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'sms.default.yzx', '54', 'zh_CN', '物业费催缴', '119706', '999974');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'sms.default.yzx', '54', 'zh_CN', '物业费催缴', '119706', '999974');
 SET @eh_locale_templates_id = (SELECT max(id) FROM `eh_locale_templates`);
-INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'sms.default.yzx', '54', 'zh_CN', '物业费催缴', '117613', '999973');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@eh_locale_templates_id := @eh_locale_templates_id + 1), 'sms.default.yzx', '54', 'zh_CN', '物业费催缴', '117613', '999973');
 SET @eh_asset_vendor_id = (SELECT max(id) FROM `eh_asset_vendor`);
-INSERT INTO `ehcore`.`eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`) VALUES ((@eh_asset_vendor_id := @eh_asset_vendor_id + 1), 'community', '240111044331050388', '张江高科缴费', 'ZJGK', '2', '999971');
-INSERT INTO `ehcore`.`eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`) VALUES ((@eh_asset_vendor_id := @eh_asset_vendor_id + 1), 'community', '240111044331050389', '张江高科人才公寓缴费', 'ZJGK', '2', '999971');
+INSERT INTO `eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`) VALUES ((@eh_asset_vendor_id := @eh_asset_vendor_id + 1), 'community', '240111044331050388', '张江高科缴费', 'ZJGK', '2', '999971');
+INSERT INTO `eh_asset_vendor` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `status`, `namespace_id`) VALUES ((@eh_asset_vendor_id := @eh_asset_vendor_id + 1), 'community', '240111044331050389', '张江高科人才公寓缴费', 'ZJGK', '2', '999971');
 
 UPDATE `eh_web_menus` set leaf_flag = '0';
 

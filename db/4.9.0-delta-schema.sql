@@ -602,14 +602,15 @@ CREATE TABLE `eh_customer_economic_indicators` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 缴费模块表结构
 
-SET FOREIGN_KEY_CHECKS=0;
 
+-- 缴费模块表结构---王闻天
 -- ----------------------------
 -- Table structure for eh_payment_bill_groups
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_payment_bill_groups`;
+
+SET FOREIGN_KEY_CHECKS=0;
+-- DROP TABLE IF EXISTS `eh_payment_bill_groups`;
 CREATE TABLE `eh_payment_bill_groups` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
@@ -629,7 +630,7 @@ CREATE TABLE `eh_payment_bill_groups` (
 -- ----------------------------
 -- Table structure for eh_payment_bill_groups_rules
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_payment_bill_groups_rules`;
+-- DROP TABLE IF EXISTS `eh_payment_bill_groups_rules`;
 CREATE TABLE `eh_payment_bill_groups_rules` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL,
@@ -646,7 +647,7 @@ CREATE TABLE `eh_payment_bill_groups_rules` (
 -- ----------------------------
 -- Table structure for eh_payment_bill_items
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_payment_bill_items`;
+-- DROP TABLE IF EXISTS `eh_payment_bill_items`;
 CREATE TABLE `eh_payment_bill_items` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(20) NOT NULL DEFAULT '0',
@@ -683,7 +684,7 @@ CREATE TABLE `eh_payment_bill_items` (
 -- ----------------------------
 -- Table structure for eh_payment_bill_notice_records
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_payment_bill_notice_records`;
+-- DROP TABLE IF EXISTS `eh_payment_bill_notice_records`;
 CREATE TABLE `eh_payment_bill_notice_records` (
   `id` bigint(20) NOT NULL,
   `bill_id` bigint(20) NOT NULL DEFAULT '0',
@@ -698,7 +699,7 @@ CREATE TABLE `eh_payment_bill_notice_records` (
 -- ----------------------------
 -- Table structure for eh_payment_bills
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_payment_bills`;
+-- DROP TABLE IF EXISTS `eh_payment_bills`;
 CREATE TABLE `eh_payment_bills` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
@@ -733,7 +734,7 @@ CREATE TABLE `eh_payment_bills` (
 -- ----------------------------
 -- Table structure for eh_payment_charging_item_scopes
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_payment_charging_item_scopes`;
+-- DROP TABLE IF EXISTS `eh_payment_charging_item_scopes`;
 CREATE TABLE `eh_payment_charging_item_scopes` (
   `id` bigint(20) NOT NULL,
   `charging_item_id` bigint(20) NOT NULL DEFAULT '0',
@@ -746,7 +747,7 @@ CREATE TABLE `eh_payment_charging_item_scopes` (
 -- ----------------------------
 -- Table structure for eh_payment_charging_items
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_payment_charging_items`;
+-- DROP TABLE IF EXISTS `eh_payment_charging_items`;
 CREATE TABLE `eh_payment_charging_items` (
   `id` bigint(20) NOT NULL,
   `name` varchar(15) DEFAULT NULL,
@@ -761,7 +762,7 @@ CREATE TABLE `eh_payment_charging_items` (
 -- ----------------------------
 -- Table structure for eh_payment_charging_standards
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_payment_charging_standards`;
+-- DROP TABLE IF EXISTS `eh_payment_charging_standards`;
 CREATE TABLE `eh_payment_charging_standards` (
   `id` bigint(20) NOT NULL,
   `name` varchar(10) DEFAULT NULL,
@@ -781,7 +782,7 @@ CREATE TABLE `eh_payment_charging_standards` (
 -- ----------------------------
 -- Table structure for eh_payment_charging_standards_scopes
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_payment_charging_standards_scopes`;
+-- DROP TABLE IF EXISTS `eh_payment_charging_standards_scopes`;
 CREATE TABLE `eh_payment_charging_standards_scopes` (
   `id` bigint(20) NOT NULL,
   `charging_standard_id` bigint(20) NOT NULL DEFAULT '0',
@@ -797,7 +798,7 @@ CREATE TABLE `eh_payment_charging_standards_scopes` (
 -- ----------------------------
 -- Table structure for eh_payment_exemption_items
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_payment_exemption_items`;
+-- DROP TABLE IF EXISTS `eh_payment_exemption_items`;
 CREATE TABLE `eh_payment_exemption_items` (
   `id` bigint(20) NOT NULL,
   `bill_id` bigint(20) NOT NULL DEFAULT '0',
@@ -817,7 +818,7 @@ CREATE TABLE `eh_payment_exemption_items` (
 -- ----------------------------
 -- Table structure for eh_payment_variables
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_payment_variables`;
+-- DROP TABLE IF EXISTS `eh_payment_variables`;
 CREATE TABLE `eh_payment_variables` (
   `id` bigint(20) NOT NULL,
   `charging_standard_id` bigint(20) DEFAULT NULL,
@@ -833,7 +834,7 @@ CREATE TABLE `eh_payment_variables` (
 -- ----------------------------
 -- Table structure for eh_payment_contract_receiver
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_payment_contract_receiver`;
+-- DROP TABLE IF EXISTS `eh_payment_contract_receiver`;
 CREATE TABLE `eh_payment_contract_receiver` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT '0',
