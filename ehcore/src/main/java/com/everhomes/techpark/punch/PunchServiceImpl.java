@@ -6365,7 +6365,7 @@ public class PunchServiceImpl implements PunchService {
 			for (UniongroupMemberDetail detail : employees) {
 				UniongroupTarget target = new UniongroupTarget();
 				target.setName(detail.getContactName());
-				target.setId(detail.getId());
+				target.setId(detail.getDetailId());
 				target.setType(UniongroupTargetType.MEMBERDETAIL.getCode());
 				dto.getEmployees().add(target);
 			}
@@ -6569,18 +6569,32 @@ public class PunchServiceImpl implements PunchService {
 		punchOrg.setName(cmd.getGroupName());
 		organizationProvider.updateOrganization(punchOrg);
 		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
+
+		List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
+
 		//添加关联
 		SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
-        command.setGroupId(punchOrg.getId());
-        command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
-        command.setEnterpriseId(cmd.getOwnerId());
-        command.setTargets(cmd.getTargets());
-        try {
-            this.uniongroupService.saveUniongroupConfigures(command);
-        }catch(NoNodeAvailableException e){
-            LOGGER.error("NoNodeAvailableException",e);
-        }
-        //打卡地点和wifi
+		command.setGroupId(punchOrg.getId());
+		command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
+		command.setEnterpriseId(cmd.getOwnerId());
+		command.setTargets(cmd.getTargets());
+		try {
+			this.uniongroupService.saveUniongroupConfigures(command);
+		}catch(NoNodeAvailableException e){
+			LOGGER.error("NoNodeAvailableException",e);
+		}
+		List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
+		if(null != oldEmployees){
+			if(null == newEmployees)
+				newEmployees = new ArrayList<>();
+			for (UniongroupMemberDetail employee : oldEmployees) {
+				if (!isEmployeeInList(employee, newEmployees)) {
+					//删除被踢出考勤组的人的设置 -- 排班
+					punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndTarget(pr.getId(),employee.getDetailId());
+				}
+			}
+		}
+		//打卡地点和wifi
         saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
 
         //打卡时间,特殊日期,排班等
@@ -6603,6 +6617,18 @@ public class PunchServiceImpl implements PunchService {
 		sendMessageToGroupUser(pr,cmd.getTimeRules());
 		return null;
 	}
+
+	private boolean isEmployeeInList(UniongroupMemberDetail employee, List<UniongroupMemberDetail> newEmployees) {
+		if (null != newEmployees) {
+			for (UniongroupMemberDetail emp : newEmployees) {
+				if (emp.getDetailId().equals(employee.getDetailId())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	/**给组下面所有人发消息通知*/
 	private void sendMessageToGroupUser(PunchRule pr, List<PunchTimeRuleDTO> timeRules) {
 		//捞人

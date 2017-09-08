@@ -35,4 +35,6 @@ public interface PunchSchedulingProvider {
 			Date date);
 
 	void deletePunchSchedulingByPunchRuleId(Long id, Date ruleDate, Long ownerId, Long targetId);
+
+	void deletePunchSchedulingByPunchRuleIdAndTarget(Long id, Long detailId);
 }
