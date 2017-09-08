@@ -386,7 +386,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             params.put("enterpriseIdentifier",identifier);
         }else if(targetType!=null && targetType.equals("eh_user")){
             url = ZjgkUrls.USER_CONTRACT_LIST;
-            User user = userProvider.findUserById(cmd.getTargetId());
+            User user = UserContext.current().getUser();
             identifier = user.getIdentifierToken();
             params.put("userMobile",identifier);
         }else{

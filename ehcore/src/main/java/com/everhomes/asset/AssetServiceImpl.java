@@ -251,7 +251,11 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillItemsResponse response = new ListBillItemsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
-            cmd.setPageAnchor(0l);
+            if(UserContext.getCurrentNamespaceId()!=999971){
+                cmd.setPageAnchor(0l);
+            }else{
+                cmd.setPageAnchor(1l);
+            }
         }
         if(cmd.getPageSize() == null){
             cmd.setPageSize(20);
@@ -399,7 +403,11 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void OneKeyNotice(OneKeyNoticeCommand cmd) {
         ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
-        convertedCmd.setPageAnchor(0l);
+        if(UserContext.getCurrentNamespaceId()!=999971){
+            convertedCmd.setPageAnchor(0l);
+        }else{
+            convertedCmd.setPageAnchor(null);
+        }
         convertedCmd.setPageSize(999999);
         convertedCmd.setStatus((byte)1);
         convertedCmd.setBillStatus((byte)0);
