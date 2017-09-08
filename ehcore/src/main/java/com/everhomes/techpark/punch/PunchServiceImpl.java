@@ -173,7 +173,6 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 public class PunchServiceImpl implements PunchService {
 	final String downloadDir ="download/";
 
-	private MessagingService messagingService;
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(PunchServiceImpl.class);
 	@Autowired
@@ -202,6 +201,9 @@ public class PunchServiceImpl implements PunchService {
 
 	@Autowired
 	private ScheduleProvider scheduleProvider;
+
+	@Autowired
+	private MessagingService messagingService;
 
 	@Autowired
 	private PunchProvider punchProvider;
