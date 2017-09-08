@@ -923,12 +923,14 @@ public class ContractServiceImpl implements ContractService {
 
 				List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
 				if(mappings != null && mappings.size() > 0) {
-					//先检查是否全是待租的，不是的话报错
-					for(CommunityAddressMapping mapping : mappings) {
-						if(!AddressMappingStatus.FREE.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
-							LOGGER.error("contract apartment is not all free! mapping: {}", mapping);
-							throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_APARTMENT_IS_NOT_FREE,
-									"contract apartment is not all free!");
+					//对于审批不通过合同 先检查是否全是待租的，不是的话报错
+					if(ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))){
+						for(CommunityAddressMapping mapping : mappings) {
+							if(!AddressMappingStatus.FREE.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
+								LOGGER.error("contract apartment is not all free! mapping: {}", mapping);
+								throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_APARTMENT_IS_NOT_FREE,
+										"contract apartment is not all free!");
+							}
 						}
 					}
 
