@@ -73,7 +73,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     @Override
     public void onFlowCaseAbsorted(FlowCaseState ctx) {
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("step into onFlowCaseEnd, ctx: {}", ctx);
+            LOGGER.debug("step into onFlowCaseAbsorted, ctx: {}", ctx);
         }
         FlowCase flowCase = ctx.getFlowCase();
         Contract contract = contractProvider.findContractById(flowCase.getReferId());
@@ -83,6 +83,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
             contractSearcher.feedDoc(contract);
             dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
         }else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+            
         }
     }
 

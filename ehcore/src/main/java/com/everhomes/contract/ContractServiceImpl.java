@@ -671,6 +671,7 @@ public class ContractServiceImpl implements ContractService {
 					mapping.setNamespaceId(contract.getNamespaceId());
 //					mapping.setOrganizationName(contract.getCustomerName());
 					mapping.setContractId(contract.getId());
+					mapping.setAreaSize(buildingApartment.getChargeArea());
 					mapping.setContractNumber(contract.getContractNumber());
 					mapping.setStatus(CommonStatus.ACTIVE.getCode());
 					mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1201,6 +1202,7 @@ public class ContractServiceImpl implements ContractService {
 		if(contractApartments != null && contractApartments.size() > 0) {
 			List<BuildingApartmentDTO> apartmentDtos = contractApartments.stream().map(apartment -> {
 				BuildingApartmentDTO apartmentDto = ConvertHelper.convert(apartment, BuildingApartmentDTO.class);
+				apartmentDto.setChargeArea(apartment.getAreaSize());
 				return apartmentDto;
 			}).collect(Collectors.toList());
 			dto.setApartments(apartmentDtos);
