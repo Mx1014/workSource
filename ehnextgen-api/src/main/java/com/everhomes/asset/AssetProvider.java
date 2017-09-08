@@ -128,4 +128,6 @@ public interface AssetProvider {
     List<PaymentBillGroup> listAllBillGroups();
 
     void updateBillSwitchOnTime(String billDateStr);
+
+    String findZjgkCommunityIdentifierById(Long ownerId);
 }

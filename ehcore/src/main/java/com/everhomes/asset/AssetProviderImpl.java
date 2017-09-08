@@ -1665,4 +1665,9 @@ public class AssetProviderImpl implements AssetProvider {
                 .execute();
     }
 
+    @Override
+    public String findZjgkCommunityIdentifierById(Long ownerId) {
+        return null;
+    }
+
 }

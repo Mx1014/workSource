@@ -274,8 +274,8 @@ public class ZhangjianggaokeAssetVendor extends ZuolinAssetVendorHandler{
         List<ListBillsDTO> list = new ArrayList<>();
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
+        String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
         params.put("customerName", targetName==null?"":targetName);
-        //通过ownerId来找这个communityIdentifier就不会有两个ownerId的问题了
         params.put("communityIdentifer", communityIdentifier==null?"":communityIdentifier);
         params.put("buildingIdentifier", buildingName==null?"":String.valueOf(buildingName));
         params.put("apartmentIdentifier", apartmentName==null?"":String.valueOf(apartmentName));
