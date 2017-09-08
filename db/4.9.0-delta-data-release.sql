@@ -1378,3 +1378,8 @@ delete from eh_var_field_group_scopes where group_id in(2,3);
 -- 科技园增加创客空间 by R 20170907
 SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
 INSERT eh_web_menu_scopes VALUES(@scope_id := @scope_id+1, '40600', '', 'EhNamespaces', '1000000',2);
+
+
+-- 保集和嘉定不要合同管理和缴费管理，只要客户管理（且希望把我们现在命名的客户管理 改为“企业信息管理”）；张江只要我们的缴费模块；by xiongying20170908
+delete from eh_web_menu_scopes where menu_id in(21100, 21110, 21120, 21200, 21210, 21220) and owner_id = 999971;
+delete from eh_web_menu_scopes where menu_id in(21200, 21210, 21220) and owner_id in (999973, 999974);
