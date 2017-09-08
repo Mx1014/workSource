@@ -2,15 +2,29 @@
 package com.everhomes.rest.order;
 
 
-import com.everhomes.rest.order.PaymentParamsDTO;
-
 import javax.validation.constraints.NotNull;
 
 
 /**
- * Created by Wentian Wang on 2017/9/6.
+ * <ul>
+ *     <li>clientAppName: clientAppName</li>
+ *     <li>orderType: orderType</li>
+ *     <li>orderId: orderId</li>
+ *     <li>payerId: payerId</li>
+ *     <li>amount: amount</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>ownerType: ownerType</li>
+ *     <li>ownerId: ownerId</li>
+ *     <li>resourceType: resourceType</li>
+ *     <li>resourceId: resourceId</li>
+ *     <li>openid: openid</li>
+ *     <li>summary: summary</li>
+ *     <li>expiration: expiration</li>
+ *     <li>extendInfo: extendInfo</li>
+ *     <li>paymentType: paymentType</li>
+ *     <li>paymentParams: paymentParams {@link com.everhomes.rest.order.PaymentParamsDTO}</li>
+ * </ul>
  */
-
 public class PreOrderCommand {
 
     @NotNull
