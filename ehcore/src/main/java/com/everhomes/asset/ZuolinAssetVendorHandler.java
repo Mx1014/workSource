@@ -5,10 +5,17 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contract.ContractService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.contract.ListCustomerContractsCommand;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.search.OrganizationSearcher;
@@ -54,6 +61,15 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Autowired
     private AddressProvider addressProvider;
+
+    @Autowired
+    private OrganizationService organizationService;
+
+    @Autowired
+    private AssetService assetService;
+
+    @Autowired
+    private ContractService contractService;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -295,6 +311,48 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         response.setBillPeriodMonths(dateStrFilter.size());
         response.setBillDetailDTOList(billDetailDTOList);
         return response;
+    }
+
+    @Override
+    public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
+        FindUserInfoForPaymentResponse res = new FindUserInfoForPaymentResponse();
+        List<FindUserInfoForPaymentDTO> list = new ArrayList<>();
+        String targeType = cmd.getTargetType();
+        ListCustomerContractsCommand cmd1 = new ListCustomerContractsCommand();
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        cmd1.setCommunityId(cmd.getCommunityId());
+        if(targeType.equals(AssetPaymentStrings.EH_USER)){
+            cmd1.setTargetId(UserContext.currentUserId());
+            cmd1.setTargetType(CustomerType.INDIVIDUAL.getCode());
+            res.setCustomerName(UserContext.current().getUser().getNickName());
+        }else if(targeType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+            cmd1.setTargetId(cmd.getTargetId());
+            cmd1.setTargetType(CustomerType.ENTERPRISE.getCode());
+            OrganizationDTO organizationById = organizationService.getOrganizationById(cmd.getTargetId());
+            res.setCustomerName(organizationById.getName());
+        }else{
+            throw new RuntimeException("用户类型错误");
+        }
+        List<ContractDTO> dtos = contractService.listCustomerContracts(cmd1);
+        for(int i = 0; i < dtos.size(); i++){
+            FindUserInfoForPaymentDTO dto = new FindUserInfoForPaymentDTO();
+            dto.setContractNum(dtos.get(i).getContractNumber());
+            dto.setContractId(dtos.get(i).getId());
+            list.add(dto);
+        }
+        res.setContractList(list);
+        if(dtos.size()>0){
+            ContractDTO contractDTO = dtos.get(0);
+            FindContractCommand cmd2 = new FindContractCommand();
+            cmd2.setId(contractDTO.getId());
+            cmd2.setContractNumber(contractDTO.getContractNumber());
+            cmd2.setCommunityId(cmd.getCommunityId());
+            cmd2.setPartyAId(contractDTO.getPartyAId());
+            GetAreaAndAddressByContractDTO areaAndAddressByContract = assetService.getAreaAndAddressByContract(cmd2);
+            res.setAddressNames(areaAndAddressByContract.getAddressNames());
+            res.setAreaSizesSum(areaAndAddressByContract.getAreaSizesSum());
+        }
+        return res;
     }
 
     @Override

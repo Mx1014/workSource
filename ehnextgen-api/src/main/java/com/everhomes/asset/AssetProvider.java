@@ -130,4 +130,8 @@ public interface AssetProvider {
     void updateBillSwitchOnTime(String billDateStr);
 
     String findZjgkCommunityIdentifierById(Long ownerId);
+
+    Long findTargetIdByIdentifier(String customerIdentifier);
+
+    String findAppName(Integer currentNamespaceId);
 }

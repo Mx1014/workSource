@@ -257,7 +257,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(20);
         }
         int pageOffSet = cmd.getPageAnchor().intValue();
-        List<BillDTO> billDTOS = handler.listBillItems(cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
+        List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         if(billDTOS.size() <= cmd.getPageSize()) {
             response.setNextPageAnchor(null);
         }else{
@@ -274,7 +274,7 @@ public class AssetServiceImpl implements AssetService {
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         //张江高科的厂商的接口，还未写
-        List<NoticeInfo> noticeInfos = handler.listNoticeInfoByBillId(cmd.getBillIds());
+        List<NoticeInfo> noticeInfos = handler.listNoticeInfoByBillId(cmd.getBillIdAndTypes());
         if(noticeInfos.size()<1) return;
         List<Long> uids = new ArrayList<>();
         //"{targetName}先生/女士，您好，您的账单已出，应付{amount1}元，待缴{amount2}元，下载"{appName} APP"可及时查看账单并支持在线付款,还可体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。"
@@ -352,7 +352,7 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
         String vendorName = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-        return handler.getBillDetailForClient(cmd.getBillId());
+        return handler.getBillDetailForClient(cmd.getBillId(),cmd.getTargetType());
     }
 
     @Override
@@ -362,6 +362,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd) {
+        if(UserContext.getCurrentNamespaceId()==999971){
+            throw new RuntimeException("暂不支持");
+        }
         return assetProvider.showCreateBill(cmd.getBillGroupId());
     }
 
@@ -373,7 +376,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getTargetType().equals("eh_user")) {
             cmd.setTargetId(UserContext.currentUserId());
         }
-        return handler.listBillDetailOnDateChange(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getDateStr(),cmd.getContractId());
+        return handler.listBillDetailOnDateChange(cmd.getBillStatus(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getDateStr(),cmd.getContractId());
     }
 
     @Override
@@ -399,31 +402,42 @@ public class AssetServiceImpl implements AssetService {
         convertedCmd.setBillStatus((byte)0);
         ListBillsResponse convertedResponse = listBills(convertedCmd);
         List<ListBillsDTO> listBillsDTOS = convertedResponse.getListBillsDTOS();
-        Map<OwnerEntity,List<Long>> noticeObjects = new HashMap<>();
+        Map<OwnerEntity,List<String>> noticeObjects = new HashMap<>();
         for(int i = 0; i < listBillsDTOS.size(); i ++) {
             ListBillsDTO convertedDto = listBillsDTOS.get(i);
             OwnerEntity entity = new OwnerEntity();
             entity.setOwnerId(Long.parseLong(convertedDto.getOwnerId()));
             entity.setOwnerType(convertedDto.getOwnerType());
             if(noticeObjects.containsKey(entity)){
-                noticeObjects.get(entity).add(Long.parseLong(convertedDto.getBillId()));
+                noticeObjects.get(entity).add(convertedDto.getBillId());
             }else{
-                List<Long> ids = new ArrayList<>();
-                ids.add(Long.parseLong(convertedDto.getBillId()));
+                List<String> ids = new ArrayList<>();
+                ids.add(convertedDto.getBillId());
                 noticeObjects.put(entity,ids);
             }
         }
-        for(Map.Entry<OwnerEntity,List<Long>> entry : noticeObjects.entrySet()){
+        for(Map.Entry<OwnerEntity,List<String>> entry : noticeObjects.entrySet()){
             SelectedNoticeCommand requestCmd = new SelectedNoticeCommand();
             requestCmd.setOwnerType(entry.getKey().getOwnerType());
             requestCmd.setOwnerId(entry.getKey().getOwnerId());
-            requestCmd.setBillIds(entry.getValue());
+            List<BillIdAndType> billIdAndTypes = new ArrayList<>();
+            List<String> value = entry.getValue();
+            for(int i = 0; i < value.size(); i++){
+                BillIdAndType bit = new BillIdAndType();
+                bit.setBillId(value.get(i));
+                bit.setTargetType(cmd.getTargetType());
+                billIdAndTypes.add(bit);
+            }
+            requestCmd.setBillIdAndTypes(billIdAndTypes);
             selectNotice(requestCmd);
         }
     }
 
     @Override
     public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
+        if(UserContext.getCurrentNamespaceId()==999971l){
+            throw new RuntimeException("暂不支持修改！");
+        }
         ListBillDetailVO vo = assetProvider.listBillDetail(cmd.getBillId());
         ListBillDetailResponse response = ConvertHelper.convert(vo, ListBillDetailResponse.class);
         List<ExemptionItemDTO> dtos = response.getBillGroupDTO().getExemptionItemDTOList();
@@ -441,6 +455,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
+        if(UserContext.getCurrentNamespaceId()==999971){
+            throw new RuntimeException("张江高科暂不支持账单统计功能");
+        }
         List<BillStaticsDTO> list = new ArrayList<>();
         Byte dimension = cmd.getDimension();
         if(dimension==1){
@@ -522,6 +539,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
+        if(UserContext.getCurrentNamespaceId()==999971){
+            throw new RuntimeException("张江高科暂不支持减免项功能");
+        }
         ListSettledBillExemptionItemsResponse response = new ListSettledBillExemptionItemsResponse();
 
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
@@ -1009,44 +1029,11 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
-        FindUserInfoForPaymentResponse res = new FindUserInfoForPaymentResponse();
-        List<FindUserInfoForPaymentDTO> list = new ArrayList<>();
-        String targeType = cmd.getTargeType();
-        ListCustomerContractsCommand cmd1 = new ListCustomerContractsCommand();
-        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-        cmd1.setCommunityId(cmd.getCommunityId());
-        if(targeType.equals(AssetPaymentStrings.EH_USER)){
-            cmd1.setTargetId(UserContext.currentUserId());
-            cmd1.setTargetType(CustomerType.INDIVIDUAL.getCode());
-            res.setCustomerName(UserContext.current().getUser().getNickName());
-        }else if(targeType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
-            cmd1.setTargetId(cmd.getTargetId());
-            cmd1.setTargetType(CustomerType.ENTERPRISE.getCode());
-            OrganizationDTO organizationById = organizationService.getOrganizationById(cmd.getTargetId());
-            res.setCustomerName(organizationById.getName());
-        }else{
-            throw new RuntimeException("用户类型错误");
-        }
-        List<ContractDTO> dtos = contractService.listCustomerContracts(cmd1);
-        for(int i = 0; i < dtos.size(); i++){
-            FindUserInfoForPaymentDTO dto = new FindUserInfoForPaymentDTO();
-            dto.setContractNum(dtos.get(i).getContractNumber());
-            dto.setContractId(dtos.get(i).getId());
-            list.add(dto);
-        }
-        res.setContractList(list);
-        if(dtos.size()>0){
-            ContractDTO contractDTO = dtos.get(0);
-            FindContractCommand cmd2 = new FindContractCommand();
-            cmd2.setId(contractDTO.getId());
-            cmd2.setContractNumber(contractDTO.getContractNumber());
-            cmd2.setCommunityId(cmd.getCommunityId());
-            cmd2.setPartyAId(contractDTO.getPartyAId());
-            GetAreaAndAddressByContractDTO areaAndAddressByContract = getAreaAndAddressByContract(cmd2);
-            res.setAddressNames(areaAndAddressByContract.getAddressNames());
-            res.setAreaSizesSum(areaAndAddressByContract.getAreaSizesSum());
-        }
-        return res;
+        AssetVendor assetVendor = checkAssetVendor(cmd.getTargetType(), cmd.getTargetId());
+        String vendor = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendor);
+        return handler.findUserInfoForPayment(cmd);
+
     }
 
     @Override

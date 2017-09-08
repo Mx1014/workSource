@@ -9,14 +9,14 @@ import java.util.List;
 
 /**
  *<ul>
- * <li>billIds:账单id集合</li>
+ * <li>billIdAndTypes:账单id客户类型的集合</li>
  * <li>ownerId:所属者id</li>
  * <li>ownerType:所属者类型</li>
  *</ul>
  */
 public class SelectedNoticeCommand {
     @ItemType(Long.class)
-    private List<Long> billIds;
+    private List<BillIdAndType> billIdAndTypes;
     private String ownerType;
     private Long ownerId;
 
@@ -25,12 +25,12 @@ public class SelectedNoticeCommand {
         return StringHelper.toJsonString(this);
     }
 
-    public List<Long> getBillIds() {
-        return billIds;
+    public List<BillIdAndType> getBillIdAndTypes() {
+        return billIdAndTypes;
     }
 
-    public void setBillIds(List<Long> billIds) {
-        this.billIds = billIds;
+    public void setBillIdAndTypes(List<BillIdAndType> billIdAndTypes) {
+        this.billIdAndTypes = billIdAndTypes;
     }
 
     public String getOwnerType() {

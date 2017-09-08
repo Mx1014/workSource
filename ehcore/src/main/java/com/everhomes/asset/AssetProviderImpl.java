@@ -23,6 +23,7 @@ import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
 import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
+import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
@@ -1667,7 +1668,35 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public String findZjgkCommunityIdentifierById(Long ownerId) {
-        return null;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCommunities t = Tables.EH_COMMUNITIES.as("t");
+        return context.select(t.NAMESPACE_COMMUNITY_TOKEN)
+                .from(t)
+                .where(t.ID.eq(ownerId))
+                .fetchOne(0,String.class);
+    }
+
+    @Override
+    public Long findTargetIdByIdentifier(String customerIdentifier) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhUsers t = Tables.EH_USERS.as("t");
+        return context.select(t.ID)
+                .from(t)
+                .where(t.NAMESPACE_USER_TOKEN.eq(customerIdentifier))
+                .fetchOne(0,Long.class);
+    }
+
+    @Override
+    public String findAppName(Integer currentNamespaceId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<String> fetch = dslContext.select(Tables.EH_APP_URLS.NAME)
+                .from(Tables.EH_APP_URLS)
+                .where(Tables.EH_APP_URLS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
+                .fetch(Tables.EH_APP_URLS.NAME);
+        if(fetch!=null && fetch.size()>0){
+            return fetch.get(0);
+        }
+        return "";
     }
 
 }
