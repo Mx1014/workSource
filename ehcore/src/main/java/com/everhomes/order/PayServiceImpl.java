@@ -60,6 +60,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     public void onApplicationEvent(ContextRefreshedEvent event) {
         String payHomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.home.url", "");
         PaymentAccount paymentAccount = findPaymentAccount(SYSTEMID);
+        if(paymentAccount == null){
+            LOGGER.error("payment account no find system_id={}", SYSTEMID);
+            return;
+        }
         restClient = new RestClient(payHomeUrl, paymentAccount.getAppKey(), paymentAccount.getSecretKey());
     }
     /**
