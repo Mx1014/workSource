@@ -8,8 +8,6 @@ import javax.validation.Valid;
 
 import com.everhomes.rest.address.*;
 
-import com.everhomes.rest.enterprise.SearchEnterpriseCommunityCommand;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +23,6 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.ui.organization.ListCommunitiesBySceneResponse;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.EtagHelper;

@@ -7,12 +7,11 @@ import java.util.List;
 
 /**
  * <ul>
- *   <li>resudentials:小区列表</li>
- *   <li>commercials:园区列表</li>
+ * <li>resudentials:小区列表</li>
+ * <li>commercials:园区列表</li>
  * </ul>
- *
  */
-public class ListNearbyMixCommunitiesCommandV2Response {
+public class ListNearbyMixCommunitiesCommandV2Response extends RestResponseBase {
 
     @ItemType(CommunityDTO.class)
     private List<CommunityDTO> resudentials;
