@@ -4,7 +4,17 @@ package com.everhomes.rest.asset;
 /**
  * Created by Wentian Wang on 2017/9/8.
  */
-
+/**
+ *<ul>
+ * <li>contractId:合同id</li>
+ * <li>contractNumber:合同编号</li>
+ * <li>namespaceId:域空间</li>
+ * <li>communityId:园区id</li>
+ * <li>partyAId:第三方id</li>
+ * <li>targetType:客户类型，个人eh_user,企业eh_organization</li>
+ * <li>ownerType:所属者类型，园区为community</li>
+ *</ul>
+ */
 public class GetAreaAndAddressByContractCommand {
     private String contractId;
 

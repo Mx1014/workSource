@@ -619,7 +619,7 @@ public class AssetProviderImpl implements AssetProvider {
                     BillDetailDTO dto = new BillDetailDTO();
                     dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setAmountReceviable(r.getValue(t.AMOUNT_RECEIVABLE));
-                    dto.setBillId(r.getValue(t.ID));
+                    dto.setBillId(String.valueOf(r.getValue(t.ID)));
                     dto.setDateStr(r.getValue(t.DATE_STR));
                     dto.setStatus(r.getValue(t.STATUS));
                     dtos.add(dto);
@@ -636,13 +636,13 @@ public class AssetProviderImpl implements AssetProvider {
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        dslContext.select(t.AMOUNT_RECEIVABLE,t.CHARGING_ITEM_NAME,t.DATE_STR,t.AMOUNT_OWED,t.APARTMENT_NAME,t.BUILDING_NAME)
+        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.AMOUNT_OWED,t.APARTMENT_NAME,t.BUILDING_NAME)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
                 .map(r -> {
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
-                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
                     dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
                     dtos.add(dto);
@@ -730,7 +730,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .fetch()
                     .map(r -> {
                         ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
-                        dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                        dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                         dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
                         dtos.add(dto);
                         amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));

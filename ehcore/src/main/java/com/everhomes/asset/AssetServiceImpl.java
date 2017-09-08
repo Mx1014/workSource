@@ -309,9 +309,6 @@ public class AssetServiceImpl implements AssetService {
                 }
             }
         }
-        //测试闫杨的账号
-//        uids.add(238716l);
-        //对所有的符合推送资格的用户推送账单已出信息
         for(int k = 0; k < uids.size() ; k++) {
             MessageDTO messageDto = new MessageDTO();
             messageDto.setAppId(AppConstants.APPID_MESSAGING);
@@ -333,9 +330,15 @@ public class AssetServiceImpl implements AssetService {
                         uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
             }
         }
-        //催缴次数加1
-        assetProvider.increaseNoticeTime(cmd.getBillIds());
-
+        if(UserContext.getCurrentNamespaceId()!=999971){
+            //催缴次数加1
+            List<BillIdAndType> billIdAndTypes = cmd.getBillIdAndTypes();
+            List<Long> billIds = new ArrayList<>();
+            for(int i = 0; i < billIdAndTypes.size(); i++){
+                billIds.add(Long.parseLong(billIdAndTypes.get(i).getBillId()));
+            }
+            assetProvider.increaseNoticeTime(billIds);
+        }
     }
 
     @Override
@@ -472,7 +475,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyBillStatus(BillIdCommand cmd) {
-        assetProvider.modifyBillStatus(cmd.getBillId());
+        assetProvider.modifyBillStatus(Long.parseLong(cmd.getBillId()));
     }
 
     @Override
@@ -577,7 +580,7 @@ public class AssetServiceImpl implements AssetService {
             result = "张江高科项目暂不支持删除账单功能";
             return result;
         }
-        assetProvider.deleteBill(cmd.getBillId());
+        assetProvider.deleteBill(Long.parseLong(cmd.getBillId()));
         return result;
     }
 

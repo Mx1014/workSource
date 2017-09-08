@@ -896,7 +896,7 @@ public class AssetController extends ControllerBase {
      */
     @RequestMapping("getAreaAndAddressByContract")
     @RestReturn(value=GetAreaAndAddressByContractDTO.class,collection=true)
-    public RestResponse getAreaAndAddressByContract(FindContractCommand cmd) {
+    public RestResponse getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd) {
         GetAreaAndAddressByContractDTO dto = this.assetService.getAreaAndAddressByContract(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
