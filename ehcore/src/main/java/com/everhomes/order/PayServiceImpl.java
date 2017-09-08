@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -34,7 +36,7 @@ import java.util.Map;
 
 
 @Service
-public class PayServiceImpl implements PayService {
+public class PayServiceImpl implements PayService, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
 
@@ -54,13 +56,12 @@ public class PayServiceImpl implements PayService {
 
     private RestClient restClient = null;
 
-    @PostConstruct
-    void init() throws Exception {
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
         String payHomeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.home.url", "");
         PaymentAccount paymentAccount = findPaymentAccount(SYSTEMID);
         restClient = new RestClient(payHomeUrl, paymentAccount.getAppKey(), paymentAccount.getSecretKey());
     }
-
     /**
      * 1、检查是否已经下单
      * 2、检查买方是否有会员，无则创建
@@ -358,6 +359,5 @@ public class PayServiceImpl implements PayService {
         String format = "{\"getOrderInfoUrl\":\"%s\"}";
         return String.format(format, payV2HomeUrl+getOrderInfoUri);
     }
-
 
 }
