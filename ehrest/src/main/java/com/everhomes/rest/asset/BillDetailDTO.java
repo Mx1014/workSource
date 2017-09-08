@@ -20,7 +20,7 @@ public class BillDetailDTO {
     private BigDecimal amountReceviable;
     private BigDecimal amountOwed;
     private Byte status;
-    private Long billId;
+    private String billId;
 
     @Override
     public String toString() {
@@ -59,11 +59,11 @@ public class BillDetailDTO {
         this.status = status;
     }
 
-    public Long getBillId() {
+    public String getBillId() {
         return billId;
     }
 
-    public void setBillId(Long billId) {
+    public void setBillId(String billId) {
         this.billId = billId;
     }
 

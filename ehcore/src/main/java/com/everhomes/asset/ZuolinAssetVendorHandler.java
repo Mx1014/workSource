@@ -5,10 +5,15 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contract.ContractService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.*;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.search.OrganizationSearcher;
@@ -54,6 +59,15 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Autowired
     private AddressProvider addressProvider;
+
+    @Autowired
+    private OrganizationService organizationService;
+
+    @Autowired
+    private AssetService assetService;
+
+    @Autowired
+    private ContractService contractService;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -266,13 +280,18 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
-        List<BillDTO> list = assetProvider.listBillItems(billId,targetName,pageOffSet,pageSize);
+    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, int pageOffSet, Integer pageSize) {
+        List<BillDTO> list = assetProvider.listBillItems(Long.parseLong(billId),targetName,pageOffSet,pageSize);
         return list;
     }
 
     @Override
-    public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
+    public List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes) {
+        List<Long> billIds = new ArrayList<>();
+        for(int i = 0; i < billIdAndTypes.size(); i++){
+            BillIdAndType billIdAndType = billIdAndTypes.get(i);
+            billIds.add(Long.parseLong(billIdAndType.getBillId()));
+        }
         return assetProvider.listNoticeInfoByBillId(billIds);
     }
 
@@ -298,18 +317,95 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
+    public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
+        FindUserInfoForPaymentResponse res = new FindUserInfoForPaymentResponse();
+        List<FindUserInfoForPaymentDTO> list = new ArrayList<>();
+        String targeType = cmd.getTargetType();
+        ListCustomerContractsCommand cmd1 = new ListCustomerContractsCommand();
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+        cmd1.setCommunityId(cmd.getCommunityId());
+        if(targeType.equals(AssetPaymentStrings.EH_USER)){
+            cmd1.setTargetId(UserContext.currentUserId());
+            cmd1.setTargetType(CustomerType.INDIVIDUAL.getCode());
+            res.setCustomerName(UserContext.current().getUser().getNickName());
+        }else if(targeType.equals(AssetPaymentStrings.EH_ORGANIZATION)){
+            cmd1.setTargetId(cmd.getTargetId());
+            cmd1.setTargetType(CustomerType.ENTERPRISE.getCode());
+            OrganizationDTO organizationById = organizationService.getOrganizationById(cmd.getTargetId());
+            res.setCustomerName(organizationById.getName());
+        }else{
+            throw new RuntimeException("用户类型错误");
+        }
+        List<ContractDTO> dtos = contractService.listCustomerContracts(cmd1);
+        for(int i = 0; i < dtos.size(); i++){
+            FindUserInfoForPaymentDTO dto = new FindUserInfoForPaymentDTO();
+            dto.setContractNum(dtos.get(i).getContractNumber());
+            dto.setContractId(String.valueOf(dtos.get(i).getId()));
+            list.add(dto);
+        }
+        res.setContractList(list);
+        if(dtos.size()>0){
+            ContractDTO contractDTO = dtos.get(0);
+            FindContractCommand cmd2 = new FindContractCommand();
+            cmd2.setId(contractDTO.getId());
+            cmd2.setContractNumber(contractDTO.getContractNumber());
+            cmd2.setCommunityId(cmd.getCommunityId());
+            cmd2.setPartyAId(contractDTO.getPartyAId());
+            GetAreaAndAddressByContractCommand cmd3 = new GetAreaAndAddressByContractCommand();
+            cmd3.setCommunityId(cmd2.getCommunityId());
+            cmd3.setContractId(String.valueOf(cmd2.getId()));
+            cmd3.setContractNumber(cmd2.getContractNumber());
+            cmd3.setNamespaceId(cmd2.getNamespaceId());
+            cmd3.setOwnerType("community");
+            cmd3.setPartyAId(null);
+            cmd3.setTargetType(cmd.getTargetType());
+            GetAreaAndAddressByContractDTO areaAndAddressByContract = assetService.getAreaAndAddressByContract(cmd3);
+            res.setAddressNames(areaAndAddressByContract.getAddressNames());
+            res.setAreaSizesSum(areaAndAddressByContract.getAreaSizesSum());
+        }
+        return res;
+    }
+
+    @Override
+    public GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd1) {
+        FindContractCommand cmd = new FindContractCommand();
+        cmd.setPartyAId(cmd1.getPartyAId());
+        cmd.setCommunityId(cmd1.getCommunityId());
+        cmd.setContractNumber(cmd1.getContractNumber());
+        cmd.setId(Long.parseLong(cmd1.getContractId()));
+        cmd.setNamespaceId(cmd1.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd1.getNamespaceId());
+        GetAreaAndAddressByContractDTO dto = new GetAreaAndAddressByContractDTO();
+        List<String> addressNames = new ArrayList<>();
+        Double areaSize = 0d;
+        ContractDetailDTO contract = contractService.findContract(cmd);
+        List<BuildingApartmentDTO> apartments = contract.getApartments();
+        for(int i = 0; i < apartments.size(); i++) {
+            BuildingApartmentDTO building = apartments.get(i);
+            String addressName;
+            addressName = building.getBuildingName()+building.getApartmentName();
+            addressNames.add(addressName);
+            if(building.getChargeArea()!=null){
+                areaSize += building.getChargeArea();
+            }
+        }
+        dto.setAddressNames(addressNames);
+        dto.setAreaSizesSum(String.valueOf(areaSize));
+        return dto;
+    }
+
+    @Override
+    public ShowBillDetailForClientResponse getBillDetailForClient(String billId,String targetType) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
-        response =  assetProvider.getBillDetailForClient(billId);
+        response =  assetProvider.getBillDetailForClient(Long.parseLong(billId));
         return response;
 
     }
 
     @Override
-    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId) {
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus,Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
         Long conId = Long.parseLong(contractId);
-        response =  assetProvider.getBillDetailByDateStr(ownerId,ownerType,targetId,targetType,dateStr,conId);
+        response =  assetProvider.getBillDetailByDateStr( billStatus,ownerId,ownerType,targetId,targetType,dateStr,conId);
         return response;
     }
 

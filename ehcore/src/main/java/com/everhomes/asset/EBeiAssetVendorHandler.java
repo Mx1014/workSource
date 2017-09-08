@@ -120,34 +120,45 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse response) {
-        return zuolinAssetVendorHandler.listBills( communityIdentifier,contractNum, currentNamespaceId,  ownerId,  ownerType,  buildingName,apartmentName,  addressId,  billGroupName,  billGroupId,  billStatus,  dateStrBegin,  dateStrEnd,  pageOffSet,  pageSize,  targetName, status,targetType,response);
+    public List<ListBillsDTO> listBills(String communityIdentifier, String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
+        return null;
     }
 
     @Override
-    public List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
-        return zuolinAssetVendorHandler.listBillItems( billId,  targetName,  pageOffSet,  pageSize);
+    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, int pageOffSet, Integer pageSize) {
+        return null;
     }
 
     @Override
-    public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
-        return zuolinAssetVendorHandler.listNoticeInfoByBillId(billIds);
+    public List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes) {
+        return null;
     }
 
     @Override
-    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String ownerType1, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
-        return zuolinAssetVendorHandler.showBillForClient( ownerId,  ownerType,  ownerType1,  targetId,  billGroupId, isOwedBill,contractNum);
+    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId, Byte isOnlyOwedBill, String contractId) {
+        return null;
     }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
-        return zuolinAssetVendorHandler.getBillDetailForClient(billId);
+    public ShowBillDetailForClientResponse getBillDetailForClient(String billId, String targetType) {
+        return null;
     }
 
     @Override
-    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr, String contractId) {
-        return zuolinAssetVendorHandler.listBillDetailOnDateChange( ownerId,  ownerType,  targetType,  targetId,  dateStr,  contractId);
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus, Long ownerId, String ownerType, String targetType, Long targetId, String dateStr, String contractId) {
+        return null;
     }
+
+    @Override
+    public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd) {
+        return null;
+    }
+
 
     private Timestamp covertStrToTimestamp(String str) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");

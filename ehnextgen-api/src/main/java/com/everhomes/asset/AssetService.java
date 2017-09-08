@@ -92,7 +92,7 @@ public interface AssetService {
 
     void updateBillsToSettled(UpdateBillsToSettled cmd);
 
-    GetAreaAndAddressByContractDTO getAreaAndAddressByContract(FindContractCommand cmd);
+    GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd);
 
     PaymentBillItems findBillItemById(Long billItemId);
 

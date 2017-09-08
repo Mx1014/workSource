@@ -182,30 +182,30 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
                 SyncWebsocketMessagesRestResponse resp = (SyncWebsocketMessagesRestResponse)StringHelper.fromJsonString(result.getBody()
                         , SyncWebsocketMessagesRestResponse.class);
                 if(resp.getErrorCode().equals(200) && resp.getResponse() != null) {
-                    
+
                     AclinkWebSocketMessage respCmd = resp.getResponse();
                     state.onServerMessage(resp.getResponse(), session, handler);
-                    
+
                     byte[] bPayload = Base64.decodeBase64(respCmd.getPayload());
                     byte[] bSeq = DataUtil.intToByteArray(respCmd.getSeq().intValue());
                     byte[] bLen = DataUtil.intToByteArray(bPayload.length + 6);
                     byte[] mBuf = new byte[bPayload.length + 10];
-                    
+
                     System.arraycopy(bLen, 0, mBuf, 0, bLen.length);
                     System.arraycopy(bSeq, 0, mBuf, 6, bSeq.length);
                     System.arraycopy(bPayload, 0, mBuf, 10, bPayload.length);
-                    
+
                     BinaryMessage wsMessage = new BinaryMessage(mBuf);
                     try {
                         synchronized(session) {
-                            session.sendMessage(wsMessage);    
+                            session.sendMessage(wsMessage);
                         }
-                        
+
                     } catch (IOException e) {
                         LOGGER.error("sendMessage error", e);
                     }
                 }
-                
+
             }
             
         }

@@ -29,7 +29,7 @@ public class BillDTO {
     private String billItemName;
     private String targetName;
     private String targetId;
-    private Long targetType;
+    private String targetType;
     private String buildingName;
     private String apartmentName;
     private BigDecimal amountReceivable;
@@ -106,11 +106,11 @@ public class BillDTO {
         this.targetId = targetId;
     }
 
-    public Long getTargetType() {
+    public String getTargetType() {
         return targetType;
     }
 
-    public void setTargetType(Long targetType) {
+    public void setTargetType(String targetType) {
         this.targetType = targetType;
     }
 
