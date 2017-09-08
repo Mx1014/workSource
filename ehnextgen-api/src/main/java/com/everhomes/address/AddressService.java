@@ -70,7 +70,7 @@ public interface AddressService {
 
     ListNearbyMixCommunitiesCommandV2Response listNearbyMixCommunitiesV2(ListNearbyMixCommunitiesCommand cmd);
 
-    //获取注册中、已注册、关联最多的社区
+    //获取注册中、已注册、关联最多的社区(园区/xiaoqu)
     ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(ListNearbyMixCommunitiesCommand cmd);
 
 }
