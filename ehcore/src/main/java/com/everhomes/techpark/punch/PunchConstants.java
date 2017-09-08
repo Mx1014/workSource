@@ -47,4 +47,15 @@ public class PunchConstants {
 	public static final int SATURDAY_INT =  0b0000001;
 	
 	public static final String STATUS_SEPARATOR="/";
+
+
+	/** PUNCH_EXCEL_SCOPE ="punch.excel"  */
+	public static final String PUNCH_MESSAGE_SCOPE ="punch.message";
+	public static final int PUNCH_MESSAGE_ADD_GUDING = 1;
+	public static final int PUNCH_MESSAGE_ADD_PAIBAN = 2;
+	public static final int PUNCH_MESSAGE_UPDATE_GUDING = 3;
+	public static final int PUNCH_MESSAGE_UPDATE_PAIBAN = 4;
+	public static final int PUNCH_MESSAGE_TIMERULES = 5;
+	public static final String PUNCH_MESSAGE_RESTTIME = "6";
+
 }

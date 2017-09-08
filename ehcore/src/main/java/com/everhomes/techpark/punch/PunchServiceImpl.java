@@ -25,6 +25,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bus.*;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.print.PrintErrorCode;
@@ -243,8 +244,11 @@ public class PunchServiceImpl implements PunchService {
 
 	@Autowired
 	private LocaleStringProvider localeStringProvider;
+	@Autowired
+	private LocaleStringService localeStringService;
 
-    @Autowired
+
+	@Autowired
     private CoordinationProvider coordinationProvider;
 
 	@Autowired
@@ -6060,6 +6064,10 @@ public class PunchServiceImpl implements PunchService {
 	        punchProvider.createPunchRule(pr);
 	        //打卡时间
 			savePunchTimeRule(ConvertHelper.convert(cmd, PunchGroupDTO.class),pr);
+
+			//发消息
+			sendMessageToGroupUser(pr, cmd.getTimeRules());
+
 			return null;
 		});
 		return null;
@@ -6591,8 +6599,85 @@ public class PunchServiceImpl implements PunchService {
 //		punchProvider.deletePunchTimeRuleByRuleId(pr.getId());
 
         savePunchTimeRule(cmd, pr);
+		//发消息
+		sendMessageToGroupUser(pr,cmd.getTimeRules());
 		return null;
 	}
+	/**给组下面所有人发消息通知*/
+	private void sendMessageToGroupUser(PunchRule pr, List<PunchTimeRuleDTO> timeRules) {
+		//捞人
+		List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
+		StringBuilder timeRuleSB = new StringBuilder();
+		//拼班次信息
+		for (PunchTimeRuleDTO timeRule : timeRules) {
+			if (null == timeRule.getPunchTimeIntervals()) {
+				continue;
+			}
+			StringBuilder sb = new StringBuilder();
+			sb.append(timeRule.getName());
+			for (int i = 0 ; i < timeRule.getPunchTimeIntervals().size();i++) {
+				PunchTimeIntervalDTO interval = timeRule.getPunchTimeIntervals().get(i);
+				if (i > 0) {
+					sb.append(",");
+				}
+				sb.append(timeSF.get().format(new Date(interval.getArriveTime())));
+				sb.append("-");
+				sb.append(timeSF.get().format(new Date(interval.getLeaveTime())));
+			}
+			if (timeRule.getPunchTimeIntervals().size() == 1) {
+				if (timeRule.getNoonLeaveTime() != null) {
+					sb.append(",");
+					String result = localeStringService.getLocalizedString( PunchConstants.PUNCH_MESSAGE_SCOPE, PunchConstants.PUNCH_MESSAGE_RESTTIME,
+							UserContext.current().getUser().getLocale(),"休息时间");
+					sb.append(result);
+					sb.append(timeSF.get().format(new Date(timeRule.getNoonLeaveTime())));
+					sb.append("-");
+					sb.append(timeSF.get().format(new Date(timeRule.getAfternoonArriveTime())));
+				}
+			}
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("timeRule",sb.toString());
+			map.put("intervalNo", timeRule.getPunchTimeIntervals().size()+"");
+			String result = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_MESSAGE_SCOPE,
+					PunchConstants.PUNCH_MESSAGE_TIMERULES, RentalNotificationTemplateCode.locale, map, "");
+
+			if (timeRuleSB.length() != 0) {
+				timeRuleSB.append("\n");
+			}
+			timeRuleSB.append(result);
+
+		}
+
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("timeRules",timeRuleSB.toString());
+		String content = "";
+		if (null != employees) {
+			for(UniongroupMemberDetail employee : employees) {
+				if (null != employee.getTargetId()) {
+					//根据新增/修改 固定/排班 找模板发出去
+					if (pr.getRuleType().equals(PunchRuleType.GUDING.getCode())) {
+						if (pr.getStatus().equals(PunchRuleStatus.NEW.getCode())) {
+							content = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_MESSAGE_SCOPE,
+									PunchConstants.PUNCH_MESSAGE_ADD_GUDING, RentalNotificationTemplateCode.locale, map, "");
+						} else {
+							content = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_MESSAGE_SCOPE,
+									PunchConstants.PUNCH_MESSAGE_UPDATE_GUDING, RentalNotificationTemplateCode.locale, map, "");
+						}
+					} else {
+						if (pr.getStatus().equals(PunchRuleStatus.NEW.getCode())) {
+							content = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_MESSAGE_SCOPE,
+									PunchConstants.PUNCH_MESSAGE_ADD_PAIBAN, RentalNotificationTemplateCode.locale, map, "");
+						} else {
+							content = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_MESSAGE_SCOPE,
+									PunchConstants.PUNCH_MESSAGE_UPDATE_PAIBAN, RentalNotificationTemplateCode.locale, map, "");
+						}
+					}
+					sendMessageToUser(employee.getTargetId(),content);
+				}
+			}
+		}
+	}
+
 	@Override
 	public GetPunchDayStatusResponse getPunchDayStatus(GetPunchDayStatusCommand cmd) {
 		//
