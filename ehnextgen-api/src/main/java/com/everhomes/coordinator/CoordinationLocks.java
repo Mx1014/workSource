@@ -87,6 +87,7 @@ public enum CoordinationLocks {
 	SALARY_GROUP_LOCK("salary.group"),
 
     EVENT_STAT_SCHEDULE("event.stat.schedule"),
+    PAY_CREATE_PREORDER("pay.create.preorder"),
     ;
 
     private String code;

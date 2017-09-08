@@ -2,10 +2,8 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -62,14 +60,12 @@ import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
-import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
@@ -97,8 +93,6 @@ import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -121,7 +115,6 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -693,7 +686,7 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public PreOrderCallBack createSignupOrderV2(CreateSignupOrderV2Command cmd) {
+	public PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd) {
 
 		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
 		if(roster == null){
@@ -707,45 +700,45 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 
 
-		PreOrderMessage preOrderMessage = new PreOrderMessage();
+		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
-		preOrderMessage.setClientAppName(cmd.getClientAppName());
+		preOrderCommand.setClientAppName(cmd.getClientAppName());
 
 		//微信公众号支付，重新设置ClientName，设置支付方式和参数
 		if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS.getCode()){
 
-			if(preOrderMessage.getClientAppName() == null){
+			if(preOrderCommand.getClientAppName() == null){
 				Integer namespaceId = UserContext.getCurrentNamespaceId();
-				preOrderMessage.setClientAppName("wechat_" + namespaceId);
+				preOrderCommand.setClientAppName("wechat_" + namespaceId);
 			}
-			preOrderMessage.setPaymentType(PaymentType.WECHAT_JS.getCode());
+			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS.getCode());
 			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
 			paymentParamsDTO.setPayType("no_credit");
 			User user = UserContext.current().getUser();
 			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
 		}
 
-		preOrderMessage.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
-		preOrderMessage.setOrderId(roster.getOrderNo());
-		preOrderMessage.setAmount(activity.getChargePrice().multiply(new BigDecimal(100)).longValue());
+		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+		preOrderCommand.setOrderId(roster.getOrderNo());
+		preOrderCommand.setAmount(activity.getChargePrice().multiply(new BigDecimal(100)).longValue());
 
-		preOrderMessage.setPayerId(roster.getUid());
-		preOrderMessage.setNamespaceId(activity.getNamespaceId());
+		preOrderCommand.setPayerId(roster.getUid());
+		preOrderCommand.setNamespaceId(activity.getNamespaceId());
 
 		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
 				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_FEE),
 				UserContext.current().getUser().getLocale(),
 				"activity roster pay");
-		preOrderMessage.setSummary(temple);
+		preOrderCommand.setSummary(temple);
 
 		GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
 		timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
 		Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
 
-		preOrderMessage.setExpiration(expiredTime);
+		preOrderCommand.setExpiration(expiredTime);
 
-		PreOrderCallBack callBack = payService.createPreOrder(preOrderMessage);
+		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
 
 		return callBack;
 	}

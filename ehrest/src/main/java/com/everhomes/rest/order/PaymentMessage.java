@@ -1,9 +1,8 @@
 //@formatter:off
-package com.everhomes.order;
+package com.everhomes.rest.order;
 
+import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.PaymentParamsDTO;
-
-import java.util.Map;
 
 /**
  * Created by Wentian Wang on 2017/9/6.
@@ -11,7 +10,7 @@ import java.util.Map;
 
 /**
  *<ul>
- * <li>paymentStatus:支付状态，详见{@link com.everhomes.order.OrderPaymentStatus}</li>
+ * <li>paymentStatus:支付状态，详见{@link OrderPaymentStatus}</li>
  *</ul>
  */
 public class PaymentMessage {

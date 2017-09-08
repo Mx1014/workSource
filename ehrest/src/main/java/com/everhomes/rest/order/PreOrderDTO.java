@@ -1,5 +1,5 @@
 //@formatter:off
-package com.everhomes.order;
+package com.everhomes.rest.order;
 
 import java.util.List;
 
@@ -7,18 +7,18 @@ import java.util.List;
  * Created by Wentian Wang on 2017/9/6.
  */
 
-public class PreOrderCallBack {
+public class PreOrderDTO {
 
     private Long amount;
     private String orderCommitUrl;
     private String orderCommitToken;
     private String orderCommitNonce;
-    private String orderCommitTimestamp;
+    private Long orderCommitTimestamp;
     private String payInfo;
     private String extendInfo;
-    private List<PayMethod> payMethod;
+    private List<PayMethodDTO> payMethod;
 
-    public PreOrderCallBack() {
+    public PreOrderDTO() {
     }
 
     public Long getAmount() {
@@ -54,11 +54,11 @@ public class PreOrderCallBack {
         this.orderCommitNonce = orderCommitNonce;
     }
 
-    public String getOrderCommitTimestamp() {
+    public Long  getOrderCommitTimestamp() {
         return orderCommitTimestamp;
     }
 
-    public void setOrderCommitTimestamp(String orderCommitTimestamp) {
+    public void setOrderCommitTimestamp(Long orderCommitTimestamp) {
         this.orderCommitTimestamp = orderCommitTimestamp;
     }
 
@@ -78,11 +78,11 @@ public class PreOrderCallBack {
         this.extendInfo = extendInfo;
     }
 
-    public List<PayMethod> getPayMethod() {
+    public List<PayMethodDTO> getPayMethod() {
         return payMethod;
     }
 
-    public void setPayMethod(List<PayMethod> payMethod) {
+    public void setPayMethod(List<PayMethodDTO> payMethod) {
         this.payMethod = payMethod;
     }
 }

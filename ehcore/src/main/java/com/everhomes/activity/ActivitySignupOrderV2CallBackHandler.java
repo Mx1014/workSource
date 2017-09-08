@@ -5,6 +5,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.PaymentCallBackHandler;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
 import com.everhomes.rest.activity.ActivityCancelType;
 import com.everhomes.rest.activity.ActivityRosterPayFlag;
@@ -37,7 +38,7 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 	private CoordinationProvider coordinationProvider;
 
 	@Override
-	public void paySuccess(PaymentCallBackCommand cmd) {
+	public void paySuccess(OrderPaymentNotificationCommand cmd) {
 		LOGGER.info("ActivitySignupOrderV2CallBackHandler paySuccess start cmd = {}", cmd);
 
 		ActivityRoster roster = activityProvider.findRosterByOrderNo(cmd.getOrderId());
@@ -55,10 +56,10 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 		//支付宝回调时，可能会同时回调多次，
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode() + roster.getId()).enter(()-> {
 			roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
-			roster.setPayTime(new Timestamp(Long.valueOf(cmd.getPayDateTime())));
+			roster.setPayTime(new Timestamp(Long.valueOf(cmd.getPayDatetime())));
 			roster.setPayAmount(new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100)));
 			roster.setVendorType(String.valueOf(cmd.getPaymentType()));
-			roster.setOrderType(cmd.getOrderType());
+			roster.setOrderType(String.valueOf(cmd.getPaymentType()));
 			activityProvider.updateRoster(roster);
 			return null;
 		});
@@ -66,7 +67,7 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 	}
 
 	@Override
-	public void payFail(PaymentCallBackCommand cmd) {
+	public void payFail(OrderPaymentNotificationCommand cmd) {
 		LOGGER.info("ActivitySignupOrderV2CallBackHandler payFail cmd = {}", cmd);
 
 		if(LOGGER.isDebugEnabled())

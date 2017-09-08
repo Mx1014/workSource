@@ -1,5 +1,5 @@
 //@formatter:off
-package com.everhomes.order;
+package com.everhomes.rest.order;
 
 /**
  * <ul>

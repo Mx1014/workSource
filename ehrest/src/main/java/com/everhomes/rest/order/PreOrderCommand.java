@@ -1,5 +1,5 @@
 //@formatter:off
-package com.everhomes.order;
+package com.everhomes.rest.order;
 
 
 import com.everhomes.rest.order.PaymentParamsDTO;
@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
  * Created by Wentian Wang on 2017/9/6.
  */
 
-public class PreOrderMessage {
+public class PreOrderCommand {
 
     @NotNull
     private String clientAppName;
@@ -166,7 +166,7 @@ public class PreOrderMessage {
         this.extendInfo = extendInfo;
     }
 
-    public PreOrderMessage() {
+    public PreOrderCommand() {
     }
 
 }

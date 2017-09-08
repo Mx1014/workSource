@@ -1,20 +1,18 @@
 //@formatter:off
-package com.everhomes.order;
-
-import com.everhomes.rest.order.PaymentParamsDTO;
+package com.everhomes.rest.order;
 
 /**
  * Created by Wentian Wang on 2017/9/6.
  */
 
-public class PayMethod {
+public class PayMethodDTO {
 
     //1-微信APP支付,8-支付宝扫码支付
     private Integer paymentType;
     private String paymentName;
     private String paymentLogo;
     private PaymentParamsDTO paymentParams;
-    private paymentExtendInfo paymentExtendInfo;
+    private PaymentExtendInfo extendInfo;
 
     public Integer getPaymentType() {
         return paymentType;
@@ -48,14 +46,14 @@ public class PayMethod {
         this.paymentParams = paymentParams;
     }
 
-    public com.everhomes.order.paymentExtendInfo getPaymentExtendInfo() {
-        return paymentExtendInfo;
+    public PaymentExtendInfo getExtendInfo() {
+        return extendInfo;
     }
 
-    public void setPaymentExtendInfo(com.everhomes.order.paymentExtendInfo paymentExtendInfo) {
-        this.paymentExtendInfo = paymentExtendInfo;
+    public void setExtendInfo(PaymentExtendInfo extendInfo) {
+        this.extendInfo = extendInfo;
     }
 
-    public PayMethod() {
+    public PayMethodDTO() {
     }
 }

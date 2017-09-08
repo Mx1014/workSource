@@ -1,7 +1,7 @@
 //@formatter:off
 package com.everhomes.order;
 
-import com.everhomes.rest.order.PaymentCallBackCommand;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 
 /**
  * Created by Wentian on 2017/9/7.
@@ -22,9 +22,9 @@ public interface PaymentCallBackHandler {
     /**
      * 支付成功
      */
-    void paySuccess(PaymentCallBackCommand cmd);
+    void paySuccess(OrderPaymentNotificationCommand cmd);
     /**
      * 支付失败
      */
-    void payFail(PaymentCallBackCommand cmd);
+    void payFail(OrderPaymentNotificationCommand cmd);
 }
