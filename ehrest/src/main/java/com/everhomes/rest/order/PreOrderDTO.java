@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.order;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.List;
 
 /**
@@ -16,6 +18,7 @@ public class PreOrderDTO {
     private Long orderCommitTimestamp;
     private String payInfo;
     private String extendInfo;
+    @ItemType(PayMethodDTO.class)
     private List<PayMethodDTO> payMethod;
 
     public PreOrderDTO() {
