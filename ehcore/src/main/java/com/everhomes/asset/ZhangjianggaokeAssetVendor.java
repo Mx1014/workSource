@@ -46,24 +46,6 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     private AssetProvider assetProvider;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
-    private CommunityProvider communityProvider;
-
-    @Autowired
-    private static final String secretKey = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
-
-    @Autowired
-    private static final String appKey = "ee4c8905-9aa4-4d45-973c-ede4cbb3cf21";
-//放到数据库，或者分离出http地址前缀+配成zjgk的配置项
-    @Autowired
-    private static final String apartmentBillUrl = "http://139.129.220.146:3578/openapi/getApartmentBills";
-
-    @Autowired
-    private static final String companyBillUrl = "http://139.129.220.146:3578/openapi/getCompanyBills";
-
-    @Autowired
     private OrganizationProvider organizationProvider;
 
     @Autowired
@@ -161,148 +143,6 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         }
         finalDto.setBillDetailDTOList(dtos);
         return finalDto;
-
-//        Map<String,String> map = new HashMap<>();
-//        String payFlag = "";
-//        Community communityById = new Community();
-//        if(targetType=="community"){
-//            communityById = communityProvider.findCommunityById(ownerId);
-//        } else {
-//            return null;
-//        }
-//        String communityName = communityById.getName();
-//        if (communityName == ""){
-//            return null;
-//        }
-//        if(targetType == "eh_user") {
-//            //个人用户，查询门牌
-//            List<String[]> list = userService.listBuildingAndApartmentById(UserContext.currentUserId());
-//            //调用getApartmentBills
-//            //当目前api为：门牌楼栋不是list
-//            List<ShowBillForClientZJGKENTITY> responseList = new ArrayList<>();
-//            for(int i = 0 ; i < list.size() ; i++) {
-//                String[] address = list.get(i);
-//                if (isOwedBill==1){
-//                    String body = getUrlBody4GetApartmentBill(communityName,address[0],address[1],"0");
-//                    HttpResponseEntity<?> postReturn = postGo(body, apartmentBillUrl, ShowBillForClientZJGKENTITY.class);
-//                    ShowBillForClientZJGKENTITY res = (ShowBillForClientZJGKENTITY)postReturn.getBody();
-//                    responseList.add(res);
-//                }else{
-//                    String body1 = getUrlBody4GetApartmentBill(communityName,address[0],address[1],"0");
-//                    String body2 = getUrlBody4GetApartmentBill(communityName,address[0],address[1],"1");
-//                    HttpResponseEntity<?> postReturn1 = postGo(body1, apartmentBillUrl, ShowBillForClientZJGKENTITY.class);
-//                    HttpResponseEntity<?> postReturn2 = postGo(body2, apartmentBillUrl, ShowBillForClientZJGKENTITY.class);
-//                    ShowBillForClientZJGKENTITY res1 = (ShowBillForClientZJGKENTITY)postReturn1.getBody();
-//                    ShowBillForClientZJGKENTITY res2 = (ShowBillForClientZJGKENTITY)postReturn2.getBody();
-//                    responseList.add(res1);
-//                    responseList.add(res2);
-//                }
-//                //将这个楼栋门牌返回的结果放到list中
-//            }
-//            //处理完全的返回结果，merge，排序，填充到我的dto中的一部分
-//            sortedBills = getSortedBills(responseList);
-//        } else if(targetType == "eh_organization"){
-//            //拿到enterpriseName
-//            //调用getCompanyBills
-//            String organizationName = organizationProvider.getOrganizationNameById(targetId);
-//            if(isOwedBill.equals("1")){
-//                payFlag = "0";
-//            }
-//            //GetCompanyBillsEntity以及getSortedBills，countTotal，mergeToList剩下的开发
-//            String body = getUrlBody4GetCompanyBills(communityName,organizationName,payFlag);
-//            HttpResponseEntity<?> entity = postGo(body, companyBillUrl, GetCompanyBillsEntity.class);
-//            GetCompanyBillsEntity res = (GetCompanyBillsEntity)entity.getBody();
-//            sortedBills = getSortedBills(res);
-//        }
-//        return sortedBills;
-    }
-
-    private String getUrlBody4GetCompanyBills(String communityName, String organizationName, String payFlag) {
-        HashMap<String,String> params = new HashMap<>();
-        Calendar c = Calendar.getInstance();
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONDAY) + 1;
-        int day = c.get(Calendar.DAY_OF_MONTH);
-        String nowTime = String.valueOf(year) + String.valueOf(month) + String.valueOf(day);
-        params.put("communityName",communityName);
-        params.put("organizationName",organizationName);
-        params.put("offset","0");
-        params.put("pageSize","50");
-        if (payFlag.equals("1")){
-            params.put("payFlag","1");
-        }else if(payFlag.equals("0")){
-            params.put("payFlag","0");
-        }
-        int newMonth = month + 6>12? month+6-12:month+6;
-        int before6Month = month - 6 < 0 ? 12 -(month - 5):month - 5;
-        int newYear = month + 6 > 12? year+1 : year;
-        int before6Year = month - 6 < 0 ? year-1 : year;
-        String afterSixMonth = String.valueOf(newYear) + String.valueOf(newMonth) + String.valueOf(day);
-        String beforeSixMonth = String.valueOf(before6Year) + String.valueOf(before6Month) + String.valueOf(day);
-
-        params.put("sdateFrom",beforeSixMonth);
-        params.put("sdateTo",nowTime);
-        params.put("appKey",appKey);
-        Long l = System.currentTimeMillis();
-        params.put("timestamp",String.valueOf(l));
-        Random r = new Random();
-        int nonce = r.nextInt(1000);
-        params.put("nonce",String.valueOf(nonce));
-        params.put("crypto","Doc.Wentian");
-        String signature = computeSignature(params,secretKey);
-        String body = RestCallTemplate.queryStringBuilder()
-                .var("communityName",communityName)
-                .var("buildingName",organizationName)
-                .var("offset","0")
-                .var("pageSize","50")
-                .var("payFlag",payFlag)
-                .var("sdateFrom",nowTime)
-                .var("sdateTo",beforeSixMonth)
-                .var("appKey",appKey)
-                .var("timestamp",String.valueOf(l))
-                .var("nonce",String.valueOf(nonce))
-                .var("crypto","Doc.Wentian")
-                .var("signature",signature)
-                .build();
-        return body;
-    }
-
-    private ShowBillForClientDTO getSortedBills(GetCompanyBillsEntity res) {
-        return null;
-    }
-
-    private ShowBillForClientDTO getSortedBills(List<ShowBillForClientZJGKENTITY> responseList) {
-        Integer billPeriodMonths = 0;
-        float amountOwed = 0;
-        List<BillDetailDTO> listUnpaid = new ArrayList<>();
-        List<BillDetailDTO> listPaid = new ArrayList<>();
-        HashMap<String,BillDetailDTO> mergeList = new HashMap<>();
-
-        for (int i = 0; i<responseList.size(); i++) {
-            ShowBillForClientZJGKResponse billDTOs = responseList.get(i).getResponse();
-            List<BillDTO_zj> billDTO = billDTOs.getBillDTOS();
-            for(int j = 0; j < billDTO.size(); j++){
-                BillDTO_zj var1 = billDTO.get(j);
-                if(mergeList.containsKey(var1.getDateStr())) {
-                    if(mergeList.get(var1.getDateStr()).getStatus().equals(var1.getDetails().get(0).getPayFlag())) {
-                        mergeToList(mergeList,var1.getDateStr(),var1,true);
-                    }else{
-                        mergeToList(mergeList,var1.getDateStr(),var1,false);
-                    }
-                }else{
-                    mergeToList(mergeList,null,var1,true);
-                }
-            }
-        }
-        return countTotal(mergeList);
-    }
-
-    private ShowBillForClientDTO countTotal(HashMap<String, BillDetailDTO> mergeList) {
-        return null;
-    }
-
-    private void mergeToList(HashMap<String, BillDetailDTO> mergeList, String dateStr, BillDTO_zj var1, boolean b) {
-        return;
     }
 
     @Override
@@ -537,7 +377,6 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String identifier;
         params.put("pageOffset", "1");
         params.put("pageSize", "999");
-        String json = generateJson(params);
         String url;
         String targetType= cmd.getTargetType();
         if(targetType!=null && targetType.equals("eh_organization")){
@@ -553,6 +392,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         }else{
             throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
         }
+        String json = generateJson(params);
         try {
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
         } catch (IOException e) {
@@ -598,25 +438,17 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     @Override
     public GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd) {
         GetAreaAndAddressByContractDTO result = new GetAreaAndAddressByContractDTO();
-        List<FindUserInfoForPaymentDTO> list = new ArrayList<>();
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
         String identifier;
-        params.put("pageOffset", "1");
-        params.put("pageSize", "999");
+        params.put("contractNum", cmd.getContractNumber());
         String json = generateJson(params);
         String url;
         String targetType= cmd.getTargetType();
         if(targetType!=null && targetType.equals("eh_organization")){
-            url = ZjgkUrls.ENTERPRISE_CONTRACT_LIST;
-            Organization organization = organizationProvider.findOrganizationById(cmd.getTargetId());
-            identifier = organization.getNamespaceOrganizationToken();
-            params.put("enterpriseIdentifier",identifier);
+            url = ZjgkUrls.ENTERPRISE_BILLS_DETAIL;
         }else if(targetType!=null && targetType.equals("eh_user")){
-            url = ZjgkUrls.USER_CONTRACT_LIST;
-            User user = userProvider.findUserById(cmd.getTargetId());
-            identifier = user.getIdentifierToken();
-            params.put("userMobile",identifier);
+            url = ZjgkUrls.USER_CONTRACT_DETAIL;
         }else{
             throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
         }
@@ -627,81 +459,26 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             throw new RuntimeException("调用张江高科失败"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0){
-            ContractListResponse response =(ContractListResponse) StringHelper.fromJsonString(postJson, ContractListResponse.class);
+            ContractDetailResponse response =(ContractDetailResponse) StringHelper.fromJsonString(postJson, ContractDetailResponse.class);
             if(response.getErrorCode()==200){
-                List<ContractDTO> dtos = response.getResponse();
+                ContractDTO sourceDto = response.getResponse();
                 String customerName = "";
                 BigDecimal areaSizeSum = new BigDecimal("0");
                 List<String> addressNames = new ArrayList<>();
-                for(int i = 0; i < dtos.size(); i++){
-                    ContractDTO sourceDto = dtos.get(i);
-                    FindUserInfoForPaymentDTO dto = new FindUserInfoForPaymentDTO();
-                    dto.setContractId(sourceDto.getContractNum());
-                    dto.setContractNum(sourceDto.getContractNum());
-                    customerName = sourceDto.getSettled();
-                    List<CommunityAddressDTO> apartments = sourceDto.getApartments();
-                    if(apartments!=null){
-                        for(int k = 0 ; k < apartments.size(); k ++){
-                            CommunityAddressDTO communityAddressDTO = apartments.get(k);
-                            addressNames.add(communityAddressDTO.getBuildingName()==null?"":communityAddressDTO.getBuildingName()+communityAddressDTO.getApartmentName());
-                        }
-                    }
 
-                    areaSizeSum = areaSizeSum.add(sourceDto.getAreaSize()==null?new BigDecimal("0"):new BigDecimal(sourceDto.getAreaSize()));
-                    list.add(dto);
+                List<CommunityAddressDTO> apartments = sourceDto.getApartments();
+                for(int i = 0; i < apartments.size(); i++){
+                    CommunityAddressDTO communityAddressDTO = apartments.get(i);
+                    addressNames.add(communityAddressDTO.getBuildingName()==null?"":communityAddressDTO.getBuildingName()+communityAddressDTO.getApartmentName());
                 }
-                result.setAreaSizesSum(areaSizeSum.toString());
+                result.setAreaSizesSum(sourceDto.getAreaSize());
                 result.setAddressNames(addressNames);
-                result.setContractList(list);
-                result.setCustomerName(customerName);
             }else{
                 LOGGER.error("调用张江高科失败"+response.getErrorDescription());
                 throw new RuntimeException("调用张江高科失败"+response.getErrorDescription());
             }
         }
         return result;
-    }
-
-    private String getUrlBody4GetApartmentBill(String communityName,String buildingName,String apartmentName,String payFlag){
-        HashMap<String,String> params = new HashMap<>();
-        Calendar c = Calendar.getInstance();
-        int year = c.get(Calendar.YEAR);
-        params.put("communityName",communityName);
-        params.put("buildingName",buildingName);
-        params.put("apartmentName",apartmentName);
-        params.put("offset","0");
-        params.put("pageSize","50");
-        if (payFlag.equals("1")){
-            params.put("payFlag","1");
-        }else if(payFlag.equals("0")){
-            params.put("payFlag","0");
-        }
-        params.put("sdateFrom",year+"-01");
-        params.put("sdateTo",year+"-12");
-        params.put("appKey",appKey);
-        Long l = System.currentTimeMillis();
-        params.put("timestamp",String.valueOf(l));
-        Random r = new Random();
-        int nonce = r.nextInt(1000);
-        params.put("nonce",String.valueOf(nonce));
-        params.put("crypto","Doc.Wentian");
-        String signature = computeSignature(params,secretKey);
-        String body = RestCallTemplate.queryStringBuilder()
-                .var("communityName",communityName)
-                .var("buildingName",buildingName)
-                .var("apartmentName",apartmentName)
-                .var("offset","0")
-                .var("pageSize","")
-                .var("payFlag","")
-                .var("sdateFrom","")
-                .var("sdateTo","")
-                .var("appKey",appKey)
-                .var("timestamp",String.valueOf(l))
-                .var("nonce",String.valueOf(nonce))
-                .var("crypto","Doc.Wentian")
-                .var("signature",signature)
-                .build();
-        return body;
     }
 
     @Override
@@ -910,20 +687,18 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         }
         return list;
     }
-
-    public HttpResponseEntity<?> postGo(String body, String url, Class T) {
-    HttpResponseEntity<?> entity = RestCallTemplate.url(url)
-            .body(body)
-            .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .respType(T)
-            .post();
-    return (HttpResponseEntity<?>)entity;
-    }
+//    public HttpResponseEntity<?> postGo(String body, String url, Class T) {
+//    HttpResponseEntity<?> entity = RestCallTemplate.url(url)
+//            .body(body)
+//            .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+//            .respType(T)
+//            .post();
+//    return (HttpResponseEntity<?>)entity;
+//    }
 
     private ZuolinAssetVendorHandler getZuolinHandler(){
         return applicationContext.getBean(ZuolinAssetVendorHandler.class);
     }
-
     private void check(String fieldValue, String fieldName){
         if(fieldValue==null||fieldValue.trim().length()<1){
             LOGGER.error(fieldName+":"+fieldValue+"为必填，不能为空");

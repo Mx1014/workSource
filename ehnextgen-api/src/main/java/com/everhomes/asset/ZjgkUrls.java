@@ -18,5 +18,7 @@ public class ZjgkUrls {
     public static final String USER_BILLS_NOTIFY = "http://139.129.220.146:3578/openapi/pmfee/notifyUserPayment";
     public static final String ENTERPRISE_CONTRACT_LIST = "http://139.129.220.146:3578//openapi/contract/listContractsByEnterprise";
     public static final String USER_CONTRACT_LIST = "http://139.129.220.146:3578/openapi/contract/listContractsByUser";
+    public static final String ENTERPRISE_CONTRACT_DETAIL = "http://139.129.220.146:3578/openapi/contract/getEnterpriseContractDetail";
+    public static final String USER_CONTRACT_DETAIL = "http://139.129.220.146:3578/openapi/contract/getUserContractDetail";
 
 }
