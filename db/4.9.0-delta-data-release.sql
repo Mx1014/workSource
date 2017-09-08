@@ -1518,6 +1518,7 @@ insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 
 UPDATE `eh_web_menus` SET `module_id` = 31000 WHERE id = 31000;
 UPDATE `eh_web_menus` SET `module_id` = 32000 WHERE id = 32000;
+update `eh_service_modules` set `update_time` = now();
 
 UPDATE `eh_launch_pad_items` SET `action_data` = '{"displayType":"grid","type":212481,"parentId":212481}' WHERE id in (119001,119002) and namespace_id = 999971;
 
