@@ -280,6 +280,10 @@ public class AssetServiceImpl implements AssetService {
         //张江高科的厂商的接口，还未写
         List<NoticeInfo> noticeInfos = handler.listNoticeInfoByBillId(cmd.getBillIdAndTypes());
         if(noticeInfos.size()<1) return;
+        NoticeWithTextAndMessage(cmd, noticeInfos);
+    }
+
+    private void NoticeWithTextAndMessage(SelectedNoticeCommand cmd, List<NoticeInfo> noticeInfos) {
         List<Long> uids = new ArrayList<>();
         //"{targetName}先生/女士，您好，您的账单已出，应付{amount1}元，待缴{amount2}元，下载"{appName} APP"可及时查看账单并支持在线付款,还可体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。"
         //短信： 54	物业费催缴	王闻天	{1-> targetName}先生/女士，您好，您的物业账单已出，账期{2 dateStr}，使用"{3 appName} APP"可及时查看账单并支持在线付款。
@@ -325,7 +329,7 @@ public class AssetServiceImpl implements AssetService {
             User targetUser = userProvider.findUserById(uids.get(k));
             map.put("targetName",targetUser.getNickName());
             // targetName没有被替换
-            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(),UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
+            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(), UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
             notifyTextForApplicant.replace("targetName","南宫");
             messageDto.setBody(notifyTextForApplicant);
             messageDto.setMetaAppId(AppConstants.APPID_USER);
@@ -440,6 +444,42 @@ public class AssetServiceImpl implements AssetService {
                 billIdAndTypes.add(bit);
             }
             requestCmd.setBillIdAndTypes(billIdAndTypes);
+            String appName = assetProvider.findAppName(UserContext.getCurrentNamespaceId());
+            if(appName==null || appName.trim().length()<1){
+                appName="张江高科推荐";
+            }
+            if(UserContext.getCurrentNamespaceId()==999971){
+                List<NoticeInfo> list = new ArrayList<>();
+                List<ListBillsDTO> listBillsDTOS1 = convertedResponse.getListBillsDTOS();
+                for(int i = 0; i < listBillsDTOS1.size(); i++){
+                    ListBillsDTO dto = listBillsDTOS1.get(i);
+                    NoticeInfo info = new NoticeInfo();
+                    info.setAppName(appName);
+
+                    info.setPhoneNum(dto.getNoticeTel());
+                    info.setAmountRecevable(dto.getAmountReceivable());
+                    info.setAmountOwed(dto.getAmountOwed());
+                    Long tid = 0l;
+                    String targeType;
+                    Long uid  = assetProvider.findTargetIdByIdentifier(dto.getTargetId());
+                    Long oid = assetProvider.findOrganizationIdByIdentifier(dto.getTargetId());
+                    if(uid ==null && oid !=null){
+                        tid = oid;
+                        targeType="eh_organization";
+                    }
+                    else if(uid !=null && oid ==null){
+                        tid = uid;
+                        targeType = "eh_user";
+                    }else {
+                        throw new RuntimeException("一键催缴用户识别异常！");
+                    }
+                    info.setTargetId(tid);
+                    info.setTargetType(targeType);
+                    info.setTargetName(dto.getTargetName());
+                    list.add(info);
+                }
+                NoticeWithTextAndMessage(requestCmd,list);
+            }
             selectNotice(requestCmd);
         }
     }

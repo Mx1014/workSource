@@ -541,8 +541,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         try {
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
         } catch (IOException e) {
-            LOGGER.error("调用张江高科searchEnterpriseBills失败"+e);
-            throw new RuntimeException("调用张江高科searchEnterpriseBills失败"+e);
+            LOGGER.error("调用张江高科失败"+e);
+            throw new RuntimeException("调用张江高科失败"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0){
             SearchBillsResponse response = (SearchBillsResponse) StringHelper.fromJsonString(postJson, SearchBillsResponse.class);

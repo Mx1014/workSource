@@ -134,4 +134,6 @@ public interface AssetProvider {
     Long findTargetIdByIdentifier(String customerIdentifier);
 
     String findAppName(Integer currentNamespaceId);
+
+    Long findOrganizationIdByIdentifier(String targetId);
 }
