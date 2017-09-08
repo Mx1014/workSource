@@ -11,7 +11,7 @@ import java.util.List;
  * <li>commercials:园区列表</li>
  * </ul>
  */
-public class ListNearbyMixCommunitiesCommandV2Response extends RestResponseBase {
+public class ListNearbyMixCommunitiesCommandV2Response {
 
     @ItemType(CommunityDTO.class)
     private List<CommunityDTO> resudentials;

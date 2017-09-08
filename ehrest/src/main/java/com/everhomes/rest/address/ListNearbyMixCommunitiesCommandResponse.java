@@ -7,11 +7,11 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>dtos: 参考{@link com.everhomes.rest.address.CommunityDTO}</li>
+ * <li>dtos: 参考{@link CommunityDTO}</li>
  * <li>nextPageAnchor: 下一页锚点</li>
  * </ul>
  */
-public class ListNearbyMixCommunitiesCommandResponse extends RestResponseBase {
+public class ListNearbyMixCommunitiesCommandResponse {
 
     @ItemType(CommunityDTO.class)
     private List<CommunityDTO> dtos;
