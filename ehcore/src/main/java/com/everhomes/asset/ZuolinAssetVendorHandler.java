@@ -280,13 +280,18 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
-        List<BillDTO> list = assetProvider.listBillItems(billId,targetName,pageOffSet,pageSize);
+    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, int pageOffSet, Integer pageSize) {
+        List<BillDTO> list = assetProvider.listBillItems(Long.parseLong(billId),targetName,pageOffSet,pageSize);
         return list;
     }
 
     @Override
-    public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
+    public List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes) {
+        List<Long> billIds = new ArrayList<>();
+        for(int i = 0; i < billIdAndTypes.size(); i++){
+            BillIdAndType billIdAndType = billIdAndTypes.get(i);
+            billIds.add(Long.parseLong(billIdAndType.getBillId()));
+        }
         return assetProvider.listNoticeInfoByBillId(billIds);
     }
 
@@ -335,7 +340,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         for(int i = 0; i < dtos.size(); i++){
             FindUserInfoForPaymentDTO dto = new FindUserInfoForPaymentDTO();
             dto.setContractNum(dtos.get(i).getContractNumber());
-            dto.setContractId(dtos.get(i).getId());
+            dto.setContractId(String.valueOf(dtos.get(i).getId()));
             list.add(dto);
         }
         res.setContractList(list);
@@ -346,7 +351,15 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             cmd2.setContractNumber(contractDTO.getContractNumber());
             cmd2.setCommunityId(cmd.getCommunityId());
             cmd2.setPartyAId(contractDTO.getPartyAId());
-            GetAreaAndAddressByContractDTO areaAndAddressByContract = assetService.getAreaAndAddressByContract(cmd2);
+            GetAreaAndAddressByContractCommand cmd3 = new GetAreaAndAddressByContractCommand();
+            cmd3.setCommunityId(cmd2.getCommunityId());
+            cmd3.setContractId(String.valueOf(cmd2.getId()));
+            cmd3.setContractNumber(cmd2.getContractNumber());
+            cmd3.setNamespaceId(cmd2.getNamespaceId());
+            cmd3.setOwnerType("community");
+            cmd3.setPartyAId(null);
+            cmd3.setTargetType(cmd.getTargetType());
+            GetAreaAndAddressByContractDTO areaAndAddressByContract = assetService.getAreaAndAddressByContract(cmd3);
             res.setAddressNames(areaAndAddressByContract.getAddressNames());
             res.setAreaSizesSum(areaAndAddressByContract.getAreaSizesSum());
         }
@@ -381,18 +394,18 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
+    public ShowBillDetailForClientResponse getBillDetailForClient(String billId,String targetType) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
-        response =  assetProvider.getBillDetailForClient(billId);
+        response =  assetProvider.getBillDetailForClient(Long.parseLong(billId));
         return response;
 
     }
 
     @Override
-    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId) {
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus,Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
         Long conId = Long.parseLong(contractId);
-        response =  assetProvider.getBillDetailByDateStr(ownerId,ownerType,targetId,targetType,dateStr,conId);
+        response =  assetProvider.getBillDetailByDateStr( billStatus,ownerId,ownerType,targetId,targetType,dateStr,conId);
         return response;
     }
 

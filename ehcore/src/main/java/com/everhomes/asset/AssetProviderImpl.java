@@ -710,24 +710,28 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId) {
+    public ShowBillDetailForClientResponse getBillDetailByDateStr(Byte billStatus,Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
         final BigDecimal[] amountOwed = {new BigDecimal("0")};
         final BigDecimal[] amountReceivable = {new BigDecimal("0")};
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        // 多个账期账单，总待缴从账单里拿，这里有减免项也许，还是？
+
+        SelectQuery<Record> query = dslContext.selectQuery();
+        query.addSelect(t.AMOUNT_RECEIVABLE, t.CHARGING_ITEM_NAME, t.DATE_STR, t.AMOUNT_OWED, t.AMOUNT_RECEIVABLE);
+        query.addFrom(t);
+        query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        query.addConditions(t.OWNER_ID.eq(ownerId));
+        query.addConditions(t.TARGET_TYPE.eq(targetType));
+        query.addConditions(t.TARGET_ID.eq(targetId));
+        query.addConditions(t.DATE_STR.eq(dateStr));
+        query.addConditions(t.CONTRACT_ID.eq(contractId));
+        if(billStatus!=null){
+            query.addConditions(t.STATUS.eq(billStatus));
+        }
         try {
-            dslContext.select(t.AMOUNT_RECEIVABLE, t.CHARGING_ITEM_NAME, t.DATE_STR, t.AMOUNT_OWED, t.AMOUNT_RECEIVABLE)
-                    .from(t)
-                    .where(t.OWNER_TYPE.eq(ownerType))
-                    .and(t.OWNER_ID.eq(ownerId))
-                    .and(t.TARGET_TYPE.eq(targetType))
-                    .and(t.TARGET_ID.eq(targetId))
-                    .and(t.DATE_STR.eq(dateStr))
-                    .and(t.CONTRACT_ID.eq(contractId))
-                    .fetch()
+            query.fetch()
                     .map(r -> {
                         ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                         dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
