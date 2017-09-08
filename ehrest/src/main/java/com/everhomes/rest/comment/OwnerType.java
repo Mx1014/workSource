@@ -4,11 +4,12 @@ package com.everhomes.rest.comment;
  * <ul>园区app类型
  * <li>FORUM(1)</li>
  * <li>NEWS(2)</li>
+ * <li>SERVICEALLIANCE(3)</li>
  * </ul>
  */
 public enum OwnerType {
 
-	FORUM((byte)1),NEWS((byte)2);
+	FORUM((byte)1),NEWS((byte)2),SERVICEALLIANCE((byte)3);
 
     private byte code;
 
