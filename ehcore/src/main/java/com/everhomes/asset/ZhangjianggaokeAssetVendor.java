@@ -514,6 +514,17 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
         String json = generateJson(params);
         String url;
+        if(targetType==null||targetType.trim().equals("")){
+            url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
+            listBillOnUrls(targetType, carrier, list, json, url);
+            if(carrier.getNextPageAnchor()==null){
+                return list;
+            }
+            params.put("pageOffset",String.valueOf(carrier.getNextPageAnchor()));
+            json = generateJson(params);
+            listBillOnUrls(targetType, carrier, list, json, url);
+            return list;
+        }
         if(targetType.equals("eh_organization")){
             url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
         }else if(targetType.equals("eh_user")){
@@ -521,19 +532,24 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         }else{
             throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
         }
-        try {
+        listBillOnUrls(targetType, carrier, list, json, url);
+        return list;
+    }
 
+    private void listBillOnUrls(String targetType, ListBillsResponse carrier, List<ListBillsDTO> list, String json, String url) {
+        String postJson;
+        try {
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
         } catch (IOException e) {
             LOGGER.error("调用张江高科searchEnterpriseBills失败"+e);
             throw new RuntimeException("调用张江高科searchEnterpriseBills失败"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0){
-            SearchBillsResponse response = (SearchBillsResponse)StringHelper.fromJsonString(postJson, SearchBillsResponse.class);
+            SearchBillsResponse response = (SearchBillsResponse) StringHelper.fromJsonString(postJson, SearchBillsResponse.class);
             if(response.getErrorCode()==200){
                 List<SearchEnterpriseBillsDTO> res = response.getResponse();
                 Integer nextPageOffset = response.getNextPageOffset();
-                carrier.setNextPageAnchor(nextPageOffset==null?pageOffSet:nextPageOffset.longValue());
+                carrier.setNextPageAnchor(nextPageOffset==null?null:nextPageOffset.longValue());
                 for(int i = 0 ; i < res.size(); i++){
                     SearchEnterpriseBillsDTO sourceDto = res.get(i);
                     ListBillsDTO dto = new ListBillsDTO();
@@ -562,8 +578,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 LOGGER.error("调用张江高科searchEnterpriseBills失败"+response.getErrorDescription()+","+response.getErrorDetails());
             }
         }
-        return list;
     }
+
     private String generateJson(Map<String,String> params){
         params.put("appKey", "ee4c8905-9aa4-4d45-973c-ede4cbb3cf21");
         params.put("nonce", "54256");

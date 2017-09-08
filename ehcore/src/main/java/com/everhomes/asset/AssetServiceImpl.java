@@ -575,6 +575,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public String deleteBill(BillIdCommand cmd) {
+//        checkAuthorization(UserContext.getCurrentNamespaceId());
         String result = "OK";
         if(UserContext.getCurrentNamespaceId()==999971){
             result = "张江高科项目暂不支持删除账单功能";

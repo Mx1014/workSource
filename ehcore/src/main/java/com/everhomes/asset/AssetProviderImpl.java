@@ -1014,6 +1014,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
         query.addConditions(r.OWNER_ID.eq(ownerId));
         query.addConditions(r.OWNER_TYPE.eq(ownerType));
+        query.addConditions(r.SWITCH.eq((byte)1));
         query.addGroupBy(r.DATE_STR);
         query.addOrderBy(r.DATE_STR);
         query.fetch()
@@ -1034,11 +1035,19 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillStaticsDTO> list = new ArrayList<>();
         EhPaymentBillItems o = Tables.EH_PAYMENT_BILL_ITEMS.as("o");
         EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
+        EhPaymentBills t1 = Tables.EH_PAYMENT_BILLS.as("t1");
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> settledBillIds = context.select(t1.ID)
+                .from(t1)
+                .where(t1.SWITCH.eq((byte) 1))
+                .fetch(t1.ID);
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),o.CHARGING_ITEM_NAME);
         query.addFrom(t,o);
 //        query.addJoin(o);
+        if(settledBillIds!=null&& settledBillIds.size()>0){
+            query.addConditions(o.BILL_ID.in(settledBillIds));
+        }
         query.addConditions(o.OWNER_TYPE.eq(ownerType));
         query.addConditions(o.OWNER_ID.eq(ownerId));
         query.addConditions(o.CHARGING_ITEMS_ID.eq(t.ID));
@@ -1094,6 +1103,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(dateStrEnd!=null){
             query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
         }
+        query.addConditions(t.SWITCH.eq((byte)1));
         Table<Record> r = query.asTable("r");
 
         context.select(DSL.sum(r.field(t.AMOUNT_RECEIVED)), DSL.sum(r.field(t.AMOUNT_RECEIVABLE)), DSL.sum(r.field(t.AMOUNT_OWED)), o.NAME)
