@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>ownerType: 拥有者类型：现在是comunity</li>
+ *  <li>ownerType: 拥有者类型：EhOrganizations EhCommunities</li>
  *  <li>ownerId: 拥有者ID</li>
  *  <li>categoryId: 服务联盟大类id</li>
  *  <li>startDay: 开始时间</li>

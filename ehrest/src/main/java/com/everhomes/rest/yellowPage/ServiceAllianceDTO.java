@@ -47,6 +47,8 @@ import java.util.List;
  *  <li>descriptionHeight : 折叠服务联盟高度  0:全部展开 大于0:折叠相应高度</li>
  *  <li>displayFlag : 是否在app端显示服务联盟企业, 参考 {@link com.everhomes.rest.yellowPage.DisplayFlagType}</li>
  *  <li>defaultOrder : 排序序号</li>
+ *  <li>commentCount : 评论数量</li>
+ *  <li>commentToken : 评论token，评论当前机构需要使用此参数。</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -134,6 +136,18 @@ public class ServiceAllianceDTO {
 	
 	private Byte displayFlag;
 	
+	private Integer commentCount;
+	
+	private String commentToken;
+	
+	public String getCommentToken() {
+		return commentToken;
+	}
+
+	public void setCommentToken(String commentToken) {
+		this.commentToken = commentToken;
+	}
+
 	public Byte getDisplayFlag() {
 		return displayFlag;
 	}
@@ -406,6 +420,14 @@ public class ServiceAllianceDTO {
 
 	public void setDescriptionHeight(Integer descriptionHeight) {
 		this.descriptionHeight = descriptionHeight;
+	}
+
+	public Integer getCommentCount() {
+		return commentCount;
+	}
+
+	public void setCommentCount(Integer commentCount) {
+		this.commentCount = commentCount;
 	}
 
 	@Override
