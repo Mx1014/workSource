@@ -1041,7 +1041,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(cmd.getTargetType(), cmd.getTargetId());
+        AssetVendor assetVendor = checkAssetVendor("community", cmd.getTargetId());
         String vendor = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendor);
         return handler.findUserInfoForPayment(cmd);
