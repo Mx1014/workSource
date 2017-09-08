@@ -30,6 +30,7 @@ import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
@@ -1114,6 +1115,10 @@ public class CustomerServiceImpl implements CustomerService {
         response.setProjectTotalCount(0L);
 
         Map<Long, CustomerProjectStatisticsDTO> statistics = enterpriseCustomerProvider.listCustomerApplyProjectsByCustomerIds(customerIds);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listCustomerProjectStatistics customer ids : {}, statistics: {}", customerIds, StringHelper.toJsonString(statistics));
+        }
+
         statistics.forEach((itemId, statistic) -> {
             CustomerProjectStatisticsDTO dto = statistic;
             ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), itemId);
@@ -1124,6 +1129,7 @@ public class CustomerServiceImpl implements CustomerService {
             response.setProjectTotalAmount(response.getProjectTotalAmount().add(dto.getProjectAmount()));
             response.setProjectTotalCount(response.getProjectTotalCount() + dto.getProjectCount());
         });
+        response.setDtos(dtos);
         return response;
     }
 
