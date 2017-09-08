@@ -2344,3 +2344,22 @@ update `eh_launch_pad_items` elpi set categry_name = (select name from eh_item_s
 
 INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`)
 VALUES(1151, 999978, 'community_commercial', UTC_TIMESTAMP());
+
+-- added by R 20170908 更改图标属性
+SELECT * FROM eh_launch_pad_items WHERE item_location like '%/home/investment%' AND namespace_id=999978 ;
+SELECT * FROM eh_launch_pad_items WHERE item_location like '%/home/ResApply%' AND namespace_id=999978 ;
+SELECT * FROM eh_launch_pad_items WHERE item_location like '%/home/IntelPm%' AND namespace_id=999978 ;
+SELECT * FROM eh_launch_pad_items WHERE item_location like '%/home/IntelTrans%' AND namespace_id=999978 ;
+SELECT * FROM eh_launch_pad_items WHERE item_location like '%/home/enterprise%' AND namespace_id=999978 ;
+SELECT * FROM eh_launch_pad_items WHERE item_location like '%/home/increment%' AND namespace_id=999978 ;
+SELECT * FROM eh_launch_pad_items WHERE item_location like '%/EhPortalLayouts170%' AND namespace_id=999978 ;
+SELECT * FROM eh_launch_pad_items WHERE item_label like '%更多%' AND namespace_id=999978 AND item_group = 'Bizs1';
+
+UPDATE eh_launch_pad_items SET delete_flag = 0 WHERE item_location like '%/home/investment%' AND namespace_id=999978 ;
+UPDATE eh_launch_pad_items SET delete_flag = 0 WHERE item_location like '%/home/ResApply%' AND namespace_id=999978 ;
+UPDATE eh_launch_pad_items SET delete_flag = 0 WHERE item_location like '%/home/IntelPm%' AND namespace_id=999978 ;
+UPDATE eh_launch_pad_items SET delete_flag = 0 WHERE item_location like '%/home/IntelTrans%' AND namespace_id=999978 ;
+UPDATE eh_launch_pad_items SET delete_flag = 0 WHERE item_location like '%/home/enterprise%' AND namespace_id=999978 ;
+UPDATE eh_launch_pad_items SET delete_flag = 0 WHERE item_location like '%/home/increment%' AND namespace_id=999978 ;
+UPDATE eh_launch_pad_items SET delete_flag = 0 WHERE item_location like '%/EhPortalLayouts170%' AND namespace_id=999978 ;
+UPDATE eh_launch_pad_items SET delete_flag = 0 WHERE item_label like '%更多%' AND namespace_id=999978 AND item_group = 'Bizs1';
