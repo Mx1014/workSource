@@ -8,10 +8,7 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserProvider;
@@ -83,7 +80,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
             contractSearcher.feedDoc(contract);
             dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
         }else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-            
+
         }
     }
 
@@ -99,15 +96,16 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         }
         FlowCase flowCase = ctx.getFlowCase();
         Contract contract = contractProvider.findContractById(flowCase.getReferId());
-
-        if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-            contract.setStatus(ContractStatus.APPROVE_QUALITIED.getCode());
-            contractProvider.updateContract(contract);
-            contractSearcher.feedDoc(contract);
-        } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
-            dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+        //因为异常终止也会进FlowCaseEnd，所以需要再判断一下是不是正常结束 by xiongying20170908
+        if(FlowStepType.APPROVE_STEP.equals(ctx.getStepType()) || FlowStepType.END_STEP.equals(ctx.getStepType())) {
+            if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+                contract.setStatus(ContractStatus.APPROVE_QUALITIED.getCode());
+                contractProvider.updateContract(contract);
+                contractSearcher.feedDoc(contract);
+            } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))) {
+                dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+            }
         }
-
     }
 
     private void dealAddressLivingStatus(Contract contract, byte livingStatus) {
