@@ -6653,7 +6653,8 @@ public class PunchServiceImpl implements PunchService {
 		String content = "";
 		if (null != employees) {
 			for(UniongroupMemberDetail employee : employees) {
-				if (null != employee.getTargetId()) {
+				if (employee.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) &&
+						null != employee.getTargetId()) {
 					//根据新增/修改 固定/排班 找模板发出去
 					if (pr.getRuleType().equals(PunchRuleType.GUDING.getCode())) {
 						if (pr.getStatus().equals(PunchRuleStatus.NEW.getCode())) {
