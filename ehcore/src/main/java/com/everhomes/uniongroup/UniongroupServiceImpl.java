@@ -114,6 +114,9 @@ public class UniongroupServiceImpl implements UniongroupService {
         //获得每个org的groupPath，并找寻是否存在其子部门的记录
         Set<Long> detailIds = new HashSet<>();
         orgIds.stream().map(r -> {
+            if (null == r) {
+                return null;
+            }
             Organization org = checkOrganization(r);
             if (org != null) {
                 //对每一个已存在的部门找到其下的子部门集合
