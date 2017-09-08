@@ -1387,6 +1387,9 @@ delete from eh_web_menu_scopes where menu_id in(21200, 21210, 21220) and owner_i
 
 
 -- 业务模块整理 add by sfyan 20170908
+
+DELETE FROM eh_service_modules;
+
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('10000','信息发布','0','/10000','1','1','2','0','2016-12-06 11:40:50',NULL,NULL,'0','0','0',NULL,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('10100','论坛/公告','10000','/10000/10100','1','2','2','0','2016-12-06 11:40:50',NULL,'0000-00-00 00:00:00','0','0','0',NULL,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('10200','园区简介','10000','/10000/10200','1','2','2','0','2016-12-06 11:40:50',NULL,'0000-00-00 00:00:00','0','0','0',NULL,'0');
