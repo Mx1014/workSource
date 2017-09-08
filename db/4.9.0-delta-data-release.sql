@@ -1494,7 +1494,7 @@ insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('37000','客户资料','30000','/30000/37000','1','2','2','0','2017-05-11 20:08:38',NULL,NULL,'0','0','0',NULL,NULL);
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('21200','合同管理','30000','/30000/21200','0','2','2','0','2017-09-07 13:16:34',NULL,NULL,'0','1','1',NULL,NULL);
 
-insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('50000','企业OA服务','0','/50000','1','1','2','0','2016-12-06 11:40:51',NULL,NULL,'0','0','0',NULL,'0');
+insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('50000','内部管理','0','/50000','1','1','2','0','2016-12-06 11:40:51',NULL,NULL,'0','0','0',NULL,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('50100','组织架构','50000','/50000/50100','1','2','2','0','2016-12-06 11:40:51',NULL,NULL,'0','0','0',NULL,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('50200','岗位管理','50000','/50000/50200','1','2','2','0','2016-12-06 11:40:51',NULL,NULL,'0','0','0',NULL,'0');
 insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `update_time`, `operator_uid`, `creator_uid`, `description`, `action_type`, `multiple_flag`) values('50300','职级管理','50000','/50000/50300','1','2','2','0','2016-12-06 11:40:51',NULL,NULL,'0','0','0',NULL,'0');
@@ -1518,3 +1518,8 @@ insert into `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 
 UPDATE `eh_web_menus` SET `module_id` = 31000 WHERE id = 31000;
 UPDATE `eh_web_menus` SET `module_id` = 32000 WHERE id = 32000;
+update `eh_service_modules` set `update_time` = now();
+DELETE FROM eh_service_module_scopes WHERE module_id in (70000,70100,70200);
+
+UPDATE `eh_launch_pad_items` SET `action_data` = '{"displayType":"grid","type":212481,"parentId":212481}' WHERE id in (119001,119002) and namespace_id = 999971;
+
