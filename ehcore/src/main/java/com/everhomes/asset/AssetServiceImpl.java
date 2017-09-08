@@ -1042,24 +1042,14 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public GetAreaAndAddressByContractDTO getAreaAndAddressByContract(FindContractCommand cmd) {
-        GetAreaAndAddressByContractDTO dto = new GetAreaAndAddressByContractDTO();
-        List<String> addressNames = new ArrayList<>();
-        Double areaSize = 0d;
-        ContractDetailDTO contract = contractService.findContract(cmd);
-        List<BuildingApartmentDTO> apartments = contract.getApartments();
-        for(int i = 0; i < apartments.size(); i++) {
-            BuildingApartmentDTO building = apartments.get(i);
-            String addressName;
-            addressName = building.getBuildingName()+building.getApartmentName();
-            addressNames.add(addressName);
-            if(building.getChargeArea()!=null){
-                areaSize += building.getChargeArea();
-            }
-        }
-        dto.setAddressNames(addressNames);
-        dto.setAreaSizesSum(String.valueOf(areaSize));
-        return dto;
+    public GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(), cmd.getCommunityId());
+        String vendor = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendor);
+        return handler.getAreaAndAddressByContract(cmd);
+
+
+
     }
 
     @Override

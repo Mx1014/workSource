@@ -10,9 +10,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.contract.FindContractCommand;
-import com.everhomes.rest.contract.ListCustomerContractsCommand;
+import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -353,6 +351,33 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             res.setAreaSizesSum(areaAndAddressByContract.getAreaSizesSum());
         }
         return res;
+    }
+
+    @Override
+    public GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd1) {
+        FindContractCommand cmd = new FindContractCommand();
+        cmd.setPartyAId(cmd1.getPartyAId());
+        cmd.setCommunityId(cmd1.getCommunityId());
+        cmd.setContractNumber(cmd1.getContractNumber());
+        cmd.setId(Long.parseLong(cmd1.getContractId()));
+        cmd.setNamespaceId(cmd1.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd1.getNamespaceId());
+        GetAreaAndAddressByContractDTO dto = new GetAreaAndAddressByContractDTO();
+        List<String> addressNames = new ArrayList<>();
+        Double areaSize = 0d;
+        ContractDetailDTO contract = contractService.findContract(cmd);
+        List<BuildingApartmentDTO> apartments = contract.getApartments();
+        for(int i = 0; i < apartments.size(); i++) {
+            BuildingApartmentDTO building = apartments.get(i);
+            String addressName;
+            addressName = building.getBuildingName()+building.getApartmentName();
+            addressNames.add(addressName);
+            if(building.getChargeArea()!=null){
+                areaSize += building.getChargeArea();
+            }
+        }
+        dto.setAddressNames(addressNames);
+        dto.setAreaSizesSum(String.valueOf(areaSize));
+        return dto;
     }
 
     @Override

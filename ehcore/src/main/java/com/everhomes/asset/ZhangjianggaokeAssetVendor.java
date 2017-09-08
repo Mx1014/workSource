@@ -72,8 +72,6 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     @Autowired
     private UserProvider userProvider;
 
-    @Autowired
-    private OrganizationProvider organizationProvider;
 
 
     @Override
@@ -533,6 +531,73 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     @Override
     public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
         FindUserInfoForPaymentResponse result = new FindUserInfoForPaymentResponse();
+        List<FindUserInfoForPaymentDTO> list = new ArrayList<>();
+        String postJson = "";
+        Map<String, String> params=new HashMap<String, String> ();
+        String identifier;
+        params.put("pageOffset", "1");
+        params.put("pageSize", "999");
+        String json = generateJson(params);
+        String url;
+        String targetType= cmd.getTargetType();
+        if(targetType!=null && targetType.equals("eh_organization")){
+            url = ZjgkUrls.ENTERPRISE_CONTRACT_LIST;
+            Organization organization = organizationProvider.findOrganizationById(cmd.getTargetId());
+            identifier = organization.getNamespaceOrganizationToken();
+            params.put("enterpriseIdentifier",identifier);
+        }else if(targetType!=null && targetType.equals("eh_user")){
+            url = ZjgkUrls.USER_CONTRACT_LIST;
+            User user = userProvider.findUserById(cmd.getTargetId());
+            identifier = user.getIdentifierToken();
+            params.put("userMobile",identifier);
+        }else{
+            throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
+        }
+        try {
+            postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
+        } catch (IOException e) {
+            LOGGER.error("调用张江高科失败"+e);
+            throw new RuntimeException("调用张江高科失败"+e);
+        }
+        if(postJson!=null&&postJson.trim().length()>0){
+            ContractListResponse response =(ContractListResponse) StringHelper.fromJsonString(postJson, ContractListResponse.class);
+            if(response.getErrorCode()==200){
+                List<ContractDTO> dtos = response.getResponse();
+                String customerName = "";
+                BigDecimal areaSizeSum = new BigDecimal("0");
+                List<String> addressNames = new ArrayList<>();
+                for(int i = 0; i < dtos.size(); i++){
+                    ContractDTO sourceDto = dtos.get(i);
+                    FindUserInfoForPaymentDTO dto = new FindUserInfoForPaymentDTO();
+                    dto.setContractId(sourceDto.getContractNum());
+                    dto.setContractNum(sourceDto.getContractNum());
+                    customerName = sourceDto.getSettled();
+                    List<CommunityAddressDTO> apartments = sourceDto.getApartments();
+                    if(apartments!=null){
+                        for(int k = 0 ; k < apartments.size(); k ++){
+                            CommunityAddressDTO communityAddressDTO = apartments.get(k);
+                            addressNames.add(communityAddressDTO.getBuildingName()==null?"":communityAddressDTO.getBuildingName()+communityAddressDTO.getApartmentName());
+                        }
+                    }
+
+                    areaSizeSum = areaSizeSum.add(sourceDto.getAreaSize()==null?new BigDecimal("0"):new BigDecimal(sourceDto.getAreaSize()));
+                    list.add(dto);
+                }
+                result.setAreaSizesSum(areaSizeSum.toString());
+                result.setAddressNames(addressNames);
+                result.setContractList(list);
+                result.setCustomerName(customerName);
+            }else{
+                LOGGER.error("调用张江高科失败"+response.getErrorDescription());
+                throw new RuntimeException("调用张江高科失败"+response.getErrorDescription());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd) {
+        GetAreaAndAddressByContractDTO result = new GetAreaAndAddressByContractDTO();
         List<FindUserInfoForPaymentDTO> list = new ArrayList<>();
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
