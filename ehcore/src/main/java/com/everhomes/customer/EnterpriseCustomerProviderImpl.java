@@ -11,7 +11,6 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
@@ -20,6 +19,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
+import com.everhomes.util.StringHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -49,17 +49,42 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
     @Override
     public void createEnterpriseCustomer(EnterpriseCustomer customer) {
+        LOGGER.info("syncDataToDb create customer: {}", StringHelper.toJsonString(customer));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
+        LOGGER.info("syncDataToDb create customer id: {}", id);
         customer.setId(id);
+        LOGGER.info("syncDataToDb create customer setId");
         customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        customer.setCreatorUid(UserContext.current().getUser().getId());
+        LOGGER.info("syncDataToDb create customer setCreateTime");
         customer.setStatus(CommonStatus.ACTIVE.getCode());
-
         LOGGER.info("createEnterpriseCustomer: " + customer);
 
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         dao.insert(customer);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseCustomers.class, null);
+    }
+
+    @Override
+    public void createEnterpriseCustomer2(EnterpriseCustomer customer) {
+        LOGGER.info("syncDataToDb create customer: {}", StringHelper.toJsonString(customer));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
+        LOGGER.info("syncDataToDb create customer id: {}", id);
+        customer.setStatus(CommonStatus.ACTIVE.getCode());
+        LOGGER.info("syncDataToDb create customer setStatus");
+        customer.setId(id);
+        LOGGER.info("syncDataToDb create customer setId");
+//        customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//        LOGGER.info("syncDataToDb create customer setCreateTime");
+
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        LOGGER.info("syncDataToDb create customer context");
+        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        LOGGER.info("syncDataToDb create customer dao");
+        dao.insert(customer);
+        LOGGER.info("createEnterpriseCustomer: " + customer);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseCustomers.class, null);
     }
 

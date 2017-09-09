@@ -5,6 +5,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.ContractService;
+import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleStringService;
@@ -31,6 +32,7 @@ import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
@@ -105,6 +107,7 @@ public class CustomerServiceImpl implements CustomerService {
         if(cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
+        customer.setCreatorUid(UserContext.currentUserId());
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
         OrganizationDTO organizationDTO = createOrganization(customer);
@@ -1238,15 +1241,28 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
         if(cmd.getNamespaceId() == 999971) {
-            if(cmd.getCommunityId() == null) {
-                zjgkOpenService.syncEnterprises("0", null);
-            } else {
-                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-                if(community != null) {
-                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
-                }
+            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode()).tryEnter(()-> {
+                ExecutorUtil.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+                            if(cmd.getCommunityId() == null) {
+                                zjgkOpenService.syncEnterprises("0", null);
+                            } else {
+                                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                                if(community != null) {
+                                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
+                                }
 
-            }
+                            }
+                        }catch (Exception e){
+                            LOGGER.error("syncEnterpriseCustomers error.", e);
+                        }
+                    }
+                });
+            });
+
+
         }
 
     }
@@ -1254,14 +1270,24 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void syncIndividualCustomers(SyncCustomersCommand cmd) {
         if(cmd.getNamespaceId() == 999971) {
-            if(cmd.getCommunityId() == null) {
-                zjgkOpenService.syncIndividuals("0", null);
-            } else {
-                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-                if(community != null) {
-                    zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken());
+            ExecutorUtil.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        if(cmd.getCommunityId() == null) {
+                            zjgkOpenService.syncIndividuals("0", null);
+                        } else {
+                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                            if(community != null) {
+                                zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken());
+                            }
+                        }
+                    }catch (Exception e){
+                        LOGGER.error("syncIndividualCustomers error.", e);
+                    }
                 }
-            }
+            });
+
         }
     }
 }

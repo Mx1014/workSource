@@ -89,6 +89,7 @@ public enum CoordinationLocks {
 
 
     BILL_STATUS_UPDATE("bill.status.update"),
+    SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
 
     EVENT_STAT_SCHEDULE("event.stat.schedule");
 
