@@ -1713,4 +1713,9 @@ public class AssetProviderImpl implements AssetProvider {
         return "";
     }
 
+    @Override
+    public Long findOrganizationIdByIdentifier(String targetId) {
+        return null;
+    }
+
 }
