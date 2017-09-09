@@ -6581,7 +6581,7 @@ public class PunchServiceImpl implements PunchService {
 		organizationProvider.updateOrganization(punchOrg);
 		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
 
-		List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
+//		List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
 
 		//添加关联
 		SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
@@ -6595,16 +6595,15 @@ public class PunchServiceImpl implements PunchService {
 			LOGGER.error("NoNodeAvailableException",e);
 		}
 		List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
-		if(null != oldEmployees){
-			if(null == newEmployees)
-				newEmployees = new ArrayList<>();
-			for (UniongroupMemberDetail employee : oldEmployees) {
-				if (!isEmployeeInList(employee, newEmployees)) {
-					//删除被踢出考勤组的人的设置 -- 排班
-					punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndTarget(pr.getId(),employee.getDetailId());
-				}
-			}
+		List<Long> detailIds = new ArrayList<>();
+		if(null == newEmployees)
+			newEmployees = new ArrayList<>();
+		for (UniongroupMemberDetail employee : newEmployees) {
+			detailIds.add(employee.getDetailId());
+						//删除被踢出考勤组的人的设置 -- 排班
 		}
+		punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndTarget(pr.getId(),detailIds);
+
 		//打卡地点和wifi
         saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
 

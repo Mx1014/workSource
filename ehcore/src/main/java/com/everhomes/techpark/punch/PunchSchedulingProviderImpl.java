@@ -23,10 +23,8 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPunchSchedulingsDao;
 import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
-import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
 import com.everhomes.server.schema.tables.records.EhPunchSchedulingsRecord;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.TargetType;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -215,11 +213,11 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 	}
 
 	@Override
-	public void deletePunchSchedulingByPunchRuleIdAndTarget(Long prId, Long detailId) {
+	public void deletePunchSchedulingByPunchRuleIdAndTarget(Long prId, List<Long> detailId) {
 
 		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
 		DeleteWhereStep<EhPunchSchedulingsRecord> step = context.delete(Tables.EH_PUNCH_SCHEDULINGS);
-		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.equal(detailId)
+		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.in(detailId)
 				.and(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(prId)) ;
 		step.where(condition);
 		LOGGER.debug(step.toString());
