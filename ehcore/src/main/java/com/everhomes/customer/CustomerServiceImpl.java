@@ -1103,6 +1103,15 @@ public class CustomerServiceImpl implements CustomerService {
             dtos.add(dto);
         }
 
+        Long certificates = enterpriseCustomerProvider.countCertificatesByCustomerIds(customerIds);
+        if(certificates != null) {
+            response.setPropertyTotalCount(response.getPropertyTotalCount() + certificates);
+
+            CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
+            dto.setPropertyType("证书");
+            dto.setPropertyCount(certificates);
+            dtos.add(dto);
+        }
 
         Map<Long, Long> properties = enterpriseCustomerProvider.listCustomerPatentsByCustomerIds(customerIds);
         properties.forEach((categoryId, count) -> {
