@@ -424,9 +424,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private SmsBlackListProvider smsBlackListProvider;
 
-
-    @Autowired
-	private ContractService contractService;
+//
+//    @Autowired
+//	private ContractService contractService;
 
 	@Autowired
 	private GroupService groupService;
@@ -4588,6 +4588,9 @@ public class UserServiceImpl implements UserService {
 	public TargetDTO findTargetByNameAndAddress(String contractNum, String targetName, Long communityId, String tel,String ownerType,String targetType) {
         TargetDTO dto = new TargetDTO();
         if(contractNum!=null) {
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+			ContractService contractService = PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
             List<Object> typeIdNameAndTel = contractService.findCustomerByContractNum(contractNum,communityId,ownerType);
             if(typeIdNameAndTel!=null && typeIdNameAndTel.size()>0){
                 dto.setTargetType((String)typeIdNameAndTel.get(0));
