@@ -70,16 +70,17 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         LOGGER.info("syncDataToDb create customer: {}", StringHelper.toJsonString(customer));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
         LOGGER.info("syncDataToDb create customer id: {}", id);
+        customer.setStatus(CommonStatus.ACTIVE.getCode());
+        LOGGER.info("syncDataToDb create customer setStatus");
         customer.setId(id);
         LOGGER.info("syncDataToDb create customer setId");
         customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         LOGGER.info("syncDataToDb create customer setCreateTime");
-        customer.setStatus(CommonStatus.ACTIVE.getCode());
-        LOGGER.info("createEnterpriseCustomer: " + customer);
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         dao.insert(customer);
+        LOGGER.info("createEnterpriseCustomer: " + customer);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseCustomers.class, null);
     }
 

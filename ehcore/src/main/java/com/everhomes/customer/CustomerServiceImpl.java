@@ -5,6 +5,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.ContractService;
+import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleStringService;
@@ -1240,24 +1241,27 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
         if(cmd.getNamespaceId() == 999971) {
-            ExecutorUtil.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-                        if(cmd.getCommunityId() == null) {
-                            zjgkOpenService.syncEnterprises("0", null);
-                        } else {
-                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-                            if(community != null) {
-                                zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
-                            }
+            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode()).tryEnter(()-> {
+                ExecutorUtil.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+                            if(cmd.getCommunityId() == null) {
+                                zjgkOpenService.syncEnterprises("0", null);
+                            } else {
+                                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                                if(community != null) {
+                                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
+                                }
 
+                            }
+                        }catch (Exception e){
+                            LOGGER.error("syncEnterpriseCustomers error.", e);
                         }
-                    }catch (Exception e){
-                        LOGGER.error("syncEnterpriseCustomers error.", e);
                     }
-                }
+                });
             });
+
 
         }
 
