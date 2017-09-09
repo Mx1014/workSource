@@ -566,13 +566,17 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                         noticeTel = sourceDto.getNoticeTels();
                     }
                     dto.setNoticeTel(noticeTel);
+
                     dto.setBillId(sourceDto.getBillID());
-                    dto.setBillGroupName(sourceDto.getFeeName());
+                    dto.setBillGroupName(sourceDto.getFeeName()==null?"租金":sourceDto.getFeeName());
+                    dto.setDateStr(sourceDto.getBillDate());
+                    dto.setTargetType(targetType);
+                    dto.setTargetName(sourceDto.getCustomerName());
                     dto.setAmountOwed(new BigDecimal(sourceDto.getAmountOwed()));
                     dto.setAmountReceivable(new BigDecimal(sourceDto.getAmountReceivable()));
                     dto.setAmountReceived(new BigDecimal(sourceDto.getAmountReceived()));
                     list.add(dto);
-                    carrier.setNextPageAnchor(response.getNextPageOffset().longValue());
+                    carrier.setNextPageAnchor(response.getNextPageOffset()==null?null:response.getNextPageOffset().longValue());
                 }
             }else{
                 LOGGER.error("调用张江高科searchEnterpriseBills失败"+response.getErrorDescription()+","+response.getErrorDetails());
