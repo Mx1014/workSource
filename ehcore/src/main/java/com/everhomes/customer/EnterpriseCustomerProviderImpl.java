@@ -84,8 +84,9 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         LOGGER.info("syncDataToDb create customer dao");
         dao.insert(customer);
-        LOGGER.info("createEnterpriseCustomer: " + customer);
+        LOGGER.info("syncDataToDb create customer: {}", StringHelper.toJsonString(customer));
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseCustomers.class, null);
+        LOGGER.info("syncDataToDb create customer: 123");
     }
 
     @Override
