@@ -1182,7 +1182,6 @@ public class ZJGKOpenServiceImpl {
                     if(communityId != null) {
                         enterprise.setCommunityId(communityId);
                     }
-                    LOGGER.debug("syncDataToDb all enterprise:{}", enterprise);
                     theirEnterpriseList.add(enterprise);
                 }
 //                mergeEnterpriseList.forEach(enterprise -> {
@@ -1217,12 +1216,13 @@ public class ZJGKOpenServiceImpl {
         // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
         if (theirEnterpriseList != null) {
             for (ZJEnterprise zjEnterprise : theirEnterpriseList) {
+                LOGGER.debug("zjEnterprise deal: {}", zjEnterprise.getDealed());
                 if ((zjEnterprise.getDealed() != null && zjEnterprise.getDealed().booleanValue() == true)) {
                     continue;
                 }
                 // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
                 List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, zjEnterprise.getName());
-                if (customers == null) {
+                if (customers == null || customers.size() == 0) {
                     insertEnterpriseCustomer(NAMESPACE_ID, zjEnterprise);
                 }else {
                     updateEnterpriseCustomer(customers.get(0), zjEnterprise);
@@ -1571,7 +1571,7 @@ public class ZJGKOpenServiceImpl {
                 }
                 // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
                 List<OrganizationOwner> customers = individualCustomerProvider.listOrganizationOwnerByNamespaceIdAndName(namespaceId, zjIndividual.getName());
-                if (customers == null) {
+                if (customers == null || customers.size() == 0) {
                     insertIndividualCustomer(NAMESPACE_ID, zjIndividual);
                 }else {
                     updateIndividualCustomer(customers.get(0), zjIndividual);
