@@ -11,7 +11,7 @@ public class BillDetailDTO {
     private String billID;
     private String billDate;
     private String feeName;
-    private Byte payFlag;
+    private String payFlag;
     private String customerIdentifier;
     private String customerName;
     private List<CommunityAddressDTO> apartments;
@@ -19,9 +19,18 @@ public class BillDetailDTO {
     private String amountReceivable;
     private String amountOwed;
     private String amountReceived;
+    private String status;
 
     public String getBillID() {
         return billID;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public void setBillID(String billID) {
@@ -44,11 +53,11 @@ public class BillDetailDTO {
         this.feeName = feeName;
     }
 
-    public Byte getPayFlag() {
+    public String getPayFlag() {
         return payFlag;
     }
 
-    public void setPayFlag(Byte payFlag) {
+    public void setPayFlag(String payFlag) {
         this.payFlag = payFlag;
     }
 

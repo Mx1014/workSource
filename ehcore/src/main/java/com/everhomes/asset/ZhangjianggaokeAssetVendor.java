@@ -89,7 +89,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             throw new RuntimeException("调用张江高科失败"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0){
-            BillCountResponse response = (BillCountResponse)StringHelper.fromJsonString(postJson, BillCountResponse.class);
+            Gson gson = new Gson();
+            BillCountResponse response = gson.fromJson(postJson, BillCountResponse.class);
+//            BillCountResponse response = (BillCountResponse)StringHelper.fromJsonString(postJson, BillCountResponse.class);
             if(response.getErrorCode()==200){
                 ContractBillsStatDTO res = response.getResponse();
                 finalDto.setBillPeriodMonths(res.getMonthsTotalOwed());
@@ -388,6 +390,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             url = ZjgkUrls.ENTERPRISE_CONTRACT_LIST;
             Organization organization = organizationProvider.findOrganizationById(cmd.getTargetId());
             identifier = organization.getNamespaceOrganizationToken();
+            if(identifier==null){
+                identifier="0a313a75-db7c-43b1-ab5e-956577ea6113";
+            }
             params.put("enterpriseIdentifier",identifier);
         }else if(targetType!=null && targetType.equals("eh_user")){
             url = ZjgkUrls.USER_CONTRACT_LIST;
@@ -604,15 +609,15 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
         String json = generateJson(params);
         String url;
+        Boolean nextFLag = true;
         if(targetType==null||targetType.trim().equals("")){
-            Boolean nextFLag = true;
             url = ZjgkUrls.SEARCH_USER_BILLS;
-            listBillOnUrls(targetType, carrier, list, json, url,"eh_organization");
+            listBillOnUrls(targetType, carrier, list, json, url,"eh_user");
             if(carrier.getNextPageAnchor()==null){
                 nextFLag = false;
             }
             url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
-            listBillOnUrls(targetType, carrier, list, json, url,"eh_user");
+            listBillOnUrls(targetType, carrier, list, json, url,"eh_organization");
             if(nextFLag==false){
                 if(carrier.getNextPageAnchor()==null){
                     carrier.setNextPageAnchor(null);
@@ -650,7 +655,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             if(response.getErrorCode()==200){
                 List<SearchEnterpriseBillsDTO> res = response.getResponse();
                 String nextPageOffset = response.getNextPageOffset();
-                carrier.setNextPageAnchor(nextPageOffset==null?null:Long.parseLong(nextPageOffset));
+                carrier.setNextPageAnchor(StringUtils.isEmpty(nextPageOffset)==true?null:Long.parseLong(nextPageOffset));
                 for(int i = 0 ; i < res.size(); i++){
                     SearchEnterpriseBillsDTO sourceDto = res.get(i);
                     ListBillsDTO dto = new ListBillsDTO();
@@ -717,8 +722,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             throw new RuntimeException("调用张江高科失败"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0) {
-            BillDetailResponse response = new BillDetailResponse();
-            response = (BillDetailResponse)StringHelper.fromJsonString(postJson, BillDetailResponse.class);
+            BillDetailResponse response = (BillDetailResponse)StringHelper.fromJsonString(postJson, BillDetailResponse.class);
+//            BillDetailResponse response = gson.fromJson(postJson, BillDetailResponse.class);
             if(response.getErrorCode()==200){
                 com.everhomes.asset.zjgkVOs.BillDetailDTO sourceDto = response.getResponse();
                 String buildingName = "";
@@ -742,6 +747,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 dto.setTargetId(sourceDto.getCustomerIdentifier());
                 dto.setTargetName(sourceDto.getCustomerName());
                 dto.setTargetType(targetType);
+                dto.setPayStatus(sourceDto.getStatus());
                 list.add(dto);
             }
         }
@@ -777,7 +783,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             }
             if (postJson != null && postJson.trim().length() > 0) {
                 BillDetailResponse response = new BillDetailResponse();
-                response = (BillDetailResponse) StringHelper.fromJsonString(postJson, BillDetailResponse.class);
+                Gson gson = new Gson();
+                response = gson.fromJson(postJson, BillDetailResponse.class);
                 if (response.getErrorCode() == 200) {
                     com.everhomes.asset.zjgkVOs.BillDetailDTO sourceDto = response.getResponse();
                     NoticeInfo no = new NoticeInfo();

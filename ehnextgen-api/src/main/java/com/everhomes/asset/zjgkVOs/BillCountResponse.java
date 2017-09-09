@@ -6,6 +6,7 @@ package com.everhomes.asset.zjgkVOs;
  */
 
 public class BillCountResponse {
+    private String version;
     private String errorScope;
     private Integer errorCode;
     private String errorDescription;
@@ -18,6 +19,14 @@ public class BillCountResponse {
 
     public void setErrorScope(String errorScope) {
         this.errorScope = errorScope;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public Integer getErrorCode() {

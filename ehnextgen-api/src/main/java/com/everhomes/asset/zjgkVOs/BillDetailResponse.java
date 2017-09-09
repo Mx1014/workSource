@@ -8,11 +8,11 @@ import java.util.List;
  */
 
 public class BillDetailResponse {
+    private String version;
     private String errorScope;
     private Integer errorCode;
     private String errorDescription;
     private String errorDetails;
-    private Integer NextPageOffset;
     private BillDetailDTO response;
 
     public String getErrorScope() {
@@ -47,13 +47,14 @@ public class BillDetailResponse {
         this.errorDetails = errorDetails;
     }
 
-    public Integer getNextPageOffset() {
-        return NextPageOffset;
+    public String getVersion() {
+        return version;
     }
 
-    public void setNextPageOffset(Integer nextPageOffset) {
-        NextPageOffset = nextPageOffset;
+    public void setVersion(String version) {
+        this.version = version;
     }
+
 
     public BillDetailDTO getResponse() {
         return response;
