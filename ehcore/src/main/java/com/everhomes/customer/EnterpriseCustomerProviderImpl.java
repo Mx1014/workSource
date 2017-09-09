@@ -51,11 +51,14 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     public void createEnterpriseCustomer(EnterpriseCustomer customer) {
         LOGGER.info("syncDataToDb create customer: {}", StringHelper.toJsonString(customer));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
+        LOGGER.info("syncDataToDb create customer id: {}", id);
         customer.setId(id);
+        LOGGER.info("syncDataToDb create customer setId");
         customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        LOGGER.info("syncDataToDb create customer setCreateTime");
         customer.setCreatorUid(UserContext.current().getUser().getId());
+        LOGGER.info("syncDataToDb create customer setCreatorUid");
         customer.setStatus(CommonStatus.ACTIVE.getCode());
-
         LOGGER.info("createEnterpriseCustomer: " + customer);
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
