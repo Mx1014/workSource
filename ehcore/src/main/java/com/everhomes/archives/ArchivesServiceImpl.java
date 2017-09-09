@@ -8,6 +8,7 @@ import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
@@ -536,6 +537,37 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
+    public void updateArchivesEmployee(UpdateArchivesEmployeeCommand cmd){
+
+        addGeneralFormValuesCommand formCommand = new addGeneralFormValuesCommand();
+        formCommand.setGeneralFormId(getRealFormOriginId(cmd.getFormOriginId()));
+        formCommand.setSourceId(cmd.getDetailId());
+        formCommand.setSourceType(GeneralFormSourceType.ARCHIVES_ATUH.getCode());
+        formCommand.setValues(cmd.getValues());
+        generalFormService.addGeneralFormValues(formCommand);
+    }
+
+    @Override
+    public GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd) {
+
+        GetArchivesEmployeeResponse response = new GetArchivesEmployeeResponse();
+
+        GetGeneralFormValuesCommand formCommand = new GetGeneralFormValuesCommand();
+        formCommand.setSourceType(GeneralFormSourceType.ARCHIVES_ATUH.getCode());
+        formCommand.setSourceId(cmd.getDetailId());
+        formCommand.setOriginFieldFlag(NormalFlag.NEED.getCode());
+        List<PostApprovalFormItem> employeeForm = generalFormService.getGeneralFormValues(formCommand);
+
+        response.setForm(employeeForm);
+/*
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        Map<String, String> valueMap = new HashMap<>();
+*/
+
+        return response;
+    }
+
+    @Override
     public ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd) {
 
         ListArchivesEmployeesResponse response = new ListArchivesEmployeesResponse();
@@ -581,17 +613,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         }).collect(Collectors.toList()));
         response.setNextPageAnchor(members.getNextPageAnchor());
         return response;
-    }
-
-    @Override
-    public GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd) {
-
-//        List<PostApprovalFormItem> employeeForm = generalFormService.getGeneralFormValues();
-
-        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-        Map<String, String> valueMap = new HashMap<>();
-
-        return null;
     }
 
     //  利用 map 设置 key 来存取值

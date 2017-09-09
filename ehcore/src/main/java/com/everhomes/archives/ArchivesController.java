@@ -140,8 +140,50 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /archives/addArchivesEmployee</b>
+     * <p>8-1.添加成员至员工档案</p>
+     */
+    @RequestMapping("addArchivesEmployee")
+    @RestReturn(value = ArchivesEmployeeDTO.class)
+    public RestResponse addArchivesEmployee(AddArchivesEmployeeCommand cmd){
+        ArchivesEmployeeDTO res = archivesService.addArchivesEmployee(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /archives/updateArchivesEmployee</b>
+     * <p>8-2.编辑员工档案</p>
+     */
+    @RequestMapping("updateArchivesEmployee")
+    @RestReturn(value = String.class)
+    public RestResponse updateArchivesEmployee(UpdateArchivesEmployeeCommand cmd){
+        archivesService.updateArchivesEmployee(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /archives/getArchivesEmployee</b>
+     * <p>8-3.获取员工档案详情</p>
+     */
+    @RequestMapping("getArchivesEmployee")
+    @RestReturn(value = GetArchivesEmployeeResponse.class)
+    public RestResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd){
+        GetArchivesEmployeeResponse res = archivesService.getArchivesEmployee(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /archives/listArchivesEmployees</b>
-     * <p>8.员工列表</p>
+     * <p>9.员工列表</p>
      */
     @RequestMapping("listArchivesEmployees")
     @RestReturn(value = ListArchivesEmployeesResponse.class)
@@ -154,36 +196,8 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /archives/addArchivesEmployee</b>
-     * <p>9.添加成员至员工档案</p>
-     */
-    @RequestMapping("addArchivesEmployee")
-    @RestReturn(value = ArchivesEmployeeDTO.class)
-    public RestResponse addArchivesEmployee(AddArchivesEmployeeCommand cmd){
-        ArchivesEmployeeDTO res = archivesService.addArchivesEmployee(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /archives/getArchivesEmployee</b>
-     * <p>10.员工档案详情</p>
-     */
-    @RequestMapping("getArchivesEmployee")
-    @RestReturn(value = GetArchivesEmployeeResponse.class)
-    public RestResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd){
-        GetArchivesEmployeeResponse res = archivesService.getArchivesEmployee(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
      * <b>URL: /archives/listArchivesDismissEmployees</b>
-     * <p>11.离职员工列表</p>
+     * <p>10.离职员工列表</p>
      */
     @RequestMapping("listArchivesDismissEmployees")
     @RestReturn(value = ListArchivesDismissEmployeesResponse.class)
@@ -197,7 +211,7 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/employArchivesEmployees</b>
-     * <p>12-1.员工批量转正</p>
+     * <p>11-1.员工批量转正</p>
      */
     @RequestMapping("employArchivesEmployees")
     @RestReturn(value = String.class)
@@ -211,7 +225,7 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/transferArchivesEmployees</b>
-     * <p>12-2.员工批量调整</p>
+     * <p>11-2.员工批量调整</p>
      */
     @RequestMapping("transferArchivesEmployees")
     @RestReturn(value = String.class)
@@ -225,7 +239,7 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/dismissArchivesEmployees</b>
-     * <p>12-3.员工批量离职</p>
+     * <p>11-3.员工批量离职</p>
      */
     @RequestMapping("dismissArchivesEmployees")
     @RestReturn(value = String.class)
@@ -239,7 +253,7 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/updateArchivesForm</b>
-     * <p>13-1.增加、修改档案字段</p>
+     * <p>12-1.增加、修改档案字段</p>
      */
     @RequestMapping("updateArchivesForm")
     @RestReturn(value = GeneralFormDTO.class)
@@ -253,7 +267,7 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/getArchivesForm</b>
-     * <p>13-2.获取档案字段</p>
+     * <p>12-2.获取档案字段</p>
      */
     @RequestMapping("getArchivesForm")
     @RestReturn(value = GetArchivesFormResponse.class)
@@ -267,7 +281,7 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/identifyArchivesForm</b>
-     * <p>13-3.识别档案表单id</p>
+     * <p>12-3.识别档案表单id</p>
      */
     @RequestMapping("identifyArchivesForm")
     @RestReturn(value = ArchivesFromsDTO.class)
@@ -281,7 +295,7 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/importArchivesEmployees</b>
-     * <p>14-1.导入人事档案成员</p>
+     * <p>13-1.导入人事档案成员</p>
      */
     @RequestMapping("importArchivesEmployees")
     @RestReturn(value = ImportFileTaskDTO.class)
@@ -295,7 +309,7 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/exportArchivesEmployees</b>
-     * <p>14-2.导出人事档案成员</p>
+     * <p>13-2.导出人事档案成员</p>
      */
     @RequestMapping("exportArchivesEmployees")
     @RestReturn(value = String.class)
@@ -306,7 +320,7 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/remindArchivesEmployee</b>
-     * <p>15.为员工做提醒设置</p>
+     * <p>14.为员工做提醒设置</p>
      */
     @RequestMapping("remindArchivesEmployee")
     @RestReturn(value = String.class)

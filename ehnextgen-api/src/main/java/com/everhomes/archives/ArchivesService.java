@@ -32,7 +32,9 @@ public interface ArchivesService {
 
     ArchivesEmployeeDTO addArchivesEmployee(AddArchivesEmployeeCommand cmd);
 
-        GetArchivesEmployeeResponse getArchivesEmployee( GetArchivesEmployeeCommand cmd);
+    void updateArchivesEmployee(UpdateArchivesEmployeeCommand cmd);
+
+    GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd);
 
     ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd);
 
