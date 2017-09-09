@@ -6,17 +6,22 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.pay.order.PaymentDTO;
 import com.everhomes.rest.order.PayMethodDTO;
+import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPaymentOrderRecordsDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentUsersDao;
 import com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords;
+import com.everhomes.server.schema.tables.pojos.EhPaymentUsers;
 import com.everhomes.server.schema.tables.records.EhPaymentAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentOrderRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentTypesRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentUsersRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,13 +92,41 @@ public class PayProviderImpl implements PayProvider {
         return sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentOrderRecords.class));
     }
 
+
     @Override
-    public List<PayMethodDTO> listPayMethods(Integer namespaceId, String orderType, String ownerType, Long ownerId, String resourceType, Long resourceId) {
+    public void createPaymentUser(PaymentUser paymentUser) {
+
+        //下预付单时，BizOrderNum需要传PaymentOrderRecords表记录的id，此处先申请id，在返回值中使用BizOrderNum做为record的id
+        if(paymentUser.getId() == null){
+            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentUsers.class));
+            paymentUser.setId(id);
+        }
+
+        if(paymentUser.getCreateTime() == null){
+            paymentUser.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        }
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentUsersDao dao = new EhPaymentUsersDao(context.configuration());
+        dao.insert(paymentUser);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentUsers.class, null);
+    }
+
+    @Override
+    public Long getNewPaymentUserId(){
+        return sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentUsers.class));
+    }
+
+    @Override
+    public List<PayMethodDTO> listPayMethods(Integer namespaceId, Integer paymentType, String orderType, String ownerType, Long ownerId, String resourceType, Long resourceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhPaymentTypesRecord>  query = context.selectQuery(Tables.EH_PAYMENT_TYPES);
 
         if(namespaceId != null){
             query.addConditions(Tables.EH_PAYMENT_TYPES.NAMESPACE_ID.eq(namespaceId));
+        }
+        if(paymentType != null){
+            query.addConditions(Tables.EH_PAYMENT_TYPES.PAYMENT_TYPE.eq(paymentType));
         }
         if(orderType != null){
             query.addConditions(Tables.EH_PAYMENT_TYPES.ORDER_TYPE.eq(orderType));
@@ -113,7 +146,10 @@ public class PayProviderImpl implements PayProvider {
         List<PayMethodDTO> payMethodDTOS = new ArrayList<>();
 
         query.fetch().map(r -> {
-            payMethodDTOS.add(ConvertHelper.convert(r, PayMethodDTO.class));
+            PayMethodDTO dto = ConvertHelper.convert(r, PayMethodDTO.class);
+            PaymentParamsDTO paymentParamsDTO = (PaymentParamsDTO)StringHelper.fromJsonString(r.getPaymentparams(), PaymentParamsDTO.class);
+            dto.setPaymentParams(paymentParamsDTO);
+            payMethodDTOS.add(dto);
             return null;
         });
 

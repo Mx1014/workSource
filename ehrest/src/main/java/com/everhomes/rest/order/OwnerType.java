@@ -11,7 +11,7 @@ public enum OwnerType {
     }
     public static OwnerType fromCode(String code) {
         for (OwnerType status : OwnerType.values()) {
-            if (status.code == code) {
+            if (status.code.equals(code) ) {
                 return status;
             }
         }

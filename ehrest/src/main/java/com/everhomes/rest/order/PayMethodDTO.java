@@ -2,9 +2,14 @@
 package com.everhomes.rest.order;
 
 /**
- * Created by Wentian Wang on 2017/9/6.
+ * <ul>
+ *     <li>paymentType: 支付方式，//1-微信APP支付,8-支付宝扫码支付,9-微信公众号支付参考{@link PaymentType}</li>
+ *     <li>paymentName: paymentName</li>
+ *     <li>paymentLogo: paymentLogo</li>
+ *     <li>paymentParams: paymentParams {@link com.everhomes.rest.order.PaymentParamsDTO}</li>
+ *     <li>extendInfo: extendInfo {@link com.everhomes.rest.order.PaymentExtendInfo}</li>
+ * </ul>
  */
-
 public class PayMethodDTO {
 
     //1-微信APP支付,8-支付宝扫码支付

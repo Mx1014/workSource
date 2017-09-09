@@ -4,6 +4,7 @@ package com.everhomes.order;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.http.HttpUtils;
@@ -11,14 +12,22 @@ import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.base.RestClient;
 import com.everhomes.pay.order.*;
 import com.everhomes.pay.rest.ApiConstants;
+import com.everhomes.pay.user.BindPhoneCommand;
+import com.everhomes.pay.user.BusinessUserType;
+import com.everhomes.pay.user.RegisterBusinessUserCommand;
+import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PaymentType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +39,11 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 @Service
@@ -53,6 +64,9 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
     @Autowired
     private CoordinationProvider coordinationProvider;
+
+    @Autowired
+    private ContentServerService contentServerService;
 
     private RestClient restClient = null;
 
@@ -93,7 +107,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
                     }
 
                     //2、检查买方是否有会员，无则创建
-                    PaymentUser paymentUser = checkAndCreatePaymentUser(cmd.getOwnerType(), cmd.getOwnerId());
+                    PaymentUser paymentUser = checkAndCreatePaymentUser(OwnerType.USER.getCode(), cmd.getPayerId());
 
                     //3、收款方是否有会员，无则报错
                     PaymentServiceConfig serviceConfig = checkPaymentService(cmd.getNamespaceId(), cmd.getOrderType(), cmd.getResourceType(), cmd.getResourceId());
@@ -110,7 +124,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
                     OrderCommandResponse orderCommandResponse = createOrder(cmd, paymentUser, serviceConfig, paymentAccount);
 
                     //6、组装支付方式
-                    preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd);
+                    preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd, serviceConfig);
 
                     //7、保存订单信息
                     saveOrderRecord(cmd, orderCommandResponse, serviceConfig);
@@ -158,19 +172,112 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     //检查买方会员，无则创建
     private PaymentUser checkAndCreatePaymentUser(String ownerType, Long ownerId){
 
+        if(ownerType == null ||ownerId == null){
+            LOGGER.error("Invalid parameter, ownerType or ownerId is null ownerType={}, ownerId={}", ownerType, ownerId);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_INVALID_USER_OWNER,
+                    "invalid user owner type");
+        }
         PaymentUser paymentUser = payProvider.findPaymentUserByOwner(ownerType, ownerId);
         if(paymentUser == null){
-            //TODO 创建用户
+            paymentUser = createPaymentUser(BusinessUserType.PERSONAL.getCode(), ownerType, ownerId);
 
         }else if(paymentUser.getOwnerType() == null || OwnerType.fromCode(paymentUser.getOwnerType()) != OwnerType.USER){
-            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_INVALID_USER_OWNER_TYPE,
+            LOGGER.error("Invalid parameter ownerType={}", paymentUser.getOwnerType());
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_INVALID_USER_OWNER,
                     "invalid user owner type");
         }
         return paymentUser;
     }
 
+    private PaymentUser createPaymentUser(int businessUserType, String ownerType, Long ownerId){
 
-    //检查卖方信息，无则报错
+        Long id = payProvider.getNewPaymentUserId();
+
+        RegisterBusinessUserRestResponse restResponse = registerPayV2User(businessUserType, id + "");
+
+        if(restResponse == null || restResponse.getErrorCode() == null || restResponse.getErrorCode() != 200 ){
+            LOGGER.error("register user fail, businessUserType={}, ownerType={}, ownerId={}", businessUserType, ownerType, ownerId);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_REGISTER_USER_FAIL,
+                    "register user fail");
+        }
+
+        Long paymentUserId = restResponse.getResponse().getId();
+        String defaultPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"default.bind.phone", "");
+        StringRestResponse bindResponse = bindPhonePayV2(paymentUserId, defaultPhone);
+
+        if(bindResponse == null || bindResponse.getErrorCode() == null || bindResponse.getErrorCode() != 200 ){
+            LOGGER.error("bind phone fail, businessUserType={}, ownerType={}, ownerId={}, phone={}", businessUserType, ownerType, ownerId, defaultPhone);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_BIND_PHONE_FAIL,
+                    "bind phone fail");
+        }
+
+        PaymentUser paymentUser = new PaymentUser();
+        paymentUser.setId(id);
+        paymentUser.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        paymentUser.setOwnerType(ownerType);
+        paymentUser.setOwnerId(ownerId);
+        paymentUser.setPaymentUserType(businessUserType);
+        paymentUser.setPaymentUserId(paymentUserId);
+        payProvider.createPaymentUser(paymentUser);
+        return paymentUser;
+    }
+
+    /**
+     * 去支付系统创建用户
+     * @param paymentUserId
+     * @param phone
+     * @throws Exception
+     */
+    private StringRestResponse bindPhonePayV2(Long paymentUserId, String phone){
+        BindPhoneCommand cmd = new BindPhoneCommand();
+        cmd.setPhone(phone);
+        cmd.setUserId(paymentUserId);
+
+        if(LOGGER.isDebugEnabled()) {LOGGER.debug("bindPhonePayV2-command=" + GsonUtil.toJson(cmd));}
+        StringRestResponse response = restClient.restCall(
+                "POST",
+                ApiConstants.MEMBER_BINDPHONE_URL,
+                cmd,
+                StringRestResponse.class);
+        if(LOGGER.isDebugEnabled()) {LOGGER.debug("bindPhonePayV2-response=" + GsonUtil.toJson(response));}
+
+        return response;
+
+    }
+
+    /**
+     * 去支付系统创建用户
+     * @param businessUserType
+     * @param bizUserId
+     * @return
+     * @throws Exception
+     */
+    private RegisterBusinessUserRestResponse registerPayV2User(Integer businessUserType, String bizUserId){
+
+        RegisterBusinessUserCommand cmd = new RegisterBusinessUserCommand();
+        cmd.setBizSystemId(SYSTEMID);
+        cmd.setUserType(businessUserType);
+        cmd.setBizUserId(bizUserId);
+
+        if(LOGGER.isDebugEnabled()) {LOGGER.debug("registerPayV2User-command=" + GsonUtil.toJson(cmd));}
+        RegisterBusinessUserRestResponse response = restClient.restCall(
+                "POST",
+                ApiConstants.MEMBER_REGISTERBUSINESSUSER_URL,
+                cmd,
+                RegisterBusinessUserRestResponse.class);
+        if(LOGGER.isDebugEnabled()) {LOGGER.debug("createOrderPayV2-response=" + GsonUtil.toJson(response));}
+        return response;
+    }
+
+
+    /**
+     * 检查卖方信息，无则报错
+     * @param namespaceId
+     * @param orderType
+     * @param resourceType
+     * @param resourceId
+     * @return
+     */
     private PaymentServiceConfig checkPaymentService(Integer namespaceId, String orderType, String resourceType, Long resourceId){
 
         PaymentServiceConfigHandler handler = getServiceConfigHandler(orderType);
@@ -206,21 +313,16 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         //组装参数
         CreateOrderCommand createOrderCommand = newCreateOrderCommand(preOrderCommand, paymentUser, serviceConfig, paymentAccount);
 
-        OrderCommandResponse response = null;
+        CreateOrderRestResponse createOrderResp = createOrderPayV2(createOrderCommand);
 
-        try {
-
-            CreateOrderRestResponse createOrderResp = createOrderPayV2(createOrderCommand);
-            if(!createOrderResp.getErrorCode().equals(200)) {
-                LOGGER.error("create order fail");
-                throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
-                        "create order fail");
-            }
-            response = createOrderResp.getResponse();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(!createOrderResp.getErrorCode().equals(200)) {
+            LOGGER.error("create order fail");
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+                    "create order fail");
         }
+
+        OrderCommandResponse  response = createOrderResp.getResponse();
+
         return response;
     }
 
@@ -275,7 +377,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         return createOrderCmd;
     }
 
-    private CreateOrderRestResponse createOrderPayV2(CreateOrderCommand cmd) throws Exception {
+    private CreateOrderRestResponse createOrderPayV2(CreateOrderCommand cmd){
         if(LOGGER.isDebugEnabled()) {LOGGER.debug("createOrderPayV2-command=" + GsonUtil.toJson(cmd));}
         CreateOrderRestResponse response = restClient.restCall(
                 "POST",
@@ -305,35 +407,40 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     private PreOrderDTO recordToDto(PaymentOrderRecord record, PreOrderCommand cmd){
         PreOrderDTO dto = ConvertHelper.convert(record, PreOrderDTO.class);
 
+        PaymentServiceConfig service = checkPaymentService(cmd.getNamespaceId(), cmd.getOrderType(), cmd.getResourceType(), cmd.getResourceId());
         dto.setAmount(cmd.getAmount());
         dto.setExtendInfo(cmd.getExtendInfo());
 
-        List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getOrderType(),
-                cmd.getOwnerType(), cmd.getOwnerId(), cmd.getResourceType(), cmd.getResourceId());
+        List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getPaymentType(), cmd.getPaymentParams(), service);
         dto.setPayMethod(payMethods);
         return dto;
     }
 
-    private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
+    private PreOrderDTO orderCommandResponseToDto(OrderCommandResponse orderCommandResponse, PreOrderCommand cmd, PaymentServiceConfig service){
         PreOrderDTO dto = ConvertHelper.convert(orderCommandResponse, PreOrderDTO.class);
         dto.setAmount(cmd.getAmount());
-        List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getOrderType(),
-                cmd.getOwnerType(), cmd.getOwnerId(), cmd.getResourceType(), cmd.getResourceId());
+        List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getPaymentType(), cmd.getPaymentParams(), service);
         dto.setPayMethod(payMethods);
         return dto;
     }
 
-    private List<PayMethodDTO> listPayMethods(Integer namespaceId, String orderType, String ownerType, Long ownerId, String resourceType, Long resourceId){
-        List<PayMethodDTO> payMethods = payProvider.listPayMethods(namespaceId, orderType, ownerType, ownerId, resourceType, resourceId);
+    private List<PayMethodDTO> listPayMethods(Integer namespaceId, Integer paymentType, PaymentParamsDTO paramsDTO, PaymentServiceConfig service){
+
+        List<PayMethodDTO> payMethods = payProvider.listPayMethods(namespaceId, paymentType, service.getOrderType(),
+                service.getOwnerType(), service.getOwnerId(), service.getResourceType(), service.getResourceId());
+
         if(payMethods != null && payMethods.size() > 0){
             for(PayMethodDTO r : payMethods) {
                 PaymentExtendInfo extendInfo = new PaymentExtendInfo();
                 extendInfo.setGetOrderInfoUrl(getPayMethodExtendInfo());
                 r.setExtendInfo(extendInfo);
-
-                //TODO paymentParams和Logo暂时不管了
-                //r.setPaymentParams();
-                //r.setPaymentLogo(imageUtil.populateToImageUrl(payMethodDto.getPaymentLogo(), ResourceConfigName.APP_USER_PAYMENT_TYPE_LOGO));
+                //微信公众号支付时，acct原样返回
+                if(PaymentType.fromCode(r.getPaymentType()) == PaymentType.WECHAT_JS){
+                    r.getPaymentParams().setAcct(paramsDTO.getAcct());
+                }
+                //转化为可以访问的url
+                String url = contentServerService.parserUri(r.getPaymentLogo());
+                r.setPaymentLogo(url);
             }
         }
 
@@ -362,6 +469,22 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
         String format = "{\"getOrderInfoUrl\":\"%s\"}";
         return String.format(format, payV2HomeUrl+getOrderInfoUri);
+    }
+
+
+    /**
+     * 获得特定长度的一串随机数字
+     * @param length
+     * @return
+     * @throws
+     */
+    public static String getRandomNumberStr(int length){
+        StringBuilder builder = new StringBuilder();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        for(int i = 0 ; i < length; i++){
+            builder.append(random.nextInt(10));
+        }
+        return builder.toString();
     }
 
 }

@@ -40,8 +40,8 @@ public class PreOrderCommand {
     @NotNull
     private Integer namespaceId;
 
-    private String ownerType;
-    private Long ownerId;
+//    private String ownerType;
+//    private Long ownerId;
     private String resourceType;
     private Long resourceId;
     private String openid;
@@ -100,21 +100,21 @@ public class PreOrderCommand {
         this.namespaceId = namespaceId;
     }
 
-    public String getOwnerType() {
-        return ownerType;
-    }
-
-    public void setOwnerType(String ownerType) {
-        this.ownerType = ownerType;
-    }
-
-    public Long getOwnerId() {
-        return ownerId;
-    }
-
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
-    }
+//    public String getOwnerType() {
+//        return ownerType;
+//    }
+//
+//    public void setOwnerType(String ownerType) {
+//        this.ownerType = ownerType;
+//    }
+//
+//    public Long getOwnerId() {
+//        return ownerId;
+//    }
+//
+//    public void setOwnerId(Long ownerId) {
+//        this.ownerId = ownerId;
+//    }
 
     public String getResourceType() {
         return resourceType;

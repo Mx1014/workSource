@@ -6,7 +6,8 @@ import com.everhomes.rest.order.PayMethodDTO;
 import java.util.List;
 
 /**
- * Created by Wentian on 2017/9/7.
+ * <ul>
+ * </ul>
  */
 public interface PayProvider {
     PaymentOrderRecord findOrderRecordByOrder(String orderType, Long orderId);
@@ -19,5 +20,9 @@ public interface PayProvider {
 
     Long getNewPaymentOrderRecordId();
 
-    List<PayMethodDTO> listPayMethods(Integer namespaceId, String orderType, String ownerType, Long ownerId, String resourceType, Long resourceId);
+    void createPaymentUser(PaymentUser paymentUser);
+
+    Long getNewPaymentUserId();
+
+    List<PayMethodDTO> listPayMethods(Integer namespaceId, Integer paymentType, String orderType, String ownerType, Long ownerId, String resourceType, Long resourceId);
 }
