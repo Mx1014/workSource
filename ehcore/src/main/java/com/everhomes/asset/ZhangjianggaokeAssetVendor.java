@@ -9,6 +9,7 @@ import com.everhomes.http.HttpUtils;
 import com.everhomes.oauth2client.HttpResponseEntity;
 import com.everhomes.oauth2client.handler.RestCallTemplate;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.recommend.RecommendationService;
 import com.everhomes.rest.asset.*;
@@ -390,8 +391,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             params.put("enterpriseIdentifier",identifier);
         }else if(targetType!=null && targetType.equals("eh_user")){
             url = ZjgkUrls.USER_CONTRACT_LIST;
-            User user = UserContext.current().getUser();
-            identifier = user.getIdentifierToken();
+            identifier = assetProvider.findIdentifierByUid(UserContext.currentUserId());
+            //测试
+            identifier = "18616759112";
             params.put("userMobile",identifier);
         }else{
             throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
