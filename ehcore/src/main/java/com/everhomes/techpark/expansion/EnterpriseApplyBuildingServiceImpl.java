@@ -223,7 +223,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 	private void processDetailUrl(LeaseBuildingDTO dto) {
 		String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
-		String detailUrl = configProvider.getValue(ConfigConstants.APPLY_ENTRY_BUILDING_DETAIL_URL, "");
+		String detailUrl = configProvider.getValue(ConfigConstants.APPLY_ENTRY_LEASE_BUILDING_DETAIL_URL, "");
 
 		detailUrl = String.format(detailUrl, dto.getId());
 
