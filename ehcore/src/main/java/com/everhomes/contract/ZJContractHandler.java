@@ -511,8 +511,12 @@ public class ZJContractHandler implements ContractService{
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("post to shenzhou, method: {}, params: {}", shenzhouUrl + method, StringHelper.toJsonString(params));
             }
+            Long beforeRequest = System.currentTimeMillis();
             json = HttpUtils.postJson(shenzhouUrl + method, StringHelper.toJsonString(params), 30, HTTP.UTF_8);
-
+            Long afterRequest = System.currentTimeMillis();
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("request shenzhou url: {}, total elapse: {}", shenzhouUrl + method, afterRequest-beforeRequest);
+            }
         } catch (Exception e) {
             LOGGER.error("sync from shenzhou request error, param={}", params, e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
