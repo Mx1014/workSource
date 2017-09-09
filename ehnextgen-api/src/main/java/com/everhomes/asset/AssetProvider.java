@@ -138,4 +138,6 @@ public interface AssetProvider {
     Long findOrganizationIdByIdentifier(String targetId);
 
     AssetVendor findAssetVendorByNamespace(Integer namespaceId);
+
+    String findIdentifierByUid(Long aLong);
 }

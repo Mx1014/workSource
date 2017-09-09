@@ -23,6 +23,7 @@ import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
 import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
+import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -1734,6 +1735,16 @@ public class AssetProviderImpl implements AssetProvider {
         }else{
             return null;
         }
+    }
+
+    @Override
+    public String findIdentifierByUid(Long aLong) {
+        DSLContext con = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhUserIdentifiers t = Tables.EH_USER_IDENTIFIERS.as("t");
+        return con.select(t.IDENTIFIER_TOKEN)
+                .from(t)
+                .where(t.OWNER_UID.eq(aLong))
+                .fetchOne(0,String.class);
     }
 
 }

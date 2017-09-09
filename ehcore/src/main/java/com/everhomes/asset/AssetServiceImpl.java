@@ -1022,6 +1022,7 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vendor = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendor);
+//        ZhangjianggaokeAssetVendor handler = new ZhangjianggaokeAssetVendor();
         return handler.findUserInfoForPayment(cmd);
 
     }
