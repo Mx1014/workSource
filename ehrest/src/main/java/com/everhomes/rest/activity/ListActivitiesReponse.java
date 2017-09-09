@@ -5,7 +5,6 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 /**
  * 
- * @author elians
  *<ul>
  *<li>nextPageAnchor:下一页</li>
  *<li>activities: 活动列表</li>
