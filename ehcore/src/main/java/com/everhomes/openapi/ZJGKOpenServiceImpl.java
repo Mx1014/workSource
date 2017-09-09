@@ -21,10 +21,7 @@ import com.everhomes.http.HttpUtils;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.organization.*;
-import com.everhomes.organization.pm.CommunityAddressMapping;
-import com.everhomes.organization.pm.OrganizationOwnerAddress;
-import com.everhomes.organization.pm.OrganizationOwnerType;
-import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.*;
 import com.everhomes.pmtask.ebei.EbeiJsonEntity;
 import com.everhomes.pmtask.ebei.EbeiResult;
 import com.everhomes.region.Region;
@@ -46,15 +43,14 @@ import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
 import com.everhomes.rest.techpark.expansion.LeasePromotionType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.search.CommunitySearcher;
+import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.search.PMOwnerSearcher;
 import com.everhomes.server.schema.tables.pojos.EhZjSyncdataBackup;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeasePromotion;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
+import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.http.HttpEntity;
@@ -170,6 +166,12 @@ public class ZJGKOpenServiceImpl {
 
     @Autowired
     private PropertyMgrProvider propertyMgrProvider;
+
+    @Autowired
+    private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
+
+    @Autowired
+    private PMOwnerSearcher pmOwnerSearcher;
 
 
     public void syncData() {
@@ -452,10 +454,13 @@ public class ZJGKOpenServiceImpl {
             }
 
             List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, dataType);
+
             if (backupList == null || backupList.isEmpty()) {
+                LOGGER.debug("backupList is empty, NAMESPACE_ID: {}, dataType: {}", NAMESPACE_ID, dataType);
                 return ;
             }
             try {
+                LOGGER.debug("backupList size：{}", backupList.size());
                 updateAllDate(dataType, allFlag, NAMESPACE_ID , backupList);
             } finally {
                 zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
@@ -490,6 +495,7 @@ public class ZJGKOpenServiceImpl {
     private void updateAllDate(Byte dataType, Byte allFlag, Integer namespaceId,
                                List<ZjSyncdataBackup> backupList) {
         DataType zjDataType = DataType.fromCode(dataType);
+        LOGGER.debug("zjDataType : {}", zjDataType);
         switch (zjDataType) {
             case COMMUNITY:
                 syncAllCommunities(namespaceId, backupList);
@@ -501,6 +507,7 @@ public class ZJGKOpenServiceImpl {
                 syncAllApartments(namespaceId, backupList);
                 break;
             case ENTERPRISE:
+                LOGGER.debug("SYNC ENTERPRISE");
                 syncAllEnterprises(namespaceId, backupList, allFlag);
                 break;
             case APARTMENT_LIVING_STATUS:
@@ -1263,6 +1270,7 @@ public class ZJGKOpenServiceImpl {
             Organization organization = insertOrganization(customer);
             customer.setOrganizationId(organization.getId());
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
 
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
@@ -1412,6 +1420,7 @@ public class ZJGKOpenServiceImpl {
             customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             customer.setStatus(CommonStatus.INACTIVE.getCode());
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
         }
 
         DeleteOrganizationIdCommand deleteOrganizationIdCommand = new DeleteOrganizationIdCommand();
@@ -1457,6 +1466,7 @@ public class ZJGKOpenServiceImpl {
         customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
 
         //查找对应的企业账号
         Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
@@ -1655,6 +1665,9 @@ public class ZJGKOpenServiceImpl {
         customer.setNamespaceCustomerType(NamespaceCustomerType.SHENZHOU.getCode());
         customer.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
         organizationProvider.updateOrganizationOwner(customer);
+
+        CommunityPmOwner communityPmOwner = ConvertHelper.convert(customer, CommunityPmOwner.class);
+        pmOwnerSearcher.feedDoc(communityPmOwner);
 
         insertOrUpdateOrganizationOwnerAddresses(zjIndividual.getCommunityId(), zjIndividual.getAddressList(), customer);
     }
