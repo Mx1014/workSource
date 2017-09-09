@@ -59,7 +59,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         customer.setStatus(CommonStatus.ACTIVE.getCode());
         LOGGER.info("createEnterpriseCustomer: " + customer);
 
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         dao.insert(customer);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseCustomers.class, null);
@@ -77,7 +78,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         LOGGER.info("syncDataToDb create customer setCreateTime");
 
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         dao.insert(customer);
         LOGGER.info("createEnterpriseCustomer: " + customer);
