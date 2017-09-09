@@ -29,6 +29,7 @@ import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.yellowPage.*;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.user.*;
 import com.everhomes.util.DateHelper;
 import org.apache.poi.ss.usermodel.Font;
@@ -207,7 +208,8 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
                 }
             }
             request.setCreatorMobile(identifier.getIdentifierToken());
-            if (OwnerType.COMMUNITY.getCode().equals(flowCase.getProjectType())){
+            if (EntityType.COMMUNITY.getCode().equals(flowCase.getProjectType()) || "community".equals(flowCase.getProjectType())
+                    || EhCommunities.class.getName().equals(flowCase.getProjectType())){
                 request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
                 List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
                 request.setOwnerId(communityList.get(0).getId());
@@ -220,6 +222,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             request.setCreatorUid(user.getId());
             request.setTemplateType("flowCase");
             feedDoc(request);
+            LOGGER.debug("request = "+request);
         }
     }
 

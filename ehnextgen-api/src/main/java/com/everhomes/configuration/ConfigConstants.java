@@ -104,6 +104,8 @@ public interface ConfigConstants {
 
     String APPLY_ENTRY_BUILDING_DETAIL_URL = "apply.entry.building.detail.url";
 
+    String APPLY_ENTRY_LEASE_BUILDING_DETAIL_URL = "apply.entry.lease.building.detail.url";
+
     String APP_ROUTE_BROWSER_OUTER_URI = "app.route.browser.outer.uri";
 
     String APP_ROUTE_BROWSER_INNER_URI = "app.route.browser.inner.uri";

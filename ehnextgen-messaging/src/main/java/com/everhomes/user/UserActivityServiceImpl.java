@@ -1397,7 +1397,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         gm.setNamespaceId(UserContext.getCurrentNamespaceId());
         gm.setOrganizationId(cmd.getCreatorOrganizationId());
         gm.setProjectId(cmd.getOwnerId());
-        gm.setProjectType(EhCommunities.class.getName());
+        gm.setProjectType(EntityType.COMMUNITY.getCode());
         gm.setOwnerType(FlowOwnerType.CUSTOM_REQUEST.getCode());
         gm.setOwnerId(template.getId());
         gm.setModuleId(40500l);//服务联盟id

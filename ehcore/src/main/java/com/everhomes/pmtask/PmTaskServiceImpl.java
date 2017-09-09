@@ -2570,10 +2570,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTask task = list.get(0);
 
 		PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
-		Byte state = cmd.getStateId();
+		//TODO  枚举值更新
+		Byte state = cmd.getStateId()==6?PmTaskStatus.INACTIVE.getCode():cmd.getStateId();
+
 		dbProvider.execute((TransactionStatus status) -> {
 
-			task.setStatus(state > PmTaskStatus.PROCESSED.getCode() ? PmTaskStatus.PROCESSED.getCode() : state);
+			task.setStatus(state > PmTaskStatus.PROCESSED.getCode() &&  state<PmTaskStatus.INACTIVE.getCode()
+					? PmTaskStatus.PROCESSED.getCode(): state );
 			pmTaskProvider.updateTask(task);
 			dto.setStatus(task.getStatus());
 

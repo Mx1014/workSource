@@ -851,6 +851,11 @@ public class AssetServiceImpl implements AssetService {
         //define the end of the date the calculation should take as multiply
         Calendar c5 = Calendar.getInstance();
         //first to check if the whole period is less than one month
+
+        Calendar c7 = Calendar.getInstance();
+        Calendar c8 = Calendar.getInstance();
+//        c7.setTime(c1.getTime());
+//        c8.setTime(c8.getTime());
         if(c1.get(Calendar.YEAR)==c2.get(Calendar.YEAR)&&c1.get(Calendar.MONTH)==c2.get(Calendar.MONTH)){
             duration = ((float)c2.get(Calendar.DAY_OF_MONTH)-(float)c1.get(Calendar.DAY_OF_MONTH)+1f)/(float)c1.getActualMaximum(Calendar.DAY_OF_MONTH);
             c5.setTime(c2.getTime());
@@ -1001,6 +1006,7 @@ public class AssetServiceImpl implements AssetService {
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillExpectanciesOnContract(cmd);
+
     }
 
     @Override
