@@ -10,7 +10,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contract.ContractService;
+//import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -170,8 +170,8 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private SequenceProvider sequenceProvider;
 
-    @Autowired
-    private ContractService contractService;
+//    @Autowired
+//    private ContractService contractService;
 
     @Autowired
     private UserService userService;

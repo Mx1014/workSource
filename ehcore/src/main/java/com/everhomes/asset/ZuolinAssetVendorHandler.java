@@ -2,6 +2,7 @@ package com.everhomes.asset;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -66,8 +67,8 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     @Autowired
     private AssetService assetService;
 
-    @Autowired
-    private ContractService contractService;
+//    @Autowired
+//    private ContractService contractService;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -336,6 +337,9 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         }else{
             throw new RuntimeException("用户类型错误");
         }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+        ContractService contractService = PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
         List<ContractDTO> dtos = contractService.listCustomerContracts(cmd1);
         for(int i = 0; i < dtos.size(); i++){
             FindUserInfoForPaymentDTO dto = new FindUserInfoForPaymentDTO();
@@ -377,6 +381,9 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         GetAreaAndAddressByContractDTO dto = new GetAreaAndAddressByContractDTO();
         List<String> addressNames = new ArrayList<>();
         Double areaSize = 0d;
+        Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+        ContractService contractService = PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
         ContractDetailDTO contract = contractService.findContract(cmd);
         List<BuildingApartmentDTO> apartments = contract.getApartments();
         for(int i = 0; i < apartments.size(); i++) {
