@@ -7021,6 +7021,10 @@ public class PunchServiceImpl implements PunchService {
 				(punchTimeLong > (intervals.get(intervals.size()-1).getLeaveTimeLong()+timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS)))){
 			result.setPunchType(PunchType.NOT_WORKTIME.getCode());
 			result.setPunchIntervalNo(PunchIntervalNo);
+
+			if(punchTimeLong < (ptr.getStartEarlyTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)))){
+				result.setExpiryTime(ptr.getStartEarlyTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)));
+			}
 			return result ;
 		}
 
@@ -7135,6 +7139,10 @@ public class PunchServiceImpl implements PunchService {
 				(punchTimeLong > (ptr.getStartLateTimeLong()+ptr.getWorkTimeLong()+timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS)))){
 			result.setPunchType(PunchType.NOT_WORKTIME.getCode());
 			result.setPunchIntervalNo(PunchIntervalNo);
+
+			if(punchTimeLong < (ptr.getStartEarlyTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)))){
+				result.setExpiryTime(ptr.getStartEarlyTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)));
+			}
 			return result ;
 		}
 		//如果在在最早上班打卡之后 下午上班之前
@@ -7234,6 +7242,9 @@ public class PunchServiceImpl implements PunchService {
 		}else{
 			//不在时间范围内无法打卡
 			result.setPunchType(PunchType.NOT_WORKTIME.getCode());
+			if(punchTimeLong < (ptr.getStartEarlyTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)))){
+				result.setExpiryTime(ptr.getStartEarlyTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)));
+			}
 			return result ;
 		}
 	}
