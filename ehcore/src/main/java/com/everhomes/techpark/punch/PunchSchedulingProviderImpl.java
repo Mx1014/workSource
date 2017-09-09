@@ -223,4 +223,17 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 		LOGGER.debug(step.toString());
 		step.execute();
 	}
+
+	@Override
+	public void deletePunchSchedulingByPunchRuleIdAndNotInTarget(Long prId, List<Long> detailIds) {
+
+		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchSchedulingsRecord> step = context.delete(Tables.EH_PUNCH_SCHEDULINGS);
+		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.notIn(detailIds)
+				.and(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(prId)) ;
+		step.where(condition);
+		LOGGER.debug(step.toString());
+		step.execute();
+
+	}
 }

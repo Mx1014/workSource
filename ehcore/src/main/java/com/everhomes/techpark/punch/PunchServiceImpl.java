@@ -6602,7 +6602,7 @@ public class PunchServiceImpl implements PunchService {
 			detailIds.add(employee.getDetailId());
 						//删除被踢出考勤组的人的设置 -- 排班
 		}
-		punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndTarget(pr.getId(),detailIds);
+		punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndNotInTarget(pr.getId(),detailIds);
 
 		//打卡地点和wifi
         saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
