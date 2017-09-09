@@ -26,6 +26,7 @@ import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -83,6 +84,9 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public ListContractsResponse listContracts(ListContractsCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("zjgk listContracts. cmd:{}", cmd);
+        }
         String contractStatus  = convertContractStatus(cmd.getStatus());
         String contractAttribute = convertContractAttribute(cmd.getContractType());
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
@@ -110,6 +114,9 @@ public class ZJContractHandler implements ContractService{
         if(contracts != null && contracts.size() > 0) {
             List<ContractDTO> dtos = contracts.stream().map(contract -> {
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
+                if(dto.getContractNumber() == null) {
+                    dto.setContractNumber(contract.getName());
+                }
                 dto.setBuildings(contract.getApartments());
                 dto.setContractStartDate(strToTimestamp(contract.getContractStartDate()));
                 dto.setContractEndDate(strToTimestamp(contract.getContractEndDate()));
@@ -161,6 +168,9 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public ContractDetailDTO findContract(FindContractCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("zjgk findContract. cmd:{}", cmd);
+        }
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
         if(community != null) {
             String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
@@ -202,6 +212,9 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public List<ContractDTO> listCustomerContracts(ListCustomerContractsCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("zjgk listCustomerContracts. cmd:{}", cmd);
+        }
         UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(cmd.getTargetId(), cmd.getNamespaceId());
         if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
             ListIndividualCustomerContractsCommand command = new ListIndividualCustomerContractsCommand();
@@ -226,6 +239,7 @@ public class ZJContractHandler implements ContractService{
 
     private ContractDetailDTO convertZJContractDetailToContractDetailDTO(ZJContractDetail zjContract) {
         ContractDetailDTO dto = new ContractDetailDTO();
+        dto.setPartyAId(0L);
         dto.setContractNumber(zjContract.getContractNum());
         dto.setCustomerName(zjContract.getLessee());
         dto.setRentSize(zjContract.getAreaSize());
@@ -301,21 +315,22 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public List<ContractDTO> listEnterpriseCustomerContracts(ListEnterpriseCustomerContractsCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("zjgk listEnterpriseCustomerContracts. cmd:{}", cmd);
+        }
         EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(cmd.getEnterpriseCustomerId());
         if(enterpriseCustomer != null) {
             String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
             String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
             Map<String, String> params= new HashMap<String,String>();
             params.put("appKey", appKey);
-//            params.put("timestamp", ""+System.currentTimeMillis());
-//            params.put("nonce", ""+(long)(Math.random()*100000));
-//            params.put("crypto", "sssss");
-            params.put("timestamp", "1504681998261");
-            params.put("nonce", "57903");
+            params.put("timestamp", ""+System.currentTimeMillis());
+            params.put("nonce", ""+(long)(Math.random()*100000));
             params.put("crypto", "sssss");
             params.put("pageOffset", "0");
             params.put("pageSize", "");
-            params.put("enterpriseIdentifier", enterpriseCustomer.getNamespaceCustomerToken());
+            String enterpriseIdentifier = enterpriseCustomer.getNamespaceCustomerToken() == null ? "" : enterpriseCustomer.getNamespaceCustomerToken();
+            params.put("enterpriseIdentifier", enterpriseIdentifier);
             String signature = SignatureHelper.computeSignature(params, secretKey);
             params.put("signature", signature);
             String contracts = postToShenzhou(params, LIST_CONTRACTS_BY_ENTERPRISE, null);
@@ -334,6 +349,9 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public List<ContractDTO> listIndividualCustomerContracts(ListIndividualCustomerContractsCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("zjgk listIndividualCustomerContracts. cmd:{}", cmd);
+        }
         String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
         String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
         Map<String, String> params= new HashMap<String,String>();
@@ -402,10 +420,16 @@ public class ZJContractHandler implements ContractService{
         params.put("nonce", ""+(long)(Math.random()*100000));
         params.put("crypto", "sssss");
         params.put("contractNum", "");
+        if(communityIdentifier==null) {
+            communityIdentifier = "";
+        }
         params.put("communityIdentifier", communityIdentifier);
         params.put("contractStatus", contractStatus);
         params.put("contractAttribute", contractAttribute);
         params.put("category", category);
+        if(customerName == null) {
+            customerName = "";
+        }
         params.put("customerName", customerName);
         params.put("pageOffset", pageOffset);
         params.put("pageSize", pageSize);
@@ -441,7 +465,9 @@ public class ZJContractHandler implements ContractService{
         ContractStatus contractStatus = ContractStatus.fromStatus(status);
         if(contractStatus != null) {
             switch (contractStatus) {
-                case ACTIVE: return "执行中";
+                case ACTIVE:
+                case EXPIRING:
+                    return "执行中";
                 case WAITING_FOR_APPROVAL: return "审核中";
                 case EXPIRED: return "已到期";
                 case HISTORY: return "终止";
@@ -482,6 +508,9 @@ public class ZJContractHandler implements ContractService{
         String json = null;
 
         try {
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("post to shenzhou, method: {}, params: {}", shenzhouUrl + method, StringHelper.toJsonString(params));
+            }
             json = HttpUtils.postJson(shenzhouUrl + method, StringHelper.toJsonString(params), 30, HTTP.UTF_8);
 
         } catch (Exception e) {

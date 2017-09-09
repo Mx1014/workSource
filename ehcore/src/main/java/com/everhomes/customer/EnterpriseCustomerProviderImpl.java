@@ -734,6 +734,15 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public Long countCertificatesByCustomerIds(List<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectCount().from(Tables.EH_CUSTOMER_CERTIFICATES)
+                .where(Tables.EH_CUSTOMER_CERTIFICATES.CUSTOMER_ID.in(customerIds))
+                .and(Tables.EH_CUSTOMER_CERTIFICATES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .fetchAnyInto(Long.class);
+    }
+
+    @Override
     public void updateCustomerApplyProject(CustomerApplyProject project) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerApplyProjects.class, project.getId()));
         EhCustomerApplyProjectsDao dao = new EhCustomerApplyProjectsDao(context.configuration());
