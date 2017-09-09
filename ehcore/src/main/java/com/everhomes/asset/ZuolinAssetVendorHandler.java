@@ -7,6 +7,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contract.ContractService;
+import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.asset.*;
@@ -20,17 +21,17 @@ import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserProvider;
+import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.ExcelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
+import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -69,6 +70,12 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
 //    @Autowired
 //    private ContractService contractService;
+
+    @Autowired
+    private DbProvider dbProvider;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -398,6 +405,162 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         dto.setAddressNames(addressNames);
         dto.setAreaSizesSum(String.valueOf(areaSize));
         return dto;
+    }
+
+    @Override
+    public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
+        ListBillDetailVO vo = assetProvider.listBillDetail(cmd.getBillId());
+        ListBillDetailResponse response = ConvertHelper.convert(vo, ListBillDetailResponse.class);
+        List<ExemptionItemDTO> dtos = response.getBillGroupDTO().getExemptionItemDTOList();
+        for(int i = 0; i< dtos.size(); i ++) {
+            ExemptionItemDTO dto = dtos.get(i);
+            if(dto.getAmount().compareTo(new BigDecimal("0"))==-1) {
+                dto.setIsPlus((byte)0);
+                dto.setAmount(dto.getAmount().divide(new BigDecimal("-1")));
+            }else{
+                dto.setIsPlus((byte)1);
+            }
+        }
+        return response;
+    }
+
+    @Override
+    public void deleteBill(String l) {
+        assetProvider.deleteBill(Long.parseLong(l));
+    }
+
+    @Override
+    public void deleteBillItem(BillItemIdCommand cmd) {
+        this.dbProvider.execute((TransactionStatus status) ->{
+            PaymentBillItems billItem = assetService.findBillItemById(cmd.getBillItemId());
+            assetService.deleteBill(billItem);
+            assetProvider.deleteBillItem(cmd.getBillItemId());
+            return null;
+        });
+    }
+
+    @Override
+    public void deletExemptionItem(ExemptionItemIdCommand cmd) {
+        this.dbProvider.execute((TransactionStatus status) ->{
+            PaymentExemptionItems exemItem = assetService.findExemptionItemById(cmd.getExemptionItemId());
+            assetService.deleteBill(exemItem);
+            assetProvider.deletExemptionItem(cmd.getExemptionItemId());
+            return null;
+        });
+
+    }
+
+    @Override
+    public ShowCreateBillDTO showCreateBill(Long billGroupId) {
+        return assetProvider.showCreateBill(billGroupId);
+    }
+
+    @Override
+    public ListBillsDTO createBill(CreateBillCommand cmd) {
+        if(!cmd.getOwnerType().equals("community")){
+            throw new RuntimeException("保存账单不在一个园区");
+        }
+        TargetDTO targetDto = userService.findTargetByNameAndAddress(cmd.getContractNum(), cmd.getTargetName(), cmd.getOwnerId(), cmd.getNoticeTel(), cmd.getOwnerType(), cmd.getTargetType());
+        if(targetDto!=null){
+            cmd.setContractId(targetDto.getContractId());
+            cmd.setTargetId(targetDto.getTargetId());
+        }
+//        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
+        return assetProvider.creatPropertyBill(cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getContractNum(),cmd.getContractId());
+    }
+
+    @Override
+    public void modifyBillStatus(BillIdCommand cmd) {
+        assetProvider.modifyBillStatus(Long.parseLong(cmd.getBillId()));
+    }
+
+    @Override
+    public ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
+        ListSettledBillExemptionItemsResponse response = new ListSettledBillExemptionItemsResponse();
+
+        if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
+            cmd.setPageAnchor(0l);
+        }
+        if(cmd.getPageSize() == null){
+            cmd.setPageSize(20);
+        }
+        int pageOffSet = cmd.getPageAnchor().intValue();
+        List<ListBillExemptionItemsDTO> list = assetProvider.listBillExemptionItems(cmd.getBillId(),pageOffSet,cmd.getPageSize(),cmd.getDateStr(),cmd.getTargetName());
+        for(int i = 0; i < list.size(); i++){
+            ListBillExemptionItemsDTO dto = list.get(i);
+            if(dto.getAmount().compareTo(new BigDecimal("0"))==-1){
+                dto.setIsPlus((byte)0);
+            }else if(dto.getAmount().compareTo(new BigDecimal("0"))==1 || dto.getAmount().compareTo(new BigDecimal("0"))==0){
+                dto.setIsPlus((byte)1);
+            }
+        }
+        if(list.size() <= cmd.getPageSize()) {
+//            response.setNextPageAnchor(0l);
+        }else{
+            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+            list.remove(list.size()-1);
+        }
+        response.setBillDTOS(list);
+        return response;
+    }
+
+    @Override
+    public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
+        List<BillStaticsDTO> list = new ArrayList<>();
+        Byte dimension = cmd.getDimension();
+        if(dimension==1){
+            list = assetProvider.listBillStaticsByDateStrs(cmd.getBeginLimit(),cmd.getEndLimit(),cmd.getOwnerId(),cmd.getOwnerType());
+        }else if(dimension==2){
+            list = assetProvider.listBillStaticsByChargingItems(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getBeginLimit(),cmd.getEndLimit());
+        }else if(dimension==3){
+            list = assetProvider.listBillStaticsByCommunities(cmd.getBeginLimit(),cmd.getEndLimit(),UserContext.getCurrentNamespaceId());
+        }
+        return list;
+    }
+
+    @Override
+    public PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd) {
+        PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
+        if(cmd.getPageSize()==null ||cmd.getPageSize()<1||cmd.getPageSize()>Integer.MAX_VALUE){
+            cmd.setPageSize(20);
+        }
+        if(cmd.getPageOffset()==null||cmd.getPageOffset()<0){
+            cmd.setPageSize(0);
+        }
+        List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize());
+        if(dtos.size() <= cmd.getPageSize()){
+//            response.setNextPageOffset(cmd.getPageOffset());
+        }else{
+            response.setNextPageOffset(cmd.getPageOffset()+cmd.getPageSize());
+            dtos.remove(dtos.size()-1);
+        }
+        response.setList(dtos);
+        return response;
+    }
+
+    @Override
+    public void exportRentalExcelTemplate(HttpServletResponse response) {
+        String[] propertyNames = {"dateStr","buildingName","apartmentName","targetType","targetName","contractNum","noticeTel","amountReceivable","amountReceived","amountOwed","exemption","exemptionRemark","supplement","supplementRemark"};
+//        Field[] declaredFields = ListBillsDTO.class.getDeclaredFields();
+//        String[] propertyNames = new String[declaredFields.length];
+        String[] titleName ={"账期","楼栋","门牌","客户类型","客户名称","合同编号","催缴电话","应收(元)","已收(元)","欠收(元)","减免金额（元）","减免备注","增收金额（元）","增收备注"};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20,20,20,20,20};
+//        for(int i = 0; i < declaredFields.length; i++){
+//            propertyNames[i] = declaredFields[i].getName();
+//        }
+        List<RentalExcelTemplate> list = new ArrayList<>();
+        RentalExcelTemplate data = new RentalExcelTemplate();
+        data.setDateStr("2018-02");
+        data.setTargetType("个人客户/企业客户");
+        data.setTargetName("李四/xx公司");
+        list.add(data);
+        ExcelUtils excel = new ExcelUtils(response,"租金账单模板","sheet1");
+        excel.writeExcel(propertyNames,titleName,titleSize,list);
+    }
+
+    @Override
+    public void updateBillsToSettled(UpdateBillsToSettled cmd) {
+        assetProvider.updateBillsToSettled(cmd.getContractId(),cmd.getOwnerType(),cmd.getOwnerId());
     }
 
     @Override

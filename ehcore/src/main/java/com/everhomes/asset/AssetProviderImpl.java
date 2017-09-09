@@ -1323,7 +1323,8 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListBillExemptionItemsDTO> listBillExemptionItems(Long billId, int pageOffSet, Integer pageSize, String dateStr, String targetName) {
+    public List<ListBillExemptionItemsDTO> listBillExemptionItems(String billIdstr, int pageOffSet, Integer pageSize, String dateStr, String targetName) {
+        Long billId = Long.parseLong(billIdstr);
         List<ListBillExemptionItemsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentExemptionItems t = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t");
@@ -1716,6 +1717,23 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public Long findOrganizationIdByIdentifier(String targetId) {
         return null;
+    }
+
+    @Override
+    public AssetVendor findAssetVendorByNamespace(Integer namespaceId) {
+        List<AssetVendor> list = new ArrayList<>();
+        dbProvider.getDslContext(AccessSpec.readOnly()).selectFrom(Tables.EH_ASSET_VENDOR)
+                .where(Tables.EH_ASSET_VENDOR.NAMESPACE_ID.eq(namespaceId))
+                .fetch()
+                .map(r -> {
+                    list.add(ConvertHelper.convert(r, AssetVendor.class));
+                    return null;
+                });
+        if(list!=null&&list.size()>0){
+            return (AssetVendor)list.get(0);
+        }else{
+            return null;
+        }
     }
 
 }

@@ -2,6 +2,7 @@ package com.everhomes.asset;
 
 import com.everhomes.rest.asset.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -33,4 +34,28 @@ public interface AssetVendorHandler {
     FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd);
 
     GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd);
+
+    ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd);
+
+    void deleteBill(String l);
+
+    void deleteBillItem(BillItemIdCommand cmd);
+
+    void deletExemptionItem(ExemptionItemIdCommand cmd);
+
+    ShowCreateBillDTO showCreateBill(Long billGroupId);
+
+    ListBillsDTO createBill(CreateBillCommand cmd);
+
+    void modifyBillStatus(BillIdCommand cmd);
+
+    ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd);
+
+    List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd);
+
+    PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd);
+
+    void exportRentalExcelTemplate(HttpServletResponse response);
+
+    void updateBillsToSettled(UpdateBillsToSettled cmd);
 }

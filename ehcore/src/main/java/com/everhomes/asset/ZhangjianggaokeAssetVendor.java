@@ -4,6 +4,7 @@ package com.everhomes.asset;
 import com.everhomes.asset.zjgkVOs.*;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.oauth2client.HttpResponseEntity;
 import com.everhomes.oauth2client.handler.RestCallTemplate;
@@ -16,6 +17,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.elasticsearch.index.analysis.AnalysisSettingsRequired;
 import org.springframework.context.ApplicationContext;
@@ -27,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
@@ -482,6 +485,90 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
+    public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler listBillDetail");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void deleteBill(String l) {
+        LOGGER.error("Insufficient privilege, zjgkhandler deleteBill");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void deleteBillItem(BillItemIdCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler deleteBillItem");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void deletExemptionItem(ExemptionItemIdCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler deletExemptionItem");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public ShowCreateBillDTO showCreateBill(Long billGroupId) {
+        LOGGER.error("Insufficient privilege, zjgkhandler showCreateBill");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public ListBillsDTO createBill(CreateBillCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler createBill");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void modifyBillStatus(BillIdCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler modifyBillStatus");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler listBillExemptionItems");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler listBillExemptionItems");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler listBillExpectanciesOnContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void exportRentalExcelTemplate(HttpServletResponse response) {
+        LOGGER.error("Insufficient privilege, zjgkhandler exportRentalExcelTemplate");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void updateBillsToSettled(UpdateBillsToSettled cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler updateBillsToSettled");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
         return null;
     }
@@ -516,27 +603,29 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String url;
         if(targetType==null||targetType.trim().equals("")){
             url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
-            listBillOnUrls(targetType, carrier, list, json, url);
+            listBillOnUrls(targetType, carrier, list, json, url,"eh_organization");
             if(carrier.getNextPageAnchor()==null){
                 return list;
             }
+            url = ZjgkUrls.SEARCH_USER_BILLS;
             params.put("pageOffset",String.valueOf(carrier.getNextPageAnchor()));
             json = generateJson(params);
-            listBillOnUrls(targetType, carrier, list, json, url);
+            listBillOnUrls(targetType, carrier, list, json, url,"eh_user");
             return list;
         }
         if(targetType.equals("eh_organization")){
             url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
+            listBillOnUrls(targetType, carrier, list, json, url,"eh_organization");
         }else if(targetType.equals("eh_user")){
             url = ZjgkUrls.SEARCH_USER_BILLS;
+            listBillOnUrls(targetType, carrier, list, json, url,"eh_user");
         }else{
             throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
         }
-        listBillOnUrls(targetType, carrier, list, json, url);
         return list;
     }
 
-    private void listBillOnUrls(String targetType, ListBillsResponse carrier, List<ListBillsDTO> list, String json, String url) {
+    private void listBillOnUrls(String targetType, ListBillsResponse carrier, List<ListBillsDTO> list, String json, String url,String RelTargetType) {
         String postJson;
         try {
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
@@ -556,7 +645,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 //                    dto.setContractId(sourceDto.getCont);
                     dto.setContractNum(sourceDto.getContractNum());
                     dto.setTargetId(sourceDto.getCustomerIdentifier());
-                    dto.setTargetType(targetType);
+                    dto.setTargetType(RelTargetType);
                     dto.setBillStatus(sourceDto.getPayFlag());
                     String noticeTel = "";
                     String noticeTels = sourceDto.getNoticeTels();

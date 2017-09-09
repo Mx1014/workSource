@@ -1,5 +1,7 @@
 package com.everhomes.asset;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -35,6 +37,8 @@ public class AssetController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(AssetController.class);
     @Autowired
     private AssetService assetService;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
 //    根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
     /**
@@ -649,6 +653,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("importBills")
     @RestReturn(value = String.class)
     public RestResponse importBills(HttpServletResponse response) {
+        // unfinished, under plan
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorDescription("OK");
         restResponse.setErrorCode(ErrorCodes.SUCCESS);

@@ -1,13 +1,16 @@
 package com.everhomes.asset;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.pmkexing.PmKeXingBillService;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.pmkexing.*;
+import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletResponse;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -121,42 +124,142 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public List<ListBillsDTO> listBills(String communityIdentifier, String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
-        return null;
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
     }
 
     @Override
     public List<BillDTO> listBillItems(String targetType, String billId, String targetName, int pageOffSet, Integer pageSize) {
-        return null;
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
     }
 
     @Override
     public List<NoticeInfo> listNoticeInfoByBillId(List<BillIdAndType> billIdAndTypes) {
-        return null;
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
     }
 
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId, Byte isOnlyOwedBill, String contractId) {
-        return null;
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
     }
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(String billId, String targetType) {
-        return null;
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
     }
 
     @Override
     public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus, Long ownerId, String ownerType, String targetType, Long targetId, String dateStr, String contractId) {
-        return null;
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
     }
 
     @Override
     public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
-        return null;
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
     }
 
     @Override
     public GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd) {
-        return null;
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void deleteBill(String l) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void deleteBillItem(BillItemIdCommand cmd) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void deletExemptionItem(ExemptionItemIdCommand cmd) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public ShowCreateBillDTO showCreateBill(Long billGroupId) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public ListBillsDTO createBill(CreateBillCommand cmd) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void modifyBillStatus(BillIdCommand cmd) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void exportRentalExcelTemplate(HttpServletResponse response) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void updateBillsToSettled(UpdateBillsToSettled cmd) {
+        LOGGER.error("Insufficient privilege, EBeiAssetHandler");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
     }
 
 

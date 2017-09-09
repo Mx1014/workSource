@@ -77,7 +77,7 @@ public interface AssetProvider {
 
     void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId,String targetName);
 
-    List<ListBillExemptionItemsDTO> listBillExemptionItems(Long billId, int pageOffSet, Integer pageSize, String dateStr, String targetName);
+    List<ListBillExemptionItemsDTO> listBillExemptionItems(String billId, int pageOffSet, Integer pageSize, String dateStr, String targetName);
 
     void deleteBill(Long billId);
 
@@ -136,4 +136,6 @@ public interface AssetProvider {
     String findAppName(Integer currentNamespaceId);
 
     Long findOrganizationIdByIdentifier(String targetId);
+
+    AssetVendor findAssetVendorByNamespace(Integer namespaceId);
 }
