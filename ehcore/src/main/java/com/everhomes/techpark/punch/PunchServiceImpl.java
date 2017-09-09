@@ -6780,17 +6780,17 @@ public class PunchServiceImpl implements PunchService {
 				Calendar punCalendar = Calendar.getInstance();
 				punCalendar.setTime(punchTime);
 				java.sql.Date pDate = calculatePunchDate(punCalendar, cmd.getEnterpriseId(), userId);
-				response.setPunchDate(pDate.getTime());
 				PunchLogDTO punchLog = getPunchType(userId, cmd.getEnterpriseId(), punchTime, pDate);
 				if (null != punchLog) {
-                    if (null != punchLog.getExpiryTime()) {
-                        punchLog.setExpiryTime(process24hourTimeToGMTTime(punchTime, punchLog.getExpiryTime()));
-                    }
-                    punchLog.setRuleTime(process24hourTimeToGMTTime(punchTime, punchLog.getRuleTime()));
-                    response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
-                }
-            }
-        }
+					if (null != punchLog.getExpiryTime()) {
+						punchLog.setExpiryTime(process24hourTimeToGMTTime(punchTime, punchLog.getExpiryTime()));
+					}
+					punchLog.setRuleTime(process24hourTimeToGMTTime(punchTime, punchLog.getRuleTime()));
+					response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
+				}
+				response.setPunchDate(pDate.getTime());
+			}
+		}
 
         punchTime = new Date(cmd.getQueryTime());
         response.setIntervals(new ArrayList<>());
