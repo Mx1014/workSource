@@ -792,8 +792,10 @@ public class PunchServiceImpl implements PunchService {
             for(int i = 0;i<statusArrary.length/2;i++){
 
 				String status = processIntevalStatus(statusArrary[2 * i],statusArrary[2 * i+1]);
-
-                if(i == 0){
+				if (!status.equals(PunchStatus.NORMAL.getCode())) {
+					pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+				}
+				if(i == 0){
                     statusList = status;
                 }else{
                     statusList = statusList + PunchConstants.STATUS_SEPARATOR + status;
