@@ -356,7 +356,7 @@ public class ZJGKOpenServiceImpl {
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getNextPageOffset() == null) {
-                if(communityIdentifier == null) {
+                if(communityIdentifier == null || "".equals(communityIdentifier)) {
                     syncDataToDb(DataType.ENTERPRISE.getCode(), SyncFlag.ALL.getCode());
                 } else {
                     syncDataToDb(DataType.ENTERPRISE.getCode(), SyncFlag.PART.getCode());
@@ -374,9 +374,10 @@ public class ZJGKOpenServiceImpl {
         params.put("timestamp", ""+System.currentTimeMillis());
         params.put("nonce", ""+(long)(Math.random()*100000));
         params.put("crypto", "sssss");
-        if(communityIdentifier != null) {
-            params.put("communityIdentifier", communityIdentifier);
+        if(communityIdentifier == null) {
+            communityIdentifier = "";
         }
+        params.put("communityIdentifier", communityIdentifier);
         params.put("pageOffset", "0");
 //        params.put("pageOffset", pageOffset);
         params.put("pageSize", PAGE_SIZE);
@@ -399,7 +400,7 @@ public class ZJGKOpenServiceImpl {
 
             //如果到最后一页了，则开始更新到我们数据库中
             if(entity.getNextPageOffset() == null) {
-                if(communityIdentifier == null) {
+                if(communityIdentifier == null || "".equals(communityIdentifier)) {
                     syncDataToDb(DataType.INDIVIDUAL.getCode(), SyncFlag.ALL.getCode());
                 } else {
                     syncDataToDb(DataType.INDIVIDUAL.getCode(), SyncFlag.PART.getCode());
