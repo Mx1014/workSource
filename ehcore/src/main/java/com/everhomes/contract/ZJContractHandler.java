@@ -239,6 +239,7 @@ public class ZJContractHandler implements ContractService{
 
     private ContractDetailDTO convertZJContractDetailToContractDetailDTO(ZJContractDetail zjContract) {
         ContractDetailDTO dto = new ContractDetailDTO();
+        dto.setPartyAId(0L);
         dto.setContractNumber(zjContract.getContractNum());
         dto.setCustomerName(zjContract.getLessee());
         dto.setRentSize(zjContract.getAreaSize());
@@ -466,7 +467,9 @@ public class ZJContractHandler implements ContractService{
         ContractStatus contractStatus = ContractStatus.fromStatus(status);
         if(contractStatus != null) {
             switch (contractStatus) {
-                case ACTIVE: return "执行中";
+                case ACTIVE:
+                case EXPIRING:
+                    return "执行中";
                 case WAITING_FOR_APPROVAL: return "审核中";
                 case EXPIRED: return "已到期";
                 case HISTORY: return "终止";
