@@ -19,6 +19,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.google.gson.Gson;
 import org.elasticsearch.index.analysis.AnalysisSettingsRequired;
 import org.springframework.context.ApplicationContext;
 import org.apache.commons.lang.StringUtils;
@@ -602,15 +603,22 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String json = generateJson(params);
         String url;
         if(targetType==null||targetType.trim().equals("")){
-            url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
+            Boolean nextFLag = true;
+            url = ZjgkUrls.SEARCH_USER_BILLS;
             listBillOnUrls(targetType, carrier, list, json, url,"eh_organization");
             if(carrier.getNextPageAnchor()==null){
-                return list;
+                nextFLag = false;
             }
-            url = ZjgkUrls.SEARCH_USER_BILLS;
-            params.put("pageOffset",String.valueOf(carrier.getNextPageAnchor()));
-            json = generateJson(params);
+            url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
             listBillOnUrls(targetType, carrier, list, json, url,"eh_user");
+            if(nextFLag==false){
+                if(carrier.getNextPageAnchor()==null){
+                    carrier.setNextPageAnchor(null);
+                }
+            }else{
+                Integer next = pageOffSet+1;
+                carrier.setNextPageAnchor(next.longValue());
+            }
             return list;
         }
         if(targetType.equals("eh_organization")){
@@ -634,11 +642,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             throw new RuntimeException("调用张江高科失败"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0){
-            SearchBillsResponse response = (SearchBillsResponse) StringHelper.fromJsonString(postJson, SearchBillsResponse.class);
+            Gson gson = new Gson();
+            SearchBillsResponse response = gson.fromJson(postJson, SearchBillsResponse.class);
+//            SearchBillsResponse response = (SearchBillsResponse) StringHelper.fromJsonString(postJson, SearchBillsResponse.class);
             if(response.getErrorCode()==200){
                 List<SearchEnterpriseBillsDTO> res = response.getResponse();
-                Integer nextPageOffset = response.getNextPageOffset();
-                carrier.setNextPageAnchor(nextPageOffset==null?null:nextPageOffset.longValue());
+                String nextPageOffset = response.getNextPageOffset();
+                carrier.setNextPageAnchor(nextPageOffset==null?null:Long.parseLong(nextPageOffset));
                 for(int i = 0 ; i < res.size(); i++){
                     SearchEnterpriseBillsDTO sourceDto = res.get(i);
                     ListBillsDTO dto = new ListBillsDTO();
@@ -659,13 +669,12 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setBillId(sourceDto.getBillID());
                     dto.setBillGroupName(sourceDto.getFeeName()==null?"租金":sourceDto.getFeeName());
                     dto.setDateStr(sourceDto.getBillDate());
-                    dto.setTargetType(targetType);
+                    dto.setTargetType(RelTargetType);
                     dto.setTargetName(sourceDto.getCustomerName());
                     dto.setAmountOwed(new BigDecimal(sourceDto.getAmountOwed()));
                     dto.setAmountReceivable(new BigDecimal(sourceDto.getAmountReceivable()));
                     dto.setAmountReceived(new BigDecimal(sourceDto.getAmountReceived()));
                     list.add(dto);
-                    carrier.setNextPageAnchor(response.getNextPageOffset()==null?null:response.getNextPageOffset().longValue());
                 }
             }else{
                 LOGGER.error("调用张江高科searchEnterpriseBills失败"+response.getErrorDescription()+","+response.getErrorDetails());
@@ -693,9 +702,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String json = generateJson(params);
         String url;
         if(targetType.equals("eh_organization")){
-            url = ZjgkUrls.USER_BILLS_DETAIL;
-        }else if(targetType.equals("eh_user")){
             url = ZjgkUrls.ENTERPRISE_BILLS_DETAIL;
+        }else if(targetType.equals("eh_user")){
+            url = ZjgkUrls.USER_BILLS_DETAIL;
         }else{
             throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
         }

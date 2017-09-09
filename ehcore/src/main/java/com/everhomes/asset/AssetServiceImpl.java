@@ -222,7 +222,8 @@ public class AssetServiceImpl implements AssetService {
         ListBillsResponse response = new ListBillsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
             if(UserContext.getCurrentNamespaceId()!=999971){
-                cmd.setPageAnchor(0l);
+//                cmd.setPageAnchor(0l);
+                cmd.setPageAnchor(1l);
             }else{
                 cmd.setPageAnchor(1l);
             }
@@ -252,7 +253,8 @@ public class AssetServiceImpl implements AssetService {
         ListBillItemsResponse response = new ListBillItemsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
             if(UserContext.getCurrentNamespaceId()!=999971){
-                cmd.setPageAnchor(0l);
+//                cmd.setPageAnchor(0l);
+                cmd.setPageAnchor(1l);
             }else{
                 cmd.setPageAnchor(1l);
             }
