@@ -56,8 +56,6 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         LOGGER.info("syncDataToDb create customer setId");
         customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         LOGGER.info("syncDataToDb create customer setCreateTime");
-        customer.setCreatorUid(UserContext.current().getUser().getId());
-        LOGGER.info("syncDataToDb create customer setCreatorUid");
         customer.setStatus(CommonStatus.ACTIVE.getCode());
         LOGGER.info("createEnterpriseCustomer: " + customer);
 

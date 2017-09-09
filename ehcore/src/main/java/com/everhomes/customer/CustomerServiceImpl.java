@@ -106,6 +106,7 @@ public class CustomerServiceImpl implements CustomerService {
         if(cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
+        customer.setCreatorUid(UserContext.currentUserId());
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
         OrganizationDTO organizationDTO = createOrganization(customer);
