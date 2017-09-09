@@ -1161,6 +1161,7 @@ public class ZJGKOpenServiceImpl {
         List<ZJEnterprise> mergeEnterpriseList = mergeBackupList(backupList, ZJEnterprise.class);
         List<ZJEnterprise> theirEnterpriseList = new ArrayList<ZJEnterprise>();
         if(mergeEnterpriseList != null && mergeEnterpriseList.size() > 0) {
+            LOGGER.debug("syncDataToDb mergeEnterpriseList size: {}", mergeEnterpriseList.size());
             if(SyncFlag.PART.equals(SyncFlag.fromCode(allFlag))) {
                 String communityIdentifier = backupList.get(0).getUpdateCommunity();
                 Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.SHENZHOU.getCode(), communityIdentifier);
@@ -1183,7 +1184,8 @@ public class ZJGKOpenServiceImpl {
             }
 
         }
-
+        LOGGER.debug("syncDataToDb namespaceId: {}, myEnterpriseCustomerList size: {}, theirEnterpriseList size: {}",
+                namespaceId, myEnterpriseCustomerList.size(), theirEnterpriseList.size());
         dbProvider.execute(s->{
             syncAllEnterprises(namespaceId, myEnterpriseCustomerList, theirEnterpriseList);
             return true;
@@ -1232,6 +1234,8 @@ public class ZJGKOpenServiceImpl {
     }
 
     private void insertEnterpriseCustomer(Integer namespaceId, ZJEnterprise zjEnterprise) {
+        LOGGER.debug("syncDataToDb insertEnterpriseCustomer namespaceId: {}, zjEnterprise: {}",
+                namespaceId, StringHelper.toJsonString(zjEnterprise));
         this.dbProvider.execute((TransactionStatus status) -> {
             EnterpriseCustomer customer = new EnterpriseCustomer();
             customer.setNamespaceId(namespaceId);
@@ -1415,6 +1419,8 @@ public class ZJGKOpenServiceImpl {
     }
 
     private void deleteEnterpriseCustomer(EnterpriseCustomer customer) {
+        LOGGER.debug("syncDataToDb deleteEnterpriseCustomer customer: {}",
+                StringHelper.toJsonString(customer));
         if (CommonStatus.fromCode(customer.getStatus()) != CommonStatus.INACTIVE) {
             customer.setOperatorUid(1L);
             customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1436,6 +1442,8 @@ public class ZJGKOpenServiceImpl {
     }
 
     private void updateEnterpriseCustomer(EnterpriseCustomer customer, ZJEnterprise zjEnterprise) {
+        LOGGER.debug("syncDataToDb updateEnterpriseCustomer customer: {}, zjEnterprise: {}",
+                StringHelper.toJsonString(customer), StringHelper.toJsonString(zjEnterprise));
         customer.setNamespaceCustomerType(NamespaceCustomerType.SHENZHOU.getCode());
         customer.setNamespaceCustomerToken(zjEnterprise.getEnterpriseIdentifier());
         customer.setName(zjEnterprise.getName());
