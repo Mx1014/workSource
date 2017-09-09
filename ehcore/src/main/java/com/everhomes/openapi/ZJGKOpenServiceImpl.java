@@ -428,7 +428,7 @@ public class ZJGKOpenServiceImpl {
         backup.setNamespaceId(NAMESPACE_ID);
         backup.setDataType(dataType);
         backup.setNextPageOffset(entity.getNextPageOffset());
-        backup.setData(entity.getResponse().toString());
+        backup.setData(StringHelper.toJsonString(entity.getResponse()));
         backup.setStatus(CommonStatus.ACTIVE.getCode());
         backup.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         backup.setCreatorUid(1L);
