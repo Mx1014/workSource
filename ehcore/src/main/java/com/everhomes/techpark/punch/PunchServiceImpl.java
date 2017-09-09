@@ -2619,12 +2619,44 @@ public class PunchServiceImpl implements PunchService {
 
 	}
 
-	public Workbook createPunchStatisticsBook(List<PunchCountDTO> results) {
+	public Workbook createPunchStatisticsBook(List<PunchCountDTO> results, ListPunchCountCommand cmd) {
 		if (null == results || results.size() == 0)
 			return null;
-		Workbook wb = new XSSFWorkbook();
-		Sheet sheet = wb.createSheet("punchStatistics");
+		XSSFWorkbook wb = new XSSFWorkbook();
+		XSSFSheet sheet = wb.createSheet("punchStatistics");
+		sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 9));
+		XSSFCellStyle style = wb.createCellStyle();
+		Font font = wb.createFont();
+		font.setFontHeightInPoints((short) 20);
+		font.setFontName("Courier New");
 
+		style.setFont(font);
+
+		XSSFCellStyle titleStyle = wb.createCellStyle();
+		titleStyle.setFont(font);
+		titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+		//  创建标题
+		XSSFRow rowTitle = sheet.createRow(0);
+		rowTitle.createCell(0).setCellValue("按月统计");
+		rowTitle.setRowStyle(titleStyle);
+		//副标题
+
+		sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 9));
+		XSSFCellStyle style1 = wb.createCellStyle();
+		Font font1 = wb.createFont();
+
+		font1.setFontHeightInPoints((short) 20);
+		font1.setFontName("Courier New");
+
+		style1.setFont(font1);
+
+		XSSFCellStyle titleStyle1 = wb.createCellStyle();
+
+		XSSFRow rowReminder = sheet.createRow(1);
+		rowReminder.createCell(0).setCellValue("统计时间:"+dateSF.get().format(new Date(cmd.getStartDay())) +"~"
+				+dateSF.get().format(new Date(cmd.getEndDay())));
+		rowReminder.setRowStyle(titleStyle1);
 		this.createPunchStatisticsBookSheetHead(sheet );
 		for (PunchCountDTO statistic : results )
 			this.setNewPunchStatisticsBookRow(sheet, statistic);
@@ -4226,10 +4258,22 @@ public class PunchServiceImpl implements PunchService {
 		rowTitle.createCell(0).setCellValue("按日统计");
 		rowTitle.setRowStyle(titleStyle);
 		//副标题
+
+		sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 9));
+		XSSFCellStyle style1 = wb.createCellStyle();
+		Font font1 = wb.createFont();
+
+		font1.setFontHeightInPoints((short) 20);
+		font1.setFontName("Courier New");
+
+		style1.setFont(font1);
+
+		XSSFCellStyle titleStyle1 = wb.createCellStyle();
+
 		XSSFRow rowReminder = sheet.createRow(1);
 		rowReminder.createCell(0).setCellValue("统计时间:"+dateSF.get().format(new Date(cmd.getStartDay())) +"~"
 		+dateSF.get().format(new Date(cmd.getEndDay())));
-		rowReminder.setRowStyle(titleStyle);
+		rowReminder.setRowStyle(titleStyle1);
 
 		this.createPunchDetailsBookSheetHead(sheet );
 		for (PunchDayDetailDTO dto : dtos )
@@ -4256,8 +4300,8 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(dto.getUserName());
 		row.createCell(++i).setCellValue(dto.getDeptName());
 		row.createCell(++i).setCellValue(dto.getPunchOrgName());
-		row.createCell(++i).setCellValue((dto.getArriveTime()==null)?"":datetimeSF.get().format(new Date(dto.getArriveTime())));
-		row.createCell(++i).setCellValue((dto.getLeaveTime()==null)?"":datetimeSF.get().format(new Date(dto.getLeaveTime())));
+		row.createCell(++i).setCellValue((dto.getArriveTime()==null)?"":timeSF.get().format(new Date(dto.getArriveTime())));
+		row.createCell(++i).setCellValue((dto.getLeaveTime()==null)?"":timeSF.get().format(new Date(dto.getLeaveTime())));
 		row.createCell(++i).setCellValue(String.valueOf(dto.getPunchCount()));
 		row.createCell(++i).setCellValue(convertTimeLongToString(dto.getWorkTime()));
 		row.createCell(++i).setCellValue(dto.getStatuString());
@@ -4664,7 +4708,7 @@ public class PunchServiceImpl implements PunchService {
 				+ dateSF.get().format(new Date(cmd.getEndDay())) + ").xlsx";
 		//新建了一个文件
 
-		Workbook wb = createPunchStatisticsBook(resp.getPunchCountList());
+		Workbook wb = createPunchStatisticsBook(resp.getPunchCountList(),cmd);
 
 		return download(wb,fileName,response);
 	}
