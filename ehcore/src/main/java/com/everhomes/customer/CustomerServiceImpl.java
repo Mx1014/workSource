@@ -1,5 +1,6 @@
 package com.everhomes.customer;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.contentserver.ContentServerService;
@@ -14,6 +15,7 @@ import com.everhomes.organization.ExecuteImportTaskCallback;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.contract.ContractDTO;
@@ -45,6 +47,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -90,6 +93,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private ContractProvider contractProvider;
+
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
 
     @Override
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
@@ -336,6 +342,18 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setOrganizationId(organizationDTO.getId());
             enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
+            //给企业账号添加管理员 默认添加联系人作为管理员 by xiongying20170909
+            Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
+            if (!orgAdminAccounts.get(organizationDTO.getId()).contains(str.getContactMobile())) {
+                if (!org.springframework.util.StringUtils.isEmpty(str.getContactMobile())) {
+                    CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
+                    createOrganizationAdminCommand.setOrganizationId(organizationDTO.getId());
+                    createOrganizationAdminCommand.setContactToken(str.getContactMobile());
+                    createOrganizationAdminCommand.setContactName(str.getContactName());
+                    rolePrivilegeService.createOrganizationAdmin(createOrganizationAdminCommand, cmd.getNamespaceId());
+                }
+                orgAdminAccounts.get(organizationDTO.getId()).add(str.getContactMobile());
+            }
         }
         return errorDataLogs;
     }
