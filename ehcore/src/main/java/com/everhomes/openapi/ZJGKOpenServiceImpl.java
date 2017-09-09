@@ -1284,7 +1284,7 @@ public class ZJGKOpenServiceImpl {
             //给企业客户创建一个对应的企业账号
             Organization organization = insertOrganization(customer);
             customer.setOrganizationId(organization.getId());
-            enterpriseCustomerProvider.createEnterpriseCustomer(customer);
+            enterpriseCustomerProvider.createEnterpriseCustomer2(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
             insertOrUpdateOrganizationDetail(organization, customer);

@@ -11,6 +11,7 @@ import java.util.Map;
  */
 public interface EnterpriseCustomerProvider {
     void createEnterpriseCustomer(EnterpriseCustomer customer);
+    void createEnterpriseCustomer2(EnterpriseCustomer customer);
     void updateEnterpriseCustomer(EnterpriseCustomer customer);
     void deleteEnterpriseCustomer(EnterpriseCustomer customer);
     EnterpriseCustomer findById(Long id);
