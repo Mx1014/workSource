@@ -115,7 +115,7 @@ public class ZJContractHandler implements ContractService{
             List<ContractDTO> dtos = contracts.stream().map(contract -> {
                 ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
                 if(dto.getContractNumber() == null) {
-                    dto.setContractNumber(contract.getContracId());
+                    dto.setContractNumber(contract.getName());
                 }
                 dto.setBuildings(contract.getApartments());
                 dto.setContractStartDate(strToTimestamp(contract.getContractStartDate()));
