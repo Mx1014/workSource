@@ -425,6 +425,9 @@ public class ZJContractHandler implements ContractService{
         params.put("contractStatus", contractStatus);
         params.put("contractAttribute", contractAttribute);
         params.put("category", category);
+        if(customerName == null) {
+            customerName = "";
+        }
         params.put("customerName", customerName);
         params.put("pageOffset", pageOffset);
         params.put("pageSize", pageSize);
