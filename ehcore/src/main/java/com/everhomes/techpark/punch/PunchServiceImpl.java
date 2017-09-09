@@ -558,8 +558,10 @@ public class PunchServiceImpl implements PunchService {
 			return null;
 		}
 		newPunchDayLog.setStatusList(pdl.getStatusList());
-		newPunchDayLog.setArriveTime(new Time(pdl.getArriveTime()));
-		newPunchDayLog.setLeaveTime(new Time(pdl.getLeaveTime()));
+		if(null != pdl.getArriveTime())
+			newPunchDayLog.setArriveTime(new Time(pdl.getArriveTime()));
+		if(null != pdl.getLeaveTime())
+			newPunchDayLog.setLeaveTime(new Time(pdl.getLeaveTime()));
 		newPunchDayLog.setPunchCount(pdl.getPunchCount());
 		newPunchDayLog.setUserId(userId);
 		newPunchDayLog.setEnterpriseId(companyId);
@@ -2454,7 +2456,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	private void processPunchListCount(List<PunchDayLog> list,
 			PunchStatistic statistic) {
-        statistic.setWorkDayCount(1);
+        statistic.setWorkDayCount(0);
 		statistic.setWorkCount(0.0);
 		statistic.setUnpunchCount(0.0);
 		statistic.setSickCount(0.0);
@@ -2496,7 +2498,7 @@ public class PunchServiceImpl implements PunchService {
 
     private Byte countOneDayStatistic(String status, PunchStatistic statistic, Byte isNormal,
                                       int punchTimeNo, Long timeRuleId) {
-        if (status.equals(PunchStatus.UNPUNCH.getCode())) {
+        if (status.equals(String.valueOf(PunchStatus.UNPUNCH.getCode()))) {
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
             isNormal = NormalFlag.NO.getCode();
             //缺勤计算小时
@@ -2507,19 +2509,23 @@ public class PunchServiceImpl implements PunchService {
                 statistic.setUnpunchCount(statistic.getUnpunchCount()
                         +(interval.getLeaveTime()-interval.getArriveTime())/3600000.0);
             }
-        }  else if (status.equals(PunchStatus.LEAVEEARLY.getCode())) {
+        }  else if (status.equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
             statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
             isNormal = NormalFlag.NO.getCode();
-        }  else  if (status.equals(PunchStatus.BLANDLE.getCode())) {
+        }  else  if (status.equals(String.valueOf(PunchStatus.BLANDLE.getCode()))) {
             statistic.setBlandleCount(statistic.getBlandleCount() + 1);
             statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
             isNormal = NormalFlag.NO.getCode();
-        } else  if (status.equals(PunchStatus.BELATE.getCode())) {
-            statistic.setBelateCount(statistic.getBelateCount() + 1);
-            statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-            isNormal = NormalFlag.NO.getCode();
-        }
+        } else  if (status.equals(String.valueOf(PunchStatus.BELATE.getCode()))) {
+			statistic.setBelateCount(statistic.getBelateCount() + 1);
+			statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			isNormal = NormalFlag.NO.getCode();
+		} else  if (status.equals(String.valueOf(PunchStatus.BELATE.getCode()))) {
+			statistic.setBelateCount(statistic.getBelateCount() + 1);
+			statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			isNormal = NormalFlag.NO.getCode();
+		}
         return  isNormal;
     }
 
@@ -4942,11 +4948,14 @@ public class PunchServiceImpl implements PunchService {
     /**刷固定排班*/
     private void refreshGroupDayLogAndMonthStat(PunchRule pr, Calendar yesterday) {
         List<UniongroupMemberDetail> members = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
-        for(UniongroupMemberDetail member : members) {
-            if(member.getTargetType().equals("USER")){
-                refreshDayLogAndMonthStat(member.getTargetId(),pr.getOwnerId(),yesterday);
-            }
-        }
+		if (null != members) {
+
+			for(UniongroupMemberDetail member : members) {
+				if(member.getTargetType().equals("USER")){
+					refreshDayLogAndMonthStat(member.getTargetId(),pr.getOwnerId(),yesterday);
+				}
+			}
+		}
     }
 
     private void refreshDayLogAndMonthStat(Long userId,Long ownerId ,Calendar punCalendar){
@@ -5597,10 +5606,10 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public HttpServletResponse exportPunchSchedulingTemplate(ListPunchSchedulingMonthCommand cmd,
                                                      HttpServletResponse response) {
-        LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
-                UserContext.current().getUser().getLocale());
-        String filePath = monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"scheduling":scheduleLocaleString.getText())+".xlsx";
-        //新建了一个文件
+//        LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
+//                UserContext.current().getUser().getLocale());
+		String filePath = "Schedule" + monthSF.get().format(new Date(cmd.getQueryTime())) + ".xlsx";
+		//新建了一个文件
 
         Workbook wb = createPunchSchedulingTemplateBook(cmd.getQueryTime(),cmd.getTimeRules());
 
@@ -6615,8 +6624,8 @@ public class PunchServiceImpl implements PunchService {
 //		punchProvider.deletePunchTimeRuleByRuleId(pr.getId());
 
         savePunchTimeRule(cmd, pr);
-		//发消息
-		sendMessageToGroupUser(pr,cmd.getTimeRules());
+		//发消息 暂时屏蔽
+//		sendMessageToGroupUser(pr,cmd.getTimeRules());
 		return null;
 	}
 
