@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>activityId: 活动ID</li>
  *     <li>clientAppName: Realm值，app客户端必传</li>
- *     <li>paymentType: 支付方式，微信公众号支付方式必填，9-公众号支付 参考{@link com.everhomes.order.PaymentType}</li>
+ *     <li>paymentType: 支付方式，微信公众号支付方式必填，9-公众号支付 参考{@link com.everhomes.rest.order.PaymentType}</li>
  * </ul>
  */
 public class CreateSignupOrderV2Command {
