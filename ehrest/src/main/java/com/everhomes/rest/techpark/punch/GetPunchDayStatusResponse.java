@@ -9,7 +9,8 @@ import com.everhomes.util.StringHelper;
 /**
 * <ul>  
 * <li>expiryTime：long 有效期时间戳(过期重新调接口)</li> 
-* <li>punchTimesPerDay：一天要打几次卡(总时间段*2)</li> 
+* <li>punchDate：long  这时候打卡算作哪天</li>
+* <li>punchTimesPerDay：一天要打几次卡(总时间段*2)</li>
 * <li>punchType：下次打卡是上班还是下班 0-上班 1-下班 2-不在上班时间 3-今天休息 4-今天没排班 5-今天打完卡了 参考 {@link com.everhomes.rest.techpark.punch.PunchType}</li>
 * <li>punchIntervalNo：第几个打卡时间段</li> 
 * <li>punchNormalTime：(下次打卡)正确的打卡时间--(如果是上班打卡,这个字段没用 ; 如果是下班打卡,在此之前是早退)</li>
@@ -19,6 +20,7 @@ import com.everhomes.util.StringHelper;
 */
 public class GetPunchDayStatusResponse {
 	private Long expiryTime;
+	private Long punchDate;
 	private Byte punchTimesPerDay;
 	private Byte punchType;
 	private Integer punchIntervalNo;
@@ -87,5 +89,13 @@ public class GetPunchDayStatusResponse {
 
 	public void setPunchIntervalNo(Integer punchIntervalNo) {
 		this.punchIntervalNo = punchIntervalNo;
+	}
+
+	public Long getPunchDate() {
+		return punchDate;
+	}
+
+	public void setPunchDate(Long punchDate) {
+		this.punchDate = punchDate;
 	}
 }
