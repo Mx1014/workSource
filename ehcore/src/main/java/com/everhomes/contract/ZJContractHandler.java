@@ -2,6 +2,7 @@ package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -12,9 +13,13 @@ import com.everhomes.http.HttpUtils;
 import com.everhomes.rest.asset.PaymentVariable;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.*;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.openapi.shenzhou.ShenzhouJsonEntity;
 import com.everhomes.rest.openapi.shenzhou.ZJContract;
 import com.everhomes.rest.openapi.shenzhou.ZJContractDetail;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
@@ -47,8 +52,8 @@ import java.util.stream.Collectors;
 /**
  * Created by ying.xiong on 2017/8/14.
  */
-@Component(ContractHandler.CONTRACT_PREFIX + 999971)
-public class ZJContractHandler implements ContractHandler{
+@Component(ContractService.CONTRACT_PREFIX + 999971)
+public class ZJContractHandler implements ContractService{
     private final static Logger LOGGER = LoggerFactory.getLogger(ZJContractHandler.class);
 
     private CloseableHttpClient httpclient = null;
@@ -72,6 +77,9 @@ public class ZJContractHandler implements ContractHandler{
 
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
+
+    @Autowired
+    private UserProvider userProvider;
 
     @Override
     public ListContractsResponse listContracts(ListContractsCommand cmd) {
@@ -116,6 +124,42 @@ public class ZJContractHandler implements ContractHandler{
     }
 
     @Override
+    public void contractSchedule() {
+
+    }
+
+    @Override
+    public ListContractsResponse listContractsByOraganizationId(ListContractsByOraganizationIdCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public List<Object> findCustomerByContractNum(String contractNum, Long ownerId, String ownerType) {
+        return null;
+    }
+
+    @Override
+    public ContractDetailDTO createContract(CreateContractCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public ContractDTO updateContract(UpdateContractCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void denunciationContract(DenunciationContractCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
     public ContractDetailDTO findContract(FindContractCommand cmd) {
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
         if(community != null) {
@@ -145,6 +189,37 @@ public class ZJContractHandler implements ContractHandler{
                 ContractDetailDTO dto = convertZJContractDetailToContractDetailDTO(zjContract);
                 return dto;
             }
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteContract(DeleteContractCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public List<ContractDTO> listCustomerContracts(ListCustomerContractsCommand cmd) {
+        UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(cmd.getTargetId(), cmd.getNamespaceId());
+        if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
+            ListIndividualCustomerContractsCommand command = new ListIndividualCustomerContractsCommand();
+            command.setNamespaceId(cmd.getNamespaceId());
+            command.setCommunityId(cmd.getCommunityId());
+            command.setContactToken(userIdentifier.getIdentifierToken());
+            List<ContractDTO> response = listIndividualCustomerContracts(command);
+            return response;
+        } else if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
+            EnterpriseCustomer customer = enterpriseCustomerProvider.findByOrganizationId(cmd.getTargetId());
+            if(customer != null) {
+                ListEnterpriseCustomerContractsCommand command = new ListEnterpriseCustomerContractsCommand();
+                command.setNamespaceId(cmd.getNamespaceId());
+                command.setCommunityId(cmd.getCommunityId());
+                command.setEnterpriseCustomerId(customer.getId());
+                return listEnterpriseCustomerContracts(command);
+            }
+
         }
         return null;
     }
@@ -284,6 +359,39 @@ public class ZJContractHandler implements ContractHandler{
         return null;
     }
 
+    @Override
+    public void entryContract(EntryContractCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void reviewContract(ReviewContractCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public void setContractParam(SetContractParamCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public ContractParamDTO getContractParam(GetContractParamCommand cmd) {
+        LOGGER.error("Insufficient privilege, zjgkhandler createContract");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+    }
+
+    @Override
+    public String generateContractNumber() {
+        return null;
+    }
+
     private Map<String, String> generateParams(String communityIdentifier, String contractStatus, String contractAttribute,
                                                String category, String customerName, String pageOffset, String pageSize) {
         String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
@@ -371,45 +479,16 @@ public class ZJContractHandler implements ContractHandler{
     private String postToShenzhou(Map<String, String> params, String method, Map<String, String> headers) {
 
         String shenzhouUrl = configurationProvider.getValue(NAMESPACE_ID, "shenzhou.host.url", "");
-//        HttpPost httpPost = new HttpPost(shenzhouUrl + method);
-//        CloseableHttpResponse response = null;
-//
         String json = null;
 
         try {
             json = HttpUtils.postJson(shenzhouUrl + method, StringHelper.toJsonString(params), 30, HTTP.UTF_8);
-//            StringEntity stringEntity = new StringEntity(params.toString(), "utf8");
-//            httpPost.setEntity(stringEntity);
-//
-//            response = httpclient.execute(httpPost);
-//
-//            int status = response.getStatusLine().getStatusCode();
-//            if(status == HttpStatus.SC_OK) {
-//                HttpEntity entity = response.getEntity();
-//
-//                if (entity != null) {
-//                    json = EntityUtils.toString(entity, "utf8");
-//                }
-//            }
 
         } catch (Exception e) {
             LOGGER.error("sync from shenzhou request error, param={}", params, e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "sync from shenzhou request error.");
         }
-//        finally {
-//            if (null != response) {
-//                try {
-//                    response.close();
-//                } catch (IOException e) {
-//                    LOGGER.error("sync from shenzhou close instream, response error, param={}", params, e);
-//                }
-//            }
-//        }
-//
-//        if(LOGGER.isDebugEnabled())
-//            LOGGER.debug("Data from shenzhou, param={}, json={}", params, json);
-
         return json;
     }
 
