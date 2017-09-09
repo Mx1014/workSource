@@ -20,11 +20,6 @@ public class SelectedNoticeCommand {
     private String ownerType;
     private Long ownerId;
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
     public List<BillIdAndType> getBillIdAndTypes() {
         return billIdAndTypes;
     }
@@ -47,9 +42,5 @@ public class SelectedNoticeCommand {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
-    }
-
-    public SelectedNoticeCommand() {
-
     }
 }

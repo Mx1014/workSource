@@ -1,16 +1,19 @@
 //@formatter:off
 package com.everhomes.asset.zjgkVOs;
 
+import java.util.List;
+
 /**
  * Created by Wentian Wang on 2017/9/8.
  */
 
 public class BillCountResponse {
+    private String version;
     private String errorScope;
     private Integer errorCode;
     private String errorDescription;
     private String errorDetails;
-    private ContractBillsStatDTO response;
+    private List<ContractBillsStatDTO> response;
 
     public String getErrorScope() {
         return errorScope;
@@ -18,6 +21,14 @@ public class BillCountResponse {
 
     public void setErrorScope(String errorScope) {
         this.errorScope = errorScope;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public Integer getErrorCode() {
@@ -45,11 +56,11 @@ public class BillCountResponse {
     }
 
 
-    public ContractBillsStatDTO getResponse() {
+    public List<ContractBillsStatDTO> getResponse() {
         return response;
     }
 
-    public void setResponse(ContractBillsStatDTO response) {
+    public void setResponse(List<ContractBillsStatDTO> response) {
         this.response = response;
     }
 }

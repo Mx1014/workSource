@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.asset.zjgkVOs;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.List;
 
 /**
@@ -8,12 +10,13 @@ import java.util.List;
  */
 
 public class BillDetailResponse {
+    private String version;
     private String errorScope;
     private Integer errorCode;
     private String errorDescription;
     private String errorDetails;
-    private Integer NextPageOffset;
-    private BillDetailDTO response;
+    @ItemType(BillDetailDTO.class)
+    private List<BillDetailDTO> response;
 
     public String getErrorScope() {
         return errorScope;
@@ -47,19 +50,20 @@ public class BillDetailResponse {
         this.errorDetails = errorDetails;
     }
 
-    public Integer getNextPageOffset() {
-        return NextPageOffset;
+    public String getVersion() {
+        return version;
     }
 
-    public void setNextPageOffset(Integer nextPageOffset) {
-        NextPageOffset = nextPageOffset;
+    public void setVersion(String version) {
+        this.version = version;
     }
 
-    public BillDetailDTO getResponse() {
+
+    public List<BillDetailDTO> getResponse() {
         return response;
     }
 
-    public void setResponse(BillDetailDTO response) {
+    public void setResponse(List<BillDetailDTO> response) {
         this.response = response;
     }
 }
