@@ -1247,7 +1247,7 @@ public class ZJGKOpenServiceImpl {
     private void insertEnterpriseCustomer(Integer namespaceId, ZJEnterprise zjEnterprise) {
         LOGGER.debug("syncDataToDb insertEnterpriseCustomer namespaceId: {}, zjEnterprise: {}",
                 namespaceId, StringHelper.toJsonString(zjEnterprise));
-        this.dbProvider.execute((TransactionStatus status) -> {
+//        this.dbProvider.execute((TransactionStatus status) -> {
             EnterpriseCustomer customer = new EnterpriseCustomer();
             customer.setNamespaceId(namespaceId);
             customer.setNamespaceCustomerType(NamespaceCustomerType.SHENZHOU.getCode());
@@ -1291,8 +1291,8 @@ public class ZJGKOpenServiceImpl {
             insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
             insertOrUpdateOrganizationAddresses(zjEnterprise.getCommunityId(), zjEnterprise.getApartmentIdentifierList(), customer);
 
-            return null;
-        });
+//            return null;
+//        });
 
     }
 
