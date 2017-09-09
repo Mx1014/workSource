@@ -75,12 +75,14 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         LOGGER.info("syncDataToDb create customer setStatus");
         customer.setId(id);
         LOGGER.info("syncDataToDb create customer setId");
-        customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        LOGGER.info("syncDataToDb create customer setCreateTime");
+//        customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//        LOGGER.info("syncDataToDb create customer setCreateTime");
 
 //        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        LOGGER.info("syncDataToDb create customer context");
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        LOGGER.info("syncDataToDb create customer dao");
         dao.insert(customer);
         LOGGER.info("createEnterpriseCustomer: " + customer);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseCustomers.class, null);
