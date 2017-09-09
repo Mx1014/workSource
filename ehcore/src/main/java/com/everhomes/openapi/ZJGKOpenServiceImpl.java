@@ -1163,6 +1163,7 @@ public class ZJGKOpenServiceImpl {
         if(mergeEnterpriseList != null && mergeEnterpriseList.size() > 0) {
             LOGGER.debug("syncDataToDb mergeEnterpriseList size: {}", mergeEnterpriseList.size());
             if(SyncFlag.PART.equals(SyncFlag.fromCode(allFlag))) {
+                LOGGER.debug("syncDataToDb part");
                 String communityIdentifier = backupList.get(0).getUpdateCommunity();
                 Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.SHENZHOU.getCode(), communityIdentifier);
                 if(community != null) {
@@ -1173,14 +1174,23 @@ public class ZJGKOpenServiceImpl {
                 }
 
             } else {
+                LOGGER.debug("syncDataToDb all");
                 Map<String, Long> communities = communityProvider.listCommunityIdByNamespaceType(namespaceId, NamespaceCommunityType.SHENZHOU.getCode());
-                mergeEnterpriseList.forEach(enterprise -> {
+                for(ZJEnterprise enterprise : mergeEnterpriseList) {
                     Long communityId = communities.get(enterprise.getCommunityIdentifier());
                     if(communityId != null) {
                         enterprise.setCommunityId(communityId);
                     }
+                    LOGGER.debug("syncDataToDb all enterprise:{}", enterprise);
                     theirEnterpriseList.add(enterprise);
-                });
+                }
+//                mergeEnterpriseList.forEach(enterprise -> {
+//                    Long communityId = communities.get(enterprise.getCommunityIdentifier());
+//                    if(communityId != null) {
+//                        enterprise.setCommunityId(communityId);
+//                    }
+//                    theirEnterpriseList.add(enterprise);
+//                });
             }
 
         }
