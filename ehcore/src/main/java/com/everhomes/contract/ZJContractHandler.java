@@ -26,6 +26,7 @@ import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -417,6 +418,9 @@ public class ZJContractHandler implements ContractService{
         params.put("nonce", ""+(long)(Math.random()*100000));
         params.put("crypto", "sssss");
         params.put("contractNum", "");
+        if(communityIdentifier==null) {
+            communityIdentifier = "";
+        }
         params.put("communityIdentifier", communityIdentifier);
         params.put("contractStatus", contractStatus);
         params.put("contractAttribute", contractAttribute);
