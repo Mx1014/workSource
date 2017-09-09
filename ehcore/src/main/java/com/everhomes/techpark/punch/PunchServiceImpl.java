@@ -6425,6 +6425,10 @@ public class PunchServiceImpl implements PunchService {
 		if(pr.getRuleType().equals(PunchRuleType.PAIBAN.getCode())){
 			Calendar start = Calendar.getInstance();
 			start.set(Calendar.DAY_OF_MONTH, 1);
+			start.set(Calendar.HOUR_OF_DAY, 0);
+			start.set(Calendar.MINUTE, 0);
+			start.set(Calendar.SECOND, 0);
+			start.set(Calendar.MILLISECOND, 0);
 			Calendar end = Calendar.getInstance();
 			end.add(Calendar.MONTH, 1);
 			Integer linkedCount = punchSchedulingProvider.countSchedulingUser(pr.getId(),new java.sql.Date(start.getTimeInMillis()),new java.sql.Date(end.getTimeInMillis()));
