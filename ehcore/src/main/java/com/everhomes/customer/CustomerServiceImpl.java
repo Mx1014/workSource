@@ -1094,7 +1094,7 @@ public class CustomerServiceImpl implements CustomerService {
         response.setPropertyTotalCount(0L);
         List<CustomerIntellectualPropertyStatisticsDTO> dtos = new ArrayList<>();
         Long trademarks = enterpriseCustomerProvider.countTrademarksByCustomerIds(customerIds);
-        if(trademarks != null) {
+        if(trademarks != null && trademarks != 0) {
             response.setPropertyTotalCount(response.getPropertyTotalCount() + trademarks);
 
             CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
@@ -1104,7 +1104,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         Long certificates = enterpriseCustomerProvider.countCertificatesByCustomerIds(customerIds);
-        if(certificates != null) {
+        if(certificates != null && certificates != 0) {
             response.setPropertyTotalCount(response.getPropertyTotalCount() + certificates);
 
             CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
