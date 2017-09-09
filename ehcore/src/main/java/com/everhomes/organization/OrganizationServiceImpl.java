@@ -10654,6 +10654,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setRegionCode(cmd.getRegionCode());
             if (cmd.getEmail() != null)
                 detail.setEmail(cmd.getEmail());
+            if (cmd.getEnName() != null)
+                detail.setEnName(cmd.getEnName());
             organizationProvider.updateOrganizationMemberDetails(detail,detail.getId());
         }
         if(StringUtils.isEmpty(cmd.getDetailId())){

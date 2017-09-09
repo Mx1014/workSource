@@ -27,6 +27,7 @@ import java.util.Map;
  * <li>detailId: 修改标志位(有传则为修改)</li>
  * <li>regionCode: 手机区号</li>
  * <li>email: 邮箱</li>
+ * <li>enName: 英文名</li>
  * </ul>
  */
 public class AddOrganizationPersonnelV2Command extends AddOrganizationPersonnelCommand {
@@ -38,6 +39,8 @@ public class AddOrganizationPersonnelV2Command extends AddOrganizationPersonnelC
     private String regionCode;
 
     private String email;
+
+    private String enName;
 
     public AddOrganizationPersonnelV2Command() {
     }
@@ -72,6 +75,14 @@ public class AddOrganizationPersonnelV2Command extends AddOrganizationPersonnelC
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getEnName() {
+        return enName;
+    }
+
+    public void setEnName(String enName) {
+        this.enName = enName;
     }
 
     @Override
