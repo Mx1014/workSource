@@ -12,6 +12,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.recommend.RecommendationService;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.BillDetailDTO;
 import com.everhomes.user.User;
@@ -93,9 +94,12 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             BillCountResponse response = gson.fromJson(postJson, BillCountResponse.class);
 //            BillCountResponse response = (BillCountResponse)StringHelper.fromJsonString(postJson, BillCountResponse.class);
             if(response.getErrorCode()==200){
-                ContractBillsStatDTO res = response.getResponse();
-                finalDto.setBillPeriodMonths(res.getMonthsTotalOwed());
-                finalDto.setAmountOwed(new BigDecimal(res.getAmountTotal()));
+                List<ContractBillsStatDTO> response1 = response.getResponse();
+                if(response1!=null && response1.size()==1){
+                    ContractBillsStatDTO res = response1.get(0);
+                    finalDto.setBillPeriodMonths(res.getMonthsTotalOwed());
+                    finalDto.setAmountOwed(new BigDecimal(res.getAmountTotal()));
+                }
             }else{
                 LOGGER.error("调用张江高科失败"+response.getErrorDescription()+","+response.getErrorDetails());
             }
@@ -163,9 +167,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String json = generateJson(params);
         String url;
         if(targetType.equals("eh_organization")){
-            url = ZjgkUrls.USER_BILLS_DETAIL;
-        }else if(targetType.equals("eh_user")){
             url = ZjgkUrls.ENTERPRISE_BILLS_DETAIL;
+        }else if(targetType.equals("eh_user")){
+            url = ZjgkUrls.USER_BILLS_DETAIL;
         }else{
             throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
         }
@@ -179,22 +183,29 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             BillDetailResponse response = new BillDetailResponse();
             response = (BillDetailResponse)StringHelper.fromJsonString(postJson, BillDetailResponse.class);
             if(response.getErrorCode()==200){
-                com.everhomes.asset.zjgkVOs.BillDetailDTO sourceDto = response.getResponse();
-                ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
-                dto.setBillItemName(sourceDto.getFeeName());
-                dto.setAmountOwed(sourceDto.getAmountOwed()==null?null:new BigDecimal(sourceDto.getAmountOwed()));
-                List<CommunityAddressDTO> apartments = sourceDto.getApartments();
-                String buildingName = "";
-                String apartmentName = "";
-                if(apartments!=null&&apartments.size()>0){
-                    buildingName = apartments.get(0).getBuildingName()==null?"":apartments.get(0).getBuildingName();
-                    apartmentName = apartments.get(0).getApartmentName()==null?"":apartments.get(0).getApartmentName();
+                List<com.everhomes.asset.zjgkVOs.BillDetailDTO> dtos = response.getResponse();
+                BigDecimal amountOwed = new BigDecimal("0");
+                BigDecimal amountReceivable = new BigDecimal("0");
+                for(int i = 0 ; i < dtos.size(); i++){
+                    com.everhomes.asset.zjgkVOs.BillDetailDTO sourceDto = dtos.get(i);
+                    ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
+                    dto.setBillItemName(sourceDto.getFeeName());
+                    dto.setAmountOwed(sourceDto.getAmountOwed()==null?null:new BigDecimal(sourceDto.getAmountOwed()));
+                    amountOwed = amountOwed.add(sourceDto.getAmountOwed()==null?new BigDecimal("0"):new BigDecimal(sourceDto.getAmountOwed()));
+                    amountReceivable = amountReceivable.add(sourceDto.getAmountReceivable()==null?new BigDecimal("0"):new BigDecimal(sourceDto.getAmountReceivable()));
+                    List<CommunityAddressDTO> apartments = sourceDto.getApartments();
+                    String buildingName = "";
+                    String apartmentName = "";
+                    if(apartments!=null&&apartments.size()>0){
+                        buildingName = apartments.get(0).getBuildingName()==null?"":apartments.get(0).getBuildingName();
+                        apartmentName = apartments.get(0).getApartmentName()==null?"":apartments.get(0).getApartmentName();
+                    }
+                    dto.setAddressName(buildingName+apartmentName);
+                    result.setDatestr(sourceDto.getBillDate());
+                    list.add(dto);
                 }
-                dto.setAddressName(buildingName+apartmentName);
-                list.add(dto);
-                result.setDatestr(sourceDto.getBillDate());
-                result.setAmountOwed(sourceDto.getAmountOwed()==null?null:new BigDecimal(sourceDto.getAmountOwed()));
-                result.setAmountReceivable(sourceDto.getAmountReceivable()==null?null:new BigDecimal(sourceDto.getAmountReceivable()));
+                result.setAmountOwed(amountOwed);
+                result.setAmountReceivable(amountReceivable);
                 result.setShowBillDetailForClientDTOList(list);
             }
         }
@@ -209,8 +220,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
         params.put("payFlag", "0");
-        params.put("sdateFrom","");
-        params.put("sdateTo","");
+        params.put("sdateFrom",dateStr);
+        params.put("sdateTo",dateStr);
         check(contractId,"合同编号");
         params.put("contractNum", contractId);
         String json = generateJson(params);
@@ -231,9 +242,12 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         if(postJson!=null&&postJson.trim().length()>0){
             BillCountResponse response = (BillCountResponse)StringHelper.fromJsonString(postJson, BillCountResponse.class);
             if(response.getErrorCode()==200){
-                ContractBillsStatDTO res = response.getResponse();
-                result.setAmountReceivable(res.getMonthsTotalOwed()==null?null:new BigDecimal(res.getMonthsTotalOwed()));
-                result.setAmountOwed(res.getMonthsTotalOwed()==null?null:new BigDecimal(res.getMonthsTotalOwed()));
+                List<ContractBillsStatDTO> response1 = response.getResponse();
+                if(response1!=null && response1.size()>0){
+                    ContractBillsStatDTO res = response1.get(0);
+                    result.setAmountReceivable(res.getMonthsTotalOwed()==null?null:new BigDecimal(res.getMonthsTotalOwed()));
+                    result.setAmountOwed(res.getMonthsTotalOwed()==null?null:new BigDecimal(res.getMonthsTotalOwed()));
+                }
             }else{
                 LOGGER.error("调用张江高科失败"+response.getErrorDescription()+","+response.getErrorDetails());
             }
@@ -252,8 +266,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         }
         params.put("payFlag", payFlag);
         check(dateStr,"切换的目标日期");
-        params.put("sdateFrom",payFlag);
-        params.put("sdateTo",payFlag);
+        params.put("sdateFrom",dateStr);
+        params.put("sdateTo",dateStr);
         params.put("pageOffset","1");
         params.put("pageSize","999");
         check(contractId,"合同编号");
@@ -391,14 +405,22 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             Organization organization = organizationProvider.findOrganizationById(cmd.getTargetId());
             identifier = organization.getNamespaceOrganizationToken();
             if(identifier==null){
-                identifier="0a313a75-db7c-43b1-ab5e-956577ea6113";
+//                identifier="0a313a75-db7c-43b1-ab5e-956577ea6113";
+                LOGGER.error("Insufficient privilege, zjgkhandler organization_identifier is null");
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                        "Insufficient privilege");
             }
             params.put("enterpriseIdentifier",identifier);
         }else if(targetType!=null && targetType.equals("eh_user")){
             url = ZjgkUrls.USER_CONTRACT_LIST;
             identifier = assetProvider.findIdentifierByUid(UserContext.currentUserId());
             //测试
-            identifier = "18616759112";
+            if(identifier==null){
+//                identifier = "18616759112";
+                LOGGER.error("Insufficient privilege, zjgkhandler userMobile is null");
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                        "Insufficient privilege");
+            }
             params.put("userMobile",identifier);
         }else{
             throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
@@ -452,7 +474,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
         String identifier;
-        params.put("contractNum", cmd.getContractNumber());
+        params.put("contractNum", cmd.getContractId());
         String json = generateJson(params);
         String url;
         String targetType= cmd.getTargetType();
@@ -593,6 +615,11 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 
     @Override
     public List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse carrier) {
+        if(status!=1){
+            LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
         List<ListBillsDTO> list = new ArrayList<>();
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
@@ -616,6 +643,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             if(carrier.getNextPageAnchor()==null){
                 nextFLag = false;
             }
+            if(list.size()>=pageSize){
+                return list;
+            }else{
+                pageSize = pageSize-list.size();
+            }
+            params.put("pageSize",String.valueOf(pageSize));
+            json = generateJson(params);
             url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
             listBillOnUrls(targetType, carrier, list, json, url,"eh_organization");
             if(nextFLag==false){
@@ -668,9 +702,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     String noticeTels = sourceDto.getNoticeTels();
                     if(noticeTels!=null && sourceDto.getNoticeTels().split(",").length>1){
                         noticeTel = sourceDto.getNoticeTels().split(",")[0];
-                    }else if(noticeTels!=null){
+                    }else if(noticeTels!=null && sourceDto.getNoticeTels().split("/").length>1){
+                        noticeTel = sourceDto.getNoticeTels().split(",")[0];
+                    }
+                    else if(noticeTels!=null){
                         noticeTel = sourceDto.getNoticeTels();
                     }
+
                     dto.setNoticeTel(noticeTel);
 
                     dto.setBillId(sourceDto.getBillID());
@@ -722,33 +760,37 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             throw new RuntimeException("调用张江高科失败"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0) {
-            BillDetailResponse response = (BillDetailResponse)StringHelper.fromJsonString(postJson, BillDetailResponse.class);
+            Gson gson = new Gson();
+            BillDetailResponse response = gson.fromJson(postJson, BillDetailResponse.class);
 //            BillDetailResponse response = gson.fromJson(postJson, BillDetailResponse.class);
             if(response.getErrorCode()==200){
-                com.everhomes.asset.zjgkVOs.BillDetailDTO sourceDto = response.getResponse();
-                String buildingName = "";
-                String apartmentName = "";
-                if(sourceDto.getApartments()!=null&& sourceDto.getApartments().size()>0){
-                    CommunityAddressDTO communityAddressDTO = sourceDto.getApartments().get(0);
-                    buildingName = communityAddressDTO.getBuildingName();
-                    apartmentName = communityAddressDTO.getApartmentName();
-                }
-                BillDTO dto = new BillDTO();
-                dto.setBuildingName(buildingName);
-                dto.setApartmentName(apartmentName);
+                List<com.everhomes.asset.zjgkVOs.BillDetailDTO> dtos = response.getResponse();
+                for(int i = 0; i < dtos.size(); i++){
+                    com.everhomes.asset.zjgkVOs.BillDetailDTO sourceDto = dtos.get(i);
+                    String buildingName = "";
+                    String apartmentName = "";
+                    if(sourceDto.getApartments()!=null&& sourceDto.getApartments().size()>0){
+                        CommunityAddressDTO communityAddressDTO = sourceDto.getApartments().get(0);
+                        buildingName = communityAddressDTO.getBuildingName();
+                        apartmentName = communityAddressDTO.getApartmentName();
+                    }
+                    BillDTO dto = new BillDTO();
+                    dto.setBuildingName(buildingName);
+                    dto.setApartmentName(apartmentName);
 //                    dto.setBillItemId(billId);
-                dto.setAmountOwed(sourceDto.getAmountOwed()!=null?new BigDecimal(sourceDto.getAmountOwed()):null);
-                dto.setAmountReceivable(sourceDto.getAmountReceivable()!=null?new BigDecimal(sourceDto.getAmountReceivable()):null);
-                dto.setAmountReceived(sourceDto.getAmountReceived()!=null?new BigDecimal(sourceDto.getAmountReceived()):null);
-                dto.setBillItemName(sourceDto.getFeeName());
-                dto.setBillStatus(sourceDto.getPayFlag());
-                dto.setDateStr(sourceDto.getBillDate());
+                    dto.setAmountOwed(sourceDto.getAmountOwed()!=null?new BigDecimal(sourceDto.getAmountOwed()):null);
+                    dto.setAmountReceivable(sourceDto.getAmountReceivable()!=null?new BigDecimal(sourceDto.getAmountReceivable()):null);
+                    dto.setAmountReceived(sourceDto.getAmountReceived()!=null?new BigDecimal(sourceDto.getAmountReceived()):null);
+                    dto.setBillItemName(sourceDto.getFeeName());
+                    dto.setBillStatus(sourceDto.getPayFlag());
+                    dto.setDateStr(sourceDto.getBillDate());
 //                    dto.setDefaultOrder();
-                dto.setTargetId(sourceDto.getCustomerIdentifier());
-                dto.setTargetName(sourceDto.getCustomerName());
-                dto.setTargetType(targetType);
-                dto.setPayStatus(sourceDto.getStatus());
-                list.add(dto);
+                    dto.setTargetId(sourceDto.getCustomerIdentifier());
+                    dto.setTargetName(sourceDto.getCustomerName());
+                    dto.setTargetType(targetType);
+                    dto.setPayStatus(sourceDto.getStatus());
+                    list.add(dto);
+                }
             }
         }
         return list;
@@ -769,9 +811,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             String targetType = idAndType.getTargetType();
             check(targetType, "客户类型");
             if (targetType.equals("eh_organization")) {
-                url = ZjgkUrls.USER_BILLS_DETAIL;
-            } else if (targetType.equals("eh_user")) {
                 url = ZjgkUrls.ENTERPRISE_BILLS_DETAIL;
+            } else if (targetType.equals("eh_user")) {
+                url = ZjgkUrls.USER_BILLS_DETAIL;
             } else {
                 throw new RuntimeException("查询账单传递了不正确的客户类型" + targetType + ",个人应该为eh_user，企业为eh_organization");
             }
@@ -786,29 +828,42 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 Gson gson = new Gson();
                 response = gson.fromJson(postJson, BillDetailResponse.class);
                 if (response.getErrorCode() == 200) {
-                    com.everhomes.asset.zjgkVOs.BillDetailDTO sourceDto = response.getResponse();
-                    NoticeInfo no = new NoticeInfo();
-                    no.setTargetName(sourceDto.getCustomerName());
-                    no.setTargetType(targetType);
-                    Long targetId = assetProvider.findTargetIdByIdentifier(sourceDto.getCustomerIdentifier());
-                    no.setTargetId(targetId);
-                    String appName = assetProvider.findAppName(UserContext.getCurrentNamespaceId());
-                    if (appName != null && appName.trim().length() > 0) {
-                        no.setAppName(appName);
-                    } else {
-                        no.setAppName("张江高科推荐");
+                    List<com.everhomes.asset.zjgkVOs.BillDetailDTO> dtos = response.getResponse();
+                    BigDecimal amountReceivable = new BigDecimal("0");
+                    BigDecimal amountOwed = new BigDecimal("0");
+                    if(dtos!=null&& dtos.size()>0){
+                        for(int j = 0; j < dtos.size() ; j ++){
+                            com.everhomes.asset.zjgkVOs.BillDetailDTO dto = dtos.get(j);
+                            amountReceivable = amountReceivable.add(dto.getAmountReceivable()==null?new BigDecimal("0"):new BigDecimal(dto.getAmountReceivable()));
+                            amountOwed = amountOwed.add(dto.getAmountOwed()==null?new BigDecimal("0"):new BigDecimal(dto.getAmountOwed()));
+                        }
+                        com.everhomes.asset.zjgkVOs.BillDetailDTO sourceDto = dtos.get(0);
+                        NoticeInfo no = new NoticeInfo();
+                        no.setTargetName(sourceDto.getCustomerName());
+                        no.setTargetType(targetType);
+                        Long targetId = assetProvider.findTargetIdByIdentifier(sourceDto.getCustomerIdentifier());
+                        no.setTargetId(targetId);
+                        String appName = assetProvider.findAppName(UserContext.getCurrentNamespaceId());
+                        if (appName != null && appName.trim().length() > 0) {
+                            no.setAppName(appName);
+                        } else {
+                            no.setAppName("张江高科推荐");
+                        }
+                        no.setAmountOwed(amountOwed);
+                        no.setAmountRecevable(amountReceivable);
+                        String noticeTels = sourceDto.getNoticeTels();
+                        String noticeTel = "";
+                        if (noticeTels != null && sourceDto.getNoticeTels().split(",").length > 1) {
+                            noticeTel = sourceDto.getNoticeTels().split(",")[0];
+                        }else if(noticeTels!=null && sourceDto.getNoticeTels().split("/").length>1){
+                            noticeTel = sourceDto.getNoticeTels().split(",")[0];
+                        }
+                        else if(noticeTels!=null){
+                            noticeTel = sourceDto.getNoticeTels();
+                        }
+                        no.setPhoneNum(noticeTel);
+                        list.add(no);
                     }
-                    no.setAmountOwed(sourceDto.getAmountOwed() != null ? new BigDecimal(sourceDto.getAmountOwed()) : null);
-                    no.setAmountRecevable(sourceDto.getAmountReceivable() != null ? new BigDecimal(sourceDto.getAmountReceivable()) : null);
-                    String noticeTels = sourceDto.getNoticeTels();
-                    String noticeTel = "";
-                    if (noticeTels != null && sourceDto.getNoticeTels().split(",").length > 1) {
-                        noticeTel = sourceDto.getNoticeTels().split(",")[0];
-                    } else if (noticeTels != null) {
-                        noticeTel = sourceDto.getNoticeTels();
-                    }
-                    no.setPhoneNum(noticeTel);
-                    list.add(no);
                 }
             }
         }

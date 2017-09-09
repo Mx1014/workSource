@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.asset.zjgkVOs;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.List;
 
 /**
@@ -11,9 +13,10 @@ public class BillDetailDTO {
     private String billID;
     private String billDate;
     private String feeName;
-    private String payFlag;
+    private Byte payFlag;
     private String customerIdentifier;
     private String customerName;
+    @ItemType(CommunityAddressDTO.class)
     private List<CommunityAddressDTO> apartments;
     private String noticeTels;
     private String amountReceivable;
@@ -53,11 +56,11 @@ public class BillDetailDTO {
         this.feeName = feeName;
     }
 
-    public String getPayFlag() {
+    public Byte getPayFlag() {
         return payFlag;
     }
 
-    public void setPayFlag(String payFlag) {
+    public void setPayFlag(Byte payFlag) {
         this.payFlag = payFlag;
     }
 

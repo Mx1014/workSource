@@ -233,14 +233,14 @@ public class AssetServiceImpl implements AssetService {
         }
         int pageOffSet = cmd.getPageAnchor().intValue();
         List<ListBillsDTO> list = handler.listBills(cmd.getCommunityIdentifier(),cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
-        if(UserContext.getCurrentNamespaceId()!=999971){
             if(list.size() <= cmd.getPageSize()){
 //                response.setNextPageAnchor(null);
-            }else{
+            }else if(UserContext.getCurrentNamespaceId()!=999971){
                 response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
                 list.remove(list.size()-1);
+            }else{
+                response.setNextPageAnchor(cmd.getPageAnchor()==null?1:cmd.getPageAnchor()+1);
             }
-        }
         response.setListBillsDTOS(list);
         return response;
     }
@@ -266,7 +266,7 @@ public class AssetServiceImpl implements AssetService {
         List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         if(billDTOS.size() <= cmd.getPageSize()) {
 //            response.setNextPageAnchor(null);
-        }else{
+        }else if(UserContext.getCurrentNamespaceId()!=99971){
             response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
             billDTOS.remove(billDTOS.size()-1);
         }
@@ -421,11 +421,12 @@ public class AssetServiceImpl implements AssetService {
     public void OneKeyNotice(OneKeyNoticeCommand cmd) {
         ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
         if(UserContext.getCurrentNamespaceId()!=999971){
-            convertedCmd.setPageAnchor(0l);
+//            convertedCmd.setPageAnchor(0l);
+            convertedCmd.setPageAnchor(1l);
         }else{
-            convertedCmd.setPageAnchor(null);
+            convertedCmd.setPageAnchor(1l);
         }
-        convertedCmd.setPageSize(999999);
+        convertedCmd.setPageSize(100);
         convertedCmd.setStatus((byte)1);
         convertedCmd.setBillStatus((byte)0);
         //listBills has already distributed the requests according to namespaces;
@@ -524,7 +525,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
-        cmd.setPageSize(100000);
+        if(cmd.getPageSize()==null||cmd.getPageSize()>1000){
+            cmd.setPageSize(1000);
+        }
         //has already distributed
         ListBillsResponse bills = listBills(cmd);
         Calendar c = Calendar.getInstance();
