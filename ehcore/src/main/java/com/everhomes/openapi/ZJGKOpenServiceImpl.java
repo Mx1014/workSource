@@ -1247,8 +1247,10 @@ public class ZJGKOpenServiceImpl {
     private void insertEnterpriseCustomer(Integer namespaceId, ZJEnterprise zjEnterprise) {
         LOGGER.debug("syncDataToDb insertEnterpriseCustomer namespaceId: {}, zjEnterprise: {}",
                 namespaceId, StringHelper.toJsonString(zjEnterprise));
-//        this.dbProvider.execute((TransactionStatus status) -> {
+        this.dbProvider.execute((TransactionStatus status) -> {
             EnterpriseCustomer customer = new EnterpriseCustomer();
+            Long communityId = zjEnterprise.getCommunityId() == null ? 0L : zjEnterprise.getCommunityId();
+            customer.setCommunityId(communityId);
             customer.setNamespaceId(namespaceId);
             customer.setNamespaceCustomerType(NamespaceCustomerType.SHENZHOU.getCode());
             customer.setNamespaceCustomerToken(zjEnterprise.getEnterpriseIdentifier());
@@ -1284,15 +1286,15 @@ public class ZJGKOpenServiceImpl {
             //给企业客户创建一个对应的企业账号
             Organization organization = insertOrganization(customer);
             customer.setOrganizationId(organization.getId());
-            enterpriseCustomerProvider.createEnterpriseCustomer2(customer);
+            enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
 
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
             insertOrUpdateOrganizationAddresses(zjEnterprise.getCommunityId(), zjEnterprise.getApartmentIdentifierList(), customer);
 
-//            return null;
-//        });
+            return null;
+        });
 
     }
 
