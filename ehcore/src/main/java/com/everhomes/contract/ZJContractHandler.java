@@ -83,6 +83,9 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public ListContractsResponse listContracts(ListContractsCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("zjgk listContracts. cmd:{}", cmd);
+        }
         String contractStatus  = convertContractStatus(cmd.getStatus());
         String contractAttribute = convertContractAttribute(cmd.getContractType());
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
@@ -161,6 +164,9 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public ContractDetailDTO findContract(FindContractCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("zjgk findContract. cmd:{}", cmd);
+        }
         Community community = communityProvider.findCommunityById(cmd.getCommunityId());
         if(community != null) {
             String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
@@ -202,6 +208,9 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public List<ContractDTO> listCustomerContracts(ListCustomerContractsCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("zjgk listCustomerContracts. cmd:{}", cmd);
+        }
         UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(cmd.getTargetId(), cmd.getNamespaceId());
         if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
             ListIndividualCustomerContractsCommand command = new ListIndividualCustomerContractsCommand();
@@ -301,6 +310,9 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public List<ContractDTO> listEnterpriseCustomerContracts(ListEnterpriseCustomerContractsCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("zjgk listEnterpriseCustomerContracts. cmd:{}", cmd);
+        }
         EnterpriseCustomer enterpriseCustomer = enterpriseCustomerProvider.findById(cmd.getEnterpriseCustomerId());
         if(enterpriseCustomer != null) {
             String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
@@ -334,6 +346,9 @@ public class ZJContractHandler implements ContractService{
 
     @Override
     public List<ContractDTO> listIndividualCustomerContracts(ListIndividualCustomerContractsCommand cmd) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("zjgk listIndividualCustomerContracts. cmd:{}", cmd);
+        }
         String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
         String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
         Map<String, String> params= new HashMap<String,String>();
@@ -482,6 +497,9 @@ public class ZJContractHandler implements ContractService{
         String json = null;
 
         try {
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("post to shenzhou, method: {}, params: {}", shenzhouUrl + method, StringHelper.toJsonString(params));
+            }
             json = HttpUtils.postJson(shenzhouUrl + method, StringHelper.toJsonString(params), 30, HTTP.UTF_8);
 
         } catch (Exception e) {
