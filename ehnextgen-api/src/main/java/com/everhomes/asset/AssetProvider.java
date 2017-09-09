@@ -57,7 +57,7 @@ public interface AssetProvider {
 
     ShowCreateBillDTO showCreateBill(Long billGroupId);
 
-    ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId);
+    ShowBillDetailForClientResponse getBillDetailByDateStr(Byte billStatus,Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId);
 
     ListBillsDTO creatPropertyBill(BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId);
 
@@ -128,4 +128,12 @@ public interface AssetProvider {
     List<PaymentBillGroup> listAllBillGroups();
 
     void updateBillSwitchOnTime(String billDateStr);
+
+    String findZjgkCommunityIdentifierById(Long ownerId);
+
+    Long findTargetIdByIdentifier(String customerIdentifier);
+
+    String findAppName(Integer currentNamespaceId);
+
+    Long findOrganizationIdByIdentifier(String targetId);
 }

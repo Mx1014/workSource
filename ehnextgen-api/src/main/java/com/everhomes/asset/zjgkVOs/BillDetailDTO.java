@@ -1,43 +1,24 @@
 //@formatter:off
 package com.everhomes.asset.zjgkVOs;
 
-import com.everhomes.discover.ItemType;
-import com.everhomes.util.StringHelper;
-
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Created by Wentian Wang on 2017/9/5.
+ * Created by Wentian Wang on 2017/9/8.
  */
 
-public class SearchEnterpriseBillsDTO {
+public class BillDetailDTO {
     private String billID;
     private String billDate;
     private String feeName;
     private Byte payFlag;
     private String customerIdentifier;
     private String customerName;
-    @ItemType(CommunityAddressDTO.class)
     private List<CommunityAddressDTO> apartments;
     private String noticeTels;
     private String amountReceivable;
     private String amountOwed;
     private String amountReceived;
-    private String contractNum;
-
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
-    public String getContractNum() {
-        return contractNum;
-    }
-
-    public void setContractNum(String contractNum) {
-        this.contractNum = contractNum;
-    }
 
     public String getBillID() {
         return billID;

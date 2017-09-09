@@ -9,13 +9,13 @@ import java.math.BigDecimal;
 /**
  *<ul>
  * <li>billItemName:项目名称</li>
- * <li>amountReceivable:应收金额</li>
+ * <li>amountOwed:待缴金额</li>
  * <li>addressName:地址</li>
  *</ul>
  */
 public class ShowBillDetailForClientDTO {
     private String billItemName;
-    private BigDecimal amountReceivable;
+    private BigDecimal amountOwed;
     private String addressName;
 
     @Override
@@ -39,12 +39,12 @@ public class ShowBillDetailForClientDTO {
         this.billItemName = billItemName;
     }
 
-    public BigDecimal getAmountReceivable() {
-        return amountReceivable;
+    public BigDecimal getAmountOwed() {
+        return amountOwed;
     }
 
-    public void setAmountReceivable(BigDecimal amountReceivable) {
-        this.amountReceivable = amountReceivable;
+    public void setAmountOwed(BigDecimal amountOwed) {
+        this.amountOwed = amountOwed;
     }
 
     public ShowBillDetailForClientDTO() {

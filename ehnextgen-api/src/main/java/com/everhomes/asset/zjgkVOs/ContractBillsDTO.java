@@ -1,42 +1,26 @@
 //@formatter:off
 package com.everhomes.asset.zjgkVOs;
 
-import com.everhomes.discover.ItemType;
-import com.everhomes.util.StringHelper;
-
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Created by Wentian Wang on 2017/9/5.
+ * Created by Wentian Wang on 2017/9/8.
  */
 
-public class SearchEnterpriseBillsDTO {
+public class ContractBillsDTO {
     private String billID;
     private String billDate;
     private String feeName;
     private Byte payFlag;
-    private String customerIdentifier;
+    private String cutomerIdentifier;
     private String customerName;
-    @ItemType(CommunityAddressDTO.class)
-    private List<CommunityAddressDTO> apartments;
+    private List< CommunityAddressDTO> apartments;
     private String noticeTels;
     private String amountReceivable;
-    private String amountOwed;
     private String amountReceived;
-    private String contractNum;
+    private String amountOwed;
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
-    public String getContractNum() {
-        return contractNum;
-    }
-
-    public void setContractNum(String contractNum) {
-        this.contractNum = contractNum;
+    public ContractBillsDTO() {
     }
 
     public String getBillID() {
@@ -71,12 +55,12 @@ public class SearchEnterpriseBillsDTO {
         this.payFlag = payFlag;
     }
 
-    public String getCustomerIdentifier() {
-        return customerIdentifier;
+    public String getCutomerIdentifier() {
+        return cutomerIdentifier;
     }
 
-    public void setCustomerIdentifier(String customerIdentifier) {
-        this.customerIdentifier = customerIdentifier;
+    public void setCutomerIdentifier(String cutomerIdentifier) {
+        this.cutomerIdentifier = cutomerIdentifier;
     }
 
     public String getCustomerName() {
@@ -111,19 +95,19 @@ public class SearchEnterpriseBillsDTO {
         this.amountReceivable = amountReceivable;
     }
 
-    public String getAmountOwed() {
-        return amountOwed;
-    }
-
-    public void setAmountOwed(String amountOwed) {
-        this.amountOwed = amountOwed;
-    }
-
     public String getAmountReceived() {
         return amountReceived;
     }
 
     public void setAmountReceived(String amountReceived) {
         this.amountReceived = amountReceived;
+    }
+
+    public String getAmountOwed() {
+        return amountOwed;
+    }
+
+    public void setAmountOwed(String amountOwed) {
+        this.amountOwed = amountOwed;
     }
 }
