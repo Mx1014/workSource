@@ -1402,24 +1402,26 @@ public class ZJGKOpenServiceImpl {
     }
 
     private void insertOrUpdateOrganizationCommunityRequest(Long communityId, Organization organization) {
-        OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.findOrganizationCommunityRequestByOrganizationId(communityId, organization.getId());
-        if (organizationCommunityRequest == null) {
-            organizationCommunityRequest = new OrganizationCommunityRequest();
-            organizationCommunityRequest.setCommunityId(communityId);
-            organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
-            organizationCommunityRequest.setMemberId(organization.getId());
-            organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
-            organizationCommunityRequest.setCreatorUid(1L);
-            organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            organizationCommunityRequest.setOperatorUid(1L);
-            organizationCommunityRequest.setApproveTime(organizationCommunityRequest.getCreateTime());
-            organizationCommunityRequest.setUpdateTime(organizationCommunityRequest.getCreateTime());
-            organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
-        }else {
-            organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
-            organizationCommunityRequest.setOperatorUid(1L);
-            organizationCommunityRequest.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            organizationProvider.updateOrganizationCommunityRequest(organizationCommunityRequest);
+        if(communityId != null) {
+            OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.findOrganizationCommunityRequestByOrganizationId(communityId, organization.getId());
+            if (organizationCommunityRequest == null) {
+                organizationCommunityRequest = new OrganizationCommunityRequest();
+                organizationCommunityRequest.setCommunityId(communityId);
+                organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+                organizationCommunityRequest.setMemberId(organization.getId());
+                organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+                organizationCommunityRequest.setCreatorUid(1L);
+                organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                organizationCommunityRequest.setOperatorUid(1L);
+                organizationCommunityRequest.setApproveTime(organizationCommunityRequest.getCreateTime());
+                organizationCommunityRequest.setUpdateTime(organizationCommunityRequest.getCreateTime());
+                organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
+            }else {
+                organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+                organizationCommunityRequest.setOperatorUid(1L);
+                organizationCommunityRequest.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                organizationProvider.updateOrganizationCommunityRequest(organizationCommunityRequest);
+            }
         }
     }
 
