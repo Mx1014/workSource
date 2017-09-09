@@ -456,11 +456,11 @@ public class ZJGKOpenServiceImpl {
             List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, dataType);
 
             if (backupList == null || backupList.isEmpty()) {
-                LOGGER.debug("backupList is empty, NAMESPACE_ID: {}, dataType: {}", NAMESPACE_ID, dataType);
+                LOGGER.debug("syncDataToDb backupList is empty, NAMESPACE_ID: {}, dataType: {}", NAMESPACE_ID, dataType);
                 return ;
             }
             try {
-                LOGGER.debug("backupList size：{}", backupList.size());
+                LOGGER.debug("syncDataToDb backupList size：{}", backupList.size());
                 updateAllDate(dataType, allFlag, NAMESPACE_ID , backupList);
             } finally {
                 zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
@@ -507,7 +507,7 @@ public class ZJGKOpenServiceImpl {
                 syncAllApartments(namespaceId, backupList);
                 break;
             case ENTERPRISE:
-                LOGGER.debug("SYNC ENTERPRISE");
+                LOGGER.debug("syncDataToDb SYNC ENTERPRISE");
                 syncAllEnterprises(namespaceId, backupList, allFlag);
                 break;
             case APARTMENT_LIVING_STATUS:
