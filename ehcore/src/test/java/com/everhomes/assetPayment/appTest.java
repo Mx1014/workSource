@@ -30,7 +30,7 @@ public class appTest {
         command.setIsOnlyOwedBill((byte)0);
 //        ShowBillForClientDTO showBillForClientDTO = handler.showBillForClient(command.getOwnerId(), command.getOwnerType(), command.getTargetType(), command.getTargetId(), command.getBillGroupId(), command.getIsOnlyOwedBill(), command.getContractId());
         ShowBillDetailForClientResponse eh_user = handler.getBillDetailForClient("F9507BA7-9981-45A2-A75D-A4D39ADEDDDD", "eh_user");
-        System.out.println(eh_user.getShowBillDetailForClientDTOList().get(0).getStatus());
+        System.out.println(eh_user.getShowBillDetailForClientDTOList().get(0).getPayStatus());
 //        System.out.println(showBillForClientDTO);
     }
 

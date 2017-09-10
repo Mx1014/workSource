@@ -1,16 +1,19 @@
 //@formatter:off
 package com.everhomes.asset.zjgkVOs;
 
+import java.util.List;
+
 /**
  * Created by Wentian Wang on 2017/9/8.
  */
 
 public class ContractDetailResponse {
+    private String version;
     private String errorScope;
     private Integer errorCode;
     private String errorDescription;
     private String errorDetails;
-    private ContractDTO response;
+    private List<ContractDTO> response;
 
     public String getErrorScope() {
         return errorScope;
@@ -44,11 +47,11 @@ public class ContractDetailResponse {
         this.errorDetails = errorDetails;
     }
 
-    public ContractDTO getResponse() {
+    public List<ContractDTO> getResponse() {
         return response;
     }
 
-    public void setResponse(ContractDTO response) {
+    public void setResponse(List<ContractDTO> response) {
         this.response = response;
     }
 }

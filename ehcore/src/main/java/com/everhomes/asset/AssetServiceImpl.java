@@ -176,6 +176,9 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private UserService userService;
 
+//    @Autowired
+//    private ZhangjianggaokeAssetVendor handler;
+
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -299,7 +302,6 @@ public class AssetServiceImpl implements AssetService {
                 String phoneNums = noticeInfo.getPhoneNum();
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
-                phoneNums = "15919770996";
                 smsProvider.sendSms(UserContext.getCurrentNamespaceId(), phoneNums, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
                 }
             } catch(Exception e){
@@ -339,9 +341,7 @@ public class AssetServiceImpl implements AssetService {
                     Map<String, Object> map = new HashMap<>();
                     User targetUser = userProvider.findUserById(uids.get(k));
                     map.put("targetName", targetUser.getNickName());
-                    // targetName没有被替换
                     String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(), UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
-                    notifyTextForApplicant.replace("targetName", "南宫");
                     messageDto.setBody(notifyTextForApplicant);
                     messageDto.setMetaAppId(AppConstants.APPID_USER);
                     if (!notifyTextForApplicant.trim().equals("")) {
@@ -556,7 +556,11 @@ public class AssetServiceImpl implements AssetService {
             detail.setContractNum(dto.getContractNum());
             detail.setBillGroupName(dto.getBillGroupName());
             detail.setNoticeTel(dto.getNoticeTel());
-            detail.setNoticeTimes(String.valueOf(dto.getNoticeTimes()));
+            if(UserContext.getCurrentNamespaceId()!=999971){
+                detail.setNoticeTimes(String.valueOf(dto.getNoticeTimes()));
+            }else{
+                detail.setNoticeTimes("");
+            }
             detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
             detail.setTargetName(dto.getTargetName());
             detail.setDateStr(dto.getDateStr());
@@ -1027,7 +1031,6 @@ public class AssetServiceImpl implements AssetService {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vendor = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendor);
-//        ZhangjianggaokeAssetVendor handler = new ZhangjianggaokeAssetVendor();
         return handler.findUserInfoForPayment(cmd);
 
     }

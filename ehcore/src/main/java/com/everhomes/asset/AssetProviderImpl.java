@@ -13,6 +13,7 @@ import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
+import com.everhomes.server.schema.tables.EhOrganizations;
 import com.everhomes.server.schema.tables.EhPaymentBillGroups;
 import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
@@ -1720,7 +1721,12 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public Long findOrganizationIdByIdentifier(String targetId) {
-        return null;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhOrganizations t = Tables.EH_ORGANIZATIONS.as("t");
+        return context.select(t.ID)
+                .from(t)
+                .where(t.NAMESPACE_ORGANIZATION_TOKEN.eq(targetId))
+                .fetchOne(0,Long.class);
     }
 
     @Override
