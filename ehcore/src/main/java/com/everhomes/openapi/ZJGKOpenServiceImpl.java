@@ -515,6 +515,7 @@ public class ZJGKOpenServiceImpl {
                 syncApartmentLivingStatus(namespaceId, backupList);
                 break;
             case INDIVIDUAL:
+                LOGGER.debug("syncDataToDb SYNC INDIVIDUAL");
                 syncAllIndividuals(namespaceId, backupList, allFlag);
                 break;
 
@@ -1557,6 +1558,8 @@ public class ZJGKOpenServiceImpl {
         }
 
         dbProvider.execute(s->{
+            LOGGER.info("syncDataToDb namespaceId: {}, myIndividualCustomerList: {}, theirIndividualList: {}",
+                    namespaceId, myIndividualCustomerList, theirIndividualList);
             syncAllIndividuals(namespaceId, myIndividualCustomerList, theirIndividualList);
             return true;
         });
@@ -1576,6 +1579,7 @@ public class ZJGKOpenServiceImpl {
         // 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
         if (theirIndividualList != null) {
             for (ZJIndividuals zjIndividual : theirIndividualList) {
+                LOGGER.info("syncDataToDb zjIndividual DEAL: {}", zjIndividual.getDealed());
                 if ((zjIndividual.getDealed() != null && zjIndividual.getDealed().booleanValue() == true)) {
                     continue;
                 }
@@ -1605,6 +1609,7 @@ public class ZJGKOpenServiceImpl {
 
 
     private void insertIndividualCustomer(Integer namespaceId, ZJIndividuals zjIndividual) {
+        LOGGER.info("syncDataToDb insertIndividualCustomer namespaceId: {}, zjIndividual: {}", namespaceId, zjIndividual);
         this.dbProvider.execute((TransactionStatus status) -> {
             OrganizationOwner customer = new OrganizationOwner();
             customer.setContactName(zjIndividual.getName());
@@ -1676,6 +1681,8 @@ public class ZJGKOpenServiceImpl {
     }
 
     private void updateIndividualCustomer(OrganizationOwner customer, ZJIndividuals zjIndividual) {
+        LOGGER.info("syncDataToDb updateIndividualCustomer customer: {}, zjIndividual: {}",
+                customer, zjIndividual);
         this.dbProvider.execute((TransactionStatus status) -> {
             customer.setContactName(zjIndividual.getName());
             customer.setContactToken(zjIndividual.getMobile());
