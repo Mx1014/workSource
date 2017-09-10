@@ -176,8 +176,8 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private UserService userService;
 
-//    @Autowired
-//    private ZhangjianggaokeAssetVendor handler;
+    @Autowired
+    private ZhangjianggaokeAssetVendor handler;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -424,16 +424,17 @@ public class AssetServiceImpl implements AssetService {
         }else{
             convertedCmd.setPageAnchor(1l);
         }
-//        convertedCmd.setPageSize(100);
-//        Calendar now = Calendar.getInstance();
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-//        String dateStrEnd = sdf.format(now.getTime());
-//        convertedCmd.setDateStrEnd(dateStrEnd);
+        if(convertedCmd.getDateStrEnd()==null){
+            Calendar now = Calendar.getInstance();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+            String dateStrEnd = sdf.format(now.getTime());
+            convertedCmd.setDateStrEnd(dateStrEnd);
+        }
+        if(convertedCmd.getPageSize()==null){
+            convertedCmd.setPageSize(Integer.MAX_VALUE/10);
+        }
         convertedCmd.setStatus((byte)1);
         convertedCmd.setBillStatus((byte)0);
-        if(convertedCmd.getPageSize()==null){
-            convertedCmd.setPageSize(10000);
-        }
         //listBills has already distributed the requests according to namespaces;
         ListBillsResponse convertedResponse = listBills(convertedCmd);
         List<ListBillsDTO> listBillsDTOS = convertedResponse.getListBillsDTOS();
@@ -480,7 +481,7 @@ public class AssetServiceImpl implements AssetService {
                     info.setAmountRecevable(dto.getAmountReceivable());
                     info.setAmountOwed(dto.getAmountOwed());
                     Long tid = 0l;
-                    String targeType;
+                    String targeType=null;
                     Long uid  = assetProvider.findTargetIdByIdentifier(dto.getTargetId());
                     Long oid = assetProvider.findOrganizationIdByIdentifier(dto.getTargetId());
                     if(uid ==null && oid !=null){
@@ -491,7 +492,7 @@ public class AssetServiceImpl implements AssetService {
                         tid = uid;
                         targeType = "eh_user";
                     }else {
-                        throw new RuntimeException("一键催缴用户识别异常！");
+                        LOGGER.info("NOTICE USER IS NOT IN ZUOLIN APP, USER IS {}",dto.getTargetName());
                     }
                     info.setTargetId(tid);
                     info.setTargetType(targeType);
@@ -499,6 +500,7 @@ public class AssetServiceImpl implements AssetService {
                     list.add(info);
                 }
                 NoticeWithTextAndMessage(requestCmd,list);
+                return;
             }
             selectNotice(requestCmd);
         }

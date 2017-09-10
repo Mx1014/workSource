@@ -7,7 +7,7 @@ package com.everhomes.asset.zjgkVOs;
 
 public class ContractBillsStatDTO {
     private Integer monthsTotalOwed;
-    private String amountTotal;
+    private String amountTotalOwed;
 
     public Integer getMonthsTotalOwed() {
         return monthsTotalOwed;
@@ -17,11 +17,11 @@ public class ContractBillsStatDTO {
         this.monthsTotalOwed = monthsTotalOwed;
     }
 
-    public String getAmountTotal() {
-        return amountTotal;
+    public String getAmountTotalOwed() {
+        return amountTotalOwed;
     }
 
-    public void setAmountTotal(String amountTotal) {
-        this.amountTotal = amountTotal;
+    public void setAmountTotalOwed(String amountTotalOwed) {
+        this.amountTotalOwed = amountTotalOwed;
     }
 }

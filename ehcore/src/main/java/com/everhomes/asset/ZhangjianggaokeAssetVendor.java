@@ -97,7 +97,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 if(response1!=null && response1.size()==1){
                     ContractBillsStatDTO res = response1.get(0);
                     finalDto.setBillPeriodMonths(res.getMonthsTotalOwed()==null?0:res.getMonthsTotalOwed());
-                    finalDto.setAmountOwed(res.getAmountTotal()==null?new BigDecimal("0"):new BigDecimal(res.getAmountTotal()));
+                    finalDto.setAmountOwed(res.getAmountTotalOwed()==null?new BigDecimal("0"):new BigDecimal(res.getAmountTotalOwed()));
                 }
             }else{
                 LOGGER.error("调用张江高科失败"+response.getErrorDescription()+","+response.getErrorDetails());
@@ -246,11 +246,12 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 List<ContractBillsStatDTO> response1 = response.getResponse();
                 if(response1!=null && response1.size()>0){
                     ContractBillsStatDTO res = response1.get(0);
-                    result.setAmountReceivable(res.getMonthsTotalOwed()==null?null:new BigDecimal(res.getMonthsTotalOwed()));
-                    result.setAmountOwed(res.getMonthsTotalOwed()==null?null:new BigDecimal(res.getMonthsTotalOwed()));
+                    result.setAmountOwed(res.getAmountTotalOwed()==null?null:new BigDecimal(res.getAmountTotalOwed()));
+                    result.setAmountReceivable(res.getAmountTotalOwed()==null?null:new BigDecimal(res.getAmountTotalOwed()));
                 }
+                result.setDatestr(dateStr);
             }else{
-                LOGGER.error("调用张江高科失败"+response.getErrorDescription()+","+response.getErrorDetails());
+                LOGGER.error("GET result on date change failed"+response.getErrorDescription()+","+response.getErrorDetails());
             }
         }
         //找列表
@@ -559,13 +560,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
         String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
-        if(StringUtils.isEmpty(zjgk_communityIdentifier)){
-            LOGGER.error("Zjgk community id is empty, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
-            throw RuntimeErrorException.errorWith("zjgk", 9999712,
-                    "该园区暂没有和系统对接，无法查询");
-        } else {
-            LOGGER.info("Find zjgk community id from db, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
-        }
+//        if(StringUtils.isEmpty(zjgk_communityIdentifier)){
+//            LOGGER.error("Zjgk community id is empty, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
+//            throw RuntimeErrorException.errorWith("zjgk", 9999712,
+//                    "该园区暂没有和系统对接，无法查询");
+//        } else {
+//            LOGGER.info("Find zjgk community id from db, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
+//        }
         params.put("customerName", StringUtils.isEmpty(targetName)==true?"":targetName);
         params.put("communityIdentifer", StringUtils.isEmpty(zjgk_communityIdentifier)==true?"":zjgk_communityIdentifier);
         params.put("buildingIdentifier", StringUtils.isEmpty(buildingName)==true?"":String.valueOf(buildingName));
