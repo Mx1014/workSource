@@ -404,17 +404,21 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String json = generateJson(params);
         String url;
         String targetType= cmd.getTargetType();
+        //PaymentStatus a = PaymentStatus.fromCode(targetType);
+        //if(a != null && PaymentStatus.IN_PROCESS == a)
         if(targetType!=null && targetType.equals("eh_organization")){
             url = ZjgkUrls.ENTERPRISE_CONTRACT_DETAIL;
         }else if(targetType!=null && targetType.equals("eh_user")){
             url = ZjgkUrls.USER_CONTRACT_DETAIL;
         }else{
+            LOGGER.error("Invalid target type, targetType={}, cmd={}, supportedTargetType={}", targetType, cmd, PaymentStatus.values());
             throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
         }
         try {
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
-        } catch (IOException e) {
-            LOGGER.error("调用张江高科失败"+e);
+            LOGGER.info("Get contract from zjgk by area and address success, url={}, param={}, result={}", url, json, postJson);
+        } catch (Exception e) {
+            LOGGER.error("Failed to get contract from zjgk by area and address, url={}, param={}", url, json, e);
             throw new RuntimeException("调用张江高科失败"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0){
@@ -555,10 +559,12 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
         String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
-        if(zjgk_communityIdentifier==null){
-            LOGGER.error("Insufficient privilege, zjgkhandler listsettledbills");
+        if(StringUtils.isEmpty(zjgk_communityIdentifier)){
+            LOGGER.error("Zjgk community id is empty, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
             throw RuntimeErrorException.errorWith("zjgk", 9999712,
                     "该园区暂没有和系统对接，无法查询");
+        } else {
+            LOGGER.info("Find zjgk community id from db, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
         }
         params.put("customerName", StringUtils.isEmpty(targetName)==true?"":targetName);
         params.put("communityIdentifer", StringUtils.isEmpty(zjgk_communityIdentifier)==true?"":zjgk_communityIdentifier);
@@ -626,8 +632,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String postJson;
         try {
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
-        } catch (IOException e) {
-            LOGGER.error("调用张江高科失败"+e);
+            LOGGER.info("Get bills from zjgk success, url={}, param={}, result={}", url, json, postJson);
+        } catch (Exception e) {
+            LOGGER.error("Get bills from zjgk success, url={}, param={}, ", url, json, e);
             throw new RuntimeException("调用张江高科失败"+e);
         }
 //        HashMap<CommunityFilter,CommunityAddressDTO> dump = new HashMap<>();
@@ -705,15 +712,15 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         }
         try {
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
-        } catch (IOException e) {
-            LOGGER.error("调用张江高科失败"+e);
+            LOGGER.info("Get bill items from zjgk success, url={}, param={}, result={}", url, json, postJson);
+        } catch (Exception e) {
+            LOGGER.error("Failed to get bill item from zjgk, url={}, param={}", url, json, e);
             throw new RuntimeException("调用张江高科失败"+e);
         }
-        if(postJson!=null&&postJson.trim().length()>0) {
-            Gson gson = new Gson();
-            BillDetailResponse response = gson.fromJson(postJson, BillDetailResponse.class);
+        if(postJson!=null && postJson.trim().length() > 0) {
+            BillDetailResponse response = (BillDetailResponse)StringHelper.fromJsonString(postJson, BillDetailResponse.class);
 //            BillDetailResponse response = gson.fromJson(postJson, BillDetailResponse.class);
-            if(response.getErrorCode()==200){
+            if(response.getErrorCode() == 200){
                 List<com.everhomes.asset.zjgkVOs.BillDetailDTO> dtos = response.getResponse();
                 for(int i = 0; i < dtos.size(); i++){
                     com.everhomes.asset.zjgkVOs.BillDetailDTO sourceDto = dtos.get(i);
