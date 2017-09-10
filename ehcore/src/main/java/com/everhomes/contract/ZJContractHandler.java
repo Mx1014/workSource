@@ -169,37 +169,40 @@ public class ZJContractHandler implements ContractService{
     @Override
     public ContractDetailDTO findContract(FindContractCommand cmd) {
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("zjgk findContract. cmd:{}", cmd);
+            LOGGER.debug("zjgk findContract. cmd:{}", StringHelper.toJsonString(cmd));
         }
-        Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-        if(community != null) {
-            String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
-            String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
-            Map<String, String> params= new HashMap<String,String>();
-            params.put("appKey", appKey);
-            params.put("timestamp", ""+System.currentTimeMillis());
-            params.put("nonce", ""+(long)(Math.random()*100000));
-            params.put("crypto", "sssss");
+        if(cmd.getCommunityId() != null) {
+            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+            if(community != null) {
+                String appKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.app.key", "");
+                String secretKey = configurationProvider.getValue(NAMESPACE_ID, "shenzhoushuma.secret.key", "");
+                Map<String, String> params= new HashMap<String,String>();
+                params.put("appKey", appKey);
+                params.put("timestamp", ""+System.currentTimeMillis());
+                params.put("nonce", ""+(long)(Math.random()*100000));
+                params.put("crypto", "sssss");
 //            params.put("contractNum", "T1716170622");
-            params.put("contractNum", cmd.getContractNumber());
-            String signature = SignatureHelper.computeSignature(params, secretKey);
-            params.put("signature", signature);
-            ZJContractDetail zjContract = null;
-            if(CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
-                //住宅
-                String contracts = postToShenzhou(params, GET_USER_CONTRACT_DETAIL, null);
-                zjContract = dealZJContract(contracts);
-            } else if(CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
-                //商用
-                String contracts = postToShenzhou(params, GET_ENTERPRISE_CONTRACT_DETAIL, null);
-                zjContract = dealZJContract(contracts);
-            }
+                params.put("contractNum", cmd.getContractNumber());
+                String signature = SignatureHelper.computeSignature(params, secretKey);
+                params.put("signature", signature);
+                ZJContractDetail zjContract = null;
+                if(CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
+                    //住宅
+                    String contracts = postToShenzhou(params, GET_USER_CONTRACT_DETAIL, null);
+                    zjContract = dealZJContract(contracts);
+                } else if(CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
+                    //商用
+                    String contracts = postToShenzhou(params, GET_ENTERPRISE_CONTRACT_DETAIL, null);
+                    zjContract = dealZJContract(contracts);
+                }
 
-            if(zjContract != null) {
-                ContractDetailDTO dto = convertZJContractDetailToContractDetailDTO(zjContract);
-                return dto;
+                if(zjContract != null) {
+                    ContractDetailDTO dto = convertZJContractDetailToContractDetailDTO(zjContract);
+                    return dto;
+                }
             }
         }
+
         return null;
     }
 
