@@ -313,81 +313,6 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         result.setShowBillDetailForClientDTOList(list);
         return result;
 
-        //列表
-//        ShowBillDetailForClientResponse result = new ShowBillDetailForClientResponse();
-//        String postJson = "";
-//        Map<String, String> params = new HashMap<String, String> ();
-//        String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
-//        params.put("customerName", "");
-//        params.put("communityIdentifer", "");
-//        params.put("buildingIdentifier","");
-//        params.put("apartmentIdentifier", "");
-//        String payFlag = "";
-//        if(billStatus==1){
-//            payFlag = "1";
-//        }else if(billStatus==0){
-//            payFlag = "0";
-//        }else{
-//            payFlag = "";
-//        }
-//        params.put("payFlag", payFlag);
-//        check(dateStr,"目标日期");
-//        params.put("sdateFrom",dateStr);
-//        params.put("sdateTo",dateStr);
-//        params.put("pageOffset","");
-//        params.put("pageSize","");
-//        check(contractId,"合同编号");
-//        params.put("contractNum",contractId);
-//        String json = generateJson(params);
-//        String url;
-//        if(targetType.equals("eh_organization")){
-//            url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
-//        }else if(targetType.equals("eh_user")){
-//            url = ZjgkUrls.SEARCH_USER_BILLS;
-//        }else{
-//            throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
-//        }
-//        try {
-//
-//            postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
-//        } catch (IOException e) {
-//            LOGGER.error("调用张江高科失败"+e);
-//            throw new RuntimeException("调用张江高科失败"+e);
-//        }
-//        if(postJson!=null&&postJson.trim().length()>0){
-//            SearchBillsResponse response = (SearchBillsResponse)StringHelper.fromJsonString(postJson, SearchBillsResponse.class);
-//            if(response.getErrorCode()==200){
-//                List<SearchEnterpriseBillsDTO> res = response.getResponse();
-//                Integer nextPageOffset = response.getNextPageOffset();
-//                for(int i = 0 ; i < res.size(); i++){
-//                    SearchEnterpriseBillsDTO sourceDto = res.get(i);
-//                    ListBillsDTO dto = new ListBillsDTO();
-////                    dto.setContractId(sourceDto.getCont);
-//                    dto.setContractNum(sourceDto.getContractNum());
-//                    dto.setTargetId(sourceDto.getCustomerIdentifier());
-//                    dto.setTargetType(targetType);
-//                    dto.setBillStatus(sourceDto.getPayFlag());
-//                    String noticeTel = "";
-//                    String noticeTels = sourceDto.getNoticeTels();
-//                    if(noticeTels!=null && sourceDto.getNoticeTels().split(",").length>1){
-//                        noticeTel = sourceDto.getNoticeTels().split(",")[0];
-//                    }else if(noticeTels!=null){
-//                        noticeTel = sourceDto.getNoticeTels();
-//                    }
-//                    dto.setNoticeTel(noticeTel);
-//                    dto.setBillId(sourceDto.getBillID());
-//                    dto.setBillGroupName(sourceDto.getFeeName());
-//                    dto.setAmountOwed(new BigDecimal(sourceDto.getAmountOwed()));
-//                    dto.setAmountReceivable(new BigDecimal(sourceDto.getAmountReceivable()));
-//                    dto.setAmountReceived(new BigDecimal(sourceDto.getAmountReceived()));
-//                    list.add(dto);
-//                    carrier.setNextPageAnchor(response.getNextPageOffset().longValue());
-//                }
-//            }else{
-//                LOGGER.error("调用张江高科searchEnterpriseBills失败"+response.getErrorDescription()+","+response.getErrorDetails());
-//            }
-//        }
-//        return list;
     }
 
     @Override
@@ -620,7 +545,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse carrier) {
+    public List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse carrier) {
         if(status!=1){
             LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
@@ -630,22 +555,23 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
         String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
-//        if(zjgk_communityIdentifier==null){
-//            LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
-//            throw RuntimeErrorException.errorWith("zjgk", 9999711,
-//                    "该园区没有引入到神州数码的系统中，无法查询");
-//        }
-        params.put("customerName", targetName==null?"":targetName);
-        params.put("communityIdentifer", zjgk_communityIdentifier==null?"":zjgk_communityIdentifier);
-        params.put("buildingIdentifier", buildingName==null?"":String.valueOf(buildingName));
-        params.put("apartmentIdentifier", apartmentName==null?"":String.valueOf(apartmentName));
+        if(zjgk_communityIdentifier==null){
+            LOGGER.error("Insufficient privilege, zjgkhandler listsettledbills");
+            throw RuntimeErrorException.errorWith("zjgk", 9999712,
+                    "该园区暂没有和系统对接，无法查询");
+        }
+        params.put("customerName", StringUtils.isEmpty(targetName)==true?"":targetName);
+        params.put("communityIdentifer", StringUtils.isEmpty(zjgk_communityIdentifier)==true?"":zjgk_communityIdentifier);
+        params.put("buildingIdentifier", StringUtils.isEmpty(buildingName)==true?"":String.valueOf(buildingName));
+        params.put("apartmentIdentifier", StringUtils.isEmpty(apartmentName)==true?"":String.valueOf(apartmentName));
         params.put("payFlag", billStatus==null?"":String.valueOf(billStatus));
-        params.put("sdateFrom",dateStrBegin==null?"":dateStrBegin);
-        params.put("sdateTo",dateStrEnd==null?"":dateStrEnd);
-        params.put("pageOffset",String.valueOf(pageOffSet)==null?"":String.valueOf(pageOffSet));
+        params.put("sdateFrom",StringUtils.isEmpty(dateStrBegin)==true?"":dateStrBegin);
+        params.put("sdateTo",StringUtils.isEmpty(dateStrEnd)==true?"":dateStrEnd);
+        params.put("pageOffset",pageOffSet==null?"":String.valueOf(pageOffSet));
         params.put("pageSize",pageSize==null?"":String.valueOf(pageSize));
         params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
         String json = generateJson(params);
+        LOGGER.info("listBill"+json);
         String url;
         Boolean nextFLag = true;
         if(targetType==null||targetType.trim().equals("")){
@@ -660,18 +586,18 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 pageSize = pageSize-list.size();
             }
             params = new HashMap<>();
-            params.put("customerName", targetName==null?"":targetName);
-            params.put("communityIdentifer", zjgk_communityIdentifier==null?"":zjgk_communityIdentifier);
-            params.put("buildingIdentifier", buildingName==null?"":String.valueOf(buildingName));
-            params.put("apartmentIdentifier", apartmentName==null?"":String.valueOf(apartmentName));
+            params.put("customerName", StringUtils.isEmpty(targetName)==true?"":targetName);
+            params.put("communityIdentifer", StringUtils.isEmpty(zjgk_communityIdentifier)==true?"":zjgk_communityIdentifier);
+            params.put("buildingIdentifier", StringUtils.isEmpty(buildingName)==true?"":String.valueOf(buildingName));
+            params.put("apartmentIdentifier", StringUtils.isEmpty(apartmentName)==true?"":String.valueOf(apartmentName));
             params.put("payFlag", billStatus==null?"":String.valueOf(billStatus));
-            params.put("sdateFrom",dateStrBegin==null?"":dateStrBegin);
-            params.put("sdateTo",dateStrEnd==null?"":dateStrEnd);
-            params.put("pageOffset",String.valueOf(pageOffSet)==null?"":String.valueOf(pageOffSet));
+            params.put("sdateFrom",StringUtils.isEmpty(dateStrBegin)==true?"":dateStrBegin);
+            params.put("sdateTo",StringUtils.isEmpty(dateStrEnd)==true?"":dateStrEnd);
+            params.put("pageOffset",pageOffSet==null?"":String.valueOf(pageOffSet));
             params.put("pageSize",pageSize==null?"":String.valueOf(pageSize));
             params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
-//            params.put("pageSize",String.valueOf(pageSize));
             json = generateJson(params);
+            LOGGER.info("listBill"+json);
             url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
             listBillOnUrls(targetType, carrier, list, json, url,"eh_organization");
             if(nextFLag==false){
@@ -732,26 +658,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     else if(noticeTels!=null){
                         noticeTel = sourceDto.getNoticeTels();
                     }
-
                     dto.setNoticeTel(noticeTel);
-
-//                    List<CommunityAddressDTO> apartments = sourceDto.getApartments();
-//                    for(int j = 0; j < apartments.size(); j++){
-//                        CommunityAddressDTO dtoo = apartments.get(j);
-//                        CommunityFilter f = new CommunityFilter();
-//                        f.setApartmentIden(dtoo.getApartmentIdentifier());
-//                        f.setBuildingIden(dtoo.getBuildingIdentifier());
-//                        f.setCommunityIden(dtoo.getCommunityIdentifier());
-//                        CommunityAddressDTO d = new CommunityAddressDTO();
-//                        d.setApartmentIdentifier(dtoo.getApartmentIdentifier());
-//                        d.setApartmentName(dtoo.getApartmentName());
-//                        d.setBuildingIdentifier(dtoo.getBuildingIdentifier());
-//                        d.setBuildingName(dtoo.getBuildingName());
-//                        d.setCommunityIdentifier(dtoo.getCommunityIdentifier());
-//                        d.setCommunityName(dtoo.getCommunityName());
-//                        dump.put(f,d);
-//                    }
-
 
                     dto.setBillId(sourceDto.getBillID());
                     dto.setBillGroupName(sourceDto.getFeeName()==null?"租金":sourceDto.getFeeName());
@@ -767,11 +674,6 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 LOGGER.error("调用张江高科searchEnterpriseBills失败"+response.getErrorDescription()+","+response.getErrorDetails());
             }
         }
-//        for(Map.Entry<CommunityFilter,CommunityAddressDTO> entry:dump.entrySet()){
-//            CommunityAddressDTO value = entry.getValue();
-//            LOGGER.info("addressIdentifierMarkPoint #"+value.getCommunityIdentifier()+"#"+value.getBuildingIdentifier()
-//            +"#"+value.getApartmentIdentifier()+"#"+value.getCommunityName()+"#"+value.getBuildingName()+"#"+value.getApartmentName());
-//        }
     }
 
     private String generateJson(Map<String,String> params){
@@ -785,13 +687,14 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
-    public List<BillDTO> listBillItems(String targetType,String billId, String targetName, int pageOffSet, Integer pageSize) {
+    public List<BillDTO> listBillItems(String targetType,String billId, String targetName, Integer pageOffSet, Integer pageSize) {
         List<BillDTO> list = new ArrayList<>();
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
         check(billId,"billId");
         params.put("billId", billId);
         String json = generateJson(params);
+        LOGGER.info("Billitem,1 param"+json);
         String url;
         if(targetType.equals("eh_organization")){
             url = ZjgkUrls.ENTERPRISE_BILLS_DETAIL;

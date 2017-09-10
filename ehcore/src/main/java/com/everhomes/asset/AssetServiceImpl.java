@@ -263,7 +263,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getPageSize() == null){
             cmd.setPageSize(20);
         }
-        int pageOffSet = cmd.getPageAnchor().intValue();
+        Integer pageOffSet = cmd.getPageAnchor().intValue();
         List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         if(billDTOS.size() <= cmd.getPageSize()) {
 //            response.setNextPageAnchor(null);
@@ -431,6 +431,9 @@ public class AssetServiceImpl implements AssetService {
 //        convertedCmd.setDateStrEnd(dateStrEnd);
         convertedCmd.setStatus((byte)1);
         convertedCmd.setBillStatus((byte)0);
+        if(convertedCmd.getPageSize()==null){
+            convertedCmd.setPageSize(10000);
+        }
         //listBills has already distributed the requests according to namespaces;
         ListBillsResponse convertedResponse = listBills(convertedCmd);
         List<ListBillsDTO> listBillsDTOS = convertedResponse.getListBillsDTOS();
@@ -527,8 +530,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
-        if(cmd.getPageSize()==null||cmd.getPageSize()>1000){
-            cmd.setPageSize(1000);
+        if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
+            cmd.setPageSize(5000);
         }
         //has already distributed
         ListBillsResponse bills = listBills(cmd);

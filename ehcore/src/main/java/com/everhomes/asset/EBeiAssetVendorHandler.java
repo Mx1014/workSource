@@ -123,14 +123,14 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public List<ListBillsDTO> listBills(String communityIdentifier, String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
+    public List<ListBillsDTO> listBills(String communityIdentifier, String contractNum, Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName, String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status, String targetType, ListBillsResponse response) {
         LOGGER.error("Insufficient privilege, EBeiAssetHandler");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
 
     @Override
-    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, int pageOffSet, Integer pageSize) {
+    public List<BillDTO> listBillItems(String targetType, String billId, String targetName, Integer pageOffSet, Integer pageSize) {
         LOGGER.error("Insufficient privilege, EBeiAssetHandler");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
