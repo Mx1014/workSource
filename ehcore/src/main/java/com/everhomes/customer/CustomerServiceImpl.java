@@ -633,7 +633,7 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerApplyProject checkCustomerApplyProject(Long id, Long customerId) {
         CustomerApplyProject project = enterpriseCustomerProvider.findCustomerApplyProjectById(id);
         if(project == null || !project.getCustomerId().equals(customerId)
-                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(project.getStatus()))) {
+                || CommonStatus.INACTIVE.equals(CommonStatus.fromCode(project.getStatus()))) {
             LOGGER.error("enterprise customer project is not exist or active. id: {}, project: {}", id, project);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PROJECT_NOT_EXIST,
                     "customer project is not exist or active");

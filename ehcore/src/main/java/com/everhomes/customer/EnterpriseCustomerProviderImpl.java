@@ -362,7 +362,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         project.setId(id);
         project.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         project.setCreateUid(UserContext.current().getUser().getId());
-        project.setStatus(CommonStatus.ACTIVE.getCode());
+//        project.setStatus(CommonStatus.ACTIVE.getCode());
 
         LOGGER.info("createCustomerApplyProject: " + project);
 
@@ -570,7 +570,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerApplyProjectsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_APPLY_PROJECTS);
         query.addConditions(Tables.EH_CUSTOMER_APPLY_PROJECTS.CUSTOMER_ID.eq(customerId));
-        query.addConditions(Tables.EH_CUSTOMER_APPLY_PROJECTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_CUSTOMER_APPLY_PROJECTS.STATUS.ne(CommonStatus.INACTIVE.getCode()));
 
         List<CustomerApplyProject> result = new ArrayList<>();
         query.fetch().map((r) -> {
