@@ -11,12 +11,14 @@ import java.math.BigDecimal;
  * <li>billItemName:项目名称</li>
  * <li>amountOwed:待缴金额</li>
  * <li>addressName:地址</li>
+ * <li>status:清账状态</li>
  *</ul>
  */
 public class ShowBillDetailForClientDTO {
     private String billItemName;
     private BigDecimal amountOwed;
     private String addressName;
+    private String status;
 
     @Override
     public String toString() {
@@ -29,6 +31,14 @@ public class ShowBillDetailForClientDTO {
 
     public String getAddressName() {
         return addressName;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public void setAddressName(String addressName) {

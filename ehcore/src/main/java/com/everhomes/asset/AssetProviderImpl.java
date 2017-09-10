@@ -1700,7 +1700,8 @@ public class AssetProviderImpl implements AssetProvider {
         EhOrganizationOwners t2 = Tables.EH_ORGANIZATION_OWNERS.as("t2");
         return context.select(t1.OWNER_UID)
                 .from(t1,t2)
-                .where(t2.NAMESPACE_CUSTOMER_TOKEN.eq(customerIdentifier))
+                .where(t2.CONTACT_TOKEN.eq(t1.IDENTIFIER_TOKEN))
+                .and(t2.NAMESPACE_CUSTOMER_TOKEN.eq(customerIdentifier))
                 .fetchOne(0,Long.class);
     }
 
