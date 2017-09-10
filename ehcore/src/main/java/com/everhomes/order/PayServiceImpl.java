@@ -7,7 +7,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.http.HttpUtils;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.base.RestClient;
 import com.everhomes.pay.order.*;
@@ -19,15 +18,12 @@ import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PaymentType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +32,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -434,8 +427,14 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
                 PaymentExtendInfo extendInfo = new PaymentExtendInfo();
                 extendInfo.setGetOrderInfoUrl(getPayMethodExtendInfo());
                 r.setExtendInfo(extendInfo);
+
+                if(r.getPaymentParams() == null){
+                    r.setPaymentParams(new PaymentParamsDTO());
+                }
                 //微信公众号支付时，acct原样返回
-                if(PaymentType.fromCode(r.getPaymentType()) == PaymentType.WECHAT_JS){
+                if(PaymentType.fromCode(paymentType) == PaymentType.WECHAT_JS_PAY &&
+                        PaymentType.fromCode(r.getPaymentType()) == PaymentType.WECHAT_JS_PAY &&
+                        paramsDTO != null){
                     r.getPaymentParams().setAcct(paramsDTO.getAcct());
                 }
                 //转化为可以访问的url

@@ -34,6 +34,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.order.*;
 import com.everhomes.organization.*;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
@@ -705,13 +706,13 @@ public class ActivityServiceImpl implements ActivityService {
 		preOrderCommand.setClientAppName(cmd.getClientAppName());
 
 		//微信公众号支付，重新设置ClientName，设置支付方式和参数
-		if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS.getCode()){
+		if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
 
 			if(preOrderCommand.getClientAppName() == null){
 				Integer namespaceId = UserContext.getCurrentNamespaceId();
 				preOrderCommand.setClientAppName("wechat_" + namespaceId);
 			}
-			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS.getCode());
+			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
 			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
 			paymentParamsDTO.setPayType("no_credit");
 			User user = UserContext.current().getUser();
