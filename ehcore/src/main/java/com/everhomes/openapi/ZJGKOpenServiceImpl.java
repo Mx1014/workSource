@@ -1459,6 +1459,8 @@ public class ZJGKOpenServiceImpl {
     private void updateEnterpriseCustomer(EnterpriseCustomer customer, ZJEnterprise zjEnterprise) {
         LOGGER.debug("syncDataToDb updateEnterpriseCustomer customer: {}, zjEnterprise: {}",
                 StringHelper.toJsonString(customer), StringHelper.toJsonString(zjEnterprise));
+        Long communityId = zjEnterprise.getCommunityId() == null ? 0L : zjEnterprise.getCommunityId();
+        customer.setCommunityId(communityId);
         customer.setNamespaceCustomerType(NamespaceCustomerType.SHENZHOU.getCode());
         customer.setNamespaceCustomerToken(zjEnterprise.getEnterpriseIdentifier());
         customer.setName(zjEnterprise.getName());

@@ -67,34 +67,13 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
-    public void createEnterpriseCustomer2(EnterpriseCustomer customer) {
-        LOGGER.info("syncDataToDb create customer: {}", StringHelper.toJsonString(customer));
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
-        LOGGER.info("syncDataToDb create customer id: {}", id);
-        customer.setStatus(CommonStatus.ACTIVE.getCode());
-        LOGGER.info("syncDataToDb create customer setStatus");
-        customer.setId(id);
-        LOGGER.info("syncDataToDb create customer setId");
-//        customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//        LOGGER.info("syncDataToDb create customer setCreateTime");
-
-//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        LOGGER.info("syncDataToDb create customer context");
-        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
-        LOGGER.info("syncDataToDb create customer dao");
-        dao.insert(customer);
-        LOGGER.info("syncDataToDb create customer: {}", StringHelper.toJsonString(customer));
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseCustomers.class, null);
-        LOGGER.info("syncDataToDb create customer: 123");
-    }
-
-    @Override
     public void updateEnterpriseCustomer(EnterpriseCustomer customer) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
+        LOGGER.debug("syncDataToDb updateEnterpriseCustomer customer: {}",
+                StringHelper.toJsonString(customer));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
-
-        customer.setOperatorUid(UserContext.current().getUser().getId());
+        LOGGER.debug("syncDataToDb updateEnterpriseCustomer customer: {}",
+                StringHelper.toJsonString(customer));
         customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(customer);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
@@ -104,7 +83,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     public void deleteEnterpriseCustomer(EnterpriseCustomer customer) {
         assert(customer.getId() != null);
 
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         dao.delete(customer);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
