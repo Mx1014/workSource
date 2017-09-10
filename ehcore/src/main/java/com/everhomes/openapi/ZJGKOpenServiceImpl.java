@@ -1293,7 +1293,7 @@ public class ZJGKOpenServiceImpl {
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
             insertOrUpdateOrganizationAddresses(zjEnterprise.getCommunityId(), zjEnterprise.getApartmentIdentifierList(), customer);
-
+            organizationSearcher.feedDoc(organization);
             return null;
         });
 
