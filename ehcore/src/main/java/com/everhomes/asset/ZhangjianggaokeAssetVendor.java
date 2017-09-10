@@ -92,7 +92,6 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         if(postJson!=null&&postJson.trim().length()>0){
             Gson gson = new Gson();
             BillCountResponse response = gson.fromJson(postJson, BillCountResponse.class);
-//            BillCountResponse response = (BillCountResponse)StringHelper.fromJsonString(postJson, BillCountResponse.class);
             if(response.getErrorCode()==200){
                 List<ContractBillsStatDTO> response1 = response.getResponse();
                 if(response1!=null && response1.size()==1){
@@ -202,7 +201,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                         apartmentName = apartments.get(0).getApartmentName()==null?"":apartments.get(0).getApartmentName();
                     }
                     dto.setAddressName(buildingName+apartmentName);
-                    dto.setStatus(sourceDto.getStatus()!=null?sourceDto.getStatus().equals(PaymentStatus.SUSPEND.getCode())?PaymentStatus.IN_PROCESS.getCode():null:null);
+                    dto.setPayStatus(sourceDto.getStatus()!=null?sourceDto.getStatus().equals(PaymentStatus.SUSPEND.getCode())?PaymentStatus.IN_PROCESS.getCode():null:null);
                     result.setDatestr(sourceDto.getBillDate());
                     list.add(dto);
                 }
@@ -446,7 +445,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     FindUserInfoForPaymentDTO dto = new FindUserInfoForPaymentDTO();
                     dto.setContractId(sourceDto.getContractNum());
                     dto.setContractNum(sourceDto.getContractNum());
-                    customerName = sourceDto.getSettled();
+                    customerName = UserContext.current().getUser().getNickName();
                     List<CommunityAddressDTO> apartments = sourceDto.getApartments();
                     if(apartments!=null){
                         for(int k = 0 ; k < apartments.size(); k ++){
@@ -481,7 +480,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String url;
         String targetType= cmd.getTargetType();
         if(targetType!=null && targetType.equals("eh_organization")){
-            url = ZjgkUrls.ENTERPRISE_BILLS_DETAIL;
+            url = ZjgkUrls.ENTERPRISE_CONTRACT_DETAIL;
         }else if(targetType!=null && targetType.equals("eh_user")){
             url = ZjgkUrls.USER_CONTRACT_DETAIL;
         }else{
@@ -494,9 +493,14 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             throw new RuntimeException("调用张江高科失败"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0){
-            ContractDetailResponse response =(ContractDetailResponse) StringHelper.fromJsonString(postJson, ContractDetailResponse.class);
+            Gson gson = new Gson();
+            ContractDetailResponse response = gson.fromJson(postJson,ContractDetailResponse.class);
             if(response.getErrorCode()==200){
-                ContractDTO sourceDto = response.getResponse();
+                List<ContractDTO> fakeSourceDtos = response.getResponse();
+                if(fakeSourceDtos!=null&&fakeSourceDtos.size()<0){
+                    return result;
+                }
+                ContractDTO sourceDto = fakeSourceDtos.get(0);
                 String customerName = "";
                 BigDecimal areaSizeSum = new BigDecimal("0");
                 List<String> addressNames = new ArrayList<>();
@@ -626,11 +630,11 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
         String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
-        if(zjgk_communityIdentifier==null){
-            LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
-            throw RuntimeErrorException.errorWith("zjgk", 9999711,
-                    "该园区没有引入到神州数码的系统中，无法查询");
-        }
+//        if(zjgk_communityIdentifier==null){
+//            LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
+//            throw RuntimeErrorException.errorWith("zjgk", 9999711,
+//                    "该园区没有引入到神州数码的系统中，无法查询");
+//        }
         params.put("customerName", targetName==null?"":targetName);
         params.put("communityIdentifer", zjgk_communityIdentifier==null?"":zjgk_communityIdentifier);
         params.put("buildingIdentifier", buildingName==null?"":String.valueOf(buildingName));
@@ -655,7 +659,18 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             }else{
                 pageSize = pageSize-list.size();
             }
-            params.put("pageSize",String.valueOf(pageSize));
+            params = new HashMap<>();
+            params.put("customerName", targetName==null?"":targetName);
+            params.put("communityIdentifer", zjgk_communityIdentifier==null?"":zjgk_communityIdentifier);
+            params.put("buildingIdentifier", buildingName==null?"":String.valueOf(buildingName));
+            params.put("apartmentIdentifier", apartmentName==null?"":String.valueOf(apartmentName));
+            params.put("payFlag", billStatus==null?"":String.valueOf(billStatus));
+            params.put("sdateFrom",dateStrBegin==null?"":dateStrBegin);
+            params.put("sdateTo",dateStrEnd==null?"":dateStrEnd);
+            params.put("pageOffset",String.valueOf(pageOffSet)==null?"":String.valueOf(pageOffSet));
+            params.put("pageSize",pageSize==null?"":String.valueOf(pageSize));
+            params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
+//            params.put("pageSize",String.valueOf(pageSize));
             json = generateJson(params);
             url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
             listBillOnUrls(targetType, carrier, list, json, url,"eh_organization");
@@ -706,6 +721,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setTargetId(sourceDto.getCustomerIdentifier());
                     dto.setTargetType(RelTargetType);
                     dto.setBillStatus(sourceDto.getPayFlag());
+                    dto.setOwnerType("community");
                     String noticeTel = "";
                     String noticeTels = sourceDto.getNoticeTels();
                     if(noticeTels!=null && sourceDto.getNoticeTels().split(",").length>1){
