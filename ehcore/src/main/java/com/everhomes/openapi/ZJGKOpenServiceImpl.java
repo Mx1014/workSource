@@ -1628,6 +1628,27 @@ public class ZJGKOpenServiceImpl {
             customer.setCreatorUid(UserContext.currentUserId());
             customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
+            if (zjIndividual.getAddressList() != null) {
+                List<String> communityIdentifiers = zjIndividual.getAddressList().stream().map(communityAddress -> {
+                    return communityAddress.getCommunityIdentifier();
+                }).collect(Collectors.toList());
+                List<Long> communityIds = communityProvider.listCommunityByNamespaceToken(NamespaceCommunityType.SHENZHOU.getCode(), communityIdentifiers);
+
+                if (communityIds != null && communityIds.size() > 0) {
+                    StringBuilder sb = new StringBuilder();
+                    for (Long communityId : communityIds) {
+                        if (sb.length() == 0) {
+                            sb.append(communityId);
+                        } else {
+                            sb.append(",");
+                            sb.append(communityId);
+                        }
+                    }
+                    if (sb.length() > 0) {
+                        customer.setCommunityId(sb.toString());
+                    }
+                }
+            }
             OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(zjIndividual.getCustomerCategory());
             if(ownerType != null) {
                 customer.setOrgOwnerTypeId(ownerType.getId());
@@ -1655,49 +1676,55 @@ public class ZJGKOpenServiceImpl {
     }
 
     private void updateIndividualCustomer(OrganizationOwner customer, ZJIndividuals zjIndividual) {
-        customer.setContactName(zjIndividual.getName());
-        customer.setContactToken(zjIndividual.getMobile());
-        customer.setContactType(ContactType.MOBILE.getCode());
-        customer.setCompany(zjIndividual.getCompany());
-        customer.setJob(zjIndividual.getJob());
-        customer.setMaritalStatus(zjIndividual.getMaritalStatus());
-        customer.setAddress(zjIndividual.getContactAddress());
-        customer.setRegisteredResidence(zjIndividual.getRegisteredResidence());
-        customer.setIdCardNumber(zjIndividual.getCardNumber());
-        customer.setGender(UserGender.fromText(zjIndividual.getGender()) == null ? UserGender.UNDISCLOSURED.getCode() : UserGender.fromText(zjIndividual.getGender()).getCode());
-        Timestamp ts = strToTimestamp(zjIndividual.getBirthday());
-        if(ts != null) {
-            customer.setBirthday(new Date(ts.getTime()));
-        }
-        OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(zjIndividual.getCustomerCategory());
-        if(ownerType != null) {
-            customer.setOrgOwnerTypeId(ownerType.getId());
-        }
-        if(zjIndividual.getAddressList() != null) {
-            List<String> communityIdentifiers = zjIndividual.getAddressList().stream().map(communityAddress -> {
-                return communityAddress.getCommunityIdentifier();
-            }).collect(Collectors.toList());
-            List<Long> communityIds = communityProvider.listCommunityByNamespaceToken(NamespaceCommunityType.SHENZHOU.getCode(), communityIdentifiers);
+        this.dbProvider.execute((TransactionStatus status) -> {
+            customer.setContactName(zjIndividual.getName());
+            customer.setContactToken(zjIndividual.getMobile());
+            customer.setContactType(ContactType.MOBILE.getCode());
+            customer.setCompany(zjIndividual.getCompany());
+            customer.setJob(zjIndividual.getJob());
+            customer.setMaritalStatus(zjIndividual.getMaritalStatus());
+            customer.setAddress(zjIndividual.getContactAddress());
+            customer.setRegisteredResidence(zjIndividual.getRegisteredResidence());
+            customer.setIdCardNumber(zjIndividual.getCardNumber());
+            customer.setGender(UserGender.fromText(zjIndividual.getGender()) == null ? UserGender.UNDISCLOSURED.getCode() : UserGender.fromText(zjIndividual.getGender()).getCode());
+            Timestamp ts = strToTimestamp(zjIndividual.getBirthday());
+            if (ts != null) {
+                customer.setBirthday(new Date(ts.getTime()));
+            }
+            OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(zjIndividual.getCustomerCategory());
+            if (ownerType != null) {
+                customer.setOrgOwnerTypeId(ownerType.getId());
+            }
+            if (zjIndividual.getAddressList() != null) {
+                List<String> communityIdentifiers = zjIndividual.getAddressList().stream().map(communityAddress -> {
+                    return communityAddress.getCommunityIdentifier();
+                }).collect(Collectors.toList());
+                List<Long> communityIds = communityProvider.listCommunityByNamespaceToken(NamespaceCommunityType.SHENZHOU.getCode(), communityIdentifiers);
 
-            if(communityIds != null && communityIds.size() > 0) {
-                StringBuilder sb = new StringBuilder();
-                for(Long communityId : communityIds) {
-                    if(sb.length() == 0) {
-                        sb.append(communityId);
-                    } else {
-                        sb.append(",");
-                        sb.append(communityId);
+                if (communityIds != null && communityIds.size() > 0) {
+                    StringBuilder sb = new StringBuilder();
+                    for (Long communityId : communityIds) {
+                        if (sb.length() == 0) {
+                            sb.append(communityId);
+                        } else {
+                            sb.append(",");
+                            sb.append(communityId);
+                        }
+                    }
+                    if (sb.length() > 0) {
+                        customer.setCommunityId(sb.toString());
                     }
                 }
             }
-        }
-        customer.setNamespaceCustomerType(NamespaceCustomerType.SHENZHOU.getCode());
-        customer.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
-        organizationProvider.updateOrganizationOwner(customer);
+            customer.setNamespaceCustomerType(NamespaceCustomerType.SHENZHOU.getCode());
+            customer.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
+            organizationProvider.updateOrganizationOwner(customer);
 
-        CommunityPmOwner communityPmOwner = ConvertHelper.convert(customer, CommunityPmOwner.class);
-        pmOwnerSearcher.feedDoc(communityPmOwner);
+            CommunityPmOwner communityPmOwner = ConvertHelper.convert(customer, CommunityPmOwner.class);
+            pmOwnerSearcher.feedDoc(communityPmOwner);
+            return null;
 
+        });
         insertOrUpdateOrganizationOwnerAddresses(zjIndividual.getCommunityId(), zjIndividual.getAddressList(), customer);
     }
 
