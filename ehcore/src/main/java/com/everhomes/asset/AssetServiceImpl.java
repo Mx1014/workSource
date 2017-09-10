@@ -176,8 +176,8 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private ZhangjianggaokeAssetVendor handler;
+//    @Autowired
+//    private ZhangjianggaokeAssetVendor handler;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {

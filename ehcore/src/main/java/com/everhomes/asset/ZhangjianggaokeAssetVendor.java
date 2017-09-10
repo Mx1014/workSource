@@ -560,13 +560,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
         String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
-//        if(StringUtils.isEmpty(zjgk_communityIdentifier)){
-//            LOGGER.error("Zjgk community id is empty, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
-//            throw RuntimeErrorException.errorWith("zjgk", 9999712,
-//                    "该园区暂没有和系统对接，无法查询");
-//        } else {
-//            LOGGER.info("Find zjgk community id from db, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
-//        }
+        if(StringUtils.isEmpty(zjgk_communityIdentifier)){
+            LOGGER.error("Zjgk community id is empty, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
+            throw RuntimeErrorException.errorWith("zjgk", 9999712,
+                    "该园区暂没有和系统对接，无法查询");
+        } else {
+            LOGGER.info("Find zjgk community id from db, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
+        }
         params.put("customerName", StringUtils.isEmpty(targetName)==true?"":targetName);
         params.put("communityIdentifer", StringUtils.isEmpty(zjgk_communityIdentifier)==true?"":zjgk_communityIdentifier);
         params.put("buildingIdentifier", StringUtils.isEmpty(buildingName)==true?"":String.valueOf(buildingName));
