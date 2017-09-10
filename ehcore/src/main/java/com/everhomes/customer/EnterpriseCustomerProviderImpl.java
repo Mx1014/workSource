@@ -72,10 +72,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 StringHelper.toJsonString(customer));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
-        LOGGER.debug("syncDataToDb updateEnterpriseCustomer customer: {}",
-                StringHelper.toJsonString(customer));
+        LOGGER.debug("syncDataToDb updateEnterpriseCustomer dao");
         customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        LOGGER.debug("syncDataToDb updateEnterpriseCustomer setUpdateTime");
         dao.update(customer);
+        LOGGER.debug("syncDataToDb updateEnterpriseCustomer update");
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
     }
 
