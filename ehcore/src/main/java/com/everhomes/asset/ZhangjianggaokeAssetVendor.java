@@ -97,8 +97,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 List<ContractBillsStatDTO> response1 = response.getResponse();
                 if(response1!=null && response1.size()==1){
                     ContractBillsStatDTO res = response1.get(0);
-                    finalDto.setBillPeriodMonths(res.getMonthsTotalOwed());
-                    finalDto.setAmountOwed(new BigDecimal(res.getAmountTotal()));
+                    finalDto.setBillPeriodMonths(res.getMonthsTotalOwed()==null?0:res.getMonthsTotalOwed());
+                    finalDto.setAmountOwed(res.getAmountTotal()==null?new BigDecimal("0"):new BigDecimal(res.getAmountTotal()));
                 }
             }else{
                 LOGGER.error("调用张江高科失败"+response.getErrorDescription()+","+response.getErrorDetails());
@@ -107,7 +107,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         //找列表
         postJson = "";
         params=new HashMap<String, String> ();
-        String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
+//        check(String.valueOf(ownerId),"ownerId");
+//        String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
         String payFlag = "";
         if(isOwedBill==1){
             payFlag="0";
@@ -201,6 +202,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                         apartmentName = apartments.get(0).getApartmentName()==null?"":apartments.get(0).getApartmentName();
                     }
                     dto.setAddressName(buildingName+apartmentName);
+                    dto.setStatus(sourceDto.getStatus()!=null?sourceDto.getStatus().equals(PaymentStatus.SUSPEND.getCode())?PaymentStatus.IN_PROCESS.getCode():null:null);
                     result.setDatestr(sourceDto.getBillDate());
                     list.add(dto);
                 }
@@ -624,8 +626,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
         String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
+        if(zjgk_communityIdentifier==null){
+            LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
+            throw RuntimeErrorException.errorWith("zjgk", 9999711,
+                    "该园区没有引入到神州数码的系统中，无法查询");
+        }
         params.put("customerName", targetName==null?"":targetName);
-        params.put("communityIdentifer", zjgk_communityIdentifier==null?"":communityIdentifier);
+        params.put("communityIdentifer", zjgk_communityIdentifier==null?"":zjgk_communityIdentifier);
         params.put("buildingIdentifier", buildingName==null?"":String.valueOf(buildingName));
         params.put("apartmentIdentifier", apartmentName==null?"":String.valueOf(apartmentName));
         params.put("payFlag", billStatus==null?"":String.valueOf(billStatus));
@@ -682,6 +689,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             LOGGER.error("调用张江高科失败"+e);
             throw new RuntimeException("调用张江高科失败"+e);
         }
+//        HashMap<CommunityFilter,CommunityAddressDTO> dump = new HashMap<>();
         if(postJson!=null&&postJson.trim().length()>0){
             Gson gson = new Gson();
             SearchBillsResponse response = gson.fromJson(postJson, SearchBillsResponse.class);
@@ -711,6 +719,24 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 
                     dto.setNoticeTel(noticeTel);
 
+//                    List<CommunityAddressDTO> apartments = sourceDto.getApartments();
+//                    for(int j = 0; j < apartments.size(); j++){
+//                        CommunityAddressDTO dtoo = apartments.get(j);
+//                        CommunityFilter f = new CommunityFilter();
+//                        f.setApartmentIden(dtoo.getApartmentIdentifier());
+//                        f.setBuildingIden(dtoo.getBuildingIdentifier());
+//                        f.setCommunityIden(dtoo.getCommunityIdentifier());
+//                        CommunityAddressDTO d = new CommunityAddressDTO();
+//                        d.setApartmentIdentifier(dtoo.getApartmentIdentifier());
+//                        d.setApartmentName(dtoo.getApartmentName());
+//                        d.setBuildingIdentifier(dtoo.getBuildingIdentifier());
+//                        d.setBuildingName(dtoo.getBuildingName());
+//                        d.setCommunityIdentifier(dtoo.getCommunityIdentifier());
+//                        d.setCommunityName(dtoo.getCommunityName());
+//                        dump.put(f,d);
+//                    }
+
+
                     dto.setBillId(sourceDto.getBillID());
                     dto.setBillGroupName(sourceDto.getFeeName()==null?"租金":sourceDto.getFeeName());
                     dto.setDateStr(sourceDto.getBillDate());
@@ -725,6 +751,11 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 LOGGER.error("调用张江高科searchEnterpriseBills失败"+response.getErrorDescription()+","+response.getErrorDetails());
             }
         }
+//        for(Map.Entry<CommunityFilter,CommunityAddressDTO> entry:dump.entrySet()){
+//            CommunityAddressDTO value = entry.getValue();
+//            LOGGER.info("addressIdentifierMarkPoint #"+value.getCommunityIdentifier()+"#"+value.getBuildingIdentifier()
+//            +"#"+value.getApartmentIdentifier()+"#"+value.getCommunityName()+"#"+value.getBuildingName()+"#"+value.getApartmentName());
+//        }
     }
 
     private String generateJson(Map<String,String> params){
@@ -788,7 +819,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setTargetId(sourceDto.getCustomerIdentifier());
                     dto.setTargetName(sourceDto.getCustomerName());
                     dto.setTargetType(targetType);
-                    dto.setPayStatus(sourceDto.getStatus());
+                    dto.setPayStatus(sourceDto.getStatus()!=null?sourceDto.getStatus().equals(PaymentStatus.SUSPEND.getCode())?PaymentStatus.IN_PROCESS.getCode():null:null);
                     list.add(dto);
                 }
             }

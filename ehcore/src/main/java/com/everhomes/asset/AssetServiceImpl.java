@@ -238,8 +238,6 @@ public class AssetServiceImpl implements AssetService {
             }else if(UserContext.getCurrentNamespaceId()!=999971){
                 response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
                 list.remove(list.size()-1);
-            }else{
-                response.setNextPageAnchor(cmd.getPageAnchor()==null?1:cmd.getPageAnchor()+1);
             }
         response.setListBillsDTOS(list);
         return response;
@@ -301,7 +299,7 @@ public class AssetServiceImpl implements AssetService {
                 String phoneNums = noticeInfo.getPhoneNum();
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
-                phoneNums = "15272074480";
+                phoneNums = "15919770996";
                 smsProvider.sendSms(UserContext.getCurrentNamespaceId(), phoneNums, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
                 }
             } catch(Exception e){
@@ -426,7 +424,11 @@ public class AssetServiceImpl implements AssetService {
         }else{
             convertedCmd.setPageAnchor(1l);
         }
-        convertedCmd.setPageSize(100);
+//        convertedCmd.setPageSize(100);
+//        Calendar now = Calendar.getInstance();
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+//        String dateStrEnd = sdf.format(now.getTime());
+//        convertedCmd.setDateStrEnd(dateStrEnd);
         convertedCmd.setStatus((byte)1);
         convertedCmd.setBillStatus((byte)0);
         //listBills has already distributed the requests according to namespaces;
@@ -436,7 +438,7 @@ public class AssetServiceImpl implements AssetService {
         for(int i = 0; i < listBillsDTOS.size(); i ++) {
             ListBillsDTO convertedDto = listBillsDTOS.get(i);
             OwnerEntity entity = new OwnerEntity();
-            entity.setOwnerId(Long.parseLong(convertedDto.getOwnerId()));
+            entity.setOwnerId(cmd.getOwnerId());
             entity.setOwnerType(convertedDto.getOwnerType());
             if(noticeObjects.containsKey(entity)){
                 noticeObjects.get(entity).add(convertedDto.getBillId());
