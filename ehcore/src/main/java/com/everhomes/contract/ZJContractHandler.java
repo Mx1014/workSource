@@ -241,6 +241,8 @@ public class ZJContractHandler implements ContractService{
         ContractDetailDTO dto = new ContractDetailDTO();
         dto.setPartyAId(0L);
         dto.setContractNumber(zjContract.getContractNum());
+        //张江高科合同名和合同编号一样
+        dto.setName(zjContract.getContractNum());
         dto.setCustomerName(zjContract.getLessee());
         dto.setRentSize(zjContract.getAreaSize());
         dto.setContractStartDate(zjContract.getContractStartDate());
@@ -272,6 +274,8 @@ public class ZJContractHandler implements ContractService{
     private ContractDTO convertZJContractDetailToContractDTO(ZJContractDetail zjContract) {
         ContractDTO dto = new ContractDTO();
         dto.setContractNumber(zjContract.getContractNum());
+        //张江高科合同名称和编号一样
+        dto.setName(zjContract.getContractNum());
         dto.setOrganizationName(zjContract.getLessee());
         dto.setContractStartDate(zjContract.getContractStartDate());
         dto.setContractEndDate(zjContract.getContractExpireDate());
