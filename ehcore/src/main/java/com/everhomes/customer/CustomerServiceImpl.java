@@ -3,6 +3,7 @@ package com.everhomes.customer;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -100,8 +101,18 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
 
+    private void checkPrivilege() {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if(namespaceId == 999971) {
+            LOGGER.error("Insufficient privilege, zjgk modify data");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
+    }
+
     @Override
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
+        checkPrivilege();
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setNamespaceId(UserContext.getCurrentNamespaceId());
         if(cmd.getCorpEntryDate() != null) {
@@ -150,6 +161,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd) {
+        checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         updateCustomer.setNamespaceId(customer.getNamespaceId());
@@ -197,6 +209,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd) {
+        checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         customer.setStatus(CommonStatus.INACTIVE.getCode());
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
