@@ -1298,7 +1298,15 @@ public class ZJGKOpenServiceImpl {
             customer.setCorpEmail(zjEnterprise.getCorpEmail());
             customer.setCorpWebsite(zjEnterprise.getCorpWebsite());
             customer.setCorpNatureItemName(zjEnterprise.getCorpNature());
+            Long natureItemId = enterpriseScopeFieldItem(namespaceId, zjEnterprise.getCorpNature());
+            if(natureItemId != null) {
+                customer.setCorpNatureItemId(natureItemId);
+            }
             customer.setCorpIndustryItemName(zjEnterprise.getCorpIndustry());
+            Long industryItemId = enterpriseScopeFieldItem(namespaceId, zjEnterprise.getCorpIndustry());
+            if(industryItemId != null) {
+                customer.setCorpIndustryItemId(industryItemId);
+            }
             customer.setCorpDescription(zjEnterprise.getDescription());
             if(zjEnterprise.getCorpEntryDate() != null) {
                 customer.setCorpEntryDate(dateStrToTimestamp(zjEnterprise.getCorpEntryDate()));
@@ -1524,7 +1532,15 @@ public class ZJGKOpenServiceImpl {
             customer.setCorpEmail(zjEnterprise.getCorpEmail());
             customer.setCorpWebsite(zjEnterprise.getCorpWebsite());
             customer.setCorpNatureItemName(zjEnterprise.getCorpNature());
+            Long natureItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), zjEnterprise.getCorpNature());
+            if(natureItemId != null) {
+                customer.setCorpNatureItemId(natureItemId);
+            }
             customer.setCorpIndustryItemName(zjEnterprise.getCorpIndustry());
+            Long industryItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), zjEnterprise.getCorpIndustry());
+            if(industryItemId != null) {
+                customer.setCorpIndustryItemId(industryItemId);
+            }
             customer.setCorpDescription(zjEnterprise.getDescription());
             if (zjEnterprise.getCorpEntryDate() != null) {
                 customer.setCorpEntryDate(dateStrToTimestamp(zjEnterprise.getCorpEntryDate()));
