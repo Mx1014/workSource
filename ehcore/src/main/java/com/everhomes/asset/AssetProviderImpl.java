@@ -1691,7 +1691,7 @@ public class AssetProviderImpl implements AssetProvider {
         return context.select(t.NAMESPACE_COMMUNITY_TOKEN)
                 .from(t)
                 .where(t.ID.eq(ownerId))
-                .fetchOne(0,String.class);
+                .fetchAny(0,String.class);
     }
 
     @Override

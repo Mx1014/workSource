@@ -263,7 +263,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getPageSize() == null){
             cmd.setPageSize(20);
         }
-        int pageOffSet = cmd.getPageAnchor().intValue();
+        Integer pageOffSet = cmd.getPageAnchor().intValue();
         List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         if(billDTOS.size() <= cmd.getPageSize()) {
 //            response.setNextPageAnchor(null);
@@ -424,11 +424,15 @@ public class AssetServiceImpl implements AssetService {
         }else{
             convertedCmd.setPageAnchor(1l);
         }
-//        convertedCmd.setPageSize(100);
-//        Calendar now = Calendar.getInstance();
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-//        String dateStrEnd = sdf.format(now.getTime());
-//        convertedCmd.setDateStrEnd(dateStrEnd);
+        if(convertedCmd.getDateStrEnd()==null){
+            Calendar now = Calendar.getInstance();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+            String dateStrEnd = sdf.format(now.getTime());
+            convertedCmd.setDateStrEnd(dateStrEnd);
+        }
+        if(convertedCmd.getPageSize()==null){
+            convertedCmd.setPageSize(Integer.MAX_VALUE/10);
+        }
         convertedCmd.setStatus((byte)1);
         convertedCmd.setBillStatus((byte)0);
         //listBills has already distributed the requests according to namespaces;
@@ -477,7 +481,7 @@ public class AssetServiceImpl implements AssetService {
                     info.setAmountRecevable(dto.getAmountReceivable());
                     info.setAmountOwed(dto.getAmountOwed());
                     Long tid = 0l;
-                    String targeType;
+                    String targeType=null;
                     Long uid  = assetProvider.findTargetIdByIdentifier(dto.getTargetId());
                     Long oid = assetProvider.findOrganizationIdByIdentifier(dto.getTargetId());
                     if(uid ==null && oid !=null){
@@ -488,7 +492,7 @@ public class AssetServiceImpl implements AssetService {
                         tid = uid;
                         targeType = "eh_user";
                     }else {
-                        throw new RuntimeException("一键催缴用户识别异常！");
+                        LOGGER.info("NOTICE USER IS NOT IN ZUOLIN APP, USER IS {}",dto.getTargetName());
                     }
                     info.setTargetId(tid);
                     info.setTargetType(targeType);
@@ -496,6 +500,7 @@ public class AssetServiceImpl implements AssetService {
                     list.add(info);
                 }
                 NoticeWithTextAndMessage(requestCmd,list);
+                return;
             }
             selectNotice(requestCmd);
         }
@@ -527,8 +532,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
-        if(cmd.getPageSize()==null||cmd.getPageSize()>1000){
-            cmd.setPageSize(1000);
+        if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
+            cmd.setPageSize(5000);
         }
         //has already distributed
         ListBillsResponse bills = listBills(cmd);
