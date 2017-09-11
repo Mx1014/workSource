@@ -11,6 +11,8 @@ import com.everhomes.util.StringHelper;
  * <li>plateNumber: 车牌号</li>
  * <li>plateOwnerName: 车主名称</li>
  * <li>plateOwnerPhone: 车主手机号</li>
+ * <li>cardTypeId: 卡类型id</li>
+ * <li>cardType: 卡类型名称</li>
  * <li>cardName: 卡名称</li>
  * <li>cardNumber: 卡号</li>
  * <li>startTime: 开始时间</li>

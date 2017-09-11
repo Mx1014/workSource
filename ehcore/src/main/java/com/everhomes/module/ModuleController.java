@@ -185,4 +185,53 @@ public class ModuleController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /module/createServiceModule</b>
+     * <p>
+     *  创建模块
+     * </p>
+     */
+    @RequestMapping("createServiceModule")
+    @RestReturn(value = String.class)
+    public RestResponse createServiceModule(@Valid CreateServiceModuleCommand cmd) {
+        return new RestResponse(serviceModuleService.createServiceModule(cmd));
+    }
+
+    /**
+     * <b>URL: /module/updateServiceModule</b>
+     * <p>
+     *  修改模块
+     * </p>
+     */
+    @RequestMapping("updateServiceModule")
+    @RestReturn(value = String.class)
+    public RestResponse updateServiceModule(@Valid UpdateServiceModuleCommand cmd) {
+        return new RestResponse(serviceModuleService.updateServiceModule(cmd));
+    }
+
+    /**
+     * <b>URL: /module/deleteServiceModule</b>
+     * <p>
+     *  删除模块
+     * </p>
+     */
+    @RequestMapping("deleteServiceModule")
+    @RestReturn(value = String.class)
+    public RestResponse deleteServiceModule(@Valid DeleteServiceModuleCommand cmd) {
+        serviceModuleService.deleteServiceModule(cmd);
+        return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /module/listAllServiceModules</b>
+     * <p>
+     * 全部的业务模块列表
+     * </p>
+     */
+    @RequestMapping("listAllServiceModules")
+    @RestReturn(value = ListServiceModulesResponse.class, collection = true)
+    public RestResponse listAllServiceModules(@Valid ListServiceModulesCommand cmd) {
+        return new RestResponse(serviceModuleService.listAllServiceModules(cmd));
+    }
 }

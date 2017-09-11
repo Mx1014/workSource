@@ -2,14 +2,11 @@
 package com.everhomes.parking.handler;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.everhomes.parking.*;
@@ -24,22 +21,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.wanke.WankeCardInfo;
 import com.everhomes.parking.wanke.WankeCardType;
 import com.everhomes.parking.wanke.WankeJsonEntity;
 import com.everhomes.parking.wanke.WankeTempFee;
 import com.everhomes.rest.organization.VendorType;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "WANKE")
-public class WankeParkingVendorHandler implements ParkingVendorHandler {
+public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WankeParkingVendorHandler.class);
-	
-	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
 
 	private static final String RECHARGE = "/Parking/MouthCardRecharge";
 	private static final String GET_CARD = "/Parking/CardDataQuery";
@@ -47,25 +39,15 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	private static final String GET_TEMP_FEE = "/Parking/GetCost";
 	private static final String PAY_TEMP_FEE = "/Parking/PayCost";
 
-	@Override
-	protected Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
-
 	@Autowired
 	private ParkingProvider parkingProvider;
-	@Autowired
-	private LocaleTemplateService localeTemplateService;
 	@Autowired
     private ConfigurationProvider configProvider;
 	
 	@Override
-    public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
-    		Long parkingLotId, String plateNumber) {
+    public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
-    	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
-		GetParkingCardsResponse response = new GetParkingCardsResponse();
-		response.setCards(resultList);
+    	List<ParkingCardDTO> resultList = new ArrayList<>();
 
     	WankeCardInfo card = getCard(plateNumber);
 
@@ -74,26 +56,15 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 			String expireDate = card.getExpireDate();
 			this.checkExpireDateIsNull(expireDate,plateNumber);
 
-			long expireTime = strToLong2(expireDate);
-			long now = System.currentTimeMillis();
-			long cardReserveTime = 0;
-			
-	    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
-	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
-	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
-	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
-	    		cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
+			long expireTime = Utils.strToLong(expireDate, Utils.DateStyle.DATE_TIME_STR);
 
-	    	}
-			
-			if(expireTime + cardReserveTime < now){
-				response.setToastType(ParkingToastType.CARD_EXPIRED.getCode());
-
-				return response;
+			if (checkExpireTime(parkingLot, expireTime)) {
+				return resultList;
 			}
-			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
-			parkingCardDTO.setOwnerId(ownerId);
-			parkingCardDTO.setParkingLotId(parkingLotId);
+
+			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
+			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
+			parkingCardDTO.setParkingLotId(parkingLot.getId());
 			
 			String plateOwnerName = card.getUserName();
 			String plateOwnerPhone = card.getMobile();
@@ -115,100 +86,54 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setIsValid(true);
 			
 			resultList.add(parkingCardDTO);
-		}else {
-			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
-
 		}
         
-        return response;
+        return resultList;
     }
 
 	@Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
-    	List<ParkingRechargeRate> parkingRechargeRateList = null;
-    	List<ParkingRechargeRateDTO> result = null;
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
+    	List<ParkingRechargeRate> parkingRechargeRateList;
+
     	if(StringUtils.isBlank(plateNumber)) {
-    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId, null);
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
+					parkingLot.getId(), null);
     		
     	}else{
     		WankeCardInfo cardInfo = getCard(plateNumber);           
 			
     		String cardType = cardInfo.getCardType();
-    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId, cardType);
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
+					parkingLot.getId(), cardType);
     	}
     	
     	
 		List<WankeCardType> types = getCardType();
-    	
-		result = parkingRechargeRateList.stream().map(r->{
+
+		List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
 			String type = null;
 			for(WankeCardType t: types) {
 				if(t.getId().equals(r.getCardType())) {
 					type = t.getName();
 				}
 			}
-			
-			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
-			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+
+			ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.WANKE.getCode());
 			
 			dto.setCardType(type);
 			return dto;
-		}
-		).collect(Collectors.toList());
+		}).collect(Collectors.toList());
 		
 		return result;
     }
 
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-
-    	return recharge(order);
-    }
-    
-    @Override
-    public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd){
-    	User user = UserContext.current().getUser();
-    	
-    	ParkingRechargeRate parkingRechargeRate = new ParkingRechargeRate();
-    	parkingRechargeRate.setOwnerType(cmd.getOwnerType());
-    	parkingRechargeRate.setOwnerId(cmd.getOwnerId());
-    	parkingRechargeRate.setParkingLotId(cmd.getParkingLotId());
-    	parkingRechargeRate.setCardType(cmd.getCardType());
-    	/*费率 名称默认设置 by sw*/
-    	Map<String, Object> map = new HashMap<String, Object>();
-	    map.put("count", cmd.getMonthCount().intValue());
-		String scope = ParkingNotificationTemplateCode.SCOPE;
-		int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
-		String locale = "zh_CN";
-		String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-    	parkingRechargeRate.setRateName(rateName);
-    	parkingRechargeRate.setMonthCount(cmd.getMonthCount());
-    	parkingRechargeRate.setPrice(cmd.getPrice());
-    	parkingRechargeRate.setCreatorUid(user.getId());
-    	parkingRechargeRate.setCreateTime(new Timestamp(System.currentTimeMillis()));
-    	parkingRechargeRate.setStatus(ParkingRechargeRateStatus.ACTIVE.getCode());
-    	parkingProvider.createParkingRechargeRate(parkingRechargeRate);
-    	return ConvertHelper.convert(parkingRechargeRate, ParkingRechargeRateDTO.class);
-    }
-    
-    @Override
-    public void deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd){
-    	try {
-    		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(cmd.getRateToken()));
-    		if(rate == null){
-    			LOGGER.error("remote search pay order return null.rateId="+cmd.getRateToken());
-    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    					"remote search pay order return null.");
-    		}else{
-    			parkingProvider.deleteParkingRechargeRate(rate);
-    		}
-    	} catch (Exception e) {
-			LOGGER.error("delete parkingRechargeRate fail."+cmd.getRateToken());
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION,
-    				"delete parkingRechargeRate fail."+cmd.getRateToken());
-		}
+		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
+			return rechargeMonthlyCard(order);
+		return payTempCardFee(order);
     }
     
     private void checkExpireDateIsNull(String expireDate,String plateNo) {
@@ -217,38 +142,6 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"ExpireDate is null.");
 		}
-	}
-    
-    private Long strToLong2(String str) {
-
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-		
-		Long ts = null;
-		try {
-			ts = sdf.parse(str).getTime();
-		} catch (ParseException e) {
-			LOGGER.error("validityPeriod data format is not yyyyMMddHHmmss.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"validityPeriod data format is not yyyyMMddHHmmss.");
-		}
-		
-		return ts;
-	}
-    
-    private Long strToLong3(String str) {
-
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		
-		Long ts = null;
-		try {
-			ts = sdf.parse(str).getTime();
-		} catch (ParseException e) {
-			LOGGER.error("validityPeriod data format is not yyyymmdd.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"validityPeriod data format is not yyyymmdd.");
-		}
-		
-		return ts;
 	}
     
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
@@ -296,8 +189,10 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
         WankeJsonEntity<WankeCardInfo> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<WankeCardInfo>>(){});
 		if(entity.isSuccess()){
 			card = entity.getData();
-			if(null != card)
-				card.setExpireDate(card.getExpireDate()+"235959");
+			if(null != card) {
+				//对接方返回的有效期 没有时分秒，这里补上，有效期默认是一天的23时59分59秒
+				card.setExpireDate(card.getExpireDate() + "235959");
+			}
 		}
         
         return card;
@@ -309,16 +204,16 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 
 		param.put("plateNo", order.getPlateNumber());
 		param.put("flag", "2");
-	    param.put("amount", order.getPrice().intValue()*100);
+	    param.put("amount", (order.getPrice().multiply(new BigDecimal(100))).intValue()); //单位分
 	    param.put("payMons", String.valueOf(order.getMonthCount().intValue()));
 	    param.put("chargePaidNo", order.getId());
-	    param.put("payTime", sdf1.format(new Date()));
+	    param.put("payTime", Utils.dateToStr(new Date(), Utils.DateStyle.DATE_TIME_STR));
 	    param.put("sign", "");
 
 		//将充值信息存入订单
 		WankeCardInfo card = getCard(order.getPlateNumber());
-		long startPeriod = strToLong2(card.getExpireDate());
-		order.setStartPeriod(new Timestamp(startPeriod + 1000));
+		long startPeriod = Utils.strToLong(card.getExpireDate(), Utils.DateStyle.DATE_TIME_STR);
+		order.setStartPeriod(new Timestamp(startPeriod + 1000)); //加一秒
 		order.setEndPeriod(Utils.getTimestampByAddNatureMonth(startPeriod, order.getMonthCount().intValue()));
 
 		String json = post(RECHARGE, param);
@@ -335,7 +230,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		JSONObject param = new JSONObject();
 
 		param.put("orderNo", order.getOrderToken());
-		param.put("amount", order.getPrice().intValue() * 100);
+		param.put("amount", (order.getPrice().multiply(new BigDecimal(100))).intValue());
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?1:2);
 		String json = post(PAY_TEMP_FEE, param);
 
@@ -343,24 +238,6 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		return entity.isSuccess();
 
     }
-	@Override
-	public boolean recharge(ParkingRechargeOrder order){
-		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
-			return rechargeMonthlyCard(order);
-		return payTempCardFee(order);
-    }
-	
-	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
-		if(null == rate) {
-			LOGGER.error("Rate not found, cmd={}", order);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"Rate not found.");
-		}
-		order.setRateName(rate.getRateName());
-		
-	}
 
 	private WankeTempFee getTempFee(String plateNumber) {
 
@@ -380,7 +257,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
     }
 
 	@Override
-	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId, Long parkingLotId, String plateNumber) {
+	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
 		
 		WankeTempFee tempFee = getTempFee(plateNumber);
 		
@@ -388,10 +265,10 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		if(null == tempFee)
 			return dto;
 		dto.setPlateNumber(plateNumber);
-		dto.setEntryTime(strToLong3(tempFee.getEntryTime()));
+		dto.setEntryTime(Utils.strToLong(tempFee.getEntryTime(), Utils.DateStyle.DATE_TIME));
 		dto.setParkingTime(Integer.valueOf(tempFee.getParkingTime()));
 		dto.setDelayTime(Integer.valueOf(tempFee.getDelayTime()));
-		dto.setPrice(new BigDecimal(Integer.valueOf(tempFee.getAmount()) / 100));
+		dto.setPrice(new BigDecimal(tempFee.getAmount()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 		dto.setOrderToken(tempFee.getOrderNo());
 		dto.setPayTime(System.currentTimeMillis());
 		return dto;
@@ -408,26 +285,4 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		return json;
 	}
 
-	@Override
-	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
-		return null;
-	}
-
-	@Override
-	public void lockParkingCar(LockParkingCarCommand cmd) {
-
-	}
-
-	@Override
-	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

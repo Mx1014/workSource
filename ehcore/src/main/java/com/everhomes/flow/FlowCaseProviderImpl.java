@@ -187,6 +187,37 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		return null;
     	}   	
     }
+
+	public List<FlowCaseDetail> listFlowCasesByModuleId(ListingLocator locator,
+												 int count, SearchFlowCaseCommand cmd){
+			DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
+			Condition cond = Tables.EH_FLOW_CASES.STATUS.ne(FlowCaseStatus.INVALID.getCode());
+			if(locator.getAnchor() == null) {
+				locator.setAnchor(cmd.getPageAnchor());
+			}
+			if(locator.getAnchor() != null) {
+				cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
+			}
+			FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
+			if(searchType.equals(FlowCaseSearchType.APPLIER)) {
+				cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
+
+				List<FlowCaseDetail> records = context.select().from(Tables.EH_FLOW_CASES)
+						.where(cond).orderBy(Tables.EH_FLOW_CASES.ID.desc())
+						.limit(count).fetch().map(r->ConvertHelper.convert(r, FlowCaseDetail.class));
+
+				if(records.size() >= count) {
+					locator.setAnchor(records.get(records.size() - 1).getId());
+				} else {
+					locator.setAnchor(null);
+				}
+
+				return records;
+
+			} else {
+				return null;
+			}
+	}
     
     @Override
     public List<FlowCaseDetail> findAdminFlowCases(ListingLocator locator, int count, SearchFlowCaseCommand cmd) {

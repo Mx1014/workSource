@@ -2,6 +2,7 @@
 package com.everhomes.user;
 
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -80,9 +81,9 @@ public interface UserService {
 	List<UserInfo> listUserByKeyword(String keyword);
 	List<User> listUserByIdentifier(String identifier);
 	List<UserInfo> listUserInfoByIdentifier(String identifier);
-	
 
-	List<SceneDTO> listUserRelatedScenes();
+    List<SceneDTO> listUserRelatedScenes();
+	List<SceneDTO> listUserRelatedScenes(ListUserRelatedScenesCommand cmd);
 	void toFamilySceneDTO(Integer namespaceId, Long userId, List<SceneDTO> sceneList, List<FamilyDTO> familyDtoList);
 	SceneDTO toFamilySceneDTO(Integer namespaceId, Long userId, FamilyDTO familyDto);
 	SceneTokenDTO toSceneTokenDTO(Integer namespaceId, Long userId, FamilyDTO familyDto, SceneType sceneType);
@@ -220,8 +221,26 @@ public interface UserService {
  
     SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd);
 
+    //added by R 20170803, 消息2.1增加
+    SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd);
 
     ListAuthFormsResponse listAuthForms();
 
 	GetFamilyButtonStatusResponse getFamilyButtonStatus();
+
+
+    /**
+     *
+     */
+    List<String[]> listBuildingAndApartmentById(Long uid);
+    /**
+     * created by wentian
+     * 根据客户名和地址定位唯一用户
+     */
+    TargetDTO findTargetByNameAndAddress(String contractNum, String targetName , Long ownerId,String tel,String ownerType,String targetType);
+
+    Long getCommunityIdBySceneToken(SceneTokenDTO sceneTokenDTO);
+
+    List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd);
+
 }

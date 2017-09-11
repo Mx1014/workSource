@@ -9,7 +9,9 @@ import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.util.RequireAuthentication;
+import com.mysql.jdbc.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,6 +31,7 @@ import javax.validation.Valid;
 @RestDoc(value = "entry controller", site = "ehcore")
 @RestController
 @RequestMapping("/techpark/entry")
+@Validated
 public class EnterpriseApplyEntryController extends ControllerBase{
 
 	@Autowired
@@ -61,9 +64,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 				dto.setLongitude(Double.valueOf(c.getLongitude()));
 			//end
 			dto.setEnterpriseId(c.getOrganizationId());
-			dto.setEnterpriseName(c.getDisplayName());
-			if(dto.getEnterpriseName() == null)
-				dto.setEnterpriseName(c.getName());
+			dto.setEnterpriseName(c.getName());//优先展示企业名而非昵称 by xiongying20170826
+			if(dto.getEnterpriseName() == null || StringUtils.isNullOrEmpty(dto.getEnterpriseName()))
+				dto.setEnterpriseName(c.getDisplayName());
 			dto.setContactPhone(c.getAccountPhone());
 			return dto;
 		}).collect(Collectors.toList()));
@@ -102,15 +105,43 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <b>URL: /techpark/entry/createLeasePromotionForAdmin
+	 * <p>创建招租(后台管理用)
+	 */
+	@RequestMapping("createLeasePromotionForAdmin")
+	@RestReturn(value=BuildingForRentDTO.class)
+	public RestResponse createLeasePromotionForAdmin(CreateLeasePromotionCommand cmd){
+		BuildingForRentDTO res = enterpriseApplyEntryService.createLeasePromotion(cmd, (byte)1);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/updateLeasePromotionForAdmin
+	 * <p>修改招租（后台管理用）
+	 */
+	@RequestMapping("updateLeasePromotionForAdmin")
+	@RestReturn(value=BuildingForRentDTO.class)
+	public RestResponse updateLeasePromotionForAdmin(UpdateLeasePromotionCommand cmd){
+		BuildingForRentDTO res = enterpriseApplyEntryService.updateLeasePromotion(cmd, (byte)1);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /techpark/entry/createLeasePromotion
-	 * <p>创建招租
+	 * <p>创建招租（app用）
 	 */
 	@RequestMapping("createLeasePromotion")
 	@RestReturn(value=BuildingForRentDTO.class)
 	public RestResponse createLeasePromotion(CreateLeasePromotionCommand cmd){
-		BuildingForRentDTO res = enterpriseApplyEntryService.createLeasePromotion(cmd);
+		BuildingForRentDTO res = enterpriseApplyEntryService.createLeasePromotion(cmd, (byte)2);
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -119,12 +150,12 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/updateLeasePromotion
-	 * <p>修改招租
+	 * <p>修改招租（app用）
 	 */
 	@RequestMapping("updateLeasePromotion")
 	@RestReturn(value=BuildingForRentDTO.class)
 	public RestResponse updateLeasePromotion(UpdateLeasePromotionCommand cmd){
-		BuildingForRentDTO res = enterpriseApplyEntryService.updateLeasePromotion(cmd);
+		BuildingForRentDTO res = enterpriseApplyEntryService.updateLeasePromotion(cmd, (byte)2);
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

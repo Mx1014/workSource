@@ -5,7 +5,10 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Locale;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bus.BusBridgeProvider;
 import com.everhomes.bus.LocalBus;
+import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -43,6 +46,9 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	@Autowired
 	private LocaleStringService localeService;
 
+	@Autowired
+	private BusBridgeProvider busBridgeProvider;
+
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
 
@@ -57,7 +63,7 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		BigDecimal payAmount = new BigDecimal(cmd.getPayAmount());
 
 		//支付宝回调时，可能会同时回调多次，
-		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode()).enter(()-> {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + orderId).enter(()-> {
 
 			ParkingRechargeOrder order = checkOrder(orderId);
 			//加一个开关，方便在beta环境测试
@@ -90,7 +96,7 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
 						parkingProvider.updateParkingRechargeOrder(order);
 
-						LOGGER.info("Notify parking recharge failed, cmd={}, order={}", cmd, order);
+						LOGGER.info("Notify parking recharge success, cmd={}, order={}", cmd, order);
 					}else {
 						//充值失败
 						order.setStatus(ParkingRechargeOrderStatus.FAILED.getCode());
@@ -113,7 +119,11 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 					ExecutorUtil.submit(new Runnable() {
 						@Override
 						public void run() {
-							localBus.publish(this, "Parking-Recharge" + order.getId(), dto);
+
+							LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
+							localBusSubscriber.onLocalBusMessage(null, "Parking-Recharge" + order.getId(), JSONObject.toJSONString(dto), null);
+
+							localBus.publish(this, "Parking-Recharge" + order.getId(), JSONObject.toJSONString(dto));
 						}
 					});
 				}

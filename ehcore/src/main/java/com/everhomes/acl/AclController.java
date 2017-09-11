@@ -324,6 +324,19 @@ public class AclController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /acl/getPrivilegeByRoleId</b>
+     * <p>获取角色的权限</p>
+     */
+    @RequestMapping("getPrivilegeByRoleId")
+    @RestReturn(value=GetPrivilegeByRoleIdResponse.class)
+    public RestResponse getPrivilegeByRoleId(@Valid ListPrivilegesByRoleIdCommand cmd) {
+        RestResponse response = new RestResponse(rolePrivilegeService.getPrivilegeByRoleId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /acl/deleteRolePrivileges</b>
      * <p>删除角色和权限的关系</p>
      */
@@ -342,7 +355,7 @@ public class AclController extends ControllerBase {
      * <p>角色列表</p>
      */
     @RequestMapping("listRoles")
-    @RestReturn(value=RoleDTO.class, collection = true)
+    @RestReturn(value=ListRolesResponse.class)
     public RestResponse listRoles(@Valid ListRolesCommand cmd) {
         RestResponse response = new RestResponse(rolePrivilegeService.listRoles(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);

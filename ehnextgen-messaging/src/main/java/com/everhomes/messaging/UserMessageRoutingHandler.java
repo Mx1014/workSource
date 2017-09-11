@@ -68,6 +68,11 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
     public void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
             MessageDTO message, int deliveryOption) {
         long uid = Long.parseLong(dstChannelToken);
+        
+        if(uid == 0) {
+            //ignore the anonymous added by Janson
+            return;
+        }
 
         List<UserLogin> logins = this.userService.listUserLogins(uid);
         if(LOGGER.isDebugEnabled()) {

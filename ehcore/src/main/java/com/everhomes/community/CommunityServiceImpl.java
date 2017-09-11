@@ -16,8 +16,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
-import com.everhomes.general_form.GeneralFormService;
-import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.group.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -30,6 +28,7 @@ import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.*;
 import com.everhomes.organization.*;
+import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -38,21 +37,17 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.admin.*;
 import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.region.RegionServiceErrorCode;
-import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.techpark.expansion.LeasePromotionFlag;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
@@ -60,10 +55,9 @@ import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
-import com.everhomes.techpark.expansion.LeaseFormRequest;
+import com.everhomes.techpark.servicehotline.ServiceConfiguration;
+import com.everhomes.techpark.servicehotline.ServiceConfigurationsProvider;
 import com.everhomes.user.*;
-import com.everhomes.userOrganization.UserOrganizationProvider;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
@@ -116,15 +110,11 @@ public class CommunityServiceImpl implements CommunityService {
 	private CommunitySearcher communitySearcher;
 	@Autowired
 	private ContentServerService contentServerService;
-
-    @Autowired
-    private UserGroupHistoryProvider userGroupHistoryProvider;
 	@Autowired
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
 	private OrganizationService organizationService;
-	
 
 	@Autowired
 	private GroupProvider groupProvider;
@@ -164,12 +154,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private  RolePrivilegeService rolePrivilegeService;
-	@Autowired
-	private GeneralFormService generalFormService;
-	@Autowired
-	private GeneralFormValProvider generalFormValProvider;
-	@Autowired
-	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
 
 	@Autowired
 	private  ImportFileService importFileService;
@@ -177,11 +161,11 @@ public class CommunityServiceImpl implements CommunityService {
 	@Autowired
 	private  UserActivityProvider userActivityProvider;
 
-	@Autowired
-	private UserOrganizationProvider userOrganizationProvider;
-
     @Autowired
     private GroupMemberLogProvider groupMemberLogProvider;
+
+    @Autowired
+    private ServiceConfigurationsProvider serviceConfigurationsProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -332,7 +316,7 @@ public class CommunityServiceImpl implements CommunityService {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
 		
-		if(community.getCityId() == null || community.getCityId().longValue() == 0){
+		if(community.getCityId() == null || community.getCityId() == 0L){
 		    LOGGER.error("Community missing infomation,cityId is null.communityId=" + cmd.getCommunityId());
             throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_CITY_NOT_EXIST, 
                     "Community missing infomation,cityId is null.");
@@ -601,44 +585,34 @@ public class CommunityServiceImpl implements CommunityService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize + 1,communityId, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize + 1,communityId, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), null);
 		
 		this.communityProvider.populateBuildingAttachments(buildings);
         
         Long nextPageAnchor = null;
         if(buildings.size() > pageSize) {
         	buildings.remove(buildings.size() - 1);
-            nextPageAnchor = buildings.get(buildings.size() - 1).getId();
+            nextPageAnchor = buildings.get(buildings.size() - 1).getDefaultOrder();
         }
-        
-        populateBuildings(buildings);
-        
-        List<BuildingDTO> dtoList = buildings.stream().map((r) -> {
-        	
-        	BuildingDTO dto = ConvertHelper.convert(r, BuildingDTO.class);  
-        	
-        	dto.setBuildingName(dto.getName());
-        	
-        	dto.setName(org.springframework.util.StringUtils.isEmpty(dto.getAliasName()) ? dto.getName() : dto.getAliasName());
-        	
-        	if(null != dto.getManagerUid()){
-        		OrganizationMember member = organizationProvider.findOrganizationMemberById(dto.getManagerUid());
-        		if(null != member){
-        			dto.setManagerNickName(member.getContactName());
-        			//modify by wh 2016-11-8 加了管理员电话新字段
-        			//dto.setContact(member.getContactToken());
-        			dto.setManagerContact(member.getContactToken());
-        		}
-        	}
 
-			//TODO: set detail url
-			processDetailUrl(dto);
-        	populateBuildingDTO(dto);
-        	
+        List<BuildingDTO> dtoList = buildings.stream().map((r) -> {
+
+        	BuildingDTO dto = ConvertHelper.convert(r, BuildingDTO.class);
+
+			populateBuilding(dto, r);
+
         	return dto;
         }).collect(Collectors.toList());
-        
-        
+        //增加公共区域
+        if (UserContext.getCurrentNamespaceId()==999983){
+            //if (cmd.getNamespaceId()==999983) {
+            BuildingDTO buildingDTO = new BuildingDTO();
+            buildingDTO.setName(EbeiBuildingType.publicArea);
+            buildingDTO.setBuildingName(EbeiBuildingType.publicArea);
+            buildingDTO.setId(0l);
+            dtoList.add(buildingDTO);
+        }
+
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
 	}
 
@@ -648,42 +622,10 @@ public class CommunityServiceImpl implements CommunityService {
 
 		detailUrl = String.format(detailUrl, dto.getId());
 
-//            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
 		dto.setDetailUrl(homeUrl + detailUrl);
 
 	}
 
-    private void populateBuildingDTO(BuildingDTO building) {
-        if(building == null) {
-            return;
-        }
-        
-        String posterUrl = building.getPosterUri();
-        if(posterUrl != null && posterUrl.length() > 0) {
-            try{
-                String url = contentServerService.parserUri(posterUrl, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                building.setPosterUrl(url);
-            }catch(Exception e){
-                LOGGER.error("Failed to parse poster uri of building, building=" + building, e);
-            }
-        }
-
-		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
-		cmd.setSourceType(EntityType.BUILDING.getCode());
-		cmd.setSourceId(building.getId());
-		cmd.setOriginFieldFlag(NormalFlag.NEED.getCode());
-
-		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
-		building.setFormValues(formValues);
-
-		if (LeasePromotionFlag.ENABLED.getCode() == building.getCustomFormFlag()) {
-			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(building.getNamespaceId(),
-					building.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
-			if (null != request) {
-				building.setRequestFormId(request.getSourceId());
-			}
-		}
-    }
 	@Override
 	public BuildingDTO getBuilding(GetBuildingCommand cmd) {
 		
@@ -696,10 +638,10 @@ public class CommunityServiceImpl implements CommunityService {
         				BuildingServiceErrorCode.ERROR_BUILDING_DELETED, "Building already deleted");
             }
 			this.communityProvider.populateBuildingAttachments(building);
-	        populateBuilding(building);
 
 			BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
-			populateFormInfo(dto);
+
+			populateBuilding(dto, building);
 
 			return dto;
 		}else {
@@ -708,50 +650,42 @@ public class CommunityServiceImpl implements CommunityService {
             		BuildingServiceErrorCode.ERROR_BUILDING_NOT_FOUND, "Building not found");
         }
 	}
-	
-	private void populateBuildings(List<Building> buildingList) {
-        if(buildingList == null || buildingList.size() == 0) {
-            if(LOGGER.isInfoEnabled()) {
-                LOGGER.info("The building list is empty");
-            }
-            return;
-        } else {
-            for(Building building : buildingList) {
-            	populateBuilding(building);
-            }
-        }
-    }
 
 	/**
 	 * 填充楼栋信息
 	 */
-	 private void populateBuilding(Building building) {
+	 private void populateBuilding(BuildingDTO dto, Building building) {
 		 if(building == null) {
             if(LOGGER.isInfoEnabled()) {
                 LOGGER.info("The building is null");
             }
 		 } else {
+
+			 dto.setBuildingName(dto.getName());
+			 dto.setName(StringUtils.isBlank(dto.getAliasName()) ? dto.getName() : dto.getAliasName());
+
 		     String posterUri = building.getPosterUri();
              if(posterUri != null && posterUri.length() > 0) {
                  try{
                      String url = contentServerService.parserUri(posterUri, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                     building.setPosterUrl(url);
+					 dto.setPosterUrl(url);
                  }catch(Exception e){
                      LOGGER.error("Failed to parse building poster uri, buildingId=" + building.getId() + ", posterUri=" + posterUri, e);
                  }
              } 
 		     
-			 populateBuildingCreatorInfo(building);
-			 populateBuildingManagerInfo(building);
-			 populateBuildingOperatorInfo(building);
-             
-			 populateBuildingAttachements(building, building.getAttachments());
-	        
+//			 populateBuildingCreatorInfo(building);
+			 populateBuildingManagerInfo(dto);
+//			 populateBuildingOperatorInfo(building);
+
+			 populateBuildingAttachments(dto, building.getAttachments());
+
+			 processDetailUrl(dto);
 		 }
 	 }
 	 
 	 
-	 private void populateBuildingCreatorInfo(Building building) {
+	 private void populateBuildingCreatorInfo(BuildingDTO building) {
 		 
 		 String creatorNickName = building.getCreatorNickName();
          String creatorAvatar = building.getCreatorAvatar();
@@ -773,30 +707,24 @@ public class CommunityServiceImpl implements CommunityService {
 		 
 	 }
 	 
-	 private void populateBuildingManagerInfo(Building building) {
-		 
-		 String managerNickName = building.getManagerNickName();
-         String managerAvatar = building.getManagerAvatar();
+	 private void populateBuildingManagerInfo(BuildingDTO building) {
+
          if(null == building.getManagerUid()){
         	 return;
          }
-         User manager = userProvider.findUserById(building.getManagerUid());
-         if(manager != null) {
-             if(managerNickName == null || managerNickName.trim().length() == 0) {
-            	 building.setManagerNickName(manager.getNickName());
-             }
-             if(managerAvatar == null || managerAvatar.trim().length() == 0) {
-            	 building.setManagerAvatar(manager.getAvatar());
-             }
-         }
-         managerAvatar = building.getManagerAvatar();
-         if(managerAvatar != null && managerAvatar.length() > 0) {
-             String avatarUrl = contentServerService.parserUri(managerAvatar, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-             building.setManagerAvatarUrl(avatarUrl);
-         }
+
+		 OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
+		 if(null != member){
+			 building.setManagerNickName(member.getContactName());
+			 building.setManagerName(member.getContactName());
+			 //modify by wh 2016-11-8 加了管理员电话新字段
+			 //dto.setContact(member.getContactToken());
+			 building.setManagerContact(member.getContactToken());
+		 }
+
 	 }
 
-	 private void populateBuildingOperatorInfo(Building building) {
+	 private void populateBuildingOperatorInfo(BuildingDTO building) {
 	 
 		 String operatorNickName = building.getOperateNickName();
          String operatorAvatar = building.getOperateAvatar();
@@ -819,7 +747,7 @@ public class CommunityServiceImpl implements CommunityService {
          }
 	 }
 	 
-	 private void populateBuildingAttachements(Building building, List<BuildingAttachment> attachmentList) {
+	 private void populateBuildingAttachments(BuildingDTO building, List<BuildingAttachment> attachmentList) {
 	 
 		 if(attachmentList == null || attachmentList.size() == 0) {
 	            if(LOGGER.isInfoEnabled()) {
@@ -827,12 +755,12 @@ public class CommunityServiceImpl implements CommunityService {
 	            }
 		 } else {
 	            for(BuildingAttachment attachment : attachmentList) {
-	                populateBuildingAttachement(building, attachment);
+					populateBuildingAttachment(building, attachment);
 	            }
 		 }
 	 }
 	 
-	 private void populateBuildingAttachement(Building building, BuildingAttachment attachment) {
+	 private void populateBuildingAttachment(BuildingDTO building, BuildingAttachment attachment) {
         
 		 if(attachment == null) {
 			 if(LOGGER.isInfoEnabled()) {
@@ -849,7 +777,7 @@ public class CommunityServiceImpl implements CommunityService {
 				 }
 			 } else {
 				 if(LOGGER.isWarnEnabled()) {
-					 LOGGER.warn("The content uri is empty, attchmentId=" + attachment.getId());
+					 LOGGER.warn("The content uri is empty, attachmentId=" + attachment.getId());
 				 }
 			 }
 		 }
@@ -860,15 +788,7 @@ public class CommunityServiceImpl implements CommunityService {
 	public BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd) {
 		
 		Building building = ConvertHelper.convert(cmd, Building.class);
-		building.setAddress(cmd.getAddress());
-		building.setAliasName(cmd.getAliasName());
-		building.setAreaSize(cmd.getAreaSize());
-		building.setCommunityId(cmd.getCommunityId());
-		building.setContact(cmd.getContact());
-		building.setDescription(cmd.getDescription());
-		building.setManagerUid(cmd.getManagerUid());
-		building.setName(cmd.getName());
-		building.setPosterUri(cmd.getPosterUri());
+
 		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 		building.setNamespaceId(null == cmd.getNamespaceId() ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId());
 		if(StringUtils.isNotBlank(cmd.getGeoString())){
@@ -880,71 +800,39 @@ public class CommunityServiceImpl implements CommunityService {
 			String geohash = GeoHashUtils.encode(latitude, longitude);
 			building.setGeohash(geohash);
 		}
+		if(cmd.getEntryDate() != null) {
+			building.setEntryDate(new Timestamp(cmd.getEntryDate()));
+		}
 		
-		User user = UserContext.current().getUser();
-		long userId = user.getId();
+		Long userId = UserContext.currentUserId();
 
 		dbProvider.execute((TransactionStatus status) -> {
 			if (cmd.getId() == null) {
 
-				LOGGER.info("add building");
+				LOGGER.info("add building, cmd={}", cmd);
 				this.communityProvider.createBuilding(userId, building);
-				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
-						building.getId(), cmd.getCustomFormFlag());
+
 			} else {
-				LOGGER.info("update building");
-				building.setId(cmd.getId());
+				LOGGER.info("update building, cmd={}", cmd);
 				Building b = this.communityProvider.findBuildingById(cmd.getId());
 				building.setCreatorUid(b.getCreatorUid());
 				building.setCreateTime(b.getCreateTime());
 				building.setNamespaceId(b.getNamespaceId());
 				this.communityProvider.updateBuilding(building);
 
-				generalFormValProvider.deleteGeneralFormVals(EntityType.BUILDING.getCode(), building.getId());
-				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
-						building.getId(), cmd.getCustomFormFlag());
 			}
+			processBuildingAttachments(userId, cmd.getAttachments(), building);
+
 			return null;
 		});
-		processBuildingAttachments(userId, cmd.getAttachments(), building);
-		
-		populateBuilding(building);
 
 		BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
 
-		populateFormInfo(dto);
+		populateBuilding(dto, building);
+
 		return dto;
-		
 	}
 
-	private void populateFormInfo(BuildingDTO dto) {
-		GetGeneralFormValuesCommand cmdValues = new GetGeneralFormValuesCommand();
-		cmdValues.setSourceType(EntityType.BUILDING.getCode());
-		cmdValues.setSourceId(dto.getId());
-		cmdValues.setOriginFieldFlag(NormalFlag.NEED.getCode());
-		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmdValues);
-		dto.setFormValues(formValues);
-
-		if (LeasePromotionFlag.ENABLED.getCode() == dto.getCustomFormFlag()) {
-			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(dto.getNamespaceId(),
-					dto.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
-			if (null != request) {
-				dto.setRequestFormId(request.getSourceId());
-			}
-		}
-	}
-
-	private void addGeneralFormInfo(Long generalFormId, List<PostApprovalFormItem> formValues, String sourceType,
-		Long sourceId, Byte customFormFlag) {
-		if (LeasePromotionFlag.ENABLED.getCode() == customFormFlag) {
-			addGeneralFormValuesCommand cmd = new addGeneralFormValuesCommand();
-			cmd.setGeneralFormId(generalFormId);
-			cmd.setValues(formValues);
-			cmd.setSourceId(sourceId);
-			cmd.setSourceType(sourceType);
-			generalFormService.addGeneralFormValues(cmd);
-		}
-	}
 	@Override
 	public void deleteBuilding(DeleteBuildingAdminCommand cmd) {
 		
@@ -960,13 +848,12 @@ public class CommunityServiceImpl implements CommunityService {
 		return isValid;
 	}
 	
-    private void processBuildingAttachments(long userId, List<AttachmentDescriptor> attachmentList, Building building) {
-        List<BuildingAttachment> results = null;
-        
+    private void processBuildingAttachments(Long userId, List<AttachmentDescriptor> attachmentList, Building building) {
+
         this.communityProvider.deleteBuildingAttachmentsByBuildingId(building.getId());
         
         if(attachmentList != null) {
-            results = new ArrayList<BuildingAttachment>();
+			List<BuildingAttachment> results = new ArrayList<BuildingAttachment>();
             
             BuildingAttachment attachment = null;
             for(AttachmentDescriptor descriptor : attachmentList) {
@@ -982,8 +869,7 @@ public class CommunityServiceImpl implements CommunityService {
                 	this.communityProvider.createBuildingAttachment(attachment);
                     results.add(attachment);
                 } catch(Exception e) {
-                    LOGGER.error("Failed to save the attachment, userId=" + userId 
-                        + ", attachment=" + attachment, e);
+                    LOGGER.error("Failed to save the attachment, userId={}, attachment={}", userId, attachment, e);
                 }
             }
             
@@ -1204,7 +1090,8 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setCommunityId(communityId);
 				building.setDescription(data.getDescription());
 				building.setTrafficDescription(data.getTrafficDescription());
-				
+				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
+				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
 				if (StringUtils.isNotEmpty(data.getLongitudeLatitude())) {
 					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
 					building.setLongitude(Double.parseDouble(temp[0]));
@@ -1237,13 +1124,14 @@ public class CommunityServiceImpl implements CommunityService {
 					building.setLongitude(Double.parseDouble(temp[0]));
 					building.setLatitude(Double.parseDouble(temp[1]));
 				}
-				
+
+				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
+				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
 				building.setNamespaceId(org.getNamespaceId());
 				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				
 				communityProvider.updateBuilding(building);
 			}
-			
 		}
 		return list;
 	}
@@ -1307,6 +1195,9 @@ public class CommunityServiceImpl implements CommunityService {
 				data.setContactor(trim(r.getG()));
 				data.setPhone(trim(r.getH()));
 				data.setDescription(trim(r.getI()));
+				//加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
+				data.setNamespaceBuildingType(trim(r.getJ()));
+				data.setNamespaceBuildingToken(trim(r.getK()));
 				list.add(data);
 			}
 		}
@@ -1518,7 +1409,7 @@ public class CommunityServiceImpl implements CommunityService {
             if (null != locator.getAnchor()) {
                 query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
             }
-            query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
+            query.addOrderBy(Tables.EH_GROUP_MEMBERS.ID.desc());
             return query;
         });
         memberDTOList = groupMembers.stream().map(this::toGroupMemberDTO).collect(Collectors.toList());
@@ -2052,7 +1943,7 @@ public class CommunityServiceImpl implements CommunityService {
 				List<OrganizationMember> ms = new ArrayList<>();
 				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
 				for (OrganizationMember member : members) {
-					if (member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode()) && member.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
+					if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
 						dto.setOrganizationMemberName(member.getContactName());
 						ms.add(member);
 						dto.setIsAuth(AuthFlag.YES.getCode());
@@ -2850,13 +2741,15 @@ public class CommunityServiceImpl implements CommunityService {
         List<Long> communityIds = resourceList.stream().map(NamespaceResource::getResourceId).collect(Collectors.toList());
         List<OrganizationCommunityRequest> orgs = this.organizationProvider.listOrganizationCommunityRequests(communityIds);
         if (null == orgs || orgs.size() == 0) {
-            return response;
+			LOGGER.debug("orgs is null");
+			return response;
         }
 
 		List<Long> orgIds = new ArrayList<>();
 		for(OrganizationCommunityRequest org : orgs) {
 			orgIds.add(org.getMemberId());
 		}
+		LOGGER.debug("orgIds is：" + orgIds);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2896,6 +2789,8 @@ public class CommunityServiceImpl implements CommunityService {
         } else {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(
                     cmd.getUserInfoKeyword(), cmd.getOrgNameKeyword(), orgIds, cmd.getStatus(), null, locator, pageSize);
+			LOGGER.debug("wait approve organizationMembers cmd:" + cmd);
+			LOGGER.debug("wait approve organizationMembers size " + organizationMembers.size());
         }
 
 		if(organizationMembers == null || organizationMembers.size() == 0) {
@@ -3090,10 +2985,7 @@ public class CommunityServiceImpl implements CommunityService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"ResourceType cannot be null.");
         }
-		
-//    	ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getResourceCategoryId());
-//		checkResourceCategoryIsNull(category);
-		
+
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
 				namespaceId);
@@ -3187,28 +3079,12 @@ public class CommunityServiceImpl implements CommunityService {
 	public List<ResourceCategoryDTO> listResourceCategories(ListResourceCategoryCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		
-//		List<ResourceCategoryDTO> result = new ArrayList<ResourceCategoryDTO>();
-//		String path = null;
-//		Long parentId = null == cmd.getParentId() ? 0L : cmd.getParentId();
-//		if(null != cmd.getParentId()) {
-//			ResourceCategory resourceCategory = communityProvider.findResourceCategoryById(cmd.getParentId());
-//			checkResourceCategoryIsNull(resourceCategory);
-//			path = resourceCategory.getPath();
-//		}
-		
 		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getParentId(), null, ResourceCategoryType.CATEGORY.getCode())
 			.stream().map(r -> {
 				ResourceCategoryDTO dto = ConvertHelper.convert(r, ResourceCategoryDTO.class);
 				
 				return dto;
 			}).collect(Collectors.toList());
-		
-//		for(ResourceCategoryDTO s: temp) {
-//			getChildCategories(temp, s);
-//			if(s.getParentId() == parentId) {
-//				result.add(s);
-//			}
-//		}
 		
 		return temp;
 	}
@@ -3220,12 +3096,12 @@ public class CommunityServiceImpl implements CommunityService {
 		List<ResourceCategoryDTO> list = listTreeResourceCategories(cmd);
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 
-		setresourceDTOs(list, namespaceId);
+		setResourceDTOs(list, namespaceId);
 		
 		return list;
 	}
 	
-	private void setresourceDTOs(List<ResourceCategoryDTO> list, Integer namespaceId){
+	private void setResourceDTOs(List<ResourceCategoryDTO> list, Integer namespaceId){
 		if(null != list) {
 			for(ResourceCategoryDTO r: list) {
 				List<ResourceCategoryAssignment> resourceCategoryAssignments = communityProvider.listResourceCategoryAssignment(r.getId(), namespaceId);
@@ -3235,7 +3111,7 @@ public class CommunityServiceImpl implements CommunityService {
 					dto.setResourceName(community.getName());
 					return dto;
 				}).collect(Collectors.toList());
-				setresourceDTOs(r.getCategoryDTOs(), namespaceId);
+				setResourceDTOs(r.getCategoryDTOs(), namespaceId);
 				r.setResourceDTOs(resourceDTOs);
 			}
 		}
@@ -3466,4 +3342,51 @@ public class CommunityServiceImpl implements CommunityService {
 			return null;
 		});
 	}
+
+    @Override
+    public CommunityAuthPopupConfigDTO getCommunityAuthPopupConfig(GetCommunityAuthPopupConfigCommand cmd) {
+        Integer namespaceId = cmd.getNamespaceId();
+        if (namespaceId == null) {
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
+        ServiceConfiguration conf = serviceConfigurationsProvider.getServiceConfiguration(
+                namespaceId, EntityType.NAMESPACE.getCode(), namespaceId.longValue(), ServiceConfiguration.COMMUNITY_AUTH_POPUP);
+
+        if (conf == null) {
+            conf = new ServiceConfiguration();
+            conf.setNamespaceId(namespaceId);
+            conf.setValue(String.valueOf(TrueOrFalseFlag.TRUE.getCode()));
+            conf.setOwnerType(EntityType.NAMESPACE.getCode());
+            conf.setOwnerId(namespaceId.longValue());
+            conf.setName(ServiceConfiguration.COMMUNITY_AUTH_POPUP);
+            serviceConfigurationsProvider.createServiceConfiguration(conf);
+        }
+        return new CommunityAuthPopupConfigDTO(Byte.valueOf(conf.getValue()));
+    }
+
+    @Override
+    public CommunityAuthPopupConfigDTO updateCommunityAuthPopupConfig(UpdateCommunityAuthPopupConfigCommand cmd) {
+        Integer namespaceId = cmd.getNamespaceId();
+        if (namespaceId == null) {
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
+        ServiceConfiguration conf = serviceConfigurationsProvider.getServiceConfiguration(
+                namespaceId, EntityType.NAMESPACE.getCode(), namespaceId.longValue(), ServiceConfiguration.COMMUNITY_AUTH_POPUP);
+
+        TrueOrFalseFlag status = TrueOrFalseFlag.fromCode(cmd.getStatus());
+        String value = String.valueOf(status != null ? status.getCode() : TrueOrFalseFlag.TRUE.getCode());
+        if (conf == null) {
+            conf = new ServiceConfiguration();
+            conf.setNamespaceId(namespaceId);
+            conf.setValue(value);
+            conf.setOwnerType(EntityType.NAMESPACE.getCode());
+            conf.setOwnerId(namespaceId.longValue());
+            conf.setName(ServiceConfiguration.COMMUNITY_AUTH_POPUP);
+            serviceConfigurationsProvider.createServiceConfiguration(conf);
+        } else {
+            conf.setValue(value);
+            serviceConfigurationsProvider.updateServiceConfiguration(conf);
+        }
+        return new CommunityAuthPopupConfigDTO(Byte.valueOf(conf.getValue()));
+    }
 }

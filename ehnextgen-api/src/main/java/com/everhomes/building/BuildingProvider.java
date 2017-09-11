@@ -18,5 +18,6 @@ public interface BuildingProvider {
 	void deleteBuilding(Building building);
 
 	List<Building> listBuildingByNamespaceType(Integer namespaceId, Long communityId, String namespaceType);
+	List<Building> listBuildingByNamespaceType(Integer namespaceId, String namespaceType);
 
 }

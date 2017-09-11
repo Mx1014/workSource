@@ -7,6 +7,7 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.yellowPage.JumpModuleDTO;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
+import org.jooq.Condition;
 
 public interface YellowPageProvider {
  
@@ -23,7 +24,7 @@ public interface YellowPageProvider {
 	
 	
 	List<ServiceAlliances> queryServiceAlliance(CrossShardListingLocator locator, int pageSize,
-			String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords);
+												String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords);
 
 	/**
 	 * add by dengs,20170428 不仅查小区，也查询物业公司下的 服务联盟机构
@@ -75,25 +76,25 @@ public interface YellowPageProvider {
 	List<ServiceAllianceNotifyTargets> listNotifyTargets(String ownerType, Long ownerId, Byte contactType, 
 			Long categoryId, CrossShardListingLocator locator, int pageSize);
 	
-	void createServiceAllianceRequests(ServiceAllianceRequests request);
+	Long createServiceAllianceRequests(ServiceAllianceRequests request);
 	ServiceAllianceRequests findServiceAllianceRequests(Long id);
 	List<ServiceAllianceRequests> listServiceAllianceRequests(CrossShardListingLocator locator, int pageSize);
 	
-	void createSettleRequests(SettleRequests request);
+	Long createSettleRequests(SettleRequests request);
 	SettleRequests findSettleRequests(Long id);
 	List<SettleRequests> listSettleRequests(CrossShardListingLocator locator, int pageSize);
 	
-	void createReservationRequests(ReservationRequests request);
+	Long createReservationRequests(ReservationRequests request);
 	ReservationRequests findReservationRequests(Long id);
 	List<ReservationRequests> listReservationRequests(CrossShardListingLocator locator, int pageSize);
 	
-	void createApartmentRequests(ServiceAllianceApartmentRequests request);
+	Long createApartmentRequests(ServiceAllianceApartmentRequests request);
 	ServiceAllianceApartmentRequests findApartmentRequests(Long id);
 	List<ServiceAllianceApartmentRequests> listApartmentRequests(CrossShardListingLocator locator, int pageSize);
 	
 	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId);
 
-	void createInvestRequests(ServiceAllianceInvestRequests request);
+	Long createInvestRequests(ServiceAllianceInvestRequests request);
 	ServiceAllianceInvestRequests findInvestRequests(Long id);
 	List<ServiceAllianceInvestRequests> listInvestRequests(CrossShardListingLocator locator, int pageSize);
 
@@ -102,11 +103,11 @@ public interface YellowPageProvider {
 	
 	List<ServiceAllianceAttachment> listAttachments(CrossShardListingLocator locator, int count, Long ownerId);
 
-	void createGolfRequest(ServiceAllianceGolfRequest request);
+	Long createGolfRequest(ServiceAllianceGolfRequest request);
 
-	void createGymRequest(ServiceAllianceGymRequest request);
+	Long createGymRequest(ServiceAllianceGymRequest request);
 
-	void createServerRequest(ServiceAllianceServerRequest request);
+	Long createServerRequest(ServiceAllianceServerRequest request);
 
 	ServiceAllianceServerRequest findServerRequest(Long id);
 
@@ -132,4 +133,13 @@ public interface YellowPageProvider {
 	 */
 	void updateServiceAlliancesDisplayFlag(Long id, Byte showFlag);
 
+	void createServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories);
+
+	void updateServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories);
+
+	void createServiceAllianceSkipRule(ServiceAllianceSkipRule serviceAllianceSkipRule);
+
+	void deleteServiceAllianceSkipRule(Long id);
+
+	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId, Integer namespaceId);
 }

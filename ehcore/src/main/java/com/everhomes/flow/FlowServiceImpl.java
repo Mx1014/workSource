@@ -877,18 +877,37 @@ public class FlowServiceImpl implements FlowService {
         Flow flow = getFlowByEntity(cmd.getFlowNodeId(), FlowEntityType.FLOW_NODE);
         flowMarkUpdated(flow);
 
-        FlowNode flowNode = new FlowNode();
-        flowNode.setId(cmd.getFlowNodeId());
-        flowNode.setNodeName(cmd.getFlowNodeName());
-        flowNode.setAutoStepMinute(cmd.getAutoStepMinute());
-        flowNode.setAutoStepType(cmd.getAutoStepType());
-        // flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
-        flowNode.setAllowApplierUpdate(TrueOrFalseFlag.FALSE.getCode());
-        flowNode.setAllowTimeoutAction(cmd.getAllowTimeoutAction());
-        flowNode.setParams(cmd.getParams());
-        flowNodeProvider.updateFlowNode(flowNode);
+        if (cmd.getFlowNodeId() == null) {
+            return null;
+        }
 
-        return ConvertHelper.convert(flowNode, FlowNodeDTO.class);
+        Tuple<FlowNode, Boolean> tuple = coordinationProvider.getNamedLock(CoordinationLocks.FLOW_NODE_UPDATE.getCode() + cmd.getFlowNodeId()).enter(() -> {
+            FlowNode flowNode = flowNodeProvider.getFlowNodeById(cmd.getFlowNodeId());
+            if (flowNode != null) {
+                if (cmd.getFlowNodeName() != null) {
+                    flowNode.setNodeName(cmd.getFlowNodeName());
+                }
+                if (cmd.getAllowApplierUpdate() != null) {
+                    // flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
+                }
+                flowNode.setAllowApplierUpdate(TrueOrFalseFlag.FALSE.getCode());
+                if (cmd.getAllowTimeoutAction() != null) {
+                    flowNode.setAllowTimeoutAction(cmd.getAllowTimeoutAction());
+                }
+                if (cmd.getParams() != null) {
+                    flowNode.setParams(cmd.getParams());
+                }
+                if (cmd.getAutoStepMinute() != null) {
+                    flowNode.setAutoStepMinute(cmd.getAutoStepMinute());
+                }
+                if (cmd.getAutoStepType() != null) {
+                    flowNode.setAutoStepType(cmd.getAutoStepType());
+                }
+                flowNodeProvider.updateFlowNode(flowNode);
+            }
+            return flowNode;
+        });
+        return ConvertHelper.convert(tuple.first(), FlowNodeDTO.class);
     }
 
     @Override
@@ -1856,7 +1875,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
         Flow flow = flowProvider.getEnabledConfigFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
-        if (flow != null) {
+        if (flow != null && flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
             return flowProvider.getSnapshotFlowById(flow.getId());
         }
         return null;
@@ -2241,8 +2260,10 @@ public class FlowServiceImpl implements FlowService {
             return new FlowCaseDetailDTO();
         }
         Flow snapshotFlow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+        LOGGER.debug("start rental getFlowCaseDetail  flowCase={}, flowUserType={}, inst={}", flowCase, flowUserType);
 
         List<FlowCaseEntity> entities = flowListenerManager.onFlowCaseDetailRender(flowCase, flowUserType);
+        LOGGER.debug("end rental onFlowCaseDetailRender flowCase={}, flowUserType={}, inst={}", flowCase, flowUserType);
 
         FlowCaseDetailDTO dto = ConvertHelper.convert(flowCase, FlowCaseDetailDTO.class);
         dto.setEntities(entities);
@@ -3252,7 +3273,7 @@ public class FlowServiceImpl implements FlowService {
         int code = 0;
         if (nextStatus == FlowCaseStatus.FINISHED) {
             //到终止节点
-            if (fromStep == FlowStepType.APPROVE_STEP) {
+            if (fromStep == FlowStepType.APPROVE_STEP || fromStep == FlowStepType.END_STEP) {
                 code = FlowTemplateCode.NEXT_STEP_DONE;
             } else if (fromStep == FlowStepType.ABSORT_STEP) {
                 if (flowUserType == FlowUserType.PROCESSOR) {

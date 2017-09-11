@@ -8,6 +8,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.UserInvitationsDTO;
 
@@ -21,6 +22,7 @@ public interface UserProvider {
     List<User> queryUsers(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
     
     List<UserIdentifier> listUserIdentifiersOfUser(long userId);
+    UserIdentifier findUserIdentifiersOfUser(long userId, Integer namespaceId);
 
     void createIdentifier(UserIdentifier userIdentifier);
     void updateIdentifier(UserIdentifier userIdentifier);
@@ -78,11 +80,6 @@ public interface UserProvider {
 	
 	/**
 	 * Added by Janson
-	 * @param namespaceId
-	 * @param organizationId
-	 * @param buildingId
-	 * @param isAuth
-	 * @param keyword
 	 * @param locator
 	 * @param pageSize
 	 * @return
@@ -127,4 +124,19 @@ public interface UserProvider {
      * @return  返回该记录的id
      */
     long createUserNotificationSetting(UserNotificationSetting setting);
+
+
+    List<TargetDTO> findUesrIdByNameAndAddressId(String targetName, List<Long> ids, String tel);
+
+    TargetDTO findUserByTokenAndName(String tel, String targetName);
+
+    /**
+     * 查询非当前userId的正常用户数据
+     * @param namespaceId
+     * @param identifierToken
+     * @param userId
+     * @return
+     */
+    UserIdentifier findClaimedIdentifierByTokenAndNotUserId(Integer namespaceId, String identifierToken, Long userId);
+
 }

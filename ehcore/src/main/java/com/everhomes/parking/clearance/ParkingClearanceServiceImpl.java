@@ -7,19 +7,12 @@ import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.MODULE_
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +22,8 @@ import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
 
+import com.alibaba.fastjson.JSONArray;
+import com.everhomes.parking.jinyi.JinyiClearance;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +51,7 @@ import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.parking.handler.JinyiParkingVendorHandler;
-import com.everhomes.parking.jinyi.JinyiClearance;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.parking.jinyi.JinyiJsonEntity;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -246,33 +241,54 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
             this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG_STATISTICS.getCode()).tryEnter(() -> {
 
-                ParkingClearanceLogQueryObject qo = new ParkingClearanceLogQueryObject();
+                SearchClearanceLogCommand cmd = new SearchClearanceLogCommand();
 
                 Calendar start = Calendar.getInstance();
                 start.set(Calendar.HOUR_OF_DAY, 0);
                 start.set(Calendar.MINUTE, 0);
                 start.set(Calendar.SECOND, 0);
                 start.set(Calendar.MILLISECOND, 0);
-                qo.setStartTime(start.getTimeInMillis());
+                cmd.setStartTime(start.getTimeInMillis());
                 start.set(Calendar.HOUR_OF_DAY, 23);
                 start.set(Calendar.MINUTE, 59);
                 start.set(Calendar.SECOND, 59);
                 start.set(Calendar.MILLISECOND, 999);
-                qo.setEndTime(start.getTimeInMillis());
-                qo.setStatus(ParkingClearanceLogStatus.COMPLETED.getCode());
-                List<ParkingClearanceLog> logs = clearanceLogProvider.searchClearanceLog(qo);
+                cmd.setEndTime(start.getTimeInMillis());
+//                qo.setStatus(ParkingClearanceLogStatus.COMPLETED.getCode());
 
-                logs.forEach(r -> {
-                    ParkingLot parkingLot = parkingProvider.findParkingLotById(r.getParkingLotId());
-
-                    String vendorName = parkingLot.getVendorName();
-                    JinyiParkingVendorHandler handler = getParkingVendorHandler(vendorName);
-                    List<JinyiClearance> actualLogs = handler.getTempCardLogs(r);
-                    clearanceLogProvider.updateClearanceLog(r);
-                });
-
+                sychnLogs(cmd);
             });
         }
+    }
+
+    @Override
+    public void sychnLogs(SearchClearanceLogCommand cmd) {
+        ParkingClearanceLogQueryObject qo = new ParkingClearanceLogQueryObject();
+        qo.setStartTime(cmd.getStartTime());
+        qo.setEndTime(cmd.getEndTime());
+
+        List<ParkingClearanceLog> logs = clearanceLogProvider.searchClearanceLog(qo);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        logs.forEach(r -> {
+            ParkingLot parkingLot = parkingProvider.findParkingLotById(r.getParkingLotId());
+
+            String vendorName = parkingLot.getVendorName();
+            JinyiParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+            List<JinyiClearance> actualLogs = handler.getTempCardLogs(r);
+
+            if (null != actualLogs) {
+                List<ParkingActualClearanceLogDTO> result = actualLogs.stream().map(this::convertActualClearanceLogDTO).collect(Collectors.toList());
+                Map<String, String> temp = new LinkedHashMap<>();
+                result.forEach(a -> {
+                    temp.put("进场时间", sdf.format(a.getEntryTime()));
+                    temp.put("出场时间", sdf.format(a.getExitTime()));
+                });
+                r.setLogJson(JSONArray.toJSONString(temp));
+                clearanceLogProvider.updateClearanceLog(r);
+            }
+        });
     }
 
     @Override

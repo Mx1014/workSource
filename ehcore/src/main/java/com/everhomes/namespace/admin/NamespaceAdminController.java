@@ -32,8 +32,8 @@ public class NamespaceAdminController extends ControllerBase {
 	@RequestMapping("listNamespace")
 	@RestReturn(value=NamespaceInfoDTO.class, collection=true)
 	public RestResponse listNamespace(){
-    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+//    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 		return new RestResponse(namespacesService.listNamespace());
 	}
 	
