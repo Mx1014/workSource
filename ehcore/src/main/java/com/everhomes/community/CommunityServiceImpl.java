@@ -1906,13 +1906,19 @@ public class CommunityServiceImpl implements CommunityService {
 
 				if(AuthFlag.AUTHENTICATED == AuthFlag.fromCode(cmd.getIsAuth())){
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.ACTIVE.getCode()));
+				}else if(AuthFlag.PENDING_AUTHENTICATION == AuthFlag.fromCode(cmd.getIsAuth())){
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode()));
+				}else if(AuthFlag.UNAUTHORIZED == AuthFlag.fromCode(cmd.getIsAuth())){
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.isNull());
 				}
 
 				query.addGroupBy(Tables.EH_USERS.ID);
 
 				Condition cond = Tables.EH_USERS.ID.isNotNull();
 				if(AuthFlag.UNAUTHORIZED == AuthFlag.fromCode(cmd.getIsAuth())){
-					cond = cond.and("`eh_user_organizations`.`status` is null or (`eh_user_organizations`.`status` <> " + UserOrganizationStatus.ACTIVE.getCode() + " and `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + "))");
+					cond = cond.and(" `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + " or status = " + UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode() + ")");
+				}else if(AuthFlag.PENDING_AUTHENTICATION == AuthFlag.fromCode(cmd.getIsAuth())){
+					cond = cond.and(" `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + ")");
 				}
 				query.addHaving(cond);
 
@@ -1937,23 +1943,24 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 
 			LOGGER.debug("user,userName:{}/userPhone:{}/userStatus:{}",r.getNickName(), r.getPhoneNumber(),r.getStatus());
-			dto.setIsAuth(AuthFlag.NO.getCode());
+			dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 
 			if (UserOrganizationStatus.WAITING_FOR_APPROVAL == UserOrganizationStatus.fromCode(r.getStatus()) || UserOrganizationStatus.ACTIVE == UserOrganizationStatus.fromCode(r.getStatus())) {
 				List<OrganizationMember> ms = new ArrayList<>();
 				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
+				dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
 				for (OrganizationMember member : members) {
 					if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
 						dto.setOrganizationMemberName(member.getContactName());
 						ms.add(member);
-						dto.setIsAuth(AuthFlag.YES.getCode());
+						dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 					}
 				}
 				List<OrganizationDetailDTO> organizations = new ArrayList<>();
 				organizations.addAll(populateOrganizationDetails(ms));
 				dto.setOrganizations(organizations);
 			} else {
-				dto.setIsAuth(AuthFlag.NO.getCode());
+				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 			}
 			userCommunities.add(dto);
 		}
@@ -2015,7 +2022,7 @@ public class CommunityServiceImpl implements CommunityService {
 			tempRow.createCell(1).setCellValue(UserGender.fromCode(dto.getGender()).getText());
 			tempRow.createCell(2).setCellValue(dto.getPhone());
 			tempRow.createCell(3).setCellValue(null != dto.getApplyTime() ? sdf.format(dto.getApplyTime()) : "");
-			tempRow.createCell(4).setCellValue(dto.getIsAuth() == 1 ? "认证" : "非认证");
+			tempRow.createCell(4).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
 			tempRow.createCell(5).setCellValue(enterprises.toString());
 			tempRow.createCell(6).setCellValue(null == dto.getExecutiveFlag() ? "否" : (dto.getExecutiveFlag() == 0 ? "否" : "是"));
 			tempRow.createCell(7).setCellValue(null == dto.getPosition() ? "无" : dto.getPosition());
