@@ -7088,23 +7088,27 @@ public class PunchServiceImpl implements PunchService {
 		return result ;
 	}
 
-	private PunchLogDTO processOffdutyPunchLog(PunchTimeRule ptr, List<PunchTimeInterval> intervals, PunchLogDTO result, Integer PunchIntervalNo, Long punchTimeLong) {
+	private PunchLogDTO processOffdutyPunchLog(PunchTimeRule ptr, List<PunchTimeInterval> intervals, PunchLogDTO result, Integer punchIntervalNo, Long punchTimeLong) {
 		result.setPunchType(PunchType.OFF_DUTY.getCode());
-		result.setPunchIntervalNo(PunchIntervalNo);
-		result.setRuleTime(intervals.get(PunchIntervalNo-1).getLeaveTimeLong());
+		result.setPunchIntervalNo(punchIntervalNo);
+		result.setRuleTime(intervals.get(punchIntervalNo-1).getLeaveTimeLong());
 		long leaveTime = result.getRuleTime();
 		if(ptr.getHommizationType().equals(HommizationType.FLEX.getCode())){
 			leaveTime = leaveTime + ptr.getFlexTimeLong();
 		}
-		if(punchTimeLong < leaveTime)
+		if(punchTimeLong < leaveTime){
 			result.setClockStatus(PunchStatus.LEAVEEARLY.getCode());
-		else
+			result.setExpiryTime(leaveTime);
+			result.setPunchNormalTime(leaveTime);
+		}
+		else {
 			result.setClockStatus(PunchStatus.NORMAL.getCode());
-		result.setPunchNormalTime(result.getRuleTime());
-		if(PunchIntervalNo.equals(intervals.size())){
-			result.setExpiryTime(findSmallOne(intervals.get(PunchIntervalNo - 1).getLeaveTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS),ptr.getDaySplitTimeLong()));
-		}else{
-			result.setExpiryTime(intervals.get(0).getArriveTimeLong());
+			result.setPunchNormalTime(result.getRuleTime());
+			if (punchIntervalNo.equals(intervals.size())) {
+				result.setExpiryTime(findSmallOne(intervals.get(punchIntervalNo - 1).getLeaveTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS), ptr.getDaySplitTimeLong()));
+			} else {
+				result.setExpiryTime(intervals.get(punchIntervalNo).getArriveTimeLong());
+			}
 		}
 		return result ;
 	}
@@ -7121,15 +7125,19 @@ public class PunchServiceImpl implements PunchService {
 		if(ptr.getHommizationType().equals(HommizationType.FLEX.getCode())){
 			arriveTIme = arriveTIme + ptr.getFlexTimeLong();
 		}
-		if(punchTimeLong > arriveTIme)
+		if(punchTimeLong > arriveTIme) {
 			result.setClockStatus(PunchStatus.BELATE.getCode());
-		else
+			if(PunchIntervalNo.equals(intervals.size())){
+				result.setExpiryTime(findSmallOne(intervals.get(PunchIntervalNo - 1).getLeaveTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS),ptr.getDaySplitTimeLong()));
+			}else{
+				result.setExpiryTime(intervals.get(PunchIntervalNo).getArriveTimeLong());
+			}
+			result.setPunchNormalTime(intervals.get(PunchIntervalNo-1).getArriveTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)));
+		}
+		else {
 			result.setClockStatus(PunchStatus.NORMAL.getCode());
-		result.setPunchNormalTime(intervals.get(PunchIntervalNo-1).getArriveTimeLong()-(timeIsNull(ptr.getBeginPunchTime(),ONE_DAY_MS)));
-		if(PunchIntervalNo.equals(intervals.size())){
-			result.setExpiryTime(findSmallOne(intervals.get(PunchIntervalNo - 1).getLeaveTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS),ptr.getDaySplitTimeLong()));
-		}else{
-			result.setExpiryTime(intervals.get(0).getArriveTimeLong());
+			result.setExpiryTime(arriveTIme);
+			result.setPunchNormalTime(arriveTIme);
 		}
 		return result ;
 	}
@@ -7156,12 +7164,14 @@ public class PunchServiceImpl implements PunchService {
 				result.setPunchType(PunchType.ON_DUTY.getCode());
 				result.setPunchIntervalNo(PunchIntervalNo);
 				result.setRuleTime(ptr.getStartEarlyTimeLong());
-				if(punchTimeLong < ptr.getStartLateTimeLong())
+				if(punchTimeLong < ptr.getStartLateTimeLong()){
 					result.setClockStatus(PunchStatus.NORMAL.getCode());
-				else
+					result.setExpiryTime(ptr.getStartLateTimeLong());
+				}
+				else {
 					result.setClockStatus(PunchStatus.BELATE.getCode());
-				result.setExpiryTime(ptr.getAfternoonArriveTimeLong());
-				result.setPunchNormalTime(ptr.getStartEarlyTimeLong());
+					result.setExpiryTime(ptr.getAfternoonArriveTimeLong());
+				}result.setPunchNormalTime(ptr.getStartEarlyTimeLong());
 				return result ;
 			}
 			PunchLog offDutyPunch = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), PunchIntervalNo);
@@ -7169,12 +7179,18 @@ public class PunchServiceImpl implements PunchService {
 				result.setPunchType(PunchType.OFF_DUTY.getCode());
 				result.setPunchIntervalNo(PunchIntervalNo);
 				result.setRuleTime(ptr.getNoonLeaveTimeLong());
-				if(punchTimeLong < ptr.getNoonLeaveTimeLong())
+				long noonLeaveTime = ptr.getNoonLeaveTimeLong();
+				if (ptr.getHommizationType() != null && ptr.getHommizationType().equals(HommizationType.FLEX.getCode())) {
+					noonLeaveTime = noonLeaveTime - ptr.getFlexTimeLong();
+				}
+				if(punchTimeLong < noonLeaveTime){
 					result.setClockStatus(PunchStatus.LEAVEEARLY.getCode());
-				else
+					result.setExpiryTime(noonLeaveTime);
+				}
+				else {
 					result.setClockStatus(PunchStatus.NORMAL.getCode());
-
-				result.setExpiryTime(ptr.getAfternoonArriveTimeLong());
+					result.setExpiryTime(ptr.getAfternoonArriveTimeLong());
+				}
 				result.setPunchNormalTime(ptr.getNoonLeaveTimeLong());
 				return result ;
 			}else{
@@ -7190,12 +7206,20 @@ public class PunchServiceImpl implements PunchService {
 			result.setPunchType(PunchType.ON_DUTY.getCode());
 			result.setPunchIntervalNo(PunchIntervalNo);
 			result.setRuleTime(ptr.getAfternoonArriveTimeLong());
-			if(punchTimeLong < ptr.getAfternoonArriveTimeLong())
+			long afternoonArriveTime = ptr.getAfternoonArriveTimeLong();
+			if (ptr.getHommizationType() != null && ptr.getHommizationType().equals(HommizationType.FLEX.getCode())) {
+				afternoonArriveTime = afternoonArriveTime + ptr.getFlexTimeLong();
+			}
+			if(punchTimeLong < afternoonArriveTime) {
 				result.setClockStatus(PunchStatus.NORMAL.getCode());
-			else
+				result.setExpiryTime(afternoonArriveTime);
+				result.setExpiryTime(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS));
+			}
+			else {
 				result.setClockStatus(PunchStatus.BELATE.getCode());
+				result.setExpiryTime(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS));
+			}
 
-			result.setExpiryTime(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS));
 			result.setPunchNormalTime(ptr.getAfternoonArriveTimeLong());
 			return result ;
 		}
@@ -7257,10 +7281,11 @@ public class PunchServiceImpl implements PunchService {
 		result.setRuleTime(ptr.getStartEarlyTimeLong()+ptr.getWorkTimeLong());
 		if(punchTimeLong < leaveTime){
 			result.setClockStatus(PunchStatus.LEAVEEARLY.getCode());
+			result.setExpiryTime(leaveTime);
 		}else{
 			result.setClockStatus(PunchStatus.NORMAL.getCode());
+			result.setExpiryTime(findSmallOne(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS),ptr.getDaySplitTimeLong()));
 		}
-		result.setExpiryTime(findSmallOne(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS),ptr.getDaySplitTimeLong()));
 		result.setPunchNormalTime(leaveTime);
 	}
 
@@ -7284,6 +7309,8 @@ public class PunchServiceImpl implements PunchService {
 					leaveTime = ondutyTime+ptr.getWorkTimeLong();
 				}
 			}
+		}else if(ptr.getHommizationType().equals(HommizationType.FLEX.getCode())){
+			leaveTime = leaveTime - ptr.getFlexTimeLong();
 		}
 		return leaveTime;
 	}
