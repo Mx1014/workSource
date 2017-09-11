@@ -1540,3 +1540,8 @@ UPDATE eh_launch_pad_items SET action_data = '{"url":"https:\/\/www.zuolin.com\/
 SELECT * FROM eh_launch_pad_items WHERE item_label='企业目录' AND namespace_id=999966 AND item_group='Bizs';
 
 UPDATE eh_launch_pad_items SET item_name='企业名录',item_label='企业名录' WHERE item_label='企业目录' AND namespace_id=999966 AND item_group='Bizs';
+
+-- 园区入驻3.5 add by sw 20170911
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+			VALUES ('apply.entry.lease.building.detail.url', '/park-entry/dist/index.html?hideNavigationBar=1#/building_detail/%s', '', '0', NULL);
+update eh_configurations set value = '/park-entry/dist/index.html?hideNavigationBar=1#/old_building_detail/%s' where name = 'apply.entry.building.detail.url';
