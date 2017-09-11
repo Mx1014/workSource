@@ -8,7 +8,7 @@ import com.everhomes.rest.techpark.punch.PunchStatus;
  */
 public enum HommizationType {
    
-	NO((byte)0),FLEX((byte)1),LATEARRIVE((byte)1);
+	NO((byte)0),FLEX((byte)1),LATEARRIVE((byte)2);
     
     private byte code;
     private HommizationType(byte code) {
