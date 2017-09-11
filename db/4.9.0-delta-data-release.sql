@@ -1548,4 +1548,4 @@ update eh_configurations set value = '/park-entry/dist/index.html?hideNavigation
 
 -- by dengs, 修改园区简介
 set @homeurl = (select VALUE from eh_configurations WHERE NAME = 'home.url' LIMIT 1);
-update eh_launch_pad_items SET action_data = CONCAT('{"url":"',@homeurl,'/park-introduction/index.html?hideNavigationBar=1#/#sign_suffix"}') where item_label = '园区简介' AND namespace_id = '999966';
+update eh_launch_pad_items SET action_data = CONCAT('{"url":"',@homeurl,'/park-introduction/index.html?hideNavigationBar=1#/#sign_suffix"}') where item_label = '园区简介';
