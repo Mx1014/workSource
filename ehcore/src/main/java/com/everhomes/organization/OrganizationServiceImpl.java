@@ -5353,9 +5353,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         locator.setAnchor(cmd.getPageAnchor());
 
         //组装参数
-        Organization orgCommoand = new Organization();
-        orgCommoand.setId(org.getId());
-        orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
         VisibleFlag visibleFlag = VisibleFlag.SHOW;
         if (VisibleFlag.ALL == VisibleFlag.fromCode(cmd.getVisibleFlag())) {
             visibleFlag = null;
