@@ -4192,7 +4192,7 @@ public class ActivityServiceImpl implements ActivityService {
 
         // 可见性条件：如果有当前小区/园区，则加上小区条件；如果有对应的管理机构，则加上机构条件；这两个条件为或的关系；
         Condition communityCondition = null;
-        if(communityIdList != null) {
+        if(communityIdList != null && communityIdList.size() > 0) {
             communityCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
             communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.in(communityIdList));
 

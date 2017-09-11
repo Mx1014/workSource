@@ -1549,6 +1549,17 @@ public class ForumServiceImpl implements ForumService {
                     forumIds.add(group.getOwningForumId());
                 }
             }
+
+            //加上当前园区的communitId和forumId  add by yanjun 20170911
+            OrganizationCommunityRequest OrganizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationId);
+            if(OrganizationCommunityRequest != null){
+                communityIds.add(OrganizationCommunityRequest.getCommunityId());
+                Community community = communityProvider.findCommunityById(OrganizationCommunityRequest.getCommunityId());
+                if(community != null){
+                    forumIds.add(community.getDefaultForumId());
+                }
+            }
+
             List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
             if(null != communities){
                 for (CommunityDTO communityDTO : communities) {
