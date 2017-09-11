@@ -14,6 +14,11 @@ public class GetArchivesFormCommand {
     public GetArchivesFormCommand() {
     }
 
+    public GetArchivesFormCommand(Long formOriginId) {
+        this.formOriginId = formOriginId;
+    }
+
+
     public Long getFormOriginId() {
         return formOriginId;
     }

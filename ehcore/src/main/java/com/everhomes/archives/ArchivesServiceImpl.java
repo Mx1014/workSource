@@ -552,13 +552,17 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         GetArchivesEmployeeResponse response = new GetArchivesEmployeeResponse();
 
-        GetGeneralFormValuesCommand formCommand = new GetGeneralFormValuesCommand();
-        formCommand.setSourceType(GeneralFormSourceType.ARCHIVES_ATUH.getCode());
-        formCommand.setSourceId(cmd.getDetailId());
-        formCommand.setOriginFieldFlag(NormalFlag.NEED.getCode());
-        List<PostApprovalFormItem> employeeForm = generalFormService.getGeneralFormValues(formCommand);
+        //  1.获取表单所有字段
+        GeneralFormIdCommand formCommand = new GeneralFormIdCommand(getRealFormOriginId(cmd.getFormOriginId()));
+        GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
 
-        response.setForm(employeeForm);
+        //  2.获取表单对应的值
+        GetGeneralFormValuesCommand valueCommand =
+                new GetGeneralFormValuesCommand(GeneralFormSourceType.ARCHIVES_ATUH.getCode(),cmd.getDetailId(),NormalFlag.NEED.getCode());
+        List<PostApprovalFormItem> employeeForm = generalFormService.getGeneralFormValues(valueCommand);
+
+
+//        response.setForm(employeeForm);
 /*
         OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
         Map<String, String> valueMap = new HashMap<>();

@@ -12,6 +12,13 @@ import com.everhomes.util.StringHelper;
 public class GeneralFormIdCommand {
 	private Long formOriginId;
 
+	public GeneralFormIdCommand() {
+	}
+
+	public GeneralFormIdCommand(Long formOriginId) {
+		this.formOriginId = formOriginId;
+	}
+
 	public Long getFormOriginId() {
 		return formOriginId;
 	}

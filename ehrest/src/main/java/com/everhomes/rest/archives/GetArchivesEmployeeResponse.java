@@ -16,22 +16,9 @@ public class GetArchivesEmployeeResponse {
 
     private GeneralFormDTO form;
 
-/*    @ItemType(PostApprovalFormItem.class)
-    List<PostApprovalFormItem> form;*/
-
     public GetArchivesEmployeeResponse() {
     }
-
-/*
-    public List<PostApprovalFormItem> getForm() {
-        return form;
-    }
-
-    public void setForm(List<PostApprovalFormItem> form) {
-        this.form = form;
-    }
-*/
-
+    
     public GeneralFormDTO getForm() {
         return form;
     }
