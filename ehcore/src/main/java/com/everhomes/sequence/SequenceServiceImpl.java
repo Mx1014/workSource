@@ -1627,6 +1627,14 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhActivityCategories.class, Tables.EH_ACTIVITY_CATEGORIES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ACTIVITY_CATEGORIES.ID.max()).from(Tables.EH_ACTIVITY_CATEGORIES).fetchOne().value1();
         });
+        
+        syncTableSequence(null, EhServiceAllianceCommentAttachments.class, Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhServiceAllianceComments.class, Tables.EH_SERVICE_ALLIANCE_COMMENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENTS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
