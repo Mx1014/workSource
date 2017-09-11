@@ -7226,7 +7226,7 @@ public class PunchServiceImpl implements PunchService {
 				result.setExpiryTime(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS));
 			}
 
-			result.setPunchNormalTime(punchDate + ptr.getAfternoonArriveTimeLong());
+			result.setPunchNormalTime(punchDate.getTime() + ptr.getAfternoonArriveTimeLong());
 			return result ;
 		}
 		PunchLog offDutyPunch = findPunchLog(punchLogs,PunchType.OFF_DUTY.getCode(),PunchIntervalNo);
