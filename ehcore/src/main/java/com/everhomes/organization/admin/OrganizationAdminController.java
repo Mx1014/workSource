@@ -1228,6 +1228,4 @@ public class OrganizationAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
-
 }

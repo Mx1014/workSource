@@ -389,6 +389,7 @@ public interface OrganizationService {
 	ListChildrenOrganizationJobLevelResponse listChildrenOrganizationJobLevels(ListAllChildrenOrganizationsCommand cmd);
 	
 	ListChildrenOrganizationJobPositionResponse listChildrenOrganizationJobPositions(ListAllChildrenOrganizationsCommand cmd);
+
 	List<OrganizationMemberDTO> listOrganizationMemberDTOs(Long orgId,
 			List<Long> memberUids);
 
@@ -533,5 +534,4 @@ public interface OrganizationService {
 	OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd);
 
 	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken);
-
 }

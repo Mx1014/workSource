@@ -9323,6 +9323,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "organization type not enterprise");
         }
 
+
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
@@ -9452,6 +9453,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                         departmentIds.add(hiddenDirectId);
                     }
                 }
+            }
+
+
+            //加上部门唯一性校验
+            if(cmd.getDepartmentIds() != null && cmd.getDepartmentIds().size() > 1){
+                LOGGER.error("there are more than one department in this cmd, cmd = {}", cmd);
+                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "there are more than one department in this cmd");
             }
 
             // 先把把成员从公司所有部门都删除掉
@@ -10418,10 +10426,13 @@ public class OrganizationServiceImpl implements OrganizationService {
             List<String> groupTypes = new ArrayList<>();
             groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
             List<Organization> jobPositions = new ArrayList<>();
+            //查询部门下的岗位
             for (Long organizationid : organizationIds) {
                 jobPositions.addAll(organizationProvider.listOrganizationByGroupTypes(organizationid, groupTypes));
             }
 
+
+            //与通用岗位匹配
             for (Organization jobPosition : jobPositions) {
                 if (null != organizationProvider.getOrganizationJobPositionMapByOrgIdAndJobPostionId(jobPosition.getId(), jobPositionId)) {
                     jobPositionIds.add(jobPosition.getId());

@@ -2085,8 +2085,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
         SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
         Condition condition = t1.field("id").gt(0L);
-        Condition cond = t1.field("organization_id").in(orgIds);
-        cond = cond.and(t1.field("status").eq(memberStatus));
+
+		Condition cond = t1.field("status").eq(memberStatus);
+
+        if(orgIds != null && orgIds.size() > 0){
+			cond = cond.and(t1.field("organization_id").in(orgIds));
+		}
+//        Condition cond = t1.field("organization_id").in(orgIds);
+//        cond = cond.and(t1.field("status").eq(memberStatus));
 
         if (!StringUtils.isEmpty(keywords)) {
             Condition cond1 = t2.field("contact_token").eq(keywords);
