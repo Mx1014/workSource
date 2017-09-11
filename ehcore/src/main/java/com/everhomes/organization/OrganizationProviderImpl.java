@@ -158,7 +158,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, department.getId());
 	}
 
-
+	@CacheEvict(value="OrganizationById", key="#id")
 	@Override
 	public void deleteOrganizationById(Long id){
 
@@ -169,7 +169,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, id);
 	}
 
-
+	@Cacheable(value="OrganizationById", key="#id")
 	@Override
 	public Organization findOrganizationById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1906,12 +1906,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }
 
+	@Override
+	public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
+		return listOrganizationPersonnels(keywords, orgCommoand, contactSignedupStatus, visibleFlag, locator, pageSize, null);
+	}
 
     /**
      * modify cause member_detail by lei lv
      **/
     @Override
-    public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
+    public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         pageSize = pageSize + 1;
         List<OrganizationMember> result = new ArrayList<>();
@@ -1938,6 +1942,38 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             cond = cond.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
         }
 
+		if(listCommand != null){
+			// 员工状态
+			if(listCommand.getEmployeeStatus() != null){
+				cond = cond.and(t2.field("employee_status").eq(listCommand.getEmployeeStatus()));
+			}
+
+			// 合同主体
+			if(listCommand.getContractPartyId() != null){
+				cond = cond.and(t2.field("contract_id").eq(listCommand.getContractPartyId()));
+			}
+
+			//工作地点
+			if(listCommand.getWorkPlaceId() != null){
+				cond = cond.and(t2.field("work_place").eq(listCommand.getWorkPlaceId()));
+			}
+
+			//入职日期
+			if(listCommand.getCheckInTimeStart() != null && listCommand.getCheckInTimeEnd() != null){
+				cond = cond.and(t2.field("check_in_time").between(listCommand.getCheckInTimeStart(), listCommand.getCheckInTimeEnd()));
+			}
+
+			//转正日期
+			if(listCommand.getEmploymentTimeStart() != null && listCommand.getEmploymentTimeEnd() != null){
+				cond = cond.and(t2.field("employment_time").between(listCommand.getEmploymentTimeStart(), listCommand.getEmploymentTimeEnd()));
+			}
+
+			//合同结束日期
+			if(listCommand.getContractEndTimeStart() != null && listCommand.getContractEndTimeStart() != null){
+				cond = cond.and(t2.field("contract_end_time").between(listCommand.getContractEndTimeStart(), listCommand.getContractEndTimeStart()));
+			}
+		}
+
         condition = condition.and(cond);
         if (null != locator && null != locator.getAnchor())
             condition.and(t1.field("id").lt(locator.getAnchor()));
@@ -1957,42 +1993,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             locator.setAnchor(result.get(result.size() - 1).getId());
         }
         return result;
-// SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-//        Condition cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgCommoand.getId());
-//        cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(orgCommoand.getStatus()));
-//
-//        if (!StringUtils.isEmpty(keywords)) {
-//            Condition cond1 = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords);
-//            cond1 = cond1.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + keywords + "%"));
-//            cond = cond.and(cond1);
-//        }
-
-//        if (contactSignedupStatus != null && contactSignedupStatus == ContactSignUpStatus.SIGNEDUP.getCode()) {
-//            cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L));
-//            cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
-//        }
-
-//        if (null != visibleFlag) {
-//            cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.VISIBLE_FLAG.eq(visibleFlag.getCode()));
-//        }
-
-//        query.addConditions(cond);
-//        if (null != locator && null != locator.getAnchor())
-//            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.lt(locator.getAnchor()));
-//        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
-//        query.addLimit(pageSize);
-//        query.fetch().map((r) -> {
-//            result.add(ConvertHelper.convert(r, OrganizationMember.class));
-//            return null;
-//        });
-//        if (null != locator)
-//            locator.setAnchor(null);
-//
-//        if (result.size() >= pageSize) {
-//            result.remove(result.size() - 1);
-//            locator.setAnchor(result.get(result.size() - 1).getId());
-//        }
-//        return result;
     }
 
 	@Override
@@ -2019,6 +2019,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	/**
      * modify cause member_detail by lei lv
      **/
+	@Deprecated
     @Override
     public List<OrganizationMember> listOrganizationPersonnels(String keywords, Long organizationId, OrganizationMemberStatus memberStatus, OrganizationMemberTargetType targetType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2075,6 +2076,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     /**
      * modify cause member_detail by lei lv
      **/
+	@Deprecated
     @Override
     public List<OrganizationMember> listOrganizationPersonnels(String keywords, List<Long> orgIds, Byte memberStatus, Byte contactSignedupStatus, CrossShardListingLocator locator, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -5290,5 +5292,128 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		return list;
+	}
+	
+	@Override
+	public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		pageSize = pageSize + 1;
+		List<OrganizationMember> result = new ArrayList<>();
+		/**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+		Condition condition = t1.field("id").gt(0L);
+
+		Organization org = findOrganizationById(listCommand.getOrganizationId());
+
+
+		Condition cond = t1.field("group_path").like(org.getPath()+"%").and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+
+		if (!StringUtils.isEmpty(keywords)) {
+			Condition cond1 = t2.field("contact_token").eq(keywords);
+			cond1 = cond1.or(t2.field("contact_name").like("%" + keywords + "%"));
+			cond = cond.and(cond1);
+		}
+
+		if (contactSignedupStatus != null && contactSignedupStatus == ContactSignUpStatus.SIGNEDUP.getCode()) {
+			cond = cond.and(t1.field("target_id").ne(0L));
+			cond = cond.and(t1.field("target_type").eq(OrganizationMemberTargetType.USER.getCode()));
+		}
+
+		if (null != visibleFlag) {
+			cond = cond.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
+		}
+
+
+		if(listCommand != null){
+			// 员工状态
+			if(listCommand.getEmployeeStatus() != null){
+				cond = cond.and(t2.field("employee_status").eq(listCommand.getEmployeeStatus()));
+			}
+
+			// 合同主体
+			if(listCommand.getContractPartyId() != null){
+				cond = cond.and(t2.field("contract_id").eq(listCommand.getContractPartyId()));
+			}
+
+			//工作地点
+			if(listCommand.getWorkPlaceId() != null){
+				cond = cond.and(t2.field("work_place").eq(listCommand.getWorkPlaceId()));
+			}
+
+			//入职日期
+			if(listCommand.getCheckInTimeStart() != null && listCommand.getCheckInTimeEnd() != null){
+				cond = cond.and(t2.field("check_in_time").between(listCommand.getCheckInTimeStart(), listCommand.getCheckInTimeEnd()));
+			}
+
+			//转正日期
+			if(listCommand.getEmploymentTimeStart() != null && listCommand.getEmploymentTimeEnd() != null){
+				cond = cond.and(t2.field("employment_time").between(listCommand.getEmploymentTimeStart(), listCommand.getEmploymentTimeEnd()));
+			}
+
+			//合同结束日期
+			if(listCommand.getContractEndTimeStart() != null && listCommand.getContractEndTimeStart() != null){
+				cond = cond.and(t2.field("contract_end_time").between(listCommand.getContractEndTimeStart(), listCommand.getContractEndTimeStart()));
+			}
+
+			if(listCommand.getExceptIds() != null){
+				cond = cond.and(t2.field("id").notIn(listCommand.getExceptIds()));
+			}
+		}
+
+		condition = condition.and(cond);
+		if (null != locator && null != locator.getAnchor())
+			condition.and(t1.field("id").lt(locator.getAnchor()));
+
+		List<OrganizationMember> records = step.where(condition).groupBy(t1.field("contact_token")).orderBy(t1.field("detail_id").desc()).limit(pageSize).fetch().map(new OrganizationMemberRecordMapper());
+		if (records != null) {
+			records.stream().map(r -> {
+				result.add(ConvertHelper.convert(r, OrganizationMember.class));
+				return null;
+			}).collect(Collectors.toList());
+		}
+		if (null != locator)
+			locator.setAnchor(null);
+
+		if (result.size() >= pageSize) {
+			result.remove(result.size() - 1);
+			locator.setAnchor(result.get(result.size() - 1).getId());
+		}
+		return result;
+	}
+
+	@Override
+	public List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, List<String> tokens) {
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+
+		//path一定不能为空 add by sfyan 20170428
+		if(StringUtils.isEmpty(path)){
+			return result;
+		}
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
+		if(null != groupTypes){
+			if(groupTypes.size() > 0){
+				query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+			}
+		}
+
+		if(null != tokens && tokens.size() > 0){
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.in(tokens));
+		}
+
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+
+		return result;
 	}
 }

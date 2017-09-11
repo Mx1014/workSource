@@ -1766,8 +1766,8 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/leaveTheJob</b>
-     * <p>人事档案离职</p>
+     * <b>URL: /org/syncOrganizationMemberStatus</b>
+     * <p>同步员工状态</p>
      */
     @RequestMapping("syncOrganizationMemberStatus")
     @RestReturn(value = String.class)

@@ -5,6 +5,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -19,6 +20,12 @@ import java.util.List;
  *     <li>visibleFlag: visibleFlag</li>
  *     <li>targetTypes: 是否注册{@link com.everhomes.rest.organization.OrganizationMemberTargetType}</li>
  *     <li>filterScopeTypes: 过滤范围类型{@link com.everhomes.rest.organization.FilterOrganizationContactScopeType}</li>
+ *     <li>checkInTime:入职日期</li>
+ *     <li>employmentTime:转正日期</li>
+ *     <li>contractEndTime:合同结束日期</li>
+ *     <li>employeeStatus:员工状态</li>
+ *     <li>contractPartyId:合同主体</li>
+ *     <li>workPlaceId:工作地点</li>
  * </ul>
  */
 public class ListOrganizationContactCommand {
@@ -39,6 +46,19 @@ public class ListOrganizationContactCommand {
 
     @ItemType(String.class)
     private List<String> filterScopeTypes;
+
+    private Timestamp checkInTimeStart;//入职日期
+    private Timestamp checkInTimeEnd;
+    private Timestamp employmentTimeStart;//转正日期
+    private Timestamp employmentTimeEnd;
+    private Timestamp contractEndTimeStart;//合同结束日期
+    private Timestamp contractEndTimeEnd;
+    private Byte employeeStatus;//员工状态
+    private Long contractPartyId;//合同主体
+    private Long workPlaceId;//工作地点
+
+    @ItemType(Long.class)
+    private List<Long> exceptIds;
 
     public ListOrganizationContactCommand() {
     }
@@ -133,5 +153,86 @@ public class ListOrganizationContactCommand {
 
     public void setFilterScopeTypes(List<String> filterScopeTypes) {
         this.filterScopeTypes = filterScopeTypes;
+    }
+
+
+    public Byte getEmployeeStatus() {
+        return employeeStatus;
+    }
+
+    public void setEmployeeStatus(Byte employeeStatus) {
+        this.employeeStatus = employeeStatus;
+    }
+
+    public Long getContractPartyId() {
+        return contractPartyId;
+    }
+
+    public void setContractPartyId(Long contractPartyId) {
+        this.contractPartyId = contractPartyId;
+    }
+
+    public Long getWorkPlaceId() {
+        return workPlaceId;
+    }
+
+    public void setWorkPlaceId(Long workPlaceId) {
+        this.workPlaceId = workPlaceId;
+    }
+
+    public Timestamp getCheckInTimeStart() {
+        return checkInTimeStart;
+    }
+
+    public void setCheckInTimeStart(Timestamp checkInTimeStart) {
+        this.checkInTimeStart = checkInTimeStart;
+    }
+
+    public Timestamp getCheckInTimeEnd() {
+        return checkInTimeEnd;
+    }
+
+    public void setCheckInTimeEnd(Timestamp checkInTimeEnd) {
+        this.checkInTimeEnd = checkInTimeEnd;
+    }
+
+    public Timestamp getEmploymentTimeStart() {
+        return employmentTimeStart;
+    }
+
+    public void setEmploymentTimeStart(Timestamp employmentTimeStart) {
+        this.employmentTimeStart = employmentTimeStart;
+    }
+
+    public Timestamp getEmploymentTimeEnd() {
+        return employmentTimeEnd;
+    }
+
+    public void setEmploymentTimeEnd(Timestamp employmentTimeEnd) {
+        this.employmentTimeEnd = employmentTimeEnd;
+    }
+
+    public Timestamp getContractEndTimeStart() {
+        return contractEndTimeStart;
+    }
+
+    public void setContractEndTimeStart(Timestamp contractEndTimeStart) {
+        this.contractEndTimeStart = contractEndTimeStart;
+    }
+
+    public Timestamp getContractEndTimeEnd() {
+        return contractEndTimeEnd;
+    }
+
+    public void setContractEndTimeEnd(Timestamp contractEndTimeEnd) {
+        this.contractEndTimeEnd = contractEndTimeEnd;
+    }
+
+    public List<Long> getExceptIds() {
+        return exceptIds;
+    }
+
+    public void setExceptIds(List<Long> exceptIds) {
+        this.exceptIds = exceptIds;
     }
 }

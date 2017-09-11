@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
@@ -446,7 +447,7 @@ public interface OrganizationService {
 	 */
 	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
 
-    /****** new interface ******/
+    /****** new interfac for archives-1.0  START******/
 
     ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd);
 
@@ -505,6 +506,10 @@ public interface OrganizationService {
 
     void exportOrganizationPersonnelFiles(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
 
+	/****** new interfac for archives-1.0 END******/
+
+
+
 	ImportFileTaskDTO importEnterpriseData(ImportEnterpriseDataCommand cmd, MultipartFile multipartFile, Long userId);
 	void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response);
 	ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd);
@@ -534,4 +539,11 @@ public interface OrganizationService {
 	OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd);
 
 	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken);
+
+	/**组织架构批量调整**/
+	void transferOrganizationPersonels(TransferArchivesEmployeesCommand cmd);
+
+	/**通讯录查询接口**/
+	ListOrganizationMemberCommandResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd);
+
 }

@@ -414,6 +414,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	public void deleteApprovalFormById(ApprovalFormIdCommand cmd) {
 		// 删除是状态置为invalid
 		this.generalFormProvider.invalidForms(cmd.getFormOriginId());
+
+		//  删除与表单相关控件组
+		this.generalFormProvider.deleteGeneralFormGroupsByFormOriginId(cmd.getFormOriginId());
+
 	}
 
 	@Override

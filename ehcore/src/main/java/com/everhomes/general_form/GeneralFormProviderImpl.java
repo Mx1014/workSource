@@ -1,6 +1,8 @@
 package com.everhomes.general_form;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -8,10 +10,14 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhGeneralFormGroupsDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
+import com.everhomes.server.schema.tables.pojos.EhGeneralFormGroups;
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
+import com.everhomes.server.schema.tables.records.EhGeneralFormGroupsRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormsRecord;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
@@ -162,4 +168,46 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 			return null;
 		}
 	}
+
+	@Override
+	public GeneralFormGroup createGeneralFormGroup(GeneralFormGroup group){
+		Long id = this.sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhGeneralFormGroups.class));
+		group.setId(id);
+		group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		group.setUpdateTime(group.getCreateTime());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhGeneralFormGroupsDao dao = new EhGeneralFormGroupsDao(context.configuration());
+		dao.insert(group);
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhGeneralFormGroups.class, null);
+		return group;
+	}
+
+	@Override
+	public void deleteGeneralFormGroupsByFormOriginId(Long formOriginId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_GENERAL_FORM_GROUPS)
+				.where(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId))
+				.execute();
+	}
+
+    @Override
+    public GeneralFormGroup findGeneralFormGroupByFormOriginId(Long formOriginId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralFormGroupsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_GROUPS);
+        query.addConditions(Tables.EH_GENERAL_FORM_GROUPS.FORM_ORIGIN_ID.eq(formOriginId));
+        return query.fetchOneInto(GeneralFormGroup.class);
+    }
+
+	@Override
+	public void updateGeneralFormGroup(GeneralFormGroup group){
+		group.setOperatorUid(UserContext.currentUserId());
+		group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhGeneralFormGroupsDao dao = new EhGeneralFormGroupsDao(context.configuration());
+		dao.update(group);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGeneralFormGroups.class, group.getId());
+	}
+
 }
