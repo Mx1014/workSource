@@ -309,4 +309,5 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         ParkingVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "Mybay");
         return handler.getCarLocation(parkingLot, cmd);
     }
+
 }
