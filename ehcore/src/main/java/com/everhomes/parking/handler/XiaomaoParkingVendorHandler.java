@@ -8,11 +8,14 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingRechargeOrder;
+import com.everhomes.parking.ParkingRechargeRate;
 import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.parking.xiaomao.XiaomaoCard;
 import com.everhomes.parking.xiaomao.XiaomaoJsonEntity;
 import com.everhomes.rest.parking.*;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +25,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 小猫停车对接
@@ -162,25 +166,25 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     @Override
     public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot, String plateNumber, String cardNo) {
 
-        List<ParkingRechargeRateDTO> result = new ArrayList<>();
-        ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
-        dto.setOwnerId(parkingLot.getOwnerId());
-        dto.setOwnerType(parkingLot.getOwnerType());
-        dto.setParkingLotId(parkingLot.getId());
-        dto.setRateToken("1");
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("count", 1);
-        String scope = ParkingNotificationTemplateCode.SCOPE;
-        int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
-        String locale = "zh_CN";
-        String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-        dto.setRateName(rateName);
-        dto.setCardType("月卡");
-        dto.setMonthCount(new BigDecimal(1));
-        dto.setPrice(new BigDecimal(1));
-        dto.setVendorName(ParkingLotVendor.KETUO2.getCode());
+        List<ParkingRechargeRate> parkingRechargeRateList;
 
-        result.add(dto);
+        if(StringUtils.isBlank(plateNumber)) {
+            parkingRechargeRateList = parkingProvider.listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
+                    parkingLot.getId(), null);
+        }else{
+            XiaomaoCard card = getCard(plateNumber, parkingLot.getId());
+            String cardType = card.getMemberType();
+            parkingRechargeRateList = parkingProvider.listParkingRechargeRates(parkingLot.getOwnerType(), parkingLot.getOwnerId(),
+                    parkingLot.getId(), cardType);
+        }
+
+        List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
+            ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+            dto.setRateToken(r.getId().toString());
+            dto.setVendorName(ParkingLotVendor.XIAOMAO.getCode());
+            return dto;
+        }).collect(Collectors.toList());
+
         return result;
     }
 
@@ -232,20 +236,6 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         }
 
         return false;
-    }
-
-    @Override
-    public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd) {
-        LOGGER.error("Not support create parkingRechargeRate.");
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-                "Not support create parkingRechargeRate.");
-    }
-
-    @Override
-    public void deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd) {
-        LOGGER.error("Not support delete parkingRechargeRate.");
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-                "Not support delete parkingRechargeRate.");
     }
 
     @Override

@@ -239,7 +239,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
     }
     
     @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot, String plateNumber, String cardNo) {
     	
     	List<ParkingRechargeRate> parkingRechargeRateList;
     	

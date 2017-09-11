@@ -774,6 +774,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			LeaseBuilding building = enterpriseApplyBuildingProvider.findLeaseBuildingById(dto.getBuildingId());
 			if(null != building){
 				dto.setBuildingName(building.getName());
+				dto.setCommunityId(building.getCommunityId());
 			}
 		}
 		//兼容历史app，rentPosition字段值返回的就是楼栋名称
