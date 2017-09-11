@@ -1545,3 +1545,7 @@ UPDATE eh_launch_pad_items SET item_name='企业名录',item_label='企业名录
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
 			VALUES ('apply.entry.lease.building.detail.url', '/park-entry/dist/index.html?hideNavigationBar=1#/building_detail/%s', '', '0', NULL);
 update eh_configurations set value = '/park-entry/dist/index.html?hideNavigationBar=1#/old_building_detail/%s' where name = 'apply.entry.building.detail.url';
+
+-- by dengs, 修改园区简介
+set @homeurl = (select VALUE from eh_configurations WHERE NAME = 'home.url' LIMIT 1);
+update eh_launch_pad_items SET action_data = CONCAT('{"url":"',@homeurl,'/park-introduction/index.html?hideNavigationBar=1#/#sign_suffix"}') where item_label  in ('园区简介','园区介绍');
