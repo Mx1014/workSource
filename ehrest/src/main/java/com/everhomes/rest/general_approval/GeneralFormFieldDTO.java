@@ -23,7 +23,7 @@ import com.everhomes.util.StringHelper;
  * <li>validatorType: 校验方式 {@link GeneralFormValidatorType}</li>
  * <li>dataSourceType: 数据源类型 {@link GeneralFormDataSourceType}</li>
  * <li>renderType: 渲染类型，{@link GeneralFormRenderType}</li>
- * <li>fieldValue: 字段值（查询详情时才会有值）</li>
+ * <li>fieldValue: 字段值</li>
  * <li>fieldGroupName: 字段组名称</li>
  * <li>fieldAttribute: 字段属性 比如：系统默认字段 {@link com.everhomes.rest.general_approval.GeneralFormFieldAttributeType}</li>
  * </ul>

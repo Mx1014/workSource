@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -635,16 +636,98 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  2.获取表单对应的值
         GetGeneralFormValuesCommand valueCommand =
                 new GetGeneralFormValuesCommand(GeneralFormSourceType.ARCHIVES_ATUH.getCode(),cmd.getDetailId(),NormalFlag.NEED.getCode());
-        List<PostApprovalFormItem> employeeForm = generalFormService.getGeneralFormValues(valueCommand);
+        List<PostApprovalFormItem> employeeDynamicVal = generalFormService.getGeneralFormValues(valueCommand);
 
-
-//        response.setForm(employeeForm);
-/*
+        //  3.获取个人信息
         OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-        Map<String, String> valueMap = new HashMap<>();
-*/
+        Map<String, String> employeeStaticVal = handleEmployeeStaticVal(employee);
+
+        //  4.赋值
+        for(GeneralFormFieldDTO dto : form.getFormFields()){
+            //  4-1.赋值给系统默认字段
+            if (dto.getFieldAttribute().equals(GeneralFormFieldAttributeType.DEFAULT.getCode())) {
+                dto.setFieldValue(employeeStaticVal.get(dto.getFieldName()));
+            }
+            //  TODO: 4-2.赋值给非系统默认字段
+            else {
+               //
+            }
+        }
 
         return response;
+    }
+
+
+    //  利用 map 设置 key 来存取值
+    private Map<String, String> handleEmployeeStaticVal(OrganizationMemberDetails employee) {
+        Map<String, String> valueMap = new HashMap<>();
+/*        Field[] fields = employee.getClass().getDeclaredFields();
+        for(int i=0; i<fields.length; i++){
+            valueMap.put(fields[i].getName(),fields[i].get(employee));
+        }*/
+        valueMap.put("contactName", employee.getContactName());
+        valueMap.put("enName", employee.getEnName());
+        //  TODO:性别处理,婚姻状况
+//        valueMap.put("gender",employee.getGender());
+        if(employee.getBirthday() != null)
+            valueMap.put("birthday", String.valueOf(employee.getBirthday()));
+//        valueMap.put("enName",employee.getMaritalFlag());
+        if(employee.getProcreative() != null)
+            valueMap.put("procreative", String.valueOf(employee.getProcreative()));
+        valueMap.put("ethnicity", employee.getEthnicity());
+        valueMap.put("politicalFlag", employee.getPoliticalFlag());
+        valueMap.put("nativePlace", employee.getNativePlace());
+        valueMap.put("idType", employee.getIdType());
+        valueMap.put("idNumber", employee.getIdNumber());
+        if(employee.getIdExpirtDate() != null)
+            valueMap.put("idExpirtDate", String.valueOf(employee.getIdExpirtDate()));
+        valueMap.put("degree", employee.getDegree());
+        valueMap.put("graduationSchool", employee.getGraduationSchool());
+        if(employee.getGraduationTime() != null)
+            valueMap.put("graduationTime", String.valueOf(employee.getGraduationTime()));
+        valueMap.put("contactToken", employee.getContactToken());
+        valueMap.put("email", employee.getEmail());
+        valueMap.put("wechat", employee.getWechat());
+        valueMap.put("qq", employee.getQq());
+        valueMap.put("address", employee.getAddress());
+        valueMap.put("emergencyName", employee.getEmergencyName());
+        valueMap.put("emergencyRelationship", employee.getEmergencyRelationship());
+        valueMap.put("emergencyContact", employee.getEmergencyContact());
+        if(employee.getCheckInTime() != null)
+            valueMap.put("checkInTime", String.valueOf(employee.getCheckInTime()));
+//        valueMap.put("employeeType", employee.getEmployeeType());
+//        valueMap.put("employeeStatus", employee.getEmployeeStatus());
+        valueMap.put("employmentTime", String.valueOf(employee.getEmploymentTime()));
+        //  TODO:部门的同步，岗位的修改
+//        valueMap.put("department", employee.getEnName());
+//        valueMap.put("jobPosition", employee.getJobPosition());
+        valueMap.put("employeeNo", employee.getEmployeeNo());
+        valueMap.put("contactShortToken", employee.getContactShortToken());
+        valueMap.put("workEmail", employee.getWorkEmail());
+        //  TODO:工作地点，合同主体的转化
+//        valueMap.put("workPlaceId", String.valueOf(employee.getWorkPlaceId()));
+//        valueMap.put("contractPartyId", employee.getEnName());
+        if(employee.getWorkStartTime() != null)
+            valueMap.put("workStartTime", String.valueOf(employee.getWorkStartTime()));
+        if(employee.getContractStartTime() != null)
+            valueMap.put("contractStartTime", String.valueOf(employee.getContractStartTime()));
+        if(employee.getContractEndTime() != null)
+            valueMap.put("contractEndTime", String.valueOf(employee.getContractEndTime()));
+
+        valueMap.put("salaryCardNumber", employee.getSalaryCardNumber());
+        valueMap.put("salaryCardBank", employee.getSalaryCardBank());
+        valueMap.put("socialSecurityNumber", employee.getSocialSecurityNumber());
+        valueMap.put("providentFundNumber", employee.getProvidentFundNumber());
+        valueMap.put("regResidenceType", employee.getRegResidenceType());
+        valueMap.put("regResidence", employee.getRegResidence());
+        valueMap.put("idPhoto", employee.getIdPhoto());
+        valueMap.put("visaPhoto", employee.getVisaPhoto());
+        valueMap.put("lifePhoto", employee.getLifePhoto());
+        valueMap.put("entryForm", employee.getEntryForm());
+        valueMap.put("graduationCertificate", employee.getGraduationCertificate());
+        valueMap.put("degreeCertificate", employee.getDegreeCertificate());
+        valueMap.put("contractCertificate", employee.getContractCertificate());
+        return valueMap;
     }
 
     @Override
@@ -693,74 +776,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         }).collect(Collectors.toList()));
         response.setNextPageAnchor(members.getNextPageAnchor());
         return response;
-    }
-
-    //  利用 map 设置 key 来存取值
-    private Map<String, String> handleEmployeeMap(OrganizationMemberDetails employee) {
-        Map<String, String> valueMap = new HashMap<>();
-        valueMap.put("contactName", employee.getContactName());
-        valueMap.put("enName", employee.getEnName());
-        //  TODO:性别处理,婚姻状况
-//        valueMap.put("gender",employee.getGender());
-        if(employee.getBirthday() != null)
-        valueMap.put("birthday", String.valueOf(employee.getBirthday()));
-//        valueMap.put("enName",employee.getMaritalFlag());
-        if(employee.getProcreative() != null)
-        valueMap.put("procreative", String.valueOf(employee.getProcreative()));
-        valueMap.put("ethnicity", employee.getEthnicity());
-        valueMap.put("politicalFlag", employee.getPoliticalFlag());
-        valueMap.put("nativePlace", employee.getNativePlace());
-        valueMap.put("idType", employee.getIdType());
-        valueMap.put("idNumber", employee.getIdNumber());
-        if(employee.getIdExpirtDate() != null)
-        valueMap.put("idExpirtDate", String.valueOf(employee.getIdExpirtDate()));
-        valueMap.put("degree", employee.getDegree());
-        valueMap.put("graduationSchool", employee.getGraduationSchool());
-        if(employee.getGraduationTime() != null)
-        valueMap.put("graduationTime", String.valueOf(employee.getGraduationTime()));
-        valueMap.put("contactToken", employee.getContactToken());
-        valueMap.put("email", employee.getEmail());
-        valueMap.put("wechat", employee.getWechat());
-        valueMap.put("qq", employee.getQq());
-        valueMap.put("address", employee.getAddress());
-        valueMap.put("emergencyName", employee.getEmergencyName());
-        valueMap.put("emergencyRelationship", employee.getEmergencyRelationship());
-        valueMap.put("emergencyContact", employee.getEmergencyContact());
-        if(employee.getCheckInTime() != null)
-        valueMap.put("checkInTime", String.valueOf(employee.getCheckInTime()));
-//        valueMap.put("employeeType", employee.getEmployeeType());
-//        valueMap.put("employeeStatus", employee.getEmployeeStatus());
-        valueMap.put("employmentTime", String.valueOf(employee.getEmploymentTime()));
-        //  TODO:部门的同步，岗位的修改
-//        valueMap.put("department", employee.getEnName());
-//        valueMap.put("jobPosition", employee.getJobPosition());
-        valueMap.put("employeeNo", employee.getEmployeeNo());
-        valueMap.put("contactShortToken", employee.getContactShortToken());
-        valueMap.put("workEmail", employee.getWorkEmail());
-        //  TODO:工作地点，合同主体的转化
-//        valueMap.put("workPlaceId", String.valueOf(employee.getWorkPlaceId()));
-//        valueMap.put("contractPartyId", employee.getEnName());
-        if(employee.getWorkStartTime() != null)
-        valueMap.put("workStartTime", String.valueOf(employee.getWorkStartTime()));
-        if(employee.getContractStartTime() != null)
-        valueMap.put("contractStartTime", String.valueOf(employee.getContractStartTime()));
-        if(employee.getContractEndTime() != null)
-            valueMap.put("contractEndTime", String.valueOf(employee.getContractEndTime()));
-
-        valueMap.put("salaryCardNumber", employee.getSalaryCardNumber());
-        valueMap.put("salaryCardBank", employee.getSalaryCardBank());
-        valueMap.put("socialSecurityNumber", employee.getSocialSecurityNumber());
-        valueMap.put("providentFundNumber", employee.getProvidentFundNumber());
-        valueMap.put("regResidenceType", employee.getRegResidenceType());
-        valueMap.put("regResidence", employee.getRegResidence());
-        valueMap.put("idPhoto", employee.getIdPhoto());
-        valueMap.put("visaPhoto", employee.getVisaPhoto());
-        valueMap.put("lifePhoto", employee.getLifePhoto());
-        valueMap.put("entryForm", employee.getEntryForm());
-        valueMap.put("graduationCertificate", employee.getGraduationCertificate());
-        valueMap.put("degreeCertificate", employee.getDegreeCertificate());
-        valueMap.put("contractCertificate", employee.getContractCertificate());
-        return valueMap;
     }
 
     @Override
