@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
@@ -18,6 +19,7 @@ import com.everhomes.sms.SmsHandler;
 import com.everhomes.util.Tuple;
 
 @Component("Lsm")
+@DependsOn("platformContext")
 public class LsmSmsHandler implements SmsHandler {
     protected final static Logger LOGGER = LoggerFactory.getLogger(LsmSmsHandler.class);
     

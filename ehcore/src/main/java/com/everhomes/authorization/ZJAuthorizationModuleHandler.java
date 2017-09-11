@@ -181,12 +181,14 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		if(length == 18){
 			entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_SUCCESS);
 			entity.setErrorDescription("认证成功");
-			ZjgkResponse response = new ZjgkResponse();
-			response.setCommunityName(communites[(int)(Math.random()*communites.length)]); // TODO
-			response.setBuildingName(String.valueOf(generateRandomNumber(2)));// TODO
-			response.setApartmentName(String.valueOf(generateRandomNumber(3)));
-			response.setAddress(response.getCommunityName()+response.getBuildingName()+"-"+response.getApartmentName());
-			responses.add(response);
+			for(String c:communites){
+				ZjgkResponse response = new ZjgkResponse();
+				response.setCommunityName(c); // TODO
+				response.setBuildingName(String.valueOf(generateRandomNumber(2)));// TODO
+				response.setApartmentName(String.valueOf(generateRandomNumber(3)));
+				response.setAddress(response.getCommunityName()+response.getBuildingName()+"-"+response.getApartmentName());
+				responses.add(response);
+			}
 		}else if(length == 2){
 			entity.setErrorCode(ZjgkJsonEntity.ERRORCODE_MISMATCHING);
 			entity.setErrorDescription("签名证书非法");

@@ -29,6 +29,7 @@ import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.yellowPage.*;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.user.*;
 import com.everhomes.util.DateHelper;
 import org.apache.poi.ss.usermodel.Font;
@@ -196,6 +197,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
             request.setJumpType(2L);
             request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            if(lists!=null && lists.size()>0) {
+                request.setCreateTime(lists.get(0).getCreateTime());
+            }
             request.setCreatorName(user.getNickName());
             if(organizationVal!= null && organizationVal.getFieldValue() != null){
                 PostApprovalFormTextValue organizationvalue = JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class);
@@ -204,7 +208,8 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
                 }
             }
             request.setCreatorMobile(identifier.getIdentifierToken());
-            if (OwnerType.COMMUNITY.getCode().equals(flowCase.getProjectType())){
+            if (EntityType.COMMUNITY.getCode().equals(flowCase.getProjectType()) || "community".equals(flowCase.getProjectType())
+                    || EhCommunities.class.getName().equals(flowCase.getProjectType())){
                 request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
                 List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
                 request.setOwnerId(communityList.get(0).getId());
@@ -217,6 +222,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             request.setCreatorUid(user.getId());
             request.setTemplateType("flowCase");
             feedDoc(request);
+            LOGGER.debug("request = "+request);
         }
     }
 
@@ -932,7 +938,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             try {
 				Date date=format.parse(d);
 				b.field("createDate", date.getTime());
-			} catch (ParseException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
             

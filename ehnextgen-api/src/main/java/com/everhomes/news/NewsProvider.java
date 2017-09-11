@@ -28,4 +28,8 @@ public interface NewsProvider {
 	List<Long> listNewsCommunities(Long newsId);
 
 	Boolean getCommentForbiddenFlag(Long categoryId, Integer namespaceId);
+
+	void createNewsCategory(NewsCategory newsCategory);
+
+	void updateNewsCategory(NewsCategory newsCategory);
 }

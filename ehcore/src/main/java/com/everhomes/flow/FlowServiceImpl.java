@@ -2260,8 +2260,10 @@ public class FlowServiceImpl implements FlowService {
             return new FlowCaseDetailDTO();
         }
         Flow snapshotFlow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+        LOGGER.debug("start rental getFlowCaseDetail  flowCase={}, flowUserType={}, inst={}", flowCase, flowUserType);
 
         List<FlowCaseEntity> entities = flowListenerManager.onFlowCaseDetailRender(flowCase, flowUserType);
+        LOGGER.debug("end rental onFlowCaseDetailRender flowCase={}, flowUserType={}, inst={}", flowCase, flowUserType);
 
         FlowCaseDetailDTO dto = ConvertHelper.convert(flowCase, FlowCaseDetailDTO.class);
         dto.setEntities(entities);
@@ -3271,7 +3273,7 @@ public class FlowServiceImpl implements FlowService {
         int code = 0;
         if (nextStatus == FlowCaseStatus.FINISHED) {
             //到终止节点
-            if (fromStep == FlowStepType.APPROVE_STEP) {
+            if (fromStep == FlowStepType.APPROVE_STEP || fromStep == FlowStepType.END_STEP) {
                 code = FlowTemplateCode.NEXT_STEP_DONE;
             } else if (fromStep == FlowStepType.ABSORT_STEP) {
                 if (flowUserType == FlowUserType.PROCESSOR) {

@@ -15,6 +15,7 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
@@ -256,6 +257,60 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         BigDecimal unpaidMonth = new BigDecimal(accountPeriod.size());
         dto.setUnpaidMonth(unpaidMonth);
         return dto;
+    }
+
+    @Override
+    public List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, int pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse response) {
+        List<ListBillsDTO> list = assetProvider.listBills(contractNum,currentNamespaceId,ownerId,ownerType, billGroupName,billGroupId,billStatus,dateStrBegin,dateStrEnd,pageOffSet,pageSize,targetName,status,targetType);
+        return list;
+    }
+
+    @Override
+    public List<BillDTO> listBillItems(Long billId, String targetName, int pageOffSet, Integer pageSize) {
+        List<BillDTO> list = assetProvider.listBillItems(billId,targetName,pageOffSet,pageSize);
+        return list;
+    }
+
+    @Override
+    public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
+        return assetProvider.listNoticeInfoByBillId(billIds);
+    }
+
+    @Override
+    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractId) {
+        ShowBillForClientDTO response = new ShowBillForClientDTO();
+        if(targetType.equals("eh_user")) {
+            targetId = UserContext.current().getUser().getId();
+        }
+        Long cid = Long.parseLong(contractId);
+        List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId,isOwedBill,cid);
+        HashSet<String> dateStrFilter = new HashSet<>();
+        BigDecimal amountOwed = new BigDecimal("0");
+        for(int i = 0; i < billDetailDTOList.size(); i++) {
+            BillDetailDTO dto = billDetailDTOList.get(i);
+            dateStrFilter.add(dto.getDateStr());
+            amountOwed.add(dto.getAmountOwed());
+        }
+        response.setAmountOwed(amountOwed);
+        response.setBillPeriodMonths(dateStrFilter.size());
+        response.setBillDetailDTOList(billDetailDTOList);
+        return response;
+    }
+
+    @Override
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long billId) {
+        ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
+        response =  assetProvider.getBillDetailForClient(billId);
+        return response;
+
+    }
+
+    @Override
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId) {
+        ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
+        Long conId = Long.parseLong(contractId);
+        response =  assetProvider.getBillDetailByDateStr(ownerId,ownerType,targetId,targetType,dateStr,conId);
+        return response;
     }
 
     private List<SimpleAssetBillDTO> convertAssetBillToSimpleDTO(List<AssetBill> bills) {

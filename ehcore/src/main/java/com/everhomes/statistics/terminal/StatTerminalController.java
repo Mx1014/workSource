@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * <ul>
@@ -31,9 +32,37 @@ public class StatTerminalController extends ControllerBase {
      * <p>執行任務</p>
      */
     @RequestMapping("executeStatTask")
-    @RestReturn(value=String.class)
+    @RestReturn(value=TerminalStatisticsTaskDTO.class, collection = true)
     public RestResponse executeStatTask(@Valid ExecuteTaskCommand cmd) {
-        RestResponse response = new RestResponse(statTerminalService.executeStatTask(cmd.getStartDate(), cmd.getEndDate()));
+        RestResponse response = new RestResponse(statTerminalService.executeStatTask(cmd.getNamespaceId(), cmd.getStartDate(), cmd.getEndDate()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /stat/terminal/executeUserSyncTask</b>
+     * <p>執行用户同步任务</p>
+     */
+    @RequestMapping("executeUserSyncTask")
+    @RestReturn(value=Long.class, collection = true)
+    public RestResponse executeUserSyncTask(@Valid ExecuteSyncUserTaskCommand cmd) {
+        List<Long> userIdList = statTerminalService.executeUserSyncTask(cmd.getNamespaceId());
+        RestResponse response = new RestResponse(userIdList);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /stat/terminal/deleteStatTaskLog</b>
+     * <p>删除统计任务log</p>
+     */
+    @RequestMapping("deleteStatTaskLog")
+    @RestReturn(value=String.class)
+    public RestResponse deleteStatTaskLog(@Valid DeleteStatTaskLogCommand cmd) {
+        statTerminalService.deleteStatTaskLog(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

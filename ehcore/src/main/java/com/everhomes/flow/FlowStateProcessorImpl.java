@@ -142,6 +142,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			ctx.setOperator(userInfo);
 			FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
 			event.setFiredUserId(user.getId());
+            if (stepDTO.getSubjectId() != null) {
+                event.setSubject(flowSubjectProvider.getFlowSubjectById(stepDTO.getSubjectId()));
+            }
 			ctx.setCurrentEvent(event);
 			
 			FlowStepType stepType = FlowStepType.fromCode(stepDTO.getAutoStepType());
@@ -432,6 +435,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			stepDTO.setStepCount(ctx.getFlowCase().getStepCount());
 			stepDTO.setFlowNodeId(curr.getFlowNode().getId());
 			stepDTO.setAutoStepType(curr.getFlowNode().getAutoStepType());
+			stepDTO.setOperatorId(User.SYSTEM_UID);
 			ft.setJson(stepDTO.toString());
 			
 			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute() * 60 * 1000L;

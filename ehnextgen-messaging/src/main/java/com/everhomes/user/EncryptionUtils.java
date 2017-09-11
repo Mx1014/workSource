@@ -106,8 +106,9 @@ public class EncryptionUtils {
     }
 
     public static void main(String[] args) {
-        String dd="8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c9225b3e7b8c20f1e1e637627285bee8f31";
-        System.out.println(hashPassword("8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92bcefc39826307f9ef71f43879d6e7c3f"));
+      //  String dd="8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c9225b3e7b8c20f1e1e637627285bee8f31";
+       // System.out.println(hashPassword("8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92bcefc39826307f9ef71f43879d6e7c3f"));
+        System.out.print(encode("654321",SHA_256));
     }
 
 }
