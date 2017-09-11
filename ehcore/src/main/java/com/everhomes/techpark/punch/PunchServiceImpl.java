@@ -6242,10 +6242,12 @@ public class PunchServiceImpl implements PunchService {
         //排班
         if(punchGroupDTO.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && punchGroupDTO.getSchedulings() != null){
         	for(PunchSchedulingDTO monthScheduling : punchGroupDTO.getSchedulings()){
-                for (PunchSchedulingEmployeeDTO r : monthScheduling.getEmployees()) {
-                    saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs);
-        		}
-        	}
+				if (null != monthScheduling.getEmployees()) {
+					for (PunchSchedulingEmployeeDTO r : monthScheduling.getEmployees()) {
+						saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs);
+					}
+				}
+			}
         }
 	}
 
@@ -6622,61 +6624,65 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd) {
 		//
-		if(cmd.getRuleType() == null)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid rule type parameter in the command");
-		//获取考勤组
-		Organization punchOrg = this.organizationProvider.findOrganizationById(cmd.getId());
-		punchOrg.setName(cmd.getGroupName());
-		organizationProvider.updateOrganization(punchOrg);
-		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
+		this.dbProvider.execute((status) -> {
+
+			if (cmd.getRuleType() == null)
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+						ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Invalid rule type parameter in the command");
+			//获取考勤组
+			Organization punchOrg = this.organizationProvider.findOrganizationById(cmd.getId());
+			punchOrg.setName(cmd.getGroupName());
+			organizationProvider.updateOrganization(punchOrg);
+			PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
 
 //		List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
 
-		//添加关联
-		SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
-		command.setGroupId(punchOrg.getId());
-		command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
-		command.setEnterpriseId(cmd.getOwnerId());
-		command.setTargets(cmd.getTargets());
-		try {
-			this.uniongroupService.saveUniongroupConfigures(command);
-		}catch(NoNodeAvailableException e){
-			LOGGER.error("NoNodeAvailableException",e);
-		}
-		List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
-		List<Long> detailIds = new ArrayList<>();
-		if(null == newEmployees)
-			newEmployees = new ArrayList<>();
-		for (UniongroupMemberDetail employee : newEmployees) {
-			detailIds.add(employee.getDetailId());
-						//删除被踢出考勤组的人的设置 -- 排班
-		}
-		punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndNotInTarget(pr.getId(),detailIds);
+			//添加关联
+			SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
+			command.setGroupId(punchOrg.getId());
+			command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
+			command.setEnterpriseId(cmd.getOwnerId());
+			command.setTargets(cmd.getTargets());
+			try {
+				this.uniongroupService.saveUniongroupConfigures(command);
+			} catch (NoNodeAvailableException e) {
+				LOGGER.error("NoNodeAvailableException", e);
+			}
+			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
+			List<Long> detailIds = new ArrayList<>();
+			if (null == newEmployees)
+				newEmployees = new ArrayList<>();
+			for (UniongroupMemberDetail employee : newEmployees) {
+				detailIds.add(employee.getDetailId());
+				//删除被踢出考勤组的人的设置 -- 排班
+			}
+			punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndNotInTarget(pr.getId(), detailIds);
 
-		//打卡地点和wifi
-        saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
+			//打卡地点和wifi
+			saveGeopointsAndWifis(punchOrg.getId(), cmd.getPunchGeoPoints(), cmd.getWifis());
 
-        //打卡时间,特殊日期,排班等
-        pr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
-        pr.setOwnerId(cmd.getOwnerId());
-        pr.setChinaHolidayFlag(cmd.getChinaHolidayFlag());
-        pr.setName(cmd.getGroupName());
-        pr.setRuleType(cmd.getRuleType());
-        pr.setPunchOrganizationId( punchOrg.getId());
-		pr.setStatus(PunchRuleStatus.MODIFYED.getCode());
-		pr.setOperatorUid(UserContext.current().getUser().getId());
-		pr.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		// 新增一条修改状态的规则
-		//TODO:删除
-        punchProvider.updatePunchRule(pr);
+			//打卡时间,特殊日期,排班等
+			pr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+			pr.setOwnerId(cmd.getOwnerId());
+			pr.setChinaHolidayFlag(cmd.getChinaHolidayFlag());
+			pr.setName(cmd.getGroupName());
+			pr.setRuleType(cmd.getRuleType());
+			pr.setPunchOrganizationId(punchOrg.getId());
+			pr.setStatus(PunchRuleStatus.MODIFYED.getCode());
+			pr.setOperatorUid(UserContext.current().getUser().getId());
+			pr.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			// 新增一条修改状态的规则
+			//TODO:删除
+			punchProvider.updatePunchRule(pr);
 //		punchProvider.deletePunchTimeRuleByRuleId(pr.getId());
 
-        savePunchTimeRule(cmd, pr);
-		//发消息 暂时屏蔽
+			savePunchTimeRule(cmd, pr);
+			//发消息 暂时屏蔽
 //		sendMessageToGroupUser(pr,cmd.getTimeRules());
-		return null;
+			return null;
+		});
+		return  null;
 	}
 
 	private boolean isEmployeeInList(UniongroupMemberDetail employee, List<UniongroupMemberDetail> newEmployees) {
