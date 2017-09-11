@@ -406,6 +406,8 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
         List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getPaymentType(), cmd.getPaymentParams(), service);
         dto.setPayMethod(payMethods);
+        Long expiredIntervalTime = getExpiredIntervalTime(cmd.getExpiration());
+        dto.setExpiredIntervalTime(expiredIntervalTime);
         return dto;
     }
 
@@ -414,7 +416,22 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         dto.setAmount(cmd.getAmount());
         List<PayMethodDTO> payMethods = listPayMethods(cmd.getNamespaceId(), cmd.getPaymentType(), cmd.getPaymentParams(), service);
         dto.setPayMethod(payMethods);
+        Long expiredIntervalTime = getExpiredIntervalTime(cmd.getExpiration());
+        dto.setExpiredIntervalTime(expiredIntervalTime);
         return dto;
+    }
+
+    private Long getExpiredIntervalTime(Long expiration){
+        Long expiredIntervalTime = null;
+        if(expiration != null){
+            expiredIntervalTime = expiration - System.currentTimeMillis();
+            //转换成秒
+            expiredIntervalTime = expiredIntervalTime/1000;
+            if(expiredIntervalTime < 0){
+               expiredIntervalTime = 0L;
+            }
+        }
+        return expiredIntervalTime;
     }
 
     private List<PayMethodDTO> listPayMethods(Integer namespaceId, Integer paymentType, PaymentParamsDTO paramsDTO, PaymentServiceConfig service){

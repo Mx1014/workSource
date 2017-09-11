@@ -1,13 +1,15 @@
 //@formatter:off
 package com.everhomes.rest.order;
 
+import com.everhomes.pay.order.PaymentType;
+
 /**
  * <ul>
  *     <li>paymentType: 支付方式，//1-微信APP支付,8-支付宝扫码支付,9-微信公众号支付参考{@link PaymentType}</li>
- *     <li>paymentName: paymentName</li>
+ *     <li>paymentName: 支付方式名称</li>
  *     <li>paymentLogo: paymentLogo</li>
- *     <li>paymentParams: paymentParams {@link com.everhomes.rest.order.PaymentParamsDTO}</li>
- *     <li>extendInfo: extendInfo {@link com.everhomes.rest.order.PaymentExtendInfo}</li>
+ *     <li>paymentParams: 参数 {@link com.everhomes.rest.order.PaymentParamsDTO}</li>
+ *     <li>extendInfo: 扩展信息 {@link com.everhomes.rest.order.PaymentExtendInfo}</li>
  * </ul>
  */
 public class PayMethodDTO {

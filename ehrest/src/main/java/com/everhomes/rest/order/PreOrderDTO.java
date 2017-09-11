@@ -6,11 +6,21 @@ import com.everhomes.discover.ItemType;
 import java.util.List;
 
 /**
- * Created by Wentian Wang on 2017/9/6.
+ * <ul>
+ *     <li>expiredIntervalTime: 订单失效间隔时间，单位为秒</li>
+ *     <li>amount: 支付金额，以分为单位</li>
+ *     <li>orderCommitUrl: 付系统createOrder返回参数</li>
+ *     <li>orderCommitToken: 支付系统createOrder返回参数</li>
+ *     <li>orderCommitNonce: 支付系统createOrder返回参数</li>
+ *     <li>orderCommitTimestamp: 支付系统createOrder返回参数</li>
+ *     <li>payInfo: 支付信息</li>
+ *     <li>extendInfo: 扩展信息</li>
+ *     <li>payMethod: 支付方式 {@link com.everhomes.rest.order.PayMethodDTO}</li>
+ * </ul>
  */
-
 public class PreOrderDTO {
 
+    private Long expiredIntervalTime;
     private Long amount;
     private String orderCommitUrl;
     private String orderCommitToken;
@@ -22,6 +32,14 @@ public class PreOrderDTO {
     private List<PayMethodDTO> payMethod;
 
     public PreOrderDTO() {
+    }
+
+    public Long getExpiredIntervalTime() {
+        return expiredIntervalTime;
+    }
+
+    public void setExpiredIntervalTime(Long expiredIntervalTime) {
+        this.expiredIntervalTime = expiredIntervalTime;
     }
 
     public Long getAmount() {
@@ -57,7 +75,7 @@ public class PreOrderDTO {
         this.orderCommitNonce = orderCommitNonce;
     }
 
-    public Long  getOrderCommitTimestamp() {
+    public Long getOrderCommitTimestamp() {
         return orderCommitTimestamp;
     }
 
