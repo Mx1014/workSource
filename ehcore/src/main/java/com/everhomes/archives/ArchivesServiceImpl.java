@@ -151,32 +151,77 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  状态码为 0 时删除
         if (cmd.getStick().equals("0")) {
-            ArchivesStickyContacts result = archivesProvider.findArchivesContactsStickyByDetailIdAndOrganizationId(
+            ArchivesStickyContacts result = archivesProvider.findArchivesStickyContactsByDetailIdAndOrganizationId(
                     user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
             if (result != null)
-                archivesProvider.deleteArchivesContactsSticky(result);
+                archivesProvider.deleteArchivesStickyContacts(result);
         }
 
         //  状态码为 1 时新增置顶
         if (cmd.getStick().equals("1")) {
-            ArchivesStickyContacts result = archivesProvider.findArchivesContactsStickyByDetailIdAndOrganizationId(user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
+            ArchivesStickyContacts result = archivesProvider.findArchivesStickyContactsByDetailIdAndOrganizationId(user.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
             if (result == null) {
                 ArchivesStickyContacts contactsSticky = new ArchivesStickyContacts();
                 contactsSticky.setNamespaceId(user.getNamespaceId());
                 contactsSticky.setOrganizationId(cmd.getOrganizationId());
                 contactsSticky.setDetailId(cmd.getDetailId());
                 contactsSticky.setOperatorUid(user.getId());
-                archivesProvider.createArchivesContactsSticky(contactsSticky);
+                archivesProvider.createArchivesStickyContacts(contactsSticky);
             } else {
-                archivesProvider.updateArchivesContactsSticky(result);
+                archivesProvider.updateArchivesStickyContacts(result);
             }
         }
     }
 
     @Override
-    public ArchivesContactDTO getArchivesContact(ArchivesIdCommand cmd) {
+    public ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd) {
+
+        /* Steps：
+           1.If the keywords is not null, just pass the key and get the corresponding employee back.
+           2.If the keywords is null, then judged by the "pageAnchor"
+           3.If the pageAnchor is null, we should get stick employees first.
+           4.if the pageAnchor is not null, means we should get the next page of employees, so ignore those stick employees.*/
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        ListArchivesContactsResponse response = new ListArchivesContactsResponse();
+        final Integer stickCount = 10;  //  置顶数为10,表示一页最多显示10个置顶人员
+        if (cmd.getPageSize() != null)
+            cmd.setPageSize(cmd.getPageSize());
+        else
+            cmd.setPageSize(20);
+
+        List<Long> detailIds = archivesProvider.listArchivesStickyContactsIds(namespaceId, cmd.getOrganizationId(), stickCount);    //  保存置顶人员
+        if (!StringUtils.isEmpty(cmd.getKeywords())) {
+            //  有查询的时候已经不需要置顶了，直接查询对应人员
+            List<ArchivesContactDTO> contacts = new ArrayList<>();
+            contacts.addAll(listArchivesContacts(cmd, response, null));
+            response.setContacts(contacts);
+        } else {
+            if (StringUtils.isEmpty(cmd.getPageAnchor())) {
+                List<ArchivesContactDTO> contacts = new ArrayList<>();
+                //  读取置顶人员
+                for (Long detailId : detailIds) {
+                    ArchivesContactDTO stickDTO = getArchivesStickyContactInfo(detailId);
+                    if (stickDTO != null)
+                        contacts.add(stickDTO);
+                }
+                //  获取其余人员
+                cmd.setPageSize(cmd.getPageSize() - detailIds.size());
+                contacts.addAll(listArchivesContacts(cmd, response, detailIds));
+                response.setContacts(contacts);
+            } else {
+                //  若已经读取了置顶的人则直接往下继续读
+                List<ArchivesContactDTO> contacts = new ArrayList<>();
+                contacts.addAll(listArchivesContacts(cmd, response, detailIds));
+                response.setContacts(contacts);
+            }
+        }
+        return response;
+    }
+
+    private ArchivesContactDTO getArchivesStickyContactInfo(Long detailId) {
         ArchivesContactDTO dto = new ArchivesContactDTO();
-        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
 
         if (detail == null)
             return null;
@@ -207,52 +252,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         dto.setStick("1");
 
         return dto;
-    }
-
-    @Override
-    public ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd) {
-
-        /* Steps：
-           1.If the keywords is not null, just pass the key and get the corresponding employee back.
-           2.If the keywords is null, then judged by the "pageAnchor"
-           3.If the pageAnchor is null, we should get stick employees first.
-           4.if the pageAnchor is not null, means we should get the next page of employees, so ignore those stick employees.*/
-
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        ListArchivesContactsResponse response = new ListArchivesContactsResponse();
-        final Integer stickCount = 10;  //  置顶数为10,表示一页最多显示10个置顶人员
-        if (cmd.getPageSize() != null)
-            cmd.setPageSize(cmd.getPageSize());
-        else
-            cmd.setPageSize(20);
-
-        List<Long> detailIds = archivesProvider.listArchivesContactsStickyIds(namespaceId, cmd.getOrganizationId(), stickCount);    //  保存置顶人员
-        if (!StringUtils.isEmpty(cmd.getKeywords())) {
-            //  有查询的时候已经不需要置顶了，直接查询对应人员
-            List<ArchivesContactDTO> contacts = new ArrayList<>();
-            contacts.addAll(listArchivesContacts(cmd, response, null));
-            response.setContacts(contacts);
-        } else {
-            if (StringUtils.isEmpty(cmd.getPageAnchor())) {
-                List<ArchivesContactDTO> contacts = new ArrayList<>();
-                //  读取置顶人员
-                for (Long detailId : detailIds) {
-                    ArchivesContactDTO stickDTO = getArchivesContact(new ArchivesIdCommand(detailId));
-                    if (stickDTO != null)
-                        contacts.add(stickDTO);
-                }
-                //  获取其余人员
-                cmd.setPageSize(cmd.getPageSize() - detailIds.size());
-                contacts.addAll(listArchivesContacts(cmd, response, detailIds));
-                response.setContacts(contacts);
-            } else {
-                //  若已经读取了置顶的人则直接往下继续读
-                List<ArchivesContactDTO> contacts = new ArrayList<>();
-                contacts.addAll(listArchivesContacts(cmd, response, detailIds));
-                response.setContacts(contacts);
-            }
-        }
-        return response;
     }
 
     private List<ArchivesContactDTO> listArchivesContacts(ListArchivesContactsCommand cmd, ListArchivesContactsResponse response, List<Long> detailIds) {

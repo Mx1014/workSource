@@ -39,7 +39,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public void createArchivesContactsSticky(ArchivesStickyContacts archivesContactsSticky) {
+    public void createArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesStickyContacts.class));
         archivesContactsSticky.setId(id);
         archivesContactsSticky.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -54,7 +54,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public void updateArchivesContactsSticky(ArchivesStickyContacts archivesContactsSticky) {
+    public void updateArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky) {
         archivesContactsSticky.setOperatorUid(UserContext.current().getUser().getId());
         archivesContactsSticky.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
@@ -66,7 +66,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public void deleteArchivesContactsSticky(ArchivesStickyContacts archivesContactsSticky) {
+    public void deleteArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesStickyContactsDao dao = new EhArchivesStickyContactsDao(context.configuration());
         dao.deleteById(archivesContactsSticky.getId());
@@ -74,14 +74,14 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public ArchivesStickyContacts findArchivesContactsStickyById(Long id) {
+    public ArchivesStickyContacts findArchivesStickyContactsById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhArchivesStickyContactsDao dao = new EhArchivesStickyContactsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), ArchivesStickyContacts.class);
     }
 
     @Override
-    public List<Long> listArchivesContactsStickyIds(Integer namespaceId, Long organizationId, Integer stickCount) {
+    public List<Long> listArchivesStickyContactsIds(Integer namespaceId, Long organizationId, Integer stickCount) {
         List<Long> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select(Tables.EH_ARCHIVES_STICKY_CONTACTS.DETAIL_ID)
@@ -94,7 +94,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public ArchivesStickyContacts findArchivesContactsStickyByDetailIdAndOrganizationId(Integer namespaceId, Long organizationId, Long detailId) {
+    public ArchivesStickyContacts findArchivesStickyContactsByDetailIdAndOrganizationId(Integer namespaceId, Long organizationId, Long detailId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesStickyContactsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_STICKY_CONTACTS);
         query.addConditions(Tables.EH_ARCHIVES_STICKY_CONTACTS.NAMESPACE_ID.eq(namespaceId));
