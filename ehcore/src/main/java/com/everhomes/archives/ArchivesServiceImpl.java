@@ -9,6 +9,7 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
@@ -16,6 +17,7 @@ import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.jooq.Condition;
@@ -273,7 +275,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             dto.setTargetType(r.getTargetType());
             dto.setContactName(r.getContactName());
             dto.setDepartments(r.getDepartments());
-            //  TODO: 区号的添加
+            dto.setGender(r.getGender());
             dto.setContactToken("+" + r.getRegionCode() + " " + r.getContactToken());
             //  TODO:组织架构list接口多返回邮箱
 //                dto.setEmail(r.getEmail);
@@ -469,6 +471,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             gender = 2;
         }
         addCommand.setGender(gender);
+        addCommand.setContactShortToken(data.getContactShortToken());
         addCommand.setRegionCode(getRealContactToken(data.getContactToken(), "regionCode"));
         addCommand.setContactToken(getRealContactToken(data.getContactToken(), "contactToken"));
         addCommand.setWorkEmail(data.getWorkEmail());
@@ -503,7 +506,45 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse) {
+        ListArchivesContactsCommand listCommand = new ListArchivesContactsCommand();
+        listCommand.setOrganizationId(cmd.getOrganizationId());
+        listCommand.setKeywords(cmd.getKeywords());
+        listCommand.setPageSize(10000);
+        ListArchivesContactsResponse response = listArchivesContacts(listCommand);
+        if(response.getContacts() !=null && response.getContacts().size()>0){
+            List<ArchivesContactDTO> contacts = response.getContacts().stream().map(r ->{
+                ArchivesContactDTO dto = convertArchivesContactForExcel(r);
+                return dto;
+            }).collect(Collectors.toList());
+            String fileName = "通讯录成员列表";
+            ExcelUtils excelUtils = new ExcelUtils(httpResponse,fileName,"通讯录成员列表");
+            List<String> propertyNames = new ArrayList<String>(Arrays.asList("contactName", "genderString", "contactToken",
+                    "contactShortToken", "workEmail", "departmentString", "jobPositionString"));
+            List<String> titleNames = new ArrayList<String>(Arrays.asList("姓名", "性别", "手机", "短号", "工作邮箱", "部门", "职务"));
+            List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 10, 20, 20, 20, 20, 20));
+            excelUtils.setNeedSequenceColumn(false);
+            excelUtils.writeExcel(propertyNames,titleNames,titleSizes,contacts);
+        }
+    }
 
+    private ArchivesContactDTO convertArchivesContactForExcel(ArchivesContactDTO dto) {
+
+        if (dto.getGender().equals(UserGender.MALE.getCode()))
+            dto.setGenderString("男");
+        else
+            dto.setGenderString("女");
+
+        if (dto.getDepartments()!=null && dto.getDepartments().size()>0){
+            String departmentString ="";
+            for(OrganizationDTO depDTO: dto.getDepartments()){
+                departmentString += depDTO.getName() + ",";
+            }
+            departmentString = departmentString.substring(0,departmentString.length()-1);
+            dto.setDepartmentString(departmentString);
+        }
+        //  TODO:岗位的导出
+
+        return dto;
     }
 
     @Override

@@ -13,6 +13,7 @@ import java.util.List;
  * <li>targetId: 用户id</li>
  * <li>targetType: 用户类型</li>
  * <li>contactName: 姓名</li>
+ * <li>gender: 性别: 1-男, 2-女</li>
  * <li>jobPositions: 职务</li>
  * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>contactToken: 手机号</li>
@@ -32,6 +33,8 @@ public class ArchivesContactDTO {
 
     private String contactName;
 
+    private Byte gender;
+
     private String jobPositions;
 
     @ItemType(OrganizationDTO.class)
@@ -42,6 +45,14 @@ public class ArchivesContactDTO {
     private String email;
 
     private String stick;
+
+
+    //  export
+    private String genderString;
+
+    private String departmentString;
+
+    private String jobPositionString;
 
     public ArchivesContactDTO() {
     }
@@ -86,6 +97,14 @@ public class ArchivesContactDTO {
         this.contactName = contactName;
     }
 
+    public Byte getGender() {
+        return gender;
+    }
+
+    public void setGender(Byte gender) {
+        this.gender = gender;
+    }
+
     public String getJobPositions() {
         return jobPositions;
     }
@@ -124,6 +143,30 @@ public class ArchivesContactDTO {
 
     public void setStick(String stick) {
         this.stick = stick;
+    }
+
+    public String getGenderString() {
+        return genderString;
+    }
+
+    public void setGenderString(String genderString) {
+        this.genderString = genderString;
+    }
+
+    public String getDepartmentString() {
+        return departmentString;
+    }
+
+    public void setDepartmentString(String departmentString) {
+        this.departmentString = departmentString;
+    }
+
+    public String getJobPositionString() {
+        return jobPositionString;
+    }
+
+    public void setJobPositionString(String jobPositionString) {
+        this.jobPositionString = jobPositionString;
     }
 
     @Override
