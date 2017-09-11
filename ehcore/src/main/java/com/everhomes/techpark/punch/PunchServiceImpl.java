@@ -7256,7 +7256,7 @@ public class PunchServiceImpl implements PunchService {
 				result.setRuleTime(ptr.getStartEarlyTimeLong());
 				if(punchTimeLong < ptr.getStartLateTimeLong()){
 					result.setClockStatus(PunchStatus.NORMAL.getCode());
-					result.setExpiryTime(tr.getStartLateTimeLong());
+					result.setExpiryTime(ptr.getStartLateTimeLong());
 				}
 				else {
 					result.setClockStatus(PunchStatus.BELATE.getCode());
