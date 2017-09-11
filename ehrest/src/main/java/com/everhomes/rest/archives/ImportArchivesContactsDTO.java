@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>gender: 性别</li>
  * <li>contactToken: 手机</li>
  * <li>contactShortToken: 短号</li>
- * <li>email: 工作邮箱</li>
+ * <li>workEmail: 工作邮箱</li>
  * <li>department: 部门</li>
  * <li>jobPosition: 职务</li>
  * </ul>
@@ -26,7 +26,7 @@ public class ImportArchivesContactsDTO {
 
     private String contactShortToken;
 
-    private String email;
+    private String workEmail;
 
     private String department;
 
@@ -75,12 +75,12 @@ public class ImportArchivesContactsDTO {
         this.contactShortToken = contactShortToken;
     }
 
-    public String getEmail() {
-        return email;
+    public String getWorkEmail() {
+        return workEmail;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setWorkEmail(String workEmail) {
+        this.workEmail = workEmail;
     }
 
     public String getDepartment() {

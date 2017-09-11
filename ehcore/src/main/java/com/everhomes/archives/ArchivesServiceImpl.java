@@ -274,7 +274,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             dto.setContactName(r.getContactName());
             dto.setDepartments(r.getDepartments());
             //  TODO: 区号的添加
-            dto.setContactToken(r.getContactToken());
+            dto.setContactToken("+" + r.getRegionCode() + " " + r.getContactToken());
             //  TODO:组织架构list接口多返回邮箱
 //                dto.setEmail(r.getEmail);
             dto.setStick("0");
@@ -327,11 +327,8 @@ public class ArchivesServiceImpl implements ArchivesService {
                 }
 
                 //  开始导入，同时设置导入结果
-                importArchivesContactsFiles(datas, response);
-                //  设置导入结果
-/*                response.setTotalCount((long) datas.size());
-                response.setFailCount((long) result.size());*/
-                //  覆盖数与文件错误的设置
+                importArchivesContactsFiles(datas, response, cmd.getOrganizationId(), cmd.getDepartmentId());
+                //  返回结果
                 return response;
             }
         }, task);
@@ -364,7 +361,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             if (null != r.getCells().get("E"))
                 data.setContactShortToken(r.getCells().get("E"));
             if (null != r.getCells().get("F"))
-                data.setEmail(r.getCells().get("F"));
+                data.setWorkEmail(r.getCells().get("F"));
             if (null != r.getCells().get("G"))
                 data.setDepartment(r.getCells().get("G"));
             if (null != r.getCells().get("H"))
@@ -374,7 +371,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         return datas;
     }
 
-    private void importArchivesContactsFiles(List<ImportArchivesContactsDTO> datas, ImportFileResponse response) {
+    private void importArchivesContactsFiles(List<ImportArchivesContactsDTO> datas, ImportFileResponse response, Long organizationId, Long departmentId) {
 
         ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
         List<ImportFileResultLog<ImportArchivesContactsDTO>> errorDataLogs = new ArrayList<>();
@@ -387,7 +384,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 continue;
             }
             //  2.导入数据库
-            boolean flag = saveArchivesContactsdatas(data);
+            boolean flag = saveArchivesContactsdatas(data, organizationId, departmentId);
             if (flag)
                 coverCount++;
         }
@@ -413,7 +410,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         temp.add(title.getGender());
         temp.add(title.getContactToken());
         temp.add(title.getContactShortToken());
-        temp.add(title.getEmail());
+        temp.add(title.getWorkEmail());
         temp.add(title.getDepartment());
         temp.add(title.getJobPosition());
 
@@ -459,10 +456,49 @@ public class ArchivesServiceImpl implements ArchivesService {
         return null;
     }
 
-    private boolean saveArchivesContactsdatas(ImportArchivesContactsDTO data) {
+    private boolean saveArchivesContactsdatas(ImportArchivesContactsDTO data, Long organizationId, Long departmentId) {
+        AddArchivesContactCommand addCommand = new AddArchivesContactCommand();
+        addCommand.setOrganizationId(organizationId);
+        addCommand.setContactName(data.getContactName());
+        addCommand.setContactEnName(data.getContactEnName());
+        //  性别
+        Byte gender;
+        if (data.getGender().trim().equals("男")) {
+            gender = 1;
+        } else {
+            gender = 2;
+        }
+        addCommand.setGender(gender);
+        addCommand.setRegionCode(getRealContactToken(data.getContactToken(), "regionCode"));
+        addCommand.setContactToken(getRealContactToken(data.getContactToken(), "contactToken"));
+        addCommand.setWorkEmail(data.getWorkEmail());
+        if (StringUtils.isEmpty(data.getDepartment())) {
+            addCommand.setDepartmentIds(Arrays.asList(departmentId));
+//            addArchivesContact()
+        }
+        //  TODO:部门、岗位中文查询
+        addCommand.setVisibleFlag(VisibleFlag.SHOW.getCode());
         //  TODO:手机号存在的话则累积数目+1
-//        return 2L
-        return true;
+        VerifyPersonnelByPhoneCommand verifyCommand = new VerifyPersonnelByPhoneCommand();
+        verifyCommand.setEnterpriseId(organizationId);
+        verifyCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+        verifyCommand.setPhone(addCommand.getContactToken());
+        VerifyPersonnelByPhoneCommandResponse verifyRes = organizationService.verifyPersonnelByPhone(verifyCommand);
+
+        if (null != verifyRes && null != verifyRes.getDto()) {
+            addArchivesContact(addCommand);
+            return true;
+        } else
+            return false;
+    }
+
+    private String getRealContactToken(String tokens, String type) {
+        String token[] = tokens.split(" ");
+        token[0] = token[0].substring(1, token[0].length());
+        if (type.equals("contactToken"))
+            return token[1];
+        else
+            return token[0];
     }
 
     @Override
@@ -577,12 +613,12 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         ListOrganizationContactCommand orgCommand = new ListOrganizationContactCommand();
         orgCommand.setOrganizationId(cmd.getOrganizationId());
-        orgCommand.setCheckInTimeStart(ArchivesDateUtil.dateToTimestamp(cmd.getCheckInTimeStart()));
-        orgCommand.setCheckInTimeEnd(ArchivesDateUtil.dateToTimestamp(cmd.getCheckInTimeEnd()));
-        orgCommand.setEmploymentTimeStart(ArchivesDateUtil.dateToTimestamp(cmd.getEmploymentTimeStart()));
-        orgCommand.setEmploymentTimeEnd(ArchivesDateUtil.dateToTimestamp(cmd.getEmploymentTimeEnd()));
-        orgCommand.setContractEndTimeStart(ArchivesDateUtil.dateToTimestamp(cmd.getCheckInTimeStart()));
-        orgCommand.setContractEndTimeEnd(ArchivesDateUtil.dateToTimestamp(cmd.getContractTimeEnd()));
+        orgCommand.setCheckInTimeStart(cmd.getCheckInTimeStart());
+        orgCommand.setCheckInTimeEnd(cmd.getCheckInTimeEnd());
+        orgCommand.setEmploymentTimeStart(cmd.getEmploymentTimeStart());
+        orgCommand.setEmploymentTimeEnd(cmd.getEmploymentTimeEnd());
+        orgCommand.setContractEndTimeStart(cmd.getCheckInTimeStart());
+        orgCommand.setContractEndTimeEnd(cmd.getContractTimeEnd());
         orgCommand.setEmployeeStatus(cmd.getEmployeeStatus());
         orgCommand.setContractPartyId(cmd.getContractPartyId());
         //  TODO:查询文字的确定

@@ -3,6 +3,7 @@ package com.everhomes.rest.archives;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -26,17 +27,17 @@ public class ListArchivesEmployeesCommand {
 
     private Long organizationId;
 
-    private Date checkInTimeStart;
+    private Timestamp checkInTimeStart;
 
-    private Date checkInTimeEnd;
+    private Timestamp checkInTimeEnd;
 
-    private Date employmentTimeStart;
+    private Timestamp employmentTimeStart;
 
-    private Date employmentTimeEnd;
+    private Timestamp employmentTimeEnd;
 
-    private Date contractTimeStart;
+    private Timestamp contractTimeStart;
 
-    private Date contractTimeEnd;
+    private Timestamp contractTimeEnd;
 
     private Byte employeeStatus;
 
@@ -55,51 +56,51 @@ public class ListArchivesEmployeesCommand {
     public ListArchivesEmployeesCommand() {
     }
 
-    public Date getCheckInTimeStart() {
+    public Timestamp getCheckInTimeStart() {
         return checkInTimeStart;
     }
 
-    public void setCheckInTimeStart(Date checkInTimeStart) {
+    public void setCheckInTimeStart(Timestamp checkInTimeStart) {
         this.checkInTimeStart = checkInTimeStart;
     }
 
-    public Date getCheckInTimeEnd() {
+    public Timestamp getCheckInTimeEnd() {
         return checkInTimeEnd;
     }
 
-    public void setCheckInTimeEnd(Date checkInTimeEnd) {
+    public void setCheckInTimeEnd(Timestamp checkInTimeEnd) {
         this.checkInTimeEnd = checkInTimeEnd;
     }
 
-    public Date getEmploymentTimeStart() {
+    public Timestamp getEmploymentTimeStart() {
         return employmentTimeStart;
     }
 
-    public void setEmploymentTimeStart(Date employmentTimeStart) {
+    public void setEmploymentTimeStart(Timestamp employmentTimeStart) {
         this.employmentTimeStart = employmentTimeStart;
     }
 
-    public Date getEmploymentTimeEnd() {
+    public Timestamp getEmploymentTimeEnd() {
         return employmentTimeEnd;
     }
 
-    public void setEmploymentTimeEnd(Date employmentTimeEnd) {
+    public void setEmploymentTimeEnd(Timestamp employmentTimeEnd) {
         this.employmentTimeEnd = employmentTimeEnd;
     }
 
-    public Date getContractTimeStart() {
+    public Timestamp getContractTimeStart() {
         return contractTimeStart;
     }
 
-    public void setContractTimeStart(Date contractTimeStart) {
+    public void setContractTimeStart(Timestamp contractTimeStart) {
         this.contractTimeStart = contractTimeStart;
     }
 
-    public Date getContractTimeEnd() {
+    public Timestamp getContractTimeEnd() {
         return contractTimeEnd;
     }
 
-    public void setContractTimeEnd(Date contractTimeEnd) {
+    public void setContractTimeEnd(Timestamp contractTimeEnd) {
         this.contractTimeEnd = contractTimeEnd;
     }
 

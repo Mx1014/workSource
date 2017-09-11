@@ -17,11 +17,4 @@ public class ArchivesDateUtil {
         java.sql.Date date = new java.sql.Date(d.getTime());
         return date;
     }
-
-    public static Timestamp dateToTimestamp(java.sql.Date date) {
-        if (date != null)
-            return new Timestamp(date.getTime());
-        else
-            return null;
-    }
 }
