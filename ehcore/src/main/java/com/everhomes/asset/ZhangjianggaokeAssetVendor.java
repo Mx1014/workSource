@@ -22,6 +22,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
+import org.elasticsearch.common.recycler.Recycler;
 import org.elasticsearch.index.analysis.AnalysisSettingsRequired;
 import org.springframework.context.ApplicationContext;
 import org.apache.commons.lang.StringUtils;
@@ -31,10 +32,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import sun.java2d.pipe.SpanShapeRenderer;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.everhomes.util.SignatureHelper.computeSignature;
@@ -86,8 +89,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         try {
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
         } catch (IOException e) {
-            LOGGER.error("调用张江高科失败"+e);
-            throw new RuntimeException("调用张江高科失败"+e);
+            LOGGER.error("Request ShenZhouShuMa Failed"+e);
+            throw new RuntimeException("Request ShenZhouShuMa Failed"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0){
             Gson gson = new Gson();
@@ -100,7 +103,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     finalDto.setAmountOwed(res.getAmountTotalOwed()==null?new BigDecimal("0"):new BigDecimal(res.getAmountTotalOwed()));
                 }
             }else{
-                LOGGER.error("调用张江高科失败"+response.getErrorDescription()+","+response.getErrorDetails());
+                LOGGER.error("Request ShenZhouShuMa Failed"+response.getErrorDescription()+","+response.getErrorDetails());
             }
         }
         //找列表
@@ -109,14 +112,18 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 //        check(String.valueOf(ownerId),"ownerId");
 //        String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
         String payFlag = "";
+        String dateStrEnd = "";
         if(isOwedBill==1){
             payFlag="0";
+            Calendar c = Calendar.getInstance();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+            dateStrEnd = sdf.format(c.getTime());
         }else if(isOwedBill==0){
             payFlag="";
         }
         params.put("payFlag", payFlag);
         params.put("sdateFrom","");
-        params.put("sdateTo","");
+        params.put("sdateTo",dateStrEnd);
         params.put("pageOffset","1");
         params.put("pageSize","999");
         params.put("contractNum", contractNum);
@@ -146,6 +153,10 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setBillId(sourceDto.getBillID());
                     dto.setDateStr(sourceDto.getBillDate());
                     dto.setStatus(sourceDto.getPayFlag());
+                    String szsm_status = sourceDto.getStatus();
+                    if(szsm_status.equals(PaymentStatus.SUSPEND)){
+                        dto.setPayStatus(PaymentStatus.IN_PROCESS.getCode());
+                    }
                     dtos.add(dto);
                 }
             }else{
@@ -176,8 +187,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         try {
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
         } catch (IOException e) {
-            LOGGER.error("调用张江高科失败"+e);
-            throw new RuntimeException("调用张江高科失败"+e);
+            LOGGER.error("Request ShenZhouShuMa Failed"+e);
+            throw new RuntimeException("Request ShenZhouShuMa Failed"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0) {
             BillDetailResponse response = new BillDetailResponse();
@@ -191,6 +202,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                     dto.setBillItemName(sourceDto.getFeeName());
                     dto.setAmountOwed(sourceDto.getAmountOwed()==null?null:new BigDecimal(sourceDto.getAmountOwed()));
+                    dto.setAmountReceivable(sourceDto.getAmountReceivable()==null?null:new BigDecimal(sourceDto.getAmountReceivable()));
                     amountOwed = amountOwed.add(sourceDto.getAmountOwed()==null?new BigDecimal("0"):new BigDecimal(sourceDto.getAmountOwed()));
                     amountReceivable = amountReceivable.add(sourceDto.getAmountReceivable()==null?new BigDecimal("0"):new BigDecimal(sourceDto.getAmountReceivable()));
                     List<CommunityAddressDTO> apartments = sourceDto.getApartments();
@@ -237,8 +249,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         try {
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
         } catch (IOException e) {
-            LOGGER.error("调用张江高科失败"+e);
-            throw new RuntimeException("调用张江高科失败"+e);
+            LOGGER.error("Request ShenZhouShuMa Failed"+e);
+            throw new RuntimeException("Request ShenZhouShuMa Failed"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0){
             BillCountResponse response = (BillCountResponse)StringHelper.fromJsonString(postJson, BillCountResponse.class);
@@ -259,7 +271,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         params=new HashMap<String, String> ();
         String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
         String payFlag = "";
-        if(billStatus==1){
+        if(billStatus==null){
+            payFlag="";
+        }else if(billStatus==1){
             payFlag="1";
         }else if(billStatus==0){
             payFlag="0";
@@ -296,6 +310,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     ContractBillsDTO sourceDto = res.get(i);
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                     dto.setAmountOwed(sourceDto.getAmountOwed()==null?null:new BigDecimal(sourceDto.getAmountOwed()));
+                    dto.setAmountReceivable(sourceDto.getAmountReceivable()==null?null:new BigDecimal(sourceDto.getAmountReceivable()));
                     String buildingName = "";
                     String apartmentName = "";
                     if(sourceDto.getApartments()!=null&& sourceDto.getApartments().size()>0){
@@ -324,29 +339,27 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         Map<String, String> params=new HashMap<String, String> ();
         String identifier;
         params.put("pageOffset", "1");
-        params.put("pageSize", "999");
+        params.put("pageSize", "2000");
         String url;
         String targetType= cmd.getTargetType();
-        if(targetType!=null && targetType.equals("eh_organization")){
+        if(targetType!=null && targetType.equals(AssetTargetType.ORGANIZATION.getCode())){
             url = ZjgkUrls.ENTERPRISE_CONTRACT_LIST;
             Organization organization = organizationProvider.findOrganizationById(cmd.getTargetId());
             identifier = organization.getNamespaceOrganizationToken();
             if(identifier==null){
-                identifier="806553F9-7322-4480-86D2-3A4302B19ADB";
-//                LOGGER.error("Insufficient privilege, zjgkhandler organization_identifier is null");
-//                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-//                        "Insufficient privilege");
+                LOGGER.error("Insufficient privilege, zjgkhandler organization_identifier is null");
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                        "Insufficient privilege");
             }
             params.put("enterpriseIdentifier",identifier);
-        }else if(targetType!=null && targetType.equals("eh_user")){
+        }else if(targetType!=null && targetType.equals(AssetTargetType.USER.getCode())){
             url = ZjgkUrls.USER_CONTRACT_LIST;
             identifier = assetProvider.findIdentifierByUid(UserContext.currentUserId());
             //测试
             if(identifier==null){
-                identifier = "18616759112";
-//                LOGGER.error("Insufficient privilege, zjgkhandler userMobile is null");
-//                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-//                        "Insufficient privilege");
+                LOGGER.error("Insufficient privilege, zjgkhandler userMobile is null");
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                        "Insufficient privilege");
             }
             params.put("userMobile",identifier);
         }else{
@@ -356,8 +369,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         try {
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
         } catch (IOException e) {
-            LOGGER.error("调用张江高科失败"+e);
-            throw new RuntimeException("调用张江高科失败"+e);
+            LOGGER.error("Request ShenZhouShuMa Failed"+e);
+            throw new RuntimeException("Request ShenZhouShuMa Failed"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0){
             ContractListResponse response =(ContractListResponse) StringHelper.fromJsonString(postJson, ContractListResponse.class);
@@ -371,7 +384,20 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     FindUserInfoForPaymentDTO dto = new FindUserInfoForPaymentDTO();
                     dto.setContractId(sourceDto.getContractNum());
                     dto.setContractNum(sourceDto.getContractNum());
-                    customerName = UserContext.current().getUser().getNickName();
+                    try{
+                        if(cmd.getTargetType()!=null){
+                            if(targetType.equals(AssetTargetType.ORGANIZATION.getCode())){
+                                customerName = organizationProvider.findOrganizationById(cmd.getTargetId()).getName();
+                            }else{
+                                customerName = UserContext.current().getUser().getNickName();
+                            }
+                        }else{
+                            customerName = UserContext.current().getUser().getNickName();
+                        }
+                    }catch(Exception e){
+                        customerName = UserContext.current().getUser().getNickName();
+                        LOGGER.error("findUserInfo targetType failed expects, targetType is {} ",targetType);
+                    }
                     List<CommunityAddressDTO> apartments = sourceDto.getApartments();
                     if(apartments!=null){
                         for(int k = 0 ; k < apartments.size(); k ++){
@@ -388,8 +414,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 result.setContractList(list);
                 result.setCustomerName(customerName);
             }else{
-                LOGGER.error("调用张江高科失败"+response.getErrorDescription());
-                throw new RuntimeException("调用张江高科失败"+response.getErrorDescription());
+                LOGGER.error("Request ShenZhouShuMa Failed"+response.getErrorDescription());
+                throw new RuntimeException("Request ShenZhouShuMa Failed"+response.getErrorDescription());
             }
         }
         return result;
@@ -420,7 +446,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             LOGGER.info("Get contract from zjgk by area and address success, url={}, param={}, result={}", url, json, postJson);
         } catch (Exception e) {
             LOGGER.error("Failed to get contract from zjgk by area and address, url={}, param={}", url, json, e);
-            throw new RuntimeException("调用张江高科失败"+e);
+            throw new RuntimeException("Request ShenZhouShuMa Failed"+e);
         }
         if(postJson!=null&&postJson.trim().length()>0){
             Gson gson = new Gson();
@@ -443,8 +469,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 result.setAreaSizesSum(sourceDto.getAreaSize());
                 result.setAddressNames(addressNames);
             }else{
-                LOGGER.error("调用张江高科失败"+response.getErrorDescription());
-                throw new RuntimeException("调用张江高科失败"+response.getErrorDescription());
+                LOGGER.error("Request ShenZhouShuMa Failed"+response.getErrorDescription());
+                throw new RuntimeException("Request ShenZhouShuMa Failed"+response.getErrorDescription());
             }
         }
         return result;
@@ -583,7 +609,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         Boolean nextFLag = true;
         if(targetType==null||targetType.trim().equals("")){
             url = ZjgkUrls.SEARCH_USER_BILLS;
-            listBillOnUrls(targetType, carrier, list, json, url,"eh_user");
+            listBillOnUrls(targetType, carrier, list, json, url,AssetTargetType.USER.getCode());
             if(carrier.getNextPageAnchor()==null){
                 nextFLag = false;
             }
@@ -606,7 +632,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             json = generateJson(params);
             LOGGER.info("listBill"+json);
             url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
-            listBillOnUrls(targetType, carrier, list, json, url,"eh_organization");
+            listBillOnUrls(targetType, carrier, list, json, url,AssetTargetType.ORGANIZATION.getCode());
             if(nextFLag==false){
                 if(carrier.getNextPageAnchor()==null){
                     carrier.setNextPageAnchor(null);
@@ -636,7 +662,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             LOGGER.info("Get bills from zjgk success, url={}, param={}, result={}", url, json, postJson);
         } catch (Exception e) {
             LOGGER.error("Get bills from zjgk success, url={}, param={}, ", url, json, e);
-            throw new RuntimeException("调用张江高科失败"+e);
+            throw new RuntimeException("Request ShenZhouShuMa Failed"+e);
         }
 //        HashMap<CommunityFilter,CommunityAddressDTO> dump = new HashMap<>();
         if(postJson!=null&&postJson.trim().length()>0){
@@ -656,18 +682,29 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setTargetType(RelTargetType);
                     dto.setBillStatus(sourceDto.getPayFlag());
                     dto.setOwnerType("community");
-                    String noticeTel = "";
+                    List<String> noticeTel = new ArrayList<>();
                     String noticeTels = sourceDto.getNoticeTels();
                     if(noticeTels!=null && sourceDto.getNoticeTels().split(",").length>1){
-                        noticeTel = sourceDto.getNoticeTels().split(",")[0];
+                        for(String tel:sourceDto.getNoticeTels().split(",")){
+                            noticeTel.add(tel);
+                        }
                     }else if(noticeTels!=null && sourceDto.getNoticeTels().split("/").length>1){
-                        noticeTel = sourceDto.getNoticeTels().split(",")[0];
+                        for(String tel:sourceDto.getNoticeTels().split("/")){
+                            noticeTel.add(tel);
+                        }
                     }
                     else if(noticeTels!=null){
-                        noticeTel = sourceDto.getNoticeTels();
+                        noticeTel.add(sourceDto.getNoticeTels());
                     }
-                    dto.setNoticeTel(noticeTel);
-
+                    StringBuilder phones = new StringBuilder();
+                    forPhoneLoop:for(int k = 0; k < noticeTel.size(); k++){
+                        if(k == noticeTel.size()-1){
+                            phones.append(noticeTel.get(k));
+                            break forPhoneLoop;
+                        }
+                        phones.append(noticeTel.get(k)+",");
+                    }
+                    dto.setNoticeTel(phones.toString());
                     dto.setBillId(sourceDto.getBillID());
                     dto.setBillGroupName(sourceDto.getFeeName()==null?"租金":sourceDto.getFeeName());
                     dto.setDateStr(sourceDto.getBillDate());
@@ -716,7 +753,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             LOGGER.info("Get bill items from zjgk success, url={}, param={}, result={}", url, json, postJson);
         } catch (Exception e) {
             LOGGER.error("Failed to get bill item from zjgk, url={}, param={}", url, json, e);
-            throw new RuntimeException("调用张江高科失败"+e);
+            throw new RuntimeException("Request ShenZhouShuMa Failed"+e);
         }
         if(postJson!=null && postJson.trim().length() > 0) {
             BillDetailResponse response = (BillDetailResponse)StringHelper.fromJsonString(postJson, BillDetailResponse.class);
@@ -778,8 +815,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             try {
                 postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
             } catch (IOException e) {
-                LOGGER.error("调用张江高科失败" + e);
-                throw new RuntimeException("调用张江高科失败" + e);
+                LOGGER.error("Request ShenZhouShuMa Failed" + e);
+                throw new RuntimeException("Request ShenZhouShuMa Failed" + e);
             }
             if (postJson != null && postJson.trim().length() > 0) {
                 BillDetailResponse response = new BillDetailResponse();
@@ -810,16 +847,29 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                         no.setAmountOwed(amountOwed);
                         no.setAmountRecevable(amountReceivable);
                         String noticeTels = sourceDto.getNoticeTels();
-                        String noticeTel = "";
-                        if (noticeTels != null && sourceDto.getNoticeTels().split(",").length > 1) {
-                            noticeTel = sourceDto.getNoticeTels().split(",")[0];
+                        List<String> tempList = new ArrayList<>();
+                        if(noticeTels!=null && sourceDto.getNoticeTels().split(",").length>1){
+                            for(String tel:sourceDto.getNoticeTels().split(",")){
+                                tempList.add(tel);
+                            }
                         }else if(noticeTels!=null && sourceDto.getNoticeTels().split("/").length>1){
-                            noticeTel = sourceDto.getNoticeTels().split(",")[0];
+                            for(String tel:sourceDto.getNoticeTels().split("/")){
+                                tempList.add(tel);
+                            }
                         }
                         else if(noticeTels!=null){
-                            noticeTel = sourceDto.getNoticeTels();
+                            tempList.add(sourceDto.getNoticeTels());
                         }
-                        no.setPhoneNum(noticeTel);
+                        StringBuilder sb = new StringBuilder();
+                        for(int l = 0; l < tempList.size(); l ++){
+                            if(l == tempList.size()-1){
+                                sb.append(tempList.get(l));
+                                break;
+                            }
+                            sb.append(tempList.get(l)+",");
+                        }
+                        no.setPhoneNums(sb.toString());
+                        no.setDateStr(sourceDto.getBillDate());
                         list.add(no);
                     }
                 }

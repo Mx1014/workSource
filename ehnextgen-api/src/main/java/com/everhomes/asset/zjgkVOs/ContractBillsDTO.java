@@ -19,6 +19,7 @@ public class ContractBillsDTO {
     private String amountReceivable;
     private String amountReceived;
     private String amountOwed;
+    private String status;
 
     public ContractBillsDTO() {
     }
@@ -29,6 +30,14 @@ public class ContractBillsDTO {
 
     public void setBillID(String billID) {
         this.billID = billID;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getBillDate() {

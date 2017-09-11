@@ -19,6 +19,7 @@ public class ShowBillDetailForClientDTO {
     private BigDecimal amountOwed;
     private String addressName;
     private String payStatus;
+    private BigDecimal amountReceivable;
 
     @Override
     public String toString() {
@@ -27,6 +28,14 @@ public class ShowBillDetailForClientDTO {
 
     public String getBillItemName() {
         return billItemName;
+    }
+
+    public BigDecimal getAmountReceivable() {
+        return amountReceivable;
+    }
+
+    public void setAmountReceivable(BigDecimal amountReceivable) {
+        this.amountReceivable = amountReceivable;
     }
 
     public String getAddressName() {

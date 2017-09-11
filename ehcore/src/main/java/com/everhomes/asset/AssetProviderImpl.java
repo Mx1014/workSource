@@ -569,7 +569,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
                 .fetch().map(r -> {
                     NoticeInfo info = new NoticeInfo();
-                    info.setPhoneNum(r.getValue(Tables.EH_PAYMENT_BILLS.NOTICETEL));
+                    info.setPhoneNums(r.getValue(Tables.EH_PAYMENT_BILLS.NOTICETEL));
                     info.setAmountRecevable(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE));
                     info.setAmountOwed(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED));
                     info.setTargetId(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_ID));

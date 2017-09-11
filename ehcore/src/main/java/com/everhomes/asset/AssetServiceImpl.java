@@ -293,30 +293,34 @@ public class AssetServiceImpl implements AssetService {
             for (int i = 0; i < noticeInfos.size(); i++) {
                 NoticeInfo noticeInfo = noticeInfos.get(i);
                 //收集短信的信息
+                String phoneNums = noticeInfo.getPhoneNums();
+                if(phoneNums == null){
+                    continue;
+                }
+                String[] telNOs = phoneNums.split(",");
                 List<Tuple<String, Object>> variables = new ArrayList<>();
                 smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
                 //模板改了，所以这个也要改
-                smsProvider.addToTupleList(variables, "dateStr", "2017-05");
+                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
 //            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
                 smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
-                String phoneNums = noticeInfo.getPhoneNum();
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
-                smsProvider.sendSms(UserContext.getCurrentNamespaceId(), phoneNums, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
-                }
-            } catch(Exception e){
-                LOGGER.error("短信催缴失败");
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                        "短信催缴失败");
-                }
-                //客户在系统内，把需要推送的uid放在list中
+                smsProvider.sendSms(UserContext.getCurrentNamespaceId(), telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
+            }
+        } catch(Exception e){
+            LOGGER.error("YZX MAIL SEND FAILED");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "YZX MAIL SEND FAILED");
+            }
+            //客户在系统内，把需要推送的uid放在list中
         for (int i = 0; i < noticeInfos.size(); i++) {
             NoticeInfo noticeInfo = noticeInfos.get(i);
             Long targetId = noticeInfo.getTargetId();
             if (targetId != null && targetId != 0l) {
-                if (noticeInfo.getTargetType().equals("eh_user")) {
+                if (noticeInfo.getTargetType().equals(AssetTargetType.USER.getCode())) {
                     uids.add(noticeInfo.getTargetId());
-                } else if (noticeInfo.getTargetType().equals("eh_organization")) {
+                } else if (noticeInfo.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
                     ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
                     tempCmd.setOwnerId(cmd.getOwnerId());
                     tempCmd.setOwnerType(cmd.getOwnerType());
@@ -350,9 +354,9 @@ public class AssetServiceImpl implements AssetService {
                         }
                     }
                 } catch (Exception e) {
-                    LOGGER.error("短信催缴成功，app推送失败，用户也许没有在系统内注册");
+                    LOGGER.error("MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                            "短信催缴成功，app推送失败，用户也许没有在系统内注册");
+                            "MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
                 }
                 if (UserContext.getCurrentNamespaceId() != 999971) {
                     //催缴次数加1
@@ -476,8 +480,7 @@ public class AssetServiceImpl implements AssetService {
                     ListBillsDTO dto = listBillsDTOS1.get(i);
                     NoticeInfo info = new NoticeInfo();
                     info.setAppName(appName);
-
-                    info.setPhoneNum(dto.getNoticeTel());
+                    info.setPhoneNums(dto.getNoticeTel());
                     info.setAmountRecevable(dto.getAmountReceivable());
                     info.setAmountOwed(dto.getAmountOwed());
                     Long tid = 0l;
@@ -486,11 +489,11 @@ public class AssetServiceImpl implements AssetService {
                     Long oid = assetProvider.findOrganizationIdByIdentifier(dto.getTargetId());
                     if(uid ==null && oid !=null){
                         tid = oid;
-                        targeType="eh_organization";
+                        targeType=AssetTargetType.ORGANIZATION.getCode();
                     }
                     else if(uid !=null && oid ==null){
                         tid = uid;
-                        targeType = "eh_user";
+                        targeType = AssetTargetType.USER.getCode();
                     }else {
                         LOGGER.info("NOTICE USER IS NOT IN ZUOLIN APP, USER IS {}",dto.getTargetName());
                     }

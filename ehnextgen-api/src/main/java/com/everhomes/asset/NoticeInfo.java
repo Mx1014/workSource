@@ -5,18 +5,23 @@ package com.everhomes.asset;
 import java.math.BigDecimal;
 
 public class NoticeInfo {
-    private String phoneNum;
+    private String phoneNums;
     private BigDecimal amountRecevable;
     private BigDecimal amountOwed;
     private String targetType;
     private Long targetId;
     private String appName;
     private String targetName;
+    private String dateStr;
     public NoticeInfo() {
     }
 
-    public String getPhoneNum() {
-        return phoneNum;
+    public String getDateStr() {
+        return dateStr;
+    }
+
+    public void setDateStr(String dateStr) {
+        this.dateStr = dateStr;
     }
 
     public String getTargetName() {
@@ -27,8 +32,12 @@ public class NoticeInfo {
         this.targetName = targetName;
     }
 
-    public void setPhoneNum(String phoneNum) {
-        this.phoneNum = phoneNum;
+    public String getPhoneNums() {
+        return phoneNums;
+    }
+
+    public void setPhoneNums(String phoneNums) {
+        this.phoneNums = phoneNums;
     }
 
     public BigDecimal getAmountRecevable() {
