@@ -1529,3 +1529,23 @@ DELETE FROM eh_service_module_scopes WHERE module_id in (70000,70100,70200);
 
 UPDATE `eh_launch_pad_items` SET `action_data` = '{"displayType":"grid","type":212481,"parentId":212481}' WHERE id in (119001,119002) and namespace_id = 999971;
 
+-- 光大we谷 6 个 icon 需配成“功能开发中”页面 by R 20170909
+SELECT * FROM eh_launch_pad_items WHERE item_label in ('生活用品','办公用品') AND namespace_id=999979 AND item_group='shangcheng';
+SELECT * FROM eh_launch_pad_items WHERE item_label in ('共享汽车','中港直通车','银行排号','园区美食') AND namespace_id=999979 AND item_group='peitao';
+
+UPDATE eh_launch_pad_items SET action_data = '{"url":"https:\/\/www.zuolin.com\/mobile\/static\/coming_soon\/index.html"}' WHERE item_label in ('生活用品','办公用品') AND namespace_id=999979 AND item_group='shangcheng';
+UPDATE eh_launch_pad_items SET action_data = '{"url":"https:\/\/www.zuolin.com\/mobile\/static\/coming_soon\/index.html"}' WHERE item_label in ('共享汽车','中港直通车','银行排号','园区美食') AND namespace_id=999979 AND item_group='peitao';
+
+-- 深圳湾修改"企业目录"为"企业名录" by R 20170909
+SELECT * FROM eh_launch_pad_items WHERE item_label='企业目录' AND namespace_id=999966 AND item_group='Bizs';
+
+UPDATE eh_launch_pad_items SET item_name='企业名录',item_label='企业名录' WHERE item_label='企业目录' AND namespace_id=999966 AND item_group='Bizs';
+
+-- 园区入驻3.5 add by sw 20170911
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+			VALUES ('apply.entry.lease.building.detail.url', '/park-entry/dist/index.html?hideNavigationBar=1#/building_detail/%s', '', '0', NULL);
+update eh_configurations set value = '/park-entry/dist/index.html?hideNavigationBar=1#/old_building_detail/%s' where name = 'apply.entry.building.detail.url';
+
+-- by dengs, 修改园区简介
+set @homeurl = (select VALUE from eh_configurations WHERE NAME = 'home.url' LIMIT 1);
+update eh_launch_pad_items SET action_data = CONCAT('{"url":"',@homeurl,'/park-introduction/index.html?hideNavigationBar=1#/#sign_suffix"}') where item_label  in ('园区简介','园区介绍');

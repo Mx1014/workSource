@@ -48,10 +48,6 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-	@Autowired
-    private ConfigurationProvider configProvider;
-	@Autowired
-	private LocaleTemplateService localeTemplateService;
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
