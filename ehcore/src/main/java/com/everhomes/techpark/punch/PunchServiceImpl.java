@@ -6787,6 +6787,7 @@ public class PunchServiceImpl implements PunchService {
 					}
 					punchLog.setRuleTime(process24hourTimeToGMTTime(punchTime, punchLog.getRuleTime()));
 					response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
+					response.setClockStatus(punchLog.getClockStatus());
 				}
 				response.setPunchDate(pDate.getTime());
 			}
