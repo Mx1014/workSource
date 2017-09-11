@@ -14,14 +14,15 @@ import java.util.List;
  */
 public class GetArchivesEmployeeResponse {
 
-//    private GeneralFormDTO form;
+    private GeneralFormDTO form;
 
-    @ItemType(PostApprovalFormItem.class)
-    List<PostApprovalFormItem> form;
+/*    @ItemType(PostApprovalFormItem.class)
+    List<PostApprovalFormItem> form;*/
 
     public GetArchivesEmployeeResponse() {
     }
 
+/*
     public List<PostApprovalFormItem> getForm() {
         return form;
     }
@@ -29,14 +30,15 @@ public class GetArchivesEmployeeResponse {
     public void setForm(List<PostApprovalFormItem> form) {
         this.form = form;
     }
+*/
 
-    /*    public GeneralFormDTO getForm() {
+    public GeneralFormDTO getForm() {
         return form;
     }
 
     public void setForm(GeneralFormDTO form) {
         this.form = form;
-    }*/
+    }
 
     @Override
     public String toString() {
