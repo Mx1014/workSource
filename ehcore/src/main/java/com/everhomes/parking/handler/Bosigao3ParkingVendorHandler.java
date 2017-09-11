@@ -30,11 +30,6 @@ import com.everhomes.util.RuntimeErrorException;
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO3")
 public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Bosigao3ParkingVendorHandler.class);
-
-	@Autowired
-	private ParkingProvider parkingProvider;
-	@Autowired
-    private ConfigurationProvider configProvider;
 	
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {

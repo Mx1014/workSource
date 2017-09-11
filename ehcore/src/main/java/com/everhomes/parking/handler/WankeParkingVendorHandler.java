@@ -38,11 +38,6 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final String GET_TYPES = "/Parking/GetMonthCardList";
 	private static final String GET_TEMP_FEE = "/Parking/GetCost";
 	private static final String PAY_TEMP_FEE = "/Parking/PayCost";
-
-	@Autowired
-	private ParkingProvider parkingProvider;
-	@Autowired
-    private ConfigurationProvider configProvider;
 	
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {

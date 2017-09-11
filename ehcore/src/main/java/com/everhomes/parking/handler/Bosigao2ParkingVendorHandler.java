@@ -52,11 +52,6 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 	
 	private static final String FLAG2 = "2"; //2:车牌
 	
-	@Autowired
-	private ParkingProvider parkingProvider;
-	@Autowired
-    private ConfigurationProvider configProvider;
-	
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
