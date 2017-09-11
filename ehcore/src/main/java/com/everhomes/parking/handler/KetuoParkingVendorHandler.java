@@ -301,7 +301,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		return false;
 	}
 
-	public String post(JSONObject param, String type) {
+	protected String post(JSONObject param, String type) {
 
 		KetuoRequestConfig config = getKetuoRequestConfig();
 		String url = config.getUrl() + type;

@@ -110,17 +110,6 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         parkingProvider.deleteParkingRechargeRate(rate);
     }
 
-    @Override
-    public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-        ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
-        if(null == rate) {
-            LOGGER.error("Rate not found, cmd={}", order);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Rate not found.");
-        }
-        order.setRateName(rate.getRateName());
-    }
-
     void updateFlowStatus(ParkingRechargeOrder order) {
         User user = UserContext.current().getUser();
         LOGGER.debug("ParkingCardRequest pay callback user={}", user);

@@ -130,7 +130,18 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 			return rechargeMonthlyCard(order);
 		return payTempCardFee(order);
     }
-    
+
+	@Override
+	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
+		if(null == rate) {
+			LOGGER.error("Rate not found, cmd={}", order);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Rate not found.");
+		}
+		order.setRateName(rate.getRateName());
+	}
+
     private void checkExpireDateIsNull(String expireDate,String plateNo) {
 		if(StringUtils.isBlank(expireDate)){
 			LOGGER.error("ExpireDate is null, plateNo={}", plateNo);

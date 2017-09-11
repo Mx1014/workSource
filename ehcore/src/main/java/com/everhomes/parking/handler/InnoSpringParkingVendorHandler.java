@@ -107,6 +107,11 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 		return result;
     }
 
+	@Override
+	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+
+	}
+
 	private String getLocale() {
 		User user = UserContext.current().getUser();
 		if(user != null && user.getLocale() != null)
