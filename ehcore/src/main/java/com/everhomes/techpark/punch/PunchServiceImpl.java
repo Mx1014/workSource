@@ -7248,11 +7248,14 @@ public class PunchServiceImpl implements PunchService {
 			if(null == onDutyPunch){
 				result.setPunchType(PunchType.ON_DUTY.getCode());
 				result.setRuleTime(ptr.getStartEarlyTimeLong());
-				if(punchTimeLong < ptr.getStartLateTimeLong())
+				if(punchTimeLong < ptr.getStartLateTimeLong()){
 					result.setClockStatus(PunchStatus.NORMAL.getCode());
-				else
+					result.setExpiryTime(ptr.getStartLateTimeLong());
+				}
+				else {
 					result.setClockStatus(PunchStatus.BELATE.getCode());
-				result.setExpiryTime(findSmallOne(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS),ptr.getDaySplitTimeLong()));
+					result.setExpiryTime(findSmallOne(ptr.getStartLateTimeLong() + ptr.getWorkTimeLong() + timeIsNull(ptr.getEndPunchTime(), ONE_DAY_MS), ptr.getDaySplitTimeLong()));
+				}
 				result.setPunchNormalTime(ptr.getStartLateTimeLong());
 				return result ;
 			}
