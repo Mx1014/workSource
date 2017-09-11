@@ -1550,23 +1550,30 @@ public class ForumServiceImpl implements ForumService {
                 }
             }
 
-            //加上当前园区的communitId和forumId  add by yanjun 20170911
-            OrganizationCommunityRequest OrganizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationId);
-            if(OrganizationCommunityRequest != null){
-                communityIds.add(OrganizationCommunityRequest.getCommunityId());
-                Community community = communityProvider.findCommunityById(OrganizationCommunityRequest.getCommunityId());
-                if(community != null){
-                    forumIds.add(community.getDefaultForumId());
+
+            // 因为左邻管理后台的原因
+            // 左邻0域空间只传一个organizationId则只查organization和organization所在园区，
+            // 其他情况下沿用原来的逻辑查organization和底下管理的园区   add by yanjun 20170911
+            Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+            if(currentNamespaceId != null && currentNamespaceId == 0){
+                OrganizationCommunityRequest OrganizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationId);
+                if(OrganizationCommunityRequest != null){
+                    communityIds.add(OrganizationCommunityRequest.getCommunityId());
+                    Community community = communityProvider.findCommunityById(OrganizationCommunityRequest.getCommunityId());
+                    if(community != null){
+                        forumIds.add(community.getDefaultForumId());
+                    }
+                }
+            }else {
+                List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
+                if(null != communities){
+                    for (CommunityDTO communityDTO : communities) {
+                        communityIds.add(communityDTO.getId());
+                        forumIds.add(communityDTO.getDefaultForumId());
+                    }
                 }
             }
 
-            List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
-            if(null != communities){
-                for (CommunityDTO communityDTO : communities) {
-                    communityIds.add(communityDTO.getId());
-                    forumIds.add(communityDTO.getDefaultForumId());
-                }
-            }
         }else if(namespaceId != null && namespaceId != 0){
             //0域空间有25万园区，直接会把系统搞挂了  add by yanjun 20170906
             ListingLocator locator = new CrossShardListingLocator();
