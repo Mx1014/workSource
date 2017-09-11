@@ -2574,7 +2574,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private void createPunchStatisticsBookSheetHead(Sheet sheet ){
-		Row row = sheet.createRow(sheet.getLastRowNum());
+		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int i =-1 ;
 
 		row.createCell(++i).setCellValue("时间");
@@ -2657,7 +2657,7 @@ public class PunchServiceImpl implements PunchService {
 		XSSFCellStyle titleStyle1 = wb.createCellStyle();
 
 		XSSFRow rowReminder = sheet.createRow(1);
-		rowReminder.createCell(0).setCellValue("统计时间:"+dateSF.get().format(new Date(cmd.getStartDay())) +"~"
+		rowReminder.createCell(0).setCellValue("统计时间:"+dateSF.get().format(new Date(cmd.getStartDay())) +" ~ "
 				+dateSF.get().format(new Date(cmd.getEndDay())));
 		rowReminder.setRowStyle(titleStyle1);
 		this.createPunchStatisticsBookSheetHead(sheet );
