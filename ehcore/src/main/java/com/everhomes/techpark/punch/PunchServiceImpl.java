@@ -6788,9 +6788,9 @@ public class PunchServiceImpl implements PunchService {
 				java.sql.Date pDate = calculatePunchDate(punCalendar, cmd.getEnterpriseId(), userId);
 				PunchLogDTO punchLog = getPunchType(userId, cmd.getEnterpriseId(), punchTime, pDate);
 				if (null != punchLog) {
-					if (null != punchLog.getExpiryTime()) {
-						punchLog.setExpiryTime(process24hourTimeToGMTTime(punchTime, punchLog.getExpiryTime()));
-					}
+//					if (null != punchLog.getExpiryTime()) {
+//						punchLog.setExpiryTime(process24hourTimeToGMTTime(punchTime, punchLog.getExpiryTime()));
+//					}
 					punchLog.setRuleTime(process24hourTimeToGMTTime(punchTime, punchLog.getRuleTime()));
 					response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
 					response.setClockStatus(punchLog.getClockStatus());
