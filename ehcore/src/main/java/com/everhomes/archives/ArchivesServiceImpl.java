@@ -534,17 +534,19 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     private ArchivesContactDTO convertArchivesContactForExcel(ArchivesContactDTO dto) {
 
-        if (dto.getGender().equals(UserGender.MALE.getCode()))
+        if (StringUtils.isEmpty(dto.getGender()))
+            dto.setGenderString("");
+        else if (dto.getGender().equals(UserGender.MALE.getCode()))
             dto.setGenderString("男");
         else
             dto.setGenderString("女");
 
-        if (dto.getDepartments()!=null && dto.getDepartments().size()>0){
-            String departmentString ="";
-            for(OrganizationDTO depDTO: dto.getDepartments()){
+        if (dto.getDepartments() != null && dto.getDepartments().size() > 0) {
+            String departmentString = "";
+            for (OrganizationDTO depDTO : dto.getDepartments()) {
                 departmentString += depDTO.getName() + ",";
             }
-            departmentString = departmentString.substring(0,departmentString.length()-1);
+            departmentString = departmentString.substring(0, departmentString.length() - 1);
             dto.setDepartmentString(departmentString);
         }
         //  TODO:岗位的导出
