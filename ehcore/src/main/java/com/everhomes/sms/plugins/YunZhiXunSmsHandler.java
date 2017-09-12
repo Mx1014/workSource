@@ -234,6 +234,13 @@ public class YunZhiXunSmsHandler implements SmsHandler {
             YzxSmsResult res = (YzxSmsResult) StringHelper.fromJsonString(rspMessage.getMessage(), YzxSmsResult.class);
             for (String phoneNumber : phoneNumbers) {
                 SmsLog log = new SmsLog();
+                if ("000000".equals(res.resp.respCode)) {
+                    log.setSmsId(res.resp.templateSMS.smsId);
+                    log.setStatus(SmsLogStatus.SEND_SUCCESS.getCode());
+                } else {
+                    log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
+                }
+
                 log.setCreateTime(new Timestamp(System.currentTimeMillis()));
                 log.setNamespaceId(namespaceId);
                 log.setScope(templateScope);
@@ -243,13 +250,7 @@ public class YunZhiXunSmsHandler implements SmsHandler {
                 log.setResult(rspMessage.getMessage());
                 log.setHandler(YUN_ZHI_XUN_HANDLER_NAME);
                 log.setText(variables);
-                log.setSmsId(res.resp.templateSMS.smsId);
 
-                if ("000000".equals(res.resp.respCode)) {
-                    log.setStatus(SmsLogStatus.SEND_SUCCESS.getCode());
-                } else {
-                    log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
-                }
                 smsLogs.add(log);
             }
         }

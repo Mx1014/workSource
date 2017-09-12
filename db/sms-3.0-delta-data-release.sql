@@ -3,26 +3,26 @@
 --
 SET @configurations_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`), 1);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
-	VALUES ((@configurations_id := @configurations_id + 1), 'sms.lxt.server', '', '联信通server', 0, NULL);
+	VALUES ((@configurations_id := @configurations_id + 1), 'sms.LianXinTong.server', '', '联信通server', 0, NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
-	VALUES ((@configurations_id := @configurations_id + 1), 'sms.lxt.spId', '', '联信通账户', 0, NULL);
+	VALUES ((@configurations_id := @configurations_id + 1), 'sms.LianXinTong.spId', '', '联信通账户', 0, NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
-	VALUES ((@configurations_id := @configurations_id + 1), 'sms.lxt.authCode', '', '联信通密码', 0, NULL);
+	VALUES ((@configurations_id := @configurations_id + 1), 'sms.LianXinTong.authCode', '', '联信通密码', 0, NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
-	VALUES ((@configurations_id := @configurations_id + 1), 'sms.lxt.srcId', '', '联信通srcId', 0, NULL);
+	VALUES ((@configurations_id := @configurations_id + 1), 'sms.LianXinTong.srcId', '', '联信通srcId', 0, NULL);
 
 --
 -- 优讯通
 --
 SET @configurations_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`), 1);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
-	VALUES ((@configurations_id := @configurations_id + 1), 'sms.yxt.server', '', '优讯通server', 0, NULL);
+	VALUES ((@configurations_id := @configurations_id + 1), 'sms.YouXunTong.server', 'http://new.yxuntong.com/emmpdata/sms/Submit', '优讯通server', 0, NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
-	VALUES ((@configurations_id := @configurations_id + 1), 'sms.yxt.accountName', '', '优讯通账户', 0, NULL);
+	VALUES ((@configurations_id := @configurations_id + 1), 'sms.YouXunTong.accountName', '2002467', '优讯通账户', 0, NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
-	VALUES ((@configurations_id := @configurations_id + 1), 'sms.yxt.password', '', '优讯通密码', 0, NULL);
+	VALUES ((@configurations_id := @configurations_id + 1), 'sms.YouXunTong.password', '(Un"|71#', '优讯通密码', 0, NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
-	VALUES ((@configurations_id := @configurations_id + 1), 'sms.yxt.token', '', '优讯通token', 0, NULL);
+	VALUES ((@configurations_id := @configurations_id + 1), 'sms.YouXunTong.token', '', '优讯通token', 0, NULL);
 
 --
 -- 短信签名

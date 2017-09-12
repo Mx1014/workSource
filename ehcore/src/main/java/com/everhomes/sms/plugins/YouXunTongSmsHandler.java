@@ -34,10 +34,10 @@ public class YouXunTongSmsHandler implements SmsHandler {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(YouXunTongSmsHandler.class);
 
-    private static final String YXT_USER_NAME = "sms.yxt.accountName";
-    private static final String YXT_PASSWORD = "sms.yxt.password";
-    private static final String YXT_SERVER = "sms.yxt.server";
-    private static final String YXT_TOKEN = "sms.yxt.token";
+    private static final String YXT_USER_NAME = "sms.YouXunTong.accountName";
+    private static final String YXT_PASSWORD = "sms.YouXunTong.password";
+    private static final String YXT_SERVER = "sms.YouXunTong.server";
+    private static final String YXT_TOKEN = "sms.YouXunTong.token";
 
     private static final int MAX_LIMIT = 100;
 
@@ -74,11 +74,16 @@ public class YouXunTongSmsHandler implements SmsHandler {
     private RspMessage createAndSend(Map<String, String> message) {
         SmsChannel channel = SmsBuilder.create(false);
 
+        message.put("account", userName);
+        message.put("password", MD5Encode(password));
+
         Map<String, String> params = new HashMap<>();
-        params.put("message", StringHelper.toJsonString(message));
-        // params.put("sid", sid);
+        String jsonMsg = StringHelper.toJsonString(message);
+        params.put("message", jsonMsg);
         params.put("type", "json");
 
+        String sid= SHA1Encode((token+"&"+ jsonMsg));
+        params.put("sid", sid);
         return channel.sendMessage(server, SmsBuilder.HttpMethod.POST.val(), params, null, null);
     }
 
@@ -127,8 +132,6 @@ public class YouXunTongSmsHandler implements SmsHandler {
                 System.arraycopy(phoneNumbers, i, phonesPart, 0, length);
 
                 Map<String, String> message = new HashMap<>();
-                message.put("account", userName);
-                message.put("password", MD5Encode(password));
                 message.put("phones", StringUtils.join(phonesPart, ","));
                 message.put("content", content);
                 message.put("sign", sign.getText());
@@ -226,6 +229,16 @@ public class YouXunTongSmsHandler implements SmsHandler {
             resultString = byte2hexString(md.digest(resultString.getBytes()));
         } catch (Exception ignored) { }
         return resultString;
+    }
+
+    private static String SHA1Encode(String sourceString) {
+        String resultString = null;
+        try {
+            resultString = sourceString;
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            resultString = byte2hexString(md.digest(resultString.getBytes("utf-8")));
+        } catch (Exception ignored) { }
+        return resultString.toUpperCase();
     }
 
     private static String byte2hexString(byte[] bytes) {

@@ -67,7 +67,6 @@ public class SmsProviderImpl implements SmsProvider {
         String[] handlerNames = handlerStr.split(",");
 
         String selectedHandlerName = null;
-        SmsLogStatus selectedStatus = null;
 
         Map<String, SmsLog> handlerToSmsLogMap = smsLogProvider.findLastLogByMobile(namespaceId, phoneNumber, handlerNames);
         if (handlerToSmsLogMap != null) {
@@ -77,6 +76,7 @@ public class SmsProviderImpl implements SmsProvider {
                     if (!sendHandlers.contains(handlerName)) {
                         SmsLog smsLog = new SmsLog();
                         smsLog.setStatus(SmsLogStatus.UNKNOWN.getCode());
+                        smsLog.setHandler(handlerName);
                         handlerToSmsLogMap.put(handlerName, smsLog);
                     }
                 }
@@ -96,7 +96,12 @@ public class SmsProviderImpl implements SmsProvider {
 
             SmsLogStatus status = SmsLogStatus.fromCode(smsLog.getStatus());
             if (status == expectStatus) {
-                if (smsLog.getCreateTime() != null && (System.currentTimeMillis() - smsLog.getCreateTime().getTime()) > 3 * 60 * 1000) {
+                if (smsLog.getCreateTime() != null) {
+                    if ((System.currentTimeMillis() - smsLog.getCreateTime().getTime()) > 3 * 60 * 1000) {
+                        selectedHandlerName = smsLog.getHandler();
+                        break;
+                    }
+                } else {
                     selectedHandlerName = smsLog.getHandler();
                     break;
                 }

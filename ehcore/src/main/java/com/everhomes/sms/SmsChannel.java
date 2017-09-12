@@ -19,6 +19,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -74,7 +75,7 @@ public class SmsChannel {
                     }
                     if (request instanceof HttpEntityEnclosingRequest) {
                         HttpEntityEnclosingRequest req = (HttpEntityEnclosingRequest) request;
-                        logger.debug("send sms request entity = {} ", EntityUtils.toString(req.getEntity()));
+                        logger.debug("send sms request entity = {} ", EntityUtils.toString(req.getEntity(), Charset.forName("utf-8")));
                     }
                 } catch (IOException | ParseException e) {
                     e.printStackTrace();
@@ -144,19 +145,18 @@ public class SmsChannel {
 
     private HttpUriRequest createRequest(String url, String method, Map<String, String> body,String entityJsonStr) {
         RequestBuilder rbudiler = RequestBuilder.create(method);
-        this.headers.forEach((key, val) -> {
-            rbudiler.addHeader(key, val);
-        });
+        this.headers.forEach(rbudiler::addHeader);
         // assert entityBuilder has some value
         HttpEntity  httpEntity = null;
         EntityBuilder entityBuilder = null;
         if (MapUtils.isNotEmpty(body)) {
             entityBuilder = EntityBuilder.create();
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            List<NameValuePair> params = new ArrayList<>();
             body.forEach((jsonKey, jsonVal) -> {
                 params.add(new BasicNameValuePair(jsonKey, jsonVal));
             });
             entityBuilder.setParameters(params);
+            entityBuilder.setContentType(ContentType.APPLICATION_FORM_URLENCODED.withCharset("utf-8"));
             httpEntity = entityBuilder.build();
         }
         if (entityBuilder == null && entityJsonStr == null) {

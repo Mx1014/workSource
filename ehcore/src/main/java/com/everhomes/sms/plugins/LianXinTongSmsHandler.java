@@ -28,10 +28,10 @@ public class LianXinTongSmsHandler implements SmsHandler {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(LianXinTongSmsHandler.class);
 
-    private static final String LXT_SERVER = "sms.lxt.server";
-    private static final String LXT_SP_ID = "sms.lxt.spId";
-    private static final String LXT_AUTH_CODE = "sms.lxt.authCode";
-    private static final String LXT_SRC_ID = "sms.lxt.srcId";
+    private static final String LXT_SERVER = "sms.LianXinTong.server";
+    private static final String LXT_SP_ID = "sms.LianXinTong.spId";
+    private static final String LXT_AUTH_CODE = "sms.LianXinTong.authCode";
+    private static final String LXT_SRC_ID = "sms.LianXinTong.srcId";
 
     private String spId;
     private String authCode;

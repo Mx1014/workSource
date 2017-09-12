@@ -67,8 +67,8 @@ public class SmsLogProviderImpl implements SmsLogProvider {
         com.everhomes.server.schema.tables.EhSmsLogs t = Tables.EH_SMS_LOGS;
 
         Table<EhSmsLogsRecord> subT = context.selectFrom(t)
-                .where(t.NAMESPACE_ID.eq(namespaceId))
-                .and(t.MOBILE.eq(mobile))
+                // .where(t.NAMESPACE_ID.eq(namespaceId))
+                .where(t.MOBILE.eq(mobile))
                 .and(t.HANDLER.in(handlerNames))
                 .orderBy(t.ID.desc()).asTable();
 
