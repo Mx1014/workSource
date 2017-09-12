@@ -6394,11 +6394,14 @@ public class PunchServiceImpl implements PunchService {
 			nextPageAnchor = organizations.get(organizations.size() - 1).getId();
 		}
 		response.setNextPageAnchor(nextPageAnchor);
-        List<PunchGroupDTO> punchGroups = organizations.stream().map(r -> {
-        	PunchGroupDTO dto = getPunchGroupDTOByOrg(r);
-            return dto;
-        }).collect(Collectors.toList());
-        response.setPunchGroups(punchGroups);
+		List<PunchGroupDTO> punchGroups = new ArrayList<>();
+		for (Organization r : organizations) {
+			PunchGroupDTO dto = getPunchGroupDTOByOrg(r);
+			if (null != dto) {
+				punchGroups.add(dto);
+			}
+		}
+		response.setPunchGroups(punchGroups);
 		return response;
 	}
 	private PunchGroupDTO getPunchGroupDTOByOrg(Organization r) {
