@@ -44,6 +44,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.forum.Post;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
@@ -51,6 +52,8 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.reserver.ReserverEntity;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.comment.OwnerTokenDTO;
+import com.everhomes.rest.comment.OwnerType;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.servicehotline.GetHotlineListCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListResponse;
@@ -89,6 +92,7 @@ import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceDisplayModeDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceListResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceLocalStringCode;
+import com.everhomes.rest.yellowPage.ServiceAllianceOwnerType;
 import com.everhomes.rest.yellowPage.ServiceAllianceSourceRequestType;
 import com.everhomes.rest.yellowPage.SetNotifyTargetStatusCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
@@ -117,6 +121,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.WebTokenGenerator;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -169,6 +174,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Autowired
 	private GeneralApprovalProvider generalApprovalProvider;
+	
+	@Autowired
+	private ServiceAllianceCommentProvider commentProvider;
 
 	private void populateYellowPage(YellowPage yellowPage) { 
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -858,11 +866,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 			processServiceUrl(dto);
 			this.processDetailUrl(dto);
-//			dto.setDisplayName(serviceAlliance.getNickName());
+			this.processCommentToken(dto);
 			response.getDtos().add(dto);
 
         }
-
+        this.processCommentCount(response.getDtos());
         this.processRange(response.getDtos());
 
 		long time6 = System.currentTimeMillis();
@@ -873,7 +881,30 @@ public class YellowPageServiceImpl implements YellowPageService {
 		return response;
 	}
 
-	private  void processRange(List<ServiceAllianceDTO> dtos){
+	//根据服务联盟机构id，产生评论使用的token
+	private void processCommentToken(ServiceAllianceDTO dto) {
+        OwnerTokenDTO ownerTokenDto = new OwnerTokenDTO();
+        ownerTokenDto.setId(dto.getId());
+        ownerTokenDto.setType(OwnerType.SERVICEALLIANCE.getCode());
+        String ownerTokenStr = WebTokenGenerator.getInstance().toWebToken(ownerTokenDto);
+        dto.setCommentToken(ownerTokenStr);
+	}
+
+	//查询服务联盟的机构评论的数量。
+	private void processCommentCount(List<ServiceAllianceDTO> dtos) {
+		List<Long> ownerIds = dtos.stream().map(r->r.getId()).collect(Collectors.toList());
+		Map<String,Integer> mapcounts = commentProvider.listServiceAllianceCommentCountByOwner(UserContext.getCurrentNamespaceId(), ServiceAllianceOwnerType.SERVICE_ALLIANCE.getCode(), ownerIds);
+		for (ServiceAllianceDTO dto : dtos) {
+			String key = String.valueOf(dto.getId());
+			if(mapcounts.get(key)!=null){
+				dto.setCommentCount(mapcounts.get(key));
+			}else{
+				dto.setCommentCount(0);
+			}
+		}
+	}
+
+	private void processRange(List<ServiceAllianceDTO> dtos){
 		for (ServiceAllianceDTO dto:dtos){
 			String range = dto.getRange();
 			if (range!=null && !range.equals("all")){

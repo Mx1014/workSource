@@ -49,6 +49,7 @@ import java.util.List;
  *  <li>defaultOrder : 排序序号</li>
  *  <li>commentCount : 评论数量</li>
  *  <li>commentToken : 评论token，评论当前机构需要使用此参数。</li>
+ *  <li>summaryDescription : 概要描述字段。</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -139,6 +140,8 @@ public class ServiceAllianceDTO {
 	private Integer commentCount;
 	
 	private String commentToken;
+	
+	private String summaryDescription;
 	
 	public String getCommentToken() {
 		return commentToken;
@@ -428,6 +431,14 @@ public class ServiceAllianceDTO {
 
 	public void setCommentCount(Integer commentCount) {
 		this.commentCount = commentCount;
+	}
+
+	public String getSummaryDescription() {
+		return summaryDescription;
+	}
+
+	public void setSummaryDescription(String summaryDescription) {
+		this.summaryDescription = summaryDescription;
 	}
 
 	@Override

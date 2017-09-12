@@ -9,4 +9,5 @@ package com.everhomes.rest.comment;
 public interface OwnerTypeConstants {
     public static final long FORUM = 1;
     public static final long NEWS = 2;
+    public static final long SERVICEALLIANCE = 3;
 }
