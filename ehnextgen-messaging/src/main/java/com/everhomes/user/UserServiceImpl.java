@@ -803,12 +803,12 @@ public class UserServiceImpl implements UserService {
 		String deviceIdentifier = cmd.getDeviceIdentifier();
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
-//		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, signupToken.getIdentifierToken());
-//
-//		if(null != userIdentifier){
-//			LOGGER.error("The identify token has been registered, signupToken = {}, cmd = {}", signupToken, cmd);
-//			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFY_TOKEN_REGISTERED, "The identify token has been registered");
-//		}
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, signupToken.getIdentifierToken());
+
+		if(null != userIdentifier){
+			LOGGER.error("The identify token has been registered, signupToken = {}, cmd = {}", signupToken, cmd);
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFY_TOKEN_REGISTERED, "The identify token has been registered");
+		}
 
 		UserIdentifier identifier = this.findIdentifierByToken(namespaceId, signupToken);
 		if(identifier == null) {
@@ -824,11 +824,12 @@ public class UserServiceImpl implements UserService {
 
 			UserLogin rLogin = this.dbProvider.execute((TransactionStatus status)-> {
 				if(identifier.getClaimStatus() == IdentifierClaimStatus.VERIFYING.getCode()) {
-					UserIdentifier existingClaimedIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, identifier.getIdentifierToken());
-					if(existingClaimedIdentifier != null) {
-						existingClaimedIdentifier.setClaimStatus(IdentifierClaimStatus.TAKEN_OVER.getCode());
-						this.userProvider.updateIdentifier(existingClaimedIdentifier);
-					}
+					//覆盖账号流程没有闭环，暂时注释掉
+//					UserIdentifier existingClaimedIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, identifier.getIdentifierToken());
+//					if(existingClaimedIdentifier != null) {
+//						existingClaimedIdentifier.setClaimStatus(IdentifierClaimStatus.TAKEN_OVER.getCode());
+//						this.userProvider.updateIdentifier(existingClaimedIdentifier);
+//					}
 
 					identifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
 					this.userProvider.updateIdentifier(identifier);
@@ -857,10 +858,10 @@ public class UserServiceImpl implements UserService {
 				UserLogin login = createLogin(namespaceId, user, deviceIdentifier, cmd.getPusherIdentify());
 				login.setStatus(UserLoginStatus.LOGGED_IN);
 				UserIdentifier uIdentifier = userProvider.findClaimedIdentifierByTokenAndNotUserId(namespaceId, identifier.getIdentifierToken(), identifier.getOwnerUid());
-//				if(null != uIdentifier){
-//					LOGGER.error("The identify token has been registered, signupToken = {}, cmd = {}", signupToken, cmd);
-//					throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFY_TOKEN_REGISTERED, "The identify token has been registered");
-//				}
+				if(null != uIdentifier){
+					LOGGER.error("The identify token has been registered, signupToken = {}, cmd = {}", signupToken, cmd);
+					throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFY_TOKEN_REGISTERED, "The identify token has been registered");
+				}
 				return login;
 			});
 

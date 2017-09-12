@@ -124,12 +124,6 @@ public interface RolePrivilegeService {
 	ListOrganizationMemberCommandResponse listOrganizationAdministrators(ListOrganizationAdministratorCommand cmd);
 	
 	/**
-	 * 删除管理员
-	 * @param cmd
-	 */
-	void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd);
-	
-	/**
 	 * 删除角色人员
 	 * @param cmd
 	 */
