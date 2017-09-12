@@ -373,7 +373,7 @@ public class AclAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/acl/createOrganizationSuperAdmins </b>
+     * <b>URL: /admin/acl/createOrganizationSuperAdmins</b>
      * <p>批量创建超级管理员</p>
      */
     @RequestMapping("createOrganizationSuperAdmins")
@@ -388,8 +388,8 @@ public class AclAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/acl/transferOrganizationSuperAdmin </b>
-     * <p>创建超级管理员</p>
+     * <b>URL: /admin/acl/transferOrganizationSuperAdmin</b>
+     * <p>移交管理员权限</p>
      */
     @RequestMapping("transferOrganizationSuperAdmin")
     @RestReturn(value=String.class)
