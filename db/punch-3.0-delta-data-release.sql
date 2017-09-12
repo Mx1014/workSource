@@ -33,7 +33,7 @@ SET @id =(SELECT MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'punch.status','17','zh_CN','非工作日');
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'punch.message','6','zh_CN','休息时间'); 
 
-UPDATE eh_locale_strings SET TEXT = '缺卡' WHERE scope = 'punch.status' AND  CODE = '17' ;
+UPDATE eh_locale_strings SET TEXT = '缺卡' WHERE scope = 'punch.status' AND  CODE = '14' ;
 
 -- 更改工作流显示
 UPDATE eh_locale_templates SET TEXT = '异常日期：${exceptionDate}
