@@ -802,8 +802,8 @@ public class PunchServiceImpl implements PunchService {
                 }
 
             }
-        }
-        pdl.setStatusList(statusList);
+			pdl.setStatusList(statusList);
+		}
         return  pdl;
     }
 
