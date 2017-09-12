@@ -406,4 +406,6 @@ public interface RolePrivilegeService {
 
 	//	批量增加管理员 added by R 20170912.
 	void createOrganizationSuperAdmins(CreateOrganizationAdminsCommand cmd);
+	//	移交管理员权限 added by R 20170912.
+    void transferOrganizationSuperAdmin(TransferOrganizationSuperAdminCommand cmd);
 }

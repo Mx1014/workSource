@@ -374,13 +374,28 @@ public class AclAdminController extends ControllerBase {
 
     /**
      * <b>URL: /admin/acl/createOrganizationSuperAdmins </b>
-     * <p>创建超级管理员</p>
+     * <p>批量创建超级管理员</p>
      */
     @RequestMapping("createOrganizationSuperAdmins")
     @RestReturn(value=String.class)
     public RestResponse createOrganizationSuperAdmins(@Valid CreateOrganizationAdminsCommand cmd) {
         rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
         rolePrivilegeService.createOrganizationSuperAdmins(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/acl/transferOrganizationSuperAdmin </b>
+     * <p>创建超级管理员</p>
+     */
+    @RequestMapping("transferOrganizationSuperAdmin")
+    @RestReturn(value=String.class)
+    public RestResponse transferOrganizationSuperAdmin(@Valid TransferOrganizationSuperAdminCommand cmd) {
+        rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
+        rolePrivilegeService.transferOrganizationSuperAdmin(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

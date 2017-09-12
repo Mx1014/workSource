@@ -3131,8 +3131,22 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	public void createOrganizationSuperAdmins(CreateOrganizationAdminsCommand cmd){
-
+		dbProvider.execute((TransactionStatus status) ->{
+			for(CreateOrganizationAdminCommand command : cmd.getCommands()){
+				createOrganizationAdmin(cmd.getOrganizationId(), command.getContactName(), command.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+			}
+			return null;
+		});
 	}
+
+	public void transferOrganizationSuperAdmin(TransferOrganizationSuperAdminCommand cmd){
+		dbProvider.execute((TransactionStatus status) ->{
+			deleteOrganizationAdmin(cmd.getOrganizationId(),cmd.getOriginalContactToken(),PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+			createOrganizationAdmin(cmd.getOrganizationId(),cmd.getNewContactName(),cmd.getNewContactToken(),PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+			return null;
+		});
+	}
+
 
 	public static void main(String[] args) {
 //		System.out.println(GeoHashUtils.encode(41.843665, 123.455102));

@@ -62,11 +62,9 @@ public class CreateOrganizationAdminCommand {
 		this.contactName = contactName;
 	}
 
-
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-    
 }
