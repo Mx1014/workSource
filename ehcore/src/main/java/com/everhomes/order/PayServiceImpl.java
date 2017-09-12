@@ -441,9 +441,9 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
         if(payMethods != null && payMethods.size() > 0){
             for(PayMethodDTO r : payMethods) {
-                PaymentExtendInfo extendInfo = new PaymentExtendInfo();
-                extendInfo.setGetOrderInfoUrl(getPayMethodExtendInfo());
-                r.setExtendInfo(extendInfo);
+//                PaymentExtendInfo extendInfo = new PaymentExtendInfo();
+//                extendInfo.setGetOrderInfoUrl(getPayMethodExtendInfo());
+                r.setExtendInfo(getPayMethodExtendInfo());
 
                 if(r.getPaymentParams() == null){
                     r.setPaymentParams(new PaymentParamsDTO());

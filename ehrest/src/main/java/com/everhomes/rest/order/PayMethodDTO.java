@@ -17,7 +17,7 @@ public class PayMethodDTO {
     private String paymentName;
     private String paymentLogo;
     private PaymentParamsDTO paymentParams;
-    private PaymentExtendInfo extendInfo;
+    private String extendInfo;
 
     public Integer getPaymentType() {
         return paymentType;
@@ -51,11 +51,11 @@ public class PayMethodDTO {
         this.paymentParams = paymentParams;
     }
 
-    public PaymentExtendInfo getExtendInfo() {
+    public String getExtendInfo() {
         return extendInfo;
     }
 
-    public void setExtendInfo(PaymentExtendInfo extendInfo) {
+    public void setExtendInfo(String extendInfo) {
         this.extendInfo = extendInfo;
     }
 
