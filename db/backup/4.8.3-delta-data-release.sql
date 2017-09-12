@@ -224,3 +224,26 @@ WHERE namespace_id = 1 AND name = 'ServiceMarketLayout';
 -- by dengs, 20170901 左邻域报错，修改
 SET @id = (SELECT MAX(id) FROM `eh_namespace_details`);
 INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) VALUES ((@id := @id + 1), '0', 'community_residential', NOW());
+
+-- 配置模块下的权限分类  add by sfyan 20170725
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(60110,'超级管理员',60100,'/60000/60100/60110','1','3','2','0',NOW(), 0, 0); 
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(60120,'模块管理员',60100,'/60000/60100/60120','1','3','2','0',NOW(), 0, 0); 
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(60210,'责任部门配置',60200,'/60000/60200/60210','1','3','2','0',NOW(), 0, 0);	
+
+update eh_service_modules set instance_config = '{"publishPrivilege":1,"livePrivilege":2,"listStyle":2,"scope":2,"style":4,"title": "白领活动"}' where id = 10600;
+update eh_service_modules set instance_config = '{"timeWidgetStyle":"date"}' where id = 10800;
+update eh_service_modules set instance_config = '{"pageType":0}' where id = 40400;
+update eh_service_modules set instance_config = '{"displayType":"grid","detailFlag":1}' where id = 40500;
+update eh_service_modules set multiple_flag = 0 where id = 10100;
+update eh_service_modules set multiple_flag = 0 where id = 20100;
+
+update eh_service_modules set action_type = 46 where id = 50400;
+update eh_service_modules set action_type = 54 where id = 52000;
+update eh_service_modules set action_type = 56 where id = 70100;
+update eh_service_modules set action_type = 62 where id = 10100;
+update eh_service_modules set action_type = 65 where id = 52000;
+
+
+

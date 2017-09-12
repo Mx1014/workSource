@@ -13,6 +13,8 @@ import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
 import com.everhomes.rest.techpark.expansion.LeasePromotionFormDataSourceType;
 import com.everhomes.util.ConvertHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +24,12 @@ import java.util.List;
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "EhLeasePromotions")
 public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApplyEntryFormHandler.class);
+
     @Autowired
     private EnterpriseApplyEntryService enterpriseApplyEntryService;
     @Autowired
     private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
-    @Autowired
-    private GeneralFormService generalFormService;
     @Autowired
     private GeneralFormProvider generalFormProvider;
 
@@ -35,18 +37,23 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
     public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
 
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASEPROMOTION.getCode());
+                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASE_PROMOTION.getCode());
 
-        Long requestFormId = null;
+        BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
+                GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
+        Long requestFormId;
         if (null == request) {
             //查询初始默认数据
-            BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
-                    GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
-
-            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
+            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASE_PROMOTION.getCode());
             requestFormId = form.getFormOriginId();
         }else {
-            requestFormId = request.getSourceId();
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(request.getSourceId());
+            if (form == null) {
+                GeneralForm defaultForm = handler.getDefaultGeneralForm(EntityType.LEASE_PROMOTION.getCode());
+                requestFormId = defaultForm.getFormOriginId();
+            }else {
+                requestFormId = request.getSourceId();
+            }
         }
         List<PostApprovalFormItem> values = cmd.getValues();
 
@@ -121,40 +128,36 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
 
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-        LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASEPROMOTION.getCode());
+//        LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+//                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASE_PROMOTION.getCode());
+//
+//        GeneralFormDTO dto;
 
-        GeneralFormDTO dto = null;
-        if (null != request) {
-            GetTemplateByFormIdCommand cmd2 = new GetTemplateByFormIdCommand();
-            cmd2.setFormId(request.getSourceId());
+        //查询初始默认数据
+        BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
+                GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
 
-            dto = generalFormService.getTemplateByFormId(cmd2);
-            List<GeneralFormFieldDTO> temp = dto.getFormFields();
+        return handler.getTemplateBySourceId(cmd);
 
-            //查询初始默认数据
-            BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
-                    GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
+//        GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASE_PROMOTION.getCode());
+//        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 
-            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
-            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+//        if (null != request) {
+//            try {
+//                GetTemplateByFormIdCommand cmd2 = new GetTemplateByFormIdCommand();
+//                cmd2.setFormId(request.getSourceId());
+//                dto = generalFormService.getTemplateByFormId(cmd2);
+//                fieldDTOs.addAll(dto.getFormFields());
+//            }catch (Exception e) {
+//                LOGGER.error("get Template By SourceId, cmd={}", cmd, e);
+//                dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+//            }
+//        } else {
+//            dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+//        }
+//        dto.setFormFields(fieldDTOs);
 
-            fieldDTOs.addAll(temp);
-            dto.setFormFields(fieldDTOs);
-        } else {
-            //查询初始默认数据
-            BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
-                    GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
-
-            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
-
-            dto = ConvertHelper.convert(form, GeneralFormDTO.class);
-            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-
-            dto.setFormFields(fieldDTOs);
-        }
-
-        return dto;
+//        return dto;
     }
 
 }

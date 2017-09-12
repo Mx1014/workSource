@@ -20,13 +20,13 @@ public interface EnterpriseApplyEntryProvider {
 	List<LeasePromotion> listLeasePromotions(LeasePromotion leasePromotion,
 			ListingLocator locator, int pageSize);
 
-	LeasePromotion createLeasePromotion(LeasePromotion leasePromotion);
+	void createLeasePromotion(LeasePromotion leasePromotion);
 	
 	LeasePromotion getLeasePromotionById(Long id);
 	
 	boolean updateLeasePromotion(LeasePromotion leasePromotion);
 	
-	boolean deleteLeasePromotionAttachment(Long leaseId);
+	boolean deleteLeasePromotionAttachment(String ownerTYpe, Long ownerId);
 	
 	boolean addPromotionAttachment(LeasePromotionAttachment attachment);
 	
@@ -48,7 +48,7 @@ public interface EnterpriseApplyEntryProvider {
 
 	void updateApplyEntry(EnterpriseOpRequest request);
 
-	List<LeasePromotionAttachment> getAttachmentsByLeaseId(Long leaseId);
+	List<LeasePromotionAttachment> findAttachmentsByOwnerTypeAndOwnerId(String ownerType, Long ownerId);
 
 	void deleteLeasePromotionByUidAndIssuerType(long id, String issuerType);
 

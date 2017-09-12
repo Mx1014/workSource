@@ -39,13 +39,15 @@ public class PortalLayoutProviderImpl1 implements PortalLayoutProvider {
 
             portalLayout.setName(layout.getName());
             String displayName = map.get("displayName");
-            displayName = processDisplayName(displayName, layout);
+            // displayName = processDisplayName(displayName, layout);
 
             portalLayout.setLabel(displayName);
             portalLayout.setDescription(layout.getName());
 
             portalLayout.setId(layout.getId());
             portalLayout.setStatus(status);
+
+            portalLayout.setSceneType(layout.getSceneType());
 
             portalLayoutList.add(portalLayout);
         }

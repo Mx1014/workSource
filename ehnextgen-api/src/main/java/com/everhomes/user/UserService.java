@@ -2,6 +2,7 @@
 package com.everhomes.user;
 
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -227,5 +228,19 @@ public interface UserService {
 
 	GetFamilyButtonStatusResponse getFamilyButtonStatus();
 
+
+    /**
+     *
+     */
+    List<String[]> listBuildingAndApartmentById(Long uid);
+    /**
+     * created by wentian
+     * 根据客户名和地址定位唯一用户
+     */
+    TargetDTO findTargetByNameAndAddress(String contractNum, String targetName , Long ownerId,String tel,String ownerType,String targetType);
+
+    Long getCommunityIdBySceneToken(SceneTokenDTO sceneTokenDTO);
+
     List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd);
+
 }

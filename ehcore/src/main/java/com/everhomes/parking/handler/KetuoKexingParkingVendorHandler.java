@@ -33,8 +33,6 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(KetuoKexingParkingVendorHandler.class);
 
 	@Autowired
-    private ConfigurationProvider configProvider;
-	@Autowired
 	private LocaleStringService localeStringService;
 
 	private static final String GET_PARKINGS = "/api/find/GetParkingLotList";

@@ -41,11 +41,6 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 	private static final String GET_TEMP_FEE = "70111005";
 	private static final String PAY_TEMP_FEE = "70111004";
 
-	@Autowired
-	private LocaleTemplateService localeTemplateService;
-	@Autowired
-    private ConfigurationProvider configProvider;
-
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
 
@@ -111,6 +106,11 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 
 		return result;
     }
+
+	@Override
+	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+
+	}
 
 	private String getLocale() {
 		User user = UserContext.current().getUser();
@@ -337,7 +337,7 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 		param.put("version", version);
 		param.put("licensekey", licensekey);
 	    param.put("car_id", order.getPlateNumber());
-	    param.put("amt", order.getPrice().setScale(2, RoundingMode.FLOOR));
+	    param.put("amt", order.getPrice().setScale(2, RoundingMode.HALF_UP));
 
 		JSONObject newParam = createRequestParam(PAY_TEMP_FEE, param);
 		String json = post(newParam);

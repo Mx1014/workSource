@@ -1,6 +1,56 @@
 // @formatter:off
 package com.everhomes.user;
 
+
+import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.everhomes.asset.AddressIdAndName;
+import com.everhomes.contract.ContractService;
+import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhGroupMemberLogs;
+import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.geo.GeoHashUtils;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
+
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.PortalRoleResolver;
 import com.everhomes.acl.Role;
@@ -101,50 +151,113 @@ import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.*;
-import com.everhomes.util.*;
-import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.geo.GeoHashUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+import com.everhomes.rest.ui.user.ContentBriefDTO;
+import com.everhomes.rest.ui.user.FamilyButtonStatusType;
+import com.everhomes.rest.ui.user.FormSourceDTO;
+import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
+import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
+import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.ListAuthFormsResponse;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
+import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
+import com.everhomes.rest.ui.user.SceneDTO;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
+import com.everhomes.rest.ui.user.SearchTypeDTO;
+import com.everhomes.rest.user.AssumePortalRoleCommand;
+import com.everhomes.rest.user.BorderListResponse;
+import com.everhomes.rest.user.CreateInvitationCommand;
+import com.everhomes.rest.user.CreateUserImpersonationCommand;
+import com.everhomes.rest.user.DeleteUserImpersonationCommand;
+import com.everhomes.rest.user.DeviceIdentifierType;
+import com.everhomes.rest.user.GetBizSignatureCommand;
+import com.everhomes.rest.user.GetMessageSessionInfoCommand;
+import com.everhomes.rest.user.GetSignatureCommandResponse;
+import com.everhomes.rest.user.GetUserInfoByIdCommand;
+import com.everhomes.rest.user.GetUserNotificationSettingCommand;
+import com.everhomes.rest.user.IdentifierClaimStatus;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.InitBizInfoCommand;
+import com.everhomes.rest.user.InitBizInfoDTO;
+import com.everhomes.rest.user.InvitationRoster;
+import com.everhomes.rest.user.ListLoginByPhoneCommand;
+import com.everhomes.rest.user.ListRegisterUsersResponse;
+import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.MessageSessionInfoDTO;
+import com.everhomes.rest.user.ResendVerificationCodeByIdentifierCommand;
+import com.everhomes.rest.user.SearchUserByNamespaceCommand;
+import com.everhomes.rest.user.SearchUserImpersonationCommand;
+import com.everhomes.rest.user.SearchUserImpersonationResponse;
+import com.everhomes.rest.user.SearchUsersCommand;
+import com.everhomes.rest.user.SearchUsersResponse;
+import com.everhomes.rest.user.SendMessageTestCommand;
+import com.everhomes.rest.user.SetUserAccountInfoCommand;
+import com.everhomes.rest.user.SetUserInfoCommand;
+import com.everhomes.rest.user.SignupCommand;
+import com.everhomes.rest.user.SynThridUserCommand;
+import com.everhomes.rest.user.UpdateUserNotificationSettingCommand;
+import com.everhomes.rest.user.UserCurrentEntity;
+import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.user.UserDTO;
+import com.everhomes.rest.user.UserGender;
+import com.everhomes.rest.user.UserIdentifierDTO;
+import com.everhomes.rest.user.UserImperInfo;
+import com.everhomes.rest.user.UserImpersonationDTO;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserInvitationsDTO;
+import com.everhomes.rest.user.UserLoginDTO;
+import com.everhomes.rest.user.UserLoginResponse;
+import com.everhomes.rest.user.UserLoginStatus;
+import com.everhomes.rest.user.UserMuteNotificationFlag;
+import com.everhomes.rest.user.UserNotificationSettingDTO;
+import com.everhomes.rest.user.UserNotificationTemplateCode;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.user.ValidatePassCommand;
+import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
+import com.everhomes.rest.user.VerifyAndLogonCommand;
+import com.everhomes.rest.user.admin.InvitatedUsers;
+import com.everhomes.rest.user.admin.ListInvitatedUserCommand;
+import com.everhomes.rest.user.admin.ListInvitatedUserResponse;
+import com.everhomes.rest.user.admin.ListUsersWithAddrCommand;
+import com.everhomes.rest.user.admin.ListUsersWithAddrResponse;
+import com.everhomes.rest.user.admin.SearchInvitatedUserCommand;
+import com.everhomes.rest.user.admin.SearchUsersWithAddrCommand;
+import com.everhomes.rest.user.admin.SendUserTestMailCommand;
+import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
+import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
+import com.everhomes.rest.user.admin.UsersWithAddrResponse;
+import com.everhomes.sms.SmsBlackList;
+import com.everhomes.sms.SmsBlackListCreateType;
+import com.everhomes.sms.SmsBlackListProvider;
+import com.everhomes.sms.SmsBlackListStatus;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RandomGenerator;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 import static com.everhomes.rest.ui.user.SceneType.*;
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
+
 
 /**
  * 
@@ -311,11 +424,16 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private SmsBlackListProvider smsBlackListProvider;
 
+//
+//    @Autowired
+//	private ContractService contractService;
+
 	@Autowired
 	private GroupService groupService;
 
     @Autowired
     private CommunityService communityService;
+
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -4441,6 +4559,119 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<String[]> listBuildingAndApartmentById(Long uid) {
+	    List<String[]> list = new ArrayList<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhGroupMemberLogs t1 = Tables.EH_GROUP_MEMBER_LOGS.as("t1");
+        EhAddresses t2 = Tables.EH_ADDRESSES.as("t2");
+//        EhCommunities t3 = Tables.EH_COMMUNITIES.as("t3");
+//        context.select(t2.BUILDING_NAME,t2.APARTMENT_NAME,t3.NAME)
+        context.select(t2.BUILDING_NAME,t2.APARTMENT_NAME)
+//				.from(t1,t2,t3)
+				.from(t1,t2)
+				.where(t1.MEMBER_ID.eq(uid))
+                .and(t1.ADDRESS_ID.eq(t2.ID))
+//                .and(t2.COMMUNITY_ID.eq(t3.ID))
+                .fetch(r -> {
+//                    String[] v = new String[3];
+                    String[] v = new String[2];
+//                    v[0] = r.getValue(t3.NAME);
+                    v[0] = r.getValue(t2.BUILDING_NAME);
+                    v[1] = r.getValue(t2.APARTMENT_NAME);
+                    list.add(v);
+                    return null;
+                });
+		return list;
+	}
+
+	@Override
+	public TargetDTO findTargetByNameAndAddress(String contractNum, String targetName, Long communityId, String tel,String ownerType,String targetType) {
+        TargetDTO dto = new TargetDTO();
+        if(contractNum!=null) {
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+			ContractService contractService = PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
+            List<Object> typeIdNameAndTel = contractService.findCustomerByContractNum(contractNum,communityId,ownerType);
+            if(typeIdNameAndTel!=null && typeIdNameAndTel.size()>0){
+                dto.setTargetType((String)typeIdNameAndTel.get(0));
+                dto.setTargetId((Long)typeIdNameAndTel.get(1));
+                dto.setTargetName((String)typeIdNameAndTel.get(2));
+                dto.setUserIdentifier((String)typeIdNameAndTel.get(3));
+                dto.setContractId((Long)typeIdNameAndTel.get(4));
+                return dto;
+            }
+        }else{
+            //确定客户的优先度， 查到合同算查到人，楼栋门牌只是为了填写账单的地址用
+//            List<AddressIdAndName> addressByPossibleName = addressService.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), communityId, buildingName, apartmentName);
+//            List<Long> ids = new ArrayList<>();
+//            for (int i = 0; i < addressByPossibleName.size(); i++){
+//                ids.add(addressByPossibleName.get(i).getAddressId());
+//            }
+            //想在eh_user中找
+//            List<TargetDTO> users = userProvider.findUesrIdByNameAndAddressId(targetName,ids,tel);
+//            //再在eh_organization中找
+//            List<TargetDTO> organizations = organizationProvider.findOrganizationIdByNameAndAddressId(targetName,ids);
+			if(targetType!=null && targetType.equals("eh_user")){
+                dto = userProvider.findUserByTokenAndName(tel,targetName);
+                return dto;
+			}
+			if(targetType!=null && targetType.equals("eh_organization")){
+                Organization organization = organizationProvider.findOrganizationByName(targetName, UserContext.getCurrentNamespaceId());
+                dto.setTargetName(organization.getName());
+                dto.setTargetType("eh_organization");
+                dto.setTargetId(organization.getId());
+                return dto;
+            }
+        }
+        return null;
+	}
+
+
+	@Override
+	public Long getCommunityIdBySceneToken(SceneTokenDTO sceneTokenDTO) {
+
+		SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
+
+		Long communityId = null;
+
+		switch (sceneType) {
+			case DEFAULT:
+			case PARK_TOURIST:
+				communityId = sceneTokenDTO.getEntityId();
+
+				break;
+			case FAMILY:
+				FamilyDTO family = familyProvider.getFamilyById(sceneTokenDTO.getEntityId());
+				Community community = null;
+				if (family != null) {
+					community = communityProvider.findCommunityById(family.getCommunityId());
+				} else {
+					if (LOGGER.isWarnEnabled()) {
+						LOGGER.warn("Family not found, sceneToken=" + sceneTokenDTO);
+					}
+				}
+				if (community != null) {
+					communityId = community.getId();
+				}
+
+				break;
+			case PM_ADMIN:// 无小区ID
+			case ENTERPRISE: // 增加两场景，与园区企业保持一致
+			case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致
+				OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.
+						getOrganizationCommunityRequestByOrganizationId(sceneTokenDTO.getEntityId());
+				if (null != organizationCommunityRequest) {
+					communityId = organizationCommunityRequest.getCommunityId();
+				}
+				break;
+			default:
+				LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDTO);
+				break;
+		}
+
+		return communityId;
+	}
+
 	public List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd) {
 		if(cmd.getSceneType() == null){
 			LOGGER.error("Invalid listUserRelatedScenesByCurrentType, cmd=" + cmd);
@@ -4589,4 +4820,5 @@ public class UserServiceImpl implements UserService {
 		default_communityScene.setStatus(SCENE_EXAMPLE);
 		return default_communityScene;
 	}
+
 }

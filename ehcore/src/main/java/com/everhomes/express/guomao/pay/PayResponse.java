@@ -7,7 +7,9 @@ public class PayResponse<T> {
 	private Boolean success;
 	private String content;
 	private Integer errorCode;
+	private Boolean result;
 	private T data;
+	private T body;
 	public Boolean getSuccess() {
 		return success;
 	}
@@ -32,7 +34,18 @@ public class PayResponse<T> {
 	public void setData(T data) {
 		this.data = data;
 	}
-	
+	public Boolean getResult() {
+		return result;
+	}
+	public void setResult(Boolean result) {
+		this.result = result;
+	}
+	public T getBody() {
+		return body;
+	}
+	public void setBody(T body) {
+		this.body = body;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

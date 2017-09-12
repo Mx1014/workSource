@@ -48,10 +48,6 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-	@Autowired
-    private ConfigurationProvider configProvider;
-	@Autowired
-	private LocaleTemplateService localeTemplateService;
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
@@ -62,7 +58,7 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 		if(null != card){
 			//格式yyyy-MM-dd
-			String expiredate = card.getExpiredate() + " 23:59:59";
+			String expiredate = card.getMaxuseddate() + " 23:59:59";
 			LocalDateTime time = LocalDateTime.parse(expiredate, dtf2);
 			Long endTime = Timestamp.valueOf(time).getTime();
 
@@ -271,6 +267,9 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 		return cardType;
 	}
 
+	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+		//什么都不做, 金溢对接，
+	}
     @Override
     public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
     	

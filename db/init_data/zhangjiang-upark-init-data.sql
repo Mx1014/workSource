@@ -1954,7 +1954,146 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),999971,0,6,240111044331050389,'/home/AptIntro','AptIntroBizs','公寓简介','公寓简介','cs://1/image/aW1hZ2UvTVRvNU5XTmlOR1UxWmpWak56YzBNV0ZtWmpKaU5tUTFNREprWm1RellURmtNdw',1,1,33,CONCAT('{"type":',@category_id,',"parentId":',@category_id,',"displayType": "tab"}'),0,0,1,1,'1',0,NULL,NULL,NULL,0,'default',0,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),999971,0,6,240111044331050389,'/home/AptIntro','AptIntroBizs','生活便利','生活便利','cs://1/image/aW1hZ2UvTVRvME16SXpOekE1Tm1RNU5ETTJOVGc0T0dNMllUTTVaREkzT0RoallURmtNZw',1,1,33,CONCAT('{"type":',@category_id+1,',"parentId":',@category_id+1,',"displayType": "tab"}'),1,0,1,1,'1',0,NULL,NULL,NULL,0,'default',0,NULL);
  
- ;
 
  UPDATE eh_launch_pad_items SET  scope_code = 1 WHERE scope_id=  240111044331050389 AND namespace_id = 999971 AND item_location = '/home';
  UPDATE eh_launch_pad_items SET  scope_code = 6 WHERE scope_id=  240111044331050389 AND namespace_id = 999971 AND item_location = '/home/AptIntro';
+
+-- bydegns,修改公寓简介内容，20170904
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),999971,0,6,240111044331050389,'/home/AptIntro','AptIntroBanner','人才公寓banner','人才公寓banner','cs://1/image/aW1hZ2UvTVRwak1UUTRaR1UyWlRRNFpEZGtZelZpWlROaFlXRmhZalEwTmpreFpqSmtZdw',1,1,0,'',0,0,1,1,'1',0,NULL,NULL,NULL,0,'pm_admin',0,NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),999971,0,6,240111044331050389,'/home/AptIntro','AptIntroBizs','公寓简介','公寓简介','cs://1/image/aW1hZ2UvTVRvNU5XTmlOR1UxWmpWak56YzBNV0ZtWmpKaU5tUTFNREprWm1RellURmtNdw',1,1,33,CONCAT('{"type":201251,"parentId":201251,"displayType": "tab"}'),0,0,1,1,'1',0,NULL,NULL,NULL,0,'pm_admin',0,NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),999971,0,6,240111044331050389,'/home/AptIntro','AptIntroBizs','生活便利','生活便利','cs://1/image/aW1hZ2UvTVRvME16SXpOekE1Tm1RNU5ETTJOVGc0T0dNMllUTTVaREkzT0RoallURmtNZw',1,1,33,CONCAT('{"type":201252,"parentId":201252,"displayType": "tab"}'),1,0,1,1,'1',0,NULL,NULL,NULL,0,'pm_admin',0,NULL);
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),999971,0,6,240111044331050389,'/home/AptIntro','AptIntroBanner','人才公寓banner','人才公寓banner','cs://1/image/aW1hZ2UvTVRwak1UUTRaR1UyWlRRNFpEZGtZelZpWlROaFlXRmhZalEwTmpreFpqSmtZdw',1,1,0,'',0,0,1,1,'1',0,NULL,NULL,NULL,0,'park_tourist',0,NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),999971,0,6,240111044331050389,'/home/AptIntro','AptIntroBizs','公寓简介','公寓简介','cs://1/image/aW1hZ2UvTVRvNU5XTmlOR1UxWmpWak56YzBNV0ZtWmpKaU5tUTFNREprWm1RellURmtNdw',1,1,33,CONCAT('{"type":201251,"parentId":201251,"displayType": "tab"}'),0,0,1,1,'1',0,NULL,NULL,NULL,0,'park_tourist',0,NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),999971,0,6,240111044331050389,'/home/AptIntro','AptIntroBizs','生活便利','生活便利','cs://1/image/aW1hZ2UvTVRvME16SXpOekE1Tm1RNU5ETTJOVGc0T0dNMllUTTVaREkzT0RoallURmtNZw',1,1,33,CONCAT('{"type":201252,"parentId":201252,"displayType": "tab"}'),1,0,1,1,'1',0,NULL,NULL,NULL,0,'park_tourist',0,NULL);
+
+update `eh_launch_pad_layouts`  SET layout_json = '{"versionCode":"2017090402","versionName":"3.10.0","layoutName":"AptIntroLayout","displayName":"公寓介绍","groups":[{"groupName":"公寓介绍Banner","widget":"Navigator","instanceConfig":{"itemGroup":"AptIntroBanner"},"style":"Gallery","defaultOrder":1,"separatorFlag":0,"separatorHeight":0,"columnCount":1,"editFlag":0},{"groupName":"公寓介绍icon","widget":"Navigator","instanceConfig":{"itemGroup":"AptIntroBizs","cssStyleFlag":1,"paddingTop":20,"paddingLeft":20,"paddingBottom":20,"paddingRight":20,"lineSpacing":16,"columnSpacing":16,"backgroundColor":"FFFFFF"},"style":"Gallery","defaultOrder":2,"separatorFlag":0,"separatorHeight":0,"columnCount":2,"editFlag":0}]}',version_code = '2017090402' WHERE namespace_id = 999971 AND `name` = 'AptIntroLayout';
+
+update eh_launch_pad_items SET scope_id = 0, scope_code = 0,apply_policy = 0 WHERE item_label in ('人才公寓banner','公寓简介','生活便利') AND namespace_id = 999971;
+
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),999971,0,0,0,'/home/AptIntro','AptIntroBanner','人才公寓banner','人才公寓banner','cs://1/image/aW1hZ2UvTVRwak1UUTRaR1UyWlRRNFpEZGtZelZpWlROaFlXRmhZalEwTmpreFpqSmtZdw',1,1,0,'',0,0,1,1,'1',0,NULL,NULL,NULL,0,'default',0,NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),999971,0,0,0,'/home/AptIntro','AptIntroBizs','公寓简介','公寓简介','cs://1/image/aW1hZ2UvTVRvNU5XTmlOR1UxWmpWak56YzBNV0ZtWmpKaU5tUTFNREprWm1RellURmtNdw',1,1,33,CONCAT('{"type":201251,"parentId":201251,"displayType": "tab"}'),0,0,1,1,'1',0,NULL,NULL,NULL,0,'default',0,NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),999971,0,0,0,'/home/AptIntro','AptIntroBizs','生活便利','生活便利','cs://1/image/aW1hZ2UvTVRvME16SXpOekE1Tm1RNU5ETTJOVGc0T0dNMllUTTVaREkzT0RoallURmtNZw',1,1,33,CONCAT('{"type":201252,"parentId":201252,"displayType": "tab"}'),1,0,1,1,'1',0,NULL,NULL,NULL,0,'default',0,NULL);
+
+-- 张江高科服务联盟重新配置 园区商业 by dengs
+SET @category_id = (SELECT MAX(id) FROM eh_service_alliance_categories) +1 ;
+SET @sa_id = (SELECT MAX(id) FROM `eh_service_alliances`) +1 ;
+-- 添加公寓介绍下面的2个服务联盟 by dengs,
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES (@category_id , 'community', 240111044331050388, '0', '招商信息', '招商信息', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, 999971, '');
+
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+    VALUES (@sa_id , '0', 'community', 240111044331050388, '招商信息', '招商信息', @category_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+UPDATE eh_launch_pad_items SET action_data = CONCAT('{"displayType":"grid","type":',@category_id,'"parentId":',@category_id,'}') WHERE item_label = '招商信息' and namespace_id = '999971';
+
+-- 张江高科的app入口配置 by wentian
+update `eh_launch_pad_items` set action_data='{"url":"http://zhangjiang-beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
+where item_label = '费用查缴' and scene_type != 'pm_admin';
+
+update `eh_launch_pad_items` set action_data='{"url":"http://zhangjiang-beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
+where item_label = '企业账单' and scene_type != 'pm_admin';
+
+-- 张江高科的菜单配置 by wentian
+UPDATE `eh_web_menus` set leaf_flag = '0' where id = '20400';
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`,`module_id`,`level`,`condition_type`,`category`)
+VALUES ('204011', '账单管理', 20400, NULL, 'react:/payment-management/bills-manage', 1, 2, '/20000/20400/204011', 'park', 990453,20400,3,null,'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`,`module_id`,`level`,`condition_type`,`category`)
+VALUES ('204021', '账单统计', 20400, NULL, 'react:/payment-management/bills-statistics', 1, 2, '/20000/20400/204021', 'park', 999242,20400,3,null,'module');
+
+SET @eh_web_menus_id_paym = '204011';
+SET @eh_web_menus_id_payb = '204021';
+
+SET @menu_scope_id = (SELECT MAX FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_paym, '', 'EhNamespaces', 999971, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_payb, '', 'EhNamespaces', 999971, 2);
+
+SET @privilege_id = (SELECT MAX FROM `eh_acl_privileges`);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
+VALUES ((@privilege_id := @privilege_id + 1), 0, 'zjgk账单管理', 'zjgk账单管理 全部权限', NULL);
+SET @web_menu_privilege_id = (SELECT MAX FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @privilege_id, @eh_web_menus_id_paym, '账单管理', 1, 1, '账单管理 全部权限', 990);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1001, 'EhAclRoles', 0, 1, NOW);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1005, 'EhAclRoles', 0, 1, NOW);
+SET @eh_service_module_privileges_id = (SELECT MAX FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), @eh_web_menus_id_paym, '1', @privilege_id, NULL, '0', UTC_TIMESTAMP());
+
+SET @privilege_id = (SELECT MAX FROM `eh_acl_privileges`);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
+VALUES ((@privilege_id := @privilege_id + 1), 0, 'zjgk账单统计', 'zjgk账单统计 全部权限', NULL);
+SET @web_menu_privilege_id = (SELECT MAX FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @privilege_id, @eh_web_menus_id_payb, '账单统计', 1, 1, '账单统计 全部权限', 999);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+SET @acl_id = (SELECT MAX from `eh_acls`);
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1001, 'EhAclRoles', 0, 1, NOW);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1005, 'EhAclRoles', 0, 1, NOW);
+SET @eh_service_module_privileges_id = (SELECT MAX FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), @eh_web_menus_id_payb, '1', @privilege_id, NULL, '0', UTC_TIMESTAMP());
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`,`operator_uid`,`creator_uid`)
+VALUES (@eh_web_menus_id_paym, '账单管理', '20400', '/20000/20400/', '0', '2', '2', '0', UTC_TIMESTAMP(),1,1);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`,`operator_uid`,`creator_uid`)
+VALUES (@eh_web_menus_id_payb, '账单统计', '20400', '/20000/20400/', '0', '2', '2', '0', UTC_TIMESTAMP(),1,1);
+
+SET @eh_service_module_scopes_id = (SELECT MAX FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999971, @eh_web_menus_id_paym, '账单管理', 'EhNamespaces', 999971, NULL, 2);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999971, @eh_web_menus_id_payb, '账单统计', 'EhNamespaces', 999971, NULL, 2);
+
+-- 张江高科的账单组设置 by wentian
+truncate `eh_payment_variables`;
+INSERT INTO `eh_payment_variables` VALUES ('1', '1', '1', '月单价', null, null, null, null, 'ydj');
+INSERT INTO `eh_payment_variables` VALUES ('2', '1', '1', '计费面积', null, null, null, null, 'mj');
+INSERT INTO `eh_payment_variables` VALUES ('3', '2', '1', '固定金额', null, null, null, null, 'gdje');
+
+truncate `eh_payment_charging_standards_scopes`;
+INSERT INTO `eh_payment_charging_standards_scopes` VALUES ('1', '1', 'community', '240111044331050388', '0', UTC_TIMESTAMP(), null, null);
+INSERT INTO `eh_payment_charging_standards_scopes` VALUES ('2', '2', 'community', '240111044331050388', '0', UTC_TIMESTAMP(), null, null);
+INSERT INTO `eh_payment_charging_standards_scopes` VALUES ('3', '1', 'community', '240111044332059779', '0', UTC_TIMESTAMP(), null, null);
+INSERT INTO `eh_payment_charging_standards_scopes` VALUES ('4', '2', 'community', '240111044332059779', '0', UTC_TIMESTAMP(), null, null);
+INSERT INTO `eh_payment_charging_standards_scopes` VALUES ('5', '1', 'community', '240111044332059780', '0', UTC_TIMESTAMP(), null, null);
+INSERT INTO `eh_payment_charging_standards_scopes` VALUES ('6', '2', 'community', '240111044332059780', '0', UTC_TIMESTAMP(), null, null);
+INSERT INTO `eh_payment_charging_standards_scopes` VALUES ('7', '1', 'community', '240111044332059781', '0', UTC_TIMESTAMP(), null, null);
+INSERT INTO `eh_payment_charging_standards_scopes` VALUES ('8', '2', 'community', '240111044332059781', '0', UTC_TIMESTAMP(), null, null);
+
+truncate `eh_payment_charging_standards`;
+INSERT INTO `eh_payment_charging_standards` VALUES ('1', '租金(月单价*面积)', '1', '月单价*面积', 'ydj*mj', '2', '1', '2', '0', UTC_TIMESTAMP(), null, null);
+INSERT INTO `eh_payment_charging_standards` VALUES ('2', '租金(固定金额)', '1', '固定金额', 'gdje', '1', '1', '2', '0', UTC_TIMESTAMP(), null, null);
+
+truncate `eh_payment_charging_items`;
+INSERT INTO `eh_payment_charging_items` VALUES ('1', '租金', '0', UTC_TIMESTAMP(), null, null, '1');
+
+truncate `eh_payment_charging_item_scopes`;
+INSERT INTO `eh_payment_charging_item_scopes` VALUES ('1', '1', '999971', '240111044331050388', 'community');
+INSERT INTO `eh_payment_charging_item_scopes` VALUES ('2', '1', '999971', '240111044332059779', 'community');
+INSERT INTO `eh_payment_charging_item_scopes` VALUES ('3', '1', '999971', '240111044332059780', 'community');
+INSERT INTO `eh_payment_charging_item_scopes` VALUES ('4', '1', '999971', '240111044332059781', 'community');
+
+truncate `eh_payment_bill_groups_rules`;
+INSERT INTO `eh_payment_bill_groups_rules` VALUES ('1', '999971', '1', '1', '1', '租金月单价*面积', '{\"ydj\":\"1000\",\"mj\":\"0\"}', 'community', '240111044331050388');
+INSERT INTO `eh_payment_bill_groups_rules` VALUES ('2', '999971', '1', '1', '2', '租金固定金额', '{\"gdje\":\"10\"}', 'community', '240111044331050388');
+INSERT INTO `eh_payment_bill_groups_rules` VALUES ('3', '999971', '2', '1', '1', '租金月单价*面积', '{\"ydj\":\"1000\",\"mj\":\"0\"}', 'community', '240111044332059779');
+INSERT INTO `eh_payment_bill_groups_rules` VALUES ('4', '999971', '2', '1', '2', '租金固定金额', '{\"gdje\":\"10\"}', 'community', '240111044332059779');
+INSERT INTO `eh_payment_bill_groups_rules` VALUES ('5', '999971', '3', '1', '1', '租金月单价*面积', '{\"ydj\":\"1000\",\"mj\":\"0\"}', 'community', '240111044332059780');
+INSERT INTO `eh_payment_bill_groups_rules` VALUES ('6', '999971', '3', '1', '2', '租金固定金额', '{\"gdje\":\"10\"}', 'community', '240111044332059780');
+INSERT INTO `eh_payment_bill_groups_rules` VALUES ('7', '999971', '4', '1', '1', '租金月单价*面积', '{\"ydj\":\"1000\",\"mj\":\"0\"}', 'community', '240111044332059781');
+INSERT INTO `eh_payment_bill_groups_rules` VALUES ('8', '999971', '4', '1', '2', '租金固定金额', '{\"gdje\":\"10\"}', 'community', '240111044332059781');
+
+
+truncate `eh_payment_bill_groups`;
+INSERT INTO `eh_payment_bill_groups` VALUES ('1', '999971', '240111044331050388', 'community', '租金', '2', '5', '0', UTC_TIMESTAMP(), null, null, '1');
+INSERT INTO `eh_payment_bill_groups` VALUES ('2', '999971', '240111044332059779', 'community', '租金', '2', '5', '0', UTC_TIMESTAMP(), null, null, '1');
+INSERT INTO `eh_payment_bill_groups` VALUES ('3', '999971', '240111044332059780', 'community', '租金', '2', '5', '0', UTC_TIMESTAMP(), null, null, '1');
+INSERT INTO `eh_payment_bill_groups` VALUES ('4', '999971', '240111044332059781', 'community', '租金', '2', '5', '0', UTC_TIMESTAMP(), null, null, '1');

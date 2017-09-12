@@ -385,6 +385,8 @@ public class ActivityServiceImpl implements ActivityService {
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 		        }
+
+				LOGGER.info("signup start activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
         
 		        Post post = forumProvider.findPostById(activity.getPostId());
 		        if (post == null) {
@@ -530,6 +532,9 @@ public class ActivityServiceImpl implements ActivityService {
 	            long signupStatEndTime = System.currentTimeMillis();
 	            LOGGER.debug("Signup success, totalElapse={}, rosterElapse={}, cmd={}", (signupStatEndTime - signupStatStartTime), 
 	            		(signupStatEndTime - rosterStatStartTime), cmd);
+
+				LOGGER.info("signup end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 	            return dto;
 	        });
         }).first();
@@ -854,6 +859,9 @@ public class ActivityServiceImpl implements ActivityService {
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 		        }
+
+				LOGGER.info("manualSignup start activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 		        //检查是否超过报名人数限制, add by tt, 20161012
 		        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
 		        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -894,6 +902,9 @@ public class ActivityServiceImpl implements ActivityService {
 	            //createActivityRoster(roster);
 	            activityProvider.createActivityRoster(roster);
 	            activityProvider.updateActivity(activity);
+
+				LOGGER.info("manualSignup end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 	            return roster;
 	        });
         }).first();
@@ -1047,6 +1058,9 @@ public class ActivityServiceImpl implements ActivityService {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
+
+			LOGGER.info("importSignupInfo start activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 			List<ActivityRoster> rostersTemp = getRostersFromExcel(files[0]);
 			
 			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
@@ -1070,6 +1084,9 @@ public class ActivityServiceImpl implements ActivityService {
 	            
 				return null;
 			});
+
+			LOGGER.info("importSignupInfo end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 			return null;
 		});
 		
@@ -1518,7 +1535,9 @@ public class ActivityServiceImpl implements ActivityService {
 	                 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 	                         ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 	             }
-	             
+
+				LOGGER.info("cancelSignup start activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 	             //手动取消 要检查过期时间  add by yanjun 20170519
 	             if(cmd.getCancelType() == null || cmd.getCancelType().byteValue()== ActivityCancelType.HAND.getCode()){
 	            	 if(activity.getSignupEndTime() != null && activity.getSignupEndTime().getTime() < DateHelper.currentGMTTime().getTime()){
@@ -1576,6 +1595,9 @@ public class ActivityServiceImpl implements ActivityService {
 	             sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_CANCEL_TO_CREATOR, null);
 	             long cancelEndTime = System.currentTimeMillis();
 	             LOGGER.debug("Canel the activity signup, elapse={}, cmd={}", (cancelEndTime - cancelStartTime), cmd);
+
+				 LOGGER.info("cancelSignup end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 	             return dto;
 	        	
 	        });
@@ -2103,7 +2125,17 @@ public class ActivityServiceImpl implements ActivityService {
     		
     		//在锁内部重新活动信息  add by yanjun 20170522
     		ActivityRoster item = activityProvider.findRosterById(cmd.getRosterId());
-    		Activity activity = activityProvider.findActivityById(item.getActivityId());
+
+    		//在锁的内部重新校验报名信息，防止报名取消了之后再发起确认操作  add by yanjun 20170905
+			if (item == null || item.getStatus() == null || item.getStatus().byteValue() != ActivityRosterStatus.NORMAL.getCode()) {
+				LOGGER.error("cannnot find roster record in database");
+				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+						ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER,
+						"cannnot find roster record in database id=" + cmd.getRosterId());
+			}
+
+
+			Activity activity = activityProvider.findActivityById(item.getActivityId());
     		if (activity == null) {
     			LOGGER.error("cannnot find activity record in database");
     			// TODO
@@ -2111,6 +2143,8 @@ public class ActivityServiceImpl implements ActivityService {
     					ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "cannnot find activity record in database id="
     							+ cmd.getRosterId());
     		}
+
+
     		Post post = forumProvider.findPostById(activity.getPostId());
     		//validate post status
     		if (post == null) {
@@ -2136,6 +2170,7 @@ public class ActivityServiceImpl implements ActivityService {
     		//                    "the user is invalid.cannot confirm id=" + cmd.getRosterId());
     		//        }
     		dbProvider.execute(status -> {
+				LOGGER.info("confirm start activityId: " + activity.getId() + " userId: " + item.getUid() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
     			//           forumProvider.createPost(createPost(user.getId(), post, cmd.getConfirmFamilyId(), cmd.getTargetName()));
 
 
@@ -2167,6 +2202,8 @@ public class ActivityServiceImpl implements ActivityService {
     				rosterPayTimeoutService.pushTimeout(item);
     			}
     			activityProvider.updateRoster(item);
+
+				LOGGER.info("confirm end activityId: " + activity.getId() + " userId: " + item.getUid() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
     			return status;
     		});
 
@@ -2317,6 +2354,14 @@ public class ActivityServiceImpl implements ActivityService {
 
     		//在锁内部重新查询报名信息  add by yanjun 20170522
     		ActivityRoster roster = activityProvider.findRosterById(cmd.getRosterId());
+
+			//在锁的内部重新校验报名信息，防止报名取消了之后再发起拒绝操作  add by yanjun 20170905
+			if (roster == null || roster.getStatus() == null || roster.getStatus().byteValue() != ActivityRosterStatus.NORMAL.getCode()) {
+				LOGGER.error("cannnot find roster record in database");
+				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+						ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER,
+						"cannnot find roster record in database id=" + cmd.getRosterId());
+			}
 
     		Activity activity = activityProvider.findActivityById(roster.getActivityId());
     		if (activity == null) {
