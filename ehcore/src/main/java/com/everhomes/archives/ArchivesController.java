@@ -129,7 +129,7 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/getImportContactsResult</b>
-     * <p>5-4.查询导入的文件结果</p>
+     * <p>5-4.查询通讯录导入结果</p>
      */
     @RequestMapping("getImportContactsResult")
     @RestReturn(value = ImportFileResponse.class)
