@@ -1504,9 +1504,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			dto.setTargetId(member.getTargetId());
 			dto.setContactToken(member.getContactToken());
 			dto.setTargetType(member.getTargetType());
-			if(dto.getId() != null){
-				dtos.add(dto);
-			}
+			dtos.add(dto);
 		}
 		return dtos;
 	}

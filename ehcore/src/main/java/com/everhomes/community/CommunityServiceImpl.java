@@ -1951,10 +1951,10 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
 				for (OrganizationMember member : members) {
 					if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
-						dto.setOrganizationMemberName(member.getContactName());
-						ms.add(member);
 						dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 					}
+					dto.setOrganizationMemberName(member.getContactName());
+					ms.add(member);
 				}
 				List<OrganizationDetailDTO> organizations = new ArrayList<>();
 				organizations.addAll(populateOrganizationDetails(ms));

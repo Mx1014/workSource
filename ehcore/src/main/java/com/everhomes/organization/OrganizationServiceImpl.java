@@ -6139,13 +6139,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         Organization org = checkOrganization(organizationId);
         Integer namespaceId = UserContext.getCurrentNamespaceId(org.getNamespaceId());
         OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(organizationId, contactToken);
-
-        if(OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
-            LOGGER.error("This user has been added to the administrator list.");
-            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_EXISTS,
-                    "This user has been added to the administrator list.");
-        }
-
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId,contactToken);
         boolean sendMsgFlag = false;
         if(null == member){
@@ -6172,6 +6165,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             createOrganiztionMemberWithDetailAndUserOrganization(member, org.getId());
         }else{
+            if(OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+                LOGGER.error("This user has been added to the administrator list.");
+                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_EXISTS,
+                        "This user has been added to the administrator list.");
+            }
+
             member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
             if(OrganizationMemberStatus.ACTIVE != OrganizationMemberStatus.fromCode(member.getStatus())){
                 //把正在申请加入公司状态的 记录改成正常
