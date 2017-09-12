@@ -176,14 +176,15 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
     }
 
+    /**
+     * 1.If the keywords is not null, just pass the key and get the corresponding employee back.
+     * 2.If the keywords is null, then judged by the "pageAnchor"
+     * 3.If the pageAnchor is null, we should get stick employees first.
+     * 4.if the pageAnchor is not null, means we should get the next page of employees, so ignore those stick employees.
+     * @return
+     */
     @Override
     public ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd) {
-
-        /* Steps：
-           1.If the keywords is not null, just pass the key and get the corresponding employee back.
-           2.If the keywords is null, then judged by the "pageAnchor"
-           3.If the pageAnchor is null, we should get stick employees first.
-           4.if the pageAnchor is not null, means we should get the next page of employees, so ignore those stick employees.*/
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListArchivesContactsResponse response = new ListArchivesContactsResponse();
@@ -232,7 +233,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         dto.setOrganizationId(detail.getOrganizationId());
         dto.setContactName(detail.getContactName());
         dto.setContactToken(detail.getContactToken());
-        dto.setEmail(detail.getEmail());
+        dto.setWorkEmail(detail.getWorkEmail());
         dto.setTargetId(detail.getTargetId());
         dto.setTargetType(detail.getTargetType());
         dto.setRegionCode(detail.getRegionCode());
@@ -280,6 +281,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             dto.setGender(r.getGender());
             dto.setRegionCode(r.getRegionCode());
             dto.setContactToken(r.getContactToken());
+            dto.setWorkEmail(r.getWorkEmail());
             //  TODO:组织架构list接口多返回邮箱
 //                dto.setEmail(r.getEmail);
             dto.setStick("0");
