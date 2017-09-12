@@ -131,7 +131,7 @@ public class ArchivesController extends ControllerBase{
      * <b>URL: /archives/getImportContactsResult</b>
      * <p>5-4.查询导入的文件结果</p>
      */
-    @RequestMapping("getImportFileResult")
+    @RequestMapping("getImportContactsResult")
     @RestReturn(value = ImportFileResponse.class)
     public RestResponse getImportContactsResult(GetImportFileResultCommand cmd) {
         RestResponse response = new RestResponse(archivesService.getImportContactsResult(cmd));
