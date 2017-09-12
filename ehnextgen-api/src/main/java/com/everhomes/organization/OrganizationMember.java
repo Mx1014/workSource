@@ -46,6 +46,7 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
     private String workEmail;
     private String regionCode;
     private Timestamp contractEndTime;
+    private String contactShortToken;
 
     public OrganizationMember() {
     }
@@ -229,5 +230,13 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     public void setContractEndTime(Timestamp contractEndTime) {
         this.contractEndTime = contractEndTime;
+    }
+
+    public String getContactShortToken() {
+        return contactShortToken;
+    }
+
+    public void setContactShortToken(String contactShortToken) {
+        this.contactShortToken = contactShortToken;
     }
 }

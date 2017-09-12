@@ -18,6 +18,7 @@ import java.util.List;
  * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>regionCode: 区号</li>
  * <li>contactToken: 手机号</li>
+ * <li>contactShortToken: 短号</li>
  * <li>workEmail: 工作邮箱</li>
  * <li>stick: 置顶状态: 0-未置顶 1-置顶</li>
  * </ul>
@@ -44,6 +45,8 @@ public class ArchivesContactDTO {
     private String regionCode;
 
     private String contactToken;
+
+    private String contactShortToken;
 
     private String workEmail;
 
@@ -138,6 +141,14 @@ public class ArchivesContactDTO {
 
     public void setContactToken(String contactToken) {
         this.contactToken = contactToken;
+    }
+
+    public String getContactShortToken() {
+        return contactShortToken;
+    }
+
+    public void setContactShortToken(String contactShortToken) {
+        this.contactShortToken = contactShortToken;
     }
 
     public String getWorkEmail() {
