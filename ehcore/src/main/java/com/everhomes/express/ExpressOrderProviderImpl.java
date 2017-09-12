@@ -86,6 +86,10 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 			step.and(Tables.EH_EXPRESS_ORDERS.EXPRESS_COMPANY_ID.eq(condition.getExpressCompanyId()));
 		}
 		
+		if (condition.getSendType() != null){
+			step.and(Tables.EH_EXPRESS_ORDERS.SEND_TYPE.eq(condition.getSendType()));
+		}
+		
 		String keyword = condition.getKeyword();
 		if (keyword != null && !keyword.isEmpty()) {
 			keyword = keyword + "%";
@@ -125,5 +129,17 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public ExpressOrder findExpressOrderByOrderNo(String orderNo) {
+		List<ExpressOrder> list = getReadOnlyContext().select().from(Tables.EH_EXPRESS_ORDERS)
+		.where(Tables.EH_EXPRESS_ORDERS.ORDER_NO.eq(orderNo))
+		.fetch()
+		.map(r->ConvertHelper.convert(r, ExpressOrder.class));
+		if(list != null && list.size()>0){
+			return list.get(0);
+		}
+		return null;
 	}
 }

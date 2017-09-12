@@ -76,4 +76,6 @@ public interface PmTaskProvider {
 	PmTaskHistoryAddress findTaskHistoryAddressById(Long id);
 
 	List<PmTask> listTasksById(List<Long> ids);
+
+	public List<PmTask> findTaskByOrderId(String orderId);
 }

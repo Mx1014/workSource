@@ -9,6 +9,7 @@ import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.util.RequireAuthentication;
+import com.mysql.jdbc.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -61,9 +62,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 				dto.setLongitude(Double.valueOf(c.getLongitude()));
 			//end
 			dto.setEnterpriseId(c.getOrganizationId());
-			dto.setEnterpriseName(c.getDisplayName());
-			if(dto.getEnterpriseName() == null)
-				dto.setEnterpriseName(c.getName());
+			dto.setEnterpriseName(c.getName());//优先展示企业名而非昵称 by xiongying20170826
+			if(dto.getEnterpriseName() == null || StringUtils.isNullOrEmpty(dto.getEnterpriseName()))
+				dto.setEnterpriseName(c.getDisplayName());
 			dto.setContactPhone(c.getAccountPhone());
 			return dto;
 		}).collect(Collectors.toList()));

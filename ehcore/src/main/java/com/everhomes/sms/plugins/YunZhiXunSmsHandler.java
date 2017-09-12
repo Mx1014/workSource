@@ -242,9 +242,8 @@ public class YunZhiXunSmsHandler implements SmsHandler {
                 log.setMobile(phoneNumber);
                 log.setResult(rspMessage.getMessage());
                 log.setHandler(YUN_ZHI_XUN_HANDLER_NAME);
-                log.setVariables(variables);
+                log.setText(variables);
                 log.setSmsId(res.resp.templateSMS.smsId);
-                log.setHttpStatusCode(rspMessage.getCode());
 
                 if ("000000".equals(res.resp.respCode)) {
                     log.setStatus(SmsLogStatus.SEND_SUCCESS.getCode());

@@ -11,9 +11,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhSmsLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhSmsLogs;
 import com.everhomes.server.schema.tables.records.EhSmsLogsRecord;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -66,13 +64,17 @@ public class SmsLogProviderImpl implements SmsLogProvider {
     @Override
     public Map<String, SmsLog> findLastLogByMobile(Integer namespaceId, String mobile, String[] handlerNames) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhSmsLogs.class));
-        return context.selectFrom(Tables.EH_SMS_LOGS)
-                .where(Tables.EH_SMS_LOGS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_SMS_LOGS.MOBILE.eq(mobile))
-                .and(Tables.EH_SMS_LOGS.HANDLER.in(handlerNames))
-                .groupBy(Tables.EH_SMS_LOGS.HANDLER)
-                .orderBy(Tables.EH_SMS_LOGS.CREATE_TIME.desc())
-                .fetchMap(Tables.EH_SMS_LOGS.HANDLER, SmsLog.class);
+        com.everhomes.server.schema.tables.EhSmsLogs t = Tables.EH_SMS_LOGS;
+
+        Table<EhSmsLogsRecord> subT = context.selectFrom(t)
+                .where(t.NAMESPACE_ID.eq(namespaceId))
+                .and(t.MOBILE.eq(mobile))
+                .and(t.HANDLER.in(handlerNames))
+                .orderBy(t.ID.desc()).asTable();
+
+        return context.selectFrom(subT)
+                .groupBy(subT.field(t.HANDLER))
+                .fetchMap(t.HANDLER, SmsLog.class);
     }
 
     @Override

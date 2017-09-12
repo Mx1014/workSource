@@ -61,6 +61,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("biz.secretKey", "PSsIB9nZm3ENS3stei8oAvGa2afRW7wT+Y6x76XDtUCUcXOUhkPYK9V/5r03pD2rquQ==")
             .withProperty("elastic.nodes.httpports", "9200")
             .withProperty("equipment.ip", "127.0.0.1")
+            .withProperty("schedule.running.flag", "0")
             .withProperty("src.path", "/home/janson/ssd2/everhomes/ehnextgen")
             );
     }

@@ -82,10 +82,8 @@ public class SmsProviderImpl implements SmsProvider {
                 }
             }
             selectedHandlerName = selectHandler(handlerToSmsLogMap.entrySet(), SmsLogStatus.REPORT_SUCCESS);
-            selectedStatus = SmsLogStatus.fromCode(handlerToSmsLogMap.get(selectedHandlerName).getStatus());
         }
-
-        if (selectedHandlerName == null || selectedStatus == SmsLogStatus.REPORT_FAILED) {
+        if (selectedHandlerName == null || SmsLogStatus.fromCode(handlerToSmsLogMap.get(selectedHandlerName).getStatus()) == SmsLogStatus.REPORT_FAILED) {
             selectedHandlerName = handlerNames[0];
         }
         return handlers.get(selectedHandlerName.toLowerCase());
@@ -96,15 +94,15 @@ public class SmsProviderImpl implements SmsProvider {
         for (Map.Entry<String, SmsLog> entry : entries) {
             SmsLog smsLog = entry.getValue();
 
-            long interval = System.currentTimeMillis() - smsLog.getCreateTime().getTime();
-
             SmsLogStatus status = SmsLogStatus.fromCode(smsLog.getStatus());
-            if (status == expectStatus && interval > 3 * 60 * 1000) {
-                selectedHandlerName = smsLog.getHandler();
-                break;
+            if (status == expectStatus) {
+                if (smsLog.getCreateTime() != null && (System.currentTimeMillis() - smsLog.getCreateTime().getTime()) > 3 * 60 * 1000) {
+                    selectedHandlerName = smsLog.getHandler();
+                    break;
+                }
             }
         }
-        if (selectedHandlerName == null && expectStatus.ordinal() < SmsLogStatus.values().length) {
+        if (selectedHandlerName == null && expectStatus.ordinal() < SmsLogStatus.values().length - 1) {
             return selectHandler(entries, SmsLogStatus.values()[expectStatus.ordinal() + 1]);
         }
         return selectedHandlerName;
@@ -162,13 +160,11 @@ public class SmsProviderImpl implements SmsProvider {
             handlersMap = this.getHandler(namespaceId, phoneNumbers);
         }
 
-        List<SmsLog> smsLogList = new ArrayList<>();
-
         handlersMap.forEach((handler, phones) -> {
             publishEvent(() -> {
                 List<SmsLog> logs = handler.doSend(namespaceId, phones, templateScope, templateId, templateLocale, variables);
                 if (logs != null) {
-                    smsLogList.addAll(logs);
+                    saveSmsLog(logs);
                 }
             });
         });
@@ -178,7 +174,6 @@ public class SmsProviderImpl implements SmsProvider {
                     + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
         }
 
-        saveSmsLog(smsLogList);
     }
 
     private void saveSmsLog(List<SmsLog> smsLogList) {

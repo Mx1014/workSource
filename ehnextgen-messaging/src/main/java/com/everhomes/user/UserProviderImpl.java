@@ -422,7 +422,30 @@ public class UserProviderImpl implements UserProvider {
         
         return null;
     }
-    
+
+    @Override
+    public UserIdentifier findClaimedIdentifierByTokenAndNotUserId(Integer namespaceId, String identifierToken, Long userId) {
+        final List<UserIdentifier> result = new ArrayList<>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
+            context.select().from(EH_USER_IDENTIFIERS)
+                    .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
+                    .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
+                    .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                    .and(EH_USER_IDENTIFIERS.OWNER_UID.ne(userId))
+                    .fetch().map((r) -> {
+                result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                return null;
+            });
+
+            return true;
+        });
+        if(result.size() > 0){
+            return result.get(0);
+        }
+        return null;
+    }
+
     @Cacheable(value = "UserIdentifier-OwnerAndType", key="{#ownerUid, #identifierType}", unless="#result == null")
     @Override
     public UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerUid, byte identifierType) {

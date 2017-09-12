@@ -615,5 +615,31 @@ public class CommunityAdminController extends ControllerBase {
         return response;
     }
 	
-	
+    /**
+     * <b>URL: /admin/community/getCommunityAuthPopupConfig</b>
+     * <p>获取用户认证弹窗设置</p>
+     */
+    @RequestMapping("getCommunityAuthPopupConfig")
+    @RestReturn(CommunityAuthPopupConfigDTO.class)
+    public RestResponse getCommunityAuthPopupConfig(@Valid GetCommunityAuthPopupConfigCommand cmd){
+        CommunityAuthPopupConfigDTO dto = communityService.getCommunityAuthPopupConfig(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/community/updateCommunityAuthPopupConfig</b>
+     * <p>修改用户认证弹窗设置</p>
+     */
+    @RequestMapping("updateCommunityAuthPopupConfig")
+    @RestReturn(CommunityAuthPopupConfigDTO.class)
+    public RestResponse updateCommunityAuthPopupConfig(@Valid UpdateCommunityAuthPopupConfigCommand cmd){
+        CommunityAuthPopupConfigDTO dto = communityService.updateCommunityAuthPopupConfig(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

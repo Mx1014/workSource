@@ -70,7 +70,7 @@ import com.everhomes.util.RuntimeErrorException;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI)
 public class EbeiPmTaskHandle implements PmTaskHandle{
-	
+
 	private static final String LIST_SERVICE_TYPE = "/rest/crmFeedBackInfoJoin/serviceTypeList";
 	private static final String CREATE_TASK = "/rest/crmFeedBackInfoJoin/uploadFeedBackOrder";
 	private static final String GET_TASK_DETAIL = "/rest/crmFeedBackInfoJoin/feedBackOrderDetail";
@@ -78,23 +78,23 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	private static final String EVALUATE = "/rest/crmFeedBackInfoJoin/evaluateFeedBack";
 	private static final String GET_TOKEN = "/rest/ebeiInfo/sysQueryToken";
 
-    private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	private String projectId = null;
-    
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(EbeiPmTaskHandle.class);
 
 	private CloseableHttpClient httpclient = null;
 
 	@Autowired
-    private DbProvider dbProvider;
+	private DbProvider dbProvider;
 	@Autowired
 	private PmTaskProvider pmTaskProvider;
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
 	@Autowired
-    private ContentServerService contentServerService;
+	private ContentServerService contentServerService;
 	@Autowired
-    private ConfigurationProvider configProvider;
+	private ConfigurationProvider configProvider;
 	@Autowired
 	private PmTaskCommonServiceImpl pmTaskCommonService;
 	@Autowired
@@ -123,11 +123,11 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	private List<CategoryDTO> listServiceType(String projectId, Long parentId) {
 		JSONObject param = new JSONObject();
 		param.put("projectId", projectId);
-		
+
 		String json = postToEbei(param, LIST_SERVICE_TYPE, null);
-		
+
 		EbeiJsonEntity<EbeiServiceType> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiServiceType>>(){});
-		
+
 		if(entity.isSuccess()) {
 			EbeiServiceType type = entity.getData();
 //			List<EbeiServiceType> types = type.getItems();
@@ -143,12 +143,12 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			}
 			List<CategoryDTO> result = types.stream().map(c -> {
 				return convertCategory(c);
-				
+
 			}).collect(Collectors.toList());
-			
+
 			return result;
 		}
-		
+
 		return null;
 	}
 
@@ -170,14 +170,14 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	}
 
 	private CategoryDTO convertCategory(EbeiServiceType ebeiServiceType) {
-		
+
 		CategoryDTO dto = new CategoryDTO();
 		dto.setId(getCategoryIdByMapping(ebeiServiceType.getServiceId()));
 		String parentId = ebeiServiceType.getParentId();
 		dto.setParentId("".equals(parentId)?PmTaskHandle.EBEI_TASK_CATEGORY:getCategoryIdByMapping(parentId));
 		dto.setName(ebeiServiceType.getServiceName());
 		dto.setIsSupportDelete((byte)0);
-		
+
 		List<EbeiServiceType> types = ebeiServiceType.getItems();
 		if(null != types) {
 			List<CategoryDTO> childrens = types.stream().map(r -> {
@@ -185,7 +185,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			}).collect(Collectors.toList());
 			dto.setChildrens(childrens);
 		}
-		
+
 		return dto;
 	}
 
@@ -199,19 +199,19 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		String scope = DockingMappingScope.EBEI_PM_TASK.getCode();
 
 		return coordinationProvider.getNamedLock(CoordinationLocks.PMTASK_STATISTICS.getCode()).enter(()-> {
-		DockingMapping dockingMapping = dockingMappingProvider
-				.findDockingMappingByScopeAndMappingValue(namespaceId, scope, serviceId);
+			DockingMapping dockingMapping = dockingMappingProvider
+					.findDockingMappingByScopeAndMappingValue(namespaceId, scope, serviceId);
 
-		if (null == dockingMapping) {
-			dockingMapping = new DockingMapping();
-			long id = sequenceProvider.getNextSequence(NameMapper
-					.getSequenceDomainFromTablePojo(EhDockingMappings.class));
-			dockingMapping.setId(id);
-			dockingMapping.setScope(scope);
-			dockingMapping.setMappingValue(serviceId);
+			if (null == dockingMapping) {
+				dockingMapping = new DockingMapping();
+				long id = sequenceProvider.getNextSequence(NameMapper
+						.getSequenceDomainFromTablePojo(EhDockingMappings.class));
+				dockingMapping.setId(id);
+				dockingMapping.setScope(scope);
+				dockingMapping.setMappingValue(serviceId);
 
-			dockingMappingProvider.createDockingMapping(dockingMapping);
-		}
+				dockingMappingProvider.createDockingMapping(dockingMapping);
+			}
 			return dockingMapping;
 		}).first().getId();
 	}
@@ -229,30 +229,30 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		String url = configProvider.getValue("pmtask.ebei.url", "");
 		HttpPost httpPost = new HttpPost(url + method);
 		CloseableHttpResponse response = null;
-		
+
 		String json = null;
-		
+
 		try {
 			StringEntity stringEntity = new StringEntity(param.toString(), "utf8");
 			httpPost.setEntity(stringEntity);
 //			httpPost.addHeader("EBEI_TOKEN", "");
 //			httpPost.addHeader("HTMIMI_USERID", "");
-			
+
 			response = httpclient.execute(httpPost);
-			
+
 			int status = response.getStatusLine().getStatusCode();
 			if(status == HttpStatus.SC_OK) {
 				HttpEntity entity = response.getEntity();
-				
+
 				if (entity != null) {
 					json = EntityUtils.toString(entity, "utf8");
 				}
 			}
-			
+
 		} catch (IOException e) {
 			LOGGER.error("Pmtask request error, param={}", param, e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"Pmtask request error.");
+					"Pmtask request error.");
 		}finally {
 			if (null != response) {
 				try {
@@ -261,15 +261,15 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 					LOGGER.error("Pmtask close instream, response error, param={}", param, e);
 				}
 			}
-        }
-		
+		}
+
 		if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Data from Ebei, param={}, json={}", param, json);
-		
+
 		return json;
 	}
 
-	
+
 	@PreDestroy
 	public void destroy() {
 		if(null != httpclient) {
@@ -282,9 +282,9 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	}
 
 	private EbeiTaskResult createTask(PmTask task, List<AttachmentDescriptor> attachments) {
-		
+
 		JSONObject param = new JSONObject();
-		
+
 		param.put("userId", "");
 		param.put("address", task.getAddress());
 
@@ -304,7 +304,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			}
 			fileAddrs = sb.toString();
 		}
-		
+
 		param.put("buildingId", "");
 		param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
 		param.put("type", "1");
@@ -313,11 +313,11 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		param.put("anonymous", "0");
 		param.put("fileAddrs", fileAddrs);
 		param.put("buildingType", "0");
-		
+
 		String json = postToEbei(param, CREATE_TASK, null);
-		
+
 		EbeiJsonEntity<EbeiTaskResult> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiTaskResult>>(){});
-		
+
 		if(entity.isSuccess()) {
 			EbeiTaskResult dto = entity.getData();
 			if(dto.getResult() == 1) {
@@ -327,15 +327,15 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 				"Request of third failed.");
 	}
-	
+
 	private Boolean cancelTask(PmTask task) {
-		
+
 		JSONObject param = new JSONObject();
-		
+
 		param.put("orderId", task.getStringTag1());
-		
+
 		String json = postToEbei(param, CANCEL_TASK, null);
-		
+
 		EbeiJsonEntity<EbeiResult> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiResult>>(){});
 
 		if(entity.isSuccess()) {
@@ -344,15 +344,15 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 				return true;
 			}
 		}
-		
+
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 				"Request of third failed.");
 	}
-	
+
 	private Boolean evaluateTask(PmTask task) {
-		
+
 		JSONObject param = new JSONObject();
-		
+
 		param.put("userId", "");
 		param.put("recordId", task.getStringTag1());
 		Byte star = task.getStar();
@@ -366,9 +366,9 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		param.put("ownerName", task.getRequestorName());
 		param.put("ownerPhone", task.getRequestorPhone());
 		param.put("projectId", projectId);
-		
+
 		String json = postToEbei(param, EVALUATE, null);
-		
+
 		EbeiJsonEntity<EbeiResult> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiResult>>(){});
 
 		if(entity.isSuccess()) {
@@ -377,34 +377,34 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	private EbeiPmTaskDTO getTaskDetail(PmTask task) {
-		
+
 		JSONObject param = new JSONObject();
-		
+
 		param.put("orderId", task.getStringTag1());
-		
+
 		String json = postToEbei(param, GET_TASK_DETAIL, null);
-		
+
 		EbeiJsonEntity<EbeiPmTaskDTO> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiPmTaskDTO>>(){});
-		
+
 		if(entity.isSuccess())
 			return entity.getData();
-		
+
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 				"Request of third failed.");
 	}
-	
+
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
 
 		if(null == cmd.getCategoryId()){
 			LOGGER.error("Invalid categoryId parameter.");
-    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
-    				"Invalid categoryId parameter.");
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
+					"Invalid categoryId parameter.");
 		}
 		if(null == cmd.getAddressType()){
 			LOGGER.error("Invalid addressType parameter.");
@@ -479,7 +479,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			return null;
 		});
 
-		pmTaskSearch.feedDoc(task);	
+		pmTaskSearch.feedDoc(task);
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}
 
@@ -528,34 +528,34 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 
 	private void checkCreateTaskParam(String ownerType, Long ownerId, Long taskCategoryId, String content){
 		checkOwnerIdAndOwnerType(ownerType, ownerId);
-    	if(null == taskCategoryId) {
-        	LOGGER.error("Invalid taskCategoryId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Invalid taskCategoryId parameter.");
-        }
-    	
-    	if(StringUtils.isBlank(content)) {
-        	LOGGER.error("Invalid content parameter.");
-    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CONTENT_NULL,
-    				"Invalid content parameter.");
-        }
-    	
-    }
-	
+		if(null == taskCategoryId) {
+			LOGGER.error("Invalid taskCategoryId parameter.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid taskCategoryId parameter.");
+		}
+
+		if(StringUtils.isBlank(content)) {
+			LOGGER.error("Invalid content parameter.");
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CONTENT_NULL,
+					"Invalid content parameter.");
+		}
+
+	}
+
 	private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
 		if(null == ownerId) {
-        	LOGGER.error("Invalid ownerId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Invalid ownerId parameter.");
-        }
-    	
-    	if(StringUtils.isBlank(ownerType)) {
-        	LOGGER.error("Invalid ownerType parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Invalid ownerType parameter.");
-        }
+			LOGGER.error("Invalid ownerId parameter.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid ownerId parameter.");
+		}
+
+		if(StringUtils.isBlank(ownerType)) {
+			LOGGER.error("Invalid ownerType parameter.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid ownerType parameter.");
+		}
 	}
-	
+
 	@Override
 	public void cancelTask(CancelTaskCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
@@ -589,7 +589,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			return null;
 		});
 	}
-	
+
 	@Override
 	public void evaluateTask(EvaluateTaskCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
@@ -598,8 +598,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		PmTask task = checkPmTask(cmd.getId());
 		if(!task.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
 			LOGGER.error("Task have not been completed, cmd={}", cmd);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"Task have not been completed.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Task have not been completed.");
 		}
 		task.setOperatorStar(cmd.getOperatorStar());
 		task.setStar(cmd.getStar());
@@ -608,39 +608,39 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		}
 
 	}
-	
+
 	private void checkId(Long id){
 		if(null == id) {
-        	LOGGER.error("Invalid id parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Invalid id parameter.");
-        }
+			LOGGER.error("Invalid id parameter.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter.");
+		}
 	}
-	
+
 	private PmTask checkPmTask(Long id){
 		PmTask pmTask = pmTaskProvider.findTaskById(id);
 		if(null == pmTask) {
-        	LOGGER.error("PmTask not found, id={}", id);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"PmTask not found.");
-        }
+			LOGGER.error("PmTask not found, id={}", id);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"PmTask not found.");
+		}
 		return pmTask;
 	}
 
 	@Override
 	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
 		// TODO Auto-generated method stub
-		
+
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
+
 		PmTask task = pmTaskProvider.findTaskById(cmd.getId());
-		
+
 		PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
-		
+
 		dbProvider.execute((TransactionStatus status) -> {
-			
+
 			EbeiPmTaskDTO ebeiPmTask = getTaskDetail(task);
-			
+
 			Integer state = ebeiPmTask.getState();
 			task.setStatus(state.byteValue() > PmTaskStatus.PROCESSED.getCode() ? PmTaskStatus.PROCESSED.getCode(): state.byteValue() );
 			pmTaskProvider.updateTask(task);
@@ -661,11 +661,11 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			CategoryDTO taskCategory = createCategoryDTO();
 			dto.setTaskCategoryName(taskCategory.getName());
 			dto.setCategoryName(ebeiPmTask.getServiceName());
-			
+
 			String filePath = ebeiPmTask.getFilePath();
 			if(StringUtils.isNotBlank(filePath)) {
 				String[] filePaths = filePath.split(",");
-				
+
 				List<PmTaskAttachmentDTO> attachments = new ArrayList<>();
 				for (String url: filePaths) {
 					PmTaskAttachmentDTO d = new PmTaskAttachmentDTO();
@@ -674,9 +674,9 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 				}
 				dto.setAttachments(attachments);
 			}
-			
+
 			List<EbeiPmtaskLogDTO> logs = ebeiPmTask.getScheduleStr();
-			
+
 			if(null != logs) {
 				List<PmTaskLogDTO> taskLogs = new ArrayList<>();
 				for(EbeiPmtaskLogDTO ebeiLog: logs) {
@@ -693,17 +693,17 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 				}
 				dto.setTaskLogs(taskLogs);
 			}
-		
+
 			return null;
 		});
-		
+
 		//elasticsearch更新
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
-		
+
 		return dto;
 	}
-	
+
 	private Timestamp strDateToTimestamp(String s) {
 		try {
 			Date date = datetimeSF.parse(s);
@@ -715,37 +715,37 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		}
 		return null;
 	}
-	
+
 	@Override
 	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
-		
+
 		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
-		
+
 		List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
-		
+
 		if(null == cmd.getParentId()) {
 			CategoryDTO dto = createCategoryDTO();
 			dto.setChildrens(childrens);
-			
+
 			response.setRequests(Collections.singletonList(dto));
 		}else {
 			response.setRequests(childrens);
 
 		}
-		
+
 		return response;
 	}
 
 	@Override
 	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
-		
+
 		List<CategoryDTO> childrens = listServiceType(projectId, null);
 		CategoryDTO dto = createCategoryDTO();
 		dto.setChildrens(childrens);
-		
+
 		return Collections.singletonList(dto);
 	}
-	
+
 	private CategoryDTO createCategoryDTO() {
 		CategoryDTO dto = new CategoryDTO();
 		dto.setId(PmTaskHandle.EBEI_TASK_CATEGORY);
@@ -754,19 +754,19 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		dto.setIsSupportDelete((byte)0);
 		return dto;
 	}
-	
+
 	private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
-        String url = null;
-        if(uri != null && uri.length() > 0) {
-            try{
-                url = contentServerService.parserUri(uri, ownerType, ownerId);
-            }catch(Exception e){
-                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
-            }
-        }
-        
-        return url;
-    }
+		String url = null;
+		if(uri != null && uri.length() > 0) {
+			try{
+				url = contentServerService.parserUri(uri, ownerType, ownerId);
+			}catch(Exception e){
+				LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
+			}
+		}
+
+		return url;
+	}
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -774,29 +774,29 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
 		SearchTasksResponse response = new SearchTasksResponse();
-		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), 
-				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), 
+		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(),
+				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(),
 				cmd.getPageAnchor(), pageSize+1);
 		int listSize = list.size();
 		if(listSize > 0){
-    		response.setRequests(list.stream().map(t -> {
+			response.setRequests(list.stream().map(t -> {
 //    			PmTask task = pmTaskProvider.findTaskById(t.getId());
-    			PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
-    			
-    			CategoryDTO taskCategory = createCategoryDTO();
-    			dto.setTaskCategoryId(taskCategory.getId());
-    			dto.setTaskCategoryName(taskCategory.getName());
-    			
-    			return dto;
-    		}).collect(Collectors.toList()));
-    		if(listSize <= pageSize){
-        		response.setNextPageAnchor(null);
-        	}else{
-        		response.setNextPageAnchor(list.get(listSize-1).getCreateTime().getTime());
+				PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
+
+				CategoryDTO taskCategory = createCategoryDTO();
+				dto.setTaskCategoryId(taskCategory.getId());
+				dto.setTaskCategoryName(taskCategory.getName());
+
+				return dto;
+			}).collect(Collectors.toList()));
+			if(listSize <= pageSize){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(list.get(listSize-1).getCreateTime().getTime());
 				response.getRequests().remove(list.get(listSize-1));
-        	}
-    	}
-		
+			}
+		}
+
 		return response;
 	}
 
@@ -805,7 +805,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		User current = UserContext.current().getUser();
-		
+
 		Byte status = cmd.getStatus();
 		List<PmTask> list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, cmd.getTaskCategoryId(),
 				cmd.getPageAnchor(), cmd.getPageSize());
@@ -813,26 +813,26 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		ListUserTasksResponse response = new ListUserTasksResponse();
 		int size = list.size();
 		if(size > 0){
-    		response.setRequests(list.stream().map(r -> {
-    			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
+			response.setRequests(list.stream().map(r -> {
+				PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
 //    			if(null == r.getOrganizationId() || r.getOrganizationId() ==0 ){
 //    				User user = userProvider.findUserById(r.getCreatorUid());
 //        			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 //        			dto.setRequestorName(user.getNickName());
 //        			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
 //    			}
-    			CategoryDTO taskCategory = createCategoryDTO();
-    	    	dto.setTaskCategoryName(taskCategory.getName());
-    			
-    			return dto;
-    		}).collect(Collectors.toList()));
-    		if(size != pageSize){
-        		response.setNextPageAnchor(null);
-        	}else{
-        		response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
-        	}
-    	}
-		
+				CategoryDTO taskCategory = createCategoryDTO();
+				dto.setTaskCategoryName(taskCategory.getName());
+
+				return dto;
+			}).collect(Collectors.toList()));
+			if(size != pageSize){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
+			}
+		}
+
 		return response;
 	}
 

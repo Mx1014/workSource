@@ -101,15 +101,16 @@ public class YouXunTongSmsHandler implements SmsHandler {
             model = variables.stream().collect(Collectors.toMap(Tuple::first, Tuple::second));
         }
 
-        LocaleTemplate sign = localeTemplateService.getLocalizedTemplate(namespaceId, SmsTemplateCode.SCOPE, SmsTemplateCode.SIGN_CODE, templateLocale);
+        String signScope = SmsTemplateCode.SCOPE + ".sign";
+        LocaleTemplate sign = localeTemplateService.getLocalizedTemplate(namespaceId, signScope, SmsTemplateCode.SIGN_CODE, templateLocale);
 
         templateScope = templateScope + "." + SmsTemplateCode.YOU_XUN_TONG_SUFFIX;
-        String content = localeTemplateService.getLocaleTemplateString(namespaceId, templateScope, templateId, templateLocale, model, "");
+        String content = localeTemplateService.getLocaleTemplateString(namespaceId, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
         if (content == null || content.isEmpty()) {
             content = localeTemplateService.getLocaleTemplateString(namespaceId, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
         }
         if (content == null || content.isEmpty()) {
-            content = localeTemplateService.getLocaleTemplateString(Namespace.DEFAULT_NAMESPACE, templateScope, templateId, templateLocale, model, "");
+            content = localeTemplateService.getLocaleTemplateString(Namespace.DEFAULT_NAMESPACE, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
         }
         if (content == null || content.isEmpty()) {
             content = localeTemplateService.getLocaleTemplateString(Namespace.DEFAULT_NAMESPACE, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
@@ -117,7 +118,7 @@ public class YouXunTongSmsHandler implements SmsHandler {
 
         if (content != null && content.trim().length() > 0) {
             List<SmsLog> smsLogList = new ArrayList<>();
-            for (int i = 0; i < phoneNumbers.length + MAX_LIMIT; i += MAX_LIMIT) {
+            for (int i = 0; i < phoneNumbers.length; i += MAX_LIMIT) {
                 int length = MAX_LIMIT;
                 if (i + MAX_LIMIT > phoneNumbers.length) {
                     length = phoneNumbers.length - i;
@@ -163,9 +164,8 @@ public class YouXunTongSmsHandler implements SmsHandler {
                 log.setMobile(phoneNumber);
                 log.setResult(rspMessage.getMessage());
                 log.setHandler(YOU_XUN_TONG_HANDLER_NAME);
-                log.setVariables(content);
+                log.setText(content);
                 log.setSmsId(result.msgid);
-                log.setHttpStatusCode(rspMessage.getCode());
 
                 if ("0".equals(result.result)) {
                     log.setStatus(SmsLogStatus.SEND_SUCCESS.getCode());

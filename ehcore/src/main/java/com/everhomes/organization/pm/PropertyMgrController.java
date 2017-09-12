@@ -18,7 +18,6 @@ import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsResponse;
 import com.everhomes.rest.address.UpdateApartmentCommand;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
-import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationDTO;

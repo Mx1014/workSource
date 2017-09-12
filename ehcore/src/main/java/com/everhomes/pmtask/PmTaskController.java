@@ -576,4 +576,19 @@ public class PmTaskController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp;
     }
+
+    /**
+     * <b>URL: /pmtask/changeTaskState</b>
+     * <p>提供给一碑的回调接口</p>
+     */
+    @RequestMapping("changeTaskState")
+    @RestReturn(value = String.class)
+    public RestResponse changeTaskState(UpdateTasksStatusCommand cmd){
+        pmTaskService.changeTasksStatus(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
 }

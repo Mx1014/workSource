@@ -6,6 +6,8 @@ import com.everhomes.rest.sms.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateUtils;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -98,7 +97,13 @@ public class SmsServiceImpl implements SmsService {
     @Override
     public void sendTestSms(SendTestSmsCommand cmd) {
         String[] mobiles = cmd.getMobile().split(",");
-        String locale = Locale.CHINESE.toString();
+        String locale = Locale.CHINA.toString();
+
+        List<Tuple<String, Object>> tuples = new ArrayList<>();
+        if (cmd.getVariables() != null) {
+            Map<String, String> map = (Map<String, String>) StringHelper.fromJsonString(cmd.getVariables(), Map.class);
+            map.forEach((k, v) -> smsProvider.addToTupleList(tuples, k, v));
+        }
 
         smsProvider.sendSms(
                 cmd.getHandler(),
@@ -107,7 +112,7 @@ public class SmsServiceImpl implements SmsService {
                 SmsTemplateCode.SCOPE,
                 cmd.getTemplateCode() != null ? cmd.getTemplateCode() : -1,
                 locale,
-                null
+                tuples
         );
     }
 

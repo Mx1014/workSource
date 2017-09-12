@@ -10,7 +10,6 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,11 +54,13 @@ public class LianXinTongSmsHandler implements SmsHandler {
         this.server = configurationProvider.getValue(LXT_SERVER, "");
     }
 
-    private RspMessage createAndSend(Map<String, String> message) {
+    private RspMessage createAndSend(Map<String, Object> message) {
         SmsChannel channel = SmsBuilder.create(false);
         message.put("authCode", authCode);
         message.put("spId", spId);
         message.put("srcId", srcId);
+        message.put("reqId", "123456");
+        message.put("serviceId", "");
         return channel.sendMessage(server, SmsBuilder.HttpMethod.POST.val(), null, null, StringHelper.toJsonString(message));
     }
 
@@ -93,15 +94,16 @@ public class LianXinTongSmsHandler implements SmsHandler {
             model = variables.stream().collect(Collectors.toMap(Tuple::first, Tuple::second));
         }
 
-        LocaleTemplate sign = localeTemplateService.getLocalizedTemplate(namespaceId, SmsTemplateCode.SCOPE, SmsTemplateCode.SIGN_CODE, templateLocale);
+        String signScope = SmsTemplateCode.SCOPE + ".sign";
+        LocaleTemplate sign = localeTemplateService.getLocalizedTemplate(namespaceId, signScope, SmsTemplateCode.SIGN_CODE, templateLocale);
 
         templateScope = templateScope + "." + SmsTemplateCode.LIAN_XIN_TONG_SUFFIX;
-        String content = localeTemplateService.getLocaleTemplateString(namespaceId, templateScope, templateId, templateLocale, model, "");
+        String content = localeTemplateService.getLocaleTemplateString(namespaceId, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
         if (content == null || content.isEmpty()) {
             content = localeTemplateService.getLocaleTemplateString(namespaceId, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
         }
         if (content == null || content.isEmpty()) {
-            content = localeTemplateService.getLocaleTemplateString(Namespace.DEFAULT_NAMESPACE, templateScope, templateId, templateLocale, model, "");
+            content = localeTemplateService.getLocaleTemplateString(Namespace.DEFAULT_NAMESPACE, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
         }
         if (content == null || content.isEmpty()) {
             content = localeTemplateService.getLocaleTemplateString(Namespace.DEFAULT_NAMESPACE, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
@@ -109,7 +111,7 @@ public class LianXinTongSmsHandler implements SmsHandler {
 
         if (content != null && content.trim().length() > 0) {
             List<SmsLog> smsLogList = new ArrayList<>();
-            for (int i = 0; i < phoneNumbers.length + MAX_LIMIT; i += MAX_LIMIT) {
+            for (int i = 0; i < phoneNumbers.length; i += MAX_LIMIT) {
                 int length = MAX_LIMIT;
                 if (i + MAX_LIMIT > phoneNumbers.length) {
                     length = phoneNumbers.length - i;
@@ -117,11 +119,10 @@ public class LianXinTongSmsHandler implements SmsHandler {
                 String[] phonesPart = new String[length];
                 System.arraycopy(phoneNumbers, i, phonesPart, 0, length);
 
-                Map<String, String> message = new HashMap<>();
+                Map<String, Object> message = new HashMap<>();
                 message.put("content", content);
-                message.put("mobiles", StringHelper.toJsonString(phonesPart));
+                message.put("mobiles", phonesPart);
                 // message.put("content", sign.getText() + content);
-                // message.put("reqId", "123456");
 
                 RspMessage rspMessage = createAndSend(message);
                 smsLogList.addAll(buildSmsLogs(namespaceId, phonesPart, templateScope, templateId, templateLocale, content, rspMessage));
@@ -149,8 +150,11 @@ public class LianXinTongSmsHandler implements SmsHandler {
         List<SmsLog> smsLogs = new ArrayList<>();
         if (rspMessage != null) {
             Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-            List<Result> results = gson.fromJson(rspMessage.getMessage(), new TypeToken<List<Result>>(){}.getType());
-            for (Result result : results) {
+            Rets rets = gson.fromJson(rspMessage.getMessage(), Rets.class);
+            if (rets == null) {
+                return smsLogs;
+            }
+            for (Result result : rets.rets) {
                 SmsLog log = new SmsLog();
                 log.setCreateTime(new Timestamp(System.currentTimeMillis()));
                 log.setNamespaceId(namespaceId);
@@ -160,9 +164,8 @@ public class LianXinTongSmsHandler implements SmsHandler {
                 log.setMobile(result.mobile);
                 log.setResult(rspMessage.getMessage());
                 log.setHandler(LIAN_XIN_TONG_HANDLER_NAME);
-                log.setVariables(content);
+                log.setText(content);
                 log.setSmsId(result.msgId);
-                log.setHttpStatusCode(rspMessage.getCode());
 
                 if ("0".equals(result.rspcod)) {
                     log.setStatus(SmsLogStatus.SEND_SUCCESS.getCode());
@@ -199,6 +202,10 @@ public class LianXinTongSmsHandler implements SmsHandler {
         String mobile;
         String msgId;
         String rspcod;
+    }
+
+    private static class Rets {
+        List<Result> rets;
     }
 
     private static class Report {
