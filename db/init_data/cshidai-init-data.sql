@@ -114,20 +114,17 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 
 -- 短信
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 1, 'zh_CN', '验证码-军民', '89972');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 4, 'zh_CN', '派单-军民', '90103');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 5, 'zh_CN', '任务-军民', '90296');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 6, 'zh_CN', '任务2-军民', '90298');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 7, 'zh_CN', '新报修-军民', '90327');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 1, 'zh_CN', '验证码-C时代', '147016');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 4, 'zh_CN', '派单-C时代', '147018');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 5, 'zh_CN', '任务-C时代', '147019');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 6, 'zh_CN', '任务2-C时代', '147020');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 7, 'zh_CN', '新报修-C时代', '147022');
 
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 15, 'zh_CN', '物业任务3-军民', '90343');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 12, 'zh_CN', '预定1-军民', '90345');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 13, 'zh_CN', '预定2-军民', '90346');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 14, 'zh_CN', '预定3-军民', '90347');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 15, 'zh_CN', '物业任务3-C时代', '147021');
 
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 51, 'zh_CN', '视频会-军民', '90350');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 52, 'zh_CN', '视测会-军民', '90352');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 53, 'zh_CN', '申诉-军民', '90348');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 51, 'zh_CN', '视频会-C时代', '147023');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 52, 'zh_CN', '视测会-C时代', '147024');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999965, 'sms.default.yzx', 53, 'zh_CN', '申诉-C时代', '147025');
 
 
 -- ---------------自动生成的代码
