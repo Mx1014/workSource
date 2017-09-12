@@ -121,7 +121,7 @@ CREATE TABLE `eh_payment_order` (
   `status` tinyint(4) DEFAULT '2' COMMENT '0: cancel, 1: reject, 2:normal',
   `cancel_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_act_roster_uuid` (`uuid`),
+  UNIQUE KEY `u_eh_asset_order_uuid` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
