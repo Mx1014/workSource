@@ -403,4 +403,7 @@ public interface RolePrivilegeService {
 	List<ServiceModuleDTO> listServiceModulesByTarget(ListServiceModulesByTargetCommand cmd);
 
 	void assignmentAclRole(String ownerType, Long ownerId, String targetType, Long targetId, Integer namespaceId, Long creatorUid, Long roleId);
+
+	//	批量增加管理员 added by R 20170912.
+	void createOrganizationSuperAdmins(CreateOrganizationAdminsCommand cmd);
 }

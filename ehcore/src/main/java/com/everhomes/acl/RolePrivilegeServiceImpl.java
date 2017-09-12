@@ -3132,6 +3132,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return authorizationRelation;
 	}
 
+	public void createOrganizationSuperAdmins(CreateOrganizationAdminsCommand cmd){
+
+	}
+
 	public static void main(String[] args) {
 //		System.out.println(GeoHashUtils.encode(41.843665, 123.455102));
 		System.out.println("2015/11/11".replaceAll("/", "-"));
