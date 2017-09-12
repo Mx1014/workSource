@@ -5365,7 +5365,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(keywords, cmd.getIsSignedup(), visibleFlag, locator, pageSize, cmd);
 
-        Long endTime2 = System.currentTimeMillis();
+        Map<String, OrganizationMember> contact_member = new HashMap<>();
+
+        organizationMembers.stream().map(r->{
+            contact_member.put(r.getContactToken(),r);
+            return null;
+        }).collect(Collectors.toList());
 
         if (0 == organizationMembers.size()) {
             return response;
@@ -5390,20 +5395,29 @@ public class OrganizationServiceImpl implements OrganizationService {
         Map<String, OrganizationMemberDTO> target_map = new HashMap<>();
 
         origins.forEach(r -> {
-            OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
+            Organization org_now = organizationProvider.findOrganizationById(r.getOrganizationId());
+            if (org_now == null){
+                return;
+            }
+            //准备放入的dto
+            OrganizationMemberDTO dto = ConvertHelper.convert(contact_member.get(r.getContactToken()), OrganizationMemberDTO.class);
+            //拿出的dto
+            OrganizationMemberDTO orgDto_target = target_map.get(r.getContactToken());
+            //本次获得的orgDto
+            OrganizationDTO orgDTO_now = ConvertHelper.convert(org_now, OrganizationDTO.class);
+
             switch (OrganizationGroupType.fromCode(r.getGroupType())) {
                 case ENTERPRISE:
-                    target_map.put(dto.getContactToken(), dto);
+                    if(orgDto_target == null){
+                        target_map.put(dto.getContactToken(), dto);
+                    }
                     break;
                 case DIRECT_UNDER_ENTERPRISE:
                 case DEPARTMENT:
                 case GROUP:
-                    Organization org_now = organizationProvider.findOrganizationById(r.getOrganizationId());
                     List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>();
-                    if (org_now != null ) {
-                        OrganizationDTO orgDTO_now = ConvertHelper.convert(org_now, OrganizationDTO.class);
-                        OrganizationMemberDTO orgDto_target = target_map.get(r.getContactToken());
-                        if (orgDto_target == null) {
+                        //拼装
+                        if (orgDto_target == null) {  //首次拼装
                             departments.add(orgDTO_now);
                             dto.setDepartments(departments);
                             target_map.put(dto.getContactToken(), dto);
@@ -5419,30 +5433,25 @@ public class OrganizationServiceImpl implements OrganizationService {
                             }
 
                         }
-                    }
                     break;
                 case JOB_POSITION:
-                    Organization position_now = organizationProvider.findOrganizationById(r.getOrganizationId());
-                    if (position_now != null) {
-                        OrganizationDTO positionDTO_now = ConvertHelper.convert(position_now, OrganizationDTO.class);
                         List<OrganizationDTO> jobPositions = new ArrayList<OrganizationDTO>();
-                        OrganizationMemberDTO orgDto_target = target_map.get(r.getContactToken());
-                        if (orgDto_target == null) {
-                            jobPositions.add(positionDTO_now);
+                        //拼装
+                        if (orgDto_target == null) {  //首次拼装
+                            jobPositions.add(orgDTO_now);
                             dto.setJobPositions(jobPositions);
                             target_map.put(dto.getContactToken(), dto);
                         } else {
                             if(orgDto_target.getJobPositions() == null){
-                                jobPositions.add(positionDTO_now);
+                                jobPositions.add(orgDTO_now);
                                 orgDto_target.setJobPositions(jobPositions);
                             }else{
-                                orgDto_target.getJobPositions().add(positionDTO_now);
+                                orgDto_target.getJobPositions().add(orgDTO_now);
 //                                jobPositions = orgDto_target.getJobPositions();
 //                                jobPositions.add(positionDTO_now);
 //                                orgDto_target.setJobPositions(jobPositions);
                             }
                         }
-                    }
                     break;
                 default:
                     break;
