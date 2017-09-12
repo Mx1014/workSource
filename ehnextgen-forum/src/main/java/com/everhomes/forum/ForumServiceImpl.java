@@ -1417,12 +1417,16 @@ public class ForumServiceImpl implements ForumService {
     	 Long operatorId = operator.getId();
     	 Long organizationId = cmd.getOrganizationId();
          Long communityId = cmd.getCommunityId();
+        Integer namespaceId = cmd.getNamespaceId();
+        if(namespaceId == null){
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
          List<Long> forumIds = new ArrayList<Long>();
          //Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
          List<Long> communityIdList = new ArrayList<Long>();
 
          //获取园区id和论坛Id,并返回orgId，因为当查询域空间时需要orgid来查发送到“全部”的帖子 edit by yanjun 20170830
-         organizationId = populateCommunityIdAndForumId(communityId, organizationId, cmd.getNamespaceId(), communityIdList, forumIds);
+         organizationId = populateCommunityIdAndForumId(communityId, organizationId, namespaceId, communityIdList, forumIds);
          
          if(null != cmd.getEmbeddedAppId() && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
         	 ListActivitiesReponse response = activityService.listOfficialActivities(cmd);

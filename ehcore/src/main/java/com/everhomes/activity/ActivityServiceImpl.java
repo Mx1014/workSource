@@ -4193,12 +4193,16 @@ public class ActivityServiceImpl implements ActivityService {
         Long operatorId = operator.getId();
         Long organizationId = cmd.getOrganizationId();
         Long communityId = cmd.getCommunityId();
+        Integer namespaceId = cmd.getNamespaceId();
+        if(namespaceId == null){
+        	namespaceId = UserContext.getCurrentNamespaceId();
+		}
         List<Long> forumIds = new ArrayList<Long>();
         
         List<Long> communityIdList = new ArrayList<Long>();
 
 		//获取园区id和论坛Id,并返回orgId，因为当查询域空间时需要orgid来查发送到“全部”的帖子 edit by yanjun 20170830
-		organizationId = forumService.populateCommunityIdAndForumId(communityId, organizationId, cmd.getNamespaceId(), communityIdList, forumIds);
+		organizationId = forumService.populateCommunityIdAndForumId(communityId, organizationId, namespaceId, communityIdList, forumIds);
 
         // 当论坛list为空时，JOOQ的IN语句会变成1=0，导致条件永远不成立，也就查不到东西
         if(forumIds.size() == 0) {
@@ -4211,7 +4215,7 @@ public class ActivityServiceImpl implements ActivityService {
         //增加categoryId add by xiongying 20161118
         if(null != cmd.getCategoryId()) {
         	//老版本用id作为标识，新版本id无意义，使用entryId和namespaceId作为标识。此处弃用findActivityCategoriesById  add by yanjun 20170524
-            ActivityCategories category = activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), UserContext.getCurrentNamespaceId());
+            ActivityCategories category = activityProvider.findActivityCategoriesByEntryId(cmd.getCategoryId(), namespaceId);
             if (category != null) {
             	if(SelectorBooleanFlag.TRUE.equals(SelectorBooleanFlag.fromCode(category.getDefaultFlag()))) {
                     activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.in(cmd.getCategoryId(), 0L));
@@ -4228,7 +4232,7 @@ public class ActivityServiceImpl implements ActivityService {
         //增加活动主题分类，add by tt, 20170109
         if (cmd.getContentCategoryId() != null) {
         	//老版本用id作为标识，新版本id无意义，使用entryId和namespaceId作为标识。此处弃用findActivityCategoriesById  add by yanjun 20170524
-        	ActivityCategories category = activityProvider.findActivityCategoriesByEntryId(cmd.getContentCategoryId(), UserContext.getCurrentNamespaceId());
+        	ActivityCategories category = activityProvider.findActivityCategoriesByEntryId(cmd.getContentCategoryId(), namespaceId);
         	//如果没有查到分类或者分类的allFlag为是，则表示查询全部，不用加条件
         	if (category != null && TrueOrFalseFlag.FALSE == TrueOrFalseFlag.fromCode(category.getAllFlag())) {
         		activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(cmd.getContentCategoryId()));
