@@ -7,7 +7,7 @@ package com.everhomes.rest.order;
  *     <li>paymentName: 支付方式名称</li>
  *     <li>paymentLogo: paymentLogo</li>
  *     <li>paymentParams: 参数 {@link com.everhomes.rest.order.PaymentParamsDTO}</li>
- *     <li>extendInfo: 扩展信息 {@link com.everhomes.rest.order.PaymentExtendInfo}</li>
+ *     <li>extendInfo: 扩展信息jsonstring {@link com.everhomes.rest.order.PaymentExtendInfo}</li>
  * </ul>
  */
 public class PayMethodDTO {
