@@ -140,4 +140,6 @@ public interface AssetProvider {
     AssetVendor findAssetVendorByNamespace(Integer namespaceId);
 
     String findIdentifierByUid(Long aLong);
+
+    void saveAnOrderCopy(String payerType, String payerId, String amountOwed, String billIdsWithComma, String clientAppName, Long communityId, String contactNum, String openid, String payerName);
 }

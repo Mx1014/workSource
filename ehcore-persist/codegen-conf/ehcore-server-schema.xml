@@ -199,7 +199,7 @@
         eh_stat_event_device_logs | eh_stat_event_upload_strategies | eh_stat_events | eh_stat_event_params | eh_stat_event_content_logs |
         eh_stat_event_logs | eh_stat_event_param_logs | eh_stat_event_app_attachment_logs | eh_stat_event_portal_configs | eh_stat_event_portal_statistics |
         eh_stat_event_statistics | eh_stat_event_task_logs | eh_community_default | eh_namespace_masks | eh_door_auth_level |
-            eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types |
+            eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types | eh_payment_order |
         </includes>
 
             <!-- All elements that are excluded from your schema

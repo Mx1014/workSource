@@ -58,4 +58,6 @@ public interface AssetVendorHandler {
     void exportRentalExcelTemplate(HttpServletResponse response);
 
     void updateBillsToSettled(UpdateBillsToSettled cmd);
+
+    PlaceAnAssetOrderResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
 }

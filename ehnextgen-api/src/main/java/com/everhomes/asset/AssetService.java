@@ -99,4 +99,6 @@ public interface AssetService {
     PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
 
     void updateBillSwitchOnTime();
+
+    PlaceAnAssetOrderResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
 }
