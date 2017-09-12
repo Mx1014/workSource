@@ -3,6 +3,7 @@ package com.everhomes.uniongroup;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.organization.*;
 import com.everhomes.rest.uniongroup.*;
@@ -30,6 +31,9 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Autowired
     private OrganizationService organizationService;
+
+    @Autowired
+    private CoordinationProvider coordinationProvider ;
 
     @Autowired
     private OrganizationProvider organizationProvider;
@@ -200,6 +204,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 
                     return null;
                 });
+            return null;
         });
 
 
