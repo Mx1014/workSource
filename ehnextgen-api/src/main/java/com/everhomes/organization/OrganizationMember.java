@@ -5,6 +5,7 @@ import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 public class OrganizationMember extends EhOrganizationMembers implements Comparable<OrganizationMember> {
 
@@ -40,6 +41,11 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 	private Byte employeeType;
 
     private Long enterpriserId;
+
+    private String email;
+    private String workEmail;
+    private String regionCode;
+    private Timestamp contractEndTime;
 
     public OrganizationMember() {
     }
@@ -191,5 +197,37 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     public void setEnterpriserId(Long enterpriserId) {
         this.enterpriserId = enterpriserId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getWorkEmail() {
+        return workEmail;
+    }
+
+    public void setWorkEmail(String workEmail) {
+        this.workEmail = workEmail;
+    }
+
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
+    }
+
+    public Timestamp getContractEndTime() {
+        return contractEndTime;
+    }
+
+    public void setContractEndTime(Timestamp contractEndTime) {
+        this.contractEndTime = contractEndTime;
     }
 }
