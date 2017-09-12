@@ -10501,11 +10501,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 CrossShardListingLocator locator = new CrossShardListingLocator();
                 locator.setAnchor(cmd.getPageAnchor());
-                List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(null,
-                        orgCommoand, null, null, locator, 10000);
-                dto.setMembers(organizationMembers.stream().map(m -> ConvertHelper.convert(m, OrganizationMemberDTO.class))
-                        .collect(Collectors.toList()));
-
+                if(cmd.getSimpleFlag() == null || cmd.getSimpleFlag() == OrganizationChildrenJobPositionSimpleFlag.NO.getCode()) {
+                    List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(null,
+                            orgCommoand, null, null, locator, 10000);
+                    dto.setMembers(organizationMembers.stream().map(m -> ConvertHelper.convert(m, OrganizationMemberDTO.class))
+                            .collect(Collectors.toList()));
+                }
                 return dto;
             }).collect(Collectors.toList()));
 
