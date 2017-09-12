@@ -4,13 +4,9 @@ package com.everhomes.openapi;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.server.schema.tables.records.EhContractBuildingMappingsRecord;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Record2;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -163,6 +159,23 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 			.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_NUMBER.eq(contractNumber))
 			.fetch()
 			.map(r->ConvertHelper.convert(r, ContractBuildingMapping.class));
+	}
+
+	@Override
+	public List<ContractBuildingMapping> listByContract(Long contractId) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhContractBuildingMappingsRecord> query = context.selectQuery(Tables.EH_CONTRACT_BUILDING_MAPPINGS);
+		query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(contractId));
+		query.addConditions(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+		List<ContractBuildingMapping> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, ContractBuildingMapping.class));
+			return null;
+		});
+
+		return result;
 	}
 
 	private EhContractBuildingMappingsDao getReadWriteDao() {

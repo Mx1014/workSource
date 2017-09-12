@@ -17,12 +17,14 @@ import javax.annotation.PreDestroy;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
-import com.everhomes.flow.FlowNodeProvider;
-import com.everhomes.flow.FlowService;
+import com.everhomes.flow.*;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pmtask.ebei.*;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -31,6 +33,7 @@ import com.everhomes.docking.DockingMapping;
 import com.everhomes.docking.DockingMappingProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.docking.DockingMappingScope;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhDockingMappings;
 import org.apache.commons.lang.StringUtils;
@@ -55,12 +58,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.pmtask.ebei.EbeiPmtaskLogDTO;
-import com.everhomes.pmtask.ebei.EbeiResult;
-import com.everhomes.pmtask.ebei.EbeiTaskResult;
-import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
-import com.everhomes.pmtask.ebei.EbeiJsonEntity;
-import com.everhomes.pmtask.ebei.EbeiServiceType;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -71,390 +68,404 @@ import com.everhomes.util.RuntimeErrorException;
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI)
 public class EbeiPmTaskHandle implements PmTaskHandle{
 
-	private static final String LIST_SERVICE_TYPE = "/rest/crmFeedBackInfoJoin/serviceTypeList";
-	private static final String CREATE_TASK = "/rest/crmFeedBackInfoJoin/uploadFeedBackOrder";
-	private static final String GET_TASK_DETAIL = "/rest/crmFeedBackInfoJoin/feedBackOrderDetail";
-	private static final String CANCEL_TASK = "/rest/crmFeedBackInfoJoin/cancelOrder";
-	private static final String EVALUATE = "/rest/crmFeedBackInfoJoin/evaluateFeedBack";
-	private static final String GET_TOKEN = "/rest/ebeiInfo/sysQueryToken";
+    private static final String LIST_SERVICE_TYPE = "/rest/crmFeedBackInfoJoin/serviceTypeList";
+    private static final String CREATE_TASK = "/rest/crmFeedBackInfoJoin/uploadFeedBackOrder";
+    private static final String GET_TASK_DETAIL = "/rest/crmFeedBackInfoJoin/feedBackOrderDetail";
+    private static final String CANCEL_TASK = "/rest/crmFeedBackInfoJoin/cancelOrder";
+    private static final String EVALUATE = "/rest/crmFeedBackInfoJoin/evaluateFeedBack";
+    private static final String GET_TOKEN = "/rest/ebeiInfo/sysQueryToken";
 
-	private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-	private String projectId = null;
+    private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    private String projectId = null;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(EbeiPmTaskHandle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EbeiPmTaskHandle.class);
 
-	private CloseableHttpClient httpclient = null;
+    private CloseableHttpClient httpclient = null;
 
-	@Autowired
-	private DbProvider dbProvider;
-	@Autowired
-	private PmTaskProvider pmTaskProvider;
-	@Autowired
-	private PmTaskSearch pmTaskSearch;
-	@Autowired
-	private ContentServerService contentServerService;
-	@Autowired
-	private ConfigurationProvider configProvider;
-	@Autowired
-	private PmTaskCommonServiceImpl pmTaskCommonService;
-	@Autowired
-	private DockingMappingProvider dockingMappingProvider;
-	@Autowired
-	private SequenceProvider sequenceProvider;
-	@Autowired
-	private CoordinationProvider coordinationProvider;
-	@Autowired
-	private FlowCaseProvider flowCaseProvider;
-	@Autowired
-	private BuildingProvider buildingProvider;
-	@Autowired
-	private CommunityProvider communityProvider;
-	@Autowired
-	private FlowService flowService;
+    @Autowired
+    private DbProvider dbProvider;
+    @Autowired
+    private PmTaskProvider pmTaskProvider;
+    @Autowired
+    private PmTaskSearch pmTaskSearch;
+    @Autowired
+    private ContentServerService contentServerService;
+    @Autowired
+    private ConfigurationProvider configProvider;
+    @Autowired
+    private PmTaskCommonServiceImpl pmTaskCommonService;
+    @Autowired
+    private DockingMappingProvider dockingMappingProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
+    @Autowired
+    private CoordinationProvider coordinationProvider;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
+    @Autowired
+    private BuildingProvider buildingProvider;
+    @Autowired
+    private CommunityProvider communityProvider;
+    @Autowired
+    private FlowService flowService;
+    @Autowired
+    private CategoryProvider categoryProvider;
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
+    @PostConstruct
+    public void init() {
+        httpclient = HttpClients.createDefault();
+        //对接的科兴，所以默认科兴 园区id
+        projectId = configProvider.getValue("pmtask.ebei.projectId", "240111044331055940");
+    }
 
-	@PostConstruct
-	public void init() {
-		httpclient = HttpClients.createDefault();
-		//对接的科兴，所以默认科兴 园区id
-		projectId = configProvider.getValue("pmtask.ebei.projectId", "240111044331055940");
-	}
+    private List<CategoryDTO> listServiceType(String projectId, Long parentId) {
+        JSONObject param = new JSONObject();
+        param.put("projectId", projectId);
 
-	private List<CategoryDTO> listServiceType(String projectId, Long parentId) {
-		JSONObject param = new JSONObject();
-		param.put("projectId", projectId);
+        String json = postToEbei(param, LIST_SERVICE_TYPE, null);
 
-		String json = postToEbei(param, LIST_SERVICE_TYPE, null);
+        EbeiJsonEntity<EbeiServiceType> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiServiceType>>(){});
 
-		EbeiJsonEntity<EbeiServiceType> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiServiceType>>(){});
-
-		if(entity.isSuccess()) {
-			EbeiServiceType type = entity.getData();
+        if(entity.isSuccess()) {
+            EbeiServiceType type = entity.getData();
 //			List<EbeiServiceType> types = type.getItems();
-			type.setServiceId(String.valueOf(PmTaskHandle.EBEI_TASK_CATEGORY));
-			List<EbeiServiceType> types;
+            type.setServiceId(String.valueOf(PmTaskHandle.EBEI_TASK_CATEGORY));
+            List<EbeiServiceType> types;
 
-			if (null == parentId || PmTaskHandle.EBEI_TASK_CATEGORY == parentId) {
-				types = type.getItems();
-			}else {
-				String mappingId = getMappingIdByCategoryId(parentId);
-				types = getTypes(type, mappingId);
+            if (null == parentId || PmTaskHandle.EBEI_TASK_CATEGORY == parentId) {
+                types = type.getItems();
+            }else {
+                String mappingId = getMappingIdByCategoryId(parentId);
+                types = getTypes(type, mappingId);
 
-			}
-			List<CategoryDTO> result = types.stream().map(c -> {
-				return convertCategory(c);
+            }
+            List<CategoryDTO> result = types.stream().map(c -> {
+                return convertCategory(c);
 
-			}).collect(Collectors.toList());
+            }).collect(Collectors.toList());
 
-			return result;
-		}
+            return result;
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	private List<EbeiServiceType> getTypes(EbeiServiceType type, String parentId) {
+    private List<EbeiServiceType> getTypes(EbeiServiceType type, String parentId) {
 
-		List<EbeiServiceType> result = new ArrayList<>();
-		List<EbeiServiceType> types = type.getItems();
+        List<EbeiServiceType> result = new ArrayList<>();
+        List<EbeiServiceType> types = type.getItems();
 
-		if (parentId.equals(type.getServiceId())) {
-			result.addAll(types);
-			return result;
-		}
+        if (parentId.equals(type.getServiceId())) {
+            result.addAll(types);
+            return result;
+        }
 
-		types.forEach(t -> {
-			result.addAll(getTypes(t, parentId));
-		});
+        types.forEach(t -> {
+            result.addAll(getTypes(t, parentId));
+        });
 
-		return result;
-	}
+        return result;
+    }
 
-	private CategoryDTO convertCategory(EbeiServiceType ebeiServiceType) {
+    private CategoryDTO convertCategory(EbeiServiceType ebeiServiceType) {
 
-		CategoryDTO dto = new CategoryDTO();
-		dto.setId(getCategoryIdByMapping(ebeiServiceType.getServiceId()));
-		String parentId = ebeiServiceType.getParentId();
-		dto.setParentId("".equals(parentId)?PmTaskHandle.EBEI_TASK_CATEGORY:getCategoryIdByMapping(parentId));
-		dto.setName(ebeiServiceType.getServiceName());
-		dto.setIsSupportDelete((byte)0);
+        CategoryDTO dto = new CategoryDTO();
+        dto.setId(getCategoryIdByMapping(ebeiServiceType.getServiceId()));
+        String parentId = ebeiServiceType.getParentId();
+        dto.setParentId("".equals(parentId)?PmTaskHandle.EBEI_TASK_CATEGORY:getCategoryIdByMapping(parentId));
+        dto.setName(ebeiServiceType.getServiceName());
+        dto.setIsSupportDelete((byte)0);
 
-		List<EbeiServiceType> types = ebeiServiceType.getItems();
-		if(null != types) {
-			List<CategoryDTO> childrens = types.stream().map(r -> {
-				return convertCategory(r);
-			}).collect(Collectors.toList());
-			dto.setChildrens(childrens);
-		}
+        List<EbeiServiceType> types = ebeiServiceType.getItems();
+        if(null != types) {
+            List<CategoryDTO> childrens = types.stream().map(r -> {
+                return convertCategory(r);
+            }).collect(Collectors.toList());
+            dto.setChildrens(childrens);
+        }
 
-		return dto;
-	}
+        return dto;
+    }
 
-	private Long getCategoryIdByMapping(String serviceId) {
+    private Long getCategoryIdByMapping(String serviceId) {
 
-		if (StringUtils.isBlank(serviceId)) {
-			return 0L;
-		}
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if (StringUtils.isBlank(serviceId)) {
+            return 0L;
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-		String scope = DockingMappingScope.EBEI_PM_TASK.getCode();
+        String scope = DockingMappingScope.EBEI_PM_TASK.getCode();
 
-		return coordinationProvider.getNamedLock(CoordinationLocks.PMTASK_STATISTICS.getCode()).enter(()-> {
-			DockingMapping dockingMapping = dockingMappingProvider
-					.findDockingMappingByScopeAndMappingValue(namespaceId, scope, serviceId);
+        return coordinationProvider.getNamedLock(CoordinationLocks.PMTASK_STATISTICS.getCode()).enter(()-> {
+            DockingMapping dockingMapping = dockingMappingProvider
+                    .findDockingMappingByScopeAndMappingValue(namespaceId, scope, serviceId);
 
-			if (null == dockingMapping) {
-				dockingMapping = new DockingMapping();
-				long id = sequenceProvider.getNextSequence(NameMapper
-						.getSequenceDomainFromTablePojo(EhDockingMappings.class));
-				dockingMapping.setId(id);
-				dockingMapping.setScope(scope);
-				dockingMapping.setMappingValue(serviceId);
+            if (null == dockingMapping) {
+                dockingMapping = new DockingMapping();
+                long id = sequenceProvider.getNextSequence(NameMapper
+                        .getSequenceDomainFromTablePojo(EhDockingMappings.class));
+                dockingMapping.setId(id);
+                dockingMapping.setScope(scope);
+                dockingMapping.setMappingValue(serviceId);
 
-				dockingMappingProvider.createDockingMapping(dockingMapping);
-			}
-			return dockingMapping;
-		}).first().getId();
-	}
+                dockingMappingProvider.createDockingMapping(dockingMapping);
+            }
+            return dockingMapping;
+        }).first().getId();
+    }
 
-	private String getMappingIdByCategoryId(Long categoryId) {
+    private String getMappingIdByCategoryId(Long categoryId) {
 
-		DockingMapping dockingMapping = dockingMappingProvider
-				.findDockingMappingById(categoryId);
+        DockingMapping dockingMapping = dockingMappingProvider
+                .findDockingMappingById(categoryId);
 
-		return dockingMapping.getMappingValue();
-	}
+        return dockingMapping.getMappingValue();
+    }
 
-	public String postToEbei(JSONObject param, String method, Map<String, String> headers) {
+    public String postToEbei(JSONObject param, String method, Map<String, String> headers) {
 
-		String url = configProvider.getValue("pmtask.ebei.url", "");
-		HttpPost httpPost = new HttpPost(url + method);
-		CloseableHttpResponse response = null;
+        String url = configProvider.getValue("pmtask.ebei.url", "");
+        HttpPost httpPost = new HttpPost(url + method);
+        CloseableHttpResponse response = null;
 
-		String json = null;
+        String json = null;
 
-		try {
-			StringEntity stringEntity = new StringEntity(param.toString(), "utf8");
-			httpPost.setEntity(stringEntity);
+        try {
+            StringEntity stringEntity = new StringEntity(param.toString(), "utf8");
+            httpPost.setEntity(stringEntity);
 //			httpPost.addHeader("EBEI_TOKEN", "");
 //			httpPost.addHeader("HTMIMI_USERID", "");
 
-			response = httpclient.execute(httpPost);
+            response = httpclient.execute(httpPost);
 
-			int status = response.getStatusLine().getStatusCode();
-			if(status == HttpStatus.SC_OK) {
-				HttpEntity entity = response.getEntity();
+            int status = response.getStatusLine().getStatusCode();
+            if(status == HttpStatus.SC_OK) {
+                HttpEntity entity = response.getEntity();
 
-				if (entity != null) {
-					json = EntityUtils.toString(entity, "utf8");
-				}
-			}
+                if (entity != null) {
+                    json = EntityUtils.toString(entity, "utf8");
+                }
+            }
 
-		} catch (IOException e) {
-			LOGGER.error("Pmtask request error, param={}", param, e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"Pmtask request error.");
-		}finally {
-			if (null != response) {
-				try {
-					response.close();
-				} catch (IOException e) {
-					LOGGER.error("Pmtask close instream, response error, param={}", param, e);
-				}
-			}
-		}
+        } catch (IOException e) {
+            LOGGER.error("Pmtask request error, param={}", param, e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "Pmtask request error.");
+        }finally {
+            if (null != response) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    LOGGER.error("Pmtask close instream, response error, param={}", param, e);
+                }
+            }
+        }
 
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Data from Ebei, param={}, json={}", param, json);
+        if(LOGGER.isDebugEnabled())
+            LOGGER.debug("Data from Ebei, param={}, json={}", param, json);
 
-		return json;
-	}
+        return json;
+    }
 
 
-	@PreDestroy
-	public void destroy() {
-		if(null != httpclient) {
-			try {
-				httpclient.close();
-			} catch (IOException e) {
-				LOGGER.error("Pmtask close httpclient, response error, httpclient={}", httpclient, e);
-			}
-		}
-	}
+    @PreDestroy
+    public void destroy() {
+        if(null != httpclient) {
+            try {
+                httpclient.close();
+            } catch (IOException e) {
+                LOGGER.error("Pmtask close httpclient, response error, httpclient={}", httpclient, e);
+            }
+        }
+    }
 
-	private EbeiTaskResult createTask(PmTask task, List<AttachmentDescriptor> attachments) {
+    private EbeiTaskResult createTask(PmTask task, List<AttachmentDescriptor> attachments,String requestorName) {
 
-		JSONObject param = new JSONObject();
+        JSONObject param = new JSONObject();
 
-		param.put("userId", "");
-		param.put("address", task.getAddress());
+        param.put("userId", "");
+        param.put("address", task.getAddress());
 
-		param.put("linkName", task.getRequestorName());
-		param.put("linkTel", task.getRequestorPhone());
-		String fileAddrs = "";
-		if(null != attachments) {
-			StringBuilder sb = new StringBuilder();
-			int i = 0;
-			for(AttachmentDescriptor ad: attachments) {
-				String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
-				if(i == 0)
-					sb.append(contentUrl);
-				else
-					sb.append(",").append(contentUrl);
-				i++;
-			}
-			fileAddrs = sb.toString();
-		}
+        param.put("linkName", task.getRequestorName());
+        param.put("linkTel", task.getRequestorPhone());
+        String fileAddrs = "";
+        if(null != attachments) {
+            StringBuilder sb = new StringBuilder();
+            int i = 0;
+            for(AttachmentDescriptor ad: attachments) {
+                String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
+                if(i == 0)
+                    sb.append(contentUrl);
+                else
+                    sb.append(",").append(contentUrl);
+                i++;
+            }
+            fileAddrs = sb.toString();
+        }
 
-		param.put("buildingId", "");
-		param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
-		param.put("type", "1");
-		param.put("remarks", task.getContent());
-		param.put("projectId", projectId);
-		param.put("anonymous", "0");
-		param.put("fileAddrs", fileAddrs);
-		param.put("buildingType", "0");
+        param.put("buildingId", "");
+        //param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
+        if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(task.getOwnerType())){
+            List<Organization> list = organizationProvider.findOrganizationByCommunityId(task.getOwnerId());
+            param.put("companyName",list.get(0).getName());
+        }
+        param.put("submitter",requestorName);
+        param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
+        param.put("type", "1");
+        param.put("remarks", task.getContent());
+        param.put("projectId", projectId);
+        param.put("anonymous", "0");
+        param.put("fileAddrs", fileAddrs);
+        if (EbeiBuildingType.publicArea.equals(task.getBuildingName()))
+            param.put("buildingType", "1");
+        else
+            param.put("buildingType", "0");
 
-		String json = postToEbei(param, CREATE_TASK, null);
+        String json = postToEbei(param, CREATE_TASK, null);
 
-		EbeiJsonEntity<EbeiTaskResult> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiTaskResult>>(){});
+        EbeiJsonEntity<EbeiTaskResult> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiTaskResult>>(){});
 
-		if(entity.isSuccess()) {
-			EbeiTaskResult dto = entity.getData();
-			if(dto.getResult() == 1) {
-				return dto;
-			}
-		}
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-				"Request of third failed.");
-	}
+        if(entity.isSuccess()) {
+            EbeiTaskResult dto = entity.getData();
+            if(dto.getResult() == 1) {
+                return dto;
+            }
+        }
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                "Request of third failed.");
+    }
 
-	private Boolean cancelTask(PmTask task) {
+    private Boolean cancelTask(PmTask task) {
 
-		JSONObject param = new JSONObject();
+        JSONObject param = new JSONObject();
 
-		param.put("orderId", task.getStringTag1());
+        param.put("orderId", task.getStringTag1());
 
-		String json = postToEbei(param, CANCEL_TASK, null);
+        String json = postToEbei(param, CANCEL_TASK, null);
 
-		EbeiJsonEntity<EbeiResult> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiResult>>(){});
+        EbeiJsonEntity<EbeiResult> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiResult>>(){});
 
-		if(entity.isSuccess()) {
-			EbeiResult ebeiResult = entity.getData();
-			if(ebeiResult.getResult() == 1) {
-				return true;
-			}
-		}
+        if(entity.isSuccess()) {
+            EbeiResult ebeiResult = entity.getData();
+            if(ebeiResult.getResult() == 1) {
+                return true;
+            }
+        }
 
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-				"Request of third failed.");
-	}
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                "Request of third failed.");
 
-	private Boolean evaluateTask(PmTask task) {
+    }
 
-		JSONObject param = new JSONObject();
+    private Boolean evaluateTask(PmTask task) {
 
-		param.put("userId", "");
-		param.put("recordId", task.getStringTag1());
-		Byte star = task.getStar();
-		if(null == star)
-			star = (byte)0;
-		param.put("serviceAttitude", star);
-		param.put("serviceEfficiency", star);
-		param.put("serviceQuality", star);
-		param.put("remark", "");
-		param.put("fileAddrs", "");
-		param.put("ownerName", task.getRequestorName());
-		param.put("ownerPhone", task.getRequestorPhone());
-		param.put("projectId", projectId);
+        JSONObject param = new JSONObject();
 
-		String json = postToEbei(param, EVALUATE, null);
+        param.put("userId", "");
+        param.put("recordId", task.getStringTag1());
+        Byte star = task.getStar();
+        if(null == star)
+            star = (byte)0;
+        param.put("serviceAttitude", star);
+        param.put("serviceEfficiency", star);
+        param.put("serviceQuality", star);
+        param.put("remark", "");
+        param.put("fileAddrs", "");
+        param.put("ownerName", task.getRequestorName());
+        param.put("ownerPhone", task.getRequestorPhone());
+        param.put("projectId", projectId);
 
-		EbeiJsonEntity<EbeiResult> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiResult>>(){});
+        String json = postToEbei(param, EVALUATE, null);
 
-		if(entity.isSuccess()) {
-			EbeiResult ebeiResult = entity.getData();
-			if(ebeiResult.getResult() == 1) {
-				return true;
-			}
-		}
+        EbeiJsonEntity<EbeiResult> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiResult>>(){});
 
-		return false;
-	}
+        if(entity.isSuccess()) {
+            EbeiResult ebeiResult = entity.getData();
+            if(ebeiResult.getResult() == 1) {
+                return true;
+            }
+        }
 
-	private EbeiPmTaskDTO getTaskDetail(PmTask task) {
+        return false;
+    }
 
-		JSONObject param = new JSONObject();
+    private EbeiPmTaskDTO getTaskDetail(PmTask task) {
 
-		param.put("orderId", task.getStringTag1());
+        JSONObject param = new JSONObject();
 
-		String json = postToEbei(param, GET_TASK_DETAIL, null);
+        param.put("orderId", task.getStringTag1());
 
-		EbeiJsonEntity<EbeiPmTaskDTO> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiPmTaskDTO>>(){});
+        String json = postToEbei(param, GET_TASK_DETAIL, null);
 
-		if(entity.isSuccess())
-			return entity.getData();
+        EbeiJsonEntity<EbeiPmTaskDTO> entity = JSONObject.parseObject(json, new TypeReference<EbeiJsonEntity<EbeiPmTaskDTO>>(){});
 
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-				"Request of third failed.");
-	}
+        if(entity.isSuccess())
+            return entity.getData();
 
-	@Override
-	public PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                "Request of third failed.");
+    }
 
-		if(null == cmd.getCategoryId()){
-			LOGGER.error("Invalid categoryId parameter.");
-			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
-					"Invalid categoryId parameter.");
-		}
-		if(null == cmd.getAddressType()){
-			LOGGER.error("Invalid addressType parameter.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid addressType parameter.");
-		}
-		final PmTask task = new PmTask();
-		dbProvider.execute((TransactionStatus status) -> {
+    @Override
+    public PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
 
-			User user = UserContext.current().getUser();
-			Integer namespaceId = user.getNamespaceId();
-			String ownerType = cmd.getOwnerType();
-			Long ownerId = cmd.getOwnerId();
-			Long taskCategoryId = cmd.getTaskCategoryId();
-			Long categoryId = cmd.getCategoryId();
-			String content = cmd.getContent();
-			Timestamp now = new Timestamp(System.currentTimeMillis());
+        if(null == cmd.getCategoryId()){
+            LOGGER.error("Invalid categoryId parameter.");
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
+                    "Invalid categoryId parameter.");
+        }
+        if(null == cmd.getAddressType()){
+            LOGGER.error("Invalid addressType parameter.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid addressType parameter.");
+        }
+        final PmTask task = new PmTask();
+        dbProvider.execute((TransactionStatus status) -> {
 
-			checkCreateTaskParam(ownerType, ownerId, taskCategoryId, content);
+            User user = UserContext.current().getUser();
+            Integer namespaceId = user.getNamespaceId();
+            String ownerType = cmd.getOwnerType();
+            Long ownerId = cmd.getOwnerId();
+            Long taskCategoryId = cmd.getTaskCategoryId();
+            Long categoryId = cmd.getCategoryId();
+            String content = cmd.getContent();
+            Timestamp now = new Timestamp(System.currentTimeMillis());
 
-			//设置门牌地址,楼栋地址,服务地点
-			pmTaskCommonService.setPmTaskAddressInfo(cmd, task);
+            checkCreateTaskParam(ownerType, ownerId, taskCategoryId, content);
 
-			task.setNamespaceId(namespaceId);
-			task.setOwnerId(ownerId);
-			task.setOwnerType(ownerType);
+            //设置门牌地址,楼栋地址,服务地点
+            pmTaskCommonService.setPmTaskAddressInfo(cmd, task);
 
-			task.setTaskCategoryId(taskCategoryId);
-			task.setCategoryId(categoryId);
-			task.setContent(content);
-			task.setStatus(PmTaskStatus.UNPROCESSED.getCode());
-			task.setUnprocessedTime(now);
-			task.setCreatorUid(user.getId());
-			task.setCreateTime(now);
-			if(null != cmd.getReserveTime())
-				task.setReserveTime(new Timestamp(cmd.getReserveTime()));
-			task.setPriority(cmd.getPriority());
-			task.setSourceType(cmd.getSourceType() == null ? PmTaskSourceType.APP.getCode() : cmd.getSourceType());
+            task.setNamespaceId(namespaceId);
+            task.setOwnerId(ownerId);
+            task.setOwnerType(ownerType);
 
-			task.setOrganizationId(cmd.getOrganizationId());
-			task.setRequestorName(requestorName);
-			task.setRequestorPhone(requestorPhone);
+            task.setTaskCategoryId(taskCategoryId);
+            task.setCategoryId(categoryId);
+            task.setContent(content);
+            task.setStatus(PmTaskStatus.UNPROCESSED.getCode());
+            task.setUnprocessedTime(now);
+            task.setCreatorUid(user.getId());
+            task.setCreateTime(now);
+            if(null != cmd.getReserveTime())
+                task.setReserveTime(new Timestamp(cmd.getReserveTime()));
+            task.setPriority(cmd.getPriority());
+            task.setSourceType(cmd.getSourceType() == null ? PmTaskSourceType.APP.getCode() : cmd.getSourceType());
 
-			EbeiTaskResult createTaskResultDTO = createTask(task, cmd.getAttachments());
-			if(null != createTaskResultDTO) {
-				task.setStringTag1(createTaskResultDTO.getOrderId());
-			}
-			pmTaskProvider.createTask(task);
-			//附件
-			pmTaskCommonService.addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
+            task.setOrganizationId(cmd.getOrganizationId());
+            task.setRequestorName(requestorName);
+            task.setRequestorPhone(requestorPhone);
+            Long time  = System.currentTimeMillis();
+            EbeiTaskResult createTaskResultDTO = createTask(task, cmd.getAttachments(),requestorName);
+            LOGGER.info("--------------------------------------timecost:"+(System.currentTimeMillis()-time));
+            if(null != createTaskResultDTO) {
+                task.setStringTag1(createTaskResultDTO.getOrderId());
+            }
+            pmTaskProvider.createTask(task);
+            //附件
+            pmTaskCommonService.addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
 
 //			PmTaskLog pmTaskLog = new PmTaskLog();
 //			pmTaskLog.setNamespaceId(task.getNamespaceId());
@@ -475,371 +486,359 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 //			if(size > 0){
 //				sendMessageForCreateTask(targets, requestorName, requestorPhone, taskCategory.getName(), user);
 //			}
-			createFlowCase(task);
-			return null;
-		});
+            createFlowCase(task);
+            return null;
+        });
 
-		pmTaskSearch.feedDoc(task);
-		return ConvertHelper.convert(task, PmTaskDTO.class);
-	}
+        pmTaskSearch.feedDoc(task);
+        return ConvertHelper.convert(task, PmTaskDTO.class);
+    }
 
 
-	private void createFlowCase(PmTask task) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+    private void createFlowCase(PmTask task) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-		GeneralModuleInfo gm = new GeneralModuleInfo();
+        Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+                FlowModuleType.REPAIR_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+        if(null == flow) {
+            LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+                    "Enable pmtask flow not found.");
+        }
 
-		gm.setNamespaceId(namespaceId);
-		gm.setOwnerType(FlowOwnerType.PMTASK.getCode());
-		gm.setOwnerId(task.getOwnerId());
-		gm.setModuleType(FlowModuleType.NO_MODULE.getCode());
-		gm.setModuleId(FlowConstants.PM_TASK_MODULE);
-		gm.setProjectId(task.getOwnerId());
-		gm.setProjectType(EntityType.COMMUNITY.getCode());
 
-		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-		createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
-//		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
-//		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
-		createFlowCaseCommand.setReferId(task.getId());
-		createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
-		//createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
-		createFlowCaseCommand.setContent(task.getContent());
+        CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+        Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
+        createFlowCaseCommand.setTitle("物业报修");
+        createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
+        createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+        createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+        createFlowCaseCommand.setReferId(task.getId());
+        createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
+        //createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
+        createFlowCaseCommand.setContent(task.getContent());
+        createFlowCaseCommand.setCurrentOrganizationId(task.getOrganizationId());
 
-		createFlowCaseCommand.setProjectId(task.getOwnerId());
-		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
-		if (StringUtils.isNotBlank(task.getBuildingName())) {
-			Building building = buildingProvider.findBuildingByName(namespaceId, task.getOwnerId(),
-					task.getBuildingName());
-			if(building != null){
-				ResourceCategoryAssignment resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(),
-						EntityType.BUILDING.getCode(), namespaceId);
-				if (null != resourceCategory) {
-					createFlowCaseCommand.setProjectId(resourceCategory.getResourceCategryId());
-					createFlowCaseCommand.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
-				}
-			}
-		}
+        createFlowCaseCommand.setProjectId(task.getOwnerId());
+        createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
+        if (StringUtils.isNotBlank(task.getBuildingName())) {
+            Building building = buildingProvider.findBuildingByName(namespaceId, task.getOwnerId(),
+                    task.getBuildingName());
+            if(building != null){
+                ResourceCategoryAssignment resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(),
+                        EntityType.BUILDING.getCode(), namespaceId);
+                if (null != resourceCategory) {
+                    createFlowCaseCommand.setProjectId(resourceCategory.getResourceCategryId());
+                    createFlowCaseCommand.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+                }
+            }
+        }
 
-		FlowCase flowCase = flowService.createDumpFlowCase(gm, createFlowCaseCommand);
-		task.setFlowCaseId(flowCase.getId());
-		pmTaskProvider.updateTask(task);
-	}
+        FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
+        task.setFlowCaseId(flowCase.getId());
+        pmTaskProvider.updateTask(task);
+    }
 
-	private void checkCreateTaskParam(String ownerType, Long ownerId, Long taskCategoryId, String content){
-		checkOwnerIdAndOwnerType(ownerType, ownerId);
-		if(null == taskCategoryId) {
-			LOGGER.error("Invalid taskCategoryId parameter.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid taskCategoryId parameter.");
-		}
+    private void checkCreateTaskParam(String ownerType, Long ownerId, Long taskCategoryId, String content){
+        checkOwnerIdAndOwnerType(ownerType, ownerId);
+        if(null == taskCategoryId) {
+            LOGGER.error("Invalid taskCategoryId parameter.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid taskCategoryId parameter.");
+        }
 
-		if(StringUtils.isBlank(content)) {
-			LOGGER.error("Invalid content parameter.");
-			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CONTENT_NULL,
-					"Invalid content parameter.");
-		}
+        if(StringUtils.isBlank(content)) {
+            LOGGER.error("Invalid content parameter.");
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CONTENT_NULL,
+                    "Invalid content parameter.");
+        }
 
-	}
+    }
 
-	private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
-		if(null == ownerId) {
-			LOGGER.error("Invalid ownerId parameter.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid ownerId parameter.");
-		}
+    private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
+        if(null == ownerId) {
+            LOGGER.error("Invalid ownerId parameter.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid ownerId parameter.");
+        }
 
-		if(StringUtils.isBlank(ownerType)) {
-			LOGGER.error("Invalid ownerType parameter.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid ownerType parameter.");
-		}
-	}
+        if(StringUtils.isBlank(ownerType)) {
+            LOGGER.error("Invalid ownerType parameter.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid ownerType parameter.");
+        }
+    }
 
-	@Override
-	public void cancelTask(CancelTaskCommand cmd) {
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		checkId(cmd.getId());
+    @Override
+    public void cancelTask(CancelTaskCommand cmd) {
+        checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+        checkId(cmd.getId());
 
-		dbProvider.execute((TransactionStatus transactionStatus) -> {
+        dbProvider.execute((TransactionStatus transactionStatus) -> {
 
-			PmTask task = checkPmTask(cmd.getId());
-			EbeiPmTaskDTO dto = getTaskDetail(task);
-			if(!(dto.getState().byteValue() == PmTaskStatus.UNPROCESSED.getCode())){
-				LOGGER.error("Task cannot be canceled. cmd={}", cmd);
-				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CANCEL_TASK,
-						"Task cannot be canceled.");
-			}
+            PmTask task = checkPmTask(cmd.getId());
+            EbeiPmTaskDTO dto = getTaskDetail(task);
+            if(!(dto.getState().byteValue() == PmTaskStatus.UNPROCESSED.getCode())){
+                LOGGER.error("Task cannot be canceled. cmd={}", cmd);
+                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CANCEL_TASK,
+                        "Task cannot be canceled.");
+            }
 
-			if(cancelTask(task)) {
-				User user = UserContext.current().getUser();
-				Timestamp now = new Timestamp(System.currentTimeMillis());
-				task.setStatus(PmTaskStatus.INACTIVE.getCode());
-				task.setDeleteUid(user.getId());
-				task.setDeleteTime(now);
-				pmTaskProvider.updateTask(task);
-			}
-			//更新工作流case状态
-			FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
-			flowCase.setStatus(FlowCaseStatus.ABSORTED.getCode());
-			flowCaseProvider.updateFlowCase(flowCase);
-			//elasticsearch更新
-			pmTaskSearch.deleteById(task.getId());
+            if(cancelTask(task)) {
+                User user = UserContext.current().getUser();
+                Timestamp now = new Timestamp(System.currentTimeMillis());
+                task.setStatus(PmTaskStatus.INACTIVE.getCode());
+                task.setDeleteUid(user.getId());
+                task.setDeleteTime(now);
+                pmTaskProvider.updateTask(task);
+            }
+            //更新工作流case状态
+            FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+            flowCase.setStatus(FlowCaseStatus.ABSORTED.getCode());
+            flowCaseProvider.updateFlowCase(flowCase);
+            //elasticsearch更新
+            pmTaskSearch.deleteById(task.getId());
 
-			return null;
-		});
-	}
+            return null;
+        });
+    }
 
-	@Override
-	public void evaluateTask(EvaluateTaskCommand cmd) {
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		checkId(cmd.getId());
 
-		PmTask task = checkPmTask(cmd.getId());
-		if(!task.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
-			LOGGER.error("Task have not been completed, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"Task have not been completed.");
-		}
-		task.setOperatorStar(cmd.getOperatorStar());
-		task.setStar(cmd.getStar());
-		if(evaluateTask(task)) {
-			pmTaskProvider.updateTask(task);
-		}
+    @Override
+    public void evaluateTask(EvaluateTaskCommand cmd) {
+        checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+        checkId(cmd.getId());
 
-	}
+        PmTask task = checkPmTask(cmd.getId());
+        if(!task.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
+            LOGGER.error("Task have not been completed, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "Task have not been completed.");
+        }
+        task.setOperatorStar(cmd.getOperatorStar());
+        task.setStar(cmd.getStar());
+        if(evaluateTask(task)) {
+            pmTaskProvider.updateTask(task);
+        }
 
-	private void checkId(Long id){
-		if(null == id) {
-			LOGGER.error("Invalid id parameter.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid id parameter.");
-		}
-	}
+    }
 
-	private PmTask checkPmTask(Long id){
-		PmTask pmTask = pmTaskProvider.findTaskById(id);
-		if(null == pmTask) {
-			LOGGER.error("PmTask not found, id={}", id);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"PmTask not found.");
-		}
-		return pmTask;
-	}
+    private void checkId(Long id){
+        if(null == id) {
+            LOGGER.error("Invalid id parameter.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid id parameter.");
+        }
+    }
 
-	@Override
-	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
-		// TODO Auto-generated method stub
+    private PmTask checkPmTask(Long id){
+        PmTask pmTask = pmTaskProvider.findTaskById(id);
+        if(null == pmTask) {
+            LOGGER.error("PmTask not found, id={}", id);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "PmTask not found.");
+        }
+        return pmTask;
+    }
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+    @Override
+    public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
+        // TODO Auto-generated method stub
 
-		PmTask task = pmTaskProvider.findTaskById(cmd.getId());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-		PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
+        PmTask task = pmTaskProvider.findTaskById(cmd.getId());
 
-		dbProvider.execute((TransactionStatus status) -> {
+        PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
 
-			EbeiPmTaskDTO ebeiPmTask = getTaskDetail(task);
+        dbProvider.execute((TransactionStatus status) -> {
 
-			Integer state = ebeiPmTask.getState();
-			task.setStatus(state.byteValue() > PmTaskStatus.PROCESSED.getCode() ? PmTaskStatus.PROCESSED.getCode(): state.byteValue() );
-			pmTaskProvider.updateTask(task);
-			dto.setStatus(task.getStatus());
+            EbeiPmTaskDTO ebeiPmTask = getTaskDetail(task);
+            //TODO  枚举值更新
+            Integer state = ebeiPmTask.getState()==6 ? PmTaskStatus.INACTIVE.getCode():ebeiPmTask.getState();
+            task.setStatus(state.byteValue() > PmTaskStatus.PROCESSED.getCode() ? PmTaskStatus.PROCESSED.getCode(): state.byteValue() );
+            //pmTaskProvider.updateTask(task);
+            dto.setStatus(task.getStatus());
 
-			//更新工作流case状态
-			FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
 
-			if (FlowCaseStatus.INVALID.getCode() != flowCase.getStatus()) {
-				Byte flowCaseStatus = state.byteValue() >= PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
-						(state.byteValue() == PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.ABSORTED.getCode() :
-								FlowCaseStatus.PROCESS.getCode());
+            CategoryDTO taskCategory = createCategoryDTO();
+            dto.setTaskCategoryName(taskCategory.getName());
+            dto.setCategoryName(ebeiPmTask.getServiceName());
 
-				flowCase.setStatus(flowCaseStatus);
-				flowCaseProvider.updateFlowCase(flowCase);
-			}
+            String filePath = ebeiPmTask.getFilePath();
+            if(StringUtils.isNotBlank(filePath)) {
+                String[] filePaths = filePath.split(",");
 
-			CategoryDTO taskCategory = createCategoryDTO();
-			dto.setTaskCategoryName(taskCategory.getName());
-			dto.setCategoryName(ebeiPmTask.getServiceName());
+                List<PmTaskAttachmentDTO> attachments = new ArrayList<>();
+                for (String url: filePaths) {
+                    PmTaskAttachmentDTO d = new PmTaskAttachmentDTO();
+                    d.setContentUrl(url);
+                    attachments.add(d);
+                }
+                dto.setAttachments(attachments);
+            }
 
-			String filePath = ebeiPmTask.getFilePath();
-			if(StringUtils.isNotBlank(filePath)) {
-				String[] filePaths = filePath.split(",");
+            List<EbeiPmtaskLogDTO> logs = ebeiPmTask.getScheduleStr();
 
-				List<PmTaskAttachmentDTO> attachments = new ArrayList<>();
-				for (String url: filePaths) {
-					PmTaskAttachmentDTO d = new PmTaskAttachmentDTO();
-					d.setContentUrl(url);
-					attachments.add(d);
-				}
-				dto.setAttachments(attachments);
-			}
+            if(null != logs) {
+                List<PmTaskLogDTO> taskLogs = new ArrayList<>();
+                for(EbeiPmtaskLogDTO ebeiLog: logs) {
+                    PmTaskLogDTO taskLog = new PmTaskLogDTO();
+                    taskLog.setId(0L);
+                    taskLog.setNamespaceId(namespaceId);
+                    taskLog.setOwnerId(task.getOwnerId());
+                    taskLog.setOwnerType(task.getOwnerType());
+                    taskLog.setOperatorTime(strDateToTimestamp(ebeiLog.getOperateDate()));
+                    taskLog.setText(ebeiLog.getOperateResult());
+                    taskLog.setStatus((byte)0);
+                    taskLog.setStatusName(ebeiLog.getOperateName());
+                    taskLogs.add(taskLog);
+                }
+                dto.setTaskLogs(taskLogs);
+            }
 
-			List<EbeiPmtaskLogDTO> logs = ebeiPmTask.getScheduleStr();
+            return null;
+        });
 
-			if(null != logs) {
-				List<PmTaskLogDTO> taskLogs = new ArrayList<>();
-				for(EbeiPmtaskLogDTO ebeiLog: logs) {
-					PmTaskLogDTO taskLog = new PmTaskLogDTO();
-					taskLog.setId(0L);
-					taskLog.setNamespaceId(namespaceId);
-					taskLog.setOwnerId(task.getOwnerId());
-					taskLog.setOwnerType(task.getOwnerType());
-					taskLog.setOperatorTime(strDateToTimestamp(ebeiLog.getOperateDate()));
-					taskLog.setText(ebeiLog.getOperateResult());
-					taskLog.setStatus((byte)0);
-					taskLog.setStatusName(ebeiLog.getOperateName());
-					taskLogs.add(taskLog);
-				}
-				dto.setTaskLogs(taskLogs);
-			}
+        return dto;
+    }
 
-			return null;
-		});
+    private Timestamp strDateToTimestamp(String s) {
+        try {
+            Date date = datetimeSF.parse(s);
+            if(null != date)
+                return new Timestamp(date.getTime());
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-		//elasticsearch更新
-		pmTaskSearch.deleteById(task.getId());
-		pmTaskSearch.feedDoc(task);
+    @Override
+    public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
 
-		return dto;
-	}
+        ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 
-	private Timestamp strDateToTimestamp(String s) {
-		try {
-			Date date = datetimeSF.parse(s);
-			if(null != date)
-				return new Timestamp(date.getTime());
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
+        List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
 
-	@Override
-	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
+        if(null == cmd.getParentId()) {
+            CategoryDTO dto = createCategoryDTO();
+            dto.setChildrens(childrens);
 
-		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
+            response.setRequests(Collections.singletonList(dto));
+        }else {
+            response.setRequests(childrens);
 
-		List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
+        }
 
-		if(null == cmd.getParentId()) {
-			CategoryDTO dto = createCategoryDTO();
-			dto.setChildrens(childrens);
+        return response;
+    }
 
-			response.setRequests(Collections.singletonList(dto));
-		}else {
-			response.setRequests(childrens);
+    @Override
+    public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
 
-		}
+        List<CategoryDTO> childrens = listServiceType(projectId, null);
+        CategoryDTO dto = createCategoryDTO();
+        dto.setChildrens(childrens);
 
-		return response;
-	}
+        return Collections.singletonList(dto);
+    }
 
-	@Override
-	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
+    private CategoryDTO createCategoryDTO() {
+        CategoryDTO dto = new CategoryDTO();
+        dto.setId(PmTaskHandle.EBEI_TASK_CATEGORY);
+        dto.setName("物业报修");
+        dto.setParentId(0L);
+        dto.setIsSupportDelete((byte)0);
+        return dto;
+    }
 
-		List<CategoryDTO> childrens = listServiceType(projectId, null);
-		CategoryDTO dto = createCategoryDTO();
-		dto.setChildrens(childrens);
+    private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
+        String url = null;
+        if(uri != null && uri.length() > 0) {
+            try{
+                url = contentServerService.parserUri(uri, ownerType, ownerId);
+            }catch(Exception e){
+                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
+            }
+        }
 
-		return Collections.singletonList(dto);
-	}
+        return url;
+    }
 
-	private CategoryDTO createCategoryDTO() {
-		CategoryDTO dto = new CategoryDTO();
-		dto.setId(PmTaskHandle.EBEI_TASK_CATEGORY);
-		dto.setName("物业报修");
-		dto.setParentId(0L);
-		dto.setIsSupportDelete((byte)0);
-		return dto;
-	}
+    @Override
+    public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
+        checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+        Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
-	private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
-		String url = null;
-		if(uri != null && uri.length() > 0) {
-			try{
-				url = contentServerService.parserUri(uri, ownerType, ownerId);
-			}catch(Exception e){
-				LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
-			}
-		}
-
-		return url;
-	}
-
-	@Override
-	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-
-		SearchTasksResponse response = new SearchTasksResponse();
-		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(),
-				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(),
-				cmd.getPageAnchor(), pageSize+1);
-		int listSize = list.size();
-		if(listSize > 0){
-			response.setRequests(list.stream().map(t -> {
+        SearchTasksResponse response = new SearchTasksResponse();
+        List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(),
+                cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(),
+                cmd.getPageAnchor(), pageSize+1);
+        int listSize = list.size();
+        if(listSize > 0){
+            response.setRequests(list.stream().map(t -> {
 //    			PmTask task = pmTaskProvider.findTaskById(t.getId());
-				PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
+                PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
 
-				CategoryDTO taskCategory = createCategoryDTO();
-				dto.setTaskCategoryId(taskCategory.getId());
-				dto.setTaskCategoryName(taskCategory.getName());
+                CategoryDTO taskCategory = createCategoryDTO();
+                dto.setTaskCategoryId(taskCategory.getId());
+                dto.setTaskCategoryName(taskCategory.getName());
 
-				return dto;
-			}).collect(Collectors.toList()));
-			if(listSize <= pageSize){
-				response.setNextPageAnchor(null);
-			}else{
-				response.setNextPageAnchor(list.get(listSize-1).getCreateTime().getTime());
-				response.getRequests().remove(list.get(listSize-1));
-			}
-		}
+                return dto;
+            }).collect(Collectors.toList()));
+            if(listSize <= pageSize){
+                response.setNextPageAnchor(null);
+            }else{
+                response.setNextPageAnchor(list.get(listSize-1).getCreateTime().getTime());
+                response.getRequests().remove(list.get(listSize-1));
+            }
+        }
 
-		return response;
-	}
+        return response;
+    }
 
-	@Override
-	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		User current = UserContext.current().getUser();
+    @Override
+    public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
+        checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+        Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        User current = UserContext.current().getUser();
 
-		Byte status = cmd.getStatus();
-		List<PmTask> list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, cmd.getTaskCategoryId(),
-				cmd.getPageAnchor(), cmd.getPageSize());
+        Byte status = cmd.getStatus();
+        List<PmTask> list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, cmd.getTaskCategoryId(),
+                cmd.getPageAnchor(), cmd.getPageSize());
 
-		ListUserTasksResponse response = new ListUserTasksResponse();
-		int size = list.size();
-		if(size > 0){
-			response.setRequests(list.stream().map(r -> {
-				PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
+        ListUserTasksResponse response = new ListUserTasksResponse();
+        int size = list.size();
+        if(size > 0){
+            response.setRequests(list.stream().map(r -> {
+                PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
 //    			if(null == r.getOrganizationId() || r.getOrganizationId() ==0 ){
 //    				User user = userProvider.findUserById(r.getCreatorUid());
 //        			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 //        			dto.setRequestorName(user.getNickName());
 //        			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
 //    			}
-				CategoryDTO taskCategory = createCategoryDTO();
-				dto.setTaskCategoryName(taskCategory.getName());
+                CategoryDTO taskCategory = createCategoryDTO();
+                dto.setTaskCategoryName(taskCategory.getName());
 
-				return dto;
-			}).collect(Collectors.toList()));
-			if(size != pageSize){
-				response.setNextPageAnchor(null);
-			}else{
-				response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
-			}
-		}
+                return dto;
+            }).collect(Collectors.toList()));
+            if(size != pageSize){
+                response.setNextPageAnchor(null);
+            }else{
+                response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
+            }
+        }
 
-		return response;
-	}
+        return response;
+    }
 
-	@Override
-	public void updateTaskByOrg(UpdateTaskCommand cmd) {
-		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		handler.updateTaskByOrg(cmd);
-	}
+    @Override
+    public void updateTaskByOrg(UpdateTaskCommand cmd) {
+        PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+        handler.updateTaskByOrg(cmd);
+    }
 
 }

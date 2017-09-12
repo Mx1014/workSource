@@ -158,6 +158,7 @@ public class StatEventServiceImpl implements StatEventService {
             dto.setDisplayName(statistic.getDisplayName());
             dto.setOwnerType(statistic.getOwnerType());
             dto.setOwnerId(statistic.getOwnerId());
+            dto.setSceneType(statistic.getSceneType());
             if (isPortalItemGroupType) {
                 processWidget(statistic, dto);
             }
@@ -172,7 +173,12 @@ public class StatEventServiceImpl implements StatEventService {
     private void processWidget(StatEventPortalStatistic statistic, StatEventPortalStatDTO dto) {
         String[] split = statistic.getIdentifier().split(":");
         if (split.length >= 2) {
-            dto.setWidget(split[1]);
+            if (dto.getWidget() == null) {
+                dto.setWidget(split[1]);
+            } else {
+                dto.setWidget(statistic.getWidget());
+            }
+
             if (split[1].equals("OPPush")) {
                 switch (split[2]) {
                     case "OPPushBiz":

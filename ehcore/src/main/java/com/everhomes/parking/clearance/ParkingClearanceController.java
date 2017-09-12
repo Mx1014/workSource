@@ -94,6 +94,17 @@ public class ParkingClearanceController extends ControllerBase {
     public RestResponse getActualClearanceLog(GetActualClearanceLogCommand cmd) {
         return response(parkingClearanceService.getActualClearanceLog(cmd));
     }
+
+    /**
+     * <p>同步实际来访记录</p>
+     * <b>URL: /clearance/sychnLogs</b>
+     */
+    @RequestMapping("sychnLogs")
+    @RestReturn(String.class)
+    public RestResponse sychnLogs(SearchClearanceLogCommand cmd) {
+        parkingClearanceService.sychnLogs(cmd);
+        return new RestResponse();
+    }
     
     /**
      * <p>导出车辆放行log</p>

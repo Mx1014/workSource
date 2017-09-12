@@ -2,6 +2,7 @@
 package com.everhomes.parking.handler;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -106,7 +107,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 		BosigaoCardInfo card = getCardInfo(order.getPlateNumber());
 
 		String url = configProvider.getValue("parking.techpark.url", "");
-		String cost = String.valueOf((order.getPrice().intValue() * 100));
+		String cost = String.valueOf((order.getPrice().multiply(new BigDecimal(100))).intValue());
 
 		JSONObject jsonParam = new JSONObject();
 
@@ -178,7 +179,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 		String parkingId = configProvider.getValue("parking.techpark.parkingId", "");
 		if (verifyParkingCar(order.getPlateNumber(), parkingId)) {
 			String url = configProvider.getValue("parking.techpark.url", "");
-			String cost = String.valueOf((order.getPrice().intValue() * 100));
+			String cost = String.valueOf((order.getPrice().multiply(new BigDecimal(100))).intValue());
 
 			JSONObject jsonParam = new JSONObject();
 			jsonParam.put("OrderID", order.getOrderToken());
@@ -266,7 +267,8 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
 		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
 			return rechargeMonthlyCard(order);
-		return payTempCardFee(order);    }
+		return payTempCardFee(order);
+	}
     
     private Long strToLong(String str) {
 		return Utils.strToLong(str, Utils.DateStyle.DATE_TIME_STR);
@@ -296,21 +298,18 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 			dto.setPlateNumber(plateNumber);
 			long entranceDate = strToLong(tempFee.getEntranceDate());
 			dto.setEntryTime(entranceDate);
-	//		dto.setPayTime(tempFee.getPayTime());
 			long payTime = strToLong(tempFee.getPayDate());
 
 			dto.setPayTime(payTime);
 			dto.setParkingTime((int)((tempFee.getPayTime() - entranceDate) / (1000 * 60)));
 			dto.setDelayTime(tempFee.getOutTime());
-			dto.setPrice(pkorder.getAmount().divide(new BigDecimal(100)));
+			dto.setPrice(pkorder.getAmount().divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 			dto.setOrderToken(pkorder.getOrderID());
 		}else if (tempFee.getResult() == 2 || tempFee.getResult() == 10) {
 			dto.setPlateNumber(plateNumber);
 			long entranceDate = strToLong(tempFee.getEntranceDate());
 			dto.setEntryTime(entranceDate);
-			//		dto.setPayTime(tempFee.getPayTime());
 			long payTime = strToLong(tempFee.getPayDate());
-
 			dto.setPayTime(payTime);
 			dto.setParkingTime((int)((tempFee.getPayTime() - entranceDate) / (1000 * 60)));
 			dto.setDelayTime(tempFee.getOutTime());

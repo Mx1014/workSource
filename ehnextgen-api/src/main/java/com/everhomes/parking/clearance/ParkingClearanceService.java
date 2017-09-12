@@ -48,4 +48,6 @@ public interface ParkingClearanceService {
 	void deleteClearanceLog(DeleteClearanceLogCommand cmd);
 
     List<ParkingActualClearanceLogDTO> getActualClearanceLog(GetActualClearanceLogCommand cmd);
+
+    void sychnLogs(SearchClearanceLogCommand cmd);
 }

@@ -40,7 +40,7 @@ public interface CommunityProvider {
 			String keyword);
 	List<Community> findCommunitiesByNameCityIdAreaId(String name, Long cityId,Long areaId);
 	
-	List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId);
+	List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId, String keyword);
 	
 	Building findBuildingById(Long id);
 	
@@ -110,6 +110,13 @@ public interface CommunityProvider {
 
     Map<Long, Community> listCommunitiesByIds(List<Long> ids);
     List<Community> listCommunityByNamespaceIdAndName(Integer namespaceId, String communityName);
+
+    List<Community> listCommunityByNamespaceType(Integer namespaceId, String namespaceType);
+    Map<String, Long> listCommunityIdByNamespaceType(Integer namespaceId, String namespaceType);
+    CommunityGeoPoint findCommunityGeoPointByCommunityId(long communityId);
+    Community findCommunityByNamespaceToken(String namespaceType, String namespaceToken);
+    List<Long> listCommunityByNamespaceToken(String namespaceType, List<String> namespaceToken);
+
     List<Community> listCommunities(Integer namespaceId, ListingLocator locator, Integer pageSize,
                                     ListingQueryBuilderCallback queryBuilderCallback);
 									
@@ -118,4 +125,5 @@ public interface CommunityProvider {
 
     //获取对应的目标communityId
     Long findDefaultCommunityByCommunityId(Integer namespaceId, Long originId);
+
 }

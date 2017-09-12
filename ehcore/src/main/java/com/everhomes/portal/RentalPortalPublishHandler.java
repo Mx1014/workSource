@@ -88,4 +88,9 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
         }
         return rentalResourceType;
     }
+
+    @Override
+    public String processInstanceConfig(String instanceConfig) {
+        return instanceConfig;
+    }
 }
