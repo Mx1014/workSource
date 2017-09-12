@@ -160,7 +160,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dtos.add(dto);
                 }
             }else{
-                LOGGER.error("调用张江高科searchEnterpriseBills失败"+response.getErrorDescription()+","+response.getErrorDetails());
+                LOGGER.error("Failed at request shenzhoushuma"+response.getErrorDescription()+","+response.getErrorDetails());
             }
         }
         finalDto.setBillDetailDTOList(dtos);
@@ -182,7 +182,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         }else if(targetType.equals("eh_user")){
             url = ZjgkUrls.USER_BILLS_DETAIL;
         }else{
-            throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
+            LOGGER.error("TargetType incorrect , the targetType given = {},the supported type are, for enterpriise={},for individual={}",targetType,AssetTargetType.ORGANIZATION.getCode(),AssetTargetType.USER.getCode());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "TargetType incorrect");
         }
         try {
             postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
@@ -200,7 +202,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 for(int i = 0 ; i < dtos.size(); i++){
                     com.everhomes.asset.zjgkVOs.BillDetailDTO sourceDto = dtos.get(i);
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
-                    dto.setBillItemName(sourceDto.getFeeName());
+                    dto.setBillItemName(StringUtils.isEmpty(sourceDto.getFeeName())==true?"租金":sourceDto.getFeeName());
                     dto.setAmountOwed(sourceDto.getAmountOwed()==null?null:new BigDecimal(sourceDto.getAmountOwed()));
                     dto.setAmountReceivable(sourceDto.getAmountReceivable()==null?null:new BigDecimal(sourceDto.getAmountReceivable()));
                     amountOwed = amountOwed.add(sourceDto.getAmountOwed()==null?new BigDecimal("0"):new BigDecimal(sourceDto.getAmountOwed()));
