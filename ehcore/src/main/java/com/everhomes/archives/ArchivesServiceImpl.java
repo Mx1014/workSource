@@ -235,6 +235,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         dto.setEmail(detail.getEmail());
         dto.setTargetId(detail.getTargetId());
         dto.setTargetType(detail.getTargetType());
+        dto.setRegionCode(detail.getRegionCode());
         //  TODO: 职位的获取待确定后在修改
         dto.setJobPositions(detail.getJobPosition());
 
@@ -277,7 +278,8 @@ public class ArchivesServiceImpl implements ArchivesService {
             dto.setContactName(r.getContactName());
             dto.setDepartments(r.getDepartments());
             dto.setGender(r.getGender());
-            dto.setContactToken("+" + r.getRegionCode() + " " + r.getContactToken());
+            dto.setRegionCode(r.getRegionCode());
+            dto.setContactToken(r.getContactToken());
             //  TODO:组织架构list接口多返回邮箱
 //                dto.setEmail(r.getEmail);
             dto.setStick("0");

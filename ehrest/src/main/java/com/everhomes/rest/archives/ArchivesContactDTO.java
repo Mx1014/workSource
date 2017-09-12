@@ -16,6 +16,7 @@ import java.util.List;
  * <li>gender: 性别: 1-男, 2-女</li>
  * <li>jobPositions: 职务</li>
  * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * <li>regionCode: 区号</li>
  * <li>contactToken: 手机号</li>
  * <li>email: 邮箱</li>
  * <li>stick: 置顶状态: 0-未置顶 1-置顶</li>
@@ -39,6 +40,8 @@ public class ArchivesContactDTO {
 
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> departments;
+
+    private String regionCode;
 
     private String contactToken;
 
@@ -119,6 +122,14 @@ public class ArchivesContactDTO {
 
     public void setDepartments(List<OrganizationDTO> departments) {
         this.departments = departments;
+    }
+
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
     }
 
     public String getContactToken() {
