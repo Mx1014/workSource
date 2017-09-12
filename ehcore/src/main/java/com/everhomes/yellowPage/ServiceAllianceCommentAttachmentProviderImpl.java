@@ -2,9 +2,14 @@
 package com.everhomes.yellowPage;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.jooq.DSLContext;
+import org.jooq.Record2;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +18,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceCommentAttachmentsDao;
@@ -86,5 +92,17 @@ public class ServiceAllianceCommentAttachmentProviderImpl implements ServiceAlli
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public List<ServiceAllianceCommentAttachment> listServiceAllianceCommentAttachment(Integer namespaceId,
+			List<Long> ownerIds) {
+		 List<ServiceAllianceCommentAttachment> list =	getReadOnlyContext().select().from(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS)
+				.where(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.OWNER_ID.in(ownerIds))
+				.and(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.ID.desc())
+				.fetch().map(r->ConvertHelper.convert(r, ServiceAllianceCommentAttachment.class));
+		return list;
 	}
 }

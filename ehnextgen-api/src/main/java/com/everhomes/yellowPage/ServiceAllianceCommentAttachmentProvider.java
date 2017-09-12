@@ -12,5 +12,7 @@ public interface ServiceAllianceCommentAttachmentProvider {
 	ServiceAllianceCommentAttachment findServiceAllianceCommentAttachmentById(Long id);
 
 	List<ServiceAllianceCommentAttachment> listServiceAllianceCommentAttachment();
+	
+	List<ServiceAllianceCommentAttachment> listServiceAllianceCommentAttachment(Integer namespaceId,List<Long> ownerIds);
 
 }

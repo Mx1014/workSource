@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record2;
 import org.jooq.Result;
@@ -51,8 +52,15 @@ public class ServiceAllianceCommentProviderImpl implements ServiceAllianceCommen
 	@Override
 	public void updateServiceAllianceComment(ServiceAllianceComment serviceAllianceComment) {
 		assert (serviceAllianceComment.getId() != null);
-//		serviceAllianceComment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//		serviceAllianceComment.setOperatorUid(UserContext.current().getUser().getId());
+		getReadWriteDao().update(serviceAllianceComment);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceAllianceComments.class, serviceAllianceComment.getId());
+	}
+	
+	@Override
+	public void deleteServiceAllianceComment(ServiceAllianceComment serviceAllianceComment) {
+		assert (serviceAllianceComment.getId() != null);
+		serviceAllianceComment.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		serviceAllianceComment.setDeleterUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(serviceAllianceComment);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceAllianceComments.class, serviceAllianceComment.getId());
 	}
@@ -95,10 +103,19 @@ public class ServiceAllianceCommentProviderImpl implements ServiceAllianceCommen
 	}
 
 	@Override
-	public List<ServiceAllianceComment> listServiceAllianceCommentByOwner(Integer namespaceId, String ownerType,
-			Long ownerId) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<ServiceAllianceComment> listServiceAllianceCommentByOwner(Integer namespaceId,String ownerType,Long ownerId,
+			Long pageAnchor,Integer pageSize) {
+		Condition cond = Tables.EH_SERVICE_ALLIANCE_COMMENTS.NAMESPACE_ID.eq(namespaceId)
+				.and(Tables.EH_SERVICE_ALLIANCE_COMMENTS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_SERVICE_ALLIANCE_COMMENTS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SERVICE_ALLIANCE_COMMENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		if(pageAnchor!=null){
+			cond = cond.and(Tables.EH_SERVICE_ALLIANCE_COMMENTS.ID.lt(pageAnchor));
+		}
+		List<ServiceAllianceComment> list = getReadOnlyContext().select().from(Tables.EH_SERVICE_ALLIANCE_COMMENTS)
+			.where(cond).orderBy(Tables.EH_SERVICE_ALLIANCE_COMMENTS.ID.desc()).limit(pageSize)		
+			.fetch().map(r->ConvertHelper.convert(r, ServiceAllianceComment.class));
+		return list;
 	}
 
 	@Override
