@@ -55,17 +55,6 @@ CREATE TABLE `eh_archives_forms` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
-DROP TABLE IF EXISTS `eh_archives_working_places`;
-CREATE TABLE `eh_archives_working_places` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-	`organization_id` BIGINT NOT NULL COMMENT'the id of organization',
-  `working_place` VARCHAR(256) NOT NULL DEFAULT 0 COMMENT 'company address',
-  `create_time` DATETIME COMMENT 'the time of data creating',
-  `operator_uid` BIGINT COMMENT 'the id of the operator',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
-
 -- eh_organization_member_details 表的字段添加
 ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE COMMENT '离职日期';
 ALTER TABLE eh_organization_member_details CHANGE political_status political_flag VARCHAR(128) COMMENT '政治面貌';
@@ -83,7 +72,6 @@ ALTER TABLE eh_organization_member_details ADD COLUMN job_position VARCHAR(256) 
 ALTER TABLE eh_organization_member_details ADD COLUMN report_target VARCHAR(128) COMMENT '汇报对象';
 ALTER TABLE eh_organization_member_details ADD COLUMN contact_short_token VARCHAR(128) COMMENT '短号';
 ALTER TABLE eh_organization_member_details ADD COLUMN work_email VARCHAR(128) COMMENT '工作邮箱';
-ALTER TABLE eh_organization_member_details ADD COLUMN work_place_id BIGINT COMMENT '工作地点';
 ALTER TABLE eh_organization_member_details ADD COLUMN contract_party_id BIGINT COMMENT '合同主体';
 ALTER TABLE eh_organization_member_details ADD COLUMN work_start_time DATE COMMENT '参加工作日期';
 ALTER TABLE eh_organization_member_details ADD COLUMN contract_start_time DATE COMMENT '合同开始日期';
