@@ -7320,7 +7320,7 @@ public class PunchServiceImpl implements PunchService {
 			ondutyTime += calendar.get(Calendar.SECOND)*1000L;//second
 			if(ondutyTime>ptr.getStartEarlyTimeLong()){
 				if(ondutyTime>ptr.getStartLateTimeLong()){
-					leaveTime = ptr.getStartEarlyTimeLong()+ptr.getWorkTimeLong();
+					leaveTime = ptr.getStartLateTimeLong()+ptr.getWorkTimeLong();
 				}else{
 					leaveTime = ondutyTime+ptr.getWorkTimeLong();
 				}
