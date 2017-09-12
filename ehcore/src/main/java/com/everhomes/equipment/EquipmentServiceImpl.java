@@ -22,11 +22,14 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.appurl.AppUrlService;
 import com.everhomes.forum.Attachment;
+import com.everhomes.pmNotify.PmNotifyConfigurations;
+import com.everhomes.pmNotify.PmNotifyProvider;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.ServiceModuleAuthorizationsDTO;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.pmNotify.*;
 import com.everhomes.user.*;
 
 import com.everhomes.configuration.ConfigConstants;
@@ -194,6 +197,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
+
+	@Autowired
+	private PmNotifyProvider pmNotifyProvider;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(
@@ -4094,4 +4100,77 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return dataMap;
 	}
 
+	private PmNotifyParamDTO convertPmNotifyConfigurationsToDTO(PmNotifyConfigurations configuration) {
+		PmNotifyParamDTO param = ConvertHelper.convert(configuration, PmNotifyParamDTO.class);
+		String receiverJson = configuration.getReceiverJson();
+		if(StringUtils.isNotBlank(receiverJson)) {
+			PmNotifyReceiverList receiverList = (PmNotifyReceiverList) StringHelper.fromJsonString(receiverJson, PmNotifyReceiverList.class);
+			if(receiverList != null) {
+				param.setReceivers(receiverList.getReceivers());
+			}
+		}
+		return param;
+	}
+
+	@Override
+	public List<PmNotifyParamDTO> listPmNotifyParams(ListPmNotifyParamsCommand cmd) {
+		Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
+		Long scopeId = cmd.getNamespaceId().longValue();
+		if(cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
+			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
+			scopeId = cmd.getCommunityId();
+		}
+		List<PmNotifyConfigurations> configurations = pmNotifyProvider.listScopePmNotifyConfigurations(EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+		if(configurations != null && configurations.size() > 0) {
+			List<PmNotifyParamDTO> params = configurations.stream().map(configuration -> {
+				return convertPmNotifyConfigurationsToDTO(configuration);
+			}).collect(Collectors.toList());
+			return params;
+		} else {
+			//scopeType是community的情况下 如果拿不到数据，则返回该域空间下的设置 ps 以后可以再else一下 域空间的没有返回all的
+			if(PmNotifyScopeType.COMMUNITY.equals(PmNotifyScopeType.fromCode(scopeType))) {
+				scopeType = PmNotifyScopeType.NAMESPACE.getCode();
+				scopeId = cmd.getNamespaceId().longValue();
+				List<PmNotifyConfigurations> namespaceConfigurations = pmNotifyProvider.listScopePmNotifyConfigurations(EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+				if(namespaceConfigurations != null && namespaceConfigurations.size() > 0) {
+					List<PmNotifyParamDTO> params = namespaceConfigurations.stream().map(configuration -> {
+						return convertPmNotifyConfigurationsToDTO(configuration);
+					}).collect(Collectors.toList());
+					return params;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public void setPmNotifyParams(SetPmNotifyParamsCommand cmd) {
+		PmNotifyConfigurations configuration = ConvertHelper.convert(cmd, PmNotifyConfigurations.class);
+		List<PmNotifyReceiver> receivers = cmd.getReceivers();
+		if(receivers != null && receivers.size() > 0) {
+			PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
+			receiverList.setReceivers(receivers);
+			configuration.setReceiverJson(receiverList.toString());
+		}
+
+		if(cmd.getId() == null) {
+			pmNotifyProvider.createPmNotifyConfigurations(configuration);
+		} else {
+			Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
+			Long scopeId = cmd.getNamespaceId().longValue();
+			if(cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
+				scopeType = PmNotifyScopeType.COMMUNITY.getCode();
+				scopeId = cmd.getCommunityId();
+			}
+			PmNotifyConfigurations exist = pmNotifyProvider.findScopePmNotifyConfiguration(cmd.getId(), EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+			if(exist != null) {
+				configuration.setCreateTime(exist.getCreateTime());
+				pmNotifyProvider.updatePmNotifyConfigurations(configuration);
+			} else {
+				pmNotifyProvider.createPmNotifyConfigurations(configuration);
+			}
+		}
+
+	}
 }
