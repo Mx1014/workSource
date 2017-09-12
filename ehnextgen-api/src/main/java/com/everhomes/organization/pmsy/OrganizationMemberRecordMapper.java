@@ -4,7 +4,6 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOrganizationMemberDetails;
 import com.everhomes.server.schema.tables.EhOrganizationMembers;
-import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
@@ -61,6 +60,11 @@ public class OrganizationMemberRecordMapper implements RecordMapper<Record, Orga
         member.setEmploymentTime(r.getValue(t2.EMPLOYMENT_TIME));
         member.setProfileIntegrity(r.getValue(t2.PROFILE_INTEGRITY));
         member.setCheckInTime(r.getValue(t2.CHECK_IN_TIME));
+        member.setEmail(r.getValue(t2.EMAIL));
+        member.setWorkEmail(r.getValue(t2.WORK_EMAIL));
+        member.setRegionCode(r.getValue(t2.REGION_CODE));
+        member.setContractEndTime(r.getValue(t2.CONTRACT_END_TIME));
+        member.setContactShortToken(r.getValue(t2.CONTACT_SHORT_TOKEN));
         return member;
     }
 }

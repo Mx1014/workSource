@@ -124,7 +124,7 @@ public class OrganizationMemberDTO {
     private String email;
     private String workEmail;
     private String regionCode;
-    private Timestamp contractEndTime;
+    private Date contractEndTime;
     private String contactShortToken;
 
     public OrganizationMemberDTO() {
@@ -517,8 +517,12 @@ public class OrganizationMemberDTO {
         this.regionCode = regionCode;
     }
 
-    public Timestamp getContractEndTime() {
+    public Date getContractEndTime() {
         return contractEndTime;
+    }
+
+    public void setContractEndTime(Date contractEndTime) {
+        this.contractEndTime = contractEndTime;
     }
 
     public String getContactShortToken() {
@@ -529,7 +533,4 @@ public class OrganizationMemberDTO {
         this.contactShortToken = contactShortToken;
     }
 
-    public void setContractEndTime(Timestamp contractEndTime) {
-        this.contractEndTime = contractEndTime;
-    }
 }
