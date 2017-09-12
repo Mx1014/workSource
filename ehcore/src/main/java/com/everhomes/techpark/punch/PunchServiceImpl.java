@@ -6639,7 +6639,7 @@ public class PunchServiceImpl implements PunchService {
 			organizationProvider.updateOrganization(punchOrg);
 			PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
 
-//		List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
+			List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
 
 			//添加关联
 			SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
@@ -6659,6 +6659,10 @@ public class PunchServiceImpl implements PunchService {
 			for (UniongroupMemberDetail employee : newEmployees) {
 				detailIds.add(employee.getDetailId());
 				//删除被踢出考勤组的人的设置 -- 排班
+				//删除新增人员之前的排班
+				if(!isEmployeeInList(employee,oldEmployees)){
+					punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndTarget(pr.getId(), employee.getDetailId());
+				}
 			}
 			punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndNotInTarget(pr.getId(), detailIds);
 
