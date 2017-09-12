@@ -1549,3 +1549,37 @@ update eh_configurations set value = '/park-entry/dist/index.html?hideNavigation
 -- by dengs, 修改园区简介
 set @homeurl = (select VALUE from eh_configurations WHERE NAME = 'home.url' LIMIT 1);
 update eh_launch_pad_items SET action_data = CONCAT('{"url":"',@homeurl,'/park-introduction/index.html?hideNavigationBar=1#/#sign_suffix"}') where item_label  in ('园区简介','园区介绍');
+
+
+-- 补充丢失的action_type add sfyan 20170912
+update `eh_service_modules` set `action_type` = 62 where `id` = 10100;
+update `eh_service_modules` set `action_type` = 13 where `id` = 10200;
+update `eh_service_modules` set `action_type` = 61 where `id` = 10600;
+update `eh_service_modules` set `action_type` = 42 where `id` = 10750;
+update `eh_service_modules` set `action_type` = 48 where `id` = 10800;
+update `eh_service_modules` set `action_type` = 13 where `id` = 10850;
+update `eh_service_modules` set `action_type` = 60 where `id` = 20100;
+update `eh_service_modules` set `action_type` = 13 where `id` = 20400;
+update `eh_service_modules` set `action_type` = 44 where `id` = 20600;
+update `eh_service_modules` set `action_type` = 13 where `id` = 20800;
+update `eh_service_modules` set `action_type` = 57 where `id` = 20900;
+update `eh_service_modules` set `action_type` = 28 where `id` = 40100;
+update `eh_service_modules` set `action_type` = 13 where `id` = 40200;
+update `eh_service_modules` set `action_type` = 45 where `id` = 40300;
+update `eh_service_modules` set `action_type` = 49 where `id` = 40400;
+update `eh_service_modules` set `action_type` = 33 where `id` = 40500;
+update `eh_service_modules` set `action_type` = 32 where `id` = 40600;
+update `eh_service_modules` set `action_type` = 13 where `id` = 40700;
+update `eh_service_modules` set `action_type` = 30 where `id` = 40800;
+update `eh_service_modules` set `action_type` = 40 where `id` = 41000;
+update `eh_service_modules` set `action_type` = 47 where `id` = 41100;
+update `eh_service_modules` set `action_type` = 13 where `id` = 41200;
+update `eh_service_modules` set `action_type` = 13 where `id` = 49100;
+update `eh_service_modules` set `action_type` = 46 where `id` = 50400;
+update `eh_service_modules` set `action_type` = 23 where `id` = 50600;
+update `eh_service_modules` set `action_type` = 27 where `id` = 50700;
+update `eh_service_modules` set `action_type` = 65 where `id` = 52000;
+update `eh_service_modules` set `action_type` = 56 where `id` = 70100;
+
+update `eh_service_modules` set `multiple_flag` = 0 where `multiple_flag` <> 1;
+ 
