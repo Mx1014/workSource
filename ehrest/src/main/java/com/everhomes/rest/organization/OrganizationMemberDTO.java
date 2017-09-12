@@ -119,6 +119,8 @@ public class OrganizationMemberDTO {
     private Long approveTime;
     private String operatorName;
     private String operatorPhone;
+
+    //  added for archives-2.0
     private String email;
     private String workEmail;
     private String regionCode;
