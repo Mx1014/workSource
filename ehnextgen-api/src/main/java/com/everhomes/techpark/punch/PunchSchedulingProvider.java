@@ -32,7 +32,7 @@ public interface PunchSchedulingProvider {
 	Integer countSchedulingUser(Long ruleId, java.sql.Date start, java.sql.Date end);
 
 	PunchScheduling getPunchSchedulingByRuleDateAndTarget(Long punchOrganizationId, Long userId,
-			Date date);
+			Date date,Long puchruleId);
 
 	void deletePunchSchedulingByPunchRuleId(Long id, Date ruleDate, Long ownerId, Long targetId);
 

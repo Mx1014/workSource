@@ -2317,7 +2317,7 @@ public class PunchServiceImpl implements PunchService {
 		}else{
 			//查询当天那个人的班次
             OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, pr.getOwnerId());
-            PunchScheduling punchScheduling = this.punchSchedulingProvider.getPunchSchedulingByRuleDateAndTarget(pr.getOwnerId(),member.getDetailId(),date);
+			PunchScheduling punchScheduling = this.punchSchedulingProvider.getPunchSchedulingByRuleDateAndTarget(pr.getOwnerId(), member.getDetailId(), date, pr.getId());
 			if(null == punchScheduling || punchScheduling.getPunchRuleId() == null )
 				return null ;
 			return punchScheduling.getTimeRuleId();

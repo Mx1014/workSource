@@ -179,7 +179,7 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 
 	@Override
 	public PunchScheduling getPunchSchedulingByRuleDateAndTarget(Long punchOrganizationId,
-			Long userId, Date date) {
+			Long userId, Date date,Long punchruleId) {
 
 		List<PunchScheduling> results = queryPunchSchedulings(null, 1, new ListingQueryBuilderCallback()  {
 			@Override
@@ -188,6 +188,7 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.equal(new java.sql.Date(date.getTime())));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.equal(punchOrganizationId));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.equal(userId));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(punchruleId));
 //				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
 				return null;
 			}
