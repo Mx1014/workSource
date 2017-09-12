@@ -614,7 +614,6 @@ public class ArchivesServiceImpl implements ArchivesService {
             memberDetail.setDepartment(getDepartmentName(Arrays.asList(cmd.getDepartmentId())));
             memberDetail.setContactShortToken(cmd.getContactShortToken());
             memberDetail.setWorkEmail(cmd.getWorkEmail());
-            memberDetail.setWorkPlaceId(cmd.getWorkingPlaceId());
             memberDetail.setContractPartyId(cmd.getContractId());
             memberDetail.setRegionCode(cmd.getRegionCode());
             organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
@@ -657,7 +656,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  4.赋值
         for(GeneralFormFieldDTO dto : form.getFormFields()){
             //  4-1.赋值给系统默认字段
-            if (dto.getFieldAttribute().equals(GeneralFormFieldAttributeType.DEFAULT.getCode())) {
+            if (GeneralFormFieldAttributeType.DEFAULT.getCode().equals(dto.getFieldAttribute())) {
                 dto.setFieldValue(employeeStaticVal.get(dto.getFieldName()));
             }
             //  TODO: 4-2.赋值给非系统默认字段
@@ -666,6 +665,9 @@ public class ArchivesServiceImpl implements ArchivesService {
             }
         }
 
+        //  摒弃冗余字段
+        form.setTemplateText(null);
+        response.setForm(form);
         return response;
     }
 

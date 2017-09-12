@@ -40,7 +40,6 @@ import com.everhomes.server.schema.tables.pojos.EhApprovalTimeRanges;
 import com.everhomes.server.schema.tables.pojos.EhArchivesDismissEmployees;
 import com.everhomes.server.schema.tables.pojos.EhArchivesForms;
 import com.everhomes.server.schema.tables.pojos.EhArchivesStickyContacts;
-import com.everhomes.server.schema.tables.pojos.EhArchivesWorkingPlaces;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.pojos.EhAuthorizationRelations;
@@ -2180,10 +2179,6 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhArchivesForms.class, Tables.EH_ARCHIVES_FORMS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ARCHIVES_FORMS.ID.max()).from(Tables.EH_ARCHIVES_FORMS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhArchivesWorkingPlaces.class, Tables.EH_ARCHIVES_WORKING_PLACES.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_ARCHIVES_WORKING_PLACES.ID.max()).from(Tables.EH_ARCHIVES_WORKING_PLACES).fetchOne().value1();
         });
     }
 
