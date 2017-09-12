@@ -145,6 +145,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -6192,6 +6193,50 @@ public class OrganizationServiceImpl implements OrganizationService {
             joinOrganizationAfterOperation(member);
         }
         return member;
+    }
+
+    @Override
+    public ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd) {
+        ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
+
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        String keywords = cmd.getKeywords();
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembers(locator, pageSize, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+                List<String> groupTypes = new ArrayList<>();
+                Condition cond = null;
+                groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+
+                if(cmd.getOrganizationIds() != null && cmd.getOrganizationIds().size() > 0){
+                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(cmd.getOrganizationIds()));
+                }
+
+                if (!StringUtils.isEmpty(keywords)) {
+                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords).or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + keywords + "%")));
+                }
+                query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+                query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+                return query;
+            }
+        });
+
+        if (0 == organizationMembers.size()) {
+            return response;
+        }
+
+        response.setNextPageAnchor(locator.getAnchor());
+
+        response.setMembers(organizationMembers.stream().map(r->{
+            return ConvertHelper.convert(r, OrganizationMemberDTO.class);
+        }).collect(Collectors.toList()));
+
+        return response;
     }
 
 

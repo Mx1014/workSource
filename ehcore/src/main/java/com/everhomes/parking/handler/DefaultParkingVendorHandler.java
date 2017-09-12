@@ -28,8 +28,7 @@ import java.util.Map;
 /**
  * @author sw on 2017/8/16.
  */
-@Component
-public class DefaultParkingVendorHandler implements ParkingVendorHandler {
+public abstract class DefaultParkingVendorHandler implements ParkingVendorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultParkingVendorHandler.class);
 
@@ -170,6 +169,11 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
     }
 
     @Override
+    public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
+        return null;
+    }
+
+    @Override
     public ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd) {
         return null;
     }
@@ -196,31 +200,6 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
 
     @Override
     public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
-        return null;
-    }
-
-    @Override
-    public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
-        return null;
-    }
-
-    @Override
-    public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
-        return null;
-    }
-
-    @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot, String plateNumber, String cardNo) {
-        return null;
-    }
-
-    @Override
-    public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-        return null;
-    }
-
-    @Override
-    public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
         return null;
     }
 

@@ -416,7 +416,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private void createPriceRules(PriceRuleType priceRuleType, Long ruleId, List<PriceRuleDTO> priceRules) {
+		LOGGER.debug("test enter cerate resource price rules, defaultRule={}", JSON.toJSON(priceRules));
+
 		if (priceRules != null && !priceRules.isEmpty()) {
+			LOGGER.debug("test foreach cerate resource price rules, defaultRule={}", JSON.toJSON(priceRules));
+
 			priceRules.forEach(p->createPriceRule(priceRuleType, ruleId, p));
 		}
 	}
@@ -5209,8 +5213,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			BigDecimal weekendPrice = defaultRule.getWeekendPrice() == null ? new BigDecimal(0) : defaultRule.getWeekendPrice(); 
 			BigDecimal workdayPrice = defaultRule.getWorkdayPrice() == null ? new BigDecimal(0) : defaultRule.getWorkdayPrice();
-			
+
+			LOGGER.debug("test enter cerate cell, defaultRule={}", defaultRule);
 			for (PriceRuleDTO priceRuleDTO : defaultRule.getPriceRules()) {
+				LOGGER.debug("test foreach cerate cell, ");
 				List<AddRentalSiteSingleSimpleRule> addSingleRules =new ArrayList<>();
 				if (priceRuleDTO.getRentalType().equals(RentalType.HOUR.getCode()))  {
 					if(defaultRule.getTimeIntervals() != null){
@@ -5261,10 +5267,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				priceRuleDTO.setCellEndId(cellBeginId+seqNum.get()-1);
 //				updatePriceRule(priceRuleDTO);
 			}
-			
-			
 
-			
+			LOGGER.debug("test out cerate cell, defaultRule={}", defaultRule);
+
+
+
 //			if(LOGGER.isDebugEnabled()) {
 //	            LOGGER.debug("eh rental cells get next sequence block, id=" + cellBeginId+",block count = "+ seqNum.get()); 
 //	            LOGGER.debug("eh rental cells current id =" +  sequenceProvider.getCurrentSequence(NameMapper
@@ -5319,7 +5326,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					this.rentalv2Provider.createRentalSitePic(detailPic);
 				}
 			}
-			
+
+			LOGGER.debug("test enter cerate resource price rules, defaultRule={}", defaultRule);
 			createPriceRules(PriceRuleType.RESOURCE, resource.getId(), defaultRule.getPriceRules());
 
 			createRentalConfigAttachment(defaultRule.getAttachments(), resource.getId(), EhRentalv2Resources.class.getSimpleName());
