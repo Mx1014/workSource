@@ -53,6 +53,7 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
@@ -6138,6 +6139,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         Organization org = checkOrganization(organizationId);
         Integer namespaceId = UserContext.getCurrentNamespaceId(org.getNamespaceId());
         OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(organizationId, contactToken);
+
+        if(OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+            LOGGER.error("This user has been added to the administrator list.");
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_EXISTS,
+                    "This user has been added to the administrator list.");
+        }
+
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId,contactToken);
         boolean sendMsgFlag = false;
         if(null == member){
