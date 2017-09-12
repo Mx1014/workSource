@@ -17,3 +17,10 @@ CREATE TABLE `eh_news_tag` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_news_tag_vals` (
+  `id` BIGINT(20) NOT NULL,
+  `news_id` BIGINT(20) NOT NULL DEFAULT '0',
+  `news_tag_id` BIGINT(20) NOT NULL DEFAULT '0',
+  `name` VARCHAR(45) NULL DEFAULT NULL,
+  `value` VARCHAR(45) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`));
