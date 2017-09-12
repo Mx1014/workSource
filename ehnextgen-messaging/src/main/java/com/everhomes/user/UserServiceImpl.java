@@ -4794,9 +4794,14 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 
-		if(defalut_communityId == null){
-			//再从namespace中取默认
-			defalut_community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, type);
+		if(defalut_communityId == null){//找默认的社区
+			SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
+			if(communityScene != null){
+				defalut_community = ConvertHelper.convert(communityScene, Community.class);
+			}else{
+				//再从namespace中取默认
+				defalut_community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, type);
+			}
 		}else{
 			defalut_community = this.communityProvider.findCommunityById(defalut_communityId);
 		}
