@@ -2,6 +2,12 @@ package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>organizationId: 公司id</li>
+ * <li>keywords: 搜索关键词</li>
+ * </ul>
+ */
 public class ExportArchivesContactsCommand {
 
     private Long organizationId;
