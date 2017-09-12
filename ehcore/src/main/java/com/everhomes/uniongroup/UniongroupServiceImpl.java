@@ -2,6 +2,7 @@
 package com.everhomes.uniongroup;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.db.DbProvider;
 import com.everhomes.organization.*;
 import com.everhomes.rest.uniongroup.*;
@@ -10,7 +11,6 @@ import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -181,24 +181,27 @@ public class UniongroupServiceImpl implements UniongroupService {
         }).collect(Collectors.toList());
 
         //4.保存
-        dbProvider.execute((TransactionStatus status) -> {
-            //--------------------------1.保存配置表--------------------------
-            if (configureList.size() > 0) {
-                configureList.stream().map(r -> {
-                    this.uniongroupConfigureProvider.createUniongroupConfigures(r);
-                    //2保存关系表
-                    return null;
-                }).collect(Collectors.toList());
-            }
-            if (unionDetailsList.size() > 0) {
-                //--------------------------2.保存关系表--------------------------
-                this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(new ArrayList(detailIds));
-                //后保存
-                this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(unionDetailsList);
-            }
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
+                dbProvider.execute((TransactionStatus status) -> {
+                    //--------------------------1.保存配置表--------------------------
+                    if (configureList.size() > 0) {
+                        configureList.stream().map(r -> {
+                            this.uniongroupConfigureProvider.createUniongroupConfigures(r);
+                            //2保存关系表
+                            return null;
+                        }).collect(Collectors.toList());
+                    }
+                    if (unionDetailsList.size() > 0) {
+                        //--------------------------2.保存关系表--------------------------
+                        this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(new ArrayList(detailIds));
+                        //后保存
+                        this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(unionDetailsList);
+                    }
 
-            return null;
+                    return null;
+                });
         });
+
 
         //5.同步搜索引擎
         this.uniongroupSearcher.deleteAll();

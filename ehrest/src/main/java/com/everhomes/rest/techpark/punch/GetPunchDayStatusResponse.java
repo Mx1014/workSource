@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
 * <li>punchNormalTime：(下次打卡)正确的打卡时间--(如果是上班打卡,这个字段没用 ; 如果是下班打卡,在此之前是早退)</li>
  * <li>intervals：打卡班次列表 参考{@link com.everhomes.rest.techpark.punch.PunchIntevalLogDTO}</li>
  * <li>statusList：班次的打卡状态列表多个状态用/分隔:比如"0" "0/2/1"</li>
+ * <li>clockStatus：下次打卡的打卡状态 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
 * </ul>
 */
 public class GetPunchDayStatusResponse {
@@ -25,6 +26,7 @@ public class GetPunchDayStatusResponse {
 	private Byte punchType;
 	private Integer punchIntervalNo;
 	private Long punchNormalTime;
+	private Byte clockStatus;
 
 	@ItemType(PunchIntevalLogDTO.class)
 	private List<PunchIntevalLogDTO> intervals;
@@ -97,5 +99,13 @@ public class GetPunchDayStatusResponse {
 
 	public void setPunchDate(Long punchDate) {
 		this.punchDate = punchDate;
+	}
+
+	public Byte getClockStatus() {
+		return clockStatus;
+	}
+
+	public void setClockStatus(Byte clockStatus) {
+		this.clockStatus = clockStatus;
 	}
 }
