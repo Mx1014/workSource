@@ -1,7 +1,9 @@
 package com.everhomes.archives;
 
 import com.everhomes.rest.archives.*;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +29,8 @@ public interface ArchivesService {
     void exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse);
 
     void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd);
+
+    ImportFileResponse<ImportArchivesContactsDTO> getImportContactsResult(GetImportFileResultCommand cmd);
 
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
 

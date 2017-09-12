@@ -5,7 +5,9 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.archives.*;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -120,6 +122,19 @@ public class ArchivesController extends ControllerBase{
     public RestResponse verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd){
         archivesService.verifyPersonnelByPassword(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /archives/getImportContactsResult</b>
+     * <p>5-4.查询导入的文件结果</p>
+     */
+    @RequestMapping("getImportFileResult")
+    @RestReturn(value = ImportFileResponse.class)
+    public RestResponse getImportContactsResult(GetImportFileResultCommand cmd) {
+        RestResponse response = new RestResponse(archivesService.getImportContactsResult(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
