@@ -361,6 +361,7 @@ import com.everhomes.server.schema.tables.pojos.EhServiceAllianceNotifyTargets;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceReservationRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceServerRequests;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceSkipRule;
 import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
 import com.everhomes.server.schema.tables.pojos.EhServiceHotlines;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
@@ -1285,6 +1286,9 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhServiceAllianceAttachments.class, Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhServiceAllianceSkipRule.class, Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE).fetchOne().value1();
         });
         syncTableSequence(null, EhAclinkLogs.class, Tables.EH_ACLINK_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ACLINK_LOGS.ID.max()).from(Tables.EH_ACLINK_LOGS).fetchOne().value1();
