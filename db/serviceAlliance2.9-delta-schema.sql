@@ -4,7 +4,7 @@ CREATE TABLE `eh_service_alliance_comments` (
 	`namespace_id` INTEGER NOT NULL DEFAULT 0,
 	`owner_type` VARCHAR(64),
 	`owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'owner id, e.g servicealliance id',
-	`parent_comment_id` BIGINT COMMENT 'parent comment Id'
+	`parent_comment_id` BIGINT COMMENT 'parent comment Id',
 	`content_type` VARCHAR(32) COMMENT 'object content type',
 	`content` TEXT COMMENT 'content data, depends on value of content_type',
 	`status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
