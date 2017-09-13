@@ -6186,7 +6186,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
             organizationProvider.updateOrganizationMember(member);
-            List<OrganizationMember> ms = organizationProvider.listOrganizationMemberByPath(org.getPath() + "/%", null, member.getContactToken())
+            List<OrganizationMember> ms = organizationProvider.listOrganizationMemberByPath(org.getPath() + "/%", null, member.getContactToken());
             for (OrganizationMember m: ms) {
                 m.setContactName(contactName);
                 organizationProvider.updateOrganizationMember(m);
