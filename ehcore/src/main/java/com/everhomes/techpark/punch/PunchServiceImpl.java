@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -2509,8 +2510,9 @@ public class PunchServiceImpl implements PunchService {
             if(null != r1) {
                 PunchTimeRuleDTO dto1 = convertPunchTimeRule2DTO(r1);
                 PunchTimeIntervalDTO interval = dto1.getPunchTimeIntervals().get(punchTimeNo - 1);
-                statistic.setUnpunchCount(statistic.getUnpunchCount()
-                        +(interval.getLeaveTime()-interval.getArriveTime())/3600000.0);
+				BigDecimal b = new BigDecimal(statistic.getUnpunchCount()
+						+ (interval.getLeaveTime() - interval.getArriveTime()));
+				statistic.setUnpunchCount(b.divide(new BigDecimal(3600000), 2, RoundingMode.HALF_UP).doubleValue());
             }
         }  else if (status.equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
             statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
