@@ -11,49 +11,51 @@ import java.util.List;
  * <ul>
  * <li>formOriginId: 表单 id</li>
  * <li>detailId: 员工 id</li>
- * <li>contactName: contactName</li>
- * <li>enName: enName</li>
- * <li>gender: gender</li>
+ * <li>organizationId: organizationId</li>
  * <li>birthday: birthday</li>
+ * <li>contactName: contactName</li>
+ * <li>contactToken: contactToken</li>
+ * <li>regionCode: regionCode</li>
+ * <li>employeeNo: employeeNo</li>
+ * <li>gender: gender</li>
  * <li>maritalFlag: maritalFlag</li>
- * <li>procreative: procreative</li>
- * <li>ethnicity: ethnicity</li>
  * <li>politicalFlag: politicalFlag</li>
  * <li>nativePlace: nativePlace</li>
- * <li>idType: idType</li>
+ * <li>enName: enName</li>
+ * <li>regResidence: regResidence</li>
  * <li>idNumber: idNumber</li>
+ * <li>email: email</li>
+ * <li>wechat: wechat</li>
+ * <li>qq: qq</li>
+ * <li>emergencyName: emergencyName</li>
+ * <li>emergencyContact: emergencyContact</li>
+ * <li>address: address</li>
+ * <li>employeeType: employeeType</li>
+ * <li>employeeStatus: employeeStatus</li>
+ * <li>employmentTime: employmentTime</li>
+ * <li>salaryCardNumber: salaryCardNumber</li>
+ * <li>socialSecurityNumber: socialSecurityNumber</li>
+ * <li>providentFundNumber: providentFundNumber</li>
+ * <li>checkInTime: checkInTime</li>
+ * <li>procreative: procreative</li>
+ * <li>ethnicity: ethnicity</li>
+ * <li>idType: idType</li>
  * <li>idExpiryDate: idExpiryDate</li>
  * <li>degree: degree</li>
  * <li>graduationSchool: graduationSchool</li>
  * <li>graduationTime: graduationTime</li>
- * <li>contactToken: contactToken</li>
- * <li>email: email</li>
- * <li>wechat: wechat</li>
- * <li>qq: qq</li>
- * <li>address: address</li>
- * <li>emergencyName: emergencyName</li>
  * <li>emergencyRelationship: emergencyRelationship</li>
- * <li>emergencyContact: emergencyContact</li>
- * <li>checkInTime: checkInTime</li>
- * <li>employeeType: employeeType</li>
- * <li>employeeStatus: employeeStatus</li>
- * <li>employmentTime: employmentTime</li>
  * <li>department: department</li>
  * <li>jobPosition: jobPosition</li>
  * <li>reportTarget: reportTarget</li>
- * <li>employeeNo: employeeNo</li>
  * <li>contactShortToken: contactShortToken</li>
  * <li>workEmail: workEmail</li>
- * <li>contractId: contractId</li>
+ * <li>contractPartyId: contractPartyId</li>
  * <li>workStartTime: workStartTime</li>
  * <li>contractStartTime: contractStartTime</li>
  * <li>contractEndTime: contractEndTime</li>
- * <li>salaryCardNumber: salaryCardNumber</li>
  * <li>salaryCardBank: salaryCardBank</li>
- * <li>socialSecurityNumber: socialSecurityNumber</li>
- * <li>providentFundNumber: providentFundNumber</li>
  * <li>regResidenceType: regResidenceType</li>
- * <li>regResidence: regResidence</li>
  * <li>idPhoto: idPhoto</li>
  * <li>visaPhoto: visaPhoto</li>
  * <li>lifePhoto: lifePhoto</li>
@@ -61,7 +63,7 @@ import java.util.List;
  * <li>graduationCertificate: graduationCertificate</li>
  * <li>degreeCertificate: degreeCertificate</li>
  * <li>contractCertificate: contractCertificate</li>
- * <li>values: 更新字段及其值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>values: 非系统字段值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
  * </ul>
  */
 public class UpdateArchivesEmployeeCommand {
@@ -70,27 +72,63 @@ public class UpdateArchivesEmployeeCommand {
 
     private Long detailId;
 
-    private String contactName;
-
-    private String enName;
-
-    private Byte gender;
+    private Long organizationId;
 
     private Date birthday;
 
+    private String contactName;
+
+    private String contactToken;
+
+    private String regionCode;
+
+    private String employeeNo;
+
+    private Byte gender;
+
     private Byte maritalFlag;
-
-    private Date procreative;
-
-    private String ethnicity;
 
     private String politicalFlag;
 
     private String nativePlace;
 
-    private Byte idType;
+    private String enName;
+
+    private String regResidence;
 
     private String idNumber;
+
+    private String email;
+
+    private String wechat;
+
+    private String qq;
+
+    private String emergencyName;
+
+    private String emergencyContact;
+
+    private String address;
+
+    private Byte employeeType;
+
+    private Byte employeeStatus;
+
+    private Date employmentTime;
+
+    private String salaryCardNumber;
+
+    private String socialSecurityNumber;
+
+    private String providentFundNumber;
+
+    private Date checkInTime;
+
+    private Date procreative;
+
+    private String ethnicity;
+
+    private String idType;
 
     private Date idExpiryDate;
 
@@ -100,29 +138,7 @@ public class UpdateArchivesEmployeeCommand {
 
     private Date graduationTime;
 
-    private String contactToken;
-
-    private String email;
-
-    private String wechat;
-
-    private String qq;
-
-    private String address;
-
-    private String emergencyName;
-
     private String emergencyRelationship;
-
-    private String emergencyContact;
-
-    private Date checkInTime;
-
-    private Byte employeeType;
-
-    private Byte employeeStatus;
-
-    private Date employmentTime;
 
     private String department;
 
@@ -130,13 +146,11 @@ public class UpdateArchivesEmployeeCommand {
 
     private String reportTarget;
 
-    private String employeeNo;
-
     private String contactShortToken;
 
     private String workEmail;
 
-    private Long contractId;
+    private Long contractPartyId;
 
     private Date workStartTime;
 
@@ -144,17 +158,9 @@ public class UpdateArchivesEmployeeCommand {
 
     private Date contractEndTime;
 
-    private String salaryCardNumber;
-
     private String salaryCardBank;
 
-    private String socialSecurityNumber;
-
-    private String providentFundNumber;
-
     private String regResidenceType;
-
-    private String regResidence;
 
     private String idPhoto;
 
@@ -192,6 +198,13 @@ public class UpdateArchivesEmployeeCommand {
         this.detailId = detailId;
     }
 
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public String getContactName() {
         return contactName;
@@ -265,11 +278,11 @@ public class UpdateArchivesEmployeeCommand {
         this.nativePlace = nativePlace;
     }
 
-    public Byte getIdType() {
+    public String getIdType() {
         return idType;
     }
 
-    public void setIdType(Byte idType) {
+    public void setIdType(String idType) {
         this.idType = idType;
     }
 
@@ -319,6 +332,14 @@ public class UpdateArchivesEmployeeCommand {
 
     public void setContactToken(String contactToken) {
         this.contactToken = contactToken;
+    }
+
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
     }
 
     public String getEmail() {
@@ -457,12 +478,12 @@ public class UpdateArchivesEmployeeCommand {
         this.workEmail = workEmail;
     }
 
-    public Long getContractId() {
-        return contractId;
+    public Long getContractPartyId() {
+        return contractPartyId;
     }
 
-    public void setContractId(Long contractId) {
-        this.contractId = contractId;
+    public void setContractPartyId(Long contractPartyId) {
+        this.contractPartyId = contractPartyId;
     }
 
     public Date getWorkStartTime() {

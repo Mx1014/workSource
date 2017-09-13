@@ -25,7 +25,7 @@ import com.everhomes.util.StringHelper;
  * <li>renderType: 渲染类型，{@link GeneralFormRenderType}</li>
  * <li>fieldValue: 字段值</li>
  * <li>fieldGroupName: 字段组名称</li>
- * <li>fieldAttribute: 字段属性 比如：系统默认字段 {@link com.everhomes.rest.general_approval.GeneralFormFieldAttributeType}</li>
+ * <li>fieldAttribute: 字段属性 比如：系统字段 {@link com.everhomes.rest.general_approval.GeneralFormFieldAttributeType}</li>
  * </ul>
  * @author janson
  *

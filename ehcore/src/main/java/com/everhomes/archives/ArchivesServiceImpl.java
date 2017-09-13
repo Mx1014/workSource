@@ -633,12 +633,123 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void updateArchivesEmployee(UpdateArchivesEmployeeCommand cmd){
 
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        detail = updateArchivesEmployeeDetail(detail, cmd);
+
+
         addGeneralFormValuesCommand formCommand = new addGeneralFormValuesCommand();
         formCommand.setGeneralFormId(getRealFormOriginId(cmd.getFormOriginId()));
         formCommand.setSourceId(cmd.getDetailId());
         formCommand.setSourceType(GeneralFormSourceType.ARCHIVES_ATUH.getCode());
         formCommand.setValues(cmd.getValues());
         generalFormService.addGeneralFormValues(formCommand);
+    }
+
+    private OrganizationMemberDetails updateArchivesEmployeeDetail(OrganizationMemberDetails detail, UpdateArchivesEmployeeCommand cmd){
+        if(cmd.getBirthday() !=null)
+            detail.setBirthday(cmd.getBirthday());
+        if(cmd.getContactName() !=null)
+            detail.setContactName(cmd.getContactName());
+        if(cmd.getContactToken() !=null)
+            detail.setContactToken(cmd.getContactToken());
+        if(cmd.getRegionCode() !=null)
+            detail.setRegionCode(cmd.getRegionCode());
+        if(cmd.getEmployeeNo() !=null)
+            detail.setEmployeeNo(cmd.getEmployeeNo());
+        if(cmd.getGender() !=null)
+            detail.setGender(cmd.getGender());
+        if(cmd.getMaritalFlag() !=null)
+            detail.setMaritalFlag(cmd.getMaritalFlag());
+        if(cmd.getPoliticalFlag() !=null)
+            detail.setPoliticalFlag(cmd.getPoliticalFlag());
+        if(cmd.getNativePlace() !=null)
+            detail.setNativePlace(cmd.getNativePlace());
+        if(cmd.getEnName() !=null)
+            detail.setEnName(cmd.getEnName());
+        if(cmd.getRegResidence() !=null)
+            detail.setRegResidence(cmd.getRegResidence());
+        if(cmd.getIdNumber() !=null)
+            detail.setIdNumber(cmd.getIdNumber());
+        if(cmd.getEmail() !=null)
+            detail.setEmail(cmd.getEmail());
+        if(cmd.getWechat() !=null)
+            detail.setWechat(cmd.getWechat());
+        if(cmd.getQq() !=null)
+            detail.setQq(cmd.getQq());
+        if(cmd.getEmergencyName() !=null)
+            detail.setEmergencyName(cmd.getEmergencyName());
+        if(cmd.getEmergencyContact() !=null)
+            detail.setEmergencyContact(cmd.getEmergencyContact());
+        if(cmd.getAddress() !=null)
+            detail.setAddress(cmd.getAddress());
+        if(cmd.getEmployeeType() !=null)
+            detail.setEmployeeType(cmd.getEmployeeType());
+        if(cmd.getEmployeeStatus() !=null)
+            detail.setEmployeeStatus(cmd.getEmployeeStatus());
+        if(cmd.getEmploymentTime() !=null)
+            detail.setEmploymentTime(cmd.getEmploymentTime());
+        if(cmd.getSalaryCardNumber() !=null)
+            detail.setSalaryCardNumber(cmd.getSalaryCardNumber());
+        if(cmd.getSocialSecurityNumber() !=null)
+            detail.setSocialSecurityNumber(cmd.getSocialSecurityNumber());
+        if(cmd.getProvidentFundNumber() !=null)
+            detail.setProvidentFundNumber(cmd.getProvidentFundNumber());
+        if(cmd.getCheckInTime() !=null)
+            detail.setCheckInTime(cmd.getCheckInTime());
+        if(cmd.getProcreative() !=null)
+            detail.setProcreative(cmd.getProcreative());
+        if(cmd.getEthnicity() !=null)
+            detail.setEthnicity(cmd.getEthnicity());
+        if(cmd.getIdType() !=null)
+            detail.setIdType(cmd.getIdType());
+        if(cmd.getIdExpiryDate() !=null)
+            detail.setIdExpiryDate(cmd.getIdExpiryDate());
+        if(cmd.getDegree() !=null)
+            detail.setDegree(cmd.getDegree());
+        if(cmd.getGraduationSchool() !=null)
+            detail.setGraduationSchool(cmd.getGraduationSchool());
+        if(cmd.getGraduationTime() !=null)
+            detail.setGraduationTime(cmd.getGraduationTime());
+        if(cmd.getEmergencyRelationship() !=null)
+            detail.setEmergencyRelationship(cmd.getEmergencyRelationship());
+/*        if(cmd.getDepartment() !=null)
+            detail.setDepartment(cmd.getDepartment());
+        if(cmd.getJobPosition() !=null)
+            detail.setJobPosition(cmd.getJobPosition());
+        if(cmd.getReportTarget() !=null)
+            detail.setReportTarget(cmd.getReportTarget());*/
+        if(cmd.getContactShortToken() !=null)
+            detail.setContactShortToken(cmd.getContactShortToken());
+        if(cmd.getWorkEmail() !=null)
+            detail.setWorkEmail(cmd.getWorkEmail());
+        if(cmd.getContractPartyId() !=null)
+            detail.setContractPartyId((cmd.getContractPartyId()));
+        if(cmd.getWorkStartTime() !=null)
+            detail.setWorkStartTime(cmd.getWorkStartTime());
+        if(cmd.getContractStartTime() !=null)
+            detail.setContractStartTime(cmd.getContractStartTime());
+        if(cmd.getContractEndTime() !=null)
+            detail.setContractEndTime(cmd.getContractEndTime());
+        if(cmd.getSalaryCardBank() !=null)
+            detail.setSalaryCardBank(cmd.getSalaryCardBank());
+        if(cmd.getRegResidenceType() !=null)
+            detail.setRegResidenceType(cmd.getRegResidenceType());
+        if(cmd.getIdPhoto() !=null)
+            detail.setIdPhoto(cmd.getIdPhoto());
+        if(cmd.getVisaPhoto() !=null)
+            detail.setVisaPhoto(cmd.getVisaPhoto());
+        if(cmd.getLifePhoto() !=null)
+            detail.setLifePhoto(cmd.getLifePhoto());
+        if(cmd.getEntryForm() !=null)
+            detail.setEntryForm(cmd.getEntryForm());
+        if(cmd.getGraduationCertificate() !=null)
+            detail.setGraduationCertificate(cmd.getGraduationCertificate());
+        if(cmd.getDegreeCertificate() !=null)
+            detail.setDegreeCertificate(cmd.getDegreeCertificate());
+        if(cmd.getContractCertificate() !=null)
+            detail.setContractCertificate(cmd.getContractCertificate());
+
+        return detail;
     }
 
     @Override
@@ -681,17 +792,13 @@ public class ArchivesServiceImpl implements ArchivesService {
     //  利用 map 设置 key 来存取值
     private Map<String, String> handleEmployeeStaticVal(OrganizationMemberDetails employee) {
         Map<String, String> valueMap = new HashMap<>();
-/*        Field[] fields = employee.getClass().getDeclaredFields();
-        for(int i=0; i<fields.length; i++){
-            valueMap.put(fields[i].getName(),fields[i].get(employee));
-        }*/
+
         valueMap.put("contactName", employee.getContactName());
         valueMap.put("enName", employee.getEnName());
-        //  TODO:性别处理,婚姻状况
-//        valueMap.put("gender",employee.getGender());
+        valueMap.put("gender",String.valueOf(employee.getGender()));
         if(employee.getBirthday() != null)
             valueMap.put("birthday", String.valueOf(employee.getBirthday()));
-//        valueMap.put("enName",employee.getMaritalFlag());
+        valueMap.put("maritalFlag",String.valueOf(employee.getMaritalFlag()));
         if(employee.getProcreative() != null)
             valueMap.put("procreative", String.valueOf(employee.getProcreative()));
         valueMap.put("ethnicity", employee.getEthnicity());
@@ -715,8 +822,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put("emergencyContact", employee.getEmergencyContact());
         if(employee.getCheckInTime() != null)
             valueMap.put("checkInTime", String.valueOf(employee.getCheckInTime()));
-//        valueMap.put("employeeType", employee.getEmployeeType());
-//        valueMap.put("employeeStatus", employee.getEmployeeStatus());
+        valueMap.put("employeeType", String.valueOf(employee.getEmployeeType()));
+        valueMap.put("employeeStatus", String.valueOf(employee.getEmployeeStatus()));
         valueMap.put("employmentTime", String.valueOf(employee.getEmploymentTime()));
         //  TODO:部门的同步，岗位的修改
 //        valueMap.put("department", employee.getEnName());
@@ -725,8 +832,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put("contactShortToken", employee.getContactShortToken());
         valueMap.put("workEmail", employee.getWorkEmail());
         //  TODO:工作地点，合同主体的转化
-//        valueMap.put("workPlaceId", String.valueOf(employee.getWorkPlaceId()));
-//        valueMap.put("contractPartyId", employee.getEnName());
+        valueMap.put("contractPartyId", String.valueOf(employee.getContractPartyId()));
         if(employee.getWorkStartTime() != null)
             valueMap.put("workStartTime", String.valueOf(employee.getWorkStartTime()));
         if(employee.getContractStartTime() != null)

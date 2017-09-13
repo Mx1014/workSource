@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * 图片值：{@link com.everhomes.rest.general_approval.PostApprovalFormImageValue}
  * 文件值：{@link com.everhomes.rest.general_approval.PostApprovalFormFileValue}
  * 子表单值：{@link com.everhomes.rest.general_approval.PostApprovalFormSubformValue}
+ * <li>fieldAttribute: 字段属性 比如：系统字段 {@link com.everhomes.rest.general_approval.GeneralFormFieldAttributeType}</li>
  * </li>
  * <ul>
  * @author janson
@@ -26,6 +27,8 @@ public class PostApprovalFormItem {
 	private String fieldName;
 	private String fieldValue;
 	private String fieldDisplayName;
+
+	private String fieldAttribute;
 
 	public String getFieldDisplayName() {
 		return fieldDisplayName;
@@ -53,7 +56,15 @@ public class PostApprovalFormItem {
 	public void setFieldValue(String fieldValue) {
 		this.fieldValue = fieldValue;
 	}
-	
+
+	public String getFieldAttribute() {
+		return fieldAttribute;
+	}
+
+	public void setFieldAttribute(String fieldAttribute) {
+		this.fieldAttribute = fieldAttribute;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
