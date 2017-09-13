@@ -4,15 +4,18 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.equipment.EquipmentProvider;
 import com.everhomes.equipment.EquipmentService;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pmNotify.PmNotifyLog;
 import com.everhomes.pmNotify.PmNotifyProvider;
 import com.everhomes.pmNotify.PmNotifyRecord;
 import com.everhomes.pmNotify.PmNotifyService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.equipment.EquipmentNotificationTemplateCode;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -31,6 +34,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
@@ -64,6 +68,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 
     @Autowired
     private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
 
     private String queueDelay = "pmtaskdelays";
     private String queueNoDelay = "pmtasknodelays";
@@ -123,24 +130,38 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
             Set<Long> notifyUsers = resolveUserSelection(receiverList.getReceivers(), record.getOwnerType(), record.getOwnerId());
             String taskName = "";
             Timestamp time = null;
+            int code = 0;
+            String scope = "";
+            String locale = "zh_CN";
             PmNotifyType notify = PmNotifyType.fromCode(record.getNotifyType());
             if (EntityType.EQUIPMENT_TASK.getCode().equals(record.getOwnerType())) {
+                scope = EquipmentNotificationTemplateCode.SCOPE;
                 EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(record.getId());
                 taskName = task.getTaskName();
                 if(PmNotifyType.BEFORE_START.equals(notify)) {
                     time = task.getExecutiveStartTime();
+                    code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_BEFORE_BEGIN;
                 } else if(PmNotifyType.BEFORE_DELAY.equals(notify)){
                     time = task.getExecutiveExpireTime();
+                    code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_BEFORE_DELAY;
+                } else if(PmNotifyType.AFTER_DELAY.equals(notify)){
+                    time = task.getExecutiveExpireTime();
+                    code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_AFTER_DELAY;
                 }
             }
             for (Long userId : notifyUsers) {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("processPmNotifyRecord, userId={}, recordId={}", userId, record.getId());
                 }
+                PmNotifyLog log = new PmNotifyLog();
+                log.setOwnerType(record.getOwnerType());
+                log.setOwnerId(record.getOwnerId());
+                log.setReceiverId(userId);
                 PmNotifyMode notifyMode = PmNotifyMode.fromCode(record.getNotifyMode());
                 switch (notifyMode) {
                     case MESSAGE:
-                        sendMessage(userId, taskName, time, notify);
+                        String notifyTextForApplicant = sendMessage(userId, taskName, time, notify, scope, locale, code);
+                        log.setNotifyText(notifyTextForApplicant);
                         break;
                     case SMS:
 //                        sndSMS(userId, record);
@@ -148,13 +169,24 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     default:
                         break;
                 }
+                pmNotifyProvider.createPmNotifyLog(log);
             }
         }
 
     }
 
-    private void sendMessage(Long userId, String taskName, Timestamp time, PmNotifyType type) {
+    private String sendMessage(Long userId, String taskName, Timestamp time, PmNotifyType type, String scope, String locale, int code) {
+        Map<String, Object> notifyMap = new HashMap<String, Object>();
+        notifyMap.put("taskName", taskName);
+        notifyMap.put("time", timeToStr(time));
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+        sendMessageToUser(userId, notifyTextForApplicant);
+        return notifyTextForApplicant;
+    }
 
+    private String timeToStr(Timestamp time) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(time);
     }
 
     private void sendMessageToUser(Long userId, String content) {

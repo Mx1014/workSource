@@ -24,6 +24,8 @@ import com.everhomes.appurl.AppUrlService;
 import com.everhomes.forum.Attachment;
 import com.everhomes.pmNotify.PmNotifyConfigurations;
 import com.everhomes.pmNotify.PmNotifyProvider;
+import com.everhomes.pmNotify.PmNotifyRecord;
+import com.everhomes.pmNotify.PmNotifyService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.ServiceModuleAuthorizationsDTO;
 import com.everhomes.rest.appurl.AppUrlDTO;
@@ -200,6 +202,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private PmNotifyProvider pmNotifyProvider;
+
+	@Autowired
+	private PmNotifyService pmNotifyService;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(
@@ -2019,15 +2024,47 @@ public class EquipmentServiceImpl implements EquipmentService {
 				List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
 				if(paramDTOs != null && paramDTOs.size() > 0) {
 					for (PmNotifyParamDTO notifyParamDTO : paramDTOs) {
+						List<PmNotifyReceiver> receivers = notifyParamDTO.getReceivers();
+						if(receivers != null && receivers.size() > 0) {
+							PmNotifyRecord record = ConvertHelper.convert(notifyParamDTO, PmNotifyRecord.class);
+							PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
+							receiverList.setReceivers(receivers);
+							record.setReceiverJson(receiverList.toString());
+							record.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+							record.setOwnerId(task.getId());
+
+							//notify_time
+							PmNotifyType notify = PmNotifyType.fromCode(record.getNotifyType());
+							switch (notify) {
+								case BEFORE_START:
+									Timestamp starttime = minusMinutes(task.getExecutiveStartTime(), notifyParamDTO.getNotifyTickMinutes());
+									record.setNotifyTime(starttime);
+									break;
+								case BEFORE_DELAY:
+									Timestamp delaytime = minusMinutes(task.getExecutiveExpireTime(), notifyParamDTO.getNotifyTickMinutes());
+									record.setNotifyTime(delaytime);
+									break;
+								case AFTER_DELAY:
+									record.setNotifyTime(task.getExecutiveExpireTime());
+									break;
+								default:
+									break;
+							}
+							pmNotifyService.pushPmNotifyRecord(record);
+						}
 
 					}
 				}
 			}
 		}
-			
-//		}
-		
-		
+	}
+
+	private Timestamp minusMinutes(Timestamp startTime, int minus) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(startTime);
+		calendar.add(Calendar.MINUTE, -minus);
+		Timestamp time = new Timestamp(calendar.getTimeInMillis());
+		return time;
 	}
 	
 	private String timestampToStr(Timestamp time) {
@@ -4154,6 +4191,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public void setPmNotifyParams(SetPmNotifyParamsCommand cmd) {
 		PmNotifyConfigurations configuration = ConvertHelper.convert(cmd, PmNotifyConfigurations.class);
+		configuration.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
 		List<PmNotifyReceiver> receivers = cmd.getReceivers();
 		if(receivers != null && receivers.size() > 0) {
 			PmNotifyReceiverList receiverList = new PmNotifyReceiverList();

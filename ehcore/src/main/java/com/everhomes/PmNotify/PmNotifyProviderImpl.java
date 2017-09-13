@@ -6,6 +6,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.pmNotify.PmNotifyConfigurations;
+import com.everhomes.pmNotify.PmNotifyLog;
 import com.everhomes.pmNotify.PmNotifyProvider;
 import com.everhomes.pmNotify.PmNotifyRecord;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
@@ -13,9 +14,11 @@ import com.everhomes.rest.pmNotify.PmNotifyRecordStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPmNotifyConfigurationsDao;
+import com.everhomes.server.schema.tables.daos.EhPmNotifyLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPmNotifyRecordsDao;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyConfigurations;
+import com.everhomes.server.schema.tables.pojos.EhPmNotifyLogs;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyRecords;
 import com.everhomes.server.schema.tables.records.EhPmNotifyConfigurationsRecord;
 import com.everhomes.util.ConvertHelper;
@@ -124,6 +127,22 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
         dao.insert(record);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmNotifyRecords.class, null);
+    }
+
+    @Override
+    public void createPmNotifyLog(PmNotifyLog log) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPmNotifyLogs.class));
+
+        log.setId(id);
+        log.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
+        log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        LOGGER.info("createPmNotifyLog: " + log);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPmNotifyLogsDao dao = new EhPmNotifyLogsDao(context.configuration());
+        dao.insert(log);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmNotifyLogs.class, null);
     }
 
     @Override

@@ -14,4 +14,6 @@ public interface PmNotifyProvider {
     void createPmNotifyRecord(PmNotifyRecord record);
     PmNotifyRecord findRecordById(Long id);
     boolean updateIfUnsend(Long id);
+
+    void createPmNotifyLog(PmNotifyLog log);
 }
