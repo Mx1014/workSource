@@ -1,4 +1,4 @@
-package com.everhomes.rest.incubator.hotTag;
+package com.everhomes.rest.incubator;
 
 import com.everhomes.util.StringHelper;
 
