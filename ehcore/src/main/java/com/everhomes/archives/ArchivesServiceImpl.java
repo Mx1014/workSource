@@ -592,14 +592,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setOrganizationId(cmd.getOrganizationId());
         addCommand.setContactName(cmd.getContactName());
         addCommand.setGender(cmd.getGender());
-        addCommand.setCheckInTime(cmd.getCheckInTime());
-        addCommand.setEmployeeType(cmd.getEmployeeType());
-        addCommand.setEmployeeStatus(cmd.getEmployeeStatus());
-        addCommand.setEmploymentTime(cmd.getEmploymentTime());
         addCommand.setDepartmentIds(Arrays.asList(cmd.getDepartmentId()));
         addCommand.setContactToken(cmd.getContactToken());
-        if (cmd.getEmployeeNo() != null)
-            addCommand.setEmployeeNo(cmd.getEmployeeNo());
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 
         //  2.获得 detailId 然后处理其它信息
@@ -608,6 +602,12 @@ public class ArchivesServiceImpl implements ArchivesService {
             detailId = memberDTO.getDetailId();
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         if (memberDetail != null) {
+
+            memberDetail.setCheckInTime(cmd.getCheckInTime());
+            memberDetail.setEmployeeType(cmd.getEmployeeType());
+            memberDetail.setEmployeeStatus(cmd.getEmployeeStatus());
+            memberDetail.setEmploymentTime(cmd.getEmploymentTime());
+            memberDetail.setEmployeeNo(cmd.getEmployeeNo());
             memberDetail.setEnName(cmd.getEnName());
             //  TODO:职位有可能修改
             memberDetail.setJobPosition(cmd.getJobPosition());

@@ -2,21 +2,24 @@ package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Date;
+
 
 /**
  * <ul>
  * <li>organizationId: 公司 id</li>
  * <li>contactName: 员工姓名</li>
+ * <li>enName: 英文名</li>
+ * <li>gender: 性别: 1-男, 2-女</li>
  * <li>checkInTime: 入职日期</li>
  * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣 {@link com.everhomes.rest.organization.EmployeeType}</li>
  * <li>employeeStatus: 工状态, 0: 试用 1: 在职 2: 离职 {@link com.everhomes.rest.organization.EmployeeStatus}</li>
  * <li>employmentTime: 转正时间</li>
  * <li>departmentId: 部门 id</li>
- * <li>jobPositionId: 职务</li>
+ * <li>jobPosition: jobPosition</li>
  * <li>employeeNo: 工号</li>
  * <li>contactShortToken: 手机短号</li>
  * <li>workEmail: 工作邮箱</li>
- * <li>workingPlace: 工作地点</li>
  * <li>contractId: 合同主体</li>
  * <li>regionCode: 手机区号</li>
  * <li>contactToken: 手机号</li>
@@ -32,13 +35,13 @@ public class AddArchivesEmployeeCommand {
 
     private Byte gender;
 
-    private String checkInTime;
+    private Date checkInTime;
 
     private Byte employeeType;
 
     private Byte employeeStatus;
 
-    private String employmentTime;
+    private Date employmentTime;
 
     private Long departmentId;
 
@@ -49,8 +52,6 @@ public class AddArchivesEmployeeCommand {
     private String contactShortToken;
 
     private String workEmail;
-
-    private Long workingPlaceId;
 
     private Long contractId;
 
@@ -85,12 +86,12 @@ public class AddArchivesEmployeeCommand {
         this.gender = gender;
     }
 
-    public String getCheckInTime() {
+    public Date getCheckInTime() {
         return checkInTime;
     }
 
     public void setCheckInTime(String checkInTime) {
-        this.checkInTime = checkInTime;
+        this.checkInTime = ArchivesDateUtil.parseDate(checkInTime);
     }
 
     public Byte getEmployeeType() {
@@ -109,12 +110,12 @@ public class AddArchivesEmployeeCommand {
         this.employeeStatus = employeeStatus;
     }
 
-    public String getEmploymentTime() {
+    public Date getEmploymentTime() {
         return employmentTime;
     }
 
     public void setEmploymentTime(String employmentTime) {
-        this.employmentTime = employmentTime;
+        this.employmentTime =  ArchivesDateUtil.parseDate(employmentTime);
     }
 
     public Long getDepartmentId() {
@@ -155,14 +156,6 @@ public class AddArchivesEmployeeCommand {
 
     public void setWorkEmail(String workEmail) {
         this.workEmail = workEmail;
-    }
-
-    public Long getWorkingPlaceId() {
-        return workingPlaceId;
-    }
-
-    public void setWorkingPlaceId(Long workingPlaceId) {
-        this.workingPlaceId = workingPlaceId;
     }
 
     public Long getContractId() {
