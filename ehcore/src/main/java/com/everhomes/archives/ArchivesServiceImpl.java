@@ -693,8 +693,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put("nativePlace", employee.getNativePlace());
         valueMap.put("idType", employee.getIdType());
         valueMap.put("idNumber", employee.getIdNumber());
-        if(employee.getIdExpirtDate() != null)
-            valueMap.put("idExpirtDate", String.valueOf(employee.getIdExpirtDate()));
+        if(employee.getIdExpiryDate() != null)
+            valueMap.put("idExpiryDate", String.valueOf(employee.getIdExpiryDate()));
         valueMap.put("degree", employee.getDegree());
         valueMap.put("graduationSchool", employee.getGraduationSchool());
         if(employee.getGraduationTime() != null)
