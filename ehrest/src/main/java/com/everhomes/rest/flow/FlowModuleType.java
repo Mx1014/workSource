@@ -3,15 +3,15 @@ package com.everhomes.rest.flow;
 /**
  * 
  * <ul>
- * <li>any-module : 任何模块(不分模块)</li>
+ * <li>any-module : 任何模块</li>
  * <li>service_alliance : 服务联盟应用模块</li>
  * </ul>
  *
- *  @author:dengs 2017年9月8日
+ *  @author:dengs
  */
 public enum FlowModuleType {
 
-	NO_MODULE("any-module"),
+	NO_MODULE("any-module"),REPAIR_MODULE("repair"),
 	SERVICE_ALLIANCE("service_alliance");
 	
 	private String code;

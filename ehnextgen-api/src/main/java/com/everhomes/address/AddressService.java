@@ -3,9 +3,9 @@ package com.everhomes.address;
 
 import java.util.List;
 
+import com.everhomes.asset.AddressIdAndName;
 import com.everhomes.rest.address.*;
 
-import com.everhomes.rest.enterprise.SearchEnterpriseCommunityCommand;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
@@ -13,6 +13,8 @@ import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandV2Response;
 import com.everhomes.util.Tuple;
 
 public interface AddressService {
@@ -62,8 +64,14 @@ public interface AddressService {
 	Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeywordForBusiness(ListPropApartmentsByKeywordCommand cmd);
 	Object importParkAddressData(ImportAddressCommand cmd, MultipartFile file);
 
+    List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName);
+
+    List<GetApartmentNameByBuildingNameDTO> getApartmentNameByBuildingName(GetApartmentNameByBuildingNameCommand cmd);
+
+
     ListNearbyMixCommunitiesCommandV2Response listNearbyMixCommunitiesV2(ListNearbyMixCommunitiesCommand cmd);
 
-    //获取注册中、已注册、关联最多的社区
-    ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(SearchEnterpriseCommunityCommand cmd);
+    //获取注册中、已注册、关联最多的社区(园区/xiaoqu)
+    ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(ListNearbyMixCommunitiesCommand cmd);
+
 }

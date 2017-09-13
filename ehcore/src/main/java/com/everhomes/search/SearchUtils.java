@@ -66,6 +66,8 @@ public class SearchUtils {
     public static final String WAREHOUSE_STOCK_LOG = "warehouseStockLog";
 
     public static final String WAREHOUSE_REQUEST_MATERIAL= "warehouseRequestMaterial";
+    public static final String CONTRACT= "contract";
+    public static final String ENTERPRISE_CUSTOMER= "enterpriseCustomer";
 
     public static final String UNIONGROUP_DETAILS= "uniongroupDetails";
 

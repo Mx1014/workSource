@@ -311,6 +311,25 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				}
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
+			PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+			//TODO:为科兴与一碑对接
+			if(task.getNamespaceId() == 999983 &&
+					task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+				CancelTaskCommand command = new CancelTaskCommand();
+				command.setId(task.getId());
+				command.setOwnerId(task.getOwnerId());
+				command.setOwnerType(task.getOwnerType());
+				handler.cancelTask(command);
+
+				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+				stepDTO.setFlowCaseId(flowCase.getId());
+				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+				stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+				flowService.processAutoStep(stepDTO);
+				ctx.setContinueStep(false);
+
+			}else
 			if ("ASSIGNING".equals(nodeType)) {
 				FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
 				stepDTO.setFlowCaseId(flowCase.getId());
@@ -323,7 +342,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				flowService.processAutoStep(stepDTO);
 				ctx.setContinueStep(false);
 
-				PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
 				pmTaskProvider.updateTask(task);

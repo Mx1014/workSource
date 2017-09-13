@@ -54,6 +54,9 @@ public class LaunchpadOnLauncPadItemClickEventHandler extends AbstractStatEventP
         Long launchPadItemId = Long.valueOf(paramsToValueMap.get("id"));
         PortalLaunchPadMapping mapping = portalLaunchPadMappingProvider.findPortalLaunchPadMapping(EhPortalItems.class.getSimpleName(), launchPadItemId);
         PortalItem portalItem = portalItemProvider.findPortalItemById(mapping.getPortalContentId());
+        if (portalItem == null) {
+            return null;
+        }
 
         StatEventStatistic eventStat = new StatEventStatistic();
         eventStat.setOwnerType(EhLaunchPadItems.class.getSimpleName());
