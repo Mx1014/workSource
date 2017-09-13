@@ -182,6 +182,7 @@ public class NewsServiceImpl implements NewsService {
 		news.setStatus(NewsStatus.ACTIVE.getCode());
 		news.setCreatorUid(userId);
 		news.setDeleterUid(0L);
+		news.setPhone(cmd.getPhone());
 		if (StringUtils.isEmpty(news.getContentAbstract())) {
 			news.setContentAbstract(news.getContent().substring(0,
 					news.getContent().length() > 100 ? 100 : news.getContent().length()));

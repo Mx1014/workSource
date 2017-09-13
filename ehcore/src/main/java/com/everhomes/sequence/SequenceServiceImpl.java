@@ -189,6 +189,8 @@ import com.everhomes.server.schema.tables.pojos.EhNews;
 import com.everhomes.server.schema.tables.pojos.EhNewsComment;
 import com.everhomes.server.schema.tables.pojos.EhNewsCommentRule;
 import com.everhomes.server.schema.tables.pojos.EhNewsCommunities;
+import com.everhomes.server.schema.tables.pojos.EhNewsTag;
+import com.everhomes.server.schema.tables.pojos.EhNewsTagVals;
 import com.everhomes.server.schema.tables.pojos.EhOauth2ClientTokens;
 import com.everhomes.server.schema.tables.pojos.EhOauth2Codes;
 import com.everhomes.server.schema.tables.pojos.EhOauth2Servers;
@@ -2162,8 +2164,12 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_EXPRESS_HOTLINES.ID.max()).from(Tables.EH_EXPRESS_HOTLINES).fetchOne().value1();
         });
 
-        syncTableSequence(null, EhExpressHotlines.class, Tables.EH_NEWS_TAG.getName(), (dbContext) -> {
+        syncTableSequence(null, EhNewsTag.class, Tables.EH_NEWS_TAG.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_NEWS_TAG.ID.max()).from(Tables.EH_NEWS_TAG).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhNewsTagVals.class, Tables.EH_NEWS_TAG_VALS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_NEWS_TAG_VALS.ID.max()).from(Tables.EH_NEWS_TAG_VALS).fetchOne().value1();
         });
     }
 

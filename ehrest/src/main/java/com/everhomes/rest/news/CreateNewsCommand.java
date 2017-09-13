@@ -24,7 +24,9 @@ import com.everhomes.util.StringHelper;
  * <li>publishTime: 发布时间</li>
  * <li>sourceDesc: 来源</li>
  * <li>sourceUrl: 原文链接</li>
+ * <li>phone: 联系方式</li>
  * <li>communityIds: 可见范围</li>
+ * <li>newsTagVals: 标签</li>
  * </ul>
  */
 public class CreateNewsCommand {
@@ -43,8 +45,11 @@ public class CreateNewsCommand {
 	private Long publishTime;
 	private String sourceDesc;
 	private String sourceUrl;
+	private Long phone;
 	@ItemType(Long.class)
 	private List<Long> communityIds;
+	@ItemType(NewsTagValsDTO.class)
+	private List<NewsTagValsDTO> newsTagVals;
 	private String visibleType;
 
 	public String getVisibleType() {
@@ -156,4 +161,19 @@ public class CreateNewsCommand {
 		this.categoryId = categoryId;
 	}
 
+	public Long getPhone() {
+		return phone;
+	}
+
+	public void setPhone(Long phone) {
+		this.phone = phone;
+	}
+
+	public List<NewsTagValsDTO> getNewsTagVals() {
+		return newsTagVals;
+	}
+
+	public void setNewsTagVals(List<NewsTagValsDTO> newsTagVals) {
+		this.newsTagVals = newsTagVals;
+	}
 }

@@ -24,6 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>topFlag: 置顶标记，0未置顶，1已置顶，参考{@link com.everhomes.rest.news.NewsTopFlag}</li>
  * <li>likeFlag: 点赞状态，0未点赞，1不喜欢，2已点赞，参考{@link com.everhomes.rest.user.UserLikeType}</li>
  * <li>newsUrl: 新闻链接(供分享)</li>
+ * <li>phone: 联系电话</li>
  * <li>categoryId: 新闻类型ID</li>
  * <li>commentFlag: 新闻是否可以评论，1：可以 0：禁止 {@link NewsNormalFlag}</li>
  * </ul>
@@ -41,6 +42,7 @@ public class BriefNewsDTO {
 	private Byte topFlag;
 	private Byte likeFlag;
 	private String newsUrl;
+	private Long phone;
 	private Long categoryId;
 	private Byte commentFlag;
 	private String visibleType;
@@ -180,6 +182,14 @@ public class BriefNewsDTO {
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public Long getPhone() {
+		return phone;
+	}
+
+	public void setPhone(Long phone) {
+		this.phone = phone;
 	}
 
 }
