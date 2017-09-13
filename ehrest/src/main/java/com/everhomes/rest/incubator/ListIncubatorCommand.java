@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *     <li>applyUserId: 申请人的uid</li>
  *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过</li>
  *     <li>needReject: 是否需要查询拒绝的数据 0-否，1-是，默认为1查询</li>
+ *     <li>keyWord: keyWord</li>
  *     <li>nextPageAnchor: nextPageAnchor</li>
  *     <li>pageSize: 数量</li>
  *     <li>orderBy: 排序方式，0-创建时间，1-审核时间</li>
@@ -20,6 +21,7 @@ public class ListIncubatorCommand {
 	private Long applyUserId;
 	private Byte approveStatus;
 	private Byte needReject;
+	private String keyWord;
 	private Long nextPageAnchor;
 	private Integer pageSize;
 	private Byte orderBy;
@@ -78,6 +80,14 @@ public class ListIncubatorCommand {
 
 	public void setOrderBy(Byte orderBy) {
 		this.orderBy = orderBy;
+	}
+
+	public String getKeyWord() {
+		return keyWord;
+	}
+
+	public void setKeyWord(String keyWord) {
+		this.keyWord = keyWord;
 	}
 
 	@Override

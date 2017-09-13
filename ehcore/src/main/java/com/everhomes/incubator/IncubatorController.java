@@ -22,12 +22,11 @@ public class IncubatorController extends ControllerBase {
      * <p>查询入孵申请的记录</p>
      */
     @RequestMapping("listIncubator")
-    @RestReturn(value=IncubatorDTO.class, collection = true)
+    @RestReturn(value=ListIncubatorResponse.class, collection = true)
     public RestResponse listIncubator(ListIncubatorCommand cmd) {
     	
-    	List<IncubatorDTO> dtos = null;
-        
-        RestResponse response = new RestResponse(dtos);
+
+        RestResponse response = new RestResponse(null);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -38,12 +37,11 @@ public class IncubatorController extends ControllerBase {
      * <p>获取入孵申请的项目类型</p>
      */
     @RequestMapping("listIncubatorProject")
-    @RestReturn(value=IncubatorProjectTypeDTO.class, collection = true)
+    @RestReturn(value=ListIncubatorProjectTypeResponse.class, collection = true)
     public RestResponse listIncubatorProject() {
 
-        List<IncubatorProjectTypeDTO> dtos = null;
 
-        RestResponse response = new RestResponse(dtos);
+        RestResponse response = new RestResponse(null);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
