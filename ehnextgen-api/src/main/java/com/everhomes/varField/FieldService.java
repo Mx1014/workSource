@@ -1,5 +1,6 @@
 package com.everhomes.varField;
 
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -16,5 +17,5 @@ public interface FieldService {
 
     void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response);
 
-    void exportFieldsExcel(ListFieldGroupCommand cmd, HttpServletResponse response);
+    void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
 }

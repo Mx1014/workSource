@@ -101,5 +101,4 @@ public interface AssetService {
 
     void updateBillSwitchOnTime();
 
-    PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
 }

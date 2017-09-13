@@ -924,18 +924,4 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /asset/payBills</b>
-     * <p></p>
-     */
-    @RequestMapping("payBills")
-    @RestReturn(PreOrderDTO.class)
-    public RestResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd){
-        PreOrderDTO response = assetService.placeAnAssetOrder(cmd);
-        RestResponse restResponse = new RestResponse(response);
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        restResponse.setErrorDescription("OK");
-        return restResponse;
-    }
-
 }

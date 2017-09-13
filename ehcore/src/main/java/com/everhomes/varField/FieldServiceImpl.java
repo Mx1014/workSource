@@ -1,5 +1,6 @@
 package com.everhomes.varField;
 
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -130,25 +131,8 @@ public class FieldServiceImpl implements FieldService {
         }
         org.apache.poi.hssf.usermodel.HSSFWorkbook workbook = new HSSFWorkbook();
         ExcelUtils excel = new ExcelUtils();
-        for( int i = 0; i < groups.size(); i++){
-            FieldGroupDTO group = groups.get(i);
-            ListFieldCommand cmd1 = new ListFieldCommand();
-            cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-            cmd1.setGroupPath(group.getGroupPath());
-            cmd1.setModuleName(group.getModuleName());
-            List<FieldDTO> fields = listFields(cmd1);
-            String headers[] = new String[fields.size()];
-            //根据每个group获得字段,作为header
-            for(int j = 0; j < fields.size(); j++){
-                FieldDTO field = fields.get(j);
-                headers[j] = field.getFieldDisplayName();
-            }
-            try {
-                excel.exportExcel(workbook,i,group.getGroupDisplayName(),headers,null);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+
+        sheetGenerate(groups, workbook, excel);
         ServletOutputStream out;
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
         try {
@@ -165,10 +149,94 @@ public class FieldServiceImpl implements FieldService {
         }
     }
 
+    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel) {
+        for( int i = 0; i < groups.size(); i++){
+            //sheet卡为真的标识
+            boolean isRealSheet = true;
+            FieldGroupDTO group = groups.get(i);
+            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
+                sheetGenerate(group.getChildrenGroup(),workbook,excel);
+                //对于有子group的，本身为无效的sheet
+                isRealSheet = false;
+            }
+            if(isRealSheet){
+                ListFieldCommand cmd1 = new ListFieldCommand();
+                cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+                cmd1.setGroupPath(group.getGroupPath());
+                cmd1.setModuleName(group.getModuleName());
+                List<FieldDTO> fields = listFields(cmd1);
+                String headers[] = new String[fields.size()];
+                //根据每个group获得字段,作为header
+                for(int j = 0; j < fields.size(); j++){
+                    FieldDTO field = fields.get(j);
+                    headers[j] = field.getFieldDisplayName();
+                }
+                try {
+                    excel.exportExcel(workbook,i,group.getGroupDisplayName(),headers,null);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return;
+    }
+    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Long customerId,Byte customerType) {
+        for( int i = 0; i < groups.size(); i++){
+            boolean isRealSheet = true;
+            FieldGroupDTO group = groups.get(i);
+            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
+                sheetGenerate(group.getChildrenGroup(),workbook,excel,customerId,customerType);
+                isRealSheet = false;
+            }
+            if(isRealSheet){
+                ListFieldCommand cmd1 = new ListFieldCommand();
+                cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+                cmd1.setGroupPath(group.getGroupPath());
+                cmd1.setModuleName(group.getModuleName());
+                //获取一个sheet中的标题
+                List<FieldDTO> fields = listFields(cmd1);
+                String headers[] = new String[fields.size()];
+                //根据每个group获得字段,作为header
+                for(int j = 0; j < fields.size(); j++){
+                    FieldDTO field = fields.get(j);
+                    headers[j] = field.getFieldDisplayName();
+                }
+                //获取一个sheet的数据
+                List<List<String>> data = getDataOnFields(group,customerId,customerType);
+                try {
+                    excel.exportExcel(workbook,i,group.getGroupDisplayName(),headers,data);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return;
+    }
+
+    private List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType) {
+        List<List<String>> data = new ArrayList<>();
+        //使用groupName来对应不同的接口
+        return data;
+    }
+
+
     @Override
-    public void exportFieldsExcel(ListFieldGroupCommand cmd, HttpServletResponse response) {
-        List<FieldGroupDTO> groups = listFieldGroups(cmd);
-        //先去掉基本信息，建议使用stream的方式
+    public void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
+        ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
+        List<FieldGroupDTO> allGroups = listFieldGroups(cmd1);
+        List<FieldGroupDTO> groups = new ArrayList<>();
+
+        //双重循环寻找target
+        List<String> includedParentSheetNames = cmd.getIncludedParentSheetNames();
+        for(int i = 0 ; i < includedParentSheetNames.size(); i ++){
+            String targetName = includedParentSheetNames.get(i);
+            for(int j = 0; j < allGroups.size(); j++){
+                if(allGroups.get(j).getGroupDisplayName()!=null && allGroups.get(j).getGroupDisplayName().equals(targetName)){
+                    groups.add(allGroups.get(j));
+                }
+            }
+        }
+
         for( int i = 0; i < groups.size(); i++){
             FieldGroupDTO group = groups.get(i);
             if(group.getGroupDisplayName().equals("基本信息")){
@@ -177,28 +245,7 @@ public class FieldServiceImpl implements FieldService {
         }
         org.apache.poi.hssf.usermodel.HSSFWorkbook workbook = new HSSFWorkbook();
         ExcelUtils excel = new ExcelUtils();
-        for( int i = 0; i < groups.size(); i++){
-            FieldGroupDTO group = groups.get(i);
-            ListFieldCommand cmd1 = new ListFieldCommand();
-            cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-            cmd1.setGroupPath(group.getGroupPath());
-            cmd1.setModuleName(group.getModuleName());
-            List<FieldDTO> fields = listFields(cmd1);
-            List<List<String>> data = new ArrayList<List<String>>();
-            String headers[] = new String[fields.size()];
-            //根据每个group获得字段,作为header
-            for(int j = 0; j < fields.size(); j++){
-                FieldDTO field = fields.get(j);
-                headers[j] = field.getFieldDisplayName();
-                List<String> rowData = new ArrayList<>();
-                rowData.add()
-            }
-            try {
-                excel.exportExcel(workbook,i,group.getGroupDisplayName(),headers,null);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        sheetGenerate(groups,workbook,excel,cmd.getCustomerId(),cmd.getCustomerType());
         ServletOutputStream out;
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
         try {

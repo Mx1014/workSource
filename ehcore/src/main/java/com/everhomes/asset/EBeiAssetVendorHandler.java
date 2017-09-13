@@ -263,11 +263,6 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
                 "Insufficient privilege");
     }
 
-    @Override
-    public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        return null;
-    }
-
 
     private Timestamp covertStrToTimestamp(String str) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");

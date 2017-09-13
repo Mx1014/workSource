@@ -177,8 +177,8 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private ZhangjianggaokeAssetVendor handler;
+//    @Autowired
+//    private ZhangjianggaokeAssetVendor handler;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -1140,13 +1140,6 @@ public class AssetServiceImpl implements AssetService {
             });
     }
 
-    @Override
-    public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-//        AssetVendor vendor = checkAssetVendor(cmd.getOwnerType(),cmd.getCommunityId());
-//        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
-        ZhangjianggaokeAssetVendor handler = new ZhangjianggaokeAssetVendor();
-        return handler.placeAnAssetOrder(cmd);
-    }
 
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
         CacheAccessor accessor = cacheProvider.getCacheAccessor(null);

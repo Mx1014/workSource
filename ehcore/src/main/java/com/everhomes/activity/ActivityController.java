@@ -98,21 +98,7 @@ public class ActivityController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /activity/createSignupOrderV2</b>
-     * <p>创建活动报名收费订单</p>
-     */
-    @RequestMapping("createSignupOrderV2")
-    @RestReturn(value=PreOrderDTO.class)
-    public RestResponse createSignupOrderV2(@Valid CreateSignupOrderV2Command cmd) {
-        PreOrderDTO dto = activityService.createSignupOrderV2(cmd);
-        RestResponse response = new RestResponse(dto);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * 
+     *
      * <p>后台手动添加活动报名</p>
      * <b>URL: /activity/manualSignup</b>
      */
@@ -327,7 +313,7 @@ public class ActivityController extends ControllerBase {
         rsp.setNextPageAnchor(ret.first());
         return new RestResponse(rsp);
     }
-    
+
     /**
      * 查询周边活动2.0
      * @return
@@ -335,7 +321,7 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("listNearbyActivitiesV2")
     @RestReturn(ListNearbyActivitiesResponse.class)
     public RestResponse listNearbyActivitiesV2(@Valid ListNearByActivitiesCommandV2 cmdV2){
-    	
+
         Tuple<Long, List<ActivityDTO>> ret = activityService.listNearByActivitiesV2(cmdV2);
         ListNearbyActivitiesResponse rsp=new ListNearbyActivitiesResponse();
         rsp.setActivities(ret.second());
