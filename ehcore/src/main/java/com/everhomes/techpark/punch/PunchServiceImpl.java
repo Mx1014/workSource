@@ -7408,7 +7408,9 @@ public class PunchServiceImpl implements PunchService {
 		// TODO Auto-generated method sub
         cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
 		if (null == cmd.getQueryTime()) {
-			cmd.setQueryTime(DateHelper.currentGMTTime().getTime());
+			Calendar punCalendar = Calendar.getInstance();
+			java.sql.Date pDate = calculatePunchDate(punCalendar, cmd.getEnterpriseId(), UserContext.currentUserId());
+			cmd.setQueryTime(pDate.getTime());
 		}
 		ListPunchMonthStatusResponse response = new ListPunchMonthStatusResponse();
         response.setDayStatus(new ArrayList<>());
