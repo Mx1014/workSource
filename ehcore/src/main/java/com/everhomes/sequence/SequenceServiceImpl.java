@@ -54,7 +54,10 @@ import com.everhomes.server.schema.tables.pojos.EhCategories;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityApprove;
 import com.everhomes.server.schema.tables.pojos.EhCommunityApproveRequests;
+import com.everhomes.server.schema.tables.pojos.EhCommunityBuildingGeos;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
+import com.everhomes.server.schema.tables.pojos.EhCommunityMapInfos;
+import com.everhomes.server.schema.tables.pojos.EhCommunityMapSearchTypes;
 import com.everhomes.server.schema.tables.pojos.EhConfAccountCategories;
 import com.everhomes.server.schema.tables.pojos.EhConfAccountHistories;
 import com.everhomes.server.schema.tables.pojos.EhConfAccounts;
@@ -66,9 +69,20 @@ import com.everhomes.server.schema.tables.pojos.EhConfOrders;
 import com.everhomes.server.schema.tables.pojos.EhConfReservations;
 import com.everhomes.server.schema.tables.pojos.EhConfSourceAccounts;
 import com.everhomes.server.schema.tables.pojos.EhContentServerResources;
+import com.everhomes.server.schema.tables.pojos.EhContractAttachments;
 import com.everhomes.server.schema.tables.pojos.EhContractBuildingMappings;
+import com.everhomes.server.schema.tables.pojos.EhContractChargingItemAddresses;
+import com.everhomes.server.schema.tables.pojos.EhContractChargingItems;
+import com.everhomes.server.schema.tables.pojos.EhContractParams;
 import com.everhomes.server.schema.tables.pojos.EhContracts;
 import com.everhomes.server.schema.tables.pojos.EhCooperationRequests;
+import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
+import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicators;
+import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
+import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
 import com.everhomes.server.schema.tables.pojos.EhDockingMappings;
 import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
@@ -94,6 +108,7 @@ import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactEntries;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactGroupMembers;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactGroups;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseContacts;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseDetails;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequestBuildings;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests;
@@ -159,10 +174,12 @@ import com.everhomes.server.schema.tables.pojos.EhJournals;
 import com.everhomes.server.schema.tables.pojos.EhLaunchAdvertisements;
 import com.everhomes.server.schema.tables.pojos.EhLaunchPadItems;
 import com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts;
+import com.everhomes.server.schema.tables.pojos.EhLeaseBuildings;
 import com.everhomes.server.schema.tables.pojos.EhLeaseConfigs;
 import com.everhomes.server.schema.tables.pojos.EhLeaseIssuerAddresses;
 import com.everhomes.server.schema.tables.pojos.EhLeaseIssuers;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotionAttachments;
+import com.everhomes.server.schema.tables.pojos.EhLeasePromotionCommunities;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
 import com.everhomes.server.schema.tables.pojos.EhLocaleTemplates;
 import com.everhomes.server.schema.tables.pojos.EhNamespaceDetails;
@@ -346,6 +363,7 @@ import com.everhomes.server.schema.tables.pojos.EhServiceAllianceNotifyTargets;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceReservationRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceServerRequests;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceSkipRule;
 import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
 import com.everhomes.server.schema.tables.pojos.EhServiceHotlines;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
@@ -391,6 +409,7 @@ import com.everhomes.server.schema.tables.pojos.EhTerminalAppVersionStatistics;
 import com.everhomes.server.schema.tables.pojos.EhTerminalDayStatistics;
 import com.everhomes.server.schema.tables.pojos.EhTerminalHourStatistics;
 import com.everhomes.server.schema.tables.pojos.EhTerminalStatisticsTasks;
+import com.everhomes.server.schema.tables.pojos.EhThirdpartConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhUserBlacklists;
 import com.everhomes.server.schema.tables.pojos.EhUserCommunities;
 import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
@@ -408,6 +427,12 @@ import com.everhomes.server.schema.tables.pojos.EhUserPosts;
 import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
 import com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.pojos.EhVarFieldGroupScopes;
+import com.everhomes.server.schema.tables.pojos.EhVarFieldGroups;
+import com.everhomes.server.schema.tables.pojos.EhVarFieldItemScopes;
+import com.everhomes.server.schema.tables.pojos.EhVarFieldItems;
+import com.everhomes.server.schema.tables.pojos.EhVarFieldScopes;
+import com.everhomes.server.schema.tables.pojos.EhVarFields;
 import com.everhomes.server.schema.tables.pojos.EhVersionRealm;
 import com.everhomes.server.schema.tables.pojos.EhVersionUpgradeRules;
 import com.everhomes.server.schema.tables.pojos.EhVersionUrls;
@@ -428,6 +453,7 @@ import com.everhomes.server.schema.tables.pojos.EhYellowPageAttachments;
 import com.everhomes.server.schema.tables.pojos.EhYellowPages;
 import com.everhomes.server.schema.tables.pojos.EhYzbDevices;
 import com.everhomes.server.schema.tables.pojos.EhYzxSmsLogs;
+import com.everhomes.server.schema.tables.pojos.EhZjSyncdataBackup;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import org.slf4j.Logger;
@@ -1262,6 +1288,9 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhServiceAllianceAttachments.class, Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhServiceAllianceSkipRule.class, Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE).fetchOne().value1();
         });
         syncTableSequence(null, EhAclinkLogs.class, Tables.EH_ACLINK_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ACLINK_LOGS.ID.max()).from(Tables.EH_ACLINK_LOGS).fetchOne().value1();
@@ -2140,12 +2169,13 @@ public class SequenceServiceImpl implements SequenceService {
         });
         
         syncTableSequence(null, EhServiceAllianceCommentAttachments.class, Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS).fetchOne().value1();
+        	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS).fetchOne().value1();
         });
-        
+        	
         syncTableSequence(null, EhServiceAllianceComments.class, Tables.EH_SERVICE_ALLIANCE_COMMENTS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENTS).fetchOne().value1();
+        	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENTS).fetchOne().value1();
         });
+
     }
 
     @SuppressWarnings("rawtypes")
