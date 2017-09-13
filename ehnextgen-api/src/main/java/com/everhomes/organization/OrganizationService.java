@@ -545,4 +545,7 @@ public interface OrganizationService {
 	/**通讯录查询接口**/
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd);
 
+	/**根据detailId更新通用信息**/
+	Long updateOrganizationMemberInfoByDetailId(Long detailId);
+
 }
