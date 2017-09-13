@@ -147,6 +147,8 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                 } else if(PmNotifyType.AFTER_DELAY.equals(notify)){
                     time = task.getExecutiveExpireTime();
                     code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_AFTER_DELAY;
+                    //过期提醒的notifytime即为任务的截止时间，所以先关掉任务
+                    equipmentProvider.closeTask(task);
                 }
             }
             for (Long userId : notifyUsers) {
