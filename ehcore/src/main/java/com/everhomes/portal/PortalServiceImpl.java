@@ -1309,6 +1309,10 @@ public class PortalServiceImpl implements PortalService {
 				if(null == instanceConfig.getMargin()){
 					instanceConfig.setMargin(1);
 				}
+
+				if(null == instanceConfig.getBackgroundColor()){
+					instanceConfig.setBackgroundColor("#FFFFFF");
+				}
 				config.setPaddingBottom(instanceConfig.getPadding());
 				config.setPaddingLeft(instanceConfig.getPadding());
 				config.setPaddingRight(instanceConfig.getPadding());
