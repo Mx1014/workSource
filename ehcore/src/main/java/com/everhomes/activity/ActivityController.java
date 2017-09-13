@@ -97,20 +97,7 @@ public class ActivityController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /activity/createSignupOrderV2</b>
-     * <p>创建活动报名收费订单</p>
-     */
-    @RequestMapping("createSignupOrderV2")
-    @RestReturn(value=PreOrderDTO.class)
-    public RestResponse createSignupOrderV2(@Valid CreateSignupOrderV2Command cmd) {
-        PreOrderDTO dto = activityService.createSignupOrderV2(cmd);
-        RestResponse response = new RestResponse(dto);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
+
     /**
      * 
      * <p>后台手动添加活动报名</p>

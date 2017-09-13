@@ -34,7 +34,6 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.order.*;
 import com.everhomes.organization.*;
-import com.everhomes.pay.order.PaymentType;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
@@ -250,9 +249,6 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	@Autowired
 	private RosterPayTimeoutService rosterPayTimeoutService;
-
-	@Autowired
-	private PayService payService;
 	
 	
     @PostConstruct
@@ -689,64 +685,6 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 		
 		return dto;
-	}
-
-	@Override
-	public PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd) {
-
-		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
-		if(roster == null){
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
-					"no roster.");
-		}
-		Activity activity = activityProvider.findActivityById(roster.getActivityId());
-		if(activity == null){
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
-					"no activity.");
-		}
-
-
-		PreOrderCommand preOrderCommand = new PreOrderCommand();
-
-		preOrderCommand.setClientAppName(cmd.getClientAppName());
-
-		//微信公众号支付，重新设置ClientName，设置支付方式和参数
-		if(cmd.getPaymentType() != null && cmd.getPaymentType().intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
-
-			if(preOrderCommand.getClientAppName() == null){
-				Integer namespaceId = UserContext.getCurrentNamespaceId();
-				preOrderCommand.setClientAppName("wechat_" + namespaceId);
-			}
-			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
-			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-			paymentParamsDTO.setPayType("no_credit");
-			User user = UserContext.current().getUser();
-			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
-		}
-
-		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
-		preOrderCommand.setOrderId(roster.getOrderNo());
-		preOrderCommand.setAmount(activity.getChargePrice().multiply(new BigDecimal(100)).longValue());
-
-		preOrderCommand.setPayerId(roster.getUid());
-		preOrderCommand.setNamespaceId(activity.getNamespaceId());
-
-		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
-				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_FEE),
-				UserContext.current().getUser().getLocale(),
-				"activity roster pay");
-		preOrderCommand.setSummary(temple);
-
-		GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
-		timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
-		Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
-
-		preOrderCommand.setExpiration(expiredTime);
-
-		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
-
-		return callBack;
 	}
 
 	@Override

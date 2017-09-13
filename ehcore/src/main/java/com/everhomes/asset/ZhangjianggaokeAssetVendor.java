@@ -2,41 +2,24 @@
 package com.everhomes.asset;
 
 import com.everhomes.asset.zjgkVOs.*;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.http.HttpUtils;
-import com.everhomes.oauth2client.HttpResponseEntity;
-import com.everhomes.oauth2client.handler.RestCallTemplate;
-import com.everhomes.order.PayService;
 import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.recommend.RecommendationService;
-import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.BillDetailDTO;
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PreOrderCommand;
-import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
-import org.elasticsearch.common.recycler.Recycler;
-import org.elasticsearch.index.analysis.AnalysisSettingsRequired;
 import org.springframework.context.ApplicationContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import sun.java2d.pipe.SpanShapeRenderer;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -67,8 +50,6 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     @Autowired
     private UserProvider userProvider;
 
-    @Autowired
-    private PayService payService;
 
 
 
