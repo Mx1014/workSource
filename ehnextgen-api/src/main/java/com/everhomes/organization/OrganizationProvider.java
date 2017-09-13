@@ -472,4 +472,6 @@ public interface OrganizationProvider {
 
 	List<UserOrganizations> listUserOrganizationByUserId(Long userId);
 
+	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType);
+
 }

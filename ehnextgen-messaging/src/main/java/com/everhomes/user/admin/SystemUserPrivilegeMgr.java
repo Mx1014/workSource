@@ -298,19 +298,22 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     @Override
     public void checkUserAuthority(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId){
-
-
         if(null == userId){
             userId = UserContext.current().getUser().getId();
         }
 
-        if(checkUserPrivilege(userId, ownerType, ownerId, currentOrgId, privilegeId)){
-            LOGGER.debug("authority success...");
-            return;
+        ResourceUserRoleResolver resolver = PlatformContext.getComponent(EntityType.USER.getCode());
+        List<Long> roles = resolver.determineRoleInResource(userId, null, EntityType.USER.getCode(), null);
+        if(!aclProvider.checkAccess("system", null, EntityType.USER.getCode(),
+                userId, Privilege.All, roles)){
+            if(checkUserPrivilege(userId, ownerType, ownerId, currentOrgId, privilegeId)){
+                LOGGER.debug("authority success...");
+                return;
+            }
+            LOGGER.error("Insufficient privilege, privilegeId={}, currentOrgId = {}", privilegeId, currentOrgId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
         }
-        LOGGER.error("Insufficient privilege, privilegeId={}, currentOrgId = {}", privilegeId, currentOrgId);
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                "Insufficient privilege");
     }
 
     @Override
@@ -330,6 +333,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     @Override
     public void checkUserBlacklistAuthority(Long userId, String ownerType, Long ownerId, Long privilegeId){
+
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
         AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
         descriptors.add(descriptor);
