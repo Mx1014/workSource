@@ -583,6 +583,12 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
+    public void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse){
+        importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId());
+    }
+
+
+    @Override
     public ArchivesEmployeeDTO addArchivesEmployee(AddArchivesEmployeeCommand cmd) {
 
         ArchivesEmployeeDTO dto = new ArchivesEmployeeDTO();

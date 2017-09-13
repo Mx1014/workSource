@@ -32,6 +32,8 @@ public interface ArchivesService {
 
     ImportFileResponse<ImportArchivesContactsDTO> getImportContactsResult(GetImportFileResultCommand cmd);
 
+    void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
+
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
 
     ArchivesEmployeeDTO addArchivesEmployee(AddArchivesEmployeeCommand cmd);

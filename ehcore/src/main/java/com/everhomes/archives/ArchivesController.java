@@ -48,12 +48,26 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/transferArchivesContacts</b>
-     * <p>2.调整通讯录成员</p>
+     * <p>2-1.调整通讯录成员</p>
      */
     @RequestMapping("transferArchivesContacts")
     @RestReturn(value = String.class)
     public RestResponse transferArchivesContacts(TransferArchivesContactsCommand cmd){
         archivesService.transferArchivesContacts(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /archives/deleteArchivesContacts</b>
+     * <p>2-2.批量删除通讯录、员工</p>
+     */
+    @RequestMapping("deleteArchivesContacts")
+    @RestReturn(value = String.class)
+    public RestResponse deleteArchivesContacts(DeleteArchivesContactsCommand cmd){
+        archivesService.deleteArchivesContacts(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -141,13 +155,13 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /archives/deleteArchivesContacts</b>
-     * <p>6.批量删除通讯录、员工</p>
+     * <b>URL: /archives/exportImportFileFailResults</b>
+     * <p>6.查询通讯录导入结果</p>
      */
-    @RequestMapping("deleteArchivesContacts")
+    @RequestMapping("exportImportFileFailResults")
     @RestReturn(value = String.class)
-    public RestResponse deleteArchivesContacts(DeleteArchivesContactsCommand cmd){
-        archivesService.deleteArchivesContacts(cmd);
+    public RestResponse exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
+        archivesService.exportImportFileFailResults(cmd, httpResponse);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
