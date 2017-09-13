@@ -4,6 +4,7 @@ package com.everhomes.rest.news;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -30,6 +31,7 @@ public class SearchNewsCommand {
 	private String keyword;
 	private Long pageAnchor;
 	private Integer pageSize;
+	@ItemType(Long.class)
 	private List<Long> tagIds;
 
 	public String getOwnerType() {
