@@ -1,16 +1,27 @@
 package com.everhomes.varField;
 
 import com.everhomes.rest.varField.*;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.SortOrder;
+import com.everhomes.util.excel.ExcelUtils;
 import jdk.nashorn.internal.ir.ReturnNode;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by ying.xiong on 2017/8/3.
@@ -105,6 +116,103 @@ public class FieldServiceImpl implements FieldService {
         }
 
         return null;
+    }
+
+    @Override
+    public void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response){
+        List<FieldGroupDTO> groups = listFieldGroups(cmd);
+        //先去掉基本信息，建议使用stream的方式
+        for( int i = 0; i < groups.size(); i++){
+            FieldGroupDTO group = groups.get(i);
+            if(group.getGroupDisplayName().equals("基本信息")){
+                groups.remove(i);
+            }
+        }
+        org.apache.poi.hssf.usermodel.HSSFWorkbook workbook = new HSSFWorkbook();
+        ExcelUtils excel = new ExcelUtils();
+        for( int i = 0; i < groups.size(); i++){
+            FieldGroupDTO group = groups.get(i);
+            ListFieldCommand cmd1 = new ListFieldCommand();
+            cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+            cmd1.setGroupPath(group.getGroupPath());
+            cmd1.setModuleName(group.getModuleName());
+            List<FieldDTO> fields = listFields(cmd1);
+            String headers[] = new String[fields.size()];
+            //根据每个group获得字段,作为header
+            for(int j = 0; j < fields.size(); j++){
+                FieldDTO field = fields.get(j);
+                headers[j] = field.getFieldDisplayName();
+            }
+            try {
+                excel.exportExcel(workbook,i,group.getGroupDisplayName(),headers,null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        ServletOutputStream out;
+        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+        try {
+            out = response.getOutputStream();
+            workbook.write(byteArray);
+            out.write(byteArray.toByteArray());
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(byteArray!=null){
+                byteArray = null;
+            }
+        }
+    }
+
+    @Override
+    public void exportFieldsExcel(ListFieldGroupCommand cmd, HttpServletResponse response) {
+        List<FieldGroupDTO> groups = listFieldGroups(cmd);
+        //先去掉基本信息，建议使用stream的方式
+        for( int i = 0; i < groups.size(); i++){
+            FieldGroupDTO group = groups.get(i);
+            if(group.getGroupDisplayName().equals("基本信息")){
+                groups.remove(i);
+            }
+        }
+        org.apache.poi.hssf.usermodel.HSSFWorkbook workbook = new HSSFWorkbook();
+        ExcelUtils excel = new ExcelUtils();
+        for( int i = 0; i < groups.size(); i++){
+            FieldGroupDTO group = groups.get(i);
+            ListFieldCommand cmd1 = new ListFieldCommand();
+            cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+            cmd1.setGroupPath(group.getGroupPath());
+            cmd1.setModuleName(group.getModuleName());
+            List<FieldDTO> fields = listFields(cmd1);
+            List<List<String>> data = new ArrayList<List<String>>();
+            String headers[] = new String[fields.size()];
+            //根据每个group获得字段,作为header
+            for(int j = 0; j < fields.size(); j++){
+                FieldDTO field = fields.get(j);
+                headers[j] = field.getFieldDisplayName();
+                List<String> rowData = new ArrayList<>();
+                rowData.add()
+            }
+            try {
+                excel.exportExcel(workbook,i,group.getGroupDisplayName(),headers,null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        ServletOutputStream out;
+        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+        try {
+            out = response.getOutputStream();
+            workbook.write(byteArray);
+            out.write(byteArray.toByteArray());
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(byteArray!=null){
+                byteArray = null;
+            }
+        }
     }
 
     @Override

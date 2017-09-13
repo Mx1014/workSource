@@ -570,8 +570,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     }
 
     @Override
-    public PlaceAnAssetOrderResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        PlaceAnAssetOrderResponse response = new PlaceAnAssetOrderResponse();
+    public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
+//        PlaceAnAssetOrderResponse response = new PlaceAnAssetOrderResponse();
         //存一份到我这
         List<String> billIds = cmd.getBillIds();
         String billIdsWithComma = assetUtils.convertStringList2CommaSeparation(billIds);
@@ -600,7 +600,15 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         cmd2pay.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
         cmd2pay.setPayerId(payerId);
         PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
-        return response;
+//        response.setAmount(String.valueOf(preOrder.getAmount()));
+//        response.setExpiredIntervalTime(15l*60l);
+//        response.setOrderCommitNonce(preOrder.getOrderCommitNonce());
+//        response.setOrderCommitTimestamp(preOrder.getOrderCommitTimestamp());
+//        response.setOrderCommitToken(preOrder.getOrderCommitToken());
+//        response.setOrderCommitUrl(preOrder.getOrderCommitUrl());
+//        response.setPayMethod(preOrder.getPayMethod());
+
+        return preOrder;
     }
 
     @Override

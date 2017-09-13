@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
+import com.everhomes.rest.order.PayMethodDTO;
+
 import java.util.List;
 
 /**
@@ -8,19 +10,19 @@ import java.util.List;
  */
 
 public class PlaceAnAssetOrderResponse {
-    private String expiredIntervalTime;
+    private Long expiredIntervalTime;
     private String amount;
     private String orderCommitUrl;
     private String orderCommitToken;
     private String orderCommitNonce;
-    private String orderCommitTimestamp;
-    private List<PayMethod> payMethod;
+    private Long orderCommitTimestamp;
+    private List<PayMethodDTO> payMethod;
 
-    public String getExpiredIntervalTime() {
+    public Long getExpiredIntervalTime() {
         return expiredIntervalTime;
     }
 
-    public void setExpiredIntervalTime(String expiredIntervalTime) {
+    public void setExpiredIntervalTime(Long expiredIntervalTime) {
         this.expiredIntervalTime = expiredIntervalTime;
     }
 
@@ -56,19 +58,19 @@ public class PlaceAnAssetOrderResponse {
         this.orderCommitNonce = orderCommitNonce;
     }
 
-    public String getOrderCommitTimestamp() {
+    public Long getOrderCommitTimestamp() {
         return orderCommitTimestamp;
     }
 
-    public void setOrderCommitTimestamp(String orderCommitTimestamp) {
+    public void setOrderCommitTimestamp(Long orderCommitTimestamp) {
         this.orderCommitTimestamp = orderCommitTimestamp;
     }
 
-    public List<PayMethod> getPayMethod() {
+    public List<PayMethodDTO> getPayMethod() {
         return payMethod;
     }
 
-    public void setPayMethod(List<PayMethod> payMethod) {
+    public void setPayMethod(List<PayMethodDTO> payMethod) {
         this.payMethod = payMethod;
     }
 }

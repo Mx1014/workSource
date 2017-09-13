@@ -2,6 +2,7 @@ package com.everhomes.asset;
 
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -100,5 +101,5 @@ public interface AssetService {
 
     void updateBillSwitchOnTime();
 
-    PlaceAnAssetOrderResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
+    PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
 }

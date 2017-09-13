@@ -87,6 +87,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService {

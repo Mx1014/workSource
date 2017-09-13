@@ -2,6 +2,7 @@ package com.everhomes.varField;
 
 import com.everhomes.rest.varField.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -12,4 +13,8 @@ public interface FieldService {
     List<FieldDTO> listFields(ListFieldCommand cmd);
     List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd);
     List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd);
+
+    void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response);
+
+    void exportFieldsExcel(ListFieldGroupCommand cmd, HttpServletResponse response);
 }
