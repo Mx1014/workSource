@@ -569,39 +569,39 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 "Insufficient privilege");
     }
 
-    @Override
-    public PlaceAnAssetOrderResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        PlaceAnAssetOrderResponse response = new PlaceAnAssetOrderResponse();
-        //存一份到我这
-        List<String> billIds = cmd.getBillIds();
-        String billIdsWithComma = assetUtils.convertStringList2CommaSeparation(billIds);
-        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),cmd.getAmountOwed(),billIdsWithComma,cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),15l*60l*1000l);
-        //请求支付模块的下预付单
-        PreOrderCommand cmd2pay = new PreOrderCommand();
-//        Long amount = 转成分(cmd.getAmountOwed());
-        Long payerId = null;
-        if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
-            if(Long.parseLong(cmd.getPayerId())==UserContext.currentUserId()){
-                payerId = Long.parseLong(cmd.getPayerId());
-            }else{
-                LOGGER.error("individual make asset order failed, the given uid = {}, but the online uid is = {}",cmd.getPayerId(),UserContext.currentUserId());
-                throw new RuntimeErrorException("individual make asset order failed");
-            }
-        }
-        String amountOwed = cmd.getAmountOwed();
-        Long amount1 = Long.parseLong(amountOwed);
-        amount1 = amount1*100l;
-        cmd2pay.setAmount(amount1);
-        cmd2pay.setClientAppName(cmd.getClientAppName());
-        cmd2pay.setExpiration(15l*60l);
-        cmd2pay.setNamespaceId(UserContext.getCurrentNamespaceId());
-        cmd2pay.setOpenid(cmd.getOpenid());
-        cmd2pay.setOrderId(orderId);
-        cmd2pay.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
-        cmd2pay.setPayerId(payerId);
-        PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
-        return response;
-    }
+//    @Override
+//    public PlaceAnAssetOrderResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
+//        PlaceAnAssetOrderResponse response = new PlaceAnAssetOrderResponse();
+//        //存一份到我这
+//        List<String> billIds = cmd.getBillIds();
+//        String billIdsWithComma = assetUtils.convertStringList2CommaSeparation(billIds);
+//        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),cmd.getAmountOwed(),billIdsWithComma,cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),15l*60l*1000l);
+//        //请求支付模块的下预付单
+//        PreOrderCommand cmd2pay = new PreOrderCommand();
+////        Long amount = 转成分(cmd.getAmountOwed());
+//        Long payerId = null;
+//        if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
+//            if(Long.parseLong(cmd.getPayerId())==UserContext.currentUserId()){
+//                payerId = Long.parseLong(cmd.getPayerId());
+//            }else{
+//                LOGGER.error("individual make asset order failed, the given uid = {}, but the online uid is = {}",cmd.getPayerId(),UserContext.currentUserId());
+//                throw new RuntimeErrorException("individual make asset order failed");
+//            }
+//        }
+//        String amountOwed = cmd.getAmountOwed();
+//        Long amount1 = Long.parseLong(amountOwed);
+//        amount1 = amount1*100l;
+//        cmd2pay.setAmount(amount1);
+//        cmd2pay.setClientAppName(cmd.getClientAppName());
+//        cmd2pay.setExpiration(15l*60l);
+//        cmd2pay.setNamespaceId(UserContext.getCurrentNamespaceId());
+//        cmd2pay.setOpenid(cmd.getOpenid());
+//        cmd2pay.setOrderId(orderId);
+//        cmd2pay.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
+//        cmd2pay.setPayerId(payerId);
+//        PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
+//        return response;
+//    }
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {

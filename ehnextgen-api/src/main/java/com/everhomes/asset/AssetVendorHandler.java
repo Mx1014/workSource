@@ -59,5 +59,4 @@ public interface AssetVendorHandler {
 
     void updateBillsToSettled(UpdateBillsToSettled cmd);
 
-    PlaceAnAssetOrderResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
 }

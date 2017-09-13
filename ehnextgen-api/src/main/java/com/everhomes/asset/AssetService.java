@@ -100,5 +100,4 @@ public interface AssetService {
 
     void updateBillSwitchOnTime();
 
-    PlaceAnAssetOrderResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
 }
