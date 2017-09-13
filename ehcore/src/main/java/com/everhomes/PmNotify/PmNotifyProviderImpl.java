@@ -7,12 +7,16 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.pmNotify.PmNotifyConfigurations;
 import com.everhomes.pmNotify.PmNotifyProvider;
+import com.everhomes.pmNotify.PmNotifyRecord;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
+import com.everhomes.rest.pmNotify.PmNotifyRecordStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPmNotifyConfigurationsDao;
+import com.everhomes.server.schema.tables.daos.EhPmNotifyRecordsDao;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyConfigurations;
+import com.everhomes.server.schema.tables.pojos.EhPmNotifyRecords;
 import com.everhomes.server.schema.tables.records.EhPmNotifyConfigurationsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -104,5 +108,44 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
             return result.get(0);
         }
         return null;
+    }
+
+    @Override
+    public void createPmNotifyRecord(PmNotifyRecord record) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPmNotifyRecords.class));
+
+        record.setId(id);
+        record.setStatus(PmNotifyRecordStatus.WAITING_FOR_SEND_OUT.getCode());
+        record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        LOGGER.info("createPmNotifyRecord: " + record);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPmNotifyRecordsDao dao = new EhPmNotifyRecordsDao(context.configuration());
+        dao.insert(record);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmNotifyRecords.class, null);
+    }
+
+    @Override
+    public boolean updateIfUnsend(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmNotifyRecords.class));
+
+        int effect = context.update(Tables.EH_PM_NOTIFY_RECORDS)
+                .set(Tables.EH_PM_NOTIFY_RECORDS.STATUS, PmNotifyRecordStatus.ALREADY_SENDED.getCode())
+                .where(Tables.EH_PM_NOTIFY_RECORDS.STATUS.eq(PmNotifyRecordStatus.WAITING_FOR_SEND_OUT.getCode()).and(Tables.EH_PM_NOTIFY_RECORDS.ID.eq(id)))
+                .execute();
+
+        if(effect > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public PmNotifyRecord findRecordById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPmNotifyRecordsDao dao = new EhPmNotifyRecordsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), PmNotifyRecord.class);
     }
 }

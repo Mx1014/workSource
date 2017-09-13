@@ -1106,7 +1106,7 @@ public class EquipmentController extends ControllerBase {
 
 	/**
 	 * <b>URL: /equipment/listPmNotifyParams</b>
-	 * <p>设置通知参数</p>
+	 * <p>列出通知参数</p>
 	 */
 	@RequestMapping("listPmNotifyParams")
 	@RestReturn(value = PmNotifyParamDTO.class, collection = true)

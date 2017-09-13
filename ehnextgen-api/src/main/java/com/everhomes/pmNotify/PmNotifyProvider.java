@@ -10,4 +10,8 @@ public interface PmNotifyProvider {
     void updatePmNotifyConfigurations(PmNotifyConfigurations configuration);
     List<PmNotifyConfigurations> listScopePmNotifyConfigurations(String ownerType, Byte scopeType, Long scopeId);
     PmNotifyConfigurations findScopePmNotifyConfiguration(Long id, String ownerType,Byte scopeType, Long scopeId);
+
+    void createPmNotifyRecord(PmNotifyRecord record);
+    PmNotifyRecord findRecordById(Long id);
+    boolean updateIfUnsend(Long id);
 }

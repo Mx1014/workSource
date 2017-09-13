@@ -2009,10 +2009,19 @@ public class EquipmentServiceImpl implements EquipmentService {
 							timestampToStr(new Timestamp(now)).substring(2) + i;
 					task.setTaskName(taskName);
 				}
-
 				equipmentProvider.creatEquipmentTask(task);
 				equipmentTasksSearcher.feedDoc(task);
 
+//				启动提醒
+				ListPmNotifyParamsCommand command = new ListPmNotifyParamsCommand();
+				command.setCommunityId(task.getTargetId());
+				command.setNamespaceId(task.getNamespaceId());
+				List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
+				if(paramDTOs != null && paramDTOs.size() > 0) {
+					for (PmNotifyParamDTO notifyParamDTO : paramDTOs) {
+
+					}
+				}
 			}
 		}
 			
@@ -3696,9 +3705,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<Long> taskIdlist = new ArrayList<Long>();
 
         for(final Long value : taskIds){
-
         	taskIdlist.add(value);
-
         }
 
         Collections.sort(taskIdlist);
@@ -4127,7 +4134,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}).collect(Collectors.toList());
 			return params;
 		} else {
-			//scopeType是community的情况下 如果拿不到数据，则返回该域空间下的设置 ps 以后可以再else一下 域空间的没有返回all的
+			//scopeType是community的情况下 如果拿不到数据，则返回该域空间下的设置 ps以后可以再else一下 域空间的没有返回all的
 			if(PmNotifyScopeType.COMMUNITY.equals(PmNotifyScopeType.fromCode(scopeType))) {
 				scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 				scopeId = cmd.getNamespaceId().longValue();
@@ -4171,6 +4178,37 @@ public class EquipmentServiceImpl implements EquipmentService {
 				pmNotifyProvider.createPmNotifyConfigurations(configuration);
 			}
 		}
+	}
 
+	@Override
+	public Set<Long> getTaskGroupUsers(Long taskId, byte groupType) {
+		EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(taskId);
+		List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByStandardIdAndGroupType(task.getStandardId(), groupType);
+		if(maps != null && maps.size() > 0) {
+			Set<Long> userIds = new HashSet<>();
+			maps.forEach(map -> {
+				if(map.getPositionId() == null) {
+					List<OrganizationMember> members = organizationProvider.listOrganizationMembers(map.getGroupId(), null);
+					if (members != null) {
+						for (OrganizationMember member : members) {
+							userIds.add(member.getTargetId());
+						}
+					}
+				} else {
+					ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
+					command.setOrganizationId(map.getGroupId());
+					command.setJobPositionId(map.getPositionId());
+					List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
+
+					if (contacts != null && contacts.size() > 0) {
+						for (OrganizationContactDTO contact : contacts) {
+							userIds.add(contact.getTargetId());
+						}
+					}
+				}
+			});
+			return userIds;
+		}
+		return null;
 	}
 }

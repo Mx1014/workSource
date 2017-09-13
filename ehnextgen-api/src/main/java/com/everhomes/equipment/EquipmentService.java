@@ -1,6 +1,7 @@
 package com.everhomes.equipment;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -80,4 +81,6 @@ public interface EquipmentService {
 
 	void setPmNotifyParams(SetPmNotifyParamsCommand cmd);
 	List<PmNotifyParamDTO> listPmNotifyParams(ListPmNotifyParamsCommand cmd);
+
+	Set<Long> getTaskGroupUsers(Long taskId, byte groupType);
 }
