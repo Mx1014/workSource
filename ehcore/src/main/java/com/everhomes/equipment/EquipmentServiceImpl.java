@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -2787,9 +2788,92 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return dtos;
 	}
 
+	private Timestamp addMonths(Timestamp now, int months) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(now);
+		calendar.add(Calendar.MONTH, months);
+		Timestamp time = new Timestamp(calendar.getTimeInMillis());
+
+		return time;
+	}
+
+	private ListEquipmentTasksResponse listDelayTasks(ListEquipmentTasksCommand cmd) {
+		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
+		int pageSize = cmd.getPageSize() == null ? Integer.MAX_VALUE - 1 : cmd.getPageSize();
+		if(null == cmd.getPageAnchor()) {
+			cmd.setPageAnchor(0L);
+		}
+		Integer offset = cmd.getPageAnchor().intValue();
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		//是否是管理员
+		boolean isAdmin = false;
+		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), user.getId());
+		if(null != resources && 0 != resources.size()){
+			for (RoleAssignment resource : resources) {
+				if(resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN
+						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
+						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
+						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
+					isAdmin = true;
+					userId =0L;
+					break;
+				}
+			}
+		}
+		//只展示近一个月的
+		Timestamp startTime = addMonths(new Timestamp(System.currentTimeMillis()), -1);
+		List<EquipmentInspectionTasks> tasks = null;
+		if(isAdmin) {
+			tasks = equipmentProvider.listDelayTasks(cmd.getInspectionCategoryId(), null, cmd.getTargetType(),
+						cmd.getTargetId(), offset, pageSize, AdminFlag.YES.getCode(), startTime);
+		}
+		if(!isAdmin) {
+			List<Long> standards = new ArrayList<>();
+			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
+			List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
+			if (maps != null && maps.size() > 0) {
+				for (EquipmentInspectionStandardGroupMap r : maps) {
+						standards.add(r.getStandardId());
+				}
+			}
+			tasks = equipmentProvider.listDelayTasks(cmd.getInspectionCategoryId(), standards, cmd.getTargetType(),
+						cmd.getTargetId(), offset, pageSize, AdminFlag.NO.getCode(), startTime);
+		}
+
+		if (tasks.size() > pageSize) {
+			tasks.remove(tasks.size() - 1);
+			response.setNextPageAnchor((long) (offset + 1));
+		}
+
+		Set<Long> taskEquipmentIds = tasks.stream().map(r -> {
+			return r.getEquipmentId();
+		}).filter(r -> r != null).collect(Collectors.toSet());
+
+
+		Map<Long, EquipmentInspectionEquipments> equipmentsMap = equipmentProvider.listEquipmentsById(taskEquipmentIds);
+		List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
+			EquipmentTaskDTO dto = ConvertHelper.convert(r, EquipmentTaskDTO.class);
+			EquipmentInspectionEquipments equipment = equipmentsMap.get(dto.getEquipmentId());
+			if (equipment != null) {
+				dto.setEquipmentLocation(equipment.getLocation());
+				dto.setQrCodeFlag(equipment.getQrCodeFlag());
+				dto.setEquipmentName(equipment.getName());
+			}
+			return dto;
+		}).filter(r -> r != null).collect(Collectors.toList());
+
+		response.setTasks(dtos);
+		return response;
+	}
+
 	@Override
 	public ListEquipmentTasksResponse listEquipmentTasks(
 			ListEquipmentTasksCommand cmd) {
+		if(cmd.getTaskStatus() != null && cmd.getTaskStatus().size() == 1
+				&& EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(cmd.getTaskStatus().get(0)))) {
+			return listDelayTasks(cmd);
+		}
 
 		long startTime = System.currentTimeMillis();
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
@@ -2828,13 +2912,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				}
 			}
 		}
-
-//		List<Long> executeStandardIds = null;
-//		List<Long> reviewStandardIds = null;
-
 		List<EquipmentInspectionTasks> allTasks = null;
-
-		Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
+//		Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
 //		List<Long> ownerIds = new ArrayList<>();
 //
 //		if(organization != null) {
