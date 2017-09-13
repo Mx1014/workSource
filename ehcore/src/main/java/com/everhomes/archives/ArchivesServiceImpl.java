@@ -124,7 +124,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             for (Long detailId : cmd.getDetailIds()) {
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
                 detail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
-                organizationProvider.updateOrganizationMemberDetails(detail,detail.getId());
+                organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
             }
             // TODO: 循环添加档案记录
         }
@@ -180,6 +180,7 @@ public class ArchivesServiceImpl implements ArchivesService {
      * 2.If the keywords is null, then judged by the "pageAnchor"
      * 3.If the pageAnchor is null, we should get stick employees first.
      * 4.if the pageAnchor is not null, means we should get the next page of employees, so ignore those stick employees.
+     *
      * @return
      */
     @Override
@@ -265,7 +266,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         orgCommand.setOrganizationId(cmd.getOrganizationId());
         orgCommand.setPageAnchor(cmd.getPageAnchor());
         orgCommand.setPageSize(cmd.getPageSize());
-        if (detailIds!=null && detailIds.size() >0)
+        if (detailIds != null && detailIds.size() > 0)
             orgCommand.setExceptIds(detailIds);
         if (!StringUtils.isEmpty(cmd.getKeywords()))
             orgCommand.setKeywords(cmd.getKeywords());
@@ -517,19 +518,19 @@ public class ArchivesServiceImpl implements ArchivesService {
         listCommand.setKeywords(cmd.getKeywords());
         listCommand.setPageSize(10000);
         ListArchivesContactsResponse response = listArchivesContacts(listCommand);
-        if(response.getContacts() !=null && response.getContacts().size()>0){
-            List<ArchivesContactDTO> contacts = response.getContacts().stream().map(r ->{
+        if (response.getContacts() != null && response.getContacts().size() > 0) {
+            List<ArchivesContactDTO> contacts = response.getContacts().stream().map(r -> {
                 ArchivesContactDTO dto = convertArchivesContactForExcel(r);
                 return dto;
             }).collect(Collectors.toList());
             String fileName = "通讯录成员列表";
-            ExcelUtils excelUtils = new ExcelUtils(httpResponse,fileName,"通讯录成员列表");
+            ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, "通讯录成员列表");
             List<String> propertyNames = new ArrayList<String>(Arrays.asList("contactName", "genderString", "contactToken",
                     "contactShortToken", "workEmail", "departmentString", "jobPositionString"));
             List<String> titleNames = new ArrayList<String>(Arrays.asList("姓名", "性别", "手机", "短号", "工作邮箱", "部门", "职务"));
             List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 10, 20, 20, 20, 20, 20));
             excelUtils.setNeedSequenceColumn(false);
-            excelUtils.writeExcel(propertyNames,titleNames,titleSizes,contacts);
+            excelUtils.writeExcel(propertyNames, titleNames, titleSizes, contacts);
         }
     }
 
@@ -583,7 +584,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse){
+    public void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
         importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId());
     }
 
@@ -631,12 +632,17 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public void updateArchivesEmployee(UpdateArchivesEmployeeCommand cmd){
+    public void updateArchivesEmployee(UpdateArchivesEmployeeCommand cmd) {
 
+        //  1.更新 detail 表信息
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
         detail = updateArchivesEmployeeDetail(detail, cmd);
+        organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
 
+        //  2.更新 member 表信息
+        organizationService.updateOrganizationMemberInfoByDetailId(cmd);
 
+        //  3.更新自定义字段值
         addGeneralFormValuesCommand formCommand = new addGeneralFormValuesCommand();
         formCommand.setGeneralFormId(getRealFormOriginId(cmd.getFormOriginId()));
         formCommand.setSourceId(cmd.getDetailId());
@@ -645,72 +651,79 @@ public class ArchivesServiceImpl implements ArchivesService {
         generalFormService.addGeneralFormValues(formCommand);
     }
 
-    private OrganizationMemberDetails updateArchivesEmployeeDetail(OrganizationMemberDetails detail, UpdateArchivesEmployeeCommand cmd){
-        if(cmd.getBirthday() !=null)
+    /**
+     * 对前端传来的值进行分析并给对应的变量赋值
+     *
+     * @param detail
+     * @param cmd
+     * @return
+     */
+    private OrganizationMemberDetails updateArchivesEmployeeDetail(OrganizationMemberDetails detail, UpdateArchivesEmployeeCommand cmd) {
+        if (cmd.getBirthday() != null)
             detail.setBirthday(cmd.getBirthday());
-        if(cmd.getContactName() !=null)
+        if (cmd.getContactName() != null)
             detail.setContactName(cmd.getContactName());
-        if(cmd.getContactToken() !=null)
+        if (cmd.getContactToken() != null)
             detail.setContactToken(cmd.getContactToken());
-        if(cmd.getRegionCode() !=null)
+        if (cmd.getRegionCode() != null)
             detail.setRegionCode(cmd.getRegionCode());
-        if(cmd.getEmployeeNo() !=null)
+        if (cmd.getEmployeeNo() != null)
             detail.setEmployeeNo(cmd.getEmployeeNo());
-        if(cmd.getGender() !=null)
+        if (cmd.getGender() != null)
             detail.setGender(cmd.getGender());
-        if(cmd.getMaritalFlag() !=null)
+        if (cmd.getMaritalFlag() != null)
             detail.setMaritalFlag(cmd.getMaritalFlag());
-        if(cmd.getPoliticalFlag() !=null)
+        if (cmd.getPoliticalFlag() != null)
             detail.setPoliticalFlag(cmd.getPoliticalFlag());
-        if(cmd.getNativePlace() !=null)
+        if (cmd.getNativePlace() != null)
             detail.setNativePlace(cmd.getNativePlace());
-        if(cmd.getEnName() !=null)
+        if (cmd.getEnName() != null)
             detail.setEnName(cmd.getEnName());
-        if(cmd.getRegResidence() !=null)
+        if (cmd.getRegResidence() != null)
             detail.setRegResidence(cmd.getRegResidence());
-        if(cmd.getIdNumber() !=null)
+        if (cmd.getIdNumber() != null)
             detail.setIdNumber(cmd.getIdNumber());
-        if(cmd.getEmail() !=null)
+        if (cmd.getEmail() != null)
             detail.setEmail(cmd.getEmail());
-        if(cmd.getWechat() !=null)
+        if (cmd.getWechat() != null)
             detail.setWechat(cmd.getWechat());
-        if(cmd.getQq() !=null)
+        if (cmd.getQq() != null)
             detail.setQq(cmd.getQq());
-        if(cmd.getEmergencyName() !=null)
+        if (cmd.getEmergencyName() != null)
             detail.setEmergencyName(cmd.getEmergencyName());
-        if(cmd.getEmergencyContact() !=null)
+        if (cmd.getEmergencyContact() != null)
             detail.setEmergencyContact(cmd.getEmergencyContact());
-        if(cmd.getAddress() !=null)
+        if (cmd.getAddress() != null)
             detail.setAddress(cmd.getAddress());
-        if(cmd.getEmployeeType() !=null)
+        if (cmd.getEmployeeType() != null)
             detail.setEmployeeType(cmd.getEmployeeType());
-        if(cmd.getEmployeeStatus() !=null)
+        if (cmd.getEmployeeStatus() != null)
             detail.setEmployeeStatus(cmd.getEmployeeStatus());
-        if(cmd.getEmploymentTime() !=null)
+        if (cmd.getEmploymentTime() != null)
             detail.setEmploymentTime(cmd.getEmploymentTime());
-        if(cmd.getSalaryCardNumber() !=null)
+        if (cmd.getSalaryCardNumber() != null)
             detail.setSalaryCardNumber(cmd.getSalaryCardNumber());
-        if(cmd.getSocialSecurityNumber() !=null)
+        if (cmd.getSocialSecurityNumber() != null)
             detail.setSocialSecurityNumber(cmd.getSocialSecurityNumber());
-        if(cmd.getProvidentFundNumber() !=null)
+        if (cmd.getProvidentFundNumber() != null)
             detail.setProvidentFundNumber(cmd.getProvidentFundNumber());
-        if(cmd.getCheckInTime() !=null)
+        if (cmd.getCheckInTime() != null)
             detail.setCheckInTime(cmd.getCheckInTime());
-        if(cmd.getProcreative() !=null)
+        if (cmd.getProcreative() != null)
             detail.setProcreative(cmd.getProcreative());
-        if(cmd.getEthnicity() !=null)
+        if (cmd.getEthnicity() != null)
             detail.setEthnicity(cmd.getEthnicity());
-        if(cmd.getIdType() !=null)
+        if (cmd.getIdType() != null)
             detail.setIdType(cmd.getIdType());
-        if(cmd.getIdExpiryDate() !=null)
+        if (cmd.getIdExpiryDate() != null)
             detail.setIdExpiryDate(cmd.getIdExpiryDate());
-        if(cmd.getDegree() !=null)
+        if (cmd.getDegree() != null)
             detail.setDegree(cmd.getDegree());
-        if(cmd.getGraduationSchool() !=null)
+        if (cmd.getGraduationSchool() != null)
             detail.setGraduationSchool(cmd.getGraduationSchool());
-        if(cmd.getGraduationTime() !=null)
+        if (cmd.getGraduationTime() != null)
             detail.setGraduationTime(cmd.getGraduationTime());
-        if(cmd.getEmergencyRelationship() !=null)
+        if (cmd.getEmergencyRelationship() != null)
             detail.setEmergencyRelationship(cmd.getEmergencyRelationship());
 /*        if(cmd.getDepartment() !=null)
             detail.setDepartment(cmd.getDepartment());
@@ -718,35 +731,35 @@ public class ArchivesServiceImpl implements ArchivesService {
             detail.setJobPosition(cmd.getJobPosition());
         if(cmd.getReportTarget() !=null)
             detail.setReportTarget(cmd.getReportTarget());*/
-        if(cmd.getContactShortToken() !=null)
+        if (cmd.getContactShortToken() != null)
             detail.setContactShortToken(cmd.getContactShortToken());
-        if(cmd.getWorkEmail() !=null)
+        if (cmd.getWorkEmail() != null)
             detail.setWorkEmail(cmd.getWorkEmail());
-        if(cmd.getContractPartyId() !=null)
+        if (cmd.getContractPartyId() != null)
             detail.setContractPartyId((cmd.getContractPartyId()));
-        if(cmd.getWorkStartTime() !=null)
+        if (cmd.getWorkStartTime() != null)
             detail.setWorkStartTime(cmd.getWorkStartTime());
-        if(cmd.getContractStartTime() !=null)
+        if (cmd.getContractStartTime() != null)
             detail.setContractStartTime(cmd.getContractStartTime());
-        if(cmd.getContractEndTime() !=null)
+        if (cmd.getContractEndTime() != null)
             detail.setContractEndTime(cmd.getContractEndTime());
-        if(cmd.getSalaryCardBank() !=null)
+        if (cmd.getSalaryCardBank() != null)
             detail.setSalaryCardBank(cmd.getSalaryCardBank());
-        if(cmd.getRegResidenceType() !=null)
+        if (cmd.getRegResidenceType() != null)
             detail.setRegResidenceType(cmd.getRegResidenceType());
-        if(cmd.getIdPhoto() !=null)
+        if (cmd.getIdPhoto() != null)
             detail.setIdPhoto(cmd.getIdPhoto());
-        if(cmd.getVisaPhoto() !=null)
+        if (cmd.getVisaPhoto() != null)
             detail.setVisaPhoto(cmd.getVisaPhoto());
-        if(cmd.getLifePhoto() !=null)
+        if (cmd.getLifePhoto() != null)
             detail.setLifePhoto(cmd.getLifePhoto());
-        if(cmd.getEntryForm() !=null)
+        if (cmd.getEntryForm() != null)
             detail.setEntryForm(cmd.getEntryForm());
-        if(cmd.getGraduationCertificate() !=null)
+        if (cmd.getGraduationCertificate() != null)
             detail.setGraduationCertificate(cmd.getGraduationCertificate());
-        if(cmd.getDegreeCertificate() !=null)
+        if (cmd.getDegreeCertificate() != null)
             detail.setDegreeCertificate(cmd.getDegreeCertificate());
-        if(cmd.getContractCertificate() !=null)
+        if (cmd.getContractCertificate() != null)
             detail.setContractCertificate(cmd.getContractCertificate());
 
         return detail;
@@ -763,22 +776,23 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  2.获取表单对应的值
         GetGeneralFormValuesCommand valueCommand =
-                new GetGeneralFormValuesCommand(GeneralFormSourceType.ARCHIVES_ATUH.getCode(),cmd.getDetailId(),NormalFlag.NEED.getCode());
+                new GetGeneralFormValuesCommand(GeneralFormSourceType.ARCHIVES_ATUH.getCode(), cmd.getDetailId(), NormalFlag.NEED.getCode());
         List<PostApprovalFormItem> employeeDynamicVal = generalFormService.getGeneralFormValues(valueCommand);
+        Map<String, String> employeeDynamicMaps = handleEmployeeDynamicVal(employeeDynamicVal);
 
-        //  3.获取个人信息
+        //  3.获取个人信息的值
         OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-        Map<String, String> employeeStaticVal = handleEmployeeStaticVal(employee);
+        Map<String, String> employeeDefaultMaps = handleEmployeeDefaultVal(employee);
 
         //  4.赋值
-        for(GeneralFormFieldDTO dto : form.getFormFields()){
+        for (GeneralFormFieldDTO dto : form.getFormFields()) {
             //  4-1.赋值给系统默认字段
             if (GeneralFormFieldAttributeType.DEFAULT.getCode().equals(dto.getFieldAttribute())) {
-                dto.setFieldValue(employeeStaticVal.get(dto.getFieldName()));
+                dto.setFieldValue(employeeDefaultMaps.get(dto.getFieldName()));
             }
             //  TODO: 4-2.赋值给非系统默认字段
             else {
-               //
+                dto.setFieldValue(employeeDynamicMaps.get(dto.getFieldName()));
             }
         }
 
@@ -788,29 +802,31 @@ public class ArchivesServiceImpl implements ArchivesService {
         return response;
     }
 
-
-    //  利用 map 设置 key 来存取值
-    private Map<String, String> handleEmployeeStaticVal(OrganizationMemberDetails employee) {
+    /**
+     * 给系统字段赋值，利用 map 设置 key 来存取值
+     * @param employee
+     * @return
+     */
+    private Map<String, String> handleEmployeeDefaultVal(OrganizationMemberDetails employee) {
         Map<String, String> valueMap = new HashMap<>();
-
         valueMap.put("contactName", employee.getContactName());
         valueMap.put("enName", employee.getEnName());
-        valueMap.put("gender",String.valueOf(employee.getGender()));
-        if(employee.getBirthday() != null)
+        valueMap.put("gender", String.valueOf(employee.getGender()));
+        if (employee.getBirthday() != null)
             valueMap.put("birthday", String.valueOf(employee.getBirthday()));
-        valueMap.put("maritalFlag",String.valueOf(employee.getMaritalFlag()));
-        if(employee.getProcreative() != null)
+        valueMap.put("maritalFlag", String.valueOf(employee.getMaritalFlag()));
+        if (employee.getProcreative() != null)
             valueMap.put("procreative", String.valueOf(employee.getProcreative()));
         valueMap.put("ethnicity", employee.getEthnicity());
         valueMap.put("politicalFlag", employee.getPoliticalFlag());
         valueMap.put("nativePlace", employee.getNativePlace());
         valueMap.put("idType", employee.getIdType());
         valueMap.put("idNumber", employee.getIdNumber());
-        if(employee.getIdExpiryDate() != null)
+        if (employee.getIdExpiryDate() != null)
             valueMap.put("idExpiryDate", String.valueOf(employee.getIdExpiryDate()));
         valueMap.put("degree", employee.getDegree());
         valueMap.put("graduationSchool", employee.getGraduationSchool());
-        if(employee.getGraduationTime() != null)
+        if (employee.getGraduationTime() != null)
             valueMap.put("graduationTime", String.valueOf(employee.getGraduationTime()));
         valueMap.put("contactToken", employee.getContactToken());
         valueMap.put("email", employee.getEmail());
@@ -820,7 +836,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put("emergencyName", employee.getEmergencyName());
         valueMap.put("emergencyRelationship", employee.getEmergencyRelationship());
         valueMap.put("emergencyContact", employee.getEmergencyContact());
-        if(employee.getCheckInTime() != null)
+        if (employee.getCheckInTime() != null)
             valueMap.put("checkInTime", String.valueOf(employee.getCheckInTime()));
         valueMap.put("employeeType", String.valueOf(employee.getEmployeeType()));
         valueMap.put("employeeStatus", String.valueOf(employee.getEmployeeStatus()));
@@ -831,15 +847,14 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put("employeeNo", employee.getEmployeeNo());
         valueMap.put("contactShortToken", employee.getContactShortToken());
         valueMap.put("workEmail", employee.getWorkEmail());
-        //  TODO:工作地点，合同主体的转化
+        //  TODO:合同主体的转化
         valueMap.put("contractPartyId", String.valueOf(employee.getContractPartyId()));
-        if(employee.getWorkStartTime() != null)
+        if (employee.getWorkStartTime() != null)
             valueMap.put("workStartTime", String.valueOf(employee.getWorkStartTime()));
-        if(employee.getContractStartTime() != null)
+        if (employee.getContractStartTime() != null)
             valueMap.put("contractStartTime", String.valueOf(employee.getContractStartTime()));
-        if(employee.getContractEndTime() != null)
+        if (employee.getContractEndTime() != null)
             valueMap.put("contractEndTime", String.valueOf(employee.getContractEndTime()));
-
         valueMap.put("salaryCardNumber", employee.getSalaryCardNumber());
         valueMap.put("salaryCardBank", employee.getSalaryCardBank());
         valueMap.put("socialSecurityNumber", employee.getSocialSecurityNumber());
@@ -853,6 +868,21 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put("graduationCertificate", employee.getGraduationCertificate());
         valueMap.put("degreeCertificate", employee.getDegreeCertificate());
         valueMap.put("contractCertificate", employee.getContractCertificate());
+        return valueMap;
+    }
+
+    /**
+     * 给用户自定义字段赋值，利用 map 设置 key 来存取值
+     * @param employeeDynamicVals
+     * @return
+     */
+    private Map<String, String> handleEmployeeDynamicVal(List<PostApprovalFormItem> employeeDynamicVals) {
+        Map<String, String> valueMap = new HashMap<>();
+        if (employeeDynamicVals != null && employeeDynamicVals.size() > 0) {
+            for (PostApprovalFormItem value : employeeDynamicVals) {
+                valueMap.put(value.getFieldName(), value.getFieldValue());
+            }
+        }
         return valueMap;
     }
 

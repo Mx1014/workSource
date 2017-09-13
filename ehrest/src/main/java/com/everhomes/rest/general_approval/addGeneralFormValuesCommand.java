@@ -18,6 +18,9 @@ public class addGeneralFormValuesCommand {
 	private String sourceType;
 	private Long sourceId;
 
+	@ItemType(PostApprovalFormItem.class)
+	List<PostApprovalFormItem> values;
+
 	public String getSourceType() {
 		return sourceType;
 	}
@@ -33,9 +36,6 @@ public class addGeneralFormValuesCommand {
 	public void setSourceId(Long sourceId) {
 		this.sourceId = sourceId;
 	}
-
-	@ItemType(PostApprovalFormItem.class)
-	List<PostApprovalFormItem> values;
 
 	public List<PostApprovalFormItem> getValues() {
 		return values;

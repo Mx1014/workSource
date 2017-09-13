@@ -5476,8 +5476,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Long updateOrganizationMemberInfoByDetailId(UpdateArchivesEmployeeCommand cmd) {
-        this.organizationProvider.updateOrganizationMemberByDetailId(cmd.getDetailId(), cmd.getContactToken(), cmd.getContactName(), cmd.getGender());
-        return cmd.getDetailId();
+        if (cmd.getContactName() == null && cmd.getContactToken() == null && cmd.getGender() == null)
+            return cmd.getDetailId();
+        else {
+            this.organizationProvider.updateOrganizationMemberByDetailId(cmd.getDetailId(), cmd.getContactToken(), cmd.getContactName(), cmd.getGender());
+            return cmd.getDetailId();
+        }
     }
 
     /**
