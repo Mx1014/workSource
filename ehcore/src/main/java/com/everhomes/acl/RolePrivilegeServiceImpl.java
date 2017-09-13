@@ -1499,7 +1499,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, OrganizationMemberGroupType.MANAGER.getCode(), targetType);
 		for (OrganizationMember member: members ) {
 			OrganizationContactDTO dto = new OrganizationContactDTO();
-			dto.setNickName(member.getContactName());
+			if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+				User user = userProvider.findUserById(member.getTargetId());
+				if(null != user)
+					dto.setNickName(user.getNickName());
+			}
+			dto.setContactName(member.getContactName());
 			dto.setGender(member.getGender());
 			dto.setTargetId(member.getTargetId());
 			dto.setContactToken(member.getContactToken());

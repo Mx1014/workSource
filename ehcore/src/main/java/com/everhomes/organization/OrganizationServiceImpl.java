@@ -6171,7 +6171,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_EXISTS,
                         "This user has been added to the administrator list.");
             }
-
+            member.setContactName(contactName);
             member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
             if(OrganizationMemberStatus.ACTIVE != OrganizationMemberStatus.fromCode(member.getStatus())){
                 //把正在申请加入公司状态的 记录改成正常
@@ -6186,6 +6186,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
             organizationProvider.updateOrganizationMember(member);
+            if(null != member.getDetailId()){
+                OrganizationMemberDetails detail =  organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
+                detail.setContactName(contactName);
+                organizationProvider.updateOrganizationMemberDetails(detail, member.getDetailId());
+            }
+
         }
 
         //是注册用户或者从加入公司待审核的注册用户 则需要发送消息等等操作
