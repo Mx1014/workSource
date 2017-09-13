@@ -2622,7 +2622,7 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(statistic.getBlandleCount());
 		if (null != statistic.getExts()) {
 			for (ExtDTO ext : statistic.getExts()) {
-				row.createCell(++i).setCellValue(ext.getName());
+				row.createCell(++i).setCellValue(ext.getTimeCount());
 
 			}
 		}
@@ -3988,7 +3988,10 @@ public class PunchServiceImpl implements PunchService {
 		List<Long> absenceUserIdList = new ArrayList<>();
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
-            punchCountDTOList.add(dto);
+			if (null != dto.getUnpunchCount()) {
+				dto.setUnpunchCount(new BigDecimal(dto.getUnpunchCount()).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
+			}
+			punchCountDTOList.add(dto);
 //			if(statistic.getOverTimeSum().equals(0L)){
 //				dto.setOverTimeSum(0.0);
 //			}
