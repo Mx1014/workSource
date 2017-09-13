@@ -40,7 +40,7 @@ public class AclController extends ControllerBase {
      * <p>创建公司管理员</p>
      */
     @RequestMapping("createOrganizationAdmin")
-    @RestReturn(value=String.class)
+    @RestReturn(value=OrganizationContactDTO.class)
     public RestResponse createOrganizationAdmin(@Valid CreateOrganizationAdminCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
