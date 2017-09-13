@@ -1,95 +1,115 @@
--- 物业报修2.8 add by sw 20170306
-ALTER TABLE eh_pm_tasks ADD COLUMN `building_name` VARCHAR(128);
-ALTER TABLE eh_pm_tasks ADD COLUMN `organization_uid` BIGINT;
+ALTER TABLE eh_buildings DROP COLUMN lift_description;
+ALTER TABLE eh_buildings DROP COLUMN pm_description;
+ALTER TABLE eh_buildings DROP COLUMN parking_lot_description;
+ALTER TABLE eh_buildings DROP COLUMN environmental_description;
+ALTER TABLE eh_buildings DROP COLUMN power_description;
+ALTER TABLE eh_buildings DROP COLUMN telecommunication_description;
+ALTER TABLE eh_buildings DROP COLUMN air_condition_description;
+ALTER TABLE eh_buildings DROP COLUMN security_description;
+ALTER TABLE eh_buildings DROP COLUMN fire_control_description;
+ALTER TABLE eh_buildings DROP COLUMN general_form_id;
+ALTER TABLE eh_buildings DROP COLUMN custom_form_flag;
 
-ALTER TABLE eh_pm_task_targets ADD COLUMN `create_time` DATETIME;
-ALTER TABLE eh_pm_task_targets ADD COLUMN `creator_uid` BIGINT;
+ALTER TABLE eh_enterprise_op_requests DROP COLUMN building_id;
 
--- 修改dataType 长度 add by sw 20170306
-ALTER TABLE eh_web_menus MODIFY COLUMN data_type VARCHAR (256);
+ALTER TABLE `eh_lease_promotion_attachments` ADD COLUMN `owner_type` VARCHAR(128) NOT NULL AFTER `id`;
+ALTER TABLE `eh_lease_promotion_attachments` CHANGE COLUMN `lease_id` `owner_id` BIGINT NOT NULL AFTER `id`;
+
+ALTER TABLE `eh_lease_promotions` DROP COLUMN community_id;
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `building_name` VARCHAR(512) DEFAULT NULL AFTER `building_id`;
+ALTER TABLE `eh_lease_promotions` DROP COLUMN `subject`;
+ALTER TABLE `eh_lease_promotions` DROP COLUMN `rent_position`;
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `update_uid` bigint(20) DEFAULT NULL AFTER `update_time`;
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `apartment_name` varchar(128) DEFAULT NULL AFTER `address_id`;
 
 
--- 活动报名表添加活动报名信息等字段, add by tt, 20170227
-ALTER TABLE `eh_activities` ADD COLUMN `signup_end_time` DATETIME;
-ALTER TABLE `eh_activity_roster` ADD COLUMN `phone` VARCHAR(32);
-ALTER TABLE `eh_activity_roster` ADD COLUMN `real_name` VARCHAR(128);
-ALTER TABLE `eh_activity_roster` ADD COLUMN `gender` TINYINT;
-ALTER TABLE `eh_activity_roster` ADD COLUMN `community_name` VARCHAR(64);
-ALTER TABLE `eh_activity_roster` ADD COLUMN `organization_name` VARCHAR(128);
-ALTER TABLE `eh_activity_roster` ADD COLUMN `position` VARCHAR(64);
-ALTER TABLE `eh_activity_roster` ADD COLUMN `leader_flag` TINYINT;
-ALTER TABLE `eh_activity_roster` ADD COLUMN `source_flag` TINYINT;
-
-ALTER TABLE `eh_activity_roster` DROP INDEX `u_eh_act_roster_user`;
-
-CREATE TABLE `eh_docking_mappings` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',  
-  `scope` VARCHAR(64) NOT NULL,
-  `name` VARCHAR(256),
-  `mapping_value` VARCHAR(256),
-  `mapping_json` VARCHAR(1024),
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-
+CREATE TABLE `eh_lease_promotion_communities` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `lease_promotion_id` bigint(20) NOT NULL COMMENT 'lease promotion id',
+  `community_id` bigint(20) NOT NULL COMMENT 'community id',
+  `creator_uid` bigint(20) NOT NULL,
+  `create_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `eh_lease_issuers` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `community_id` BIGINT NOT NULL DEFAULT 0,
-  `issuer_contact` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'For rent',
-  `issuer_name` VARCHAR(128),
-  `enterprise_id` BIGINT COMMENT 'enterprise id',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `status` TINYINT COMMENT '0: inactive, 2: active',
+CREATE TABLE `eh_lease_buildings` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `community_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refering to eh_communities',
+  `building_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refering to eh_buildings',
+
+  `name` varchar(128) NOT NULL DEFAULT '' COMMENT 'building name',
+  `alias_name` varchar(128) DEFAULT NULL,
+  `manager_name` varchar(128) DEFAULT NULL,
+  `manager_contact` varchar(128) DEFAULT NULL COMMENT 'the phone number',
+  `longitude` double DEFAULT NULL,
+  `latitude` double DEFAULT NULL,
+  `address` varchar(1024) DEFAULT NULL,
+  `area_size` double DEFAULT NULL,
+
+  `description` text,
+  `poster_uri` varchar(128) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '2' COMMENT '0: inactive, 1: confirming, 2: active',
+  `traffic_description` text,
+  `general_form_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'id of eh_general_form',
+  `custom_form_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: not add custom field, 1: add custom field',
+  `default_order` bigint(20) NOT NULL,
   
+  `creator_uid` bigint(20) DEFAULT NULL COMMENT 'uid of the user who has suggested address, NULL if it is system created',
+  `create_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'uid of the user who process the address',
+  `operate_time` datetime DEFAULT NULL,
+  `delete_flag` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0: forbidden 1: support delete',
+  
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_community_id_name` (`community_id`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 增加详情字段 by st.zheng
+ALTER TABLE `eh_rentalv2_items` ADD COLUMN `description` VARCHAR(1024) NULL DEFAULT NULL AFTER `item_type`;
+-- 创建 审批表 by st.zheng
+CREATE TABLE `eh_community_approve` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL,
+  `organization_id` bigint(20) NOT NULL,
+  `owner_id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL,
+  `module_id` bigint(20) DEFAULT NULL,
+  `module_type` varchar(64) DEFAULT NULL,
+  `project_id` bigint(20) DEFAULT '0',
+  `project_type` varchar(64) DEFAULT NULL,
+  `approve_name` varchar(64) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  `form_origin_id` bigint(20) DEFAULT NULL,
+  `form_version` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `eh_lease_issuer_addresses` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `lease_issuer_id` BIGINT NOT NULL COMMENT 'eh_enterprise_op_requests id',
-  `building_id` BIGINT COMMENT 'building id ',
-  `address_id` BIGINT COMMENT 'address id ',
-  `status` TINYINT,
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
+-- 创建申请表 by st.zheng
+CREATE TABLE `eh_community_approve_requests` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `organization_id` bigint(20) NOT NULL DEFAULT '0',
+  `owner_id` bigint(20) NOT NULL,
+  `owner_type` varchar(64) NOT NULL,
+  `module_id` bigint(20) DEFAULT NULL,
+  `module_type` varchar(64) DEFAULT NULL,
+  `flow_case_id` bigint(20) DEFAULT '0',
+  `form_origin_id` bigint(20) DEFAULT NULL,
+  `form_version` bigint(20) DEFAULT NULL,
+  `approve_id` bigint(20) DEFAULT '0',
+  `approve_name` varchar(64) DEFAULT NULL,
+  `requestor_name` varchar(64) DEFAULT NULL,
+  `requestor_phone` varchar(64) DEFAULT NULL,
+  `requestor_company` varchar(64) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE eh_lease_promotions MODIFY COLUMN rent_areas DECIMAL(10,2);
-ALTER TABLE eh_lease_promotions ADD COLUMN `enter_time_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled';
-ALTER TABLE eh_lease_promotions ADD COLUMN `address_id` BIGINT NOT NULL DEFAULT 0;
-ALTER TABLE eh_lease_promotions ADD COLUMN `orientation` VARCHAR(128);
-ALTER TABLE eh_lease_promotions ADD COLUMN `rent_amount` DECIMAL(10,2);
-ALTER TABLE eh_lease_promotions ADD COLUMN `issuer_type` VARCHAR(128) COMMENT '1: organization 2: normal_user';
-
-ALTER TABLE eh_enterprise_op_requests ADD COLUMN `issuer_type` VARCHAR(128) COMMENT '1: organization 2: normal_user';
-ALTER TABLE eh_enterprise_op_requests ADD COLUMN `building_id` BIGINT NOT NULL DEFAULT 0;
-ALTER TABLE eh_enterprise_op_requests ADD COLUMN `address_id` BIGINT NOT NULL DEFAULT 0;
-ALTER TABLE eh_enterprise_op_requests ADD COLUMN `flowcase_id` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_rentalv2_orders`  ADD COLUMN `requestor_organization_id` BIGINT DEFAULT NULL COMMENT 'id of the requestor organization';
 
 
-CREATE TABLE `eh_lease_configs` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `rent_amount_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled',
-  `issuing_lease_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled',
-  `issuer_manage_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled',
-  `park_indroduce_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled',
-  `renew_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled',
 
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
-ALTER TABLE `eh_buildings` ADD COLUMN `traffic_description` text;
-ALTER TABLE `eh_buildings` ADD COLUMN `lift_description` text;
-ALTER TABLE `eh_buildings` ADD COLUMN `pm_description` text;
-ALTER TABLE `eh_buildings` ADD COLUMN `parking_lot_description` text;
-ALTER TABLE `eh_buildings` ADD COLUMN `environmental_description` text;
-ALTER TABLE `eh_buildings` ADD COLUMN `power_description` text;
-ALTER TABLE `eh_buildings` ADD COLUMN `telecommunication_description` text;
-ALTER TABLE `eh_buildings` ADD COLUMN `air_condition_description` text;
-ALTER TABLE `eh_buildings` ADD COLUMN `security_description` text;
-ALTER TABLE `eh_buildings` ADD COLUMN `fire_control_description` text;

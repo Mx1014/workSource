@@ -803,12 +803,12 @@ public class UserServiceImpl implements UserService {
 		String deviceIdentifier = cmd.getDeviceIdentifier();
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
-//		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, signupToken.getIdentifierToken());
-//
-//		if(null != userIdentifier){
-//			LOGGER.error("The identify token has been registered, signupToken = {}, cmd = {}", signupToken, cmd);
-//			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFY_TOKEN_REGISTERED, "The identify token has been registered");
-//		}
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, signupToken.getIdentifierToken());
+
+		if(null != userIdentifier){
+			LOGGER.error("The identify token has been registered, signupToken = {}, cmd = {}", signupToken, cmd);
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFY_TOKEN_REGISTERED, "The identify token has been registered");
+		}
 
 		UserIdentifier identifier = this.findIdentifierByToken(namespaceId, signupToken);
 		if(identifier == null) {
@@ -824,11 +824,12 @@ public class UserServiceImpl implements UserService {
 
 			UserLogin rLogin = this.dbProvider.execute((TransactionStatus status)-> {
 				if(identifier.getClaimStatus() == IdentifierClaimStatus.VERIFYING.getCode()) {
-					UserIdentifier existingClaimedIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, identifier.getIdentifierToken());
-					if(existingClaimedIdentifier != null) {
-						existingClaimedIdentifier.setClaimStatus(IdentifierClaimStatus.TAKEN_OVER.getCode());
-						this.userProvider.updateIdentifier(existingClaimedIdentifier);
-					}
+					//覆盖账号流程没有闭环，暂时注释掉
+//					UserIdentifier existingClaimedIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, identifier.getIdentifierToken());
+//					if(existingClaimedIdentifier != null) {
+//						existingClaimedIdentifier.setClaimStatus(IdentifierClaimStatus.TAKEN_OVER.getCode());
+//						this.userProvider.updateIdentifier(existingClaimedIdentifier);
+//					}
 
 					identifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
 					this.userProvider.updateIdentifier(identifier);
@@ -857,10 +858,10 @@ public class UserServiceImpl implements UserService {
 				UserLogin login = createLogin(namespaceId, user, deviceIdentifier, cmd.getPusherIdentify());
 				login.setStatus(UserLoginStatus.LOGGED_IN);
 				UserIdentifier uIdentifier = userProvider.findClaimedIdentifierByTokenAndNotUserId(namespaceId, identifier.getIdentifierToken(), identifier.getOwnerUid());
-//				if(null != uIdentifier){
-//					LOGGER.error("The identify token has been registered, signupToken = {}, cmd = {}", signupToken, cmd);
-//					throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFY_TOKEN_REGISTERED, "The identify token has been registered");
-//				}
+				if(null != uIdentifier){
+					LOGGER.error("The identify token has been registered, signupToken = {}, cmd = {}", signupToken, cmd);
+					throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFY_TOKEN_REGISTERED, "The identify token has been registered");
+				}
 				return login;
 			});
 
@@ -2849,7 +2850,7 @@ public class UserServiceImpl implements UserService {
 //				LOGGER.debug("如果园区场景有且只有一个，通过小区查询默认园区");
 //			}
 
-			if(default_community_one != null && default_community_one.getId() != null){
+			if(default_community_one != null && default_community_one.getCommunityType()!= null){
 				sceneList.add(convertCommunityToScene(namespaceId,userId,default_community_one));
 			}else{
 				LOGGER.debug("The default park scene was not found");
@@ -2863,7 +2864,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.debug("If the cell scene is 0, check the default cell through the park");
 			}
 
-			if(default_community_two != null && default_community_two.getId() != null){
+			if(default_community_two != null && default_community_two.getCommunityType() != null){
 				sceneList.add(convertCommunityToScene(namespaceId,userId,default_community_two));
 			}else{
 				LOGGER.debug("The default scene was not found");
@@ -4785,6 +4786,14 @@ public class UserServiceImpl implements UserService {
 
 	// 查询默认场景
 	private Community findDefaultCommunity(Integer namespaceId, Long userId, List<SceneDTO> sceneList, Byte type){
+
+		SceneType shadowSceneType = DEFAULT;
+		if(type == CommunityType.COMMERCIAL.getCode()){
+			shadowSceneType = PARK_TOURIST;
+		}else{
+			shadowSceneType = DEFAULT;
+		}
+
 		//先从默认关联表中查询
 		Long defalut_communityId = null;
 		Community defalut_community = null;
@@ -4796,9 +4805,14 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 
-		if(defalut_communityId == null){
-			//再从namespace中取默认
-			defalut_community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, type);
+		if(defalut_communityId == null){//找默认的社区
+			SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
+			if(communityScene != null && communityScene.getSceneType() == shadowSceneType.getCode()){
+				defalut_community = ConvertHelper.convert(communityScene, Community.class);
+			}else{
+				//再从namespace中取默认
+				defalut_community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, type);
+			}
 		}else{
 			defalut_community = this.communityProvider.findCommunityById(defalut_communityId);
 		}

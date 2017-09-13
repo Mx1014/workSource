@@ -53,6 +53,7 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
@@ -144,6 +145,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -6164,6 +6166,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             createOrganiztionMemberWithDetailAndUserOrganization(member, org.getId());
         }else{
+            if(OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+                LOGGER.error("This user has been added to the administrator list.");
+                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_EXISTS,
+                        "This user has been added to the administrator list.");
+            }
+            member.setContactName(contactName);
             member.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
             if(OrganizationMemberStatus.ACTIVE != OrganizationMemberStatus.fromCode(member.getStatus())){
                 //把正在申请加入公司状态的 记录改成正常
@@ -6178,6 +6186,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
             organizationProvider.updateOrganizationMember(member);
+            if(null != member.getDetailId()){
+                OrganizationMemberDetails detail =  organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
+                detail.setContactName(contactName);
+                organizationProvider.updateOrganizationMemberDetails(detail, member.getDetailId());
+            }
+
         }
 
         //是注册用户或者从加入公司待审核的注册用户 则需要发送消息等等操作
@@ -6185,6 +6199,50 @@ public class OrganizationServiceImpl implements OrganizationService {
             joinOrganizationAfterOperation(member);
         }
         return member;
+    }
+
+    @Override
+    public ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd) {
+        ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
+
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        String keywords = cmd.getKeywords();
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembers(locator, pageSize, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+                List<String> groupTypes = new ArrayList<>();
+                Condition cond = null;
+                groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+
+                if(cmd.getOrganizationIds() != null && cmd.getOrganizationIds().size() > 0){
+                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(cmd.getOrganizationIds()));
+                }
+
+                if (!StringUtils.isEmpty(keywords)) {
+                    query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords).or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + keywords + "%")));
+                }
+                query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+                query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+                return query;
+            }
+        });
+
+        if (0 == organizationMembers.size()) {
+            return response;
+        }
+
+        response.setNextPageAnchor(locator.getAnchor());
+
+        response.setMembers(organizationMembers.stream().map(r->{
+            return ConvertHelper.convert(r, OrganizationMemberDTO.class);
+        }).collect(Collectors.toList()));
+
+        return response;
     }
 
 
@@ -10096,7 +10154,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public String verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd) {
         try {
+            LOGGER.debug("email verify enterprise contact, token = {}", cmd.getVerifyToken());
             VerifyEnterpriseContactDTO dto = WebTokenGenerator.getInstance().fromWebToken(cmd.getVerifyToken(), VerifyEnterpriseContactDTO.class);
+            LOGGER.debug("email verify enterprise contact, dto = {}", dto, cmd.getVerifyToken());
             if (dto == null || dto.getEndTime() == null || dto.getEnterpriseId() == null || dto.getUserId() == null) {
                 return configProvider.getValue("auth.fail", "");
             }
@@ -10106,6 +10166,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             approveForEnterpriseContact(cmd2);
             return configProvider.getValue("auth.success", "");
         } catch (Exception e) {
+            LOGGER.error("email verify enterprise contact error, token = {}", cmd.getVerifyToken());
             return configProvider.getValue("auth.fail", "");
         }
     }
