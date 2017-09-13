@@ -6480,8 +6480,10 @@ public class PunchServiceImpl implements PunchService {
 		if(null != timeRules && timeRules.size() > 0)
 			dto.setTimeRules(timeRules.stream().map(r1 -> {
 				PunchTimeRuleDTO dto1 = convertPunchTimeRule2DTO(r1) ;
-                dto1.setAfternoonArriveTime(r1.getAfternoonArriveTimeLong());
-                dto1.setNoonLeaveTime(r1.getNoonLeaveTimeLong());
+				if(r1.getPunchTimesPerDay().equals((byte)2)) {
+					dto1.setAfternoonArriveTime(r1.getAfternoonArriveTimeLong());
+					dto1.setNoonLeaveTime(r1.getNoonLeaveTimeLong());
+				}
 	            return dto1;
 	        }).collect(Collectors.toList()));
 
