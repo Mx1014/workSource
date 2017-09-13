@@ -11,58 +11,58 @@ import java.util.List;
  * <ul>
  * <li>formOriginId: 表单 id</li>
  * <li>detailId: 员工 id</li>
- * <li>organizationId: organizationId</li>
- * <li>birthday: birthday</li>
- * <li>contactName: contactName</li>
- * <li>contactToken: contactToken</li>
- * <li>regionCode: regionCode</li>
- * <li>employeeNo: employeeNo</li>
- * <li>gender: gender</li>
- * <li>maritalFlag: maritalFlag</li>
- * <li>politicalFlag: politicalFlag</li>
- * <li>nativePlace: nativePlace</li>
- * <li>enName: enName</li>
- * <li>regResidence: regResidence</li>
- * <li>idNumber: idNumber</li>
- * <li>email: email</li>
- * <li>wechat: wechat</li>
- * <li>qq: qq</li>
- * <li>emergencyName: emergencyName</li>
- * <li>emergencyContact: emergencyContact</li>
- * <li>address: address</li>
- * <li>employeeType: employeeType</li>
- * <li>employeeStatus: employeeStatus</li>
- * <li>employmentTime: employmentTime</li>
- * <li>salaryCardNumber: salaryCardNumber</li>
- * <li>socialSecurityNumber: socialSecurityNumber</li>
- * <li>providentFundNumber: providentFundNumber</li>
- * <li>checkInTime: checkInTime</li>
- * <li>procreative: procreative</li>
- * <li>ethnicity: ethnicity</li>
- * <li>idType: idType</li>
- * <li>idExpiryDate: idExpiryDate</li>
- * <li>degree: degree</li>
- * <li>graduationSchool: graduationSchool</li>
- * <li>graduationTime: graduationTime</li>
- * <li>emergencyRelationship: emergencyRelationship</li>
- * <li>department: department</li>
- * <li>jobPosition: jobPosition</li>
- * <li>reportTarget: reportTarget</li>
- * <li>contactShortToken: contactShortToken</li>
- * <li>workEmail: workEmail</li>
- * <li>contractPartyId: contractPartyId</li>
- * <li>workStartTime: workStartTime</li>
- * <li>contractStartTime: contractStartTime</li>
- * <li>contractEndTime: contractEndTime</li>
- * <li>salaryCardBank: salaryCardBank</li>
- * <li>regResidenceType: regResidenceType</li>
- * <li>idPhoto: idPhoto</li>
- * <li>visaPhoto: visaPhoto</li>
- * <li>lifePhoto: lifePhoto</li>
- * <li>entryForm: entryForm</li>
- * <li>graduationCertificate: graduationCertificate</li>
- * <li>degreeCertificate: degreeCertificate</li>
- * <li>contractCertificate: contractCertificate</li>
+ * <li>organizationId: 公司 id</li>
+ * <li>contactName: 姓名</li>
+ * <li>enName: 英文名</li>
+ * <li>gender: 性别</li>
+ * <li>birthday: 生日</li>
+ * <li>maritalFlag: 婚姻状况</li>
+ * <li>procreative: 生育状况</li>
+ * <li>ethnicity: 民族</li>
+ * <li>politicalFlag: 政治面貌</li>
+ * <li>nativePlace: 籍贯</li>
+ * <li>idType: 证件类型</li>
+ * <li>idNumber: 证件号码</li>
+ * <li>idExpiryDate: 证件有效期</li>
+ * <li>degree: 学历</li>
+ * <li>graduationSchool: 毕业学校</li>
+ * <li>graduationTime: 毕业时间</li>
+ * <li>regionCode: 区号</li>
+ * <li>contactToken: 手机号码</li>
+ * <li>email: 个人邮箱</li>
+ * <li>wechat: 微信</li>
+ * <li>qq: qq号码</li>
+ * <li>address: 现住址</li>
+ * <li>emergencyName: 紧急联系人</li>
+ * <li>emergencyRelationship: 联系人关系</li>
+ * <li>emergencyContact: 紧急联系方式</li>
+ * <li>checkInTime: 入职日期</li>
+ * <li>employeeType: 员工类型</li>
+ * <li>employeeStatus: 员工状态</li>
+ * <li>employmentTime: 转正日期</li>
+ * <li>department: 部门(待定)</li>
+ * <li>jobPosition: 职务(待定)</li>
+ * <li>reportTarget: 汇报对象(待定)</li>
+ * <li>employeeNo: 工号</li>
+ * <li>contactShortToken: 短号</li>
+ * <li>workEmail: 工作邮箱</li>
+ * <li>contractPartyId: 合同主体id </li>
+ * <li>workStartTime: 参加工作日期</li>
+ * <li>contractStartTime: 合同开始日期</li>
+ * <li>contractEndTime: 合同终止日期</li>
+ * <li>salaryCardNumber: 工资卡号</li>
+ * <li>salaryCardBank: 开户行</li>
+ * <li>socialSecurityNumber: 社保号码</li>
+ * <li>providentFundNumber: 公积金卡号</li>
+ * <li>regResidenceType: 户籍类型</li>
+ * <li>regResidence: 户籍地址</li>
+ * <li>idPhoto: 身份证照片</li>
+ * <li>visaPhoto: 一寸免冠照</li>
+ * <li>lifePhoto: 生活照</li>
+ * <li>entryForm: 入职登记表</li>
+ * <li>graduationCertificate: 毕业证书</li>
+ * <li>degreeCertificate:  学位证书</li>
+ * <li>contractCertificate: 劳动合同</li>
  * <li>values: 非系统字段值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
  * </ul>
  */
@@ -74,61 +74,27 @@ public class UpdateArchivesEmployeeCommand {
 
     private Long organizationId;
 
-    private Date birthday;
-
     private String contactName;
-
-    private String contactToken;
-
-    private String regionCode;
-
-    private String employeeNo;
-
-    private Byte gender;
-
-    private Byte maritalFlag;
-
-    private String politicalFlag;
-
-    private String nativePlace;
 
     private String enName;
 
-    private String regResidence;
+    private Byte gender;
 
-    private String idNumber;
+    private Date birthday;
 
-    private String email;
-
-    private String wechat;
-
-    private String qq;
-
-    private String emergencyName;
-
-    private String emergencyContact;
-
-    private String address;
-
-    private Byte employeeType;
-
-    private Byte employeeStatus;
-
-    private Date employmentTime;
-
-    private String salaryCardNumber;
-
-    private String socialSecurityNumber;
-
-    private String providentFundNumber;
-
-    private Date checkInTime;
+    private Byte maritalFlag;
 
     private Date procreative;
 
     private String ethnicity;
 
+    private String politicalFlag;
+
+    private String nativePlace;
+
     private String idType;
+
+    private String idNumber;
 
     private Date idExpiryDate;
 
@@ -138,13 +104,39 @@ public class UpdateArchivesEmployeeCommand {
 
     private Date graduationTime;
 
+    private String regionCode;
+
+    private String contactToken;
+
+    private String email;
+
+    private String wechat;
+
+    private String qq;
+
+    private String address;
+
+    private String emergencyName;
+
     private String emergencyRelationship;
+
+    private String emergencyContact;
+
+    private Date checkInTime;
+
+    private Byte employeeType;
+
+    private Byte employeeStatus;
+
+    private Date employmentTime;
 
     private String department;
 
     private String jobPosition;
 
     private String reportTarget;
+
+    private String employeeNo;
 
     private String contactShortToken;
 
@@ -158,9 +150,17 @@ public class UpdateArchivesEmployeeCommand {
 
     private Date contractEndTime;
 
+    private String salaryCardNumber;
+
     private String salaryCardBank;
 
+    private String socialSecurityNumber;
+
+    private String providentFundNumber;
+
     private String regResidenceType;
+
+    private String regResidence;
 
     private String idPhoto;
 
