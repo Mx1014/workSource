@@ -8,6 +8,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.oauth2client.HttpResponseEntity;
 import com.everhomes.oauth2client.handler.RestCallTemplate;
+import com.everhomes.order.PayService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
@@ -15,6 +16,9 @@ import com.everhomes.recommend.RecommendationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.BillDetailDTO;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PreOrderCommand;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -62,6 +66,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private PayService payService;
 
 
 
@@ -560,6 +567,40 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         LOGGER.error("Insufficient privilege, zjgkhandler updateBillsToSettled");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
+    }
+
+    @Override
+    public PlaceAnAssetOrderResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
+        PlaceAnAssetOrderResponse response = new PlaceAnAssetOrderResponse();
+        //存一份到我这
+        List<String> billIds = cmd.getBillIds();
+        String billIdsWithComma = assetUtils.convertStringList2CommaSeparation(billIds);
+        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),cmd.getAmountOwed(),billIdsWithComma,cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),15l*60l*1000l);
+        //请求支付模块的下预付单
+        PreOrderCommand cmd2pay = new PreOrderCommand();
+//        Long amount = 转成分(cmd.getAmountOwed());
+        Long payerId = null;
+        if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
+            if(Long.parseLong(cmd.getPayerId())==UserContext.currentUserId()){
+                payerId = Long.parseLong(cmd.getPayerId());
+            }else{
+                LOGGER.error("individual make asset order failed, the given uid = {}, but the online uid is = {}",cmd.getPayerId(),UserContext.currentUserId());
+                throw new RuntimeErrorException("individual make asset order failed");
+            }
+        }
+        String amountOwed = cmd.getAmountOwed();
+        Long amount1 = Long.parseLong(amountOwed);
+        amount1 = amount1*100l;
+        cmd2pay.setAmount(amount1);
+        cmd2pay.setClientAppName(cmd.getClientAppName());
+        cmd2pay.setExpiration(15l*60l);
+        cmd2pay.setNamespaceId(UserContext.getCurrentNamespaceId());
+        cmd2pay.setOpenid(cmd.getOpenid());
+        cmd2pay.setOrderId(orderId);
+        cmd2pay.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
+        cmd2pay.setPayerId(payerId);
+        PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
+        return response;
     }
 
     @Override

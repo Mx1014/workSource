@@ -1,14 +1,13 @@
 // @formatter:off
 package com.everhomes.activity;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.order.CreateWechatJsPayOrderResp;
 import org.apache.commons.collections.CollectionUtils;
@@ -92,6 +91,20 @@ public class ActivityController extends ControllerBase {
     @RestReturn(value=CreateWechatJsPayOrderResp.class)
     public RestResponse createWechatJsSignupOrder(@Valid CreateWechatJsSignupOrderCommand cmd) {
         CreateWechatJsPayOrderResp dto = activityService.createWechatJsSignupOrder(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/createSignupOrderV2</b>
+     * <p>创建活动报名收费订单</p>
+     */
+    @RequestMapping("createSignupOrderV2")
+    @RestReturn(value=PreOrderDTO.class)
+    public RestResponse createSignupOrderV2(@Valid CreateSignupOrderV2Command cmd) {
+        PreOrderDTO dto = activityService.createSignupOrderV2(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

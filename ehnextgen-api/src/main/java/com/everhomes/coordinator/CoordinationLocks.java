@@ -87,6 +87,8 @@ public enum CoordinationLocks {
 	SALARY_GROUP_LOCK("salary.group"),
 
 
+    PAY_CREATE_PREORDER("pay.create.preorder"),
+
 
     BILL_STATUS_UPDATE("bill.status.update"),
     SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),

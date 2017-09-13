@@ -11,6 +11,7 @@ package com.everhomes.rest.order;
  *	<li>10000006-rentalrefund-思源物业</li>
  *  <li>10000007-activitySignupOrder-活动报名缴费</li>
  *  <li>10000008-PRINT_ORDER_CODE-活动报名缴费</li>
+ *  <li>10000010-ZJGK_RENTAL_CODE-张江高科租金缴费</li>
  *</ul>
  */
 public class OrderType {
@@ -23,6 +24,7 @@ public class OrderType {
 	public static final int ACTIVITY_SIGNUP_ORDER_CODE = 10000007;
 	public static final int PRINT_ORDER_CODE = 10000008;
 	public static final int ACTIVITY_SIGNUP_ORDER_WECHAT_CODE = 10000009;
+	public static final int ZJGK_RENTAL_CODE = 10000010;
 
 	public static enum OrderTypeEnum{
 		WUYETEST(OrderType.WU_YE_TEST_CODE,"wuyetest","物业支付-测试用"),
@@ -33,7 +35,8 @@ public class OrderType {
 		EXPRESS_ORDER(OrderType.EXPRESS_ORDER_CODE,"expressOrder","快递订单"),
 		ACTIVITYSIGNUPORDER(OrderType.ACTIVITY_SIGNUP_ORDER_CODE,"activitySignupOrder","活动报名缴费"),
 		PRINT_ORDER(OrderType.PRINT_ORDER_CODE,"printOrder","打印订单"),
-		ACTIVITYSIGNUPORDERWECHAT(OrderType.ACTIVITY_SIGNUP_ORDER_WECHAT_CODE,"activitysignuporderwechat","活动报名（微信）缴费");
+		ACTIVITYSIGNUPORDERWECHAT(OrderType.ACTIVITY_SIGNUP_ORDER_WECHAT_CODE,"activitysignuporderwechat","活动报名（微信）缴费"),
+		ZJGK_RENTAL_CODE(OrderType.ZJGK_RENTAL_CODE,"zjgkrentalcode","张江高科租金缴费");
 		
 
 		private int code;
