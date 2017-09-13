@@ -7,6 +7,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.order.OrderType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.*;
@@ -31,6 +32,7 @@ import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+import com.everhomes.server.schema.tables.pojos.EhPaymentOrder;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -1754,6 +1756,45 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(t)
                 .where(t.OWNER_UID.eq(aLong))
                 .fetchOne(0,String.class);
+    }
+
+    @Override
+    public Long saveAnOrderCopy(String payerType, String payerId, String amountOwed, String billIdsWithComma, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //TO SAVE A PRE ORDER COPY IN THE ORDER TABLE WITH STATUS BEING NOT BEING PAID YET
+        long nextOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_ORDER.getClass()));
+        PaymentOrder order = new PaymentOrder();
+        order.setBillIds(billIdsWithComma);
+        order.setClientAppName(clientAppName);
+        order.setCommunityId(String.valueOf(communityId));
+        order.setContractId(contactNum);
+        order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        order.setId(nextOrderId);
+        order.setNamespaceId(UserContext.getCurrentNamespaceId());
+        // GET THE START TIME AND EXPIRTIME
+        Timestamp startTime = new Timestamp(DateHelper.currentGMTTime().getTime());
+        Calendar c = Calendar.getInstance();
+        long l = startTime.getTime() + expireTimePeriod;
+
+        Timestamp endTime = new Timestamp(l);
+        order.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        order.setOrderExpireTime(endTime);
+        order.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
+//        order.setUuid(UUID());
+        Random r = new Random();
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < 11; i++){
+               sb.append(r.nextInt(10));
+        }
+        order.setOrderNo(Long.parseLong(sb.toString()));
+        order.setUid(UserContext.currentUserId());
+        order.setPayAmount(new BigDecimal(amountOwed));
+        order.setPayerType(payerType);
+
+        EhPaymentOrderDao dao = new EhPaymentOrderDao(context.configuration());
+        dao.insert(order);
+        return nextOrderId;
     }
 
 }

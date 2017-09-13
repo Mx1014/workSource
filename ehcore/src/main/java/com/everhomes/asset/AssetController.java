@@ -924,10 +924,10 @@ public class AssetController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /asset/payTheFuckingBills</b>
+     * <b>URL: /asset/payBills</b>
      * <p></p>
      */
-    @RequestMapping("payTheFuckingBills")
+    @RequestMapping("payBills")
     @RestReturn(PlaceAnAssetOrderResponse.class)
     public RestResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd){
         PlaceAnAssetOrderResponse response = assetService.placeAnAssetOrder(cmd);
