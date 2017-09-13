@@ -6844,7 +6844,7 @@ public class PunchServiceImpl implements PunchService {
 				PunchLogDTO punchLog = getPunchType(userId, cmd.getEnterpriseId(), punchTime, pDate);
 				if (null != punchLog) {
 					if (null != punchLog.getExpiryTime()) {
-						punchLog.setExpiryTime(process24hourTimeToGMTTime(punchTime, punchLog.getExpiryTime()));
+						punchLog.setExpiryTime(process24hourTimeToGMTTime(pDate, punchLog.getExpiryTime()));
 					}
 					punchLog.setRuleTime(process24hourTimeToGMTTime(punchTime, punchLog.getRuleTime()));
 					response = ConvertHelper.convert(punchLog, GetPunchDayStatusResponse.class);
