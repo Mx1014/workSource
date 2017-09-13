@@ -3988,6 +3988,15 @@ public class PunchServiceImpl implements PunchService {
 		List<Long> absenceUserIdList = new ArrayList<>();
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
+			dto.setPunchOrgName(null);
+			PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), statistic.getOwnerId(), statistic.getUserId());
+			if (null != pr) {
+				Organization punchorg = organizationProvider.findOrganizationById(pr.getPunchOrganizationId());
+				if (null != punchorg) {
+
+					dto.setPunchOrgName(punchorg.getName());
+				}
+			}
 			if (null != dto.getUnpunchCount()) {
 				dto.setUnpunchCount(new BigDecimal(dto.getUnpunchCount()).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
 			}
@@ -4639,6 +4648,15 @@ public class PunchServiceImpl implements PunchService {
     }
 	public PunchDayDetailDTO convertToPunchDayDetailDTO(PunchDayLog r ){
 		PunchDayDetailDTO dto =  ConvertHelper.convert(r,PunchDayDetailDTO.class);
+		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), r.getEnterpriseId(), r.getUserId());
+		dto.setPunchOrgName(null);
+		if (null != pr) {
+			Organization org = organizationProvider.findOrganizationById(pr.getPunchOrganizationId());
+			if (null != org) {
+
+				dto.setPunchOrgName(org.getName());
+			}
+		}
 		dto.setStatuString(processStatus(r.getStatusList()));
 		if(null != r.getPunchOrganizationId()) {
 			Organization punchGroup = organizationProvider.findOrganizationById(r.getPunchOrganizationId());
