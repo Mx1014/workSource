@@ -2850,7 +2850,7 @@ public class UserServiceImpl implements UserService {
 //				LOGGER.debug("如果园区场景有且只有一个，通过小区查询默认园区");
 //			}
 
-			if(default_community_one != null && default_community_one.getId() != null){
+			if(default_community_one != null && default_community_one.getCommunityType()!= null){
 				sceneList.add(convertCommunityToScene(namespaceId,userId,default_community_one));
 			}else{
 				LOGGER.debug("The default park scene was not found");
@@ -2864,7 +2864,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.debug("If the cell scene is 0, check the default cell through the park");
 			}
 
-			if(default_community_two != null && default_community_two.getId() != null){
+			if(default_community_two != null && default_community_two.getCommunityType() != null){
 				sceneList.add(convertCommunityToScene(namespaceId,userId,default_community_two));
 			}else{
 				LOGGER.debug("The default scene was not found");
@@ -4783,6 +4783,14 @@ public class UserServiceImpl implements UserService {
 
 	// 查询默认场景
 	private Community findDefaultCommunity(Integer namespaceId, Long userId, List<SceneDTO> sceneList, Byte type){
+
+		SceneType shadowSceneType = DEFAULT;
+		if(type == CommunityType.COMMERCIAL.getCode()){
+			shadowSceneType = PARK_TOURIST;
+		}else{
+			shadowSceneType = DEFAULT;
+		}
+
 		//先从默认关联表中查询
 		Long defalut_communityId = null;
 		Community defalut_community = null;
@@ -4796,7 +4804,7 @@ public class UserServiceImpl implements UserService {
 
 		if(defalut_communityId == null){//找默认的社区
 			SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
-			if(communityScene != null){
+			if(communityScene != null && communityScene.getSceneType() == shadowSceneType.getCode()){
 				defalut_community = ConvertHelper.convert(communityScene, Community.class);
 			}else{
 				//再从namespace中取默认
