@@ -1,8 +1,10 @@
 package com.everhomes.rest.archives;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Date;
+import java.util.List;
 
 
 /**
@@ -15,7 +17,7 @@ import java.sql.Date;
  * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣 {@link com.everhomes.rest.organization.EmployeeType}</li>
  * <li>employeeStatus: 工状态, 0: 试用 1: 在职 2: 离职 {@link com.everhomes.rest.organization.EmployeeStatus}</li>
  * <li>employmentTime: 转正时间</li>
- * <li>departmentId: 部门 id</li>
+ * <li>departmentIds: 部门 ids</li>
  * <li>jobPosition: jobPosition</li>
  * <li>employeeNo: 工号</li>
  * <li>contactShortToken: 手机短号</li>
@@ -43,7 +45,8 @@ public class AddArchivesEmployeeCommand {
 
     private Date employmentTime;
 
-    private Long departmentId;
+    @ItemType(Long.class)
+    private List<Long> departmentIds;
 
     private String jobPosition;
 
@@ -118,12 +121,12 @@ public class AddArchivesEmployeeCommand {
         this.employmentTime =  ArchivesDateUtil.parseDate(employmentTime);
     }
 
-    public Long getDepartmentId() {
-        return departmentId;
+    public List<Long> getDepartmentIds() {
+        return departmentIds;
     }
 
-    public void setDepartmentId(Long departmentId) {
-        this.departmentId = departmentId;
+    public void setDepartmentIds(List<Long> departmentIds) {
+        this.departmentIds = departmentIds;
     }
 
     public String getJobPosition() {

@@ -598,7 +598,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setOrganizationId(cmd.getOrganizationId());
         addCommand.setContactName(cmd.getContactName());
         addCommand.setGender(cmd.getGender());
-        addCommand.setDepartmentIds(Arrays.asList(cmd.getDepartmentId()));
+        addCommand.setDepartmentIds(cmd.getDepartmentIds());
         addCommand.setContactToken(cmd.getContactToken());
         OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 
@@ -617,7 +617,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             memberDetail.setEnName(cmd.getEnName());
             //  TODO:职位有可能修改
             memberDetail.setJobPosition(cmd.getJobPosition());
-            memberDetail.setDepartment(getDepartmentName(Arrays.asList(cmd.getDepartmentId())));
+            memberDetail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
             memberDetail.setContactShortToken(cmd.getContactShortToken());
             memberDetail.setWorkEmail(cmd.getWorkEmail());
             memberDetail.setContractPartyId(cmd.getContractId());
