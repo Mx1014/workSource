@@ -50,19 +50,30 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     @Autowired
     private UserProvider userProvider;
 
-
-
-
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
         List<BillDetailDTO> dtos = new ArrayList<>();
+        //用时间区分待缴
+        String dateStrEnd = "";
+        if(isOwedBill==1){
+            Calendar c1 = Calendar.getInstance();
+            Calendar c2 = Calendar.getInstance();
+            Calendar c3 = Calendar.getInstance();
+            c2.add(Calendar.DAY_OF_MONTH,15);
+            c3.add(Calendar.MONTH,1);
+            if(c2.compareTo(c3) != -1){
+                c1 = c3;
+            }
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+            dateStrEnd = sdf.format(c1.getTime());
+        }
         //找合计
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
         params.put("payFlag", "0");
         params.put("sdateFrom","");
-        params.put("sdateTo","");
+        params.put("sdateTo",dateStrEnd);
         check(contractNum,"合同编号");
         params.put("contractNum", contractNum);
         String json = generateJson(params);
@@ -100,12 +111,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 //        check(String.valueOf(ownerId),"ownerId");
 //        String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
         String payFlag = "";
-        String dateStrEnd = "";
         if(isOwedBill==1){
             payFlag="0";
-            Calendar c = Calendar.getInstance();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-            dateStrEnd = sdf.format(c.getTime());
         }else if(isOwedBill==0){
             payFlag="";
         }
@@ -140,7 +147,10 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setAmountReceviable(sourceDto.getAmountReceivable()==null?null:new BigDecimal(sourceDto.getAmountReceivable()));
                     dto.setBillId(sourceDto.getBillID());
                     dto.setDateStr(sourceDto.getBillDate());
+                    //将billDate转为yyyy-MM，然后和现在比较，如果大于现在，则status为3即欠费
+                    String billDate = sourceDto.getBillDate();
                     dto.setStatus(sourceDto.getPayFlag());
+
                     String szsm_status = sourceDto.getStatus();
                     if(szsm_status.equals(PaymentStatus.SUSPEND)){
                         dto.setPayStatus(PaymentStatus.IN_PROCESS.getCode());
