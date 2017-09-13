@@ -2575,7 +2575,7 @@ public class PunchServiceImpl implements PunchService {
 		return response;
 	}
 
-	private void createPunchStatisticsBookSheetHead(Sheet sheet ){
+	private void createPunchStatisticsBookSheetHead(Sheet sheet, List<PunchCountDTO> results){
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int i =-1 ;
 
@@ -2583,17 +2583,26 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue("姓名");
 		row.createCell(++i).setCellValue("部门");
 		row.createCell(++i).setCellValue("所属规则");
-		row.createCell(++i).setCellValue("应上班天数");
-		row.createCell(++i).setCellValue("实际上班天数");
+		row.createCell(++i).setCellValue("应打卡天数");
+		row.createCell(++i).setCellValue("正常天数");
+		row.createCell(++i).setCellValue("异常天数");
 		row.createCell(++i).setCellValue("缺勤天数");
 		row.createCell(++i).setCellValue("迟到次数");
 		row.createCell(++i).setCellValue("早退次数");
 		row.createCell(++i).setCellValue("迟到且早退次数");
-		row.createCell(++i).setCellValue("事假天数");
-		row.createCell(++i).setCellValue("病假天数");
-		row.createCell(++i).setCellValue("调休天数");
-		row.createCell(++i).setCellValue("公出天数");
-		row.createCell(++i).setCellValue("加班小时数");
+		if (null != results && results.size() > 0) {
+			if (null != results.get(0).getExts()) {
+				for (ExtDTO ext : results.get(0).getExts()) {
+					row.createCell(++i).setCellValue(ext.getName());
+
+				}
+			}
+		}
+//		row.createCell(++i).setCellValue("事假天数");
+//		row.createCell(++i).setCellValue("病假天数");
+//		row.createCell(++i).setCellValue("调休天数");
+//		row.createCell(++i).setCellValue("公出天数");
+//		row.createCell(++i).setCellValue("加班小时数");
 
 	}
 
@@ -2606,21 +2615,28 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(statistic.getPunchOrgName());
 		row.createCell(++i).setCellValue(statistic.getWorkDayCount());
 		row.createCell(++i).setCellValue(statistic.getWorkCount());
+		row.createCell(++i).setCellValue(statistic.getWorkDayCount() - statistic.getWorkCount());
 		row.createCell(++i).setCellValue(statistic.getUnpunchCount());
 		row.createCell(++i).setCellValue(statistic.getBelateCount());
 		row.createCell(++i).setCellValue(statistic.getLeaveEarlyCount());
 		row.createCell(++i).setCellValue(statistic.getBlandleCount());
-		row.createCell(++i).setCellValue(statistic.getAbsenceCount());
-		row.createCell(++i).setCellValue(statistic.getSickCount());
-		row.createCell(++i).setCellValue(statistic.getExchangeCount());
-		row.createCell(++i).setCellValue(statistic.getOutworkCount());
-		if(statistic.getOverTimeSum()==null || statistic.getOverTimeSum().equals(0L)){
-			row.createCell(++i).setCellValue(0);
+		if (null != statistic.getExts()) {
+			for (ExtDTO ext : statistic.getExts()) {
+				row.createCell(++i).setCellValue(ext.getName());
+
+			}
 		}
-		else{
-			BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
-			row.createCell(++i).setCellValue(b.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
-		}
+//		row.createCell(++i).setCellValue(statistic.getAbsenceCount());
+//		row.createCell(++i).setCellValue(statistic.getSickCount());
+//		row.createCell(++i).setCellValue(statistic.getExchangeCount());
+//		row.createCell(++i).setCellValue(statistic.getOutworkCount());
+//		if(statistic.getOverTimeSum()==null || statistic.getOverTimeSum().equals(0L)){
+//			row.createCell(++i).setCellValue(0);
+//		}
+//		else{
+//			BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
+//			row.createCell(++i).setCellValue(b.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
+//		}
 
 	}
 
@@ -2662,7 +2678,7 @@ public class PunchServiceImpl implements PunchService {
 		rowReminder.createCell(0).setCellValue("统计时间:"+dateSF.get().format(new Date(cmd.getStartDay())) +" ~ "
 				+dateSF.get().format(new Date(cmd.getEndDay())));
 		rowReminder.setRowStyle(titleStyle1);
-		this.createPunchStatisticsBookSheetHead(sheet );
+		this.createPunchStatisticsBookSheetHead(sheet,results );
 		for (PunchCountDTO statistic : results )
 			this.setNewPunchStatisticsBookRow(sheet, statistic);
 		return wb;
