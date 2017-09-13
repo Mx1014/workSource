@@ -10154,7 +10154,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public String verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd) {
         try {
+            LOGGER.debug("email verify enterprise contact, token = {}", cmd.getVerifyToken());
             VerifyEnterpriseContactDTO dto = WebTokenGenerator.getInstance().fromWebToken(cmd.getVerifyToken(), VerifyEnterpriseContactDTO.class);
+            LOGGER.debug("email verify enterprise contact, dto = {}", dto, cmd.getVerifyToken());
             if (dto == null || dto.getEndTime() == null || dto.getEnterpriseId() == null || dto.getUserId() == null) {
                 return configProvider.getValue("auth.fail", "");
             }
@@ -10164,6 +10166,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             approveForEnterpriseContact(cmd2);
             return configProvider.getValue("auth.success", "");
         } catch (Exception e) {
+            LOGGER.error("email verify enterprise contact error, token = {}", cmd.getVerifyToken());
             return configProvider.getValue("auth.fail", "");
         }
     }
