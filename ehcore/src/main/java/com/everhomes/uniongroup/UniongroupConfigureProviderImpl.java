@@ -6,11 +6,8 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationMemberDetailsMapper;
-import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -25,6 +22,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.*;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +40,8 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
     @Autowired
     private SequenceProvider sequenceProvider;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UniongroupConfigureProviderImpl.class);
 
     /**
      * UniongroupConfigures
@@ -214,6 +215,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
             return null;
         }).collect(Collectors.toList());
         EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
+        LOGGER.debug("batchCreateUniongroupMemberDetail data.size()" + list.size());
         dao.insert(list);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhUniongroupMemberDetails.class, null);
     }
@@ -246,7 +248,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(detailId));
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType));
         EhUniongroupMemberDetailsRecord record = query.fetchAny();
-        if(record != null) {
+        if (record != null) {
             return ConvertHelper.convert(record, UniongroupMemberDetail.class);
         }
         return null;
@@ -293,6 +295,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         }
         return null;
     }
+
     @Override
     public void deleteUniongroupMemberDetailsByDetailIds(List<Long> detailIds) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -311,7 +314,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType));
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId));
-        if(groupId!= null && groupId != 0L){
+        if (groupId != null && groupId != 0L) {
             query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
         }
         List<EhUniongroupMemberDetailsRecord> records = query.fetch();
@@ -331,7 +334,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
     //  added by RN
     @Override
-    public Integer countUnionGroupMemberDetailsByOrgId(Integer namespaceId, Long ownerId){
+    public Integer countUnionGroupMemberDetailsByOrgId(Integer namespaceId, Long ownerId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         return context.select(DSL.countDistinct(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID))
                 .from(Tables.EH_UNIONGROUP_MEMBER_DETAILS)
@@ -339,8 +342,9 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
                 .fetchOneInto(Integer.class);
     }
+
     @Override
-    public Integer countUnionGroupMemberDetailsByGroupId(Integer namespaceId, Long groupId){
+    public Integer countUnionGroupMemberDetailsByGroupId(Integer namespaceId, Long groupId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         return context.select(DSL.countDistinct(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID))
                 .from(Tables.EH_UNIONGROUP_MEMBER_DETAILS)
@@ -348,10 +352,11 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
                 .fetchOneInto(Integer.class);
     }
+
     @Override
     public List<Object[]> listUniongroupMemberDetailsCount(Integer namespaceId, List<Long> groupIds, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        return   context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID, DSL.countDistinct(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID))
+        return context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID, DSL.countDistinct(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID))
                 .from(Tables.EH_UNIONGROUP_MEMBER_DETAILS)
                 .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.in(groupIds))
@@ -391,7 +396,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
-    public List<Object[]> listUniongroupMemberGroupIds(Integer namespaceId, Long ownerId){
+    public List<Object[]> listUniongroupMemberGroupIds(Integer namespaceId, Long ownerId) {
         return getReadOnlyContext().select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID,
                 Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID)
                 .from(Tables.EH_UNIONGROUP_MEMBER_DETAILS)
