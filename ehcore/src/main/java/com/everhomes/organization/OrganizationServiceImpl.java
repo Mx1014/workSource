@@ -63,14 +63,13 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
+import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.common.Router;
-import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
-import com.everhomes.rest.community_map.SearchCommunityMapContentsResponse;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
@@ -5476,8 +5475,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public Long updateOrganizationMemberInfoByDetailId(Long detailId) {
-        return null;
+    public Long updateOrganizationMemberInfoByDetailId(UpdateArchivesEmployeeCommand cmd) {
+        this.organizationProvider.updateOrganizationMemberByDetailId(cmd.getDetailId(), cmd.getContactToken(), cmd.getContactName(), cmd.getGender());
+        return cmd.getDetailId();
     }
 
     /**

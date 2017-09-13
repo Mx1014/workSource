@@ -478,5 +478,6 @@ public interface OrganizationProvider {
 	// path查询接口
 	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, List<String> tokens);
 
+	void updateOrganizationMemberByDetailId(Long detailId, String contactToken, String contactName, Byte gender);
 
 }

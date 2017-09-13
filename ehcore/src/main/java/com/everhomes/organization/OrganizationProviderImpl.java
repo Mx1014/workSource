@@ -1,5 +1,6 @@
 // @formatter:off
 package com.everhomes.organization;
+
 import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
@@ -28,35 +29,8 @@ import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhImportFileTasks;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAttachments;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunityRequests;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationDetails;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositionMaps;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositions;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberContracts;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberDetails;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberEducations;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberInsurances;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberLogs;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberProfileLogs;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberWorkExperiences;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
@@ -5409,5 +5383,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 
 		return result;
+	}
+
+	@Override
+	public void updateOrganizationMemberByDetailId(Long detailId, String contactToken, String contactName, Byte gender) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_ORGANIZATION_MEMBERS)
+				.set(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME, contactName)
+				.set(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN, contactToken)
+				.set(Tables.EH_ORGANIZATION_MEMBERS.GENDER, gender)
+				.where(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId)).execute();
 	}
 }
