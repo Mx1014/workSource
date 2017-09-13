@@ -4467,6 +4467,7 @@ public class UserServiceImpl implements UserService {
 				dto.setContactToken(detail.getContactToken());
 				if (!StringUtils.isEmpty(detail.getEmail()))
 					dto.setEmail(detail.getEmail());
+				dto.setRegionCode(detail.getRegionCode());
 				getRelevantContactMoreInfo(dto, detail.getOrganizationId());
 				return dto;
 			}
