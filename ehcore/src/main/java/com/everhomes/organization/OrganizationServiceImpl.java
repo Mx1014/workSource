@@ -5475,6 +5475,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         return response;
     }
 
+    @Override
+    public Long updateOrganizationMemberInfoByDetailId(Long detailId) {
+        return null;
+    }
+
     /**
      * 根据contactToken退出删除organization path路径下的所有机构
      *
