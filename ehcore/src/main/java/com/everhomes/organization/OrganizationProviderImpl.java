@@ -5388,10 +5388,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public void updateOrganizationMemberByDetailId(Long detailId, String contactToken, String contactName, Byte gender) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		context.update(Tables.EH_ORGANIZATION_MEMBERS)
-				.set(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME, contactName)
-				.set(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN, contactToken)
-				.set(Tables.EH_ORGANIZATION_MEMBERS.GENDER, gender)
-				.where(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId)).execute();
+		UpdateQuery<EhOrganizationMembersRecord> query = context.updateQuery(Tables.EH_ORGANIZATION_MEMBERS);
+
+		if (contactToken != null)
+			query.addValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN, contactToken);
+		if (contactName != null)
+			query.addValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME, contactName);
+		if (gender != null)
+			query.addValue(Tables.EH_ORGANIZATION_MEMBERS.GENDER, gender);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId));
+		query.execute();
+
 	}
 }
