@@ -4331,8 +4331,8 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(dto.getUserName());
 		row.createCell(++i).setCellValue(dto.getDeptName());
 		row.createCell(++i).setCellValue(dto.getPunchOrgName());
-		row.createCell(++i).setCellValue((dto.getArriveTime()==null)?"":timeSF.get().format(new Date(dto.getArriveTime())));
-		row.createCell(++i).setCellValue((dto.getLeaveTime()==null)?"":timeSF.get().format(new Date(dto.getLeaveTime())));
+		row.createCell(++i).setCellValue((dto.getArriveTime()==null)?"":timeSF.get().format(convertTime(dto.getArriveTime())));
+		row.createCell(++i).setCellValue((dto.getLeaveTime()==null)?"":timeSF.get().format(convertTime(dto.getLeaveTime())));
 		row.createCell(++i).setCellValue(String.valueOf(dto.getPunchCount()));
 		row.createCell(++i).setCellValue(convertTimeLongToString(dto.getWorkTime()));
 		row.createCell(++i).setCellValue(dto.getStatuString());
