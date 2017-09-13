@@ -4192,6 +4192,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 	public void setPmNotifyParams(SetPmNotifyParamsCommand cmd) {
 		PmNotifyConfigurations configuration = ConvertHelper.convert(cmd, PmNotifyConfigurations.class);
 		configuration.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+		if(cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
+			configuration.setScopeId(cmd.getCommunityId());
+			configuration.setScopeType(PmNotifyScopeType.COMMUNITY.getCode());
+		} else {
+			configuration.setScopeId(cmd.getNamespaceId().longValue());
+			configuration.setScopeType(PmNotifyScopeType.NAMESPACE.getCode());
+		}
 		List<PmNotifyReceiver> receivers = cmd.getReceivers();
 		if(receivers != null && receivers.size() > 0) {
 			PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
