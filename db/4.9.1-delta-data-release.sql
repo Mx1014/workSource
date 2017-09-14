@@ -26,3 +26,6 @@ delete from eh_web_menu_scopes where id=115109; -- 物业缴费/设置
 -- select * from eh_web_menus where name like '%物业缴费%'; by wentian
 -- select * from eh_web_menu_scopes where owner_id=999971 and menu_id in (20410); -- 缴费记录
 delete from eh_web_menu_scopes where id=115108;
+
+-- 增加联系人职位 add by xiongying 20170914
+ALTER TABLE eh_enterprise_customers ADD COLUMN contact_position VARCHAR(64);
