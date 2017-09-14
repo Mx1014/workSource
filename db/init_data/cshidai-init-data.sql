@@ -106,7 +106,7 @@ SET @sa_id = (SELECT MAX(id) FROM `eh_service_alliances`);
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES ((@category_id:=@category_id+1), 'community', 240111044332059898, '0', '服务联盟', '服务联盟', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, 999965, '');
 INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
-    VALUES ((@sa_id := @sa_id + 1), '0', 'organaization', 1035855, '服务联盟', '服务联盟', @category_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    VALUES ((@sa_id := @sa_id + 1), '0', 'organaization', 1024525, '服务联盟', '服务联盟', @category_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES
 	((@item_id := @item_id + 1),999965,0,0,0,'/home','Bizs','服务联盟','服务联盟','cs://1/image/aW1hZ2UvTVRwaVlqUTVNalV4WVRReE9HRXhZMlV6TUdNek5qY3hZek5tWXpFeE5qSTRNQQ',1,1,33,CONCAT('{"type":',@category_id,',"parentId":',@category_id,',"displayType": "grid"}'),5,0,1,1,'1',0,NULL,NULL,NULL,1,'pm_admin',0,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES
@@ -130,7 +130,7 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 -- ---------------自动生成的代码
 
 INSERT INTO `eh_acl_role_assignments` (id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES (114821,'EhOrganizations',1035855,'EhUsers',350687,1001,1,UTC_TIMESTAMP());
+	VALUES (114821,'EhOrganizations',1024525,'EhUsers',350687,1001,1,UTC_TIMESTAMP());
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `area_size`)
 	VALUES (239825274387458688,UUID(),240111044332059898,64,'佛山市',65,'南海区','电子商务大厦-304','电子商务大厦','304','2','0',UTC_TIMESTAMP(),999965,NULL);
@@ -440,15 +440,15 @@ INSERT INTO `eh_configurations` ( `id`, `name`, `value`, `description`, `namespa
 INSERT INTO `eh_configurations` ( `id`, `name`, `value`, `description`, `namespace_id`, `display_name` )
 	VALUES (1777,'pmtask.handler-999965','flow','0',999965,'物业报修工作流');
 
-INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
-	VALUES (191711,UUID(),999965,2,'EhGroups',1042112,'广东百花物业管理有限公司论坛',NULL,'0','0',UTC_TIMESTAMP(),UTC_TIMESTAMP());
+  INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
+	VALUES (191711,UUID(),999965,2,'EhGroups',1004280,'广东百花物业管理有限公司论坛',NULL,'0','0',UTC_TIMESTAMP(),UTC_TIMESTAMP());
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
 	VALUES (191712,UUID(),999965,2,'',0,'C时代社区论坛',NULL,'0','0',UTC_TIMESTAMP(),UTC_TIMESTAMP());
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
 	VALUES (191713,UUID(),999965,2,'',0,'C时代意见反馈论坛',NULL,'0','0',UTC_TIMESTAMP(),UTC_TIMESTAMP());
 
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES (1042112,UUID(),'广东百花物业管理有限公司','广东百花物业管理有限公司',1,1,1035855,'enterprise',1,1,UTC_TIMESTAMP(),UTC_TIMESTAMP(),191711,1,999965);
+	VALUES (1004280,UUID(),'广东百花物业管理有限公司','广东百花物业管理有限公司',1,1,1024525,'enterprise',1,1,UTC_TIMESTAMP(),UTC_TIMESTAMP(),191711,1,999965);
 
 INSERT INTO `eh_namespaces` (`id`, `name`)
 	VALUES (999965,'凯泰C时代');
@@ -460,300 +460,302 @@ INSERT INTO `eh_namespace_resources` (`id`, `namespace_id`, `resource_type`, `re
 	VALUES (19980,999965,'COMMUNITY',240111044332059898,UTC_TIMESTAMP());
 
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`)
-	VALUES (1035855,0,'PM','广东百花物业管理有限公司','广东百花物业管理有限公司成立于1996年，秉承“创新励行，精细至善”的服务宗旨，凭借多年的品牌、人才、管理经验的厚重积累，一直深耕于物业管理的专业领域。','/1035855',1,2,'ENTERPRISE',999965,1042112);
+	VALUES (1024525,0,'PM','广东百花物业管理有限公司','广东百花物业管理有限公司成立于1996年，秉承“创新励行，精细至善”的服务宗旨，凭借多年的品牌、人才、管理经验的厚重积累，一直深耕于物业管理的专业领域。','/1024525',1,2,'ENTERPRISE',999965,1004280);
 
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40680,1035855,240111044332059898,239825274387458687,'电子商务大厦-303',2);
+	VALUES (40680,1024525,240111044332059898,239825274387458687,'电子商务大厦-303',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40712,1035855,240111044332059898,239825274387458719,'电子商务大厦-606',2);
+	VALUES (40712,1024525,240111044332059898,239825274387458719,'电子商务大厦-606',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40744,1035855,240111044332059898,239825274387458751,'盈创大厦-109',2);
+	VALUES (40744,1024525,240111044332059898,239825274387458751,'盈创大厦-109',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40776,1035855,240111044332059898,239825274387458783,'盈创大厦-704',2);
+	VALUES (40776,1024525,240111044332059898,239825274387458783,'盈创大厦-704',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40681,1035855,240111044332059898,239825274387458688,'电子商务大厦-304',2);
+	VALUES (40681,1024525,240111044332059898,239825274387458688,'电子商务大厦-304',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40713,1035855,240111044332059898,239825274387458720,'电子商务大厦-607',2);
+	VALUES (40713,1024525,240111044332059898,239825274387458720,'电子商务大厦-607',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40745,1035855,240111044332059898,239825274387458752,'盈创大厦-110',2);
+	VALUES (40745,1024525,240111044332059898,239825274387458752,'盈创大厦-110',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40777,1035855,240111044332059898,239825274387458784,'盈创大厦-705',2);
+	VALUES (40777,1024525,240111044332059898,239825274387458784,'盈创大厦-705',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40682,1035855,240111044332059898,239825274387458689,'电子商务大厦-305',2);
+	VALUES (40682,1024525,240111044332059898,239825274387458689,'电子商务大厦-305',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40714,1035855,240111044332059898,239825274387458721,'电子商务大厦-608',2);
+	VALUES (40714,1024525,240111044332059898,239825274387458721,'电子商务大厦-608',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40746,1035855,240111044332059898,239825274387458753,'盈创大厦-111',2);
+	VALUES (40746,1024525,240111044332059898,239825274387458753,'盈创大厦-111',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40778,1035855,240111044332059898,239825274387458785,'盈创大厦-706',2);
+	VALUES (40778,1024525,240111044332059898,239825274387458785,'盈创大厦-706',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40683,1035855,240111044332059898,239825274387458690,'电子商务大厦-306',2);
+	VALUES (40683,1024525,240111044332059898,239825274387458690,'电子商务大厦-306',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40715,1035855,240111044332059898,239825274387458722,'电子商务大厦-609',2);
+	VALUES (40715,1024525,240111044332059898,239825274387458722,'电子商务大厦-609',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40747,1035855,240111044332059898,239825274387458754,'盈创大厦-112',2);
+	VALUES (40747,1024525,240111044332059898,239825274387458754,'盈创大厦-112',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40779,1035855,240111044332059898,239825274387458786,'盈创大厦-707',2);
+	VALUES (40779,1024525,240111044332059898,239825274387458786,'盈创大厦-707',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40684,1035855,240111044332059898,239825274387458691,'电子商务大厦-307',2);
+	VALUES (40684,1024525,240111044332059898,239825274387458691,'电子商务大厦-307',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40716,1035855,240111044332059898,239825274387458723,'电子商务大厦-610',2);
+	VALUES (40716,1024525,240111044332059898,239825274387458723,'电子商务大厦-610',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40748,1035855,240111044332059898,239825274387458755,'盈创大厦-113',2);
+	VALUES (40748,1024525,240111044332059898,239825274387458755,'盈创大厦-113',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40780,1035855,240111044332059898,239825274387458787,'盈创大厦-708',2);
+	VALUES (40780,1024525,240111044332059898,239825274387458787,'盈创大厦-708',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40685,1035855,240111044332059898,239825274387458692,'电子商务大厦-308',2);
+	VALUES (40685,1024525,240111044332059898,239825274387458692,'电子商务大厦-308',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40717,1035855,240111044332059898,239825274387458724,'电子商务大厦-701',2);
+	VALUES (40717,1024525,240111044332059898,239825274387458724,'电子商务大厦-701',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40749,1035855,240111044332059898,239825274387458756,'盈创大厦-114',2);
+	VALUES (40749,1024525,240111044332059898,239825274387458756,'盈创大厦-114',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40781,1035855,240111044332059898,239825274387458788,'盈创大厦-801',2);
+	VALUES (40781,1024525,240111044332059898,239825274387458788,'盈创大厦-801',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40686,1035855,240111044332059898,239825274387458693,'电子商务大厦-309',2);
+	VALUES (40686,1024525,240111044332059898,239825274387458693,'电子商务大厦-309',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40718,1035855,240111044332059898,239825274387458725,'电子商务大厦-702',2);
+	VALUES (40718,1024525,240111044332059898,239825274387458725,'电子商务大厦-702',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40750,1035855,240111044332059898,239825274387458757,'盈创大厦-115',2);
+	VALUES (40750,1024525,240111044332059898,239825274387458757,'盈创大厦-115',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40782,1035855,240111044332059898,239825274387458789,'盈创大厦-802',2);
+	VALUES (40782,1024525,240111044332059898,239825274387458789,'盈创大厦-802',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40687,1035855,240111044332059898,239825274387458694,'电子商务大厦-401',2);
+	VALUES (40687,1024525,240111044332059898,239825274387458694,'电子商务大厦-401',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40719,1035855,240111044332059898,239825274387458726,'电子商务大厦-703',2);
+	VALUES (40719,1024525,240111044332059898,239825274387458726,'电子商务大厦-703',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40751,1035855,240111044332059898,239825274387458758,'盈创大厦-116',2);
+	VALUES (40751,1024525,240111044332059898,239825274387458758,'盈创大厦-116',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40783,1035855,240111044332059898,239825274387458790,'盈创大厦-803',2);
+	VALUES (40783,1024525,240111044332059898,239825274387458790,'盈创大厦-803',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40688,1035855,240111044332059898,239825274387458695,'电子商务大厦-402',2);
+	VALUES (40688,1024525,240111044332059898,239825274387458695,'电子商务大厦-402',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40720,1035855,240111044332059898,239825274387458727,'电子商务大厦-704',2);
+	VALUES (40720,1024525,240111044332059898,239825274387458727,'电子商务大厦-704',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40752,1035855,240111044332059898,239825274387458759,'盈创大厦-117',2);
+	VALUES (40752,1024525,240111044332059898,239825274387458759,'盈创大厦-117',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40784,1035855,240111044332059898,239825274387458791,'盈创大厦-804',2);
+	VALUES (40784,1024525,240111044332059898,239825274387458791,'盈创大厦-804',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40689,1035855,240111044332059898,239825274387458696,'电子商务大厦-403',2);
+	VALUES (40689,1024525,240111044332059898,239825274387458696,'电子商务大厦-403',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40721,1035855,240111044332059898,239825274387458728,'电子商务大厦-705',2);
+	VALUES (40721,1024525,240111044332059898,239825274387458728,'电子商务大厦-705',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40753,1035855,240111044332059898,239825274387458760,'盈创大厦-118',2);
+	VALUES (40753,1024525,240111044332059898,239825274387458760,'盈创大厦-118',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40785,1035855,240111044332059898,239825274387458792,'盈创大厦-805',2);
+	VALUES (40785,1024525,240111044332059898,239825274387458792,'盈创大厦-805',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40690,1035855,240111044332059898,239825274387458697,'电子商务大厦-404',2);
+	VALUES (40690,1024525,240111044332059898,239825274387458697,'电子商务大厦-404',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40722,1035855,240111044332059898,239825274387458729,'电子商务大厦-706',2);
+	VALUES (40722,1024525,240111044332059898,239825274387458729,'电子商务大厦-706',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40754,1035855,240111044332059898,239825274387458761,'盈创大厦-119',2);
+	VALUES (40754,1024525,240111044332059898,239825274387458761,'盈创大厦-119',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40786,1035855,240111044332059898,239825274387458793,'盈创大厦-806',2);
+	VALUES (40786,1024525,240111044332059898,239825274387458793,'盈创大厦-806',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40691,1035855,240111044332059898,239825274387458698,'电子商务大厦-405',2);
+	VALUES (40691,1024525,240111044332059898,239825274387458698,'电子商务大厦-405',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40723,1035855,240111044332059898,239825274387458730,'电子商务大厦-707',2);
+	VALUES (40723,1024525,240111044332059898,239825274387458730,'电子商务大厦-707',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40755,1035855,240111044332059898,239825274387458762,'盈创大厦-120',2);
+	VALUES (40755,1024525,240111044332059898,239825274387458762,'盈创大厦-120',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40787,1035855,240111044332059898,239825274387458794,'盈创大厦-807',2);
+	VALUES (40787,1024525,240111044332059898,239825274387458794,'盈创大厦-807',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40660,1035855,240111044332059898,239825274387458667,'电子商务大厦-101',2);
+	VALUES (40660,1024525,240111044332059898,239825274387458667,'电子商务大厦-101',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40692,1035855,240111044332059898,239825274387458699,'电子商务大厦-406',2);
+	VALUES (40692,1024525,240111044332059898,239825274387458699,'电子商务大厦-406',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40724,1035855,240111044332059898,239825274387458731,'电子商务大厦-708',2);
+	VALUES (40724,1024525,240111044332059898,239825274387458731,'电子商务大厦-708',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40756,1035855,240111044332059898,239825274387458763,'盈创大厦-121',2);
+	VALUES (40756,1024525,240111044332059898,239825274387458763,'盈创大厦-121',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40788,1035855,240111044332059898,239825274387458795,'盈创大厦-808',2);
+	VALUES (40788,1024525,240111044332059898,239825274387458795,'盈创大厦-808',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40661,1035855,240111044332059898,239825274387458668,'电子商务大厦-102',2);
+	VALUES (40661,1024525,240111044332059898,239825274387458668,'电子商务大厦-102',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40693,1035855,240111044332059898,239825274387458700,'电子商务大厦-407',2);
+	VALUES (40693,1024525,240111044332059898,239825274387458700,'电子商务大厦-407',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40725,1035855,240111044332059898,239825274387458732,'电子商务大厦-709',2);
+	VALUES (40725,1024525,240111044332059898,239825274387458732,'电子商务大厦-709',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40757,1035855,240111044332059898,239825274387458764,'盈创大厦-122',2);
+	VALUES (40757,1024525,240111044332059898,239825274387458764,'盈创大厦-122',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40789,1035855,240111044332059898,239825274387458796,'盈创大厦-809',2);
+	VALUES (40789,1024525,240111044332059898,239825274387458796,'盈创大厦-809',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40662,1035855,240111044332059898,239825274387458669,'电子商务大厦-103',2);
+	VALUES (40662,1024525,240111044332059898,239825274387458669,'电子商务大厦-103',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40694,1035855,240111044332059898,239825274387458701,'电子商务大厦-408',2);
+	VALUES (40694,1024525,240111044332059898,239825274387458701,'电子商务大厦-408',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40726,1035855,240111044332059898,239825274387458733,'电子商务大厦-710',2);
+	VALUES (40726,1024525,240111044332059898,239825274387458733,'电子商务大厦-710',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40758,1035855,240111044332059898,239825274387458765,'盈创大厦-123',2);
+	VALUES (40758,1024525,240111044332059898,239825274387458765,'盈创大厦-123',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40790,1035855,240111044332059898,239825274387458797,'盈创大厦-810',2);
+	VALUES (40790,1024525,240111044332059898,239825274387458797,'盈创大厦-810',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40663,1035855,240111044332059898,239825274387458670,'电子商务大厦-104',2);
+	VALUES (40663,1024525,240111044332059898,239825274387458670,'电子商务大厦-104',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40695,1035855,240111044332059898,239825274387458702,'电子商务大厦-409',2);
+	VALUES (40695,1024525,240111044332059898,239825274387458702,'电子商务大厦-409',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40727,1035855,240111044332059898,239825274387458734,'电子商务大厦-711',2);
+	VALUES (40727,1024525,240111044332059898,239825274387458734,'电子商务大厦-711',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40759,1035855,240111044332059898,239825274387458766,'盈创大厦-124',2);
+	VALUES (40759,1024525,240111044332059898,239825274387458766,'盈创大厦-124',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40791,1035855,240111044332059898,239825274387458798,'盈创大厦-811',2);
+	VALUES (40791,1024525,240111044332059898,239825274387458798,'盈创大厦-811',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40664,1035855,240111044332059898,239825274387458671,'电子商务大厦-105',2);
+	VALUES (40664,1024525,240111044332059898,239825274387458671,'电子商务大厦-105',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40696,1035855,240111044332059898,239825274387458703,'电子商务大厦-410',2);
+	VALUES (40696,1024525,240111044332059898,239825274387458703,'电子商务大厦-410',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40728,1035855,240111044332059898,239825274387458735,'电子商务大厦-801',2);
+	VALUES (40728,1024525,240111044332059898,239825274387458735,'电子商务大厦-801',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40760,1035855,240111044332059898,239825274387458767,'盈创大厦-125',2);
+	VALUES (40760,1024525,240111044332059898,239825274387458767,'盈创大厦-125',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40792,1035855,240111044332059898,239825274387458799,'盈创大厦-812',2);
+	VALUES (40792,1024525,240111044332059898,239825274387458799,'盈创大厦-812',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40665,1035855,240111044332059898,239825274387458672,'电子商务大厦-106',2);
+	VALUES (40665,1024525,240111044332059898,239825274387458672,'电子商务大厦-106',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40697,1035855,240111044332059898,239825274387458704,'电子商务大厦-411',2);
+	VALUES (40697,1024525,240111044332059898,239825274387458704,'电子商务大厦-411',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40729,1035855,240111044332059898,239825274387458736,'电子商务大厦-802',2);
+	VALUES (40729,1024525,240111044332059898,239825274387458736,'电子商务大厦-802',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40761,1035855,240111044332059898,239825274387458768,'盈创大厦-126',2);
+	VALUES (40761,1024525,240111044332059898,239825274387458768,'盈创大厦-126',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40793,1035855,240111044332059898,239825274387458800,'盈创大厦-813',2);
+	VALUES (40793,1024525,240111044332059898,239825274387458800,'盈创大厦-813',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40666,1035855,240111044332059898,239825274387458673,'电子商务大厦-107',2);
+	VALUES (40666,1024525,240111044332059898,239825274387458673,'电子商务大厦-107',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40698,1035855,240111044332059898,239825274387458705,'电子商务大厦-412',2);
+	VALUES (40698,1024525,240111044332059898,239825274387458705,'电子商务大厦-412',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40730,1035855,240111044332059898,239825274387458737,'电子商务大厦-803',2);
+	VALUES (40730,1024525,240111044332059898,239825274387458737,'电子商务大厦-803',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40762,1035855,240111044332059898,239825274387458769,'盈创大厦-601',2);
+	VALUES (40762,1024525,240111044332059898,239825274387458769,'盈创大厦-601',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40794,1035855,240111044332059898,239825274387458801,'盈创大厦-901',2);
+	VALUES (40794,1024525,240111044332059898,239825274387458801,'盈创大厦-901',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40667,1035855,240111044332059898,239825274387458674,'电子商务大厦-108',2);
+	VALUES (40667,1024525,240111044332059898,239825274387458674,'电子商务大厦-108',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40699,1035855,240111044332059898,239825274387458706,'电子商务大厦-413',2);
+	VALUES (40699,1024525,240111044332059898,239825274387458706,'电子商务大厦-413',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40731,1035855,240111044332059898,239825274387458738,'电子商务大厦-804',2);
+	VALUES (40731,1024525,240111044332059898,239825274387458738,'电子商务大厦-804',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40763,1035855,240111044332059898,239825274387458770,'盈创大厦-602',2);
+	VALUES (40763,1024525,240111044332059898,239825274387458770,'盈创大厦-602',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40795,1035855,240111044332059898,239825274387458802,'盈创大厦-902',2);
+	VALUES (40795,1024525,240111044332059898,239825274387458802,'盈创大厦-902',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40668,1035855,240111044332059898,239825274387458675,'电子商务大厦-201',2);
+	VALUES (40668,1024525,240111044332059898,239825274387458675,'电子商务大厦-201',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40700,1035855,240111044332059898,239825274387458707,'电子商务大厦-414',2);
+	VALUES (40700,1024525,240111044332059898,239825274387458707,'电子商务大厦-414',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40732,1035855,240111044332059898,239825274387458739,'电子商务大厦-805',2);
+	VALUES (40732,1024525,240111044332059898,239825274387458739,'电子商务大厦-805',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40764,1035855,240111044332059898,239825274387458771,'盈创大厦-603',2);
+	VALUES (40764,1024525,240111044332059898,239825274387458771,'盈创大厦-603',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40796,1035855,240111044332059898,239825274387458803,'盈创大厦-903',2);
+	VALUES (40796,1024525,240111044332059898,239825274387458803,'盈创大厦-903',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40669,1035855,240111044332059898,239825274387458676,'电子商务大厦-202',2);
+	VALUES (40669,1024525,240111044332059898,239825274387458676,'电子商务大厦-202',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40701,1035855,240111044332059898,239825274387458708,'电子商务大厦-415',2);
+	VALUES (40701,1024525,240111044332059898,239825274387458708,'电子商务大厦-415',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40733,1035855,240111044332059898,239825274387458740,'电子商务大厦-806',2);
+	VALUES (40733,1024525,240111044332059898,239825274387458740,'电子商务大厦-806',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40765,1035855,240111044332059898,239825274387458772,'盈创大厦-604',2);
+	VALUES (40765,1024525,240111044332059898,239825274387458772,'盈创大厦-604',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40797,1035855,240111044332059898,239825274387458804,'盈创大厦-904',2);
+	VALUES (40797,1024525,240111044332059898,239825274387458804,'盈创大厦-904',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40670,1035855,240111044332059898,239825274387458677,'电子商务大厦-203',2);
+	VALUES (40670,1024525,240111044332059898,239825274387458677,'电子商务大厦-203',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40702,1035855,240111044332059898,239825274387458709,'电子商务大厦-416',2);
+	VALUES (40702,1024525,240111044332059898,239825274387458709,'电子商务大厦-416',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40734,1035855,240111044332059898,239825274387458741,'电子商务大厦-807',2);
+	VALUES (40734,1024525,240111044332059898,239825274387458741,'电子商务大厦-807',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40766,1035855,240111044332059898,239825274387458773,'盈创大厦-605',2);
+	VALUES (40766,1024525,240111044332059898,239825274387458773,'盈创大厦-605',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40798,1035855,240111044332059898,239825274387458805,'盈创大厦-905',2);
+	VALUES (40798,1024525,240111044332059898,239825274387458805,'盈创大厦-905',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40671,1035855,240111044332059898,239825274387458678,'电子商务大厦-204',2);
+	VALUES (40671,1024525,240111044332059898,239825274387458678,'电子商务大厦-204',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40703,1035855,240111044332059898,239825274387458710,'电子商务大厦-417',2);
+	VALUES (40703,1024525,240111044332059898,239825274387458710,'电子商务大厦-417',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40735,1035855,240111044332059898,239825274387458742,'电子商务大厦-808',2);
+	VALUES (40735,1024525,240111044332059898,239825274387458742,'电子商务大厦-808',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40767,1035855,240111044332059898,239825274387458774,'盈创大厦-606',2);
+	VALUES (40767,1024525,240111044332059898,239825274387458774,'盈创大厦-606',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40799,1035855,240111044332059898,239825274387458806,'盈创大厦-906',2);
+	VALUES (40799,1024525,240111044332059898,239825274387458806,'盈创大厦-906',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40672,1035855,240111044332059898,239825274387458679,'电子商务大厦-205',2);
+	VALUES (40672,1024525,240111044332059898,239825274387458679,'电子商务大厦-205',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40704,1035855,240111044332059898,239825274387458711,'电子商务大厦-418',2);
+	VALUES (40704,1024525,240111044332059898,239825274387458711,'电子商务大厦-418',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40736,1035855,240111044332059898,239825274387458743,'盈创大厦-101',2);
+	VALUES (40736,1024525,240111044332059898,239825274387458743,'盈创大厦-101',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40768,1035855,240111044332059898,239825274387458775,'盈创大厦-607',2);
+	VALUES (40768,1024525,240111044332059898,239825274387458775,'盈创大厦-607',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40800,1035855,240111044332059898,239825274387458807,'盈创大厦-907',2);
+	VALUES (40800,1024525,240111044332059898,239825274387458807,'盈创大厦-907',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40673,1035855,240111044332059898,239825274387458680,'电子商务大厦-206',2);
+	VALUES (40673,1024525,240111044332059898,239825274387458680,'电子商务大厦-206',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40705,1035855,240111044332059898,239825274387458712,'电子商务大厦-419',2);
+	VALUES (40705,1024525,240111044332059898,239825274387458712,'电子商务大厦-419',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40737,1035855,240111044332059898,239825274387458744,'盈创大厦-102',2);
+	VALUES (40737,1024525,240111044332059898,239825274387458744,'盈创大厦-102',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40769,1035855,240111044332059898,239825274387458776,'盈创大厦-608',2);
+	VALUES (40769,1024525,240111044332059898,239825274387458776,'盈创大厦-608',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40801,1035855,240111044332059898,239825274387458808,'盈创大厦-908',2);
+	VALUES (40801,1024525,240111044332059898,239825274387458808,'盈创大厦-908',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40674,1035855,240111044332059898,239825274387458681,'电子商务大厦-207',2);
+	VALUES (40674,1024525,240111044332059898,239825274387458681,'电子商务大厦-207',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40706,1035855,240111044332059898,239825274387458713,'电子商务大厦-501',2);
+	VALUES (40706,1024525,240111044332059898,239825274387458713,'电子商务大厦-501',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40738,1035855,240111044332059898,239825274387458745,'盈创大厦-103',2);
+	VALUES (40738,1024525,240111044332059898,239825274387458745,'盈创大厦-103',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40770,1035855,240111044332059898,239825274387458777,'盈创大厦-609',2);
+	VALUES (40770,1024525,240111044332059898,239825274387458777,'盈创大厦-609',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40802,1035855,240111044332059898,239825274387458809,'盈创大厦-909',2);
+	VALUES (40802,1024525,240111044332059898,239825274387458809,'盈创大厦-909',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40675,1035855,240111044332059898,239825274387458682,'电子商务大厦-208',2);
+	VALUES (40675,1024525,240111044332059898,239825274387458682,'电子商务大厦-208',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40707,1035855,240111044332059898,239825274387458714,'电子商务大厦-601',2);
+	VALUES (40707,1024525,240111044332059898,239825274387458714,'电子商务大厦-601',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40739,1035855,240111044332059898,239825274387458746,'盈创大厦-104',2);
+	VALUES (40739,1024525,240111044332059898,239825274387458746,'盈创大厦-104',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40771,1035855,240111044332059898,239825274387458778,'盈创大厦-610',2);
+	VALUES (40771,1024525,240111044332059898,239825274387458778,'盈创大厦-610',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40676,1035855,240111044332059898,239825274387458683,'电子商务大厦-209',2);
+	VALUES (40676,1024525,240111044332059898,239825274387458683,'电子商务大厦-209',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40708,1035855,240111044332059898,239825274387458715,'电子商务大厦-602',2);
+	VALUES (40708,1024525,240111044332059898,239825274387458715,'电子商务大厦-602',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40740,1035855,240111044332059898,239825274387458747,'盈创大厦-105',2);
+	VALUES (40740,1024525,240111044332059898,239825274387458747,'盈创大厦-105',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40772,1035855,240111044332059898,239825274387458779,'盈创大厦-611',2);
+	VALUES (40772,1024525,240111044332059898,239825274387458779,'盈创大厦-611',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40677,1035855,240111044332059898,239825274387458684,'电子商务大厦-210',2);
+	VALUES (40677,1024525,240111044332059898,239825274387458684,'电子商务大厦-210',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40709,1035855,240111044332059898,239825274387458716,'电子商务大厦-603',2);
+	VALUES (40709,1024525,240111044332059898,239825274387458716,'电子商务大厦-603',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40741,1035855,240111044332059898,239825274387458748,'盈创大厦-106',2);
+	VALUES (40741,1024525,240111044332059898,239825274387458748,'盈创大厦-106',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40773,1035855,240111044332059898,239825274387458780,'盈创大厦-701',2);
+	VALUES (40773,1024525,240111044332059898,239825274387458780,'盈创大厦-701',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40678,1035855,240111044332059898,239825274387458685,'电子商务大厦-301',2);
+	VALUES (40678,1024525,240111044332059898,239825274387458685,'电子商务大厦-301',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40710,1035855,240111044332059898,239825274387458717,'电子商务大厦-604',2);
+	VALUES (40710,1024525,240111044332059898,239825274387458717,'电子商务大厦-604',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40742,1035855,240111044332059898,239825274387458749,'盈创大厦-107',2);
+	VALUES (40742,1024525,240111044332059898,239825274387458749,'盈创大厦-107',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40774,1035855,240111044332059898,239825274387458781,'盈创大厦-702',2);
+	VALUES (40774,1024525,240111044332059898,239825274387458781,'盈创大厦-702',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40679,1035855,240111044332059898,239825274387458686,'电子商务大厦-302',2);
+	VALUES (40679,1024525,240111044332059898,239825274387458686,'电子商务大厦-302',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40711,1035855,240111044332059898,239825274387458718,'电子商务大厦-605',2);
+	VALUES (40711,1024525,240111044332059898,239825274387458718,'电子商务大厦-605',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40743,1035855,240111044332059898,239825274387458750,'盈创大厦-108',2);
+	VALUES (40743,1024525,240111044332059898,239825274387458750,'盈创大厦-108',2);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES (40775,1035855,240111044332059898,239825274387458782,'盈创大厦-703',2);
+	VALUES (40775,1024525,240111044332059898,239825274387458782,'盈创大厦-703',2);
 
+SET @req_id = (SELECT  MAX(id) from eh_organization_community_requests);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES (1152670,240111044332059898,'organization',1035855,3,0,UTC_TIMESTAMP());
+	VALUES ((@req_id := @req_id + 1),240111044332059898,'organization',1024525,3,0,UTC_TIMESTAMP());
 
+SET @member_id = (SELECT  MAX(id) from eh_organization_members);
 INSERT INTO `eh_organization_members` (id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES (2166992,1035855,'USER',350687,'manager','孔文豪',0,'15815656103',3,999965);
+	VALUES ((@member_id := @member_id + 1),1024525,'USER',350687,'manager','孔文豪',0,'15815656103',3,999965);
 
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`)
 	VALUES (63,0,'广东','GUANGDONG','GD','/广东',1,1,NULL,NULL,2,0,999965);
@@ -767,7 +769,7 @@ INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, 
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`)
-VALUES((@acl_id := @acl_id + 1),'EhOrganizations','1035855','1','10','350687','0','350687',now(),'999965','EhUsers','admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+VALUES((@acl_id := @acl_id + 1),'EhOrganizations','1024525','1','10','350687','0','350687',now(),'999965','EhUsers','admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
 	VALUES (323210,350687,0,'15815656103',NULL,3,UTC_TIMESTAMP(),999965);
@@ -923,5 +925,13 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `ow
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES (3045,31000,NULL,'EhNamespaces',999965,2);
 INSERT INTO `eh_organization_communities` (`organization_id`, `community_id`)
-	VALUES (1035855,240111044332059898);
+	VALUES (1024525,240111044332059898);
 
+-- beta执行
+set @group_id = 1004280; -- 1042112
+set @organization_id = 1024525; -- 1035855
+update eh_forums set owner_id = @group_id WHERE id = 191711;
+
+update eh_service_alliances SET owner_id = @organization_id WHERE type  = (SELECT id from eh_service_alliance_categories WHERE namespace_id = 999965) AND `name` = '服务联盟';
+update eh_acl_role_assignments SET owner_id = @organization_id WHERE id = 114821;
+update eh_organization_address_mappings SET organization_id = @organization_id WHERE id in (40680,40712,40744,40776,40681,40713,40745,40777,40682,40714,40746,40778,40683,40715,40747,40779,40684,40716,40748,40780,40685,40717,40749,40781,40686,40718,40750,40782,40687,40719,40751,40783,40688,40720,40752,40784,40689,40721,40753,40785,40690,40722,40754,40786,40691,40723,40755,40787,40660,40692,40724,40756,40788,40661,40693,40725,40757,40789,40662,40694,40726,40758,40790,40663,40695,40727,40759,40791,40664,40696,40728,40760,40792,40665,40697,40729,40761,40793,40666,40698,40730,40762,40794,40667,40699,40731,40763,40795,40668,40700,40732,40764,40796,40669,40701,40733,40765,40797,40670,40702,40734,40766,40798,40671,40703,40735,40767,40799,40672,40704,40736,40768,40800,40673,40705,40737,40769,40801,40674,40706,40738,40770,40802,40675,40707,40739,40771,40676,40708,40740,40772,40677,40709,40741,40773,40678,40710,40742,40774,40679,40711,40743,40775);
