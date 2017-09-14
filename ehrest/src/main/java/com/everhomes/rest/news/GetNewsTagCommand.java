@@ -11,7 +11,7 @@ public class GetNewsTagCommand {
     @NotNull
     private Long ownerId;
     private Byte isSearch;
-    private Integer pageAnchor;
+    private Long pageAnchor;
     private Integer pageSize;
 
     public String getOwnerType() {
@@ -30,11 +30,11 @@ public class GetNewsTagCommand {
         this.ownerId = ownerId;
     }
 
-    public Integer getPageAnchor() {
+    public Long getPageAnchor() {
         return pageAnchor;
     }
 
-    public void setPageAnchor(Integer pageAnchor) {
+    public void setPageAnchor(Long pageAnchor) {
         this.pageAnchor = pageAnchor;
     }
 

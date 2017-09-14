@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface NewsProvider {
 
-	void createNews(News news);
+	Long createNews(News news);
 
 	void updateNews(News news);
 
@@ -32,4 +32,18 @@ public interface NewsProvider {
 	void createNewsCategory(NewsCategory newsCategory);
 
 	void updateNewsCategory(NewsCategory newsCategory);
+
+	Long createNewsTag(NewsTag newsTag);
+
+	void createNewsTagVals(NewsTagVals newsTagVals);
+
+	List<NewsTagVals> listNewsTagVals(Long newsId);
+
+	NewsTag findNewsTagById(Long id);
+
+	void updateNewsTag(NewsTag newsTag);
+
+	List<NewsTag> listNewsTag(String ownerType,Long ownerId,Byte isSearch,Long parentId,Long pageAnchor,Integer pageSize);
+
+	void increaseViewCount(Long newsId);
 }

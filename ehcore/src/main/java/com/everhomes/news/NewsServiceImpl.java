@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationCommunityRequest;
@@ -144,7 +145,7 @@ public class NewsServiceImpl implements NewsService {
 		News news = processNewsCommand(userId, namespaceId, cmd);
 
 		dbProvider.execute((TransactionStatus status) -> {
-			newsProvider.createNews(news);
+			Long id = newsProvider.createNews(news);
 
 			if (null != cmd.getCommunityIds()) {
 				cmd.getCommunityIds().forEach(m -> {
@@ -154,6 +155,13 @@ public class NewsServiceImpl implements NewsService {
 					newsProvider.createNewsCommunity(newsCommunity);
 				});
 			}
+			if (null != cmd.getNewsTagVals())
+				cmd.getNewsTagVals().forEach(r->{
+					NewsTagVals newsTagVals = new NewsTagVals();
+					newsTagVals.setNewsTagId(r.getNewsTagId());
+					newsTagVals.setNewsId(id);
+					newsProvider.createNewsTagVals(newsTagVals);
+				});
 			return null;
 		});
 
@@ -583,15 +591,20 @@ public class NewsServiceImpl implements NewsService {
 	public GetNewsDetailInfoResponse getNewsDetailInfo(GetNewsDetailInfoCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
-		final List<News> list = new ArrayList<>();
-		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(() -> {
-			News news = findNewsById(userId, newsId);
-			news.setViewCount(news.getViewCount() + 1L);
-			newsProvider.updateNews(news);
-			list.add(news);
-			return null;
+
+		News news = findNewsById(userId, newsId);
+		newsProvider.increaseViewCount(newsId);
+		news.setViewCount(news.getViewCount()+1L);
+
+		List<NewsTagVals> list = newsProvider.listNewsTagVals(newsId);
+		list.forEach(r->{
+			NewsTag newsTag = newsProvider.findNewsTagById(r.getNewsTagId());
+			r.setValue(newsTag.getValue());
+			r.setName(newsProvider.findNewsTagById(newsTag.getParentId()).getValue());
 		});
-		return convertNewsToNewsDTO(userId, list.get(0));
+		GetNewsDetailInfoResponse response = convertNewsToNewsDTO(userId, news);
+		response.setTags(list.stream().map(r->ConvertHelper.convert(r,NewsTagValsDTO.class)).collect(Collectors.toList()));
+		return response;
 	}
 
 	private GetNewsDetailInfoResponse convertNewsToNewsDTO(Long userId, News news) {
@@ -977,6 +990,48 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 	@Override
+	public void updateNewsTag(UpdateNewsTagCommand cmd) {
+		NewsTag parentTag = ConvertHelper.convert(cmd,NewsTag.class);
+		dbProvider.execute((TransactionStatus status) -> {
+			Long parentId = 0l;
+			if (parentTag.getId() == 0){
+				parentId = newsProvider.createNewsTag(parentTag);
+			}else{
+				parentId = parentTag.getId();
+				newsProvider.updateNewsTag(parentTag);
+			}
+
+			List<NewsTagDTO> tags = cmd.getTags();
+			for (NewsTagDTO dto : tags){
+				NewsTag tag = ConvertHelper.convert(dto,NewsTag.class);
+				tag.setParentId(parentId);
+				if (tag.getId() == 0)
+					newsProvider.createNewsTag(tag);
+				else
+					newsProvider.updateNewsTag(tag);
+			}
+		return null;
+		});
+	}
+
+	@Override
+	public GetNewsTagResponse getNewsTag(GetNewsTagCommand cmd) {
+		List<NewsTag> parentTags = newsProvider.listNewsTag(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getIsSearch(),0l,
+				cmd.getPageAnchor(),cmd.getPageSize());
+		List<NewsTagDTO> result = parentTags.stream().map(r->ConvertHelper.convert(r,NewsTagDTO.class)).
+				collect(Collectors.toList());
+		result.stream().forEach(r->{
+			List<NewsTag> tags = newsProvider.listNewsTag(r.getOwnerType(),r.getOwnerId(),null,r.getId(),
+					null,null);
+			r.setChildTags(tags.stream().map(t->ConvertHelper.convert(t,NewsTagDTO.class)).collect(Collectors.toList()));
+		});
+		GetNewsTagResponse response = new GetNewsTagResponse();
+		response.setTags(result);
+		response.setPageAnchor(result.get(result.size()-1).getId());
+		return response;
+	}
+
+	@Override
 	public ListNewsBySceneResponse listNewsByScene(ListNewsBySceneCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		SceneTokenDTO sceneTokenDTO = getNamespaceFromSceneToken(userId, cmd.getSceneToken());
@@ -1223,6 +1278,7 @@ public class NewsServiceImpl implements NewsService {
 		News news = newsProvider.findNewsById(id);
 		if (news != null) {
 			news.setCommunityIds(newsProvider.listNewsCommunities(id));
+			news.setTagIds(newsProvider.listNewsTagVals(id).stream().map(r->r.getNewsTagId()).collect(Collectors.toList()));
 			//正则表达式去掉content中的富文本内容 modified by xiongying20160908
 			String content = news.getContent();
 			content = removeTag(content);

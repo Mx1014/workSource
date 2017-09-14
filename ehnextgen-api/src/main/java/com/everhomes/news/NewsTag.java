@@ -14,13 +14,4 @@ public class NewsTag extends EhNewsTag {
         super();
     }
 
-    private List<NewsTag> newsTags;
-
-    public List<NewsTag> getNewsTags() {
-        return newsTags;
-    }
-
-    public void setNewsTags(List<NewsTag> newsTags) {
-        this.newsTags = newsTags;
-    }
 }
