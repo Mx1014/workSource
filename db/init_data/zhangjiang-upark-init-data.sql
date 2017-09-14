@@ -2098,7 +2098,14 @@ INSERT INTO `eh_payment_bill_groups` VALUES ('1', '999971', '240111044331050388'
 INSERT INTO `eh_payment_bill_groups` VALUES ('2', '999971', '240111044332059779', 'community', '租金', '2', '5', '0', UTC_TIMESTAMP(), null, null, '1');
 INSERT INTO `eh_payment_bill_groups` VALUES ('3', '999971', '240111044332059780', 'community', '租金', '2', '5', '0', UTC_TIMESTAMP(), null, null, '1');
 INSERT INTO `eh_payment_bill_groups` VALUES ('4', '999971', '240111044332059781', 'community', '租金', '2', '5', '0', UTC_TIMESTAMP(), null, null, '1');
-
+INSERT INTO `eh_payment_bill_groups` VALUES ('5', '999971', '240111044331050388', 'community', '物业费', '2', '5', '0', UTC_TIMESTAMP(), null, null, '2');
+INSERT INTO `eh_payment_bill_groups` VALUES ('6', '999971', '240111044332059779', 'community', '物业费', '2', '5', '0', UTC_TIMESTAMP(), null, null, '2');
+INSERT INTO `eh_payment_bill_groups` VALUES ('7', '999971', '240111044332059780', 'community', '物业费', '2', '5', '0', UTC_TIMESTAMP(), null, null, '2');
+INSERT INTO `eh_payment_bill_groups` VALUES ('8', '999971', '240111044332059781', 'community', '物业费', '2', '5', '0', UTC_TIMESTAMP(), null, null, '2');
+INSERT INTO `eh_payment_bill_groups` VALUES ('9', '999971', '240111044331050388', 'community', '水电费', '2', '5', '0', UTC_TIMESTAMP(), null, null, '3');
+INSERT INTO `eh_payment_bill_groups` VALUES ('10', '999971', '240111044332059779', 'community', '水电费', '2', '5', '0', UTC_TIMESTAMP(), null, null, '3');
+INSERT INTO `eh_payment_bill_groups` VALUES ('11', '999971', '240111044332059780', 'community', '水电费', '2', '5', '0', UTC_TIMESTAMP(), null, null, '3');
+INSERT INTO `eh_payment_bill_groups` VALUES ('12', '999971', '240111044332059781', 'community', '水电费', '2', '5', '0', UTC_TIMESTAMP(), null, null, '3');
 
 -- 4.8.3 张江高科重新配置的数据 by lei.lv 9月13日
 -- By lei.lv
