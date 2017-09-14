@@ -475,6 +475,9 @@ public class PunchServiceImpl implements PunchService {
 		// DateHelper.currentGMTTime().getTime();
 //		Date now = new Date();
 		if(punchDayLog.getPunchTimesPerDay().equals(PunchTimesPerDay.TWICE.getCode())){
+			if (null != punchDayLog.getStatusList()) {
+				punchDayLog.setStatus(Byte.valueOf(punchDayLog.getStatusList()));
+			}
 			pdl.setPunchStatus(punchDayLog.getStatus());
 
 			pdl.setExceptionStatus(punchDayLog.getStatus().equals(
@@ -662,8 +665,12 @@ public class PunchServiceImpl implements PunchService {
 			pdl.setAfternoonArriveTime(punchDayLog.getAfternoonArriveTime().getTime());
 		if(punchDayLog.getNoonLeaveTime()!=null)
 			pdl.setNoonLeaveTime(punchDayLog.getNoonLeaveTime().getTime());
-		
-		if(punchDayLog.getPunchTimesPerDay().equals(PunchTimesPerDay.FORTH.getCode())) {
+		if(punchDayLog.getPunchTimesPerDay().equals(PunchTimesPerDay.TWICE.getCode())) {
+			if (null != punchDayLog.getStatusList()) {
+				punchDayLog.setStatus(Byte.valueOf(punchDayLog.getStatusList()));
+			}
+		}
+		else if(punchDayLog.getPunchTimesPerDay().equals(PunchTimesPerDay.FORTH.getCode())) {
 			if (null != punchDayLog.getStatusList()) {
 				String[] status = punchDayLog.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
 				if (status.length <= 1) {
