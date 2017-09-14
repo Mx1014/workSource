@@ -11,6 +11,7 @@ import java.util.List;
  * <li>groupType: 组类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}</li>
  * <li>groupId: 组id，既是organizationId</li>
  * <li>enterpriseId: 公司Id</li>
+ * <li>versionCode: 版本号</li>
  * <li>targetId: 目标Id</li>
  * <li>targetType: 组类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}</LI>
  * </ul>
@@ -22,6 +23,9 @@ public class SaveUniongroupConfiguresCommand {
     private Long groupId;
 
     private Long enterpriseId;
+
+    private Integer versionCode;
+
     @ItemType(UniongroupTarget.class)
     private List<UniongroupTarget> targets;
 
@@ -72,5 +76,13 @@ public class SaveUniongroupConfiguresCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Integer getVersionCode() {
+        return versionCode;
+    }
+
+    public void setVersionCode(Integer versionCode) {
+        this.versionCode = versionCode;
     }
 }
