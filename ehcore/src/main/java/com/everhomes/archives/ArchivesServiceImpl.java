@@ -42,6 +42,10 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     private static final String ARCHIVES = "archives_information";
 
+    private static final String ARCHIVE_OWNER_TYPE = "archives_type";
+
+    private static final String ARCHIVESFORM = "archives.form.origin.id";
+
     @Autowired
     ArchivesProvider archivesProvider;
 
@@ -798,6 +802,11 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  摒弃冗余字段
         form.setTemplateText(null);
+        //  由于业务的特殊性，此处的 formOriginId 由另外的接口去提供
+        //  故屏蔽掉此处的返回以免造成误解
+        form.setFormOriginId(null);
+        form.setFormVersion(null);
+        response.setForm(form);
         response.setForm(form);
         return response;
     }
@@ -1016,7 +1025,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             //  新增时，在组织架构增加表单
             CreateApprovalFormCommand createCommand = new CreateApprovalFormCommand();
             createCommand.setOwnerId(cmd.getOrganizationId());
-            createCommand.setOwnerType("organization");
+            createCommand.setOwnerType(ARCHIVE_OWNER_TYPE);
             createCommand.setOrganizationId(cmd.getOrganizationId());
             createCommand.setFormName(ARCHIVES);
             createCommand.setFormFields(cmd.getFormFields());
@@ -1031,7 +1040,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             UpdateApprovalFormCommand updateCommand = new UpdateApprovalFormCommand();
             updateCommand.setFormOriginId(cmd.getFormOriginId());
             updateCommand.setOwnerId(cmd.getOrganizationId());
-            updateCommand.setOwnerType("organization");
+            updateCommand.setOwnerType(ARCHIVE_OWNER_TYPE);
             updateCommand.setOrganizationId(cmd.getOrganizationId());
             updateCommand.setFormFields(cmd.getFormFields());
             updateCommand.setFormGroups(cmd.getFormGroups());
@@ -1047,6 +1056,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
     }
 
+    /**
+     * 业务部门新增表单记录，从而能够让业务获取到正确的表单 id
+     * @param form
+     */
     private void createArchivesForm(GeneralFormDTO form) {
         ArchivesFroms archivesFrom = new ArchivesFroms();
         archivesFrom.setNamespaceId(form.getNamespaceId());
@@ -1064,6 +1077,13 @@ public class ArchivesServiceImpl implements ArchivesService {
         GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
         formCommand.setFormOriginId(getRealFormOriginId(cmd.getFormOriginId()));
         GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
+
+        //  摒弃冗余字段
+        form.setTemplateText(null);
+        //  由于业务的特殊性，此处的 formOriginId 由另外的接口去提供
+        //  故屏蔽掉此处的返回以免造成误解
+        form.setFormOriginId(null);
+        form.setFormVersion(null);
         response.setForm(form);
         return response;
     }
@@ -1077,7 +1097,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         Long formOriginId = id;
         if (id == 0L) {
             //  当没有表单 id 的时候则去获取模板表单的id
-            String value = configurationProvider.getValue("archives.form.origin.id", "");
+            String value = configurationProvider.getValue(ARCHIVESFORM, "");
             formOriginId = Long.valueOf(value);
         }
         return formOriginId;

@@ -9,10 +9,10 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>organizationId: organizationId</li>
- * <li>formOriginId: formOriginId</li>
- * <li>formFields: formFields {@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
- * <li>formGroups: formGroups {@link com.everhomes.rest.general_approval.GeneralFormGroupDTO}</li>
+ * <li>organizationId: 公司 id</li>
+ * <li>formOriginId: 表单 id(根据独立的结果获取)</li>
+ * <li>formFields: 字段 {@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
+ * <li>formGroups: 字段组 {@link com.everhomes.rest.general_approval.GeneralFormGroupDTO}</li>
  * </ul>
  */
 public class UpdateArchivesFormCommand {
