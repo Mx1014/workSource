@@ -10167,7 +10167,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 return configProvider.getValue("auth.overtime", "");
             ApproveContactCommand cmd2 = ConvertHelper.convert(dto, ApproveContactCommand.class);
             approveForEnterpriseContact(cmd2);
-            return configProvider.getValue("auth.success", "");
+            String success = configProvider.getValue("auth.success", "");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("auth success redirectUrl = {}", success);
+            }
+            return success;
         } catch (Exception e) {
             LOGGER.error("email verify enterprise contact error, token = {}", cmd.getVerifyToken());
             return configProvider.getValue("auth.fail", "");
