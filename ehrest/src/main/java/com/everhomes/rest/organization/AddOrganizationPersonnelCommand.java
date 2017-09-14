@@ -51,6 +51,8 @@ public class AddOrganizationPersonnelCommand {
 	private String employmentTime;
 
 	private String checkInTime;
+
+	private Byte visibleFlag;
 	
 	@ItemType(Long.class)
 	private List<Long> departmentIds;
@@ -205,4 +207,11 @@ public class AddOrganizationPersonnelCommand {
     }
 
 
+	public Byte getVisibleFlag() {
+		return visibleFlag;
+	}
+
+	public void setVisibleFlag(Byte visibleFlag) {
+		this.visibleFlag = visibleFlag;
+	}
 }
