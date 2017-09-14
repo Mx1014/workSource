@@ -14,10 +14,18 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'user'
 
 
 -- 张江高科的app入口配置 by wentian
-update `eh_launch_pad_items` set action_data='{"url":"http://zhangjiang-beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
+-- 这是上到beta的入口配置
+-- update `eh_launch_pad_items` set action_data='{"url":"http://beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
+-- where item_label = '费用查缴' and scene_type != 'pm_admin' and namespace_id='999971';
+--
+-- update `eh_launch_pad_items` set action_data='{"url":"http://beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
+-- where item_label = '企业账单' and scene_type != 'pm_admin' and namespace_id='999971';
+
+-- 这是上到线网的入口
+update `eh_launch_pad_items` set action_data='{"url":"http://core.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
 where item_label = '费用查缴' and scene_type != 'pm_admin' and namespace_id='999971';
 
-update `eh_launch_pad_items` set action_data='{"url":"http://zhangjiang-beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
+update `eh_launch_pad_items` set action_data='{"url":"http://core.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
 where item_label = '企业账单' and scene_type != 'pm_admin' and namespace_id='999971';
 
 -- 张江高科的菜单配置 by wentian
