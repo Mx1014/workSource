@@ -1292,7 +1292,7 @@ public class ZJGKOpenServiceImpl {
             customer.setContactAddress(zjEnterprise.getContactAddress());
             customer.setContactEmail(zjEnterprise.getContactEmail());
             customer.setContactPhone(zjEnterprise.getContactPhone());
-//            customer.setco
+            customer.setContactPosition(zjEnterprise.getContactPosition());
             customer.setContactOffficePhone(zjEnterprise.getContactOffficePhone());
             customer.setContactFamilyPhone(zjEnterprise.getContactFamilyPhone());
             customer.setContactFax(zjEnterprise.getContactFax());
