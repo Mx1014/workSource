@@ -1113,3 +1113,5 @@ CREATE TABLE `eh_community_building_geos` (
 ALTER TABLE eh_stat_event_portal_statistics ADD COLUMN `scene_type` VARCHAR(64) COMMENT 'default, pm_admin, park_tourist...';
 ALTER TABLE eh_stat_event_portal_statistics ADD COLUMN `widget` VARCHAR(64) COMMENT 'Navigator, Banner, OPPush...';
 
+-- 增加联系人职位 add by xiongying 20170914
+ALTER TABLE eh_enterprise_customers ADD COLUMN contact_position VARCHAR(64);

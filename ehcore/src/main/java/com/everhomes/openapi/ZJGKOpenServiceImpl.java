@@ -1292,6 +1292,7 @@ public class ZJGKOpenServiceImpl {
             customer.setContactAddress(zjEnterprise.getContactAddress());
             customer.setContactEmail(zjEnterprise.getContactEmail());
             customer.setContactPhone(zjEnterprise.getContactPhone());
+            customer.setco
             customer.setContactOffficePhone(zjEnterprise.getContactOffficePhone());
             customer.setContactFamilyPhone(zjEnterprise.getContactFamilyPhone());
             customer.setContactFax(zjEnterprise.getContactFax());
@@ -1330,22 +1331,22 @@ public class ZJGKOpenServiceImpl {
 
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
-            insertOrUpdateOrganizationAddresses(zjEnterprise.getCommunityId(), zjEnterprise.getApartmentIdentifierList(), customer);
+            insertOrUpdateOrganizationAddresses(zjEnterprise.getApartmentIdentifierList(), customer);
             organizationSearcher.feedDoc(organization);
             return null;
         });
 
     }
 
-    private void insertOrUpdateOrganizationAddresses(Long communityId, List<String> apartmentIdentifier, EnterpriseCustomer customer){
+    private void insertOrUpdateOrganizationAddresses(List<CommunityAddressDTO> apartmentIdentifier, EnterpriseCustomer customer){
         List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(customer.getOrganizationId());
-        List<String> apartments = apartmentIdentifier;
+        List<CommunityAddressDTO> apartments = apartmentIdentifier;
         for (OrganizationAddress organizationAddress : myOrganizationAddressList) {
             Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
             if (address != null && address.getNamespaceAddressType() != null && address.getNamespaceAddressToken() != null) {
                 if (address.getNamespaceAddressType().equals(NamespaceAddressType.SHENZHOU.getCode())) {
-                    for(String identifier : apartmentIdentifier) {
-                        if(address.getNamespaceAddressToken().equals(identifier)) {
+                    for(CommunityAddressDTO identifier : apartmentIdentifier) {
+                        if(address.getNamespaceAddressToken().equals(identifier.getApartmentIdentifier())) {
                             apartments.remove(identifier);
                         }
                     }
@@ -1362,11 +1363,11 @@ public class ZJGKOpenServiceImpl {
 
     }
 
-    private void insertOrganizationAddress(String apartmentIdentifier, EnterpriseCustomer customer) {
-        if (StringUtils.isBlank(apartmentIdentifier)) {
+    private void insertOrganizationAddress(CommunityAddressDTO apartmentIdentifier, EnterpriseCustomer customer) {
+        if (apartmentIdentifier == null) {
             return;
         }
-        Address address = addressProvider.findAddressByNamespaceTypeAndName(NamespaceAddressType.SHENZHOU.getCode(), apartmentIdentifier);
+        Address address = addressProvider.findAddressByNamespaceTypeAndName(NamespaceAddressType.SHENZHOU.getCode(), apartmentIdentifier.getApartmentIdentifier());
         if (address == null) {
             return;
         }
@@ -1573,7 +1574,7 @@ public class ZJGKOpenServiceImpl {
 
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
-            insertOrUpdateOrganizationAddresses(zjEnterprise.getCommunityId(), zjEnterprise.getApartmentIdentifierList(), customer);
+            insertOrUpdateOrganizationAddresses(zjEnterprise.getApartmentIdentifierList(), customer);
             organizationSearcher.feedDoc(organization);
             return null;
         });
