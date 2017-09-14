@@ -15,10 +15,10 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'user'
 
 -- 张江高科的app入口配置 by wentian
 update `eh_launch_pad_items` set action_data='{"url":"http://zhangjiang-beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
-where item_label = '费用查缴' and scene_type != 'pm_admin';
+where item_label = '费用查缴' and scene_type != 'pm_admin' and namespace_id='999971';
 
 update `eh_launch_pad_items` set action_data='{"url":"http://zhangjiang-beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
-where item_label = '企业账单' and scene_type != 'pm_admin';
+where item_label = '企业账单' and scene_type != 'pm_admin' and namespace_id='999971';
 
 -- 张江高科的菜单配置 by wentian
 
@@ -26,7 +26,7 @@ where item_label = '企业账单' and scene_type != 'pm_admin';
 delete from eh_web_menu_scopes where menu_id in ('20410','20420') and owner_id = '999971';
 
 -- 删除账单管理在保集和嘉定，和张江的缴费的菜单 by wentian
-delete from eh_web_menu_scopes where menu_id in (select id from eh_web_menus where path like '/20700/%' and (name = '账单管理' or name = '账单统计')
+delete from eh_web_menu_scopes where menu_id in (select id from eh_web_menus where path like '/20700/%' and (name = '账单管理' or name = '账单统计'));
 
 -- 配置新的张江的菜单 by wentian
 UPDATE `eh_web_menus` set leaf_flag = '0' where id = '20400';

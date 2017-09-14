@@ -1991,10 +1991,10 @@ UPDATE eh_launch_pad_items SET action_data = CONCAT('{"displayType":"grid","type
 
 -- 张江高科的app入口配置 by wentian
 update `eh_launch_pad_items` set action_data='{"url":"http://zhangjiang-beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
-where item_label = '费用查缴' and scene_type != 'pm_admin';
+where item_label = '费用查缴' and scene_type != 'pm_admin' and namespace_id='999971';
 
 update `eh_launch_pad_items` set action_data='{"url":"http://zhangjiang-beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
-where item_label = '企业账单' and scene_type != 'pm_admin';
+where item_label = '企业账单' and scene_type != 'pm_admin' and namespace_id='999971';
 
 -- 张江高科的菜单配置 by wentian
 UPDATE `eh_web_menus` set leaf_flag = '0' where id = '20400';
