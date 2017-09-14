@@ -1137,3 +1137,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
     VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'Gallery', '政务服务', '政务服务', 'cs://1/image/aW1hZ2UvTVRvNE5EVTVaREUxWXpaa05UTmpNelppTkdRMllUUTROMlEzTlRRNU1EaGlOQQ', '1', '1', 2,'{"itemLocation":"/home/GovernmentService","layoutName":"GovernmentServiceLayout"}', 14, '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 
+-- 添加155权限  add by xq.tian  2017/09/14
+SET @eh_acls_id = IFNULL((SELECT MAX(id) FROM `eh_acls`), 1);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`)
+VALUES ((@eh_acls_id := @eh_acls_id + 1), 'EhGroups', NULL, 1, 155, 5, 0, 1, now(), 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);

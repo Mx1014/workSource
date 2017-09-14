@@ -14,10 +14,18 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'user'
 
 
 -- 张江高科的app入口配置 by wentian
-update `eh_launch_pad_items` set action_data='{"url":"http://zhangjiang-beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
+-- 这是上到beta的入口配置
+-- update `eh_launch_pad_items` set action_data='{"url":"http://beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
+-- where item_label = '费用查缴' and scene_type != 'pm_admin' and namespace_id='999971';
+--
+-- update `eh_launch_pad_items` set action_data='{"url":"http://beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
+-- where item_label = '企业账单' and scene_type != 'pm_admin' and namespace_id='999971';
+
+-- 这是上到线网的入口
+update `eh_launch_pad_items` set action_data='{"url":"http://core.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
 where item_label = '费用查缴' and scene_type != 'pm_admin' and namespace_id='999971';
 
-update `eh_launch_pad_items` set action_data='{"url":"http://zhangjiang-beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
+update `eh_launch_pad_items` set action_data='{"url":"http://core.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
 where item_label = '企业账单' and scene_type != 'pm_admin' and namespace_id='999971';
 
 -- 张江高科的菜单配置 by wentian
@@ -26,7 +34,7 @@ where item_label = '企业账单' and scene_type != 'pm_admin' and namespace_id=
 delete from eh_web_menu_scopes where menu_id in ('20410','20420') and owner_id = '999971';
 
 -- 删除账单管理在保集和嘉定，和张江的缴费的菜单 by wentian
-delete from eh_web_menu_scopes where menu_id in (select id from eh_web_menus where path like '/20700/%' and (name = '账单管理' or name = '账单统计'));
+delete from eh_web_menu_scopes where menu_id in (select id from eh_web_menus where path like '/20700/%' and (name = '账单管理' or name = '账单统计')) and owner_id in ('999971','999973','999974');
 
 -- 配置新的张江的菜单 by wentian
 UPDATE `eh_web_menus` set leaf_flag = '0' where id = '20400';
@@ -39,38 +47,39 @@ VALUES ('204021', '账单统计', 20400, NULL, 'react:/payment-management/bills-
 SET @eh_web_menus_id_paym = '204011';
 SET @eh_web_menus_id_payb = '204021';
 
-SET @menu_scope_id = (SELECT MAX FROM `eh_web_menu_scopes`);
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_paym, '', 'EhNamespaces', 999971, 2);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 VALUES ((@menu_scope_id := @menu_scope_id + 1), @eh_web_menus_id_payb, '', 'EhNamespaces', 999971, 2);
 
-SET @privilege_id = (SELECT MAX FROM `eh_acl_privileges`);
+SET @privilege_id = (SELECT MAX(id) FROM `eh_acl_privileges`);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
 VALUES ((@privilege_id := @privilege_id + 1), 0, 'zjgk账单管理', 'zjgk账单管理 全部权限', NULL);
-SET @web_menu_privilege_id = (SELECT MAX FROM `eh_web_menu_privileges`);
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @privilege_id, @eh_web_menus_id_paym, '账单管理', 1, 1, '账单管理 全部权限', 990);
+SET @acl_id = (SELECT MAX(id) from `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
-VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1001, 'EhAclRoles', 0, 1, NOW);
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1001, 'EhAclRoles', 0, 1, UTC_TIMESTAMP());
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
-VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1005, 'EhAclRoles', 0, 1, NOW);
-SET @eh_service_module_privileges_id = (SELECT MAX FROM `eh_service_module_privileges`);
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1005, 'EhAclRoles', 0, 1, UTC_TIMESTAMP());
+SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), @eh_web_menus_id_paym, '1', @privilege_id, NULL, '0', UTC_TIMESTAMP());
 
-SET @privilege_id = (SELECT MAX FROM `eh_acl_privileges`);
+SET @privilege_id = (SELECT MAX(id) FROM `eh_acl_privileges`);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
 VALUES ((@privilege_id := @privilege_id + 1), 0, 'zjgk账单统计', 'zjgk账单统计 全部权限', NULL);
-SET @web_menu_privilege_id = (SELECT MAX FROM `eh_web_menu_privileges`);
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @privilege_id, @eh_web_menus_id_payb, '账单统计', 1, 1, '账单统计 全部权限', 999);
+SET @acl_id = (SELECT MAX(id) from `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
-SET @acl_id = (SELECT MAX from `eh_acls`);
-VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1001, 'EhAclRoles', 0, 1, NOW);
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1001, 'EhAclRoles', 0, 1, UTC_TIMESTAMP());
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
-VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1005, 'EhAclRoles', 0, 1, NOW);
-SET @eh_service_module_privileges_id = (SELECT MAX FROM `eh_service_module_privileges`);
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1005, 'EhAclRoles', 0, 1, UTC_TIMESTAMP());
+SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), @eh_web_menus_id_payb, '1', @privilege_id, NULL, '0', UTC_TIMESTAMP());
 
@@ -79,7 +88,7 @@ VALUES (@eh_web_menus_id_paym, '账单管理', '20400', '/20000/20400/', '0', '2
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`,`operator_uid`,`creator_uid`)
 VALUES (@eh_web_menus_id_payb, '账单统计', '20400', '/20000/20400/', '0', '2', '2', '0', UTC_TIMESTAMP(),1,1);
 
-SET @eh_service_module_scopes_id = (SELECT MAX FROM `eh_service_module_scopes`);
+SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
 VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999971, @eh_web_menus_id_paym, '账单管理', 'EhNamespaces', 999971, NULL, 2);
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
@@ -234,6 +243,7 @@ INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `fi
 update eh_var_field_item_scopes set item_display_name = '先生' where namespace_id = 999971 and module_name = 'enterprise_customer' and item_display_name = '男';
 update eh_var_field_item_scopes set item_display_name = '女士' where namespace_id = 999971 and module_name = 'enterprise_customer' and item_display_name = '女';
 
+
 -- 张江高科合同管理和客户管理的菜单加上 add by xiongying20170914
 SET @menu_scope_id = (SELECT MAX FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21200', '', 'EhNamespaces', '999971', '2');
@@ -241,5 +251,9 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21100', '', 'EhNamespaces', '999971', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21110', '', 'EhNamespaces', '999971', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21120', '', 'EhNamespaces', '999971', '2');
+
+
+-- 修改招租管理模块名称 add by xq.tian  2017/09/14
+UPDATE eh_flow_cases set module_name = '招租管理' where module_id = 40100;
 
 
