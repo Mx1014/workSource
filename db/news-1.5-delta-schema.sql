@@ -8,7 +8,7 @@ CREATE TABLE `eh_news_tag` (
   `owner_type` varchar(32) DEFAULT NULL,
   `owner_id` bigint(20) DEFAULT '0',
   `parent_id` bigint(20) DEFAULT '0',
-  `name` varchar(32) DEFAULT NULL,
+  `value` varchar(32) DEFAULT NULL,
   `is_search` tinyint(8) DEFAULT '0' COMMENT '是否开启筛选',
   `is_default` tinyint(8) DEFAULT '0' COMMENT '是否是默认选项',
   `delete_flag` tinyint(8) NOT NULL DEFAULT '0',
