@@ -4269,39 +4269,44 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public void setPmNotifyParams(SetPmNotifyParamsCommand cmd) {
-		PmNotifyConfigurations configuration = ConvertHelper.convert(cmd, PmNotifyConfigurations.class);
-		configuration.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
-		if(cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
-			configuration.setScopeId(cmd.getCommunityId());
-			configuration.setScopeType(PmNotifyScopeType.COMMUNITY.getCode());
-		} else {
-			configuration.setScopeId(cmd.getNamespaceId().longValue());
-			configuration.setScopeType(PmNotifyScopeType.NAMESPACE.getCode());
-		}
-		List<PmNotifyReceiver> receivers = cmd.getReceivers();
-		if(receivers != null && receivers.size() > 0) {
-			PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
-			receiverList.setReceivers(receivers);
-			configuration.setReceiverJson(receiverList.toString());
+		if(cmd.getParams() != null && cmd.getParams().size() > 0) {
+			for(PmNotifyParams params : cmd.getParams()) {
+				PmNotifyConfigurations configuration = ConvertHelper.convert(params, PmNotifyConfigurations.class);
+				configuration.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+				if(params.getCommunityId() != null && params.getCommunityId() != 0L) {
+					configuration.setScopeId(params.getCommunityId());
+					configuration.setScopeType(PmNotifyScopeType.COMMUNITY.getCode());
+				} else {
+					configuration.setScopeId(params.getNamespaceId().longValue());
+					configuration.setScopeType(PmNotifyScopeType.NAMESPACE.getCode());
+				}
+				List<PmNotifyReceiver> receivers = params.getReceivers();
+				if(receivers != null && receivers.size() > 0) {
+					PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
+					receiverList.setReceivers(receivers);
+					configuration.setReceiverJson(receiverList.toString());
+				}
+
+				if(params.getId() == null) {
+					pmNotifyProvider.createPmNotifyConfigurations(configuration);
+				} else {
+					Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
+					Long scopeId = params.getNamespaceId().longValue();
+					if(params.getCommunityId() != null && params.getCommunityId() != 0L) {
+						scopeType = PmNotifyScopeType.COMMUNITY.getCode();
+						scopeId = params.getCommunityId();
+					}
+					PmNotifyConfigurations exist = pmNotifyProvider.findScopePmNotifyConfiguration(params.getId(), EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+					if(exist != null) {
+						configuration.setCreateTime(exist.getCreateTime());
+						pmNotifyProvider.updatePmNotifyConfigurations(configuration);
+					} else {
+						pmNotifyProvider.createPmNotifyConfigurations(configuration);
+					}
+				}
+			}
 		}
 
-		if(cmd.getId() == null) {
-			pmNotifyProvider.createPmNotifyConfigurations(configuration);
-		} else {
-			Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
-			Long scopeId = cmd.getNamespaceId().longValue();
-			if(cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
-				scopeType = PmNotifyScopeType.COMMUNITY.getCode();
-				scopeId = cmd.getCommunityId();
-			}
-			PmNotifyConfigurations exist = pmNotifyProvider.findScopePmNotifyConfiguration(cmd.getId(), EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
-			if(exist != null) {
-				configuration.setCreateTime(exist.getCreateTime());
-				pmNotifyProvider.updatePmNotifyConfigurations(configuration);
-			} else {
-				pmNotifyProvider.createPmNotifyConfigurations(configuration);
-			}
-		}
 	}
 
 	@Override
