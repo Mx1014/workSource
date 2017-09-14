@@ -1988,7 +1988,7 @@ INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`,
     VALUES (@sa_id , '0', 'community', 240111044331050388, '招商信息', '招商信息', @category_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 UPDATE eh_launch_pad_items SET action_data = CONCAT('{"displayType":"grid","type":',@category_id,'"parentId":',@category_id,'}') WHERE item_label = '招商信息' and namespace_id = '999971';
 
-<<<<<<< HEAD
+
 -- 张江高科的app入口配置 by wentian
 update `eh_launch_pad_items` set action_data='{"url":"http://zhangjiang-beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
 where item_label = '费用查缴' and scene_type != 'pm_admin';
@@ -2098,7 +2098,7 @@ INSERT INTO `eh_payment_bill_groups` VALUES ('1', '999971', '240111044331050388'
 INSERT INTO `eh_payment_bill_groups` VALUES ('2', '999971', '240111044332059779', 'community', '租金', '2', '5', '0', UTC_TIMESTAMP(), null, null, '1');
 INSERT INTO `eh_payment_bill_groups` VALUES ('3', '999971', '240111044332059780', 'community', '租金', '2', '5', '0', UTC_TIMESTAMP(), null, null, '1');
 INSERT INTO `eh_payment_bill_groups` VALUES ('4', '999971', '240111044332059781', 'community', '租金', '2', '5', '0', UTC_TIMESTAMP(), null, null, '1');
-=======
+
 
 -- 4.8.3 张江高科重新配置的数据 by lei.lv 9月13日
 -- By lei.lv
@@ -2200,4 +2200,4 @@ INSERT INTO `eh_namespace_masks` VALUES ('2', '999971', '园区服务', '3', '�
 DELETE from eh_addresses WHERE namespace_id = 999971 AND community_id = 240111044331050388;
 -- 删除原有的楼栋
 DELETE from eh_buildings WHERE namespace_id = 999971 AND community_id = 240111044331050388;
->>>>>>> 4.9.1
+

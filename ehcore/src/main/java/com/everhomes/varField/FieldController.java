@@ -4,11 +4,13 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -122,4 +124,28 @@ public class FieldController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+//    /**
+//     * <p>模板导出</p>
+//     * <b>URL: /varField/exportExcelTemplate</b>
+//     */
+//    @RequestMapping("exportExcelTemplate")
+//    public void exportExcelTemplate(@Valid ListFieldGroupCommand cmd,HttpServletResponse response){
+//        fieldService.exportExcelTemplate(cmd,response);
+//        RestResponse restResponse = new RestResponse();
+//        restResponse.setErrorDescription("OK");
+//        restResponse.setErrorCode(200);
+//    }
+//
+//    /**
+//     * <p>excel数据导出</p>
+//     * <b>URL: /varField/exportFieldsExcel</b>
+//     */
+//    @RequestMapping("exportFieldsExcel")
+//    public void exportFieldsExcel(@Valid ExportFieldsExcelCommand cmd, HttpServletResponse response){
+//        fieldService.exportFieldsExcel(cmd,response);
+//        RestResponse restResponse = new RestResponse();
+//        restResponse.setErrorDescription("OK");
+//        restResponse.setErrorCode(200);
+//    }
 }

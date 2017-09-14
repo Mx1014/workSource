@@ -3,6 +3,7 @@ package com.everhomes.asset;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.pmkexing.PmKeXingBillService;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.*;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
@@ -261,6 +262,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
+
 
     private Timestamp covertStrToTimestamp(String str) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
