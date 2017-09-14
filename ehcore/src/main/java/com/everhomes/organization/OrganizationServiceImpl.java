@@ -5047,7 +5047,6 @@ public class OrganizationServiceImpl implements OrganizationService {
      */
     @Override
     public void approveForEnterpriseContact(ApproveContactCommand cmd) {
-
         User operator = UserContext.current().getUser();
         Long operatorUid = operator.getId();
         // 如果有人先把申请拒绝了，那就找不到此人了，此时也让它成功以便客户端不报错 by lqs 20160415
@@ -10160,9 +10159,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public String verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd) {
         try {
-            LOGGER.debug("email verify enterprise contact, token = {}", cmd.getVerifyToken());
             VerifyEnterpriseContactDTO dto = WebTokenGenerator.getInstance().fromWebToken(cmd.getVerifyToken(), VerifyEnterpriseContactDTO.class);
-            LOGGER.debug("email verify enterprise contact, dto = {}", dto, cmd.getVerifyToken());
             if (dto == null || dto.getEndTime() == null || dto.getEnterpriseId() == null || dto.getUserId() == null) {
                 return configProvider.getValue("auth.fail", "");
             }

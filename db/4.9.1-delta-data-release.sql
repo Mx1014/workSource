@@ -242,3 +242,5 @@ INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `fi
 update eh_var_field_item_scopes set item_display_name = '先生' where namespace_id = 999971 and module_name = 'enterprise_customer' and item_display_name = '男';
 update eh_var_field_item_scopes set item_display_name = '女士' where namespace_id = 999971 and module_name = 'enterprise_customer' and item_display_name = '女';
 
+-- 修改招租管理模块名称 add by xq.tian  2017/09/14
+UPDATE eh_flow_cases set module_name = '招租管理' where module_id = 40100;
