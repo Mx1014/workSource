@@ -494,14 +494,19 @@ public class PunchServiceImpl implements PunchService {
 			}
 		}
 		else if(punchDayLog.getPunchTimesPerDay().equals(PunchTimesPerDay.FORTH.getCode())) {
+			if (null != punchDayLog.getStatusList()) {
+				String[] status = punchDayLog.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+				if (status.length <= 1) {
+					punchDayLog.setMorningStatus(Byte.valueOf(status[0]));
+					punchDayLog.setAfternoonStatus(Byte.valueOf(status[0]));
+				}else{
+					punchDayLog.setMorningStatus(Byte.valueOf(status[0]));
+					punchDayLog.setAfternoonStatus(Byte.valueOf(status[1]));
+				}
+			}
 			pdl.setMorningPunchStatus(punchDayLog.getMorningStatus());
 			pdl.setAfternoonPunchStatus(punchDayLog.getAfternoonStatus());
-			pdl.setExceptionStatus((punchDayLog.getMorningStatus().equals(
-						PunchStatus.NORMAL.getCode())||punchDayLog.getMorningStatus().equals(
-								ApprovalStatus.OVERTIME.getCode())) &&(punchDayLog.getAfternoonStatus().equals(
-										PunchStatus.NORMAL.getCode())||punchDayLog.getAfternoonStatus().equals(
-                    ApprovalStatus.OVERTIME.getCode()))? ExceptionStatus.NORMAL
-						.getCode() : ExceptionStatus.EXCEPTION.getCode() );
+			pdl.setExceptionStatus(punchDayLog.getExceptionStatus() );
 			PunchExceptionApproval exceptionApproval = punchProvider.getPunchExceptionApprovalByDate(userId, companyId,
 							dateSF.get().format(logDay.getTime()));
 			if (null != exceptionApproval) {
