@@ -23,8 +23,8 @@ public class ContractController extends ControllerBase {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
-	@Autowired
-	private ContractService contractService;
+//	@Autowired
+//	private ContractService contractService;
 
 	@Autowired
 	private ContractSearcher contractSearcher;

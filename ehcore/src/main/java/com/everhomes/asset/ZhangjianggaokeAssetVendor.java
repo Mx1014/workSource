@@ -63,6 +63,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             Calendar c3 = Calendar.getInstance();
             c2.add(Calendar.DAY_OF_MONTH,15);
             c3.add(Calendar.MONTH,1);
+            c3.set(Calendar.DAY_OF_MONTH,c3.getActualMinimum(Calendar.DAY_OF_MONTH));
             if(c2.compareTo(c3) != -1){
                 c1 = c3;
             }
@@ -120,7 +121,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         params.put("sdateFrom","");
         params.put("sdateTo",dateStrEnd);
         params.put("pageOffset","1");
-        params.put("pageSize","999");
+        params.put("pageSize",String.valueOf(Integer.MAX_VALUE));
         params.put("contractNum", contractNum);
         json = generateJson(params);
         if(targetType.equals("eh_organization")){
@@ -155,13 +156,13 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                         Calendar c4 = Calendar.getInstance();
                         c4.setTime(returnedDate);
                         Calendar c5 = Calendar.getInstance();
-                        if(c4.compareTo(c5)!=-1){
+                        if(c4.compareTo(c5)!=1){
                             billStatus = 2;
                         }
                     }catch (Exception e){
                         LOGGER.error("billStatus parse failed");
                     }
-                    dto.setStatus(sourceDto.getPayFlag());
+                    dto.setStatus(billStatus);
                     String szsm_status = sourceDto.getStatus();
                     if(szsm_status.equals(PaymentStatus.SUSPEND)){
                         dto.setPayStatus(PaymentStatus.IN_PROCESS.getCode());

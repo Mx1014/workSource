@@ -1,5 +1,7 @@
 package com.everhomes.varField;
 
+import com.everhomes.customer.CustomerService;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.*;
 import com.everhomes.user.UserContext;
@@ -33,6 +35,8 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private FieldProvider fieldProvider;
+    @Autowired
+    private CustomerService customerService;
     @Override
     public List<FieldDTO> listFields(ListFieldCommand cmd) {
         List<FieldDTO> dtos = null;
@@ -216,6 +220,54 @@ public class FieldServiceImpl implements FieldService {
     private List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType) {
         List<List<String>> data = new ArrayList<>();
         //使用groupName来对应不同的接口
+        String sheetName = group.getGroupDisplayName();
+        switch (sheetName){
+            case "人才团队信息":
+                ListCustomerTalentsCommand cmd1 = new ListCustomerTalentsCommand();
+                cmd1.setCustomerId(customerId);
+                cmd1.setCustomerType(customerType);
+                List<CustomerTalentDTO> customerTalentDTOS = customerService.listCustomerTalents(cmd1);
+                break;
+            case "知识产权":
+                ListCustomerTrademarksCommand cmd2 = new ListCustomerTrademarksCommand();
+                cmd2.setCustomerId(customerId);
+                cmd2.setCustomerType(customerType);
+                List<CustomerTrademarkDTO> customerTrademarkDTOS = customerService.listCustomerTrademarks(cmd2);
+                ListCustomerPatentsCommand cmd3 = new ListCustomerPatentsCommand();
+                cmd3.setCustomerId(customerId);
+                cmd3.setCustomerType(customerType);
+                List<CustomerPatentDTO> customerPatentDTOS = customerService.listCustomerPatents(cmd3);
+                ListCustomerCertificatesCommand cmd4 = new ListCustomerCertificatesCommand();
+                cmd4.setCustomerId(customerId);
+                cmd4.setCustomerType(customerType);
+                List<CustomerCertificateDTO> customerCertificateDTOS = customerService.listCustomerCertificates(cmd4);
+                break;
+            case "申报项目":
+                ListCustomerApplyProjectsCommand cmd5 = new ListCustomerApplyProjectsCommand();
+                cmd5.setCustomerId(customerId);
+                cmd5.setCustomerType(customerType);
+                List<CustomerApplyProjectDTO> customerApplyProjectDTOS = customerService.listCustomerApplyProjects(cmd5);
+                break;
+            case "工商信息":
+                ListCustomerCommercialsCommand cmd6 = new ListCustomerCommercialsCommand();
+                cmd6.setCustomerId(customerId);
+                cmd6.setCustomerType(customerType);
+                List<CustomerCommercialDTO> customerCommercialDTOS = customerService.listCustomerCommercials(cmd6);
+                break;
+            case "投融情况":
+                ListCustomerInvestmentsCommand cmd7 = new ListCustomerInvestmentsCommand();
+                cmd7.setCustomerId(customerId);
+                cmd7.setCustomerType(customerType);
+                List<CustomerInvestmentDTO> customerInvestmentDTOS = customerService.listCustomerInvestments(cmd7);
+                break;
+            case "经济指标":
+                ListCustomerEconomicIndicatorsCommand cmd8 = new ListCustomerEconomicIndicatorsCommand();
+                List<CustomerEconomicIndicatorDTO> customerEconomicIndicatorDTOS = customerService.listCustomerEconomicIndicators(cmd8);
+                break;
+        }
+
+
+
         return data;
     }
 

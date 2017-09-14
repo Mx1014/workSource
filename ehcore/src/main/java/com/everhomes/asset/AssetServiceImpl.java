@@ -307,6 +307,8 @@ public class AssetServiceImpl implements AssetService {
                 smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
+                telNOs = new String[1];
+                telNOs[0] = "15919770996";
                 smsProvider.sendSms(UserContext.getCurrentNamespaceId(), telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
