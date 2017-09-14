@@ -149,10 +149,10 @@ INSERT INTO `eh_payment_bill_groups` VALUES ('11', '999971', '240111044332059780
 INSERT INTO `eh_payment_bill_groups` VALUES ('12', '999971', '240111044332059781', 'community', '水电费', '2', '5', '0', UTC_TIMESTAMP(), null, null, '3');
 
 -- 同步神州数码的小区标识
-update `eh_communities` set namespace_community_token='D6B7C7C4-F469-4979-9624-BF6214FB0CEB' and namespace_community_type = 'shenzhou' where id = '240111044331050388';
-update `eh_communities` set namespace_community_token='7866D7BC-2544-4208-A41E-94ED2A25D2A4' and namespace_community_type = 'shenzhou' where id = '240111044332059779';
-update `eh_communities` set namespace_community_token='1C465757-4EAD-47F9-B967-F1A08A2997CC' and namespace_community_type = 'shenzhou' where id = '240111044332059780';
-update `eh_communities` set namespace_community_token='4941ABFE-0C36-44B4-BE2D-FDC90178E233' and namespace_community_type = 'shenzhou' where id = '240111044332059781';
+update `eh_communities` set namespace_community_token='D6B7C7C4-F469-4979-9624-BF6214FB0CEB' , namespace_community_type = 'shenzhou' where id = '240111044331050388';
+update `eh_communities` set namespace_community_token='7866D7BC-2544-4208-A41E-94ED2A25D2A4' , namespace_community_type = 'shenzhou' where id = '240111044332059779';
+update `eh_communities` set namespace_community_token='1C465757-4EAD-47F9-B967-F1A08A2997CC' , namespace_community_type = 'shenzhou' where id = '240111044332059780';
+update `eh_communities` set namespace_community_token='4941ABFE-0C36-44B4-BE2D-FDC90178E233' , namespace_community_type = 'shenzhou' where id = '240111044332059781';
 -- wentian's script above is end here which is a gorgeous cut-off line
 
 
