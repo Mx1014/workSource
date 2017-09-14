@@ -61,7 +61,7 @@ public class UniongroupServiceImpl implements UniongroupService {
                 unionPolicyObject = callBack.policyProcess(cmd);
             }
 
-            //4.保存s
+            //4.保存
             UnionPolicyObject finalUnionPolicyObject = unionPolicyObject; //拷贝变量
 
             this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
