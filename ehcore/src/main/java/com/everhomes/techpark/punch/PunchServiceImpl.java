@@ -662,8 +662,19 @@ public class PunchServiceImpl implements PunchService {
 			pdl.setAfternoonArriveTime(punchDayLog.getAfternoonArriveTime().getTime());
 		if(punchDayLog.getNoonLeaveTime()!=null)
 			pdl.setNoonLeaveTime(punchDayLog.getNoonLeaveTime().getTime());
-
-
+		
+		if(punchDayLog.getPunchTimesPerDay().equals(PunchTimesPerDay.FORTH.getCode())) {
+			if (null != punchDayLog.getStatusList()) {
+				String[] status = punchDayLog.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+				if (status.length <= 1) {
+					punchDayLog.setMorningStatus(Byte.valueOf(status[0]));
+					punchDayLog.setAfternoonStatus(Byte.valueOf(status[0]));
+				} else {
+					punchDayLog.setMorningStatus(Byte.valueOf(status[0]));
+					punchDayLog.setAfternoonStatus(Byte.valueOf(status[1]));
+				}
+			}
+		}
 		pdl.setPunchStatus(punchDayLog.getStatus());
 		pdl.setMorningPunchStatus(punchDayLog.getMorningStatus());
 		pdl.setAfternoonPunchStatus(punchDayLog.getAfternoonStatus());
