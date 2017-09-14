@@ -1154,8 +1154,25 @@ VALUES ((@eh_acls_id := @eh_acls_id + 1), 'EhGroups', NULL, 1, 156, 5, 0, 1, now
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`)
 VALUES ((@eh_acls_id := @eh_acls_id + 1), 'EhGroups', NULL, 1, 157, 5, 0, 1, now(), 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
-
 -- fix 15413 add by xiongying20170914
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) VALUES ('13908', '13905', '南山区', 'NANSHANQU', 'NSQ', '/广东/深圳市/南山区', '3', '3', NULL, '0755', '2', '0', '999966');
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) VALUES ('13905', '13874', '深圳市', 'SHENZHENSHI', 'SZS', '/广东/深圳市', '2', '2', NULL, '0755', '2', '1', '999966');
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) VALUES ('13874', '0', '广东', 'GUANGDONG', 'GD', '/广东', '1', '1', NULL, NULL, '2', '0', '999966');
+
+-- 停车环境 add by sw 20170914
+UPDATE eh_configurations set `value` = 'http://119.23.144.8' where `name` = 'parking.xiaomao.url';
+UPDATE eh_configurations set `value` = 'zuolin' where `name` = 'parking.xiaomao.accessKeyId';
+UPDATE eh_configurations set `value` = '91d747682a32176c78283c9a0cf8a08f' where `name` = 'parking.xiaomao.accessKeyValue';
+UPDATE eh_configurations set `value` = '0755000021433988491' where `name` = 'parking.xiaomao.parkId.10011';
+UPDATE eh_configurations set `value` = '07550002501499136602' where `name` = 'parking.xiaomao.parkId.10012';
+
+UPDATE eh_configurations set `value` = 'http://sty.szbay.com:9000' where `name` = 'parking.mybay.searchCar.url';
+
+UPDATE eh_configurations set `value` = 'http://sty.szbay.com:8099' where `name` = 'parking.mybay.url';
+UPDATE eh_configurations set `value` = 'F7A0B971B199FD2A98DA0BF6' where `name` = 'parking.mybay.key';
+UPDATE eh_configurations set `value` = 'ktapi' where `name` = 'parking.mybay.user';
+UPDATE eh_configurations set `value` = '0306F2' where `name` = 'parking.mybay.pwd';
+
+update eh_configurations set value = '[{"typeId":"11", "typeName":"VIP月卡"},{"typeId":"5", "typeName":"普通月卡"}]' where name = 'parking.xiaomao.types.10011';
+update eh_configurations set value = '[{"typeId":"02", "typeName":"VIP月卡"}]' where name = 'parking.xiaomao.types.10012';
+

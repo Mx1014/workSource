@@ -1,7 +1,7 @@
 -- 蒙版提示信息修改 by lei.lv
 UPDATE `eh_namespace_masks` SET `id`='1', `namespace_id`='999971', `item_name`='人才公寓', `image_type`='3', `tips`='快速切换至人才公寓首页', `scene_type`='park_tourist' WHERE (`id`='1');
 UPDATE `eh_namespace_masks` SET `id`='2', `namespace_id`='999971', `item_name`='园区服务', `image_type`='3', `tips`='快速切换至园区首页', `scene_type`='default' WHERE (`id`='2');
-
+update `eh_configurations` SET value = 0 WHERE namespace_id = 999971 AND name = 'mask.key';
 
 -- 把有管理员权限的用户，在eh_organization_members表里面标识成 manager add by sfyan 20170911
 update `eh_organization_members` eom set `member_group` = '';
@@ -149,10 +149,10 @@ INSERT INTO `eh_payment_bill_groups` VALUES ('11', '999971', '240111044332059780
 INSERT INTO `eh_payment_bill_groups` VALUES ('12', '999971', '240111044332059781', 'community', '水电费', '2', '5', '0', UTC_TIMESTAMP(), null, null, '3');
 
 -- 同步神州数码的小区标识
-update `eh_communities` set namespace_community_token='D6B7C7C4-F469-4979-9624-BF6214FB0CEB' and namespace_community_type = 'shenzhou' where id = '240111044331050388';
-update `eh_communities` set namespace_community_token='7866D7BC-2544-4208-A41E-94ED2A25D2A4' and namespace_community_type = 'shenzhou' where id = '240111044332059779';
-update `eh_communities` set namespace_community_token='1C465757-4EAD-47F9-B967-F1A08A2997CC' and namespace_community_type = 'shenzhou' where id = '240111044332059780';
-update `eh_communities` set namespace_community_token='4941ABFE-0C36-44B4-BE2D-FDC90178E233' and namespace_community_type = 'shenzhou' where id = '240111044332059781';
+update `eh_communities` set namespace_community_token='D6B7C7C4-F469-4979-9624-BF6214FB0CEB' , namespace_community_type = 'shenzhou' where id = '240111044331050388';
+update `eh_communities` set namespace_community_token='7866D7BC-2544-4208-A41E-94ED2A25D2A4' , namespace_community_type = 'shenzhou' where id = '240111044332059779';
+update `eh_communities` set namespace_community_token='1C465757-4EAD-47F9-B967-F1A08A2997CC' , namespace_community_type = 'shenzhou' where id = '240111044332059780';
+update `eh_communities` set namespace_community_token='4941ABFE-0C36-44B4-BE2D-FDC90178E233' , namespace_community_type = 'shenzhou' where id = '240111044332059781';
 -- wentian's script above is end here which is a gorgeous cut-off line
 
 
