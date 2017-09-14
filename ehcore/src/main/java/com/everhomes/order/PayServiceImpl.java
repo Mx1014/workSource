@@ -23,6 +23,7 @@ import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,11 +126,34 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     }
     @Override
     public void payNotify(OrderPaymentNotificationCommand cmd) {
+
+        //校验签名
+        PaymentAccount paymentAccount = findPaymentAccount(SYSTEMID);
+        if (paymentAccount == null) {
+            LOGGER.error("payment account no find system_id={}", SYSTEMID);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_ACCOUNT_NO_FIND,
+                    "payment account no find");
+        }
+
+        Map<String, String> params = new HashMap<>();
+        com.everhomes.util.StringHelper.toStringMap(null, cmd, params);
+        params.remove("signature");
+
+        if(!SignatureHelper.verifySignature(params, paymentAccount.getSecretKey(), cmd.getSignature())) {
+            LOGGER.error("Notification signature verify fail");
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_SIGNATURE_VERIFY_FAIL,
+                    "Notification signature verify fail");
+        }
+
+
+        //校验订单是否存在
         if(cmd.getOrderId() == null||cmd.getPaymentStatus()==null||cmd.getPaymentType()==null){
             LOGGER.error("Invalid parameter,orderId,orderType or paymentStatus is null");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter,orderId,orderType or paymentStatus is null");
         }
+
+        //调用具体业务
         PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(cmd.getPaymentType()));
         LOGGER.debug("PaymentCallBackHandler="+handler.getClass().getName());
         if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
