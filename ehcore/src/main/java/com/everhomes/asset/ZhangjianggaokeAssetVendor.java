@@ -575,11 +575,12 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         //存一份到我这
         List<String> billIds = cmd.getBillIds();
         String billIdsWithComma = assetUtils.convertStringList2CommaSeparation(billIds);
-        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),cmd.getAmountOwed(),billIdsWithComma,cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),15l*60l*1000l);
+//        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),cmd.getAmountOwed(),billIdsWithComma,cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),15l*60l*1000l);
+        Long orderId = 0010202031231l;
         //请求支付模块的下预付单
         PreOrderCommand cmd2pay = new PreOrderCommand();
 //        Long amount = 转成分(cmd.getAmountOwed());
-        Long payerId = null;
+        Long payerId = Long.parseLong(cmd.getPayerId());
         if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
             if(Long.parseLong(cmd.getPayerId())==UserContext.currentUserId()){
                 payerId = Long.parseLong(cmd.getPayerId());
@@ -599,6 +600,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         cmd2pay.setOrderId(orderId);
         cmd2pay.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
         cmd2pay.setPayerId(payerId);
+
         PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
 //        response.setAmount(String.valueOf(preOrder.getAmount()));
 //        response.setExpiredIntervalTime(15l*60l);
