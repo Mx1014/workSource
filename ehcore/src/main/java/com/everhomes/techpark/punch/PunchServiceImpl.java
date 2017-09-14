@@ -6975,7 +6975,12 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private PunchLogDTO convertPunchLog2DTO(PunchLog pl) {
-		PunchLogDTO dto1 = ConvertHelper.convert(pl, PunchLogDTO.class);
+		PunchLogDTO dto1 = new PunchLogDTO();
+		if(pl.getRuleTime()!=null) {
+			dto1 = ConvertHelper.convert(pl, PunchLogDTO.class);
+		}else{
+			dto1.setPunchType(pl.getPunchType());
+		}
 		dto1.setPunchTime(pl.getPunchTime().getTime());
 		dto1.setClockStatus(pl.getStatus());
 		return dto1;
