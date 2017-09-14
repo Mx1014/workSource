@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 /**
  * <ul>
@@ -16,7 +17,7 @@ import java.sql.Timestamp;
  * <li>contractTimeEnd: 合同结束日期</li>
  * <li>employeeStatus: 员工状态</li>
  * <li>contractPartyId: 合同主体 id</li>
- * <li>contactName: 姓名</li>
+ * <li>keywords: 搜索关键词</li>
  * <li>departmentId: 部门 id</li>
  * <li>workingPlaceId: 工作地点 id</li>
  * <li>pageAnchor: 锚点值</li>
@@ -27,23 +28,23 @@ public class ListArchivesEmployeesCommand {
 
     private Long organizationId;
 
-    private Timestamp checkInTimeStart;
+    private Date checkInTimeStart;
 
-    private Timestamp checkInTimeEnd;
+    private Date checkInTimeEnd;
 
-    private Timestamp employmentTimeStart;
+    private Date employmentTimeStart;
 
-    private Timestamp employmentTimeEnd;
+    private Date employmentTimeEnd;
 
-    private Timestamp contractTimeStart;
+    private Date contractTimeStart;
 
-    private Timestamp contractTimeEnd;
+    private Date contractTimeEnd;
 
     private Byte employeeStatus;
 
     private Long contractPartyId;
 
-    private String contactName;
+    private String keywords;
 
     private Long departmentId;
 
@@ -53,55 +54,57 @@ public class ListArchivesEmployeesCommand {
 
     private Integer pageSize;
 
+    SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
     public ListArchivesEmployeesCommand() {
     }
 
-    public Timestamp getCheckInTimeStart() {
+    public Date getCheckInTimeStart() {
         return checkInTimeStart;
     }
 
-    public void setCheckInTimeStart(Timestamp checkInTimeStart) {
-        this.checkInTimeStart = checkInTimeStart;
+    public void setCheckInTimeStart(String checkInTimeStart) {
+        this.checkInTimeStart = ArchivesDateUtil.parseDate(checkInTimeStart);
     }
 
-    public Timestamp getCheckInTimeEnd() {
+    public Date getCheckInTimeEnd() {
         return checkInTimeEnd;
     }
 
-    public void setCheckInTimeEnd(Timestamp checkInTimeEnd) {
-        this.checkInTimeEnd = checkInTimeEnd;
+    public void setCheckInTimeEnd(String checkInTimeEnd) {
+        this.checkInTimeEnd = ArchivesDateUtil.parseDate(checkInTimeEnd);
     }
 
-    public Timestamp getEmploymentTimeStart() {
+    public Date getEmploymentTimeStart() {
         return employmentTimeStart;
     }
 
-    public void setEmploymentTimeStart(Timestamp employmentTimeStart) {
-        this.employmentTimeStart = employmentTimeStart;
+    public void setEmploymentTimeStart(String employmentTimeStart) {
+        this.employmentTimeStart =  ArchivesDateUtil.parseDate(employmentTimeStart);
     }
 
-    public Timestamp getEmploymentTimeEnd() {
+    public Date getEmploymentTimeEnd() {
         return employmentTimeEnd;
     }
 
-    public void setEmploymentTimeEnd(Timestamp employmentTimeEnd) {
-        this.employmentTimeEnd = employmentTimeEnd;
+    public void setEmploymentTimeEnd(String employmentTimeEnd) {
+        this.employmentTimeEnd =  ArchivesDateUtil.parseDate(employmentTimeEnd);
     }
 
-    public Timestamp getContractTimeStart() {
+    public Date getContractTimeStart() {
         return contractTimeStart;
     }
 
-    public void setContractTimeStart(Timestamp contractTimeStart) {
-        this.contractTimeStart = contractTimeStart;
+    public void setContractTimeStart(String contractTimeStart) {
+        this.contractTimeStart =  ArchivesDateUtil.parseDate(contractTimeStart);
     }
 
-    public Timestamp getContractTimeEnd() {
+    public Date getContractTimeEnd() {
         return contractTimeEnd;
     }
 
-    public void setContractTimeEnd(Timestamp contractTimeEnd) {
-        this.contractTimeEnd = contractTimeEnd;
+    public void setContractTimeEnd(String contractTimeEnd) {
+        this.contractTimeEnd =  ArchivesDateUtil.parseDate(contractTimeEnd);
     }
 
     public Byte getEmployeeStatus() {
@@ -128,12 +131,12 @@ public class ListArchivesEmployeesCommand {
         this.contractPartyId = contractPartyId;
     }
 
-    public String getContactName() {
-        return contactName;
+    public String getKeywords() {
+        return keywords;
     }
 
-    public void setContactName(String contactName) {
-        this.contactName = contactName;
+    public void setKeywords(String keywords) {
+        this.keywords = keywords;
     }
 
     public Long getDepartmentId() {

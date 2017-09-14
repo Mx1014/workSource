@@ -11,6 +11,8 @@ public class ExportArchivesEmployeesCommand {
 
     private Long organizationId;
 
+    private String keywords;
+
     public ExportArchivesEmployeesCommand() {
     }
 

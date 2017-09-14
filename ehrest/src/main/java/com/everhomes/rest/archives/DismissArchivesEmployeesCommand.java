@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>organizationId: 公司id</li>
  * <li>detailIds: (List)员工detailId</li>
  * <li>dismissType: 离职类型: 1-辞职,2-解雇,3-其他 参考{@link com.everhomes.rest.archives.DismissType}</li>
  * <li>dismissReason: 离职原因 参考{@link com.everhomes.rest.archives.DismissReason}</li>
@@ -16,6 +17,8 @@ import java.util.List;
  * </ul>
  */
 public class DismissArchivesEmployeesCommand {
+
+    private Long organizationId;
 
     @ItemType(Long.class)
     private List<Long> detailIds;
@@ -29,6 +32,14 @@ public class DismissArchivesEmployeesCommand {
     private String dismissRemark;
 
     public DismissArchivesEmployeesCommand() {
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public List<Long> getDetailIds() {

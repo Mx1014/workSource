@@ -2,6 +2,7 @@ package com.everhomes.archives;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.archives.*;
@@ -25,11 +26,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Date;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,6 +48,9 @@ public class ArchivesServiceImpl implements ArchivesService {
     private static final String ARCHIVE_OWNER_TYPE = "archives_type";
 
     private static final String ARCHIVESFORM = "archives.form.origin.id";
+
+    @Autowired
+    private DbProvider dbProvider;
 
     @Autowired
     ArchivesProvider archivesProvider;
@@ -906,12 +912,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         orgCommand.setCheckInTimeEnd(cmd.getCheckInTimeEnd());
         orgCommand.setEmploymentTimeStart(cmd.getEmploymentTimeStart());
         orgCommand.setEmploymentTimeEnd(cmd.getEmploymentTimeEnd());
-        orgCommand.setContractEndTimeStart(cmd.getCheckInTimeStart());
+        orgCommand.setContractEndTimeStart(cmd.getContractTimeStart());
         orgCommand.setContractEndTimeEnd(cmd.getContractTimeEnd());
         orgCommand.setEmployeeStatus(cmd.getEmployeeStatus());
         orgCommand.setContractPartyId(cmd.getContractPartyId());
         //  TODO:查询文字的确定
-        orgCommand.setKeywords(cmd.getContactName());
+        orgCommand.setKeywords(cmd.getKeywords());
         if (cmd.getDepartmentId() != null)
             orgCommand.setOrganizationId(cmd.getDepartmentId());
         orgCommand.setWorkPlaceId(cmd.getWorkingPlaceId());
@@ -935,6 +941,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             //  TODO: 区号的添加,工作邮箱的读取,合同时间的读取
             dto.setContactToken(r.getContactToken());
 //            dto.setWorkEmail(r.getEmail());
+            dto.setCheckInTime(r.getCheckInTime());
             dto.setEmploymentTime(r.getEmploymentTime());
 //            dto.setContractTime(r.getcontr);
             return dto;
@@ -1003,6 +1010,21 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void employArchivesEmployees(EmployArchivesEmployeesCommand cmd) {
 
+        //  TODO:增加一个配置项
+    }
+
+    /**
+     * 员工转正及添加记录
+     * @param detailId
+     * @param employmentTime
+     */
+    private void employArchivesEmployees(Long detailId, Date employmentTime, String remark) {
+        //  1.更新员工状态
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        detail.setEmployeeStatus(EmployeeStatus.ONTHEJOB.getCode());
+        detail.setEmploymentTime(employmentTime);
+        organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+        //  TODO:2.更新人员变动记录
     }
 
     @Override
@@ -1010,9 +1032,58 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     }
 
+    /**
+     * 员工部门调整及添加记录
+     * @param detailIds
+     * @param departmentIds
+     * @param organizationId
+     * @param effectiveTime
+     */
+    private void transferArchivesEmployees(List<Long> detailIds, List<Long> departmentIds, Long organizationId, Date effectiveTime){
+        //  1.调整员工部门
+        TransferArchivesContactsCommand transferCommand = new TransferArchivesContactsCommand();
+        transferCommand.setOrganizationId(organizationId);
+        transferCommand.setDepartmentIds(departmentIds);
+        transferCommand.setDetailIds(detailIds);
+        transferArchivesContacts(transferCommand);
+
+        //  TODO:2.调整员工岗位
+
+        //  TODO:3.更新员工人事变动记录
+
+    }
+
     @Override
     public void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd) {
 
+    }
+
+    private void dismissArchivesEmployees(Long detailId, Long organizationId,
+                                          Date dismissTime, Byte dismissType,
+                                          String dismissReason, String dismissRemarks){
+        //  1.将员工添加到离职人员表
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        ArchivesDismissEmployees dismissEmployee = new ArchivesDismissEmployees();
+        dismissEmployee.setNamespaceId(detail.getNamespaceId());
+        dismissEmployee.setOrganizationId(detail.getOrganizationId());
+        dismissEmployee.setContactName(detail.getContactName());
+        dismissEmployee.setEmployeeStatus(detail.getEmployeeStatus());
+        dismissEmployee.setDepartment(detail.getDepartment());
+        dismissEmployee.setCheckInTime(detail.getCheckInTime());
+        dismissEmployee.setDismissTime(dismissTime);
+        dismissEmployee.setDismissType(dismissType);
+        dismissEmployee.setDismissReason(dismissReason);
+        dismissEmployee.setDismissRemarks(dismissRemarks);
+        archivesProvider.createArchivesDismissEmployee(dismissEmployee);
+
+        //  2.删除员工权限
+        DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
+        deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(detail.getOrganizationId());
+        deleteOrganizationPersonnelByContactTokenCommand.setContactToken(detail.getContactToken());
+        deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
+        organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
+
+        //  TODO:3.添加档案记录
     }
 
     @Override

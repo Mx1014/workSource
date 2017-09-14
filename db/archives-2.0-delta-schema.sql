@@ -55,6 +55,21 @@ CREATE TABLE `eh_archives_forms` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
+DROP TABLE IF EXISTS `eh_archives_configurations`;
+CREATE TABLE `eh_archives_configurations` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+	`organization_id` BIGINT NOT NULL COMMENT'the id of organization',
+	`detail_id` BIGINT NOT NULL COMMENT 'the detailId of the employee',
+	`operation_type` TINYINT NOT NULL COMMENT'the type of operation',
+	`operation_time` DATE NOT NULL DEFAULT NOW() COMMENT 'the time to execute the operation',
+  `operation_remark` VARCHAR(256) COMMENT 'the remark of the operation',
+  `remind_time` DATETIME COMMENT 'time to send email to the corresponding member',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'pending, execution',
+  `create_time` DATETIME COMMENT 'create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
+
 -- eh_organization_member_details 表的字段添加
 ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE COMMENT '离职日期';
 ALTER TABLE eh_organization_member_details CHANGE political_status political_flag VARCHAR(128) COMMENT '政治面貌';

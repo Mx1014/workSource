@@ -9,8 +9,8 @@ import java.util.List;
 /**
  * <ul>
  * <li>detailIds: (List)员工 detailId</li>
- * <li>departmentId: 部门 id</li>
- * <li>jobPositionId: 职务 id</li>
+ * <li>departmentIds: 部门 id(以数组形式传参)</li>
+ * <li>jobPositionIds: 岗位 id</li>
  * <li>organizationId: 工作地点 id</li>
  * <li>effectiveTime: 生效时间</li>
  * <li>transferType: 调整类型: 1-晋升,2-调整,3-其他</li>
@@ -25,7 +25,8 @@ public class TransferArchivesEmployeesCommand {
     @ItemType(Long.class)
     private List<Long> departmentIds;
 
-    private String jobPosition;
+    @ItemType(Long.class)
+    private List<Long> jobPositionIds;
 
     private Long organizationId;
 
@@ -44,14 +45,6 @@ public class TransferArchivesEmployeesCommand {
 
     public void setDetailIds(List<Long> detailIds) {
         this.detailIds = detailIds;
-    }
-
-    public String getJobPosition() {
-        return jobPosition;
-    }
-
-    public void setJobPosition(String jobPosition) {
-        this.jobPosition = jobPosition;
     }
 
     public Long getOrganizationId() {
@@ -97,5 +90,13 @@ public class TransferArchivesEmployeesCommand {
 
     public void setDepartmentIds(List<Long> departmentIds) {
         this.departmentIds = departmentIds;
+    }
+
+    public List<Long> getJobPositionIds() {
+        return jobPositionIds;
+    }
+
+    public void setJobPositionIds(List<Long> jobPositionIds) {
+        this.jobPositionIds = jobPositionIds;
     }
 }

@@ -41,6 +41,8 @@ public class ArchivesEmployeeDTO {
 
     private String workEmail;
 
+    private Date checkInTime;
+
     private Date employmentTime;
 
     private Date contractTime;
@@ -118,6 +120,14 @@ public class ArchivesEmployeeDTO {
 
     public void setWorkEmail(String workEmail) {
         this.workEmail = workEmail;
+    }
+
+    public Date getCheckInTime() {
+        return checkInTime;
+    }
+
+    public void setCheckInTime(Date checkInTime) {
+        this.checkInTime = checkInTime;
     }
 
     public Date getEmploymentTime() {
