@@ -54,6 +54,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
         List<BillDetailDTO> dtos = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
         //用时间区分待缴
         String dateStrEnd = "";
         if(isOwedBill==1){
@@ -65,7 +66,6 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             if(c2.compareTo(c3) != -1){
                 c1 = c3;
             }
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
             dateStrEnd = sdf.format(c1.getTime());
         }
         //找合计
@@ -148,9 +148,20 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setBillId(sourceDto.getBillID());
                     dto.setDateStr(sourceDto.getBillDate());
                     //将billDate转为yyyy-MM，然后和现在比较，如果大于现在，则status为3即欠费
-                    String billDate = sourceDto.getBillDate();
+                    Byte billStatus = sourceDto.getPayFlag();
+                    try{
+                        String billDate = sourceDto.getBillDate();
+                        Date returnedDate = sdf.parse(billDate);
+                        Calendar c4 = Calendar.getInstance();
+                        c4.setTime(returnedDate);
+                        Calendar c5 = Calendar.getInstance();
+                        if(c4.compareTo(c5)!=-1){
+                            billStatus = 2;
+                        }
+                    }catch (Exception e){
+                        LOGGER.error("billStatus parse failed");
+                    }
                     dto.setStatus(sourceDto.getPayFlag());
-
                     String szsm_status = sourceDto.getStatus();
                     if(szsm_status.equals(PaymentStatus.SUSPEND)){
                         dto.setPayStatus(PaymentStatus.IN_PROCESS.getCode());
