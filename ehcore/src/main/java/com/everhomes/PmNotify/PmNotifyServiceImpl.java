@@ -136,7 +136,7 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
             PmNotifyType notify = PmNotifyType.fromCode(record.getNotifyType());
             if (EntityType.EQUIPMENT_TASK.getCode().equals(record.getOwnerType())) {
                 scope = EquipmentNotificationTemplateCode.SCOPE;
-                EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(record.getId());
+                EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(record.getOwnerId());
                 taskName = task.getTaskName();
                 if(PmNotifyType.BEFORE_START.equals(notify)) {
                     time = task.getExecutiveStartTime();
