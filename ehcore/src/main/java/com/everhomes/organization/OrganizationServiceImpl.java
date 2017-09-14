@@ -10165,12 +10165,19 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             if (DateHelper.currentGMTTime().getTime() > dto.getEndTime())
                 return configProvider.getValue("auth.overtime", "");
+
             ApproveContactCommand cmd2 = ConvertHelper.convert(dto, ApproveContactCommand.class);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("email verify approveForEnterpriseContact cmd2 = {}", cmd2);
+            }
+
             approveForEnterpriseContact(cmd2);
+
             String success = configProvider.getValue("auth.success", "");
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("auth success redirectUrl = {}", success);
+                LOGGER.debug("email verify auth success redirectUrl = {}", success);
             }
+
             return success;
         } catch (Exception e) {
             LOGGER.error("email verify enterprise contact error, token = {}", cmd.getVerifyToken());
