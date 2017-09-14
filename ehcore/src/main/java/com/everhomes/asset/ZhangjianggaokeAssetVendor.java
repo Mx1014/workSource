@@ -50,6 +50,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     @Autowired
     private UserProvider userProvider;
 
+
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
