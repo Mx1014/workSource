@@ -14,6 +14,11 @@ public interface UniongroupService {
     public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd);
 
     /**
+     * 保存一次组配置
+     **/
+    public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd, SaveUniongroupCallBack callBack);
+
+    /**
      * 根据组Id获取配置项记录
      **/
     public List getConfiguresListByGroupId(GetUniongroupConfiguresCommand cmd);

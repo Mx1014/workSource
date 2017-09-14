@@ -46,27 +46,39 @@ public class UniongroupServiceImpl implements UniongroupService {
     private UniongroupSearcher uniongroupSearcher;
 
     @Override
-    public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
+    public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd){
+        this.saveUniongroupConfigures(cmd,null);
+    }
+
+    @Override
+    public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd, SaveUniongroupCallBack callBack) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
-            UnionPolicyObject unionPolicyObject = this.originPolicyAlgorithm(cmd);
+            UnionPolicyObject unionPolicyObject = new UnionPolicyObject();
+            if(callBack != null){
+                unionPolicyObject = this.originPolicyAlgorithm(cmd);
+            }else{
+                unionPolicyObject = callBack.policyProcess(cmd);
+            }
 
-            //4.保存
+            //4.保存s
+            UnionPolicyObject finalUnionPolicyObject = unionPolicyObject; //拷贝变量
+
             this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
 
                 //--------------------------1.保存配置表--------------------------
-                if (unionPolicyObject.getConfigureList().size() > 0) {
-                    unionPolicyObject.getConfigureList().stream().map(r -> {
+                if (finalUnionPolicyObject.getConfigureList().size() > 0) {
+                    finalUnionPolicyObject.getConfigureList().stream().map(r -> {
                         this.uniongroupConfigureProvider.createUniongroupConfigures(r);
                         //2保存关系表
                         return null;
                     }).collect(Collectors.toList());
                 }
-                if (unionPolicyObject.getUnionDetailsList().size() > 0) {
+                if (finalUnionPolicyObject.getUnionDetailsList().size() > 0) {
                     //--------------------------2.保存关系表--------------------------
-                    this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(new ArrayList(unionPolicyObject.getDetailIds()));
+                    this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(new ArrayList(finalUnionPolicyObject.getDetailIds()));
                     //后保存
-                    this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(unionPolicyObject.getUnionDetailsList());
+                    this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(finalUnionPolicyObject.getUnionDetailsList());
                 }
 
                 return null;
