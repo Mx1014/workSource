@@ -15,6 +15,7 @@ import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
@@ -562,6 +563,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     public void updateBillsToSettled(UpdateBillsToSettled cmd) {
         assetProvider.updateBillsToSettled(cmd.getContractId(),cmd.getOwnerType(),cmd.getOwnerId());
     }
+
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(String billId,String targetType) {

@@ -1,14 +1,30 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.List;
 
 /**
  * Created by Wentian Wang on 2017/9/12.
  */
-
+/**
+ *<ul>
+ * <li>clientAppName:客户端名称</li>
+ * <li>billIds:账单id列表</li>
+ * <li>contactNum:合同号</li>
+ * <li>amountOwed:缴纳金额，单位元</li>
+ * <li>communityId:园区id</li>
+ * <li>payerType:支付者的类型，eh_user为个人，eh_organization为企业</li>
+ * <li>payerId:支付者的id</li>
+ * <li>payerName:支付者的名称</li>
+ * <li>ownerType:所属者类型，通常为community</li>
+ * <li>openid:微信标识</li>
+ *</ul>
+ */
 public class PlaceAnAssetOrderCommand {
     private String clientAppName;
+    @ItemType(String.class)
     private List<String> billIds;
     private String contactNum;
     private String amountOwed;

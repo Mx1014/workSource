@@ -15,13 +15,16 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
+import javax.servlet.http.HttpServletResponse;
+
 @RestController
 @RequestMapping("/contract")
 public class ContractController extends ControllerBase {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
-//	private ContractService contractService;
+	@Autowired
+	private ContractService contractService;
 
 	@Autowired
 	private ContractSearcher contractSearcher;
@@ -243,4 +246,5 @@ public class ContractController extends ControllerBase {
 		String handler = configurationProvider.getValue(namespaceId, "contractService", "");
 		return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
 	}
+
 }

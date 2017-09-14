@@ -47,6 +47,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
@@ -1139,12 +1140,6 @@ public class AssetServiceImpl implements AssetService {
             });
     }
 
-    @Override
-    public PlaceAnAssetOrderResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        AssetVendor vendor = checkAssetVendor(cmd.getOwnerType(),cmd.getCommunityId());
-        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
-        return handler.placeAnAssetOrder(cmd);
-    }
 
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
         CacheAccessor accessor = cacheProvider.getCacheAccessor(null);

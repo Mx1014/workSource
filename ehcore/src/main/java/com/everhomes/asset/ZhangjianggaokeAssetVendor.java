@@ -2,41 +2,24 @@
 package com.everhomes.asset;
 
 import com.everhomes.asset.zjgkVOs.*;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.http.HttpUtils;
-import com.everhomes.oauth2client.HttpResponseEntity;
-import com.everhomes.oauth2client.handler.RestCallTemplate;
-import com.everhomes.order.PayService;
 import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.recommend.RecommendationService;
-import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.BillDetailDTO;
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PreOrderCommand;
-import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
-import org.elasticsearch.common.recycler.Recycler;
-import org.elasticsearch.index.analysis.AnalysisSettingsRequired;
 import org.springframework.context.ApplicationContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import sun.java2d.pipe.SpanShapeRenderer;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -67,21 +50,30 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     @Autowired
     private UserProvider userProvider;
 
-    @Autowired
-    private PayService payService;
-
-
-
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
         List<BillDetailDTO> dtos = new ArrayList<>();
+        //用时间区分待缴
+        String dateStrEnd = "";
+        if(isOwedBill==1){
+            Calendar c1 = Calendar.getInstance();
+            Calendar c2 = Calendar.getInstance();
+            Calendar c3 = Calendar.getInstance();
+            c2.add(Calendar.DAY_OF_MONTH,15);
+            c3.add(Calendar.MONTH,1);
+            if(c2.compareTo(c3) != -1){
+                c1 = c3;
+            }
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+            dateStrEnd = sdf.format(c1.getTime());
+        }
         //找合计
         String postJson = "";
         Map<String, String> params=new HashMap<String, String> ();
         params.put("payFlag", "0");
         params.put("sdateFrom","");
-        params.put("sdateTo","");
+        params.put("sdateTo",dateStrEnd);
         check(contractNum,"合同编号");
         params.put("contractNum", contractNum);
         String json = generateJson(params);
@@ -119,12 +111,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 //        check(String.valueOf(ownerId),"ownerId");
 //        String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
         String payFlag = "";
-        String dateStrEnd = "";
         if(isOwedBill==1){
             payFlag="0";
-            Calendar c = Calendar.getInstance();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-            dateStrEnd = sdf.format(c.getTime());
         }else if(isOwedBill==0){
             payFlag="";
         }
@@ -159,7 +147,10 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setAmountReceviable(sourceDto.getAmountReceivable()==null?null:new BigDecimal(sourceDto.getAmountReceivable()));
                     dto.setBillId(sourceDto.getBillID());
                     dto.setDateStr(sourceDto.getBillDate());
+                    //将billDate转为yyyy-MM，然后和现在比较，如果大于现在，则status为3即欠费
+                    String billDate = sourceDto.getBillDate();
                     dto.setStatus(sourceDto.getPayFlag());
+
                     String szsm_status = sourceDto.getStatus();
                     if(szsm_status.equals(PaymentStatus.SUSPEND)){
                         dto.setPayStatus(PaymentStatus.IN_PROCESS.getCode());
@@ -567,40 +558,6 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         LOGGER.error("Insufficient privilege, zjgkhandler updateBillsToSettled");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
-    }
-
-    @Override
-    public PlaceAnAssetOrderResponse placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        PlaceAnAssetOrderResponse response = new PlaceAnAssetOrderResponse();
-        //存一份到我这
-        List<String> billIds = cmd.getBillIds();
-        String billIdsWithComma = assetUtils.convertStringList2CommaSeparation(billIds);
-        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),cmd.getAmountOwed(),billIdsWithComma,cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),15l*60l*1000l);
-        //请求支付模块的下预付单
-        PreOrderCommand cmd2pay = new PreOrderCommand();
-//        Long amount = 转成分(cmd.getAmountOwed());
-        Long payerId = null;
-        if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
-            if(Long.parseLong(cmd.getPayerId())==UserContext.currentUserId()){
-                payerId = Long.parseLong(cmd.getPayerId());
-            }else{
-                LOGGER.error("individual make asset order failed, the given uid = {}, but the online uid is = {}",cmd.getPayerId(),UserContext.currentUserId());
-                throw new RuntimeErrorException("individual make asset order failed");
-            }
-        }
-        String amountOwed = cmd.getAmountOwed();
-        Long amount1 = Long.parseLong(amountOwed);
-        amount1 = amount1*100l;
-        cmd2pay.setAmount(amount1);
-        cmd2pay.setClientAppName(cmd.getClientAppName());
-        cmd2pay.setExpiration(15l*60l);
-        cmd2pay.setNamespaceId(UserContext.getCurrentNamespaceId());
-        cmd2pay.setOpenid(cmd.getOpenid());
-        cmd2pay.setOrderId(orderId);
-        cmd2pay.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
-        cmd2pay.setPayerId(payerId);
-        PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
-        return response;
     }
 
     @Override
