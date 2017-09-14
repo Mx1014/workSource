@@ -133,7 +133,7 @@ public class PayProviderImpl implements PayProvider {
         }else{
             query.addConditions(Tables.EH_PAYMENT_TYPES.PAYMENT_TYPE.ne(PaymentType.WECHAT_JS_PAY.getCode()));
         }
-        
+
         if(orderType != null){
             query.addConditions(Tables.EH_PAYMENT_TYPES.ORDER_TYPE.eq(orderType));
         }

@@ -9,6 +9,7 @@ import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.order.RefundCallbackCommand;
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ public class PayController extends ControllerBase {
 	 */
 	@RequestMapping("payNotify")
 	@RestReturn(value=String.class)
+	@RequireAuthentication(false)
 	public RestResponse payNotify(@Valid OrderPaymentNotificationCommand cmd) {
 		payService.payNotify(cmd);
 		RestResponse response = new RestResponse();
@@ -40,19 +42,19 @@ public class PayController extends ControllerBase {
 		return response;
 	}
 
-	/**
-	 * <b>URL: /pay/createPreOrder</b>
-	 * <p>用于测试</p>
-	 */
-	@RequestMapping("createPreOrder")
-	@RestReturn(value=PreOrderDTO.class)
-	public RestResponse createPreOrder(PreOrderCommand cmd) {
-		PreOrderDTO dto = payService.createPreOrder(cmd);
-		RestResponse response = new RestResponse(dto);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /pay/createPreOrder</b>
+//	 * <p>用于测试</p>
+//	 */
+//	@RequestMapping("createPreOrder")
+//	@RestReturn(value=PreOrderDTO.class)
+//	public RestResponse createPreOrder(PreOrderCommand cmd) {
+//		PreOrderDTO dto = payService.createPreOrder(cmd);
+//		RestResponse response = new RestResponse(dto);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 
 
 
