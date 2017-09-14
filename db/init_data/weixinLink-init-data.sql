@@ -1141,6 +1141,8 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
     VALUES ((@pad_items_id := @pad_items_id + 1), 999991, 0, 0, 0, '/home/resourceService', 'resourceGroup', '公司后勤', '公司后勤', 'cs://1/image/aW1hZ2UvTVRvMk1XVmpOVEE1WW1JMU0ySXlNR1U1TlRrM1lUQmxNVGxrWXpWaE4yVXlOdw', 1, 1, 33, CONCAT('{"type":',@categories_id,',"parentId":',@categories_id,',"displayType": "list"}'), 80, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'park_tourist', 0, NULL, 30, NULL);
 
+UPDATE eh_launch_pad_items set action_data = '{"url": "https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1999990&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%3Fisfromindex%3D0%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix"}' where item_label = '外卖点送' AND namespace_id = 999991;
+
 --  重配服务广场  edit by yanjun 20170914 end 到 1144行
 
 
