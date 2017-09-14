@@ -927,6 +927,15 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `ow
 INSERT INTO `eh_organization_communities` (`organization_id`, `community_id`)
 	VALUES (1024525,240111044332059898);
 
+SET @lease_config_id = (SELECT MAX(id) FROM `eh_lease_configs`);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`) VALUES ((@lease_config_id := @lease_config_id + 1), '999965', '1', '1', '1', '1', '1', '0');
+
+SET @eh_app_id = (SELECT MAX(id) FROM `eh_app_urls`);
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
+	VALUES ((@eh_app_id := @eh_app_id+1), '999965', '凯泰C时代', '1', '', '', '移动平台聚合服务，助力园区效能提升');
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
+	VALUES ((@eh_app_id := @eh_app_id+1), '999965', '凯泰C时代', '2', '', '', '移动平台聚合服务，助力园区效能提升');
+
 -- 仅仅beta执行
 -- set @group_id = 1004280; -- 1042112
 -- set @organization_id = 1024525; -- 1035855
