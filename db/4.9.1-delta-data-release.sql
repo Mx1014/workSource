@@ -243,5 +243,22 @@ INSERT INTO `eh_var_field_item_scopes` (`id`, `namespace_id`, `module_name`, `fi
 update eh_var_field_item_scopes set item_display_name = '先生' where namespace_id = 999971 and module_name = 'enterprise_customer' and item_display_name = '男';
 update eh_var_field_item_scopes set item_display_name = '女士' where namespace_id = 999971 and module_name = 'enterprise_customer' and item_display_name = '女';
 
+
+-- 张江高科合同管理和客户管理的菜单加上 add by xiongying20170914
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21200', '', 'EhNamespaces', '999971', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21210', '', 'EhNamespaces', '999971', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21100', '', 'EhNamespaces', '999971', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21110', '', 'EhNamespaces', '999971', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '21120', '', 'EhNamespaces', '999971', '2');
+
+
 -- 修改招租管理模块名称 add by xq.tian  2017/09/14
 UPDATE eh_flow_cases set module_name = '招租管理' where module_id = 40100;
+
+-- 神州数码的配置数据 add by xiongying20170914
+SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'shenzhou.host.url', 'http://139.129.220.146:3578', NULL, '999971', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'shenzhoushuma.app.key', 'ee4c8905-9aa4-4d45-973c-ede4cbb3cf21', NULL, '999971', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'shenzhoushuma.secret.key', '2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==', NULL, '999971', NULL);
+

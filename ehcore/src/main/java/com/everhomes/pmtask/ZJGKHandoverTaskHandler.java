@@ -42,6 +42,7 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZJGKHandoverTaskHandler.class);
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final String CREATE_TASK = "/openapi/createTask";
 
     @Autowired
     private ConfigurationProvider configProvider;
@@ -70,7 +71,7 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
 
     @Override
     public void handoverTaskToTrd(PmTask task) {
-        String url = configProvider.getValue("pmtask.zjgk.url", "");
+        String url = configProvider.getValue(task.getNamespaceId(), "shenzhou.host.url", "");
         Map<String, String> params = generateParams(task);
 
         ZjgkJsonEntity entity = new ZjgkJsonEntity();
@@ -78,7 +79,7 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
 
         String jsonStr = null;
         try {
-            jsonStr = HttpUtils.post(url, params, 20, "UTF-8");
+            jsonStr = HttpUtils.post(url+CREATE_TASK, params, 20, "UTF-8");
             //向张江认证。
             entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity>(){});
         } catch (Exception e) {
