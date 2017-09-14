@@ -11,35 +11,36 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>organizationId: 组织id</li>
- * <li>targetType：成员是否注册 参考{@link com.everhomes.rest.organization.OrganizationMemberTargetType}</li>
- * <li>targetId：注册用户对应的userId，未注册填0</li>
- * <li>contactName：成员名称</li>
- * <li>contactToken：联系信息</li>
- * <li>gender：性别</li>
- * <li>employeeNo：工号</li>
- * <li>contactDescription：描述</li>
+ * <li>targetType: 成员是否注册 参考{@link com.everhomes.rest.organization.OrganizationMemberTargetType}</li>
+ * <li>targetId: 注册用户对应的userId，未注册填0</li>
+ * <li>contactName: 成员名称</li>
+ * <li>contactToken: 联系信息</li>
+ * <li>gender: 性别</li>
  * <li>employeeNo: 工号</li>
  * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣 参考{@link com.everhomes.rest.organization.EmployeeType}</li>
  * <li>employeeStatus: 员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
  * <li>employmentTime: 转正时间</li>
  * <li>checkInTime: 入职时间</li>
- * <li>departmentIds：添加到多部门</li>
- * <li>jobPositionIds：添加到多群组</li>
+ * <li>visibleFlag: 成员隐私性: 0-显示 1-隐藏 (默认为显示)</li>
+ * <li>departmentIds: 添加到多部门</li>
+ * <li>groupIds: groupIds</li>
+ * <li>jobPositionIds: 添加到多群组</li>
+ * <li>jobLevelIds: jobLevelIds</li>
  * </ul>
  */
 public class AddOrganizationPersonnelCommand {
-	
-    @NotNull
-    private Long   organizationId;
-   
+
+	@NotNull
+	private Long organizationId;
+
 	private String targetType;
-	
-	private Long   targetId;
-	
+
+	private Long targetId;
+
 	private String contactName;
-	
+
 	private String contactToken;
-	
+
 	private Byte gender;
 
 	private String employeeNo;
@@ -53,7 +54,7 @@ public class AddOrganizationPersonnelCommand {
 	private String checkInTime;
 
 	private Byte visibleFlag;
-	
+
 	@ItemType(Long.class)
 	private List<Long> departmentIds;
 
@@ -62,7 +63,7 @@ public class AddOrganizationPersonnelCommand {
 
 	@ItemType(Long.class)
 	private List<Long> jobPositionIds;
-	
+
 	@ItemType(Long.class)
 	private List<Long> jobLevelIds;
 
@@ -202,9 +203,9 @@ public class AddOrganizationPersonnelCommand {
 	}
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 
 	public Byte getVisibleFlag() {
