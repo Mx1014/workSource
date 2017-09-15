@@ -436,13 +436,8 @@ public interface OrganizationProvider {
 	boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path);
 
 	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
-
-<<<<<<< HEAD
-	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
-
-=======
-	
->>>>>>> punch-3.0
+  
+ 
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
 	List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId,List<String> groupTypes);
 	
