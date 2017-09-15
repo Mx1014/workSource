@@ -1176,3 +1176,14 @@ UPDATE eh_configurations set `value` = '0306F2' where `name` = 'parking.mybay.pw
 update eh_configurations set value = '[{"typeId":"11", "typeName":"VIP月卡"},{"typeId":"5", "typeName":"普通月卡"}]' where name = 'parking.xiaomao.types.10011';
 update eh_configurations set value = '[{"typeId":"02", "typeName":"VIP月卡"}]' where name = 'parking.xiaomao.types.10012';
 
+
+-- 搜索类型 add by xujuan 20170915
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('1', '0', '', '0', '投票', 'poll', '1', NULL, NULL, '3');
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('2', '0', '', '0', '活动', 'activity', '1', NULL, NULL, '2');
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('3', '0', '', '0', '话题', 'topic', '1', NULL, NULL, '1');
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('43', '0', '', '0', '应用', 'launchpaditem', '1', NULL, NULL, '5');
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('56', '0', '', '0', '商家', 'shop', '1', NULL, NULL, '6');
+
+
+-- 补充缺失数据 add by xujuan 20170915
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('1478', 'biz.search.shops.api', '/zl-ec/rest/openapi/shop/listByKeyword', '搜索电商商家API', '0', NULL);
