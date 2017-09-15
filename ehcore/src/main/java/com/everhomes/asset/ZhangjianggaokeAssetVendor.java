@@ -12,11 +12,13 @@ import com.everhomes.order.PayService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.recommend.RecommendationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.BillDetailDTO;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.user.User;
@@ -576,7 +578,12 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         List<String> billIds = cmd.getBillIds();
         String billIdsWithComma = assetUtils.convertStringList2CommaSeparation(billIds);
 //        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),cmd.getAmountOwed(),billIdsWithComma,cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),15l*60l*1000l);
-        Long orderId = 0010202031231l;
+        Long orderId = 372345452133252l;
+        Random r = new Random();
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < 7; i++){
+            sb.append(r.nextInt(10));
+        }
         //请求支付模块的下预付单
         PreOrderCommand cmd2pay = new PreOrderCommand();
 //        Long amount = 转成分(cmd.getAmountOwed());
@@ -590,8 +597,10 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             }
         }
         String amountOwed = cmd.getAmountOwed();
-        Long amount1 = Long.parseLong(amountOwed);
-        amount1 = amount1*100l;
+        Float var = Float.parseFloat(amountOwed);
+        var = var*100f;
+        Long amount1 = Long.parseLong(String.valueOf(var.intValue()));
+
         cmd2pay.setAmount(amount1);
         cmd2pay.setClientAppName(cmd.getClientAppName());
         cmd2pay.setExpiration(15l*60l);
@@ -600,6 +609,16 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         cmd2pay.setOrderId(orderId);
         cmd2pay.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
         cmd2pay.setPayerId(payerId);
+
+        //没有返回paymethod，payparams
+        cmd2pay.setPaymentType(PaymentType.WECHAT_APPPAY.getCode());
+        PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+        paymentParamsDTO.setPayType("no_credit");
+        User user = UserContext.current().getUser();
+        paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+        cmd2pay.setPaymentParams(paymentParamsDTO);
+
+
 
         PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
 //        response.setAmount(String.valueOf(preOrder.getAmount()));
