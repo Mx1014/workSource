@@ -57,7 +57,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
         //用时间区分待缴
         String dateStrEnd = "";
-        if(isOwedBill==1){
+        if(isOwedBill==1 || isOwedBill==0){
             Calendar c1 = Calendar.getInstance();
             Calendar c2 = Calendar.getInstance();
             Calendar c3 = Calendar.getInstance();
@@ -119,7 +119,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         }
         params.put("payFlag", payFlag);
         params.put("sdateFrom","");
-        params.put("sdateTo",dateStrEnd);
+        params.put("sdateTo",isOwedBill==1?dateStrEnd:"");
         params.put("pageOffset","1");
         params.put("pageSize",String.valueOf(Integer.MAX_VALUE));
         params.put("contractNum", contractNum);
@@ -273,7 +273,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 if(response1!=null && response1.size()>0){
                     ContractBillsStatDTO res = response1.get(0);
                     result.setAmountOwed(res.getAmountTotalOwed()==null?null:new BigDecimal(res.getAmountTotalOwed()));
-                    result.setAmountReceivable(res.getAmountTotalOwed()==null?null:new BigDecimal(res.getAmountTotalOwed()));
+//                    result.setAmountReceivable(res.getAmountTotalOwed()==null?null:new BigDecimal(res.getAmountTotalOwed()));
                 }
                 result.setDatestr(dateStr);
             }else{
@@ -316,6 +316,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             LOGGER.error("调用神州数码失败"+e);
             throw new RuntimeException("调用神州数码失败"+e);
         }
+        BigDecimal amountReceivable = new BigDecimal("0");
         if(postJson!=null&&postJson.trim().length()>0){
             ContractBillResponse response = (ContractBillResponse)StringHelper.fromJsonString(postJson, ContractBillResponse.class);
             if(response.getErrorCode()==200){
@@ -325,6 +326,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                     dto.setAmountOwed(sourceDto.getAmountOwed()==null?null:new BigDecimal(sourceDto.getAmountOwed()));
                     dto.setAmountReceivable(sourceDto.getAmountReceivable()==null?null:new BigDecimal(sourceDto.getAmountReceivable()));
+                    amountReceivable = amountReceivable.add(sourceDto.getAmountReceivable()==null?new BigDecimal("0"):new BigDecimal(sourceDto.getAmountReceivable()));
                     String buildingName = "";
                     String apartmentName = "";
                     if(sourceDto.getApartments()!=null&& sourceDto.getApartments().size()>0){
@@ -340,6 +342,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 LOGGER.error("调用张江高科searchEnterpriseBills失败"+response.getErrorDescription()+","+response.getErrorDetails());
             }
         }
+        result.setAmountReceivable(amountReceivable);
         result.setShowBillDetailForClientDTOList(list);
         return result;
 
@@ -591,80 +594,86 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 
     @Override
     public List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse carrier) {
-        if(status!=1){
-            LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                    "Insufficient privilege");
-        }
+        List<ListBillGroupsDTO> listBillGroupsDTOS = assetProvider.listBillGroups(ownerId, ownerType);
         List<ListBillsDTO> list = new ArrayList<>();
-        String postJson = "";
-        Map<String, String> params=new HashMap<String, String> ();
-        String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
-        if(StringUtils.isEmpty(zjgk_communityIdentifier)){
-            LOGGER.error("Zjgk community id is empty, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
-            throw RuntimeErrorException.errorWith("zjgk", 9999712,
-                    "该园区暂没有和系统对接，无法查询");
-        } else {
-            LOGGER.info("Find zjgk community id from db, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
-        }
-        params.put("customerName", StringUtils.isEmpty(targetName)==true?"":targetName);
-        params.put("communityIdentifer", StringUtils.isEmpty(zjgk_communityIdentifier)==true?"":zjgk_communityIdentifier);
-        params.put("buildingIdentifier", StringUtils.isEmpty(buildingName)==true?"":String.valueOf(buildingName));
-        params.put("apartmentIdentifier", StringUtils.isEmpty(apartmentName)==true?"":String.valueOf(apartmentName));
-        params.put("payFlag", billStatus==null?"":String.valueOf(billStatus));
-        params.put("sdateFrom",StringUtils.isEmpty(dateStrBegin)==true?"":dateStrBegin);
-        params.put("sdateTo",StringUtils.isEmpty(dateStrEnd)==true?"":dateStrEnd);
-        params.put("pageOffset",pageOffSet==null?"":String.valueOf(pageOffSet));
-        params.put("pageSize",pageSize==null?"":String.valueOf(pageSize));
-        params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
-        String json = generateJson(params);
-        LOGGER.info("listBill"+json);
-        String url;
-        Boolean nextFLag = true;
-        if(targetType==null||targetType.trim().equals("")){
-            url = ZjgkUrls.SEARCH_USER_BILLS;
-            listBillOnUrls(targetType, carrier, list, json, url,AssetTargetType.USER.getCode());
-            if(carrier.getNextPageAnchor()==null){
-                nextFLag = false;
-            }
-            if(list.size()>=pageSize){
-                return list;
-            }else{
-                pageSize = pageSize-list.size();
-            }
-            params = new HashMap<>();
-            params.put("customerName", StringUtils.isEmpty(targetName)==true?"":targetName);
-            params.put("communityIdentifer", StringUtils.isEmpty(zjgk_communityIdentifier)==true?"":zjgk_communityIdentifier);
-            params.put("buildingIdentifier", StringUtils.isEmpty(buildingName)==true?"":String.valueOf(buildingName));
-            params.put("apartmentIdentifier", StringUtils.isEmpty(apartmentName)==true?"":String.valueOf(apartmentName));
-            params.put("payFlag", billStatus==null?"":String.valueOf(billStatus));
-            params.put("sdateFrom",StringUtils.isEmpty(dateStrBegin)==true?"":dateStrBegin);
-            params.put("sdateTo",StringUtils.isEmpty(dateStrEnd)==true?"":dateStrEnd);
-            params.put("pageOffset",pageOffSet==null?"":String.valueOf(pageOffSet));
-            params.put("pageSize",pageSize==null?"":String.valueOf(pageSize));
-            params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
-            json = generateJson(params);
-            LOGGER.info("listBill"+json);
-            url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
-            listBillOnUrls(targetType, carrier, list, json, url,AssetTargetType.ORGANIZATION.getCode());
-            if(nextFLag==false){
-                if(carrier.getNextPageAnchor()==null){
-                    carrier.setNextPageAnchor(null);
+        for(int i = 0; i < listBillGroupsDTOS.size(); i++){
+            ListBillGroupsDTO billGroup = listBillGroupsDTOS.get(i);
+            if(billGroup.getBillGroupId()==billGroupId && billGroup.getBillGroupName().equals("租金")){
+                if(status!=1){
+                    LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                            "Insufficient privilege");
                 }
-            }else{
-                Integer next = pageOffSet+1;
-                carrier.setNextPageAnchor(next.longValue());
+                String postJson = "";
+                Map<String, String> params=new HashMap<String, String> ();
+                String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
+                if(StringUtils.isEmpty(zjgk_communityIdentifier)){
+                    LOGGER.error("Zjgk community id is empty, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
+                    throw RuntimeErrorException.errorWith("zjgk", 9999712,
+                            "该园区暂没有和系统对接，无法查询");
+                } else {
+                    LOGGER.info("Find zjgk community id from db, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
+                }
+                params.put("customerName", StringUtils.isEmpty(targetName)==true?"":targetName);
+                params.put("communityIdentifer", StringUtils.isEmpty(zjgk_communityIdentifier)==true?"":zjgk_communityIdentifier);
+                params.put("buildingIdentifier", StringUtils.isEmpty(buildingName)==true?"":String.valueOf(buildingName));
+                params.put("apartmentIdentifier", StringUtils.isEmpty(apartmentName)==true?"":String.valueOf(apartmentName));
+                params.put("payFlag", billStatus==null?"":String.valueOf(billStatus));
+                params.put("sdateFrom",StringUtils.isEmpty(dateStrBegin)==true?"":dateStrBegin);
+                params.put("sdateTo",StringUtils.isEmpty(dateStrEnd)==true?"":dateStrEnd);
+                params.put("pageOffset",pageOffSet==null?"":String.valueOf(pageOffSet));
+                params.put("pageSize",pageSize==null?"":String.valueOf(pageSize));
+                params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
+                String json = generateJson(params);
+                LOGGER.info("listBill"+json);
+                String url;
+                Boolean nextFLag = true;
+                if(targetType==null||targetType.trim().equals("")){
+                    url = ZjgkUrls.SEARCH_USER_BILLS;
+                    listBillOnUrls(targetType, carrier, list, json, url,AssetTargetType.USER.getCode());
+                    if(carrier.getNextPageAnchor()==null){
+                        nextFLag = false;
+                    }
+                    if(list.size()>=pageSize){
+                        return list;
+                    }else{
+                        pageSize = pageSize-list.size();
+                    }
+                    params = new HashMap<>();
+                    params.put("customerName", StringUtils.isEmpty(targetName)==true?"":targetName);
+                    params.put("communityIdentifer", StringUtils.isEmpty(zjgk_communityIdentifier)==true?"":zjgk_communityIdentifier);
+                    params.put("buildingIdentifier", StringUtils.isEmpty(buildingName)==true?"":String.valueOf(buildingName));
+                    params.put("apartmentIdentifier", StringUtils.isEmpty(apartmentName)==true?"":String.valueOf(apartmentName));
+                    params.put("payFlag", billStatus==null?"":String.valueOf(billStatus));
+                    params.put("sdateFrom",StringUtils.isEmpty(dateStrBegin)==true?"":dateStrBegin);
+                    params.put("sdateTo",StringUtils.isEmpty(dateStrEnd)==true?"":dateStrEnd);
+                    params.put("pageOffset",pageOffSet==null?"":String.valueOf(pageOffSet));
+                    params.put("pageSize",pageSize==null?"":String.valueOf(pageSize));
+                    params.put("contractNum", StringUtils.isEmpty(contractNum)?"":contractNum);
+                    json = generateJson(params);
+                    LOGGER.info("listBill"+json);
+                    url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
+                    listBillOnUrls(targetType, carrier, list, json, url,AssetTargetType.ORGANIZATION.getCode());
+                    if(nextFLag==false){
+                        if(carrier.getNextPageAnchor()==null){
+                            carrier.setNextPageAnchor(null);
+                        }
+                    }else{
+                        Integer next = pageOffSet+1;
+                        carrier.setNextPageAnchor(next.longValue());
+                    }
+                    return list;
+                }
+                if(targetType.equals("eh_organization")){
+                    url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
+                    listBillOnUrls(targetType, carrier, list, json, url,"eh_organization");
+                }else if(targetType.equals("eh_user")){
+                    url = ZjgkUrls.SEARCH_USER_BILLS;
+                    listBillOnUrls(targetType, carrier, list, json, url,"eh_user");
+                }else{
+                    throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
+                }
             }
-            return list;
-        }
-        if(targetType.equals("eh_organization")){
-            url = ZjgkUrls.SEARCH_ENTERPRISE_BILLS;
-            listBillOnUrls(targetType, carrier, list, json, url,"eh_organization");
-        }else if(targetType.equals("eh_user")){
-            url = ZjgkUrls.SEARCH_USER_BILLS;
-            listBillOnUrls(targetType, carrier, list, json, url,"eh_user");
-        }else{
-            throw new RuntimeException("查询账单传递了不正确的客户类型"+targetType+",个人应该为eh_user，企业为eh_organization");
         }
         return list;
     }
