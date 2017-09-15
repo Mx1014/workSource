@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  *     根据场景类型中的定义{@link com.everhomes.rest.ui.user.SceneType}</li>
  * <li>communityType : 园区类型</li>
  * <li>status : 认证状态</li>
+ * <li>communityId : 园区ID</li>
  * </ul>
  */
 public class SceneDTO {

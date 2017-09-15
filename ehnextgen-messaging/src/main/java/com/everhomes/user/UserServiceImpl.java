@@ -2944,7 +2944,7 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setAvatar(organizationDto.getAvatarUri());
 		sceneDto.setAvatarUrl(organizationDto.getAvatarUrl());
 
-			String entityContent = StringHelper.toJsonString(organizationDto);
+		String entityContent = StringHelper.toJsonString(organizationDto);
 		sceneDto.setEntityContent(entityContent);
 
 		SceneTokenDTO sceneTokenDto = toSceneTokenDTO(namespaceId, userId, organizationDto, sceneType);
@@ -2958,6 +2958,10 @@ public class UserServiceImpl implements UserService {
 			sceneDto.setStatus(members.get(0).getStatus());
 		}else{
 			LOGGER.debug("This OrganizationMember is trouble");
+		}
+		OrganizationCommunityRequest organizationCommunityRequest = this.organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationDto.getId());
+		if(organizationCommunityRequest != null){
+			sceneDto.setCommunityId(organizationCommunityRequest.getCommunityId());
 		}
 
 		return sceneDto;
