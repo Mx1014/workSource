@@ -4327,6 +4327,21 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	@Override
+	public void deletePmNotifyParams(DeletePmNotifyParamsCommand cmd) {
+		Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
+		Long scopeId = cmd.getNamespaceId().longValue();
+		if(cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
+			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
+			scopeId = cmd.getCommunityId();
+		}
+		PmNotifyConfigurations configuration = pmNotifyProvider.findScopePmNotifyConfiguration(cmd.getId(), EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+		if(configuration != null) {
+			configuration.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
+			pmNotifyProvider.updatePmNotifyConfigurations(configuration);
+		}
+	}
+
+	@Override
 	public List<PmNotifyParamDTO> listPmNotifyParams(ListPmNotifyParamsCommand cmd) {
 		Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 		Long scopeId = cmd.getNamespaceId().longValue();
