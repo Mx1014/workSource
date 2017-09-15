@@ -784,6 +784,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
     VALUES ((@item_id := @item_id + 1), 999991, '0', '0', '0', '/association', 'TabGroup', '互动', '互动', 'cs://1/image/aW1hZ2UvTVRwbE1qVTNabUkzWVdGaE9XTTNNamc0TUdGaVpqbGtaV05sTnpNeU56TXhNdw', '1', '1', 62,'{}', 20, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', 20);
 
 -- 增加入口
+DELETE from eh_activity_categories where namespace_id = 999991 and name = '活动管理' AND entry_id = 1;
 SET @categories_id = (SELECT MAX(id) from eh_activity_categories);
 INSERT INTO `eh_activity_categories`(`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`)
 	VALUES((@categories_id := @categories_id + 1),'','0','1','-1','活动管理','/1','0','2','1',NOW(),'0',NULL,999991,'0','1','cs://1/image/aW1hZ2UvTVRvMVlXSTNOalEyTWpaa01XUTRPRGRrWXpJell6YzBNalk0TkdFNVlXWTBaQQ',NULL,NULL,'0');
