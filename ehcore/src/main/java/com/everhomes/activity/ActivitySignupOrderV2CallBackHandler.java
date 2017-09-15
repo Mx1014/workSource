@@ -54,15 +54,13 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 		//检验支付结果和应价格是否相等
 		checkPayAmount(cmd.getAmount(), activity.getChargePrice());
 		//支付宝回调时，可能会同时回调多次，
-		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode() + roster.getId()).enter(()-> {
-			roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
-			roster.setPayTime(new Timestamp(Long.valueOf(cmd.getPayDatetime())));
-			roster.setPayAmount(new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100)));
-			roster.setVendorType(String.valueOf(cmd.getPaymentType()));
-			roster.setOrderType(String.valueOf(cmd.getPaymentType()));
-			activityProvider.updateRoster(roster);
-			return null;
-		});
+		roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
+		roster.setPayTime(new Timestamp(Long.valueOf(cmd.getPayDatetime())));
+		roster.setPayAmount(new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100)));
+		roster.setVendorType(String.valueOf(cmd.getPaymentType()));
+		roster.setOrderType(String.valueOf(cmd.getPaymentType()));
+		activityProvider.updateRoster(roster);
+
 		LOGGER.info("ActivitySignupOrderV2CallBackHandler paySuccess end");
 	}
 

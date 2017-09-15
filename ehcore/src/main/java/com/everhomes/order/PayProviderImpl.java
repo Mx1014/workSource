@@ -7,6 +7,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.pay.order.PaymentDTO;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.sequence.SequenceProvider;
@@ -125,9 +126,14 @@ public class PayProviderImpl implements PayProvider {
         if(namespaceId != null){
             query.addConditions(Tables.EH_PAYMENT_TYPES.NAMESPACE_ID.eq(namespaceId));
         }
+
+        //1、可以指定支付方式，2、不指定支付方式则是所有非微信公众号支付，因为微信公众号支付必须指定支付方式
         if(paymentType != null){
             query.addConditions(Tables.EH_PAYMENT_TYPES.PAYMENT_TYPE.eq(paymentType));
+        }else{
+            query.addConditions(Tables.EH_PAYMENT_TYPES.PAYMENT_TYPE.ne(PaymentType.WECHAT_JS_PAY.getCode()));
         }
+
         if(orderType != null){
             query.addConditions(Tables.EH_PAYMENT_TYPES.ORDER_TYPE.eq(orderType));
         }

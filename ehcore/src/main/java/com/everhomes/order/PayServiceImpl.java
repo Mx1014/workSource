@@ -23,6 +23,7 @@ import com.everhomes.rest.pay.controller.RegisterBusinessUserRestResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,55 +89,71 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     @Override
     public PreOrderDTO createPreOrder(PreOrderCommand cmd) {
 
-        //防止同样的订单并发请求两次，加了锁之后会第二个请求会被阻塞，当它拿到锁之后订单已存在然后直接获取返回
-        String lockName = CoordinationLocks.PAY_CREATE_PREORDER.getCode() + cmd.getOrderType() + cmd.getOrderId();
-        PreOrderDTO dto = coordinationProvider.getNamedLock(lockName).enter(()-> {
-                    PreOrderDTO preOrderDTO = null;
-                    //1、查order表，如果order已经存在，则返回已有的合同，交易停止；否则，继续
-                    PaymentOrderRecord orderRecord = payProvider.findOrderRecordByOrder(cmd.getOrderType(), cmd.getOrderId());
-                    if (orderRecord != null) {
-                        preOrderDTO = recordToDto(orderRecord, cmd);
-                        return preOrderDTO;
-                    }
+        PreOrderDTO preOrderDTO = null;
+        //1、查order表，如果order已经存在，则返回已有的合同，交易停止；否则，继续
+        PaymentOrderRecord orderRecord = payProvider.findOrderRecordByOrder(cmd.getOrderType(), cmd.getOrderId());
+        if (orderRecord != null) {
+            preOrderDTO = recordToDto(orderRecord, cmd);
+            return preOrderDTO;
+        }
 
-                    //2、检查买方是否有会员，无则创建
-                    PaymentUser paymentUser = checkAndCreatePaymentUser(OwnerType.USER.getCode(), cmd.getPayerId());
+        //2、检查买方是否有会员，无则创建
+        PaymentUser paymentUser = checkAndCreatePaymentUser(OwnerType.USER.getCode(), cmd.getPayerId());
 
-                    //3、收款方是否有会员，无则报错
-                    PaymentServiceConfig serviceConfig = checkPaymentService(cmd.getNamespaceId(), cmd.getOrderType(), cmd.getResourceType(), cmd.getResourceId());
+        //3、收款方是否有会员，无则报错
+        PaymentServiceConfig serviceConfig = checkPaymentService(cmd.getNamespaceId(), cmd.getOrderType(), cmd.getResourceType(), cmd.getResourceId());
 
-                    //4、获取在支付系统中的账号，用户与支付系统交互,
-                    PaymentAccount paymentAccount = findPaymentAccount(SYSTEMID);
-                    if (paymentAccount == null) {
-                        LOGGER.error("payment account no find system_id={}", SYSTEMID);
-                        throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_ACCOUNT_NO_FIND,
-                                "payment account no find");
-                    }
+        //4、获取在支付系统中的账号，用户与支付系统交互,
+        PaymentAccount paymentAccount = findPaymentAccount(SYSTEMID);
+        if (paymentAccount == null) {
+            LOGGER.error("payment account no find system_id={}", SYSTEMID);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_ACCOUNT_NO_FIND,
+                    "payment account no find");
+        }
 
-                    //5、组装报文，发起下单请求
-                    OrderCommandResponse orderCommandResponse = createOrder(cmd, paymentUser, serviceConfig, paymentAccount);
+        //5、组装报文，发起下单请求
+        OrderCommandResponse orderCommandResponse = createOrder(cmd, paymentUser, serviceConfig, paymentAccount);
 
-                    //6、组装支付方式
-                    preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd, serviceConfig);
+        //6、组装支付方式
+        preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd, serviceConfig);
 
-                    //7、保存订单信息
-                    saveOrderRecord(cmd, orderCommandResponse, serviceConfig);
-
-                    //8、返回
-                    return preOrderDTO;
-                }).first();
+        //7、保存订单信息
+        saveOrderRecord(cmd, orderCommandResponse, serviceConfig);
 
         //8、返回
-        return dto;
+        return preOrderDTO;
 
     }
     @Override
     public void payNotify(OrderPaymentNotificationCommand cmd) {
+
+        //校验签名
+        PaymentAccount paymentAccount = findPaymentAccount(SYSTEMID);
+        if (paymentAccount == null) {
+            LOGGER.error("payment account no find system_id={}", SYSTEMID);
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_PAYMENT_ACCOUNT_NO_FIND,
+                    "payment account no find");
+        }
+
+        Map<String, String> params = new HashMap<>();
+        com.everhomes.util.StringHelper.toStringMap(null, cmd, params);
+        params.remove("signature");
+
+        if(!SignatureHelper.verifySignature(params, paymentAccount.getSecretKey(), cmd.getSignature())) {
+            LOGGER.error("Notification signature verify fail");
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_SIGNATURE_VERIFY_FAIL,
+                    "Notification signature verify fail");
+        }
+
+
+        //校验订单是否存在
         if(cmd.getOrderId() == null||cmd.getPaymentStatus()==null||cmd.getPaymentType()==null){
             LOGGER.error("Invalid parameter,orderId,orderType or paymentStatus is null");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter,orderId,orderType or paymentStatus is null");
         }
+
+        //调用具体业务
         PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(cmd.getPaymentType()));
         LOGGER.debug("PaymentCallBackHandler="+handler.getClass().getName());
         if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
