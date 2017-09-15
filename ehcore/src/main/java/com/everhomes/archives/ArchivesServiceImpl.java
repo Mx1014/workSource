@@ -929,23 +929,25 @@ public class ArchivesServiceImpl implements ArchivesService {
             orgCommand.setPageSize(20);
         ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
 
-        response.setArchivesEmployees(members.getMembers().stream().map(r -> {
-            ArchivesEmployeeDTO dto = new ArchivesEmployeeDTO();
-            dto.setDetailId(r.getDetailId());
-            dto.setTargetId(r.getTargetId());
-            dto.setTargetType(r.getTargetType());
-            dto.setContactName(r.getContactName());
-            dto.setEmployeeStatus(r.getEmployeeStatus());
-            //  TODO: 岗位的确定
-            dto.setDepartments(r.getDepartments());
-            //  TODO: 区号的添加,工作邮箱的读取,合同时间的读取
-            dto.setContactToken(r.getContactToken());
-//            dto.setWorkEmail(r.getEmail());
-            dto.setCheckInTime(r.getCheckInTime());
-            dto.setEmploymentTime(r.getEmploymentTime());
-//            dto.setContractTime(r.getcontr);
-            return dto;
-        }).collect(Collectors.toList()));
+        if (members.getMembers() != null && members.getMembers().size() > 0) {
+            response.setArchivesEmployees(members.getMembers().stream().map(r -> {
+                ArchivesEmployeeDTO dto = new ArchivesEmployeeDTO();
+                dto.setDetailId(r.getDetailId());
+                dto.setTargetId(r.getTargetId());
+                dto.setTargetType(r.getTargetType());
+                dto.setContactName(r.getContactName());
+                dto.setEmployeeStatus(r.getEmployeeStatus());
+                //  TODO: 岗位的确定
+                dto.setDepartments(r.getDepartments());
+                dto.setContactToken(r.getContactToken());
+                dto.setRegionCode(r.getRegionCode());
+                dto.setWorkEmail(r.getWorkEmail());
+                dto.setCheckInTime(r.getCheckInTime());
+                dto.setEmploymentTime(r.getEmploymentTime());
+                dto.setContractTime(r.getContractEndTime());
+                return dto;
+            }).collect(Collectors.toList()));
+        }
         response.setNextPageAnchor(members.getNextPageAnchor());
         return response;
     }
