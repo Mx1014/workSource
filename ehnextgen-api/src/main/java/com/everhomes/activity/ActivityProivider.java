@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.rest.activity.ActivityAttachmentDTO;
+import com.everhomes.rest.activity.ActivityRosterStatus;
 import org.jooq.Condition;
 import org.jooq.Operator;
 
@@ -36,7 +37,7 @@ public interface ActivityProivider {
 
     List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int count, Long activityId, boolean onlyConfirm);
 
-    List<ActivityRoster> listRosters(Long activityId);
+    List<ActivityRoster> listRosters(Long activityId, ActivityRosterStatus status);
     
     /**
      * 按条件统计报名人数 add by yanjun 20170502

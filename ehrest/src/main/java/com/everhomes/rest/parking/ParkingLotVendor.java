@@ -15,7 +15,7 @@ package com.everhomes.rest.parking;
  */
 public enum ParkingLotVendor {
     BOSIGAO("BOSIGAO"), BOSIGAO2("BOSIGAO2"), KETUO("KETUO"), KETUO2("KETUO2"), WANKE("WANKE"),
-    INNOSPRING("INNOSPRING"), JIN_YI("JIN_YI");
+    INNOSPRING("INNOSPRING"), JIN_YI("JIN_YI"), XIAOMAO("XIAOMAO"), MYBAY("Mybay");
     
     private String code;
     private ParkingLotVendor(String code) {

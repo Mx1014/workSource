@@ -68,6 +68,8 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
+import com.everhomes.rest.community_map.SearchCommunityMapContentsResponse;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
@@ -705,6 +707,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         dto.setCommunityId(organizationDTO.getCommunityId());
         dto.setCommunityName(organizationDTO.getCommunityName());
         dto.setAvatarUri(org.getAvatar());
+        if(!StringUtils.isEmpty(org.getDisplayName())){
+            dto.setDisplayName(org.getDisplayName());
+        }
 		if(null != org.getCheckinDate())
             dto.setCheckinDate(org.getCheckinDate().getTime());
 		if(!StringUtils.isEmpty(org.getAvatar()))
@@ -717,7 +722,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<AddressDTO> addresses = organizationAddresses.stream().map(r->{
 			OrganizationAddressDTO address = ConvertHelper.convert(r,OrganizationAddressDTO.class);
             Address addr = addressProvider.findAddressById(address.getAddressId());
-            return ConvertHelper.convert(addr, AddressDTO.class);
+
+            AddressDTO addressDTO = ConvertHelper.convert(addr, AddressDTO.class);
+            if (null != addr) {
+                Building building = communityProvider.findBuildingByCommunityIdAndName(addr.getCommunityId(), addr.getBuildingName());
+                if (null != building) {
+                    addressDTO.setBuildingId(building.getId());
+                }
+            }
+            return addressDTO;
         }).collect(Collectors.toList());
 
         dto.setAddresses(addresses);
@@ -1206,7 +1219,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void updateEnterprise(UpdateEnterpriseCommand cmd) {
         updateEnterprise(cmd, true);
     }
-
+    @Override
     public void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress) {
         //先判断，后台管理员才能创建。状态直接设为正常
         Organization organization = checkOrganization(cmd.getId());
@@ -4447,7 +4460,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Integer namespaceId = null == cmd.getNamespaceId() ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
         CrossShardListingLocator locator = new CrossShardListingLocator();
-        List<Building> buildings = this.communityProvider.ListBuildingsByCommunityId(locator, AppConstants.PAGINATION_MAX_SIZE + 1, community.getCommunityId(), namespaceId);
+        List<Building> buildings = this.communityProvider.ListBuildingsByCommunityId(locator, AppConstants.PAGINATION_MAX_SIZE + 1, community.getCommunityId(), namespaceId, null);
         List<Building> unassigned = new ArrayList<Building>();
         for (Building building : buildings) {
             if (!pmBuildingIds.contains(building.getId()))
@@ -8843,6 +8856,12 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    public OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd) {
+
+        return toOrganizationDetailDTO(cmd.getId(), false);
+    }
+
+    @Override
     public Long getTopOrganizationId(Long organizationId) {
         Organization organization = organizationProvider.findOrganizationById(organizationId);
         if (organization != null) {
@@ -9898,17 +9917,18 @@ public class OrganizationServiceImpl implements OrganizationService {
         ContractDTO contractDTO = ConvertHelper.convert(contract, ContractDTO.class);
         contractDTO.setContractNumber(contract.getContractNumber());
         contractDTO.setContractEndDate(contract.getContractEndDate());
-        contractDTO.setOrganizationName(contract.getOrganizationName());
-        contractDTO.setAdminMembers(getAdmins(contract.getOrganizationId()));
-        contractDTO.setSignupCount(getSignupCount(contract.getOrganizationId()));
+        contractDTO.setOrganizationName(contract.getCustomerName());
+        //应该从合同中拿到客户id，根据客户id查客户，从客户表中拿到organizationid by xiongying 201708
+        contractDTO.setAdminMembers(getAdmins(contract.getCustomerId()));
+        contractDTO.setSignupCount(getSignupCount(contract.getCustomerId()));
 
-        OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(contract.getOrganizationId());
+        OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(contract.getCustomerId());
         if (organizationDetail != null) {
             contractDTO.setContract(organizationDetail.getContact());
             contractDTO.setContactor(organizationDetail.getContactor());
             contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
 
-            OrganizationServiceUser user = getServiceUser(contract.getOrganizationId(), organizationDetail.getServiceUserId());
+            OrganizationServiceUser user = getServiceUser(contract.getCustomerId(), organizationDetail.getServiceUserId());
             if (user != null) {
                 contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
                 contractDTO.setServiceUserName(user.getServiceUserName());
