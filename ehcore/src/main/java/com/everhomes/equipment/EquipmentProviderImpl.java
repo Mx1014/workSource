@@ -157,12 +157,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 //			});
 		}
 
-		Long notifyTime = System.currentTimeMillis() + 300000;
-		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
-		String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
-		String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
-		scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
-				notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
+//		Long notifyTime = System.currentTimeMillis() + 300000;
+//		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
+//		String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
+//		String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
+//		scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
+//				notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
 
 
 	}
