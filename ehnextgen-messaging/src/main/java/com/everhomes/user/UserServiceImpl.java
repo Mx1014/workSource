@@ -2680,7 +2680,11 @@ public class UserServiceImpl implements UserService {
 
 		// 处于某个公司对应的场景
 		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+		//TODO test
+		LOGGER.info("listUserRelatedScenes  organizationService namespaceid={}, userid={}", namespaceId, userId);
 		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
+		//TODO test
+		LOGGER.info("listUserRelatedScenes  organizationService return  organizationList.size={}", organizationList.size());
 		//toOrganizationSceneDTO(sceneList, enterpriseList);
 		for(OrganizationDTO orgDto : organizationList) {
 			String orgType = orgDto.getOrganizationType();
