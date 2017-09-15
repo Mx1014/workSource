@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -80,16 +81,18 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
         workerPoolFactory.getWorkerPool().addQueue(queueNoDelay);
     }
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        setup();
+    @PostConstruct
+    public void init() {
+        //重启时内存中启的job都会消失 所以把没发消息的job加上
+        List<PmNotifyRecord> records = pmNotifyProvider.listUnsendRecords();
+        if(records != null && records.size() > 0) {
+            records.forEach(record -> {
+                pushIntoEnqueue(record);
+            });
+        }
     }
 
-    @Override
-    public void pushPmNotifyRecord(PmNotifyRecord record) {
-
-        pmNotifyProvider.createPmNotifyRecord(record);
-
+    private void pushIntoEnqueue(PmNotifyRecord record) {
         if (record.getId() > 0) {
             Map<String, Object> map = new HashMap<>();
             map.put("pmNotifyRecordId", record.getId());
@@ -124,8 +127,22 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
     }
 
     @Override
+    public void onApplicationEvent(ContextRefreshedEvent arg0) {
+        setup();
+    }
+
+    @Override
+    public void pushPmNotifyRecord(PmNotifyRecord record) {
+
+        pmNotifyProvider.createPmNotifyRecord(record);
+
+        pushIntoEnqueue(record);
+    }
+
+    @Override
     public void processPmNotifyRecord(PmNotifyRecord record) {
         PmNotifyReceiverList receiverList = (PmNotifyReceiverList) StringHelper.fromJsonString(record.getReceiverJson(), PmNotifyReceiverList.class);
+        LOGGER.info("processPmNotifyRecord receiverList:{}", receiverList);
         if(receiverList != null) {
             Set<Long> notifyUsers = resolveUserSelection(receiverList.getReceivers(), record.getOwnerType(), record.getOwnerId());
             String taskName = "";
@@ -206,12 +223,16 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
     }
 
     private Set<Long> resolveUserSelection(List<PmNotifyReceiver> receivers, String ownerType, Long ownerId) {
+        LOGGER.info("processPmNotifyRecord resolveUserSelection");
         Set<Long> userIds = new HashSet<>();
         receivers.forEach(receiver -> {
             PmNotifyReceiverType receiverType = PmNotifyReceiverType.fromCode(receiver.getReceiverType());
+            LOGGER.info("processPmNotifyRecord ReceiverType: {}", receiver.getReceiverType());
             switch(receiverType) {
                 case EXECUTOR:
+                    LOGGER.info("processPmNotifyRecord ReceiverType: EXECUTOR");
                     if(EntityType.EQUIPMENT_TASK.getCode().equals(ownerType)) {
+                        LOGGER.info("processPmNotifyRecord ownerType: EhEquipmentInspectionTasks");
                         Set<Long> ids = equipmentService.getTaskGroupUsers(ownerId, QualityGroupType.EXECUTIVE_GROUP.getCode());
                         if(ids != null && ids.size() > 0) {
                             userIds.addAll(ids);
@@ -219,7 +240,9 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     }
                     break;
                 case REVIEWER:
+                    LOGGER.info("processPmNotifyRecord ReceiverType: REVIEWER");
                     if(EntityType.EQUIPMENT_TASK.getCode().equals(ownerType)) {
+                        LOGGER.info("processPmNotifyRecord ownerType: EhEquipmentInspectionTasks");
                         Set<Long> ids = equipmentService.getTaskGroupUsers(ownerId, QualityGroupType.REVIEW_GROUP.getCode());
                         if(ids != null && ids.size() > 0) {
                             userIds.addAll(ids);
@@ -227,6 +250,7 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     }
                     break;
                 case ORGANIZATION:
+                    LOGGER.info("processPmNotifyRecord ReceiverType: ORGANIZATION");
                     receiver.getReceiverIds().forEach(receiverId -> {
                         List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(receiverId);
                         if(members != null && members.size() > 0) {
@@ -239,12 +263,14 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 
                     break;
                 case USER:
+                    LOGGER.info("processPmNotifyRecord ReceiverType: USER");
                     userIds.addAll(receiver.getReceiverIds());
                     break;
                 default:
                     break;
             }
         });
+        LOGGER.info("processPmNotifyRecord userIds: {}", StringHelper.toJsonString(userIds));
         return userIds;
     }
 }

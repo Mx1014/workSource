@@ -4316,7 +4316,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(maps != null && maps.size() > 0) {
 			Set<Long> userIds = new HashSet<>();
 			maps.forEach(map -> {
-				if(map.getPositionId() == null) {
+				if(map.getPositionId() == null || map.getPositionId() == 0L) {
 					List<OrganizationMember> members = organizationProvider.listOrganizationMembers(map.getGroupId(), null);
 					if (members != null) {
 						for (OrganizationMember member : members) {

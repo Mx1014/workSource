@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +47,7 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+
     @Override
     public void createPmNotifyConfigurations(PmNotifyConfigurations configuration) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPmNotifyConfigurations.class));
@@ -159,6 +161,21 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
         }
 
         return false;
+    }
+
+    @Override
+    public List<PmNotifyRecord> listUnsendRecords() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<PmNotifyRecord> result  = new ArrayList<PmNotifyRecord>();
+        SelectQuery<EhPmNotifyConfigurationsRecord> query = context.selectQuery(Tables.EH_PM_NOTIFY_CONFIGURATIONS);
+        query.addConditions(Tables.EH_PM_NOTIFY_RECORDS.STATUS.eq(PmNotifyRecordStatus.WAITING_FOR_SEND_OUT.getCode()));
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, PmNotifyRecord.class));
+            return null;
+        });
+
+        return result;
     }
 
     @Override

@@ -62,6 +62,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("elastic.nodes.httpports", "9200")
             .withProperty("equipment.ip", "127.0.0.1")
             .withProperty("src.path", "/home/janson/ssd2/everhomes/ehnextgen")
+            .withProperty("schedule.running.flag", "1")
             );
     }
 }
