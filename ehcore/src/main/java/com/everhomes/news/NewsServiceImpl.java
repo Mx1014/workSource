@@ -467,7 +467,7 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public SearchNewsResponse searchNews(SearchNewsCommand cmd) {
-		if (StringUtils.isEmpty(cmd.getKeyword())) {
+		if (StringUtils.isEmpty(cmd.getKeyword()) && cmd.getTagIds()==null ) {
 			return ConvertHelper.convert(listNews(ConvertHelper.convert(cmd, ListNewsCommand.class)),
 					SearchNewsResponse.class);
 		}
@@ -479,10 +479,10 @@ public class NewsServiceImpl implements NewsService {
 		NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(cmd.getOwnerType());
 
 		if (newsOwnerType == NewsOwnerType.ORGANIZATION) {
-			return searchNews(null, userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), pageAnchor, pageSize);
+			return searchNews(null, userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), cmd.getTagIds(),pageAnchor, pageSize);
 
 		}else {
-			return searchNews(cmd.getOwnerId(), userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(), pageAnchor, pageSize);
+			return searchNews(cmd.getOwnerId(), userId, namespaceId, cmd.getCategoryId(), cmd.getKeyword(),cmd.getTagIds(), pageAnchor, pageSize);
 		}
 	}
  
@@ -490,8 +490,8 @@ public class NewsServiceImpl implements NewsService {
 	 * 拼接搜索串的部分移出来并增加highlight部分，以便后续处理
 	 * xiongying
 	 */
-	private String getSearchJson(Long communityId, Long userId, Integer namespaceId, Long categoryId, String keyword, Long pageAnchor,
-			Integer pageSize) {
+	private String getSearchJson(Long communityId, Long userId, Integer namespaceId, Long categoryId, String keyword,List<Long> tagIds,
+								 Long pageAnchor, Integer pageSize) {
 		Long from = pageAnchor * pageSize;
 
 		// {\"from\":0,\"size\":15,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[],\"should\":[]}}}}}
@@ -517,6 +517,10 @@ public class NewsServiceImpl implements NewsService {
 				.getJSONObject("bool").getJSONArray("must");
 		must.add(JSONObject.parse("{\"term\":{\"namespaceId\":" + namespaceId + "}}"));
 		must.add(JSONObject.parse("{\"term\":{\"status\":" + NewsStatus.ACTIVE.getCode() + "}}"));
+		if (null != tagIds)
+			for (Long id : tagIds)
+				must.add(JSONObject.parse("{\"term\":{\"tags\":" + id + "}}"));
+
 		if (null != communityId) {
 			must.add(JSONObject.parse("{\"term\":{\"communityIds\":" + communityId + "}}"));
 		}
@@ -531,11 +535,11 @@ public class NewsServiceImpl implements NewsService {
 	}
 	
 
-	private SearchNewsResponse searchNews(Long communityId, Long userId, Integer namespaceId, Long categoryId, String keyword, Long pageAnchor,
-			Integer pageSize) {
+	private SearchNewsResponse searchNews(Long communityId, Long userId, Integer namespaceId, Long categoryId, String keyword,
+										  List<Long> tagIds, Long pageAnchor, Integer pageSize) {
 		
 
-		String jsonString = getSearchJson(communityId, userId, namespaceId,categoryId, keyword, pageAnchor, pageSize);
+		String jsonString = getSearchJson(communityId, userId, namespaceId,categoryId, keyword,tagIds, pageAnchor, pageSize);
  
 		// 需要查询的字段
 		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag,communityIds,visibleType";
@@ -599,8 +603,13 @@ public class NewsServiceImpl implements NewsService {
 		List<NewsTagVals> list = newsProvider.listNewsTagVals(newsId);
 		list.forEach(r->{
 			NewsTag newsTag = newsProvider.findNewsTagById(r.getNewsTagId());
-			r.setValue(newsTag.getValue());
-			r.setName(newsProvider.findNewsTagById(newsTag.getParentId()).getValue());
+			if (newsTag.getDeleteFlag()!=(byte)0)
+				r.setValue(newsTag.getValue());
+
+			newsTag = newsProvider.findNewsTagById(newsTag.getParentId());
+
+			if (newsTag.getDeleteFlag()!=(byte)0)
+				r.setName(newsTag.getValue());
 		});
 		GetNewsDetailInfoResponse response = convertNewsToNewsDTO(userId, news);
 		response.setTags(list.stream().map(r->ConvertHelper.convert(r,NewsTagValsDTO.class)).collect(Collectors.toList()));
@@ -1223,7 +1232,7 @@ public class NewsServiceImpl implements NewsService {
 					StringBuilder sb = new StringBuilder();
 					list.forEach(n -> {
 						n.setCommunityIds(newsProvider.listNewsCommunities(n.getId()));
-
+						n.setTagIds(newsProvider.listNewsTagVals(n.getId()).stream().map(r->r.getNewsTagId()).collect(Collectors.toList()));
 						//正则表达式去掉content中的富文本内容 modified by xiongying20160908
 						String content = n.getContent();
 						content = removeTag(content);
@@ -1340,7 +1349,7 @@ public class NewsServiceImpl implements NewsService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 
-		String jsonString = getSearchJson(null, userId, namespaceId,null, cmd.getKeyword(), pageAnchor, pageSize);
+		String jsonString = getSearchJson(null, userId, namespaceId,null, cmd.getKeyword(),null, pageAnchor, pageSize);
 		// 需要查询的字段
 		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag";
 
