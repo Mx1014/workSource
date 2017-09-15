@@ -72,14 +72,10 @@ public enum EntityType {
     ORGANIZATION_FILE("EhOrganizationFiles"),
     COMMUNITY_APPROVE(EhCommunityApprove.class.getSimpleName()),
 	TALENT_REQUEST(EhTalentRequests.class.getSimpleName()),
-<<<<<<< HEAD
 	EQUIPMENT_TASK(EhEquipmentInspectionTasks.class.getSimpleName()),
-    CHILD_PROJECT("child_project");
-=======
     CHILD_PROJECT("child_project"),
     LEASE_BUILDING(EhLeaseBuildings.class.getSimpleName());
 
->>>>>>> 4.9.1
 
     private String code;
     

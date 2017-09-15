@@ -41,7 +41,7 @@ public class OrganizationMemberDetailsMapper implements RecordMapper<Record, EhO
         detail.setEmployeeType(r.getValue((Field<Byte>) r.field("employee_type")));
         detail.setEmployeeStatus(r.getValue((Field<Byte>) r.field("employee_status")));
         detail.setEmploymentTime(r.getValue((Field<Date>) r.field("employment_time")));
-        detail.setDimissionTime(r.getValue((Field<Date>) r.field("dimission_time")));
+        detail.setDismissTime(r.getValue((Field<Date>) r.field("dimission_time")));
         detail.setSalaryCardNumber(r.getValue((Field<String>) r.field("salary_card_number")));
         detail.setSocialSecurityNumber(r.getValue((Field<String>) r.field("social_security_number")));
         detail.setProvidentFundNumber(r.getValue((Field<String>) r.field("provident_fund_number")));
