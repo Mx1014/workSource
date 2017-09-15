@@ -40,14 +40,13 @@ public class AclController extends ControllerBase {
      * <p>创建公司管理员</p>
      */
     @RequestMapping("createOrganizationAdmin")
-    @RestReturn(value=String.class)
+    @RestReturn(value=OrganizationContactDTO.class)
     public RestResponse createOrganizationAdmin(@Valid CreateOrganizationAdminCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
             resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_CREATE);
         }
-        rolePrivilegeService.createOrganizationAdmin(cmd);
-        RestResponse response =  new RestResponse();
+        RestResponse response =  new RestResponse(rolePrivilegeService.createOrganizationAdmin(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -62,8 +61,7 @@ public class AclController extends ControllerBase {
     public RestResponse createOrganizationSuperAdmin(@Valid CreateOrganizationAdminCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_CREATE);
-        rolePrivilegeService.createOrganizationSuperAdmin(cmd);
-        RestResponse response =  new RestResponse();
+        RestResponse response =  new RestResponse(rolePrivilegeService.createOrganizationSuperAdmin(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -324,6 +322,19 @@ public class AclController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /acl/getPrivilegeByRoleId</b>
+     * <p>获取角色的权限</p>
+     */
+    @RequestMapping("getPrivilegeByRoleId")
+    @RestReturn(value=GetPrivilegeByRoleIdResponse.class)
+    public RestResponse getPrivilegeByRoleId(@Valid ListPrivilegesByRoleIdCommand cmd) {
+        RestResponse response = new RestResponse(rolePrivilegeService.getPrivilegeByRoleId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /acl/deleteRolePrivileges</b>
      * <p>删除角色和权限的关系</p>
      */
@@ -342,7 +353,7 @@ public class AclController extends ControllerBase {
      * <p>角色列表</p>
      */
     @RequestMapping("listRoles")
-    @RestReturn(value=RoleDTO.class, collection = true)
+    @RestReturn(value=ListRolesResponse.class)
     public RestResponse listRoles(@Valid ListRolesCommand cmd) {
         RestResponse response = new RestResponse(rolePrivilegeService.listRoles(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);

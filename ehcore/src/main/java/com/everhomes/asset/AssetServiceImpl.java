@@ -10,18 +10,21 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+//import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -31,42 +34,61 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.group.GroupDiscriminator;
+
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.contract.ListCustomerContractsCommand;
+
+import com.everhomes.rest.contract.*;
+
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
-import com.everhomes.rest.search.GroupQueryResult;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserNotificationTemplateCode;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.OrganizationSearcher;
-import com.everhomes.server.schema.tables.pojos.EhAssetBills;
-import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
+import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.*;
+import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 
-
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.sun.org.apache.regexp.internal.RE;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.DSLContext;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+import scala.Char;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -81,7 +103,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Created by Administrator on 2017/2/20.
+ * Created by Wentian on 2017/2/20.
  */
 @Component
 public class AssetServiceImpl implements AssetService {
@@ -137,6 +159,27 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private OrganizationService organizationService;
 
+    @Autowired
+    private SmsProvider smsProvider;
+
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
+
+    @Autowired
+    private ScheduleProvider scheduleProvider;
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
+
+//    @Autowired
+//    private ContractService contractService;
+
+    @Autowired
+    private UserService userService;
+
+//    @Autowired
+//    private ZhangjianggaokeAssetVendor handler;
+
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -173,6 +216,930 @@ public class AssetServiceImpl implements AssetService {
         }
         this.processLatestSelectedOrganization(dtoList);
         return dtoList;
+    }
+
+    @Override
+    public ListBillsResponse listBills(ListBillsCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        ListBillsResponse response = new ListBillsResponse();
+        if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
+            if(UserContext.getCurrentNamespaceId()!=999971){
+//                cmd.setPageAnchor(0l);
+                cmd.setPageAnchor(1l);
+            }else{
+                cmd.setPageAnchor(1l);
+            }
+        }
+        if(cmd.getPageSize() == null || cmd.getPageSize() < 1 || cmd.getPageSize() > Integer.MAX_VALUE/10){
+            cmd.setPageSize(20);
+        }
+        int pageOffSet = cmd.getPageAnchor().intValue();
+        List<ListBillsDTO> list = handler.listBills(cmd.getCommunityIdentifier(),cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
+            if(list.size() <= cmd.getPageSize()){
+//                response.setNextPageAnchor(null);
+            }else if(UserContext.getCurrentNamespaceId()!=999971){
+                response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+                list.remove(list.size()-1);
+            }
+        response.setListBillsDTOS(list);
+        return response;
+    }
+
+    @Override
+    public ListBillItemsResponse listBillItems(ListBillItemsCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        ListBillItemsResponse response = new ListBillItemsResponse();
+        if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
+            if(UserContext.getCurrentNamespaceId()!=999971){
+//                cmd.setPageAnchor(0l);
+                cmd.setPageAnchor(1l);
+            }else{
+                cmd.setPageAnchor(1l);
+            }
+        }
+        if(cmd.getPageSize() == null){
+            cmd.setPageSize(20);
+        }
+        Integer pageOffSet = cmd.getPageAnchor().intValue();
+        List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
+        if(billDTOS.size() <= cmd.getPageSize()) {
+//            response.setNextPageAnchor(null);
+        }else if(UserContext.getCurrentNamespaceId()!=99971){
+            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+            billDTOS.remove(billDTOS.size()-1);
+        }
+        response.setBillDTOS(billDTOS);
+        return response;
+    }
+
+    @Override
+    public void selectNotice(SelectedNoticeCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        List<NoticeInfo> noticeInfos = handler.listNoticeInfoByBillId(cmd.getBillIdAndTypes());
+        if(noticeInfos.size()<1) return;
+        NoticeWithTextAndMessage(cmd, noticeInfos);
+    }
+
+    private void NoticeWithTextAndMessage(SelectedNoticeCommand cmd, List<NoticeInfo> noticeInfos) {
+        List<Long> uids = new ArrayList<>();
+        //"{targetName}先生/女士，您好，您的账单已出，应付{amount1}元，待缴{amount2}元，下载"{appName} APP"可及时查看账单并支持在线付款,还可体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。"
+        //短信： 54	物业费催缴	王闻天	{1-> targetName}先生/女士，您好，您的物业账单已出，账期{2 dateStr}，使用"{3 appName} APP"可及时查看账单并支持在线付款。
+        try {
+            for (int i = 0; i < noticeInfos.size(); i++) {
+                NoticeInfo noticeInfo = noticeInfos.get(i);
+                //收集短信的信息
+                String phoneNums = noticeInfo.getPhoneNums();
+                if(phoneNums == null){
+                    continue;
+                }
+                String[] telNOs = phoneNums.split(",");
+                List<Tuple<String, Object>> variables = new ArrayList<>();
+                smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
+                //模板改了，所以这个也要改
+                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
+//            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
+                smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
+                String templateLocale = UserContext.current().getUser().getLocale();
+                //phoneNums make it fake during test
+                telNOs = new String[1];
+                telNOs[0] = "15919770996";
+                smsProvider.sendSms(UserContext.getCurrentNamespaceId(), telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
+            }
+        } catch(Exception e){
+            LOGGER.error("YZX MAIL SEND FAILED");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "YZX MAIL SEND FAILED");
+            }
+            //客户在系统内，把需要推送的uid放在list中
+        for (int i = 0; i < noticeInfos.size(); i++) {
+            NoticeInfo noticeInfo = noticeInfos.get(i);
+            Long targetId = noticeInfo.getTargetId();
+            if (targetId != null && targetId != 0l) {
+                if (noticeInfo.getTargetType().equals(AssetTargetType.USER.getCode())) {
+                    uids.add(noticeInfo.getTargetId());
+                } else if (noticeInfo.getTargetType().equals(AssetTargetType.ORGANIZATION.getCode())) {
+                    ListServiceModuleAdministratorsCommand tempCmd = new ListServiceModuleAdministratorsCommand();
+                    tempCmd.setOwnerId(cmd.getOwnerId());
+                    tempCmd.setOwnerType(cmd.getOwnerType());
+                    tempCmd.setOrganizationId(noticeInfo.getTargetId());
+                    //企业超管是1005？不是1001
+                    List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(tempCmd);
+                    for (int j = 0; i < organizationContactDTOS.size(); i++) {
+                        uids.add(organizationContactDTOS.get(0).getId());
+                    }
+                }
+            }
+        }
+            try {
+                for (int k = 0; k < uids.size(); k++) {
+                    MessageDTO messageDto = new MessageDTO();
+                    messageDto.setAppId(AppConstants.APPID_MESSAGING);
+                    messageDto.setSenderUid(User.SYSTEM_UID);
+                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
+                    messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+                    //insert into eh_locale_template values(@xx+1,user_notification,3?,zh_CN,物业账单通知用户,text,999985)
+                    //这个逻辑是张江高科的， 但为了测试统一，999971先改为999985用华润测试
+                    Map<String, Object> map = new HashMap<>();
+                    User targetUser = userProvider.findUserById(uids.get(k));
+                    map.put("targetName", targetUser.getNickName());
+                    String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(), UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
+                    messageDto.setBody(notifyTextForApplicant);
+                    messageDto.setMetaAppId(AppConstants.APPID_USER);
+                    if (!notifyTextForApplicant.trim().equals("")) {
+                        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                                uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                        }
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                            "MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
+                }
+                if (UserContext.getCurrentNamespaceId() != 999971) {
+                    //催缴次数加1
+                    List<BillIdAndType> billIdAndTypes = cmd.getBillIdAndTypes();
+                    List<Long> billIds = new ArrayList<>();
+                    for (int i = 0; i < billIdAndTypes.size(); i++) {
+                        billIds.add(Long.parseLong(billIdAndTypes.get(i).getBillId()));
+                    }
+                    assetProvider.increaseNoticeTime(billIds);
+                }
+            }
+
+
+    @Override
+    public ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd) {
+        //app用户的权限还未判断，是否可以查看账单
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vendorName = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
+        return handler.showBillForClient(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill(),cmd.getContractId());
+    }
+
+    @Override
+    public ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vendorName = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
+        return handler.getBillDetailForClient(cmd.getBillId(),cmd.getTargetType());
+    }
+
+    @Override
+    public List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd) {
+        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType());
+    }
+
+    @Override
+    public ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.showCreateBill(cmd.getBillGroupId());
+    }
+
+    @Override
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vendorName = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
+        if(cmd.getTargetType().equals("eh_user")) {
+            cmd.setTargetId(UserContext.currentUserId());
+        }
+        return handler.listBillDetailOnDateChange(cmd.getBillStatus(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getDateStr(),cmd.getContractId());
+    }
+
+    @Override
+    public ListBillsDTO createBill(CreateBillCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.createBill(cmd);
+    }
+
+    @Override
+    public void OneKeyNotice(OneKeyNoticeCommand cmd) {
+        ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
+        if(UserContext.getCurrentNamespaceId()!=999971){
+//            convertedCmd.setPageAnchor(0l);
+            convertedCmd.setPageAnchor(1l);
+        }else{
+            convertedCmd.setPageAnchor(1l);
+        }
+        if(convertedCmd.getDateStrEnd()==null){
+            Calendar now = Calendar.getInstance();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+            String dateStrEnd = sdf.format(now.getTime());
+            convertedCmd.setDateStrEnd(dateStrEnd);
+        }
+        if(convertedCmd.getPageSize()==null){
+            convertedCmd.setPageSize(Integer.MAX_VALUE/10);
+        }
+        convertedCmd.setStatus((byte)1);
+        convertedCmd.setBillStatus((byte)0);
+        //listBills has already distributed the requests according to namespaces;
+        ListBillsResponse convertedResponse = listBills(convertedCmd);
+        List<ListBillsDTO> listBillsDTOS = convertedResponse.getListBillsDTOS();
+        Map<OwnerEntity,List<String>> noticeObjects = new HashMap<>();
+        for(int i = 0; i < listBillsDTOS.size(); i ++) {
+            ListBillsDTO convertedDto = listBillsDTOS.get(i);
+            OwnerEntity entity = new OwnerEntity();
+            entity.setOwnerId(cmd.getOwnerId());
+            entity.setOwnerType(convertedDto.getOwnerType());
+            if(noticeObjects.containsKey(entity)){
+                noticeObjects.get(entity).add(convertedDto.getBillId());
+            }else{
+                List<String> ids = new ArrayList<>();
+                ids.add(convertedDto.getBillId());
+                noticeObjects.put(entity,ids);
+            }
+        }
+        for(Map.Entry<OwnerEntity,List<String>> entry : noticeObjects.entrySet()){
+            SelectedNoticeCommand requestCmd = new SelectedNoticeCommand();
+            requestCmd.setOwnerType(entry.getKey().getOwnerType());
+            requestCmd.setOwnerId(entry.getKey().getOwnerId());
+            List<BillIdAndType> billIdAndTypes = new ArrayList<>();
+            List<String> value = entry.getValue();
+            for(int i = 0; i < value.size(); i++){
+                BillIdAndType bit = new BillIdAndType();
+                bit.setBillId(value.get(i));
+                bit.setTargetType(cmd.getTargetType());
+                billIdAndTypes.add(bit);
+            }
+            requestCmd.setBillIdAndTypes(billIdAndTypes);
+            String appName = assetProvider.findAppName(UserContext.getCurrentNamespaceId());
+            if(appName==null || appName.trim().length()<1){
+                appName="张江高科推荐";
+            }
+            if(UserContext.getCurrentNamespaceId()==999971){
+                List<NoticeInfo> list = new ArrayList<>();
+                List<ListBillsDTO> listBillsDTOS1 = convertedResponse.getListBillsDTOS();
+                for(int i = 0; i < listBillsDTOS1.size(); i++){
+                    ListBillsDTO dto = listBillsDTOS1.get(i);
+                    NoticeInfo info = new NoticeInfo();
+                    info.setAppName(appName);
+                    info.setPhoneNums(dto.getNoticeTel());
+                    info.setAmountRecevable(dto.getAmountReceivable());
+                    info.setAmountOwed(dto.getAmountOwed());
+                    Long tid = 0l;
+                    String targeType=null;
+                    Long uid  = assetProvider.findTargetIdByIdentifier(dto.getTargetId());
+                    Long oid = assetProvider.findOrganizationIdByIdentifier(dto.getTargetId());
+                    if(uid ==null && oid !=null){
+                        tid = oid;
+                        targeType=AssetTargetType.ORGANIZATION.getCode();
+                    }
+                    else if(uid !=null && oid ==null){
+                        tid = uid;
+                        targeType = AssetTargetType.USER.getCode();
+                    }else {
+                        LOGGER.info("NOTICE USER IS NOT IN ZUOLIN APP, USER IS {}",dto.getTargetName());
+                    }
+                    info.setTargetId(tid);
+                    info.setTargetType(targeType);
+                    info.setTargetName(dto.getTargetName());
+                    list.add(info);
+                }
+                NoticeWithTextAndMessage(requestCmd,list);
+                return;
+            }
+            selectNotice(requestCmd);
+        }
+    }
+
+    @Override
+    public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.listBillDetail(cmd);
+    }
+
+    @Override
+    public List<BillStaticsDTO> listBillStatics(BillStaticsCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.listBillStatics(cmd);
+    }
+
+    @Override
+    public void modifyBillStatus(BillIdCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        handler.modifyBillStatus(cmd);
+    }
+
+    @Override
+    public void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
+        if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
+            cmd.setPageSize(5000);
+        }
+        //has already distributed
+        ListBillsResponse bills = listBills(cmd);
+        Calendar c = Calendar.getInstance();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int date = c.get(Calendar.DATE);
+        int hour = c.get(Calendar.HOUR_OF_DAY);
+        int minute = c.get(Calendar.MINUTE);
+        int second = c.get(Calendar.SECOND);
+        String fileName = "bill"+"/"+year + "/" + month + "/" + date + " " +hour + ":" +minute + ":" + second;
+        List<ListBillsDTO> dtos = bills.getListBillsDTOS();
+
+        List<exportPaymentBillsDetail> dataList = new ArrayList<>();
+        //组装datalist来确定propertyNames的值
+
+        for(int i = 0; i < dtos.size(); i++) {
+            ListBillsDTO dto = dtos.get(i);
+            exportPaymentBillsDetail detail = new exportPaymentBillsDetail();
+            detail.setAmountOwed(dto.getAmountOwed().toString());
+            detail.setAmountReceivable(dto.getAmountReceivable().toString());
+            detail.setAmountReceived(dto.getAmountReceived().toString());
+//            detail.setApartmentName(dto.getApartmentName());
+//            detail.setBuildingName(dto.getBuildingName());
+            detail.setContractNum(dto.getContractNum());
+            detail.setBillGroupName(dto.getBillGroupName());
+            detail.setNoticeTel(dto.getNoticeTel());
+            if(UserContext.getCurrentNamespaceId()!=999971){
+                detail.setNoticeTimes(String.valueOf(dto.getNoticeTimes()));
+            }else{
+                detail.setNoticeTimes("");
+            }
+            detail.setStatus(dto.getBillStatus()==1?"已缴":"待缴");
+            detail.setTargetName(dto.getTargetName());
+            detail.setDateStr(dto.getDateStr());
+            dataList.add(detail);
+        }
+//        String[] propertyNames = {"dateStr","billGroupName","targetName","buildingName","apartmentName","noticeTel","amountReceivable","amountReceived","amountOwed","status","noticeTimes"};
+        String[] propertyNames = {"dateStr","billGroupName","targetName","contractNum","noticeTel","amountReceivable","amountReceived","amountOwed","status","noticeTimes"};
+//        Field[] declaredFields = ListBillsDTO.class.getDeclaredFields();
+//        String[] propertyNames = new String[declaredFields.length];
+        String[] titleName ={"账期","账单组","客户名称","合同编号","催缴手机号","应收(元)","已收(元)","欠收(元)","缴费状态","催缴次数"};
+        int[] titleSize = {20,20,20,20,20,20,20,20,20,20};
+//        for(int i = 0; i < declaredFields.length; i++){
+//            propertyNames[i] = declaredFields[i].getName();
+//        }
+        ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
+        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
+    }
+
+    @Override
+    public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {
+        return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId());
+    }
+
+    @Override
+    public List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd) {
+        return assetProvider.listChargingStandards(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingItemId());
+    }
+
+    @Override
+    public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
+        assetProvider.modifyNotSettledBill(cmd.getBillId(),cmd.getBillGroupDTO(),cmd.getTargetType(),cmd.getTargetId(),cmd.getTargetName());
+    }
+
+    @Override
+    public ListSettledBillExemptionItemsResponse listBillExemptionItems(listBillExemtionItemsCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.listBillExemptionItems(cmd);
+    }
+
+    @Override
+    public String deleteBill(BillIdCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        String result = "OK";
+        handler.deleteBill(cmd.getBillId());
+        return result;
+    }
+
+    @Override
+    public void deleteBill(PaymentBillItems billItem) {
+        this.assetProvider.updatePaymentBill(billItem.getBillId(),billItem.getAmountReceivable(),billItem.getAmountReceived(),billItem.getAmountOwed());
+    }
+
+    @Override
+    public void deleteBill(PaymentExemptionItems exemItem) {
+        this.assetProvider.updatePaymentBillByExemItemChanges(exemItem.getBillId(),exemItem.getAmount());
+    }
+
+    @Override
+    public String deleteBillItem(BillItemIdCommand cmd) {
+        String result = "OK";
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        handler.deleteBillItem(cmd);
+        return result;
+    }
+
+    @Override
+    public String deletExemptionItem(ExemptionItemIdCommand cmd) {
+        String result = "OK";
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        handler.deletExemptionItem(cmd);
+        return result;
+    }
+
+    @Override
+    public PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd) {
+        //calculate the details of payment expectancies
+        PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
+        List<PaymentExpectancyDTO> dtos = new ArrayList<>();
+        List<FeeRules> feesRules = cmd.getFeesRules();
+        HashMap<BillIdentity,PaymentBills> map = new HashMap<>();
+        String json = "";
+        List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
+        List<EhPaymentBills> billList = new ArrayList<>();
+        List<EhPaymentContractReceiver> contractDateList = new ArrayList<>();
+        for(int i = 0; i < feesRules.size(); i++) {
+            List<PaymentExpectancyDTO> dtos1 = new ArrayList<>();
+            FeeRules rule = feesRules.get(i);
+            List<ContractProperty> var1 = rule.getProperties();
+            List<VariableIdAndValue> variableIdAndValueList = assetProvider.findPreInjectedVariablesForCal(rule.getChargingStandardId());
+            List<VariableIdAndValue> var2 = rule.getVariableIdAndValueList();
+            coverVariables(var2,variableIdAndValueList);
+            String formula = assetProvider.findFormulaByChargingStandardId(rule.getChargingStandardId());
+            String chargingItemName = assetProvider.findChargingItemNameById(rule.getChargingItemId());
+            Byte billingCycle = assetProvider.findBillyCycleById(rule.getChargingStandardId());
+            List<Object> billConf = assetProvider.getBillDayAndCycleByChargingItemId(rule.getChargingStandardId(),rule.getChargingItemId(),cmd.getOwnerType(),cmd.getOwnerId());
+            Integer billDay = (Integer)billConf.get(0);
+            Byte balanceType = (Byte)billConf.get(1);
+            PaymentBillGroupRule groupRule = assetProvider.getBillGroupRule(rule.getChargingItemId(),rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
+            Long billGroupId = groupRule.getBillGroupId();
+            for(int j = 0; j < var1.size(); j ++){
+                List<PaymentExpectancyDTO> dtos2 = new ArrayList<>();
+                ContractProperty property = var1.get(j);
+                //如果收费项目的计费周期是按照固定日期，以合同开始日为计费周期
+                if(billingCycle==AssetPaymentStrings.CONTRACT_BEGIN_DATE_AS_FIXED_DAY_OF_MONTH){
+                    FixedAtContractStartHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
+                }
+                //自然月的计费方式
+                else if(billingCycle == AssetPaymentStrings.NATRUAL_MONTH){
+                    NaturalMonthHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
+                }else{
+                    throw new RuntimeException("创建账单失败，暂不支持自然月自费周期以外的方式");
+                }
+                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), dtos2.size());
+                long currentBillItemSeq = nextBillItemBlock - dtos2.size() + 1;
+                if(currentBillItemSeq == 0){
+                    currentBillItemSeq = currentBillItemSeq+1;
+                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()));
+                }
+                for(int g = 0; g< dtos2.size(); g++) {
+                    PaymentExpectancyDTO dto = dtos2.get(g);
+                    BillIdentity identity = new BillIdentity();
+                    identity.setBillGroupId(groupRule.getBillGroupId());
+                    identity.setContract(cmd.getContractNum());
+                    String dateStr = dto.getDateStrBegin().substring(0,dto.getDateStrBegin().lastIndexOf("-"));
+                    identity.setDateStr(dateStr);
+                    // define a billId for billItem and bill to set
+                    long nextBillId = 0l;
+                    if(map.containsKey(identity)){
+                        nextBillId = map.get(identity).getId();
+                    }else{
+                        nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
+                        if(nextBillId == 0){
+                            nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
+                        }
+                    }
+                    // build a billItem
+                    PaymentBillItems item = new PaymentBillItems();
+                    item.setAddressId(property.getAddressId());
+                    item.setBuildingName(property.getBuldingName());
+                    item.setApartmentName(property.getApartmentName());
+                    item.setPropertyIdentifer(property.getPropertyName());
+                    item.setAmountOwed(dto.getAmountReceivable());
+                    item.setAmountReceivable(dto.getAmountReceivable());
+                    item.setAmountReceived(new BigDecimal("0"));
+                    item.setBillGroupId(billGroupId);
+                    item.setBillId(nextBillId);
+                    item.setChargingItemName(groupRule.getChargingItemName());
+                    item.setChargingItemsId(rule.getChargingItemId());
+                    item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    item.setCreatorUid(UserContext.currentUserId());
+                    item.setDateStr(dateStr);
+                    item.setDateStrBegin(dto.getDateStrBegin());
+                    item.setDateStrEnd(dto.getDateStrEnd());
+                    item.setDateStrDue(dto.getDueDateStr());
+                    item.setId(currentBillItemSeq);
+                    currentBillItemSeq += 1;
+                    item.setNamespaceId(cmd.getNamesapceId());
+                    item.setOwnerType(cmd.getOwnerType());
+                    item.setOwnerId(cmd.getOwnerId());
+                    item.setTargetType(cmd.getTargetType());
+                    item.setTargetId(cmd.getTargetId());
+                    item.setContractId(cmd.getContractId());
+                    item.setContractNum(cmd.getContractNum());
+                    item.setTargetName(cmd.getTargetName());
+                    item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    billItemsList.add(item);
+                    if(balanceType == AssetPaymentStrings.BALANCE_ON_MONTH) {
+                        // create a new bill or update a bean according to whether the corresponding contract bill exists
+                        if(map.containsKey(identity)){
+                            PaymentBills bill = map.get(identity);
+                            bill.setAmountReceivable(bill.getAmountReceivable().add(item.getAmountReceivable()));
+                            bill.setAmountOwed(bill.getAmountOwed().add(item.getAmountOwed()));
+                            bill.setAmountReceived(bill.getAmountReceived().add(item.getAmountReceived()));
+                        }else{
+                            PaymentBills newBill = new PaymentBills();
+                            //账单只存第一个资产信息，收费项目中对应多个资产,根据地址查询账单
+                            //一是直接查账单表，二是确定用户信息，拿到targetId
+                            newBill.setAddressId(property.getAddressId());
+                            newBill.setBuildingName(property.getBuldingName());
+                            newBill.setApartmentName(property.getApartmentName());
+                            newBill.setAmountOwed(item.getAmountOwed());
+                            newBill.setAmountReceivable(item.getAmountReceivable());
+                            newBill.setAmountReceived(item.getAmountReceived());
+                            newBill.setAmountSupplement(new BigDecimal("0"));
+                            newBill.setAmountExemption(new BigDecimal("0"));
+                            newBill.setBillGroupId(billGroupId);
+                            // identity中最小的那个设置为datestr
+                            newBill.setDateStr(item.getDateStr());
+                            newBill.setId(nextBillId);
+                            newBill.setNamespaceId(cmd.getNamesapceId());
+                            newBill.setNoticetel(cmd.getNoticeTel());
+                            newBill.setOwnerId(cmd.getOwnerId());
+                            newBill.setContractId(cmd.getContractId());
+                            newBill.setContractNum(cmd.getContractNum());
+                            newBill.setTargetName(cmd.getTargetName());
+                            newBill.setOwnerType(cmd.getOwnerType());
+                            newBill.setTargetType(cmd.getTargetType());
+                            newBill.setTargetId(cmd.getTargetId());
+                            newBill.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            newBill.setCreatorId(UserContext.currentUserId());
+                            newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            newBill.setNoticeTimes(0);
+                            newBill.setStatus((byte)0);
+                            newBill.setSwitch((byte)3);
+                            map.put(identity,newBill);
+                        }
+                        //if the billing cycle is on quarter or year, just change the way how the billIdentity defines that muliti bills should be merged as one or be independently
+                    }else{
+                        throw new RuntimeException("暂只支持按月计费，请联系左邻在账单组设置");
+                    }
+                }
+
+            }
+            dtos.addAll(dtos1);
+            // contract receiver added with status being set as 0 i.e. inactive
+            Gson gson = new Gson();
+            Map<String,String> variableMap = new HashMap<>();
+            for(int k = 0; k< variableIdAndValueList.size(); k++){
+                VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
+                variableMap.put((String)variableIdAndValue.getVariableId(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
+            }
+            json = gson.toJson(variableMap, Map.class);
+            PaymentContractReceiver entity = new PaymentContractReceiver();
+            StringBuilder addressIds = new StringBuilder();
+            for(int l =0 ; l < var1.size(); l++) {
+                Long addressId = var1.get(l).getAddressId();
+                if(addressId!=null){
+                    if(l == var1.size()-1){
+                        addressIds.append(var1.get(l).getPropertyName());
+                        break;
+                    }
+                    addressIds.append(var1.get(l).getPropertyName()+",");
+                }
+            }
+//            entity.setApartmentName(property.getApartmentName());
+//            entity.setBuildingName(property.getBuldingName());
+            entity.setAddressIdsJson(addressIds.toString());
+            entity.setContractId(cmd.getContractId());
+            entity.setContractNum(cmd.getContractNum());
+            entity.setEhPaymentChargingItemId(rule.getChargingItemId());
+            entity.setEhPaymentChargingStandardId(rule.getChargingStandardId());
+            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
+            if(nextSequence==0l){
+                nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
+            }
+            entity.setId(nextSequence);
+            entity.setNamespaceId(cmd.getNamesapceId());
+            entity.setNoticeTel(cmd.getNoticeTel());
+            entity.setOwnerId(cmd.getOwnerId());
+            entity.setOwnerType(cmd.getOwnerType());
+            entity.setStatus((byte)0);
+            entity.setTargetId(cmd.getTargetId());
+            entity.setTargetType(cmd.getTargetType());
+            entity.setTargetName(cmd.getTargetName());
+            entity.setVariablesJsonString(json);
+            contractDateList.add(entity);
+        }
+        for(Map.Entry entry : map.entrySet()){
+            billList.add((PaymentBills)entry.getValue());
+        }
+        this.dbProvider.execute((TransactionStatus status) -> {
+            if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
+                return null;
+            }
+            assetProvider.saveBillItems(billItemsList);
+            assetProvider.saveBills(billList);
+            assetProvider.saveContractVariables(contractDateList);
+            return null;
+        });
+        response.setList(dtos);
+        return response;
+    }
+
+    private void NaturalMonthHandler(List<PaymentExpectancyDTO> dtos1, FeeRules rule, List<VariableIdAndValue> variableIdAndValueList, String formula, String chargingItemName, Integer billDay, List<PaymentExpectancyDTO> dtos2, ContractProperty property) {
+        String propertyName = property.getPropertyName();
+        Date dateStrBegin = rule.getDateStrBegin();
+        Date dateStrEnd = rule.getDateStrEnd();
+        Calendar c1 = Calendar.getInstance();
+        Calendar c2 = Calendar.getInstance();
+        // c1 is the start of the contract
+        c1.setTime(dateStrBegin);
+        // c2 is the end date of the contract
+        c2.setTime(dateStrEnd);
+        Calendar c3 = Calendar.getInstance();
+        // c3 starts as the begin of the contract
+        c3.setTime(dateStrBegin);
+        //define duration for cal
+        float duration = 0;
+        //define the end of the date the calculation should take as multiply
+        Calendar c5 = Calendar.getInstance();
+        //first to check if the whole period is less than one month
+
+        Calendar c7 = Calendar.getInstance();
+        Calendar c8 = Calendar.getInstance();
+//        c7.setTime(c1.getTime());
+//        c8.setTime(c8.getTime());
+        if(c1.get(Calendar.YEAR)==c2.get(Calendar.YEAR)&&c1.get(Calendar.MONTH)==c2.get(Calendar.MONTH)){
+            duration = ((float)c2.get(Calendar.DAY_OF_MONTH)-(float)c1.get(Calendar.DAY_OF_MONTH)+1f)/(float)c1.getActualMaximum(Calendar.DAY_OF_MONTH);
+            c5.setTime(c2.getTime());
+            if(duration <= 0){
+                throw new RuntimeException("日期错误,结束日期需要大于开始日期");
+            }
+        }else{
+            //calculate the per cent of month from c1 to the end of the month c1 is at
+            duration = ((float)c1.getActualMaximum(Calendar.DAY_OF_MONTH) - (float)c1.get(Calendar.DAY_OF_MONTH)+1f)/(float)c1.getActualMaximum(Calendar.DAY_OF_MONTH);
+            c5.setTime(c3.getTime());
+            c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
+        }
+        BigDecimal tempDuration = new BigDecimal(duration);
+        tempDuration = tempDuration.setScale(2,BigDecimal.ROUND_CEILING);
+        if(duration != 0){
+            if(c5.compareTo(c3)==0){
+            }else{
+                addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, tempDuration.floatValue(),billDay);
+            }
+        }
+        //C3 即账期前进一个月
+        c3.add(Calendar.MONTH,1);
+        c3.set(Calendar.DAY_OF_MONTH,c3.getActualMinimum(Calendar.DAY_OF_MONTH));
+        Calendar c4 = Calendar.getInstance();
+        c4.setTime(c3.getTime());
+        //c4 must be ahead of c3 for one month
+        c4.add(Calendar.MONTH,1);
+
+
+        while(c4.compareTo(c2) == -1 || c4.compareTo(c2) == 0) {
+            //each month exactly
+            duration = 1;
+            c5.setTime(c3.getTime());
+            c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
+            addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, duration,billDay);
+            c3.add(Calendar.MONTH,1);
+            c3.set(Calendar.DAY_OF_MONTH,c3.getActualMinimum(Calendar.DAY_OF_MONTH));
+            c4.add(Calendar.MONTH,1);
+            c4.set(Calendar.DAY_OF_MONTH,c4.getActualMinimum(Calendar.DAY_OF_MONTH));
+        }
+        if(c2.compareTo(c4) < 0 && c3.compareTo(c2) < 0){
+            //less than one month
+            duration = ((float)c2.get(Calendar.DAY_OF_MONTH)-(float)c2.getActualMinimum(Calendar.DAY_OF_MONTH))/(float)c2.getActualMaximum(Calendar.DAY_OF_MONTH);
+            addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c2, c3, duration,billDay);
+        }
+        dtos1.addAll(dtos2);
+    }
+
+    private void FixedAtContractStartHandler(List<PaymentExpectancyDTO> dtos1, FeeRules rule, List<VariableIdAndValue> variableIdAndValueList, String formula, String chargingItemName, Integer billDay, List<PaymentExpectancyDTO> dtos2, ContractProperty property) {
+        if(true){
+            throw new RuntimeException("暂不支持按照固定日期进行账单结算的模式");
+        }
+        String propertyName = property.getPropertyName();
+        Date dateStrBegin = rule.getDateStrBegin();
+        Date dateStrEnd = rule.getDateStrEnd();
+        Calendar c1 = Calendar.getInstance();
+        Calendar c2 = Calendar.getInstance();
+        // c1 is the start of the contract
+        c1.setTime(dateStrBegin);
+        // c2 is the end date of the contract
+        c2.setTime(dateStrEnd);
+        Calendar c3 = Calendar.getInstance();
+        // c3 starts as the begin of the contract
+        c3.setTime(dateStrBegin);
+        int day = c3.get(Calendar.DAY_OF_MONTH);
+
+        Calendar c4 = Calendar.getInstance();
+        c4.setTime(c3.getTime());
+        c4.add(Calendar.MONTH,1);
+        if(c4.getActualMaximum(Calendar.DAY_OF_MONTH)<day){
+            c4.set(Calendar.DAY_OF_MONTH,c4.getActualMaximum(Calendar.DAY_OF_MONTH));
+        }else{
+            c4.set(Calendar.DAY_OF_MONTH,day);
+        }
+
+        if(c4.compareTo(c2) == 0){
+            // one month
+            // get dto and add to dtos
+            float duration = 1;
+            addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c2, c3, duration,billDay);
+        }else{
+            while(c4.compareTo(c2) != 1) {
+                //each month
+                float duration = 1;
+                Calendar c5 = Calendar.getInstance();
+                c5.setTime(c3.getTime());
+                if(c5.getActualMaximum(Calendar.DAY_OF_MONTH)<day){
+                    c5.set(Calendar.DAY_OF_MONTH,c5.getActualMaximum(Calendar.DAY_OF_MONTH));
+                }else{
+                    c5.set(Calendar.DAY_OF_MONTH,day);
+                }
+                addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c5, c3, duration,billDay);
+                c3.add(Calendar.MONTH,1);
+                if(c3.getActualMaximum(Calendar.DAY_OF_MONTH)<day){
+                    c3.set(Calendar.DAY_OF_MONTH,c3.getActualMaximum(Calendar.DAY_OF_MONTH));
+                }else{
+                    c3.set(Calendar.DAY_OF_MONTH,day);
+                }
+                c4.add(Calendar.MONTH,1);
+                if(c4.getActualMaximum(Calendar.DAY_OF_MONTH)<day){
+                    c4.set(Calendar.DAY_OF_MONTH,c4.getActualMaximum(Calendar.DAY_OF_MONTH));
+                }else{
+                    c4.set(Calendar.DAY_OF_MONTH,day);
+                }
+            }
+            if(c4.compareTo(c2) == 1 && c2.compareTo(c3) == 1){
+                //less than one month
+                int c2day = c2.get(Calendar.DAY_OF_MONTH);
+                int c3day = c3.get(Calendar.DAY_OF_MONTH);
+                int distance = 0;
+                if(c2day>c3day){
+                    distance = c2day+c3day;
+                }else{
+                    distance = c3.getActualMaximum(Calendar.DAY_OF_MONTH)-c2day+c2day;
+                }
+                float duration = (float)distance/(float)c4.getActualMaximum(Calendar.DAY_OF_MONTH);
+                addFeeDTO(dtos2, formula, chargingItemName, propertyName, variableIdAndValueList, c2, c3, duration,billDay);
+            }
+        }
+        dtos1.addAll(dtos2);
+    }
+
+    @Override
+    public void generateBillsOnContractSigned(String contractNum) {
+        //保存合同，改变状态
+//        List<PaymentContractReceiver> materials = assetProvider.findContractReceiverByContractNumAndTimeLimit(contractNum);
+//        for(int i = 0; i < materials.size(); i++) {
+//            PaymentContractReceiver p = materials.get(i);
+//
+//        }
+//        String variablesJsonString = m_1.getVariablesJsonString();
+//        String formula = assetProvider.findFormulaByChargingStandardId();
+//        calculateFee()
+    }
+
+    @Override
+    public void upodateBillStatusOnContractStatusChange(Long contractId,String targetStatus) {
+        if(targetStatus.equals(AssetPaymentStrings.CONTRACT_SAVE)){
+            assetProvider.changeBillStatusOnContractSaved(contractId);
+        }else if(targetStatus.equals(AssetPaymentStrings.CONTRACT_CANCEL)){
+            assetProvider.deleteContractPayment(contractId);
+        }
+    }
+
+    @Override
+    public PaymentExpectanciesResponse listBillExpectanciesOnContract(ListBillExpectanciesOnContractCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        return handler.listBillExpectanciesOnContract(cmd);
+
+    }
+
+    @Override
+    public void exportRentalExcelTemplate(HttpServletResponse response) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        handler.exportRentalExcelTemplate(response);
+    }
+
+    @Override
+    public FindUserInfoForPaymentResponse findUserInfoForPayment(FindUserInfoForPaymentCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vendor = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendor);
+        return handler.findUserInfoForPayment(cmd);
+
+    }
+
+    @Override
+    public void updateBillsToSettled(UpdateBillsToSettled cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vender);
+        handler.updateBillsToSettled(cmd);
+    }
+
+    @Override
+    public GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
+        String vendor = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendor);
+        return handler.getAreaAndAddressByContract(cmd);
+
+
+
+    }
+
+    @Override
+    public PaymentBillItems findBillItemById(Long billItemId) {
+        return assetProvider.findBillItemById(billItemId);
+    }
+
+    @Override
+    public PaymentExemptionItems findExemptionItemById(Long ExemptionItemId) {
+        return assetProvider.findExemptionItemById(ExemptionItemId);
+    }
+
+    private void coverVariables(List<VariableIdAndValue> var1, List<VariableIdAndValue> var2) {
+        for(int i = 0 ; i < var1.size(); i++){
+            VariableIdAndValue v1 = var1.get(i);
+            String id1 = (String)v1.getVariableId();
+            for(int j = 0; j< var2.size(); j++){
+                VariableIdAndValue v2 = var2.get(j);
+                String id2 = (String)v2.getVariableId();
+                if(id1.equals(id2)){
+                    v2.setVariableValue(v1.getVariableValue());
+                }
+
+            }
+        }
+    }
+
+    private void addFeeDTO(List<PaymentExpectancyDTO> dtos, String formula, String chargingItemName, String propertyName, List<VariableIdAndValue> variableIdAndValueList, Calendar c5, Calendar c3, float duration,Integer billDay) {
+        PaymentExpectancyDTO dto = new PaymentExpectancyDTO();
+        BigDecimal amountReceivable = calculateFee(variableIdAndValueList,formula,duration);
+        dto.setAmountReceivable(amountReceivable);
+        dto.setChargingItemName(chargingItemName);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        dto.setDateStrBegin(sdf.format(c3.getTime()));
+//        dto.setDateStrEnd(sdf.format(c2.getTime()));
+        Calendar c6 = Calendar.getInstance();
+        c6.setTime(c3.getTime());
+        c6.add(Calendar.MONTH,1);
+        c6.set(Calendar.DAY_OF_MONTH,billDay);
+        dto.setDueDateStr(sdf.format(c6.getTime()));
+        dto.setDateStrEnd(sdf.format(c5.getTime()));
+        dto.setPropertyIdentifier(propertyName);
+        dtos.add(dto);
+    }
+
+    private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula, float duration) {
+        Gson gson = new Gson();
+        HashMap<String,String> map = new HashMap();
+        for(int i = 0; i < variableIdAndValueList.size(); i++){
+            VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
+            map.put((String)variableIdAndValue.getVariableId(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
+        }
+        for(Map.Entry<String,String> entry : map.entrySet()){
+            formula = formula.replace(entry.getKey(),entry.getValue());
+        }
+        formula += "*"+duration;
+        BigDecimal response = CalculatorUtil.arithmetic(formula);
+        response.setScale(2,BigDecimal.ROUND_CEILING);
+        return response;
+    }
+    @Scheduled(cron = "0 0 23 * * ?")
+    @Override
+    public void updateBillSwitchOnTime() {
+//        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE){
+            coordinationProvider.getNamedLock(CoordinationLocks.BILL_STATUS_UPDATE.getCode()).tryEnter(() ->{
+                List<PaymentBillGroup> list = assetProvider.listAllBillGroups();
+                //获取当前时间，如果是5号，则将之前的账单的switch装为1
+                for(int i = 0; i < list.size(); i++){
+                    PaymentBillGroup paymentBillGroup = list.get(i);
+                    Calendar c = Calendar.getInstance();
+                    if(c.get(Calendar.DAY_OF_MONTH)==paymentBillGroup.getBillsDay()){
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                        String billDateStr = sdf.format(c.getTime());
+                        assetProvider.updateBillSwitchOnTime(billDateStr);
+                    }
+                }
+            });
     }
 
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
@@ -250,6 +1217,21 @@ public class AssetServiceImpl implements AssetService {
                     "assetVendor not found");
         }
 
+        return assetVendor;
+    }
+
+    private AssetVendor checkAssetVendor(Integer namespaceId){
+        if(null == namespaceId) {
+            LOGGER.error("checkAssetVendor namespaceId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "checkAssetVendor namespaceId cannot be null.");
+        }
+        AssetVendor assetVendor = assetProvider.findAssetVendorByNamespace(namespaceId);
+        if(null == assetVendor) {
+            LOGGER.error("assetVendor not found, assetVendor namespaceId={}, targetId={}", namespaceId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "assetVendor not found");
+        }
         return assetVendor;
     }
 

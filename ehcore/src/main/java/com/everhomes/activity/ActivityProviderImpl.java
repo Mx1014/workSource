@@ -119,7 +119,6 @@ public class ActivityProviderImpl implements ActivityProivider {
         dao.insert(activity);
     }
 
-    @Cacheable(value = "findActivityById", key = "#id",unless="#result==null")
     @Override
     public Activity findActivityById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivities.class, id));
@@ -412,14 +411,21 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
     @Override
-    public List<ActivityRoster> listRosters(Long activityId) {
+    public List<ActivityRoster> listRosters(Long activityId, ActivityRosterStatus status) {
         List<ActivityRoster> rosters=new ArrayList<ActivityRoster>();
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class,activityId),null,
                 (context, obj) -> {
-                    context.select().from(Tables.EH_ACTIVITY_ROSTER)
-                            .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId)).fetch().forEach(item -> {
-                                rosters.add(ConvertHelper.convert(item, ActivityRoster.class));
-                            });
+                    SelectQuery<EhActivityRosterRecord> query = context.selectQuery(Tables.EH_ACTIVITY_ROSTER);
+                    query.addConditions(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId));
+
+                    //add by yanjun 20170830
+                    if(status != null){
+                        query.addConditions(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(status.getCode()));
+                    }
+                    query.fetch().forEach(item -> {
+                        rosters.add(ConvertHelper.convert(item, ActivityRoster.class));
+                    });
+
                     return true;
                 });
         return rosters;
@@ -687,6 +693,52 @@ public class ActivityProviderImpl implements ActivityProivider {
 			.and(Tables.EH_ACTIVITY_CATEGORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 			.and(Tables.EH_ACTIVITY_CATEGORIES.ENABLED.eq(TrueOrFalseFlag.TRUE.getCode()))
 			.fetchOneInto(ActivityCategories.class);
+    }
+
+    @Override
+    public void createActivityCategories(ActivityCategories activityCategory) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(ActivityCategories.class));
+
+        activityCategory.setId(id);
+        activityCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        LOGGER.info("createActivityCategories: " + activityCategory);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(ActivityCategories.class, id));
+        EhActivityCategoriesDao dao = new EhActivityCategoriesDao(context.configuration());
+        dao.insert(activityCategory);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, ActivityCategories.class, null);
+    }
+
+    @Override
+    public void updateActivityCategories(ActivityCategories activityCategory) {
+
+        activityCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        LOGGER.info("updateActivityCategories: " + activityCategory);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(ActivityCategories.class, activityCategory.getId()));
+        EhActivityCategoriesDao dao = new EhActivityCategoriesDao(context.configuration());
+        dao.update(activityCategory);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, ActivityCategories.class, null);
+    }
+
+    @Override
+    public void deleteActivityCategories(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhActivityCategoriesDao dao = new EhActivityCategoriesDao(context.configuration());
+        dao.deleteById(id);
+    }
+
+    @Override
+    public Long findActivityCategoriesMaxEntryId(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityCategories.class));
+        return context.select(DSL.max(Tables.EH_ACTIVITY_CATEGORIES.ENTRY_ID))
+                .from(Tables.EH_ACTIVITY_CATEGORIES)
+                .where(Tables.EH_ACTIVITY_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+                .fetchOneInto(Long.class);
     }
 
     @Override

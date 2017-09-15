@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>isSupportRecharge: 是否支持过期充值</li>
  * <li>reserveDay: 最多过期天数</li>
  * <li>rechargeMonthCount: 过期续交时，预交月数</li>
- * <li>rechargeType: 预交，计费方式 1: 整月，2:实际天数   {@link com.everhomes.rest.parking.ParkingLotRechargeType}</li>
+ * <li>rechargeType: 预交，计费方式 1: 整月，2:实际天数   {@link ParkingCardExpiredRechargeType}</li>
  * </ul>
  */
 public class SetParkingLotConfigCommand {

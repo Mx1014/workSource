@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
+import com.everhomes.rest.community_map.SearchCommunityMapContentsResponse;
 import com.everhomes.rest.organization.*;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -168,6 +170,7 @@ public interface OrganizationService {
 	void updateChildrenOrganization(UpdateOrganizationsCommand cmd);
 	void setAclRoleAssignmentRole(SetAclRoleAssignmentCommand cmd, EntityType entityType);
 	void updateEnterprise(UpdateEnterpriseCommand cmd);
+	void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress);
 	void deleteEnterpriseById(DeleteOrganizationIdCommand cmd);
 	
 	ListOrganizationMemberCommandResponse listOrgAuthPersonnels(ListOrganizationContactCommand cmd);
@@ -305,7 +308,6 @@ public interface OrganizationService {
 
 	/**
 	 * 获取最顶级部门
-	 * @param organizationGroupType
 	 * @param token
 	 * @param organizationId
      * @return
@@ -498,7 +500,7 @@ public interface OrganizationService {
 
 	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
 													   Long userId, ImportOrganizationPersonnelDataCommand cmd);
-    List<Object> getOrganizationMemberIdAndVisibleFlag(String contactToken, Long organizationId);
+    Byte getOrganizationMemberVisibleFlag(String contactToken, Long organizationId);
 
     void exportOrganizationPersonnelFiles(ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse);
 
@@ -522,9 +524,22 @@ public interface OrganizationService {
 	List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path,
 			Long userId);
 	String checkIfLastOnNode(DeleteOrganizationPersonnelByContactTokenCommand cmd);
-
+ 
+	 
+	// added by R, for salaryGroup 20170630
+	public Organization createSalaryGroupOrganization(Long organizationId, String name);
+	public ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize);
+	Organization createUniongroupOrganization(Long organizationId, String name, String groupType);
+	 
 	/**人事管理-离职**/
 	void leaveTheJob(LeaveTheJobCommand cmd);
 
 	ListOrganizationMemberCommandResponse syncOrganizationMemberStatus();
+
+	OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd);
+
+	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken);
+ 
+	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
+ 
 }

@@ -1,54 +1,48 @@
 package com.everhomes.pmtask;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
-
-
-
-
-
-
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
 import com.everhomes.module.ServiceModuleService;
-import com.everhomes.parking.ParkingCardRequest;
+import com.everhomes.namespace.*;
+import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
+import com.everhomes.pmtask.ebei.EbeiPmtaskLogDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
-import com.everhomes.rest.parking.ParkingCardRequestStatus;
-import com.everhomes.rest.parking.ParkingFlowConstant;
+
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.user.*;
 import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.doc.DocUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -89,15 +83,11 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceDetail;
-import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -115,7 +105,8 @@ import com.everhomes.util.Tuple;
 
 @Component
 public class PmTaskServiceImpl implements PmTaskService {
-	
+	final String downloadDir ="\\download\\";
+
 	private static final String CATEGORY_SEPARATOR = "/";
 
 	private static final String HANDLER = "pmtask.handler-";
@@ -173,6 +164,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Autowired
 	private ServiceModuleService serviceModuleService;
+	@Autowired
+	private AppProvider appProvider;
+	@Autowired
+	private NamespaceProvider namespaceProvider;
 
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
@@ -605,7 +600,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		if (null == cmd.getOrganizationId()) {
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-			return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
+			List<OrganizationMember> list = organizationProvider.listOrganizationMembersByPhoneAndNamespaceId(userIdentifier.getIdentifierToken(),namespaceId);
+			//真实姓名
+			if (list==null || list.size()==0)
+				return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
+			else
+				return handler.createTask(cmd, user.getId(), list.get(0).getContactName(), userIdentifier.getIdentifierToken());
 		}else {
 			String requestorPhone = cmd.getRequestorPhone();
 			String requestorName = cmd.getRequestorName();
@@ -660,8 +660,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if (null == namespaceId) {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
-		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		//Todo:为科兴与一碑对接
+		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() &&
+				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			handle = PmTaskHandle.EBEI;
+		}
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
 		return handler.createTask(cmd, null, requestorName, requestorPhone);
@@ -779,7 +784,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
-		
+
+		//为科兴与一碑对接
+		if(namespaceId == 999983 ) {
+			handle = PmTaskHandle.EBEI;
+		}
+
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
 		return handler.listAllTaskCategories(cmd);
@@ -2324,5 +2334,297 @@ public class PmTaskServiceImpl implements PmTaskService {
 		});
 
 		return dto;
+	}
+
+	@Override
+	public void notifyTaskResult(NotifyTaskResultCommand cmd) {
+		//根据app key来验证是否有接口权限以及是提供给哪个第三方的 eh_apps里面拿到name
+		App app = appProvider.findAppByKey(cmd.getAppKey());
+		if(app == null) {
+			LOGGER.error("app key is not exist.");
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_APP_KEY,
+					"app key is not exist.");
+		}
+//		verifySignature();
+		Long taskId = Long.valueOf(cmd.getTaskNum());
+		PmTask task = pmTaskProvider.findTaskById(taskId);
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+
+		FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+		stepDTO.setFlowCaseId(flowCase.getId());
+		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+		stepDTO.setAutoStepType(FlowStepType.END_STEP.getCode());
+		dbProvider.execute((TransactionStatus status) -> {
+			LOGGER.info("stepDTO: {}", stepDTO);
+			flowService.processAutoStep(stepDTO);
+
+			task.setRemarkSource(TaskRemarkSource.fromCode(app.getName()).getCode());
+			task.setRemark(cmd.getRemark());
+			task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+			pmTaskProvider.updateTask(task);
+			pmTaskSearch.feedDoc(task);
+			return null;
+		});
+	}
+
+	public static String computeSignature(Map<String, String> params, String secretKey) {
+		assert (params != null);
+		assert (secretKey != null);
+
+		try {
+			Mac mac = Mac.getInstance("HmacSHA1");
+			byte[] rawKey = Base64.getDecoder().decode(secretKey);
+
+			SecretKeySpec keySpec = new SecretKeySpec(rawKey, "HmacSHA1");
+			mac.init(keySpec);
+
+			List<String> keyList = new ArrayList<String>();
+			CollectionUtils.addAll(keyList, params.keySet().iterator());
+			Collections.sort(keyList);
+
+			for (String key : keyList) {
+				mac.update(key.getBytes("UTF-8"));
+				String val = params.get(key);
+				if (val != null && !val.isEmpty())
+					mac.update(val.getBytes("UTF-8"));
+			}
+
+			byte[] encryptedBytes = mac.doFinal();
+			String signature = Base64.getEncoder().encodeToString(encryptedBytes);
+
+			return signature;
+		} catch (InvalidKeyException e) {
+			throw new InvalidParameterException("Invalid secretKey for signing");
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException("NoSuchAlgorithmException for HmacSHA1", e);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException("UnsupportedEncodingException for UTF-8", e);
+		}
+	}
+
+	public static boolean verifySignature(Map<String, String> params, String secretKey, String signatureToVerify) {
+		String signature = computeSignature(params, secretKey);
+
+		if (signature.equals(signatureToVerify))
+			return true;
+
+		return false;
+	}
+
+	@Override
+	public void exportTasksCard(ExportTasksCardCommand cmd, HttpServletResponse response) {
+		List<Long> taskIds = new ArrayList<>();
+		if(!StringUtils.isEmpty(cmd.getIds())) {
+			String[] ids = cmd.getIds().split(",");
+			for(String id : ids) {
+				taskIds.add(Long.valueOf(id));
+			}
+		}
+		LOGGER.info("taskIds: {}", taskIds);
+		List<PmTask> tasks = pmTaskProvider.listTasksById(taskIds);
+		List<PmTaskDTO> dtos = tasks.stream().map(task -> {
+			PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
+			return dto;
+		}).collect(Collectors.toList());
+
+		String filePath = cmd.getFilePath();
+		if(StringUtils.isEmpty(cmd.getFilePath())) {
+			URL rootPath = PmTaskServiceImpl.class.getResource("/");
+			filePath = rootPath.getPath() + this.downloadDir ;
+			File file = new File(filePath);
+			if(!file.exists())
+				file.mkdirs();
+
+		}
+
+		DocUtil docUtil=new DocUtil();
+		List<String> files = new ArrayList<>();
+
+		for(int i = 0; i <dtos.size(); i++ ) {
+			PmTaskDTO dto = dtos.get(i);
+			Map<String, Object> dataMap=createTaskCardDoc(dto);
+
+			String savePath = filePath + dto.getId() + ".doc";
+
+			docUtil.createDoc(dataMap, "zjgk", savePath);
+			if(StringUtils.isEmpty(cmd.getFilePath())) {
+				files.add(savePath);
+			}
+		}
+		if(StringUtils.isEmpty(cmd.getFilePath())) {
+			if(files.size() > 1) {
+				String zipPath = filePath + System.currentTimeMillis() + "TaskCard.zip";
+				LOGGER.info("filePath:{}, zipPath:{}",filePath,zipPath);
+				DownloadUtils.writeZip(files, zipPath);
+				download(zipPath,response);
+			} else if(files.size() == 1) {
+				download(files.get(0),response);
+			}
+
+		}
+	}
+
+	private Map<String, Object> createTaskCardDoc(PmTaskDTO dto) {
+		Map<String, Object> dataMap=new HashMap<String, Object>();
+		Namespace namespace = namespaceProvider.findNamespaceById(dto.getNamespaceId());
+		if(namespace != null) {
+			dataMap.put("namespaceName", namespace.getName());
+		} else {
+			dataMap.put("namespaceName", "");
+		}
+
+		dataMap.put("No", dto.getId());
+		dataMap.put("name", dto.getRequestorName());
+		dataMap.put("address", dto.getAddress());
+		dataMap.put("requestorName", dto.getRequestorName());
+		dataMap.put("requestorPhone", dto.getRequestorPhone());
+		if(dto.getProcessingTime() != null) {
+			dataMap.put("processingTime", datetimeSF.format(dto.getProcessingTime()));
+		} else {
+			dataMap.put("processingTime", "");
+		}
+
+		if(dto.getReserveTime() != null) {
+			dataMap.put("reserveTime", datetimeSF.format(dto.getReserveTime()));
+		} else {
+			dataMap.put("reserveTime", "");
+		}
+
+
+		Community community = communityProvider.findCommunityById(dto.getOwnerId());
+		Organization org = organizationProvider.findOrganizationByCommunityIdAndOrgType(dto.getOwnerId(), OrganizationType.PM.getCode());
+		if(community != null) {
+			dataMap.put("communityName", community.getName());
+		} else {
+			dataMap.put("communityName", "");
+		}
+
+		if(org != null) {
+			dataMap.put("organizationName", org.getName());
+		} else {
+			dataMap.put("organizationName", "");
+		}
+
+		Category category = categoryProvider.findCategoryById(dto.getCategoryId());
+
+		if(category != null) {
+			dataMap.put("categoryName",category.getName());
+		} else {
+			dataMap.put("categoryName","");
+		}
+
+		dataMap.put("content",dto.getContent());
+
+		return dataMap;
+	}
+
+	public HttpServletResponse download(String path, HttpServletResponse response) {
+		try {
+			// path是指欲下载的文件的路径。
+			File file = new File(path);
+			if ( !file.isFile() ) {
+				LOGGER.info("filename:{} is not a file", path);
+			}
+			// 取得文件名。
+			String filename = file.getName();
+			// 取得文件的后缀名。
+			String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+
+			// 以流的形式下载文件。
+			InputStream fis = new BufferedInputStream(new FileInputStream(path));
+			byte[] buffer = new byte[fis.available()];
+			fis.read(buffer);
+			fis.close();
+			// 清空response
+			response.reset();
+			// 设置response的Header
+			response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
+			response.addHeader("Content-Length", "" + file.length());
+			OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+			response.setContentType("application/octet-stream");
+			toClient.write(buffer);
+			toClient.flush();
+			toClient.close();
+
+			// 读取完成删除文件
+			if (file.isFile() && file.exists()) {
+				file.delete();
+			}
+
+		} catch (IOException ex) {
+			LOGGER.error(ex.getMessage());
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,
+					PmTaskErrorCode.ERROR_DOWNLOAD,
+					ex.getLocalizedMessage());
+
+		}
+		return response;
+	}
+
+	@Override
+	public void changeTasksStatus(UpdateTasksStatusCommand cmd) {
+        List<PmTask> list = pmTaskProvider.findTaskByOrderId(cmd.getOrderId());
+        if(list==null || list.size()==0)
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ORDER_ID,
+                    "OrderId does not exist.");
+		PmTask task = list.get(0);
+
+		PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
+		//TODO  枚举值更新
+		Byte state = cmd.getStateId()==6?PmTaskStatus.INACTIVE.getCode():cmd.getStateId();
+
+		dbProvider.execute((TransactionStatus status) -> {
+
+			task.setStatus(state > PmTaskStatus.PROCESSED.getCode() &&  state<PmTaskStatus.INACTIVE.getCode()
+					? PmTaskStatus.PROCESSED.getCode(): state );
+			pmTaskProvider.updateTask(task);
+			dto.setStatus(task.getStatus());
+
+			//更新工作流case状态
+			FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+
+			if (FlowCaseStatus.INVALID.getCode() != flowCase.getStatus()) {
+				Byte flowCaseStatus = state >= PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
+						(state == PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.ABSORTED.getCode() :
+								FlowCaseStatus.PROCESS.getCode());
+
+				if (flowCaseStatus == FlowCaseStatus.ABSORTED.getCode() && flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode())
+					cancelTask(task.getId());
+				else if (flowCaseStatus == FlowCaseStatus.FINISHED.getCode() && flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode())
+					finishTask(task.getId());
+			}
+			return null;
+		});
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
+		}
+	private void cancelTask(Long id){
+		PmTask task = checkPmTask(id);
+		//更新工作流case状态
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+		flowCase.setStatus(FlowCaseStatus.ABSORTED.getCode());
+		flowCaseProvider.updateFlowCase(flowCase);
+		//节点状态流转
+		FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+		stepDTO.setFlowCaseId(flowCase.getId());
+		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+		stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+		flowService.processAutoStep(stepDTO);
+
+	}
+
+	private void finishTask(Long id){
+		PmTask task = checkPmTask(id);
+		//更新工作流case状态
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+		flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());
+		flowCaseProvider.updateFlowCase(flowCase);
+		//节点状态流转
+		FlowAutoStepDTO stepDTO = ConvertHelper.convert(flowCase, FlowAutoStepDTO.class);
+		stepDTO.setFlowCaseId(flowCase.getId());
+		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+		flowService.processAutoStep(stepDTO);
 	}
 }

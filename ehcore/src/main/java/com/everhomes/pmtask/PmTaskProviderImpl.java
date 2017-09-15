@@ -606,5 +606,30 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		}
 		return new ArrayList<PmTaskLog>();
 	}
-	
+
+	@Override
+	public List<PmTask> listTasksById(List<Long> ids) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+		SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
+
+		if(null != ids)
+			query.addConditions(Tables.EH_PM_TASKS.ID.in(ids));
+
+		List<PmTask> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTask.class)).collect(Collectors.toList());
+		return result;
+	}
+
+	/**
+	 * 通过orderId查询task 与一碑对接的订单号存在string_tag1中
+	 * @param orderId
+	 * @return
+	 */
+	@Override
+	public List<PmTask> findTaskByOrderId(String orderId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+		SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
+		query.addConditions(Tables.EH_PM_TASKS.STRING_TAG1.eq(orderId));
+		List<PmTask> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTask.class)).collect(Collectors.toList());
+		return result;
+	}
 }

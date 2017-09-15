@@ -23,7 +23,26 @@ public class ShopDTO {
 	private Long searchTypeId;
 	private String searchTypeName;
 	private String contentType;
-	
+
+	private String buildingId;
+	private String apartmentId;
+
+	public String getBuildingId() {
+		return buildingId;
+	}
+
+	public void setBuildingId(String buildingId) {
+		this.buildingId = buildingId;
+	}
+
+	public String getApartmentId() {
+		return apartmentId;
+	}
+
+	public void setApartmentId(String apartmentId) {
+		this.apartmentId = apartmentId;
+	}
+
 	public String getShopNo() {
 		return shopNo;
 	}

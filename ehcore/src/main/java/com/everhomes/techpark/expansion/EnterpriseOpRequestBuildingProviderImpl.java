@@ -77,18 +77,14 @@ public class EnterpriseOpRequestBuildingProviderImpl implements EnterpriseOpRequ
 	    }
 
 	    @Override
-	    public List<EnterpriseOpRequestBuilding> queryEnterpriseOpRequestBuildings(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+	    public List<EnterpriseOpRequestBuilding> queryEnterpriseOpRequestBuildings(ListingQueryBuilderCallback queryBuilderCallback) {
 	        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
 
 	        SelectQuery<EhEnterpriseOpRequestBuildingsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS);
-	        if(queryBuilderCallback != null)
-	            queryBuilderCallback.buildCondition(locator, query);
+	        if(queryBuilderCallback != null) {
+				queryBuilderCallback.buildCondition(null, query);
+			}
 
-	        if(null != locator && locator.getAnchor() != null) {
-	            query.addConditions(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS.ID.gt(locator.getAnchor()));
-	            }
-
-	        query.addLimit(count);
 	        List<EnterpriseOpRequestBuilding> objs = query.fetch().map((r) -> {
 	            return ConvertHelper.convert(r, EnterpriseOpRequestBuilding.class);
 	        });

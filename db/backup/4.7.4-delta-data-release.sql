@@ -1,6 +1,6 @@
 -- 添加审批 by zt.zheng
 INSERT INTO `eh_community_approve` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `project_id`,
- `approve_name`, `status`, `form_origin_id`, `form_version`, `update_time`, `create_time`) VALUES ('1', '999977', '1008900', '240111044331055940', 'community',
+ `approve_name`, `status`, `form_origin_id`, `form_version`, `update_time`, `create_time`) VALUES ('1', '999977', '1023180', '240111044332059733', 'community',
  '41600', 'EhCommunityApprove', '0', '委托找房', '1', '0', '0', NOW(), NOW());
 
 -- 添加菜单 -- 按照产品要求，添加菜单到左邻域 by zt.zheng
@@ -26,16 +26,16 @@ VALUES ((@eh_acl_privileges_id := @eh_acl_privileges_id+1), 0, '园区审批', '
 -- 菜单对应的权限 by zt.zheng
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41400, '园区审批', 1, 1, '园区审批  全部权限', 499);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41600, '园区审批', 1, 1, '园区审批  全部权限', 499);
 
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41410, '表单管理', 1, 1, '表单管理  全部权限', 500);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41610, '表单管理', 1, 1, '表单管理  全部权限', 500);
 
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41420, '审批管理', 1, 1, '审批管理  全部权限', 501);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41620, '审批管理', 1, 1, '审批管理  全部权限', 501);
 
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41430, '申请记录', 1, 1, '打印价格  全部权限', 502);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @eh_acl_privileges_id, 41630, '申请记录', 1, 1, '申请记录  全部权限', 502);
 
 -- 角色对应的菜单权限 by zt.zheng
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
@@ -77,7 +77,7 @@ SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`,
 `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
 VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999977, 0, 0, 0, '/home', 'Bizs', '委托找房', '委托找房',
-'', 1, 1, 60, '{"url":"zl://form/create?sourceType=COMMUNITY_APPROVE&sourceId=1&ownerType=EhcommunityApprove&ownerId=1008900&displayName=委托找房&metaObject="}', 3, 0,
+'cs://1/image/aW1hZ2UvTVRvNE1tSXlaakU1TjJNMk16VTRNV0poTTJabU1tRm1ZalV3TVdJM1ptWXhOdw', 1, 1, 60, '{"url":"zl://form/create?sourceType=COMMUNITY_APPROVE&sourceId=1&ownerType=EhcommunityApprove&ownerId=1023180&displayName=委托找房&metaObject="}', 3, 0,
  1, 1, '', 0, NULL, NULL, NULL, 0,
  'park_tourist', 1, NULL, NULL, 0, NULL);
 
@@ -87,7 +87,7 @@ VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999977, 0, 0, 
 `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`,
 `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
 VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 999977, 0, 0, 0, '/home', 'Bizs', '委托找房', '委托找房',
-'', 1, 1, 60, '{"url":"zl://form/create?sourceType=COMMUNITY_APPROVE&sourceId=1&ownerType=EhcommunityApprove&ownerId=1008900&displayName=委托找房&metaObject="}', 3, 0,
+'cs://1/image/aW1hZ2UvTVRvNE1tSXlaakU1TjJNMk16VTRNV0poTTJabU1tRm1ZalV3TVdJM1ptWXhOdw', 1, 1, 60, '{"url":"zl://form/create?sourceType=COMMUNITY_APPROVE&sourceId=1&ownerType=EhcommunityApprove&ownerId=1023180&displayName=委托找房&metaObject="}', 3, 0,
  1, 1, '', 0, NULL, NULL, NULL, 0,
  'pm_admin', 1, NULL, NULL, 0, NULL);
 

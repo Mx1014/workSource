@@ -5,15 +5,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.server.schema.Tables;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -24,6 +23,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,6 +166,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+
+	@Autowired
+	private GeneralApprovalProvider generalApprovalProvider;
 
 	private void populateYellowPage(YellowPage yellowPage) { 
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -666,7 +669,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 //			return null;
 //		}
 //		populateYellowPage(yellowPage);
-		
+		if (cmd.getOwnerType().equals(ServiceAllianceBelongType.COMMUNITY.getCode())){
+			cmd.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
+			List<Organization> organizationList= this.organizationProvider.findOrganizationByCommunityId(cmd.getOwnerId());
+			cmd.setOwnerId(organizationList.get(0).getId());
+		}
 		ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getType());
 		if (null == sa)
 			{
@@ -763,8 +770,21 @@ public class YellowPageServiceImpl implements YellowPageService {
         	 }
         	
         }else{
+//			if (cmd.getOwnerType().equals(ServiceAllianceBelongType.ORGANAIZATION.getCode())) {
+//				List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+//				for (OrganizationCommunity organizationCommunity : communityList) {
+//					Condition condition = Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(organizationCommunity.getCommunityId())
+//							.and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
+//					if (conditionOR == null) {
+//						conditionOR = condition;
+//					} else {
+//						conditionOR = conditionOR.or(condition);
+//					}
+//				}
+//			}
         	sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
  	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
+
         }
 
 		long time5 = System.currentTimeMillis();
@@ -800,6 +820,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 					dto.setTemplateName(dto.getTemplateType());
 					dto.setButtonTitle("我要申请");
 				}
+
+
 			} else {
 				//兼容以前只有模板跳转时jumptype字段为null的情况
 				if(dto.getTemplateType() != null) {
@@ -816,6 +838,27 @@ public class YellowPageServiceImpl implements YellowPageService {
 				dto.setButtonTitle(sa.getButtonTitle());
 			}
 
+			// 服务联盟跳转到审批，审批模块可控制在app端是否显示
+			if((ServiceAllianceSourceRequestType.CLIENT == sourceRequestType || sourceRequestType == null)
+					&& dto.getJumpType() == JumpType.MODULE.getCode() && dto.getModuleUrl()!=null){
+				int start = dto.getModuleUrl().indexOf('?');
+				String s[] = dto.getModuleUrl().substring(start).split("&");
+				s = s[0].split("=");
+				if(s.length>1){
+					try {
+						Long approveId = Long.valueOf(s[1]);
+						GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(approveId);
+						if(CommonStatus.ACTIVE.getCode() != approval.getStatus().intValue()){
+							dto.setButtonTitle(null);
+							dto.setJumpType(JumpType.NONE.getCode());
+							dto.setModuleUrl(null);
+						}
+
+					}catch (Exception e){}
+				}
+
+			}
+
 			processServiceUrl(dto);
 			this.processDetailUrl(dto);
 //			dto.setDisplayName(serviceAlliance.getNickName());
@@ -823,12 +866,35 @@ public class YellowPageServiceImpl implements YellowPageService {
 
         }
 
+        this.processRange(response.getDtos());
+
 		long time6 = System.currentTimeMillis();
 		LOGGER.info("populate dto time: {}", time6 - time5);
 
 		LOGGER.info("getServiceAllianceEnterpriseList total time: {}", time6 - startTime);
 
 		return response;
+	}
+
+	private  void processRange(List<ServiceAllianceDTO> dtos){
+		for (ServiceAllianceDTO dto:dtos){
+			String range = dto.getRange();
+			if (range!=null && !range.equals("all")){
+				String [] communities = range.split(",");
+				List<Long> communityIds = new ArrayList<>();
+				for (int i = 0;i<communities.length;i++)
+					communityIds.add(Long.valueOf(communities[i]));
+				List<Community> communities2 = communityProvider.findCommunitiesByIds(communityIds);
+				String rangeDisplay = "";
+				for (Community co : communities2)
+					rangeDisplay += co.getName()+",";
+				if (rangeDisplay.length()>0)
+					rangeDisplay = rangeDisplay.substring(0,rangeDisplay.length()-1);
+				dto.setRangeDisplay(rangeDisplay);
+			}
+			if (range!=null && range.equals("all"))
+				dto.setRangeDisplay("全部");
+		}
 	}
 
 	private void processServiceUrl(ServiceAllianceDTO dto) {

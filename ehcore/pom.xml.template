@@ -325,12 +325,36 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+		<dependency>
+		    <groupId>alipay-sdk</groupId>
+		    <artifactId>alipay-sdk</artifactId>
+		    <version>20170725114550</version>
+		</dependency>
 		
 		<!--<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz-jobs</artifactId>
 			<version>2.2.1</version>
 		</dependency>-->
+
+		<dependency>
+            <groupId>com.everhomes</groupId>
+            <artifactId>ehutil-common</artifactId>
+            <version>1.0.3-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.everhomes.pay</groupId>
+            <artifactId>ehpay-rest</artifactId>
+            <version>1.0.3-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.everhomes.pay</groupId>
+            <artifactId>ehpay-rest-response</artifactId>
+            <version>1.0.3-SNAPSHOT</version>
+        </dependency>
 
 	</dependencies>
 

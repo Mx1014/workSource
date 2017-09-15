@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.everhomes.server.schema.tables.daos.EhNewsCommunitiesDao;
+import com.everhomes.server.schema.tables.pojos.EhNewsCategories;
 import com.everhomes.server.schema.tables.pojos.EhNewsCommunities;
 import com.everhomes.server.schema.tables.records.EhNewsCommunitiesRecord;
 import com.everhomes.user.UserContext;
@@ -49,6 +50,15 @@ public class NewsProviderImpl implements NewsProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNews.class, null);
 	}
 
+	@Override
+	public void createNewsCategory(NewsCategory newsCategory) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNewsCategories.class));
+		newsCategory.setId(id);
+		newsCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		new EhNewsCategoriesDao(getContext(AccessSpec.readWrite()).configuration()).insert(newsCategory);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNewsCategories.class, null);
+	}
+
 	
 	
 	@Override
@@ -66,7 +76,11 @@ public class NewsProviderImpl implements NewsProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNews.class, null);
 	}
 
-
+	@Override
+	public void updateNewsCategory(NewsCategory newsCategory) {
+		new EhNewsCategoriesDao(getContext(AccessSpec.readWrite()).configuration()).update(newsCategory);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhNewsCategories.class, null);
+	}
 
 	@Override
 	public void updateNews(News news) {

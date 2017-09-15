@@ -31,7 +31,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("messaging.routing.block.size", 10)
             .withProperty("forum.postbox.size", 10)
             .withProperty("forum.flush.interval", 3000)
-            .withProperty("db.master", "jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore")
+            .withProperty("db.master", "jdbc:mysql://wuhan:wuhan@10.1.10.101:3306/ehcore_20160409")
             .withProperty("db.conn.pool", 8)
             .withProperty("db.tx.timeout", 600)
             .withProperty("db.jta", false)
@@ -61,6 +61,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("biz.secretKey", "PSsIB9nZm3ENS3stei8oAvGa2afRW7wT+Y6x76XDtUCUcXOUhkPYK9V/5r03pD2rquQ==")
             .withProperty("elastic.nodes.httpports", "9200")
             .withProperty("equipment.ip", "127.0.0.1")
+            .withProperty("schedule.running.flag", "0")
             .withProperty("src.path", "/home/janson/ssd2/everhomes/ehnextgen")
             .withProperty("schedule.running.flag", "1")
             );

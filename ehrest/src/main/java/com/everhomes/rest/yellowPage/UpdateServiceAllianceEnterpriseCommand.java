@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *  <li>parentId: 父id</li>
  *  <li>ownerType: 拥有者类型 参考 {@link com.everhomes.rest.yellowPage.ServiceAllianceBelongType}</li>
  *  <li>ownerId: 拥有者ID</li>
+ *  <li>range: 可见范围</li>
  *  <li>name: 企业名称</li>
  *  <li>displayName: 简称</li>
  *  <li>address: 地址</li>
@@ -48,7 +49,9 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	private String   ownerType;
 	@NotNull
 	private Long     ownerId;
-	
+
+	private String   range;
+
 	private String   name;
 	
 	private String   displayName;
@@ -139,6 +142,14 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public String getRange() {
+		return range;
+	}
+
+	public void setRange(String range) {
+		this.range = range;
 	}
 
 	public String getName() {

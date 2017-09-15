@@ -2,10 +2,8 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -34,8 +32,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespacesProvider;
-import com.everhomes.order.OrderEmbeddedHandler;
-import com.everhomes.order.OrderUtil;
+import com.everhomes.order.*;
 import com.everhomes.organization.*;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
@@ -63,14 +60,12 @@ import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
-import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
@@ -98,8 +93,6 @@ import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -122,7 +115,6 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -259,7 +251,6 @@ public class ActivityServiceImpl implements ActivityService {
 	private RosterPayTimeoutService rosterPayTimeoutService;
 	
 	
-	
     @PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(WarnActivityBeginningAction.QUEUE_NAME);
@@ -371,13 +362,7 @@ public class ActivityServiceImpl implements ActivityService {
     	
     	//先删除已经过期未支付的活动 add by yanjun 20170417
     	this.cancelExpireRosters(cmd.getActivityId());
-    	
-    	LOGGER.debug("Before  enter.");
-    	this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
-    		LOGGER.debug("Enter Success.");
-    		return null;
-    	});
-    	LOGGER.debug("Exit Enter.");
+
     	// 把锁放在查询语句的外面，update by tt, 20170210
     	return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
@@ -390,7 +375,7 @@ public class ActivityServiceImpl implements ActivityService {
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 		        }
-        
+
 		        Post post = forumProvider.findPostById(activity.getPostId());
 		        if (post == null) {
 		            LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
@@ -535,6 +520,7 @@ public class ActivityServiceImpl implements ActivityService {
 	            long signupStatEndTime = System.currentTimeMillis();
 	            LOGGER.debug("Signup success, totalElapse={}, rosterElapse={}, cmd={}", (signupStatEndTime - signupStatStartTime), 
 	            		(signupStatEndTime - rosterStatStartTime), cmd);
+
 	            return dto;
 	        });
         }).first();
@@ -553,6 +539,8 @@ public class ActivityServiceImpl implements ActivityService {
 		 if(cmd.getSignupSourceFlag() != null && cmd.getSignupSourceFlag().byteValue() == ActivityRosterSourceFlag.WECHAT.getCode()){
 			 return;
 		 }
+
+		 LOGGER.info("UserContext current getVersion , version = {}", version);
 
 		 if(version == null){
 			 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -689,6 +677,7 @@ public class ActivityServiceImpl implements ActivityService {
 		return dto;
 	}
 
+
 	@Override
 	public CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd) {
 //		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
@@ -799,6 +788,9 @@ public class ActivityServiceImpl implements ActivityService {
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 		        }
+
+				LOGGER.info("manualSignup start activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 		        //检查是否超过报名人数限制, add by tt, 20161012
 		        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
 		        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -839,6 +831,9 @@ public class ActivityServiceImpl implements ActivityService {
 	            //createActivityRoster(roster);
 	            activityProvider.createActivityRoster(roster);
 	            activityProvider.updateActivity(activity);
+
+				LOGGER.info("manualSignup end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 	            return roster;
 	        });
         }).first();
@@ -992,6 +987,9 @@ public class ActivityServiceImpl implements ActivityService {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
+
+			LOGGER.info("importSignupInfo start activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 			List<ActivityRoster> rostersTemp = getRostersFromExcel(files[0]);
 			
 			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
@@ -1015,6 +1013,9 @@ public class ActivityServiceImpl implements ActivityService {
 	            
 				return null;
 			});
+
+			LOGGER.info("importSignupInfo end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 			return null;
 		});
 		
@@ -1463,7 +1464,9 @@ public class ActivityServiceImpl implements ActivityService {
 	                 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 	                         ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 	             }
-	             
+
+				LOGGER.info("cancelSignup start activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 	             //手动取消 要检查过期时间  add by yanjun 20170519
 	             if(cmd.getCancelType() == null || cmd.getCancelType().byteValue()== ActivityCancelType.HAND.getCode()){
 	            	 if(activity.getSignupEndTime() != null && activity.getSignupEndTime().getTime() < DateHelper.currentGMTTime().getTime()){
@@ -1521,6 +1524,9 @@ public class ActivityServiceImpl implements ActivityService {
 	             sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_CANCEL_TO_CREATOR, null);
 	             long cancelEndTime = System.currentTimeMillis();
 	             LOGGER.debug("Canel the activity signup, elapse={}, cmd={}", (cancelEndTime - cancelStartTime), cmd);
+
+				 LOGGER.info("cancelSignup end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+
 	             return dto;
 	        	
 	        });
@@ -1580,7 +1586,7 @@ public class ActivityServiceImpl implements ActivityService {
 			LOGGER.error("Refund failed from vendor, orderNo={}, userId={}, activityId={}, refundCmd={}, response={}", 
 					roster.getOrderNo(), userId, activity.getId(), refundCmd, refundResponse);
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+					RentalServiceErrorCode.ERROR_REFUND_ERROR,
 							"bill  refound error"); 
 		}
 		long endTime = System.currentTimeMillis();
@@ -2048,7 +2054,17 @@ public class ActivityServiceImpl implements ActivityService {
     		
     		//在锁内部重新活动信息  add by yanjun 20170522
     		ActivityRoster item = activityProvider.findRosterById(cmd.getRosterId());
-    		Activity activity = activityProvider.findActivityById(item.getActivityId());
+
+    		//在锁的内部重新校验报名信息，防止报名取消了之后再发起确认操作  add by yanjun 20170905
+			if (item == null || item.getStatus() == null || item.getStatus().byteValue() != ActivityRosterStatus.NORMAL.getCode()) {
+				LOGGER.error("cannnot find roster record in database");
+				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+						ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER,
+						"cannnot find roster record in database id=" + cmd.getRosterId());
+			}
+
+
+			Activity activity = activityProvider.findActivityById(item.getActivityId());
     		if (activity == null) {
     			LOGGER.error("cannnot find activity record in database");
     			// TODO
@@ -2056,6 +2072,8 @@ public class ActivityServiceImpl implements ActivityService {
     					ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "cannnot find activity record in database id="
     							+ cmd.getRosterId());
     		}
+
+
     		Post post = forumProvider.findPostById(activity.getPostId());
     		//validate post status
     		if (post == null) {
@@ -2081,6 +2099,7 @@ public class ActivityServiceImpl implements ActivityService {
     		//                    "the user is invalid.cannot confirm id=" + cmd.getRosterId());
     		//        }
     		dbProvider.execute(status -> {
+				LOGGER.info("confirm start activityId: " + activity.getId() + " userId: " + item.getUid() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
     			//           forumProvider.createPost(createPost(user.getId(), post, cmd.getConfirmFamilyId(), cmd.getTargetName()));
 
 
@@ -2112,6 +2131,8 @@ public class ActivityServiceImpl implements ActivityService {
     				rosterPayTimeoutService.pushTimeout(item);
     			}
     			activityProvider.updateRoster(item);
+
+				LOGGER.info("confirm end activityId: " + activity.getId() + " userId: " + item.getUid() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
     			return status;
     		});
 
@@ -2263,6 +2284,14 @@ public class ActivityServiceImpl implements ActivityService {
     		//在锁内部重新查询报名信息  add by yanjun 20170522
     		ActivityRoster roster = activityProvider.findRosterById(cmd.getRosterId());
 
+			//在锁的内部重新校验报名信息，防止报名取消了之后再发起拒绝操作  add by yanjun 20170905
+			if (roster == null || roster.getStatus() == null || roster.getStatus().byteValue() != ActivityRosterStatus.NORMAL.getCode()) {
+				LOGGER.error("cannnot find roster record in database");
+				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+						ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER,
+						"cannnot find roster record in database id=" + cmd.getRosterId());
+			}
+
     		Activity activity = activityProvider.findActivityById(roster.getActivityId());
     		if (activity == null) {
     			LOGGER.error("invalid activity.id={}", roster.getActivityId());
@@ -2373,7 +2402,7 @@ public class ActivityServiceImpl implements ActivityService {
         if(activity==null){
             return null;
         }
-        List<ActivityRoster> rosterList = activityProvider.listRosters(activity.getId());
+        List<ActivityRoster> rosterList = activityProvider.listRosters(activity.getId(), ActivityRosterStatus.NORMAL);
         ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), UserContext
                 .current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
         ActivityListResponse response = new ActivityListResponse();
@@ -3534,9 +3563,11 @@ public class ActivityServiceImpl implements ActivityService {
             }
             break;
 	    case PM_ADMIN:
-	        ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
-	        execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
-	        resp = listOrgNearbyActivities(execOrgCmd);
+			ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
+			execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
+			//resp = listOrgNearbyActivities(execOrgCmd);
+			execOrgCmd.setSceneToken(cmd.getSceneToken());
+			resp = listOrgActivitiesByScope(execOrgCmd);
 	        break;
 	    default:
 	        LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDto);
@@ -3551,14 +3582,24 @@ public class ActivityServiceImpl implements ActivityService {
 	    
 	    return resp;
 	}
-	
+
 	//华润要求只能看到当前小区的活动，因此增加一种位置范围-COMMUNITY。根据传来的范围参数，如果是小区使用新的方法，否则使用老方法。
-	private ListActivitiesReponse listActivitiesByScope(SceneTokenDTO sceneTokenDto, ListNearbyActivitiesBySceneCommand cmd, 
-	        int geoCharCount, Long communityId, ActivityLocationScope scope){
+	private ListActivitiesReponse listActivitiesByScope(SceneTokenDTO sceneTokenDto, ListNearbyActivitiesBySceneCommand cmd,
+														int geoCharCount, Long communityId, ActivityLocationScope scope){
 		if(scope.getCode() == ActivityLocationScope.COMMUNITY.getCode()){
-			return listCommunityActivities(sceneTokenDto, cmd, communityId);
+			return listOfficialActivitiesByScene(cmd);
 		}else{
 			return listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, communityId);
+		}
+	}
+
+	//华润要求只能看到当前小区的活动，因此增加一种位置范围-COMMUNITY。根据传来的范围参数，如果是小区使用新的方法，否则使用老方法。
+	private  ListActivitiesReponse listOrgActivitiesByScope(ListOrgNearbyActivitiesCommand execOrgCmd){
+		if(execOrgCmd.getScope() == ActivityLocationScope.COMMUNITY.getCode()){
+			ListNearbyActivitiesBySceneCommand command = ConvertHelper.convert(execOrgCmd, ListNearbyActivitiesBySceneCommand.class);
+			return listOfficialActivitiesByScene(command);
+		}else{
+			return listOrgNearbyActivities(execOrgCmd);
 		}
 	}
 	
@@ -5120,38 +5161,40 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	public static void main(String[] args) {
-		String a = "{\n" +
-				"    \"module\": \"file\",\n" +
-				"    \"from\": \"record\",\n" +
-				"    \"appid\": \"K0MvwB2WmFJNrgg4\",\n" +
-				"    \"lid\": \"2kGogxABi86pHQkd\",\n" +
-				"    \"fid\": \"/video/4/5d/2kGogxABi86pHQkd.mp4\",\n" +
-				"    \"size\": \"1220641\",\n" +
-				"    \"dura\": \"14\",\n" +
-				"    \"state\": 1,\n" +
-				"    \"msg\": \"created\"\n" +
-				"}";
+		System.out.print(SignatureHelper.generateSecretKey());
 
-		VideoCallbackCommand cmd = JSONObject.parseObject(a, VideoCallbackCommand.class);
-		VideoState videoState = null;
-		if(cmd.getModule().trim().equals("live")){
-			if(cmd.getState() == 0){
-				videoState = VideoState.UN_READY;
-			}else{
-				videoState = VideoState.LIVE;
-			}
-		}else if(cmd.getModule().trim().equals("file") && !StringUtils.isEmpty(cmd.getFrom()) && cmd.getFrom().trim().equals("record")){
-			if(cmd.getState() == -1){
-				videoState = VideoState.EXCEPTION;
-			}else if(cmd.getState() == 1){
-				videoState = VideoState.RECORDING;
-			}else{
-				videoState = VideoState.LIVE;
-			}
-		}else{
-			System.out.print("aaaa...........");
-			return;
-		}
+//		String a = "{\n" +
+//				"    \"module\": \"file\",\n" +
+//				"    \"from\": \"record\",\n" +
+//				"    \"appid\": \"K0MvwB2WmFJNrgg4\",\n" +
+//				"    \"lid\": \"2kGogxABi86pHQkd\",\n" +
+//				"    \"fid\": \"/video/4/5d/2kGogxABi86pHQkd.mp4\",\n" +
+//				"    \"size\": \"1220641\",\n" +
+//				"    \"dura\": \"14\",\n" +
+//				"    \"state\": 1,\n" +
+//				"    \"msg\": \"created\"\n" +
+//				"}";
+//
+//		VideoCallbackCommand cmd = JSONObject.parseObject(a, VideoCallbackCommand.class);
+//		VideoState videoState = null;
+//		if(cmd.getModule().trim().equals("live")){
+//			if(cmd.getState() == 0){
+//				videoState = VideoState.UN_READY;
+//			}else{
+//				videoState = VideoState.LIVE;
+//			}
+//		}else if(cmd.getModule().trim().equals("file") && !StringUtils.isEmpty(cmd.getFrom()) && cmd.getFrom().trim().equals("record")){
+//			if(cmd.getState() == -1){
+//				videoState = VideoState.EXCEPTION;
+//			}else if(cmd.getState() == 1){
+//				videoState = VideoState.RECORDING;
+//			}else{
+//				videoState = VideoState.LIVE;
+//			}
+//		}else{
+//			System.out.print("aaaa...........");
+//			return;
+//		}
 	}
 	
 	private Map<String, String> createActivityRouterMeta(String url, String subject){

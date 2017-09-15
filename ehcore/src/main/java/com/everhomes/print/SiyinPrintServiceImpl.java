@@ -384,16 +384,18 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			return new InformPrintResponse(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode());
 		}finally {
 			LOGGER.info("subject = {}.{}, print response = {}", PRINT_SUBJECT, cmd.getIdentifierToken(),JSONObject.toJSONString(printResponse));
-			ExecutorUtil.submit(()->{
-				try {
-					LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
-					localBusSubscriber.onLocalBusMessage(null, PRINT_SUBJECT + "." + cmd.getIdentifierToken(), JSONObject.toJSONString(printResponse), null);
-				}catch (Exception e){
-				    LOGGER.error("submit LocalBusSubscriber {}.{} got excetion",PRINT_SUBJECT ,cmd.getIdentifierToken(), e);
+			ExecutorUtil.submit(new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
+						localBusSubscriber.onLocalBusMessage(null, PRINT_SUBJECT + "." + cmd.getIdentifierToken(), JSONObject.toJSONString(printResponse), null);
+					} catch (Exception e) {
+						LOGGER.error("submit LocalBusSubscriber {}.{} got excetion", PRINT_SUBJECT, cmd.getIdentifierToken(), e);
+					}
+					localBus.publish(null, PRINT_SUBJECT + "." + cmd.getIdentifierToken(), JSONObject.toJSONString(printResponse));
 				}
-				localBus.publish(null, PRINT_SUBJECT + "." + cmd.getIdentifierToken(), JSONObject.toJSONString(printResponse));
-				return ;
-			});
+			},"subscriberPrint"));
 		}
 
 	}

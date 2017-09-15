@@ -72,7 +72,7 @@ public interface RolePrivilegeService {
 	 * @param cmd
 	 * @return
 	 */
-	List<RoleDTO> listRoles(ListRolesCommand cmd);
+	ListRolesResponse listRoles(ListRolesCommand cmd);
 	
 	/**
 	 * 判断是否是系统管理员
@@ -80,6 +80,8 @@ public interface RolePrivilegeService {
 	 * @return
 	 */
 	boolean checkAdministrators(Long organizationId);
+
+	GetPrivilegeByRoleIdResponse getPrivilegeByRoleId(ListPrivilegesByRoleIdCommand cmd);
 	
 	/**
 	 * 校验是否有权限
@@ -94,7 +96,7 @@ public interface RolePrivilegeService {
 	 * 创建超级管理员
 	 * @param cmd
 	 */
-	void createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd);
+	OrganizationContactDTO createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd);
 	
 	/**
 	 * 创建普通管理员
@@ -120,12 +122,6 @@ public interface RolePrivilegeService {
 	 * @return
 	 */
 	ListOrganizationMemberCommandResponse listOrganizationAdministrators(ListOrganizationAdministratorCommand cmd);
-	
-	/**
-	 * 删除管理员
-	 * @param cmd
-	 */
-	void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd);
 	
 	/**
 	 * 删除角色人员
@@ -163,7 +159,7 @@ public interface RolePrivilegeService {
 	 * 创建公司管理员
 	 * @param cmd
      */
-	void createOrganizationAdmin(CreateOrganizationAdminCommand cmd);
+	OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd);
 
 	/**
 	 * 创建业务模块管理员
@@ -350,7 +346,7 @@ public interface RolePrivilegeService {
      */
 	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, List<Long> moduleIds, ServiceModulePrivilegeType type);
 
-	void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId);
+	OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId);
 
 	/**
 	 * 获取权限列表
@@ -406,4 +402,5 @@ public interface RolePrivilegeService {
 
 	List<ServiceModuleDTO> listServiceModulesByTarget(ListServiceModulesByTargetCommand cmd);
 
+	void assignmentAclRole(String ownerType, Long ownerId, String targetType, Long targetId, Integer namespaceId, Long creatorUid, Long roleId);
 }

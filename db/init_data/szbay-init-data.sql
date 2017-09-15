@@ -4597,3 +4597,34 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),60000,'', 'EhNamespaces', 999987,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),60100,'', 'EhNamespaces', 999987,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),60200,'', 'EhNamespaces', 999987,2);
+
+
+-- fix 13772 add by xiongying20170810
+set @app_url_id = IFNULL((select max(id) from eh_app_urls),0);
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@app_url_id := @app_url_id + 1), '999987', '深圳湾', '2', '', '', '移动平台聚合服务，助力园区效能提升');
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@app_url_id := @app_url_id + 1), '999987', '深圳湾', '1', '', '', '移动平台聚合服务，助力园区效能提升');
+
+set @config_id = IFNULL((select max(id) from eh_lease_configs),0);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`, `display_name_str`, `display_order_str`) VALUES ((@config_id := @config_id + 1), '999987', '1', '1', '1', '1', '1', '1', '园区介绍, 虚位以待', '1,2');
+
+set @resource_id = IFNULL((select max(id) from eh_rentalv2_resource_types),0);
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`, `unauth_visible`) VALUES ((@resource_id := @resource_id + 1), '会议室预约', '0', NULL, '2', '999987', '0', '0');
+
+update eh_launch_pad_items set item_label = '会议室预约' where item_label = '行业动态' and namespace_id = 999987;
+update eh_launch_pad_items set action_type = 49 where item_label = '会议室预约' and namespace_id = 999987;
+update eh_launch_pad_items set action_data = CONCAT('{"resourceTypeId":',@resource_id,',"pageType": 0}') where item_label = '会议室预约' and namespace_id = 999987;
+
+-- 【深圳湾】服务广场增加item add by sfyan 20170825
+SET @eh_biz_serverURL = "http://biz.szbay.com"; -- 取具体环境连接core server的链接
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`); 
+SET @service_categry_id1 = (SELECT id FROM `eh_item_service_categries` where namespace_id = 999966 and name = '企业服务' and scene_type = 'pm_admin'); 
+SET @service_categry_id2 = (SELECT id FROM `eh_item_service_categries` where namespace_id = 999966 and name = '企业服务' and scene_type = 'park_tourist'); 
+
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),'999966','0','0','0','/home','Bizs','BizManager','店铺管理','cs://1/image/aW1hZ2UvTVRwaU56SXhOelJrTURFNFlqSmlOVEpqTldRNU5qSmtOV000TlRObVpXWTJZdw
+','1','1','13',CONCAT('{"url":"',@eh_biz_serverURL,'/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1999986&sourceUrl=https%3A%2F%2Fbiz.szbay.com%2Fnar%2Fbiz%2Fweb%2Fapp_ng%2Fshop%2Findex.html%3F_k%3Dzlbiz#sign_suffix"}'),'30','0','1','0',NULL,'0',NULL,NULL,NULL,'1','park_tourist',1,@service_categry_id2,NULL,'2',NULL);
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),'999966','0','0','0','/home','Bizs','BizManager','店铺管理','cs://1/image/aW1hZ2UvTVRwaU56SXhOelJrTURFNFlqSmlOVEpqTldRNU5qSmtOV000TlRObVpXWTJZdw
+','1','1','13',CONCAT('{"url":"',@eh_biz_serverURL,'/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1999986&sourceUrl=https%3A%2F%2Fbiz.szbay.com%2Fnar%2Fbiz%2Fweb%2Fapp_ng%2Fshop%2Findex.html%3F_k%3Dzlbiz#sign_suffix"}'),'30','0','1','0',NULL,'0',NULL,NULL,NULL,'1','pm_admin',1,@service_categry_id1,NULL,'2',NULL);
+
+
+
+

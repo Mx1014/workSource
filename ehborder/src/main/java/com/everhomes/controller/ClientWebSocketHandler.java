@@ -249,6 +249,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
             if(currentTick - stats.getLastSendTick() > heartbeatInterval) {
                 try {
                     synchronized(session) {
+                        LOGGER.info("Border server ping message to " + session.getId());
                         session.sendMessage(msg);
                     }
                     updateSessionSendTick(session);
@@ -370,13 +371,13 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                 LOGGER.info("REST call /user/appIdStatus, session=" + session.getId() + ", result=" + result.getBody());
                 Gson gson = new Gson();
                 AppIdStatusRestResponse resp = gson.fromJson(result.getBody(), AppIdStatusRestResponse.class);
+
                 //Object respObj = StringHelper.fromJsonString(result.getBody(), AppIdStatusRestResponse.class);
                 //if(respObj == null) {
                 //    LOGGER.error("error for /user/appIdStatus");
                 //    return;
                     //}
                 //AppIdStatusRestResponse resp = (AppIdStatusRestResponse) respObj;
-                
                 for(Long appId : resp.getResponse().getAppIds()) {
                     PduFrame pdu = new PduFrame();
                     StoredMessageIndicationPdu clientPdu = new StoredMessageIndicationPdu();
@@ -389,7 +390,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                     } catch (IOException e) {
                         LOGGER.error("Session send error, session=" + session.getId() + ", appId= " + appId.toString(), e);
                         tearDownSession(session);
-                    }    
+                    }
                 }
             }
 

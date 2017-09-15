@@ -416,7 +416,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private void createPriceRules(PriceRuleType priceRuleType, Long ruleId, List<PriceRuleDTO> priceRules) {
+		LOGGER.debug("test enter cerate resource price rules, defaultRule={}", JSON.toJSON(priceRules));
+
 		if (priceRules != null && !priceRules.isEmpty()) {
+			LOGGER.debug("test foreach cerate resource price rules, defaultRule={}", JSON.toJSON(priceRules));
+
 			priceRules.forEach(p->createPriceRule(priceRuleType, ruleId, p));
 		}
 	}
@@ -693,7 +697,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalDefaultRule defaultRule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getResourceTypeId());
 		if(null==defaultRule){
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOTFOUND, "didnt have default rule!");
+					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "didnt have default rule!");
 		}
 		if(null==cmd.getSiteCounts()) 
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -787,7 +791,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(null==defaultRule){
 			throw RuntimeErrorException
 					.errorWith(RentalServiceErrorCode.SCOPE,
-							RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOTFOUND, "didnt have default rule!");
+							RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "didnt have default rule!");
 		}
 		this.dbProvider.execute((TransactionStatus status) -> {
 
@@ -2551,81 +2555,81 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			rs.setOrgMemberWorkdayPrice(orgMemberWorkdayPrice);
 //			rs.setApprovingUserWeekendPrice(approvingUserWeekendPrice);
 //			rs.setApprovingUserWorkdayPrice(approvingUserWorkdayPrice);
-			
-			for (PriceRuleDTO priceRuleDTO : cmd.getPriceRules()) {
-				currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
-				seqNum.set(0L);
-				if (priceRuleDTO.getRentalType().byteValue() == RentalType.HOUR.getCode()) {
-					//删除rentalResource 对应的 timeInterval
-					rentalv2Provider.deleteTimeIntervalsByOwnerId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
-					if(null != cmd.getTimeIntervals()) {
-						
-						Double beginTime = null;
-						Double endTime = null;
-						for (TimeIntervalDTO timeInterval: cmd.getTimeIntervals()) {
 
-							if(null == timeInterval.getBeginTime() || null == timeInterval.getEndTime()) {
-								continue;
-							}
-							RentalTimeInterval timeIntervalDB = ConvertHelper.convert(timeInterval, RentalTimeInterval.class);
+			if (cmd.getNeedPay() == NormalFlag.NEED.getCode()) {
+				for (PriceRuleDTO priceRuleDTO : cmd.getPriceRules()) {
+					currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
+					seqNum.set(0L);
+					if (priceRuleDTO.getRentalType().byteValue() == RentalType.HOUR.getCode()) {
+						//删除rentalResource 对应的 timeInterval
+						rentalv2Provider.deleteTimeIntervalsByOwnerId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
+						if(null != cmd.getTimeIntervals()) {
 
-							timeIntervalDB.setOwnerType(EhRentalv2Resources.class.getSimpleName());
-							timeIntervalDB.setOwnerId(rs.getId());
-							this.rentalv2Provider.createTimeInterval(timeIntervalDB);
+							Double beginTime = null;
+							Double endTime = null;
+							for (TimeIntervalDTO timeInterval: cmd.getTimeIntervals()) {
 
-							if(beginTime == null || beginTime > timeInterval.getBeginTime()) {
-								beginTime = timeInterval.getBeginTime();
+								if(null == timeInterval.getBeginTime() || null == timeInterval.getEndTime()) {
+									continue;
+								}
+								RentalTimeInterval timeIntervalDB = ConvertHelper.convert(timeInterval, RentalTimeInterval.class);
+
+								timeIntervalDB.setOwnerType(EhRentalv2Resources.class.getSimpleName());
+								timeIntervalDB.setOwnerId(rs.getId());
+								this.rentalv2Provider.createTimeInterval(timeIntervalDB);
+
+								if(beginTime == null || beginTime > timeInterval.getBeginTime()) {
+									beginTime = timeInterval.getBeginTime();
+								}
+								if(endTime == null || endTime < timeInterval.getEndTime()) {
+									endTime = timeInterval.getEndTime();
+								}
+								AddRentalSiteSingleSimpleRule singleCmd = ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
+								singleCmd.setBeginTime(timeInterval.getBeginTime());
+								singleCmd.setEndTime(timeInterval.getEndTime());
+								singleCmd.setTimeStep(timeInterval.getTimeStep());
+								singleCmd.setRentalType(priceRuleDTO.getRentalType());
+								singleCmd.setWeekendPrice(priceRuleDTO.getWeekendPrice());
+								singleCmd.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
+								singleCmd.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
+								singleCmd.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
+								singleCmd.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
+								singleCmd.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
+								addRentalSiteSingleSimpleRule(singleCmd);
 							}
-							if(endTime == null || endTime < timeInterval.getEndTime()) {
-								endTime = timeInterval.getEndTime();
+							if((null != endTime && endTime > 24.0) || (null != beginTime && beginTime < 0)) {
+								throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+										ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter of timeInterval > 24 or < 0");
 							}
-							AddRentalSiteSingleSimpleRule singleCmd = ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
-							singleCmd.setBeginTime(timeInterval.getBeginTime());
-							singleCmd.setEndTime(timeInterval.getEndTime());
-							singleCmd.setTimeStep(timeInterval.getTimeStep());
-							singleCmd.setRentalType(priceRuleDTO.getRentalType());
-							singleCmd.setWeekendPrice(priceRuleDTO.getWeekendPrice());
-							singleCmd.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
-							singleCmd.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
-							singleCmd.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
-							singleCmd.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
-							singleCmd.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
-							addRentalSiteSingleSimpleRule(singleCmd);
+							if (null != beginTime) {
+								rs.setDayBeginTime(convertTime((long) (beginTime*1000*60*60L)));
+							}
+							if (null != endTime) {
+								rs.setDayEndTime(convertTime((long) (endTime*1000*60*60L)));
+							}
 						}
-						if((null != endTime && endTime > 24.0) || (null != beginTime && beginTime < 0)) {
-							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-									ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter of timeInterval > 24 or < 0");
+					}else {
+						if (RentalType.HALFDAY.getCode() == priceRuleDTO.getRentalType().byteValue() || RentalType.THREETIMEADAY.getCode() == priceRuleDTO.getRentalType().byteValue()) {
+							rentalv2Provider.deleteTimeIntervalsByOwnerId(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId());
+							setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId(), cmd.getHalfDayTimeIntervals());
 						}
-						if (null != beginTime) {
-							rs.setDayBeginTime(convertTime((long) (beginTime*1000*60*60L)));
-						}
-						if (null != endTime) {
-							rs.setDayEndTime(convertTime((long) (endTime*1000*60*60L)));
-						}
+						AddRentalSiteSingleSimpleRule singleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class);
+						singleCmd.setRentalType(priceRuleDTO.getRentalType());
+						singleCmd.setWeekendPrice(priceRuleDTO.getWeekendPrice());
+						singleCmd.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
+						singleCmd.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
+						singleCmd.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
+						singleCmd.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
+						singleCmd.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
+						addRentalSiteSingleSimpleRule(singleCmd);
 					}
-				}else {
-					if (RentalType.HALFDAY.getCode() == priceRuleDTO.getRentalType().byteValue() || RentalType.THREETIMEADAY.getCode() == priceRuleDTO.getRentalType().byteValue()) {
-						rentalv2Provider.deleteTimeIntervalsByOwnerId(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId());
-						setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId(), cmd.getHalfDayTimeIntervals());
-					}
-					AddRentalSiteSingleSimpleRule singleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class);
-					singleCmd.setRentalType(priceRuleDTO.getRentalType());
-					singleCmd.setWeekendPrice(priceRuleDTO.getWeekendPrice());
-					singleCmd.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
-					singleCmd.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
-					singleCmd.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
-					singleCmd.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
-					singleCmd.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
-					addRentalSiteSingleSimpleRule(singleCmd);
+
+					Long cellBeginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), seqNum.get());
+					priceRuleDTO.setCellBeginId(cellBeginId);
+					priceRuleDTO.setCellEndId(cellBeginId + seqNum.get()-1);
 				}
-				
-				Long cellBeginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), seqNum.get());
-				priceRuleDTO.setCellBeginId(cellBeginId);
-				priceRuleDTO.setCellEndId(cellBeginId + seqNum.get()-1);
 			}
-			
-			
-			
+
 //			if(LOGGER.isDebugEnabled()) {
 //	            LOGGER.debug("eh rental cells get next sequence block, id=" + cellBeginId+",block count = "+ seqNum.get()); 
 //	            LOGGER.debug("eh rental cells current id =" +  sequenceProvider.getCurrentSequence(NameMapper
@@ -3148,7 +3152,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							else{
 								LOGGER.error("bill id=["+order.getId()+"] refound error param is "+refundCmd.toString());
 								throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-										RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+										RentalServiceErrorCode.ERROR_REFUND_ERROR,
 												"bill  refound error"); 
 							}	
 //						}
@@ -5118,7 +5122,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			User user = UserContext.current().getUser();
 			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
 		}
-		return convertRentalSite2DTO(rentalSite, sceneTokenDTO);
+		RentalSiteDTO  dto = convertRentalSite2DTO(rentalSite, sceneTokenDTO);
+//		if(dto.getIntroduction() != null){
+//			dto.setIntroduction(dto.getIntroduction().replaceAll("<.*?>", "").replaceAll("&nbsp;",""));
+//		}
+		return dto;
 	}
 
 	@Override
@@ -5163,7 +5171,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			} 
 			if (null == defaultRule)
 				throw RuntimeErrorException
-				.errorWith(RentalServiceErrorCode.SCOPE,RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOTFOUND, "didnt have default rule!");
+				.errorWith(RentalServiceErrorCode.SCOPE,RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "didnt have default rule!");
 			resource.setExclusiveFlag(defaultRule.getExclusiveFlag());
 			if(defaultRule.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
 				defaultRule.setUnit(1.0);
@@ -5205,8 +5213,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			BigDecimal weekendPrice = defaultRule.getWeekendPrice() == null ? new BigDecimal(0) : defaultRule.getWeekendPrice(); 
 			BigDecimal workdayPrice = defaultRule.getWorkdayPrice() == null ? new BigDecimal(0) : defaultRule.getWorkdayPrice();
-			
+
+			LOGGER.debug("test enter cerate cell, defaultRule={}", defaultRule);
 			for (PriceRuleDTO priceRuleDTO : defaultRule.getPriceRules()) {
+				LOGGER.debug("test foreach cerate cell, ");
 				List<AddRentalSiteSingleSimpleRule> addSingleRules =new ArrayList<>();
 				if (priceRuleDTO.getRentalType().equals(RentalType.HOUR.getCode()))  {
 					if(defaultRule.getTimeIntervals() != null){
@@ -5257,10 +5267,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				priceRuleDTO.setCellEndId(cellBeginId+seqNum.get()-1);
 //				updatePriceRule(priceRuleDTO);
 			}
-			
-			
 
-			
+			LOGGER.debug("test out cerate cell, defaultRule={}", defaultRule);
+
+
+
 //			if(LOGGER.isDebugEnabled()) {
 //	            LOGGER.debug("eh rental cells get next sequence block, id=" + cellBeginId+",block count = "+ seqNum.get()); 
 //	            LOGGER.debug("eh rental cells current id =" +  sequenceProvider.getCurrentSequence(NameMapper
@@ -5315,7 +5326,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					this.rentalv2Provider.createRentalSitePic(detailPic);
 				}
 			}
-			
+
+			LOGGER.debug("test enter cerate resource price rules, defaultRule={}", defaultRule);
 			createPriceRules(PriceRuleType.RESOURCE, resource.getId(), defaultRule.getPriceRules());
 
 			createRentalConfigAttachment(defaultRule.getAttachments(), resource.getId(), EhRentalv2Resources.class.getSimpleName());
@@ -5344,9 +5356,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			RentalResource rentalsite = this.rentalv2Provider.getRentalSiteById(cmd.getId()); 
 
 			RentalResourceType type = this.rentalv2Provider.getRentalResourceTypeById(rentalsite.getResourceTypeId());
-			if(PayMode.OFFLINE_PAY.getCode().equals(type.getPayMode())&&(null==cmd.getOfflineCashierAddress()||null==cmd.getOfflinePayeeUid())){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-						ErrorCodes.ERROR_INVALID_PARAMETER,
+
+			if (PayMode.OFFLINE_PAY.getCode().equals(type.getPayMode()) &&
+					(null == cmd.getOfflineCashierAddress() ||
+							null== cmd.getOfflinePayeeUid())) {
+				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+						RentalServiceErrorCode.ERROR_OFFLINE_PAY_UPDATE_RESOURCE_STATUS,
 						"Neither offline cashier address nor payee uid can  be null");
 			}
 			
@@ -5779,7 +5794,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter : refund order id  can not find refund order ");
 		if(refundOrder.getOnlinePayStyleNo().equals(VendorType.WEI_XIN.getStyleNo()))
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 
-					RentalServiceErrorCode.ERROR_REFOUND_ERROR, "refund order is wechat  ");
+					RentalServiceErrorCode.ERROR_REFUND_ERROR, "refund order is wechat  ");
 		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
 		String refoundApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "");
 		String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
@@ -5804,11 +5819,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			LOGGER.error("refund order no =["+refundOrder.getRefundOrderNo()+"] refound error param is "+refundCmd.toString());
 			if (null != refundResponse.getErrorDetails())
 				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-						RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+						RentalServiceErrorCode.ERROR_REFUND_ERROR,
 						refundResponse.getErrorDetails()); 
 			else
 				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-						RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+						RentalServiceErrorCode.ERROR_REFUND_ERROR,
 						"refund order error"); 
 		}	
 		 
@@ -6007,7 +6022,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(null==defaultRule){
 			throw RuntimeErrorException
 			.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOTFOUND, "didnt have default rule!");
+					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "didnt have default rule!");
 		} 
 		this.dbProvider.execute((TransactionStatus status) -> {
 
