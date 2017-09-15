@@ -353,7 +353,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         createOrderCmd.setSettlementType(null);
         createOrderCmd.setSplitRuleId(serviceConfig.getPaymentSplitRuleId());
         if(cmd.getExpiration() != null) {
-            createOrderCmd.setExpiration(new Timestamp(cmd.getExpiration()));
+            createOrderCmd.setExpirationMillis(cmd.getExpiration());
         }
         createOrderCmd.setSummary(cmd.getSummary());
         createOrderCmd.setPayeeUserId(serviceConfig.getPaymentUserId());
@@ -382,7 +382,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         createOrderCmd.setOrderRemark3(null);
         createOrderCmd.setOrderRemark4(null);
         createOrderCmd.setOrderRemark5(null);
-        createOrderCmd.setCommitFlag(null);
+        createOrderCmd.setCommitFlag(0);
 
         return createOrderCmd;
     }
