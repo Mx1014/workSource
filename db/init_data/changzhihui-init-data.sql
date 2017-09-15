@@ -1142,3 +1142,11 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- 更换人人试验连接 by dengs, 20170831
 UPDATE eh_launch_pad_items SET action_data='{"url": "http://www.renrenlab.com"}'  WHERE item_label = '人人实验' AND namespace_id = 999969;
+
+-- 增加黑名单模块菜单 add by sfan 20170915
+SET @namespace_id = 999990;
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+SET @service_module_scope_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+
+insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 30600, 2); 
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),30600,'', 'EhNamespaces', @namespace_id,2);

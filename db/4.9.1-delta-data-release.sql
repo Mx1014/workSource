@@ -153,6 +153,10 @@ UPDATE `eh_communities` SET namespace_community_token='D6B7C7C4-F469-4979-9624-B
 UPDATE `eh_communities` SET namespace_community_token='7866D7BC-2544-4208-A41E-94ED2A25D2A4' , namespace_community_type = 'shenzhou' WHERE id = '240111044332059779';
 UPDATE `eh_communities` SET namespace_community_token='1C465757-4EAD-47F9-B967-F1A08A2997CC' , namespace_community_type = 'shenzhou' WHERE id = '240111044332059780';
 UPDATE `eh_communities` SET namespace_community_token='4941ABFE-0C36-44B4-BE2D-FDC90178E233' , namespace_community_type = 'shenzhou' WHERE id = '240111044332059781';
+
+-- 设置张江高科app的名字为张江高科Upark
+update eh_app_urls set name = '张江高科Upark' where namespace_id='999971';
+
 -- wentian's script above is end here which is a gorgeous cut-off line
 
 
@@ -13334,3 +13338,18 @@ AND r.`id` = m.`punch_rule_id` AND d.`group_id` = r.`punch_organization_id`   AN
 
 -- (深圳湾) 修改深圳湾resources的默认排序 by lei.lv 20170915
 UPDATE eh_namespace_resources SET default_order = 1 WHERE namespace_id = 999966 AND resource_id = 240111044331050370;
+
+-- 增加黑名单模块菜单 add by sfan 20170915
+SET @namespace_id = 999990;
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+SET @service_module_scope_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+
+insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 30600, 2); 
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),30600,'', 'EhNamespaces', @namespace_id,2);
+
+
+
+
+
+
+
