@@ -13338,3 +13338,18 @@ AND r.`id` = m.`punch_rule_id` AND d.`group_id` = r.`punch_organization_id`   AN
 
 -- (深圳湾) 修改深圳湾resources的默认排序 by lei.lv 20170915
 UPDATE eh_namespace_resources SET default_order = 1 WHERE namespace_id = 999966 AND resource_id = 240111044331050370;
+
+-- 增加黑名单模块菜单 add by sfan 20170915
+SET @namespace_id = 999990;
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+SET @service_module_scope_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+
+insert into `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) values((@service_module_scope_id := @service_module_scope_id + 1), @namespace_id, 30600, 2); 
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),30600,'', 'EhNamespaces', @namespace_id,2);
+
+
+
+
+
+
+

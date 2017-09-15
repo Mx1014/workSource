@@ -1637,9 +1637,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		User user = UserContext.current().getUser();
 		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken, organizationId);
-
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if(null == member){
 			LOGGER.error("User is not in the organization.");
+			member = new OrganizationMember();
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, contactToken);
+			if(null != userIdentifier){
+				member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+				member.setTargetId(userIdentifier.getOwnerUid());
+			}
 		}else{
 			//从公司人员里面把管理员的标识去掉
 			member.setMemberGroup("");
