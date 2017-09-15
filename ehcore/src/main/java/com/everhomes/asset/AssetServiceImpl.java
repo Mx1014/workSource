@@ -331,6 +331,7 @@ public class AssetServiceImpl implements AssetService {
                     for (int j = 0; i < organizationContactDTOS.size(); i++) {
                         uids.add(organizationContactDTOS.get(0).getId());
                     }
+                    LOGGER.info("notice uids found = {}"+uids.size());
                 }
             }
         }
