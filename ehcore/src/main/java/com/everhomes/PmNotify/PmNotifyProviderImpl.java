@@ -21,6 +21,7 @@ import com.everhomes.server.schema.tables.pojos.EhPmNotifyConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyLogs;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyRecords;
 import com.everhomes.server.schema.tables.records.EhPmNotifyConfigurationsRecord;
+import com.everhomes.server.schema.tables.records.EhPmNotifyRecordsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
@@ -168,7 +169,7 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<PmNotifyRecord> result  = new ArrayList<PmNotifyRecord>();
-        SelectQuery<EhPmNotifyConfigurationsRecord> query = context.selectQuery(Tables.EH_PM_NOTIFY_CONFIGURATIONS);
+        SelectQuery<EhPmNotifyRecordsRecord> query = context.selectQuery(Tables.EH_PM_NOTIFY_RECORDS);
         query.addConditions(Tables.EH_PM_NOTIFY_RECORDS.STATUS.eq(PmNotifyRecordStatus.WAITING_FOR_SEND_OUT.getCode()));
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, PmNotifyRecord.class));
