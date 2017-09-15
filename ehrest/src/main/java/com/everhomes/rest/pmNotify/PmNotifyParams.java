@@ -16,6 +16,7 @@ import java.util.List;
  *     <li>repeatId: 周期id</li>
  *     <li>receivers: 提醒接收人列表 参考{@link com.everhomes.rest.pmNotify.PmNotifyReceiver}</li>
  *     <li>notifyTickMinutes: 提前多久提醒, 都转化成分钟</li>
+ *     <li>status: 状态 参考{@link com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus}</li>
  * </ul>
  * Created by ying.xiong on 2017/9/14.
  */
@@ -38,6 +39,16 @@ public class PmNotifyParams {
     private List<PmNotifyReceiver> receivers;
 
     private Integer notifyTickMinutes;
+
+    private Byte status;
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
 
     public Long getId() {
         return id;

@@ -4625,6 +4625,6 @@ insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@item_id := @item_id + 1),'999966','0','0','0','/home','Bizs','BizManager','店铺管理','cs://1/image/aW1hZ2UvTVRwaU56SXhOelJrTURFNFlqSmlOVEpqTldRNU5qSmtOV000TlRObVpXWTJZdw
 ','1','1','13',CONCAT('{"url":"',@eh_biz_serverURL,'/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1999986&sourceUrl=https%3A%2F%2Fbiz.szbay.com%2Fnar%2Fbiz%2Fweb%2Fapp_ng%2Fshop%2Findex.html%3F_k%3Dzlbiz#sign_suffix"}'),'30','0','1','0',NULL,'0',NULL,NULL,NULL,'1','pm_admin',1,@service_categry_id1,NULL,'2',NULL);
 
-
-
-
+-- 删除乱七八糟的用户 add by 20170915
+update eh_users set status = 0 where id in (select owner_uid from eh_user_identifiers where verification_code is null and  notify_time is null and region_code is null and namespace_id = 999966);
+update eh_user_identifiers set claim_status = 0 where verification_code is null and  notify_time is null and region_code is null and namespace_id = 999966;
