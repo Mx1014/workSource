@@ -9337,14 +9337,12 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setOperatorUid(user.getId());
         organizationMember.setGroupId(0l);
         /**Modify by lei.lv**/
-/*        java.util.Date nDate = DateHelper.currentGMTTime();
+        java.util.Date nDate = DateHelper.currentGMTTime();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String sDate = sdf.format(nDate);
         java.sql.Date now = java.sql.Date.valueOf(sDate);
-
         java.sql.Date checkInTime = cmd.getCheckInTime() != null ? java.sql.Date.valueOf(cmd.getCheckInTime()):now;
-
-        organizationMember.setCheckInTime(checkInTime);
+/*        organizationMember.setCheckInTime(checkInTime);
         if (organizationMember.getEmployeeStatus() != null) {
             if (organizationMember.getEmployeeStatus().equals(EmployeeStatus.PROBATION.getCode())) {
                 organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getEmploymentTime()));
@@ -9354,10 +9352,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             organizationMember.setEmploymentTime(checkInTime);
         }*/
-        if (cmd.getCheckInTime() != null)
-            organizationMember.setCheckInTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
-        if (cmd.getEmploymentTime() != null)
-            organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getEmploymentTime()));
+        organizationMember.setEmployeeType(cmd.getEmployeeType() !=null ? cmd.getEmployeeType():EmployeeType.FULLTIME.getCode());
+        organizationMember.setEmployeeStatus(cmd.getEmployeeStatus() !=null ? cmd.getEmployeeStatus():EmployeeStatus.ONTHEJOB.getCode());
+        organizationMember.setCheckInTime(checkInTime);
+        organizationMember.setEmploymentTime(checkInTime);
 
         //手机号已注册，就把user id 跟通讯录关联起来
         if (null != userIdentifier) {
@@ -10660,7 +10658,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     //  Updated By R form function addOrganizationPersonnel
     @Override
     public OrganizationMemberDTO addOrganizationPersonnelV2(AddOrganizationPersonnelV2Command cmd) {
-        OrganizationMemberDTO memberDTO = this.addOrganizationPersonnel(ConvertHelper.convert(cmd, AddOrganizationPersonnelCommand.class));
+        AddOrganizationPersonnelCommand addCommand = ConvertHelper.convert(cmd, AddOrganizationPersonnelCommand.class);
+        if(cmd.getDepartmentIds() == null || cmd.getDepartmentIds().size() == 0){
+            List<Long> departmentIds = new ArrayList<>();
+            departmentIds.add(cmd.getOrganizationId());
+            addCommand.setDepartmentIds(departmentIds);
+        }
+        OrganizationMemberDTO memberDTO = this.addOrganizationPersonnel(addCommand);
 
         if(StringUtils.isEmpty(cmd.getDetailId())){
             this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.ENTRY.getCode(),
