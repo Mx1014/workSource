@@ -13332,3 +13332,5 @@ insert into `eh_punch_schedulings` (`id`, `owner_type`, `owner_id`, `target_type
 WHERE s.owner_type = m.`owner_type` AND s.`owner_id` = m.`owner_id` AND s.`target_type` = m.`target_type` AND s.`target_id` = m.`target_id`
 AND r.`id` = m.`punch_rule_id` AND d.`group_id` = r.`punch_organization_id`   AND m.owner_id <> 1023455 ;
 
+-- (深圳湾) 修改深圳湾resources的默认排序 by lei.lv 20170915
+UPDATE eh_namespace_resources SET default_order = 1 WHERE namespace_id = 999966 AND resource_id = 240111044331050370;
