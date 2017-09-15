@@ -356,5 +356,5 @@ CREATE TABLE `eh_pm_notify_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- 增加域空间资源排序 add by lvlei 20170915
+-- (深圳湾) 增加域空间资源排序 add by lvlei 20170915 
 ALTER TABLE eh_namespace_resources ADD COLUMN default_order int(11) DEFAULT 0;

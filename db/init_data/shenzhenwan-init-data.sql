@@ -1218,3 +1218,14 @@ INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_nam
     VALUES ('36', '999966', '物业报修', 'zl://propertyrepair/create?type=user&taskCategoryId=203042&displayName=物业报修', '0', '1');
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`, `signal`)
     VALUES ('37', '999966', '投诉建议', 'zl://propertyrepair/create?type=user&taskCategoryId=203043&displayName=投诉建议', '0', '1');
+
+-- 搜索类型 add by xujuan 20170915
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('1', '0', '', '0', '投票', 'poll', '1', NULL, NULL, '3');
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('2', '0', '', '0', '活动', 'activity', '1', NULL, NULL, '2');
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('3', '0', '', '0', '话题', 'topic', '1', NULL, NULL, '1');
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('43', '0', '', '0', '应用', 'launchpaditem', '1', NULL, NULL, '5');
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES ('56', '0', '', '0', '商家', 'shop', '1', NULL, NULL, '6');
+
+
+-- 补充缺失数据 add by xujuan 20170915
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('1478', 'biz.search.shops.api', '/zl-ec/rest/openapi/shop/listByKeyword', '搜索电商商家API', '0', NULL);
