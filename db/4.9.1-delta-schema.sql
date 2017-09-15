@@ -231,7 +231,7 @@ CREATE TABLE `eh_uniongroup_configures` (
   `group_id` BIGINT(20) NOT NULL COMMENT 'id of group',
   `current_id` BIGINT(20) DEFAULT NULL COMMENT 'id of target, organization or memberDetail',
   `current_type` VARCHAR(32) COMMENT 'organziation,memberDetail',
-  `current_name` VARCHAR(32) COMMENT 'name',
+  `current_name` VARCHAR(132) COMMENT 'name',
   `operator_uid` BIGINT(20),
   `update_time` DATETIME,
   PRIMARY KEY (`id`)
@@ -247,7 +247,7 @@ CREATE TABLE `eh_uniongroup_member_details` (
   `target_type` VARCHAR(64),
   `target_id` BIGINT NOT NULL,
   `enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id' ,
-  `contact_name` VARCHAR(64) COMMENT 'the name of the member',
+  `contact_name` VARCHAR(164) COMMENT 'the name of the member',
   `contact_token` VARCHAR(128) COMMENT 'phone number, reference for eh_organization_member contact_token',
   `update_time` DATETIME,
   `operator_uid` BIGINT(20),
@@ -327,9 +327,9 @@ CREATE TABLE `eh_pm_notify_configurations` (
   `receiver_json` TEXT COMMENT 'notify receivers:{"receivers":[{"receiverType":"3","receiverId":["1","2"]},{"receiverType":"0","receiverId":[]}]}', 
   `notify_tick_minutes` INTEGER COMMENT '提前多少分钟',
   `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
-  `create_time` datetime NOT NULL COMMENT 'record create time',
+  `create_time` DATETIME NOT NULL COMMENT 'record create time',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_pm_notify_records` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -342,7 +342,7 @@ CREATE TABLE `eh_pm_notify_records` (
   `create_time` DATETIME NOT NULL,
   `status` TINYINT NOT NULL COMMENT '0: invalid, 1: waiting for send out, 2: already sended',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_pm_notify_logs` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -353,8 +353,8 @@ CREATE TABLE `eh_pm_notify_logs` (
   `create_time` DATETIME NOT NULL,
   `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
--- (深圳湾) 增加域空间资源排序 add by lvlei 20170915 
-ALTER TABLE eh_namespace_resources ADD COLUMN default_order int(11) DEFAULT 0;
+-- 增加域空间资源排序 add by lvlei 20170915
+ALTER TABLE eh_namespace_resources ADD COLUMN default_order INT(11) DEFAULT 0;
