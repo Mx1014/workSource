@@ -968,7 +968,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             if (results.size() > cmd.getPageSize()) {
                 nextPageOffset = cmd.getPageOffset() + 1;
             }
-            response.setNextPageOffset(nextPageOffset);
+            response.setNextPageAnchor(nextPageOffset);
             return response;
         }
 

@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class ListArchivesDismissEmployeesResponse {
 
-    private Integer nextPageOffset;
+    private Integer nextPageAnchor;
 
     @ItemType(ArchivesDismissEmployeeDTO.class)
     private List<ArchivesDismissEmployeeDTO> dismissEmployees;
@@ -21,12 +21,12 @@ public class ListArchivesDismissEmployeesResponse {
     public ListArchivesDismissEmployeesResponse() {
     }
 
-    public Integer getNextPageOffset() {
-        return nextPageOffset;
+    public Integer getNextPageAnchor() {
+        return nextPageAnchor;
     }
 
-    public void setNextPageOffset(Integer nextPageOffset) {
-        this.nextPageOffset = nextPageOffset;
+    public void setNextPageAnchor(Integer nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
     }
 
     public List<ArchivesDismissEmployeeDTO> getDismissEmployees() {
