@@ -207,6 +207,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Autowired
 	private PmNotifyService pmNotifyService;
 
+	@Autowired
+	private UserProvider userProvider;
+
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(
 			UpdateEquipmentStandardCommand cmd) {
@@ -2046,11 +2049,21 @@ public class EquipmentServiceImpl implements EquipmentService {
 				List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
 				if(paramDTOs != null && paramDTOs.size() > 0) {
 					for (PmNotifyParamDTO notifyParamDTO : paramDTOs) {
-						List<PmNotifyReceiver> receivers = notifyParamDTO.getReceivers();
+						List<PmNotifyReceiverDTO> receivers = notifyParamDTO.getReceivers();
 						if(receivers != null && receivers.size() > 0) {
 							PmNotifyRecord record = ConvertHelper.convert(notifyParamDTO, PmNotifyRecord.class);
 							PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
-							receiverList.setReceivers(receivers);
+							List<PmNotifyReceiver> pmNotifyReceivers = new ArrayList<>();
+							receivers.forEach(receiver -> {
+								PmNotifyReceiver pmNotifyReceiver = new PmNotifyReceiver();
+								pmNotifyReceiver.setReceiverType(receiver.getReceiverType());
+								List<Long> ids = receiver.getReceivers().stream().map(receiverName -> {
+									return receiverName.getId();
+								}).collect(Collectors.toList());
+								pmNotifyReceiver.setReceiverIds(ids);
+								pmNotifyReceivers.add(pmNotifyReceiver);
+							});
+							receiverList.setReceivers(pmNotifyReceivers);
 							record.setReceiverJson(receiverList.toString());
 							record.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
 							record.setOwnerId(task.getId());
@@ -4269,13 +4282,45 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return dataMap;
 	}
 
-	private PmNotifyParamDTO convertPmNotifyConfigurationsToDTO(PmNotifyConfigurations configuration) {
+	private PmNotifyParamDTO convertPmNotifyConfigurationsToDTO(Integer namespaceId, PmNotifyConfigurations configuration) {
 		PmNotifyParamDTO param = ConvertHelper.convert(configuration, PmNotifyParamDTO.class);
 		String receiverJson = configuration.getReceiverJson();
 		if(StringUtils.isNotBlank(receiverJson)) {
 			PmNotifyReceiverList receiverList = (PmNotifyReceiverList) StringHelper.fromJsonString(receiverJson, PmNotifyReceiverList.class);
-			if(receiverList != null) {
-				param.setReceivers(receiverList.getReceivers());
+			if(receiverList != null && receiverList.getReceivers() != null && receiverList.getReceivers().size() > 0) {
+//				param.setReceivers(receiverList.getReceivers());
+				List<PmNotifyReceiverDTO> receiverDTOs = new ArrayList<>();
+				receiverList.getReceivers().forEach(receiver -> {
+					PmNotifyReceiverDTO dto = new PmNotifyReceiverDTO();
+					dto.setReceiverType(receiver.getReceiverType());
+					if(PmNotifyReceiverType.ORGANIZATION.equals(PmNotifyReceiverType.fromCode(receiver.getReceiverType()))) {
+						List<Organization> organizations = organizationProvider.listOrganizationsByIds(receiver.getReceiverIds());
+						if(organizations != null && organizations.size() > 0) {
+							List<ReceiverName> dtoReceivers = new ArrayList<ReceiverName>();
+							organizations.forEach(organization -> {
+								ReceiverName receiverName = new ReceiverName();
+								receiverName.setId(organization.getId());
+								receiverName.setName(organization.getName());
+								dtoReceivers.add(receiverName);
+							});
+							dto.setReceivers(dtoReceivers);
+						}
+					} else if(PmNotifyReceiverType.USER.equals(PmNotifyReceiverType.fromCode(receiver.getReceiverType()))) {
+						List<User> users = userProvider.listUserByIds(namespaceId, receiver.getReceiverIds());
+						if(users != null && users.size() > 0) {
+							List<ReceiverName> dtoReceivers = new ArrayList<ReceiverName>();
+							users.forEach(user -> {
+								ReceiverName receiverName = new ReceiverName();
+								receiverName.setId(user.getId());
+								receiverName.setName(user.getNickName());
+								dtoReceivers.add(receiverName);
+							});
+							dto.setReceivers(dtoReceivers);
+						}
+					}
+					receiverDTOs.add(dto);
+				});
+				param.setReceivers(receiverDTOs);
 			}
 		}
 		return param;
@@ -4292,7 +4337,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<PmNotifyConfigurations> configurations = pmNotifyProvider.listScopePmNotifyConfigurations(EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
 		if(configurations != null && configurations.size() > 0) {
 			List<PmNotifyParamDTO> params = configurations.stream().map(configuration -> {
-				return convertPmNotifyConfigurationsToDTO(configuration);
+				return convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration);
 			}).collect(Collectors.toList());
 			return params;
 		} else {
@@ -4303,7 +4348,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				List<PmNotifyConfigurations> namespaceConfigurations = pmNotifyProvider.listScopePmNotifyConfigurations(EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
 				if(namespaceConfigurations != null && namespaceConfigurations.size() > 0) {
 					List<PmNotifyParamDTO> params = namespaceConfigurations.stream().map(configuration -> {
-						return convertPmNotifyConfigurationsToDTO(configuration);
+						return convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration);
 					}).collect(Collectors.toList());
 					return params;
 				}

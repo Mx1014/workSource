@@ -12,7 +12,7 @@ import java.util.List;
  *     <li>notifyMode: 提醒方式 参考{@link com.everhomes.rest.pmNotify.PmNotifyMode}</li>
  *     <li>repeatType: 周期提醒类型 参考{@link com.everhomes.rest.pmNotify.PmNotifyRepeatType}</li>
  *     <li>repeatId: 周期id</li>
- *     <li>receivers: 提醒接收人列表 参考{@link com.everhomes.rest.pmNotify.PmNotifyReceiver}</li>
+ *     <li>receivers: 提醒接收人列表 参考{@link com.everhomes.rest.pmNotify.PmNotifyReceiverDTO}</li>
  *     <li>notifyTickMinutes: 提前多久提醒, 都转化成分钟</li>
  * </ul>
  * Created by ying.xiong on 2017/9/11.
@@ -28,8 +28,8 @@ public class PmNotifyParamDTO {
 
     private Long repeatId;
 
-    @ItemType(PmNotifyReceiver.class)
-    private List<PmNotifyReceiver> receivers;
+    @ItemType(PmNotifyReceiverDTO.class)
+    private List<PmNotifyReceiverDTO> receivers;
 
     private Integer notifyTickMinutes;
 
@@ -65,11 +65,11 @@ public class PmNotifyParamDTO {
         this.notifyType = notifyType;
     }
 
-    public List<PmNotifyReceiver> getReceivers() {
+    public List<PmNotifyReceiverDTO> getReceivers() {
         return receivers;
     }
 
-    public void setReceivers(List<PmNotifyReceiver> receivers) {
+    public void setReceivers(List<PmNotifyReceiverDTO> receivers) {
         this.receivers = receivers;
     }
 
