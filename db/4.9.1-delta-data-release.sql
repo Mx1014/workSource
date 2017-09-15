@@ -272,3 +272,20 @@ INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_pref
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) VALUES ('13905', '13874', '深圳市', 'SHENZHENSHI', 'SZS', '/广东/深圳市', '2', '2', NULL, '0755', '2', '1', '999966');
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) VALUES ('13874', '0', '广东', 'GUANGDONG', 'GD', '/广东', '1', '1', NULL, NULL, '2', '0', '999966');
 
+-- merge from equipment-notify by xiongying20170915
+-- 增加消息提醒菜单 add by xiongying20170914
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `category`) VALUES (20860, '消息提醒配置', '20800', 'react:/equipment-inspection/message-call', '0', '2', '/20000/20800/20860', 'park', '420', '20800', '3', 'module');
+
+set @privilege_id = (select distinct privilege_id from eh_web_menu_privileges where name='设备巡检' );
+set @eh_web_menu_privilege_id = (select max(id) from eh_web_menu_privileges);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) VALUES (@eh_web_menu_privilege_id+1, @privilege_id, '20860', '物业巡检', '1', '1', '物业巡检 管理员权限', '720');
+
+set @menu_scope_id = (select max(id) from eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@menu_scope_id  + 1, '20860', '', 'EhNamespaces', '999992', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@menu_scope_id  + 2, '20860', '', 'EhNamespaces', '999975', '2');
+
+-- 增加消息提醒模板
+SET @id = (SELECT MAX(id) FROM eh_locale_templates);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'equipment.notification', '7', 'zh_CN', '任务开始前提醒', '你的任务${taskName}将在${time}开始', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'equipment.notification', '8', 'zh_CN', '任务过期前提醒', '你的任务${taskName}将在${time}结束', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ((@id := @id + 1), 'equipment.notification', '9', 'zh_CN', '任务过期后提醒', '你的任务${taskName}已在${time}结束', '0');
