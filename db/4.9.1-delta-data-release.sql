@@ -153,6 +153,10 @@ UPDATE `eh_communities` SET namespace_community_token='D6B7C7C4-F469-4979-9624-B
 UPDATE `eh_communities` SET namespace_community_token='7866D7BC-2544-4208-A41E-94ED2A25D2A4' , namespace_community_type = 'shenzhou' WHERE id = '240111044332059779';
 UPDATE `eh_communities` SET namespace_community_token='1C465757-4EAD-47F9-B967-F1A08A2997CC' , namespace_community_type = 'shenzhou' WHERE id = '240111044332059780';
 UPDATE `eh_communities` SET namespace_community_token='4941ABFE-0C36-44B4-BE2D-FDC90178E233' , namespace_community_type = 'shenzhou' WHERE id = '240111044332059781';
+
+-- 设置张江高科app的名字为张江高科Upark
+update eh_app_urls set name = '张江高科Upark' where namespace_id='999971';
+
 -- wentian's script above is end here which is a gorgeous cut-off line
 
 
