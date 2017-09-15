@@ -1755,7 +1755,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     public ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(ListNearbyMixCommunitiesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListingLocator locator = new ListingLocator();
-        Integer pageSize = 20;
+        Integer pageSize = 40;
         if (cmd.getPageSize() != null) {
             pageSize = cmd.getPageSize();
         }
@@ -1772,36 +1772,22 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             communities = communityProvider.listCommunities(namespaceId, locator, 1000, null);
         }
 
-        Map<Integer, CommunityDTO> sortMap = new TreeMap<Integer, CommunityDTO>(new Comparator<Integer>() {
-            public int compare(Integer o1, Integer o2) {
-                //降序
-                return o2.compareTo(o1);
-            }
-        });
-        communities.forEach(r -> {
-            List<OrganizationCommunityRequest> organizationCommunityRequests = this.organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, r.getId(), 1000, null);
+        List<CommunityDTO> dtos = communities.stream().map(r -> {
             Integer communityUserCount = organizationProvider.countUserOrganization(namespaceId, r.getId(), null);
-            sortMap.put(communityUserCount, ConvertHelper.convert(r, CommunityDTO.class));
-//            if(organizationCommunityRequests != null && organizationCommunityRequests.size() > 0){
-//                organizationCommunityRequests.forEach(x -> {
-////                Organization org = this.organizationProvider.findOrganizationById(x.getMemberId());
-////                if(org.getGroupType() ==  OrganizationGroupType.ENTERPRISE.getCode()){
-////                    Integer communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
-////                }
-//                    Integer communityUserCount = organizationProvider.countUserOrganization(namespaceId, x.getCommunityId(), null);
-//                    Community community = this.communityProvider.findCommunityById(x.getCommunityId());
-//                    sortMap.put(communityUserCount, ConvertHelper.convert(community, CommunityDTO.class));
-//                });
-//            }else{
-//                sortMap.put(0, ConvertHelper.convert(r, CommunityDTO.class));
-//            }
-        });
+            CommunityDTO dto = ConvertHelper.convert(r, CommunityDTO.class);
+            dto.setCommunityUserCount(communityUserCount);
+            return dto;
+        }).collect(Collectors.toList());
 
-        if (sortMap != null) {
+        if (dtos != null && dtos.size() > 0) {
             ListNearbyMixCommunitiesCommandV2Response response = new ListNearbyMixCommunitiesCommandV2Response();
-            List<CommunityDTO> dtos = new ArrayList<>();
-            dtos.addAll(sortMap.values());
-            if(pageSize < dtos.size()){
+            Collections.sort(dtos, new Comparator<CommunityDTO>() {
+                public int compare(CommunityDTO arg0, CommunityDTO arg1) {
+                    return arg1.getCommunityUserCount().compareTo(arg0.getCommunityUserCount());
+                }
+            });
+
+            if (pageSize < dtos.size()) {
                 dtos = dtos.subList(0, pageSize - 1);
             }
             response.setDtos(dtos);

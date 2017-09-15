@@ -9480,14 +9480,12 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setVisibleFlag(cmd.getVisibleFlag());
         organizationMember.setGroupId(0l);
         /**Modify by lei.lv**/
-/*        java.util.Date nDate = DateHelper.currentGMTTime();
+        java.util.Date nDate = DateHelper.currentGMTTime();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String sDate = sdf.format(nDate);
         java.sql.Date now = java.sql.Date.valueOf(sDate);
-
         java.sql.Date checkInTime = cmd.getCheckInTime() != null ? java.sql.Date.valueOf(cmd.getCheckInTime()):now;
-
-        organizationMember.setCheckInTime(checkInTime);
+/*        organizationMember.setCheckInTime(checkInTime);
         if (organizationMember.getEmployeeStatus() != null) {
             if (organizationMember.getEmployeeStatus().equals(EmployeeStatus.PROBATION.getCode())) {
                 organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getEmploymentTime()));
@@ -9497,10 +9495,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             organizationMember.setEmploymentTime(checkInTime);
         }*/
-        if (cmd.getCheckInTime() != null)
-            organizationMember.setCheckInTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
-        if (cmd.getEmploymentTime() != null)
-            organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getEmploymentTime()));
+        organizationMember.setEmployeeStatus(cmd.getEmployeeStatus() !=null ? cmd.getEmployeeStatus():EmployeeStatus.ONTHEJOB.getCode());
+        organizationMember.setCheckInTime(checkInTime);
+        organizationMember.setEmploymentTime(checkInTime);
 
         //手机号已注册，就把user id 跟通讯录关联起来
         if (null != userIdentifier) {
@@ -10819,7 +10816,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     //  Updated By R form function addOrganizationPersonnel
     @Override
     public OrganizationMemberDTO addOrganizationPersonnelV2(AddOrganizationPersonnelV2Command cmd) {
-        OrganizationMemberDTO memberDTO = this.addOrganizationPersonnel(ConvertHelper.convert(cmd, AddOrganizationPersonnelCommand.class));
+        AddOrganizationPersonnelCommand addCommand = ConvertHelper.convert(cmd, AddOrganizationPersonnelCommand.class);
+        if(cmd.getDepartmentIds() == null || cmd.getDepartmentIds().size() == 0){
+            List<Long> departmentIds = new ArrayList<>();
+            departmentIds.add(cmd.getOrganizationId());
+            addCommand.setDepartmentIds(departmentIds);
+        }
+        OrganizationMemberDTO memberDTO = this.addOrganizationPersonnel(addCommand);
 
         //  added by R at 20170824, 人事1.4
         if(cmd.getRegionCode() !=null) {
@@ -11843,7 +11846,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
-        if (!StringUtils.isEmpty(data.getOrgnaizationPath())) {
+        //  暂时去掉部门的校验 changed by R, 20170915
+/*        if (!StringUtils.isEmpty(data.getOrgnaizationPath())) {
             String[] deptStrArr = data.getOrgnaizationPath().split(",");
             for (String deptName : deptStrArr) {
                 Organization dept = deptMap.get(deptName.trim());
@@ -11861,7 +11865,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setErrorLog("Organization member department is null");
             log.setCode(OrganizationServiceErrorCode.ERROR_DEPARTMENT_ISNULL);
             return log;
-        }
+        }*/
 
         //  暂时去掉职位的校验 changed by R, 20170720
         /*if (!StringUtils.isEmpty(data.getJobPosition())) {
@@ -11884,7 +11888,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             return log;
         }*/
 
-        if (StringUtils.isEmpty(data.getCheckInTime())) {
+        //  暂时去掉入职日期、试用期、转正日期的校验 changed by R, 20170915
+/*        if (StringUtils.isEmpty(data.getCheckInTime())) {
             LOGGER.warn("Organization member checkInTime is null. data = {}", data);
             log.setData(data);
             log.setErrorLog("Organization member checkInTime is null");
@@ -11908,7 +11913,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setErrorLog("Organization member employeeStatus is null");
             log.setCode(OrganizationServiceErrorCode.ERROR_EMPLOYEESTATUS_ISNULL);
             return log;
-        }
+        }*/
 
         if (!StringUtils.isEmpty(data.getJobLevel())) {
             String[] jobLevelStrArr = data.getJobLevel().split(",");
@@ -12244,16 +12249,19 @@ public class OrganizationServiceImpl implements OrganizationService {
             memberCommand.setJobPositionIds(jobPositionIds);
         }
         //  入职日期
+        if(!StringUtils.isEmpty(data.getCheckInTime()))
         memberCommand.setCheckInTime(data.getCheckInTime());
 
         //  试用期
-        Byte employeeStatus;
-        if (data.getEmployeeStatus().equals("是")) {
-            employeeStatus = 0;
-        } else {
-            employeeStatus = 1;
+        if (!StringUtils.isEmpty(data.getEmployeeStatus())) {
+            Byte employeeStatus;
+            if (data.getEmployeeStatus().equals("是")) {
+                employeeStatus = 0;
+            } else {
+                employeeStatus = 1;
+            }
+            memberCommand.setEmployeeStatus(employeeStatus);
         }
-        memberCommand.setEmployeeStatus(employeeStatus);
 
         //  转正日期
         if (!StringUtils.isEmpty(data.getEmploymentTime()))

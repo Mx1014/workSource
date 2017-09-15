@@ -2880,6 +2880,7 @@ public class UserServiceImpl implements UserService {
 
 		sceneDto.setCommunityType(CommunityType.RESIDENTIAL.getCode());
 		sceneDto.setStatus(familyDto.getMembershipStatus());
+		sceneDto.setCommunityId(familyDto.getCommunityId());
 
 		return sceneDto;
 	}

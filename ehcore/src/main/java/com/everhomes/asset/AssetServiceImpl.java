@@ -307,8 +307,6 @@ public class AssetServiceImpl implements AssetService {
                 smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
-                telNOs = new String[1];
-                telNOs[0] = "15919770996";
                 smsProvider.sendSms(UserContext.getCurrentNamespaceId(), telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
@@ -333,6 +331,7 @@ public class AssetServiceImpl implements AssetService {
                     for (int j = 0; i < organizationContactDTOS.size(); i++) {
                         uids.add(organizationContactDTOS.get(0).getId());
                     }
+                    LOGGER.info("notice uids found = {}"+uids.size());
                 }
             }
         }
@@ -1123,23 +1122,24 @@ public class AssetServiceImpl implements AssetService {
         response.setScale(2,BigDecimal.ROUND_CEILING);
         return response;
     }
-    @Scheduled(cron = "0 0 23 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     @Override
     public void updateBillSwitchOnTime() {
-//        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE){
-            coordinationProvider.getNamedLock(CoordinationLocks.BILL_STATUS_UPDATE.getCode()).tryEnter(() ->{
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
+            coordinationProvider.getNamedLock(CoordinationLocks.BILL_STATUS_UPDATE.getCode()).tryEnter(() -> {
                 List<PaymentBillGroup> list = assetProvider.listAllBillGroups();
                 //获取当前时间，如果是5号，则将之前的账单的switch装为1
-                for(int i = 0; i < list.size(); i++){
+                for (int i = 0; i < list.size(); i++) {
                     PaymentBillGroup paymentBillGroup = list.get(i);
                     Calendar c = Calendar.getInstance();
-                    if(c.get(Calendar.DAY_OF_MONTH)==paymentBillGroup.getBillsDay()){
+                    if (c.get(Calendar.DAY_OF_MONTH) == paymentBillGroup.getBillsDay()) {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
                         String billDateStr = sdf.format(c.getTime());
                         assetProvider.updateBillSwitchOnTime(billDateStr);
                     }
                 }
             });
+        }
     }
 
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
