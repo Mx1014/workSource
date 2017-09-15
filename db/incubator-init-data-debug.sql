@@ -158,6 +158,16 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `ow
 INSERT INTO `eh_organization_communities` (`organization_id`, `community_id`)
 	VALUES (1035992,240111044332059913);
 
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999964, 'sms.default.yzx', 1, 'zh_CN', '验证码-创业场', '150446');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999964, 'sms.default.yzx', 4, 'zh_CN', '派单-创业场', '150447');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999964, 'sms.default.yzx', 5, 'zh_CN', '任务-创业场', '150448');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999964, 'sms.default.yzx', 6, 'zh_CN', '任务2-创业场', '150449');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999964, 'sms.default.yzx', 7, 'zh_CN', '新报修-创业场', '150454');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999964, 'sms.default.yzx', 15, 'zh_CN', '物业任务3-创业场', '150465');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999964, 'sms.default.yzx', 51, 'zh_CN', '视频会-创业场', '150477');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999964, 'sms.default.yzx', 52, 'zh_CN', '视测会-创业场', '150478');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999964, 'sms.default.yzx', 53, 'zh_CN', '申诉-创业场', '150479');
+
 
 set @community_id = 240111044332059913;
 -- 园区管理员
