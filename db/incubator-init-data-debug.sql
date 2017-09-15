@@ -259,9 +259,9 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 -- 更多
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
-    VALUES ((@pad_items_id := @pad_items_id + 1), 999964, 0, 0, 0, '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRveE1qbGtOR1l6WVRobFpEZGlaVEprTWpsaU1ERTFNR0l5TkRabU9ETTBNQQ', 1, 1, 1, '{"itemLocation":"/home","itemGroup":"Bizs"}', 40, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 0, NULL, 60, NULL);
+    VALUES ((@pad_items_id := @pad_items_id + 1), 999964, 0, 0, 0, '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRveE1qbGtOR1l6WVRobFpEZGlaVEprTWpsaU1ERTFNR0l5TkRabU9ETTBNQQ', 1, 1, 1, '{"itemLocation":"/home","itemGroup":"Bizs"}', 60, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 0, NULL, 60, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
-    VALUES ((@pad_items_id := @pad_items_id + 1), 999964, 0, 0, 0, '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRveE1qbGtOR1l6WVRobFpEZGlaVEprTWpsaU1ERTFNR0l5TkRabU9ETTBNQQ', 1, 1, 1, '{"itemLocation":"/home","itemGroup":"Bizs"}', 40, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, 60, NULL);
+    VALUES ((@pad_items_id := @pad_items_id + 1), 999964, 0, 0, 0, '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRveE1qbGtOR1l6WVRobFpEZGlaVEprTWpsaU1ERTFNR0l5TkRabU9ETTBNQQ', 1, 1, 1, '{"itemLocation":"/home","itemGroup":"Bizs"}', 60, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, 60, NULL);
 
 
 -- 产品信息发布
