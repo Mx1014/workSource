@@ -4328,6 +4328,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public void deletePmNotifyParams(DeletePmNotifyParamsCommand cmd) {
+		if(cmd.getId() == null ) {
+			return ;
+		}
 		Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
 		Long scopeId = cmd.getNamespaceId().longValue();
 		if(cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
