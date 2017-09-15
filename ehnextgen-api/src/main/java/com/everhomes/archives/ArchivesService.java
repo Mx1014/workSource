@@ -44,6 +44,8 @@ public interface ArchivesService {
 
     ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd);
 
+    void employArchivesEmployeesConfig(EmployArchivesEmployeesCommand cmd);
+
     void employArchivesEmployees(EmployArchivesEmployeesCommand cmd);
 
     void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd);

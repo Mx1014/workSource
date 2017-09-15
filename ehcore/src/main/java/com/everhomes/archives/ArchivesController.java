@@ -245,7 +245,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("employArchivesEmployees")
     @RestReturn(value = String.class)
     public RestResponse employArchivesEmployees(EmployArchivesEmployeesCommand cmd){
-        archivesService.employArchivesEmployees(cmd);
+        archivesService.employArchivesEmployeesConfig(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

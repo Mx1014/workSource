@@ -63,7 +63,7 @@ CREATE TABLE `eh_archives_configurations` (
 	`detail_id` BIGINT NOT NULL COMMENT 'the detailId of the employee',
 	`operation_type` TINYINT NOT NULL COMMENT'the type of operation',
 	`operation_time` DATE NOT NULL DEFAULT NOW() COMMENT 'the time to execute the operation',
-  `operation_remark` VARCHAR(256) COMMENT 'the remark of the operation',
+  `operation_template` TEXT COMMENT 'informations which contained by the operation',
   `remind_time` DATETIME COMMENT 'time to send email to the corresponding member',
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'pending, execution',
   `create_time` DATETIME COMMENT 'create time',

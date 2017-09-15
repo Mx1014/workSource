@@ -1010,22 +1010,24 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public void employArchivesEmployees(EmployArchivesEmployeesCommand cmd) {
+    public void employArchivesEmployeesConfig(EmployArchivesEmployeesCommand cmd) {
 
         //  TODO:增加一个配置项
     }
 
     /**
      * 员工转正及添加记录
-     * @param detailId
-     * @param employmentTime
+     * @param cmd
      */
-    private void employArchivesEmployees(Long detailId, Date employmentTime, String remark) {
+    @Override
+    public void employArchivesEmployees(EmployArchivesEmployeesCommand cmd) {
         //  1.更新员工状态
-        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-        detail.setEmployeeStatus(EmployeeStatus.ONTHEJOB.getCode());
-        detail.setEmploymentTime(employmentTime);
-        organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+        for (Long detailId : cmd.getDetailIds()) {
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+            detail.setEmployeeStatus(EmployeeStatus.ONTHEJOB.getCode());
+            detail.setEmploymentTime(cmd.getEmploymentTime());
+            organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+        }
         //  TODO:2.更新人员变动记录
     }
 
