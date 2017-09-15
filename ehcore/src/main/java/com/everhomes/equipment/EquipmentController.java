@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
 import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
@@ -1112,6 +1113,20 @@ public class EquipmentController extends ControllerBase {
 	@RestReturn(value = PmNotifyParamDTO.class, collection = true)
 	public RestResponse listPmNotifyParams(ListPmNotifyParamsCommand cmd) {
 		RestResponse response = new RestResponse(equipmentService.listPmNotifyParams(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/deletePmNotifyParams</b>
+	 * <p>删除通知参数</p>
+	 */
+	@RequestMapping("deletePmNotifyParams")
+	@RestReturn(value = String.class)
+	public RestResponse deletePmNotifyParams(DeletePmNotifyParamsCommand cmd) {
+		equipmentService.deletePmNotifyParams(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

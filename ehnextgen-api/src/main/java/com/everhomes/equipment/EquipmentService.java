@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
 import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
 import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
@@ -81,6 +82,7 @@ public interface EquipmentService {
 
 	void setPmNotifyParams(SetPmNotifyParamsCommand cmd);
 	List<PmNotifyParamDTO> listPmNotifyParams(ListPmNotifyParamsCommand cmd);
+	void deletePmNotifyParams(DeletePmNotifyParamsCommand cmd);
 
 	Set<Long> getTaskGroupUsers(Long taskId, byte groupType);
 }
