@@ -3732,6 +3732,10 @@ public class UserServiceImpl implements UserService {
 		List<User> userList = userProvider.findThirdparkUserByTokenAndType(namespaceId, namespaceUserType, namespaceUserToken);
 		if(userList == null || userList.size() == 0) {
 			userProvider.createUser(user);
+
+			//设定默认园区  add by  yanjun 20170915
+			setDefaultCommunity(user.getId(), namespaceId);
+
 			return true;
 		} else {
 			LOGGER.warn("User already existed, namespaceId={}, userType={}, userToken={}", namespaceId, namespaceUserType, namespaceUserToken);
