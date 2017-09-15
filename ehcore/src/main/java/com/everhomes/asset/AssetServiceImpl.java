@@ -11,6 +11,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 //import com.everhomes.contract.ContractService;
+import com.everhomes.contract.ContractScheduleJob;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -90,6 +91,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 import scala.Char;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.*;
