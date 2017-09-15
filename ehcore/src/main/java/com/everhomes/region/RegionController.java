@@ -67,10 +67,12 @@ public class RegionController extends ControllerBase {
                 .map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })
                 .collect(Collectors.toList());
         if(dtoResultList != null){
-            int hashCode = dtoResultList.hashCode();
-            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
-                return new RestResponse(dtoResultList);
-            }
+            return new RestResponse(dtoResultList);
+            //去掉etag add by xiongying20170914
+//            int hashCode = dtoResultList.hashCode();
+//            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+//                return new RestResponse(dtoResultList);
+//            }
         }
         
         return new RestResponse();
