@@ -60,10 +60,7 @@ import com.everhomes.messaging.PusherService;
 import com.everhomes.messaging.UserMessageRoutingHandler;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceDetail;
-import com.everhomes.namespace.NamespaceResource;
-import com.everhomes.namespace.NamespaceResourceProvider;
+import com.everhomes.namespace.*;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
 import com.everhomes.organization.*;
@@ -89,8 +86,7 @@ import com.everhomes.rest.group.GroupNameEmptyFlag;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.namespace.NamespaceCommunityType;
-import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.namespace.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
@@ -317,6 +313,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private SmsBlackListProvider smsBlackListProvider;
+
+	@Autowired
+	private NamespaceResourceService namespaceResourceService;
 
 //
 //    @Autowired
@@ -2851,20 +2850,29 @@ public class UserServiceImpl implements UserService {
 		StringBuffer fullName = new StringBuffer();
 		StringBuffer aliasName = new StringBuffer();
 
-		if(!StringUtils.isEmpty(familyDto.getCityName())){
-			fullName.append(familyDto.getCityName());
-		}
-		if(!StringUtils.isEmpty(familyDto.getAreaName())){
-			fullName.append(familyDto.getAreaName());
-		}
-		if(!StringUtils.isEmpty(familyDto.getCommunityName())){
-			fullName.append(familyDto.getCommunityName());
-			aliasName.append(familyDto.getCommunityName());
-		}
-		if(!StringUtils.isEmpty(familyDto.getName())){
-			fullName.append(familyDto.getName());
-			aliasName.append(familyDto.getName());
-		}
+		GetNamespaceDetailCommand cmd = new GetNamespaceDetailCommand();
+		cmd.setNamespaceId(namespaceId);
+		NamespaceDetailDTO namespaceDetail= this.namespaceResourceService.getNamespaceDetail(cmd);
+//		switch (namespaceDetail.get)
+//		NamespaceNameType
+
+//		if(!StringUtils.isEmpty(familyDto.getCityName())){
+//			fullName.append(familyDto.getCityName());
+//		}
+//		if(!StringUtils.isEmpty(familyDto.getAreaName())){
+//			fullName.append(familyDto.getAreaName());
+//		}
+//		if(!StringUtils.isEmpty(familyDto.getCommunityName())){
+//			fullName.append(familyDto.getCommunityName());
+//			aliasName.append(familyDto.getCommunityName());
+//		}
+//		if(!StringUtils.isEmpty(familyDto.getName())){
+//			fullName.append(familyDto.getName());
+//			aliasName.append(familyDto.getName());
+//		}
+
+
+
 		sceneDto.setName(fullName.toString());
 		sceneDto.setAliasName(aliasName.toString());
 		sceneDto.setAvatar(familyDto.getAvatarUri());
