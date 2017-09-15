@@ -275,6 +275,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             updateCmd.setMeterId(meter.getId());
             updateCmd.setCalculationType(cmd.getCalculationType());
             updateCmd.setConfigId(cmd.getConfigId());
+            updateCmd.setNamespaceId(cmd.getNamespaceId() == null ? currNamespaceId() : cmd.getNamespaceId());
             this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
             this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
             this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
@@ -685,6 +686,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 meters.forEach(r -> {
                     UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
                     updateCmd.setMeterId(r.getId());
+                    updateCmd.setNamespaceId(cmd.getNamespaceId()==null ? currNamespaceId() : cmd.getNamespaceId());
                     // 价格
                     if (cmd.getPrice() != null || cmd.getConfigId() != null) {
                         updateCmd.setPrice(cmd.getPrice());
@@ -1026,6 +1028,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 updateCmd.setMeterId(meter.getId());
                 updateCmd.setCalculationType(meter.getCalculationType());
                 updateCmd.setConfigId(meter.getConfigId());
+                updateCmd.setNamespaceId(cmd.getNamespaceId() == null ? currNamespaceId() : cmd.getNamespaceId());
                 this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
                 this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
                 this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
