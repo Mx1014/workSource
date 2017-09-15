@@ -1032,7 +1032,8 @@ public class NewsServiceImpl implements NewsService {
 		result.stream().forEach(r->{
 			List<NewsTag> tags = newsProvider.listNewsTag(r.getOwnerType(),r.getOwnerId(),null,r.getId(),
 					null,null);
-			r.setChildTags(tags.stream().map(t->ConvertHelper.convert(t,NewsTagDTO.class)).collect(Collectors.toList()));
+			List<NewsTagDTO> list = tags.stream().map(t->ConvertHelper.convert(t,NewsTagDTO.class)).collect(Collectors.toList());
+			r.setChildTags(JSONObject.toJSONString(list));
 		});
 		GetNewsTagResponse response = new GetNewsTagResponse();
 		response.setTags(result);

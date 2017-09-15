@@ -29,8 +29,8 @@ public class NewsTagDTO {
     private Byte isDefault;
     private Byte deleteFlag;
     private Long defaultOrder;
-    @ItemType(NewsTagDTO.class)
-    private List<NewsTagDTO> childTags;
+
+    private String childTags;
 
     public Long getId() {
         return id;
@@ -112,11 +112,11 @@ public class NewsTagDTO {
         this.isSearch = isSearch;
     }
 
-    public List<NewsTagDTO> getChildTags() {
+    public String getChildTags() {
         return childTags;
     }
 
-    public void setChildTags(List<NewsTagDTO> childTags) {
+    public void setChildTags(String childTags) {
         this.childTags = childTags;
     }
 }
