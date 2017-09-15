@@ -11674,7 +11674,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
-        if (!StringUtils.isEmpty(data.getOrgnaizationPath())) {
+        //  暂时去掉部门的校验 changed by R, 20170915
+/*        if (!StringUtils.isEmpty(data.getOrgnaizationPath())) {
             String[] deptStrArr = data.getOrgnaizationPath().split(",");
             for (String deptName : deptStrArr) {
                 Organization dept = deptMap.get(deptName.trim());
@@ -11692,7 +11693,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setErrorLog("Organization member department is null");
             log.setCode(OrganizationServiceErrorCode.ERROR_DEPARTMENT_ISNULL);
             return log;
-        }
+        }*/
 
         //  暂时去掉职位的校验 changed by R, 20170720
         /*if (!StringUtils.isEmpty(data.getJobPosition())) {
@@ -11715,7 +11716,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             return log;
         }*/
 
-        if (StringUtils.isEmpty(data.getCheckInTime())) {
+        //  暂时去掉入职日期、试用期、转正日期的校验 changed by R, 20170915
+/*        if (StringUtils.isEmpty(data.getCheckInTime())) {
             LOGGER.warn("Organization member checkInTime is null. data = {}", data);
             log.setData(data);
             log.setErrorLog("Organization member checkInTime is null");
@@ -11739,7 +11741,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setErrorLog("Organization member employeeStatus is null");
             log.setCode(OrganizationServiceErrorCode.ERROR_EMPLOYEESTATUS_ISNULL);
             return log;
-        }
+        }*/
 
         if (!StringUtils.isEmpty(data.getJobLevel())) {
             String[] jobLevelStrArr = data.getJobLevel().split(",");
@@ -12075,16 +12077,19 @@ public class OrganizationServiceImpl implements OrganizationService {
             memberCommand.setJobPositionIds(jobPositionIds);
         }
         //  入职日期
+        if(!StringUtils.isEmpty(data.getCheckInTime()))
         memberCommand.setCheckInTime(data.getCheckInTime());
 
         //  试用期
-        Byte employeeStatus;
-        if (data.getEmployeeStatus().equals("是")) {
-            employeeStatus = 0;
-        } else {
-            employeeStatus = 1;
+        if (!StringUtils.isEmpty(data.getEmployeeStatus())) {
+            Byte employeeStatus;
+            if (data.getEmployeeStatus().equals("是")) {
+                employeeStatus = 0;
+            } else {
+                employeeStatus = 1;
+            }
+            memberCommand.setEmployeeStatus(employeeStatus);
         }
-        memberCommand.setEmployeeStatus(employeeStatus);
 
         //  转正日期
         if (!StringUtils.isEmpty(data.getEmploymentTime()))
