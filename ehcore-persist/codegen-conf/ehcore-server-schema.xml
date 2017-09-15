@@ -176,6 +176,8 @@
         eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |
         eh_sms_black_lists | eh_yzx_sms_logs |
         eh_user_identifier_logs | eh_user_appeal_logs | eh_organization_members_test |
+	    eh_salary_default_entities | eh_salary_entity_categories | eh_salary_group_entities | eh_salary_employee_origin_vals | eh_salary_groups | eh_salary_employees | eh_salary_employee_period_vals |
+        eh_uniongroup_configures | eh_uniongroup_member_details |
         eh_authorization_third_party_forms | eh_authorization_third_party_records | eh_authorization_third_party_buttons |
         eh_user_identifier_logs | eh_user_appeal_logs |
         eh_var_field_groups | eh_var_fields | eh_var_field_items | eh_var_field_group_scopes | eh_var_field_scopes | eh_var_field_item_scopes |
@@ -200,6 +202,8 @@
         eh_stat_event_logs | eh_stat_event_param_logs | eh_stat_event_app_attachment_logs | eh_stat_event_portal_configs | eh_stat_event_portal_statistics |
         eh_stat_event_statistics | eh_stat_event_task_logs | eh_community_default | eh_namespace_masks | eh_door_auth_level |
             eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types | eh_payment_order |
+
+        eh_punch_special_days | eh_punch_time_intervals |
         </includes>
 
             <!-- All elements that are excluded from your schema
