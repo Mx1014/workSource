@@ -25,6 +25,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
+import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -67,6 +68,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
@@ -467,6 +469,29 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return result;
 	}
 
+
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq(memberGroup));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+
+		if(null != OrganizationMemberTargetType.fromCode(targetType)){
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(targetType));
+		}
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		return result;
+	}
 
 	@Override
 	public List<OrganizationMember> listOrganizationMembers(Long memberUid) {
@@ -5033,7 +5058,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         });
         return results;
     }
-	
 	@Override
     public Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType) {
         Map<Long, String> orgMap = new HashMap<>();
@@ -5193,6 +5217,24 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 	@Override
+	public List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
+			CrossShardListingLocator locator, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
+		if(null != organizationId)
+			step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(organizationId));
+		if (null != locator) {
+			step.and(Tables.EH_ORGANIZATIONS.ID.gt(locator.getAnchor()));
+		}
+
+		step.orderBy(Tables.EH_ORGANIZATIONS.ID.asc());
+		if (null != pageSize) {
+			step.limit(pageSize);
+		}
+		return step.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
+	}
+	
 	public List listOrganizationMembersGroupByToken() {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<EhOrganizationMembers> list = new ArrayList<>();
@@ -5230,7 +5272,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return list;
 	}
 
-	@Override
+	@Override 
 	public String getOrganizationNameById(Long targetId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.select(Tables.EH_ORGANIZATIONS.NAME)
@@ -5284,5 +5326,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		return list;
+	}
+	@Override
+	public void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.EMAIL_CONTENT, emailContent)
+				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(UniongroupType.SALARYGROUP.getCode()))
+				.and(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID.eq(ownerId)).execute();
+ 
 	}
 }

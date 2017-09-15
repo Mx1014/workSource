@@ -63,6 +63,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("equipment.ip", "127.0.0.1")
             .withProperty("schedule.running.flag", "0")
             .withProperty("src.path", "/home/janson/ssd2/everhomes/ehnextgen")
+            .withProperty("schedule.running.flag", "1")
             );
     }
 }

@@ -7,14 +7,14 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>punchDate: 打卡日期</li>
- * <li>exceptionRequestType: 异常类型，{@link com.everhomes.rest.approval.ExceptionRequestType}</li>
+ * <li>punchIntervalNo: 当天第几个班次</li>
  * <li>punchDetail: 打卡详情</li>
  * <li>punchStatusName: 打卡状态名称</li>
  * </ul>
  */
 public class ApprovalExceptionContent {
 	private Long punchDate;
-	private Byte exceptionRequestType;
+	private Integer punchIntervalNo;
 	private String punchDetail;
 	private String punchStatusName;
 
@@ -24,14 +24,6 @@ public class ApprovalExceptionContent {
 
 	public void setPunchDate(Long punchDate) {
 		this.punchDate = punchDate;
-	}
-
-	public Byte getExceptionRequestType() {
-		return exceptionRequestType;
-	}
-
-	public void setExceptionRequestType(Byte exceptionRequestType) {
-		this.exceptionRequestType = exceptionRequestType;
 	}
 
 	public String getPunchDetail() {
@@ -54,4 +46,12 @@ public class ApprovalExceptionContent {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+
+	public Integer getPunchIntervalNo() {
+		return punchIntervalNo;
+	}
+
+	public void setPunchIntervalNo(Integer punchIntervalNo) {
+		this.punchIntervalNo = punchIntervalNo;
+	} 
 }

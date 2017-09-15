@@ -12,7 +12,9 @@ import com.everhomes.util.StringHelper;
  *</ul>
  */
 public class SearchContentsBySceneCommand {
-	
+
+	private Long buildingId;
+
 	private String sceneToken;
 	
 	private String keyword;
@@ -22,6 +24,14 @@ public class SearchContentsBySceneCommand {
 	private Long pageAnchor;
     
     private Integer pageSize;
+
+	public Long getBuildingId() {
+		return buildingId;
+	}
+
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
+	}
 
 	public String getSceneToken() {
 		return sceneToken;

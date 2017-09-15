@@ -287,21 +287,7 @@ public class AclAdminController extends ControllerBase {
         return response;
     }
     
-    /**
-     * <b>URL: /admin/acl/deleteOrganizationAdmin  </b>
-     * <p>删除管理员</p>
-     */
-    @RequestMapping("deleteOrganizationAdmin")
-    @RestReturn(value=String.class)
-    public RestResponse deleteOrganizationAdmin(@Valid DeleteOrganizationAdminCommand cmd) {
-    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
-    	rolePrivilegeService.deleteOrganizationAdmin(cmd);
-    	RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
+
     /**
      * <b>URL: /admin/acl/listOrganizationAdministrators</b>
      * <p>管理员列表</p>

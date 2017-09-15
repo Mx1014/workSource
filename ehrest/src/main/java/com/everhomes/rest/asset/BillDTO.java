@@ -20,6 +20,7 @@ import java.math.BigDecimal;
  * <li>amountReceived:实收金额</li>
  * <li>amountOwed:欠收金额</li>
  * <li>billStatus:缴费状态,0:待缴;1:已缴</li>
+ * <li>payStatus:清账信息</li>
  *</ul>
  */
 public class BillDTO {
@@ -29,13 +30,14 @@ public class BillDTO {
     private String billItemName;
     private String targetName;
     private String targetId;
-    private Long targetType;
+    private String targetType;
     private String buildingName;
     private String apartmentName;
     private BigDecimal amountReceivable;
     private BigDecimal amountReceived;
     private BigDecimal amountOwed;
     private Byte billStatus;
+    private String payStatus;
 
     @Override
     public String toString() {
@@ -44,6 +46,14 @@ public class BillDTO {
 
     public Long getBillItemId() {
         return billItemId;
+    }
+
+    public String getPayStatus() {
+        return payStatus;
+    }
+
+    public void setPayStatus(String payStatus) {
+        this.payStatus = payStatus;
     }
 
     public void setBillItemId(Long billItemId) {
@@ -106,11 +116,11 @@ public class BillDTO {
         this.targetId = targetId;
     }
 
-    public Long getTargetType() {
+    public String getTargetType() {
         return targetType;
     }
 
-    public void setTargetType(Long targetType) {
+    public void setTargetType(String targetType) {
         this.targetType = targetType;
     }
 

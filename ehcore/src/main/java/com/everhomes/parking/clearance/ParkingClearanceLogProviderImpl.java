@@ -95,7 +95,9 @@ public class ParkingClearanceLogProviderImpl implements ParkingClearanceLogProvi
             query.addConditions(Tables.EH_PARKING_CLEARANCE_LOGS.CREATE_TIME.le(new Timestamp(qo.getPageAnchor())));
         }
         query.addOrderBy(Tables.EH_PARKING_CLEARANCE_LOGS.CREATE_TIME.desc());
-        query.addLimit(qo.getPageSize());
+        if (null != qo.getPageSize()) {
+            query.addLimit(qo.getPageSize());
+        }
         LOGGER.debug("Search parking clarance log sql: {}", query.getSQL(true));
         return query.fetchInto(ParkingClearanceLog.class);
     }

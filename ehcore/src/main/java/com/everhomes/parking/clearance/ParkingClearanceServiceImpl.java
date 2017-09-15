@@ -282,8 +282,12 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
                 List<ParkingActualClearanceLogDTO> result = actualLogs.stream().map(this::convertActualClearanceLogDTO).collect(Collectors.toList());
                 Map<String, String> temp = new LinkedHashMap<>();
                 result.forEach(a -> {
-                    temp.put("进场时间", sdf.format(a.getEntryTime()));
-                    temp.put("出场时间", sdf.format(a.getExitTime()));
+                    if (null != a.getEntryTime()) {
+                        temp.put("进场时间", sdf.format(a.getEntryTime()));
+                    }
+                    if (null != a.getExitTime()) {
+                        temp.put("出场时间", sdf.format(a.getExitTime()));
+                    }
                 });
                 r.setLogJson(JSONArray.toJSONString(temp));
                 clearanceLogProvider.updateClearanceLog(r);
@@ -450,24 +454,11 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 					Integer.parseInt(ParkingLocalStringCode.NO_DATA), "no data");
 		}
 	}
-    
+
     private void formatToExport(ParkingClearanceLogDTO log) {
     	log.setApplyTimeString(DateUtil.dateToStr(log.getApplyTime(), DateUtil.DATE_TIME_LINE));
     	log.setClearanceTimeString(DateUtil.dateToStr(log.getClearanceTime(), DateUtil.YMR_SLASH));
 
-    	if (StringUtils.isNotBlank(log.getLogJson())) {
-    	    StringBuilder sb = new StringBuilder();
-            JinyiJsonEntity<List<JinyiClearance>> jsonEntity = JSONObject.parseObject(log.getLogJson(), new TypeReference<JinyiJsonEntity<List<JinyiClearance>>>(){});
-            List<JinyiClearance> list = jsonEntity.getData();
-            Integer[] i = {1};
-            list.forEach(r -> {
-                sb.append(i[0]).append(",").append(r.getEntrytime()).append("进场").append("\n");
-                i[0] = i[0] + 1;
-                sb.append(i[0]).append(",").append(r.getExittime()).append("出场").append("\n");
-                i[0] = i[0] + 1;
-            });
-            log.setLogJson(sb.toString());
-    	}
     }
 
 	@Override

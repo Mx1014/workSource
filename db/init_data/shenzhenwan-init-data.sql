@@ -1137,3 +1137,42 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
     VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'Gallery', '政务服务', '政务服务', 'cs://1/image/aW1hZ2UvTVRvNE5EVTVaREUxWXpaa05UTmpNelppTkdRMllUUTROMlEzTlRRNU1EaGlOQQ', '1', '1', 2,'{"itemLocation":"/home/GovernmentService","layoutName":"GovernmentServiceLayout"}', 14, '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 
+-- 添加151-157群组相关权限  add by xq.tian  2017/09/14
+SET @eh_acls_id = IFNULL((SELECT MAX(id) FROM `eh_acls`), 1);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`)
+VALUES ((@eh_acls_id := @eh_acls_id + 1), 'EhGroups', NULL, 1, 151, 5, 0, 1, now(), 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`)
+VALUES ((@eh_acls_id := @eh_acls_id + 1), 'EhGroups', NULL, 1, 152, 5, 0, 1, now(), 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`)
+VALUES ((@eh_acls_id := @eh_acls_id + 1), 'EhGroups', NULL, 1, 153, 5, 0, 1, now(), 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`)
+VALUES ((@eh_acls_id := @eh_acls_id + 1), 'EhGroups', NULL, 1, 154, 5, 0, 1, now(), 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`)
+VALUES ((@eh_acls_id := @eh_acls_id + 1), 'EhGroups', NULL, 1, 155, 5, 0, 1, now(), 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`)
+VALUES ((@eh_acls_id := @eh_acls_id + 1), 'EhGroups', NULL, 1, 156, 5, 0, 1, now(), 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`)
+VALUES ((@eh_acls_id := @eh_acls_id + 1), 'EhGroups', NULL, 1, 157, 5, 0, 1, now(), 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+-- fix 15413 add by xiongying20170914
+INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) VALUES ('13908', '13905', '南山区', 'NANSHANQU', 'NSQ', '/广东/深圳市/南山区', '3', '3', NULL, '0755', '2', '0', '999966');
+INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) VALUES ('13905', '13874', '深圳市', 'SHENZHENSHI', 'SZS', '/广东/深圳市', '2', '2', NULL, '0755', '2', '1', '999966');
+INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) VALUES ('13874', '0', '广东', 'GUANGDONG', 'GD', '/广东', '1', '1', NULL, NULL, '2', '0', '999966');
+
+-- 停车环境 add by sw 20170914
+UPDATE eh_configurations set `value` = 'http://119.23.144.8' where `name` = 'parking.xiaomao.url';
+UPDATE eh_configurations set `value` = 'zuolin' where `name` = 'parking.xiaomao.accessKeyId';
+UPDATE eh_configurations set `value` = '91d747682a32176c78283c9a0cf8a08f' where `name` = 'parking.xiaomao.accessKeyValue';
+UPDATE eh_configurations set `value` = '0755000021433988491' where `name` = 'parking.xiaomao.parkId.10011';
+UPDATE eh_configurations set `value` = '07550002501499136602' where `name` = 'parking.xiaomao.parkId.10012';
+
+UPDATE eh_configurations set `value` = 'http://sty.szbay.com:9000' where `name` = 'parking.mybay.searchCar.url';
+
+UPDATE eh_configurations set `value` = 'http://sty.szbay.com:8099' where `name` = 'parking.mybay.url';
+UPDATE eh_configurations set `value` = 'F7A0B971B199FD2A98DA0BF6' where `name` = 'parking.mybay.key';
+UPDATE eh_configurations set `value` = 'ktapi' where `name` = 'parking.mybay.user';
+UPDATE eh_configurations set `value` = '0306F2' where `name` = 'parking.mybay.pwd';
+
+update eh_configurations set value = '[{"typeId":"11", "typeName":"VIP月卡"},{"typeId":"5", "typeName":"普通月卡"}]' where name = 'parking.xiaomao.types.10011';
+update eh_configurations set value = '[{"typeId":"02", "typeName":"VIP月卡"}]' where name = 'parking.xiaomao.types.10012';
+

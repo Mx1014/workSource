@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.community_map;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.business.BusinessService;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
@@ -51,6 +53,8 @@ public class CommunityMapServiceImpl implements CommunityMapService {
     private CommunityService communityService;
     @Autowired
     private ContentServerService contentServerService;
+    @Autowired
+    private AddressProvider addressProvider;
 
     @Override
     public ListCommunityMapSearchTypesResponse listCommunityMapSearchTypesByScene(ListCommunityMapSearchTypesCommand cmd) {
@@ -155,6 +159,17 @@ public class CommunityMapServiceImpl implements CommunityMapService {
                             dto.setGeos(geos.stream().map(g -> ConvertHelper.convert(g, CommunityMapBuildingGeoDTO.class))
                                     .collect(Collectors.toList()));
                         }
+
+                        if (StringUtils.isNotBlank(r.getApartmentId())) {
+                            List<ApartmentDTO> apartmentDTOS = new ArrayList<ApartmentDTO>();
+                            Address address = addressProvider.findAddressById(Long.valueOf(r.getApartmentId()));
+                            ApartmentDTO apartmentDTO = new ApartmentDTO();
+                            apartmentDTO.setApartmentName(address.getApartmentName());
+                            apartmentDTO.setAddressId(address.getId());
+                            apartmentDTOS.add(apartmentDTO);
+                            dto.setApartments(apartmentDTOS);
+                        }
+
                         buildings.add(dto);
                         shop.setBuildings(buildings);
                     }

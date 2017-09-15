@@ -11,7 +11,6 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
@@ -20,6 +19,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
+import com.everhomes.util.StringHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -49,15 +49,18 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
     @Override
     public void createEnterpriseCustomer(EnterpriseCustomer customer) {
+        LOGGER.info("syncDataToDb create customer: {}", StringHelper.toJsonString(customer));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
+        LOGGER.info("syncDataToDb create customer id: {}", id);
         customer.setId(id);
+        LOGGER.info("syncDataToDb create customer setId");
         customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        customer.setCreatorUid(UserContext.current().getUser().getId());
+        LOGGER.info("syncDataToDb create customer setCreateTime");
         customer.setStatus(CommonStatus.ACTIVE.getCode());
-
         LOGGER.info("createEnterpriseCustomer: " + customer);
 
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         dao.insert(customer);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseCustomers.class, null);
@@ -65,12 +68,15 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
     @Override
     public void updateEnterpriseCustomer(EnterpriseCustomer customer) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
+        LOGGER.debug("syncDataToDb updateEnterpriseCustomer customer: {}",
+                StringHelper.toJsonString(customer));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
-
-        customer.setOperatorUid(UserContext.current().getUser().getId());
+        LOGGER.debug("syncDataToDb updateEnterpriseCustomer dao");
         customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        LOGGER.debug("syncDataToDb updateEnterpriseCustomer setUpdateTime");
         dao.update(customer);
+        LOGGER.debug("syncDataToDb updateEnterpriseCustomer update");
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
     }
 
@@ -78,7 +84,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     public void deleteEnterpriseCustomer(EnterpriseCustomer customer) {
         assert(customer.getId() != null);
 
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         dao.delete(customer);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
@@ -356,7 +362,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         project.setId(id);
         project.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         project.setCreateUid(UserContext.current().getUser().getId());
-        project.setStatus(CommonStatus.ACTIVE.getCode());
+//        project.setStatus(CommonStatus.ACTIVE.getCode());
 
         LOGGER.info("createCustomerApplyProject: " + project);
 
@@ -564,7 +570,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerApplyProjectsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_APPLY_PROJECTS);
         query.addConditions(Tables.EH_CUSTOMER_APPLY_PROJECTS.CUSTOMER_ID.eq(customerId));
-        query.addConditions(Tables.EH_CUSTOMER_APPLY_PROJECTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_CUSTOMER_APPLY_PROJECTS.STATUS.ne(CommonStatus.INACTIVE.getCode()));
 
         List<CustomerApplyProject> result = new ArrayList<>();
         query.fetch().map((r) -> {
@@ -730,6 +736,15 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         return context.selectCount().from(Tables.EH_CUSTOMER_TRADEMARKS)
                 .where(Tables.EH_CUSTOMER_TRADEMARKS.CUSTOMER_ID.in(customerIds))
                 .and(Tables.EH_CUSTOMER_TRADEMARKS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .fetchAnyInto(Long.class);
+    }
+
+    @Override
+    public Long countCertificatesByCustomerIds(List<Long> customerIds) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectCount().from(Tables.EH_CUSTOMER_CERTIFICATES)
+                .where(Tables.EH_CUSTOMER_CERTIFICATES.CUSTOMER_ID.in(customerIds))
+                .and(Tables.EH_CUSTOMER_CERTIFICATES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
                 .fetchAnyInto(Long.class);
     }
 

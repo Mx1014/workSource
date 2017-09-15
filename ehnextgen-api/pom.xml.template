@@ -178,6 +178,25 @@
 			<artifactId>itextpdf</artifactId>
 			<version>${itextpdf.version}</version>
 		</dependency>
+
+		<dependency>
+            <groupId>com.everhomes</groupId>
+            <artifactId>ehutil-common</artifactId>
+            <version>1.0.3-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.everhomes.pay</groupId>
+            <artifactId>ehpay-rest</artifactId>
+            <version>1.0.3-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.everhomes.pay</groupId>
+            <artifactId>ehpay-rest-response</artifactId>
+            <version>1.0.3-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -16,9 +16,6 @@ import org.springframework.stereotype.Component;
 public class KetuoChunengParkingVendorHandler extends KetuoParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(KetuoChunengParkingVendorHandler.class);
 
-	@Autowired
-    private ConfigurationProvider configProvider;
-
 	protected KetuoRequestConfig getKetuoRequestConfig() {
 
 		String url = configProvider.getValue("parking.chuneng.url", "");
