@@ -141,10 +141,10 @@ public class ServiceAllianceCommentHandler implements CommentHandler {
 			List<ServiceAllianceCommentAttachment> attachments,String ownerToken) {
 		Map<String,List<ServiceAllianceCommentAttachment>> map = new HashMap<String,List<ServiceAllianceCommentAttachment>>();
 		attachments.stream().forEach(r->{
-			List<ServiceAllianceCommentAttachment> atts = map.get(String.valueOf(r.getId()));
+			List<ServiceAllianceCommentAttachment> atts = map.get(String.valueOf(r.getOwnerId()));
 			if(atts == null){
 				atts = new ArrayList<ServiceAllianceCommentAttachment>();
-				map.put(String.valueOf(r.getId()), atts);
+				map.put(String.valueOf(r.getOwnerId()), atts);
 			}
 			atts.add(r);
 		});

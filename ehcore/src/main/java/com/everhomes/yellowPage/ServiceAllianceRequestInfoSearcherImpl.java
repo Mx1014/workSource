@@ -65,6 +65,7 @@ import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.user.FieldContentType;
@@ -210,9 +211,12 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             request.setCreatorMobile(identifier.getIdentifierToken());
             if (EntityType.COMMUNITY.getCode().equals(flowCase.getProjectType()) || "community".equals(flowCase.getProjectType())
                     || EhCommunities.class.getName().equals(flowCase.getProjectType())){
-                request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-                List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
-                request.setOwnerId(communityList.get(0).getId());
+            	// bydengs,修改owner
+            	 request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+            	 request.setOwnerId(flowCase.getProjectId());
+//                request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+//                List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
+//                request.setOwnerId(communityList.get(0).getId());
             }else{
                 request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
                 request.setOwnerId(request.getCreatorOrganizationId());
@@ -449,9 +453,21 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             builder.addHighlightedField("creatorName").addHighlightedField("serviceOrganization").addHighlightedField("creatorOrganization");
             
         }
-        
-        FilterBuilder fb = FilterBuilders.termFilter("ownerType", cmd.getOwnerType());
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+        FilterBuilder fb = null;
+        if(ServiceAllianceBelongType.ORGANAIZATION == ServiceAllianceBelongType.fromCode(cmd.getOwnerType())){
+        	//
+        	List<OrganizationCommunity> result = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+        	
+        	for (OrganizationCommunity orgcommunity : result) {
+        		FilterBuilder orfb = FilterBuilders.termFilter("ownerType", ServiceAllianceBelongType.COMMUNITY.getCode());
+        		orfb = FilterBuilders.andFilter(orfb, FilterBuilders.termFilter("ownerId", orgcommunity.getCommunityId()));
+        		fb = FilterBuilders.orFilter(fb,orfb);
+			}
+        	
+        }else{
+	        fb = FilterBuilders.termFilter("ownerType", cmd.getOwnerType());
+	        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+        }
 
         if(cmd.getCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("type", cmd.getCategoryId()));
@@ -918,16 +934,17 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             b.field("jumpType", request.getJumpType());
             b.field("templateType", request.getTemplateType());
             b.field("type", request.getType());
-            if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(request.getOwnerType())){
-                b.field("ownerType", EntityType.ORGANIZATIONS.getCode());
-                List <Organization> organizations = organizationProvider.findOrganizationByCommunityId(request.getOwnerId());
-                if(organizations!=null && organizations.size()>0) {
-                    b.field("ownerId", organizations.get(0).getId());
-                }
-            }else{
-                b.field("ownerType", request.getOwnerType());
-                b.field("ownerId", request.getOwnerId());
-            }
+            //by dengs,修改owner
+//            if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(request.getOwnerType())){
+//                b.field("ownerType", EntityType.ORGANIZATIONS.getCode());
+//                List <Organization> organizations = organizationProvider.findOrganizationByCommunityId(request.getOwnerId());
+//                if(organizations!=null && organizations.size()>0) {
+//                    b.field("ownerId", organizations.get(0).getId());
+//                }
+//            }else{
+            b.field("ownerType", request.getOwnerType());
+            b.field("ownerId", request.getOwnerId());
+//            }
             b.field("creatorName", request.getCreatorName());
             b.field("creatorOrganizationId", request.getCreatorOrganizationId());
             b.field("creatorMobile", request.getCreatorMobile());
