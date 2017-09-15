@@ -16,6 +16,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.userOrganization.UserOrganizations;
+
 import org.jooq.Condition;
 
 import java.math.BigDecimal;
@@ -436,10 +437,16 @@ public interface OrganizationProvider {
 
 	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
 
+<<<<<<< HEAD
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
 
+=======
+	
+>>>>>>> punch-3.0
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
 	List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId,List<String> groupTypes);
+	
+	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
 
 	//	根据 group_type 查找薪酬组 added by R 20170630
 	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId);
@@ -456,7 +463,9 @@ public interface OrganizationProvider {
 	 * 查询非离职状态下所有员工的 detailId
 	 * added by R, 20170719
 	 */
-	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId);
+	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId); 
+	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
+			CrossShardListingLocator locator, Integer pageSize);
 
 
 	List listOrganizationMembersGroupByToken();
@@ -464,8 +473,7 @@ public interface OrganizationProvider {
 	List listOrganizationMemberByToken(String token);
 
 	List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId);
-
-
+ 
     String getOrganizationNameById(Long targetId);
 
 	List<TargetDTO> findOrganizationIdByNameAndAddressId(String targetName, List<Long> ids);
@@ -473,5 +481,7 @@ public interface OrganizationProvider {
 	List<UserOrganizations> listUserOrganizationByUserId(Long userId);
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType);
-
+ 
+	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
+ 
 }

@@ -255,7 +255,7 @@ public interface PunchProvider {
 
 	Long createPunchStatistic(PunchStatistic obj);
 
-	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, String month, Byte exceptionStatus,
+	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
 			List<Long> userIds, CrossShardListingLocator locator, int i);
   
 	public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId);
@@ -267,7 +267,7 @@ public interface PunchProvider {
 			Time workTime, Byte exceptionStatus,Integer pageOffset,Integer pageSize);
 
 	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long ownerId, Long punchDate,
-			Byte exceptionRequestType);
+														   Integer intervalTimeNo);
 
 	public PunchExceptionRequest findPunchExceptionRequestByRequestId(Long ownerId, Long creatorUid, Long id);
 
@@ -294,7 +294,40 @@ public interface PunchProvider {
 
 	void deletePunchTimeRulesByOwnerAndTarget(String ownerType, Long ownerId,
 			String targetType, Long targetId);
- 
- 
- 
+
+	public void createPunchTimeInterval(PunchTimeInterval ptInterval);
+
+	public void createPunchSpecialDay(PunchSpecialDay psd);
+
+	public void deletePunchGeopointsByOwnerId(Long id);
+
+	public void deletePunchWifisByOwnerId(Long id);
+
+	public PunchRule getPunchruleByPunchOrgId(Long id);
+
+	public void deletePunchTimeRuleByPunchOrgId(Long id);
+
+	public void deletePunchSpecialDaysByPunchOrgId(Long id);
+
+	public void deletePunchTimeIntervalByPunchRuleId(Long id);
+
+	public List<PunchTimeRule> listActivePunchTimeRuleByOwner(String ownerType, Long ownerId);
+
+	public List<PunchTimeInterval> listPunchTimeIntervalByTimeRuleId(Long timeRuleId);
+
+	public List<PunchGeopoint> listPunchGeopointsByOwner(String ownerType, Long ownerId);
+
+	public List<PunchWifi> listPunchWifsByOwner(String ownerType, Long ownerId);
+
+	public List<PunchSpecialDay> listPunchSpecailDaysByOrgId(Long punchOrganizationId);
+
+	public PunchSpecialDay findSpecialDayByDateAndOrgId(Long punchOrganizationId,
+			java.util.Date date);
+
+	public PunchHoliday findHolidayByDate(java.sql.Date punchDate);
+
+
+	List<PunchTimeRule> listPunchTimeRulesBySplitTime(long beginTime, long endTime);
+
+	void deletePunchTimeRuleByRuleId(Long id);
 }
