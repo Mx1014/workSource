@@ -461,9 +461,12 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         	for (OrganizationCommunity orgcommunity : result) {
         		FilterBuilder orfb = FilterBuilders.termFilter("ownerType", ServiceAllianceBelongType.COMMUNITY.getCode());
         		orfb = FilterBuilders.andFilter(orfb, FilterBuilders.termFilter("ownerId", orgcommunity.getCommunityId()));
-        		fb = FilterBuilders.orFilter(fb,orfb);
+        		if(fb == null){
+        			fb = orfb;
+        		}else{
+        			fb = FilterBuilders.orFilter(fb,orfb);
+        		}
 			}
-        	
         }else{
 	        fb = FilterBuilders.termFilter("ownerType", cmd.getOwnerType());
 	        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
