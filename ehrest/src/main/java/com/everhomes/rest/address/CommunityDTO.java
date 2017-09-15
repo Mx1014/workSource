@@ -40,6 +40,7 @@ import com.everhomes.util.StringHelper;
  * <li>updateTime: 更新时间</li>
  * <li>categoryId: 分类id</li>
  * <li>categoryName: 分类名称</li>
+ * <li>communityUserCount : 统计人数</li>
  * </ul>
  */
 public class CommunityDTO {
@@ -80,6 +81,8 @@ public class CommunityDTO {
     private String categoryName;
 
     private Long categoryId;
+
+    private Integer communityUserCount;
     
     @ItemType(CommunityGeoPointDTO.class)
     private List<CommunityGeoPointDTO> geoPointList;
@@ -378,5 +381,13 @@ public class CommunityDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Integer getCommunityUserCount() {
+        return communityUserCount;
+    }
+
+    public void setCommunityUserCount(Integer communityUserCount) {
+        this.communityUserCount = communityUserCount;
     }
 }

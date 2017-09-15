@@ -2879,6 +2879,7 @@ public class UserServiceImpl implements UserService {
 
 		sceneDto.setCommunityType(CommunityType.RESIDENTIAL.getCode());
 		sceneDto.setStatus(familyDto.getMembershipStatus());
+		sceneDto.setCommunityId(familyDto.getCommunityId());
 
 		return sceneDto;
 	}
@@ -3660,7 +3661,8 @@ public class UserServiceImpl implements UserService {
 	public List<SceneDTO> listTouristRelatedScenes() {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long userId = UserContext.current().getUser().getId();
-		List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+		// 修改成按照defalutOrder排序 by lei.lv 20170915
+		List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespaceOrderByDefaultOrder(namespaceId, NamespaceResourceType.COMMUNITY);
 		List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
 		for (NamespaceResource resource : resources) {
 			Community community = communityProvider.findCommunityById(resource.getResourceId());

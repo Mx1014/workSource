@@ -2,26 +2,28 @@ package com.everhomes.rest.techpark.punch;
 
 import com.everhomes.util.StringHelper;
 
-
 /**
-* <ul>  
-* <li>enterpriseId：企业Id</li>
-* <li>latitude: 坐标纬度</li>
-* <li>longitude： 坐标经度</li>
-* <li>wifiMac： wifiMac地址信息</li>
-* </ul>
-*/
+ * <ul>
+ * <li>enterpriseId：企业Id</li>
+ * <li>punchType：0上班 1下班 这里只有上班或者下班</li>
+ * <li>latitude: 坐标纬度</li>
+ * <li>longitude： 坐标经度</li>
+ * <li>wifiMac： wifiMac地址信息</li>
+ * </ul>
+ */
 public class PunchClockCommand {
- 
-    private Long enterpriseId;
-    private String identification;
-    private Double latitude;
-    private Double longitude;
-    private String wifiMac;
-     @Override
-     public String toString() {
-         return StringHelper.toJsonString(this);
-     }
+
+	private Long enterpriseId;
+	private Byte punchType;
+	private String identification;
+	private Double latitude;
+	private Double longitude;
+	private String wifiMac;
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 	public Double getLatitude() {
 		return latitude;
@@ -63,4 +65,12 @@ public class PunchClockCommand {
 		this.wifiMac = wifiMac;
 	}
 
- }
+	public Byte getPunchType() {
+		return punchType;
+	}
+
+	public void setPunchType(Byte punchType) {
+		this.punchType = punchType;
+	}
+
+}

@@ -7,6 +7,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.pmNotify.DeletePmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.ListPmNotifyParamsCommand;
+import com.everhomes.rest.pmNotify.PmNotifyParamDTO;
+import com.everhomes.rest.pmNotify.SetPmNotifyParamsCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1086,4 +1090,47 @@ public class EquipmentController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /equipment/setPmNotifyParams</b>
+	 * <p>设置通知参数</p>
+	 */
+	@RequestMapping("setPmNotifyParams")
+	@RestReturn(value = String.class)
+	public RestResponse setPmNotifyParams(SetPmNotifyParamsCommand cmd) {
+		equipmentService.setPmNotifyParams(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/listPmNotifyParams</b>
+	 * <p>列出通知参数</p>
+	 */
+	@RequestMapping("listPmNotifyParams")
+	@RestReturn(value = PmNotifyParamDTO.class, collection = true)
+	public RestResponse listPmNotifyParams(ListPmNotifyParamsCommand cmd) {
+		RestResponse response = new RestResponse(equipmentService.listPmNotifyParams(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/deletePmNotifyParams</b>
+	 * <p>删除通知参数</p>
+	 */
+	@RequestMapping("deletePmNotifyParams")
+	@RestReturn(value = String.class)
+	public RestResponse deletePmNotifyParams(DeletePmNotifyParamsCommand cmd) {
+		equipmentService.deletePmNotifyParams(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
 }
