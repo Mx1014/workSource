@@ -158,6 +158,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                         Calendar c5 = Calendar.getInstance();
                         if(c4.compareTo(c5)!=1 && billStatus==0){
                             billStatus = 2;
+                        }else if(c4.compareTo(c5)==1 && billStatus==0){
+                            billStatus = 3;
                         }
                     }catch (Exception e){
                         LOGGER.error("billStatus parse failed");
