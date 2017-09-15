@@ -2934,10 +2934,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 		}
 		List<EquipmentInspectionTasks> allTasks = null;
-<<<<<<< HEAD
-=======
 
->>>>>>> 4.9.1
 //		Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
 //		List<Long> ownerIds = new ArrayList<>();
 //
