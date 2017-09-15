@@ -1,6 +1,10 @@
 package com.everhomes.rest.pmNotify;
 
 /**
+ * <ul>
+ *     <li>0: 失效</li>
+ *     <li>1: 有效</li>
+ * </ul>
  * Created by ying.xiong on 2017/9/12.
  */
 public enum PmNotifyConfigurationStatus {
