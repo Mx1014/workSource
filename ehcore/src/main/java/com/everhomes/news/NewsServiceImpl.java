@@ -496,7 +496,7 @@ public class NewsServiceImpl implements NewsService {
 
 		// {\"from\":0,\"size\":15,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[],\"should\":[]}}}}}
 		JSONObject json = JSONObject.parseObject(
-				"{\"from\":0,\"size\":0,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[]}}}},\"highlight\":{\"fragment_size\":60,\"number_of_fragments\":8,\"fields\":{\"title\":{},\"content\":{},\"sourceDesc\":{}}}}");
+				"{\"from\":0,\"size\":0,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[]}}}},\"highlight\":{\"fragment_size\":60,\"number_of_fragments\":0,\"fields\":{\"title\":{},\"content\":{},\"sourceDesc\":{}}}}");
 		// 设置from和size
 		json.put("from", from);
 		json.put("size", pageSize + 1);
@@ -529,8 +529,15 @@ public class NewsServiceImpl implements NewsService {
 		if(null != categoryId){
 			must.add(JSONObject.parse("{ \"term\": { \"categoryId\": "+categoryId+"}} "));
 		}
- 
-		
+		//设置高亮
+		JSONObject highLight = json.getJSONObject("highlight");
+		JSONArray preTags = new JSONArray();
+		preTags.add("<span style=\"color:red\">");
+		highLight.put("pre_tags",preTags);
+		JSONArray postTags = new JSONArray();
+		postTags.add("</span>");
+		highLight.put("post_tags",postTags);
+
 		return json.toJSONString();
 	}
 	
@@ -542,7 +549,7 @@ public class NewsServiceImpl implements NewsService {
 		String jsonString = getSearchJson(communityId, userId, namespaceId,categoryId, keyword,tagIds, pageAnchor, pageSize);
  
 		// 需要查询的字段
-		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag,communityIds,visibleType";
+		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag,communityIds,visibleType,tag";
 
 		// 从es查询
 		JSONArray result = searchProvider.query(SearchUtils.NEWS, jsonString, fields);
