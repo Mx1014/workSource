@@ -25,7 +25,7 @@ import java.util.List;
 public class PlaceAnAssetOrderCommand {
     private String clientAppName;
     @ItemType(String.class)
-    private List<String> billIds;
+    private List<BillIdAndAmount> bills;
     private String contactNum;
     private String amountOwed;
     private Long communityId;
@@ -43,8 +43,12 @@ public class PlaceAnAssetOrderCommand {
         this.clientAppName = clientAppName;
     }
 
-    public List<String> getBillIds() {
-        return billIds;
+    public List<BillIdAndAmount> getBills() {
+        return bills;
+    }
+
+    public void setBills(List<BillIdAndAmount> bills) {
+        this.bills = bills;
     }
 
     public String getPayerId() {
@@ -61,10 +65,6 @@ public class PlaceAnAssetOrderCommand {
 
     public void setOpenid(String openid) {
         this.openid = openid;
-    }
-
-    public void setBillIds(List<String> billIds) {
-        this.billIds = billIds;
     }
 
     public String getContactNum() {
