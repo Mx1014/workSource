@@ -819,7 +819,7 @@ public class OrganizationAdminController extends ControllerBase {
 
     /**
      * <b>URL: /admin/org/verifyPersonnelByPhone</b>
-     * <p>删除机构成员</p>
+     * <p>判断成员是否已经存在</p>
      */
     @RequestMapping("verifyPersonnelByPhone")
     @RestReturn(value = OrganizationMemberDTO.class)

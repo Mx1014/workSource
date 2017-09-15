@@ -7,8 +7,10 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
+ * <li>ownerType: ownerType</li>
+ * <li>ownerId: ownerId</li>
  * <li>organizationId: 机构id</li>
- * <li>userId: 用户Id</li>
+ * <li>contactToken: 管理员手机号</li>
  * </ul>
  */
 public class DeleteOrganizationAdminCommand {
@@ -24,8 +26,9 @@ public class DeleteOrganizationAdminCommand {
 
 	@NotNull
 	private String contactToken;
-	
+
 	private Long userId;
+
 	public Long getOrganizationId() {
 		return organizationId;
 	}
@@ -67,9 +70,9 @@ public class DeleteOrganizationAdminCommand {
 	}
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
-    
+
 }
