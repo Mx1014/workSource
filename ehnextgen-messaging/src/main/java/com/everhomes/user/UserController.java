@@ -1337,7 +1337,12 @@ public class UserController extends ControllerBase {
 			WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response, 7000);
 		}
 
-
+		// 当从园区版登录时，有指定的namespaceId，需要对这些用户进行特殊处理
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		if(namespaceId != null) {
+			setCookieInResponse("namespace_id", String.valueOf(namespaceId), request, response);
+			userService.setDefaultCommunity(login.getUserId(), namespaceId);
+		}
 //		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
 //		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
 //		cmdResponse.setContentServer(contentServerService.getContentServer());
