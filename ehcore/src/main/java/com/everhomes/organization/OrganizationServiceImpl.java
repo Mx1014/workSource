@@ -9828,18 +9828,20 @@ public class OrganizationServiceImpl implements OrganizationService {
         //参数不传代表默认操作全部的通讯录隐藏显示
         if (null == contactTokens) {
             List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByOrgId(cmd.getOrganizationId());
-            contactTokens = members.stream().map(r -> {
-                return r.getContactToken();
-            }).collect(Collectors.toList());
+            if(null !=members) {
+                contactTokens = members.stream().map(r -> {
+                    return r.getContactToken();
+                }).collect(Collectors.toList());
+            }
         }
-
-        for (String contactToken : contactTokens) {
-            UpdateOrganizationContactVisibleFlagCommand command = new UpdateOrganizationContactVisibleFlagCommand();
-            command.setVisibleFlag(cmd.getVisibleFlag());
-            command.setOrganizationId(cmd.getOrganizationId());
-            command.setContactToken(contactToken);
-            this.updateOrganizationContactVisibleFlag(command);
-        }
+        if(null != contactTokens)
+            for (String contactToken : contactTokens) {
+                UpdateOrganizationContactVisibleFlagCommand command = new UpdateOrganizationContactVisibleFlagCommand();
+                command.setVisibleFlag(cmd.getVisibleFlag());
+                command.setOrganizationId(cmd.getOrganizationId());
+                command.setContactToken(contactToken);
+                this.updateOrganizationContactVisibleFlag(command);
+            }
     }
 
     @Override
