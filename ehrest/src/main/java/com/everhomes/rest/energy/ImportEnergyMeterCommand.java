@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
  *     <li>ownerId: 组织id</li>
  *     <li>ownerType: 组织类型</li>
  *     <li>communityId: 小区id</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class ImportEnergyMeterCommand {
@@ -16,6 +17,7 @@ public class ImportEnergyMeterCommand {
     @NotNull private Long ownerId;
     @NotNull private String ownerType;
     @NotNull private Long communityId;
+    private Integer namespaceId;
 
     public Long getCommunityId() {
         return communityId;
@@ -40,6 +42,14 @@ public class ImportEnergyMeterCommand {
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {

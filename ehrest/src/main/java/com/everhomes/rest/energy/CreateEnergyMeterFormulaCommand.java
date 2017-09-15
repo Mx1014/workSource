@@ -14,6 +14,7 @@ import javax.validation.constraints.Size;
  *     <li>name: 公式名称</li>
  *     <li>expression: 公式</li>
  *     <li>formulaType: 公式类型 {@link com.everhomes.rest.energy.EnergyFormulaType}</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class CreateEnergyMeterFormulaCommand {
@@ -25,6 +26,7 @@ public class CreateEnergyMeterFormulaCommand {
     @NotNull @Size(max = 255) private String expression;
     @EnumType(EnergyFormulaType.class)
     private Byte formulaType;
+    private Integer namespaceId;
 
 
     public Long getOwnerId() {
@@ -74,6 +76,14 @@ public class CreateEnergyMeterFormulaCommand {
     public void setFormulaType(Byte formulaType) {
         this.formulaType = formulaType;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {

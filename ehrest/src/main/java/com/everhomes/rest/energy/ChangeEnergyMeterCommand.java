@@ -13,6 +13,7 @@ import java.math.BigDecimal;
  *     <li>newReading: 新表读数</li>
  *     <li>maxReading: 新表最大量程</li>
  *     <li>meterId: 表记id</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class ChangeEnergyMeterCommand {
@@ -23,6 +24,7 @@ public class ChangeEnergyMeterCommand {
     @NotNull private BigDecimal newReading;
     private BigDecimal maxReading;
     @NotNull private Long meterId;
+    private Integer namespaceId;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -71,6 +73,14 @@ public class ChangeEnergyMeterCommand {
     public void setMeterId(Long meterId) {
         this.meterId = meterId;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {

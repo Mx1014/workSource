@@ -25,6 +25,7 @@ import java.util.List;
  *     <li>amountFormulaEnd: 用量计算公式结束时间</li>
  *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType} </li>
  *     <li>configId: 价格方案id </li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class BatchUpdateEnergyMeterSettingsCommand {
@@ -53,6 +54,8 @@ public class BatchUpdateEnergyMeterSettingsCommand {
 
     private Byte calculationType;
     private Long configId;
+    
+    private Integer namespaceId;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -181,6 +184,14 @@ public class BatchUpdateEnergyMeterSettingsCommand {
     public void setConfigId(Long configId) {
         this.configId = configId;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {

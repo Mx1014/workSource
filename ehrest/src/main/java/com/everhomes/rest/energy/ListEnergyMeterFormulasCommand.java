@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
  *     <li>ownerType: 公式所属组织类型</li>
  *     <li>communityId: 公式所属园区id</li>
  *     <li>formulaType: 公式类型 {@link com.everhomes.rest.energy.EnergyFormulaType}</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class ListEnergyMeterFormulasCommand {
@@ -18,6 +19,8 @@ public class ListEnergyMeterFormulasCommand {
     @NotNull private String ownerType;
     @NotNull private Long communityId;
     @NotNull private Byte formulaType;
+    
+    private Integer namespaceId;
 
     public Long getCommunityId() {
         return communityId;
@@ -50,6 +53,14 @@ public class ListEnergyMeterFormulasCommand {
     public void setFormulaType(Byte formulaType) {
         this.formulaType = formulaType;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {

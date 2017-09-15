@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
  *     <li>ownerType: 所属组织类型</li>
  *     <li>communityId: 所属园区id</li>
  *     <li>meterType: 表记类型 {@link com.everhomes.rest.energy.EnergyMeterType}</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class ListEnergyDefaultSettingsCommand {
@@ -18,6 +19,7 @@ public class ListEnergyDefaultSettingsCommand {
     @NotNull private String ownerType;
     @NotNull private Long communityId;
     private Byte meterType;
+    private Integer namespaceId;
 
     public Long getCommunityId() {
         return communityId;
@@ -50,6 +52,14 @@ public class ListEnergyDefaultSettingsCommand {
     public void setMeterType(Byte meterType) {
         this.meterType = meterType;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {

@@ -12,6 +12,7 @@ import javax.validation.constraints.Size;
  *     <li>communityId: 分类所属园区id</li>
  *     <li>name: 名称</li>
  *     <li>categoryType: 类型 {@link com.everhomes.rest.energy.EnergyCategoryType}</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class CreateEnergyMeterCategoryCommand {
@@ -21,6 +22,7 @@ public class CreateEnergyMeterCategoryCommand {
     @NotNull private Long communityId;
     @NotNull @Size(max = 255) private String name;
     @NotNull private Byte categoryType;
+    private Integer namespaceId;
 
     public Long getCommunityId() {
         return communityId;
@@ -61,6 +63,14 @@ public class CreateEnergyMeterCategoryCommand {
     public void setCategoryType(Byte categoryType) {
         this.categoryType = categoryType;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {

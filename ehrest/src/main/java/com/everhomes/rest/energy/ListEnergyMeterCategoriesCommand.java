@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
  *     <li>ownerType: 组织类型</li>
  *     <li>communityId: 园区</li>
  *     <li>categoryType: 分类类型 {@link com.everhomes.rest.energy.EnergyCategoryType}</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class ListEnergyMeterCategoriesCommand {
@@ -20,6 +21,8 @@ public class ListEnergyMeterCategoriesCommand {
     @NotNull private Long communityId;
     @EnumType(value = EnergyCategoryType.class)
     @NotNull private Byte categoryType;
+    
+    private Integer namespaceId;
 
     public Long getCommunityId() {
         return communityId;
@@ -52,6 +55,14 @@ public class ListEnergyMeterCategoriesCommand {
     public void setCategoryType(Byte categoryType) {
         this.categoryType = categoryType;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 
     @Override

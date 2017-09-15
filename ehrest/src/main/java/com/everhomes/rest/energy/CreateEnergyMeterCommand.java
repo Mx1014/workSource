@@ -24,6 +24,7 @@ import java.math.BigDecimal;
  *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType}</li>
  *     <li>configId: 价格方案id </li>
  *     <li>ownerType: 所属组织类型</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class CreateEnergyMeterCommand {
@@ -44,6 +45,7 @@ public class CreateEnergyMeterCommand {
     private Byte calculationType;
     private Long configId;
     private String ownerType;
+    private Integer namespaceId;
 
     public Long getCommunityId() {
         return communityId;
@@ -172,8 +174,17 @@ public class CreateEnergyMeterCommand {
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
     }
+    
 
-    @Override
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

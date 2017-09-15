@@ -13,6 +13,7 @@ import javax.validation.constraints.Size;
  *     <li>name: 方案名称</li>
  *     <li>description: 方案说明</li>
  *     <li>expression: 方案表达式，json格式</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class CreateEnergyMeterPriceConfigCommand {
@@ -27,6 +28,8 @@ public class CreateEnergyMeterPriceConfigCommand {
     @NotNull @Size(max = 255) private String name;
     @NotNull @Size(max = 512) private String description;
     @NotNull @Size(max = 1024) private String expression;
+    
+    private Integer namespaceId;
 
     public String getOwnerType() {
         return ownerType;
@@ -75,6 +78,14 @@ public class CreateEnergyMeterPriceConfigCommand {
     public void setExpression(String expression) {
         this.expression = expression;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {

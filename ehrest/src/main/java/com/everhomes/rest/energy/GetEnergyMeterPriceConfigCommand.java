@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *     <li>ownerId: 拥有者id</li>
  *     <li>ownerType: 拥有者类型</li>
  *     <li>communityId: 园区id</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class GetEnergyMeterPriceConfigCommand {
@@ -19,6 +20,8 @@ public class GetEnergyMeterPriceConfigCommand {
     private String ownerType;
 
     private Long ownerId;
+    
+    private Integer namespaceId;
 
     public Long getId() {
         return id;
@@ -51,6 +54,14 @@ public class GetEnergyMeterPriceConfigCommand {
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {
