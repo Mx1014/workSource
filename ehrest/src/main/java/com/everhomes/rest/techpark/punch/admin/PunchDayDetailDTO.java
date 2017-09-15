@@ -2,7 +2,10 @@ package com.everhomes.rest.techpark.punch.admin;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.techpark.punch.PunchLogDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -11,10 +14,12 @@ import com.everhomes.util.StringHelper;
  * <li>userId：用户id</li>
  * <li>userName：用户名称</li>
  * <li>deptName：部门</li>  
+ * <li>punchOrgName：所属规则</li>  
  * <li>punchDate: 打卡日期</li>
  * <li>arriveTime：上班打卡时间</li>
  * <li>leaveTime：下班打卡时间</li>
  * <li>workTime：工作时间</li>
+ * <li>punchCount：打卡次数</li>
  * <li>status：打卡状态{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
  * <li>morningStatus：早上打卡状态{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
  * <li>afternoonStatus：下午打卡状态{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
@@ -24,7 +29,8 @@ import com.everhomes.util.StringHelper;
  * <li>exceptionStatus：状态{@link com.everhomes.rest.techpark.punch.ExceptionStatus}</li>
  * <li>punchTimesPerDay：打卡状态</li> 
  * <li>deviceChangeFlag：设备改变  0-没变 1-改变标红</li> 
- * <li>statuString：状态文字</li> 
+ * <li>statuString：状态文字</li>
+ * <li>punchLogs：打卡记录列表 参照{@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
  * </ul>
  */
 public class PunchDayDetailDTO {
@@ -32,12 +38,14 @@ public class PunchDayDetailDTO {
 	private Long userId;
 	private String userName;
 	private String deptName;   
+	private String punchOrgName;   
 	private Long punchDate;
 	private Long arriveTime;
 	private Long noonLeaveTime;
 	private Long afternoonArriveTime;
 	private Long leaveTime;
 	private Long workTime;
+	private Integer punchCount;
 	private Byte status;
 	private java.lang.Byte morningStatus;
 	private java.lang.Byte afternoonStatus;  
@@ -49,6 +57,8 @@ public class PunchDayDetailDTO {
     private Byte exceptionStatus ;
     private Byte deviceChangeFlag;
     private String statuString;
+	@ItemType(PunchLogDTO.class)
+	private List<PunchLogDTO> punchLogs;
 	public java.lang.Byte getMorningApprovalStatus() {
 		return morningApprovalStatus;
 	}
@@ -223,6 +233,29 @@ public class PunchDayDetailDTO {
 	public void setStatuString(String statuString) {
 		this.statuString = statuString;
 	}
- 
 
+	public String getPunchOrgName() {
+		return punchOrgName;
+	}
+
+	public void setPunchOrgName(String punchOrgName) {
+		this.punchOrgName = punchOrgName;
+	}
+
+	public Integer getPunchCount() {
+		return punchCount;
+	}
+
+	public void setPunchCount(Integer punchCount) {
+		this.punchCount = punchCount;
+	}
+
+
+	public List<PunchLogDTO> getPunchLogs() {
+		return punchLogs;
+	}
+
+	public void setPunchLogs(List<PunchLogDTO> punchLogs) {
+		this.punchLogs = punchLogs;
+	}
 }

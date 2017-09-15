@@ -32,6 +32,7 @@ public class SceneDTO {
     private String sceneType;
     private Byte communityType;
     private Byte status;
+    private Long communityId;
 
     public String getSceneToken() {
         return sceneToken;
@@ -116,5 +117,13 @@ public class SceneDTO {
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 }

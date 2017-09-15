@@ -2,6 +2,7 @@ package com.everhomes.asset;
 
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -92,11 +93,12 @@ public interface AssetService {
 
     void updateBillsToSettled(UpdateBillsToSettled cmd);
 
-    GetAreaAndAddressByContractDTO getAreaAndAddressByContract(FindContractCommand cmd);
+    GetAreaAndAddressByContractDTO getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd);
 
     PaymentBillItems findBillItemById(Long billItemId);
 
     PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
 
     void updateBillSwitchOnTime();
+
 }

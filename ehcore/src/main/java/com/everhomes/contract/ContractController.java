@@ -1,8 +1,12 @@
 // @formatter:off
 package com.everhomes.contract;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.rest.contract.*;
 import com.everhomes.search.ContractSearcher;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,12 +15,16 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
+import javax.servlet.http.HttpServletResponse;
+
 @RestController
 @RequestMapping("/contract")
 public class ContractController extends ControllerBase {
 	
 	@Autowired
-	private ContractService contractService;
+	private ConfigurationProvider configurationProvider;
+//	@Autowired
+//	private ContractService contractService;
 
 	@Autowired
 	private ContractSearcher contractSearcher;
@@ -28,6 +36,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("listContracts")
 	@RestReturn(ListContractsResponse.class)
 	public RestResponse listContracts(ListContractsCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		return new RestResponse(contractService.listContracts(cmd));
 	}
 
@@ -38,6 +48,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("listContractsByOraganizationId")
 	@RestReturn(ListContractsResponse.class)
 	public RestResponse listContractsByOraganizationId(ListContractsByOraganizationIdCommand cmd){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		return new RestResponse(contractService.listContractsByOraganizationId(cmd));
 	}
 
@@ -48,6 +60,12 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("searchContracts")
 	@RestReturn(ListContractsResponse.class)
 	public RestResponse searchContracts(SearchContractCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		if (namespaceId == 999971) {
+			ContractService contractService = getContractService(namespaceId);
+			ListContractsCommand command = ConvertHelper.convert(cmd, ListContractsCommand.class);
+			return new RestResponse(contractService.listContracts(command));
+		}
 		return new RestResponse(contractSearcher.queryContracts(cmd));
 	}
 
@@ -69,6 +87,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("generateContractNumber")
 	@RestReturn(String.class)
 	public RestResponse generateContractNumber(){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		return new RestResponse(contractService.generateContractNumber());
 	}
 
@@ -79,6 +99,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("createContract")
 	@RestReturn(ContractDetailDTO.class)
 	public RestResponse createContract(CreateContractCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		return new RestResponse(contractService.createContract(cmd));
 	}
 
@@ -89,6 +111,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("updateContract")
 	@RestReturn(ContractDTO.class)
 	public RestResponse updateContract(UpdateContractCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		return new RestResponse(contractService.updateContract(cmd));
 	}
 
@@ -99,6 +123,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("deleteContract")
 	@RestReturn(String.class)
 	public RestResponse deleteContract(DeleteContractCommand cmd){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		contractService.deleteContract(cmd);
 		return new RestResponse();
 	}
@@ -110,6 +136,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("denunciationContract")
 	@RestReturn(String.class)
 	public RestResponse denunciationContract(DenunciationContractCommand cmd){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		contractService.denunciationContract(cmd);
 		return new RestResponse();
 	}
@@ -121,6 +149,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("findContract")
 	@RestReturn(ContractDetailDTO.class)
 	public RestResponse findContract(FindContractCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		ContractDetailDTO detail = contractService.findContract(cmd);
 		return new RestResponse(detail);
 	}
@@ -132,6 +162,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("listCustomerContracts")
 	@RestReturn(value = ContractDTO.class, collection = true)
 	public RestResponse listCustomerContracts(ListCustomerContractsCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		return new RestResponse(contractService.listCustomerContracts(cmd));
 	}
 
@@ -142,6 +174,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("listEnterpriseCustomerContracts")
 	@RestReturn(value = ContractDTO.class, collection = true)
 	public RestResponse listEnterpriseCustomerContracts(ListEnterpriseCustomerContractsCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		return new RestResponse(contractService.listEnterpriseCustomerContracts(cmd));
 	}
 
@@ -152,6 +186,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("listIndividualCustomerContracts")
 	@RestReturn(value = ContractDTO.class, collection = true)
 	public RestResponse listIndividualCustomerContracts(ListIndividualCustomerContractsCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		return new RestResponse(contractService.listIndividualCustomerContracts(cmd));
 	}
 
@@ -162,6 +198,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("setContractParam")
 	@RestReturn(String.class)
 	public RestResponse setContractParam(SetContractParamCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		contractService.setContractParam(cmd);
 		return new RestResponse();
 	}
@@ -173,6 +211,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("getContractParam")
 	@RestReturn(ContractParamDTO.class)
 	public RestResponse getContractParam(GetContractParamCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		return new RestResponse(contractService.getContractParam(cmd));
 	}
 
@@ -183,6 +223,8 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("reviewContract")
 	@RestReturn(String.class)
 	public RestResponse reviewContract(ReviewContractCommand cmd){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		contractService.reviewContract(cmd);
 		return new RestResponse();
 	}
@@ -194,7 +236,15 @@ public class ContractController extends ControllerBase {
 	@RequestMapping("entryContract")
 	@RestReturn(String.class)
 	public RestResponse entryContract(EntryContractCommand cmd){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
 		contractService.entryContract(cmd);
 		return new RestResponse();
 	}
+
+	private ContractService getContractService(Integer namespaceId) {
+		String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+		return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
+	}
+
 }

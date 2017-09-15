@@ -89,7 +89,7 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEM_GROUPS)
 				.where(Tables.EH_PORTAL_ITEM_GROUPS.STATUS.eq(PortalItemGroupStatus.ACTIVE.getCode()))
 				.and(Tables.EH_PORTAL_ITEM_GROUPS.LAYOUT_ID.eq(layoutId))
-				.orderBy(Tables.EH_PORTAL_ITEM_GROUPS.ID.asc(),Tables.EH_PORTAL_ITEM_GROUPS.DEFAULT_ORDER.asc())
+				.orderBy(Tables.EH_PORTAL_ITEM_GROUPS.DEFAULT_ORDER.asc(), Tables.EH_PORTAL_ITEM_GROUPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItemGroup.class));
 	}
 	

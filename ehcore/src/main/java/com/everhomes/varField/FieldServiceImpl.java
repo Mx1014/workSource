@@ -1,15 +1,21 @@
 package com.everhomes.varField;
 
+import com.everhomes.customer.CustomerService;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.varField.*;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.SortOrder;
-import jdk.nashorn.internal.ir.ReturnNode;
+import com.everhomes.util.excel.ExcelUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -21,6 +27,8 @@ public class FieldServiceImpl implements FieldService {
 
     @Autowired
     private FieldProvider fieldProvider;
+    @Autowired
+    private CustomerService customerService;
     @Override
     public List<FieldDTO> listFields(ListFieldCommand cmd) {
         List<FieldDTO> dtos = null;
@@ -106,6 +114,197 @@ public class FieldServiceImpl implements FieldService {
 
         return null;
     }
+
+//    @Override
+//    public void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response){
+//        List<FieldGroupDTO> groups = listFieldGroups(cmd);
+//        //先去掉基本信息，建议使用stream的方式
+//        for( int i = 0; i < groups.size(); i++){
+//            FieldGroupDTO group = groups.get(i);
+//            if(group.getGroupDisplayName().equals("基本信息")){
+//                groups.remove(i);
+//            }
+//        }
+//        org.apache.poi.hssf.usermodel.HSSFWorkbook workbook = new HSSFWorkbook();
+//        ExcelUtils excel = new ExcelUtils();
+//
+//        sheetGenerate(groups, workbook, excel);
+//        ServletOutputStream out;
+//        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+//        try {
+//            out = response.getOutputStream();
+//            workbook.write(byteArray);
+//            out.write(byteArray.toByteArray());
+//            out.flush();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if(byteArray!=null){
+//                byteArray = null;
+//            }
+//        }
+//    }
+
+//    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel) {
+//        for( int i = 0; i < groups.size(); i++){
+//            //sheet卡为真的标识
+//            boolean isRealSheet = true;
+//            FieldGroupDTO group = groups.get(i);
+//            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
+//                sheetGenerate(group.getChildrenGroup(),workbook,excel);
+//                //对于有子group的，本身为无效的sheet
+//                isRealSheet = false;
+//            }
+//            if(isRealSheet){
+//                ListFieldCommand cmd1 = new ListFieldCommand();
+//                cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+//                cmd1.setGroupPath(group.getGroupPath());
+//                cmd1.setModuleName(group.getModuleName());
+//                List<FieldDTO> fields = listFields(cmd1);
+//                String headers[] = new String[fields.size()];
+//                //根据每个group获得字段,作为header
+//                for(int j = 0; j < fields.size(); j++){
+//                    FieldDTO field = fields.get(j);
+//                    headers[j] = field.getFieldDisplayName();
+//                }
+//                try {
+//                    excel.exportExcel(workbook,i,group.getGroupDisplayName(),headers,null);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//        return;
+//    }
+//    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Long customerId,Byte customerType) {
+//        for( int i = 0; i < groups.size(); i++){
+//            boolean isRealSheet = true;
+//            FieldGroupDTO group = groups.get(i);
+//            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
+//                sheetGenerate(group.getChildrenGroup(),workbook,excel,customerId,customerType);
+//                isRealSheet = false;
+//            }
+//            if(isRealSheet){
+//                ListFieldCommand cmd1 = new ListFieldCommand();
+//                cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+//                cmd1.setGroupPath(group.getGroupPath());
+//                cmd1.setModuleName(group.getModuleName());
+//                //获取一个sheet中的标题
+//                List<FieldDTO> fields = listFields(cmd1);
+//                String headers[] = new String[fields.size()];
+//                //根据每个group获得字段,作为header
+//                for(int j = 0; j < fields.size(); j++){
+//                    FieldDTO field = fields.get(j);
+//                    headers[j] = field.getFieldDisplayName();
+//                }
+//                //获取一个sheet的数据
+//                List<List<String>> data = getDataOnFields(group,customerId,customerType);
+//                try {
+//                    excel.exportExcel(workbook,i,group.getGroupDisplayName(),headers,data);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//        return;
+//    }
+
+//    private List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType) {
+//        List<List<String>> data = new ArrayList<>();
+//        //使用groupName来对应不同的接口
+//        String sheetName = group.getGroupDisplayName();
+//        switch (sheetName){
+//            case "人才团队信息":
+//                ListCustomerTalentsCommand cmd1 = new ListCustomerTalentsCommand();
+//                cmd1.setCustomerId(customerId);
+//                cmd1.setCustomerType(customerType);
+//                List<CustomerTalentDTO> customerTalentDTOS = customerService.listCustomerTalents(cmd1);
+//                break;
+//            case "知识产权":
+//                ListCustomerTrademarksCommand cmd2 = new ListCustomerTrademarksCommand();
+//                cmd2.setCustomerId(customerId);
+//                cmd2.setCustomerType(customerType);
+//                List<CustomerTrademarkDTO> customerTrademarkDTOS = customerService.listCustomerTrademarks(cmd2);
+//                ListCustomerPatentsCommand cmd3 = new ListCustomerPatentsCommand();
+//                cmd3.setCustomerId(customerId);
+//                cmd3.setCustomerType(customerType);
+//                List<CustomerPatentDTO> customerPatentDTOS = customerService.listCustomerPatents(cmd3);
+//                ListCustomerCertificatesCommand cmd4 = new ListCustomerCertificatesCommand();
+//                cmd4.setCustomerId(customerId);
+//                cmd4.setCustomerType(customerType);
+//                List<CustomerCertificateDTO> customerCertificateDTOS = customerService.listCustomerCertificates(cmd4);
+//                break;
+//            case "申报项目":
+//                ListCustomerApplyProjectsCommand cmd5 = new ListCustomerApplyProjectsCommand();
+//                cmd5.setCustomerId(customerId);
+//                cmd5.setCustomerType(customerType);
+//                List<CustomerApplyProjectDTO> customerApplyProjectDTOS = customerService.listCustomerApplyProjects(cmd5);
+//                break;
+//            case "工商信息":
+//                ListCustomerCommercialsCommand cmd6 = new ListCustomerCommercialsCommand();
+//                cmd6.setCustomerId(customerId);
+//                cmd6.setCustomerType(customerType);
+//                List<CustomerCommercialDTO> customerCommercialDTOS = customerService.listCustomerCommercials(cmd6);
+//                break;
+//            case "投融情况":
+//                ListCustomerInvestmentsCommand cmd7 = new ListCustomerInvestmentsCommand();
+//                cmd7.setCustomerId(customerId);
+//                cmd7.setCustomerType(customerType);
+//                List<CustomerInvestmentDTO> customerInvestmentDTOS = customerService.listCustomerInvestments(cmd7);
+//                break;
+//            case "经济指标":
+//                ListCustomerEconomicIndicatorsCommand cmd8 = new ListCustomerEconomicIndicatorsCommand();
+//                List<CustomerEconomicIndicatorDTO> customerEconomicIndicatorDTOS = customerService.listCustomerEconomicIndicators(cmd8);
+//                break;
+//        }
+//
+//
+//
+//        return data;
+//    }
+
+
+//    @Override
+//    public void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
+//        ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
+//        List<FieldGroupDTO> allGroups = listFieldGroups(cmd1);
+//        List<FieldGroupDTO> groups = new ArrayList<>();
+//
+//        //双重循环寻找target
+//        List<String> includedParentSheetNames = cmd.getIncludedParentSheetNames();
+//        for(int i = 0 ; i < includedParentSheetNames.size(); i ++){
+//            String targetName = includedParentSheetNames.get(i);
+//            for(int j = 0; j < allGroups.size(); j++){
+//                if(allGroups.get(j).getGroupDisplayName()!=null && allGroups.get(j).getGroupDisplayName().equals(targetName)){
+//                    groups.add(allGroups.get(j));
+//                }
+//            }
+//        }
+//
+//        for( int i = 0; i < groups.size(); i++){
+//            FieldGroupDTO group = groups.get(i);
+//            if(group.getGroupDisplayName().equals("基本信息")){
+//                groups.remove(i);
+//            }
+//        }
+//        org.apache.poi.hssf.usermodel.HSSFWorkbook workbook = new HSSFWorkbook();
+//        ExcelUtils excel = new ExcelUtils();
+//        sheetGenerate(groups,workbook,excel,cmd.getCustomerId(),cmd.getCustomerType());
+//        ServletOutputStream out;
+//        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+//        try {
+//            out = response.getOutputStream();
+//            workbook.write(byteArray);
+//            out.write(byteArray.toByteArray());
+//            out.flush();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if(byteArray!=null){
+//                byteArray = null;
+//            }
+//        }
+//    }
 
     @Override
     public List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd) {

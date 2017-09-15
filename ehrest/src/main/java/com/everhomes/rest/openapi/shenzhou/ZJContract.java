@@ -10,6 +10,7 @@ import java.util.List;
  * Created by ying.xiong on 2017/8/14.
  */
 public class ZJContract {
+    private String contracId;
     private String contractNumber;
     private String name;
     private String contractAttribute;
@@ -19,6 +20,14 @@ public class ZJContract {
     private List<BuildingApartmentDTO> apartments;
     private BigDecimal amount;
     private String status;
+
+    public String getContracId() {
+        return contracId;
+    }
+
+    public void setContracId(String contracId) {
+        this.contracId = contracId;
+    }
 
     public BigDecimal getAmount() {
         return amount;

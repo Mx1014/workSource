@@ -1,7 +1,11 @@
 package com.everhomes.rest.techpark.punch.admin;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -11,7 +15,10 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId：id</li>
  * <li>targetType: 填organization/user</li>
  * <li>targetId：对应设置目标的id比如机构比如人的id</li>
+ * <li>punchOriganizationId：打卡考勤组id</li>
  * <li>queryTime: 查询时间 数字时间戳</li>
+ * <li>employees：每一个人的排班{@link PunchSchedulingEmployeeDTO}</li>
+ * <li>timeRules: 上班时间 列表{@link com.everhomes.rest.techpark.punch.PunchTimeRuleDTO}</li>
  * </ul>
  */
 public class ListPunchSchedulingMonthCommand {
@@ -21,10 +28,14 @@ public class ListPunchSchedulingMonthCommand {
 	@NotNull
 	private Long ownerId;
 	private String targetType;
-	private Long targetId;
+	private Long targetId; 
+	private Long punchOriganizationId;
+	private Long queryTime;
 
-	private Long queryTime; 
-
+	@ItemType(PunchTimeRuleDTO.class)
+	private  List<PunchTimeRuleDTO> timeRules;
+	@ItemType(PunchSchedulingEmployeeDTO.class)
+	private List<PunchSchedulingEmployeeDTO> employees;
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
@@ -70,4 +81,27 @@ public class ListPunchSchedulingMonthCommand {
 		this.queryTime = queryTime;
 	}
 
+	public Long getPunchOriganizationId() {
+		return punchOriganizationId;
+	}
+
+	public void setPunchOriganizationId(Long punchOriganizationId) {
+		this.punchOriganizationId = punchOriganizationId;
+	}
+
+	public List<PunchSchedulingEmployeeDTO> getEmployees() {
+		return employees;
+	}
+
+	public void setEmployees(List<PunchSchedulingEmployeeDTO> employees) {
+		this.employees = employees;
+	}
+
+	public List<PunchTimeRuleDTO> getTimeRules() {
+		return timeRules;
+	}
+
+	public void setTimeRules(List<PunchTimeRuleDTO> timeRules) {
+		this.timeRules = timeRules;
+	}
 }

@@ -454,11 +454,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public void createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd){
+	public OrganizationContactDTO createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd){
+		List<OrganizationContactDTO> dtos = new ArrayList<>();
 		dbProvider.execute((TransactionStatus status) -> {
-			createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+			OrganizationContactDTO dto = createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+			dtos.add(dto);
 			return null;
 		});
+		if(dtos.size() > 0){
+			return dtos.get(0);
+		}
+		return null;
 	}
 
 
@@ -1392,14 +1398,20 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 
 	@Override
-	public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId){
+	public OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId){
+		List<OrganizationContactDTO> dtos = new ArrayList<>();
 		dbProvider.execute((TransactionStatus status) -> {
-			createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN);
+			OrganizationContactDTO dto = createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN);
+			dtos.add(dto);
 			return null;
 		});
+		if(dtos.size() > 0){
+			return dtos.get(0);
+		}
+		return null;
 	}
 
-	private void createOrganizationAdmin(Long organizationId, String contactName, String contactToken, Long adminPrivilegeId){
+	private OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName, String contactToken, Long adminPrivilegeId){
 		//创建机构账号，包括注册、把用户添加到公司
 		OrganizationMember member = organizationService.createOrganiztionMemberWithDetailAndUserOrganizationAdmin(organizationId, contactName, contactToken);
 
@@ -1407,12 +1419,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			//分配具体公司管理员权限
 			assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(),"admin", adminPrivilegeId);
 		}
+
+		return processOrganizationContactDTO(member);
 	}
 
 
 	@Override
-	public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd){
-		createOrganizationAdmin(cmd, null);
+	public OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd){
+		return createOrganizationAdmin(cmd, null);
 	}
 
 	@Override
@@ -1498,17 +1512,25 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<OrganizationContactDTO> dtos = new ArrayList<>();
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, OrganizationMemberGroupType.MANAGER.getCode(), targetType);
 		for (OrganizationMember member: members ) {
-			OrganizationContactDTO dto = new OrganizationContactDTO();
-			dto.setNickName(member.getContactName());
-			dto.setGender(member.getGender());
-			dto.setTargetId(member.getTargetId());
-			dto.setContactToken(member.getContactToken());
-			dto.setTargetType(member.getTargetType());
-			dtos.add(dto);
+			dtos.add(processOrganizationContactDTO(member));
 		}
 		return dtos;
 	}
 
+	private OrganizationContactDTO processOrganizationContactDTO(OrganizationMember member){
+		OrganizationContactDTO dto = new OrganizationContactDTO();
+		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+			User user = userProvider.findUserById(member.getTargetId());
+			if(null != user)
+				dto.setNickName(user.getNickName());
+		}
+		dto.setContactName(member.getContactName());
+		dto.setGender(member.getGender());
+		dto.setTargetId(member.getTargetId());
+		dto.setContactToken(member.getContactToken());
+		dto.setTargetType(member.getTargetType());
+		return dto;
+	}
 
 	@Override
 	public List<OrganizationContactDTO> listOrganizationAdministrators(ListServiceModuleAdministratorsCommand cmd) {
