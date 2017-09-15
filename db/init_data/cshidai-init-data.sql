@@ -936,6 +936,9 @@ INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_ur
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
 	VALUES ((@eh_app_id := @eh_app_id+1), '999965', '凯泰C时代', '2', '', '', '移动平台聚合服务，助力园区效能提升');
 
+--更新小站连接
+update eh_configurations SET VALUE = 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&mallId=1999964&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%23%2fmicroshop%2fhome#sign_suffix' WHERE NAME = 'business.url' AND namespace_id = 999965;
+
 -- 仅仅beta执行
 -- set @group_id = 1004280; -- 1042112
 -- set @organization_id = 1024525; -- 1035855
