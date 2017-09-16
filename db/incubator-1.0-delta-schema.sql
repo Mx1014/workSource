@@ -13,6 +13,7 @@ CREATE TABLE `eh_incubator_applies` (
 `charger_phone`  varchar(18) NULL ,
 `charger_email`  varchar(255) NULL ,
 `charger_wechat`  varchar(255) NULL ,
+`approve_user_id`  bigint(22) NULL ,
 `approve_status`  tinyint(4) NULL COMMENT '审批状态，0-待审批，1-拒绝，2-通过' ,
 `approve_time`  datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP ,
 `approve_opinion`  varchar(255) NULL ,
@@ -20,7 +21,7 @@ CREATE TABLE `eh_incubator_applies` (
 PRIMARY KEY (`id`)
 );
 -- 入孵申请项目类型 add by yanjun 20170913
-CREATE TABLE `eh_incubator_project_type` (
+CREATE TABLE `eh_incubator_project_types` (
 `id`  bigint(22) NOT NULL ,
 `uuid`  varchar(128) NOT NULL DEFAULT '' ,
 `name`  varchar(255) NOT NULL ,
