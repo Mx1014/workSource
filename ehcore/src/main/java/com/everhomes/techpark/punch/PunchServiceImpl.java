@@ -6999,7 +6999,7 @@ public class PunchServiceImpl implements PunchService {
 		return calendar.getTimeInMillis()+ruleTime;
 	}
 
-	private long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
+	private Long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
 		if(ptr.getPunchTimesPerDay().intValue() == 2){
 			if (punchType.equals(PunchType.ON_DUTY.getCode())) {
 				return ptr.getStartEarlyTimeLong();
