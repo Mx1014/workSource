@@ -14,6 +14,17 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 
 -- 打卡
+-- 节假日
+
+
+INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1000',NULL,NULL,NULL,'1','2017-10-02','1','2017-09-16 10:50:51',NULL);
+INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1001',NULL,NULL,NULL,'1','2017-10-03','1','2017-09-16 10:50:51',NULL);
+INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1002',NULL,NULL,NULL,'1','2017-10-04','1','2017-09-16 10:50:51',NULL);
+INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1003',NULL,NULL,NULL,'1','2017-10-05','1','2017-09-16 10:50:51',NULL);
+INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1004',NULL,NULL,NULL,'1','2017-10-06','1','2017-09-16 10:50:51',NULL);
+INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1005',NULL,NULL,NULL,'0','2017-09-30','1','2017-09-16 10:50:51','2017-10-05');
+
+
 SET @id =(SELECT MAX(id) FROM eh_locale_templates); 
 INSERT INTO `eh_locale_templates` (`id`,`scope`,`code`,`locale`,`description`,`text`,`namespace_id`)VALUES ((@id:=@id+1),'punch.tool.uri','1','zh_CN','tools跳转uri','zl://attendance/punchClockTool?type=${qrtype}&token=${token}',0); 
 INSERT INTO `eh_locale_templates` (`id`,`scope`,`code`,`locale`,`description`,`text`,`namespace_id`)VALUES ((@id:=@id+1),'punch.excel','1','zh_CN','排班excel说明','${timeRules}休息（只能按现有班次排班，否则无法识别。班次信息可以在管理后台修改）',0); 

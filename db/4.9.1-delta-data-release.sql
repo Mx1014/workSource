@@ -153,9 +153,6 @@ UPDATE `eh_communities` SET namespace_community_token='D6B7C7C4-F469-4979-9624-B
 UPDATE `eh_communities` SET namespace_community_token='7866D7BC-2544-4208-A41E-94ED2A25D2A4' , namespace_community_type = 'shenzhou' WHERE id = '240111044332059779';
 UPDATE `eh_communities` SET namespace_community_token='1C465757-4EAD-47F9-B967-F1A08A2997CC' , namespace_community_type = 'shenzhou' WHERE id = '240111044332059780';
 UPDATE `eh_communities` SET namespace_community_token='4941ABFE-0C36-44B4-BE2D-FDC90178E233' , namespace_community_type = 'shenzhou' WHERE id = '240111044332059781';
-
--- 修改张江高科的app名称
-update eh_app_urls set name='张江高科Upark' where namespace_id='999971';
 -- wentian's script above is end here which is a gorgeous cut-off line
 
 
@@ -296,6 +293,17 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 
 
 -- 打卡3.0 
+-- 节假日
+
+
+INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1000',NULL,NULL,NULL,'1','2017-10-02','1','2017-09-16 10:50:51',NULL);
+INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1001',NULL,NULL,NULL,'1','2017-10-03','1','2017-09-16 10:50:51',NULL);
+INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1002',NULL,NULL,NULL,'1','2017-10-04','1','2017-09-16 10:50:51',NULL);
+INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1003',NULL,NULL,NULL,'1','2017-10-05','1','2017-09-16 10:50:51',NULL);
+INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1004',NULL,NULL,NULL,'1','2017-10-06','1','2017-09-16 10:50:51',NULL);
+INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1005',NULL,NULL,NULL,'0','2017-09-30','1','2017-09-16 10:50:51','2017-10-05');
+
+
 -- 打卡
 SET @id =(SELECT MAX(id) FROM eh_locale_templates); 
 INSERT INTO `eh_locale_templates` (`id`,`scope`,`code`,`locale`,`description`,`text`,`namespace_id`)VALUES ((@id:=@id+1),'punch.tool.uri','1','zh_CN','tools跳转uri','zl://attendance/punchClockTool?type=${qrtype}&token=${token}',0); 
