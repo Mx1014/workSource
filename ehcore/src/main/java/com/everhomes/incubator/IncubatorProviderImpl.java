@@ -16,11 +16,13 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class IncubatorProviderImpl implements IncubatorProvider {
 
     @Autowired
