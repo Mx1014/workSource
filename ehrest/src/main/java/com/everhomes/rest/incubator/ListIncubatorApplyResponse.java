@@ -7,21 +7,32 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>dtos: dtos {@link com.everhomes.rest.incubator.IncubatorDTO}</li>
+ *     <li>dtos: dtos {@link IncubatorApplyDTO}</li>
+ *     <li>nextPageOffset: 下页页码</li>
  * </ul>
  */
-public class ListIncubatorResponse {
+public class ListIncubatorApplyResponse {
 
 
-	@ItemType(IncubatorDTO.class)
-	private List<IncubatorDTO> dtos;
+	@ItemType(IncubatorApplyDTO.class)
+	private List<IncubatorApplyDTO> dtos;
 
-	public List<IncubatorDTO> getDtos() {
+	private Integer nextPageOffset;
+
+	public List<IncubatorApplyDTO> getDtos() {
 		return dtos;
 	}
 
-	public void setDtos(List<IncubatorDTO> dtos) {
+	public void setDtos(List<IncubatorApplyDTO> dtos) {
 		this.dtos = dtos;
+	}
+
+	public Integer getNextPageOffset() {
+		return nextPageOffset;
+	}
+
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
 	}
 
 	@Override

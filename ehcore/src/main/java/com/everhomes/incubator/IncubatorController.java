@@ -6,27 +6,28 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.incubator.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestDoc(value = "Incubator Controller", site = "core")
 @RestController
 @RequestMapping("/incubator")
 public class IncubatorController extends ControllerBase {
 
+    @Autowired
+    IncubatorService incubatorService;
 
 	/**
-     * <b>URL: /incubator/listIncubator</b>
+     * <b>URL: /incubator/listIncubatorApply</b>
      * <p>查询入孵申请的记录</p>
      */
-    @RequestMapping("listIncubator")
-    @RestReturn(value=ListIncubatorResponse.class, collection = true)
-    public RestResponse listIncubator(ListIncubatorCommand cmd) {
-    	
+    @RequestMapping("listIncubatorApply")
+    @RestReturn(value=ListIncubatorApplyResponse.class, collection = true)
+    public RestResponse listIncubatorApply(ListIncubatorApplyCommand cmd) {
 
-        RestResponse response = new RestResponse(null);
+        ListIncubatorApplyResponse list = incubatorService.listIncubatorApply(cmd);
+        RestResponse response = new RestResponse(list);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -40,22 +41,23 @@ public class IncubatorController extends ControllerBase {
     @RestReturn(value=ListIncubatorProjectTypeResponse.class, collection = true)
     public RestResponse listIncubatorProject() {
 
+        ListIncubatorProjectTypeResponse list = incubatorService.listIncubatorProject();
 
-        RestResponse response = new RestResponse(null);
+        RestResponse response = new RestResponse(list);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
 
     /**
-     * <b>URL: /incubator/addIncubator</b>
+     * <b>URL: /incubator/addIncubatorApply</b>
      * <p>入孵申请</p>
      */
-    @RequestMapping("addIncubator")
-    @RestReturn(value=IncubatorDTO.class)
-    public RestResponse addIncubator(AddIncubatorCommand cmd) {
+    @RequestMapping("addIncubatorApply")
+    @RestReturn(value=IncubatorApplyDTO.class)
+    public RestResponse addIncubatorApply(AddIncubatorApplyCommand cmd) {
 
-        IncubatorDTO dto = null;
+        IncubatorApplyDTO dto = incubatorService.addIncubatorApply(cmd);
         
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -64,14 +66,28 @@ public class IncubatorController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /incubator/approveIncubator</b>
+     * <b>URL: /incubator/approveIncubatorApply</b>
      * <p>审批入孵申请</p>
      */
-    @RequestMapping("approveIncubator")
+    @RequestMapping("approveIncubatorApply")
     @RestReturn(value=String.class)
-    public RestResponse approveIncubator(ApproveIncubatorCommand cmd) {
-    	
+    public RestResponse approveIncubatorApply(ApproveIncubatorApplyCommand cmd) {
+    	incubatorService.approveIncubatorApply(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /incubator/findIncubatorApply</b>
+     * <p>获取申请详情</p>
+     */
+    @RequestMapping("findIncubatorApply")
+    @RestReturn(value=IncubatorApplyDTO.class)
+    public RestResponse findIncubatorApplyById(FindIncubatorApplyCommand cmd){
+        IncubatorApplyDTO dto = incubatorService.findIncubatorApplyById(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

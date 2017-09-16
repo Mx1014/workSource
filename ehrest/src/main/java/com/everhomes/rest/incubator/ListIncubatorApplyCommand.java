@@ -9,12 +9,12 @@ import com.everhomes.util.StringHelper;
  *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过</li>
  *     <li>needReject: 是否需要查询拒绝的数据 0-否，1-是，默认为1查询</li>
  *     <li>keyWord: keyWord</li>
- *     <li>nextPageAnchor: nextPageAnchor</li>
+ *     <li>pageOffset: 页码</li>
  *     <li>pageSize: 数量</li>
  *     <li>orderBy: 排序方式，0-创建时间，1-审核时间</li>
  * </ul>
  */
-public class ListIncubatorCommand {
+public class ListIncubatorApplyCommand {
 
 
 	private Integer namespaceId;
@@ -22,7 +22,7 @@ public class ListIncubatorCommand {
 	private Byte approveStatus;
 	private Byte needReject;
 	private String keyWord;
-	private Long nextPageAnchor;
+	private Integer pageOffset;
 	private Integer pageSize;
 	private Byte orderBy;
 
@@ -58,12 +58,12 @@ public class ListIncubatorCommand {
 		this.needReject = needReject;
 	}
 
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	public Integer getPageOffset() {
+		return pageOffset;
 	}
 
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setPageOffset(Integer pageOffset) {
+		this.pageOffset = pageOffset;
 	}
 
 	public Integer getPageSize() {

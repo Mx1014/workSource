@@ -18,13 +18,15 @@ import java.sql.Timestamp;
  *     <li>chargerPhone: chargerPhone</li>
  *     <li>chargerEmail: chargerEmail</li>
  *     <li>chargerWechat: chargerWechat</li>
+ *     <li>approveUserId: approveUserId</li>
+ *     <li>approveUserName: approveUserName</li>
  *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过</li>
  *     <li>approveTime: approveTime</li>
  *     <li>approveOpinion: approveOpinion</li>
  *     <li>createTime: createTime</li>
  * </ul>
  */
-public class IncubatorDTO {
+public class IncubatorApplyDTO {
 
 	Long id;
 	Integer namespaceId;
@@ -38,6 +40,8 @@ public class IncubatorDTO {
 	String chargerPhone;
 	String chargerEmail;
 	String chargerWechat;
+	Long approveUserId;
+	String approveUserName;
 	String approveStatus;
 	Timestamp approveTime;
 	String approveOpinion;
@@ -121,6 +125,22 @@ public class IncubatorDTO {
 
 	public void setChargerWechat(String chargerWechat) {
 		this.chargerWechat = chargerWechat;
+	}
+
+	public Long getApproveUserId() {
+		return approveUserId;
+	}
+
+	public void setApproveUserId(Long approveUserId) {
+		this.approveUserId = approveUserId;
+	}
+
+	public String getApproveUserName() {
+		return approveUserName;
+	}
+
+	public void setApproveUserName(String approveUserName) {
+		this.approveUserName = approveUserName;
 	}
 
 	public String getApproveStatus() {

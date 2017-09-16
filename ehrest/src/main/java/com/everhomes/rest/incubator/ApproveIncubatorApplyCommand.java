@@ -4,14 +4,24 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *     <li>applyId: applyId</li>
  *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过</li>
  *     <li>approveOpinion: approveOpinion</li>
  * </ul>
  */
-public class ApproveIncubatorCommand {
+public class ApproveIncubatorApplyCommand {
 
+    private Long applyId;
     private Byte approveStatus;
     private String approveOpinion;
+
+    public Long getApplyId() {
+        return applyId;
+    }
+
+    public void setApplyId(Long applyId) {
+        this.applyId = applyId;
+    }
 
     public Byte getApproveStatus() {
         return approveStatus;

@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  *     <li>chargerWechat: chargerWechat</li>
  * </ul>
  */
-public class AddIncubatorCommand {
+public class AddIncubatorApplyCommand {
 
 	Integer namespaceId;
 	String teamName;
