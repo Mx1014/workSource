@@ -42,7 +42,7 @@ public class IncubatorApplyDTO {
 	String chargerWechat;
 	Long approveUserId;
 	String approveUserName;
-	String approveStatus;
+	Byte approveStatus;
 	Timestamp approveTime;
 	String approveOpinion;
 	Timestamp createTime;
@@ -143,11 +143,11 @@ public class IncubatorApplyDTO {
 		this.approveUserName = approveUserName;
 	}
 
-	public String getApproveStatus() {
+	public Byte getApproveStatus() {
 		return approveStatus;
 	}
 
-	public void setApproveStatus(String approveStatus) {
+	public void setApproveStatus(Byte approveStatus) {
 		this.approveStatus = approveStatus;
 	}
 

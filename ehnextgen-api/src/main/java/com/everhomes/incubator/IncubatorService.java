@@ -6,11 +6,11 @@ import com.everhomes.rest.incubator.*;
 public interface IncubatorService {
 	ListIncubatorApplyResponse listIncubatorApply(ListIncubatorApplyCommand cmd);
 
-	ListIncubatorProjectTypeResponse listIncubatorProject();
+	ListIncubatorProjectTypeResponse listIncubatorProjectType();
 
 	IncubatorApplyDTO addIncubatorApply(AddIncubatorApplyCommand cmd);
 
 	void approveIncubatorApply(ApproveIncubatorApplyCommand cmd);
 
-	IncubatorApplyDTO findIncubatorApplyById(FindIncubatorApplyCommand cmd);
+	IncubatorApplyDTO findIncubatorApply(FindIncubatorApplyCommand cmd);
 }

@@ -85,7 +85,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 	}
 
 	@Override
-	public ListIncubatorProjectTypeResponse listIncubatorProject() {
+	public ListIncubatorProjectTypeResponse listIncubatorProjectType() {
 		List<IncubatorProjectType> list = incubatorProvider.listIncubatorProjectType();
 		List<IncubatorProjectTypeDTO> dtos = new ArrayList<>();
 		if(list != null){
@@ -113,11 +113,10 @@ public class IncubatorServiceImpl implements IncubatorService {
 
 	@Override
 	public void approveIncubatorApply(ApproveIncubatorApplyCommand cmd) {
-		User user = UserContext.current().getUser();
 		IncubatorApply incubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getApplyId());
-		Community community = communityProvider.findCommunityById(user.getCommunityId());
-		CommunityGeoPoint communityGeoPoint = communityProvider.findCommunityGeoPointByCommunityId(user.getCommunityId());
-		incubatorApply.setApplyUserId(user.getId());
+		User applyUser = userProvider.findUserById(incubatorApply.getApplyUserId());
+		Community community = communityProvider.findCommunityById(applyUser.getCommunityId());
+		CommunityGeoPoint communityGeoPoint = communityProvider.findCommunityGeoPointByCommunityId(applyUser.getCommunityId());
 		incubatorApply.setApproveStatus(cmd.getApproveStatus());
 		incubatorApply.setApproveOpinion(cmd.getApproveOpinion());
 		incubatorApply.setApproveTime(new Timestamp(System.currentTimeMillis()));
@@ -140,8 +139,8 @@ public class IncubatorServiceImpl implements IncubatorService {
 				//3、添加当前用户为管理员
 				CreateOrganizationAdminCommand adminCommand = new CreateOrganizationAdminCommand();
 				adminCommand.setOrganizationId(organizationDTO.getId());
-				adminCommand.setContactToken(user.getIdentifierToken());
-				adminCommand.setContactName(user.getNickName());
+				adminCommand.setContactToken(applyUser.getIdentifierToken());
+				adminCommand.setContactName(applyUser.getNickName());
 				rolePrivilegeService.createOrganizationAdmin(adminCommand);
 
 				return null;
@@ -152,7 +151,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 	}
 
 	@Override
-	public IncubatorApplyDTO findIncubatorApplyById(FindIncubatorApplyCommand cmd) {
+	public IncubatorApplyDTO findIncubatorApply(FindIncubatorApplyCommand cmd) {
 		Assert.notNull(cmd.getId());
 		IncubatorApply incubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getId());
 		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApply, IncubatorApplyDTO.class);

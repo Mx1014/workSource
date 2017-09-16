@@ -37,14 +37,14 @@ public class IncubatorController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /incubator/listIncubatorProject</b>
+     * <b>URL: /incubator/listIncubatorProjectType</b>
      * <p>获取入孵申请的项目类型</p>
      */
-    @RequestMapping("listIncubatorProject")
+    @RequestMapping("listIncubatorProjectType")
     @RestReturn(value=ListIncubatorProjectTypeResponse.class, collection = true)
-    public RestResponse listIncubatorProject() {
+    public RestResponse listIncubatorProjectType() {
 
-        ListIncubatorProjectTypeResponse list = incubatorService.listIncubatorProject();
+        ListIncubatorProjectTypeResponse list = incubatorService.listIncubatorProjectType();
 
         RestResponse response = new RestResponse(list);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -89,8 +89,8 @@ public class IncubatorController extends ControllerBase {
      */
     @RequestMapping("findIncubatorApply")
     @RestReturn(value=IncubatorApplyDTO.class)
-    public RestResponse findIncubatorApplyById(FindIncubatorApplyCommand cmd){
-        IncubatorApplyDTO dto = incubatorService.findIncubatorApplyById(cmd);
+    public RestResponse findIncubatorApply(FindIncubatorApplyCommand cmd){
+        IncubatorApplyDTO dto = incubatorService.findIncubatorApply(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

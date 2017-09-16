@@ -293,4 +293,15 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
     VALUES ((@pad_items_id := @pad_items_id + 1), 999964, 0, 0, 0, '/home', 'Bizs', '机构信息发布', '机构信息发布', 'cs://1/image/aW1hZ2UvTVRveU16STJOekprTURGalpUWmlZVFJtWWpsaVpqaG1OV05pTmpBek1tSXhNUQ', 1, 1, 33, CONCAT('{"type":',@categories_id,',"parentId":',@categories_id,',"displayType": "list"}'), 80, 0, 1, 0, '', 0, NULL, NULL, NULL, 1, 'park_tourist', 0, NULL, 30, NULL);
 
 
+-- 初始化 项目类型
+INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) VALUES ('1', '', '互联网金融', NOW());
+INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) VALUES ('2', '', '医疗健康', NOW());
+INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) VALUES ('3', '', '智能硬件', NOW());
+INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) VALUES ('4', '', '电子商务', NOW());
+INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) VALUES ('5', '', '生活服务', NOW());
+INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) VALUES ('6', '', '企业服务', NOW());
+INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) VALUES ('7', '', '游戏娱乐社交', NOW());
+INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) VALUES ('8', '', '旅游户外', NOW());
+INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) VALUES ('9', '', '教育', NOW());
+INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) VALUES ('10', '', '其他', NOW());
 
