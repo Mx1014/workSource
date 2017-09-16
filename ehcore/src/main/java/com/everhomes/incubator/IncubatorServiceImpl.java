@@ -12,9 +12,11 @@ import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.incubator.*;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,6 +117,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 	public void approveIncubatorApply(ApproveIncubatorApplyCommand cmd) {
 		IncubatorApply incubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getApplyId());
 		User applyUser = userProvider.findUserById(incubatorApply.getApplyUserId());
+		UserIdentifier applyIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(applyUser.getId(), IdentifierType.MOBILE.getCode());
 		Community community = communityProvider.findCommunityById(applyUser.getCommunityId());
 		CommunityGeoPoint communityGeoPoint = communityProvider.findCommunityGeoPointByCommunityId(applyUser.getCommunityId());
 		incubatorApply.setApproveStatus(cmd.getApproveStatus());
@@ -139,7 +142,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 				//3、添加当前用户为管理员
 				CreateOrganizationAdminCommand adminCommand = new CreateOrganizationAdminCommand();
 				adminCommand.setOrganizationId(organizationDTO.getId());
-				adminCommand.setContactToken(applyUser.getIdentifierToken());
+				adminCommand.setContactToken(applyIdentifier.getIdentifierToken());
 				adminCommand.setContactName(applyUser.getNickName());
 				rolePrivilegeService.createOrganizationAdmin(adminCommand);
 
