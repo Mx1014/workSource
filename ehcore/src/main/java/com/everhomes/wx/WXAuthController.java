@@ -301,9 +301,9 @@ public class WXAuthController {// extends ControllerBase
             }
 
             redirectByWx(response, url);
+        }else {
+            LOGGER.info("checkUserIdentifier success");
         }
-
-        LOGGER.info("checkUserIdentifier success");
 
     }
 	
