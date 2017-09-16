@@ -123,6 +123,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 		incubatorApply.setApproveStatus(cmd.getApproveStatus());
 		incubatorApply.setApproveOpinion(cmd.getApproveOpinion());
 		incubatorApply.setApproveTime(new Timestamp(System.currentTimeMillis()));
+		incubatorApply.setApproveUserId(UserContext.currentUserId());
 
 		if(cmd.getApproveStatus().byteValue() == ApproveStatus.AGREE.getCode()){
 			dbProvider.execute((TransactionStatus status) -> {
