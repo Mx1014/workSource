@@ -278,9 +278,15 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     });
 
                     break;
-                case USER:
-                    LOGGER.info("processPmNotifyRecord ReceiverType: USER");
-                    userIds.addAll(receiver.getReceiverIds());
+                case ORGANIZATION_MEMBER:
+                    LOGGER.info("processPmNotifyRecord ReceiverType: ORGANIZATION_MEMBER");
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByIds(receiver.getReceiverIds());
+                    if(members != null && members.size() > 0) {
+                        members.forEach(member -> {
+                            userIds.add(member.getTargetId());
+                        });
+                    }
+
                     break;
                 default:
                     break;
