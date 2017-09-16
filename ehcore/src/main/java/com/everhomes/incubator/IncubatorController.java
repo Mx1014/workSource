@@ -1,11 +1,14 @@
 package com.everhomes.incubator;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.incubator.*;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -72,7 +75,8 @@ public class IncubatorController extends ControllerBase {
     @RequestMapping("approveIncubatorApply")
     @RestReturn(value=String.class)
     public RestResponse approveIncubatorApply(ApproveIncubatorApplyCommand cmd) {
-    	incubatorService.approveIncubatorApply(cmd);
+
+        incubatorService.approveIncubatorApply(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -1,8 +1,17 @@
 package com.everhomes.incubator;
 
 
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityGeoPoint;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.incubator.*;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -10,6 +19,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.Assert;
 
 import java.sql.Timestamp;
@@ -24,8 +34,18 @@ public class IncubatorServiceImpl implements IncubatorService {
 	@Autowired
 	UserProvider userProvider;
 	@Autowired
+	OrganizationService organizationService;
+
+	@Autowired
+	private DbProvider dbProvider;
+
+	@Autowired
 	private ConfigurationProvider configProvider;
 
+	@Autowired
+	private CommunityProvider communityProvider;
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 	@Override
 	public ListIncubatorApplyResponse listIncubatorApply(ListIncubatorApplyCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId();
@@ -84,6 +104,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 		IncubatorApply incubatorApply = ConvertHelper.convert(cmd, IncubatorApply.class);
 		User user = UserContext.current().getUser();
 		incubatorApply.setApplyUserId(user.getId());
+		incubatorApply.setApproveStatus(ApproveStatus.WAIT.getCode());
 		incubatorProvider.createIncubatorApply(incubatorApply);
 		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApply, IncubatorApplyDTO.class);
 		populateApproveUserName(dto);
@@ -94,11 +115,40 @@ public class IncubatorServiceImpl implements IncubatorService {
 	public void approveIncubatorApply(ApproveIncubatorApplyCommand cmd) {
 		User user = UserContext.current().getUser();
 		IncubatorApply incubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getApplyId());
+		Community community = communityProvider.findCommunityById(user.getCommunityId());
+		CommunityGeoPoint communityGeoPoint = communityProvider.findCommunityGeoPointByCommunityId(user.getCommunityId());
 		incubatorApply.setApplyUserId(user.getId());
 		incubatorApply.setApproveStatus(cmd.getApproveStatus());
 		incubatorApply.setApproveOpinion(cmd.getApproveOpinion());
 		incubatorApply.setApproveTime(new Timestamp(System.currentTimeMillis()));
-		incubatorProvider.updateIncubatorApply(incubatorApply);
+
+		if(cmd.getApproveStatus().byteValue() == ApproveStatus.AGREE.getCode()){
+			dbProvider.execute((TransactionStatus status) -> {
+				//1、更新申请记录为成功
+				incubatorProvider.updateIncubatorApply(incubatorApply);
+
+				//2、创建公司
+				CreateEnterpriseCommand enterpriseCmd = new CreateEnterpriseCommand();
+				enterpriseCmd.setName(incubatorApply.getTeamName());
+				enterpriseCmd.setNamespaceId(incubatorApply.getNamespaceId());
+				enterpriseCmd.setCommunityId(community.getId());
+				enterpriseCmd.setAddress(community.getAddress());
+				enterpriseCmd.setLatitude(String.valueOf(communityGeoPoint.getLatitude()));
+				enterpriseCmd.setLongitude(String.valueOf(communityGeoPoint.getLongitude()));
+				OrganizationDTO  organizationDTO = organizationService.createEnterprise(enterpriseCmd);
+
+				//3、添加当前用户为管理员
+				CreateOrganizationAdminCommand adminCommand = new CreateOrganizationAdminCommand();
+				adminCommand.setOrganizationId(organizationDTO.getId());
+				adminCommand.setContactToken(user.getIdentifierToken());
+				adminCommand.setContactName(user.getNickName());
+				rolePrivilegeService.createOrganizationAdmin(adminCommand);
+
+				return null;
+			});
+		}else {
+			incubatorProvider.updateIncubatorApply(incubatorApply);
+		}
 	}
 
 	@Override

@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>namespaceId: namespaceId</li>
  *     <li>applyUserId: 申请人的uid</li>
- *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过</li>
+ *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过 参考 {@link ApproveStatus}</li>
  *     <li>needReject: 是否需要查询拒绝的数据 0-否，1-是，默认为1查询</li>
  *     <li>keyWord: keyWord</li>
  *     <li>pageOffset: 页码</li>

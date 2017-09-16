@@ -20,7 +20,7 @@ import java.sql.Timestamp;
  *     <li>chargerWechat: chargerWechat</li>
  *     <li>approveUserId: approveUserId</li>
  *     <li>approveUserName: approveUserName</li>
- *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过</li>
+ *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过 参考 {@link ApproveStatus}</li>
  *     <li>approveTime: approveTime</li>
  *     <li>approveOpinion: approveOpinion</li>
  *     <li>createTime: createTime</li>

@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>applyId: applyId</li>
- *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过</li>
+ *     <li>approveStatus: 审批状态，0-待审批，1-拒绝，2-通过 参考 {@link ApproveStatus}</li>
  *     <li>approveOpinion: approveOpinion</li>
  * </ul>
  */
