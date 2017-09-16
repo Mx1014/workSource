@@ -2327,6 +2327,9 @@ public class PunchServiceImpl implements PunchService {
             //如果为节假日则返回null  如果是节假调休日,用调休日期代替
             java.sql.Date punchDate = new java.sql.Date(date.getTime());
             punchDate = checkHoliday(pr,punchDate);
+			if (punchDate == null) {
+				return null;
+			}
 			//看是循环timerule找当天的timeRule
 			List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId());
 			if(null != timeRules)
