@@ -15,7 +15,7 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 -- 打卡
 -- 节假日
-
+DELETE FROM eh_punch_holidays;
 
 INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1000',NULL,NULL,NULL,'1','2017-10-02','1','2017-09-16 10:50:51',NULL);
 INSERT INTO `eh_punch_holidays` (`id`, `owner_type`, `owner_id`, `workday_rule_id`, `status`, `rule_date`, `creator_uid`, `create_time`, `exchange_from_date`) VALUES('1001',NULL,NULL,NULL,'1','2017-10-03','1','2017-09-16 10:50:51',NULL);
