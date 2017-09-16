@@ -1176,6 +1176,12 @@ UPDATE eh_configurations set `value` = '0306F2' where `name` = 'parking.mybay.pw
 update eh_configurations set value = '[{"typeId":"11", "typeName":"VIP月卡"},{"typeId":"5", "typeName":"普通月卡"}]' where name = 'parking.xiaomao.types.10011';
 update eh_configurations set value = '[{"typeId":"02", "typeName":"VIP月卡"}]' where name = 'parking.xiaomao.types.10012';
 
+-- by  邓爽，活动配置修正 20170914
+update eh_launch_pad_items SET categry_name = '创业服务' WHERE item_label = '创业活动' AND item_group = 'Bizs' AND item_location = '/home' AND namespace_id = 999966;
+update eh_launch_pad_items SET action_data = '{"categoryId":3,"publishPrivilege":1,"livePrivilege":2,"listStyle":2,"scope":3,"style":4}' WHERE item_label = '创业活动' AND namespace_id = 999966;
+update eh_activity_categories SET `status` = 2 AND parent_id = 3 WHERE id = 1003;
+
+
 -- 修改深圳湾报修配置 add by sw 20170915
 SET @namespace_id=999966;
 SET @parent_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
