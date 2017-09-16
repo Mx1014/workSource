@@ -4305,14 +4305,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 							});
 							dto.setReceivers(dtoReceivers);
 						}
-					} else if(PmNotifyReceiverType.USER.equals(PmNotifyReceiverType.fromCode(receiver.getReceiverType()))) {
-						List<User> users = userProvider.listUserByIds(namespaceId, receiver.getReceiverIds());
-						if(users != null && users.size() > 0) {
+					} else if(PmNotifyReceiverType.ORGANIZATION_MEMBER.equals(PmNotifyReceiverType.fromCode(receiver.getReceiverType()))) {
+						List<OrganizationMember> members = organizationProvider.listOrganizationMembersByIds(receiver.getReceiverIds());
+						if(members != null && members.size() > 0) {
 							List<ReceiverName> dtoReceivers = new ArrayList<ReceiverName>();
-							users.forEach(user -> {
+							members.forEach(member -> {
 								ReceiverName receiverName = new ReceiverName();
-								receiverName.setId(user.getId());
-								receiverName.setName(user.getNickName());
+								receiverName.setId(member.getId());
+								receiverName.setName(member.getContactName());
 								dtoReceivers.add(receiverName);
 							});
 							dto.setReceivers(dtoReceivers);

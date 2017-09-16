@@ -478,5 +478,6 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType);
  
 	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
- 
+
+	List<OrganizationMember> listOrganizationMembersByIds(List<Long> ids);
 }
