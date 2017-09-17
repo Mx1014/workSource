@@ -10,7 +10,7 @@ package com.everhomes.rest.pmNotify;
  * Created by ying.xiong on 2017/9/12.
  */
 public enum PmNotifyReceiverType {
-    EXECUTOR((byte)0), REVIEWER((byte)1), ORGANIZATION((byte)2), USER((byte)3);
+    EXECUTOR((byte)0), REVIEWER((byte)1), ORGANIZATION((byte)2), ORGANIZATION_MEMBER((byte)3);
 
     private byte code;
 

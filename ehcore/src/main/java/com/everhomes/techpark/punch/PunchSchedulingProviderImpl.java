@@ -237,4 +237,18 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 		step.execute();
 
 	}
+
+	@Override
+	public void deletePunchSchedulingByOwnerIdAndTarget(Long ownerId, Long detailId) {
+
+
+		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchSchedulingsRecord> step = context.delete(Tables.EH_PUNCH_SCHEDULINGS);
+		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.eq(detailId)
+				.and(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.equal(ownerId)) ;
+		step.where(condition);
+		LOGGER.debug(step.toString());
+		step.execute();
+
+	}
 }
