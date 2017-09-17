@@ -13,13 +13,13 @@ package com.everhomes.rest.archives;
  * <li>OTHER("其他"): 其他</li>
  * </ul>
  */
-public enum DismissReason {
+public enum ArchivesDismissReason {
     SALARY("薪资"), CULTURE("文化"), BALANCE("生活平衡"), PERSONALREASON("个人原因"), CAREERDEVELOPMENT("职业发展"),
     FIRE("不胜任"), ADJUSTMENT("编制调整"), BREAKRULE("违纪"), OTHER("其他");
 
     private String code;
 
-    private DismissReason(String code) {
+    private ArchivesDismissReason(String code) {
         this.code = code;
     }
 
@@ -27,10 +27,10 @@ public enum DismissReason {
         return this.code;
     }
 
-    public static DismissReason fromCode(String code) {
+    public static ArchivesDismissReason fromCode(String code) {
         if (code != null) {
-            DismissReason[] values = DismissReason.values();
-            for (DismissReason value : values) {
+            ArchivesDismissReason[] values = ArchivesDismissReason.values();
+            for (ArchivesDismissReason value : values) {
                 if (code.equals(value.code)) {
                     return value;
                 }

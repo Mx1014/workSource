@@ -1,6 +1,5 @@
 package com.everhomes.rest.archives;
 
-import com.everhomes.rest.servicehotline.LayoutType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -10,11 +9,11 @@ import com.everhomes.util.StringHelper;
  * <li>OTHER((byte) 3): 其它</li>
  * </ul>
  */
-public enum DismissType {
+public enum ArchivesDismissType {
     QUIT((byte) 1), FIRE((byte) 2), OTHER((byte) 3);
     private Byte code;
 
-    private DismissType(Byte code) {
+    private ArchivesDismissType(Byte code) {
         this.code = code;
     }
 
@@ -27,9 +26,9 @@ public enum DismissType {
         return StringHelper.toJsonString(this);
     }
 
-    public static LayoutType fromCode(Byte code) {
+    public static ArchivesDismissType fromCode(Byte code) {
         if (code != null) {
-            for (LayoutType a : LayoutType.values()) {
+            for (ArchivesDismissType a : ArchivesDismissType.values()) {
                 if (code.byteValue() == a.getCode().byteValue()) {
                     return a;
                 }

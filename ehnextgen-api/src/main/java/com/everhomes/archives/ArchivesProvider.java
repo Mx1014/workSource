@@ -27,4 +27,8 @@ public interface ArchivesProvider {
     void updateArchivesForm(ArchivesFroms form);
 
     ArchivesFroms findArchivesFormOriginId(Integer namespaceId, Long organizationId);
+
+    void createArchivesConfigurations(ArchivesConfigurations configuration);
+
+    void updateArchivesConfigurations(ArchivesConfigurations configuration);
 }

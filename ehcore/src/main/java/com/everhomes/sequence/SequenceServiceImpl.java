@@ -37,6 +37,7 @@ import com.everhomes.server.schema.tables.pojos.EhApprovalRequests;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRuleFlowMap;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRules;
 import com.everhomes.server.schema.tables.pojos.EhApprovalTimeRanges;
+import com.everhomes.server.schema.tables.pojos.EhArchivesConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhArchivesDismissEmployees;
 import com.everhomes.server.schema.tables.pojos.EhArchivesForms;
 import com.everhomes.server.schema.tables.pojos.EhArchivesStickyContacts;
@@ -2179,6 +2180,10 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhArchivesForms.class, Tables.EH_ARCHIVES_FORMS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ARCHIVES_FORMS.ID.max()).from(Tables.EH_ARCHIVES_FORMS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhArchivesConfigurations.class, Tables.EH_ARCHIVES_CONFIGURATIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ARCHIVES_CONFIGURATIONS.ID.max()).from(Tables.EH_ARCHIVES_CONFIGURATIONS).fetchOne().value1();
         });
     }
 

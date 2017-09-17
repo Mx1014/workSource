@@ -7,9 +7,11 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhArchivesConfigurationsDao;
 import com.everhomes.server.schema.tables.daos.EhArchivesDismissEmployeesDao;
 import com.everhomes.server.schema.tables.daos.EhArchivesFormsDao;
 import com.everhomes.server.schema.tables.daos.EhArchivesStickyContactsDao;
+import com.everhomes.server.schema.tables.pojos.EhArchivesConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhArchivesDismissEmployees;
 import com.everhomes.server.schema.tables.pojos.EhArchivesForms;
 import com.everhomes.server.schema.tables.pojos.EhArchivesStickyContacts;
@@ -39,38 +41,38 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public void createArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky) {
+    public void createArchivesStickyContacts(ArchivesStickyContacts stickyContact) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesStickyContacts.class));
-        archivesContactsSticky.setId(id);
-        archivesContactsSticky.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        archivesContactsSticky.setOperatorUid(UserContext.current().getUser().getId());
-        archivesContactsSticky.setUpdateTime(archivesContactsSticky.getCreateTime());
+        stickyContact.setId(id);
+        stickyContact.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        stickyContact.setOperatorUid(UserContext.current().getUser().getId());
+        stickyContact.setUpdateTime(stickyContact.getCreateTime());
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesStickyContactsDao dao = new EhArchivesStickyContactsDao(context.configuration());
-        dao.insert(archivesContactsSticky);
+        dao.insert(stickyContact);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesStickyContacts.class, null);
     }
 
     @Override
-    public void updateArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky) {
-        archivesContactsSticky.setOperatorUid(UserContext.current().getUser().getId());
-        archivesContactsSticky.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    public void updateArchivesStickyContacts(ArchivesStickyContacts stickyContact) {
+        stickyContact.setOperatorUid(UserContext.current().getUser().getId());
+        stickyContact.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesStickyContactsDao dao = new EhArchivesStickyContactsDao(context.configuration());
-        dao.update(archivesContactsSticky);
+        dao.update(stickyContact);
 
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesStickyContacts.class, archivesContactsSticky.getId());
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesStickyContacts.class, stickyContact.getId());
     }
 
     @Override
-    public void deleteArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky) {
+    public void deleteArchivesStickyContacts(ArchivesStickyContacts stickyContact) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesStickyContactsDao dao = new EhArchivesStickyContactsDao(context.configuration());
-        dao.deleteById(archivesContactsSticky.getId());
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesStickyContacts.class, archivesContactsSticky.getId());
+        dao.deleteById(stickyContact.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesStickyContacts.class, stickyContact.getId());
     }
 
     @Override
@@ -107,14 +109,14 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public void createArchivesDismissEmployee(ArchivesDismissEmployees archivesDismissEmployee) {
+    public void createArchivesDismissEmployee(ArchivesDismissEmployees dismissEmployee) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesDismissEmployees.class));
-        archivesDismissEmployee.setId(id);
-        archivesDismissEmployee.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        archivesDismissEmployee.setOperatorUid(UserContext.current().getUser().getId());
+        dismissEmployee.setId(id);
+        dismissEmployee.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dismissEmployee.setOperatorUid(UserContext.current().getUser().getId());
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesDismissEmployeesDao dao = new EhArchivesDismissEmployeesDao(context.configuration());
-        dao.insert(archivesDismissEmployee);
+        dao.insert(dismissEmployee);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesDismissEmployees.class, null);
     }
@@ -172,5 +174,30 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         query.addConditions(Tables.EH_ARCHIVES_FORMS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ARCHIVES_FORMS.ORGANIZATION_ID.eq(organizationId));
         return query.fetchOneInto(ArchivesFroms.class);
+    }
+
+    @Override
+    public void createArchivesConfigurations(ArchivesConfigurations configuration){
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesConfigurations.class));
+        configuration.setId(id);
+        configuration.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        configuration.setOperatorUid(UserContext.current().getUser().getId());
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhArchivesConfigurationsDao dao = new EhArchivesConfigurationsDao(context.configuration());
+        dao.insert(configuration);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesConfigurations.class, null);
+    }
+
+    @Override
+    public void updateArchivesConfigurations(ArchivesConfigurations configuration) {
+        configuration.setOperatorUid(UserContext.current().getUser().getId());
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhArchivesConfigurationsDao dao = new EhArchivesConfigurationsDao(context.configuration());
+        dao.update(configuration);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesConfigurations.class, configuration.getId());
     }
 }

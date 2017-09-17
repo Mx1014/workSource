@@ -12,8 +12,8 @@ import java.sql.Date;
  * <li>department: 部门</li>
  * <li>checkInTime: 入职日期</li>
  * <li>dimissTime: 离职日期</li>
- * <li>dismissType: 离职类型: 1-辞职,2-解雇,3-其他 参考{@link DismissType}</li>
- * <li>dismissReason: 离职原因 参考{@link DismissReason}</li>
+ * <li>dismissType: 离职类型: 1-辞职,2-解雇,3-其他 参考{@link ArchivesDismissType}</li>
+ * <li>dismissReason: 离职原因 参考{@link ArchivesDismissReason}</li>
  * <li>dimissRemarks: 备注</li>
  * <li>detailId: 成员detailId</li>
  * </ul>

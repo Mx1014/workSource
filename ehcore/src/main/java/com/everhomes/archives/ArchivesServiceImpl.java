@@ -1,5 +1,6 @@
 package com.everhomes.archives;
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
@@ -1012,6 +1013,13 @@ public class ArchivesServiceImpl implements ArchivesService {
     public void employArchivesEmployeesConfig(EmployArchivesEmployeesCommand cmd) {
 
         //  TODO:增加一个配置项
+        ArchivesConfigurations configuration = new ArchivesConfigurations();
+        configuration.setNamespaceId(UserContext.getCurrentNamespaceId());
+        configuration.setOrganizationId(cmd.getOrganizationId());
+        configuration.setOperationType(ArchivesOperationType.EMPLOY.getCode());
+        configuration.setOperationTime(cmd.getEmploymentTime());
+        configuration.setOperationInformation(JSON.toJSONString(cmd));
+        archivesProvider.createArchivesConfigurations(configuration);
     }
 
     /**
