@@ -75,7 +75,7 @@ ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DA
 ALTER TABLE eh_organization_member_details CHANGE political_status political_flag VARCHAR(128) COMMENT '政治面貌';
 ALTER TABLE eh_organization_member_details ADD COLUMN procreative DATE COMMENT '生育状况';
 ALTER TABLE eh_organization_member_details ADD COLUMN ethnicity VARCHAR(128) COMMENT '民族';
-ALTER TABLE eh_organization_member_details ADD COLUMN id_type V0ARCHAR(64) COMMENT '证件类型';
+ALTER TABLE eh_organization_member_details ADD COLUMN id_type VARCHAR(64) COMMENT '证件类型';
 ALTER TABLE eh_organization_member_details ADD COLUMN id_expiry_date DATE COMMENT '证件有效期';
 ALTER TABLE eh_organization_member_details ADD COLUMN degree VARCHAR(64) COMMENT '学历';
 ALTER TABLE eh_organization_member_details ADD COLUMN graduation_school VARCHAR(256) COMMENT '毕业学校';
