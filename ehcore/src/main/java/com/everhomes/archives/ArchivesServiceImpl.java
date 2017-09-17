@@ -1009,12 +1009,17 @@ public class ArchivesServiceImpl implements ArchivesService {
         return condition;
     }
 
+    //  执行定时配置项
+    @Override
+    public void executeArchivesConfiguration(){
+
+    }
+
+
     @Override
     public void employArchivesEmployeesConfig(EmployArchivesEmployeesCommand cmd) {
-
-        //  TODO:增加一个配置项
+        //  增加转正配置
         ArchivesConfigurations configuration = new ArchivesConfigurations();
-        configuration.setNamespaceId(UserContext.getCurrentNamespaceId());
         configuration.setOrganizationId(cmd.getOrganizationId());
         configuration.setOperationType(ArchivesOperationType.EMPLOY.getCode());
         configuration.setOperationTime(cmd.getEmploymentTime());
@@ -1028,34 +1033,41 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     @Override
     public void employArchivesEmployees(EmployArchivesEmployeesCommand cmd) {
-        //  1.更新员工状态
-        for (Long detailId : cmd.getDetailIds()) {
-            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-            detail.setEmployeeStatus(EmployeeStatus.ONTHEJOB.getCode());
-            detail.setEmploymentTime(cmd.getEmploymentTime());
-            organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
-        }
-        //  TODO:2.更新人员变动记录
+        //  添加事物
+        dbProvider.execute((TransactionStatus status) -> {
+            for (Long detailId : cmd.getDetailIds()) {
+                //  1.更新员工状态
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                detail.setEmployeeStatus(EmployeeStatus.ONTHEJOB.getCode());
+                detail.setEmploymentTime(cmd.getEmploymentTime());
+                organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+                //  TODO:2.更新人员变动记录
+            }
+            return null;
+        });
     }
 
     @Override
-    public void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd) {
-
+    public void transferArchivesEmployeesConfig (TransferArchivesEmployeesCommand cmd) {
+        //  添加调整配置
+        ArchivesConfigurations configuration = new ArchivesConfigurations();
+        configuration.setOrganizationId(cmd.getOrganizationId());
+        configuration.setOperationType(ArchivesOperationType.TRANSFER.getCode());
+        configuration.setOperationTime(cmd.getEffectiveTime());
+        configuration.setOperationInformation(JSON.toJSONString(cmd));
+        archivesProvider.createArchivesConfigurations(configuration);
     }
 
     /**
      * 员工部门调整及添加记录
-     * @param detailIds
-     * @param departmentIds
-     * @param organizationId
-     * @param effectiveTime
+     * @param cmd
      */
-    private void transferArchivesEmployees(List<Long> detailIds, List<Long> departmentIds, Long organizationId, Date effectiveTime){
+    public void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd){
         //  1.调整员工部门
         TransferArchivesContactsCommand transferCommand = new TransferArchivesContactsCommand();
-        transferCommand.setOrganizationId(organizationId);
-        transferCommand.setDepartmentIds(departmentIds);
-        transferCommand.setDetailIds(detailIds);
+        transferCommand.setOrganizationId(cmd.getOrganizationId());
+        transferCommand.setDepartmentIds(cmd.getDepartmentIds());
+        transferCommand.setDetailIds(cmd.getDetailIds());
         transferArchivesContacts(transferCommand);
 
         //  TODO:2.调整员工岗位
@@ -1065,36 +1077,46 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd) {
-
+    public void dismissArchivesEmployeesConfig(DismissArchivesEmployeesCommand cmd) {
+        //  添加离职配置
+        ArchivesConfigurations configuration = new ArchivesConfigurations();
+        configuration.setOrganizationId(cmd.getOrganizationId());
+        configuration.setOperationType(ArchivesOperationType.DISMISS.getCode());
+        configuration.setOperationTime(cmd.getDismissTime());
+        configuration.setOperationInformation(JSON.toJSONString(cmd));
+        archivesProvider.createArchivesConfigurations(configuration);
     }
 
-    private void dismissArchivesEmployees(Long detailId, Long organizationId,
-                                          Date dismissTime, Byte dismissType,
-                                          String dismissReason, String dismissRemarks){
-        //  1.将员工添加到离职人员表
-        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-        ArchivesDismissEmployees dismissEmployee = new ArchivesDismissEmployees();
-        dismissEmployee.setNamespaceId(detail.getNamespaceId());
-        dismissEmployee.setOrganizationId(detail.getOrganizationId());
-        dismissEmployee.setContactName(detail.getContactName());
-        dismissEmployee.setEmployeeStatus(detail.getEmployeeStatus());
-        dismissEmployee.setDepartment(detail.getDepartment());
-        dismissEmployee.setCheckInTime(detail.getCheckInTime());
-        dismissEmployee.setDismissTime(dismissTime);
-        dismissEmployee.setDismissType(dismissType);
-        dismissEmployee.setDismissReason(dismissReason);
-        dismissEmployee.setDismissRemarks(dismissRemarks);
-        archivesProvider.createArchivesDismissEmployee(dismissEmployee);
+    public void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd){
+        //  添加事物
+        dbProvider.execute((TransactionStatus status) ->{
+            for(Long detailId : cmd.getDetailIds()) {
+                //  1.将员工添加到离职人员表
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                ArchivesDismissEmployees dismissEmployee = new ArchivesDismissEmployees();
+                dismissEmployee.setNamespaceId(detail.getNamespaceId());
+                dismissEmployee.setOrganizationId(detail.getOrganizationId());
+                dismissEmployee.setContactName(detail.getContactName());
+                dismissEmployee.setEmployeeStatus(detail.getEmployeeStatus());
+                dismissEmployee.setDepartment(detail.getDepartment());
+                dismissEmployee.setCheckInTime(detail.getCheckInTime());
+                dismissEmployee.setDismissTime(cmd.getDismissTime());
+                dismissEmployee.setDismissType(cmd.getDismissType());
+                dismissEmployee.setDismissReason(cmd.getDismissReason());
+                dismissEmployee.setDismissRemarks(cmd.getDismissRemark());
+                archivesProvider.createArchivesDismissEmployee(dismissEmployee);
 
-        //  2.删除员工权限
-        DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
-        deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(detail.getOrganizationId());
-        deleteOrganizationPersonnelByContactTokenCommand.setContactToken(detail.getContactToken());
-        deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
-        organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
+                //  2.删除员工权限
+                DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
+                deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(detail.getOrganizationId());
+                deleteOrganizationPersonnelByContactTokenCommand.setContactToken(detail.getContactToken());
+                deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
+                organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
 
-        //  TODO:3.添加档案记录
+                //  TODO:3.添加档案记录
+            }
+            return null;
+        });
     }
 
     @Override

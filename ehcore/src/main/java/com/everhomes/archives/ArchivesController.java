@@ -259,7 +259,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("transferArchivesEmployees")
     @RestReturn(value = String.class)
     public RestResponse transferArchivesEmployees(TransferArchivesEmployeesCommand cmd){
-        archivesService.transferArchivesEmployees(cmd);
+        archivesService.transferArchivesEmployeesConfig(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -273,7 +273,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("dismissArchivesEmployees")
     @RestReturn(value = String.class)
     public RestResponse dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd){
-        archivesService.dismissArchivesEmployees(cmd);
+        archivesService.dismissArchivesEmployeesConfig(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -182,6 +182,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         configuration.setId(id);
         configuration.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         configuration.setOperatorUid(UserContext.current().getUser().getId());
+        configuration.setNamespaceId(UserContext.getCurrentNamespaceId());
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesConfigurationsDao dao = new EhArchivesConfigurationsDao(context.configuration());
