@@ -813,7 +813,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         form.setFormOriginId(null);
         form.setFormVersion(null);
         response.setForm(form);
-        response.setForm(form);
         return response;
     }
 

@@ -59,9 +59,9 @@ DROP TABLE IF EXISTS `eh_archives_configurations`;
 CREATE TABLE `eh_archives_configurations` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-	`organization_id` BIGINT NOT NULL COMMENT'the id of organization',
+	`organization_id` BIGINT NOT NULL DEFAULT 0 COMMENT'the id of organization',
 	`operation_type` TINYINT NOT NULL COMMENT'the type of operation',
-	`operation_time` DATE NOT NULL DEFAULT NOW() COMMENT 'the time to execute the operation',
+	`operation_time` DATE NOT NULL COMMENT 'the time to execute the operation',
   `operation_information` TEXT COMMENT 'information about the operation',
   `remind_time` DATETIME COMMENT 'time to send email to the corresponding member',
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'pending, execution',

@@ -23,37 +23,6 @@ public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
     public OrganizationMemberDetails() {
     }
 
-
-    public OrganizationMemberDetails(OrganizationMember member) {
-/*        java.util.Date nDate = new java.util.Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String sDate = sdf.format(nDate);
-        java.sql.Date now = java.sql.Date.valueOf(sDate);
-
-        //需要判断organizationMember在detail表中organization_id的取值。应该取公司或者子公司
-        Long directOrgId = 0L;
-        if (member.getGroupType().equals("ENTERPRISE")) {
-            directOrgId = member.getOrganizationId();
-        } else {
-            Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
-            directOrgId = org.getDirectlyEnterpriseId();
-        }
-
-        this.setId(member.getUserDetailId() != null ? member.getUserDetailId() : 0L);
-        this.setNamespaceId(member.getNamespaceId() != null ? member.getNamespaceId() : 0);
-        this.setOrganizationId(directOrgId);
-        this.setContactName(member.getContactName());
-        this.setContactToken(member.getContactToken());
-        this.setContactDescription(member.getContactDescription());
-        this.setEmployeeNo(member.getEmployeeNo());
-        this.setAvatar(member.getAvatar());
-        this.setGender(member.getGender());
-        this.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
-        this.setEmployeeStatus(member.getEmployeeStatus() != null ? member.getEmployeeStatus() : (byte) 0);
-        this.setEmploymentTime(member.getEmploymentTime()!= null ? member.getEmploymentTime() : member.getCheckInTime());
-        this.setProfileIntegrity(member.getProfileIntegrity());*/
-    }
-
     public String getTargetType() {
         return targetType;
     }
