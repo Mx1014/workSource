@@ -66,6 +66,7 @@ CREATE TABLE `eh_archives_configurations` (
   `remind_time` DATETIME COMMENT 'time to send email to the corresponding member',
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'pending, execution',
   `create_time` DATETIME COMMENT 'create time',
+  `operator_uid` BIGINT COMMENT 'the id of the operator',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
