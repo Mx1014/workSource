@@ -75,7 +75,7 @@ ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DA
 ALTER TABLE eh_organization_member_details CHANGE political_status political_flag VARCHAR(128) COMMENT '政治面貌';
 ALTER TABLE eh_organization_member_details ADD COLUMN procreative DATE COMMENT '生育状况';
 ALTER TABLE eh_organization_member_details ADD COLUMN ethnicity VARCHAR(128) COMMENT '民族';
-ALTER TABLE eh_organization_member_details ADD COLUMN id_type VARCHAR(64) COMMENT '证件类型';
+ALTER TABLE eh_organization_member_details ADD COLUMN id_type V0ARCHAR(64) COMMENT '证件类型';
 ALTER TABLE eh_organization_member_details ADD COLUMN id_expiry_date DATE COMMENT '证件有效期';
 ALTER TABLE eh_organization_member_details ADD COLUMN degree VARCHAR(64) COMMENT '学历';
 ALTER TABLE eh_organization_member_details ADD COLUMN graduation_school VARCHAR(256) COMMENT '毕业学校';
@@ -100,10 +100,3 @@ ALTER TABLE eh_organization_member_details ADD COLUMN entry_form TEXT COMMENT '�
 ALTER TABLE eh_organization_member_details ADD COLUMN graduation_certificate TEXT COMMENT '毕业证书';
 ALTER TABLE eh_organization_member_details ADD COLUMN degree_certificate TEXT COMMENT '学位证书';
 ALTER TABLE eh_organization_member_details ADD COLUMN contract_certificate TEXT COMMENT '劳动合同';
-
--- 菜单的修改与添加
-INSERT INTO `ehcore`.`eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES (50450, '员工档案', '50000', NULL, 'react:/employee-record/employee-list/1', '0', '2', '/50000/50450', 'park', '539', NULL, '2', NULL, 'module');
-SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
-INSERT INTO `eh_web_menu_scopes` VALUES(@scope_id := @scope_id + 1,50450,'','EhNamespaces',1,2);
-
-UPDATE `ehcore`.`eh_web_menus` SET `data_type`='react:/address-book/address-list', `sort_num`='538' WHERE `name` like '%人员管理%';
