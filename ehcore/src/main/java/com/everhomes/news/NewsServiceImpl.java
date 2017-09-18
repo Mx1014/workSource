@@ -498,7 +498,7 @@ public class NewsServiceImpl implements NewsService {
 		JSONObject json = JSONObject.parseObject(
 				"{\"from\":0,\"size\":0,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":" +
 						"{\"must\":[]}}}},\"highlight\":{\"fields\":{\"title\":{\"fragment_size\":60,\"number_of_fragments\":0}," +
-						"\"content\":{\"fragment_size\":20,\"number_of_fragments\":1}}}}");
+						"\"content\":{\"fragment_size\":34,\"number_of_fragments\":1}}}}");
 		// 设置from和size
 		json.put("from", from);
 		json.put("size", pageSize + 1);
