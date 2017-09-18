@@ -148,19 +148,30 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setAmountReceviable(sourceDto.getAmountReceivable()==null?null:new BigDecimal(sourceDto.getAmountReceivable()));
                     dto.setBillId(sourceDto.getBillID());
                     dto.setDateStr(sourceDto.getBillDate());
-                    //将billDate转为yyyy-MM，然后和现在比较，如果大于现在，则status为3即欠费
                     Byte billStatus = sourceDto.getPayFlag();
                     try{
                         String billDate = sourceDto.getBillDate();
                         Date returnedDate = sdf.parse(billDate);
                         Calendar c4 = Calendar.getInstance();
                         c4.setTime(returnedDate);
-                        Calendar c5 = Calendar.getInstance();
-                        if(c4.compareTo(c5)!=1 && billStatus==0){
+                        Calendar local = Calendar.getInstance();
+                        Calendar local15 = Calendar.getInstance();
+                        local15.add(Calendar.DAY_OF_MONTH,15);
+
+                        //0:待缴；payflag为0，本地时间加15天大于等于 账期所在月,本地时间小于账期
+                        if(billStatus == 0 && (local.compareTo(c4)==-1 && local15.compareTo(c4)!=-1)){
+                            billStatus = 0;
+                        }else if(billStatus == 1){
+                            // 1：已缴；payflag为1
+                            billStatus = 1;
+                        }else if(billStatus == 0 && c4.compareTo(local)!=1){
+                            // 2：欠费；payfalg为0，账期小于本地时间
                             billStatus = 2;
-                        }else if(c4.compareTo(c5)==1 && billStatus==0){
+                        }else if(billStatus == 0 && c4.compareTo(local15)==1){
+                            // 3：未缴，payflag为0，日期大于本地时间15天
                             billStatus = 3;
                         }
+
                     }catch (Exception e){
                         LOGGER.error("billStatus parse failed");
                     }
