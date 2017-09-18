@@ -149,20 +149,31 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setAmountReceviable(sourceDto.getAmountReceivable()==null?null:new BigDecimal(sourceDto.getAmountReceivable()));
                     dto.setBillId(sourceDto.getBillID());
                     dto.setDateStr(sourceDto.getBillDate());
-                    //将billDate转为yyyy-MM，然后和现在比较，如果大于现在，则status为3即欠费
                     Byte billStatus = sourceDto.getPayFlag();
                     try{
                         String billDate = sourceDto.getBillDate();
                         Date returnedDate = sdf.parse(billDate);
                         Calendar c4 = Calendar.getInstance();
                         c4.setTime(returnedDate);
-                        Calendar c5 = Calendar.getInstance();
 
-                        if(c4.compareTo(c5)!=1 && billStatus==0){
+                        Calendar local = Calendar.getInstance();
+                        Calendar local15 = Calendar.getInstance();
+                        local15.add(Calendar.DAY_OF_MONTH,15);
+
+                        //0:待缴；payflag为0，本地时间加15天大于等于 账期所在月,本地时间小于账期
+                        if(billStatus == 0 && (local.compareTo(c4)==-1 && local15.compareTo(c4)!=-1)){
+                            billStatus = 0;
+                        }else if(billStatus == 1){
+                            // 1：已缴；payflag为1
+                            billStatus = 1;
+                        }else if(billStatus == 0 && c4.compareTo(local)!=1){
+                            // 2：欠费；payfalg为0，账期小于本地时间
                             billStatus = 2;
-                        }else if(c4.compareTo(c5)==1 && billStatus==0){
+                        }else if(billStatus == 0 && c4.compareTo(local15)==1){
+                            // 3：未缴，payflag为0，日期大于本地时间15天
                             billStatus = 3;
                         }
+
                     }catch (Exception e){
                         LOGGER.error("billStatus parse failed");
                     }
@@ -598,24 +609,24 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     public List<ListBillsDTO> listBills(String communityIdentifier,String contractNum,Integer currentNamespaceId, Long ownerId, String ownerType, String buildingName,String apartmentName, Long addressId, String billGroupName, Long billGroupId, Byte billStatus, String dateStrBegin, String dateStrEnd, Integer pageOffSet, Integer pageSize, String targetName, Byte status,String targetType,ListBillsResponse carrier) {
         List<ListBillGroupsDTO> listBillGroupsDTOS = assetProvider.listBillGroups(ownerId, ownerType);
         List<ListBillsDTO> list = new ArrayList<>();
+        if(status!=1){
+            LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
+        String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
+        if(StringUtils.isEmpty(zjgk_communityIdentifier)){
+            LOGGER.error("Zjgk community id is empty, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
+            throw RuntimeErrorException.errorWith("zjgk", 9999712,
+                    "该园区暂没有和系统对接，无法查询");
+        } else {
+            LOGGER.info("Find zjgk community id from db, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
+        }
         for(int i = 0; i < listBillGroupsDTOS.size(); i++){
             ListBillGroupsDTO billGroup = listBillGroupsDTOS.get(i);
-            if(billGroup.getBillGroupId()==billGroupId && billGroup.getBillGroupName().equals("租金")){
-                if(status!=1){
-                    LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                            "Insufficient privilege");
-                }
+            if(billGroupId == null || (billGroup.getBillGroupId()==billGroupId && billGroup.getBillGroupName().equals("租金"))){
                 String postJson = "";
                 Map<String, String> params=new HashMap<String, String> ();
-                String zjgk_communityIdentifier = assetProvider.findZjgkCommunityIdentifierById(ownerId);
-                if(StringUtils.isEmpty(zjgk_communityIdentifier)){
-                    LOGGER.error("Zjgk community id is empty, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
-                    throw RuntimeErrorException.errorWith("zjgk", 9999712,
-                            "该园区暂没有和系统对接，无法查询");
-                } else {
-                    LOGGER.info("Find zjgk community id from db, ownerType={}, ownerId={}, result={}", ownerType, ownerId, zjgk_communityIdentifier);
-                }
                 params.put("customerName", StringUtils.isEmpty(targetName)==true?"":targetName);
                 params.put("communityIdentifer", StringUtils.isEmpty(zjgk_communityIdentifier)==true?"":zjgk_communityIdentifier);
                 params.put("buildingIdentifier", StringUtils.isEmpty(buildingName)==true?"":String.valueOf(buildingName));
