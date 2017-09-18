@@ -32,7 +32,16 @@ public class ParkingRechargeRateDTO {
     private BigDecimal price;
     private Timestamp createTime;
     private String cardType;
-    
+    private BigDecimal originalPrice;
+
+    public BigDecimal getOriginalPrice() {
+        return originalPrice;
+    }
+
+    public void setOriginalPrice(BigDecimal originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+
     public ParkingRechargeRateDTO() {
     }
 

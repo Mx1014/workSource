@@ -69,6 +69,25 @@ public class ParkingRechargeOrderDTO {
     private Timestamp refundTime;
     private Integer delayTime;
 
+    private BigDecimal originalPrice;
+    private String invoiceName;
+
+    public BigDecimal getOriginalPrice() {
+        return originalPrice;
+    }
+
+    public void setOriginalPrice(BigDecimal originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+
+    public String getInvoiceName() {
+        return invoiceName;
+    }
+
+    public void setInvoiceName(String invoiceName) {
+        this.invoiceName = invoiceName;
+    }
+
     public Integer getDelayTime() {
         return delayTime;
     }

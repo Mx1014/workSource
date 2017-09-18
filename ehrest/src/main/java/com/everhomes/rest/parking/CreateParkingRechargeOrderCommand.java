@@ -46,7 +46,17 @@ public class CreateParkingRechargeOrderCommand {
 
     private Byte orderType;
 
+    private Long invoiceType;
+
 	public CreateParkingRechargeOrderCommand() {
+    }
+
+    public Long getInvoiceType() {
+        return invoiceType;
+    }
+
+    public void setInvoiceType(Long invoiceType) {
+        this.invoiceType = invoiceType;
     }
 
     public Byte getOrderType() {

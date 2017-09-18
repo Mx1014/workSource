@@ -56,11 +56,11 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 
 			long expireTime = strToLong(expireDate);
 
-			if (checkExpireTime(parkingLot, expireTime)) {
-				return resultList;
-			}
-
 			ParkingCardDTO parkingCardDTO = convertCardInfo(parkingLot);
+
+			if (checkExpireTime(parkingLot, expireTime)) {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}
 
 			if (null != card.getName()) {
 				String plateOwnerName = card.getName();

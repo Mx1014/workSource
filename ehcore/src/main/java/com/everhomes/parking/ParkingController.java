@@ -55,15 +55,27 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("listParkingCards")
     @RestReturn(value=ParkingCardDTO.class, collection=true)
     public RestResponse listParkingCards(@Valid ListParkingCardsCommand cmd) {
-        List<ParkingCardDTO> parkingCardList;
-        
-        parkingCardList = parkingService.listParkingCards(cmd);
+
+        List<ParkingCardDTO> parkingCardList = parkingService.listParkingCards(cmd);
         RestResponse response = new RestResponse(parkingCardList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /parking/getParkingCards</b>
+     * <p>查询指定园区/小区、停车场、车牌号对应的月卡列表</p>
+     */
+    @RequestMapping("getParkingCards")
+    @RestReturn(value=ParkingCardDTO.class, collection=true)
+    public RestResponse getParkingCards(@Valid ListParkingCardsCommand cmd) {
+        RestResponse response = new RestResponse(parkingService.getParkingCards(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /parking/getOpenCardInfo</b>
      * <p>查询开通月卡信息</p>
@@ -562,6 +574,34 @@ public class ParkingController extends ControllerBase {
     public RestResponse getCarLocation(GetCarLocationCommand cmd) {
 
         RestResponse response = new RestResponse(parkingService.getCarLocation(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/listParkingCardRequestTypes</b>
+     * <p>获取月卡申请卡类型</p>
+     */
+    @RequestMapping("listParkingCardRequestTypes")
+    @RestReturn(value=ParkingCardRequestTypeDTO.class, collection = true)
+    public RestResponse listParkingCardRequestTypes(ListParkingCardRequestTypesCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.listParkingCardRequestTypes(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/listParkingInvoiceTypes</b>
+     * <p>获取发票列表</p>
+     */
+    @RequestMapping("listParkingInvoiceTypes")
+    @RestReturn(value=ParkingInvoiceTypeDTO.class, collection = true)
+    public RestResponse listParkingInvoiceTypes(ListParkingInvoiceTypesCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.listParkingInvoiceTypes(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

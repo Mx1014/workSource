@@ -63,7 +63,7 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 			Long endTime = Timestamp.valueOf(time).getTime();
 
 			if (checkExpireTime(parkingLot, endTime)) {
-				return resultList;
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
 			}
 			
 			String plateOwnerName = card.getOwnername();

@@ -32,6 +32,44 @@ public class ParkingLot extends EhParkingLots {
     //停车场客服联系方式
     private String contact;
 
+    private Byte monthlyDiscountFlag;
+    private Integer monthlyDiscount;
+
+    private Byte tempFeeDiscountFlag;
+    private Integer tempFeeDiscount;
+
+    public Byte getMonthlyDiscountFlag() {
+        return monthlyDiscountFlag;
+    }
+
+    public void setMonthlyDiscountFlag(Byte monthlyDiscountFlag) {
+        this.monthlyDiscountFlag = monthlyDiscountFlag;
+    }
+
+    public Integer getMonthlyDiscount() {
+        return monthlyDiscount;
+    }
+
+    public void setMonthlyDiscount(Integer monthlyDiscount) {
+        this.monthlyDiscount = monthlyDiscount;
+    }
+
+    public Byte getTempFeeDiscountFlag() {
+        return tempFeeDiscountFlag;
+    }
+
+    public void setTempFeeDiscountFlag(Byte tempFeeDiscountFlag) {
+        this.tempFeeDiscountFlag = tempFeeDiscountFlag;
+    }
+
+    public Integer getTempFeeDiscount() {
+        return tempFeeDiscount;
+    }
+
+    public void setTempFeeDiscount(Integer tempFeeDiscount) {
+        this.tempFeeDiscount = tempFeeDiscount;
+    }
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }

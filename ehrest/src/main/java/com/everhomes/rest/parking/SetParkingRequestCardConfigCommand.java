@@ -25,7 +25,26 @@ public class SetParkingRequestCardConfigCommand {
 	private Byte cardAgreementFlag;
 	private Byte maxRequestNumFlag;
 	private Byte maxIssueNumFlag;
-    
+
+	private Byte cardTypeTipFlag;
+	private String cardTypeTip;
+
+	public Byte getCardTypeTipFlag() {
+		return cardTypeTipFlag;
+	}
+
+	public void setCardTypeTipFlag(Byte cardTypeTipFlag) {
+		this.cardTypeTipFlag = cardTypeTipFlag;
+	}
+
+	public String getCardTypeTip() {
+		return cardTypeTip;
+	}
+
+	public void setCardTypeTip(String cardTypeTip) {
+		this.cardTypeTip = cardTypeTip;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}

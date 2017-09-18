@@ -35,15 +35,26 @@ public class ParkingCardDTO {
 	private String cardName;
 	private Long startTime;
 	private Long endTime;
+	@Deprecated
 	private Boolean isValid;
 	
     private String freeAmount;
     private Byte isSupportOnlinePaid;
-	
+
+    private Byte cardStatus;
+
 	public ParkingCardDTO() {
 	    
 	}
-	
+
+	public Byte getCardStatus() {
+		return cardStatus;
+	}
+
+	public void setCardStatus(Byte cardStatus) {
+		this.cardStatus = cardStatus;
+	}
+
 	public String getOwnerType() {
         return ownerType;
     }
@@ -129,10 +140,11 @@ public class ParkingCardDTO {
         return StringHelper.toJsonString(this);
     }
 
+	@Deprecated
 	public Boolean getIsValid() {
 		return isValid;
 	}
-
+	@Deprecated
 	public void setIsValid(Boolean isValid) {
 		this.isValid = isValid;
 	}

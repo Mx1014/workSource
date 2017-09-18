@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -55,6 +57,8 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
     private ContentServerService contentServerService;
 	@Autowired
 	private UserProvider userProvider;
+	@Autowired
+	private AddressProvider addressProvider;
 
 	@Override
 	public FlowModuleInfo initModule() {
@@ -158,7 +162,18 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		Integer count = parkingProvider.waitingCardCount(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
 				parkingCardRequest.getParkingLotId(), parkingCardRequest.getCreateTime());
 		dto.setRanking(count + 1);
-		
+
+		ParkingCardRequestType parkingCardRequestType = parkingProvider.findParkingCardTypeByTypeId(parkingCardRequest.getCardTypeId());
+		dto.setCardTypeName(parkingCardRequestType.getCardTypeName());
+
+		ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(parkingCardRequest.getInvoiceType());
+		dto.setInvoiceName(parkingInvoiceType.getName());
+
+		Address address = addressProvider.findAddressById(parkingCardRequest.getAddressId());
+		if (null != address) {
+			dto.setApartmentName(address.getAddress());
+		}
+
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));//StringHelper.toJsonString(dto)
 		
 		List<FlowCaseEntity> entities = new ArrayList<>();

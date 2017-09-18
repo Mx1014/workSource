@@ -66,7 +66,35 @@ public class ParkingCardRequestDTO {
 	private Timestamp processSucceedTime;
 	private Timestamp openCardTime;
 	private Timestamp cancelTime;
-	
+
+	private String cardTypeName;
+    private String apartmentName;
+    private String invoiceName;
+
+    public String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
+    }
+
+    public String getInvoiceName() {
+        return invoiceName;
+    }
+
+    public void setInvoiceName(String invoiceName) {
+        this.invoiceName = invoiceName;
+    }
+
+    public String getCardTypeName() {
+        return cardTypeName;
+    }
+
+    public void setCardTypeName(String cardTypeName) {
+        this.cardTypeName = cardTypeName;
+    }
+
     public ParkingCardRequestDTO() {
     }
 

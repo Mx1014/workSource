@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>cardAgreement: 停车月卡协议</li>
  * <li>maxIssueNum: 可发放的月卡总数</li>
  * <li>flowId: 工作流模式id</li>
+ * <li>cardTypeTipFlag: app月卡申请 月卡类型选择页面提示文案</li>
+ * <li>cardTypeTip: app月卡申请 月卡类型选择页面提示文案</li>
  * </ul>
  */
 public class ParkingRequestCardConfigDTO {
@@ -34,7 +36,26 @@ public class ParkingRequestCardConfigDTO {
     private Long flowId;
     
     private String cardAgreementUrl;
-    
+
+	private Byte cardTypeTipFlag;
+	private String cardTypeTip;
+
+	public Byte getCardTypeTipFlag() {
+		return cardTypeTipFlag;
+	}
+
+	public void setCardTypeTipFlag(Byte cardTypeTipFlag) {
+		this.cardTypeTipFlag = cardTypeTipFlag;
+	}
+
+	public String getCardTypeTip() {
+		return cardTypeTip;
+	}
+
+	public void setCardTypeTip(String cardTypeTip) {
+		this.cardTypeTip = cardTypeTip;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}

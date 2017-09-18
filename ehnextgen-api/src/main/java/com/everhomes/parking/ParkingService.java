@@ -14,6 +14,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 public interface ParkingService {
 	List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
 
+    List<ParkingCardDTO> getParkingCards(ListParkingCardsCommand cmd);
+
     List<ParkingLotDTO> listParkingLots(ListParkingLotsCommand cmd);
     
     List<ParkingRechargeRateDTO> listParkingRechargeRates(ListParkingRechargeRatesCommand cmd);
@@ -84,4 +86,8 @@ public interface ParkingService {
     ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd);
 
     ParkingCarLocationDTO getCarLocation(GetCarLocationCommand cmd);
+
+    List<ParkingCardRequestTypeDTO> listParkingCardRequestTypes(ListParkingCardRequestTypesCommand cmd);
+
+    List<ParkingInvoiceTypeDTO> listParkingInvoiceTypes(ListParkingInvoiceTypesCommand cmd);
 }

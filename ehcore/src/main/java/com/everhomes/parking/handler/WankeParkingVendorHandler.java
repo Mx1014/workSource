@@ -54,7 +54,7 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 			long expireTime = Utils.strToLong(expireDate, Utils.DateStyle.DATE_TIME_STR);
 
 			if (checkExpireTime(parkingLot, expireTime)) {
-				return resultList;
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
 			}
 
 			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());

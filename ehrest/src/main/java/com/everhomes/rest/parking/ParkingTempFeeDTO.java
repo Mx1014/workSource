@@ -12,7 +12,16 @@ public class ParkingTempFeeDTO {
 	private BigDecimal price;
 	private Integer delayTime;
 	private String orderToken;
-	
+	private BigDecimal originalPrice;
+
+	public BigDecimal getOriginalPrice() {
+		return originalPrice;
+	}
+
+	public void setOriginalPrice(BigDecimal originalPrice) {
+		this.originalPrice = originalPrice;
+	}
+
 	public String getPlateNumber() {
 		return plateNumber;
 	}

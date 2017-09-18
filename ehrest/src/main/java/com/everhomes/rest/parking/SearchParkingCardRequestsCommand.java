@@ -37,7 +37,17 @@ public class SearchParkingCardRequestsCommand {
     private Long flowId;
     private String carBrand;
     private String carSerieName;
-    
+
+    private String cardTypeId;
+
+    public String getCardTypeId() {
+        return cardTypeId;
+    }
+
+    public void setCardTypeId(String cardTypeId) {
+        this.cardTypeId = cardTypeId;
+    }
+
     public SearchParkingCardRequestsCommand() {
     }
 

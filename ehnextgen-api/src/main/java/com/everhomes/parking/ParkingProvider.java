@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.parking.ParkingLotVendor;
 import org.jooq.SortField;
 
 public interface ParkingProvider {
@@ -48,7 +47,7 @@ public interface ParkingProvider {
     List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
                                                        String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate,
                                                        Timestamp endDate, Byte status, String carBrand, String carSeriesName, String plateOwnerEnterpriseName,
-                                                       Long flowId, SortField order, Long pageAnchor, Integer pageSize);
+                                                       Long flowId, SortField order, String cardTypeId, Long pageAnchor, Integer pageSize);
     
     void updateParkingLot(ParkingLot parkingLot);
     
@@ -91,4 +90,12 @@ public interface ParkingProvider {
     Integer countParkingCardRequest(String ownerType, Long ownerId, Long parkingLotId, Long flowId, Byte geStatus, Byte status);
     
     ParkingFlow findParkingRequestCardConfig(Long id);
+
+    ParkingInvoiceType findParkingInvoiceTypeById(Long id);
+
+    ParkingCardRequestType findParkingCardTypeByTypeId(String cardTypeId);
+
+    List<ParkingInvoiceType> listParkingInvoiceTypes(String ownerType, Long ownerId, Long parkingLotId);
+
+    List<ParkingCardRequestType> listParkingCardTypes(String ownerType, Long ownerId, Long parkingLotId);
 }

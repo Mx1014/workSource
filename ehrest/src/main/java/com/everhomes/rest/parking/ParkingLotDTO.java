@@ -31,6 +31,12 @@ public class ParkingLotDTO {
     //支持过期充值时，按照什么模式充值 {@link ParkingCardExpiredRechargeType}
     private Byte expiredRechargeType;
 
+    private Byte monthlyDiscountFlag;
+    private Integer monthlyDiscount;
+
+    private Byte tempFeeDiscountFlag;
+    private Integer tempFeeDiscount;
+
     //申请月卡的模式
     private Integer flowMode;
 
@@ -46,6 +52,38 @@ public class ParkingLotDTO {
     private Byte currentInfoType;
     //停车场客服联系方式
     private String contact;
+
+    public Byte getMonthlyDiscountFlag() {
+        return monthlyDiscountFlag;
+    }
+
+    public void setMonthlyDiscountFlag(Byte monthlyDiscountFlag) {
+        this.monthlyDiscountFlag = monthlyDiscountFlag;
+    }
+
+    public Integer getMonthlyDiscount() {
+        return monthlyDiscount;
+    }
+
+    public void setMonthlyDiscount(Integer monthlyDiscount) {
+        this.monthlyDiscount = monthlyDiscount;
+    }
+
+    public Byte getTempFeeDiscountFlag() {
+        return tempFeeDiscountFlag;
+    }
+
+    public void setTempFeeDiscountFlag(Byte tempFeeDiscountFlag) {
+        this.tempFeeDiscountFlag = tempFeeDiscountFlag;
+    }
+
+    public Integer getTempFeeDiscount() {
+        return tempFeeDiscount;
+    }
+
+    public void setTempFeeDiscount(Integer tempFeeDiscount) {
+        this.tempFeeDiscount = tempFeeDiscount;
+    }
 
     public Byte getCurrentInfoType() {
         return currentInfoType;

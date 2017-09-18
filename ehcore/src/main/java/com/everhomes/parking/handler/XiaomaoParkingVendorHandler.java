@@ -50,11 +50,11 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 
             long expireTime = expireDate.getTime();
 
-            if (checkExpireTime(parkingLot, expireTime)) {
-                return resultList;
-            }
-
             ParkingCardDTO parkingCardDTO = convertCardInfo(parkingLot);
+
+            if (checkExpireTime(parkingLot, expireTime)) {
+                parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+            }
 
             parkingCardDTO.setPlateNumber(plateNumber);
 
