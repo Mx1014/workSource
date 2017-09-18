@@ -205,7 +205,10 @@ public class UniongroupServiceImpl implements UniongroupService {
                     //--------------------------2.保存关系表--------------------------
 
                     List detailIdsArray =  detailIds.stream().map(r->{
-                        return r.longValue();
+                        if(r.longValue() != 0L){
+                            return r.longValue();
+                        }
+                        return null;
                     }).collect(Collectors.toList());
 
                     this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(detailIdsArray);
