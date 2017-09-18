@@ -1881,4 +1881,4 @@ UPDATE eh_uniongroup_member_details ud INNER JOIN (SELECT o.namespace_id, d.deta
 
 
 -- added by wh 刷错误数据,
-UPDATE  eh_punch_day_logs SET time_rule_id = NULL WHERE time_rule_id =1  ;
+UPDATE  eh_punch_day_logs SET time_rule_id = 0  WHERE time_rule_id =1 OR  time_rule_id IS NULL;
