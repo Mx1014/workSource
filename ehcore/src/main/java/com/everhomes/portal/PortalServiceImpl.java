@@ -60,6 +60,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -275,28 +276,35 @@ public class PortalServiceImpl implements PortalService {
 		portalLayout.setStatus(PortalLayoutStatus.ACTIVE.getCode());
 
 		this.dbProvider.execute((status) -> {
-			portalLayoutProvider.createPortalLayout(portalLayout);
 			if(null != cmd.getLayoutTemplateId()){
 				PortalLayoutTemplate template = portalLayoutTemplateProvider.findPortalLayoutTemplateById(cmd.getLayoutTemplateId());
 				if(null != template && !StringUtils.isEmpty(template.getTemplateJson())){
 					List<PortalItemGroup> groups = new ArrayList<>();
-					PortalItemGroupJson[] jsonObjs = (PortalItemGroupJson[])StringHelper.fromJsonString(template.getTemplateJson(), PortalItemGroupJson[].class);
-					for (PortalItemGroupJson jsonObj: jsonObjs) {
-						PortalItemGroup portalItemGroup = ConvertHelper.convert(jsonObj, PortalItemGroup.class);
-						String instanceConfig = StringHelper.toJsonString(jsonObj.getInstanceConfig());
-						if(!StringUtils.isEmpty(instanceConfig) && !"null".equals(instanceConfig)){
-							portalItemGroup.setInstanceConfig(instanceConfig);
+					PortalLayoutJson layoutJson = (PortalLayoutJson)StringHelper.fromJsonString(template.getTemplateJson(), PortalLayoutJson.class);
+					portalLayout.setName(layoutJson.getLayoutName());
+					portalLayout.setLocation(layoutJson.getLocation());
+					portalLayoutProvider.createPortalLayout(portalLayout);
+					if(null != layoutJson.getGroups()){
+						for (PortalItemGroupJson jsonObj: layoutJson.getGroups()) {
+							PortalItemGroup portalItemGroup = ConvertHelper.convert(jsonObj, PortalItemGroup.class);
+							String instanceConfig = StringHelper.toJsonString(jsonObj.getInstanceConfig());
+							if(!StringUtils.isEmpty(instanceConfig) && !"null".equals(instanceConfig)){
+								portalItemGroup.setInstanceConfig(instanceConfig);
+							}
+							portalItemGroup.setStatus(PortalItemGroupStatus.ACTIVE.getCode());
+							portalItemGroup.setLayoutId(portalLayout.getId());
+							portalItemGroup.setCreatorUid(user.getId());
+							portalItemGroup.setOperatorUid(user.getId());
+							groups.add(portalItemGroup);
 						}
-						portalItemGroup.setStatus(PortalItemGroupStatus.ACTIVE.getCode());
-						portalItemGroup.setLayoutId(portalLayout.getId());
-						portalItemGroup.setCreatorUid(user.getId());
-						portalItemGroup.setOperatorUid(user.getId());
-						groups.add(portalItemGroup);
-
+						portalItemGroupProvider.createPortalItemGroups(groups);
 					}
-					portalItemGroupProvider.createPortalItemGroups(groups);
+
 				}
+			}else{
+				portalLayoutProvider.createPortalLayout(portalLayout);
 			}
+
 			return null;
 		});
 		return processPortalLayoutDTO(portalLayout);
@@ -536,6 +544,7 @@ public class PortalServiceImpl implements PortalService {
 		portalItem.setActionData(cmd.getActionData());
 		portalItem.setDescription(cmd.getDescription());
 		portalItem.setIconUri(cmd.getIconUri());
+		portalItem.setBgcolor(cmd.getBgcolor());
 		portalItem.setSelectedIconUri(cmd.getSelectedIconUri());
 		this.dbProvider.execute((status) -> {
 			portalItemProvider.updatePortalItem(portalItem);
@@ -703,7 +712,7 @@ public class PortalServiceImpl implements PortalService {
 		return dto;
 	}
 
-		@Override
+	@Override
 	public void reorderPortalItem(ReorderPortalItemCommand cmd) {
 		if(null == cmd.getReorders() && cmd.getReorders().size() == 0){
 			LOGGER.error("Params reorders is null.cmd = {}", cmd);
@@ -1283,6 +1292,14 @@ public class PortalServiceImpl implements PortalService {
 		for (PortalItemGroup itemGroup: itemGroups) {
 			LaunchPadLayoutGroup group = ConvertHelper.convert(itemGroup, LaunchPadLayoutGroup.class);
 			group.setGroupName(itemGroup.getLabel());
+			if(null != itemGroup.getSeparatorFlag()){
+				group.setSeparatorFlag(itemGroup.getSeparatorFlag().intValue());
+			}
+
+			if(null != itemGroup.getSeparatorHeight()){
+				group.setSeparatorHeight(itemGroup.getSeparatorHeight().doubleValue());
+			}
+
 			ItemGroupInstanceConfig instanceConfig = new ItemGroupInstanceConfig();
 			if(!StringUtils.isEmpty(itemGroup.getInstanceConfig())){
 				instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
@@ -1757,6 +1774,13 @@ public class PortalServiceImpl implements PortalService {
 					itemGroup.setStatus(layout.getStatus());
 					itemGroup.setCreatorUid(user.getId());
 					itemGroup.setOperatorUid(user.getId());
+					if(null != padLayoutGroup.getSeparatorFlag()){
+						itemGroup.setSeparatorFlag(padLayoutGroup.getSeparatorFlag().byteValue());
+					}
+
+					if(null != padLayoutGroup.getSeparatorHeight()){
+						itemGroup.setSeparatorHeight(new BigDecimal(padLayoutGroup.getSeparatorHeight()));
+					}
 					if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NAVIGATOR){
 						NavigatorInstanceConfig instanceConfig = (NavigatorInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), NavigatorInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
@@ -2063,7 +2087,11 @@ public class PortalServiceImpl implements PortalService {
 	public static void main(String[] args) {
 //		PortalItemGroupJson[] jsons = (PortalItemGroupJson[])StringHelper.fromJsonString("[{\"label\":\"应用\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Navigator\",\"style\":\"Metro\",\"instanceConfig\":{\"margin\":20,\"padding\":16,\"backgroundColor\":\"#ffffff\",\"titleFlag\":0,\"title\":\"标题\",\"titleUri\":\"cs://\"},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"横幅广告\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Banners\",\"style\":\"Default\",\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"公告\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Bulletins\",\"style\":\"Default\",\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"运营模块\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"OPPush\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"titleFlag\":0,\"title\":\"标题\",\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"无时间轴\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"News_Flash\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"时间轴\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"News\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"timeWidgetStyle\":\"date\",\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"分页签\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Tabs\",\"style\":\"Pure_text\",\"defaultOrder\":0,\"description\":\"描述\"}]", PortalItemGroupJson[].class);
 //		for (PortalItemGroupJson json: jsons) {
-			System.out.println(GeoHashUtils.encode(113.952532, 22.550182));
+		Byte b = 1;
+		System.out.println("int：" +b.intValue());
 //		}
+		BigDecimal bd = new BigDecimal(1);
+		System.out.println("Double：" +bd.doubleValue());
+
 	}
 }

@@ -2207,4 +2207,15 @@ INSERT INTO `eh_namespace_masks` VALUES ('2', '999971', '园区服务', '3', '�
 DELETE FROM eh_addresses WHERE namespace_id = 999971 AND community_id = 240111044331050388;
 -- 删除原有的楼栋
 DELETE FROM eh_buildings WHERE namespace_id = 999971 AND community_id = 240111044331050388;
+
+-- added by wh add 搜索 快讯
+
+SET @search_types_id = (SELECT MAX(id) FROM `eh_search_types`);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999971','','0','投票','poll','1',NULL,NULL,'3');
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999971','','0','活动','activity','1',NULL,NULL,'2');
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999971','','0','话题','topic','1',NULL,NULL,'1');
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999971','','0','应用','launchpaditem','1',NULL,NULL,'5');
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999971','','0','商家','shop','1',NULL,NULL,'6');
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999971','', '0', '快讯', 'news', '1',NULL,NULL,'6');
+
   
