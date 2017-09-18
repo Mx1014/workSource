@@ -1637,17 +1637,21 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		User user = UserContext.current().getUser();
 		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken, organizationId);
-
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if(null == member){
 			LOGGER.error("User is not in the organization.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"User is not in the organization.");
+			member = new OrganizationMember();
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, contactToken);
+			if(null != userIdentifier){
+				member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+				member.setTargetId(userIdentifier.getOwnerUid());
+			}
+		}else{
+			//从公司人员里面把管理员的标识去掉
+			member.setMemberGroup("");
+			member.setOperatorUid(user.getId());
+			organizationProvider.updateOrganizationMember(member);
 		}
-
-		//从公司人员里面把管理员的标识去掉
-		member.setMemberGroup("");
-		member.setOperatorUid(user.getId());
-		organizationProvider.updateOrganizationMember(member);
 
 		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
 			//删除管理员权限

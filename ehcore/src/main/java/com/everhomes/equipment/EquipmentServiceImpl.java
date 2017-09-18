@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,11 +23,16 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.appurl.AppUrlService;
 import com.everhomes.forum.Attachment;
+import com.everhomes.pmNotify.PmNotifyConfigurations;
+import com.everhomes.pmNotify.PmNotifyProvider;
+import com.everhomes.pmNotify.PmNotifyRecord;
+import com.everhomes.pmNotify.PmNotifyService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.ServiceModuleAuthorizationsDTO;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.pmNotify.*;
 import com.everhomes.user.*;
 
 import com.everhomes.configuration.ConfigConstants;
@@ -194,6 +200,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
+
+	@Autowired
+	private PmNotifyProvider pmNotifyProvider;
+
+	@Autowired
+	private PmNotifyService pmNotifyService;
+
+	@Autowired
+	private UserProvider userProvider;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(
@@ -2024,16 +2039,70 @@ public class EquipmentServiceImpl implements EquipmentService {
 							timestampToStr(new Timestamp(now)).substring(2) + i;
 					task.setTaskName(taskName);
 				}
-
 				equipmentProvider.creatEquipmentTask(task);
 				equipmentTasksSearcher.feedDoc(task);
 
+//				启动提醒
+				ListPmNotifyParamsCommand command = new ListPmNotifyParamsCommand();
+				command.setCommunityId(task.getTargetId());
+				command.setNamespaceId(task.getNamespaceId());
+				List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
+				if(paramDTOs != null && paramDTOs.size() > 0) {
+					for (PmNotifyParamDTO notifyParamDTO : paramDTOs) {
+						List<PmNotifyReceiverDTO> receivers = notifyParamDTO.getReceivers();
+						if(receivers != null && receivers.size() > 0) {
+							PmNotifyRecord record = ConvertHelper.convert(notifyParamDTO, PmNotifyRecord.class);
+							PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
+							List<PmNotifyReceiver> pmNotifyReceivers = new ArrayList<>();
+							receivers.forEach(receiver -> {
+								PmNotifyReceiver pmNotifyReceiver = new PmNotifyReceiver();
+								pmNotifyReceiver.setReceiverType(receiver.getReceiverType());
+								if(receiver != null && receiver.getReceivers() != null) {
+									List<Long> ids = receiver.getReceivers().stream().map(receiverName -> {
+										return receiverName.getId();
+									}).collect(Collectors.toList());
+									pmNotifyReceiver.setReceiverIds(ids);
+								}
+
+								pmNotifyReceivers.add(pmNotifyReceiver);
+							});
+							receiverList.setReceivers(pmNotifyReceivers);
+							record.setReceiverJson(receiverList.toString());
+							record.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+							record.setOwnerId(task.getId());
+
+							//notify_time
+							PmNotifyType notify = PmNotifyType.fromCode(record.getNotifyType());
+							switch (notify) {
+								case BEFORE_START:
+									Timestamp starttime = minusMinutes(task.getExecutiveStartTime(), notifyParamDTO.getNotifyTickMinutes());
+									record.setNotifyTime(starttime);
+									break;
+								case BEFORE_DELAY:
+									Timestamp delaytime = minusMinutes(task.getExecutiveExpireTime(), notifyParamDTO.getNotifyTickMinutes());
+									record.setNotifyTime(delaytime);
+									break;
+								case AFTER_DELAY:
+									record.setNotifyTime(task.getExecutiveExpireTime());
+									break;
+								default:
+									break;
+							}
+							pmNotifyService.pushPmNotifyRecord(record);
+						}
+
+					}
+				}
 			}
 		}
-			
-//		}
-		
-		
+	}
+
+	private Timestamp minusMinutes(Timestamp startTime, int minus) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(startTime);
+		calendar.add(Calendar.MINUTE, -minus);
+		Timestamp time = new Timestamp(calendar.getTimeInMillis());
+		return time;
 	}
 	
 	private String timestampToStr(Timestamp time) {
@@ -2756,9 +2825,92 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return dtos;
 	}
 
+	private Timestamp addMonths(Timestamp now, int months) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(now);
+		calendar.add(Calendar.MONTH, months);
+		Timestamp time = new Timestamp(calendar.getTimeInMillis());
+
+		return time;
+	}
+
+	private ListEquipmentTasksResponse listDelayTasks(ListEquipmentTasksCommand cmd) {
+		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
+		int pageSize = cmd.getPageSize() == null ? Integer.MAX_VALUE - 1 : cmd.getPageSize();
+		if(null == cmd.getPageAnchor()) {
+			cmd.setPageAnchor(0L);
+		}
+		Integer offset = cmd.getPageAnchor().intValue();
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		//是否是管理员
+		boolean isAdmin = false;
+		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), user.getId());
+		if(null != resources && 0 != resources.size()){
+			for (RoleAssignment resource : resources) {
+				if(resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN
+						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
+						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
+						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
+					isAdmin = true;
+					userId =0L;
+					break;
+				}
+			}
+		}
+		//只展示近一个月的
+		Timestamp startTime = addMonths(new Timestamp(System.currentTimeMillis()), -1);
+		List<EquipmentInspectionTasks> tasks = null;
+		if(isAdmin) {
+			tasks = equipmentProvider.listDelayTasks(cmd.getInspectionCategoryId(), null, cmd.getTargetType(),
+						cmd.getTargetId(), offset, pageSize, AdminFlag.YES.getCode(), startTime);
+		}
+		if(!isAdmin) {
+			List<Long> standards = new ArrayList<>();
+			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
+			List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
+			if (maps != null && maps.size() > 0) {
+				for (EquipmentInspectionStandardGroupMap r : maps) {
+						standards.add(r.getStandardId());
+				}
+			}
+			tasks = equipmentProvider.listDelayTasks(cmd.getInspectionCategoryId(), standards, cmd.getTargetType(),
+						cmd.getTargetId(), offset, pageSize, AdminFlag.NO.getCode(), startTime);
+		}
+
+		if (tasks.size() > pageSize) {
+			tasks.remove(tasks.size() - 1);
+			response.setNextPageAnchor((long) (offset + 1));
+		}
+
+		Set<Long> taskEquipmentIds = tasks.stream().map(r -> {
+			return r.getEquipmentId();
+		}).filter(r -> r != null).collect(Collectors.toSet());
+
+
+		Map<Long, EquipmentInspectionEquipments> equipmentsMap = equipmentProvider.listEquipmentsById(taskEquipmentIds);
+		List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
+			EquipmentTaskDTO dto = ConvertHelper.convert(r, EquipmentTaskDTO.class);
+			EquipmentInspectionEquipments equipment = equipmentsMap.get(dto.getEquipmentId());
+			if (equipment != null) {
+				dto.setEquipmentLocation(equipment.getLocation());
+				dto.setQrCodeFlag(equipment.getQrCodeFlag());
+				dto.setEquipmentName(equipment.getName());
+			}
+			return dto;
+		}).filter(r -> r != null).collect(Collectors.toList());
+
+		response.setTasks(dtos);
+		return response;
+	}
+
 	@Override
 	public ListEquipmentTasksResponse listEquipmentTasks(
 			ListEquipmentTasksCommand cmd) {
+		if(cmd.getTaskStatus() != null && cmd.getTaskStatus().size() == 1
+				&& EquipmentTaskStatus.DELAY.equals(EquipmentTaskStatus.fromStatus(cmd.getTaskStatus().get(0)))) {
+			return listDelayTasks(cmd);
+		}
 
 		long startTime = System.currentTimeMillis();
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
@@ -2797,10 +2949,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 				}
 			}
 		}
-
-//		List<Long> executeStandardIds = null;
-//		List<Long> reviewStandardIds = null;
-
 		List<EquipmentInspectionTasks> allTasks = null;
 
 //		Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
@@ -3732,9 +3880,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<Long> taskIdlist = new ArrayList<Long>();
 
         for(final Long value : taskIds){
-
         	taskIdlist.add(value);
-
         }
 
         Collections.sort(taskIdlist);
@@ -4139,4 +4285,171 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return dataMap;
 	}
 
+	private PmNotifyParamDTO convertPmNotifyConfigurationsToDTO(Integer namespaceId, PmNotifyConfigurations configuration) {
+		PmNotifyParamDTO param = ConvertHelper.convert(configuration, PmNotifyParamDTO.class);
+		String receiverJson = configuration.getReceiverJson();
+		if(StringUtils.isNotBlank(receiverJson)) {
+			PmNotifyReceiverList receiverList = (PmNotifyReceiverList) StringHelper.fromJsonString(receiverJson, PmNotifyReceiverList.class);
+			if(receiverList != null && receiverList.getReceivers() != null && receiverList.getReceivers().size() > 0) {
+//				param.setReceivers(receiverList.getReceivers());
+				List<PmNotifyReceiverDTO> receiverDTOs = new ArrayList<>();
+				receiverList.getReceivers().forEach(receiver -> {
+					PmNotifyReceiverDTO dto = new PmNotifyReceiverDTO();
+					dto.setReceiverType(receiver.getReceiverType());
+					if(PmNotifyReceiverType.ORGANIZATION.equals(PmNotifyReceiverType.fromCode(receiver.getReceiverType()))) {
+						List<Organization> organizations = organizationProvider.listOrganizationsByIds(receiver.getReceiverIds());
+						if(organizations != null && organizations.size() > 0) {
+							List<ReceiverName> dtoReceivers = new ArrayList<ReceiverName>();
+							organizations.forEach(organization -> {
+								ReceiverName receiverName = new ReceiverName();
+								receiverName.setId(organization.getId());
+								receiverName.setName(organization.getName());
+								dtoReceivers.add(receiverName);
+							});
+							dto.setReceivers(dtoReceivers);
+						}
+					} else if(PmNotifyReceiverType.ORGANIZATION_MEMBER.equals(PmNotifyReceiverType.fromCode(receiver.getReceiverType()))) {
+						List<OrganizationMember> members = organizationProvider.listOrganizationMembersByIds(receiver.getReceiverIds());
+						if(members != null && members.size() > 0) {
+							List<ReceiverName> dtoReceivers = new ArrayList<ReceiverName>();
+							members.forEach(member -> {
+								ReceiverName receiverName = new ReceiverName();
+								receiverName.setId(member.getId());
+								receiverName.setName(member.getContactName());
+								dtoReceivers.add(receiverName);
+							});
+							dto.setReceivers(dtoReceivers);
+						}
+					}
+					receiverDTOs.add(dto);
+				});
+				param.setReceivers(receiverDTOs);
+			}
+		}
+		return param;
+	}
+
+	@Override
+	public void deletePmNotifyParams(DeletePmNotifyParamsCommand cmd) {
+		if(cmd.getId() == null ) {
+			return ;
+		}
+		Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
+		Long scopeId = cmd.getNamespaceId().longValue();
+		if(cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
+			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
+			scopeId = cmd.getCommunityId();
+		}
+		PmNotifyConfigurations configuration = pmNotifyProvider.findScopePmNotifyConfiguration(cmd.getId(), EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+		if(configuration != null) {
+			configuration.setStatus(PmNotifyConfigurationStatus.INVAILD.getCode());
+			pmNotifyProvider.updatePmNotifyConfigurations(configuration);
+		}
+	}
+
+	@Override
+	public List<PmNotifyParamDTO> listPmNotifyParams(ListPmNotifyParamsCommand cmd) {
+		Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
+		Long scopeId = cmd.getNamespaceId().longValue();
+		if(cmd.getCommunityId() != null && cmd.getCommunityId() != 0L) {
+			scopeType = PmNotifyScopeType.COMMUNITY.getCode();
+			scopeId = cmd.getCommunityId();
+		}
+		List<PmNotifyConfigurations> configurations = pmNotifyProvider.listScopePmNotifyConfigurations(EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+		if(configurations != null && configurations.size() > 0) {
+			List<PmNotifyParamDTO> params = configurations.stream().map(configuration -> {
+				return convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration);
+			}).collect(Collectors.toList());
+			return params;
+		} else {
+			//scopeType是community的情况下 如果拿不到数据，则返回该域空间下的设置 ps以后可以再else一下 域空间的没有返回all的
+			if(PmNotifyScopeType.COMMUNITY.equals(PmNotifyScopeType.fromCode(scopeType))) {
+				scopeType = PmNotifyScopeType.NAMESPACE.getCode();
+				scopeId = cmd.getNamespaceId().longValue();
+				List<PmNotifyConfigurations> namespaceConfigurations = pmNotifyProvider.listScopePmNotifyConfigurations(EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+				if(namespaceConfigurations != null && namespaceConfigurations.size() > 0) {
+					List<PmNotifyParamDTO> params = namespaceConfigurations.stream().map(configuration -> {
+						return convertPmNotifyConfigurationsToDTO(cmd.getNamespaceId(), configuration);
+					}).collect(Collectors.toList());
+					return params;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public void setPmNotifyParams(SetPmNotifyParamsCommand cmd) {
+		if(cmd.getParams() != null && cmd.getParams().size() > 0) {
+			for(PmNotifyParams params : cmd.getParams()) {
+				PmNotifyConfigurations configuration = ConvertHelper.convert(params, PmNotifyConfigurations.class);
+				configuration.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+				if(params.getCommunityId() != null && params.getCommunityId() != 0L) {
+					configuration.setScopeId(params.getCommunityId());
+					configuration.setScopeType(PmNotifyScopeType.COMMUNITY.getCode());
+				} else {
+					configuration.setScopeId(params.getNamespaceId().longValue());
+					configuration.setScopeType(PmNotifyScopeType.NAMESPACE.getCode());
+				}
+				List<PmNotifyReceiver> receivers = params.getReceivers();
+				if(receivers != null && receivers.size() > 0) {
+					PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
+					receiverList.setReceivers(receivers);
+					configuration.setReceiverJson(receiverList.toString());
+				}
+
+				if(params.getId() == null) {
+					pmNotifyProvider.createPmNotifyConfigurations(configuration);
+				} else {
+					Byte scopeType = PmNotifyScopeType.NAMESPACE.getCode();
+					Long scopeId = params.getNamespaceId().longValue();
+					if(params.getCommunityId() != null && params.getCommunityId() != 0L) {
+						scopeType = PmNotifyScopeType.COMMUNITY.getCode();
+						scopeId = params.getCommunityId();
+					}
+					PmNotifyConfigurations exist = pmNotifyProvider.findScopePmNotifyConfiguration(params.getId(), EntityType.EQUIPMENT_TASK.getCode(), scopeType, scopeId);
+					if(exist != null) {
+						configuration.setCreateTime(exist.getCreateTime());
+						pmNotifyProvider.updatePmNotifyConfigurations(configuration);
+					} else {
+						pmNotifyProvider.createPmNotifyConfigurations(configuration);
+					}
+				}
+			}
+		}
+
+	}
+
+	@Override
+	public Set<Long> getTaskGroupUsers(Long taskId, byte groupType) {
+		EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(taskId);
+		List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByStandardIdAndGroupType(task.getStandardId(), groupType);
+		if(maps != null && maps.size() > 0) {
+			Set<Long> userIds = new HashSet<>();
+			maps.forEach(map -> {
+				if(map.getPositionId() == null || map.getPositionId() == 0L) {
+					List<OrganizationMember> members = organizationProvider.listOrganizationMembers(map.getGroupId(), null);
+					if (members != null) {
+						for (OrganizationMember member : members) {
+							userIds.add(member.getTargetId());
+						}
+					}
+				} else {
+					ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
+					command.setOrganizationId(map.getGroupId());
+					command.setJobPositionId(map.getPositionId());
+					List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
+
+					if (contacts != null && contacts.size() > 0) {
+						for (OrganizationContactDTO contact : contacts) {
+							userIds.add(contact.getTargetId());
+						}
+					}
+				}
+			});
+			return userIds;
+		}
+		return null;
+	}
 }

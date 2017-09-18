@@ -18,11 +18,11 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.techpark.punch.admin.PunchTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPunchSchedulingsDao;
 import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
-import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
 import com.everhomes.server.schema.tables.records.EhPunchSchedulingsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -153,5 +153,102 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 		step.execute();
 	 
 		
+	}
+
+	@Override
+	public void deletePunchSchedulingByPunchRuleId(Long id) { 
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchSchedulingsRecord> step = context.delete(Tables.EH_PUNCH_SCHEDULINGS);
+		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(id); 
+		step.where(condition);
+		LOGGER.debug(step.toString());
+		step.execute();
+	}
+
+	@Override
+	public Integer countSchedulingUser(Long ruleId, java.sql.Date start, java.sql.Date end) {
+		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectDistinct(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID)
+				.from(Tables.EH_PUNCH_SCHEDULINGS)
+				.where(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(PunchTargetType.USER.getCode()))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.eq(ruleId))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(start))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(end))
+				.fetchCount();
+	}
+
+	@Override
+	public PunchScheduling getPunchSchedulingByRuleDateAndTarget(Long punchOrganizationId,
+			Long userId, Date date,Long punchruleId) {
+
+		List<PunchScheduling> results = queryPunchSchedulings(null, 1, new ListingQueryBuilderCallback()  {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+					SelectQuery<? extends Record> query) {  
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.equal(new java.sql.Date(date.getTime())));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.equal(punchOrganizationId));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.equal(userId));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(punchruleId));
+//				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
+				return null;
+			}
+		});
+		if(null == results || results.size()==0)
+			return null;
+		else 
+			return results.get(0);
+	}
+
+	@Override
+	public void deletePunchSchedulingByPunchRuleId(Long prId, Date ruleDate, Long ownerId, Long targetId) {
+
+		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchSchedulingsRecord> step = context.delete(Tables.EH_PUNCH_SCHEDULINGS);
+		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.equal(targetId)
+				.and(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.equal(ownerId))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.eq(new java.sql.Date(ruleDate.getTime())))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(prId)) ;
+		step.where(condition);
+		LOGGER.debug(step.toString());
+		step.execute();
+	}
+
+	@Override
+	public void deletePunchSchedulingByPunchRuleIdAndTarget(Long prId, Long detailId) {
+
+		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchSchedulingsRecord> step = context.delete(Tables.EH_PUNCH_SCHEDULINGS);
+		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.eq(detailId)
+				.and(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(prId)) ;
+		step.where(condition);
+		LOGGER.debug(step.toString());
+		step.execute();
+	}
+
+	@Override
+	public void deletePunchSchedulingByPunchRuleIdAndNotInTarget(Long prId, List<Long> detailIds) {
+
+		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchSchedulingsRecord> step = context.delete(Tables.EH_PUNCH_SCHEDULINGS);
+		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.notIn(detailIds)
+				.and(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(prId)) ;
+		step.where(condition);
+		LOGGER.debug(step.toString());
+		step.execute();
+
+	}
+
+	@Override
+	public void deletePunchSchedulingByOwnerIdAndTarget(Long ownerId, Long detailId) {
+
+
+		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchSchedulingsRecord> step = context.delete(Tables.EH_PUNCH_SCHEDULINGS);
+		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.eq(detailId)
+				.and(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.equal(ownerId)) ;
+		step.where(condition);
+		LOGGER.debug(step.toString());
+		step.execute();
+
 	}
 }
