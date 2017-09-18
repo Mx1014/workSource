@@ -1025,7 +1025,7 @@ public class PunchServiceImpl implements PunchService {
 
 				if (leaveCalendar.after(AfternoonArriveCalendar) && arriveCalendar.before(NoonLeaveTimeCalendar)) {
 					realWorkTime = leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis()
-							- punchTimeRule.getAfternoonArriveTime().getTime() + punchTimeRule.getNoonLeaveTime().getTime();
+							- punchTimeRule.getAfternoonArriveTimeLong() + punchTimeRule.getNoonLeaveTimeLong();
 				}
 			}
 			punchDayLog.setWorkTime( convertTime(realWorkTime) );
