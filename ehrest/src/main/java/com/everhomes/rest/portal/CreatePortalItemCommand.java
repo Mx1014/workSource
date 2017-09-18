@@ -32,7 +32,7 @@ public class CreatePortalItemCommand {
 
 	private Integer itemWidth;
 
-	private String bgcolor;
+	private Integer bgcolor;
 
 	private String iconUri;
 
@@ -51,7 +51,7 @@ public class CreatePortalItemCommand {
 
 	}
 
-	public CreatePortalItemCommand(Long itemGroupId, String label, String description, Integer itemWidth, String bgcolor, String iconUri, Byte status, String actionType, String actionData, List<PortalScope> scopes) {
+	public CreatePortalItemCommand(Long itemGroupId, String label, String description, Integer itemWidth, Integer bgcolor, String iconUri, Byte status, String actionType, String actionData, List<PortalScope> scopes) {
 		super();
 		this.itemGroupId = itemGroupId;
 		this.label = label;
@@ -141,11 +141,11 @@ public class CreatePortalItemCommand {
 		this.itemWidth = itemWidth;
 	}
 
-	public String getBgcolor() {
+	public Integer getBgcolor() {
 		return bgcolor;
 	}
 
-	public void setBgcolor(String bgcolor) {
+	public void setBgcolor(Integer bgcolor) {
 		this.bgcolor = bgcolor;
 	}
 

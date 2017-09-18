@@ -251,7 +251,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillItemsResponse listBillItems(ListBillItemsCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(),cmd.getOwnerId());
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillItemsResponse response = new ListBillItemsResponse();
