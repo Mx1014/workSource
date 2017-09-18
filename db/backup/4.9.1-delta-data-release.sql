@@ -1885,3 +1885,5 @@ INNER JOIN (
 	AND m.namespace_id != '' AND m.organization_id = d.organization_id
 ) AS t1 ON t1.detail_id = md.id
 SET md.namespace_id = t1.namespace_id;
+
+UPDATE eh_organization_member_details set namespace_id = 1 where contact_token in(13980969342,18588466508,13916541564,15221040896);
