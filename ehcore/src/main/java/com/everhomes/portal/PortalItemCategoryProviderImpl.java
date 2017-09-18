@@ -61,21 +61,30 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 	
 	@Override
 	public List<PortalItemCategory> listPortalItemCategory(Integer namespaceId, Long itemGroupId) {
-		return listPortalItemCategory(namespaceId, itemGroupId, null);
+		return listPortalItemCategory(namespaceId, itemGroupId, null, PortalItemCategoryStatus.ACTIVE.getCode());
+	}
+
+	@Override
+	public List<PortalItemCategory> listPortalItemCategory(Integer namespaceId, Long itemGroupId, Byte status) {
+		return listPortalItemCategory(namespaceId, itemGroupId, null, status);
 	}
 
 	public PortalItemCategory getPortalItemCategoryByName(Integer namespaceId, Long itemGroupId, String name){
-		List<PortalItemCategory>  portalItemCategories = listPortalItemCategory(namespaceId, itemGroupId, name);
+		List<PortalItemCategory>  portalItemCategories = listPortalItemCategory(namespaceId, itemGroupId, name, PortalItemCategoryStatus.ACTIVE.getCode());
 		if(portalItemCategories.size() > 0){
 			return portalItemCategories.get(0);
 		}
 		return null;
 	}
 
-	private List<PortalItemCategory> listPortalItemCategory(Integer namespaceId, Long itemGroupId, String name) {
+	private List<PortalItemCategory> listPortalItemCategory(Integer namespaceId, Long itemGroupId, String name, Byte status) {
 		Condition cond = Tables.EH_PORTAL_ITEM_CATEGORIES.STATUS.eq(PortalItemCategoryStatus.ACTIVE.getCode());
 		if(null != itemGroupId){
 			cond = cond.and(Tables.EH_PORTAL_ITEM_CATEGORIES.ITEM_GROUP_ID.eq(itemGroupId));
+		}
+
+		if(null != PortalItemCategoryStatus.fromCode(status)){
+			cond = cond.and(Tables.EH_PORTAL_ITEM_CATEGORIES.STATUS.eq(status));
 		}
 
 		if(!StringUtils.isEmpty(name)){
