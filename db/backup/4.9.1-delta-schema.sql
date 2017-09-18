@@ -362,3 +362,4 @@ ALTER TABLE eh_namespace_resources ADD COLUMN default_order INT(11) DEFAULT 0;
 -- 磊哥之前唯一约束有问题,有可能detailId不一样的contactToken一样,但是代码里不能分辨走不下去了
 ALTER TABLE eh_uniongroup_member_details DROP INDEX 'uniqueIndex';
 ALTER TABLE eh_uniongroup_member_details ADD UNIQUE INDEX `uniongroup_member_uniqueIndex` (group_type, group_id,detail_id,contact_token) ;
+ALTER TABLE eh_uniongroup_member_details ADD INDEX index_detailId (detail_id);
