@@ -150,15 +150,24 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         }
 
 
-        //校验订单是否存在
-        if(cmd.getOrderId() == null||cmd.getPaymentStatus()==null||cmd.getPaymentType()==null){
+        //校验参数不为空
+        if(cmd.getOrderId() == null||cmd.getPaymentStatus()==null||cmd.getPaymentType()==null || cmd.getBizOrderNum() == null){
             LOGGER.error("Invalid parameter,orderId,orderType or paymentStatus is null");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter,orderId,orderType or paymentStatus is null");
         }
 
+
+        //检查订单是否存在
+        PaymentOrderRecord orderRecord = payProvider.findOrderRecordByOrderIdAndPaymentOrderId(cmd.getOrderId(), Long.valueOf(cmd.getBizOrderNum()));
+        if(orderRecord == null){
+            LOGGER.error("can not find order record by orderId={}, paymentOrderId={}", cmd.getOrderId(), cmd.getBizOrderNum());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "can not find order record");
+        }
+
         //调用具体业务
-        PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(cmd.getPaymentType()));
+        PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(orderRecord.getOrderType()));
         LOGGER.debug("PaymentCallBackHandler="+handler.getClass().getName());
         if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
             handler.paySuccess(cmd);
