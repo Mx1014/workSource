@@ -39,4 +39,6 @@ public interface PunchSchedulingProvider {
 	void deletePunchSchedulingByPunchRuleIdAndTarget(Long id, Long detailId);
 
 	void deletePunchSchedulingByPunchRuleIdAndNotInTarget(Long id, List<Long> detailIds);
+
+	void deletePunchSchedulingByOwnerIdAndTarget(Long ownerId, Long detailId);
 }

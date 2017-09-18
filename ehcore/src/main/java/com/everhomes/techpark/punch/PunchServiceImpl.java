@@ -2327,6 +2327,9 @@ public class PunchServiceImpl implements PunchService {
             //如果为节假日则返回null  如果是节假调休日,用调休日期代替
             java.sql.Date punchDate = new java.sql.Date(date.getTime());
             punchDate = checkHoliday(pr,punchDate);
+			if (punchDate == null) {
+				return null;
+			}
 			//看是循环timerule找当天的timeRule
 			List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId());
 			if(null != timeRules)
@@ -6172,6 +6175,14 @@ public class PunchServiceImpl implements PunchService {
             }catch(NoNodeAvailableException e){
                 LOGGER.error("NoNodeAvailableException",e);
             }
+
+			//删除新增人员之前的考勤排班
+			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(punchOrg.getId());
+			if (null != newEmployees)
+				for (UniongroupMemberDetail employee : newEmployees) {
+					//删除新增人员之前的排班
+					punchSchedulingProvider.deletePunchSchedulingByOwnerIdAndTarget(cmd.getOwnerId(),employee.getDetailId());
+				}
 	        //打卡地点和wifi
 	        saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
 
@@ -6732,7 +6743,7 @@ public class PunchServiceImpl implements PunchService {
 				//删除被踢出考勤组的人的设置 -- 排班
 				//删除新增人员之前的排班
 				if(!isEmployeeInList(employee,oldEmployees)){
-					punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndTarget(pr.getId(), employee.getDetailId());
+					punchSchedulingProvider.deletePunchSchedulingByOwnerIdAndTarget(pr.getOwnerId(), employee.getDetailId());
 				}
 			}
 			punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndNotInTarget(pr.getId(), detailIds);
@@ -6996,7 +7007,7 @@ public class PunchServiceImpl implements PunchService {
 		return calendar.getTimeInMillis()+ruleTime;
 	}
 
-	private long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
+	private Long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
 		if(ptr.getPunchTimesPerDay().intValue() == 2){
 			if (punchType.equals(PunchType.ON_DUTY.getCode())) {
 				return ptr.getStartEarlyTimeLong();

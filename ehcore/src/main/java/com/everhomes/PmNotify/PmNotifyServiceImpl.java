@@ -22,10 +22,15 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.pmNotify.*;
 import com.everhomes.rest.quality.QualityGroupType;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +77,12 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 
     @Autowired
     private LocaleTemplateService localeTemplateService;
+
+    @Autowired
+    private SmsProvider smsProvider;
+
+    @Autowired
+    private UserProvider userProvider;
 
     private String queueDelay = "pmtaskdelays";
     private String queueNoDelay = "pmtasknodelays";
@@ -177,13 +188,19 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                 log.setOwnerId(record.getOwnerId());
                 log.setReceiverId(userId);
                 PmNotifyMode notifyMode = PmNotifyMode.fromCode(record.getNotifyMode());
+                String notifyTextForApplicant = getMessage(taskName, time, notify, scope, locale, code);
                 switch (notifyMode) {
                     case MESSAGE:
-                        String notifyTextForApplicant = sendMessage(userId, taskName, time, notify, scope, locale, code);
+                        sendMessageToUser(userId, notifyTextForApplicant);
                         log.setNotifyText(notifyTextForApplicant);
                         break;
                     case SMS:
-//                        sndSMS(userId, record);
+                        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+                        List<Tuple<String, Object>> variables = new ArrayList<>();
+                        variables.add(new Tuple<String, Object>("taskName", taskName));
+                        variables.add(new Tuple<String, Object>("time", timeToStr(time)));
+                        smsProvider.sendSms(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken(), scope, code, locale, variables);
+                        log.setNotifyText(notifyTextForApplicant);
                         break;
                     default:
                         break;
@@ -194,12 +211,11 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 
     }
 
-    private String sendMessage(Long userId, String taskName, Timestamp time, PmNotifyType type, String scope, String locale, int code) {
+    private String getMessage(String taskName, Timestamp time, PmNotifyType type, String scope, String locale, int code) {
         Map<String, Object> notifyMap = new HashMap<String, Object>();
         notifyMap.put("taskName", taskName);
         notifyMap.put("time", timeToStr(time));
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
-        sendMessageToUser(userId, notifyTextForApplicant);
         return notifyTextForApplicant;
     }
 
@@ -262,9 +278,15 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     });
 
                     break;
-                case USER:
-                    LOGGER.info("processPmNotifyRecord ReceiverType: USER");
-                    userIds.addAll(receiver.getReceiverIds());
+                case ORGANIZATION_MEMBER:
+                    LOGGER.info("processPmNotifyRecord ReceiverType: ORGANIZATION_MEMBER");
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByIds(receiver.getReceiverIds());
+                    if(members != null && members.size() > 0) {
+                        members.forEach(member -> {
+                            userIds.add(member.getTargetId());
+                        });
+                    }
+
                     break;
                 default:
                     break;
