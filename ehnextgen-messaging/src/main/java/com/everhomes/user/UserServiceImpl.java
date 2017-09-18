@@ -3753,6 +3753,10 @@ public class UserServiceImpl implements UserService {
 		List<SceneDTO> commercial_sceneList = new ArrayList<SceneDTO>();
 		addFamilySceneToList(userId, namespaceId, residential_sceneList);
 		addOrganizationSceneToList(userId, namespaceId, commercial_sceneList);
+
+		sceneList.stream().filter(r->{
+			return r.getSceneToken() != null;
+		}).collect(Collectors.toList());
 		return sceneList;
 	}
 
