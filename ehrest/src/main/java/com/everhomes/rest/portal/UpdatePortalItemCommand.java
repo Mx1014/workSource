@@ -38,6 +38,8 @@ public class UpdatePortalItemCommand {
 
 	private String actionData;
 
+	private Integer bgcolor;
+
 	@ItemType(PortalScope.class)
 	private List<PortalScope> scopes;
 
@@ -127,6 +129,14 @@ public class UpdatePortalItemCommand {
 
 	public void setSelectedIconUri(String selectedIconUri) {
 		this.selectedIconUri = selectedIconUri;
+	}
+
+	public Integer getBgcolor() {
+		return bgcolor;
+	}
+
+	public void setBgcolor(Integer bgcolor) {
+		this.bgcolor = bgcolor;
 	}
 
 	@Override

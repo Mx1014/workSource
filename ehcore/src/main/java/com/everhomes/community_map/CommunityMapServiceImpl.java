@@ -147,7 +147,7 @@ public class CommunityMapServiceImpl implements CommunityMapService {
 
                     Building building = communityProvider.findBuildingById(Long.valueOf(r.getBuildingId()));
                     if (null != building) {
-                        CommunityMapBuildingDTO dto = ConvertHelper.convert(r, CommunityMapBuildingDTO.class);
+                        CommunityMapBuildingDTO dto = ConvertHelper.convert(building, CommunityMapBuildingDTO.class);
 
                         List<CommunityBuildingGeo> geos = communityMapProvider.listCommunityBuildingGeos(building.getId());
 

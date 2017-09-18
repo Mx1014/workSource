@@ -617,8 +617,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 meterProvider.updateEnergyMeter(meter);
                 if (EnergyMeterStatus.fromCode(cmd.getStatus()) == EnergyMeterStatus.INACTIVE) {
                     // 2.删除表记对应的读表记录
-                    meterReadingLogProvider.deleteMeterReadingLogsByMeterId(currNamespaceId(), meter.getId());
                     List<EnergyMeterReadingLog> logs = meterReadingLogProvider.listMeterReadingLogsByMeterId(currNamespaceId(), meter.getId());
+                    meterReadingLogProvider.deleteMeterReadingLogsByMeterId(currNamespaceId(), meter.getId());
                     // 3.删除读表记录的索引
                     logs.forEach(log -> readingLogSearcher.deleteById(log.getId()));
                     // 4.删除表记索引
