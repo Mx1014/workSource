@@ -48,7 +48,7 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Override
     public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-//        this.dbProvider.execute((TransactionStatus status) -> {
+        this.dbProvider.execute((TransactionStatus status) -> {
             LOGGER.debug("saveUnion Time1 "+  System.currentTimeMillis());
 
             //已存在（即已分配薪酬组的）的部门集合
@@ -205,10 +205,7 @@ public class UniongroupServiceImpl implements UniongroupService {
                     //--------------------------2.保存关系表--------------------------
 
                     List detailIdsArray =  detailIds.stream().map(r->{
-                        if(r.longValue() != 0L){
-                            return r.longValue();
-                        }
-                        return null;
+                        return r.longValue();
                     }).collect(Collectors.toList());
 
                     this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(detailIdsArray);
@@ -218,8 +215,8 @@ public class UniongroupServiceImpl implements UniongroupService {
                     this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(unionDetailsList);
                 }
 
-//                return null;
-//            });
+                return null;
+            });
 //            return null;
 //        });
 
