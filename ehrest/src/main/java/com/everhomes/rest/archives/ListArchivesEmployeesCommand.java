@@ -64,7 +64,7 @@ public class ListArchivesEmployeesCommand {
     }
 
     public void setCheckInTimeStart(String checkInTimeStart) {
-        this.checkInTimeStart = ArchivesDateUtil.parseDate(checkInTimeStart);
+        this.checkInTimeStart = ArchivesUtil.parseDate(checkInTimeStart);
     }
 
     public Date getCheckInTimeEnd() {
@@ -72,7 +72,7 @@ public class ListArchivesEmployeesCommand {
     }
 
     public void setCheckInTimeEnd(String checkInTimeEnd) {
-        this.checkInTimeEnd = ArchivesDateUtil.parseDate(checkInTimeEnd);
+        this.checkInTimeEnd = ArchivesUtil.parseDate(checkInTimeEnd);
     }
 
     public Date getEmploymentTimeStart() {
@@ -80,7 +80,7 @@ public class ListArchivesEmployeesCommand {
     }
 
     public void setEmploymentTimeStart(String employmentTimeStart) {
-        this.employmentTimeStart =  ArchivesDateUtil.parseDate(employmentTimeStart);
+        this.employmentTimeStart =  ArchivesUtil.parseDate(employmentTimeStart);
     }
 
     public Date getEmploymentTimeEnd() {
@@ -88,7 +88,7 @@ public class ListArchivesEmployeesCommand {
     }
 
     public void setEmploymentTimeEnd(String employmentTimeEnd) {
-        this.employmentTimeEnd =  ArchivesDateUtil.parseDate(employmentTimeEnd);
+        this.employmentTimeEnd =  ArchivesUtil.parseDate(employmentTimeEnd);
     }
 
     public Date getContractTimeStart() {
@@ -96,7 +96,7 @@ public class ListArchivesEmployeesCommand {
     }
 
     public void setContractTimeStart(String contractTimeStart) {
-        this.contractTimeStart =  ArchivesDateUtil.parseDate(contractTimeStart);
+        this.contractTimeStart =  ArchivesUtil.parseDate(contractTimeStart);
     }
 
     public Date getContractTimeEnd() {
@@ -104,7 +104,7 @@ public class ListArchivesEmployeesCommand {
     }
 
     public void setContractTimeEnd(String contractTimeEnd) {
-        this.contractTimeEnd =  ArchivesDateUtil.parseDate(contractTimeEnd);
+        this.contractTimeEnd =  ArchivesUtil.parseDate(contractTimeEnd);
     }
 
     public Byte getEmployeeStatus() {

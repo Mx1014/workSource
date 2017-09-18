@@ -15,6 +15,7 @@ import com.everhomes.server.schema.tables.pojos.EhArchivesConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhArchivesDismissEmployees;
 import com.everhomes.server.schema.tables.pojos.EhArchivesForms;
 import com.everhomes.server.schema.tables.pojos.EhArchivesStickyContacts;
+import com.everhomes.server.schema.tables.records.EhArchivesConfigurationsRecord;
 import com.everhomes.server.schema.tables.records.EhArchivesDismissEmployeesRecord;
 import com.everhomes.server.schema.tables.records.EhArchivesFormsRecord;
 import com.everhomes.server.schema.tables.records.EhArchivesStickyContactsRecord;
@@ -27,6 +28,7 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -201,4 +203,21 @@ public class ArchivesProviderImpl implements ArchivesProvider {
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesConfigurations.class, configuration.getId());
     }
+
+    @Override
+    public List<ArchivesConfigurations> listArchivesConfigurations(Date date){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesConfigurationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_CONFIGURATIONS);
+//        query.addConditions(Tables.EH_ARCHIVES_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId));
+//        query.addConditions(Tables.EH_ARCHIVES_CONFIGURATIONS.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ARCHIVES_CONFIGURATIONS.OPERATION_TIME.eq(date));
+        List<ArchivesConfigurations> results = new ArrayList<>();
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, ArchivesConfigurations.class));
+            return null;
+        });
+        if (null != results && 0 != results.size()) {
+            return results;
+        }
+        return null;    }
 }

@@ -1012,7 +1012,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     //  执行定时配置项
     @Override
     public void executeArchivesConfiguration(){
-
+        List<ArchivesConfigurations> configurations = archivesProvider.listArchivesConfigurations(ArchivesUtil.currentDate());
     }
 
 

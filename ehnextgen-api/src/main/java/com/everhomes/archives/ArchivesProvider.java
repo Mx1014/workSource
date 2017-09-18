@@ -2,6 +2,7 @@ package com.everhomes.archives;
 
 import org.jooq.Condition;
 
+import java.sql.Date;
 import java.util.List;
 
 public interface ArchivesProvider {
@@ -31,4 +32,6 @@ public interface ArchivesProvider {
     void createArchivesConfigurations(ArchivesConfigurations configuration);
 
     void updateArchivesConfigurations(ArchivesConfigurations configuration);
+
+    List<ArchivesConfigurations> listArchivesConfigurations(Date date);
 }

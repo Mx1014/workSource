@@ -235,7 +235,7 @@ public class UpdateArchivesEmployeeCommand {
     }
 
     public void setBirthday(String birthday) {
-        this.birthday = ArchivesDateUtil.parseDate(birthday);
+        this.birthday = ArchivesUtil.parseDate(birthday);
     }
 
     public Byte getMaritalFlag() {
@@ -251,7 +251,7 @@ public class UpdateArchivesEmployeeCommand {
     }
 
     public void setProcreative(String procreative) {
-        this.procreative = ArchivesDateUtil.parseDate(procreative);
+        this.procreative = ArchivesUtil.parseDate(procreative);
     }
 
     public String getEthnicity() {
@@ -299,7 +299,7 @@ public class UpdateArchivesEmployeeCommand {
     }
 
     public void setIdExpiryDate(String idExpiryDate) {
-        this.idExpiryDate = ArchivesDateUtil.parseDate(idExpiryDate);
+        this.idExpiryDate = ArchivesUtil.parseDate(idExpiryDate);
     }
 
     public String getDegree() {
@@ -323,7 +323,7 @@ public class UpdateArchivesEmployeeCommand {
     }
 
     public void setGraduationTime(String graduationTime) {
-        this.graduationTime = ArchivesDateUtil.parseDate(graduationTime);
+        this.graduationTime = ArchivesUtil.parseDate(graduationTime);
     }
 
     public String getContactToken() {
@@ -403,7 +403,7 @@ public class UpdateArchivesEmployeeCommand {
     }
 
     public void setCheckInTime(String checkInTime) {
-        this.checkInTime = ArchivesDateUtil.parseDate(checkInTime);
+        this.checkInTime = ArchivesUtil.parseDate(checkInTime);
     }
 
     public Byte getEmployeeType() {
@@ -427,7 +427,7 @@ public class UpdateArchivesEmployeeCommand {
     }
 
     public void setEmploymentTime(String employmentTime) {
-        this.employmentTime = ArchivesDateUtil.parseDate(employmentTime);
+        this.employmentTime = ArchivesUtil.parseDate(employmentTime);
     }
 
     public String getDepartment() {
@@ -491,7 +491,7 @@ public class UpdateArchivesEmployeeCommand {
     }
 
     public void setWorkStartTime(String workStartTime) {
-        this.workStartTime = ArchivesDateUtil.parseDate(workStartTime);
+        this.workStartTime = ArchivesUtil.parseDate(workStartTime);
     }
 
     public Date getContractStartTime() {
@@ -499,7 +499,7 @@ public class UpdateArchivesEmployeeCommand {
     }
 
     public void setContractStartTime(String contractStartTime) {
-        this.contractStartTime = ArchivesDateUtil.parseDate(contractStartTime);
+        this.contractStartTime = ArchivesUtil.parseDate(contractStartTime);
     }
 
     public Date getContractEndTime() {
@@ -507,7 +507,7 @@ public class UpdateArchivesEmployeeCommand {
     }
 
     public void setContractEndTime(String contractEndTime) {
-        this.contractEndTime = ArchivesDateUtil.parseDate(contractEndTime);
+        this.contractEndTime = ArchivesUtil.parseDate(contractEndTime);
     }
 
     public String getSalaryCardNumber() {

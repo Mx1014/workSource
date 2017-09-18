@@ -1,9 +1,9 @@
 package com.everhomes.rest.archives;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
-public class ArchivesDateUtil {
+public class ArchivesUtil {
 
     public static java.sql.Date parseDate(String strDate) {
         String str = strDate;
@@ -16,5 +16,15 @@ public class ArchivesDateUtil {
         }
         java.sql.Date date = new java.sql.Date(d.getTime());
         return date;
+    }
+
+    /**
+     * 当前日期(sql.Date类型)
+     * @return
+     */
+    public static java.sql.Date currentDate(){
+        Calendar cal = Calendar.getInstance();
+        java.util.Date date = cal.getTime();
+        return new java.sql.Date(date.getTime());
     }
 }

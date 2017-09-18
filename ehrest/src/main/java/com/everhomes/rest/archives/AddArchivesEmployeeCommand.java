@@ -94,7 +94,7 @@ public class AddArchivesEmployeeCommand {
     }
 
     public void setCheckInTime(String checkInTime) {
-        this.checkInTime = ArchivesDateUtil.parseDate(checkInTime);
+        this.checkInTime = ArchivesUtil.parseDate(checkInTime);
     }
 
     public Byte getEmployeeType() {
@@ -118,7 +118,7 @@ public class AddArchivesEmployeeCommand {
     }
 
     public void setEmploymentTime(String employmentTime) {
-        this.employmentTime =  ArchivesDateUtil.parseDate(employmentTime);
+        this.employmentTime =  ArchivesUtil.parseDate(employmentTime);
     }
 
     public List<Long> getDepartmentIds() {

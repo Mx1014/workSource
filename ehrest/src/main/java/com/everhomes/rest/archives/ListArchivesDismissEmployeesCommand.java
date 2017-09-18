@@ -56,7 +56,7 @@ public class ListArchivesDismissEmployeesCommand {
     }
 
     public void setDismissTimeStart(String dismissTimeStart) {
-        this.dismissTimeStart = ArchivesDateUtil.parseDate(dismissTimeStart);
+        this.dismissTimeStart = ArchivesUtil.parseDate(dismissTimeStart);
     }
 
     public Date getDismissTimeEnd() {
@@ -64,7 +64,7 @@ public class ListArchivesDismissEmployeesCommand {
     }
 
     public void setDismissTimeEnd(String dismissTimeEnd) {
-        this.dismissTimeEnd = ArchivesDateUtil.parseDate(dismissTimeEnd);
+        this.dismissTimeEnd = ArchivesUtil.parseDate(dismissTimeEnd);
     }
 
     public Date getCheckInTimeStart() {
@@ -72,7 +72,7 @@ public class ListArchivesDismissEmployeesCommand {
     }
 
     public void setCheckInTimeStart(String checkInTimeStart) {
-        this.checkInTimeStart = ArchivesDateUtil.parseDate(checkInTimeStart);
+        this.checkInTimeStart = ArchivesUtil.parseDate(checkInTimeStart);
     }
 
     public Date getCheckInTimeEnd() {
@@ -80,7 +80,7 @@ public class ListArchivesDismissEmployeesCommand {
     }
 
     public void setCheckInTimeEnd(String checkInTimeEnd) {
-        this.checkInTimeEnd = ArchivesDateUtil.parseDate(checkInTimeEnd);
+        this.checkInTimeEnd = ArchivesUtil.parseDate(checkInTimeEnd);
     }
 
     public Byte getDismissType() {
