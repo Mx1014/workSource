@@ -5808,7 +5808,7 @@ public class PunchServiceImpl implements PunchService {
         if (null == employees ||  employees.size() == 0)
             return wb;
         for (PunchSchedulingEmployeeDTO employee : employees )
-            setNewPunchSchedulingsBookRow(sheet, employee );
+            setNewPunchSchedulingsBookRow(sheet, employee ,queryTime);
         return wb;
 	}
 	private void createPunchSchedulingsBookSheetHead(Sheet sheet, Long queryTime) {
@@ -5829,13 +5829,25 @@ public class PunchServiceImpl implements PunchService {
 			row.createCell(++cellNum).setCellValue(sf.format(startCalendar.getTime()));
 		}
 	}
-	private void setNewPunchSchedulingsBookRow(Sheet sheet, PunchSchedulingEmployeeDTO employee ) {
+	private void setNewPunchSchedulingsBookRow(Sheet sheet, PunchSchedulingEmployeeDTO employee, Long queryTime) {
+
+		Calendar startCalendar = Calendar.getInstance();
+		Calendar endCalendar = Calendar.getInstance();
+		startCalendar.setTime(new Date(queryTime));
+		startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+		startCalendar.set(Calendar.MINUTE, 0);
+		startCalendar.set(Calendar.SECOND, 0);
+		startCalendar.set(Calendar.MILLISECOND, 0);
+		endCalendar.setTime(startCalendar.getTime());
+		endCalendar.add(Calendar.MONTH, 1);
+
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int i = -1;
 		row.createCell(++i).setCellValue(employee.getContactName());
 		if(null != employee.getDaySchedulings())
-			for( String paiban : employee.getDaySchedulings()){
-				row.createCell(++i).setCellValue(paiban);
+			for(;startCalendar.before(endCalendar);startCalendar.add(Calendar.DAY_OF_MONTH, 1)){
+				row.createCell(++i).setCellValue(employee.getDaySchedulings()
+						.get(startCalendar.get(Calendar.DAY_OF_MONTH) - 1));
 			}
 	}
 	/**
