@@ -107,6 +107,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 		User user = UserContext.current().getUser();
 		incubatorApply.setApplyUserId(user.getId());
 		incubatorApply.setApproveStatus(ApproveStatus.WAIT.getCode());
+		incubatorApply.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		incubatorProvider.createIncubatorApply(incubatorApply);
 		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApply, IncubatorApplyDTO.class);
 		populateApproveUserName(dto);
