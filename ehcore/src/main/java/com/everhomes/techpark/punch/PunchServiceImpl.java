@@ -6909,7 +6909,7 @@ public class PunchServiceImpl implements PunchService {
         }
         String[] statusList =null;
         if(null != pdl) {
-            if(pdl.getTimeRuleId()>0L){
+            if(pdl.getTimeRuleId() != null && pdl.getTimeRuleId()>0L){
                 ptr = punchProvider.getPunchTimeRuleById(pdl.getTimeRuleId());
             }
             response.setStatusList(pdl.getStatusList());
@@ -7017,6 +7017,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private Long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
+		LOGGER.debug("find rule time ptr:"+JSON.toJSONString(ptr));
 		if(ptr.getPunchTimesPerDay().intValue() == 2){
 			if (punchType.equals(PunchType.ON_DUTY.getCode())) {
 				return ptr.getStartEarlyTimeLong();
