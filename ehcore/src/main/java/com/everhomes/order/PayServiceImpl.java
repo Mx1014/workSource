@@ -139,10 +139,6 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         com.everhomes.util.StringHelper.toStringMap(null, cmd, params);
         params.remove("signature");
 
-        //TODO get signature to delete
-        String teetsignature = SignatureHelper.computeSignature(params, paymentAccount.getSecretKey());
-        LOGGER.info("my signature={}, get signature={}", teetsignature, cmd.getSignature());
-        
         if(!SignatureHelper.verifySignature(params, paymentAccount.getSecretKey(), cmd.getSignature())) {
             LOGGER.error("Notification signature verify fail");
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_SIGNATURE_VERIFY_FAIL,
@@ -159,9 +155,9 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
 
         //检查订单是否存在
-        PaymentOrderRecord orderRecord = payProvider.findOrderRecordByOrderIdAndPaymentOrderId(cmd.getOrderId(), Long.valueOf(cmd.getBizOrderNum()));
+        PaymentOrderRecord orderRecord = payProvider.findOrderRecordById(Long.valueOf(cmd.getBizOrderNum()));
         if(orderRecord == null){
-            LOGGER.error("can not find order record by orderId={}, paymentOrderId={}", cmd.getOrderId(), cmd.getBizOrderNum());
+            LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "can not find order record");
         }

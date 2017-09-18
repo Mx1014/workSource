@@ -12,7 +12,7 @@ import java.util.List;
 public interface PayProvider {
     PaymentOrderRecord findOrderRecordByOrder(String orderType, Long orderId);
 
-    PaymentOrderRecord findOrderRecordByOrderIdAndPaymentOrderId(Long orderId, Long paymentOrderId);
+    PaymentOrderRecord findOrderRecordById(Long id);
 
     PaymentUser findPaymentUserByOwner(String ownerType, Long ownerId);
 
