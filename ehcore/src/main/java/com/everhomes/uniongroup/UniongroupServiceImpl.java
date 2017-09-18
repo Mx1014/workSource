@@ -189,7 +189,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             }).collect(Collectors.toList());
 
             //4.保存
-            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
+//            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
 
                 //--------------------------1.保存配置表--------------------------
                 if (configureList.size() > 0) {
@@ -201,15 +201,20 @@ public class UniongroupServiceImpl implements UniongroupService {
                 }
                 if (unionDetailsList.size() > 0) {
                     //--------------------------2.保存关系表--------------------------
-                    this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(new ArrayList(detailIds));
+
+                    List detailIdsArray =  detailIds.stream().map(r->{
+                        return r.longValue();
+                    }).collect(Collectors.toList());
+
+                    this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(detailIdsArray);
                     //后保存
                     this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(unionDetailsList);
                 }
 
                 return null;
             });
-            return null;
-        });
+//            return null;
+//        });
 
 
         //5.同步搜索引擎
