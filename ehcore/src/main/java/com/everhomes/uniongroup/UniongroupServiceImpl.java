@@ -48,7 +48,7 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Override
     public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        dbProvider.execute((TransactionStatus status) -> {
+        this.dbProvider.execute((TransactionStatus status) -> {
 
 
             //已存在（即已分配薪酬组的）的部门集合
