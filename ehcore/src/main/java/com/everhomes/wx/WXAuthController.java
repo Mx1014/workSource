@@ -276,7 +276,7 @@ public class WXAuthController {// extends ControllerBase
             //将参数拼接到链接中传给页面 add by yanjun 20170918
             params.remove(KEY_SOURCE_URL);
             sourceUrl = appendParamToUrl(sourceUrl, params);
-            
+
             redirectByWx(response, sourceUrl);
             
         }

@@ -168,6 +168,7 @@ import com.everhomes.server.schema.tables.pojos.EhGroupSettings;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhHotTags;
 import com.everhomes.server.schema.tables.pojos.EhImportFileTasks;
+import com.everhomes.server.schema.tables.pojos.EhIncubatorApplies;
 import com.everhomes.server.schema.tables.pojos.EhItemServiceCategries;
 import com.everhomes.server.schema.tables.pojos.EhJournalConfigs;
 import com.everhomes.server.schema.tables.pojos.EhJournals;
@@ -2158,6 +2159,10 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_EXPRESS_COMPANY_BUSINESSES.ID.max()).from(Tables.EH_EXPRESS_COMPANY_BUSINESSES).fetchOne().value1();
         });
         
+        syncTableSequence(null, EhIncubatorApplies.class, Tables.EH_INCUBATOR_APPLIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_INCUBATOR_APPLIES.ID.max()).from(Tables.EH_INCUBATOR_APPLIES).fetchOne().value1();
+        });
+
         syncTableSequence(null, EhExpressHotlines.class, Tables.EH_EXPRESS_HOTLINES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EXPRESS_HOTLINES.ID.max()).from(Tables.EH_EXPRESS_HOTLINES).fetchOne().value1();
         });
