@@ -139,6 +139,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         com.everhomes.util.StringHelper.toStringMap(null, cmd, params);
         params.remove("signature");
 
+        //TODO get signature to delete
+        String teetsignature = SignatureHelper.computeSignature(params, paymentAccount.getSecretKey());
+        LOGGER.info("my signature={}, get signature={}", teetsignature, cmd.getSignature());
+        
         if(!SignatureHelper.verifySignature(params, paymentAccount.getSecretKey(), cmd.getSignature())) {
             LOGGER.error("Notification signature verify fail");
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_SIGNATURE_VERIFY_FAIL,
