@@ -362,4 +362,19 @@ public class UserUiController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /ui/user/listAllCommunityScenes</b>
+	 * <p>列出当前域空间下的相关场景。</p>
+	 * <p>必须在请求的Header中提供域空间。</p>
+	 */
+	@RequestMapping("listAllCommunityScenes")
+	@RestReturn(value=SceneDTO.class, collection=true)
+	@RequireAuthentication(false)
+	public RestResponse listAllCommunityScenes() {
+		List<SceneDTO> sceneDtoList = userService.listTouristRelatedScenes();
+		RestResponse response = new RestResponse(sceneDtoList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
