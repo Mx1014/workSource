@@ -179,7 +179,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     @Override
     public void deleteUniongroupConfigresByOrgIds(Integer namespaceId, List<Long> orgIds) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhUniongroupConfiguresDao dao = new EhUniongroupConfiguresDao(context.configuration());
+//        EhUniongroupConfiguresDao dao = new EhUniongroupConfiguresDao(context.configuration());
         DeleteQuery<EhUniongroupConfiguresRecord> query = context.deleteQuery(Tables.EH_UNIONGROUP_CONFIGURES);
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_ID.in(orgIds));
@@ -199,7 +199,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         uniongroupMemberDetail.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         uniongroupMemberDetail.setOperatorUid(UserContext.current().getUser().getId());
         EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
-        List<UniongroupMemberDetail> list = new ArrayList<>();
+//        List<UniongroupMemberDetail> list = new ArrayList<>();
         dao.insert(uniongroupMemberDetail);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhUniongroupMemberDetails.class, id);
     }
@@ -244,7 +244,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     @Override
     public UniongroupMemberDetail findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId, String groupType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
+//        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
         SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(detailId));
