@@ -43,11 +43,13 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 
 		ActivityRoster roster = activityProvider.findRosterByOrderNo(cmd.getOrderId());
 		if(roster == null){
+			LOGGER.info("can not find roster by orderno = {}", cmd.getOrderId());
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
 					"no roster.");
 		}
 		Activity activity = activityProvider.findActivityById(roster.getActivityId());
 		if(activity == null){
+			LOGGER.info("can not find activity by id = {}", roster.getActivityId());
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
 					"no activity.");
 		}

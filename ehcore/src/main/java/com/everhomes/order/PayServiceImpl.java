@@ -162,6 +162,9 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
                     "can not find order record");
         }
 
+        //此处将orderId设置成业务系统的orderid，方便业务调用。原orderId为支付系统的orderid，业务不需要知道。
+        cmd.setOrderId(orderRecord.getOrderId());
+
         //调用具体业务
         PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(orderRecord.getOrderType()));
         LOGGER.debug("PaymentCallBackHandler="+handler.getClass().getName());
