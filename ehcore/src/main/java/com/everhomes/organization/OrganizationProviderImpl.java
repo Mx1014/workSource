@@ -4949,6 +4949,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						userOrganizations.setExecutiveTag(r.getValue(Tables.EH_USERS.EXECUTIVE_TAG));
 						userOrganizations.setPosition(r.getValue(Tables.EH_USERS.POSITION_TAG));
 						userOrganizations.setPhoneNumber(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+						userOrganizations.setNamespaceUserType(r.getValue(Tables.EH_USERS.NAMESPACE_USER_TYPE));
 						result.add(userOrganizations);
 						return null;
 					});

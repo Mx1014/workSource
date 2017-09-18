@@ -11,6 +11,7 @@ package com.everhomes.rest.community.admin;
  * <li>isAuth: 认证状态  1认证  2非认证</li>
  * <li>executiveFlag：是否高管 0-否 1-是</li>
  * <li>keywords: 关键字</li>
+ * <li>userSourceType: 用户来源 1：来源app 2：来源微信</li>
  * </ul>
  */
 public class ListCommunityUsersCommand {
@@ -32,6 +33,8 @@ public class ListCommunityUsersCommand {
 	private Long communityId;
 	
 	private Long organizationId;
+
+	private Byte userSourceType;
 
 	public Byte getGender() {
 		return gender;
@@ -109,6 +112,12 @@ public class ListCommunityUsersCommand {
 	public void setExecutiveFlag(Byte executiveFlag) {
 		this.executiveFlag = executiveFlag;
 	}
-	
-	
+
+	public Byte getUserSourceType() {
+		return userSourceType;
+	}
+
+	public void setUserSourceType(Byte userSourceType) {
+		this.userSourceType = userSourceType;
+	}
 }
