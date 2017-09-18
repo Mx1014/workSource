@@ -3,7 +3,7 @@ ALTER TABLE eh_parking_recharge_orders ADD COLUMN original_price decimal(10,2) D
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN card_request_id bigint(20) DEFAULT NULL;
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN invoice_type bigint(4) DEFAULT NULL;
 
-ALTER TABLE eh_parking_card_requests ADD COLUMN card_type VARCHAR(64) DEFAULT NULL;
+ALTER TABLE eh_parking_card_requests ADD COLUMN card_type_id VARCHAR(64) DEFAULT NULL;
 ALTER TABLE eh_parking_card_requests ADD COLUMN address_id bigint(20) DEFAULT NULL;
 ALTER TABLE eh_parking_card_requests ADD COLUMN invoice_type bigint(4) DEFAULT NULL;
 
