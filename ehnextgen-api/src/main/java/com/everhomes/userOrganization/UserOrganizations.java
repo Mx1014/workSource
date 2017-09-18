@@ -27,6 +27,8 @@ public class UserOrganizations extends EhUserOrganizations {
 
     private String identityNumberTag;
 
+    private String namespaceUserType;
+
     public String getUserName() {
         return userName;
     }
@@ -97,6 +99,14 @@ public class UserOrganizations extends EhUserOrganizations {
 
     public void setIdentityNumberTag(String identityNumberTag) {
         this.identityNumberTag = identityNumberTag;
+    }
+
+    public String getNamespaceUserType() {
+        return namespaceUserType;
+    }
+
+    public void setNamespaceUserType(String namespaceUserType) {
+        this.namespaceUserType = namespaceUserType;
     }
 
     public UserOrganizations() {

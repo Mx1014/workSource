@@ -1886,6 +1886,13 @@ public class CommunityServiceImpl implements CommunityService {
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
 				}
 
+
+				if(UserSourceType.WEIXIN == UserSourceType.fromCode(cmd.getUserSourceType())){
+					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
+				}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
+					query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.isNotNull());
+				}
+
 				if(null != cmd.getCommunityId()){
 					query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 				}
@@ -1961,6 +1968,14 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setOrganizations(organizations);
 			} else {
 				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+			}
+
+			if(NamespaceUserType.fromCode(r.getNamespaceUserType()) == NamespaceUserType.WX){
+				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+			}
+
+			if(null != dto.getIdentityNumber()){
+				dto.setUserSourceType(UserSourceType.APP.getCode());
 			}
 			userCommunities.add(dto);
 		}
