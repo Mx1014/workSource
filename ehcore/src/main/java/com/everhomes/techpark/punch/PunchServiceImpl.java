@@ -7017,6 +7017,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private Long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
+		LOGGER.debug("find rule time ptr:"+JSON.toJSONString(ptr));
 		if(ptr.getPunchTimesPerDay().intValue() == 2){
 			if (punchType.equals(PunchType.ON_DUTY.getCode())) {
 				return ptr.getStartEarlyTimeLong();
