@@ -1878,3 +1878,7 @@ UPDATE eh_organization_member_details md INNER JOIN (SELECT m.namespace_id,	m.de
 
 -- eh_uniongroup_member_details by lei.lv
 UPDATE eh_uniongroup_member_details ud INNER JOIN (SELECT o.namespace_id, d.detail_id FROM eh_organizations o INNER JOIN eh_uniongroup_member_details d ON d.enterprise_id = o.id) AS t1 ON t1.detail_id = ud.detail_id SET ud.namespace_id = t1.namespace_id;
+
+
+-- added by wh 刷错误数据,
+UPDATE  eh_punch_day_logs SET time_rule_id = NULL WHERE time_rule_id =1  ;
