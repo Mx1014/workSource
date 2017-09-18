@@ -19,8 +19,8 @@ public class PunchLogDTO {
 	private Long punchNormalTime;
 	private Integer punchIntervalNo;
 	private Byte punchType;
-	private long ruleTime;
-    private long punchTime; 
+	private Long ruleTime;
+    private Long punchTime;
     private Byte clockStatus;
       
 
@@ -45,10 +45,10 @@ public class PunchLogDTO {
 		this.punchNormalTime = punchNormalTime;
 	}
 
-	public long getPunchTime() {
+	public Long getPunchTime() {
 		return punchTime;
 	}
-	public void setPunchTime(long punchTime) {
+	public void setPunchTime(Long punchTime) {
 		this.punchTime = punchTime;
 	}
 
@@ -69,11 +69,11 @@ public class PunchLogDTO {
 		this.punchType = punchType;
 	}
 
-	public long getRuleTime() {
+	public Long getRuleTime() {
 		return ruleTime;
 	}
 
-	public void setRuleTime(long ruleTime) {
+	public void setRuleTime(Long ruleTime) {
 		this.ruleTime = ruleTime;
 	}
 
