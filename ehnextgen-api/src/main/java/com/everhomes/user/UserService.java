@@ -247,4 +247,6 @@ public interface UserService {
     VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
 
     UserLogin bindPhone(BindPhoneCommand cmd);
+
+    void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd);
 }

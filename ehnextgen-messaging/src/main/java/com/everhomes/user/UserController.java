@@ -1350,4 +1350,18 @@ public class UserController extends ControllerBase {
 		resp.setErrorDescription("OK");
 		return resp;
 	}
+	/**
+	 * <b>URL: /user/checkVerifyCodeAndResetPassword</b>
+	 * <p>校验验证码并重置密码</p>
+	 * @return  OK
+	 */
+	@RequestMapping(value = "checkVerifyCodeAndResetPassword")
+	@RestReturn(String.class)
+	public RestResponse checkVerifyCodeAndResetPassword(@Valid CheckVerifyCodeAndResetPasswordCommand cmd) {
+		userService.checkVerifyCodeAndResetPassword(cmd);
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
 }

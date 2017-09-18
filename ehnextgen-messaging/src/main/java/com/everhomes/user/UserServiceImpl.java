@@ -4980,4 +4980,38 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	@Override
+	public void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd) {
+		assert StringUtils.isNotEmpty(cmd.getVerifyCode());
+		assert StringUtils.isNotEmpty(cmd.getIdentifierToken());
+		assert StringUtils.isNotEmpty(cmd.getNewPassword());
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		UserIdentifier identifier = userProvider.findIdentifierByVerifyCode(cmd.getVerifyCode(),
+				cmd.getIdentifierToken());
+		if (null == identifier) {
+			LOGGER.error("invalid operation,can not find verify information");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
+					"invalid params");
+		}
+
+		// check the expire time
+		if (DateHelper.currentGMTTime().getTime() - identifier.getNotifyTime().getTime() > 10 * 60000) {
+			LOGGER.error("the verifycode is invalid with timeout");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
+		}
+
+		if(namespaceId == null || identifier.getNamespaceId() == null || namespaceId.intValue() != identifier.getNamespaceId().intValue()){
+			LOGGER.error("the namespaceId is invalid");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_INVALID_PARAMS, "Invalid namespaceId");
+		}
+
+
+		// find user by uid
+		User user = userProvider.findUserById(identifier.getOwnerUid());
+		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", cmd.getNewPassword(), user.getSalt())));
+		userProvider.updateUser(user);
+
+	}
 }
