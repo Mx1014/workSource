@@ -3167,8 +3167,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	public void transferOrganizationSuperAdmin(TransferOrganizationSuperAdminCommand cmd){
 		dbProvider.execute((TransactionStatus status) ->{
-			deleteOrganizationAdmin(cmd.getOrganizationId(),cmd.getOriginalContactToken(),PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
 			createOrganizationAdmin(cmd.getOrganizationId(),cmd.getNewContactName(),cmd.getNewContactToken(),PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+			deleteOrganizationAdmin(cmd.getOrganizationId(),cmd.getOriginalContactToken(),PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
 			return null;
 		});
 	}

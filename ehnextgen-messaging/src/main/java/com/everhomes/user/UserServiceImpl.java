@@ -4430,7 +4430,7 @@ public class UserServiceImpl implements UserService {
         }
 
         //	设置隐私保护值
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(),dto.getOrganizationId());
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(dto.getContactToken(),dto.getOrganizationId());
         dto.setVisibleFlag(member.getVisibleFlag());
     }
 
