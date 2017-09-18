@@ -2057,10 +2057,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 							receivers.forEach(receiver -> {
 								PmNotifyReceiver pmNotifyReceiver = new PmNotifyReceiver();
 								pmNotifyReceiver.setReceiverType(receiver.getReceiverType());
-								List<Long> ids = receiver.getReceivers().stream().map(receiverName -> {
-									return receiverName.getId();
-								}).collect(Collectors.toList());
-								pmNotifyReceiver.setReceiverIds(ids);
+								if(receiver != null && receiver.getReceivers() != null) {
+									List<Long> ids = receiver.getReceivers().stream().map(receiverName -> {
+										return receiverName.getId();
+									}).collect(Collectors.toList());
+									pmNotifyReceiver.setReceiverIds(ids);
+								}
+
 								pmNotifyReceivers.add(pmNotifyReceiver);
 							});
 							receiverList.setReceivers(pmNotifyReceivers);
