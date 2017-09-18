@@ -108,7 +108,20 @@ public class IncubatorServiceImpl implements IncubatorService {
 		incubatorApply.setApplyUserId(user.getId());
 		incubatorApply.setApproveStatus(ApproveStatus.WAIT.getCode());
 		incubatorApply.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		incubatorProvider.createIncubatorApply(incubatorApply);
+		dbProvider.execute((status)->{
+			incubatorProvider.createIncubatorApply(incubatorApply);
+			//如果是重新申请，更新父记录。此处的关系放在父记录维护是为了查询方便，不用每条记录都遍历查询子记录
+			if(cmd.getParentId() != null){
+				IncubatorApply parentIncubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
+				if(parentIncubatorApply != null){
+					parentIncubatorApply.setReApplyId(incubatorApply.getId());
+					incubatorProvider.updateIncubatorApply(parentIncubatorApply);
+				}
+
+			}
+			return null;
+		});
+
 		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApply, IncubatorApplyDTO.class);
 		populateApproveUserName(dto);
 		return dto;

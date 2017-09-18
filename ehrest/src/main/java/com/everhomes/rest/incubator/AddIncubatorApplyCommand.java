@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *     <li>chargerPhone: chargerPhone</li>
  *     <li>chargerEmail: chargerEmail</li>
  *     <li>chargerWechat: chargerWechat</li>
+ *     <li>parentId: 如果是重新申请的，需要传之前记录的id</li>
  * </ul>
  */
 public class AddIncubatorApplyCommand {
@@ -29,6 +30,7 @@ public class AddIncubatorApplyCommand {
 	String chargerPhone;
 	String chargerEmail;
 	String chargerWechat;
+	Long parentId;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -108,6 +110,14 @@ public class AddIncubatorApplyCommand {
 
 	public void setChargerWechat(String chargerWechat) {
 		this.chargerWechat = chargerWechat;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import java.sql.Timestamp;
  *     <li>approveTime: approveTime</li>
  *     <li>approveOpinion: approveOpinion</li>
  *     <li>createTime: createTime</li>
+ *     <li>reApplyId: 如果该记录被拒绝后又重新申请，此字段为新申请记录的Id</li>
  * </ul>
  */
 public class IncubatorApplyDTO {
@@ -46,6 +47,7 @@ public class IncubatorApplyDTO {
 	Timestamp approveTime;
 	String approveOpinion;
 	Timestamp createTime;
+	Long reApplyId;
 
 	public Long getId() {
 		return id;
@@ -189,6 +191,14 @@ public class IncubatorApplyDTO {
 
 	public void setApplyUserId(Long applyUserId) {
 		this.applyUserId = applyUserId;
+	}
+
+	public Long getReApplyId() {
+		return reApplyId;
+	}
+
+	public void setReApplyId(Long reApplyId) {
+		this.reApplyId = reApplyId;
 	}
 
 	@Override
