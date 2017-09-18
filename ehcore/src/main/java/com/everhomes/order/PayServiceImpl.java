@@ -355,7 +355,8 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         if(cmd.getExpiration() != null) {
             createOrderCmd.setExpirationMillis(cmd.getExpiration());
         }
-        createOrderCmd.setSummary(cmd.getSummary());
+        //TODO 临时删除
+        //createOrderCmd.setSummary(cmd.getSummary());
         createOrderCmd.setPayeeUserId(serviceConfig.getPaymentUserId());
         createOrderCmd.setPayerUserId(paymentUser.getPaymentUserId());
         createOrderCmd.setFrontUrl(null);
