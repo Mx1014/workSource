@@ -4917,6 +4917,11 @@ public class UserServiceImpl implements UserService {
 				user.setStatus(UserStatus.INACTIVE.getCode());
 				userProvider.updateUser(user);
 			}
+//
+			UserLogin oldLogin = UserContext.current().getLogin();
+			if(oldLogin != null){
+				this.logoff(oldLogin);
+			}
 
 			UserLogin login = createLogin(namespaceId, existUser, null, null);
 			login.setStatus(UserLoginStatus.LOGGED_IN);

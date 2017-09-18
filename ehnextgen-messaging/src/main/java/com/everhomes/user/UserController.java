@@ -1329,12 +1329,15 @@ public class UserController extends ControllerBase {
 	public RestResponse bindPhone(@Valid BindPhoneCommand cmd, HttpServletRequest request, HttpServletResponse response) {
 		UserLogin login = this.userService.bindPhone(cmd);
 		if(login != null){
+
 			LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
 			String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
 			
 			//微信公众号的accessToken过期时间是7200秒，需要设置cookie小于7200。
 			//防止用户在coreserver处于登录状态而accessToken已过期，重新登录之后会刷新accessToken   add by yanjun 20170906
 			WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response, 7000);
+			//TODO
+			LOGGER.info("new token={}", tokenString);
 		}
 
 
