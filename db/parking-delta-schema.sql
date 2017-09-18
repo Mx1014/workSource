@@ -19,13 +19,24 @@ CREATE TABLE `eh_parking_invoice_types` (
   `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` bigint(20) NOT NULL DEFAULT '0',
   `parking_lot_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'reference to id of eh_parking_lots',
-  `name` varchar(64) DEFAULT NULL COMMENT 'the name of plate owner',
-  `status` tinyint(4) DEFAULT NULL COMMENT '0: inactive, 1: queueing, 2: notified, 3: issued',
+  `name` varchar(64) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT NULL COMMENT '0: inactive, 2: active',
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_parking_card_types` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `parking_lot_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'reference to id of eh_parking_lots',
+  `card_type_id` varchar(128) DEFAULT NULL,
+  `card_type_name` varchar(128) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT NULL COMMENT '0: inactive, 2: active',
 
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- 增加联系人职位 add by xiongying 20170914
