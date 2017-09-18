@@ -18,6 +18,7 @@ CREATE TABLE `eh_incubator_applies` (
 `approve_time`  datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP ,
 `approve_opinion`  varchar(255) NULL ,
 `create_time`  datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP ,
+`re_apply_id`  bigint(22) NULL COMMENT '重新申请的Id',
 PRIMARY KEY (`id`)
 );
 -- 入孵申请项目类型 add by yanjun 20170913
