@@ -78,7 +78,7 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 	}
 
 	private List<PortalItemCategory> listPortalItemCategory(Integer namespaceId, Long itemGroupId, String name, Byte status) {
-		Condition cond = Tables.EH_PORTAL_ITEM_CATEGORIES.STATUS.eq(PortalItemCategoryStatus.ACTIVE.getCode());
+		Condition cond = Tables.EH_PORTAL_ITEM_CATEGORIES.NAMESPACE_ID.eq(namespaceId);
 		if(null != itemGroupId){
 			cond = cond.and(Tables.EH_PORTAL_ITEM_CATEGORIES.ITEM_GROUP_ID.eq(itemGroupId));
 		}
@@ -92,8 +92,7 @@ public class PortalItemCategoryProviderImpl implements PortalItemCategoryProvide
 		}
 
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEM_CATEGORIES)
-				.where(Tables.EH_PORTAL_ITEM_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
-				.and(cond)
+				.where(cond)
 				.orderBy(Tables.EH_PORTAL_ITEM_CATEGORIES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItemCategory.class));
 	}
