@@ -13,6 +13,7 @@ import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.order.PaymentCallBackCommand;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
@@ -58,7 +59,8 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 		checkPayAmount(cmd.getAmount(), activity.getChargePrice());
 		//支付宝回调时，可能会同时回调多次，
 		roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
-		roster.setPayTime(new Timestamp(Long.valueOf(cmd.getPayDatetime())));
+		Long paytime = DateHelper.parseDataString(cmd.getPayDatetime(), "YYYY-MM-DD HH:mm:ss").getTime();
+		roster.setPayTime(new Timestamp(paytime));
 		roster.setPayAmount(new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100)));
 		roster.setVendorType(String.valueOf(cmd.getPaymentType()));
 		roster.setOrderType(String.valueOf(cmd.getPaymentType()));
