@@ -490,13 +490,15 @@ public class NewsServiceImpl implements NewsService {
 	 * 拼接搜索串的部分移出来并增加highlight部分，以便后续处理
 	 * xiongying
 	 */
-	private String getSearchJson(Long communityId, Long userId, Integer namespaceId, Long categoryId, String keyword,List<Long> tagIds,
+	private  String getSearchJson(Long communityId, Long userId, Integer namespaceId, Long categoryId, String keyword,List<Long> tagIds,
 								 Long pageAnchor, Integer pageSize) {
 		Long from = pageAnchor * pageSize;
 
 		// {\"from\":0,\"size\":15,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[],\"should\":[]}}}}}
 		JSONObject json = JSONObject.parseObject(
-				"{\"from\":0,\"size\":0,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[]}}}},\"highlight\":{\"fragment_size\":60,\"number_of_fragments\":0,\"fields\":{\"title\":{}}}}");
+				"{\"from\":0,\"size\":0,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":" +
+						"{\"must\":[]}}}},\"highlight\":{\"fields\":{\"title\":{\"fragment_size\":60,\"number_of_fragments\":0}," +
+						"\"content\":{\"fragment_size\":20,\"number_of_fragments\":1}}}}");
 		// 设置from和size
 		json.put("from", from);
 		json.put("size", pageSize + 1);
@@ -1486,5 +1488,7 @@ public class NewsServiceImpl implements NewsService {
 		Long userId = UserContext.current().getUser().getId();
 		setNewsLikeFlag(userId, cmd.getNewsToken());
 	}
+
+
  
 }
