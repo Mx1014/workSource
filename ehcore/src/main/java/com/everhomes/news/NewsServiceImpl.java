@@ -496,7 +496,7 @@ public class NewsServiceImpl implements NewsService {
 
 		// {\"from\":0,\"size\":15,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[],\"should\":[]}}}}}
 		JSONObject json = JSONObject.parseObject(
-				"{\"from\":0,\"size\":0,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[]}}}},\"highlight\":{\"fragment_size\":60,\"number_of_fragments\":0,\"fields\":{\"title\":{},\"content\":{},\"sourceDesc\":{}}}}");
+				"{\"from\":0,\"size\":0,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[]}}}},\"highlight\":{\"fragment_size\":60,\"number_of_fragments\":0,\"fields\":{\"title\":{}}}}");
 		// 设置from和size
 		json.put("from", from);
 		json.put("size", pageSize + 1);
@@ -532,10 +532,10 @@ public class NewsServiceImpl implements NewsService {
 		//设置高亮
 		JSONObject highLight = json.getJSONObject("highlight");
 		JSONArray preTags = new JSONArray();
-		preTags.add("<span style=\"color:red\">");
+		preTags.add("<b class=\"news-keyword\">");
 		highLight.put("pre_tags",preTags);
 		JSONArray postTags = new JSONArray();
-		postTags.add("</span>");
+		postTags.add("</b>");
 		highLight.put("post_tags",postTags);
 
 		return json.toJSONString();
@@ -580,6 +580,7 @@ public class NewsServiceImpl implements NewsService {
 			newsDTO.setLikeFlag(getUserLikeFlag(userId, o.getLong("id")).getCode());
 			newsDTO.setCategoryId(o.getLong("categoryId"));
 			newsDTO.setVisibleType(o.getString("visibleType"));
+			newsDTO.setHighlightFields(o.getString("highlight"));
 
 			newsDTO.setCommentFlag(NewsNormalFlag.ENABLED.getCode());
 			if (commentForbiddenFlag) {

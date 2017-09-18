@@ -26,6 +26,7 @@ import com.everhomes.util.StringHelper;
  * <li>newsUrl: 新闻链接(供分享)</li>
  * <li>phone: 联系电话</li>
  * <li>categoryId: 新闻类型ID</li>
+ * <li>highlightFields: 新闻类型ID</li>
  * <li>commentFlag: 新闻是否可以评论，1：可以 0：禁止 {@link NewsNormalFlag}</li>
  * </ul>
  */
@@ -46,6 +47,8 @@ public class BriefNewsDTO {
 	private Long categoryId;
 	private Byte commentFlag;
 	private String visibleType;
+
+	private String highlightFields;
 
 	@ItemType(ProjectDTO.class)
 	private List<ProjectDTO> projectDTOS;
@@ -192,4 +195,11 @@ public class BriefNewsDTO {
 		this.phone = phone;
 	}
 
+	public String getHighlightFields() {
+		return highlightFields;
+	}
+
+	public void setHighlightFields(String highlightFields) {
+		this.highlightFields = highlightFields;
+	}
 }
