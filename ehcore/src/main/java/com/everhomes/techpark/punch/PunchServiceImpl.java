@@ -1239,6 +1239,7 @@ public class PunchServiceImpl implements PunchService {
 			return createPunchLog(cmd, punchTime,  punchCode);
 		}catch(Exception e){
 			//有报错就表示不成功
+			LOGGER.error("punch clock error",e);
 			PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
 			punchLog.setPunchStatus(ClockCode.FAIL.getCode());
 			punchProvider.createPunchLog(punchLog);
@@ -1305,7 +1306,7 @@ public class PunchServiceImpl implements PunchService {
 		    	try {
 					refreshPunchDayLog(userId, cmd.getEnterpriseId(), punCalendar);
 				} catch (Exception e) {
-					LOGGER.error(e.toString(),e);
+					LOGGER.error("refresh punch day log error",e);
 					throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 							PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
 							"Something wrong with refresh PunchDayLog");
