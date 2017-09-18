@@ -6909,7 +6909,7 @@ public class PunchServiceImpl implements PunchService {
         }
         String[] statusList =null;
         if(null != pdl) {
-            if(pdl.getTimeRuleId()>0L){
+            if(pdl.getTimeRuleId() != null && pdl.getTimeRuleId()>0L){
                 ptr = punchProvider.getPunchTimeRuleById(pdl.getTimeRuleId());
             }
             response.setStatusList(pdl.getStatusList());
