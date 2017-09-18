@@ -3871,7 +3871,6 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchRule getPunchRule(String ownerType, Long ownerId,Long userId){
 		UniongroupMemberDetail detail = findUserMemberDetail(userId, ownerId);
-		LOGGER.debug("detail is " + JSON.toJSONString(detail));
 		if (null == detail)
 			return null;
 		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(detail.getGroupId());
