@@ -35,18 +35,18 @@ public class PayController extends ControllerBase {
 	@RestReturn(value=String.class)
 	@RequireAuthentication(false)
 	public RestResponse payNotify(@Valid OrderPaymentNotificationCommand cmd) {
-		try{
+//		try{
 			payService.payNotify(cmd);
 			RestResponse response = new RestResponse();
 			response.setErrorCode(ErrorCodes.SUCCESS);
 			response.setErrorDescription("OK");
 			return response;
-		}catch (Exception ex){
-			RestResponse response = new RestResponse();
-			response.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
-			response.setErrorDescription("FAIL");
-			return response;
-		}
+//		}catch (Exception ex){
+//			RestResponse response = new RestResponse();
+//			response.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+//			response.setErrorDescription("FAIL");
+//			return response;
+//		}
 
 	}
 

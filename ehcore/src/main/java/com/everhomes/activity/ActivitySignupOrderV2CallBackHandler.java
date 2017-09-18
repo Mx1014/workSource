@@ -14,6 +14,7 @@ import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.order.PaymentCallBackCommand;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 
 	@Override
 	public void paySuccess(OrderPaymentNotificationCommand cmd) {
-		LOGGER.info("ActivitySignupOrderV2CallBackHandler paySuccess start cmd = {}", cmd);
+		LOGGER.info("ActivitySignupOrderV2CallBackHandler paySuccess start cmd = {}", StringHelper.toJsonString(cmd));
 
 		ActivityRoster roster = activityProvider.findRosterByOrderNo(cmd.getOrderId());
 		if(roster == null){
@@ -63,7 +64,6 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 		roster.setOrderType(String.valueOf(cmd.getPaymentType()));
 		activityProvider.updateRoster(roster);
 
-		LOGGER.info("ActivitySignupOrderV2CallBackHandler paySuccess end");
 	}
 
 	@Override
