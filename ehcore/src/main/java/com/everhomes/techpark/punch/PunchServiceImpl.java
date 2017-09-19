@@ -6731,6 +6731,8 @@ public class PunchServiceImpl implements PunchService {
 			PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
 
 			List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
+			LOGGER.debug("saveUnion Time0 "+  System.currentTimeMillis());
+
 
 			//添加关联
 			SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
