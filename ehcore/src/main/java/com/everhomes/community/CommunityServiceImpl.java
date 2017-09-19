@@ -2116,6 +2116,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 			}
 		}
+
+
 		int authUserCount = 0;
 		if(namespaceId == Namespace.DEFAULT_NAMESPACE){
 			if(null == cmd.getOrganizationId() && null == cmd.getCommunityId()){
@@ -2130,9 +2132,17 @@ public class CommunityServiceImpl implements CommunityService {
 			if(null == cmd.getCommunityId())
 				communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
 			else
-				communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
+				communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId());
 
-			authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
+			if(CommunityUserStatisticsType.fromCode(cmd.getStatisticsType()) == CommunityUserStatisticsType.AUTHENTICATION){
+				authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
+			}else{
+				if(null == cmd.getCommunityId())
+					authUserCount = userProvider.countUserByNamespaceIdAndNamespaceUserType(namespaceId, NamespaceUserType.WX.getCode());
+				else
+					authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null, NamespaceUserType.WX.getCode());
+
+			}
 
 		}
 

@@ -4966,7 +4966,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
+	public Integer countUserOrganization(Integer namespaceId, Long communityId){
+		return countUserOrganization(namespaceId, communityId, null, null);
+	}
+
+	@Override
 	public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus){
+		return countUserOrganization(namespaceId, communityId, userOrganizationStatus, null);
+	}
+
+	@Override
+	public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType){
 		List<Long> result = new ArrayList<>();
 		dbProvider.mapReduce(AccessSpec.readOnly(), null,
 				(DSLContext context, Object reducingContext) -> {
@@ -4983,6 +4993,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 					query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
 					if(null != communityId){
 						query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
+					}
+					if(!StringUtils.isEmpty(namespaceUserType)){
+						query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(namespaceUserType));
 					}
 					query.addGroupBy(Tables.EH_USERS.ID);
 					LOGGER.debug("query sql:{}", query.getSQL());
