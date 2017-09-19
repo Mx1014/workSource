@@ -588,6 +588,13 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setInvoiceType(cmd.getInvoiceType());
 
 		parkingRechargeOrder.setPrice(cmd.getPrice());
+		if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getTempFeeDiscountFlag()) {
+			parkingRechargeOrder.setOriginalPrice(cmd.getPrice());
+			BigDecimal newPrice = cmd.getPrice().multiply(new BigDecimal(parkingLot.getTempFeeDiscount()))
+					.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+			parkingRechargeOrder.setPrice(newPrice);
+		}
+
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
     		ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
 

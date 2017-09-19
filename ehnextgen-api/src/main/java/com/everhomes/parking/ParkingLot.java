@@ -33,10 +33,10 @@ public class ParkingLot extends EhParkingLots {
     private String contact;
 
     private Byte monthlyDiscountFlag;
-    private Integer monthlyDiscount;
+    private String monthlyDiscount;
 
     private Byte tempFeeDiscountFlag;
-    private Integer tempFeeDiscount;
+    private String tempFeeDiscount;
 
     private Byte invoiceFlag;
 
@@ -56,12 +56,20 @@ public class ParkingLot extends EhParkingLots {
         this.monthlyDiscountFlag = monthlyDiscountFlag;
     }
 
-    public Integer getMonthlyDiscount() {
+    public String getMonthlyDiscount() {
         return monthlyDiscount;
     }
 
-    public void setMonthlyDiscount(Integer monthlyDiscount) {
+    public void setMonthlyDiscount(String monthlyDiscount) {
         this.monthlyDiscount = monthlyDiscount;
+    }
+
+    public String getTempFeeDiscount() {
+        return tempFeeDiscount;
+    }
+
+    public void setTempFeeDiscount(String tempFeeDiscount) {
+        this.tempFeeDiscount = tempFeeDiscount;
     }
 
     public Byte getTempFeeDiscountFlag() {
@@ -70,14 +78,6 @@ public class ParkingLot extends EhParkingLots {
 
     public void setTempFeeDiscountFlag(Byte tempFeeDiscountFlag) {
         this.tempFeeDiscountFlag = tempFeeDiscountFlag;
-    }
-
-    public Integer getTempFeeDiscount() {
-        return tempFeeDiscount;
-    }
-
-    public void setTempFeeDiscount(Integer tempFeeDiscount) {
-        this.tempFeeDiscount = tempFeeDiscount;
     }
 
     public static long getSerialVersionUID() {

@@ -3,6 +3,7 @@ package com.everhomes.rest.parking;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 /**
@@ -32,10 +33,10 @@ public class ParkingLotDTO {
     private Byte expiredRechargeType;
 
     private Byte monthlyDiscountFlag;
-    private Integer monthlyDiscount;
+    private String monthlyDiscount;
 
     private Byte tempFeeDiscountFlag;
-    private Integer tempFeeDiscount;
+    private String tempFeeDiscount;
 
     //申请月卡的模式
     private Integer flowMode;
@@ -71,12 +72,20 @@ public class ParkingLotDTO {
         this.monthlyDiscountFlag = monthlyDiscountFlag;
     }
 
-    public Integer getMonthlyDiscount() {
+    public String getMonthlyDiscount() {
         return monthlyDiscount;
     }
 
-    public void setMonthlyDiscount(Integer monthlyDiscount) {
+    public void setMonthlyDiscount(String monthlyDiscount) {
         this.monthlyDiscount = monthlyDiscount;
+    }
+
+    public String getTempFeeDiscount() {
+        return tempFeeDiscount;
+    }
+
+    public void setTempFeeDiscount(String tempFeeDiscount) {
+        this.tempFeeDiscount = tempFeeDiscount;
     }
 
     public Byte getTempFeeDiscountFlag() {
@@ -87,13 +96,6 @@ public class ParkingLotDTO {
         this.tempFeeDiscountFlag = tempFeeDiscountFlag;
     }
 
-    public Integer getTempFeeDiscount() {
-        return tempFeeDiscount;
-    }
-
-    public void setTempFeeDiscount(Integer tempFeeDiscount) {
-        this.tempFeeDiscount = tempFeeDiscount;
-    }
 
     public Byte getCurrentInfoType() {
         return currentInfoType;
