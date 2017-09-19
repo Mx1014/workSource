@@ -56,6 +56,7 @@ DROP TABLE IF EXISTS `eh_payment_order_records`;
 CREATE TABLE `eh_payment_order_records` (
 	`id` BIGINT NOT NULL,
 	`service_config_id` BIGINT NOT NULL COMMENT '业务服务类型,eh_payment_service.id',
+	`payment_order_type` INTEGER NOT NULL COMMENT '支付系统单据类型,1-充值,2-提现,3-支付,4-退款',
 	`order_type` VARCHAR(64) NOT NULL COMMENT '服务类型,填parking/rentalOrder等',
 	`order_id` BIGINT NOT NULL COMMENT '业务订单编号',
 	`payment_order_id` BIGINT NOT NULL COMMENT '支付系统支付单号',
