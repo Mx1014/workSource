@@ -5112,12 +5112,12 @@ public class PunchServiceImpl implements PunchService {
             }
 			//刷月报
 
+			addPunchStatistics(member, orgId, startCalendar, punCalendar);
 
 		} catch (Exception e) {
 			LOGGER.error("#####refresh day log error!! userid:["+member.getTargetId()
 					+"] organization id :["+orgId+"] ",e);
 		}
-		addPunchStatistics(member, orgId, startCalendar, punCalendar);
 	}
 	@Override
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd) {
