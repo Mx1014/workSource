@@ -2902,6 +2902,10 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setCommunityType(CommunityType.RESIDENTIAL.getCode());
 		sceneDto.setStatus(familyDto.getMembershipStatus());
 		sceneDto.setCommunityId(familyDto.getCommunityId());
+		if(familyDto.getCommunityId() != null){
+			Community community = this.communityProvider.findCommunityById(familyDto.getCommunityId());
+			sceneDto.setCommunityName(community.getName());
+		}
 
 		return sceneDto;
 	}
@@ -3010,6 +3014,8 @@ public class UserServiceImpl implements UserService {
 		OrganizationCommunityRequest organizationCommunityRequest = this.organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationDto.getId());
 		if(organizationCommunityRequest != null){
 			sceneDto.setCommunityId(organizationCommunityRequest.getCommunityId());
+			Community community = this.communityProvider.findCommunityById(organizationCommunityRequest.getCommunityId());
+			sceneDto.setCommunityName(community.getName());
 		}
 
 		return sceneDto;
@@ -3204,6 +3210,7 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setSceneToken(sceneToken);
 		sceneDto.setCommunityType(community.getCommunityType());
 		sceneDto.setCommunityId(community.getId());
+		sceneDto.setCommunityName(community.getName());
 
 		return sceneDto;
 	}
