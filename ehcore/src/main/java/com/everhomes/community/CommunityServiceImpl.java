@@ -2109,6 +2109,8 @@ public class CommunityServiceImpl implements CommunityService {
 				CountCommunityUserResponse resp = new CountCommunityUserResponse();
 				resp.setCommunityUsers(allCount);
 				resp.setAuthUsers(authCount);
+				resp.setWxUserCount(authCount);
+				resp.setAppUserCount(allCount - authCount);
 				resp.setNotAuthUsers(allCount - authCount);
 				
 				return resp;
