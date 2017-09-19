@@ -49,7 +49,17 @@ public class FieldServiceImpl implements FieldService {
     }
 
     private List<FieldDTO> listScopeFields(ListFieldCommand cmd) {
-        List<ScopeField> scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getModuleName(), cmd.getGroupPath());
+        List<ScopeField> scopeFields = new ArrayList<>();
+        Boolean namespaceFlag = true;
+        if(cmd.getCommunityId() != null) {
+            scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath());
+            if(scopeFields != null && scopeFields.size() > 0) {
+                namespaceFlag = false;
+            }
+        }
+        if(namespaceFlag) {
+            scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, cmd.getModuleName(), cmd.getGroupPath());
+        }
         if(scopeFields != null && scopeFields.size() > 0) {
             List<Long> fieldIds = new ArrayList<>();
             Map<Long, FieldDTO> dtoMap = new HashMap<>();
@@ -98,7 +108,17 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd) {
-        List<ScopeFieldItem> fieldItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId());
+        List<ScopeFieldItem> fieldItems = new ArrayList<>();
+        Boolean namespaceFlag = true;
+        if(cmd.getCommunityId() != null) {
+            fieldItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId(), cmd.getCommunityId());
+            if(fieldItems != null && fieldItems.size() > 0) {
+                namespaceFlag = false;
+            }
+        }
+        if(namespaceFlag) {
+            fieldItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId(), null);
+        }
         if(fieldItems != null && fieldItems.size() > 0) {
             List<FieldItemDTO> dtos = fieldItems.stream().map(item -> {
                 FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
@@ -326,7 +346,18 @@ public class FieldServiceImpl implements FieldService {
     }
 
     private List<FieldGroupDTO> listScopeFieldGroups(ListFieldGroupCommand cmd) {
-        List<ScopeFieldGroup> groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getModuleName());
+        List<ScopeFieldGroup> groups = new ArrayList<>();
+        Boolean namespaceFlag = true;
+        if(cmd.getCommunityId() != null) {
+            groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
+            if(groups != null && groups.size() > 0) {
+                namespaceFlag = false;
+            }
+        }
+        if(namespaceFlag) {
+            groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), null, cmd.getModuleName());
+        }
+
         if(groups != null && groups.size() > 0) {
             List<Long> groupIds = new ArrayList<>();
             Map<Long, FieldGroupDTO> dtoMap = new HashMap<>();

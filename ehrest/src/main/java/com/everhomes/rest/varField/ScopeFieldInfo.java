@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>moduleName: 字段所属的模块类型名</li>
  *     <li>fieldId: 在系统里的字段id</li>
  *     <li>fieldDisplayName: 字段名</li>
- *     <li>fieldParam: 字段描述，json 如：{fieldParamType: "file", length: 9}，字段类型枚举型，参考{@link FieldParamType}</li>
+ *     <li>fieldParam: 字段描述，json 如：{fieldParamType: "file", length: 9}，字段类型枚举型，参考{@link com.everhomes.rest.varField.FieldParamType}</li>
  *     <li>mandatoryFlag: 是否必填 0: 否; 1: 是</li>
  *     <li>defaultOrder: 顺序</li>
  * </ul>

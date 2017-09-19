@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>namespaceId: 域空间id</li>
  *     <li>moduleName: 模块名</li>
+ *     <li>communityId: 项目id</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -14,6 +15,16 @@ public class ListFieldGroupCommand {
     private String moduleName;
 
     private Integer namespaceId;
+
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public String getModuleName() {
         return moduleName;

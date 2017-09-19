@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>namespaceId: 域空间id</li>
+ *     <li>communityId: 项目id</li>
  *     <li>moduleName: 模块名</li>
  *     <li>groupPath: 所属字段组在系统中的path</li>
  * </ul>
@@ -13,11 +14,21 @@ import com.everhomes.util.StringHelper;
 public class ListFieldCommand {
     private Integer namespaceId;
 
+    private Long communityId;
+
     private String moduleName;
 
 //    private Long groupId;
 
     private String groupPath;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public String getModuleName() {
         return moduleName;
