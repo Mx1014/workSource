@@ -1976,7 +1976,7 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
 			}
 
-			if(null != dto.getIdentityNumber()){
+			if(null != dto.getPhone()){
 				dto.setUserSourceType(UserSourceType.APP.getCode());
 			}
 			userCommunities.add(dto);
@@ -2155,6 +2155,8 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
 		resp.setCommunityUsers(communityUserCount);
+		resp.setWxUserCount(authUserCount);
+		resp.setAppUserCount(notAuthUsers);
 		resp.setAuthUsers(authUserCount);
 		resp.setNotAuthUsers(notAuthUsers);
 
