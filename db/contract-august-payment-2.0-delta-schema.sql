@@ -124,6 +124,7 @@ CREATE TABLE `eh_asset_payment_order` (
 -- ----------------------------
 -- Table structure for eh_asset_payment_order_bills
 -- ----------------------------
+-- changeSomething
 DROP TABLE IF EXISTS `eh_asset_payment_order_bills`;
 CREATE TABLE `eh_asset_payment_order_bills` (
   `id` bigint(20) NOT NULL,
