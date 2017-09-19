@@ -2708,12 +2708,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     public List<OrganizationSimpleDTO> listUserRelateOrganizations(Long userId){
         List<OrganizationSimpleDTO> orgs = new ArrayList<>();
-
-        List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
         Set<Long> organizationIds = new HashSet<>();
-        for (RoleAssignment roleAssignment: roleAssignments) {
-            if(EntityType.ORGANIZATIONS == EntityType.fromCode(roleAssignment.getOwnerType()) && (roleAssignment.getRoleId() == RoleConstants.PM_SUPER_ADMIN || roleAssignment.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN)){
-                organizationIds.add(roleAssignment.getOwnerId());
+
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(null, OrganizationMemberGroupType.MANAGER.getCode());
+        for (OrganizationMember member: members) {
+            if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
+                organizationIds.add(member.getOrganizationId());
             }
         }
 
