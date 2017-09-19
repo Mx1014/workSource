@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *     <li>identifierToken: 用户手机号或者邮箱</li>
+ *     <li>identifierToken: 用户手机号</li>
  *     <li>verifyCode: 验证码</li>
  *     <li>newPassword: 新密码</li>
  * </ul>
