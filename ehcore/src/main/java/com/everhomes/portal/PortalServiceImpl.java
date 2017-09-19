@@ -1543,7 +1543,7 @@ public class PortalServiceImpl implements PortalService {
 					item.setItemLabel(portalItem.getLabel());
 					item.setItemName(portalItem.getName());
 					item.setDeleteFlag(DeleteFlagType.YES.getCode());
-					item.setScaleType(ScaleType.TAILOR.getCode());
+					item.setScaleType(ScaleType.NONE.getCode());
 
 					//更多全部不进行分类
 					if(PortalItemActionType.fromCode(portalItem.getActionType()) != PortalItemActionType.ALLORMORE){
