@@ -1019,6 +1019,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         ListArchivesDismissEmployeesResponse response = new ListArchivesDismissEmployeesResponse();
 
         Condition condition = listDismissEmployeesCondition(cmd);
+        if(cmd.getPageSize() == null)
+            cmd.setPageSize(20);
 
         List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(cmd.getPageAnchor(), cmd.getPageSize() + 1, namespaceId, condition);
 
