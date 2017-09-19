@@ -131,7 +131,9 @@ CREATE TABLE `eh_asset_payment_order_bills` (
   `bill_id` varchar(20) DEFAULT NULL,
   `bill_description` varchar(255) DEFAULT NULL,
   `order_id` bigint(20) DEFAULT NULL,
-  `amount` decimal(10,2) DEFAULT NULL
+  `amount` decimal(10,2) DEFAULT NULL,
+  `namespace_id` int(10) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

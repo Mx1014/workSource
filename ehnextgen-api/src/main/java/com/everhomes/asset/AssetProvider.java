@@ -141,7 +141,9 @@ public interface AssetProvider {
 
     String findIdentifierByUid(Long aLong);
 
-    Long saveAnOrderCopy(String payerType, String payerId, String amountOwed, String billIdsWithComma, String clientAppName, Long communityId, String contactNum, String openid, String payerName, Long expireTimePeriod);
+    Long saveAnOrderCopy(String payerType, String payerId, String amountOwed,  String clientAppName, Long communityId, String contactNum, String openid, String payerName, Long expireTimePeriod);
 
-    AssetPaymentOrder findOrderById(Long orderId);
+    Long findAssetOrderByBillIds(List<String> billIds);
+
+    void saveOrderBills(List<BillIdAndAmount> bills, Long orderId);
 }

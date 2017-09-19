@@ -573,12 +573,20 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        //先进行存储
+        //先进行检查是否重复下单,查询此传来bills是否有对应的order，如果有，那么检查订单的状态，如果订单已经完毕，则返回
         List<BillIdAndAmount> bills = cmd.getBills();
-
-        String billIdsWithComma = assetUtils.convertStringList2CommaSeparation(billIds);
-//        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),cmd.getAmountOwed(),billIdsWithComma,cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),15l*60l*1000l);
-        Long orderId = 372345452133252l;
+        List<String> billIds = new ArrayList<>();
+        for(BillIdAndAmount billIdAndAmount : bills){
+            billIds.add(billIdAndAmount.getBillId());
+        }
+        Long checkedOrderId = assetProvider.findAssetOrderByBillIds(billIds);
+        if(checkedOrderId !=null){
+            //重复下单的返回
+            return null;
+        }
+        //如果账单为新的，则进行存储
+        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),cmd.getAmountOwed(),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),15l*60l*1000l);
+        assetProvider.saveOrderBills(bills,orderId);
         Random r = new Random();
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < 7; i++){
