@@ -17,6 +17,10 @@ public class CountCommunityUserResponse {
 	
 	private Integer notAuthUsers;
 
+	private Integer wxUserCount;
+
+	private Integer appUserCount;
+
 	public Integer getCommunityUsers() {
 		return communityUsers;
 	}
@@ -40,7 +44,23 @@ public class CountCommunityUserResponse {
 	public void setNotAuthUsers(Integer notAuthUsers) {
 		this.notAuthUsers = notAuthUsers;
 	}
-	
+
+	public Integer getWxUserCount() {
+		return wxUserCount;
+	}
+
+	public void setWxUserCount(Integer wxUserCount) {
+		this.wxUserCount = wxUserCount;
+	}
+
+	public Integer getAppUserCount() {
+		return appUserCount;
+	}
+
+	public void setAppUserCount(Integer appUserCount) {
+		this.appUserCount = appUserCount;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
