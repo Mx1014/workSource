@@ -1,11 +1,12 @@
 //@formatter:off
 package com.everhomes.order;
 
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 
 /**
  * Created by Wentian on 2017/9/7.
  */
+
+import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 
 /**
  * <p>订单支付回调处理类<p>
