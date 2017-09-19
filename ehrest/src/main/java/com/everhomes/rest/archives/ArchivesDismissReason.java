@@ -2,32 +2,32 @@ package com.everhomes.rest.archives;
 
 /**
  * <ul>
- * <li>SALARY("薪资"): 薪资</li>
- * <li>CULTURE("文化"): 文化</li>
- * <li>BALANCE("生活平衡"): 生活平衡</li>
- * <li>PERSONALREASON("个人原因"): 个人原因</li>
- * <li>CAREERDEVELOPMENT("职业发展"): 职业发展</li>
- * <li>FIRE("不胜任"): 不胜任</li>
- * <li>ADJUSTMENT("编制调整"): 编制调整</li>
- * <li>BREAKRULE("违纪"): 违纪</li>
- * <li>OTHER("其他"): 其他</li>
+ * <li>SALARY((byte) 0): 薪资</li>
+ * <li>CULTURE((byte) 1): 文化</li>
+ * <li>BALANCE((byte) 2): 生活平衡</li>
+ * <li>PERSONAL_REASON((byte) 3): 个人原因</li>
+ * <li>CAREER_DEVELOPMENT((byte) 4): 职业发展</li>
+ * <li>FIRE((byte) 5): 不胜任</li>
+ * <li>ADJUSTMENT((byte) 6): 编制调整</li>
+ * <li>BREAK_RULE((byte) 7): 违纪</li>
+ * <li>OTHER((byte) 8): 其他</li>
  * </ul>
  */
 public enum ArchivesDismissReason {
-    SALARY("薪资"), CULTURE("文化"), BALANCE("生活平衡"), PERSONALREASON("个人原因"), CAREERDEVELOPMENT("职业发展"),
-    FIRE("不胜任"), ADJUSTMENT("编制调整"), BREAKRULE("违纪"), OTHER("其他");
+    SALARY((byte) 0), CULTURE((byte) 1), BALANCE((byte) 2), PERSONAL_REASON((byte) 3), CAREER_DEVELOPMENT((byte) 4),
+    FIRE((byte) 5), ADJUSTMENT((byte) 6), BREAK_RULE((byte) 7), OTHER((byte) 8);
 
-    private String code;
+    private Byte code;
 
-    private ArchivesDismissReason(String code) {
+    private ArchivesDismissReason(Byte code) {
         this.code = code;
     }
 
-    public String getCode() {
+    public Byte getCode() {
         return this.code;
     }
 
-    public static ArchivesDismissReason fromCode(String code) {
+    public static ArchivesDismissReason fromCode(Byte code) {
         if (code != null) {
             ArchivesDismissReason[] values = ArchivesDismissReason.values();
             for (ArchivesDismissReason value : values) {

@@ -70,6 +70,17 @@ CREATE TABLE `eh_archives_configurations` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
+DROP TABLE IF EXISTS `eh_archives_logs`;
+CREATE TABLE `eh_archives_logs` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+	`organization_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of organization',
+	`detail_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of organization_member_detail',
+	`operation_type` TINYINT NOT NULL COMMENT'the type of operation',
+	`operation_category` TINYINT NOT NULL COMMENT'the category of operation',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
+
 -- eh_organization_member_details 表的字段添加
 ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE COMMENT '离职日期';
 ALTER TABLE eh_organization_member_details CHANGE political_status political_flag VARCHAR(128) COMMENT '政治面貌';
