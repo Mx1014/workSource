@@ -76,19 +76,6 @@ public class UniongroupServiceImpl implements UniongroupService {
                         //如果有重复的配置项，则删除前一个配置项
                         this.uniongroupConfigureProvider.deleteUniongroupConfigres(old_uc);
                     }
-//                //覆盖去重
-//                if(r.getType().equals(UniongroupTargetType.ORGANIZATION.getCode())){
-//                    //找到配置表中已经被分配薪酬组的 这个部门的 子部门
-//                    Organization org = this.organizationProvider.findOrganizationById(r.getId());
-//                    List<Long> old_atGroup_ids = this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfiguresByGroupId(namespaceId, cmd.getEnterpriseId(), cmd.getGroupId());
-//                    List<Organization> old_atGroup_orgs = this.organizationProvider.listOrganizationsByIds(old_atGroup_ids);
-//                    List<Long> under_atGroup_OrgIds = checkUnderOrganizationIdsAtConfigures(org.getPath(), old_atGroup_orgs);
-//                    if(under_atGroup_OrgIds.size() > 0){
-//                        //如果在『同一个groupId』中且有包含的配置项，删除被包含的部门的记录
-//                        this.uniongroupConfigureProvider.deleteUniongroupConfigresByOrgIds(namespaceId, under_atGroup_OrgIds);
-//                    }
-//                }
-
                     UniongroupConfigures uc = new UniongroupConfigures();
                     uc.setNamespaceId(namespaceId);
                     uc.setEnterpriseId(cmd.getEnterpriseId());
@@ -191,7 +178,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             LOGGER.debug("saveUnion Time2 "+  System.currentTimeMillis());
 
             //4.保存
-            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
+//            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
 
                 //--------------------------1.保存配置表--------------------------
                 if (configureList.size() > 0) {
@@ -217,8 +204,8 @@ public class UniongroupServiceImpl implements UniongroupService {
 
                 return null;
             });
-            return null;
-        });
+//            return null;
+//        });
 
         LOGGER.debug("saveUnion Time4 "+  System.currentTimeMillis());
         //5.同步搜索引擎

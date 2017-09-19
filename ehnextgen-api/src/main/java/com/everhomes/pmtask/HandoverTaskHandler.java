@@ -5,7 +5,7 @@ package com.everhomes.pmtask;
  */
 public interface HandoverTaskHandler {
     String HANDOVER_VENDOR_PREFIX = "HandoverVendor-";
-    int ZJGK = 9999;
+    int ZJGK = 999971;
 //    Integer ZJGK = 9999;
 
     void handoverTaskToTrd(PmTask task);
