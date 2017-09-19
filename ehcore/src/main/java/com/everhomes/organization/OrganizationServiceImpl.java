@@ -9563,8 +9563,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 for (Long departmentId : departmentIds) {
                     Organization o = checkOrganization(departmentId);
                     if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())) {
-                        if(o.getId() == org.getId()){//如果是总公司
-                            //直属场景
+                        if(o.getId().longValue() == org.getId().longValue()){
+                            //如果是总公司
                             direct_under_enterpriseIds.add(o.getId());
                         }
                         if (!enterpriseIds.contains(o.getId())) {
