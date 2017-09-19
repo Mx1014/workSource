@@ -87,26 +87,24 @@ CREATE TABLE `eh_payment_types` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_payment_order`;
-CREATE TABLE `eh_payment_order` (
+DROP TABLE IF EXISTS `eh_asset_payment_order`;
+CREATE TABLE `eh_asset_payment_order` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `uuid` varchar(36) NOT NULL,
   `payer_name` varchar(128) DEFAULT NULL,
   `payer_type` varchar(32) DEFAULT NULL,
   `uid` bigint(20) DEFAULT NULL,
   `contract_id` varchar(2048) DEFAULT NULL,
-  `namespace_id` integer DEFAULT NULL,
-  `bill_ids` varchar(2048) DEFAULT NULL,
+  `namespace_id` int(11) DEFAULT NULL,
   `client_app_name` varchar(128) DEFAULT NULL,
   `u_name` varchar(64) DEFAULT NULL,
   `family_id` bigint(20) DEFAULT NULL,
   `organization_name` varchar(128) DEFAULT NULL,
-  `organization_id` bigint DEFAULT NULL,
+  `organization_id` bigint(20) DEFAULT NULL,
   `community_id` varchar(64) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion policy, user directly managed data',
   `phone` varchar(32) DEFAULT NULL,
   `real_name` varchar(128) DEFAULT NULL,
-  `gender` tinyint(4) DEFAULT NULL,
+  `gender` tinyint(4) DEFAULT NULL COMMENT '0:female;1:male',
   `position` varchar(64) DEFAULT NULL,
   `email` varchar(128) DEFAULT NULL,
   `pay_flag` tinyint(4) DEFAULT '0' COMMENT '0: have not paid, 1:have paid',
@@ -120,8 +118,18 @@ CREATE TABLE `eh_payment_order` (
   `refund_order_no` bigint(20) DEFAULT NULL,
   `status` tinyint(4) DEFAULT '2' COMMENT '0: cancel, 1: reject, 2:normal',
   `cancel_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_asset_order_uuid` (`uuid`)
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ----------------------------
+-- Table structure for eh_asset_payment_order_bills
+-- ----------------------------
+DROP TABLE IF EXISTS `eh_asset_payment_order_bills`;
+CREATE TABLE `eh_asset_payment_order_bills` (
+  `id` bigint(20) NOT NULL,
+  `bill_id` varchar(20) DEFAULT NULL,
+  `bill_description` varchar(255) DEFAULT NULL,
+  `order_id` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
