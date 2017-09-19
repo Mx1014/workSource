@@ -191,7 +191,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             LOGGER.debug("saveUnion Time2 "+  System.currentTimeMillis());
 
             //4.保存
-            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
+//            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
 
                 //--------------------------1.保存配置表--------------------------
                 if (configureList.size() > 0) {
@@ -217,8 +217,8 @@ public class UniongroupServiceImpl implements UniongroupService {
 
                 return null;
             });
-            return null;
-        });
+//            return null;
+//        });
 
         LOGGER.debug("saveUnion Time4 "+  System.currentTimeMillis());
         //5.同步搜索引擎
