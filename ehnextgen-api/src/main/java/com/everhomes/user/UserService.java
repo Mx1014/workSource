@@ -3,6 +3,7 @@ package com.everhomes.user;
 
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -243,4 +244,7 @@ public interface UserService {
 
     List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd);
 
+    SceneDTO getProfileScene();
+
+    List<SceneDTO> listUserRelateScenesByCommunityId(ListUserRelateScenesByCommunityId cmd);
 }

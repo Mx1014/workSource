@@ -377,4 +377,35 @@ public class UserUiController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /ui/user/getProfileScene</b>
+	 * <p>获取已存储的场景信息。</p>
+	 */
+	@RequestMapping("getProfileScene")
+	@RestReturn(value=SceneDTO.class)
+	@RequireAuthentication(false)
+	public RestResponse getProfileScene() {
+		SceneDTO sceneDto = userService.getProfileScene();
+		RestResponse response = new RestResponse(sceneDto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /ui/user/listUserRelateScenesByCommunityId</b>
+	 * <p>判断用户在子场景下是否有关联的公司场景。</p>
+	 */
+	@RequestMapping("listUserRelateScenesByCommunityId")
+	@RestReturn(value=SceneDTO.class, collection=true)
+	@RequireAuthentication(false)
+	public RestResponse listUserRelateScenesByCommunityId(ListUserRelateScenesByCommunityId cmd) {
+		List<SceneDTO> sceneDtoList = userService.listUserRelateScenesByCommunityId(cmd);
+		RestResponse response = new RestResponse(sceneDtoList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

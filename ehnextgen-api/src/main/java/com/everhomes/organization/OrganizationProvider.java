@@ -441,7 +441,9 @@ public interface OrganizationProvider {
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
 	List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId,List<String> groupTypes);
 	
+	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType);
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
+	Integer countUserOrganization(Integer namespaceId, Long communityId);
 
 	//	根据 group_type 查找薪酬组 added by R 20170630
 	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId);

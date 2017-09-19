@@ -107,7 +107,6 @@ import com.everhomes.sms.*;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
-import org.jooq.Case;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -3749,6 +3748,9 @@ public class UserServiceImpl implements UserService {
 				sceneList.add(sceneDTO);
 			}
 		}
+		sceneList.stream().filter(r->{
+			return r.getSceneToken() != null;
+		}).collect(Collectors.toList());
 		return sceneList;
 	}
 
@@ -4701,6 +4703,45 @@ public class UserServiceImpl implements UserService {
 		Collections.reverse(sceneList);
 		return sceneList;
 	}
+
+	@Override
+	public SceneDTO getProfileScene() {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Long userId = UserContext.current().getUser().getId();
+		SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
+		if(communityScene != null){
+			return communityScene;
+		}
+		return null;
+	}
+
+	@Override
+	public List<SceneDTO> listUserRelateScenesByCommunityId(ListUserRelateScenesByCommunityId cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Long userId = UserContext.current().getUser().getId();
+
+		List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
+		// 列出用户有效家庭 mod by xiongying 20160523
+		addFamilySceneToList(userId, namespaceId, sceneList);
+		// 处于某个公司对应的场景
+		addOrganizationSceneToList(userId, namespaceId, sceneList);
+
+		//当关联场景不为空，且与参数中的园区id相匹配时，返回关联的场景
+		if (sceneList.size() > 0) {
+			sceneList.stream().filter(r -> {
+				return r.getCommunityId() == cmd.getCommunityId();
+			});
+			if (sceneList.size() > 0) {
+				return sceneList;
+			}
+		}
+
+		//当关联场景为空，且没有与参数中的园区id相匹配时，返回参数用的社区场景
+		sceneList.clear();
+		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+		sceneList.add(convertCommunityToScene(namespaceId, userId, community));
+		return sceneList;
+}
 
 	private List<SceneDTO> addFamilySceneToList(Long userId, Integer namespaceId, List<SceneDTO> sceneList){
 		List<FamilyDTO> familyList = this.familyProvider.getUserFamiliesByUserId(userId);
