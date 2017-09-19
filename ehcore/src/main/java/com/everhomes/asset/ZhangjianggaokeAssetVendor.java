@@ -573,9 +573,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-//        PlaceAnAssetOrderResponse response = new PlaceAnAssetOrderResponse();
-        //存一份到我这
-        List<String> billIds = cmd.getBillIds();
+        //先进行存储
+        List<BillIdAndAmount> bills = cmd.getBills();
+
         String billIdsWithComma = assetUtils.convertStringList2CommaSeparation(billIds);
 //        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),cmd.getAmountOwed(),billIdsWithComma,cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),15l*60l*1000l);
         Long orderId = 372345452133252l;
