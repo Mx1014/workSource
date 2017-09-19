@@ -183,14 +183,14 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
             ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
 
-            String type = null;
+            ParkingCardType temp = null;
             for(ParkingCardType t: types) {
                 if(t.getTypeId().equals(r.getCardType())) {
-                    type = t.getTypeName();
+                    temp = t;
                 }
             }
-
-            dto.setCardType(type);
+            dto.setCardTypeId(temp.getTypeId());
+            dto.setCardType(temp.getTypeName());
             dto.setRateToken(r.getId().toString());
             dto.setVendorName(ParkingLotVendor.XIAOMAO.getCode());
             return dto;

@@ -102,31 +102,31 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 
     	if(StringUtils.isBlank(plateNumber)) {
     		for(KetuoCardType k: types) {
-				populateRateInfo(k.getCarType(), k.getTypeName(), list);
+				populateRateInfo(k.getCarType(), k, list);
     		}
     	}else{
     		KetuoCard cardInfo = getCard(plateNumber);
     		if(null != cardInfo) {
 				String carType = cardInfo.getCarType();
-				String typeName = null;
+				KetuoCardType type = null;
 				for(KetuoCardType kt: types) {
 					if(carType.equals(kt.getCarType())) {
-						typeName = kt.getTypeName();
+						type = kt;
 						break;
 					}
 				}
-				populateRateInfo(carType, typeName, list);
+				populateRateInfo(carType, type, list);
     		}
     	}
 
 		return list.stream().map(r -> convertParkingRechargeRateDTO(parkingLot, r)).collect(Collectors.toList());
     }
 
-	void populateRateInfo(String carType, String typeName, List<KetuoCardRate> result) {
+	void populateRateInfo(String carType, KetuoCardType type, List<KetuoCardRate> result) {
 		for(KetuoCardRate rate: getCardRule(carType)) {
 			if(RULE_TYPE.equals(rate.getRuleType())) {
 				rate.setCarType(carType);
-				rate.setTypeName(typeName);
+				rate.setTypeName(type.getTypeName());
 				result.add(rate);
 			}
 		}
@@ -145,6 +145,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		String locale = Locale.SIMPLIFIED_CHINESE.toString();
 		String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 		dto.setRateName(rateName);
+		dto.setCardTypeId(rate.getCarType());
 		dto.setCardType(rate.getTypeName());
 		dto.setMonthCount(new BigDecimal(rate.getRuleAmount()));
 		dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
@@ -243,7 +244,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		param.put("orderNo", order.getOrderToken());
 		param.put("amount", (order.getPrice().multiply(new BigDecimal(100))).intValue());
 	    param.put("discount", 0);
-	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?4:5);
+	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
 		String json = post(param, PAY_TEMP_FEE);
 
         JSONObject jsonObject = JSONObject.parseObject(json);

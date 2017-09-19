@@ -97,6 +97,7 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 			String locale = getLocale();
 			String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 			dto.setRateName(rateName);
+			dto.setCardTypeId(cardType.getCardTypeId());
 			dto.setCardType(cardType.getCardTypeName());
 			dto.setMonthCount(new BigDecimal(monthCount));
 			dto.setPrice(new BigDecimal(r.getFee()));

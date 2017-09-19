@@ -319,7 +319,10 @@ public class ParkingServiceImpl implements ParkingService {
 			parkingCardRequest.setFlowId(flowId);
     		parkingCardRequest.setFlowCaseId(flowCase.getId());
     		parkingProvider.updateParkingCardRequest(parkingCardRequest);
-    		return null;
+
+			createParkingUserInvoice(cmd.getInvoiceType(), parkingLot, user);
+
+			return null;
 		});
 		ParkingCardRequestDTO parkingCardRequestDTO = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
 		
@@ -607,9 +610,15 @@ public class ParkingServiceImpl implements ParkingService {
     		handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
 
     	}
-		
-		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);	
-		
+
+    	dbProvider.execute(status -> {
+			parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);
+
+			createParkingUserInvoice(cmd.getInvoiceType(), parkingLot, user);
+
+			return null;
+		});
+
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
 		orderCmd.setBody(ParkingRechargeType.fromCode(parkingRechargeOrder.getRechargeType()).toString());
@@ -639,7 +648,27 @@ public class ParkingServiceImpl implements ParkingService {
     	
 		return dto;
 	}
-	
+
+	private void createParkingUserInvoice(Long invoiceType, ParkingLot parkingLot, User user) {
+		if (null != invoiceType) {
+			ParkingUserInvoice userType = parkingProvider.findParkingUserInvoiceByUserId(parkingLot.getOwnerType(),
+					parkingLot.getOwnerId(), parkingLot.getId(), user.getId());
+			if (null == userType) {
+				ParkingUserInvoice parkingUserInvoice = new ParkingUserInvoice();
+				parkingUserInvoice.setNamespaceId(user.getNamespaceId());
+				parkingUserInvoice.setOwnerType(parkingLot.getOwnerType());
+				parkingUserInvoice.setOwnerId(parkingLot.getOwnerId());
+				parkingUserInvoice.setParkingLotId(parkingLot.getId());
+				parkingUserInvoice.setUserId(user.getId());
+				parkingUserInvoice.setInvoiceTypeId(invoiceType);
+				parkingProvider.createParkingUserInvoice(parkingUserInvoice);
+			}else {
+				userType.setInvoiceTypeId(invoiceType);
+				parkingProvider.updateParkingUserInvoice(userType);
+			}
+		}
+	}
+
 	@Override
 	public ListParkingRechargeOrdersResponse listParkingRechargeOrders(ListParkingRechargeOrdersCommand cmd){
 		
@@ -797,25 +826,25 @@ public class ParkingServiceImpl implements ParkingService {
 	public void setParkingLotConfig(SetParkingLotConfigCommand cmd){
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		
-		if(null == cmd.getIsSupportRecharge()){
-        	LOGGER.error("IsSupportRecharge cannot be null.");
+		if(null == cmd.getExpiredRechargeFlag()){
+        	LOGGER.error("ExpiredRechargeFlag cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"IsSupportRecharge cannot be null.");
+    				"ExpiredRechargeFlag cannot be null.");
         }
 
-		ParkingRechargeConfig config = new ParkingRechargeConfig();
-		config.setExpiredRechargeFlag(cmd.getIsSupportRecharge());
-
-		if(ParkingConfigFlag.SUPPORT.getCode() == cmd.getIsSupportRecharge()) {
-
-			config.setMaxExpiredDay(cmd.getReserveDay());
-			config.setExpiredRechargeMonthCount(cmd.getRechargeMonthCount());
-			config.setExpiredRechargeType(cmd.getRechargeType());
-		}else {
-			config.setMaxExpiredDay(0);
-			config.setExpiredRechargeMonthCount(1);
-			config.setExpiredRechargeType(ParkingCardExpiredRechargeType.ALL.getCode());
-		}
+		ParkingRechargeConfig config = ConvertHelper.convert(cmd, ParkingRechargeConfig.class);
+//		config.setExpiredRechargeFlag(cmd.getIsSupportRecharge());
+//
+//		if(ParkingConfigFlag.SUPPORT.getCode() == cmd.getIsSupportRecharge()) {
+//
+//			config.setMaxExpiredDay(cmd.getReserveDay());
+//			config.setExpiredRechargeMonthCount(cmd.getRechargeMonthCount());
+//			config.setExpiredRechargeType(cmd.getRechargeType());
+//		}else {
+//			config.setMaxExpiredDay(0);
+//			config.setExpiredRechargeMonthCount(1);
+//			config.setExpiredRechargeType(ParkingCardExpiredRechargeType.ALL.getCode());
+//		}
 
 		parkingLot.setRechargeJson(JSONObject.toJSONString(config));
 
@@ -1758,6 +1787,19 @@ public class ParkingServiceImpl implements ParkingService {
 		List<ParkingCardRequestTypeDTO> dtos = types.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestTypeDTO.class))
 				.collect(Collectors.toList());
 
+		ListParkingRechargeRatesCommand listParkingRechargeRatesCommand = ConvertHelper.convert(cmd, ListParkingRechargeRatesCommand.class);
+		List<ParkingRechargeRateDTO> rates = listParkingRechargeRates(listParkingRechargeRatesCommand);
+
+		for (ParkingCardRequestTypeDTO type: dtos) {
+			for (ParkingRechargeRateDTO rate: rates) {
+				if (rate.getCardTypeId().equals(type.getCardTypeId()) && rate.getMonthCount().intValue() == 1) {
+					//默认去一个月的费率
+					type.setPrice(rate.getPrice());
+					break;
+				}
+			}
+		}
+
 		return dtos;
 	}
 
@@ -1767,6 +1809,21 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		List<ParkingInvoiceType> types = parkingProvider.listParkingInvoiceTypes(cmd.getOwnerType(), cmd.getOwnerId(), parkingLot.getId());
+
+		ParkingUserInvoice userType = parkingProvider.findParkingUserInvoiceByUserId(cmd.getOwnerType(),
+				cmd.getOwnerId(), parkingLot.getId(), UserContext.currentUserId());
+
+		if (null != userType) {
+//			ParkingInvoiceType type = types.stream().filter(r -> r.getId().equals(userType.getInvoiceTypeId())).findFirst().get();
+			ParkingInvoiceType temp = null;
+			for (ParkingInvoiceType t: types) {
+				if (t.getId().equals(userType.getInvoiceTypeId())) {
+					temp = t;
+					types.remove(temp);
+				}
+			}
+			types.add(0, temp);
+		}
 
 		List<ParkingInvoiceTypeDTO> dtos = types.stream().map(r -> ConvertHelper.convert(r, ParkingInvoiceTypeDTO.class))
 				.collect(Collectors.toList());

@@ -12,6 +12,7 @@ import com.everhomes.rest.parking.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.user.UserContext;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.springframework.beans.BeanUtils;
@@ -85,7 +86,8 @@ public class ParkingProviderImpl implements ParkingProvider {
 		if(null != ownerId) {
 			query.addConditions(Tables.EH_PARKING_INVOICE_TYPES.OWNER_ID.eq(ownerId));
 		}
-
+		query.addConditions(Tables.EH_PARKING_INVOICE_TYPES.STATUS.eq(ParkingCommonStatus.ACTIVE.getCode()));
+		query.addOrderBy(Tables.EH_PARKING_INVOICE_TYPES.ID.asc());
 		return query.fetch().map(r -> ConvertHelper.convert(r, ParkingInvoiceType.class));
 	}
 
@@ -103,6 +105,8 @@ public class ParkingProviderImpl implements ParkingProvider {
 		if(null != ownerId) {
 			query.addConditions(Tables.EH_PARKING_CARD_TYPES.OWNER_ID.eq(ownerId));
 		}
+
+		query.addConditions(Tables.EH_PARKING_CARD_TYPES.STATUS.eq(ParkingCommonStatus.ACTIVE.getCode()));
 
 		return query.fetch().map(r -> ConvertHelper.convert(r, ParkingCardRequestType.class));
 	}
@@ -144,13 +148,15 @@ public class ParkingProviderImpl implements ParkingProvider {
 
     private void populateParkingConfigInfo(ParkingLot parkingLot) {
 		String configJson = parkingLot.getConfigJson();
-		ParkingLot temp = JSONObject.parseObject(configJson, ParkingLot.class);
-		parkingLot.setTempfeeFlag(temp.getTempfeeFlag());
-		parkingLot.setRateFlag(temp.getRateFlag());
-		parkingLot.setLockCarFlag(temp.getLockCarFlag());
-		parkingLot.setSearchCarFlag(temp.getSearchCarFlag());
-		parkingLot.setCurrentInfoType(temp.getCurrentInfoType());
-		parkingLot.setContact(temp.getContact());
+		ParkingLotConfig temp = JSONObject.parseObject(configJson, ParkingLotConfig.class);
+		BeanUtils.copyProperties(temp, parkingLot);
+
+//		parkingLot.setTempfeeFlag(temp.getTempfeeFlag());
+//		parkingLot.setRateFlag(temp.getRateFlag());
+//		parkingLot.setLockCarFlag(temp.getLockCarFlag());
+//		parkingLot.setSearchCarFlag(temp.getSearchCarFlag());
+//		parkingLot.setCurrentInfoType(temp.getCurrentInfoType());
+//		parkingLot.setContact(temp.getContact());
 
 		String rechargeJson = parkingLot.getRechargeJson();
 		if (null != rechargeJson) {
@@ -780,4 +786,48 @@ public class ParkingProviderImpl implements ParkingProvider {
                 });
 		return count[0];
 	}
+
+	@Override
+	public ParkingUserInvoice findParkingUserInvoiceByUserId(String ownerType, Long ownerId, Long parkingLotId, Long userId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingUserInvoices.class));
+		SelectQuery<EhParkingUserInvoicesRecord> query = context.selectQuery(Tables.EH_PARKING_USER_INVOICES);
+
+		query.addConditions(Tables.EH_PARKING_USER_INVOICES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PARKING_USER_INVOICES.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_PARKING_USER_INVOICES.PARKING_LOT_ID.eq(parkingLotId));
+
+		return ConvertHelper.convert(query.fetchOne(), ParkingUserInvoice.class);
+	}
+
+	@Override
+	public void updateParkingUserInvoice(ParkingUserInvoice parkingUserInvoice) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingUserInvoicesDao dao = new EhParkingUserInvoicesDao(context.configuration());
+
+		parkingUserInvoice.setUpdateUid(UserContext.currentUserId());
+		parkingUserInvoice.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+		dao.update(parkingUserInvoice);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingUserInvoices.class, null);
+
+	}
+
+	@Override
+	public void createParkingUserInvoice(ParkingUserInvoice parkingUserInvoice) {
+
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhParkingUserInvoices.class));
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingUserInvoices.class));
+		EhParkingUserInvoicesDao dao = new EhParkingUserInvoicesDao(context.configuration());
+
+		parkingUserInvoice.setId(id);
+		parkingUserInvoice.setCreatorUid(UserContext.currentUserId());
+		parkingUserInvoice.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
+		dao.insert(parkingUserInvoice);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingUserInvoices.class, null);
+
+	}
+
 }

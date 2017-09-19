@@ -38,6 +38,16 @@ public class ParkingLot extends EhParkingLots {
     private Byte tempFeeDiscountFlag;
     private Integer tempFeeDiscount;
 
+    private Byte invoiceFlag;
+
+    public Byte getInvoiceFlag() {
+        return invoiceFlag;
+    }
+
+    public void setInvoiceFlag(Byte invoiceFlag) {
+        this.invoiceFlag = invoiceFlag;
+    }
+
     public Byte getMonthlyDiscountFlag() {
         return monthlyDiscountFlag;
     }

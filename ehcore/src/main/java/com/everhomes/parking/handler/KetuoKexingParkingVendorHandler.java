@@ -3,11 +3,14 @@ package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.parking.*;
 import com.everhomes.parking.ketuo.*;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -34,6 +37,8 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 	@Autowired
 	private LocaleStringService localeStringService;
+	@Autowired
+	private AddressProvider addressProvider;
 
 	private static final String GET_PARKINGS = "/api/find/GetParkingLotList";
 	private static final String GET_FREE_SPACE_NUM = "/api/find/GetFreeSpaceNum";
@@ -66,7 +71,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 		if(StringUtils.isBlank(plateNumber)) {
 			for(KetuoCardType k: types) {
-				populateRateInfo(k.getCarType(), k.getTypeName(), list);
+				populateRateInfo(k.getCarType(), k, list);
 			}
 		}else{
 			KetuoCard cardInfo = getCard(plateNumber);
@@ -82,14 +87,14 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 					}
 				}else {
 					String carType = cardInfo.getCarType();
-					String typeName = null;
+					KetuoCardType type = null;
 					for(KetuoCardType kt: types) {
 						if(carType.equals(kt.getCarType())) {
-							typeName = kt.getTypeName();
+							type = kt;
 							break;
 						}
 					}
-					populateRateInfo(carType, typeName, list);
+					populateRateInfo(carType, type, list);
 
 				}
 			}
@@ -106,7 +111,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			}
 			return payTempCardFee(order);
 		}else {
-			return addMonthCard(order);
+			return openMonthCard(order);
 		}
 	}
 
@@ -194,7 +199,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 	}
 
-	boolean addMonthCard(ParkingRechargeOrder order){
+	boolean openMonthCard(ParkingRechargeOrder order){
 
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -219,7 +224,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		Integer payMoney = (order.getPrice().multiply(new BigDecimal(100))).intValue() - Integer.parseInt(ketuoCardRate.getRuleMoney())
 				* (order.getMonthCount().intValue() - 1);
 
-		if(addMonthCard(order.getPlateNumber(), payMoney)) {
+		if(addMonthCard(order, payMoney)) {
 			Integer count = order.getMonthCount().intValue();
 
 			LOGGER.debug("Parking addMonthCard,count={}", count);
@@ -288,6 +293,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		//续费结束时间 yyyy-MM-dd HH:mm:ss 每月最后一天的23点59分59秒
 		param.put("endTime", validEnd);
 		param.put("freeMoney", card.getFreeMoney() * tempOrder.getMonthCount().intValue());
+		param.put("payType", VendorType.WEI_XIN.getCode().equals(originalOrder.getPaidType()) ? 4 : 5);
 
 		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(tempOrder.getRateToken())) {
 			ParkingLot parkingLot = parkingProvider.findParkingLotById(tempOrder.getParkingLotId());
@@ -322,13 +328,39 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		return false;
 	}
 
-	private boolean addMonthCard(String plateNo, Integer money){
+	private boolean addMonthCard(ParkingRechargeOrder order, Integer money){
 
 		JSONObject param = new JSONObject();
+		String plateNo = order.getPlateNumber();
 		plateNo = plateNo.substring(1, plateNo.length());
 
 		param.put("plateNo", plateNo);
 		param.put("money", money);
+		param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
+		if (null != order.getCardRequestId()) {
+			ParkingCardRequest request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
+			if (null != request) {
+				param.put("userName", request.getPlateOwnerName());
+				param.put("userTel", request.getPlateOwnerPhone());
+				param.put("company", request.getPlateOwnerEntperiseName());
+
+				if (null != request.getAddressId()) {
+					Address address = addressProvider.findAddressById(request.getAddressId());
+					if (null != address) {
+						param.put("doorplate", address.getAddress());
+					}
+				}
+				if (null != request.getInvoiceType()) {
+					ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(request.getInvoiceType());
+					if (null != parkingInvoiceType) {
+						param.put("invType", parkingInvoiceType.getInvoiceToken());
+					}
+				}else {
+					param.put("invType", "-1");
+				}
+			}
+		}
+
 		String json = post(param, ADD_MONTH_CARD);
 
 		JSONObject jsonObject = JSONObject.parseObject(json);

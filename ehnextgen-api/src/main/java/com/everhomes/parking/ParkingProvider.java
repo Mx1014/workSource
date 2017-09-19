@@ -98,4 +98,10 @@ public interface ParkingProvider {
     List<ParkingInvoiceType> listParkingInvoiceTypes(String ownerType, Long ownerId, Long parkingLotId);
 
     List<ParkingCardRequestType> listParkingCardTypes(String ownerType, Long ownerId, Long parkingLotId);
+
+    void createParkingUserInvoice(ParkingUserInvoice parkingUserInvoice);
+
+    void updateParkingUserInvoice(ParkingUserInvoice parkingUserInvoice);
+
+    ParkingUserInvoice findParkingUserInvoiceByUserId(String ownerType, Long ownerId, Long parkingLotId, Long userId);
 }

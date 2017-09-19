@@ -294,6 +294,7 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 				rate.setRateName(rateName);
 
 				ParkingCardType parkingCardType = createDefaultCardType();
+				rate.setCardTypeId(parkingCardType.getTypeId());
 				rate.setCardType(parkingCardType.getTypeName());
 				rate.setMonthCount(new BigDecimal(MONTH_COUNT));
 				rate.setPrice(card.getPaidin());
