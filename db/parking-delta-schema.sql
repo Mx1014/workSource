@@ -21,7 +21,22 @@ CREATE TABLE `eh_parking_invoice_types` (
   `parking_lot_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'reference to id of eh_parking_lots',
   `name` varchar(64) DEFAULT NULL,
   `status` tinyint(4) DEFAULT NULL COMMENT '0: inactive, 2: active',
+  `creator_uid` bigint(20) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_uid` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_parking_user_invoices` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+
+  `user_id` bigint(20) DEFAULT NULL,
+  `invoice_type_id` bigint(20) DEFAULT NULL,
+  `creator_uid` bigint(20) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_uid` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -34,7 +49,10 @@ CREATE TABLE `eh_parking_card_types` (
   `card_type_id` varchar(128) DEFAULT NULL,
   `card_type_name` varchar(128) DEFAULT NULL,
   `status` tinyint(4) DEFAULT NULL COMMENT '0: inactive, 2: active',
-
+  `creator_uid` bigint(20) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_uid` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
