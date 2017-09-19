@@ -5164,7 +5164,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	    return context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID)
                 .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                 .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId))
-                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.notEqual(EmployeeStatus.LEAVETHEJOB.getCode()))
+//                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.notEqual(EmployeeStatus.LEAVETHEJOB.getCode()))
+				//	TODO:离职状态人员查询逻辑
                 .fetchInto(Long.class);
     }
 

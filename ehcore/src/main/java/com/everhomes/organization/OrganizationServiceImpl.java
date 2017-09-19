@@ -5201,7 +5201,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         //更新人事管理状态
         UpdateOrganizationEmployeeStatusCommand updateOrganizationEmployeeStatusCommand = new UpdateOrganizationEmployeeStatusCommand();
         updateOrganizationEmployeeStatusCommand.setDetailId(cmd.getDetailId());
-        updateOrganizationEmployeeStatusCommand.setEmployeeStatus(EmployeeStatus.LEAVETHEJOB.getCode());
         updateOrganizationEmployeeStatusCommand.setRemarks(cmd.getRemarks());
         updateOrganizationEmployeeStatus(updateOrganizationEmployeeStatusCommand);
         //更新薪酬组（划掉）
@@ -11363,7 +11362,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
             this.addProfileJobChangeLogs(cmd.getDetailId(), PersonChangeType.POSITIVE.getCode(), "eh_organization_member_details", cmd.getRemarks(), null);
 
-        } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB.getCode())) {
+        } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.INTERSHIP.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
             this.addProfileJobChangeLogs(cmd.getDetailId(), PersonChangeType.LEAVE.getCode(), "eh_organization_member_details", cmd.getRemarks(), null);
             /**补充退出公司后的处理**/
