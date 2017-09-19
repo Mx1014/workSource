@@ -191,7 +191,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             LOGGER.debug("saveUnion Time2 "+  System.currentTimeMillis());
 
             //4.保存
-//            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
+            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
 
                 //--------------------------1.保存配置表--------------------------
                 if (configureList.size() > 0) {
@@ -205,10 +205,7 @@ public class UniongroupServiceImpl implements UniongroupService {
                     //--------------------------2.保存关系表--------------------------
 
                     List detailIdsArray =  detailIds.stream().map(r->{
-                        if(r.longValue() != 0L){
-                            return r.longValue();
-                        }
-                        return null;
+                        return r.longValue();
                     }).collect(Collectors.toList());
 
                     this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(detailIdsArray);
@@ -220,8 +217,8 @@ public class UniongroupServiceImpl implements UniongroupService {
 
                 return null;
             });
-//            return null;
-//        });
+            return null;
+        });
 
         LOGGER.debug("saveUnion Time4 "+  System.currentTimeMillis());
         //5.同步搜索引擎
