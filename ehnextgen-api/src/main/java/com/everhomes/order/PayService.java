@@ -1,9 +1,13 @@
 //@formatter:off
 package com.everhomes.order;
 
+import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+
+import java.math.BigDecimal;
 
 /**
  * Created by Wentian Wang on 2017/9/6.
@@ -29,4 +33,10 @@ public interface PayService {
      * @param cmd
      */
     void payNotify(OrderPaymentNotificationCommand cmd);
+
+    Long changePayAmount(BigDecimal amount);
+
+    BigDecimal changePayAmount(Long amount);
+
+    CreateOrderRestResponse refund(String orderType, Long payOrderId, Long refundOrderId, Long amount);
 }

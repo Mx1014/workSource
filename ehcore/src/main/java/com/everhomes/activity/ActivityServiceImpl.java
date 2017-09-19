@@ -34,7 +34,8 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.order.*;
 import com.everhomes.organization.*;
-import com.everhomes.pay.order.PaymentType;
+import com.everhomes.pay.order.*;
+import com.everhomes.pay.rest.ApiConstants;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
@@ -60,7 +61,9 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
@@ -114,6 +117,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -721,7 +725,8 @@ public class ActivityServiceImpl implements ActivityService {
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
 		preOrderCommand.setOrderId(roster.getOrderNo());
-		preOrderCommand.setAmount(activity.getChargePrice().multiply(new BigDecimal(100)).longValue());
+		Long amount = payService.changePayAmount(activity.getChargePrice());
+		preOrderCommand.setAmount(amount);
 
 		preOrderCommand.setPayerId(roster.getUid());
 		preOrderCommand.setNamespaceId(activity.getNamespaceId());
@@ -1591,7 +1596,27 @@ public class ActivityServiceImpl implements ActivityService {
 				roster == null || roster.getPayFlag() == null || roster.getPayFlag().byteValue() != ActivityRosterPayFlag.PAY.getCode()){
 			return;
 		}
-		
+
+		Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
+
+		//支付时是不同的版本，此处也要按不同的版本做处理，当前有版本1、2，默认是老版本1 edit by yanjun 20170919
+		if(ActivityRosterPayVersionFlag.fromCode(roster.getPayVersion()) == ActivityRosterPayVersionFlag.V1){
+			refoundOrderNo = refundV1(activity, roster, userId, refoundOrderNo);
+		}else{
+			refundV2(activity, roster, userId, refoundOrderNo);
+		}
+
+		roster.setPayFlag(ActivityRosterPayFlag.REFUND.getCode());
+		roster.setRefundOrderNo(refoundOrderNo);
+		roster.setRefundAmount(roster.getPayAmount());
+		roster.setRefundTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		activityProvider.updateRoster(roster);
+
+		long endTime = System.currentTimeMillis();
+		LOGGER.debug("Refund from vendor, userId={}, activityId={}, elapse={}", userId, activity.getId(), (endTime - startTime));
+	}
+
+	private Long refundV1(Activity activity, ActivityRoster roster, Long userId, Long refoundOrderNo){
 		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
 		String refoundApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
 		String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
@@ -1600,13 +1625,11 @@ public class ActivityServiceImpl implements ActivityService {
 		refundCmd.setTimestamp(timestamp);
 		Integer randomNum = (int) (Math.random()*1000);
 		refundCmd.setNonce(randomNum);
-		Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper
-				.currentGMTTime().getTime());
 		refundCmd.setRefundOrderNo(String.valueOf(refoundOrderNo));
-		
+
 		refundCmd.setOrderNo(String.valueOf(roster.getOrderNo()));
-		
-		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(roster.getVendorType()).getStyleNo()); 
+
+		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(roster.getVendorType()).getStyleNo());
 
 		// 老数据无该字段，它们都是ACTIVITYSIGNUPORDER类型的  edit by yanjun 20170713
 		if(roster.getOrderType() != null && !"".equals(roster.getOrderType())){
@@ -1615,33 +1638,44 @@ public class ActivityServiceImpl implements ActivityService {
 			refundCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
 		}
 
-		
+
 		refundCmd.setRefundAmount(roster.getPayAmount());
-		
+
 		refundCmd.setRefundMsg("报名取消退款");
 		this.setSignatureParam(refundCmd);
-		
+
 		PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
-		if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
-			roster.setPayFlag(ActivityRosterPayFlag.REFUND.getCode());
-			roster.setRefundOrderNo(refoundOrderNo);
-			roster.setRefundAmount(roster.getPayAmount());
-			roster.setRefundTime(new Timestamp(timestamp));
-			activityProvider.updateRoster(roster);
-			LOGGER.debug("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, refundCmd={}, response={}", 
+		if(refundResponse != null && refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+			LOGGER.info("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, refundCmd={}, response={}",
 					roster.getOrderNo(), userId, activity.getId(), refundCmd, refundResponse);
-		}
-		else{
-			LOGGER.error("Refund failed from vendor, orderNo={}, userId={}, activityId={}, refundCmd={}, response={}", 
+		} else{
+			LOGGER.error("Refund failed from vendor, orderNo={}, userId={}, activityId={}, refundCmd={}, response={}",
 					roster.getOrderNo(), userId, activity.getId(), refundCmd, refundResponse);
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_REFUND_ERROR,
-							"bill  refound error"); 
+					"bill  refound error");
 		}
-		long endTime = System.currentTimeMillis();
-		LOGGER.debug("Refund from vendor, userId={}, activityId={}, elapse={}", userId, activity.getId(), (endTime - startTime));
+
+		return  refoundOrderNo;
+
 	}
-	
+
+	private void refundV2(Activity activity, ActivityRoster roster, Long userId, Long refoundOrderNo){
+		Long amount = payService.changePayAmount(roster.getPayAmount());
+		CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode(), roster.getOrderNo(), refoundOrderNo, amount);
+
+		if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+			LOGGER.info("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
+					roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
+		} else{
+			LOGGER.error("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, amount={}, response={}",
+					roster.getOrderNo(), userId, activity.getId(), amount, StringHelper.toJsonString(refundResponse));
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_REFUND_ERROR,
+					"bill  refound error");
+		}
+
+	}
 	/***给支付相关的参数签名*/
 	private void setSignatureParam(PayZuolinRefundCommand cmd) {
 		App app = appProvider.findAppByKey(cmd.getAppKey());

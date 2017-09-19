@@ -10,4 +10,5 @@ public interface PayServiceErrorCode {
     int ERROR_REGISTER_USER_FAIL=10001;
     int ERROR_BIND_PHONE_FAIL=10001;
     int ERROR_SIGNATURE_VERIFY_FAIL=10001;
+    int ERROR_REFUND_FAIL=10001;
 }

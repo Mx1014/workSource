@@ -4,6 +4,7 @@ package com.everhomes.activity;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+import com.everhomes.rest.activity.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +14,6 @@ import org.springframework.stereotype.Component;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.order.OrderEmbeddedHandler;
-import com.everhomes.rest.activity.ActivityCancelSignupCommand;
-import com.everhomes.rest.activity.ActivityCancelType;
-import com.everhomes.rest.activity.ActivityRosterPayFlag;
-import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.util.DateHelper;
@@ -53,15 +50,13 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		//检验支付结果和应价格是否相等
 		checkPayAmount(cmd.getPayAmount(), activity.getChargePrice());
 		//支付宝回调时，可能会同时回调多次，
-		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode() + roster.getId()).enter(()-> {
-			roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
-			roster.setPayTime(new Timestamp(Long.valueOf(cmd.getPayTime())));
-			roster.setPayAmount(new BigDecimal(cmd.getPayAmount()));
-			roster.setVendorType(cmd.getVendorType());
-			roster.setOrderType(cmd.getOrderType());
-			activityProvider.updateRoster(roster);
-			return null;
-		});
+		roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
+		roster.setPayTime(new Timestamp(Long.valueOf(cmd.getPayTime())));
+		roster.setPayAmount(new BigDecimal(cmd.getPayAmount()));
+		roster.setVendorType(cmd.getVendorType());
+		roster.setOrderType(cmd.getOrderType());
+		roster.setPayVersion(ActivityRosterPayVersionFlag.V1.getCode());
+		activityProvider.updateRoster(roster);
 	}
 
 	@Override

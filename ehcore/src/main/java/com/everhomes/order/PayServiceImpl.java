@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
@@ -118,7 +119,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd, serviceConfig);
 
         //7、保存订单信息
-        saveOrderRecord(cmd, orderCommandResponse, serviceConfig);
+        saveOrderRecord(orderCommandResponse, cmd.getOrderId(), serviceConfig.getOrderType(),  serviceConfig.getId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
 
         //8、返回
         return preOrderDTO;
@@ -150,7 +151,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
 
         //校验参数不为空
-        if(cmd.getOrderId() == null||cmd.getPaymentStatus()==null||cmd.getPaymentType()==null || cmd.getBizOrderNum() == null){
+        if(cmd.getOrderId() == null||cmd.getPaymentStatus()==null||cmd.getPaymentType()==null || cmd.getBizOrderNum() == null || cmd.getOrderType() == null){
             LOGGER.error("Invalid parameter,orderId,orderType or paymentStatus is null");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter,orderId,orderType or paymentStatus is null");
@@ -171,12 +172,28 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         //调用具体业务
         PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(orderRecord.getOrderType()));
         LOGGER.debug("PaymentCallBackHandler="+handler.getClass().getName());
-        if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
-            handler.paySuccess(cmd);
+
+        if(cmd.getOrderType().intValue() == com.everhomes.pay.order.OrderType.PURCHACE.getCode()){
+            if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                //支付成功
+                handler.paySuccess(cmd);
+            }
+            if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                //支付失败
+                handler.payFail(cmd);
+            }
+        }else if(cmd.getOrderType().intValue() == com.everhomes.pay.order.OrderType.REFUND.getCode()){
+
+            if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                //退款成功
+                handler.refundSuccess(cmd);
+            }
+            if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                //退款失败
+                handler.refundFail(cmd);
+            }
         }
-        if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
-            handler.payFail(cmd);
-        }
+
     }
 
     private PaymentCallBackHandler getOrderHandler(String orderType) {
@@ -336,7 +353,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
     private OrderCommandResponse createOrder(PreOrderCommand preOrderCommand, PaymentUser paymentUser, PaymentServiceConfig serviceConfig, PaymentAccount paymentAccount){
         //组装参数
-        CreateOrderCommand createOrderCommand = newCreateOrderCommand(preOrderCommand, paymentUser, serviceConfig, paymentAccount);
+        CreateOrderCommand createOrderCommand = newCreateOrderCommandForPay(preOrderCommand, paymentUser, serviceConfig, paymentAccount);
 
         CreateOrderRestResponse createOrderResp = createOrderPayV2(createOrderCommand);
 
@@ -351,7 +368,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         return response;
     }
 
-    private CreateOrderCommand newCreateOrderCommand(PreOrderCommand cmd, PaymentUser paymentUser, PaymentServiceConfig serviceConfig, PaymentAccount paymentAccount){
+    private CreateOrderCommand newCreateOrderCommandForPay(PreOrderCommand cmd, PaymentUser paymentUser, PaymentServiceConfig serviceConfig, PaymentAccount paymentAccount){
 
         //PaymentParamsDTO转为Map
         Map<String, String> flattenMap = new HashMap<>();
@@ -415,18 +432,19 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     }
 
 
-    private void saveOrderRecord(PreOrderCommand preOrderCommand, OrderCommandResponse orderCommandResponse, PaymentServiceConfig serviceConfig){
+    private void saveOrderRecord(OrderCommandResponse orderCommandResponse, Long orderId, String orderType, Long serviceConfigId, Integer paymentOrderType){
 
         PaymentOrderRecord record = ConvertHelper.convert(orderCommandResponse, PaymentOrderRecord.class);
 
         //下预付单时，BizOrderNum需要传PaymentOrderRecords表记录的id，此处先申请id，在返回值中使用BizOrderNum做为record的id
         record.setId(Long.valueOf(orderCommandResponse.getBizOrderNum()));
 
-        record.setOrderId(preOrderCommand.getOrderId());
+        record.setOrderId(orderId);
         //PaymentOrderId为支付系统传来的orderId
         record.setPaymentOrderId(orderCommandResponse.getOrderId());
-        record.setServiceConfigId(serviceConfig.getId());
-        record.setOrderType(serviceConfig.getOrderType());
+        record.setServiceConfigId(serviceConfigId);
+        record.setOrderType(orderType);
+        record.setPaymentOrderType(paymentOrderType);
         payProvider.createPaymentOrderRecord(record);
     }
 
@@ -536,4 +554,65 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         return builder.toString();
     }
 
+
+    @Override
+    public Long changePayAmount(BigDecimal amount){
+
+        if(amount == null){
+            return 0L;
+        }
+        return  amount.multiply(new BigDecimal(100)).longValue();
+    }
+
+    @Override
+    public BigDecimal changePayAmount(Long amount){
+
+        if(amount == null){
+            return new BigDecimal(0);
+        }
+        return  new BigDecimal(amount).divide(new BigDecimal(100));
+    }
+
+    @Override
+    public CreateOrderRestResponse refund(String orderType, Long payOrderId, Long refundOrderId, Long amount) {
+        PaymentOrderRecord payOrderRecord = payProvider.findOrderRecordByOrder(orderType, payOrderId);
+        CreateOrderCommand cmd = newCreateOrderCommandForRefund(payOrderRecord, amount);
+        CreateOrderRestResponse response = refuncOrderPayV2(cmd);
+
+        //保存退款记录
+        saveOrderRecord(response.getResponse(), refundOrderId, orderType, payOrderRecord.getServiceConfigId(), com.everhomes.pay.order.OrderType.REFUND.getCode());
+
+        return response;
+    }
+
+    private CreateOrderRestResponse refuncOrderPayV2(CreateOrderCommand cmd){
+        CreateOrderRestResponse cmdRestResponse = restClient.restCall(
+                "POST", ApiConstants.ORDER_CREATEORDER_URL, cmd, CreateOrderRestResponse.class);
+        System.out.println("createOrder (refund) response: " + StringHelper.toJsonString(cmdRestResponse));
+        if(!cmdRestResponse.getErrorCode().equals(200)) {
+            LOGGER.error("create order fail");
+            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_REFUND_FAIL,
+                    "create order fail");
+        }
+
+        return cmdRestResponse;
+    }
+
+    private CreateOrderCommand newCreateOrderCommandForRefund(PaymentOrderRecord payOrderRecord, Long amount){
+        CreateOrderCommand cmd = new CreateOrderCommand();
+        cmd.setAmount(amount);
+        cmd.setBizSystemId(SYSTEMID);
+        cmd.setRefundOrderId(payOrderRecord.getPaymentOrderId());
+        cmd.setOrderType(com.everhomes.pay.order.OrderType.REFUND.getCode());
+        String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+        String backUri = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url", "");
+        String backUrl = homeUrl + contextPath + backUri;
+        cmd.setBackUrl(backUrl);
+        cmd.setCommitFlag(1);
+        //BizOrderNum需要传PaymentOrderRecords表记录的id，此处先申请id，在返回值中使用BizOrderNum做为record的id
+        Long orderRecordId = payProvider.getNewPaymentOrderRecordId();
+        cmd.setBizOrderNum(String.valueOf(orderRecordId));
+
+        return cmd;
+    }
 }
