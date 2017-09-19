@@ -2477,7 +2477,10 @@ public class PunchServiceImpl implements PunchService {
 //				processForthPunchListCount(list, statistic);
 //			}
 			processPunchListCount(dayLogList, statistic);
-
+			//对于2017年9月的数据特殊处理 --- 兼容之前的
+			if(startCalendar.before(new java.sql.Date(2017,9,31))){
+				statistic.setWorkDayCount((int) (statistic.getExceptionDayCount()+statistic.getWorkCount()));
+			}
 	        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/"+ownerId + "%", null);
 	        List<Long> orgIds = new ArrayList();
 	        if(null!=organizations)
@@ -2506,6 +2509,8 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setBelateCount(0);
 		statistic.setAbsenceCount(0.0);
 		statistic.setOverTimeSum(0L);
+		statistic.setExceptionDayCount(0);
+
 		statistic.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 		for (PunchDayLog pdl : list) {
             if (pdl.getTimeRuleId() != null && pdl.getTimeRuleId().longValue() != 0L) {
@@ -2527,9 +2532,12 @@ public class PunchServiceImpl implements PunchService {
                         isNormal = countOneDayStatistic(pdl.getStatusList(),statistic,isNormal,1,pdl.getTimeRuleId());
                     }
                 }
-                if (NormalFlag.fromCode(isNormal).equals(NormalFlag.YES)) {
-                    statistic.setWorkCount(statistic.getWorkCount() + 1);
-                }
+				if (NormalFlag.fromCode(isNormal).equals(NormalFlag.YES)) {
+					statistic.setWorkCount(statistic.getWorkCount() + 1);
+				} else {
+					statistic.setExceptionDayCount(statistic.getExceptionDayCount() + 1);
+				}
+
             }
 		}
 
@@ -4023,6 +4031,12 @@ public class PunchServiceImpl implements PunchService {
 		List<Long> absenceUserIdList = new ArrayList<>();
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
+			if (dto.getExceptionDayCount() == null) {
+				dto.setExceptionDayCount((int) (dto.getWorkDayCount() - dto.getWorkCount()));
+				if (dto.getExceptionDayCount() < 0) {
+					dto.setExceptionDayCount(0);
+				}
+			}
 			dto.setPunchOrgName(null);
 			PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), statistic.getOwnerId(), statistic.getUserId());
 			if (null != pr) {
@@ -5111,13 +5125,11 @@ public class PunchServiceImpl implements PunchService {
 			    this.refreshPunchDayLog(member.getTargetId(), orgId, punCalendar);
             }
 			//刷月报
-
-
+			addPunchStatistics(member, orgId, startCalendar, punCalendar);
 		} catch (Exception e) {
 			LOGGER.error("#####refresh day log error!! userid:["+member.getTargetId()
 					+"] organization id :["+orgId+"] ",e);
 		}
-		addPunchStatistics(member, orgId, startCalendar, punCalendar);
 	}
 	@Override
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd) {
