@@ -30,7 +30,10 @@ CREATE TABLE `eh_parking_invoice_types` (
 
 CREATE TABLE `eh_parking_user_invoices` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `parking_lot_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'reference to id of eh_parking_lots',
   `user_id` bigint(20) DEFAULT NULL,
   `invoice_type_id` bigint(20) DEFAULT NULL,
   `creator_uid` bigint(20) DEFAULT NULL,
