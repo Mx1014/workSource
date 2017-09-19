@@ -51,6 +51,14 @@ public class PayProviderImpl implements PayProvider {
     }
 
     @Override
+    public PaymentOrderRecord findOrderRecordById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhPaymentOrderRecordsRecord>  query = context.selectQuery(Tables.EH_PAYMENT_ORDER_RECORDS);
+        query.addConditions(Tables.EH_PAYMENT_ORDER_RECORDS.ID.eq(id));
+        return query.fetchOneInto(PaymentOrderRecord.class);
+    }
+
+    @Override
     public PaymentUser findPaymentUserByOwner(String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhPaymentUsersRecord>  query = context.selectQuery(Tables.EH_PAYMENT_USERS);

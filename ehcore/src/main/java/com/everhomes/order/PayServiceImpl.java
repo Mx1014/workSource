@@ -5,7 +5,6 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.base.RestClient;
@@ -16,6 +15,7 @@ import com.everhomes.pay.user.BusinessUserType;
 import com.everhomes.pay.user.RegisterBusinessUserCommand;
 import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
@@ -139,6 +139,9 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         com.everhomes.util.StringHelper.toStringMap(null, cmd, params);
         params.remove("signature");
 
+        //TODO
+        LOGGER.info("getSignature={}, mySignature={}", cmd.getSignature(), SignatureHelper.computeSignature(params, paymentAccount.getSecretKey()));
+
         if(!SignatureHelper.verifySignature(params, paymentAccount.getSecretKey(), cmd.getSignature())) {
             LOGGER.error("Notification signature verify fail");
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_SIGNATURE_VERIFY_FAIL,
@@ -146,15 +149,27 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         }
 
 
-        //校验订单是否存在
-        if(cmd.getOrderId() == null||cmd.getPaymentStatus()==null||cmd.getPaymentType()==null){
+        //校验参数不为空
+        if(cmd.getOrderId() == null||cmd.getPaymentStatus()==null||cmd.getPaymentType()==null || cmd.getBizOrderNum() == null){
             LOGGER.error("Invalid parameter,orderId,orderType or paymentStatus is null");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter,orderId,orderType or paymentStatus is null");
         }
 
+
+        //检查订单是否存在
+        PaymentOrderRecord orderRecord = payProvider.findOrderRecordById(Long.valueOf(cmd.getBizOrderNum()));
+        if(orderRecord == null){
+            LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "can not find order record");
+        }
+
+        //此处将orderId设置成业务系统的orderid，方便业务调用。原orderId为支付系统的orderid，业务不需要知道。
+        cmd.setOrderId(orderRecord.getOrderId());
+
         //调用具体业务
-        PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(cmd.getPaymentType()));
+        PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(orderRecord.getOrderType()));
         LOGGER.debug("PaymentCallBackHandler="+handler.getClass().getName());
         if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
             handler.paySuccess(cmd);
@@ -353,9 +368,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         createOrderCmd.setSettlementType(null);
         createOrderCmd.setSplitRuleId(serviceConfig.getPaymentSplitRuleId());
         if(cmd.getExpiration() != null) {
-            createOrderCmd.setExpiration(new Timestamp(cmd.getExpiration()));
+            createOrderCmd.setExpirationMillis(cmd.getExpiration());
         }
-        createOrderCmd.setSummary(cmd.getSummary());
+        //TODO 临时删除
+        //createOrderCmd.setSummary(cmd.getSummary());
         createOrderCmd.setPayeeUserId(serviceConfig.getPaymentUserId());
         createOrderCmd.setPayerUserId(paymentUser.getPaymentUserId());
         createOrderCmd.setFrontUrl(null);
@@ -382,7 +398,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         createOrderCmd.setOrderRemark3(null);
         createOrderCmd.setOrderRemark4(null);
         createOrderCmd.setOrderRemark5(null);
-        createOrderCmd.setCommitFlag(null);
+        createOrderCmd.setCommitFlag(0);
 
         return createOrderCmd;
     }

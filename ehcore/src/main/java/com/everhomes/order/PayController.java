@@ -3,12 +3,8 @@ package com.everhomes.order;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.order.PayCallbackCommand;
-import com.everhomes.rest.order.PreOrderCommand;
-import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.order.RefundCallbackCommand;
+import com.everhomes.rest.order.*;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,18 +31,18 @@ public class PayController extends ControllerBase {
 	@RestReturn(value=String.class)
 	@RequireAuthentication(false)
 	public RestResponse payNotify(@Valid OrderPaymentNotificationCommand cmd) {
-		try{
+//		try{
 			payService.payNotify(cmd);
 			RestResponse response = new RestResponse();
 			response.setErrorCode(ErrorCodes.SUCCESS);
 			response.setErrorDescription("OK");
 			return response;
-		}catch (Exception ex){
-			RestResponse response = new RestResponse();
-			response.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
-			response.setErrorDescription("FAIL");
-			return response;
-		}
+//		}catch (Exception ex){
+//			RestResponse response = new RestResponse();
+//			response.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION);
+//			response.setErrorDescription("FAIL");
+//			return response;
+//		}
 
 	}
 

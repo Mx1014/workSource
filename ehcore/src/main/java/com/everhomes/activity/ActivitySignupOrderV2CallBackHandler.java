@@ -5,15 +5,17 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.PaymentCallBackHandler;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
 import com.everhomes.rest.activity.ActivityCancelType;
 import com.everhomes.rest.activity.ActivityRosterPayFlag;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
+import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.order.PaymentCallBackCommand;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,15 +41,17 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 
 	@Override
 	public void paySuccess(OrderPaymentNotificationCommand cmd) {
-		LOGGER.info("ActivitySignupOrderV2CallBackHandler paySuccess start cmd = {}", cmd);
+		LOGGER.info("ActivitySignupOrderV2CallBackHandler paySuccess start cmd = {}", StringHelper.toJsonString(cmd));
 
 		ActivityRoster roster = activityProvider.findRosterByOrderNo(cmd.getOrderId());
 		if(roster == null){
+			LOGGER.info("can not find roster by orderno = {}", cmd.getOrderId());
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
 					"no roster.");
 		}
 		Activity activity = activityProvider.findActivityById(roster.getActivityId());
 		if(activity == null){
+			LOGGER.info("can not find activity by id = {}", roster.getActivityId());
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
 					"no activity.");
 		}
@@ -55,13 +59,13 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 		checkPayAmount(cmd.getAmount(), activity.getChargePrice());
 		//支付宝回调时，可能会同时回调多次，
 		roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
-		roster.setPayTime(new Timestamp(Long.valueOf(cmd.getPayDatetime())));
+		Long paytime = DateHelper.parseDataString(cmd.getPayDatetime(), "YYYY-MM-DD HH:mm:ss").getTime();
+		roster.setPayTime(new Timestamp(paytime));
 		roster.setPayAmount(new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100)));
 		roster.setVendorType(String.valueOf(cmd.getPaymentType()));
 		roster.setOrderType(String.valueOf(cmd.getPaymentType()));
 		activityProvider.updateRoster(roster);
 
-		LOGGER.info("ActivitySignupOrderV2CallBackHandler paySuccess end");
 	}
 
 	@Override
