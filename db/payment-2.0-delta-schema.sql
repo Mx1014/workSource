@@ -86,3 +86,7 @@ CREATE TABLE `eh_payment_types` (
 	`update_time` datetime DEFAULT NULL,
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 活动报名表，添加支付版本，用于退款 add by yanjun 20170919
+ALTER TABLE `eh_activity_roster`ADD COLUMN `pay_version`  tinyint(4) NULL COMMENT '支付版本，用于退款';
