@@ -235,13 +235,16 @@ import com.everhomes.server.schema.tables.pojos.EhParkingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhParkingCarSeries;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardCategories;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
+import com.everhomes.server.schema.tables.pojos.EhParkingCardTypes;
 import com.everhomes.server.schema.tables.pojos.EhParkingClearanceLogs;
 import com.everhomes.server.schema.tables.pojos.EhParkingClearanceOperators;
 import com.everhomes.server.schema.tables.pojos.EhParkingFlow;
+import com.everhomes.server.schema.tables.pojos.EhParkingInvoiceTypes;
 import com.everhomes.server.schema.tables.pojos.EhParkingLots;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
 import com.everhomes.server.schema.tables.pojos.EhParkingStatistics;
+import com.everhomes.server.schema.tables.pojos.EhParkingUserInvoices;
 import com.everhomes.server.schema.tables.pojos.EhParkingVendors;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuerCommunities;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuers;
@@ -2187,6 +2190,18 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhPmNotifyLogs.class, Tables.EH_PM_NOTIFY_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_NOTIFY_LOGS.ID.max()).from(Tables.EH_PM_NOTIFY_LOGS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhParkingUserInvoices.class, Tables.EH_PARKING_USER_INVOICES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PARKING_USER_INVOICES.ID.max()).from(Tables.EH_PARKING_USER_INVOICES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhParkingInvoiceTypes.class, Tables.EH_PARKING_INVOICE_TYPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PARKING_INVOICE_TYPES.ID.max()).from(Tables.EH_PARKING_INVOICE_TYPES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhParkingCardTypes.class, Tables.EH_PARKING_CARD_TYPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PARKING_CARD_TYPES.ID.max()).from(Tables.EH_PARKING_CARD_TYPES).fetchOne().value1();
         });
     }
 

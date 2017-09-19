@@ -163,15 +163,24 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 				parkingCardRequest.getParkingLotId(), parkingCardRequest.getCreateTime());
 		dto.setRanking(count + 1);
 
-		ParkingCardRequestType parkingCardRequestType = parkingProvider.findParkingCardTypeByTypeId(parkingCardRequest.getCardTypeId());
-		dto.setCardTypeName(parkingCardRequestType.getCardTypeName());
+		if (null != parkingCardRequest.getCardTypeId()) {
+			ParkingCardRequestType parkingCardRequestType = parkingProvider.findParkingCardTypeByTypeId(parkingCardRequest.getCardTypeId());
+			if (null != parkingCardRequestType) {
+				dto.setCardTypeName(parkingCardRequestType.getCardTypeName());
+			}
+		}
+		if (null != parkingCardRequest.getInvoiceType()) {
+			ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(parkingCardRequest.getInvoiceType());
+			if (null != parkingInvoiceType) {
+				dto.setInvoiceName(parkingInvoiceType.getName());
+			}
+		}
 
-		ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(parkingCardRequest.getInvoiceType());
-		dto.setInvoiceName(parkingInvoiceType.getName());
-
-		Address address = addressProvider.findAddressById(parkingCardRequest.getAddressId());
-		if (null != address) {
-			dto.setApartmentName(address.getAddress());
+		if (null != parkingCardRequest.getAddressId()) {
+			Address address = addressProvider.findAddressById(parkingCardRequest.getAddressId());
+			if (null != address) {
+				dto.setApartmentName(address.getAddress());
+			}
 		}
 
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));//StringHelper.toJsonString(dto)
