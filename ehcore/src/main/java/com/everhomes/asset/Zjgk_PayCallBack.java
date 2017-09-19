@@ -8,7 +8,9 @@ import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.everhomes.util.SignatureHelper.computeSignature;
@@ -20,36 +22,37 @@ import static com.everhomes.util.SignatureHelper.computeSignature;
 public class Zjgk_PayCallBack implements PaymentCallBackHandler{
     @Autowired
     private AssetProvider assetProvider;
+
+    /**
+     * 请求张江高科的接口进行回调付款，成功后返回200和ok，则修改账单的状态
+     */
     @Override
-    public void paySuccess(OrderPaymentNotificationCommand cmd) {
+    public void paySuccess(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
         Map<String,String> params = null;
         Long orderId = cmd.getOrderId();
-//        AssetPaymentOrder order = assetProvider.findOrderById(orderId);
-        findBillsOnOrderId
-        String billIds = order.getBillIds();
-        String[] split = billIds.split(",");
-        for(int i = 0; i < split.length; i++){
-            String billId = split[i];
+        AssetPaymentOrder order = assetProvider.findAssetPaymentById(cmd.getOrderId());
+        List<AssetPaymentOrderBills> bills = assetProvider.findBillsById(orderId);
+        List<String> billIds = new ArrayList<>();
+        for(int i = 0; i < bills.size(); i++){
+            AssetPaymentOrderBills bill = bills.get(i);
+            String billId = bill.getBillId();
+            billIds.add(billId);
+        }
+        for(int i = 0; i < billIds.size(); i++){
+            String billId = billIds.get(i);
             params = new HashMap<String,String>();
             params.put("contractNum","tt");
             params.put("billId",billId);
             params.put("paidMoney","1000")
         }
-        params.put();
+//        params.put();
     }
 
+    /**
+     * 修改账单状态为fail
+     */
     @Override
-    public void payFail(OrderPaymentNotificationCommand cmd) {
-        //failed
-        //调用张江高科的支付接口
-    }
-    private String generateJson(Map<String,String> params){
-        params.put("appKey", "ee4c8905-9aa4-4d45-973c-ede4cbb3cf21");
-        params.put("nonce", "54256");
-        params.put("timestamp", "1498097655000");
-        params.put("crypto", "sssss");
-        String SECRET_KEY = "2CQ7dgiGCIfdKyHfHzO772IltqC50e9w7fswbn6JezdEAZU+x4+VHsBE/RKQ5BCkz/irj0Kzg6te6Y9JLgAvbQ==";
-        params.put("signature",computeSignature(params,SECRET_KEY));
-        return StringHelper.toJsonString(params);
+    public void payFail(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
+        // order的状态给为fail
     }
 }

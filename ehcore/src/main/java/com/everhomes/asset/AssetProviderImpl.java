@@ -33,7 +33,6 @@ import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
-import com.everhomes.server.schema.tables.pojos.EhPaymentOrder;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -1830,7 +1829,8 @@ public class AssetProviderImpl implements AssetProvider {
             orderBill.setOrderId(orderId);
             orderBills.add(orderBill);
         }
-        EhAssetPaymentOrderBillsDao dao
+        EhAssetPaymentOrderBillsDao dao = new EhAssetPaymentOrderBillsDao();
+        dao.insert(orderBills);
     }
 
 }

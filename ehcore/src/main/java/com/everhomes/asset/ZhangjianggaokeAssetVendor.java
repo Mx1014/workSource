@@ -576,8 +576,11 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         //先进行检查是否重复下单,查询此传来bills是否有对应的order，如果有，那么检查订单的状态，如果订单已经完毕，则返回
         List<BillIdAndAmount> bills = cmd.getBills();
         List<String> billIds = new ArrayList<>();
+        Long amountsInCents = 0l;
         for(BillIdAndAmount billIdAndAmount : bills){
             billIds.add(billIdAndAmount.getBillId());
+            String amountOwed = billIdAndAmount.getAmountOwed();
+            amountsInCents += Long.parseLong(amountOwed)*100;
         }
         Long checkedOrderId = assetProvider.findAssetOrderByBillIds(billIds);
         if(checkedOrderId !=null){
@@ -585,17 +588,10 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
             return null;
         }
         //如果账单为新的，则进行存储
-        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),cmd.getAmountOwed(),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),15l*60l*1000l);
+        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),cmd.getAmountOwed(),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
         assetProvider.saveOrderBills(bills,orderId);
-        Random r = new Random();
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < 7; i++){
-            sb.append(r.nextInt(10));
-        }
-        //请求支付模块的下预付单
-        PreOrderCommand cmd2pay = new PreOrderCommand();
-//        Long amount = 转成分(cmd.getAmountOwed());
         Long payerId = Long.parseLong(cmd.getPayerId());
+        //检查下单人的类型和id，不能为空
         if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
             if(Long.parseLong(cmd.getPayerId())==UserContext.currentUserId()){
                 payerId = Long.parseLong(cmd.getPayerId());
@@ -604,29 +600,27 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                 throw new RuntimeErrorException("individual make asset order failed");
             }
         }
-        String amountOwed = cmd.getAmountOwed();
-        Float var = Float.parseFloat(amountOwed);
-        var = var*100f;
-        Long amount1 = Long.parseLong(String.valueOf(var.intValue()));
 
-        cmd2pay.setAmount(amount1);
+        //组装command ， 请求支付模块的下预付单
+        PreOrderCommand cmd2pay = new PreOrderCommand();
+        cmd2pay.setAmount(amountsInCents);
         cmd2pay.setClientAppName(cmd.getClientAppName());
-        cmd2pay.setExpiration(15l*60l);
+        cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
         cmd2pay.setNamespaceId(UserContext.getCurrentNamespaceId());
         cmd2pay.setOpenid(cmd.getOpenid());
         cmd2pay.setOrderId(orderId);
         cmd2pay.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
         cmd2pay.setPayerId(payerId);
 
-        //没有返回paymethod，payparams
-        cmd2pay.setPaymentType(PaymentType.WECHAT_APPPAY.getCode());
-        PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-        paymentParamsDTO.setPayType("no_credit");
-        User user = UserContext.current().getUser();
-        paymentParamsDTO.setAcct(user.getNamespaceUserToken());
-        cmd2pay.setPaymentParams(paymentParamsDTO);
+        //不填写paymentType，支持所有除了微信公众号的支付手段
+//        cmd2pay.setPaymentType(PaymentType.WECHAT_APPPAY.getCode());
 
-
+        //这个参数组装有什么用？
+//        PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+//        paymentParamsDTO.setPayType("no_credit");
+//        User user = UserContext.current().getUser();
+//        paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+//        cmd2pay.setPaymentParams(paymentParamsDTO);
 
         PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
 //        response.setAmount(String.valueOf(preOrder.getAmount()));
