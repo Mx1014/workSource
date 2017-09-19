@@ -521,7 +521,7 @@ public class NewsServiceImpl implements NewsService {
 		must.add(JSONObject.parse("{\"term\":{\"status\":" + NewsStatus.ACTIVE.getCode() + "}}"));
 		if (null != tagIds)
 			for (Long id : tagIds)
-				must.add(JSONObject.parse("{\"term\":{\"tags\":" + id + "}}"));
+				must.add(JSONObject.parse("{\"term\":{\"tag\":" + id + "}}"));
 
 		if (null != communityId) {
 			must.add(JSONObject.parse("{\"term\":{\"communityIds\":" + communityId + "}}"));
