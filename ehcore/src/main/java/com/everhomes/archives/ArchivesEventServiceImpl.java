@@ -2,7 +2,6 @@ package com.everhomes.archives;
 
 
 import com.everhomes.scheduler.ScheduleProvider;
-import com.everhomes.statistics.event.StatEventJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -18,14 +17,9 @@ public class ArchivesEventServiceImpl implements ApplicationListener<ContextRefr
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        String triggerName = "StatEventJobTrigger-" + System.currentTimeMillis();
-        String jobName = "StaEventJobName-" + System.currentTimeMillis();
+        String triggerName = "ArchivesEventJobTrigger-" + System.currentTimeMillis();
+        String jobName = "ArchiveEventJobName-" + System.currentTimeMillis();
         String cronExpression = "0 0 4 * * ?";
-        scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, StatEventJob.class, new HashMap());
+        scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, ArchivesEventJob.class, new HashMap());
     }
-
-    private void executeTask(){
-
-    }
-
 }

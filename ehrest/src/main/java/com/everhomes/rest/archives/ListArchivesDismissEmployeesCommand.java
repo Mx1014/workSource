@@ -14,7 +14,7 @@ import java.sql.Date;
  * <li>dismissType: 离职类型： 1-辞职 2-解雇 3-其他 参考{@link ArchivesDismissType}</li>
  * <li>dismissReason: 离职原因 参考{@link ArchivesDismissReason}</li>
  * <li>contactName: 姓名</li>
- * <li>pageOffset: 页码(不能为null)</li>
+ * <li>pageAnchor: 页码(不能为null)</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
@@ -36,7 +36,7 @@ public class ListArchivesDismissEmployeesCommand {
 
     private String contactName;
 
-    private Integer pageOffset;
+    private Integer pageAnchor;
 
     private Integer pageSize;
 
@@ -107,12 +107,12 @@ public class ListArchivesDismissEmployeesCommand {
         this.contactName = contactName;
     }
 
-    public Integer getPageOffset() {
-        return pageOffset;
+    public Integer getPageAnchor() {
+        return pageAnchor;
     }
 
-    public void setPageOffset(Integer pageOffset) {
-        this.pageOffset = pageOffset;
+    public void setPageAnchor(Integer pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
 
     public Integer getPageSize() {

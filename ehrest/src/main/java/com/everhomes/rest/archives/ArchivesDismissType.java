@@ -4,13 +4,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>QUIT((byte) 1): 辞职</li>
- * <li>FIRE((byte) 2): 解雇</li>
- * <li>OTHER((byte) 3): 其它</li>
+ * <li>QUIT((byte) 0): 辞职</li>
+ * <li>FIRE((byte) 1): 解雇</li>
+ * <li>OTHER((byte) 2): 其它</li>
  * </ul>
  */
 public enum ArchivesDismissType {
-    QUIT((byte) 1), FIRE((byte) 2), OTHER((byte) 3);
+    QUIT((byte) 0), FIRE((byte) 1), OTHER((byte) 2);
     private Byte code;
 
     private ArchivesDismissType(Byte code) {

@@ -14,7 +14,7 @@ public class ArchivesEventJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-
+        archivesService.executeArchivesConfiguration();
     }
 
 

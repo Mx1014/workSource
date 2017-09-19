@@ -5,11 +5,11 @@ package com.everhomes.rest.organization;
  * <ul>
  * <li>PROBATION(0): 试用期</li>
  * <li>ONTHEJOB(1): 在职</li>
- * <li>LEAVETHEJOB(2): 离职</li>
+ * <li>INTERSHIP(2): 实习</li>
  * </ul>
  */
 public enum EmployeeStatus {
-    PROBATION((byte)0), ONTHEJOB((byte)1), LEAVETHEJOB((byte)2);
+    PROBATION((byte)0), ONTHEJOB((byte)1), INTERSHIP((byte)2);
 
     private byte code;
 

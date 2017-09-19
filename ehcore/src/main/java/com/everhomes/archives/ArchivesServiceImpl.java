@@ -1,6 +1,7 @@
 package com.everhomes.archives;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
@@ -54,22 +55,22 @@ public class ArchivesServiceImpl implements ArchivesService {
     private DbProvider dbProvider;
 
     @Autowired
-    ArchivesProvider archivesProvider;
+    private ArchivesProvider archivesProvider;
 
     @Autowired
-    OrganizationService organizationService;
+    private OrganizationService organizationService;
 
     @Autowired
-    OrganizationProvider organizationProvider;
+    private OrganizationProvider organizationProvider;
 
     @Autowired
-    ImportFileService importFileService;
+    private ImportFileService importFileService;
 
     @Autowired
-    GeneralFormService generalFormService;
+    private GeneralFormService generalFormService;
 
     @Autowired
-    ConfigurationProvider configurationProvider;
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
@@ -532,14 +533,16 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (response.getContacts() != null && response.getContacts().size() > 0) {
             List<ArchivesContactDTO> contacts = response.getContacts().stream().map(r -> {
                 ArchivesContactDTO dto = convertArchivesContactForExcel(r);
-                return dto;
+//                r.setGenderString(convertToArchivesInfo(r.getGender(),"gender"));
+//                r.setDepartmentString(convertToArchivesInfo(r.getDepartments(),"departments"));
+                return r;
             }).collect(Collectors.toList());
             String fileName = "通讯录成员列表";
             ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, "通讯录成员列表");
             List<String> propertyNames = new ArrayList<String>(Arrays.asList("contactName", "genderString", "contactToken",
                     "contactShortToken", "workEmail", "departmentString", "jobPositionString"));
             List<String> titleNames = new ArrayList<String>(Arrays.asList("姓名", "性别", "手机", "短号", "工作邮箱", "部门", "职务"));
-            List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 10, 20, 20, 20, 20, 20));
+            List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 10, 20, 20, 30, 30, 20));
             excelUtils.setNeedSequenceColumn(false);
             excelUtils.writeExcel(propertyNames, titleNames, titleSizes, contacts);
         }
@@ -547,21 +550,12 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     private ArchivesContactDTO convertArchivesContactForExcel(ArchivesContactDTO dto) {
 
-        if (StringUtils.isEmpty(dto.getGender()))
-            dto.setGenderString("");
-        else if (dto.getGender().equals(UserGender.MALE.getCode()))
-            dto.setGenderString("男");
-        else
-            dto.setGenderString("女");
+        //  性别转化
+        dto.setGenderString(convertToArchivesInfo(dto.getGender(),"gender"));
 
-        if (dto.getDepartments() != null && dto.getDepartments().size() > 0) {
-            String departmentString = "";
-            for (OrganizationDTO depDTO : dto.getDepartments()) {
-                departmentString += depDTO.getName() + ",";
-            }
-            departmentString = departmentString.substring(0, departmentString.length() - 1);
-            dto.setDepartmentString(departmentString);
-        }
+        //  部门转化
+        dto.setDepartmentString(convertToArchivesInfo(dto.getDepartments(),"departments"));
+
         //  TODO:岗位的导出
 
         return dto;
@@ -826,10 +820,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         Map<String, String> valueMap = new HashMap<>();
         valueMap.put("contactName", employee.getContactName());
         valueMap.put("enName", employee.getEnName());
-        valueMap.put("gender", String.valueOf(employee.getGender()));
+        valueMap.put("gender", convertToArchivesInfo(employee.getGender(),"gender"));
         if (employee.getBirthday() != null)
             valueMap.put("birthday", String.valueOf(employee.getBirthday()));
-        valueMap.put("maritalFlag", String.valueOf(employee.getMaritalFlag()));
+        valueMap.put("maritalFlag", convertToArchivesInfo(employee.getMaritalFlag(),"maritalFlag"));
         if (employee.getProcreative() != null)
             valueMap.put("procreative", String.valueOf(employee.getProcreative()));
         valueMap.put("ethnicity", employee.getEthnicity());
@@ -853,8 +847,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put("emergencyContact", employee.getEmergencyContact());
         if (employee.getCheckInTime() != null)
             valueMap.put("checkInTime", String.valueOf(employee.getCheckInTime()));
-        valueMap.put("employeeType", String.valueOf(employee.getEmployeeType()));
-        valueMap.put("employeeStatus", String.valueOf(employee.getEmployeeStatus()));
+        valueMap.put("employeeType", convertToArchivesInfo(employee.getEmployeeType(),"employeeType"));
+        valueMap.put("employeeStatus", convertToArchivesInfo(employee.getEmployeeStatus(),"employeeStatus"));
         valueMap.put("employmentTime", String.valueOf(employee.getEmploymentTime()));
         //  TODO:部门的同步，岗位的修改
 //        valueMap.put("department", employee.getEnName());
@@ -884,6 +878,73 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put("degreeCertificate", employee.getDegreeCertificate());
         valueMap.put("contractCertificate", employee.getContractCertificate());
         return valueMap;
+    }
+
+    private String convertToArchivesInfo(Object obj, String type) {
+        if (type.equals("gender")) {
+            Byte gender = (Byte) obj;
+            if (StringUtils.isEmpty(gender))
+                return "";
+            else if (gender.equals(UserGender.MALE.getCode()))
+                return "男";
+            else if (gender.equals(UserGender.FEMALE.getCode()))
+                return "女";
+            else
+                return "";
+        }
+
+        if(type.equals("maritalFlag")){
+            Byte maritalFlag = (Byte) obj;
+            if(StringUtils.isEmpty(maritalFlag))
+                return "";
+            else if(maritalFlag.equals(MaritalFlag.UNDISCLOSURED.getCode()))
+                return "保密";
+            else if(maritalFlag.equals(MaritalFlag.MARRIED.getCode()))
+                return "已婚";
+            else if(maritalFlag.equals(MaritalFlag.UNMARRIED.getCode()))
+                return "未婚";
+            else if(maritalFlag.equals(MaritalFlag.DIVORCE.getCode()))
+                return "离异";
+        }
+
+        if(type.equals("employeeType")){
+            Byte employeeType = (Byte) obj;
+            if(StringUtils.isEmpty(employeeType))
+                return "";
+            else if(employeeType.equals(EmployeeType.FULLTIME.getCode()))
+                return "全职";
+            else if(employeeType.equals(EmployeeType.PARTTIME.getCode()))
+                return "兼职";
+            else if(employeeType.equals(EmployeeType.INTERSHIP.getCode()))
+                return "实习";
+            else if(employeeType.equals(EmployeeType.LABORDISPATCH.getCode()))
+                return "劳动派遣";
+        }
+
+        if(type.equals("employeeStatus")){
+            Byte employeeStatus = (Byte) obj;
+            if(StringUtils.isEmpty(employeeStatus))
+                return "";
+            else if(employeeStatus.equals(EmployeeStatus.PROBATION.getCode()))
+                return "试用";
+            else if(employeeStatus.equals(EmployeeStatus.ONTHEJOB.getCode()))
+                return "在职";
+            else if(employeeStatus.equals(EmployeeStatus.INTERSHIP.getCode()))
+                return "实习";
+        }
+
+        if (type.equals("departments")) {
+            List<OrganizationDTO> departments = (List<OrganizationDTO>) obj;
+            if (departments != null && departments.size() > 0) {
+                String departmentString = "";
+                for (OrganizationDTO depDTO : departments) {
+                    departmentString += depDTO.getName() + ",";
+                }
+                departmentString = departmentString.substring(0, departmentString.length() - 1);
+                return departmentString;
+            }
+        }
+        return "";
     }
 
     /**
@@ -959,7 +1020,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         Condition condition = listDismissEmployeesCondition(cmd);
 
-        List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(cmd.getPageOffset(), cmd.getPageSize() + 1, namespaceId, condition);
+        List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(cmd.getPageAnchor(), cmd.getPageSize() + 1, namespaceId, condition);
 
         if (results != null) {
             response.setDismissEmployees(results.stream().map(r -> {
@@ -968,7 +1029,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             }).collect(Collectors.toList()));
             Integer nextPageOffset = null;
             if (results.size() > cmd.getPageSize()) {
-                nextPageOffset = cmd.getPageOffset() + 1;
+                nextPageOffset = cmd.getPageAnchor() + 1;
             }
             response.setNextPageAnchor(nextPageOffset);
             return response;
@@ -1013,6 +1074,20 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void executeArchivesConfiguration(){
         List<ArchivesConfigurations> configurations = archivesProvider.listArchivesConfigurations(ArchivesUtil.currentDate());
+        if(configurations !=null && configurations.size()>0){
+            for(ArchivesConfigurations configuration : configurations){
+                if(configuration.getOperationType().equals(ArchivesOperationType.EMPLOY.getCode())){
+                    EmployArchivesEmployeesCommand cmd = JSONObject.parseObject(configuration.getOperationInformation(), EmployArchivesEmployeesCommand.class);
+                    employArchivesEmployees(cmd);
+                }else if(configuration.getOperationType().equals(ArchivesOperationType.TRANSFER.getCode())){
+                    TransferArchivesContactsCommand cmd = JSONObject.parseObject(configuration.getOperationInformation(), TransferArchivesContactsCommand.class);
+                    transferArchivesContacts(cmd);
+                }else if(configuration.getOperationType().equals(ArchivesOperationType.DISMISS.getCode())){
+                    DismissArchivesEmployeesCommand cmd = JSONObject.parseObject(configuration.getOperationInformation(), DismissArchivesEmployeesCommand.class);
+                    dismissArchivesEmployees(cmd);
+                }
+            }
+        }
     }
 
 
