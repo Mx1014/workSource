@@ -4881,7 +4881,6 @@ public class UserServiceImpl implements UserService {
 					userProvider.createIdentifier(userIdentifier);
 				} else {
 					//该用户发送过验证，更新验证码和时间
-					response.setBindPhoneType(BindPhoneType.WECHATTOPHONE.getCode());
 					userIdentifier.setVerificationCode(verificationCode);
 					userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					userProvider.updateIdentifier(userIdentifier);
