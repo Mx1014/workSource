@@ -16,3 +16,8 @@ ALTER TABLE `eh_activities` ADD COLUMN `clone_flag`  tinyint(4) NULL COMMENT 'cl
 --   PRIMARY KEY (`id`),
 --   KEY `eh_activity_roster_error_jobId` (`job_id`)
 -- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_warning_settings` ADD COLUMN `category_id`  bigint(22) NULL COMMENT '入口id';
+
+ALTER TABLE `eh_roster_order_settings` ADD COLUMN `category_id`  bigint(22) NULL COMMENT 'category_id';
+
