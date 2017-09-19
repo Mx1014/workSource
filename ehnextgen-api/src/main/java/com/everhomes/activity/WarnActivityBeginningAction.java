@@ -5,8 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.rest.activity.ActivityRosterStatus;
+import com.everhomes.rest.common.ActivityDetailActionData;
+import com.everhomes.rest.common.Router;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.util.RouterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +24,6 @@ import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
 import com.everhomes.rest.activity.ActivityWarningResponse;
 import com.everhomes.rest.activity.GetActivityWarningCommand;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
@@ -95,9 +95,12 @@ public class WarnActivityBeginningAction implements Runnable {
 			map.put("title", activity.getSubject());
 			map.put("time", time);
 			final String content = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+			//创建带链接跳转的消息头    add by yanjun 20170513
+			Map<String, String> meta = createMeta(activity);
+
 			activityRosters.forEach(r -> {
 				if (r.getUid().longValue() != activity.getCreatorUid().longValue()) {
-					sendMessageToUser(r.getUid().longValue(), content, null);
+					sendMessageToUser(r.getUid().longValue(), content, meta);
 					LOGGER.debug("活动提醒——给用户发了消息，userId：" + r.getUid());
 				}
 			});
@@ -105,6 +108,22 @@ public class WarnActivityBeginningAction implements Runnable {
 			LOGGER.debug("活动提醒结束：" + activityId);
 		}
 		LOGGER.info("WarnActivityBeginningAction end ! activityId=" + activityId);
+	}
+
+	private Map<String, String> createMeta(Activity activity){
+
+		Map<String, String> meta = new HashMap<String, String>();
+
+		ActivityDetailActionData actionData = new ActivityDetailActionData();
+		actionData.setForumId(activity.getForumId());
+		actionData.setTopicId(activity.getPostId());
+		String url =  RouterBuilder.build(Router.ACTIVITY_DETAIL, actionData);
+
+		RouterMetaObject routerMetaObject = new RouterMetaObject();
+		routerMetaObject.setUrl(url);
+		meta.put(MessageMetaConstant.META_OBJECT_TYPE, "message.router");
+		meta.put(MessageMetaConstant.META_OBJECT, routerMetaObject.toString());
+		return meta;
 	}
 	
     private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
