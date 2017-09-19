@@ -10819,11 +10819,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public OrganizationMemberDTO addOrganizationPersonnelV2(AddOrganizationPersonnelV2Command cmd) {
         AddOrganizationPersonnelCommand addCommand = ConvertHelper.convert(cmd, AddOrganizationPersonnelCommand.class);
-        if(cmd.getDepartmentIds() == null || cmd.getDepartmentIds().size() == 0){
+/*        if(cmd.getDepartmentIds() != null && cmd.getDepartmentIds().size() > 0){
             List<Long> departmentIds = new ArrayList<>();
             departmentIds.add(cmd.getOrganizationId());
             addCommand.setDepartmentIds(departmentIds);
-        }
+        }*/
         OrganizationMemberDTO memberDTO = this.addOrganizationPersonnel(addCommand);
 
         //  added by R at 20170824, 人事1.4
