@@ -206,7 +206,7 @@
             eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types | eh_payment_order |
 
         eh_punch_special_days | eh_punch_time_intervals |
-            eh_parking_invoice_types | eh_parking_card_types |
+            eh_parking_invoice_types | eh_parking_card_types | eh_parking_user_invoices |
         </includes>
 
             <!-- All elements that are excluded from your schema
