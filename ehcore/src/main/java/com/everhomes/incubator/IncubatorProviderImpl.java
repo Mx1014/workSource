@@ -82,9 +82,9 @@ public class IncubatorProviderImpl implements IncubatorProvider {
         }
 
         //排序 默认、0-创建时间，1-审核时间
-        if(orderBy != null && orderBy == 1){
+        if(orderBy == null || orderBy == 0){
             query.addOrderBy(Tables.EH_INCUBATOR_APPLIES.CREATE_TIME.desc());
-        }else {
+        }else if(orderBy == 1) {
             query.addOrderBy(Tables.EH_INCUBATOR_APPLIES.APPROVE_TIME.desc());
         }
 
