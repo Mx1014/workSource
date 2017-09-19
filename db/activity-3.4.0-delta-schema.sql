@@ -21,3 +21,5 @@ ALTER TABLE `eh_warning_settings` ADD COLUMN `category_id`  bigint(22) NULL COMM
 
 ALTER TABLE `eh_roster_order_settings` ADD COLUMN `category_id`  bigint(22) NULL COMMENT 'category_id';
 
+ALTER TABLE `eh_hot_tags` ADD COLUMN `category_id`  bigint(22) NULL ;
+
