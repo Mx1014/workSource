@@ -48,8 +48,8 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Override
     public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        dbProvider.execute((TransactionStatus status) -> {
-
+        this.dbProvider.execute((TransactionStatus status) -> {
+            LOGGER.debug("saveUnion Time1 "+  System.currentTimeMillis());
 
             //已存在（即已分配薪酬组的）的部门集合
             List<Long> old_ids = this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfigures(namespaceId, cmd.getEnterpriseId());
@@ -188,6 +188,8 @@ public class UniongroupServiceImpl implements UniongroupService {
                 return null;
             }).collect(Collectors.toList());
 
+            LOGGER.debug("saveUnion Time2 "+  System.currentTimeMillis());
+
             //4.保存
             this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
 
@@ -201,7 +203,14 @@ public class UniongroupServiceImpl implements UniongroupService {
                 }
                 if (unionDetailsList.size() > 0) {
                     //--------------------------2.保存关系表--------------------------
-                    this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(new ArrayList(detailIds));
+
+                    List detailIdsArray =  detailIds.stream().map(r->{
+                        return r.longValue();
+                    }).collect(Collectors.toList());
+
+                    this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(detailIdsArray);
+                    LOGGER.debug("saveUnion Time3 "+  System.currentTimeMillis());
+                    LOGGER.debug("deleteUniongroupMemberDetailsByDetailIds size :" + detailIdsArray.size());
                     //后保存
                     this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(unionDetailsList);
                 }
@@ -211,11 +220,12 @@ public class UniongroupServiceImpl implements UniongroupService {
             return null;
         });
 
-
+        LOGGER.debug("saveUnion Time4 "+  System.currentTimeMillis());
         //5.同步搜索引擎
         this.uniongroupSearcher.deleteAll();
         this.uniongroupSearcher.syncUniongroupDetailsAtOrg(checkOrganization(cmd.getEnterpriseId()), UniongroupType.SALARYGROUP.getCode());
         this.uniongroupSearcher.refresh();
+        LOGGER.debug("saveUnion Time5 "+  System.currentTimeMillis());
     }
 
     @Override
