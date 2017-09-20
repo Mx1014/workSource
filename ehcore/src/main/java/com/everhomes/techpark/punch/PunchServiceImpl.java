@@ -812,23 +812,31 @@ public class PunchServiceImpl implements PunchService {
         //对statuslist进行统一处理,从每次打卡状态->每个班状态
         String[] statusArrary = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
         String statusList = "";
-        if (statusArrary != null && statusArrary.length > 1) {
-            for(int i = 0;i<statusArrary.length/2;i++){
+		if (statusArrary == null) {
+			return pdl;
+		} else if (statusArrary.length == 1) {
+			if (statusArrary[0].equals(PunchStatus.NORMAL.getCode())) {
+				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+			} else {
+				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			}
+		} else if (statusArrary.length > 1) {
+			for (int i = 0; i < statusArrary.length / 2; i++) {
 
-				String status = processIntevalStatus(statusArrary[2 * i],statusArrary[2 * i+1]);
+				String status = processIntevalStatus(statusArrary[2 * i], statusArrary[2 * i + 1]);
 				if (!status.equals(PunchStatus.NORMAL.getCode())) {
 					pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 				}
-				if(i == 0){
-                    statusList = status;
-                }else{
-                    statusList = statusList + PunchConstants.STATUS_SEPARATOR + status;
-                }
+				if (i == 0) {
+					statusList = status;
+				} else {
+					statusList = statusList + PunchConstants.STATUS_SEPARATOR + status;
+				}
 
-            }
+			}
 			pdl.setStatusList(statusList);
 		}
-        return  pdl;
+		return  pdl;
     }
 
 	private String processIntevalStatus(String arrStatus, String leaveStatus) {
@@ -7021,14 +7029,14 @@ public class PunchServiceImpl implements PunchService {
 		return dto1;
 	}
 
-	private long process24hourTimeToGMTTime(Date punchTime, long ruleTime) {
+	private Long process24hourTimeToGMTTime(Date punchTime, Long ruleTime) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(punchTime);
 		calendar.set(Calendar.HOUR_OF_DAY,0);
 		calendar.set(Calendar.MINUTE,0);
 		calendar.set(Calendar.SECOND,0);
 		calendar.set(Calendar.MILLISECOND,0);
-		return calendar.getTimeInMillis()+ruleTime;
+		return calendar.getTimeInMillis() + (ruleTime == null ? 0L : ruleTime);
 	}
 
 	private Long findRuleTime(PunchTimeRule ptr, Byte punchType, Integer punchIntervalNo) {
