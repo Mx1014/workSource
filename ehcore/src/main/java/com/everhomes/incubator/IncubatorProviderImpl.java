@@ -8,10 +8,14 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhIncubatorAppliesDao;
+import com.everhomes.server.schema.tables.daos.EhIncubatorApplyAttachmentsDao;
 import com.everhomes.server.schema.tables.pojos.EhIncubatorApplies;
+import com.everhomes.server.schema.tables.pojos.EhIncubatorApplyAttachments;
 import com.everhomes.server.schema.tables.records.EhIncubatorAppliesRecord;
+import com.everhomes.server.schema.tables.records.EhIncubatorApplyAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhIncubatorProjectTypesRecord;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -19,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,5 +123,51 @@ public class IncubatorProviderImpl implements IncubatorProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhIncubatorAppliesDao dao = new EhIncubatorAppliesDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), IncubatorApply.class);
+    }
+
+
+    @Override
+    public void createAttachment(IncubatorApplyAttachment attachment) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhIncubatorApplyAttachments.class));
+
+        attachment.setId(id);
+        attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhIncubatorApplyAttachmentsDao dao = new EhIncubatorApplyAttachmentsDao(context.configuration());
+        dao.insert(attachment);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhIncubatorApplyAttachmentsDao.class, null);
+    }
+
+
+    @Override
+    public IncubatorApplyAttachment findByAttachmentId(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhIncubatorApplyAttachmentsDao dao = new EhIncubatorApplyAttachmentsDao(context.configuration());
+        EhIncubatorApplyAttachments result = dao.findById(id);
+        if (result == null) {
+            return null;
+        }
+        return ConvertHelper.convert(result, IncubatorApplyAttachment.class);
+    }
+
+    @Override
+    public List<IncubatorApplyAttachment> listAttachmentsByApplyId(Long applyId, Byte type) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhIncubatorApplyAttachmentsRecord> query = context.selectQuery(Tables.EH_INCUBATOR_APPLY_ATTACHMENTS);
+
+        query.addConditions(Tables.EH_INCUBATOR_APPLY_ATTACHMENTS.INCUBATOR_APPLY_ID.eq(applyId));
+        if(type != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLY_ATTACHMENTS.TYPE.eq(type));
+        }
+
+        List<IncubatorApplyAttachment> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, IncubatorApplyAttachment.class));
+            return null;
+        });
+
+        return result;
     }
 }

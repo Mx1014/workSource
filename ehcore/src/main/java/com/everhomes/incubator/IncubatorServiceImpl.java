@@ -78,6 +78,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 			list.forEach(r ->{
 				IncubatorApplyDTO dto = ConvertHelper.convert(r, IncubatorApplyDTO.class);
 				populateApproveUserName(dto);
+				populateAttachments(dto);
 				dtos.add(dto);
 			});
 			response.setDtos(dtos);
@@ -119,12 +120,30 @@ public class IncubatorServiceImpl implements IncubatorService {
 				}
 
 			}
+
+			//保存附件
+			saveAttachment(cmd.getBusinessLicenceAttachments(), incubatorApply.getId(), user.getId(), IncubatorApplyAttachmentType.BUSINESS_LICENCE.getCode());
+			saveAttachment(cmd.getPlanBookAttachments(), incubatorApply.getId(), user.getId(), IncubatorApplyAttachmentType.PLAN_BOOK.getCode());
+
 			return null;
 		});
 
 		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApply, IncubatorApplyDTO.class);
 		populateApproveUserName(dto);
+		populateAttachments(dto);
 		return dto;
+	}
+
+	private void saveAttachment(List<IncubatorApplyAttachmentDTO> list, Long incubatorApplyId, Long uid, Byte type){
+		if(list != null){
+			for (int i = 0; i<list.size(); i++){
+				IncubatorApplyAttachment attachment = ConvertHelper.convert(list.get(i), IncubatorApplyAttachment.class);
+				attachment.setType(type);
+				attachment.setCreatorUid(uid);
+				attachment.setIncubatorApplyId(incubatorApplyId);
+				incubatorProvider.createAttachment(attachment);
+			}
+		}
 	}
 
 	@Override
@@ -174,6 +193,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 		IncubatorApply incubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getId());
 		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApply, IncubatorApplyDTO.class);
 		populateApproveUserName(dto);
+		populateAttachments(dto);
 		return dto;
 	}
 
@@ -184,5 +204,25 @@ public class IncubatorServiceImpl implements IncubatorService {
 				dto.setApproveUserName(approveUser.getNickName());
 			}
 		}
+	}
+
+	private void populateAttachments(IncubatorApplyDTO dto){
+		List<IncubatorApplyAttachment> businessLicence= incubatorProvider.listAttachmentsByApplyId(dto.getId(), IncubatorApplyAttachmentType.BUSINESS_LICENCE.getCode());
+		List<IncubatorApplyAttachmentDTO> businessLicenceDto = new ArrayList<>();
+		if(businessLicence != null){
+			businessLicence.forEach(r ->
+				businessLicenceDto.add(ConvertHelper.convert(r, IncubatorApplyAttachmentDTO.class))
+			);
+		}
+		dto.setBusinessLicenceAttachments(businessLicenceDto);
+
+		List<IncubatorApplyAttachment> planBook= incubatorProvider.listAttachmentsByApplyId(dto.getId(), IncubatorApplyAttachmentType.PLAN_BOOK.getCode());
+		List<IncubatorApplyAttachmentDTO> planBookDto = new ArrayList<>();
+		if(planBook != null){
+			planBook.forEach(r ->
+				planBookDto.add(ConvertHelper.convert(r, IncubatorApplyAttachmentDTO.class))
+			);
+		}
+		dto.setPlanBookAttachments(planBookDto);
 	}
 }

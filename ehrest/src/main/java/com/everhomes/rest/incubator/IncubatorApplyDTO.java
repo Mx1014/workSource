@@ -1,8 +1,10 @@
 package com.everhomes.rest.incubator;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -12,8 +14,9 @@ import java.sql.Timestamp;
  *     <li>teamName: teamName</li>
  *     <li>projectType: projectType</li>
  *     <li>projectName: projectName</li>
- *     <li>businessLicenceUri: businessLicenceUri</li>
- *     <li>planBookUri: planBookUri</li>
+ *     <li>businessLicenceUri: {[],[]}</li>
+ *     <li>businessLicenceAttachments: businessLicenceAttachments {@link com.everhomes.rest.incubator.IncubatorApplyAttachmentDTO}</li>
+ *     <li>planBookAttachments: planBookAttachments {@link com.everhomes.rest.incubator.IncubatorApplyAttachmentDTO}</li>
  *     <li>chargerName: chargerName</li>
  *     <li>chargerPhone: chargerPhone</li>
  *     <li>chargerEmail: chargerEmail</li>
@@ -36,7 +39,10 @@ public class IncubatorApplyDTO {
 	String projectType;
 	String projectName;
 	String businessLicenceUri;
-	String planBookUri;
+	@ItemType(IncubatorApplyAttachmentDTO.class)
+	List<IncubatorApplyAttachmentDTO> businessLicenceAttachments;
+	@ItemType(IncubatorApplyAttachmentDTO.class)
+	List<IncubatorApplyAttachmentDTO> planBookAttachments;
 	String chargerName;
 	String chargerPhone;
 	String chargerEmail;
@@ -49,12 +55,29 @@ public class IncubatorApplyDTO {
 	Timestamp createTime;
 	Long reApplyId;
 
+
 	public Long getId() {
 		return id;
 	}
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getApplyUserId() {
+		return applyUserId;
+	}
+
+	public void setApplyUserId(Long applyUserId) {
+		this.applyUserId = applyUserId;
 	}
 
 	public String getTeamName() {
@@ -89,12 +112,20 @@ public class IncubatorApplyDTO {
 		this.businessLicenceUri = businessLicenceUri;
 	}
 
-	public String getPlanBookUri() {
-		return planBookUri;
+	public List<IncubatorApplyAttachmentDTO> getBusinessLicenceAttachments() {
+		return businessLicenceAttachments;
 	}
 
-	public void setPlanBookUri(String planBookUri) {
-		this.planBookUri = planBookUri;
+	public void setBusinessLicenceAttachments(List<IncubatorApplyAttachmentDTO> businessLicenceAttachments) {
+		this.businessLicenceAttachments = businessLicenceAttachments;
+	}
+
+	public List<IncubatorApplyAttachmentDTO> getPlanBookAttachments() {
+		return planBookAttachments;
+	}
+
+	public void setPlanBookAttachments(List<IncubatorApplyAttachmentDTO> planBookAttachments) {
+		this.planBookAttachments = planBookAttachments;
 	}
 
 	public String getChargerName() {
@@ -175,22 +206,6 @@ public class IncubatorApplyDTO {
 
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
-	}
-
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
-
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
-
-	public Long getApplyUserId() {
-		return applyUserId;
-	}
-
-	public void setApplyUserId(Long applyUserId) {
-		this.applyUserId = applyUserId;
 	}
 
 	public Long getReApplyId() {

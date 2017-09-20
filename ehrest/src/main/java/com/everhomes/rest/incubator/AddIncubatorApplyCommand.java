@@ -1,6 +1,9 @@
 package com.everhomes.rest.incubator;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 
 /**
@@ -9,8 +12,8 @@ import com.everhomes.util.StringHelper;
  *     <li>teamName: teamName</li>
  *     <li>projectType: projectType</li>
  *     <li>projectName: projectName</li>
- *     <li>businessLicenceUri: businessLicenceUri</li>
- *     <li>planBookUri: planBookUri</li>
+ *     <li>businessLicenceAttachments: businessLicenceAttachments {@link com.everhomes.rest.incubator.IncubatorApplyAttachmentDTO}</li>
+ *     <li>planBookAttachments: planBookAttachments {@link com.everhomes.rest.incubator.IncubatorApplyAttachmentDTO}</li>
  *     <li>chargerName: chargerName</li>
  *     <li>chargerPhone: chargerPhone</li>
  *     <li>chargerEmail: chargerEmail</li>
@@ -24,8 +27,10 @@ public class AddIncubatorApplyCommand {
 	String teamName;
 	String projectType;
 	String projectName;
-	String businessLicenceUri;
-	String planBookUri;
+	@ItemType(IncubatorApplyAttachmentDTO.class)
+	List<IncubatorApplyAttachmentDTO> businessLicenceAttachments;
+	@ItemType(IncubatorApplyAttachmentDTO.class)
+	List<IncubatorApplyAttachmentDTO> planBookAttachments;
 	String chargerName;
 	String chargerPhone;
 	String chargerEmail;
@@ -64,20 +69,20 @@ public class AddIncubatorApplyCommand {
 		this.projectName = projectName;
 	}
 
-	public String getBusinessLicenceUri() {
-		return businessLicenceUri;
+	public List<IncubatorApplyAttachmentDTO> getBusinessLicenceAttachments() {
+		return businessLicenceAttachments;
 	}
 
-	public void setBusinessLicenceUri(String businessLicenceUri) {
-		this.businessLicenceUri = businessLicenceUri;
+	public void setBusinessLicenceAttachments(List<IncubatorApplyAttachmentDTO> businessLicenceAttachments) {
+		this.businessLicenceAttachments = businessLicenceAttachments;
 	}
 
-	public String getPlanBookUri() {
-		return planBookUri;
+	public List<IncubatorApplyAttachmentDTO> getPlanBookAttachments() {
+		return planBookAttachments;
 	}
 
-	public void setPlanBookUri(String planBookUri) {
-		this.planBookUri = planBookUri;
+	public void setPlanBookAttachments(List<IncubatorApplyAttachmentDTO> planBookAttachments) {
+		this.planBookAttachments = planBookAttachments;
 	}
 
 	public String getChargerName() {

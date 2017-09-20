@@ -10,4 +10,10 @@ public interface IncubatorProvider {
     List<IncubatorProjectType> listIncubatorProjectType();
 
     IncubatorApply findIncubatorApplyById(Long id);
+
+    void createAttachment(IncubatorApplyAttachment attachment);
+
+    IncubatorApplyAttachment findByAttachmentId(Long id);
+
+    List<IncubatorApplyAttachment> listAttachmentsByApplyId(Long applyId, Byte type);
 }
