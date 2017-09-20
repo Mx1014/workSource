@@ -30,3 +30,16 @@ CREATE TABLE `eh_incubator_project_types` (
 PRIMARY KEY (`id`)
 );
 
+CREATE TABLE `eh_incubator_apply_attachments` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `incubator_apply_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'owner id, e.g incubator_apply_id',
+  `type`  tinyint(4) NULL COMMENT '类型，1-business_licence，2-plan_book',
+  `name` varchar(128) DEFAULT NULL,
+  `file_size` int(11) NOT NULL DEFAULT '0',
+  `content_type` varchar(32) DEFAULT NULL COMMENT 'attachment object content type',
+  `content_uri` varchar(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
+  `download_count` int(11) NOT NULL DEFAULT '0',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
