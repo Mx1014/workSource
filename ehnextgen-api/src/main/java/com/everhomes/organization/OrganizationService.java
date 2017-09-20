@@ -431,6 +431,8 @@ public interface OrganizationService {
 	List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, Long jobPositionId);
 
     List<OrgAddressDTO> listUserRelatedOrganizationAddresses(ListUserRelatedOrganizationAddressesCommand cmd);
+
+	List<OrgAddressDTO> listOrganizationAddresses(ListOrganizationAddressesCommand cmd);
 	ContractDTO processContract(Contract contract, Integer namespaceId);
 	ContractDTO processContract(Contract contract);
 

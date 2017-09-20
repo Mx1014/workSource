@@ -1366,6 +1366,19 @@ public class OrganizationController extends ControllerBase {
         return res;
     }
 
+    /**
+     * <b>URL: /org/listOrganizationAddresses</b>
+     * <p>获取机构地址</p>
+     */
+    @RequestMapping("listOrganizationAddresses")
+    @RestReturn(value = OrgAddressDTO.class, collection = true)
+    public RestResponse listOrganizationAddresses(ListOrganizationAddressesCommand cmd) {
+        RestResponse res = new RestResponse(organizationService.listOrganizationAddresses(cmd));
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
 /*New*/
 
     /**

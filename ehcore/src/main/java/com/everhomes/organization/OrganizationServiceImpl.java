@@ -10650,6 +10650,25 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    public List<OrgAddressDTO> listOrganizationAddresses(ListOrganizationAddressesCommand cmd) {
+
+        List<OrgAddressDTO> dtos = new ArrayList<>();
+
+        List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(cmd.getOrganizationId());
+
+        for (OrganizationAddress organizationAddress : addresses) {
+            Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+            if (null != address) {
+                OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
+                dto.setAddressId(address.getId());
+                dtos.add(dto);
+            }
+        }
+
+        return dtos;
+    }
+
+    @Override
     public ImportFileResponse<ImportOrganizationContactDataDTO> getImportFileResult(GetImportFileResultCommand cmd) {
         return importFileService.getImportFileResult(cmd.getTaskId());
     }
