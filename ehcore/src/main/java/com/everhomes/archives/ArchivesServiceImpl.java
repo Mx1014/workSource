@@ -1097,7 +1097,10 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void employArchivesEmployeesConfig(EmployArchivesEmployeesCommand cmd) {
-        //  增加转正配置
+        //  1.若为当天则立即执行
+        if (ArchivesUtil.currentDate().equals(cmd.getEmploymentTime()))
+            employArchivesEmployees(cmd);
+        //  2.若为其它时间则增加转正配置
         ArchivesConfigurations configuration = new ArchivesConfigurations();
         configuration.setOrganizationId(cmd.getOrganizationId());
         configuration.setOperationType(ArchivesOperationType.EMPLOY.getCode());
@@ -1128,7 +1131,10 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void transferArchivesEmployeesConfig (TransferArchivesEmployeesCommand cmd) {
-        //  添加调整配置
+        //  1.若为当天则立即执行
+        if (ArchivesUtil.currentDate().equals(cmd.getEffectiveTime()))
+            transferArchivesEmployees(cmd);
+        //  2.若为其它时间则添加调整配置
         ArchivesConfigurations configuration = new ArchivesConfigurations();
         configuration.setOrganizationId(cmd.getOrganizationId());
         configuration.setOperationType(ArchivesOperationType.TRANSFER.getCode());
@@ -1157,7 +1163,10 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void dismissArchivesEmployeesConfig(DismissArchivesEmployeesCommand cmd) {
-        //  添加离职配置
+        //  1.若为当天则立即执行
+        if (ArchivesUtil.currentDate().equals(cmd.getDismissTime()))
+            dismissArchivesEmployees(cmd);
+        //  2.若为其它时间则添加离职配置
         ArchivesConfigurations configuration = new ArchivesConfigurations();
         configuration.setOrganizationId(cmd.getOrganizationId());
         configuration.setOperationType(ArchivesOperationType.DISMISS.getCode());

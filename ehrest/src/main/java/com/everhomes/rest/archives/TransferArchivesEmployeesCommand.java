@@ -59,8 +59,8 @@ public class TransferArchivesEmployeesCommand {
         return effectiveTime;
     }
 
-    public void setEffectiveTime(Date effectiveTime) {
-        this.effectiveTime = effectiveTime;
+    public void setEffectiveTime(String effectiveTime) {
+        this.effectiveTime = ArchivesUtil.parseDate(effectiveTime);
     }
 
     public Byte getTransferType() {

@@ -48,8 +48,8 @@ public class EmployArchivesEmployeesCommand {
         return employmentTime;
     }
 
-    public void setEmploymentTime(Date employmentTime) {
-        this.employmentTime = employmentTime;
+    public void setEmploymentTime(String employmentTime) {
+        this.employmentTime = ArchivesUtil.parseDate(employmentTime);
     }
 
     public String getEmploymentEvaluation() {

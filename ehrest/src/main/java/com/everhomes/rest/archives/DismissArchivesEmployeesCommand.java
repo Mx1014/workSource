@@ -70,8 +70,8 @@ public class DismissArchivesEmployeesCommand {
         return dismissTime;
     }
 
-    public void setDismissTime(Date dismissTime) {
-        this.dismissTime = dismissTime;
+    public void setDismissTime(String dismissTime) {
+        this.dismissTime = ArchivesUtil.parseDate(dismissTime);
     }
 
     public String getDismissRemark() {
