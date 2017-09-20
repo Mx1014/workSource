@@ -74,10 +74,16 @@ DROP TABLE IF EXISTS `eh_archives_logs`;
 CREATE TABLE `eh_archives_logs` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-	`organization_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of organization',
-	`detail_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of organization_member_detail',
-	`operation_type` TINYINT NOT NULL COMMENT'the type of operation',
-	`operation_category` TINYINT NOT NULL COMMENT'the category of operation',
+	`organization_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the organization',
+	`detail_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the organization_member_detail',
+	`operation_type` TINYINT NOT NULL COMMENT'the type of the operation',
+	`operation_time` DATETIME NOT NULL DEFAULT NOW() COMMENT 'the time of the operation',
+	`operation_category` TINYINT NOT NULL COMMENT'the category of the operation',
+	`operation_reason` VARCHAR(64) COMMENT 'the reason of the operation',
+	`operation_remark` VARCHAR(256) COMMENT 'the remark',
+	`operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the operator',
+	`operator_name` VARCHAR(64) NOT NULL DEFAULT 0 COMMENT 'the id of the operator',
+	`create_time` DATETIME COMMENT 'create time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
