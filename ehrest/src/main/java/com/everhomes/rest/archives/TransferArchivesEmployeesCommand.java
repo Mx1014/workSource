@@ -11,7 +11,7 @@ import java.util.List;
  * <li>detailIds: (List)员工 detailId</li>
  * <li>departmentIds: 部门 id(以数组形式传参)</li>
  * <li>jobPositionIds: 岗位 id</li>
- * <li>organizationId: 工作地点 id</li>
+ * <li>organizationId: 公司 id</li>
  * <li>effectiveTime: 生效时间</li>
  * <li>transferType: 调整类型: 1-晋升,2-调整,3-其他</li>
  * <li>transferReason: 调整原因</li>
