@@ -2709,14 +2709,23 @@ public class OrganizationServiceImpl implements OrganizationService {
     public List<OrganizationSimpleDTO> listUserRelateOrganizations(Long userId){
         List<OrganizationSimpleDTO> orgs = new ArrayList<>();
 
-        List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
         Set<Long> organizationIds = new HashSet<>();
-        for (RoleAssignment roleAssignment: roleAssignments) {
-            if(EntityType.ORGANIZATIONS == EntityType.fromCode(roleAssignment.getOwnerType()) && (roleAssignment.getRoleId() == RoleConstants.PM_SUPER_ADMIN || roleAssignment.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN)){
-                organizationIds.add(roleAssignment.getOwnerId());
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(OrganizationMemberGroupType.MANAGER.getCode(), OrganizationMemberTargetType.USER.getCode(), userId);
+        for (OrganizationMember member: members) {
+            if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
+                organizationIds.add(member.getOrganizationId());
             }
         }
 
+        /* 人员在新的管理员数据里没有 则去查老的管理员是角色的时候数据（之前添加的管理员可以不在公司，所以在organizationMember里面查询不到）,如果打算去掉老的，需要迁移数据把创建管理员没有添加到公司的数据给补上 */
+        if(organizationIds.size() == 0){
+            List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
+            for (RoleAssignment roleAssignment: roleAssignments) {
+                if(EntityType.ORGANIZATIONS == EntityType.fromCode(roleAssignment.getOwnerType()) && (roleAssignment.getRoleId() == RoleConstants.PM_SUPER_ADMIN || roleAssignment.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN)){
+                    organizationIds.add(roleAssignment.getOwnerId());
+                }
+            }
+        }
         Set<Long> orgIds = new HashSet<>();
         List<Target> targets = new ArrayList<>();
         targets.add(new Target(EntityType.USER.getCode(), userId));
