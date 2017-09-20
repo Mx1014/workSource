@@ -162,7 +162,7 @@ public class NewsProviderImpl implements NewsProvider {
 		query.addConditions(Tables.EH_NEWS_TAG.DELETE_FLAG.eq((byte)0));
 		if (isSearch != null)
 			query.addConditions(Tables.EH_NEWS_TAG.IS_SEARCH.eq(isSearch));
-		if (parentId != null && parentId != 0)
+		if (parentId != null)
 			query.addConditions(Tables.EH_NEWS_TAG.PARENT_ID.eq(parentId));
 		if(null != pageAnchor && pageAnchor != 0)
 			query.addConditions(Tables.EH_NEWS_TAG.DEFAULT_ORDER.gt(pageAnchor));
