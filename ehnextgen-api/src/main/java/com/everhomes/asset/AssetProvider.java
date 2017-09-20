@@ -91,7 +91,7 @@ public interface AssetProvider {
 
     void saveContractVariables(List<EhPaymentContractReceiver> contractDateList);
 
-    List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId);
+    List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId,Long ownerId,String ownerType);
 
     void increaseNoticeTime(List<Long> billIds);
 

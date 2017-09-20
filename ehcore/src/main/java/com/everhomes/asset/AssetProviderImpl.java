@@ -1419,13 +1419,15 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId) {
+    public List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId,Long ownerId,String ownerType) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<VariableIdAndValue> list = new ArrayList<>();
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         String variableJson = context.select(t.VARIABLES_JSON_STRING)
                 .from(t)
                 .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+                .and(t.OWNERID.eq(ownerId))
+                .and(t.OWNERTYPE.eq(ownerType))
                 .fetchOne(0, String.class);
         Gson gson = new Gson();
         Map<String,String> map = gson.fromJson(variableJson, Map.class);
