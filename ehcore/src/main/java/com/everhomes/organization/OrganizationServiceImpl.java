@@ -715,6 +715,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         dto.setName(organization.getName());
         dto.setCommunityId(organizationDTO.getCommunityId());
         dto.setCommunityName(organizationDTO.getCommunityName());
+        if(!StringUtils.isEmpty(organization.getWebsite())){
+            dto.setWebsite(organization.getWebsite());
+        }
+        if(!StringUtils.isEmpty(organization.getUnifiedSocialCreditCode())){
+            dto.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
+        }
+
         dto.setAvatarUri(org.getAvatar());
         if(!StringUtils.isEmpty(org.getDisplayName())){
             dto.setDisplayName(org.getDisplayName());
@@ -894,9 +901,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             ExcelUtils excelUtils = new ExcelUtils(response, fileName, "企业信息");
 //
             List<OrganizationExportDetailDTO> data = organizationDetailDTOs.stream().map(this::convertToExportDetail).collect(Collectors.toList());
-            String[] propertyNames = {"displayName", "emailDomain", "apartments", "signupCount", "memberCount", "serviceUserName", "admins", "address", "contact", "checkinDateString", "description"};
-            String[] titleNames = {"企业名称", "邮箱域名", "楼栋门牌", "注册人数", "企业人数", "客服经理", "企业管理员", "地址", "咨询电话", "入驻时间", "企业介绍"};
-            int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+            String[] propertyNames = {"displayName", "emailDomain", "apartments", "signupCount", "memberCount", "serviceUserName", "admins", "address", "contact", "checkinDateString", "description", "unifiedSocialCreditCode"};
+            String[] titleNames = {"企业名称", "邮箱域名", "楼栋门牌", "注册人数", "企业人数", "客服经理", "企业管理员", "地址", "咨询电话", "入驻时间", "企业介绍", "统一社会信用代码"};
+            int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
             excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
 		}else{
             throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
@@ -1095,6 +1102,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setGroupId(group.getId());
             organization.setEmailDomain(cmd.getEmailDomain());
+            organization.setWebsite(cmd.getWebsite());
+            organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.createOrganization(organization);
 
             OrganizationDetail enterprise = new OrganizationDetail();
@@ -1239,6 +1248,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setName(cmd.getName());
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setEmailDomain(cmd.getEmailDomain());
+            organization.setWebsite(cmd.getWebsite());
+            organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.updateOrganization(organization);
 
             OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
@@ -2710,7 +2721,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationSimpleDTO> orgs = new ArrayList<>();
         Set<Long> organizationIds = new HashSet<>();
 
-        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(null, OrganizationMemberGroupType.MANAGER.getCode());
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(OrganizationMemberGroupType.MANAGER.getCode(), OrganizationMemberTargetType.USER.getCode(), userId);
         for (OrganizationMember member: members) {
             if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
                 organizationIds.add(member.getOrganizationId());
@@ -6596,7 +6607,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getE()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getF()) ||
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getG()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getH()) ||
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getI()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getJ()) ||
-                    org.apache.commons.lang.StringUtils.isNotBlank(r.getK())) {
+                    org.apache.commons.lang.StringUtils.isNotBlank(r.getK()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getL())) {
                 ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
                 if (null != r.getA())
                     data.setName(r.getA().trim());
@@ -6620,6 +6631,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     data.setCheckinDate(r.getJ().trim());
                 if (null != r.getK())
                     data.setDescription(r.getK().trim());
+                if (null != r.getL())
+                    data.setUnifiedSocialCreditCode(r.getL().trim());
                 datas.add(data);
             }
         }
@@ -6729,6 +6742,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             enterpriseCommand.setNamespaceId(namespaceId);
             enterpriseCommand.setCommunityId(cmd.getCommunityId());
             enterpriseCommand.setEmailDomain(data.getEmail());
+            enterpriseCommand.setUnifiedSocialCreditCode(data.getUnifiedSocialCreditCode());
             enterpriseCommand.setCheckinDate(data.getCheckinDate());
             if (!StringUtils.isEmpty(data.getNumber())) {
                 enterpriseCommand.setMemberCount(Long.parseLong(data.getNumber().toString()));
