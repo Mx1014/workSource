@@ -7,14 +7,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhArchivesConfigurationsDao;
-import com.everhomes.server.schema.tables.daos.EhArchivesDismissEmployeesDao;
-import com.everhomes.server.schema.tables.daos.EhArchivesFormsDao;
-import com.everhomes.server.schema.tables.daos.EhArchivesStickyContactsDao;
-import com.everhomes.server.schema.tables.pojos.EhArchivesConfigurations;
-import com.everhomes.server.schema.tables.pojos.EhArchivesDismissEmployees;
-import com.everhomes.server.schema.tables.pojos.EhArchivesForms;
-import com.everhomes.server.schema.tables.pojos.EhArchivesStickyContacts;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhArchivesConfigurationsRecord;
 import com.everhomes.server.schema.tables.records.EhArchivesDismissEmployeesRecord;
 import com.everhomes.server.schema.tables.records.EhArchivesFormsRecord;
@@ -219,5 +213,21 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         if (null != results && 0 != results.size()) {
             return results;
         }
-        return null;    }
+        return null;
+    }
+
+    @Override
+    public void createArchivesLogs(ArchivesLogs log){
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesLogs.class));
+        log.setId(id);
+        log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        log.setNamespaceId(UserContext.getCurrentNamespaceId());
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhArchivesLogsDao dao = new EhArchivesLogsDao(context.configuration());
+        dao.insert(log);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesLogs.class, null);
+    }
+
 }

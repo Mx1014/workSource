@@ -549,10 +549,10 @@ public class ArchivesServiceImpl implements ArchivesService {
     private ArchivesContactDTO convertArchivesContactForExcel(ArchivesContactDTO dto) {
 
         //  性别转化
-        dto.setGenderString(convertToArchivesInfo(dto.getGender(),"gender"));
+        dto.setGenderString(convertToArchivesInfo(dto.getGender(), "gender"));
 
         //  部门转化
-        dto.setDepartmentString(convertToArchivesInfo(dto.getDepartments(),"departments"));
+        dto.setDepartmentString(convertToArchivesInfo(dto.getDepartments(), "departments"));
 
         //  TODO:岗位的导出
 
@@ -811,6 +811,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     /**
      * 给系统字段赋值，利用 map 设置 key 来存取值
+     *
      * @param employee
      * @return
      */
@@ -818,10 +819,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         Map<String, String> valueMap = new HashMap<>();
         valueMap.put("contactName", employee.getContactName());
         valueMap.put("enName", employee.getEnName());
-        valueMap.put("gender", convertToArchivesInfo(employee.getGender(),"gender"));
+        valueMap.put("gender", convertToArchivesInfo(employee.getGender(), "gender"));
         if (employee.getBirthday() != null)
             valueMap.put("birthday", String.valueOf(employee.getBirthday()));
-        valueMap.put("maritalFlag", convertToArchivesInfo(employee.getMaritalFlag(),"maritalFlag"));
+        valueMap.put("maritalFlag", convertToArchivesInfo(employee.getMaritalFlag(), "maritalFlag"));
         if (employee.getProcreative() != null)
             valueMap.put("procreative", String.valueOf(employee.getProcreative()));
         valueMap.put("ethnicity", employee.getEthnicity());
@@ -845,8 +846,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put("emergencyContact", employee.getEmergencyContact());
         if (employee.getCheckInTime() != null)
             valueMap.put("checkInTime", String.valueOf(employee.getCheckInTime()));
-        valueMap.put("employeeType", convertToArchivesInfo(employee.getEmployeeType(),"employeeType"));
-        valueMap.put("employeeStatus", convertToArchivesInfo(employee.getEmployeeStatus(),"employeeStatus"));
+        valueMap.put("employeeType", convertToArchivesInfo(employee.getEmployeeType(), "employeeType"));
+        valueMap.put("employeeStatus", convertToArchivesInfo(employee.getEmployeeStatus(), "employeeStatus"));
         valueMap.put("employmentTime", String.valueOf(employee.getEmploymentTime()));
         //  TODO:部门的同步，岗位的修改
 //        valueMap.put("department", employee.getEnName());
@@ -891,43 +892,43 @@ public class ArchivesServiceImpl implements ArchivesService {
                 return "";
         }
 
-        if(type.equals("maritalFlag")){
+        if (type.equals("maritalFlag")) {
             Byte maritalFlag = (Byte) obj;
-            if(StringUtils.isEmpty(maritalFlag))
+            if (StringUtils.isEmpty(maritalFlag))
                 return "";
-            else if(maritalFlag.equals(MaritalFlag.UNDISCLOSURED.getCode()))
+            else if (maritalFlag.equals(MaritalFlag.UNDISCLOSURED.getCode()))
                 return "保密";
-            else if(maritalFlag.equals(MaritalFlag.MARRIED.getCode()))
+            else if (maritalFlag.equals(MaritalFlag.MARRIED.getCode()))
                 return "已婚";
-            else if(maritalFlag.equals(MaritalFlag.UNMARRIED.getCode()))
+            else if (maritalFlag.equals(MaritalFlag.UNMARRIED.getCode()))
                 return "未婚";
-            else if(maritalFlag.equals(MaritalFlag.DIVORCE.getCode()))
+            else if (maritalFlag.equals(MaritalFlag.DIVORCE.getCode()))
                 return "离异";
         }
 
-        if(type.equals("employeeType")){
+        if (type.equals("employeeType")) {
             Byte employeeType = (Byte) obj;
-            if(StringUtils.isEmpty(employeeType))
+            if (StringUtils.isEmpty(employeeType))
                 return "";
-            else if(employeeType.equals(EmployeeType.FULLTIME.getCode()))
+            else if (employeeType.equals(EmployeeType.FULLTIME.getCode()))
                 return "全职";
-            else if(employeeType.equals(EmployeeType.PARTTIME.getCode()))
+            else if (employeeType.equals(EmployeeType.PARTTIME.getCode()))
                 return "兼职";
-            else if(employeeType.equals(EmployeeType.INTERSHIP.getCode()))
+            else if (employeeType.equals(EmployeeType.INTERSHIP.getCode()))
                 return "实习";
-            else if(employeeType.equals(EmployeeType.LABORDISPATCH.getCode()))
+            else if (employeeType.equals(EmployeeType.LABORDISPATCH.getCode()))
                 return "劳动派遣";
         }
 
-        if(type.equals("employeeStatus")){
+        if (type.equals("employeeStatus")) {
             Byte employeeStatus = (Byte) obj;
-            if(StringUtils.isEmpty(employeeStatus))
+            if (StringUtils.isEmpty(employeeStatus))
                 return "";
-            else if(employeeStatus.equals(EmployeeStatus.PROBATION.getCode()))
+            else if (employeeStatus.equals(EmployeeStatus.PROBATION.getCode()))
                 return "试用";
-            else if(employeeStatus.equals(EmployeeStatus.ONTHEJOB.getCode()))
+            else if (employeeStatus.equals(EmployeeStatus.ONTHEJOB.getCode()))
                 return "在职";
-            else if(employeeStatus.equals(EmployeeStatus.INTERSHIP.getCode()))
+            else if (employeeStatus.equals(EmployeeStatus.INTERSHIP.getCode()))
                 return "实习";
         }
 
@@ -947,6 +948,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     /**
      * 给用户自定义字段赋值，利用 map 设置 key 来存取值
+     *
      * @param employeeDynamicVals
      * @return
      */
@@ -1048,9 +1050,9 @@ public class ArchivesServiceImpl implements ArchivesService {
         ListArchivesDismissEmployeesResponse response = new ListArchivesDismissEmployeesResponse();
 
         Condition condition = listDismissEmployeesCondition(cmd);
-        if(cmd.getPageAnchor() == null)
+        if (cmd.getPageAnchor() == null)
             cmd.setPageAnchor(1);
-        if(cmd.getPageSize() == null)
+        if (cmd.getPageSize() == null)
             cmd.setPageSize(20);
 
         List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(cmd.getPageAnchor(), cmd.getPageSize() + 1, namespaceId, condition);
@@ -1073,17 +1075,17 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     //  执行定时配置项
     @Override
-    public void executeArchivesConfiguration(){
+    public void executeArchivesConfiguration() {
         List<ArchivesConfigurations> configurations = archivesProvider.listArchivesConfigurations(ArchivesUtil.currentDate());
-        if(configurations !=null && configurations.size()>0){
-            for(ArchivesConfigurations configuration : configurations){
-                if(configuration.getOperationType().equals(ArchivesOperationType.EMPLOY.getCode())){
+        if (configurations != null && configurations.size() > 0) {
+            for (ArchivesConfigurations configuration : configurations) {
+                if (configuration.getOperationType().equals(ArchivesOperationType.EMPLOY.getCode())) {
                     EmployArchivesEmployeesCommand cmd = JSONObject.parseObject(configuration.getOperationInformation(), EmployArchivesEmployeesCommand.class);
                     employArchivesEmployees(cmd);
-                }else if(configuration.getOperationType().equals(ArchivesOperationType.TRANSFER.getCode())){
+                } else if (configuration.getOperationType().equals(ArchivesOperationType.TRANSFER.getCode())) {
                     TransferArchivesContactsCommand cmd = JSONObject.parseObject(configuration.getOperationInformation(), TransferArchivesContactsCommand.class);
                     transferArchivesContacts(cmd);
-                }else if(configuration.getOperationType().equals(ArchivesOperationType.DISMISS.getCode())){
+                } else if (configuration.getOperationType().equals(ArchivesOperationType.DISMISS.getCode())) {
                     DismissArchivesEmployeesCommand cmd = JSONObject.parseObject(configuration.getOperationInformation(), DismissArchivesEmployeesCommand.class);
                     dismissArchivesEmployees(cmd);
                 }
@@ -1095,7 +1097,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void employArchivesEmployeesConfig(EmployArchivesEmployeesCommand cmd) {
         //  1.若为当天则立即执行
-        if (ArchivesUtil.currentDate().equals(cmd.getEmploymentTime()))
+        if (cmd.getEmploymentTime().toString().equals(ArchivesUtil.currentDate().toString()))
             employArchivesEmployees(cmd);
         //  2.若为其它时间则增加转正配置
         ArchivesConfigurations configuration = new ArchivesConfigurations();
@@ -1108,6 +1110,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     /**
      * 员工转正及添加记录
+     *
      * @param cmd
      */
     @Override
@@ -1127,9 +1130,9 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Override
-    public void transferArchivesEmployeesConfig (TransferArchivesEmployeesCommand cmd) {
+    public void transferArchivesEmployeesConfig(TransferArchivesEmployeesCommand cmd) {
         //  1.若为当天则立即执行
-        if (ArchivesUtil.currentDate().equals(cmd.getEffectiveTime()))
+        if (cmd.getEffectiveTime().toString().equals(ArchivesUtil.currentDate().toString()))
             transferArchivesEmployees(cmd);
         //  2.若为其它时间则添加调整配置
         ArchivesConfigurations configuration = new ArchivesConfigurations();
@@ -1142,9 +1145,10 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     /**
      * 员工部门调整及添加记录
+     *
      * @param cmd
      */
-    public void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd){
+    public void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd) {
         //  1.调整员工部门
         TransferArchivesContactsCommand transferCommand = new TransferArchivesContactsCommand();
         transferCommand.setOrganizationId(cmd.getOrganizationId());
@@ -1161,7 +1165,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void dismissArchivesEmployeesConfig(DismissArchivesEmployeesCommand cmd) {
         //  1.若为当天则立即执行
-        if (ArchivesUtil.currentDate().equals(cmd.getDismissTime()))
+        if (cmd.getDismissTime().toString().equals(ArchivesUtil.currentDate().toString()))
             dismissArchivesEmployees(cmd);
         //  2.若为其它时间则添加离职配置
         ArchivesConfigurations configuration = new ArchivesConfigurations();
@@ -1172,10 +1176,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         archivesProvider.createArchivesConfigurations(configuration);
     }
 
-    public void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd){
+    public void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd) {
         //  添加事物
-        dbProvider.execute((TransactionStatus status) ->{
-            for(Long detailId : cmd.getDetailIds()) {
+        dbProvider.execute((TransactionStatus status) -> {
+            for (Long detailId : cmd.getDetailIds()) {
                 //  1.将员工添加到离职人员表
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
                 ArchivesDismissEmployees dismissEmployee = new ArchivesDismissEmployees();
@@ -1247,6 +1251,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     /**
      * 业务部门新增表单记录，从而能够让业务获取到正确的表单 id
+     *
      * @param form
      */
     private void createArchivesForm(GeneralFormDTO form) {
