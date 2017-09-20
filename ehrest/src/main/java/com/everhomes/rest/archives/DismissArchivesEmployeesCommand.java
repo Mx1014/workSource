@@ -25,7 +25,7 @@ public class DismissArchivesEmployeesCommand {
 
     private Byte dismissType;
 
-    private String dismissReason;
+    private Byte dismissReason;
 
     private Date dismissTime;
 
@@ -58,11 +58,11 @@ public class DismissArchivesEmployeesCommand {
         this.dismissType = dismissType;
     }
 
-    public String getDismissReason() {
+    public Byte getDismissReason() {
         return dismissReason;
     }
 
-    public void setDismissReason(String dismissReason) {
+    public void setDismissReason(Byte dismissReason) {
         this.dismissReason = dismissReason;
     }
 

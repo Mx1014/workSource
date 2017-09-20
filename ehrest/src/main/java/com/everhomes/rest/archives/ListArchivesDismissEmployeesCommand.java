@@ -32,7 +32,7 @@ public class ListArchivesDismissEmployeesCommand {
 
     private Byte dismissType;
 
-    private String dismissReason;
+    private Byte dismissReason;
 
     private String contactName;
 
@@ -91,11 +91,11 @@ public class ListArchivesDismissEmployeesCommand {
         this.dismissType = dismissType;
     }
 
-    public String getDismissReason() {
+    public Byte getDismissReason() {
         return dismissReason;
     }
 
-    public void setDismissReason(String dismissReason) {
+    public void setDismissReason(Byte dismissReason) {
         this.dismissReason = dismissReason;
     }
 
