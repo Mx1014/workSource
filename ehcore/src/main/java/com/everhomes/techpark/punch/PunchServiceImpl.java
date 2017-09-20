@@ -812,23 +812,31 @@ public class PunchServiceImpl implements PunchService {
         //对statuslist进行统一处理,从每次打卡状态->每个班状态
         String[] statusArrary = pdl.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
         String statusList = "";
-        if (statusArrary != null && statusArrary.length > 1) {
-            for(int i = 0;i<statusArrary.length/2;i++){
+		if (statusArrary == null) {
+			return pdl;
+		} else if (statusArrary.length == 1) {
+			if (statusArrary[0].equals(PunchStatus.NORMAL.getCode())) {
+				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+			} else {
+				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			}
+		} else if (statusArrary.length > 1) {
+			for (int i = 0; i < statusArrary.length / 2; i++) {
 
-				String status = processIntevalStatus(statusArrary[2 * i],statusArrary[2 * i+1]);
+				String status = processIntevalStatus(statusArrary[2 * i], statusArrary[2 * i + 1]);
 				if (!status.equals(PunchStatus.NORMAL.getCode())) {
 					pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 				}
-				if(i == 0){
-                    statusList = status;
-                }else{
-                    statusList = statusList + PunchConstants.STATUS_SEPARATOR + status;
-                }
+				if (i == 0) {
+					statusList = status;
+				} else {
+					statusList = statusList + PunchConstants.STATUS_SEPARATOR + status;
+				}
 
-            }
+			}
 			pdl.setStatusList(statusList);
 		}
-        return  pdl;
+		return  pdl;
     }
 
 	private String processIntevalStatus(String arrStatus, String leaveStatus) {
