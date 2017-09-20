@@ -77,7 +77,7 @@ CREATE TABLE `eh_archives_logs` (
 	`organization_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the organization',
 	`detail_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the organization_member_detail',
 	`operation_type` TINYINT NOT NULL COMMENT'the type of the operation',
-	`operation_time` DATETIME NOT NULL DEFAULT NOW() COMMENT 'the time of the operation',
+	`operation_time` DATE NOT NULL COMMENT 'the time of the operation',
 	`operation_category` TINYINT NOT NULL COMMENT'the category of the operation',
 	`operation_reason` VARCHAR(64) COMMENT 'the reason of the operation',
 	`operation_remark` VARCHAR(256) COMMENT 'the remark',
