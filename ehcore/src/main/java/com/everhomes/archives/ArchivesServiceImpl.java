@@ -1013,35 +1013,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         return response;
     }
 
-    @Override
-    public ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        ListArchivesDismissEmployeesResponse response = new ListArchivesDismissEmployeesResponse();
-
-        Condition condition = listDismissEmployeesCondition(cmd);
-        if(cmd.getPageAnchor() == null)
-            cmd.setPageAnchor(1);
-        if(cmd.getPageSize() == null)
-            cmd.setPageSize(20);
-
-        List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(cmd.getPageAnchor(), cmd.getPageSize() + 1, namespaceId, condition);
-
-        if (results != null) {
-            response.setDismissEmployees(results.stream().map(r -> {
-                ArchivesDismissEmployeeDTO dto = ConvertHelper.convert(r, ArchivesDismissEmployeeDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
-            Integer nextPageOffset = null;
-            if (results.size() > cmd.getPageSize()) {
-                nextPageOffset = cmd.getPageAnchor() + 1;
-            }
-            response.setNextPageAnchor(nextPageOffset);
-            return response;
-        }
-
-        return null;
-    }
-
     private Condition listDismissEmployeesCondition(ListArchivesDismissEmployeesCommand cmd) {
         Condition condition = Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.ORGANIZATION_ID.eq(cmd.getOrganizationId());
 
@@ -1072,6 +1043,35 @@ public class ArchivesServiceImpl implements ArchivesService {
             condition = condition.and(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.CONTACT_NAME.like("%" + cmd.getContactName() + "%"));
         }
         return condition;
+    }
+
+    @Override
+    public ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        ListArchivesDismissEmployeesResponse response = new ListArchivesDismissEmployeesResponse();
+
+        Condition condition = listDismissEmployeesCondition(cmd);
+        if(cmd.getPageAnchor() == null)
+            cmd.setPageAnchor(1);
+        if(cmd.getPageSize() == null)
+            cmd.setPageSize(20);
+
+        List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(cmd.getPageAnchor(), cmd.getPageSize() + 1, namespaceId, condition);
+
+        if (results != null) {
+            response.setDismissEmployees(results.stream().map(r -> {
+                ArchivesDismissEmployeeDTO dto = ConvertHelper.convert(r, ArchivesDismissEmployeeDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
+            Integer nextPageOffset = null;
+            if (results.size() > cmd.getPageSize()) {
+                nextPageOffset = cmd.getPageAnchor() + 1;
+            }
+            response.setNextPageAnchor(nextPageOffset);
+            return response;
+        }
+
+        return response;
     }
 
     //  执行定时配置项
