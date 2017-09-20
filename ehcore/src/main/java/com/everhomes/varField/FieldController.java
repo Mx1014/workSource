@@ -124,38 +124,5 @@ public class FieldController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <p>模板导出</p>
-     * <b>URL: /varField/exportExcelTemplate</b>
-     */
-    @RequestMapping("exportExcelTemplate")
-    public void exportExcelTemplate(@Valid ListFieldGroupCommand cmd,HttpServletResponse response){
-        fieldService.exportExcelTemplate(cmd,response);
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorDescription("OK");
-        restResponse.setErrorCode(200);
-    }
 
-    /**
-     * <p>excel数据导出</p>
-     * <b>URL: /varField/exportFieldsExcel</b>
-     */
-    @RequestMapping("exportFieldsExcel")
-    public void exportFieldsExcel(@Valid ExportFieldsExcelCommand cmd, HttpServletResponse response){
-        fieldService.exportFieldsExcel(cmd,response);
-    }
-
-    /**
-     * <p>excel数据导入</p>
-     * <b>URL: /varField/importFieldsExcel</b>
-     */
-    @RequestMapping("importFieldsExcel")
-    @RestReturn(String.class)
-    public RestResponse importFieldsExcel(@Valid ImportFieldExcelCommand cmd, MultipartFile file){
-        fieldService.importFieldsExcel(cmd,file);
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorDescription("OK");
-        restResponse.setErrorCode(200);
-        return restResponse;
-    }
 }
