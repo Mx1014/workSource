@@ -445,13 +445,14 @@ public class FieldServiceImpl implements FieldService {
             LOGGER.error("import excel for import failed for unable to get work book, file name is = {}",file.getName());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"file may not be an invalid excel file");
         }
+        //拿到所有的group，进行匹配sheet用
+        ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
+        List<FieldGroupDTO> groups = listFieldGroups(cmd1);
         int numberOfSheets = workbook.getNumberOfSheets();
         for(int i = 0; i < numberOfSheets; i ++){
             Sheet sheet = workbook.getSheetAt(numberOfSheets);
             //通过sheet名字进行匹配，获得此sheet对应的group
             String sheetName = sheet.getSheetName();
-            ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
-            List<FieldGroupDTO> groups = listFieldGroups(cmd1);
             FieldGroupDTO group = new FieldGroupDTO();
             for(int i1 = 0; i1 < groups.size(); i1 ++){
                 if(groups.get(i1).getGroupDisplayName().equals(sheetName)){
@@ -460,17 +461,55 @@ public class FieldServiceImpl implements FieldService {
                     continue;
                 }
             }
+            //通过目标group拿到请求所有字段的command，然后请求获得所有字段
+            ListFieldCommand cmd2 = new ListFieldCommand();
+            cmd2.setModuleName(group.getModuleName());
+            cmd2.setNamespaceId(group.getNamespaceId());
+            cmd2.setGroupPath(group.getGroupPath());
+            List<FieldDTO> fields = listFields(cmd2);
+            //获得根据cell顺序的fieldname
+            Row headRow = sheet.getRow(2);
+            String[] headers = new String[headRow.getLastCellNum()-headRow.getFirstCellNum()+1];
+            HashMap<Integer,String> orderedFieldNames = new HashMap<>();
+            for(int j =headRow.getFirstCellNum(); j < headRow.getLastCellNum();j++) {
+                for(int j1 = 0; j1 < fields.size();j1++){
+                    FieldDTO fieldDTO = fields.get(j1);
+                    if(fieldDTO.getFieldDisplayName().equals(headRow.getCell(j).getStringCellValue())){
+                        String fieldName = fieldDTO.getFieldName();
+                        String fieldParam = fieldDTO.getFieldParam();
+                        FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
+                        //如果是select，则修改fieldName,在末尾加上Name，减去末尾的Id如果存在的话。由抽象跌入现实，拥有了名字，这是从神降格为人的过程---第六天魔王波旬
+                        if(params.getFieldParamType().equals("select")){
+                            fieldName = fieldName.split("Id")[0];
+                            fieldName += "Name";
+                        }
+                        orderedFieldNames.put(j,fieldName);
+                    }
+                }
+                Cell cell = headRow.getCell(j);
+                headers[j] = cell.getStringCellValue();
+            }
+
+
             //通过row的个数，除去header，获得对象的个数
-
-            //获得第二行的row，获得有顺序的field集合
-
+            int objectsNum = sheet.getLastRowNum() - 3;
+            List<Object> objects = new ArrayList<>();
+            //获得对象的名称，通过表查到对象名，mapping为object隐藏起来。隐藏自身，消灭暴露者---安静的诀窍就是这个
+            getclz()
 
             for(int j = 3; j < sheet.getLastRowNum(); j ++){
                 Row row = sheet.getRow(j);
                 for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
+                    String fieldName = orderedFieldNames.get(k);
+                    Object object = get(clz);
+                    getFromObj(fieldName,object);
+                    objects.add(object);
                     Cell cell = row.getCell(k);
+                    cell.getStringCellValue();
                 }
             }
+            //此时获得一个sheet的list对象，进行存储
+
         }
 
     }
