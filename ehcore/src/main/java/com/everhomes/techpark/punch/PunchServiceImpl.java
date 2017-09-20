@@ -6739,16 +6739,18 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd) {
 		//
-		this.dbProvider.execute((status) -> {
+//		this.dbProvider.execute((status) -> {
 
 			if (cmd.getRuleType() == null)
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 						ErrorCodes.ERROR_INVALID_PARAMETER,
 						"Invalid rule type parameter in the command");
 			//获取考勤组
+			LOGGER.debug("saveUnion Time-2 "+  System.currentTimeMillis());
 			Organization punchOrg = this.organizationProvider.findOrganizationById(cmd.getId());
 			punchOrg.setName(cmd.getGroupName());
 			organizationProvider.updateOrganization(punchOrg);
+			LOGGER.debug("saveUnion Time-1 "+  System.currentTimeMillis());
 			PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
 
 			List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
@@ -6801,8 +6803,8 @@ public class PunchServiceImpl implements PunchService {
 			savePunchTimeRule(cmd, pr);
 			//发消息 暂时屏蔽
 //		sendMessageToGroupUser(pr,cmd.getTimeRules());
-			return null;
-		});
+//			return null;
+//		});
 		return  null;
 	}
 
