@@ -2,6 +2,7 @@ package com.everhomes.varField;
 
 import com.everhomes.customer.CustomerService;
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.launchpad.Item;
 import com.everhomes.rest.varField.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -325,6 +326,85 @@ public class FieldServiceImpl implements FieldService {
 //            }
 //        }
 //    }
+
+    @Override
+    public void updateFields(UpdateFieldsCommand cmd) {
+        List<ScopeFieldInfo> fields = cmd.getFields();
+        if(fields != null && fields.size() > 0) {
+            fields.forEach(field -> {
+
+            });
+        }
+    }
+
+    @Override
+    public void updateFieldGroups(UpdateFieldGroupsCommand cmd) {
+        List<ScopeFieldGroupInfo> groups = cmd.getGroups();
+        if(groups != null && groups.size() > 0) {
+            Long userId = UserContext.currentUserId();
+            List<ScopeFieldGroup> existGroups = fieldProvider.listScopeFieldGroup(cmd.getModuleName(), cmd.getNamespaceId(), cmd.getCommunityId());
+            //查出所有符合的map列表
+            //处理 没有id的增加，有的在数据库中查询找到则更新,且在列表中去掉对应的，没找到则增加
+            //将map列表中剩下的置为inactive
+            groups.forEach(group -> {
+                ScopeFieldGroup scopeFieldGroup = ConvertHelper.convert(group, ScopeFieldGroup.class);
+                scopeFieldGroup.setNamespaceId(cmd.getNamespaceId());
+                scopeFieldGroup.setCommunityId(cmd.getCommunityId());
+                if(scopeFieldGroup.getId() == null) {
+                    scopeFieldGroup.setCreatorUid(userId);
+                    fieldProvider.createScopeFieldGroup(scopeFieldGroup);
+                } else {
+                    ScopeFieldGroup exist = fieldProvider.findScopeFieldGroup(scopeFieldGroup.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
+                    if(exist != null) {
+                        scopeFieldGroup.setCreatorUid(exist.getCreatorUid());
+                        scopeFieldGroup.setCreateTime(exist.getCreateTime());
+                        scopeFieldGroup.setOperatorUid(userId);
+                        fieldProvider.updateScopeFieldGroup(scopeFieldGroup);
+                        existGroups.remove(exist.getId());
+                    } else {
+                        scopeFieldGroup.setCreatorUid(userId);
+                        fieldProvider.createScopeFieldGroup(scopeFieldGroup);
+                    }
+                }
+
+            });
+
+            if(existGroups.size() > 0) {
+                existGroups.forEach(group -> {
+                    group.setStatus(VarFieldStatus.INACTIVE.getCode());
+                    fieldProvider.updateScopeFieldGroup(group);
+                });
+            }
+        }
+
+    }
+
+    @Override
+    public void updateFieldItems(UpdateFieldItemsCommand cmd) {
+        List<ScopeFieldItemInfo> items = cmd.getItems();
+        if(items != null && items.size() > 0) {
+            items.forEach(item -> {
+
+            });
+        }
+    }
+
+    @Override
+    public ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId) {
+        ScopeFieldItem fieldItem = null;
+        Boolean namespaceFlag = true;
+        if(communityId != null) {
+            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, itemId);
+            if(fieldItem != null) {
+                namespaceFlag = false;
+            }
+        }
+        if(namespaceFlag) {
+            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
+        }
+
+        return fieldItem;
+    }
 
     @Override
     public List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd) {

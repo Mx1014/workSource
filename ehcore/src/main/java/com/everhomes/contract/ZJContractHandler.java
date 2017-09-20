@@ -25,6 +25,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -83,6 +84,9 @@ public class ZJContractHandler implements ContractService{
     @Autowired
     private UserProvider userProvider;
 
+    @Autowired
+    private FieldService fieldService;
+
     @Override
     public ListContractsResponse listContracts(ListContractsCommand cmd) {
         if(LOGGER.isDebugEnabled()) {
@@ -95,7 +99,7 @@ public class ZJContractHandler implements ContractService{
         String pageOffset = cmd.getPageAnchor() == null ? "" : cmd.getPageAnchor().toString();
         String pageSize = cmd.getPageSize() == null ? "" : cmd.getPageSize().toString();
 
-        ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCategoryItemId());
+        ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
         String categoryName = item == null ? "" : item.getItemDisplayName();
         Map<String, String> params = generateParams(communityIdentifier, contractStatus, contractAttribute, categoryName, cmd.getKeywords(), pageOffset, pageSize);
         StringBuilder sb = new StringBuilder();

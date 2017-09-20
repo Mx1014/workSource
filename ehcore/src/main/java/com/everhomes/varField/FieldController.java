@@ -25,12 +25,13 @@ public class FieldController extends ControllerBase {
 
     /**
      * <b>URL: /varField/updateFields</b>
-     * <p>更新域空间模块字段</p>
+     * <p>更新域空间or项目模块字段</p>
      * @return {@link String}
      */
     @RequestMapping("updateFields")
     @RestReturn(value=String.class)
     public RestResponse updateFields(@Valid UpdateFieldsCommand cmd) {
+        fieldService.updateFields(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
@@ -60,6 +61,7 @@ public class FieldController extends ControllerBase {
     @RequestMapping("updateFieldGroups")
     @RestReturn(value=String.class)
     public RestResponse updateFieldGroups(@Valid UpdateFieldGroupsCommand cmd) {
+        fieldService.updateFieldGroups(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
@@ -89,6 +91,7 @@ public class FieldController extends ControllerBase {
     @RequestMapping("updateFieldItems")
     @RestReturn(value=String.class)
     public RestResponse updateFieldItems(@Valid UpdateFieldItemsCommand cmd) {
+        fieldService.updateFieldItems(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");

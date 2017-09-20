@@ -14,5 +14,10 @@ public interface FieldService {
     List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd);
     List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd);
 
+    void updateFields(UpdateFieldsCommand cmd);
+    void updateFieldGroups(UpdateFieldGroupsCommand cmd);
+    void updateFieldItems(UpdateFieldItemsCommand cmd);
+
+    ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
 
 }

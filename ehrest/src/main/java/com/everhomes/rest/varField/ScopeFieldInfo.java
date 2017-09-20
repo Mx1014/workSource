@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>id: 域下的字段id，新加进去的没有</li>
  *     <li>namespaceId: 域空间id</li>
+ *     <li>communityId: 项目id</li>
  *     <li>moduleName: 字段所属的模块类型名</li>
  *     <li>fieldId: 在系统里的字段id</li>
  *     <li>fieldDisplayName: 字段名</li>
@@ -21,6 +22,8 @@ public class ScopeFieldInfo {
 
     private Integer namespaceId;
 
+    private Long communityId;
+
     private String moduleName;
 
     private Long fieldId;
@@ -32,6 +35,14 @@ public class ScopeFieldInfo {
     private Byte mandatoryFlag;
 
     private Integer defaultOrder;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Integer getDefaultOrder() {
         return defaultOrder;
