@@ -1305,6 +1305,9 @@ public class ParkingServiceImpl implements ParkingService {
 			dto.setRequestRechargeType(ParkingVendorHandler.REQUEST_RECHARGE_TYPE);
 			dto.setCardTypeTipFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
 		}
+
+		ListParkingCardRequestTypesCommand typesCommand = ConvertHelper.convert(cmd, ListParkingCardRequestTypesCommand.class);
+		dto.setRequestTypes(listParkingCardRequestTypes(typesCommand));
 		return dto;
 	}
 
