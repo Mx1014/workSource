@@ -1024,8 +1024,12 @@ public class NewsServiceImpl implements NewsService {
 			for (NewsTagDTO dto : tags){
 				NewsTag tag = ConvertHelper.convert(dto,NewsTag.class);
 				tag.setParentId(parentId);
-				if (tag.getId() == 0)
+				tag.setNamespaceId(parentTag.getNamespaceId());
+				tag.setOwnerType(parentTag.getOwnerType());
+				tag.setOwnerId(parentTag.getOwnerId());
+				if (tag.getId() == 0) {
 					newsProvider.createNewsTag(tag);
+				}
 				else
 					newsProvider.updateNewsTag(tag);
 			}
