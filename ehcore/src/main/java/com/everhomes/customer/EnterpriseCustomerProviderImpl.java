@@ -873,4 +873,67 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         dao.update(certificate);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerCertificates.class, certificate.getId());
     }
+
+	@Override
+	public void createCustomerTracking(CustomerTracking tracking) {
+	    long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerTrackings.class));
+	    tracking.setId(id);
+	    tracking.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    tracking.setCreatorUid(UserContext.current().getUser().getId());
+	    tracking.setStatus(CommonStatus.ACTIVE.getCode());
+
+        LOGGER.info("createCustomerTracking: " + tracking);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackings.class, id));
+        EhCustomerTrackingsDao dao = new EhCustomerTrackingsDao(context.configuration());
+        dao.insert(tracking);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerTrackings.class, null);
+	}
+
+	@Override
+	public CustomerTracking findCustomerTrackingById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerTrackingsDao dao = new EhCustomerTrackingsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerTracking.class);
+	}
+
+	@Override
+	public void deleteCustomerTracking(CustomerTracking tracking) {
+		assert(tracking.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackings.class, tracking.getId()));
+        context.update(Tables.EH_CUSTOMER_TRACKINGS)
+        	   .set(Tables.EH_CUSTOMER_TRACKINGS.STATUS,CommonStatus.INACTIVE.getCode())
+        	   .set(Tables.EH_CUSTOMER_TRACKINGS.DELETE_UID,UserContext.current().getUser().getId())
+        	   .set(Tables.EH_CUSTOMER_TRACKINGS.DELETE_TIME , new Timestamp(DateHelper.currentGMTTime().getTime()))
+        	   .where(Tables.EH_CUSTOMER_TRACKINGS.ID.eq(tracking.getId()))
+        	   .execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTrackings.class, tracking.getId());
+	}
+
+	@Override
+	public void updateCustomerTracking(CustomerTracking tracking) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackings.class, tracking.getId()));
+        EhCustomerTrackingsDao dao = new EhCustomerTrackingsDao(context.configuration());
+
+        tracking.setUpdateUid(UserContext.current().getUser().getId());
+        tracking.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(tracking);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTrackings.class, tracking.getId());
+	}
+
+	@Override
+	public List<CustomerTracking> listCustomerTrackingsByCustomerId(Long customerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTrackingsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKINGS);
+        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerTracking> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTracking.class));
+            return null;
+        });
+        return result;
+	}
 }

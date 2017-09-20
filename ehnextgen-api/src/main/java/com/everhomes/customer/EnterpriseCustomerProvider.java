@@ -77,4 +77,10 @@ public interface EnterpriseCustomerProvider {
     List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerIds(List<Long> customerIds);
 
     List<EnterpriseCustomer> listEnterpriseCustomerByCommunity(Long communityId);
+    
+	void createCustomerTracking(CustomerTracking tracking);
+	CustomerTracking findCustomerTrackingById(Long id);
+	void deleteCustomerTracking(CustomerTracking tracking);
+	void updateCustomerTracking(CustomerTracking tracking);
+	List<CustomerTracking> listCustomerTrackingsByCustomerId(Long customerId);
 }

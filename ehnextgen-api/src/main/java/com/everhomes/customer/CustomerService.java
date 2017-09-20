@@ -75,4 +75,12 @@ public interface CustomerService {
 
     void syncEnterpriseCustomers(SyncCustomersCommand cmd);
     void syncIndividualCustomers(SyncCustomersCommand cmd);
+    
+    
+    List<CustomerTrackingDTO> listCustomerTrackings(ListCustomerTrackingsCommand cmd);
+	CustomerTrackingDTO getCustomerTracking(GetCustomerTrackingCommand cmd);
+	void updateCustomerTracking(UpdateCustomerTrackingCommand cmd);
+	void deleteCustomerTracking(DeleteCustomerTrackingCommand cmd);
+	void createCustomerTracking(CreateCustomerTrackingCommand cmd);
+	
 }

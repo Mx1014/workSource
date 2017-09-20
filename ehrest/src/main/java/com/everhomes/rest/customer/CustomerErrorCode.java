@@ -21,4 +21,6 @@ public interface CustomerErrorCode {
     int ERROR_CUSTOMER_NAME_IS_EXIST = 10013;  //客户名称已存在
     int ERROR_CUSTOMER_CATEGORY_IS_NULL = 10014;  //客户类型不存在
     int ERROR_CUSTOMER_LEVEL_IS_NULL = 10015;  //客户级别不存在
+    
+    int ERROR_CUSTOMER_TRACKING_NOT_EXIST = 10016;  //更近信息不存在
 }

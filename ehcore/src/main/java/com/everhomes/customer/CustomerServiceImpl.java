@@ -1,11 +1,26 @@
 package com.everhomes.customer;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
@@ -20,18 +35,98 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
-import com.everhomes.rest.customer.*;
+import com.everhomes.rest.customer.CreateCustomerApplyProjectCommand;
+import com.everhomes.rest.customer.CreateCustomerCertificateCommand;
+import com.everhomes.rest.customer.CreateCustomerCommercialCommand;
+import com.everhomes.rest.customer.CreateCustomerEconomicIndicatorCommand;
+import com.everhomes.rest.customer.CreateCustomerInvestmentCommand;
+import com.everhomes.rest.customer.CreateCustomerPatentCommand;
+import com.everhomes.rest.customer.CreateCustomerTalentCommand;
+import com.everhomes.rest.customer.CreateCustomerTrackingCommand;
+import com.everhomes.rest.customer.CreateCustomerTrademarkCommand;
+import com.everhomes.rest.customer.CreateEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.CustomerApplyProjectDTO;
+import com.everhomes.rest.customer.CustomerCertificateDTO;
+import com.everhomes.rest.customer.CustomerCommercialDTO;
+import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
+import com.everhomes.rest.customer.CustomerErrorCode;
+import com.everhomes.rest.customer.CustomerIndustryStatisticsDTO;
+import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
+import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsDTO;
+import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
+import com.everhomes.rest.customer.CustomerInvestmentDTO;
+import com.everhomes.rest.customer.CustomerPatentDTO;
+import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
+import com.everhomes.rest.customer.CustomerProjectStatisticsResponse;
+import com.everhomes.rest.customer.CustomerSourceStatisticsDTO;
+import com.everhomes.rest.customer.CustomerSourceStatisticsResponse;
+import com.everhomes.rest.customer.CustomerTalentDTO;
+import com.everhomes.rest.customer.CustomerTalentStatisticsDTO;
+import com.everhomes.rest.customer.CustomerTalentStatisticsResponse;
+import com.everhomes.rest.customer.CustomerTrackingDTO;
+import com.everhomes.rest.customer.CustomerTrademarkDTO;
+import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.DeleteCustomerApplyProjectCommand;
+import com.everhomes.rest.customer.DeleteCustomerCertificateCommand;
+import com.everhomes.rest.customer.DeleteCustomerCommercialCommand;
+import com.everhomes.rest.customer.DeleteCustomerEconomicIndicatorCommand;
+import com.everhomes.rest.customer.DeleteCustomerInvestmentCommand;
+import com.everhomes.rest.customer.DeleteCustomerPatentCommand;
+import com.everhomes.rest.customer.DeleteCustomerTalentCommand;
+import com.everhomes.rest.customer.DeleteCustomerTrackingCommand;
+import com.everhomes.rest.customer.DeleteCustomerTrademarkCommand;
+import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.EnterpriseCustomerStatisticsDTO;
+import com.everhomes.rest.customer.GetCustomerApplyProjectCommand;
+import com.everhomes.rest.customer.GetCustomerCertificateCommand;
+import com.everhomes.rest.customer.GetCustomerCommercialCommand;
+import com.everhomes.rest.customer.GetCustomerEconomicIndicatorCommand;
+import com.everhomes.rest.customer.GetCustomerInvestmentCommand;
+import com.everhomes.rest.customer.GetCustomerPatentCommand;
+import com.everhomes.rest.customer.GetCustomerTalentCommand;
+import com.everhomes.rest.customer.GetCustomerTrackingCommand;
+import com.everhomes.rest.customer.GetCustomerTrademarkCommand;
+import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
+import com.everhomes.rest.customer.ImportEnterpriseCustomerDataDTO;
+import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
+import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
+import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
+import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
+import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
+import com.everhomes.rest.customer.ListCustomerPatentsCommand;
+import com.everhomes.rest.customer.ListCustomerTalentsCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
+import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
+import com.everhomes.rest.customer.ListEnterpriseCustomerStatisticsCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.SyncCustomersCommand;
+import com.everhomes.rest.customer.UpdateCustomerApplyProjectCommand;
+import com.everhomes.rest.customer.UpdateCustomerCertificateCommand;
+import com.everhomes.rest.customer.UpdateCustomerCommercialCommand;
+import com.everhomes.rest.customer.UpdateCustomerEconomicIndicatorCommand;
+import com.everhomes.rest.customer.UpdateCustomerInvestmentCommand;
+import com.everhomes.rest.customer.UpdateCustomerPatentCommand;
+import com.everhomes.rest.customer.UpdateCustomerTalentCommand;
+import com.everhomes.rest.customer.UpdateCustomerTrackingCommand;
+import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
+import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
+import com.everhomes.rest.organization.ImportFileResultLog;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.ModuleName;
-import com.everhomes.rest.warehouse.ImportWarehouseMaterialDataDTO;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
@@ -40,21 +135,6 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/15.
@@ -100,6 +180,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+    
+    @Autowired
+    private UserService userService;
 
     private void checkPrivilege() {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -1303,4 +1386,77 @@ public class CustomerServiceImpl implements CustomerService {
 
         }
     }
+
+    
+	@Override
+	public List<CustomerTrackingDTO> listCustomerTrackings(ListCustomerTrackingsCommand cmd) {
+		 List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(cmd.getCustomerId());
+        if(trackings != null && trackings.size() > 0) {
+            return trackings.stream().map(tracking -> {
+                return convertCustomerTrackingDTO(tracking);
+            }).collect(Collectors.toList());
+        }
+        return null;
+	}
+
+	@Override
+	public CustomerTrackingDTO getCustomerTracking(GetCustomerTrackingCommand cmd) {
+		CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerTrackingDTO(tracking);
+	}
+
+	private CustomerTrackingDTO convertCustomerTrackingDTO(CustomerTracking talent) {
+		CustomerTrackingDTO dto = ConvertHelper.convert(talent, CustomerTrackingDTO.class);
+        if(dto.getTrackingType() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getTrackingType());
+            if(scopeFieldItem != null) {
+                dto.setTrackingTypeName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        if(dto.getTrackingUid() != null) {
+        	UserInfo userInfo = userService.getUserInfo(dto.getTrackingUid());
+        	if(userInfo != null){
+        		dto.setTrackingUidName(userInfo.getNickName());
+        	}
+        }
+        return dto;
+	}
+
+	@Override
+	public void updateCustomerTracking(UpdateCustomerTrackingCommand cmd) {
+		CustomerTracking exist = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
+		CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
+		if(cmd.getTrackingTime() != null){
+			tracking.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
+		}
+		tracking.setCreateTime(exist.getCreateTime());
+		tracking.setCreatorUid(exist.getCreatorUid());
+        enterpriseCustomerProvider.updateCustomerTracking(tracking);
+	}
+
+	@Override
+	public void deleteCustomerTracking(DeleteCustomerTrackingCommand cmd) {
+		CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
+	    enterpriseCustomerProvider.deleteCustomerTracking(tracking);
+	}
+
+	@Override
+	public void createCustomerTracking(CreateCustomerTrackingCommand cmd) {
+		CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
+		if(cmd.getTrackingTime() != null){
+			tracking.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
+		}
+        enterpriseCustomerProvider.createCustomerTracking(tracking);
+	}
+	
+	 private CustomerTracking checkCustomerTracking(Long id, Long customerId) {
+		CustomerTracking tracking = enterpriseCustomerProvider.findCustomerTrackingById(id);
+        if(tracking == null || !tracking.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(tracking.getStatus()))) {
+            LOGGER.error("enterprise customer tracking is not exist or inactive. id: {}, tracking: {}", id, tracking);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRACKING_NOT_EXIST,
+                    "customer tracking is not exist or inactive");
+        }
+        return tracking;
+	    }
 }

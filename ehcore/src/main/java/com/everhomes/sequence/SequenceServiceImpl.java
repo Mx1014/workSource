@@ -82,6 +82,7 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicators;
 import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
 import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTrackings;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
 import com.everhomes.server.schema.tables.pojos.EhDockingMappings;
 import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
@@ -2187,6 +2188,10 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhPmNotifyLogs.class, Tables.EH_PM_NOTIFY_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_NOTIFY_LOGS.ID.max()).from(Tables.EH_PM_NOTIFY_LOGS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhCustomerTrackings.class, Tables.EH_CUSTOMER_TRACKINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_CUSTOMER_TRACKINGS.ID.max()).from(Tables.EH_CUSTOMER_TRACKINGS).fetchOne().value1();
         });
     }
 
