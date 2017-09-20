@@ -742,6 +742,7 @@ public class AssetProviderImpl implements AssetProvider {
                         ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                         dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                         dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
+                        dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                         dtos.add(dto);
                         amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
                         amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
