@@ -310,7 +310,9 @@ public class SearchProviderImpl implements SearchProvider {
 		if (hits == null)
 			return list;
 		for (int i = 0; i < hits.size(); i++) {
-			list.add(hits.getJSONObject(i).getJSONObject("_source"));
+			JSONObject o = hits.getJSONObject(i).getJSONObject("_source");
+			o.put("highlight",hits.getJSONObject(i).getJSONObject("highlight"));
+			list.add(o);
 		}
 		return list;
 	}
