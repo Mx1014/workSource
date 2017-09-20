@@ -582,7 +582,7 @@ public class NewsServiceImpl implements NewsService {
 			newsDTO.setLikeFlag(getUserLikeFlag(userId, o.getLong("id")).getCode());
 			newsDTO.setCategoryId(o.getLong("categoryId"));
 			newsDTO.setVisibleType(o.getString("visibleType"));
-			newsDTO.setHighlightFields(o.getString("highlight"));
+			newsDTO.setHighlightFields(o.getJSONObject("highlight").toJSONString());
 
 			newsDTO.setCommentFlag(NewsNormalFlag.ENABLED.getCode());
 			if (commentForbiddenFlag) {
