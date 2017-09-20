@@ -1500,6 +1500,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(t)
                 .where(t.CHARGING_ITEM_ID.eq(chargingItemId))
                 .and(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+                .and(t.OWNERTYPE.eq(ownerType))
+                .and(t.OWNERID.eq(ownerId))
                 .fetch()
                 .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
         return rules.get(0);
