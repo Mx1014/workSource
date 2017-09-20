@@ -318,6 +318,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
         param.put("projectId", projectId);
         param.put("anonymous", "0");
         param.put("fileAddrs", fileAddrs);
+        param.put("callBackUrl", configProvider.getValue("pmtask.ebei.callback", ""));
         if (EbeiBuildingType.publicArea.equals(task.getBuildingName()))
             param.put("buildingType", "1");
         else
