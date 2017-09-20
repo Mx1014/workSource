@@ -1,6 +1,9 @@
 package com.everhomes.rest.parking;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -39,6 +42,17 @@ public class ParkingRequestCardConfigDTO {
 
 	private Byte cardTypeTipFlag;
 	private String cardTypeTip;
+
+	@ItemType(ParkingCardRequestTypeDTO.class)
+	private List<ParkingCardRequestTypeDTO> requestTypes;
+
+	public List<ParkingCardRequestTypeDTO> getRequestTypes() {
+		return requestTypes;
+	}
+
+	public void setRequestTypes(List<ParkingCardRequestTypeDTO> requestTypes) {
+		this.requestTypes = requestTypes;
+	}
 
 	public Byte getCardTypeTipFlag() {
 		return cardTypeTipFlag;
