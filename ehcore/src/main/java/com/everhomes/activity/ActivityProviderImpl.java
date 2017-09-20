@@ -631,17 +631,19 @@ public class ActivityProviderImpl implements ActivityProivider {
 	}
 
 	@Override
-	public List<Activity> listActivitiesForWarning(Integer namespaceId, Timestamp queryStartTime, Timestamp queryEndTime) {
+	public List<Activity> listActivitiesForWarning(Integer namespaceId, Long categoryId, Timestamp queryStartTime, Timestamp queryEndTime) {
 		// 1 2 3 4 5
-		return dbProvider.getDslContext(AccessSpec.readOnly())
-			.select()
-			.from(Tables.EH_ACTIVITIES)
-			.where(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
-			.and(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2))
-			.and(Tables.EH_ACTIVITIES.START_TIME.gt(queryStartTime))
-			.and(Tables.EH_ACTIVITIES.START_TIME.le(queryEndTime))
-			.fetch()
-			.map(r->ConvertHelper.convert(r, Activity.class));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhActivitiesRecord> query = context.selectQuery(Tables.EH_ACTIVITIES);
+        query.addConditions(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
+        if(categoryId != null){
+            query.addConditions(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(categoryId));
+        }
+        query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2));
+        query.addConditions(Tables.EH_ACTIVITIES.START_TIME.gt(queryStartTime));
+        query.addConditions(Tables.EH_ACTIVITIES.START_TIME.le(queryEndTime));
+
+        return query.fetch().map(r->ConvertHelper.convert(r, Activity.class));
 	}
 
 	@Override

@@ -489,7 +489,7 @@ public class ActivityServiceImpl implements ActivityService {
 	           
 	            //收费且不需要确认的报名下一步就是支付了，所以先生成订单。设置订单开始时间，过期时间，用于定时取消订单  add by yanjun 20170516
 	            if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode() && activity.getConfirmFlag() == 0){
-	            	populateNewRosterOrder(roster);
+	            	populateNewRosterOrder(roster, activity.getCategoryId());
 	            }
 	            
 //	            activityProvider.createActivityRoster(roster);
@@ -638,7 +638,7 @@ public class ActivityServiceImpl implements ActivityService {
      * 填充新订单信息，订单id、支付状态、时间等
      * @param roster
      */
-    private void populateNewRosterOrder(ActivityRoster roster){
+    private void populateNewRosterOrder(ActivityRoster roster, Long categoryId){
     	Long orderNo = this.onlinePayService.createBillId(DateHelper
 				.currentGMTTime().getTime());
     	roster.setOrderNo(orderNo);
@@ -646,6 +646,7 @@ public class ActivityServiceImpl implements ActivityService {
     	
     	GetRosterOrderSettingCommand settingCmd = new GetRosterOrderSettingCommand();
     	settingCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+    	settingCmd.setCategoryId(categoryId);
     	RosterOrderSettingDTO dto = this.getRosterOrderSetting(settingCmd);
     	
     	Long nowTime = DateHelper.currentGMTTime().getTime();
@@ -2398,7 +2399,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     			//设置订单开始时间, 结束时间，用于定时取消订单
     			if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
-    				populateNewRosterOrder(item);
+    				populateNewRosterOrder(item, activity.getCategoryId());
 
     				//启动定时器，当时间超过设定时间时，取消订单。
     				rosterPayTimeoutService.pushTimeout(item);
@@ -4915,11 +4916,12 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
 	public ActivityWarningResponse setActivityWarning(SetActivityWarningCommand cmd) {
-		if (cmd.getNamespaceId()==null || cmd.getDays() == null || cmd.getHours() == null || cmd.getHours().intValue() == 0) {
+		if (cmd.getNamespaceId()==null ||cmd.getCategoryId() == null || cmd.getDays() == null
+				|| cmd.getHours() == null || cmd.getHours().intValue() == 0) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"cmd="+cmd);
 		}
-		WarningSetting warningSetting = findWarningSetting(cmd.getNamespaceId());
+		WarningSetting warningSetting = findWarningSetting(cmd.getNamespaceId(), cmd.getCategoryId());
 		if (warningSetting != null && warningSetting.getId() != null) {
 			warningSetting.setTime((long) ((cmd.getDays()*24+cmd.getHours())*3600*1000));
 			warningSetting.setUpdateTime(warningSetting.getCreateTime());
@@ -4929,6 +4931,7 @@ public class ActivityServiceImpl implements ActivityService {
 		}else {
 			warningSetting = new WarningSetting();
 			warningSetting.setNamespaceId(cmd.getNamespaceId());
+			warningSetting.setCategoryId(cmd.getCategoryId());
 			warningSetting.setTime((long) ((cmd.getDays()*24+cmd.getHours())*3600*1000));
 			warningSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			warningSetting.setCreatorUid(UserContext.current().getUser().getId());
@@ -4949,22 +4952,23 @@ public class ActivityServiceImpl implements ActivityService {
 					"cmd="+cmd);
 		}
 		
-		WarningSetting warningSetting = findWarningSetting(cmd.getNamespaceId());
+		WarningSetting warningSetting = findWarningSetting(cmd.getNamespaceId(), cmd.getCategoryId());
 		
 		if (warningSetting != null) {
 			Integer days = (int) (warningSetting.getTime() / 1000 / 3600 / 24);
 			Integer hours  = (int) (warningSetting.getTime() / 1000 / 3600 % 24);
-			return new ActivityWarningResponse(warningSetting.getNamespaceId(), days, hours, warningSetting.getTime());
+			return new ActivityWarningResponse(warningSetting.getNamespaceId(), cmd.getCategoryId(), days, hours, warningSetting.getTime());
 		}
 		
-		return new ActivityWarningResponse(cmd.getNamespaceId(), 0, 1, 3600*1000L);
+		return new ActivityWarningResponse(cmd.getNamespaceId(), cmd.getCategoryId(), 0, 1, 3600*1000L);
 	}
 	
-	private WarningSetting findWarningSetting(Integer namespaceId){
-		WarningSetting warningSetting =  warningSettingProvider.findWarningSettingByNamespaceAndType(namespaceId, EhActivities.class.getSimpleName());
+	private WarningSetting findWarningSetting(Integer namespaceId, Long categoryId){
+		WarningSetting warningSetting =  warningSettingProvider.findWarningSettingByNamespaceAndType(namespaceId, categoryId, EhActivities.class.getSimpleName());
 		if (warningSetting == null) {
 			warningSetting = new WarningSetting();
 			warningSetting.setNamespaceId(namespaceId);
+			warningSetting.setCategoryId(categoryId);
 			warningSetting.setTime(3600*1000L);
 		}
 		return warningSetting;
@@ -4972,11 +4976,12 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	@Override
 	public RosterOrderSettingDTO setRosterOrderSetting(SetRosterOrderSettingCommand cmd) {
-		if(cmd.getNamespaceId()==null || cmd.getDays() == null || cmd.getHours() == null ){
+		if(cmd.getNamespaceId()==null || cmd.getCategoryId() == null
+				|| cmd.getDays() == null || cmd.getHours() == null ){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"cmd="+cmd);
 		}
-		RosterOrderSetting rosterOrderSetting = rosterOrderSettingProvider.findRosterOrderSettingByNamespace(cmd.getNamespaceId());
+		RosterOrderSetting rosterOrderSetting = rosterOrderSettingProvider.findRosterOrderSettingByNamespace(cmd.getNamespaceId(), cmd.getCategoryId());
 		if (rosterOrderSetting != null && rosterOrderSetting.getId() != null) {
 			rosterOrderSetting.setTime(((long)( cmd.getDays()*24+cmd.getHours()))*3600*1000);
 			rosterOrderSetting.setUpdateTime(rosterOrderSetting.getCreateTime());
@@ -4987,6 +4992,7 @@ public class ActivityServiceImpl implements ActivityService {
 		}else {
 			rosterOrderSetting = new RosterOrderSetting();
 			rosterOrderSetting.setNamespaceId(cmd.getNamespaceId());
+			rosterOrderSetting.setCategoryId(cmd.getCategoryId());
 			rosterOrderSetting.setTime(((long)( cmd.getDays()*24+cmd.getHours()))*3600*1000);
 			rosterOrderSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			rosterOrderSetting.setCreatorUid(UserContext.current().getUser().getId());
@@ -5009,16 +5015,16 @@ public class ActivityServiceImpl implements ActivityService {
 					"cmd="+cmd);
 		}
 		
-		RosterOrderSetting rosterOrderSetting = rosterOrderSettingProvider.findRosterOrderSettingByNamespace(cmd.getNamespaceId());
+		RosterOrderSetting rosterOrderSetting = rosterOrderSettingProvider.findRosterOrderSettingByNamespace(cmd.getNamespaceId(), cmd.getCategoryId());
 		
 		if (rosterOrderSetting != null) {
 			Integer days = (int) (rosterOrderSetting.getTime() / 1000 / 3600 / 24);
 			Integer hours  = (int) (rosterOrderSetting.getTime() / 1000 / 3600 % 24);
-			return new RosterOrderSettingDTO(rosterOrderSetting.getNamespaceId(), days, hours,
+			return new RosterOrderSettingDTO(rosterOrderSetting.getNamespaceId(), cmd.getCategoryId(), days, hours,
 					rosterOrderSetting.getTime(), rosterOrderSetting.getWechatSignup());
 		}
 		
-		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 1, 0, (1*24)*3600*1000L, WechatSignupFlag.YES.getCode());
+		return new RosterOrderSettingDTO(cmd.getNamespaceId(), cmd.getCategoryId(), 1, 0, (1*24)*3600*1000L, WechatSignupFlag.YES.getCode());
 	}
 	
 
@@ -5026,18 +5032,22 @@ public class ActivityServiceImpl implements ActivityService {
 	public ActivityTimeResponse setActivityTime(SetActivityTimeCommand cmd) {
 		ActivityTimeResponse timeResponse = new ActivityTimeResponse();
 		timeResponse.setNamespaceId(cmd.getNamespaceId());
-		
+		timeResponse.setCategoryId(cmd.getCategoryId());
+
 		SetActivityWarningCommand warningCmd = new SetActivityWarningCommand();
 		warningCmd.setNamespaceId(cmd.getNamespaceId());
 		warningCmd.setDays(cmd.getWarningDays());
 		warningCmd.setHours(cmd.getWarningHours());
+		warningCmd.setCategoryId(cmd.getCategoryId());
 		ActivityWarningResponse  warningResponse  = this.setActivityWarning(warningCmd);
 		timeResponse.setWarningDays(warningResponse.getDays());
 		timeResponse.setWarningHours(warningResponse.getHours());
 		timeResponse.setWarningTime(warningResponse.getTime());
+
 		
 		SetRosterOrderSettingCommand orderCommand = new SetRosterOrderSettingCommand();
 		orderCommand.setNamespaceId(cmd.getNamespaceId());
+		orderCommand.setCategoryId(cmd.getCategoryId());
 		orderCommand.setDays(cmd.getOrderDays());
 		orderCommand.setHours(cmd.getOrderHours());
 		orderCommand.setWechatSignup(cmd.getWechatSignup());
@@ -5054,9 +5064,11 @@ public class ActivityServiceImpl implements ActivityService {
 	public ActivityTimeResponse getActivityTime(GetActivityTimeCommand cmd) {
 		ActivityTimeResponse timeResponse = new ActivityTimeResponse();
 		timeResponse.setNamespaceId(cmd.getNamespaceId());
+		timeResponse.setCategoryId(cmd.getCategoryId());
 		
 		GetActivityWarningCommand warningCommand = new GetActivityWarningCommand();
 		warningCommand.setNamespaceId(cmd.getNamespaceId());
+		warningCommand.setCategoryId(cmd.getCategoryId());
 		ActivityWarningResponse  warningResponse  = this.queryActivityWarning(warningCommand);
 		timeResponse.setWarningDays(warningResponse.getDays());
 		timeResponse.setWarningHours(warningResponse.getHours());
@@ -5064,6 +5076,7 @@ public class ActivityServiceImpl implements ActivityService {
 		
 		GetRosterOrderSettingCommand orderCommand = new GetRosterOrderSettingCommand();
 		orderCommand.setNamespaceId(cmd.getNamespaceId());
+		orderCommand.setCategoryId(cmd.getCategoryId());
 		RosterOrderSettingDTO orderResponse = this.getRosterOrderSetting(orderCommand);
 		timeResponse.setOrderDays(orderResponse.getDays());
 		timeResponse.setOrderHours(orderResponse.getHours());
@@ -5092,30 +5105,42 @@ public class ActivityServiceImpl implements ActivityService {
 
 				//遍历每个域空间
 				namespaces.forEach(n -> {
-					WarningSetting warningSetting = findWarningSetting(n.getId());
-					Timestamp queryStartTime = new Timestamp(now.getTime() + warningSetting.getTime());
-					Timestamp queryEndTime = new Timestamp(now.getTime() + warningSetting.getTime() + 3600 * 1000);
-
-					// 对于这个域空间时间范围内的活动，再单独设置定时任务
-					List<Activity> activities = activityProvider.listActivitiesForWarning(n.getId(), queryStartTime, queryEndTime);
-					activities.forEach(a -> {
-						if (a.getSignupAttendeeCount() != null && a.getSignupAttendeeCount() > 0 && a.getStartTime().getTime() - warningSetting.getTime() >= new Date().getTime()) {
-							final Job job1 = new Job(
-									WarnActivityBeginningAction.class.getName(),
-									new Object[]{String.valueOf(a.getId())});
-
-//        				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
-//        						new Date().getTime()+10000);
-							jesqueClientFactory.getClientPool().delayedEnqueue(WarnActivityBeginningAction.QUEUE_NAME, job1,
-									a.getStartTime().getTime() - warningSetting.getTime());
-							LOGGER.debug("设置了一个活动提醒：" + a.getId());
+					//增加了入口的设置，要遍历每个域空间下每个入口的设置
+					List<ActivityCategories> categories = activityProvider.listActivityCategory(n.getId(), null);
+					if(categories == null || categories.size() == 0){
+						setWarningSchedule(n, null, now);
+					}else {
+						for (int i = 0; i< categories.size(); i++){
+							setWarningSchedule(n, categories.get(i).getEntryId(), now);
 						}
-					});
+					}
+
 				});
 			});
 		}
 	}
 
+	private  void setWarningSchedule(NamespaceInfoDTO n, Long categoryId, Date now){
+		WarningSetting warningSetting = findWarningSetting(n.getId(), categoryId);
+		Timestamp queryStartTime = new Timestamp(now.getTime() + warningSetting.getTime());
+		Timestamp queryEndTime = new Timestamp(now.getTime() + warningSetting.getTime() + 3600 * 1000);
+
+		// 对于这个域空间时间范围内的活动，再单独设置定时任务
+		List<Activity> activities = activityProvider.listActivitiesForWarning(n.getId(), categoryId, queryStartTime, queryEndTime);
+		activities.forEach(a -> {
+			if (a.getSignupAttendeeCount() != null && a.getSignupAttendeeCount() > 0 && a.getStartTime().getTime() - warningSetting.getTime() >= new Date().getTime()) {
+				final Job job1 = new Job(
+						WarnActivityBeginningAction.class.getName(),
+						new Object[]{String.valueOf(a.getId())});
+
+//        				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+//        						new Date().getTime()+10000);
+				jesqueClientFactory.getClientPool().delayedEnqueue(WarnActivityBeginningAction.QUEUE_NAME, job1,
+						a.getStartTime().getTime() - warningSetting.getTime());
+				LOGGER.debug("设置了一个活动提醒：" + a.getId());
+			}
+		});
+	}
 	@Override
 	public List<ActivityCategoryDTO> listActivityEntryCategories(
 			ListActivityEntryCategoriesCommand cmd) {

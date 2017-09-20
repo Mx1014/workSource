@@ -13,6 +13,6 @@ public interface WarningSettingProvider {
 
 	List<WarningSetting> listWarningSetting();
 
-	WarningSetting findWarningSettingByNamespaceAndType(Integer namespaceId, String type);
+	WarningSetting findWarningSettingByNamespaceAndType(Integer namespaceId, Long categoryId, String type);
 
 }

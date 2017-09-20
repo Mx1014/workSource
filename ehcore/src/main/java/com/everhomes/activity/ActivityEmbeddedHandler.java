@@ -368,6 +368,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         if(cmd.getWechatSignup() == null){
 			GetRosterOrderSettingCommand getRosterOrderSettingCommand = new GetRosterOrderSettingCommand();
 			getRosterOrderSettingCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+			getRosterOrderSettingCommand.setCategoryId(cmd.getCategoryId());
 			RosterOrderSettingDTO rosterOrderSettingDTO = activityService.getRosterOrderSetting(getRosterOrderSettingCommand);
 
 			if(rosterOrderSettingDTO != null){
