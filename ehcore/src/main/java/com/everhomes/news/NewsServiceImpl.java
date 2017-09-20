@@ -1013,7 +1013,7 @@ public class NewsServiceImpl implements NewsService {
 		NewsTag parentTag = ConvertHelper.convert(cmd,NewsTag.class);
 		dbProvider.execute((TransactionStatus status) -> {
 			Long parentId = 0l;
-			if (parentTag.getId() == 0){
+			if (parentTag.getId() == null){
 				parentId = newsProvider.createNewsTag(parentTag);
 			}else{
 				parentId = parentTag.getId();
