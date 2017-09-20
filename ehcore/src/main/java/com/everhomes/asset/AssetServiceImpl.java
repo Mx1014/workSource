@@ -182,6 +182,9 @@ public class AssetServiceImpl implements AssetService {
 //    @Autowired
 //    private ZhangjianggaokeAssetVendor handler;
 
+//    @Autowired
+//    private ZuolinAssetVendorHandler handler;
+
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -228,8 +231,7 @@ public class AssetServiceImpl implements AssetService {
         ListBillsResponse response = new ListBillsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
             if(UserContext.getCurrentNamespaceId()!=999971){
-//                cmd.setPageAnchor(0l);
-                cmd.setPageAnchor(1l);
+                cmd.setPageAnchor(0l);
             }else{
                 cmd.setPageAnchor(1l);
             }
@@ -257,8 +259,7 @@ public class AssetServiceImpl implements AssetService {
         ListBillItemsResponse response = new ListBillItemsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
             if(UserContext.getCurrentNamespaceId()!=999971){
-//                cmd.setPageAnchor(0l);
-                cmd.setPageAnchor(1l);
+                cmd.setPageAnchor(0l);
             }else{
                 cmd.setPageAnchor(1l);
             }
@@ -427,8 +428,7 @@ public class AssetServiceImpl implements AssetService {
     public void OneKeyNotice(OneKeyNoticeCommand cmd) {
         ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
         if(UserContext.getCurrentNamespaceId()!=999971){
-//            convertedCmd.setPageAnchor(0l);
-            convertedCmd.setPageAnchor(1l);
+            convertedCmd.setPageAnchor(0l);
         }else{
             convertedCmd.setPageAnchor(1l);
         }
