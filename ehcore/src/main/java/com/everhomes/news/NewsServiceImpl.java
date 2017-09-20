@@ -1035,8 +1035,9 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public GetNewsTagResponse getNewsTag(GetNewsTagCommand cmd) {
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<NewsTag> parentTags = newsProvider.listNewsTag(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getIsSearch(),0l,
-				cmd.getPageAnchor(),cmd.getPageSize()+1);
+				cmd.getPageAnchor(),pageSize+1);
 		List<NewsTagDTO> result = parentTags.stream().map(r->ConvertHelper.convert(r,NewsTagDTO.class)).
 				collect(Collectors.toList());
 		result.stream().forEach(r->{
@@ -1047,7 +1048,7 @@ public class NewsServiceImpl implements NewsService {
 		});
 		GetNewsTagResponse response = new GetNewsTagResponse();
 		response.setTags(result);
-		if (result.size()>cmd.getPageSize()) {
+		if (result.size()>pageSize) {
 			response.setPageAnchor(result.get(result.size() - 1).getId());
 			response.getTags().remove(result.size() - 1);
 		}
