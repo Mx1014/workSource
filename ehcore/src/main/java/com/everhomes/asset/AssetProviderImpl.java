@@ -640,7 +640,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.AMOUNT_OWED,t.APARTMENT_NAME,t.BUILDING_NAME)
+        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.AMOUNT_OWED,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
