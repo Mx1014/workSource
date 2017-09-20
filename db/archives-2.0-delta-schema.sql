@@ -21,7 +21,7 @@ CREATE TABLE `eh_archives_dismiss_employees` (
 	`check_in_time` DATE COMMENT '入职日期',
 	`dismiss_time` DATE COMMENT '离职日期',
 	`dismiss_type` TINYINT COMMENT '离职类型',
-	`dismiss_reason` VARCHAR(64) COMMENT '离职原因',
+	`dismiss_reason` TINYINT COMMENT '离职原因',
 	`dismiss_remarks` VARCHAR (256) COMMENT '备注',
 	`detail_id` BIGINT NOT NULL COMMENT 'the id of member in eh_organization_member_details',
 	`create_time` DATETIME COMMENT 'the time of data creating',
