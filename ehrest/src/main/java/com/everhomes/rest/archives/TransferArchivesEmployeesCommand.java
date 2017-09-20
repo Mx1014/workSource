@@ -13,7 +13,7 @@ import java.util.List;
  * <li>jobPositionIds: 岗位 id</li>
  * <li>organizationId: 公司 id</li>
  * <li>effectiveTime: 生效时间</li>
- * <li>transferType: 调整类型: 1-晋升,2-调整,3-其他</li>
+ * <li>transferType: 调整类型: 0-晋升,1-调整,2-其他 参考{@link com.everhomes.rest.archives.ArchivesTransferType}</li>
  * <li>transferReason: 调整原因</li>
  * </ul>
  */

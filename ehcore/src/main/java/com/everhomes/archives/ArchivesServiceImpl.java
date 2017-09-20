@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
+import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.archives.*;
@@ -12,14 +13,14 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.user.EncryptionUtils;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
+import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -72,6 +73,9 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Autowired
     private ConfigurationProvider configurationProvider;
 
+    @Autowired
+    private UserProvider userProvider;
+
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
 
@@ -84,66 +88,58 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setContactToken(cmd.getContactToken());
         addCommand.setDepartmentIds(cmd.getDepartmentIds());
         addCommand.setVisibleFlag(cmd.getVisibleFlag());
-        OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
+        dbProvider.execute((TransactionStatus status) -> {
+            OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 
-        //  获得 detailId 然后处理其它信息
-        Long detailId = null;
-        if (memberDTO != null)
-            detailId = memberDTO.getDetailId();
-        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-        if (memberDetail != null) {
-            memberDetail.setEnName(cmd.getContactEnName());
-            memberDetail.setRegionCode(cmd.getRegionCode());
-            memberDetail.setContactShortToken(cmd.getContactShortToken());
-            memberDetail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
-            //  TODO:职位有可能修改
-            memberDetail.setJobPosition(cmd.getJobPosition());
-            memberDetail.setWorkEmail(cmd.getWorkEmail());
-            organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
-            dto.setDetailId(detailId);
-            dto.setContactName(memberDetail.getContactName());
-            dto.setContactToken(memberDetail.getContactToken());
-        }
-
-        //  TODO: 添加档案记录
-
-        return dto;
-    }
-
-    //  获取部门名称
-    private String getDepartmentName(List<Long> ids) {
-        String departmentName = "";
-        for (Long id : ids) {
-            Organization org = organizationProvider.findOrganizationById(id);
-            if (org != null) {
-                departmentName += org.getName() + ",";
+            //  获得 detailId 然后处理其它信息
+            Long detailId = null;
+            if (memberDTO != null)
+                detailId = memberDTO.getDetailId();
+            OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+            if (memberDetail != null) {
+                memberDetail.setEnName(cmd.getContactEnName());
+                memberDetail.setRegionCode(cmd.getRegionCode());
+                memberDetail.setContactShortToken(cmd.getContactShortToken());
+                memberDetail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
+                //  TODO:职位有可能修改
+                memberDetail.setJobPosition(cmd.getJobPosition());
+                memberDetail.setWorkEmail(cmd.getWorkEmail());
+                organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
+                dto.setDetailId(detailId);
+                dto.setContactName(memberDetail.getContactName());
+                dto.setContactToken(memberDetail.getContactToken());
             }
-        }
-        departmentName = departmentName.substring(0, departmentName.length() - 1);
-        return departmentName;
+            checkInArchivesEmployeesLogs(cmd.getOrganizationId(),detailId,ArchivesUtil.currentDate());
+            return null;
+        });
+        return dto;
     }
 
     @Override
     public void transferArchivesContacts(TransferArchivesContactsCommand cmd) {
-        if (cmd.getDetailIds() != null) {
-            TransferArchivesEmployeesCommand transferCommand = new TransferArchivesEmployeesCommand();
-            transferCommand.setOrganizationId(cmd.getOrganizationId());
-            transferCommand.setDetailIds(cmd.getDetailIds());
-            transferCommand.setDepartmentIds(cmd.getDepartmentIds());
-            organizationService.transferOrganizationPersonels(transferCommand);
+        dbProvider.execute((TransactionStatus status) -> {
+            if (cmd.getDetailIds() != null) {
+                TransferArchivesEmployeesCommand transferCommand = new TransferArchivesEmployeesCommand();
+                transferCommand.setOrganizationId(cmd.getOrganizationId());
+                transferCommand.setDetailIds(cmd.getDetailIds());
+                transferCommand.setDepartmentIds(cmd.getDepartmentIds());
+                organizationService.transferOrganizationPersonels(transferCommand);
 
-            //  同步部门名称
-            for (Long detailId : cmd.getDetailIds()) {
-                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                detail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
-                organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+                //  同步部门名称
+                for (Long detailId : cmd.getDetailIds()) {
+                    OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                    detail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
+                    organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+                }
+                // TODO: 循环添加档案记录
             }
-            // TODO: 循环添加档案记录
-        }
+            return null;
+        });
     }
 
     @Override
     public void deleteArchivesContacts(DeleteArchivesContactsCommand cmd) {
+        dbProvider.execute((TransactionStatus status) -> {
         if (cmd.getDetailIds() != null) {
             for (Long detailId : cmd.getDetailIds()) {
                 //  组织架构删除
@@ -153,9 +149,20 @@ public class ArchivesServiceImpl implements ArchivesService {
                 deleteOrganizationPersonnelByContactTokenCommand.setContactToken(detail.getContactToken());
                 deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
                 organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
-                // TODO: 循环添加档案记录
+
             }
+            //  添加档案记录
+            DismissArchivesEmployeesCommand dismissCommand = new DismissArchivesEmployeesCommand();
+            dismissCommand.setDetailIds(cmd.getDetailIds());
+            dismissCommand.setOrganizationId(cmd.getOrganizationId());
+            dismissCommand.setDismissTime(ArchivesUtil.currentDate());
+            dismissCommand.setDismissType(ArchivesDismissType.OTHER.getCode());
+            dismissCommand.setDismissReason(ArchivesDismissReason.OTHER.getCode());
+            dismissCommand.setDismissRemark("通讯录删除");
+            dismissArchivesEmployeesLogs(dismissCommand);
         }
+            return null;
+        });
     }
 
     //  通讯录成员置顶接口
@@ -531,8 +538,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (response.getContacts() != null && response.getContacts().size() > 0) {
             List<ArchivesContactDTO> contacts = response.getContacts().stream().map(r -> {
                 ArchivesContactDTO dto = convertArchivesContactForExcel(r);
-//                r.setGenderString(convertToArchivesInfo(r.getGender(),"gender"));
-//                r.setDepartmentString(convertToArchivesInfo(r.getDepartments(),"departments"));
                 return r;
             }).collect(Collectors.toList());
             String fileName = "通讯录成员列表";
@@ -592,6 +597,94 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
 
+
+    /*
+     * 增加入职记录
+     */
+    private void checkInArchivesEmployeesLogs(Long organizationId, Long detailId, Date checkInTime){
+        Long userId = UserContext.currentUserId();
+        ArchivesLogs log = new ArchivesLogs();
+        log.setDetailId(detailId);
+        log.setOrganizationId(organizationId);
+        log.setOperationType(ArchivesOperationType.CHECK_IN.getCode());
+        log.setOperationTime(checkInTime);
+        log.setOperatorUid(userId);
+        log.setOperatorName(getArchivesContactName(userId,organizationId));
+        archivesProvider.createArchivesLogs(log);
+    }
+    /*
+     * 增加转正记录
+     */
+    private void employArchivesEmployeesLogs(EmployArchivesEmployeesCommand cmd) {
+        Long userId = UserContext.currentUserId();
+        if (cmd.getDetailIds() != null) {
+            for (Long detailId : cmd.getDetailIds()) {
+                ArchivesLogs log = new ArchivesLogs();
+                log.setDetailId(detailId);
+                log.setOrganizationId(cmd.getOrganizationId());
+                log.setOperationType(ArchivesOperationType.EMPLOY.getCode());
+                log.setOperationTime(cmd.getEmploymentTime());
+                log.setOperationReason(cmd.getEmploymentEvaluation());
+                log.setOperatorUid(userId);
+                log.setOperatorName(getArchivesContactName(userId,cmd.getOrganizationId()));
+                archivesProvider.createArchivesLogs(log);
+            }
+        }
+    }
+
+    /*
+     * 增加调整记录
+     */
+    private void transferArchivesEmployeesLogs(TransferArchivesEmployeesCommand cmd) {
+        Long userId = UserContext.currentUserId();
+        if (cmd.getDetailIds() != null) {
+            for (Long detailId : cmd.getDetailIds()) {
+                ArchivesLogs log = new ArchivesLogs();
+                log.setDetailId(detailId);
+                log.setOrganizationId(cmd.getOrganizationId());
+                log.setOperationType(ArchivesOperationType.TRANSFER.getCode());
+                log.setOperationTime(cmd.getEffectiveTime());
+                log.setOperationCategory(cmd.getTransferType());
+                log.setOperationReason(cmd.getTransferReason());
+                log.setOperatorUid(userId);
+                log.setOperatorName(getArchivesContactName(userId,cmd.getOrganizationId()));
+                archivesProvider.createArchivesLogs(log);
+            }
+        }
+    }
+
+    /*
+     * 增加离职记录
+     */
+    private void dismissArchivesEmployeesLogs(DismissArchivesEmployeesCommand cmd) {
+        Long userId = UserContext.currentUserId();
+        if (cmd.getDetailIds() != null) {
+            for (Long detailId : cmd.getDetailIds()) {
+                ArchivesLogs log = new ArchivesLogs();
+                log.setDetailId(detailId);
+                log.setOrganizationId(cmd.getOrganizationId());
+                log.setOperationType(ArchivesOperationType.DISMISS.getCode());
+                log.setOperationTime(cmd.getDismissTime());
+                log.setOperationCategory(cmd.getDismissType());
+                log.setOperationReason(convertToArchivesInfo(cmd.getDismissReason(), "dismissReason"));
+                log.setOperationRemark(cmd.getDismissRemark());
+                log.setOperatorUid(userId);
+                log.setOperatorName(getArchivesContactName(userId,cmd.getOrganizationId()));
+                archivesProvider.createArchivesLogs(log);
+            }
+        }
+    }
+
+    private String getArchivesContactName(Long userId, Long organizationId){
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+        String contactToken = userIdentifier.getIdentifierToken();
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken,organizationId);
+        if(member == null)
+            return "管理员" + contactToken;
+        else
+            return member.getContactName();
+    }
+
     @Override
     public ArchivesEmployeeDTO addArchivesEmployee(AddArchivesEmployeeCommand cmd) {
 
@@ -604,62 +697,172 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setGender(cmd.getGender());
         addCommand.setDepartmentIds(cmd.getDepartmentIds());
         addCommand.setContactToken(cmd.getContactToken());
-        OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
+        dbProvider.execute((TransactionStatus status) -> {
 
-        //  2.获得 detailId 然后处理其它信息
-        Long detailId = null;
-        if (memberDTO != null)
-            detailId = memberDTO.getDetailId();
-        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-        if (memberDetail != null) {
+            OrganizationMemberDTO memberDTO = organizationService.addOrganizationPersonnel(addCommand);
 
-            memberDetail.setCheckInTime(cmd.getCheckInTime());
-            memberDetail.setEmployeeType(cmd.getEmployeeType());
-            memberDetail.setEmployeeStatus(cmd.getEmployeeStatus());
-            memberDetail.setEmploymentTime(cmd.getEmploymentTime());
-            memberDetail.setEmployeeNo(cmd.getEmployeeNo());
-            memberDetail.setEnName(cmd.getEnName());
-            //  TODO:职位有可能修改
-            memberDetail.setJobPosition(cmd.getJobPosition());
-            memberDetail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
-            memberDetail.setContactShortToken(cmd.getContactShortToken());
-            memberDetail.setWorkEmail(cmd.getWorkEmail());
-            memberDetail.setContractPartyId(cmd.getContractId());
-            memberDetail.setRegionCode(cmd.getRegionCode());
-            organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
-            dto.setDetailId(detailId);
-            dto.setContactName(memberDetail.getContactName());
-            dto.setContactToken(memberDetail.getContactToken());
-        }
+            //  2.获得 detailId 然后处理其它信息
+            Long detailId = null;
+            if (memberDTO != null)
+                detailId = memberDTO.getDetailId();
+            OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+            if (memberDetail != null) {
+
+                memberDetail.setCheckInTime(cmd.getCheckInTime());
+                memberDetail.setEmployeeType(cmd.getEmployeeType());
+                memberDetail.setEmployeeStatus(cmd.getEmployeeStatus());
+                memberDetail.setEmploymentTime(cmd.getEmploymentTime());
+                memberDetail.setEmployeeNo(cmd.getEmployeeNo());
+                memberDetail.setEnName(cmd.getEnName());
+                //  TODO:职位有可能修改
+                memberDetail.setJobPosition(cmd.getJobPosition());
+                memberDetail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
+                memberDetail.setContactShortToken(cmd.getContactShortToken());
+                memberDetail.setWorkEmail(cmd.getWorkEmail());
+                memberDetail.setContractPartyId(cmd.getContractId());
+                memberDetail.setRegionCode(cmd.getRegionCode());
+                organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
+                dto.setDetailId(detailId);
+                dto.setContactName(memberDetail.getContactName());
+                dto.setContactToken(memberDetail.getContactToken());
+            }
+            checkInArchivesEmployeesLogs(cmd.getOrganizationId(),detailId,cmd.getCheckInTime());
+            return null;
+        });
         return dto;
+    }
+
+    /*
+     * 获取部门名称
+     */
+    private String getDepartmentName(List<Long> ids) {
+        String departmentName = "";
+        for (Long id : ids) {
+            Organization org = organizationProvider.findOrganizationById(id);
+            if (org != null) {
+                departmentName += org.getName() + ",";
+            }
+        }
+        departmentName = departmentName.substring(0, departmentName.length() - 1);
+        return departmentName;
     }
 
     @Override
     public void updateArchivesEmployee(UpdateArchivesEmployeeCommand cmd) {
+        dbProvider.execute((TransactionStatus status) -> {
 
-        //  1.更新 detail 表信息
-        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-        detail = updateArchivesEmployeeDetail(detail, cmd);
-        organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+            //  1.更新 detail 表信息
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+            detail = updateArchivesEmployeeDetail(detail, cmd);
+            organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
 
-        //  2.更新 member 表信息
-        organizationService.updateOrganizationMemberInfoByDetailId(cmd);
+            //  2.更新 member 表信息
+            organizationService.updateOrganizationMemberInfoByDetailId(cmd);
 
-        //  3.更新自定义字段值
-        addGeneralFormValuesCommand formCommand = new addGeneralFormValuesCommand();
-        formCommand.setGeneralFormId(getRealFormOriginId(cmd.getFormOriginId()));
-        formCommand.setSourceId(cmd.getDetailId());
-        formCommand.setSourceType(GeneralFormSourceType.ARCHIVES_ATUH.getCode());
-        formCommand.setValues(cmd.getValues());
-        generalFormService.addGeneralFormValues(formCommand);
+            //  3.更新自定义字段值
+            addGeneralFormValuesCommand formCommand = new addGeneralFormValuesCommand();
+            formCommand.setGeneralFormId(getRealFormOriginId(cmd.getFormOriginId()));
+            formCommand.setSourceId(cmd.getDetailId());
+            formCommand.setSourceType(GeneralFormSourceType.ARCHIVES_ATUH.getCode());
+            formCommand.setValues(cmd.getValues());
+            generalFormService.addGeneralFormValues(formCommand);
+            return null;
+        });
     }
 
-    /**
+    @Override
+    public GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd) {
+
+        GetArchivesEmployeeResponse response = new GetArchivesEmployeeResponse();
+
+        //  1.获取表单所有字段
+        GeneralFormIdCommand formCommand = new GeneralFormIdCommand(getRealFormOriginId(cmd.getFormOriginId()));
+        GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
+
+        //  2.获取表单对应的值
+        GetGeneralFormValuesCommand valueCommand =
+                new GetGeneralFormValuesCommand(GeneralFormSourceType.ARCHIVES_ATUH.getCode(), cmd.getDetailId(), NormalFlag.NEED.getCode());
+        List<PostApprovalFormItem> employeeDynamicVal = generalFormService.getGeneralFormValues(valueCommand);
+        Map<String, String> employeeDynamicMaps = handleEmployeeDynamicVal(employeeDynamicVal);
+
+        //  3.获取个人信息的值
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        Map<String, String> employeeDefaultMaps = handleEmployeeDefaultVal(employee);
+
+        //  4.赋值
+        for (GeneralFormFieldDTO dto : form.getFormFields()) {
+            //  4-1.赋值给系统默认字段
+            if (GeneralFormFieldAttributeType.DEFAULT.getCode().equals(dto.getFieldAttribute())) {
+                dto.setFieldValue(employeeDefaultMaps.get(dto.getFieldName()));
+            }
+            //  4-2.赋值给非系统默认字段
+            else {
+                dto.setFieldValue(employeeDynamicMaps.get(dto.getFieldName()));
+            }
+        }
+
+        //  摒弃冗余字段
+        form.setTemplateText(null);
+        //  由于业务的特殊性，此处的 formOriginId 由另外的接口去提供
+        //  故屏蔽掉此处的返回以免造成误解
+        form.setFormOriginId(null);
+        form.setFormVersion(null);
+        response.setForm(form);
+        return response;
+    }
+
+    @Override
+    public ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd) {
+
+        ListArchivesEmployeesResponse response = new ListArchivesEmployeesResponse();
+
+        ListOrganizationContactCommand orgCommand = new ListOrganizationContactCommand();
+        orgCommand.setOrganizationId(cmd.getOrganizationId());
+        orgCommand.setCheckInTimeStart(cmd.getCheckInTimeStart());
+        orgCommand.setCheckInTimeEnd(cmd.getCheckInTimeEnd());
+        orgCommand.setEmploymentTimeStart(cmd.getEmploymentTimeStart());
+        orgCommand.setEmploymentTimeEnd(cmd.getEmploymentTimeEnd());
+        orgCommand.setContractEndTimeStart(cmd.getContractTimeStart());
+        orgCommand.setContractEndTimeEnd(cmd.getContractTimeEnd());
+        orgCommand.setEmployeeStatus(cmd.getEmployeeStatus());
+        orgCommand.setContractPartyId(cmd.getContractPartyId());
+        orgCommand.setKeywords(cmd.getKeywords());
+        if (cmd.getDepartmentId() != null)
+            orgCommand.setOrganizationId(cmd.getDepartmentId());
+        orgCommand.setWorkPlaceId(cmd.getWorkingPlaceId());
+
+        orgCommand.setPageAnchor(cmd.getPageAnchor());
+        if (cmd.getPageSize() != null)
+            orgCommand.setPageSize(cmd.getPageSize());
+        else
+            orgCommand.setPageSize(20);
+        ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
+
+        if (members.getMembers() != null && members.getMembers().size() > 0) {
+            response.setArchivesEmployees(members.getMembers().stream().map(r -> {
+                ArchivesEmployeeDTO dto = new ArchivesEmployeeDTO();
+                dto.setDetailId(r.getDetailId());
+                dto.setTargetId(r.getTargetId());
+                dto.setTargetType(r.getTargetType());
+                dto.setContactName(r.getContactName());
+                dto.setEmployeeStatus(r.getEmployeeStatus());
+                //  TODO: 岗位的确定
+                dto.setDepartments(r.getDepartments());
+                dto.setContactToken(r.getContactToken());
+                dto.setRegionCode(r.getRegionCode());
+                dto.setWorkEmail(r.getWorkEmail());
+                dto.setCheckInTime(r.getCheckInTime());
+                dto.setEmploymentTime(r.getEmploymentTime());
+                dto.setContractTime(r.getContractEndTime());
+                return dto;
+            }).collect(Collectors.toList()));
+        }
+        response.setNextPageAnchor(members.getNextPageAnchor());
+        return response;
+    }
+
+    /*
      * 对前端传来的值进行分析并给对应的变量赋值
-     *
-     * @param detail
-     * @param cmd
-     * @return
      */
     private OrganizationMemberDetails updateArchivesEmployeeDetail(OrganizationMemberDetails detail, UpdateArchivesEmployeeCommand cmd) {
         if (cmd.getBirthday() != null)
@@ -734,6 +937,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             detail.setJobPosition(cmd.getJobPosition());
         if(cmd.getReportTarget() !=null)
             detail.setReportTarget(cmd.getReportTarget());*/
+//  TODO:汇报对象
         if (cmd.getContactShortToken() != null)
             detail.setContactShortToken(cmd.getContactShortToken());
         if (cmd.getWorkEmail() != null)
@@ -768,52 +972,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         return detail;
     }
 
-    @Override
-    public GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd) {
-
-        GetArchivesEmployeeResponse response = new GetArchivesEmployeeResponse();
-
-        //  1.获取表单所有字段
-        GeneralFormIdCommand formCommand = new GeneralFormIdCommand(getRealFormOriginId(cmd.getFormOriginId()));
-        GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
-
-        //  2.获取表单对应的值
-        GetGeneralFormValuesCommand valueCommand =
-                new GetGeneralFormValuesCommand(GeneralFormSourceType.ARCHIVES_ATUH.getCode(), cmd.getDetailId(), NormalFlag.NEED.getCode());
-        List<PostApprovalFormItem> employeeDynamicVal = generalFormService.getGeneralFormValues(valueCommand);
-        Map<String, String> employeeDynamicMaps = handleEmployeeDynamicVal(employeeDynamicVal);
-
-        //  3.获取个人信息的值
-        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-        Map<String, String> employeeDefaultMaps = handleEmployeeDefaultVal(employee);
-
-        //  4.赋值
-        for (GeneralFormFieldDTO dto : form.getFormFields()) {
-            //  4-1.赋值给系统默认字段
-            if (GeneralFormFieldAttributeType.DEFAULT.getCode().equals(dto.getFieldAttribute())) {
-                dto.setFieldValue(employeeDefaultMaps.get(dto.getFieldName()));
-            }
-            //  4-2.赋值给非系统默认字段
-            else {
-                dto.setFieldValue(employeeDynamicMaps.get(dto.getFieldName()));
-            }
-        }
-
-        //  摒弃冗余字段
-        form.setTemplateText(null);
-        //  由于业务的特殊性，此处的 formOriginId 由另外的接口去提供
-        //  故屏蔽掉此处的返回以免造成误解
-        form.setFormOriginId(null);
-        form.setFormVersion(null);
-        response.setForm(form);
-        return response;
-    }
-
-    /**
+    /*
      * 给系统字段赋值，利用 map 设置 key 来存取值
-     *
-     * @param employee
-     * @return
      */
     private Map<String, String> handleEmployeeDefaultVal(OrganizationMemberDetails employee) {
         Map<String, String> valueMap = new HashMap<>();
@@ -877,6 +1037,11 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put("degreeCertificate", employee.getDegreeCertificate());
         valueMap.put("contractCertificate", employee.getContractCertificate());
         return valueMap;
+    }
+
+    private Byte convertToArchivesEnum(String str, String type) {
+
+        return null;
     }
 
     private String convertToArchivesInfo(Object obj, String type) {
@@ -943,14 +1108,34 @@ public class ArchivesServiceImpl implements ArchivesService {
                 return departmentString;
             }
         }
+
+        if (type.equals("dismissReason")) {
+            Byte dismissReason = (Byte) obj;
+            if (dismissReason.equals(ArchivesDismissReason.SALARY.getCode()))
+                return "薪资";
+            else if (dismissReason.equals(ArchivesDismissReason.CULTURE.getCode()))
+                return "文化";
+            else if (dismissReason.equals(ArchivesDismissReason.BALANCE.getCode()))
+                return "生活平衡";
+            else if (dismissReason.equals(ArchivesDismissReason.PERSONAL_REASON.getCode()))
+                return "个人原因";
+            else if (dismissReason.equals(ArchivesDismissReason.CAREER_DEVELOPMENT.getCode()))
+                return "职业发展";
+            else if (dismissReason.equals(ArchivesDismissReason.FIRE.getCode()))
+                return "不胜任";
+            else if (dismissReason.equals(ArchivesDismissReason.ADJUSTMENT.getCode()))
+                return "编制调整";
+            else if (dismissReason.equals(ArchivesDismissReason.BREAK_RULE.getCode()))
+                return "违纪";
+            else if (dismissReason.equals(ArchivesDismissReason.OTHER.getCode()))
+                return "其他";
+        }
+
         return "";
     }
 
-    /**
+    /*
      * 给用户自定义字段赋值，利用 map 设置 key 来存取值
-     *
-     * @param employeeDynamicVals
-     * @return
      */
     private Map<String, String> handleEmployeeDynamicVal(List<PostApprovalFormItem> employeeDynamicVals) {
         Map<String, String> valueMap = new HashMap<>();
@@ -960,56 +1145,6 @@ public class ArchivesServiceImpl implements ArchivesService {
             }
         }
         return valueMap;
-    }
-
-    @Override
-    public ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd) {
-
-        ListArchivesEmployeesResponse response = new ListArchivesEmployeesResponse();
-
-        ListOrganizationContactCommand orgCommand = new ListOrganizationContactCommand();
-        orgCommand.setOrganizationId(cmd.getOrganizationId());
-        orgCommand.setCheckInTimeStart(cmd.getCheckInTimeStart());
-        orgCommand.setCheckInTimeEnd(cmd.getCheckInTimeEnd());
-        orgCommand.setEmploymentTimeStart(cmd.getEmploymentTimeStart());
-        orgCommand.setEmploymentTimeEnd(cmd.getEmploymentTimeEnd());
-        orgCommand.setContractEndTimeStart(cmd.getContractTimeStart());
-        orgCommand.setContractEndTimeEnd(cmd.getContractTimeEnd());
-        orgCommand.setEmployeeStatus(cmd.getEmployeeStatus());
-        orgCommand.setContractPartyId(cmd.getContractPartyId());
-        orgCommand.setKeywords(cmd.getKeywords());
-        if (cmd.getDepartmentId() != null)
-            orgCommand.setOrganizationId(cmd.getDepartmentId());
-        orgCommand.setWorkPlaceId(cmd.getWorkingPlaceId());
-
-        orgCommand.setPageAnchor(cmd.getPageAnchor());
-        if (cmd.getPageSize() != null)
-            orgCommand.setPageSize(cmd.getPageSize());
-        else
-            orgCommand.setPageSize(20);
-        ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
-
-        if (members.getMembers() != null && members.getMembers().size() > 0) {
-            response.setArchivesEmployees(members.getMembers().stream().map(r -> {
-                ArchivesEmployeeDTO dto = new ArchivesEmployeeDTO();
-                dto.setDetailId(r.getDetailId());
-                dto.setTargetId(r.getTargetId());
-                dto.setTargetType(r.getTargetType());
-                dto.setContactName(r.getContactName());
-                dto.setEmployeeStatus(r.getEmployeeStatus());
-                //  TODO: 岗位的确定
-                dto.setDepartments(r.getDepartments());
-                dto.setContactToken(r.getContactToken());
-                dto.setRegionCode(r.getRegionCode());
-                dto.setWorkEmail(r.getWorkEmail());
-                dto.setCheckInTime(r.getCheckInTime());
-                dto.setEmploymentTime(r.getEmploymentTime());
-                dto.setContractTime(r.getContractEndTime());
-                return dto;
-            }).collect(Collectors.toList()));
-        }
-        response.setNextPageAnchor(members.getNextPageAnchor());
-        return response;
     }
 
     private Condition listDismissEmployeesCondition(ListArchivesDismissEmployeesCommand cmd) {
@@ -1083,8 +1218,8 @@ public class ArchivesServiceImpl implements ArchivesService {
                     EmployArchivesEmployeesCommand cmd = JSONObject.parseObject(configuration.getOperationInformation(), EmployArchivesEmployeesCommand.class);
                     employArchivesEmployees(cmd);
                 } else if (configuration.getOperationType().equals(ArchivesOperationType.TRANSFER.getCode())) {
-                    TransferArchivesContactsCommand cmd = JSONObject.parseObject(configuration.getOperationInformation(), TransferArchivesContactsCommand.class);
-                    transferArchivesContacts(cmd);
+                    TransferArchivesEmployeesCommand cmd = JSONObject.parseObject(configuration.getOperationInformation(), TransferArchivesEmployeesCommand.class);
+                    transferArchivesEmployees(cmd);
                 } else if (configuration.getOperationType().equals(ArchivesOperationType.DISMISS.getCode())) {
                     DismissArchivesEmployeesCommand cmd = JSONObject.parseObject(configuration.getOperationInformation(), DismissArchivesEmployeesCommand.class);
                     dismissArchivesEmployees(cmd);
@@ -1093,29 +1228,33 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
     }
 
-
     @Override
     public void employArchivesEmployeesConfig(EmployArchivesEmployeesCommand cmd) {
-        //  1.若为当天则立即执行
-        if (cmd.getEmploymentTime().toString().equals(ArchivesUtil.currentDate().toString()))
-            employArchivesEmployees(cmd);
-        //  2.若为其它时间则增加转正配置
-        ArchivesConfigurations configuration = new ArchivesConfigurations();
-        configuration.setOrganizationId(cmd.getOrganizationId());
-        configuration.setOperationType(ArchivesOperationType.EMPLOY.getCode());
-        configuration.setOperationTime(cmd.getEmploymentTime());
-        configuration.setOperationInformation(JSON.toJSONString(cmd));
-        archivesProvider.createArchivesConfigurations(configuration);
+        dbProvider.execute((TransactionStatus status) -> {
+            //  1.若为当前日期则立即执行
+            if (cmd.getEmploymentTime().toString().equals(ArchivesUtil.currentDate().toString()))
+                employArchivesEmployees(cmd);
+            else {
+                //  2.若为其它时间则增加转正配置
+                ArchivesConfigurations configuration = new ArchivesConfigurations();
+                configuration.setOrganizationId(cmd.getOrganizationId());
+                configuration.setOperationType(ArchivesOperationType.EMPLOY.getCode());
+                configuration.setOperationTime(cmd.getEmploymentTime());
+                configuration.setOperationInformation(JSON.toJSONString(cmd));
+                archivesProvider.createArchivesConfigurations(configuration);
+
+            }
+            //  3.更新人员变动记录
+            employArchivesEmployeesLogs(cmd);
+            return null;
+        });
     }
 
-    /**
-     * 员工转正及添加记录
-     *
-     * @param cmd
+    /*
+     * 员工转正
      */
     @Override
     public void employArchivesEmployees(EmployArchivesEmployeesCommand cmd) {
-        //  添加事物
         dbProvider.execute((TransactionStatus status) -> {
             for (Long detailId : cmd.getDetailIds()) {
                 //  1.更新员工状态
@@ -1123,7 +1262,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                 detail.setEmployeeStatus(EmployeeStatus.ONTHEJOB.getCode());
                 detail.setEmploymentTime(cmd.getEmploymentTime());
                 organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
-                //  TODO:2.更新人员变动记录
             }
             return null;
         });
@@ -1131,51 +1269,65 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void transferArchivesEmployeesConfig(TransferArchivesEmployeesCommand cmd) {
-        //  1.若为当天则立即执行
-        if (cmd.getEffectiveTime().toString().equals(ArchivesUtil.currentDate().toString()))
-            transferArchivesEmployees(cmd);
-        //  2.若为其它时间则添加调整配置
-        ArchivesConfigurations configuration = new ArchivesConfigurations();
-        configuration.setOrganizationId(cmd.getOrganizationId());
-        configuration.setOperationType(ArchivesOperationType.TRANSFER.getCode());
-        configuration.setOperationTime(cmd.getEffectiveTime());
-        configuration.setOperationInformation(JSON.toJSONString(cmd));
-        archivesProvider.createArchivesConfigurations(configuration);
+        dbProvider.execute((TransactionStatus status) -> {
+            //  1.若为当天则立即执行
+            if (cmd.getEffectiveTime().toString().equals(ArchivesUtil.currentDate().toString()))
+                transferArchivesEmployees(cmd);
+                //  2.若为其它时间则添加调整配置
+            else {
+                ArchivesConfigurations configuration = new ArchivesConfigurations();
+                configuration.setOrganizationId(cmd.getOrganizationId());
+                configuration.setOperationType(ArchivesOperationType.TRANSFER.getCode());
+                configuration.setOperationTime(cmd.getEffectiveTime());
+                configuration.setOperationInformation(JSON.toJSONString(cmd));
+                archivesProvider.createArchivesConfigurations(configuration);
+            }
+            //  3.更新人员调整记录
+            transferArchivesEmployeesLogs(cmd);
+            return null;
+        });
     }
 
-    /**
-     * 员工部门调整及添加记录
-     *
-     * @param cmd
+    /*
+     * 员工部门调整
      */
     public void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd) {
-        //  1.调整员工部门
-        TransferArchivesContactsCommand transferCommand = new TransferArchivesContactsCommand();
-        transferCommand.setOrganizationId(cmd.getOrganizationId());
-        transferCommand.setDepartmentIds(cmd.getDepartmentIds());
-        transferCommand.setDetailIds(cmd.getDetailIds());
-        transferArchivesContacts(transferCommand);
-
-        //  TODO:2.调整员工岗位
-
-        //  TODO:3.更新员工人事变动记录
-
+        dbProvider.execute((TransactionStatus status) -> {
+            //  1.调整员工部门
+            TransferArchivesContactsCommand transferCommand = new TransferArchivesContactsCommand();
+            transferCommand.setOrganizationId(cmd.getOrganizationId());
+            transferCommand.setDepartmentIds(cmd.getDepartmentIds());
+            transferCommand.setDetailIds(cmd.getDetailIds());
+            transferArchivesContacts(transferCommand);
+            //  TODO:2.调整员工岗位
+            return null;
+        });
     }
 
     @Override
     public void dismissArchivesEmployeesConfig(DismissArchivesEmployeesCommand cmd) {
-        //  1.若为当天则立即执行
-        if (cmd.getDismissTime().toString().equals(ArchivesUtil.currentDate().toString()))
-            dismissArchivesEmployees(cmd);
-        //  2.若为其它时间则添加离职配置
-        ArchivesConfigurations configuration = new ArchivesConfigurations();
-        configuration.setOrganizationId(cmd.getOrganizationId());
-        configuration.setOperationType(ArchivesOperationType.DISMISS.getCode());
-        configuration.setOperationTime(cmd.getDismissTime());
-        configuration.setOperationInformation(JSON.toJSONString(cmd));
-        archivesProvider.createArchivesConfigurations(configuration);
+        dbProvider.execute((TransactionStatus status) -> {
+            //  1.若为当天则立即执行
+            if (cmd.getDismissTime().toString().equals(ArchivesUtil.currentDate().toString()))
+                dismissArchivesEmployees(cmd);
+                //  2.若为其它时间则添加离职配置
+            else {
+                ArchivesConfigurations configuration = new ArchivesConfigurations();
+                configuration.setOrganizationId(cmd.getOrganizationId());
+                configuration.setOperationType(ArchivesOperationType.DISMISS.getCode());
+                configuration.setOperationTime(cmd.getDismissTime());
+                configuration.setOperationInformation(JSON.toJSONString(cmd));
+                archivesProvider.createArchivesConfigurations(configuration);
+            }
+            //  3.添加人员离职记录
+            dismissArchivesEmployeesLogs(cmd);
+            return null;
+        });
     }
 
+    /*
+     * 员工离职
+     */
     public void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd) {
         //  添加事物
         dbProvider.execute((TransactionStatus status) -> {
@@ -1201,8 +1353,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                 deleteOrganizationPersonnelByContactTokenCommand.setContactToken(detail.getContactToken());
                 deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
                 organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
-
-                //  TODO:3.添加档案记录
             }
             return null;
         });
@@ -1223,10 +1373,12 @@ public class ArchivesServiceImpl implements ArchivesService {
             createCommand.setFormName(ARCHIVES);
             createCommand.setFormFields(cmd.getFormFields());
             createCommand.setFormGroups(cmd.getFormGroups());
-            GeneralFormDTO form = generalFormService.createGeneralForm(createCommand);
-
-            //  在业务表单组新增记录
-            createArchivesForm(form);
+            GeneralFormDTO form = dbProvider.execute((TransactionStatus status) -> {
+                GeneralFormDTO dto = generalFormService.createGeneralForm(createCommand);
+                //  在业务表单组新增记录
+                createArchivesForm(dto);
+                return dto;
+            });
             return form;
         } else {
             //  修改时，在组织架构修改表单
@@ -1237,22 +1389,21 @@ public class ArchivesServiceImpl implements ArchivesService {
             updateCommand.setOrganizationId(cmd.getOrganizationId());
             updateCommand.setFormFields(cmd.getFormFields());
             updateCommand.setFormGroups(cmd.getFormGroups());
-            GeneralFormDTO form = generalFormService.updateGeneralForm(updateCommand);
-
-            //  在业务表单同步记录
-            ArchivesFroms archivesFroms = archivesProvider.findArchivesFormOriginId(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId());
-            archivesFroms.setFormOriginId(form.getFormOriginId());
-            archivesFroms.setFormVersion(form.getFormVersion());
-            archivesProvider.updateArchivesForm(archivesFroms);
-
+            GeneralFormDTO form = dbProvider.execute((TransactionStatus status) -> {
+                GeneralFormDTO dto = generalFormService.updateGeneralForm(updateCommand);
+                //  在业务表单同步记录
+                ArchivesFroms archivesFroms = archivesProvider.findArchivesFormOriginId(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId());
+                archivesFroms.setFormOriginId(dto.getFormOriginId());
+                archivesFroms.setFormVersion(dto.getFormVersion());
+                archivesProvider.updateArchivesForm(archivesFroms);
+                return dto;
+            });
             return form;
         }
     }
 
-    /**
+    /*
      * 业务部门新增表单记录，从而能够让业务获取到正确的表单 id
-     *
-     * @param form
      */
     private void createArchivesForm(GeneralFormDTO form) {
         ArchivesFroms archivesFrom = new ArchivesFroms();

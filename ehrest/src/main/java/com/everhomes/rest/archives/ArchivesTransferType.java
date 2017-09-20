@@ -4,18 +4,16 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>CHECK_IN((byte) 0): 入职</li>
- * <li>EMPLOY((byte) 1): 转正</li>
- * <li>TRANSFER((byte) 2): 调整</li>
- * <li>DISMISS((byte)3): 离职</li>
+ * <li>PROMOTE((byte) 0): 晋升</li>
+ * <li>TRANSFER((byte) 1): 调整、安排</li>
+ * <li>OTHER((byte) 2): 其他</li>
  * </ul>
  */
-public enum ArchivesOperationType {
-
-    CHECK_IN((byte) 0), EMPLOY((byte) 1), TRANSFER((byte) 2), DISMISS((byte) 3);
+public enum ArchivesTransferType {
+    PROMOTE((byte) 0), TRANSFER((byte) 1), OTHER((byte) 2);
     private Byte code;
 
-    private ArchivesOperationType(Byte code) {
+    private ArchivesTransferType(Byte code) {
         this.code = code;
     }
 
@@ -28,9 +26,9 @@ public enum ArchivesOperationType {
         return StringHelper.toJsonString(this);
     }
 
-    public static ArchivesOperationType fromCode(Byte code) {
+    public static ArchivesTransferType fromCode(Byte code) {
         if (code != null) {
-            for (ArchivesOperationType a : ArchivesOperationType.values()) {
+            for (ArchivesTransferType a : ArchivesTransferType.values()) {
                 if (code.byteValue() == a.getCode().byteValue()) {
                     return a;
                 }

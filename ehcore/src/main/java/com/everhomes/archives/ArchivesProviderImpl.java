@@ -41,7 +41,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesStickyContacts.class));
         stickyContact.setId(id);
         stickyContact.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        stickyContact.setOperatorUid(UserContext.current().getUser().getId());
+        stickyContact.setOperatorUid(UserContext.currentUserId());
         stickyContact.setUpdateTime(stickyContact.getCreateTime());
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -53,7 +53,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
 
     @Override
     public void updateArchivesStickyContacts(ArchivesStickyContacts stickyContact) {
-        stickyContact.setOperatorUid(UserContext.current().getUser().getId());
+        stickyContact.setOperatorUid(UserContext.currentUserId());
         stickyContact.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -109,7 +109,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesDismissEmployees.class));
         dismissEmployee.setId(id);
         dismissEmployee.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        dismissEmployee.setOperatorUid(UserContext.current().getUser().getId());
+        dismissEmployee.setOperatorUid(UserContext.currentUserId());
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesDismissEmployeesDao dao = new EhArchivesDismissEmployeesDao(context.configuration());
         dao.insert(dismissEmployee);
@@ -177,7 +177,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesConfigurations.class));
         configuration.setId(id);
         configuration.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        configuration.setOperatorUid(UserContext.current().getUser().getId());
+        configuration.setOperatorUid(UserContext.currentUserId());
         configuration.setNamespaceId(UserContext.getCurrentNamespaceId());
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -189,7 +189,7 @@ public class ArchivesProviderImpl implements ArchivesProvider {
 
     @Override
     public void updateArchivesConfigurations(ArchivesConfigurations configuration) {
-        configuration.setOperatorUid(UserContext.current().getUser().getId());
+        configuration.setOperatorUid(UserContext.currentUserId());
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesConfigurationsDao dao = new EhArchivesConfigurationsDao(context.configuration());

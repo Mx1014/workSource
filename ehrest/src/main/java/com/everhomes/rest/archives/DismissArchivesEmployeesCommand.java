@@ -74,6 +74,10 @@ public class DismissArchivesEmployeesCommand {
         this.dismissTime = ArchivesUtil.parseDate(dismissTime);
     }
 
+    public void setDismissTime(Date dismissTime) {
+        this.dismissTime = dismissTime;
+    }
+
     public String getDismissRemark() {
         return dismissRemark;
     }
