@@ -815,7 +815,7 @@ public class PunchServiceImpl implements PunchService {
 		if (statusArrary == null) {
 			return pdl;
 		} else if (statusArrary.length == 1) {
-			if (statusArrary[0].equals(PunchStatus.NORMAL.getCode())) {
+			if (statusArrary[0].equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
 				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 			} else {
 				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
@@ -824,7 +824,7 @@ public class PunchServiceImpl implements PunchService {
 			for (int i = 0; i < statusArrary.length / 2; i++) {
 
 				String status = processIntevalStatus(statusArrary[2 * i], statusArrary[2 * i + 1]);
-				if (!status.equals(PunchStatus.NORMAL.getCode())) {
+				if (!status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
 					pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 				}
 				if (i == 0) {
