@@ -2866,7 +2866,7 @@ public class UserServiceImpl implements UserService {
 				break;
 			case COMMUNITY_COMPANY_NAME:
 				fullName.append(familyDto.getName()).append(familyDto.getCommunityName());
-				aliasName.append(familyDto.getName());
+				aliasName.append(familyDto.getName()).append(familyDto.getCommunityName());
 				break;
 		}
 
@@ -2971,7 +2971,7 @@ public class UserServiceImpl implements UserService {
 				break;
 			case COMMUNITY_COMPANY_NAME:
 				fullName.append(organizationDto.getName()).append(organizationDto.getCommunityName());
-				aliasName.append(organizationDto.getName());
+				aliasName.append(organizationDto.getName()).append(organizationDto.getCommunityName());
 				break;
 		}
 
