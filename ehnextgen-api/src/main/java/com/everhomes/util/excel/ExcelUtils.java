@@ -16,6 +16,8 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -293,7 +295,7 @@ public class ExcelUtils {
     /**
      * @Title: exportExcel
      * @Description: 导出Excel的方法
-     * @author: evan @ 2014-01-09
+     * @Author from internet
      * @param workbook
      * @param sheetNum (sheet的位置，0表示第一个表格中的第一个sheet)
      * @param sheetTitle  （sheet的名称）
@@ -351,6 +353,60 @@ public class ExcelUtils {
                 index++;
             }
         }
+    }
+    /**
+     * 描述：根据文件后缀，自适应上传文件的版本
+     * @param inStr,fileName
+     * @return
+     * @throws Exception
+     */
+    public static Workbook getWorkbook(InputStream inStr,String fileName) throws Exception{
+        Workbook wb = null;
+        String fileType = fileName.substring(fileName.lastIndexOf("."));
+        if(".xls".equals(fileType)){
+            wb = new HSSFWorkbook(inStr);  //2003-
+        }else if(".xlsx".equals(fileType)){
+            wb = new XSSFWorkbook(inStr);  //2007+
+        }else{
+            throw new Exception("解析的文件格式有误！");
+        }
+        return wb;
+    }
+
+    /**
+     * 描述：对表格中数值进行格式化
+     * @param cell
+     * @return
+     */
+    public static Object getCellValue(Cell cell){
+        Object value = null;
+        DecimalFormat df = new DecimalFormat("0");  //格式化number String字符
+        SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd");  //日期格式化
+        DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
+
+        switch (cell.getCellType()) {
+            case Cell.CELL_TYPE_STRING:
+                value = cell.getRichStringCellValue().getString();
+                break;
+            case Cell.CELL_TYPE_NUMERIC:
+                if("General".equals(cell.getCellStyle().getDataFormatString())){
+                    value = df.format(cell.getNumericCellValue());
+                }else if("m/d/yy".equals(cell.getCellStyle().getDataFormatString())){
+                    value = sdf.format(cell.getDateCellValue());
+                }else{
+                    value = df2.format(cell.getNumericCellValue());
+                }
+                break;
+            case Cell.CELL_TYPE_BOOLEAN:
+                value = cell.getBooleanCellValue();
+                break;
+            case Cell.CELL_TYPE_BLANK:
+                value = "";
+                break;
+            default:
+                break;
+        }
+        return value;
     }
 
     public ExcelUtils() {

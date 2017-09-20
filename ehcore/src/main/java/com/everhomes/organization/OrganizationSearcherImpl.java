@@ -202,7 +202,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         QueryBuilder qb = null;
-        
+
+        //长度大于8的时候 截取掉一段查询
+        if(null != cmd.getBuildingName() && cmd.getBuildingName().length() > 8){
+            cmd.setBuildingName(cmd.getBuildingName().substring(0, 8));
+        }
+
         if(StringUtils.isEmpty(cmd.getKeyword())) {
         	if (StringUtils.isEmpty(cmd.getBuildingName())) {
         		qb = QueryBuilders.matchAllQuery();

@@ -1765,6 +1765,7 @@ public class PortalServiceImpl implements PortalService {
 				layout.setOperatorUid(user.getId());
 				layout.setCreatorUid(user.getId());
 				portalLayoutProvider.createPortalLayout(layout);
+				Integer defOrder = 1;
 				List<LaunchPadLayoutGroup> padLayoutGroups = layoutJson.getGroups();
 				for (LaunchPadLayoutGroup padLayoutGroup: padLayoutGroups) {
 					PortalItemGroup itemGroup = ConvertHelper.convert(padLayoutGroup, PortalItemGroup.class);
@@ -1774,6 +1775,7 @@ public class PortalServiceImpl implements PortalService {
 					itemGroup.setStatus(layout.getStatus());
 					itemGroup.setCreatorUid(user.getId());
 					itemGroup.setOperatorUid(user.getId());
+					itemGroup.setDefaultOrder(defOrder ++);
 					if(null != padLayoutGroup.getSeparatorFlag()){
 						itemGroup.setSeparatorFlag(padLayoutGroup.getSeparatorFlag().byteValue());
 					}

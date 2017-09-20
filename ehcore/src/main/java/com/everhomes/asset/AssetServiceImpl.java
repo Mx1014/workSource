@@ -182,6 +182,9 @@ public class AssetServiceImpl implements AssetService {
 //    @Autowired
 //    private ZhangjianggaokeAssetVendor handler;
 
+//    @Autowired
+//    private ZuolinAssetVendorHandler handler;
+
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -228,8 +231,7 @@ public class AssetServiceImpl implements AssetService {
         ListBillsResponse response = new ListBillsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
             if(UserContext.getCurrentNamespaceId()!=999971){
-//                cmd.setPageAnchor(0l);
-                cmd.setPageAnchor(1l);
+                cmd.setPageAnchor(0l);
             }else{
                 cmd.setPageAnchor(1l);
             }
@@ -251,14 +253,14 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillItemsResponse listBillItems(ListBillItemsCommand cmd) {
+        LOGGER.info("调用开始，cmd is={}"+cmd);
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillItemsResponse response = new ListBillItemsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
             if(UserContext.getCurrentNamespaceId()!=999971){
-//                cmd.setPageAnchor(0l);
-                cmd.setPageAnchor(1l);
+                cmd.setPageAnchor(0l);
             }else{
                 cmd.setPageAnchor(1l);
             }
@@ -267,6 +269,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(20);
         }
         Integer pageOffSet = cmd.getPageAnchor().intValue();
+        LOGGER.info("调用开始，cmd.getTargetType()={},cmd.getBillId()={},cmd.getTargetName()={},pageOffSet={},cmd.getPageSize()={}",cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         if(billDTOS.size() <= cmd.getPageSize()) {
 //            response.setNextPageAnchor(null);
@@ -427,8 +430,7 @@ public class AssetServiceImpl implements AssetService {
     public void OneKeyNotice(OneKeyNoticeCommand cmd) {
         ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
         if(UserContext.getCurrentNamespaceId()!=999971){
-//            convertedCmd.setPageAnchor(0l);
-            convertedCmd.setPageAnchor(1l);
+            convertedCmd.setPageAnchor(0l);
         }else{
             convertedCmd.setPageAnchor(1l);
         }
@@ -656,6 +658,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd) {
+        LOGGER.info("调用开始，cmd = {}",cmd);
         //calculate the details of payment expectancies
         PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
         List<PaymentExpectancyDTO> dtos = new ArrayList<>();
@@ -669,7 +672,7 @@ public class AssetServiceImpl implements AssetService {
             List<PaymentExpectancyDTO> dtos1 = new ArrayList<>();
             FeeRules rule = feesRules.get(i);
             List<ContractProperty> var1 = rule.getProperties();
-            List<VariableIdAndValue> variableIdAndValueList = assetProvider.findPreInjectedVariablesForCal(rule.getChargingStandardId());
+            List<VariableIdAndValue> variableIdAndValueList = assetProvider.findPreInjectedVariablesForCal(rule.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType());
             List<VariableIdAndValue> var2 = rule.getVariableIdAndValueList();
             coverVariables(var2,variableIdAndValueList);
             String formula = assetProvider.findFormulaByChargingStandardId(rule.getChargingStandardId());
@@ -689,7 +692,9 @@ public class AssetServiceImpl implements AssetService {
                 }
                 //自然月的计费方式
                 else if(billingCycle == AssetPaymentStrings.NATRUAL_MONTH){
+                    LOGGER.info("调用开始，开始使用自然月！");
                     NaturalMonthHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
+                    LOGGER.info("调用自然月结束！dtos2的长度为={}",dtos2.size());
                 }else{
                     throw new RuntimeException("创建账单失败，暂不支持自然月自费周期以外的方式");
                 }
@@ -841,6 +846,7 @@ public class AssetServiceImpl implements AssetService {
         for(Map.Entry entry : map.entrySet()){
             billList.add((PaymentBills)entry.getValue());
         }
+        LOGGER.info("调用开始！ bill list length={}，item length = {}，contractreceiver = {}",billList.size(),billItemsList.size(),contractDateList.size());
         this.dbProvider.execute((TransactionStatus status) -> {
             if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
                 return null;
