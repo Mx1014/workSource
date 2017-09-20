@@ -253,6 +253,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillItemsResponse listBillItems(ListBillItemsCommand cmd) {
+        LOGGER.info("调用开始，cmd is={}"+cmd);
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -268,6 +269,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(20);
         }
         Integer pageOffSet = cmd.getPageAnchor().intValue();
+        LOGGER.info("调用开始，cmd.getTargetType()={},cmd.getBillId()={},cmd.getTargetName()={},pageOffSet={},cmd.getPageSize()={}",cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         if(billDTOS.size() <= cmd.getPageSize()) {
 //            response.setNextPageAnchor(null);
@@ -656,6 +658,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd) {
+        LOGGER.info("调用开始，cmd = {}",cmd);
         //calculate the details of payment expectancies
         PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
         List<PaymentExpectancyDTO> dtos = new ArrayList<>();
@@ -689,7 +692,9 @@ public class AssetServiceImpl implements AssetService {
                 }
                 //自然月的计费方式
                 else if(billingCycle == AssetPaymentStrings.NATRUAL_MONTH){
+                    LOGGER.info("调用开始，开始使用自然月！");
                     NaturalMonthHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
+                    LOGGER.info("调用自然月结束！dtos2的长度为={}",dtos2.size());
                 }else{
                     throw new RuntimeException("创建账单失败，暂不支持自然月自费周期以外的方式");
                 }
@@ -841,6 +846,7 @@ public class AssetServiceImpl implements AssetService {
         for(Map.Entry entry : map.entrySet()){
             billList.add((PaymentBills)entry.getValue());
         }
+        LOGGER.info("调用开始！ bill list length={}，item length = {}，contractreceiver = {}",billList.size(),billItemsList.size(),contractDateList.size());
         this.dbProvider.execute((TransactionStatus status) -> {
             if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
                 return null;
