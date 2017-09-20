@@ -1047,7 +1047,10 @@ public class NewsServiceImpl implements NewsService {
 		});
 		GetNewsTagResponse response = new GetNewsTagResponse();
 		response.setTags(result);
-		response.setPageAnchor(result.get(result.size()-1).getId());
+		if (result.size()>0)
+			response.setPageAnchor(result.get(result.size()-1).getId());
+		else
+			response.setPageAnchor(0l);
 		return response;
 	}
 
