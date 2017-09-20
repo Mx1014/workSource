@@ -816,7 +816,12 @@ public class ParkingServiceImpl implements ParkingService {
     	if(size > 0){
     		response.setRequests(list.stream().map(r -> {
     			ParkingCardRequestDTO dto = ConvertHelper.convert(r, ParkingCardRequestDTO.class);
-
+				if (null != r.getCardTypeId()) {
+					ParkingCardRequestType parkingCardRequestType = parkingProvider.findParkingCardTypeByTypeId(r.getCardTypeId());
+					if (null != parkingCardRequestType) {
+						dto.setCardTypeName(parkingCardRequestType.getCardTypeName());
+					}
+				}
     			return dto;
     		}).collect(Collectors.toList()));
     		
