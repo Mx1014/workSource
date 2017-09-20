@@ -26,6 +26,8 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
  *  <li>latitude: 纬度</li>
  *  <li>emailDomain: 邮箱域名 -非必填</li>
  *  <li>serviceUserId: 客服服务人员id</li>
+ *  <li>website: 企业官网</li>
+ *  <li>unifiedSocialCreditCode: 统一社会信用代码</li>
  * </ul>
  * @author janson
  *
@@ -59,8 +61,26 @@ public class CreateEnterpriseCommand {
     
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
-    
-    
+
+	private String website;
+	private String unifiedSocialCreditCode;
+
+	public String getUnifiedSocialCreditCode() {
+		return unifiedSocialCreditCode;
+	}
+
+	public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
+		this.unifiedSocialCreditCode = unifiedSocialCreditCode;
+	}
+
+	public String getWebsite() {
+		return website;
+	}
+
+	public void setWebsite(String website) {
+		this.website = website;
+	}
+
 	public Long getServiceUserId() {
 		return serviceUserId;
 	}
