@@ -814,13 +814,15 @@ public class PunchServiceImpl implements PunchService {
         String statusList = "";
 		if (statusArrary == null) {
 			return pdl;
-		} else if (statusArrary.length == 1) {
-			if (statusArrary[0].equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
-				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-			} else {
-				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			}
-		} else if (statusArrary.length > 1) {
+		}
+//		else if (statusArrary.length == 1) {
+//			if (statusArrary[0].equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+//				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+//			} else {
+//				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//			}
+//		}
+		else if (statusArrary.length > 1) {
 			for (int i = 0; i < statusArrary.length / 2; i++) {
 
 				String status = processIntevalStatus(statusArrary[2 * i], statusArrary[2 * i + 1]);
