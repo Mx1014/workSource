@@ -943,7 +943,7 @@ public class PunchAdminController extends ControllerBase {
 	/**
 	 * <b>URL: punch/refreshPunchDayLogs</b>
 	 * <p>
-	 * 刷新打卡详情
+	 * 刷新某一段时间某公司的punchdaylogs
 	 * </p>
 	 */
 	@RequestMapping("refreshPunchDayLogs")
