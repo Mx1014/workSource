@@ -1011,6 +1011,7 @@ public class NewsServiceImpl implements NewsService {
 	@Override
 	public void updateNewsTag(UpdateNewsTagCommand cmd) {
 		NewsTag parentTag = ConvertHelper.convert(cmd,NewsTag.class);
+		parentTag.setParentId(0l);
 		dbProvider.execute((TransactionStatus status) -> {
 			Long parentId = 0l;
 			if (parentTag.getId() == null){
