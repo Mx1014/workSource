@@ -296,8 +296,6 @@ public class ArchivesServiceImpl implements ArchivesService {
             dto.setContactToken(r.getContactToken());
             dto.setContactShortToken(r.getContactShortToken());
             dto.setWorkEmail(r.getWorkEmail());
-            //  TODO:组织架构list接口多返回邮箱
-//                dto.setEmail(r.getEmail);
             dto.setStick("0");
             contacts.add(dto);
         });
@@ -795,7 +793,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             if (GeneralFormFieldAttributeType.DEFAULT.getCode().equals(dto.getFieldAttribute())) {
                 dto.setFieldValue(employeeDefaultMaps.get(dto.getFieldName()));
             }
-            //  TODO: 4-2.赋值给非系统默认字段
+            //  4-2.赋值给非系统默认字段
             else {
                 dto.setFieldValue(employeeDynamicMaps.get(dto.getFieldName()));
             }
@@ -977,7 +975,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         orgCommand.setContractEndTimeEnd(cmd.getContractTimeEnd());
         orgCommand.setEmployeeStatus(cmd.getEmployeeStatus());
         orgCommand.setContractPartyId(cmd.getContractPartyId());
-        //  TODO:查询文字的确定
         orgCommand.setKeywords(cmd.getKeywords());
         if (cmd.getDepartmentId() != null)
             orgCommand.setOrganizationId(cmd.getDepartmentId());
