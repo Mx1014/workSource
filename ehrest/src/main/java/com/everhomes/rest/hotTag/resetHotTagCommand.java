@@ -6,11 +6,12 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- *<ul>
- *<li>names:标签名列表</li>
- *<li>serviceType:标签服务类型 参考{@link HotTagServiceType}</li>
- *<li>namespaceId: 域空间Id</li>
- *</ul>
+ * <ul>
+ *     <li>names: 标签名列表</li>
+ *     <li>serviceType: 标签服务类型 参考{@link HotTagServiceType}</li>
+ *     <li>namespaceId: 域空间Id</li>
+ *     <li>categoryId: categoryId</li>
+ * </ul>
  */
 public class resetHotTagCommand {
 
@@ -20,6 +21,8 @@ public class resetHotTagCommand {
 	private String serviceType;
 
 	private Integer namespaceId;
+
+	private Long categoryId;
 
 	public List<String> getNames() {
 		return names;
@@ -45,9 +48,17 @@ public class resetHotTagCommand {
 		this.namespaceId = namespaceId;
 	}
 
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 }

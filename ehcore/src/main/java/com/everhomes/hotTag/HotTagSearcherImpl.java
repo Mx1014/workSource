@@ -87,6 +87,12 @@ public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagS
         if(cmd.getNamespaceId() == null){
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         }
+
+        //热门标签增加 categoryId    add by yanjun 20170920
+        if(cmd.getCategoryId() == null){
+            fb = FilterBuilders.termFilter("categoryId", cmd.getCategoryId());
+        }
+
         FilterBuilder fbNamespaceId = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
 
         qb = QueryBuilders.filteredQuery(qb, fb);

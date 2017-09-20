@@ -47,11 +47,14 @@ public class HotTagProviderImpl implements HotTagProvider {
 	private DbProvider dbProvider;
 
 	@Override
-	public List<TagDTO> listHotTag(Integer nameSpaceId, String serviceType, Integer pageSize) {
+	public List<TagDTO> listHotTag(Integer nameSpaceId, Long categoryId, String serviceType, Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhHotTagsRecord> query = context.selectQuery(Tables.EH_HOT_TAGS);
 		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
 		query.addConditions(Tables.EH_HOT_TAGS.NAMESPACE_ID.eq(nameSpaceId));
+		if(categoryId != null){
+			query.addConditions(Tables.EH_HOT_TAGS.CATEGORY_ID.eq(categoryId));
+		}
 		query.addConditions(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode()));
 		query.addOrderBy(Tables.EH_HOT_TAGS.DEFAULT_ORDER.desc());
 
@@ -132,12 +135,16 @@ public class HotTagProviderImpl implements HotTagProvider {
 	}
 
 	@Override
-	public HotTags findByName(Integer namespaceId, String serviceType, String name) {
+	public HotTags findByName(Integer namespaceId, Long categoryId, String serviceType, String name) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhHotTagsRecord> query = context.selectQuery(Tables.EH_HOT_TAGS);
 		query.addConditions(Tables.EH_HOT_TAGS.NAME.eq(name));
 		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
 		query.addConditions(Tables.EH_HOT_TAGS.NAMESPACE_ID.eq(namespaceId));
+
+		if(categoryId != null){
+			query.addConditions(Tables.EH_HOT_TAGS.CATEGORY_ID.eq(categoryId));
+		}
 
 		List<HotTags> result = new ArrayList<HotTags>();
 		query.fetch().map((r) -> {

@@ -50,11 +50,11 @@ public class HotTagServiceImpl implements HotTagService{
 		}
 
 
-		List<TagDTO> tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getServiceType(), cmd.getPageSize());
+		List<TagDTO> tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getPageSize());
 
 		//查询没有标签，则使用0域空间的数据
 		if(tags == null || tags.size() == 0){
-			tags = hotTagProvider.listHotTag(0, cmd.getServiceType(), cmd.getPageSize());
+			tags = hotTagProvider.listHotTag(0, cmd.getCategoryId(), cmd.getServiceType(), cmd.getPageSize());
 		}
 
 		return tags;
@@ -87,7 +87,7 @@ public class HotTagServiceImpl implements HotTagService{
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
-		HotTags tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getServiceType(), cmd.getName());
+		HotTags tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getName());
 		if(tag != null) {
 			if(tag.getStatus() == HotTagStatus.ACTIVE.getCode()) {
 				LOGGER.error("the tag which name = "+cmd.getName()+" and serviceType = "+cmd.getServiceType()+" is already hot tag!");
@@ -107,6 +107,7 @@ public class HotTagServiceImpl implements HotTagService{
 				tag.setDeleteUid(0L);
 				tag.setDeleteTime(null);
 				tag.setNamespaceId(cmd.getNamespaceId());
+				tag.setCategoryId(cmd.getCategoryId());
 				hotTagProvider.updateHotTag(tag);
 				
 				tag.setHotFlag(HotTagStatus.ACTIVE.getCode());
@@ -116,6 +117,7 @@ public class HotTagServiceImpl implements HotTagService{
 		else {
 			tag = new HotTags();
 			tag.setNamespaceId(cmd.getNamespaceId());
+			tag.setCategoryId(cmd.getCategoryId());
 			tag.setName(cmd.getName());
 			tag.setServiceType(cmd.getServiceType());
 			tag.setCreateUid(user.getId());
@@ -138,6 +140,7 @@ public class HotTagServiceImpl implements HotTagService{
 
 		ListHotTagCommand listCmd = new ListHotTagCommand();
 		listCmd.setNamespaceId(cmd.getNamespaceId());
+		listCmd.setCategoryId(cmd.getCategoryId());
 		listCmd.setServiceType(cmd.getServiceType());
 		listCmd.setPageSize(10000);
 
@@ -154,6 +157,7 @@ public class HotTagServiceImpl implements HotTagService{
 					deleteCmd.setNamespaceId(cmd.getNamespaceId());
 					deleteCmd.setServiceType(cmd.getServiceType());
 					deleteCmd.setName(r.getName());
+					deleteCmd.setCategoryId(cmd.getCategoryId());
 					this.deleteHotTagByName(deleteCmd);
 				});
 			}
@@ -167,7 +171,7 @@ public class HotTagServiceImpl implements HotTagService{
 					this.setHotTag(setCmd);
 
 					//如果0域空间没有加一条数据
-					HotTags tag = hotTagProvider.findByName(0, cmd.getServiceType(), r);
+					HotTags tag = hotTagProvider.findByName(0, cmd.getCategoryId(), cmd.getServiceType(), r);
 					if(tag == null){
 						setCmd.setNamespaceId(0);
 						this.setHotTag(setCmd);
@@ -201,7 +205,7 @@ public class HotTagServiceImpl implements HotTagService{
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
-		HotTags tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getServiceType(), cmd.getName());
+		HotTags tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getName());
 		if(tag == null){
 			LOGGER.error("the tag which name = "+cmd.getName()+" and serviceType = "+cmd.getServiceType()+" not found!");
 			return;

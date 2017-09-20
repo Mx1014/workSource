@@ -10,13 +10,13 @@ import com.everhomes.util.StringHelper;
  *</ul>
  */
 public class ListAllHotTagCommand {
-	
+
 	private Integer pageSize;
 
 	private Integer pageOffset;
-	
+
 	private String serviceType;
-	
+
 	public Integer getPageSize() {
 		return pageSize;
 	}
