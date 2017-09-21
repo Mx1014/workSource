@@ -4733,11 +4733,11 @@ public class UserServiceImpl implements UserService {
 
 		//当关联场景不为空，且与参数中的园区id相匹配时，返回关联的场景
 		if (sceneList.size() > 0) {
-			sceneList.stream().filter(r -> {
-				return r.getCommunityId() == cmd.getCommunityId();
+			List<SceneDTO> flist = sceneList.stream().filter(r -> {
+				return r.getCommunityId().longValue() == cmd.getCommunityId().longValue();
 			}).collect(Collectors.toList());
-			if (sceneList.size() > 0) {
-				return sceneList;
+			if (flist.size() > 0) {
+				return flist;
 			}
 		}else{
 			//当关联场景为空，且没有与参数中的园区id相匹配时，返回参数用的社区场景
