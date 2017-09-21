@@ -97,6 +97,7 @@ public class ActivityController extends ControllerBase {
         return response;
     }
 
+
     /**
      *
      * <p>后台手动添加活动报名</p>

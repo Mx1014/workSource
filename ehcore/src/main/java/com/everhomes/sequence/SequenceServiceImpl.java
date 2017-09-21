@@ -248,6 +248,9 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuers;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCards;
+import com.everhomes.server.schema.tables.pojos.EhPmNotifyConfigurations;
+import com.everhomes.server.schema.tables.pojos.EhPmNotifyLogs;
+import com.everhomes.server.schema.tables.pojos.EhPmNotifyRecords;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskAttachments;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskHistoryAddresses;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskLogs;
@@ -408,6 +411,8 @@ import com.everhomes.server.schema.tables.pojos.EhTerminalDayStatistics;
 import com.everhomes.server.schema.tables.pojos.EhTerminalHourStatistics;
 import com.everhomes.server.schema.tables.pojos.EhTerminalStatisticsTasks;
 import com.everhomes.server.schema.tables.pojos.EhThirdpartConfigurations;
+import com.everhomes.server.schema.tables.pojos.EhUniongroupConfigures;
+import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
 import com.everhomes.server.schema.tables.pojos.EhUserBlacklists;
 import com.everhomes.server.schema.tables.pojos.EhUserCommunities;
 import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
@@ -518,6 +523,12 @@ public class SequenceServiceImpl implements SequenceService {
         // user account is a special field, it default to be number stype, but it can be changed to any character only if they are unique in db
         syncUserAccountName();
 
+        syncTableSequence(EhUniongroupConfigures.class, EhUniongroupConfigures.class, Tables.EH_UNIONGROUP_CONFIGURES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_UNIONGROUP_CONFIGURES.ID.max()).from(Tables.EH_UNIONGROUP_CONFIGURES).fetchOne().value1();
+        });
+        syncTableSequence(EhUniongroupMemberDetails.class, EhUniongroupMemberDetails.class, Tables.EH_UNIONGROUP_MEMBER_DETAILS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID.max()).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).fetchOne().value1();
+        });
         syncTableSequence(EhUsers.class, EhUserGroups.class, Tables.EH_USER_GROUPS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_USER_GROUPS.ID.max()).from(Tables.EH_USER_GROUPS).fetchOne().value1();
         });
@@ -2164,6 +2175,18 @@ public class SequenceServiceImpl implements SequenceService {
         
         syncTableSequence(null, EhExpressHotlines.class, Tables.EH_EXPRESS_HOTLINES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EXPRESS_HOTLINES.ID.max()).from(Tables.EH_EXPRESS_HOTLINES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhPmNotifyConfigurations.class, Tables.EH_PM_NOTIFY_CONFIGURATIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PM_NOTIFY_CONFIGURATIONS.ID.max()).from(Tables.EH_PM_NOTIFY_CONFIGURATIONS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhPmNotifyRecords.class, Tables.EH_PM_NOTIFY_RECORDS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PM_NOTIFY_RECORDS.ID.max()).from(Tables.EH_PM_NOTIFY_RECORDS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhPmNotifyLogs.class, Tables.EH_PM_NOTIFY_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PM_NOTIFY_LOGS.ID.max()).from(Tables.EH_PM_NOTIFY_LOGS).fetchOne().value1();
         });
     }
 

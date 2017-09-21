@@ -50,6 +50,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
     @Autowired
     private UserProvider userProvider;
 
+
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
@@ -154,6 +155,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                         Date returnedDate = sdf.parse(billDate);
                         Calendar c4 = Calendar.getInstance();
                         c4.setTime(returnedDate);
+
                         Calendar local = Calendar.getInstance();
                         Calendar local15 = Calendar.getInstance();
                         local15.add(Calendar.DAY_OF_MONTH,15);

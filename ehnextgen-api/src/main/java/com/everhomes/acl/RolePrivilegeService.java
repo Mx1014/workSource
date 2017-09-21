@@ -96,7 +96,7 @@ public interface RolePrivilegeService {
 	 * 创建超级管理员
 	 * @param cmd
 	 */
-	void createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd);
+	OrganizationContactDTO createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd);
 	
 	/**
 	 * 创建普通管理员
@@ -159,7 +159,7 @@ public interface RolePrivilegeService {
 	 * 创建公司管理员
 	 * @param cmd
      */
-	void createOrganizationAdmin(CreateOrganizationAdminCommand cmd);
+	OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd);
 
 	/**
 	 * 创建业务模块管理员
@@ -346,7 +346,7 @@ public interface RolePrivilegeService {
      */
 	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, List<Long> moduleIds, ServiceModulePrivilegeType type);
 
-	void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId);
+	OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId);
 
 	/**
 	 * 获取权限列表

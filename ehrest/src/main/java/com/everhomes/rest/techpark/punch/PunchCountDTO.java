@@ -11,8 +11,10 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>userId：用户id</li>
  * <li>userName：名称</li>
+ * <li>punchMonth：打卡月份</li>
  * <li>token：联系电话</li>
  * <li>deptName：部门</li>
+ * <li>punchOrgName：所属规则</li>
  * <li>workDayCount:应上班天数</li>
  * <li>workCount:实际上班天数</li>
  * <li>belateCount：迟到天数</li>
@@ -26,6 +28,8 @@ import com.everhomes.util.StringHelper;
 public class PunchCountDTO {
 	private Long userId;
 	private String userName;
+	private String punchMonth;
+	private String punchOrgName;
 	private String token;
 	private String deptName;
     private Integer workDayCount;
@@ -170,5 +174,17 @@ public class PunchCountDTO {
 	}
 	public void setUserStatus(Byte userStatus) {
 		this.userStatus = userStatus;
+	}
+	public String getPunchOrgName() {
+		return punchOrgName;
+	}
+	public void setPunchOrgName(String punchOrgName) {
+		this.punchOrgName = punchOrgName;
+	}
+	public String getPunchMonth() {
+		return punchMonth;
+	}
+	public void setPunchMonth(String punchMonth) {
+		this.punchMonth = punchMonth;
 	}
 }

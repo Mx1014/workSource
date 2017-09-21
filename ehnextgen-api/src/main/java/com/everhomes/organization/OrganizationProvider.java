@@ -16,6 +16,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.userOrganization.UserOrganizations;
+
 import org.jooq.Condition;
 
 import java.math.BigDecimal;
@@ -435,11 +436,14 @@ public interface OrganizationProvider {
 	boolean checkIfLastOnNode(Integer namespaceId, Long organizationId, String contactToken, String path);
 
 	boolean checkOneOfOrganizationWithContextToken(String path, String contactToken);
-
-	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
-
+  
+ 
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
 	List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId,List<String> groupTypes);
+	
+	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType);
+	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
+	Integer countUserOrganization(Integer namespaceId, Long communityId);
 
 	//	根据 group_type 查找薪酬组 added by R 20170630
 	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId);
@@ -456,7 +460,9 @@ public interface OrganizationProvider {
 	 * 查询非离职状态下所有员工的 detailId
 	 * added by R, 20170719
 	 */
-	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId);
+	List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId); 
+	List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId,
+			CrossShardListingLocator locator, Integer pageSize);
 
 
 	List listOrganizationMembersGroupByToken();
@@ -464,8 +470,7 @@ public interface OrganizationProvider {
 	List listOrganizationMemberByToken(String token);
 
 	List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId);
-
-
+ 
     String getOrganizationNameById(Long targetId);
 
 	List<TargetDTO> findOrganizationIdByNameAndAddressId(String targetName, List<Long> ids);
@@ -474,4 +479,14 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType);
 
+	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId);
+
+	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId);
+
+	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
+
+	List<OrganizationMember> listOrganizationMembersByIds(List<Long> ids);
+
+	List<OrganizationMember> listOrganizationMembersByOrgIdAndMemberGroup(
+			Long orgId, String memberGroup, Long userId);
 }

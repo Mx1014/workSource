@@ -2,55 +2,6 @@
 package com.everhomes.user;
 
 
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.everhomes.asset.AddressIdAndName;
-import com.everhomes.contract.ContractService;
-import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhAddresses;
-import com.everhomes.server.schema.tables.EhGroupMemberLogs;
-import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.geo.GeoHashUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
-
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.PortalRoleResolver;
 import com.everhomes.acl.Role;
@@ -79,6 +30,7 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.contract.ContractService;
 import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -108,10 +60,7 @@ import com.everhomes.messaging.PusherService;
 import com.everhomes.messaging.UserMessageRoutingHandler;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceDetail;
-import com.everhomes.namespace.NamespaceResource;
-import com.everhomes.namespace.NamespaceResourceProvider;
+import com.everhomes.namespace.*;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
 import com.everhomes.organization.*;
@@ -119,10 +68,9 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.rest.address.ClaimAddressCommand;
-import com.everhomes.rest.address.ClaimedAddressInfo;
-import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
@@ -136,8 +84,7 @@ import com.everhomes.rest.group.GroupNameEmptyFlag;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.namespace.NamespaceCommunityType;
-import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.namespace.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
@@ -149,111 +96,52 @@ import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhGroupMemberLogs;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.*;
+import com.everhomes.util.*;
+import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.geo.GeoHashUtils;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
 
+import javax.annotation.PostConstruct;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-import com.everhomes.rest.ui.user.ContentBriefDTO;
-import com.everhomes.rest.ui.user.FamilyButtonStatusType;
-import com.everhomes.rest.ui.user.FormSourceDTO;
-import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
-import com.everhomes.rest.ui.user.ListAuthFormsResponse;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
-import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
-import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.ui.user.SearchTypeDTO;
-import com.everhomes.rest.user.AssumePortalRoleCommand;
-import com.everhomes.rest.user.BorderListResponse;
-import com.everhomes.rest.user.CreateInvitationCommand;
-import com.everhomes.rest.user.CreateUserImpersonationCommand;
-import com.everhomes.rest.user.DeleteUserImpersonationCommand;
-import com.everhomes.rest.user.DeviceIdentifierType;
-import com.everhomes.rest.user.GetBizSignatureCommand;
-import com.everhomes.rest.user.GetMessageSessionInfoCommand;
-import com.everhomes.rest.user.GetSignatureCommandResponse;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
-import com.everhomes.rest.user.GetUserNotificationSettingCommand;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.InitBizInfoCommand;
-import com.everhomes.rest.user.InitBizInfoDTO;
-import com.everhomes.rest.user.InvitationRoster;
-import com.everhomes.rest.user.ListLoginByPhoneCommand;
-import com.everhomes.rest.user.ListRegisterUsersResponse;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.MessageSessionInfoDTO;
-import com.everhomes.rest.user.ResendVerificationCodeByIdentifierCommand;
-import com.everhomes.rest.user.SearchUserByNamespaceCommand;
-import com.everhomes.rest.user.SearchUserImpersonationCommand;
-import com.everhomes.rest.user.SearchUserImpersonationResponse;
-import com.everhomes.rest.user.SearchUsersCommand;
-import com.everhomes.rest.user.SearchUsersResponse;
-import com.everhomes.rest.user.SendMessageTestCommand;
-import com.everhomes.rest.user.SetUserAccountInfoCommand;
-import com.everhomes.rest.user.SetUserInfoCommand;
-import com.everhomes.rest.user.SignupCommand;
-import com.everhomes.rest.user.SynThridUserCommand;
-import com.everhomes.rest.user.UpdateUserNotificationSettingCommand;
-import com.everhomes.rest.user.UserCurrentEntity;
-import com.everhomes.rest.user.UserCurrentEntityType;
-import com.everhomes.rest.user.UserDTO;
-import com.everhomes.rest.user.UserGender;
-import com.everhomes.rest.user.UserIdentifierDTO;
-import com.everhomes.rest.user.UserImperInfo;
-import com.everhomes.rest.user.UserImpersonationDTO;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserInvitationsDTO;
-import com.everhomes.rest.user.UserLoginDTO;
-import com.everhomes.rest.user.UserLoginResponse;
-import com.everhomes.rest.user.UserLoginStatus;
-import com.everhomes.rest.user.UserMuteNotificationFlag;
-import com.everhomes.rest.user.UserNotificationSettingDTO;
-import com.everhomes.rest.user.UserNotificationTemplateCode;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.UserStatus;
-import com.everhomes.rest.user.ValidatePassCommand;
-import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
-import com.everhomes.rest.user.VerifyAndLogonCommand;
-import com.everhomes.rest.user.admin.InvitatedUsers;
-import com.everhomes.rest.user.admin.ListInvitatedUserCommand;
-import com.everhomes.rest.user.admin.ListInvitatedUserResponse;
-import com.everhomes.rest.user.admin.ListUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.ListUsersWithAddrResponse;
-import com.everhomes.rest.user.admin.SearchInvitatedUserCommand;
-import com.everhomes.rest.user.admin.SearchUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.SendUserTestMailCommand;
-import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
-import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
-import com.everhomes.rest.user.admin.UsersWithAddrResponse;
-import com.everhomes.sms.SmsBlackList;
-import com.everhomes.sms.SmsBlackListCreateType;
-import com.everhomes.sms.SmsBlackListProvider;
-import com.everhomes.sms.SmsBlackListStatus;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RandomGenerator;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
 import static com.everhomes.rest.ui.user.SceneType.*;
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -423,6 +311,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private SmsBlackListProvider smsBlackListProvider;
+
+	@Autowired
+	private NamespaceResourceService namespaceResourceService;
 
 //
 //    @Autowired
@@ -2957,20 +2848,43 @@ public class UserServiceImpl implements UserService {
 		StringBuffer fullName = new StringBuffer();
 		StringBuffer aliasName = new StringBuffer();
 
-		if(!StringUtils.isEmpty(familyDto.getCityName())){
-			fullName.append(familyDto.getCityName());
+		// 处理名称
+		GetNamespaceDetailCommand cmd = new GetNamespaceDetailCommand();
+		cmd.setNamespaceId(namespaceId);
+		NamespaceDetailDTO namespaceDetail= this.namespaceResourceService.getNamespaceDetail(cmd);
+		NamespaceNameType namespaceNameType = NamespaceNameType.fromCode(namespaceDetail.getNameType());
+		switch (namespaceNameType){
+			case ONLY_COMPANY_NAME:
+				fullName.append(familyDto.getName());
+				aliasName.append(familyDto.getName());
+				break;
+			case ONLY_COMMUNITY_NAME:
+				fullName.append(familyDto.getCommunityName());
+				aliasName.append(familyDto.getCommunityName());
+				break;
+			case COMMUNITY_COMPANY_NAME:
+				fullName.append(familyDto.getName()).append(familyDto.getCommunityName());
+				aliasName.append(familyDto.getName()).append(familyDto.getCommunityName());
+				break;
 		}
-		if(!StringUtils.isEmpty(familyDto.getAreaName())){
-			fullName.append(familyDto.getAreaName());
-		}
-		if(!StringUtils.isEmpty(familyDto.getCommunityName())){
-			fullName.append(familyDto.getCommunityName());
-			aliasName.append(familyDto.getCommunityName());
-		}
-		if(!StringUtils.isEmpty(familyDto.getName())){
-			fullName.append(familyDto.getName());
-			aliasName.append(familyDto.getName());
-		}
+
+//		if(!StringUtils.isEmpty(familyDto.getCityName())){
+//			fullName.append(familyDto.getCityName());
+//		}
+//		if(!StringUtils.isEmpty(familyDto.getAreaName())){
+//			fullName.append(familyDto.getAreaName());
+//		}
+//		if(!StringUtils.isEmpty(familyDto.getCommunityName())){
+//			fullName.append(familyDto.getCommunityName());
+//			aliasName.append(familyDto.getCommunityName());
+//		}
+//		if(!StringUtils.isEmpty(familyDto.getName())){
+//			fullName.append(familyDto.getName());
+//			aliasName.append(familyDto.getName());
+//		}
+
+
+
 		sceneDto.setName(fullName.toString());
 		sceneDto.setAliasName(aliasName.toString());
 		sceneDto.setAvatar(familyDto.getAvatarUri());
@@ -2985,6 +2899,11 @@ public class UserServiceImpl implements UserService {
 
 		sceneDto.setCommunityType(CommunityType.RESIDENTIAL.getCode());
 		sceneDto.setStatus(familyDto.getMembershipStatus());
+		sceneDto.setCommunityId(familyDto.getCommunityId());
+		if(familyDto.getCommunityId() != null){
+			Community community = this.communityProvider.findCommunityById(familyDto.getCommunityId());
+			sceneDto.setCommunityName(community.getName());
+		}
 
 		return sceneDto;
 	}
@@ -3031,9 +2950,32 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setSceneType(sceneType.getCode());
 
 		sceneDto.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
-		sceneDto.setName(organizationDto.getName().trim());
+
+		StringBuffer fullName = new StringBuffer();
+		StringBuffer aliasName = new StringBuffer();
+		// 处理名称
+		GetNamespaceDetailCommand cmd = new GetNamespaceDetailCommand();
+		cmd.setNamespaceId(namespaceId);
+		NamespaceDetailDTO namespaceDetail = this.namespaceResourceService.getNamespaceDetail(cmd);
+		NamespaceNameType namespaceNameType = NamespaceNameType.fromCode(namespaceDetail.getNameType());
+		switch (namespaceNameType){
+			case ONLY_COMPANY_NAME:
+				fullName.append(organizationDto.getName());
+				aliasName.append(organizationDto.getName());
+				break;
+			case ONLY_COMMUNITY_NAME:
+				fullName.append(organizationDto.getCommunityName());
+				aliasName.append(organizationDto.getCommunityName());
+				break;
+			case COMMUNITY_COMPANY_NAME:
+				fullName.append(organizationDto.getName()).append(organizationDto.getCommunityName());
+				aliasName.append(organizationDto.getName()).append(organizationDto.getCommunityName());
+				break;
+		}
+
+//		sceneDto.setName(organizationDto.getName().trim());
 		// 在园区先暂时优先显示园区名称，后面再考虑怎样显示公司名称 by lqs 20160514
-		String aliasName = organizationDto.getDisplayName();
+//		String aliasName = organizationDto.getDisplayName();
 		//if(sceneType.getCode().contains("park") && organizationDto.getCommunityName() != null) {
 		//    aliasName = organizationDto.getCommunityName();
 		//}
@@ -3043,14 +2985,16 @@ public class UserServiceImpl implements UserService {
 //		if(!OrganizationType.isGovAgencyOrganization(orgType)) {
 //			aliasName = organizationDto.getCommunityName();
 //		}
-        if (aliasName == null || aliasName.trim().isEmpty()) {
-            aliasName = organizationDto.getName().trim();
-        }
-        sceneDto.setAliasName(aliasName);
+//        if (aliasName == null || aliasName.trim().isEmpty()) {
+//            aliasName = organizationDto.getName().trim();
+//        }
+
+		sceneDto.setName(fullName.toString());
+        sceneDto.setAliasName(aliasName.toString());
 		sceneDto.setAvatar(organizationDto.getAvatarUri());
 		sceneDto.setAvatarUrl(organizationDto.getAvatarUrl());
 
-			String entityContent = StringHelper.toJsonString(organizationDto);
+		String entityContent = StringHelper.toJsonString(organizationDto);
 		sceneDto.setEntityContent(entityContent);
 
 		SceneTokenDTO sceneTokenDto = toSceneTokenDTO(namespaceId, userId, organizationDto, sceneType);
@@ -3064,6 +3008,12 @@ public class UserServiceImpl implements UserService {
 			sceneDto.setStatus(members.get(0).getStatus());
 		}else{
 			LOGGER.debug("This OrganizationMember is trouble");
+		}
+		OrganizationCommunityRequest organizationCommunityRequest = this.organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationDto.getId());
+		if(organizationCommunityRequest != null){
+			sceneDto.setCommunityId(organizationCommunityRequest.getCommunityId());
+			Community community = this.communityProvider.findCommunityById(organizationCommunityRequest.getCommunityId());
+			sceneDto.setCommunityName(community.getName());
 		}
 
 		return sceneDto;
@@ -3212,16 +3162,37 @@ public class UserServiceImpl implements UserService {
 		StringBuffer fullName = new StringBuffer();
 		StringBuffer aliasName = new StringBuffer();
 
-		if(!StringUtils.isEmpty(community.getCityName())){
-			fullName.append(community.getCityName());
+
+		// 处理名称
+		GetNamespaceDetailCommand cmd = new GetNamespaceDetailCommand();
+		cmd.setNamespaceId(namespaceId);
+		NamespaceDetailDTO namespaceDetail= this.namespaceResourceService.getNamespaceDetail(cmd);
+		NamespaceNameType namespaceNameType = NamespaceNameType.fromCode(namespaceDetail.getNameType());
+		switch (namespaceNameType){
+			case ONLY_COMPANY_NAME:
+				fullName.append(community.getName());
+				aliasName.append(community.getAliasName());
+				break;
+			case ONLY_COMMUNITY_NAME:
+				fullName.append(community.getName());
+				aliasName.append(community.getAliasName());
+				break;
+			case COMMUNITY_COMPANY_NAME:
+				fullName.append(community.getName());
+				aliasName.append(community.getAliasName());
+				break;
 		}
-		if(!StringUtils.isEmpty(community.getAreaName())){
-			fullName.append(community.getAreaName());
-		}
-		if(!StringUtils.isEmpty(community.getName())){
-			fullName.append(community.getName());
-			aliasName.append(community.getName());
-		}
+//
+//		if(!StringUtils.isEmpty(community.getCityName())){
+//			fullName.append(community.getCityName());
+//		}
+//		if(!StringUtils.isEmpty(community.getAreaName())){
+//			fullName.append(community.getAreaName());
+//		}
+//		if(!StringUtils.isEmpty(community.getName())){
+//			fullName.append(community.getName());
+//			aliasName.append(community.getName());
+//		}
 
 		SceneDTO sceneDto = new SceneDTO();
 		sceneDto.setSceneType(sceneType.getCode());
@@ -3236,6 +3207,8 @@ public class UserServiceImpl implements UserService {
 		String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
 		sceneDto.setSceneToken(sceneToken);
 		sceneDto.setCommunityType(community.getCommunityType());
+		sceneDto.setCommunityId(community.getId());
+		sceneDto.setCommunityName(community.getName());
 
 		return sceneDto;
 	}
@@ -3765,7 +3738,8 @@ public class UserServiceImpl implements UserService {
 	public List<SceneDTO> listTouristRelatedScenes() {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long userId = UserContext.current().getUser().getId();
-		List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+		// 修改成按照defalutOrder排序 by lei.lv 20170915
+		List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespaceOrderByDefaultOrder(namespaceId, NamespaceResourceType.COMMUNITY);
 		List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
 		for (NamespaceResource resource : resources) {
 			Community community = communityProvider.findCommunityById(resource.getResourceId());
@@ -3779,6 +3753,9 @@ public class UserServiceImpl implements UserService {
 				sceneList.add(sceneDTO);
 			}
 		}
+		sceneList.stream().filter(r->{
+			return r.getSceneToken() != null;
+		}).collect(Collectors.toList());
 		return sceneList;
 	}
 
@@ -4732,6 +4709,83 @@ public class UserServiceImpl implements UserService {
 		return sceneList;
 	}
 
+	@Override
+	public SceneDTO getProfileScene() {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Long userId = UserContext.current().getUser().getId();
+		SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
+		if(communityScene != null){
+			return communityScene;
+		}
+		return null;
+	}
+
+	@Override
+	public List<SceneDTO> listUserRelateScenesByCommunityId(ListUserRelateScenesByCommunityId cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Long userId = UserContext.current().getUser().getId();
+
+		List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
+		// 列出用户有效家庭 mod by xiongying 20160523
+		addFamilySceneToList(userId, namespaceId, sceneList);
+		// 处于某个公司对应的场景
+		addOrganizationSceneToList(userId, namespaceId, sceneList);
+
+		//当关联场景不为空，且与参数中的园区id相匹配时，返回关联的场景
+		if (sceneList.size() > 0) {
+			sceneList.stream().filter(r -> {
+				return r.getCommunityId() == cmd.getCommunityId();
+			});
+			if (sceneList.size() > 0) {
+				return sceneList;
+			}
+		}
+
+		//当关联场景为空，且没有与参数中的园区id相匹配时，返回参数用的社区场景
+		sceneList.clear();
+		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+		sceneList.add(convertCommunityToScene(namespaceId, userId, community));
+		return sceneList;
+}
+
+	@Override
+	public List<SceneDTO> listAllCommunityScenesIfGeoExist(ListAllCommunityScenesIfGeoExistCommand cmd) {
+		ListNearbyMixCommunitiesCommandV2Response resp = new ListNearbyMixCommunitiesCommandV2Response();
+
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+
+		Long userId = UserContext.current().getUser().getId();
+
+		if (cmd.getLatitude() != null && cmd.getLongitude() != null){
+
+			ListingLocator locator = new CrossShardListingLocator();
+			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+			ListNearbyMixCommunitiesCommand listNearbyMixCommunitiesCommand = new ListNearbyMixCommunitiesCommand();
+			listNearbyMixCommunitiesCommand.setLatigtue(cmd.getLatitude());
+			listNearbyMixCommunitiesCommand.setLongitude(cmd.getLongitude());
+			listNearbyMixCommunitiesCommand.setPageSize(pageSize);
+			listNearbyMixCommunitiesCommand.setPageAnchor(0L);
+
+			ListNearbyMixCommunitiesCommandResponse listNearbyMixCommunitiesCommandResponse = this.addressService.listMixCommunitiesByDistance(listNearbyMixCommunitiesCommand, locator, pageSize);
+
+			List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
+
+			listNearbyMixCommunitiesCommandResponse.getDtos().stream().map(r->{
+				SceneType sceneType = DEFAULT;
+				if(CommunityType.fromCode(r.getCommunityType()) == CommunityType.COMMERCIAL){
+					sceneType = PARK_TOURIST;
+				}
+				SceneDTO sceneDTO = this.toCommunitySceneDTO(namespaceId, userId, r, sceneType);
+				sceneList.add(sceneDTO);
+				return null;
+			}).collect(Collectors.toList());
+
+			return sceneList;
+		}else{
+			return this.listTouristRelatedScenes();
+		}
+	}
+
 	private List<SceneDTO> addFamilySceneToList(Long userId, Integer namespaceId, List<SceneDTO> sceneList){
 		List<FamilyDTO> familyList = this.familyProvider.getUserFamiliesByUserId(userId);
 		toFamilySceneDTO(namespaceId, userId, sceneList, familyList);
@@ -4808,7 +4862,9 @@ public class UserServiceImpl implements UserService {
 		if(defalut_communityId == null){//找默认的社区
 			SceneDTO communityScene = getCurrentCommunityScene(namespaceId, userId);
 			if(communityScene != null && communityScene.getSceneType() == shadowSceneType.getCode()){
-				defalut_community = ConvertHelper.convert(communityScene, Community.class);
+//				defalut_community = ConvertHelper.convert(communityScene, Community.class);
+				defalut_community = this.communityProvider.findCommunityById(communityScene.getCommunityId());
+				LOGGER.debug("findDefaultCommunity, findUserProfileCommunity:" + StringHelper.toJsonString(defalut_community));
 			}else{
 				//再从namespace中取默认
 				defalut_community = this.communityProvider.findFirstCommunityByNameSpaceIdAndType(namespaceId, type);

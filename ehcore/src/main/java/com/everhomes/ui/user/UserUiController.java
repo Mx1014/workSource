@@ -362,4 +362,65 @@ public class UserUiController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /ui/user/listAllCommunityScenes</b>
+	 * <p>列出当前域空间下的相关场景。</p>
+	 * <p>必须在请求的Header中提供域空间。</p>
+	 */
+	@RequestMapping("listAllCommunityScenes")
+	@RestReturn(value=SceneDTO.class, collection=true)
+	@RequireAuthentication(false)
+	public RestResponse listAllCommunityScenes() {
+		List<SceneDTO> sceneDtoList = userService.listTouristRelatedScenes();
+		RestResponse response = new RestResponse(sceneDtoList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /ui/user/getProfileScene</b>
+	 * <p>获取已存储的场景信息。</p>
+	 */
+	@RequestMapping("getProfileScene")
+	@RestReturn(value=SceneDTO.class)
+	@RequireAuthentication(false)
+	public RestResponse getProfileScene() {
+		SceneDTO sceneDto = userService.getProfileScene();
+		RestResponse response = new RestResponse(sceneDto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /ui/user/listUserRelateScenesByCommunityId</b>
+	 * <p>判断用户在子场景下是否有关联的公司场景。</p>
+	 */
+	@RequestMapping("listUserRelateScenesByCommunityId")
+	@RestReturn(value=SceneDTO.class, collection=true)
+	@RequireAuthentication(false)
+	public RestResponse listUserRelateScenesByCommunityId(ListUserRelateScenesByCommunityId cmd) {
+		List<SceneDTO> sceneDtoList = userService.listUserRelateScenesByCommunityId(cmd);
+		RestResponse response = new RestResponse(sceneDtoList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /ui/user/listAllCommunityScenesIfGeoExist</b>
+	 * <p>列出当前域空间下的相关场景(区分是否传递经纬度)。</p>
+	 */
+	@RequestMapping("listAllCommunityScenesIfGeoExist")
+	@RestReturn(value=SceneDTO.class, collection=true)
+	@RequireAuthentication(false)
+	public RestResponse listAllCommunityScenesIfGeoExist(ListAllCommunityScenesIfGeoExistCommand cmd) {
+		List<SceneDTO> sceneDtoList = userService.listAllCommunityScenesIfGeoExist(cmd);
+		RestResponse response = new RestResponse(sceneDtoList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

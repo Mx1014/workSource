@@ -2,26 +2,22 @@ package com.everhomes.rest.techpark.punch;
 
 /**
  * <ul>打卡的状态
+ *<li>NOTWORKDAY(17): 非工作日无需打卡</li>
  *<li>NONENTRY(16): 未入职</li>
  *<li>RESIGNED(15): 已离职</li>
+ *<li>FORGOT(14): 缺卡</li>
  * <li>BLANDLE(4): 迟到且早退</li>
- * <li>UNPUNCH(3): 未打卡</li>
+ * <li>UNPUNCH(3): 未打卡-缺勤</li>
  * <li>LEAVEEARLY(2): 早退</li>
  * <li>BELATE(1): 迟到</li>
  * <li>NORMAL(0): 正常</li>
  * </ul>
  */
 public enum PunchStatus {
+	NOTWORKDAY((byte)17),
 	NONENTRY((byte) 16),
 	RESIGNED((byte) 15),
 	FORGOT((byte)14),
-	OVERTIME((byte)9),
-	OUTWORK((byte)8),
-	EXCHANGE((byte)7),
-	/**<li>SICK(6): 病假</li>*/
-	SICK((byte)6),
-	/**<li>ABSENCE(5): 事假</li>*/
-	ABSENCE((byte)5),
 	/**BLANDLE(4): 迟到且早退*/
 	BLANDLE((byte)4),
 	/**UNPUNCH(3): 未打卡*/

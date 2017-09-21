@@ -62,7 +62,7 @@ public class PortalLayoutTemplateProviderImpl implements PortalLayoutTemplatePro
 	public List<PortalLayoutTemplate> listPortalLayoutTemplate() {
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_LAYOUT_TEMPLATES)
 				.where(Tables.EH_PORTAL_LAYOUT_TEMPLATES.STATUS.eq(PortalLayoutTemplateStatus.ACTIVE.getCode()))
-				.orderBy(Tables.EH_PORTAL_LAYOUT_TEMPLATES.ID.asc())
+				.orderBy(Tables.EH_PORTAL_LAYOUT_TEMPLATES.ID.desc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalLayoutTemplate.class));
 	}
 	
