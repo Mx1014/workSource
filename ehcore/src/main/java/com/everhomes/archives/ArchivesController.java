@@ -282,7 +282,7 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/deleteArchivesEmployees</b>
-     * <p>11-4.员工批量离职</p>
+     * <p>11-4.员工批量删除</p>
      */
     @RequestMapping("deleteArchivesEmployees")
     @RestReturn(value = String.class)
