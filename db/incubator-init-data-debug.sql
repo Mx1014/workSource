@@ -305,3 +305,9 @@ INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) V
 INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) VALUES ('9', '', '教育', NOW());
 INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) VALUES ('10', '', '其他', NOW());
 
+-- 增加入孵申请菜单
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`,`level`,`condition_type`,`category`)
+	VALUES (39000, '入孵申请', 30000, null, 'react:/enter-apply/apply-management', 0, 2, '/30000/39000', 'park', 600, 39000, 2, null, 'module');
+-- 给成都项目配入孵申请菜单
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (3771,39000,NULL,'EhNamespaces',999964,2);
