@@ -814,17 +814,19 @@ public class PunchServiceImpl implements PunchService {
         String statusList = "";
 		if (statusArrary == null) {
 			return pdl;
-		} else if (statusArrary.length == 1) {
-			if (statusArrary[0].equals(PunchStatus.NORMAL.getCode())) {
-				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-			} else {
-				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			}
-		} else if (statusArrary.length > 1) {
+		}
+//		else if (statusArrary.length == 1) {
+//			if (statusArrary[0].equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+//				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+//			} else {
+//				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//			}
+//		}
+		else if (statusArrary.length > 1) {
 			for (int i = 0; i < statusArrary.length / 2; i++) {
 
 				String status = processIntevalStatus(statusArrary[2 * i], statusArrary[2 * i + 1]);
-				if (!status.equals(PunchStatus.NORMAL.getCode())) {
+				if (!status.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
 					pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 				}
 				if (i == 0) {
@@ -6739,16 +6741,18 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd) {
 		//
-		this.dbProvider.execute((status) -> {
+//		this.dbProvider.execute((status) -> {
 
 			if (cmd.getRuleType() == null)
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 						ErrorCodes.ERROR_INVALID_PARAMETER,
 						"Invalid rule type parameter in the command");
 			//获取考勤组
+			LOGGER.debug("saveUnion Time-2 "+  System.currentTimeMillis());
 			Organization punchOrg = this.organizationProvider.findOrganizationById(cmd.getId());
 			punchOrg.setName(cmd.getGroupName());
 			organizationProvider.updateOrganization(punchOrg);
+			LOGGER.debug("saveUnion Time-1 "+  System.currentTimeMillis());
 			PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
 
 			List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
@@ -6801,8 +6805,8 @@ public class PunchServiceImpl implements PunchService {
 			savePunchTimeRule(cmd, pr);
 			//发消息 暂时屏蔽
 //		sendMessageToGroupUser(pr,cmd.getTimeRules());
-			return null;
-		});
+//			return null;
+//		});
 		return  null;
 	}
 

@@ -483,15 +483,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return result;
 	}
 
-	@Override
-	public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId){
-		return listOrganizationMembersByOrganizationIdAndMemberGroup(null, memberGroup, targetType, targetId);
-	}
 
 	@Override
 	public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType){
 		return listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, memberGroup, targetType, null);
 	}
+
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId){
+		return listOrganizationMembersByOrganizationIdAndMemberGroup(null, memberGroup, targetType, targetId);
+	}
+
 
 	@Override
 	public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId) {
