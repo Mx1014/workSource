@@ -378,6 +378,37 @@ public class FieldServiceImpl implements FieldService {
         Object invoke = readMethod.invoke(dto);
         return String.valueOf(invoke);
     }
+    private String setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
+        Class<?> clz = dto.getClass();
+        Object val;
+        String type = clz.getDeclaredField(fieldName).getType().getSimpleName();
+        switch(type){
+            case "BigDecimal":
+                break;
+            case "Long":
+                break;
+            case "Timestamp":
+                break;
+            case "Integer":
+                break;
+            case "int":
+                break;
+            case "byte":
+                break;
+            case "Byte":
+                break;
+            case "long":
+                break;
+
+
+
+
+        }
+        PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
+        Method writeMethod = pd.getWriteMethod();
+        Object invoke = writeMethod.invoke(dto,val);
+        return String.valueOf(invoke);
+    }
 
 
     @Override
@@ -495,17 +526,36 @@ public class FieldServiceImpl implements FieldService {
             int objectsNum = sheet.getLastRowNum() - 3;
             List<Object> objects = new ArrayList<>();
             //获得对象的名称，通过表查到对象名，mapping为object隐藏起来。隐藏自身，消灭暴露者---安静的诀窍就是这个
-            getclz()
+            String className = fieldProvider.findClassNameByGroupDisplayName(group.getGroupDisplayName());
+            Class<?> clazz = null;
+            try {
+                clazz = Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                LOGGER.error("import failed,class not found exception, group name is = {}",group.getGroupDisplayName());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"import failed,class not found exception, group name is = {}",group.getGroupDisplayName());
+            }
+
 
             for(int j = 3; j < sheet.getLastRowNum(); j ++){
                 Row row = sheet.getRow(j);
                 for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
                     String fieldName = orderedFieldNames.get(k);
-                    Object object = get(clz);
-                    getFromObj(fieldName,object);
+                    Object object = null;
+                    try {
+                        object = clazz.newInstance();
+                    } catch (Exception e) {
+                        LOGGER.error("sheet class new instance failed,exception= {}",e);
+                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"sheet class new instance failed",e);
+                    }
+                    try {
+                        Cell cell = row.getCell(k);
+                        cell.getStringCellValue();
+                        setToObj(fieldName,object,cell.getStringCellValue());
+                    } catch (Exception e) {
+                        LOGGER.error("set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName());
+                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName(),e);
+                    }
                     objects.add(object);
-                    Cell cell = row.getCell(k);
-                    cell.getStringCellValue();
                 }
             }
             //此时获得一个sheet的list对象，进行存储
