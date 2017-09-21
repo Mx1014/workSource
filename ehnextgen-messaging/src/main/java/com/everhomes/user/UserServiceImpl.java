@@ -4735,18 +4735,19 @@ public class UserServiceImpl implements UserService {
 		if (sceneList.size() > 0) {
 			sceneList.stream().filter(r -> {
 				return r.getCommunityId() == cmd.getCommunityId();
-			});
+			}).collect(Collectors.toList());
 			if (sceneList.size() > 0) {
 				return sceneList;
 			}
+		}else{
+			//当关联场景为空，且没有与参数中的园区id相匹配时，返回参数用的社区场景
+			sceneList.clear();
+			Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+			sceneList.add(convertCommunityToScene(namespaceId, userId, community));
+			return sceneList;
 		}
-
-		//当关联场景为空，且没有与参数中的园区id相匹配时，返回参数用的社区场景
-		sceneList.clear();
-		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
-		sceneList.add(convertCommunityToScene(namespaceId, userId, community));
 		return sceneList;
-}
+	}
 
 	@Override
 	public List<SceneDTO> listAllCommunityScenesIfGeoExist(ListAllCommunityScenesIfGeoExistCommand cmd) {
