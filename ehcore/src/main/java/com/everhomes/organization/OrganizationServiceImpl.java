@@ -9605,7 +9605,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationMember.setEmploymentTime(checkInTime);
         }*/
         organizationMember.setEmployeeType(cmd.getEmployeeType() !=null ? cmd.getEmployeeType():EmployeeType.FULLTIME.getCode());
-        organizationMember.setEmployeeStatus(cmd.getEmployeeStatus() !=null ? cmd.getEmployeeStatus():EmployeeStatus.ONTHEJOB.getCode());
+        organizationMember.setEmployeeStatus(cmd.getEmployeeStatus() !=null ? cmd.getEmployeeStatus():EmployeeStatus.ON_THE_JOB.getCode());
         organizationMember.setCheckInTime(checkInTime);
         organizationMember.setEmploymentTime(checkInTime);
 
@@ -11362,7 +11362,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     this.addProfileJobChangeLogs(cmd.getDetailId(), PersonChangeType.PROBATION.getCode(), "eh_organization_member_details", cmd.getRemarks(), null);
                 }
             }
-        } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.ONTHEJOB.getCode())) {
+        } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.ON_THE_JOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
             this.addProfileJobChangeLogs(cmd.getDetailId(), PersonChangeType.POSITIVE.getCode(), "eh_organization_member_details", cmd.getRemarks(), null);
 
