@@ -39,4 +39,5 @@ public interface ServiceModuleService {
 
 	ListServiceModulesResponse listAllServiceModules(ListServiceModulesCommand cmd);
 	List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId);
+	List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId, Byte actionTypeFlag);
 }

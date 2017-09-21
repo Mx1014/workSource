@@ -34,6 +34,7 @@ public class SceneDTO {
     private Byte communityType;
     private Byte status;
     private Long communityId;
+    private String communityName;
 
     public String getSceneToken() {
         return sceneToken;
@@ -126,5 +127,13 @@ public class SceneDTO {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
     }
 }

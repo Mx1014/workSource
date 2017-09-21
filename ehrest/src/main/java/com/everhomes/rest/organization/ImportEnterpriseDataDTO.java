@@ -27,6 +27,16 @@ public class ImportEnterpriseDataDTO {
 
 	private String description = "";
 
+	private String unifiedSocialCreditCode = "";
+
+	public String getUnifiedSocialCreditCode() {
+		return unifiedSocialCreditCode;
+	}
+
+	public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
+		this.unifiedSocialCreditCode = unifiedSocialCreditCode;
+	}
+
 	public String getName() {
 		return name;
 	}

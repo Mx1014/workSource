@@ -126,7 +126,6 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
             params.put("organizationName", "");
         }
 
-        params.put("manager","1");
         String day = sdf.format(task.getCreateTime());
         params.put("createTime", day);
         params.put("taskName", task.getContent());
@@ -154,7 +153,7 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
             FlowEventLog log = logs.get(0);
             params.put("manager", log.getFlowUserName());
         } else {
-            params.put("manager", "");
+            params.put("manager","0");
         }
 
         String appKey = configProvider.getValue(task.getNamespaceId(), "shenzhoushuma.app.key", "");
@@ -163,8 +162,8 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
         params.put("timestamp", String.valueOf(System.currentTimeMillis()));
         Integer randomNum = (int) (Math.random()*1000);
         params.put("nonce",randomNum+"");
-        String signature = SignatureHelper.computeSignature(params, secretKey);
         params.put("crypto", "sssss");
+        String signature = SignatureHelper.computeSignature(params, secretKey);
         params.put("signature",signature);
         return params;
     }

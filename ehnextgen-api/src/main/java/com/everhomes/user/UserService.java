@@ -247,4 +247,6 @@ public interface UserService {
     SceneDTO getProfileScene();
 
     List<SceneDTO> listUserRelateScenesByCommunityId(ListUserRelateScenesByCommunityId cmd);
+
+    List<SceneDTO> listAllCommunityScenesIfGeoExist(ListAllCommunityScenesIfGeoExistCommand cmd);
 }
