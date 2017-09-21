@@ -260,15 +260,6 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
     	return ret;
     }
 
-	private ParkingCardType createDefaultCardType() {
-		//金溢对接停车 没有月卡类型，默认一个月卡类型
-		ParkingCardType cardType = new ParkingCardType();
-		cardType.setTypeId("月卡");
-		cardType.setTypeName("月卡");
-
-		return cardType;
-	}
-
 	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
 		//什么都不做, 金溢对接，
 	}

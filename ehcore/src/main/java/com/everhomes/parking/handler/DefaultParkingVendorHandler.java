@@ -1,5 +1,6 @@
 package com.everhomes.parking.handler;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -71,6 +72,18 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         parkingCardDTO.setIsValid(true);//兼容历史app
 
         return parkingCardDTO;
+    }
+
+    /**
+     * 有些停车场没有月卡类型，默认返回的就是月卡的费率，此时设置一个默认的月卡类型，以供app显示
+     * @return
+     */
+    ParkingCardType createDefaultCardType() {
+
+        String json = configProvider.getValue("parking.default.card.type", "");
+        ParkingCardType cardType = JSONObject.parseObject(json, ParkingCardType.class);
+
+        return cardType;
     }
 
     @Override

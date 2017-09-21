@@ -1799,20 +1799,31 @@ public class ParkingServiceImpl implements ParkingService {
 
 		List<ParkingCardRequestType> types = parkingProvider.listParkingCardTypes(cmd.getOwnerType(), cmd.getOwnerId(), parkingLot.getId());
 
-		List<ParkingCardRequestTypeDTO> dtos = types.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestTypeDTO.class))
-				.collect(Collectors.toList());
+		List<ParkingCardRequestTypeDTO> dtos = new ArrayList<>();
+		if (!types.isEmpty()) {
+			dtos = types.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestTypeDTO.class))
+					.collect(Collectors.toList());
 
-		ListParkingRechargeRatesCommand listParkingRechargeRatesCommand = ConvertHelper.convert(cmd, ListParkingRechargeRatesCommand.class);
-		List<ParkingRechargeRateDTO> rates = listParkingRechargeRates(listParkingRechargeRatesCommand);
+			ListParkingRechargeRatesCommand listParkingRechargeRatesCommand = ConvertHelper.convert(cmd, ListParkingRechargeRatesCommand.class);
+			List<ParkingRechargeRateDTO> rates = listParkingRechargeRates(listParkingRechargeRatesCommand);
 
-		for (ParkingCardRequestTypeDTO type: dtos) {
-			for (ParkingRechargeRateDTO rate: rates) {
-				if (rate.getCardTypeId().equals(type.getCardTypeId()) && rate.getMonthCount().intValue() == 1) {
-					//默认去一个月的费率
-					type.setPrice(rate.getPrice());
-					break;
+			for (ParkingCardRequestTypeDTO type: dtos) {
+				for (ParkingRechargeRateDTO rate: rates) {
+					if (rate.getCardTypeId().equals(type.getCardTypeId()) && rate.getMonthCount().intValue() == 1) {
+						//默认去一个月的费率
+						type.setPrice(rate.getPrice());
+						break;
+					}
 				}
 			}
+		}else {
+			String json = configProvider.getValue("parking.default.card.type", "");
+			ParkingCardType cardType = JSONObject.parseObject(json, ParkingCardType.class);
+			ParkingCardRequestTypeDTO dto = ConvertHelper.convert(cmd, ParkingCardRequestTypeDTO.class);
+			dto.setCardTypeId(cardType.getTypeId());
+			dto.setCardTypeName(cardType.getTypeName());
+			dto.setNamespaceId(UserContext.getCurrentNamespaceId());
+			dtos.add(dto);
 		}
 
 		return dtos;
