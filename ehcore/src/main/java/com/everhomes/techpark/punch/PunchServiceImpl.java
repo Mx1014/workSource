@@ -6758,7 +6758,7 @@ public class PunchServiceImpl implements PunchService {
 			PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
 
 			List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
-			LOGGER.debug("saveUnion Time0 "+  System.currentTimeMillis());
+			LOGGER.debug("saveUnion Time0 "+  System.currentTimeMillis() + "save start");
 
 
 			//添加关联
@@ -6772,6 +6772,7 @@ public class PunchServiceImpl implements PunchService {
 			} catch (NoNodeAvailableException e) {
 				LOGGER.error("NoNodeAvailableException", e);
 			}
+			LOGGER.debug("saveUnion Time6 "+  System.currentTimeMillis()+ "save end");
 			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
 			List<Long> detailIds = new ArrayList<>();
 			if (null == newEmployees)
@@ -6785,6 +6786,7 @@ public class PunchServiceImpl implements PunchService {
 				}
 			}
 
+			LOGGER.debug("saveUnion Time7 "+  System.currentTimeMillis());
 			//打卡地点和wifi
 			saveGeopointsAndWifis(punchOrg.getId(), cmd.getPunchGeoPoints(), cmd.getWifis());
 
@@ -6806,6 +6808,7 @@ public class PunchServiceImpl implements PunchService {
 			savePunchTimeRule(cmd, pr);
 			//删除不在考勤组的排班
 			punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndNotInTarget(pr.getId(), detailIds);
+			LOGGER.debug("saveUnion Time8 "+  System.currentTimeMillis());
 
 		//发消息 暂时屏蔽
 //		sendMessageToGroupUser(pr,cmd.getTimeRules());
