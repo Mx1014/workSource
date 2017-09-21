@@ -83,4 +83,10 @@ public interface EnterpriseCustomerProvider {
 	void deleteCustomerTracking(CustomerTracking tracking);
 	void updateCustomerTracking(CustomerTracking tracking);
 	List<CustomerTracking> listCustomerTrackingsByCustomerId(Long customerId);
+	
+	void createCustomerTrackingPlan(CustomerTrackingPlan plan);
+	CustomerTrackingPlan findCustomerTrackingPlanById(Long id);
+	void deleteCustomerTrackingPlan(CustomerTrackingPlan plan);
+	void updateCustomerTrackingPlan(CustomerTrackingPlan plan);
+	List<CustomerTrackingPlan> listCustomerTrackingPlans(Long customerId);
 }

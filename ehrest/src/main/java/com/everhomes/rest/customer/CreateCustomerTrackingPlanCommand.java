@@ -4,40 +4,31 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>id: id</li>
  *     <li>namespaceId: 域空间id</li>
  *     <li>customerType: 客户类型 参考{@link com.everhomes.rest.customer.CustomerType}</li>
  *     <li>customerId: 客户id</li>
  *     <li>customerName: 客户名称</li>
  *     <li>contactName: 联系人</li>
  *     <li>trackingType: 跟进方式id</li>
- *     <li>trackingUid: 跟进人id</li>
- *     <li>intentionGrade: 意向等级</li>
  *     <li>trackingTime: 跟进时间</li>
- *     <li>content: 跟进内容</li>
+ *     <li>notifyTime: 提醒时间</li>
+ *     <li>title: 标题</li>
+ *     <li>content: 内容</li>
  * </ul>
- * Created by shengyue.wang on 2017/9/20.
+ * Created by shegnyue.wang on 2017/9/20.
  */
-public class UpdateCustomerTrackingCommand {
-	private Long id;
+public class CreateCustomerTrackingPlanCommand {
     private Integer namespaceId;
     private Byte customerType;
     private Long customerId;
     private String customerName;
     private String contactName;
     private Long trackingType;
-    private Long trackingUid;
-    private Integer intentionGrade;
     private Long trackingTime;
+    private Long notifyTime;
+    private String title;
     private String content;
-    
-    public Long getId() {
-		return id;
-	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -87,22 +78,6 @@ public class UpdateCustomerTrackingCommand {
 		this.trackingType = trackingType;
 	}
 
-	public Long getTrackingUid() {
-		return trackingUid;
-	}
-
-	public void setTrackingUid(Long trackingUid) {
-		this.trackingUid = trackingUid;
-	}
-
-	public Integer getIntentionGrade() {
-		return intentionGrade;
-	}
-
-	public void setIntentionGrade(Integer intentionGrade) {
-		this.intentionGrade = intentionGrade;
-	}
-
 	public Long getTrackingTime() {
 		return trackingTime;
 	}
@@ -111,9 +86,28 @@ public class UpdateCustomerTrackingCommand {
 		this.trackingTime = trackingTime;
 	}
 
+	public Long getNotifyTime() {
+		return notifyTime;
+	}
+
+	public void setNotifyTime(Long notifyTime) {
+		this.notifyTime = notifyTime;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+
 	public String getContent() {
 		return content;
 	}
+
 
 	public void setContent(String content) {
 		this.content = content;

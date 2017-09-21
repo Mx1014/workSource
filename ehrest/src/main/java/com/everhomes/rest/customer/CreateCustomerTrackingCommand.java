@@ -1,12 +1,9 @@
 package com.everhomes.rest.customer;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 	   <li>id: id</li>
  *     <li>namespaceId: 域空间id</li>
  *     <li>customerType: 客户类型 参考{@link com.everhomes.rest.customer.CustomerType}</li>
  *     <li>customerId: 客户id</li>

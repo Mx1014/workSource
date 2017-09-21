@@ -1,25 +1,12 @@
 package com.everhomes.customer;
 
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.quality.QualityInspectionSampleCommunityMap;
-import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.sharding.ShardIterator;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback;
-import com.everhomes.util.StringHelper;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -27,12 +14,55 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhCustomerApplyProjectsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerCertificatesDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerCommercialsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerEconomicIndicatorsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerInvestmentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerPatentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTalentsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTrackingPlansDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTrackingsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerTrademarksDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
+import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
+import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
+import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicators;
+import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
+import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTrackingPlans;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTrackings;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
+import com.everhomes.server.schema.tables.records.EhCustomerApplyProjectsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerCertificatesRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerCommercialsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerEconomicIndicatorsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerInvestmentsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerPatentsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTalentsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTrackingPlansRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTrackingsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerTrademarksRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
+import com.everhomes.sharding.ShardIterator;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback;
+import com.everhomes.util.StringHelper;
 
 /**
  * Created by ying.xiong on 2017/8/11.
@@ -932,6 +962,68 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         List<CustomerTracking> result = new ArrayList<>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, CustomerTracking.class));
+            return null;
+        });
+        return result;
+	}
+
+	@Override
+	public void createCustomerTrackingPlan(CustomerTrackingPlan plan) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerTrackingPlans.class));
+		plan.setId(id);
+		plan.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		plan.setCreatorUid(UserContext.current().getUser().getId());
+		plan.setStatus(CommonStatus.ACTIVE.getCode());
+
+        LOGGER.info("createCustomerTrackingPlan: " + plan);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackingPlans.class, id));
+        EhCustomerTrackingPlansDao dao = new EhCustomerTrackingPlansDao(context.configuration());
+        dao.insert(plan);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerTrackingPlans.class, null);
+	}
+
+	@Override
+	public CustomerTrackingPlan findCustomerTrackingPlanById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCustomerTrackingPlansDao dao = new EhCustomerTrackingPlansDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), CustomerTrackingPlan.class);
+	}
+
+	@Override
+	public void deleteCustomerTrackingPlan(CustomerTrackingPlan plan) {
+		assert(plan.getId() != null);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackingPlans.class, plan.getId()));
+        context.update(Tables.EH_CUSTOMER_TRACKING_PLANS)
+        	   .set(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS,CommonStatus.INACTIVE.getCode())
+        	   .set(Tables.EH_CUSTOMER_TRACKING_PLANS.DELETE_UID,UserContext.current().getUser().getId())
+        	   .set(Tables.EH_CUSTOMER_TRACKING_PLANS.DELETE_TIME , new Timestamp(DateHelper.currentGMTTime().getTime()))
+        	   .where(Tables.EH_CUSTOMER_TRACKING_PLANS.ID.eq(plan.getId()))
+        	   .execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTrackingPlans.class, plan.getId());
+	}
+
+	@Override
+	public void updateCustomerTrackingPlan(CustomerTrackingPlan plan) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackingPlans.class, plan.getId()));
+        EhCustomerTrackingPlansDao dao = new EhCustomerTrackingPlansDao(context.configuration());
+
+        plan.setUpdateUid(UserContext.current().getUser().getId());
+        plan.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(plan);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTrackingPlans.class, plan.getId());
+	}
+
+	@Override
+	public List<CustomerTrackingPlan> listCustomerTrackingPlans(Long customerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTrackingPlansRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKING_PLANS);
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CUSTOMER_ID.eq(customerId));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<CustomerTrackingPlan> result = new ArrayList<CustomerTrackingPlan>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTrackingPlan.class));
             return null;
         });
         return result;

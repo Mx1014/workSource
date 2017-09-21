@@ -31,6 +31,9 @@ import com.everhomes.openapi.ZJGKOpenServiceImpl;
 import com.everhomes.organization.ExecuteImportTaskCallback;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.approval.CommonStatus;
@@ -43,6 +46,7 @@ import com.everhomes.rest.customer.CreateCustomerInvestmentCommand;
 import com.everhomes.rest.customer.CreateCustomerPatentCommand;
 import com.everhomes.rest.customer.CreateCustomerTalentCommand;
 import com.everhomes.rest.customer.CreateCustomerTrackingCommand;
+import com.everhomes.rest.customer.CreateCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.CreateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.CreateEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.CustomerApplyProjectDTO;
@@ -64,6 +68,7 @@ import com.everhomes.rest.customer.CustomerTalentDTO;
 import com.everhomes.rest.customer.CustomerTalentStatisticsDTO;
 import com.everhomes.rest.customer.CustomerTalentStatisticsResponse;
 import com.everhomes.rest.customer.CustomerTrackingDTO;
+import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
 import com.everhomes.rest.customer.CustomerTrademarkDTO;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.DeleteCustomerApplyProjectCommand;
@@ -74,6 +79,7 @@ import com.everhomes.rest.customer.DeleteCustomerInvestmentCommand;
 import com.everhomes.rest.customer.DeleteCustomerPatentCommand;
 import com.everhomes.rest.customer.DeleteCustomerTalentCommand;
 import com.everhomes.rest.customer.DeleteCustomerTrackingCommand;
+import com.everhomes.rest.customer.DeleteCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.DeleteCustomerTrademarkCommand;
 import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
@@ -86,6 +92,7 @@ import com.everhomes.rest.customer.GetCustomerInvestmentCommand;
 import com.everhomes.rest.customer.GetCustomerPatentCommand;
 import com.everhomes.rest.customer.GetCustomerTalentCommand;
 import com.everhomes.rest.customer.GetCustomerTrackingCommand;
+import com.everhomes.rest.customer.GetCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.GetCustomerTrademarkCommand;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
@@ -97,6 +104,7 @@ import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
 import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
 import com.everhomes.rest.customer.ListCustomerPatentsCommand;
 import com.everhomes.rest.customer.ListCustomerTalentsCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
 import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
 import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
 import com.everhomes.rest.customer.ListEnterpriseCustomerStatisticsCommand;
@@ -111,6 +119,7 @@ import com.everhomes.rest.customer.UpdateCustomerInvestmentCommand;
 import com.everhomes.rest.customer.UpdateCustomerPatentCommand;
 import com.everhomes.rest.customer.UpdateCustomerTalentCommand;
 import com.everhomes.rest.customer.UpdateCustomerTrackingCommand;
+import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
@@ -183,6 +192,9 @@ public class CustomerServiceImpl implements CustomerService {
     
     @Autowired
     private UserService userService;
+    
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
     private void checkPrivilege() {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -1390,7 +1402,7 @@ public class CustomerServiceImpl implements CustomerService {
     
 	@Override
 	public List<CustomerTrackingDTO> listCustomerTrackings(ListCustomerTrackingsCommand cmd) {
-		 List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(cmd.getCustomerId());
+		List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(cmd.getCustomerId());
         if(trackings != null && trackings.size() > 0) {
             return trackings.stream().map(tracking -> {
                 return convertCustomerTrackingDTO(tracking);
@@ -1414,9 +1426,14 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
         if(dto.getTrackingUid() != null) {
-        	UserInfo userInfo = userService.getUserInfo(dto.getTrackingUid());
-        	if(userInfo != null){
-        		dto.setTrackingUidName(userInfo.getNickName());
+        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
+        	if(null != detail && null != detail.getContactName()){
+        		dto.setTrackingUidName(detail.getContactName());
+        	}else{
+        		UserInfo userInfo = userService.getUserInfo(dto.getTrackingUid());
+        		if(userInfo != null){
+            		dto.setTrackingUidName(userInfo.getNickName());
+            	}
         	}
         }
         return dto;
@@ -1458,5 +1475,77 @@ public class CustomerServiceImpl implements CustomerService {
                     "customer tracking is not exist or inactive");
         }
         return tracking;
-	    }
+	}
+
+	@Override
+	public List<CustomerTrackingPlanDTO> listCustomerTrackingPlans(ListCustomerTrackingPlansCommand cmd) {
+		List<CustomerTrackingPlan> plans = enterpriseCustomerProvider.listCustomerTrackingPlans(cmd.getCustomerId());
+        if(plans != null && plans.size() > 0) {
+            return plans.stream().map(plan -> {
+                return convertCustomerTrackingPlanDTO(plan);
+            }).collect(Collectors.toList());
+        }
+        return null;
+	}
+
+	@Override
+	public CustomerTrackingPlanDTO getCustomerTrackingPlan(GetCustomerTrackingPlanCommand cmd) {
+		CustomerTrackingPlan plan = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerTrackingPlanDTO(plan);
+	}
+
+	private CustomerTrackingPlanDTO convertCustomerTrackingPlanDTO(CustomerTrackingPlan plan) {
+		CustomerTrackingPlanDTO dto = ConvertHelper.convert(plan, CustomerTrackingPlanDTO.class);
+        if(dto.getTrackingType() != null) {
+            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(plan.getNamespaceId(), dto.getTrackingType());
+            if(scopeFieldItem != null) {
+                dto.setTrackingTypeName(scopeFieldItem.getItemDisplayName());
+            }
+        }
+        return dto;
+	}
+
+	@Override
+	public void updateCustomerTrackingPlan(UpdateCustomerTrackingPlanCommand cmd) {
+		CustomerTrackingPlan exist = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
+		CustomerTrackingPlan plan = ConvertHelper.convert(cmd, CustomerTrackingPlan.class);
+		if(cmd.getTrackingTime() != null){
+			plan.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
+		}
+		if(cmd.getNotifyTime() != null){
+			plan.setNotifyTime(new Timestamp(cmd.getNotifyTime()));
+		}
+		plan.setCreateTime(exist.getCreateTime());
+		plan.setCreatorUid(exist.getCreatorUid());
+        enterpriseCustomerProvider.updateCustomerTrackingPlan(plan);
+	}
+
+	@Override
+	public void deleteCustomerTrackingPlan(DeleteCustomerTrackingPlanCommand cmd) {
+		CustomerTrackingPlan plan = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
+	    enterpriseCustomerProvider.deleteCustomerTrackingPlan(plan);
+	}
+	
+	 private CustomerTrackingPlan checkCustomerTrackingPlan(Long id, Long customerId) {
+		CustomerTrackingPlan plan = enterpriseCustomerProvider.findCustomerTrackingPlanById(id);
+        if(plan == null || !plan.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(plan.getStatus()))) {
+            LOGGER.error("enterprise customer tracking plan is not exist or inactive. id: {}, plan: {}", id, plan);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRACKING_NOT_EXIST,
+                    "customer tracking plan is not exist or inactive");
+        }
+        return plan;
+	}
+
+	@Override
+	public void createCustomerTrackingPlan(CreateCustomerTrackingPlanCommand cmd) {
+		CustomerTrackingPlan plan = ConvertHelper.convert(cmd, CustomerTrackingPlan.class);
+		if(cmd.getTrackingTime() != null){
+			plan.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
+		}
+		if(cmd.getNotifyTime() != null ){
+			plan.setNotifyTime(new Timestamp(cmd.getNotifyTime()));
+		}
+        enterpriseCustomerProvider.createCustomerTrackingPlan(plan);
+	}
 }

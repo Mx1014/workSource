@@ -1015,5 +1015,76 @@ public class CustomerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    
+    /**
+     * <b>URL: /customer/listCustomerTrackingPlans</b>
+     * <p>列出计划信息</p>
+     */
+    @RequestMapping("listCustomerTrackingPlans")
+    @RestReturn(value = CustomerTrackingPlanDTO.class, collection = true)
+    public RestResponse listCustomerTrackingPlans(@Valid ListCustomerTrackingPlansCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerTrackingPlans(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
+    /**
+     * <b>URL: /customer/getCustomerTrackingPlan</b>
+     * <p>查看计划信息</p>
+     */
+    @RequestMapping("getCustomerTrackingPlan")
+    @RestReturn(value = CustomerTrackingPlanDTO.class)
+    public RestResponse getCustomerTrackingPlan(@Valid GetCustomerTrackingPlanCommand cmd) {
+        RestResponse response = new RestResponse(customerService.getCustomerTrackingPlan(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /customer/updateCustomerTrackingPlan</b>
+     * <p>修改计划信息</p>
+     */
+    @RequestMapping("updateCustomerTrackingPlan")
+    @RestReturn(value = String.class)
+    public RestResponse updateCustomerTrackingPlan(@Valid UpdateCustomerTrackingPlanCommand cmd) {
+        customerService.updateCustomerTrackingPlan(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /customer/deleteCustomerTrackingPlan</b>
+     * <p>删除计划信息</p>
+     */
+    @RequestMapping("deleteCustomerTrackingPlan")
+    @RestReturn(value = String.class)
+    public RestResponse deleteCustomerTrackingPlan(@Valid DeleteCustomerTrackingPlanCommand cmd) {
+        customerService.deleteCustomerTrackingPlan(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /customer/createCustomerTrackingPlan</b>
+     * <p>新建计划信息</p>
+     */
+    @RequestMapping("createCustomerTrackingPlan")
+    @RestReturn(value = String.class)
+    public RestResponse createCustomerTrackingPlan(@Valid CreateCustomerTrackingPlanCommand cmd) {
+        customerService.createCustomerTrackingPlan(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 
 }

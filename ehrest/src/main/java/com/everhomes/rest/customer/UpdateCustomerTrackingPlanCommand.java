@@ -11,14 +11,14 @@ import com.everhomes.util.StringHelper;
  *     <li>customerName: 客户名称</li>
  *     <li>contactName: 联系人</li>
  *     <li>trackingType: 跟进方式id</li>
- *     <li>trackingUid: 跟进人id</li>
- *     <li>intentionGrade: 意向等级</li>
  *     <li>trackingTime: 跟进时间</li>
- *     <li>content: 跟进内容</li>
+ *     <li>notifyTime: 提醒时间</li>
+ *     <li>title: 标题</li>
+ *     <li>content: 内容</li>
  * </ul>
  * Created by shengyue.wang on 2017/9/20.
  */
-public class UpdateCustomerTrackingCommand {
+public class UpdateCustomerTrackingPlanCommand {
 	private Long id;
     private Integer namespaceId;
     private Byte customerType;
@@ -26,9 +26,9 @@ public class UpdateCustomerTrackingCommand {
     private String customerName;
     private String contactName;
     private Long trackingType;
-    private Long trackingUid;
-    private Integer intentionGrade;
     private Long trackingTime;
+    private Long notifyTime;
+    private String title;
     private String content;
     
     public Long getId() {
@@ -87,20 +87,20 @@ public class UpdateCustomerTrackingCommand {
 		this.trackingType = trackingType;
 	}
 
-	public Long getTrackingUid() {
-		return trackingUid;
+	public Long getNotifyTime() {
+		return notifyTime;
 	}
 
-	public void setTrackingUid(Long trackingUid) {
-		this.trackingUid = trackingUid;
+	public void setNotifyTime(Long notifyTime) {
+		this.notifyTime = notifyTime;
 	}
 
-	public Integer getIntentionGrade() {
-		return intentionGrade;
+	public String getTitle() {
+		return title;
 	}
 
-	public void setIntentionGrade(Integer intentionGrade) {
-		this.intentionGrade = intentionGrade;
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	public Long getTrackingTime() {
