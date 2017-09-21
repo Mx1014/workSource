@@ -24,6 +24,51 @@ public class FieldController extends ControllerBase {
     private FieldService fieldService;
 
     /**
+     * <b>URL: /varField/listSystemFields</b>
+     * <p>获取系统模块字段</p>
+     * @return {@link SystemFieldDTO}
+     */
+    @RequestMapping("listSystemFields")
+    @RestReturn(value=SystemFieldDTO.class, collection = true)
+    public RestResponse listSystemFields(@Valid ListSystemFieldCommand cmd) {
+        List<FieldDTO> fields = fieldService.listSystemFields(cmd);
+        RestResponse res = new RestResponse(fields);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /varField/listSystemFieldGroups</b>
+     * <p>获取域空间模块字段组</p>
+     * @return {@link SystemFieldGroupDTO}
+     */
+    @RequestMapping("listSystemFieldGroups")
+    @RestReturn(value=SystemFieldGroupDTO.class, collection = true)
+    public RestResponse listSystemFieldGroups(@Valid ListSystemFieldGroupCommand cmd) {
+        List<FieldGroupDTO> groups = fieldService.listSystemFieldGroups(cmd);
+        RestResponse res = new RestResponse(groups);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /varField/listSystemFieldItems</b>
+     * <p>获取域空间模块字段选择项</p>
+     * @return {@link SystemFieldItemDTO}
+     */
+    @RequestMapping("listSystemFieldItems")
+    @RestReturn(value=SystemFieldItemDTO.class, collection = true)
+    public RestResponse listSystemFieldItems(@Valid ListSystemFieldItemCommand cmd) {
+        List<FieldItemDTO> items = fieldService.listSystemFieldItems(cmd);
+        RestResponse res = new RestResponse(items);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
      * <b>URL: /varField/updateFields</b>
      * <p>更新域空间or项目模块字段</p>
      * @return {@link String}
