@@ -4739,13 +4739,11 @@ public class UserServiceImpl implements UserService {
 			if (flist.size() > 0) {
 				return flist;
 			}
-		}else{
-			//当关联场景为空，且没有与参数中的园区id相匹配时，返回参数用的社区场景
-			sceneList.clear();
-			Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
-			sceneList.add(convertCommunityToScene(namespaceId, userId, community));
-			return sceneList;
 		}
+		//当关联场景为空，且没有与参数中的园区id相匹配时，返回参数用的社区场景
+		sceneList.clear();
+		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+		sceneList.add(convertCommunityToScene(namespaceId, userId, community));
 		return sceneList;
 	}
 
