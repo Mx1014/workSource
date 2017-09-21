@@ -8,6 +8,7 @@ import java.util.List;
  */
 
 public class ExportFieldsExcelCommand {
+
     private String moduleName;
 
     private Integer namespaceId;
