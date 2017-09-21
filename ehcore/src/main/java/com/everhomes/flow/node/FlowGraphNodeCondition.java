@@ -21,7 +21,7 @@ public class FlowGraphNodeCondition extends FlowGraphNode {
                     .collect(Collectors.toList());
 
             for (FlowGraphNode nextNode : nextNodes) {
-                prepareCtx(ctx, branch, nextNode);
+                processCtx(ctx, branch, nextNode);
             }
         } else {
             FlowBranchDecider flowBranchDecider = FlowBranchDecider.fromCode(branch.getFlowBranch().getBranchDecider());
@@ -46,20 +46,20 @@ public class FlowGraphNodeCondition extends FlowGraphNode {
                 }
 
                 Long nextNodeId = trueCond.getCondition().getNextNodeId();
-                prepareCtx(ctx, branch, flowGraph.getGraphNode(nextNodeId));
+                processCtx(ctx, branch, flowGraph.getGraphNode(nextNodeId));
             }
         }
     }
 
-    private void prepareCtx(FlowCaseState ctx, FlowGraphBranch branch, FlowGraphNode nextNode) {
-        FlowCaseState subCtx = branch.prepareSubFlowCaseStart(ctx);
+    private void processCtx(FlowCaseState ctx, FlowGraphBranch branch, FlowGraphNode nextNode) {
+        FlowCaseState subCtx = branch.processSubFlowCaseStart(ctx);
         subCtx.setCurrentNode(this);
         subCtx.setNextNode(nextNode);
         ctx.getChildStates().add(subCtx);
     }
 
     @Override
-    public void stepLeave(FlowCaseState ctx, List<FlowGraphNode> to) throws FlowStepErrorException {
+    public void stepLeave(FlowCaseState ctx, FlowGraphNode to) throws FlowStepErrorException {
 
     }
 }

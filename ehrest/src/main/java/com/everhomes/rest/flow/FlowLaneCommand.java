@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *     <li>id: 创建时不传，更新时传</li>
  *     <li>displayName: 泳道名称</li>
  *     <li>laneLevel: 泳道level</li>
+ *     <li>flowNodeLevel: 第一个节点level</li>
  * </ul>
  */
 public class FlowLaneCommand {
@@ -14,6 +15,7 @@ public class FlowLaneCommand {
     private Long id;
     private String displayName;
     private Integer laneLevel;
+    private Integer flowNodeLevel;
 
     public String getDisplayName() {
         return displayName;
@@ -37,6 +39,14 @@ public class FlowLaneCommand {
 
     public void setLaneLevel(Integer laneLevel) {
         this.laneLevel = laneLevel;
+    }
+
+    public Integer getFlowNodeLevel() {
+        return flowNodeLevel;
+    }
+
+    public void setFlowNodeLevel(Integer flowNodeLevel) {
+        this.flowNodeLevel = flowNodeLevel;
     }
 
     @Override

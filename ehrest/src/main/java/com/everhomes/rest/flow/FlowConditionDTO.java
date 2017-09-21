@@ -13,8 +13,8 @@ import java.util.List;
  *     <li>flowMainId: flowMainId</li>
  *     <li>flowVersion: flowVersion</li>
  *     <li>conditionLevel: 条件level</li>
- *     <li>belongEntity: belongEntity</li>
- *     <li>belongTo: belongTo</li>
+ *     <li>flowNodeId: flowNodeId</li>
+ *     <li>flowNodeLevel: flowNodeLevel</li>
  *     <li>flowLinkId: flowLinkId</li>
  *     <li>flowLinkLevel: flowLinkLevel</li>
  *     <li>nextNodeId: 条件成立时执行的节点id</li>
@@ -29,8 +29,8 @@ public class FlowConditionDTO {
     private Long flowMainId;
     private Integer flowVersion;
     private Integer conditionLevel;
-    private String belongEntity;
-    private Long belongTo;
+    private Long flowNodeId;
+    private Integer flowNodeLevel;
     private Long flowLinkId;
     private Integer flowLinkLevel;
     private Long nextNodeId;
@@ -111,20 +111,20 @@ public class FlowConditionDTO {
         this.flowLinkLevel = flowLinkLevel;
     }
 
-    public Long getBelongTo() {
-        return belongTo;
+    public Long getFlowNodeId() {
+        return flowNodeId;
     }
 
-    public void setBelongTo(Long belongTo) {
-        this.belongTo = belongTo;
+    public void setFlowNodeId(Long flowNodeId) {
+        this.flowNodeId = flowNodeId;
     }
 
-    public String getBelongEntity() {
-        return belongEntity;
+    public Integer getFlowNodeLevel() {
+        return flowNodeLevel;
     }
 
-    public void setBelongEntity(String belongEntity) {
-        this.belongEntity = belongEntity;
+    public void setFlowNodeLevel(Integer flowNodeLevel) {
+        this.flowNodeLevel = flowNodeLevel;
     }
 
     public Integer getConditionLevel() {

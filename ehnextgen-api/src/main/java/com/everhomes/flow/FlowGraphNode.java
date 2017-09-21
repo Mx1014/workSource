@@ -46,7 +46,7 @@ public abstract class FlowGraphNode {
 
     public abstract void stepEnter(FlowCaseState ctx, FlowGraphNode from) throws FlowStepErrorException;
 
-    public abstract void stepLeave(FlowCaseState ctx, List<FlowGraphNode> to) throws FlowStepErrorException;
+    public abstract void stepLeave(FlowCaseState ctx, FlowGraphNode to) throws FlowStepErrorException;
 
     public FlowCaseStatus getExpectStatus() {
         //TODO better for this
@@ -186,6 +186,16 @@ public abstract class FlowGraphNode {
 
     public void setLinksOut(List<FlowGraphLink> linksOut) {
         this.linksOut = linksOut;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.flowNode.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof FlowGraphNode && this.flowNode.equals(((FlowGraphNode) obj).flowNode);
     }
 
     public FlowGraphLink getFlowLink(Long linkId) {

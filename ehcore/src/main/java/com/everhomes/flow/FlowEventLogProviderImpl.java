@@ -182,6 +182,9 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	if(cmd.getFlowCaseStatus() != null) {
     		cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
     	}
+    	if(cmd.getServiceType() != null) {
+    		cond = cond.and(Tables.EH_FLOW_CASES.TITLE.eq(cmd.getServiceType()));
+    	}
     	if(cmd.getOwnerId() != null) {
     		cond = cond.and(Tables.EH_FLOW_CASES.OWNER_ID.eq(cmd.getOwnerId()));
     	}

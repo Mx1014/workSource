@@ -22,5 +22,5 @@ public abstract class FlowGraphBranch {
 
     public abstract boolean isConcurrent();
 
-    public abstract FlowCaseState prepareSubFlowCaseStart(FlowCaseState ctx);
+    public abstract FlowCaseState processSubFlowCaseStart(FlowCaseState ctx);
 }

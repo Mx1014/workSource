@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *     <li>flowVersion: flowVersion</li>
  *     <li>displayName: 泳道名称</li>
  *     <li>laneLevel: 泳道level</li>
+ *     <li>flowNodeLevel: 第一个节点level</li>
  * </ul>
  */
 public class FlowLaneDTO {
@@ -20,6 +21,7 @@ public class FlowLaneDTO {
     private Integer flowVersion;
     private String displayName;
     private Integer laneLevel;
+    private Integer flowNodeLevel;
 
     public Long getId() {
         return id;
@@ -67,6 +69,14 @@ public class FlowLaneDTO {
 
     public void setLaneLevel(Integer laneLevel) {
         this.laneLevel = laneLevel;
+    }
+
+    public Integer getFlowNodeLevel() {
+        return flowNodeLevel;
+    }
+
+    public void setFlowNodeLevel(Integer flowNodeLevel) {
+        this.flowNodeLevel = flowNodeLevel;
     }
 
     @Override

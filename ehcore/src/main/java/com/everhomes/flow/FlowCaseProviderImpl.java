@@ -177,6 +177,9 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         	if(cmd.getFlowCaseStatus() != null) {
         		cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
         	}
+        	if(cmd.getServiceType() != null) {
+        		cond = cond.and(Tables.EH_FLOW_CASES.TITLE.eq(cmd.getServiceType()));
+        	}
         	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
         		cond = cond.and(
         				Tables.EH_FLOW_CASES.MODULE_NAME.like(cmd.getKeyword() + "%")
@@ -287,6 +290,9 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         	}
         	if(cmd.getFlowCaseStatus() != null) {
         		cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
+        	}
+        	if(cmd.getServiceType() != null) {
+        		cond = cond.and(Tables.EH_FLOW_CASES.TITLE.eq(cmd.getServiceType()));
         	}
         	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
         		cond = cond.and(

@@ -12,7 +12,7 @@ public abstract class FlowGraphLink {
         this.flowLink = flowLink;
     }
 
-    abstract public FlowGraphNode enterLink(FlowCaseState ctx, FlowGraphEvent event) throws FlowStepErrorException;
+    abstract public FlowGraphNode getToNode(FlowCaseState ctx, FlowGraphEvent event) throws FlowStepErrorException;
 
-    abstract public FlowGraphNode reverseLink(FlowCaseState ctx, FlowGraphEvent event) throws FlowStepErrorException;
+    abstract public FlowGraphNode getFromNode(FlowCaseState ctx, FlowGraphEvent event) throws FlowStepErrorException;
 }

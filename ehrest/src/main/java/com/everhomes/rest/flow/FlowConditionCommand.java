@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * <ul>
  *     <li>flowNodeId: 当前节点id</li>
- *     <li>nodeLevel: 条件节点level</li>
+ *     <li>flowNodeLevel: 条件节点level</li>
  *     <li>nextNodeId: 条件成立时去向的节点id</li>
  *     <li>nextNodeLevel: 条件成立时去向的节点level</li>
  *     <li>conditionLevel: 条件level</li>
@@ -19,7 +19,7 @@ import java.util.List;
 public class FlowConditionCommand {
 
     private Long flowNodeId;
-    private Integer nodeLevel;
+    private Integer flowNodeLevel;
     private Integer conditionLevel;
     private Long nextNodeId;
     private Integer nextNodeLevel;
@@ -37,12 +37,12 @@ public class FlowConditionCommand {
         this.flowNodeId = flowNodeId;
     }
 
-    public Integer getNodeLevel() {
-        return nodeLevel;
+    public Integer getFlowNodeLevel() {
+        return flowNodeLevel;
     }
 
-    public void setNodeLevel(Integer nodeLevel) {
-        this.nodeLevel = nodeLevel;
+    public void setFlowNodeLevel(Integer flowNodeLevel) {
+        this.flowNodeLevel = flowNodeLevel;
     }
 
     public Long getNextNodeId() {

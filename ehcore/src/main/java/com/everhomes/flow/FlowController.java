@@ -68,7 +68,13 @@ public class FlowController extends ControllerBase {
     @RequestMapping("getFlowCaseDetailByIdV2")
     @RestReturn(value=FlowCaseDetailDTOV2.class)
     public RestResponse getFlowCaseDetailByIdV2(@Valid GetFlowCaseDetailByIdV2Command cmd) {
-        RestResponse response = new RestResponse();
+        FlowCaseDetailDTOV2 dto = flowService.getFlowCaseDetailByIdV2(cmd);
+
+        Long userId = UserContext.current().getUser().getId();
+        FlowCaseDetailDTOV2 flowCaseDetail = flowService.getFlowCaseDetailByIdV2(
+                cmd.getFlowCaseId(), userId, FlowUserType.fromCode(cmd.getFlowUserType()), true
+        );
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

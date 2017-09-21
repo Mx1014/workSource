@@ -40,7 +40,7 @@ public class FlowGraphBranchNormal extends FlowGraphBranch {
     }
 
     @Override
-    public FlowCaseState prepareSubFlowCaseStart(FlowCaseState ctx) {
+    public FlowCaseState processSubFlowCaseStart(FlowCaseState ctx) {
         FlowCase flowCase = ConvertHelper.convert(ctx.getFlowCase(), FlowCase.class);
         flowCase.setParentId(ctx.getFlowCase().getId());
         flowCase.setStartNodeId(flowBranch.getOriginalNodeId());

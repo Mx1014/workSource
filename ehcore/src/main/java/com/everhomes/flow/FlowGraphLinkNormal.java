@@ -5,12 +5,12 @@ package com.everhomes.flow;
  */
 public class FlowGraphLinkNormal extends FlowGraphLink {
 
-    public FlowGraphNode enterLink(FlowCaseState ctx, FlowGraphEvent event) throws FlowStepErrorException {
+    public FlowGraphNode getToNode(FlowCaseState ctx, FlowGraphEvent event) throws FlowStepErrorException {
         return ctx.getFlowGraph().getGraphNode(flowLink.getToNodeId());
     }
 
     @Override
-    public FlowGraphNode reverseLink(FlowCaseState ctx, FlowGraphEvent event) throws FlowStepErrorException {
+    public FlowGraphNode getFromNode(FlowCaseState ctx, FlowGraphEvent event) throws FlowStepErrorException {
         return ctx.getFlowGraph().getGraphNode(flowLink.getFromNodeId());
     }
 }

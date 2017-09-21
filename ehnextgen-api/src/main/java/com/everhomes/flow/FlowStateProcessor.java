@@ -4,8 +4,6 @@ import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.user.UserInfo;
 
-import java.util.List;
-
 public interface FlowStateProcessor {
 
     void step(FlowCaseState ctx, FlowGraphEvent event);
@@ -18,13 +16,15 @@ public interface FlowStateProcessor {
 
     FlowCaseState prepareStepTimeout(FlowTimeout ft);
 
-    void normalStepLeave(FlowCaseState ctx, List<FlowGraphNode> to) throws FlowStepErrorException;
+    void normalStepLeave(FlowCaseState ctx, FlowGraphNode to) throws FlowStepErrorException;
 
-    void normalStepEnter(FlowCaseState ctx, FlowGraphNode from, FlowGraphNode to) throws FlowStepErrorException;
+    void normalStepEnter(FlowCaseState ctx, FlowGraphNode from) throws FlowStepErrorException;
 
     void endStepEnter(FlowCaseState ctx, FlowGraphNode from);
 
     FlowCaseState prepareAutoStep(FlowAutoStepDTO stepDTO);
 
     FlowCaseState prepareNoStep(FlowAutoStepDTO stepDTO);
+
+    FlowGraphNode rejectToNode(FlowCaseState ctx, Integer gotoLevel, FlowGraphNode current);
 }

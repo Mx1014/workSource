@@ -29,8 +29,6 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
         userService = PlatformContext.getComponent(UserService.class);
         flowService = PlatformContext.getComponent(FlowService.class);
         flowCaseProvider = PlatformContext.getComponent(FlowCaseProvider.class);
-        flowCaseProvider = PlatformContext.getComponent(FlowCaseProvider.class);
-        flowStateProcessor = PlatformContext.getComponent(FlowStateProcessor.class);
         flowStateProcessor = PlatformContext.getComponent(FlowStateProcessor.class);
     }
 
@@ -80,7 +78,7 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
                 }
                 // 节点只有一个出口
                 else if (current.getLinksOut().size() == 1) {
-                    next = current.getLinksOut().get(0).enterLink(ctx, this);
+                    next = current.getLinksOut().get(0).getToNode(ctx, this);
                 } else {
                     throw RuntimeErrorException.errorWith("", 1, "flow graph link error");
                 }
@@ -126,10 +124,10 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
                     }
                 } else {
                     // 驳回到上一级
-                    if (gotoLevel.equals(0)) {
+                    if (gotoLevel.equals(0) || /*指定节点就是上一个节点*/(linksIn.size() == 1 && linksIn.get(0).getFromNode(ctx, this).equals(flowGraph.getGraphNode(gotoLevel)))) {
                         // 当前节点不是汇总节点
                         if (linksIn.size() == 1) {
-                            next = linksIn.get(0).reverseLink(ctx, this);
+                            next = linksIn.get(0).getFromNode(ctx, this);
                         }
                         // 当前节点是汇总节点
                         else {
@@ -137,16 +135,25 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
                             for (FlowCase subCase : subFlowCase) {
                                 FlowCaseState subCtx = flowStateProcessor.prepareSubFlowCaseStart(ctx.getOperator(), subCase);
                                 ctx.setCurrentNode(current);
-                                ctx.setNextNode(current.getFlowLink(subCase.getEndLinkId()).reverseLink(ctx, this));
+                                ctx.setNextNode(current.getFlowLink(subCase.getEndLinkId()).getFromNode(ctx, this));
                                 ctx.getChildStates().add(subCtx);
                             }
                         }
                     }
                     // 驳回到指定节点
                     else {
-                        FlowGraphNode nextNode = flowGraph.getGraphNode(gotoLevel);
+                        // FlowGraphNode nextNode = flowGraph.getGraphNode(gotoLevel);
+
+
+                        next = flowStateProcessor.rejectToNode(ctx, gotoLevel, current);
+
+
+                        /*// 兄弟case都+1
+                        for (FlowCaseState flowCaseState : ctx.getParentState().getChildStates()) {
+                            flowCaseState.getFlowCase().setStepCount(flowCaseState.getFlowCase().getStepCount() + 1);
+                        }
                         // TODO reject
-                        ctx.setNextNode(nextNode);
+                        ctx.setNextNode(nextNode);*/
                     }
                 }
 
@@ -237,8 +244,13 @@ public class FlowGraphButtonEvent extends AbstractFlowGraphEvent {
 
                 next = flowGraph.getNodes().get(flowGraph.getNodes().size() - 1);
 
-                while (ctx.getParentState() != null) {
-                    // next = ctx.getParentState().getFlowGraph().getNodes().get()
+                // 现在在子分支进行，找到最外层的flowCase的end节点
+                FlowCaseState parentState = ctx.getParentState();
+                while (parentState != null) {
+                    parentState.setNextNode(parentState.getFlowGraph().getNodes().get(parentState.getFlowGraph().getNodes().size() - 1));
+                    // TODO step count +1
+                    // next = parentState.getFlowGraph().getNodes().get(parentState.getFlowGraph().getNodes().size() - 1);
+                    parentState = parentState.getParentState();
                 }
 
                 tracker.setLogContent(flowService.getStepMessageTemplate(stepType, next.getExpectStatus(), ctx.getCurrentEvent().getUserType(), templateMap));

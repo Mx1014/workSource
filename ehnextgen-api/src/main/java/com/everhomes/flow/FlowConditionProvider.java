@@ -13,7 +13,7 @@ public interface FlowConditionProvider {
 
     void deleteFlowCondition(Long flowMainId, Integer flowVersion);
 
-    List<FlowCondition> listFlowCondition(String belongEntity, Long belongTo);
+    List<FlowCondition> listFlowCondition(Long flowNodeId);
 
     List<FlowCondition> listFlowCondition(Long flowMainId, Integer flowVersion);
 }

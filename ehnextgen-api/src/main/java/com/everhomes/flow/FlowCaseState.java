@@ -203,4 +203,76 @@ public class FlowCaseState {
     public FlowCaseStateStackType firstProcessType() {
         return processStack.firstElement();
     }
+
+    private List<FlowCase> getChildFlowCases(FlowCaseState parentState) {
+        List<FlowCase> childStates = new ArrayList<>();
+        childStates.add(parentState.getFlowCase());
+        if (parentState.getChildStates() != null) {
+            for (FlowCaseState childState : parentState.getChildStates()) {
+                childStates.addAll(getChildFlowCases(childState));
+            }
+        }
+        return childStates;
+    }
+
+    private List<FlowEventLog> getChildLogs(FlowCaseState parentState) {
+        List<FlowEventLog> childLogs = new ArrayList<>();
+        childLogs.addAll(parentState.getLogs());
+        if (parentState.getChildStates() != null) {
+            for (FlowCaseState childState : parentState.getChildStates()) {
+                childLogs.addAll(getChildLogs(childState));
+            }
+        }
+        return childLogs;
+    }
+
+    private List<FlowEventLog> getChildUpdateLogs(FlowCaseState parentState) {
+        List<FlowEventLog> childLogs = new ArrayList<>();
+        childLogs.addAll(parentState.getUpdateLogs());
+        if (parentState.getChildStates() != null) {
+            for (FlowCaseState childState : parentState.getChildStates()) {
+                childLogs.addAll(getChildUpdateLogs(childState));
+            }
+        }
+        return childLogs;
+    }
+
+    private List<FlowTimeout> getTimeouts(FlowCaseState parentState) {
+        List<FlowTimeout> timeouts = new ArrayList<>();
+        timeouts.addAll(parentState.getTimeouts());
+        if (parentState.getChildStates() != null) {
+            for (FlowCaseState childState : parentState.getChildStates()) {
+                timeouts.addAll(getTimeouts(childState));
+            }
+        }
+        return timeouts;
+    }
+
+    public List<FlowEventLog> getAllLogs() {
+        FlowCaseState tempParentState = getGrantParentState();
+        return getChildLogs(tempParentState);
+    }
+
+    public List<FlowEventLog> getAllUpdateLogs() {
+        FlowCaseState tempParentState = getGrantParentState();
+        return getChildUpdateLogs(tempParentState);
+    }
+
+    public List<FlowTimeout> getAllTimeouts() {
+        FlowCaseState tempParentState = getGrantParentState();
+        return getTimeouts(tempParentState);
+    }
+
+    public List<FlowCase> getAllFlowCases() {
+        FlowCaseState tempParentState = getGrantParentState();
+        return getChildFlowCases(tempParentState);
+    }
+
+    public FlowCaseState getGrantParentState() {
+        FlowCaseState tempParentState = parentState;
+        while (tempParentState.getParentState() != null) {
+            tempParentState = tempParentState.getParentState();
+        }
+        return tempParentState;
+    }
 }

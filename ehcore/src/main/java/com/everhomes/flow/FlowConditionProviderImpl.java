@@ -62,11 +62,10 @@ public class FlowConditionProviderImpl implements FlowConditionProvider {
     }
 
     @Override
-    public List<FlowCondition> listFlowCondition(String belongEntity, Long belongTo) {
+    public List<FlowCondition> listFlowCondition(Long flowNodeId) {
         com.everhomes.server.schema.tables.EhFlowConditions t = Tables.EH_FLOW_CONDITIONS;
         return context().selectFrom(t)
-                .where(t.BELONG_ENTITY.eq(belongEntity))
-                .and(t.BELONG_TO.eq(belongTo))
+                .where(t.FLOW_NODE_ID.eq(flowNodeId))
                 .fetchInto(FlowCondition.class);
     }
 

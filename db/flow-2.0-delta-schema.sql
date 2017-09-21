@@ -8,8 +8,8 @@ CREATE TABLE `eh_flow_conditions` (
   `flow_main_id` BIGINT NOT NULL,
   `flow_version` INTEGER NOT NULL,
   `condition_level` INTEGER NOT NULL DEFAULT 0,
-  `belong_entity` VARCHAR(64) NOT NULL,
-  `belong_to` BIGINT NOT NULL,
+  `flow_node_id` BIGINT NOT NULL,
+  `flow_node_level` INTEGER,
   `flow_link_id` BIGINT,
   `flow_link_level` INTEGER,
   `next_node_id` BIGINT NOT NULL DEFAULT 0,
@@ -56,6 +56,7 @@ CREATE TABLE `eh_flow_lanes` (
   `flow_main_id` BIGINT NOT NULL,
   `flow_version` INTEGER NOT NULL,
   `display_name` VARCHAR(128) COMMENT 'lane name',
+  `flow_node_level` INTEGER COMMENT 'flow_node_level',
   `lane_level` INTEGER COMMENT 'lane level',
   `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
   `creator_uid` BIGINT,
@@ -218,3 +219,6 @@ ALTER TABLE `eh_flow_cases` ADD COLUMN `end_link_id` BIGINT NOT NULL COMMENT 'ç»
 
 ALTER TABLE `eh_flow_buttons` ADD COLUMN `params` VARCHAR(64) COMMENT 'the params from other module';
 ALTER TABLE `eh_flow_buttons` ADD COLUMN `default_order` INTEGER NOT NULL DEFAULT 0 COMMENT 'default order';
+
+ALTER TABLE `eh_flow_event_logs` ADD COLUMN `from_node_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'from_node_id';
+ALTER TABLE `eh_flow_event_logs` ADD COLUMN `from_case_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'from_case_id';

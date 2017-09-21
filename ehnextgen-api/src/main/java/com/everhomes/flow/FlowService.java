@@ -429,4 +429,8 @@ public interface FlowService {
     FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphCommand cmd);
 
     FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphJsonCommand cmd);
+
+    FlowCaseDetailDTOV2 getFlowCaseDetailByIdV2(GetFlowCaseDetailByIdV2Command cmd);
+
+    FlowCaseDetailDTOV2 getFlowCaseDetailByIdV2(Long flowCaseId, Long userId, FlowUserType flowUserType, boolean checkProcessor);
 }

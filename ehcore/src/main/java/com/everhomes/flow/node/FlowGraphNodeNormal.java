@@ -6,8 +6,6 @@ import com.everhomes.flow.FlowGraphNode;
 import com.everhomes.flow.FlowStateProcessor;
 import com.everhomes.flow.FlowStepErrorException;
 
-import java.util.List;
-
 public class FlowGraphNodeNormal extends FlowGraphNode {
 	private FlowStateProcessor flowStateProcessor;
 	
@@ -17,11 +15,11 @@ public class FlowGraphNodeNormal extends FlowGraphNode {
 	
 	@Override
 	public void stepEnter(FlowCaseState ctx, FlowGraphNode from) throws FlowStepErrorException {
-		flowStateProcessor.normalStepEnter(ctx, from, this);
+		flowStateProcessor.normalStepEnter(ctx, from);
 	}
 
 	@Override
-	public void stepLeave(FlowCaseState ctx, List<FlowGraphNode> to) throws FlowStepErrorException {
+	public void stepLeave(FlowCaseState ctx, FlowGraphNode to) throws FlowStepErrorException {
 		flowStateProcessor.normalStepLeave(ctx, to);
 	}
 }
