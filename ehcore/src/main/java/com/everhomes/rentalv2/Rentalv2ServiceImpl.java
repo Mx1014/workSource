@@ -4730,8 +4730,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 			Long time = rsr.getBeginTime().getTime();
 			if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
-				time -= rs.getRentalStartTime();
-				if (reserveTime.before(new java.util.Date(time))) {
+				if (reserveTime.before(new java.util.Date(time - rs.getRentalStartTime()))) {
 					dto.setStatus(SiteRuleStatus.EARLY.getCode());
 				}
 			}
@@ -4768,8 +4767,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			Long time = rsr.getResourceRentalDate().getTime() + dayBeginTime;
 			if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
-				time -= rs.getRentalStartTime();
-				if (reserveTime.before(new java.util.Date(time))) {
+				if (reserveTime.before(new java.util.Date(time - rs.getRentalStartTime()))) {
 					dto.setStatus(SiteRuleStatus.EARLY.getCode());
 				}
 			}
