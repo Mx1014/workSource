@@ -602,7 +602,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 			OrganizationMember member = null;
 			if (cmd.getFlowOrganizationId()!=null)
-				member = organizationProvider.findOrganizationMemberByOrgIdAndToken(userIdentifier.getIdentifierToken(),cmd.getFlowOrganizationId())
+				member = organizationProvider.findOrganizationMemberByOrgIdAndToken(userIdentifier.getIdentifierToken(),cmd.getFlowOrganizationId());
 			//真实姓名
 			if (member==null )
 				return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());

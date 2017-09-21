@@ -68,9 +68,7 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.rest.address.ClaimAddressCommand;
-import com.everhomes.rest.address.ClaimedAddressInfo;
-import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
@@ -4750,6 +4748,45 @@ public class UserServiceImpl implements UserService {
 		return sceneList;
 }
 
+	@Override
+	public List<SceneDTO> listAllCommunityScenesIfGeoExist(ListAllCommunityScenesIfGeoExistCommand cmd) {
+		ListNearbyMixCommunitiesCommandV2Response resp = new ListNearbyMixCommunitiesCommandV2Response();
+
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+
+		Long userId = UserContext.current().getUser().getId();
+
+		if (cmd.getLatitude() != null && cmd.getLongitude() != null){
+
+			ListingLocator locator = new CrossShardListingLocator();
+			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+			ListNearbyMixCommunitiesCommand listNearbyMixCommunitiesCommand = new ListNearbyMixCommunitiesCommand();
+			listNearbyMixCommunitiesCommand.setLatigtue(cmd.getLatitude());
+			listNearbyMixCommunitiesCommand.setLongitude(cmd.getLongitude());
+			listNearbyMixCommunitiesCommand.setPageSize(pageSize);
+			listNearbyMixCommunitiesCommand.setPageAnchor(0L);
+
+			List<Community> communities = this.addressService.listMixCommunitiesByDistanceWithNamespaceId(listNearbyMixCommunitiesCommand, locator, pageSize);
+
+			List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
+
+			communities.stream().map(r->{
+				CommunityDTO dto = ConvertHelper.convert(r,CommunityDTO.class);
+				SceneType sceneType = DEFAULT;
+				if(CommunityType.fromCode(dto.getCommunityType()) == CommunityType.COMMERCIAL){
+					sceneType = PARK_TOURIST;
+				}
+				SceneDTO sceneDTO = this.toCommunitySceneDTO(namespaceId, userId, dto, sceneType);
+				sceneList.add(sceneDTO);
+				return null;
+			}).collect(Collectors.toList());
+
+			return sceneList;
+		}else{
+			return this.listTouristRelatedScenes();
+		}
+	}
+
 	private List<SceneDTO> addFamilySceneToList(Long userId, Integer namespaceId, List<SceneDTO> sceneList){
 		List<FamilyDTO> familyList = this.familyProvider.getUserFamiliesByUserId(userId);
 		toFamilySceneDTO(namespaceId, userId, sceneList, familyList);
@@ -4840,8 +4877,9 @@ public class UserServiceImpl implements UserService {
 		return defalut_community;
 	}
 
+	@Override
 	//把默认community转换成DTO
-	private SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community){
+	public SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community){
 		//把community转换成场景
 		SceneType sceneType = DEFAULT;
 		CommunityType communityType = CommunityType.fromCode(default_community.getCommunityType());

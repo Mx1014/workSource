@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.user;
 
+import com.everhomes.community.Community;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
@@ -247,4 +248,8 @@ public interface UserService {
     SceneDTO getProfileScene();
 
     List<SceneDTO> listUserRelateScenesByCommunityId(ListUserRelateScenesByCommunityId cmd);
+
+    List<SceneDTO> listAllCommunityScenesIfGeoExist(ListAllCommunityScenesIfGeoExistCommand cmd);
+
+    SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community);
 }
