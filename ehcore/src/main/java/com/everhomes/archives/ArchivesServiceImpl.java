@@ -5,8 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
-import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -20,7 +20,6 @@ import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -46,11 +45,11 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchivesServiceImpl.class);
 
-    private static final String ARCHIVES = "archives_information";
+    private static final String ARCHIVES_FORM = "archives_form";
 
-    private static final String ARCHIVE_OWNER_TYPE = "archives_type";
+    private static final String ARCHIVE_OWNER_TYPE = "archives_owner_type";
 
-    private static final String ARCHIVESFORM = "archives.form.origin.id";
+    private static final String ARCHIVES_FORM_ORIGIN_ID = "archives.form.origin.id";
 
     @Autowired
     private DbProvider dbProvider;
@@ -75,6 +74,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
 
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
@@ -640,12 +642,18 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (cmd.getDetailIds() != null) {
             for (Long detailId : cmd.getDetailIds()) {
                 ArchivesLogs log = new ArchivesLogs();
+                Map<String, Object> map = new LinkedHashMap<>();
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                map.put("origin", detail.getDepartment());
+                map.put("new",getDepartmentName(cmd.getDepartmentIds()));
+                String remark = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_DEPARTMENT_CHANGE,"zh_CN",map,"");
                 log.setDetailId(detailId);
                 log.setOrganizationId(cmd.getOrganizationId());
                 log.setOperationType(ArchivesOperationType.TRANSFER.getCode());
                 log.setOperationTime(cmd.getEffectiveTime());
                 log.setOperationCategory(cmd.getTransferType());
                 log.setOperationReason(cmd.getTransferReason());
+                log.setOperationRemark(remark);
                 log.setOperatorUid(userId);
                 log.setOperatorName(getArchivesContactName(userId,cmd.getOrganizationId()));
                 archivesProvider.createArchivesLogs(log);
@@ -1370,7 +1378,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             createCommand.setOwnerId(cmd.getOrganizationId());
             createCommand.setOwnerType(ARCHIVE_OWNER_TYPE);
             createCommand.setOrganizationId(cmd.getOrganizationId());
-            createCommand.setFormName(ARCHIVES);
+            createCommand.setFormName(ARCHIVES_FORM);
             createCommand.setFormFields(cmd.getFormFields());
             createCommand.setFormGroups(cmd.getFormGroups());
             GeneralFormDTO form = dbProvider.execute((TransactionStatus status) -> {
@@ -1442,7 +1450,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         Long formOriginId = id;
         if (id == 0L) {
             //  当没有表单 id 的时候则去获取模板表单的id
-            String value = configurationProvider.getValue(ARCHIVESFORM, "");
+            String value = configurationProvider.getValue(ARCHIVES_FORM_ORIGIN_ID, "");
             formOriginId = Long.valueOf(value);
         }
         return formOriginId;
