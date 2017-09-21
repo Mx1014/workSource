@@ -6236,7 +6236,8 @@ public class PunchServiceImpl implements PunchService {
 			savePunchTimeRule(ConvertHelper.convert(cmd, PunchGroupDTO.class),pr);
 
 			//发消息
-			sendMessageToGroupUser(pr, cmd.getTimeRules());
+			//发消息 暂时屏蔽
+//			sendMessageToGroupUser(pr, cmd.getTimeRules());
 
 			return null;
 		});
