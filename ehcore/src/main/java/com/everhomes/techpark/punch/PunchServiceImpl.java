@@ -5104,10 +5104,13 @@ public class PunchServiceImpl implements PunchService {
         startCalendar.setTime(punCalendar.getTime());
         startCalendar.set(Calendar.HOUR_OF_DAY, 0);
         startCalendar.set(Calendar.DAY_OF_MONTH, 1);
-
-        OrganizationDTO dept = findUserDepartment(userId, ownerId);
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, dept.getId());
-        refreshDayLogAndMonthStat(ConvertHelper.convert(member, OrganizationMemberDTO.class), dept.getId(), punCalendar, startCalendar);
+		try {
+			OrganizationDTO dept = findUserDepartment(userId, ownerId);
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, dept.getId());
+			refreshDayLogAndMonthStat(ConvertHelper.convert(member, OrganizationMemberDTO.class), dept.getId(), punCalendar, startCalendar);
+		} catch (Exception e) {
+			LOGGER.error("refresh day log and month stat Wrong", e);
+		}
 
     }
     /**刷新punCalendar 当天日数据 和 start到pun 之间的月数据*/
@@ -5123,12 +5126,12 @@ public class PunchServiceImpl implements PunchService {
             }
 			//刷月报
 
+			addPunchStatistics(member, orgId, startCalendar, punCalendar);
 
 		} catch (Exception e) {
 			LOGGER.error("#####refresh day log error!! userid:["+member.getTargetId()
 					+"] organization id :["+orgId+"] ",e);
 		}
-		addPunchStatistics(member, orgId, startCalendar, punCalendar);
 	}
 	@Override
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd) {

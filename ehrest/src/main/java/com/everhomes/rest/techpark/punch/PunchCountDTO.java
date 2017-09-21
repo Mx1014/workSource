@@ -16,7 +16,8 @@ import com.everhomes.util.StringHelper;
  * <li>deptName：部门</li>
  * <li>punchOrgName：所属规则</li>
  * <li>workDayCount:应上班天数</li>
- * <li>workCount:实际上班天数</li>
+ * <li>exceptionDayCount:异常天数</li>
+ * <li>workCount:正常天数</li>
  * <li>belateCount：迟到天数</li>
  * <li>leaveEarlyCount：早退天数</li>
  * <li>unPunchCount：未打卡天数</li>
@@ -50,6 +51,17 @@ public class PunchCountDTO {
 	@ItemType(ExtDTO.class)
 	private List<ExtDTO> exts;
 	private Byte userStatus;
+
+	private Integer exceptionDayCount;
+
+	public Integer getExceptionDayCount() {
+		return exceptionDayCount;
+	}
+
+	public void setExceptionDayCount(Integer exceptionDayCount) {
+		this.exceptionDayCount = exceptionDayCount;
+	}
+
     public List<AbsenceTimeDTO> getAbsenceTimeList() {
 		return absenceTimeList;
 	}
