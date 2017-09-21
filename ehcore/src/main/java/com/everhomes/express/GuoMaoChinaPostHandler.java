@@ -191,13 +191,20 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 			checkErrorCode(entity);
 			
 //			entity = getOrderDetail(String.valueOf(expressOrder.getSendType()), expressOrder.getBillNo(), expressCompany);
-			entity = getOrderDetail(String.valueOf(expressOrder.getSendType()), expressOrder.getOrderNo(), expressCompany);
-			
-			if(!entity.getResponse().getStatus().equals(String.valueOf(expressOrder.getStatus()))){
-				LOGGER.error("updateOrderStatus failed, reponse.status = {}, order.status = {}", entity.getResponse().getStatus(),expressOrder.getStatus());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"updateOrderStatus failed, reponse.status = "+entity.getResponse().getStatus()+", order.status = "+expressOrder.getStatus());
+//			entity = getOrderDetail(String.valueOf(expressOrder.getSendType()), expressOrder.getOrderNo(), expressCompany);
+//			
+			if(expressOrder.getStatus().byteValue()== ExpressOrderStatus.PAID.getCode().byteValue()
+					|| expressOrder.getStatus().byteValue()== ExpressOrderStatus.FINISHED.getCode().byteValue()){
+				checkBillNo(entity);
+				expressOrder.setBillNo(entity.getResponse().getBillNo());
 			}
+//			
+//			if(expressOrder.getStatus().byteValue()== ExpressOrderStatus.PAID.getCode().byteValue()
+//					&& !entity.getResponse().getStatus().equals(String.valueOf(expressOrder.getStatus()))){
+//				LOGGER.error("updateOrderStatus failed, reponse.status = {}, order.status = {}", entity.getResponse().getStatus(),expressOrder.getStatus());
+//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//						"updateOrderStatus failed, reponse.status = "+entity.getResponse().getStatus()+", order.status = "+expressOrder.getStatus());
+//			}
 		}
 	}
 	
