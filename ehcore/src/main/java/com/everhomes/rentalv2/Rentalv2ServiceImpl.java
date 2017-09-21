@@ -727,6 +727,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			newDefaultRule.setResourceCounts(cmd.getSiteCounts());
 			this.rentalv2Provider.updateRentalDefaultRule(newDefaultRule);
 
+			if (NormalFlag.NONEED.getCode() == cmd.getNeedPay()) {
+                cmd.setPriceRules(buildDefaultPriceRule(cmd.getRentalTypes()));
+            }
+
 			//先删除后添加
 			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(PriceRuleType.DEFAULT.getCode(), newDefaultRule.getId());
 			createPriceRules(PriceRuleType.DEFAULT, newDefaultRule.getId(), cmd.getPriceRules());
@@ -748,6 +752,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return null;
 		});
 	}
+
+	private List<PriceRuleDTO> buildDefaultPriceRule(List<Byte> rentalTypes) {
+        List<PriceRuleDTO> priceRules = new ArrayList<>();
+        rentalTypes.forEach(r -> {
+            PriceRuleDTO rule = new PriceRuleDTO();
+            rule.setRentalType(r);
+            rule.setWorkdayPrice(new BigDecimal(0));
+            rule.setWeekendPrice(new BigDecimal(0));
+            rule.setApprovingUserWeekendPrice(new BigDecimal(0));
+            rule.setApprovingUserWorkdayPrice(new BigDecimal(0));
+            rule.setOrgMemberWeekendPrice(new BigDecimal(0));
+            rule.setOrgMemberWorkdayPrice(new BigDecimal(0));
+            priceRules.add(rule);
+        });
+
+        return priceRules;
+    }
 
 	private void setRentalRuleTimeIntervals(String ownerType, Long ownerId, List<TimeIntervalDTO> timeIntervals) {
 
@@ -2644,6 +2665,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			rs.setCellEndId(cellBeginId+seqNum.get()-1);
 			rs.setCellBeginId(0L);
 			rs.setCellEndId(0L);
+            //用来记录rentalTypes
+            if (NormalFlag.NONEED.getCode() == cmd.getNeedPay()) {
+                cmd.setPriceRules(buildDefaultPriceRule(cmd.getRentalTypes()));
+            }
 
 			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(PriceRuleType.RESOURCE.getCode(), rs.getId());
 			createPriceRules(PriceRuleType.RESOURCE, rs.getId(), cmd.getPriceRules());
