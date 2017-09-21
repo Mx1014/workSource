@@ -78,7 +78,7 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
      */
     @Override
     public void payFail(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
-        
+
         // order的状态给为fail
     }
     private String generateJson(Map<String,String> params){
