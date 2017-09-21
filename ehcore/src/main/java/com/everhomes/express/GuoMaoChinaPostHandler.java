@@ -404,10 +404,12 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 				}
 			 }
 		 }
-		 Byte byteStatus = Byte.valueOf(entity.getResponse().getStatus());
-		 if(byteStatus.byteValue() == ExpressOrderStatus.FINISHED.getCode().byteValue()){
-			 isUpdateOrder = true;
-			 expressOrder.setStatus(byteStatus);
+		 if(entity.getResponse().getStatus()!=null && entity.getResponse().getStatus().trim().length()>0){
+			 Byte byteStatus = Byte.valueOf(entity.getResponse().getStatus());
+			 if(byteStatus.byteValue() == ExpressOrderStatus.FINISHED.getCode().byteValue()){
+				 isUpdateOrder = true;
+				 expressOrder.setStatus(byteStatus);
+			 }
 		 }
 		 
 		 String billNo = entity.getResponse().getBillNo();
