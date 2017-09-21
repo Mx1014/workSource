@@ -17,5 +17,9 @@ UPDATE `ehcore`.`eh_web_menus` SET `data_type`='react:/address-book/address-list
 
 -- 中文模板字段的添加
 SET @template_id = (SELECT MAX(id) FROM `eh_locale_templates`);
-INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '4', 'zh_CN', '档案记录', '从 ${origin} 调整至 ${new}', '0');
+INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '1', 'zh_CN', '档案详情', '入职于 ${firstDate}，转正日期 ${nextDate}', '0');
+INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '2', 'zh_CN', '档案详情', '入职于 ${firstDate}，合同日期至 ${nextDate}', '0');
+INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '3', 'zh_CN', '档案详情', '入职于 ${firstDate}，离职于 ${nextDate}', '0');
+INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '4', 'zh_CN', '档案详情', '调整至 ${new}', '0');
+
 --R ended--

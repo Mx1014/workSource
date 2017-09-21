@@ -643,8 +643,6 @@ public class ArchivesServiceImpl implements ArchivesService {
             for (Long detailId : cmd.getDetailIds()) {
                 ArchivesLogs log = new ArchivesLogs();
                 Map<String, Object> map = new LinkedHashMap<>();
-                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                map.put("origin", detail.getDepartment());
                 map.put("new",getDepartmentName(cmd.getDepartmentIds()));
                 String remark = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_DEPARTMENT_CHANGE,"zh_CN",map,"");
                 log.setDetailId(detailId);
@@ -782,6 +780,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     public GetArchivesEmployeeResponse getArchivesEmployee(GetArchivesEmployeeCommand cmd) {
 
         GetArchivesEmployeeResponse response = new GetArchivesEmployeeResponse();
+        String employeeCase = "";
 
         //  1.获取表单所有字段
         GeneralFormIdCommand formCommand = new GeneralFormIdCommand(getRealFormOriginId(cmd.getFormOriginId()));
@@ -814,6 +813,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         form.setTemplateText(null);
         form.setFormOriginId(null);
         form.setFormVersion(null);
+        response.setForm(form);
 
         //  5.获取档案记录
         List<ArchivesLogs> logs = archivesProvider.listArchivesLogs(cmd.getOrganizationId(),cmd.getDetailId());
@@ -822,7 +822,27 @@ public class ArchivesServiceImpl implements ArchivesService {
                 ArchivesLogDTO dto = ConvertHelper.convert(r,ArchivesLogDTO.class);
                 return dto;
             }).collect(Collectors.toList()));
-        response.setForm(form);
+
+        //  6.拼接员工状态
+        if (cmd.getDismiss() != null) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("firstDate", employee.getCheckInTime());
+            map.put("nextDate", employee.getDismissTime());
+            employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_DISMISS_CASE, "zh_CN", map, "");
+        } else {
+            if (employee.getEmployeeStatus().equals(EmployeeStatus.ON_THE_JOB.getCode())) {
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("firstDate", employee.getCheckInTime());
+                map.put("nextDate", employee.getContractEndTime());
+                employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_ON_THE_JOB_CASE, "zh_CN", map, "");
+            } else {
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("firstDate", employee.getCheckInTime());
+                map.put("nextDate", employee.getEmploymentTime());
+                employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_PROBATION_CASE, "zh_CN", map, "");
+            }
+        }
+        response.setEmployeeCase(employeeCase);
         return response;
     }
 
@@ -1106,7 +1126,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 return "";
             else if (employeeStatus.equals(EmployeeStatus.PROBATION.getCode()))
                 return "试用";
-            else if (employeeStatus.equals(EmployeeStatus.ONTHEJOB.getCode()))
+            else if (employeeStatus.equals(EmployeeStatus.ON_THE_JOB.getCode()))
                 return "在职";
             else if (employeeStatus.equals(EmployeeStatus.INTERSHIP.getCode()))
                 return "实习";
@@ -1274,7 +1294,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             for (Long detailId : cmd.getDetailIds()) {
                 //  1.更新员工状态
                 OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                detail.setEmployeeStatus(EmployeeStatus.ONTHEJOB.getCode());
+                detail.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
                 detail.setEmploymentTime(cmd.getEmploymentTime());
                 organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
             }
