@@ -6784,7 +6784,6 @@ public class PunchServiceImpl implements PunchService {
 					punchSchedulingProvider.deletePunchSchedulingByOwnerIdAndTarget(pr.getOwnerId(), employee.getDetailId());
 				}
 			}
-			punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndNotInTarget(pr.getId(), detailIds);
 
 			//打卡地点和wifi
 			saveGeopointsAndWifis(punchOrg.getId(), cmd.getPunchGeoPoints(), cmd.getWifis());
@@ -6805,7 +6804,10 @@ public class PunchServiceImpl implements PunchService {
 //		punchProvider.deletePunchTimeRuleByRuleId(pr.getId());
 
 			savePunchTimeRule(cmd, pr);
-			//发消息 暂时屏蔽
+			//删除不在考勤组的排班
+			punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndNotInTarget(pr.getId(), detailIds);
+
+		//发消息 暂时屏蔽
 //		sendMessageToGroupUser(pr,cmd.getTimeRules());
 //			return null;
 //		});
