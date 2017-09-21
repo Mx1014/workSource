@@ -62,6 +62,10 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
 			}else {
 				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
+
+				if ("粤B9M82Y".equals(plateNumber)) {
+					parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+				}
 			}
 
 			if (null != card.getName()) {
@@ -375,6 +379,18 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 				tempFee = list.get(0);
 			}
 		}
+
+		if ("粤B5327W".equals(plateNumber)) {
+			tempFee = new KetuoTempFee();
+			tempFee.setOrderNo("ceshi123");
+			tempFee.setPayTime("2017-09-21 15:09:09");
+			tempFee.setDelayTime(20);
+			tempFee.setElapsedTime(320);
+			tempFee.setEntryTime("2017-09-21 09:09:09");
+			tempFee.setImgName("");
+			tempFee.setPayable(2000);
+		}
+
         return tempFee;
     }
 
