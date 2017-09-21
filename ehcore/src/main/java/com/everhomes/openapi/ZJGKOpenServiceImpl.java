@@ -53,6 +53,7 @@ import com.everhomes.techpark.expansion.LeasePromotion;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -178,6 +179,9 @@ public class ZJGKOpenServiceImpl {
 
     @Autowired
     private FieldProvider fieldProvider;
+
+    @Autowired
+    private FieldService fieldService;
 
     public void syncData() {
 //        Map<String, String> params = generateParams();
@@ -1250,9 +1254,9 @@ public class ZJGKOpenServiceImpl {
         return null;
     }
 
-    private Long enterpriseScopeFieldItem(Integer namespaceId, String displayName) {
+    private Long enterpriseScopeFieldItem(Integer namespaceId, Long communityId, String displayName) {
         if(!StringUtils.isBlank(displayName)) {
-            ScopeFieldItem scopeCategoryFieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, ModuleName.ENTERPRISE_CUSTOMER.getName(), displayName);
+            ScopeFieldItem scopeCategoryFieldItem = fieldService.findScopeFieldItemByDisplayName(namespaceId, communityId, ModuleName.ENTERPRISE_CUSTOMER.getName(), displayName);
             if(scopeCategoryFieldItem != null) {
                 return scopeCategoryFieldItem.getItemId();
             }
@@ -1273,18 +1277,18 @@ public class ZJGKOpenServiceImpl {
             customer.setNickName(zjEnterprise.getName());
             customer.setCustomerNumber(zjEnterprise.getCustomerNumber());
             customer.setCategoryItemName(zjEnterprise.getCustomerCategory());
-            Long categoryItemId = enterpriseScopeFieldItem(namespaceId, zjEnterprise.getCustomerCategory());
+            Long categoryItemId = enterpriseScopeFieldItem(namespaceId, communityId, zjEnterprise.getCustomerCategory());
             if(categoryItemId != null) {
                 customer.setCategoryItemId(categoryItemId);
             }
             customer.setLevelItemName(zjEnterprise.getCustomerLevel());
-            Long levelItemId = enterpriseScopeFieldItem(namespaceId, zjEnterprise.getCustomerLevel());
+            Long levelItemId = enterpriseScopeFieldItem(namespaceId, communityId, zjEnterprise.getCustomerLevel());
             if(levelItemId != null) {
                 customer.setLevelItemId(levelItemId);
             }
             customer.setContactName(zjEnterprise.getContactName());
             customer.setContactGenderItemName(zjEnterprise.getContactGender());
-            Long genderItemId = enterpriseScopeFieldItem(namespaceId, zjEnterprise.getContactGender());
+            Long genderItemId = enterpriseScopeFieldItem(namespaceId, communityId, zjEnterprise.getContactGender());
             if(genderItemId != null) {
                 customer.setContactGenderItemId(genderItemId);
             }
@@ -1299,12 +1303,12 @@ public class ZJGKOpenServiceImpl {
             customer.setCorpEmail(zjEnterprise.getCorpEmail());
             customer.setCorpWebsite(zjEnterprise.getCorpWebsite());
             customer.setCorpNatureItemName(zjEnterprise.getCorpNature());
-            Long natureItemId = enterpriseScopeFieldItem(namespaceId, zjEnterprise.getCorpNature());
+            Long natureItemId = enterpriseScopeFieldItem(namespaceId, communityId, zjEnterprise.getCorpNature());
             if(natureItemId != null) {
                 customer.setCorpNatureItemId(natureItemId);
             }
             customer.setCorpIndustryItemName(zjEnterprise.getCorpIndustry());
-            Long industryItemId = enterpriseScopeFieldItem(namespaceId, zjEnterprise.getCorpIndustry());
+            Long industryItemId = enterpriseScopeFieldItem(namespaceId, communityId, zjEnterprise.getCorpIndustry());
             if(industryItemId != null) {
                 customer.setCorpIndustryItemId(industryItemId);
             }
@@ -1313,7 +1317,7 @@ public class ZJGKOpenServiceImpl {
                 customer.setCorpEntryDate(dateStrToTimestamp(zjEnterprise.getCorpEntryDate()));
             }
             customer.setSourceItemName(zjEnterprise.getSource());
-            Long sourceItemId = enterpriseScopeFieldItem(namespaceId, zjEnterprise.getSource());
+            Long sourceItemId = enterpriseScopeFieldItem(namespaceId, communityId, zjEnterprise.getSource());
             if(sourceItemId != null) {
                 customer.setContactGenderItemId(sourceItemId);
             }
@@ -1508,18 +1512,18 @@ public class ZJGKOpenServiceImpl {
             customer.setNickName(zjEnterprise.getName());
             customer.setCustomerNumber(zjEnterprise.getCustomerNumber());
             customer.setCategoryItemName(zjEnterprise.getCustomerCategory());
-            Long categoryItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), zjEnterprise.getCustomerCategory());
+            Long categoryItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), communityId, zjEnterprise.getCustomerCategory());
             if(categoryItemId != null) {
                 customer.setCategoryItemId(categoryItemId);
             }
             customer.setLevelItemName(zjEnterprise.getCustomerLevel());
-            Long levelItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), zjEnterprise.getCustomerLevel());
+            Long levelItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), communityId, zjEnterprise.getCustomerLevel());
             if(levelItemId != null) {
                 customer.setLevelItemId(levelItemId);
             }
             customer.setContactName(zjEnterprise.getContactName());
             customer.setContactGenderItemName(zjEnterprise.getContactGender());
-            Long genderItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), zjEnterprise.getContactGender());
+            Long genderItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), communityId, zjEnterprise.getContactGender());
             if(genderItemId != null) {
                 customer.setContactGenderItemId(genderItemId);
             }
@@ -1533,12 +1537,12 @@ public class ZJGKOpenServiceImpl {
             customer.setCorpEmail(zjEnterprise.getCorpEmail());
             customer.setCorpWebsite(zjEnterprise.getCorpWebsite());
             customer.setCorpNatureItemName(zjEnterprise.getCorpNature());
-            Long natureItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), zjEnterprise.getCorpNature());
+            Long natureItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), communityId, zjEnterprise.getCorpNature());
             if(natureItemId != null) {
                 customer.setCorpNatureItemId(natureItemId);
             }
             customer.setCorpIndustryItemName(zjEnterprise.getCorpIndustry());
-            Long industryItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), zjEnterprise.getCorpIndustry());
+            Long industryItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), communityId, zjEnterprise.getCorpIndustry());
             if(industryItemId != null) {
                 customer.setCorpIndustryItemId(industryItemId);
             }
@@ -1547,7 +1551,7 @@ public class ZJGKOpenServiceImpl {
                 customer.setCorpEntryDate(dateStrToTimestamp(zjEnterprise.getCorpEntryDate()));
             }
             customer.setSourceItemName(zjEnterprise.getSource());
-            Long sourceItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), zjEnterprise.getSource());
+            Long sourceItemId = enterpriseScopeFieldItem(customer.getNamespaceId(), communityId, zjEnterprise.getSource());
             if(sourceItemId != null) {
                 customer.setSourceItemId(sourceItemId);
             }

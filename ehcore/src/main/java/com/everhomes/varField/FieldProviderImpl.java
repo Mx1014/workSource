@@ -91,10 +91,24 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public ScopeField findScopeField(Long id) {
+    public ScopeField findScopeField(Long id, Integer namespaceId, Long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        EhVarFieldScopesDao dao = new EhVarFieldScopesDao(context.configuration());
-        return ConvertHelper.convert(dao.findById(id), ScopeField.class);
+        List<ScopeField> fields = new ArrayList<>();
+        SelectQuery<EhVarFieldScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_SCOPES);
+        query.addConditions(Tables.EH_VAR_FIELD_SCOPES.ID.eq(id));
+        query.addConditions(Tables.EH_VAR_FIELD_SCOPES.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_VAR_FIELD_SCOPES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_VAR_FIELD_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
+
+        query.fetch().map((r) -> {
+            fields.add(ConvertHelper.convert(r, ScopeField.class));
+            return null;
+        });
+
+        if(fields.size() > 0) {
+            return fields.get(0);
+        }
+        return null;
     }
 
     @Override
@@ -120,28 +134,25 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public List<ScopeFieldGroup> listScopeFieldGroup(String moduleName, Integer namespaceId, Long communityId) {
+    public ScopeFieldItem findScopeFieldItem(Long id, Integer namespaceId, Long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhVarFieldGroupScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_GROUP_SCOPES);
-        query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.MODULE_NAME.eq(moduleName));
-        query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.COMMUNITY_ID.eq(communityId));
-        query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
 
-        List<ScopeFieldGroup> result = new ArrayList<>();
+        List<ScopeFieldItem> items = new ArrayList<>();
+        SelectQuery<EhVarFieldItemScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEM_SCOPES);
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.ID.eq(id));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
+
         query.fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, ScopeFieldGroup.class));
+            items.add(ConvertHelper.convert(r, ScopeFieldItem.class));
             return null;
         });
 
-        return result;
-    }
-
-    @Override
-    public ScopeFieldItem findScopeFieldItem(Long id) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        EhVarFieldItemScopesDao dao = new EhVarFieldItemScopesDao(context.configuration());
-        return ConvertHelper.convert(dao.findById(id), ScopeFieldItem.class);
+        if(items.size() > 0) {
+            return items.get(0);
+        }
+        return null;
     }
 
     @Override
@@ -231,7 +242,7 @@ public class FieldProviderImpl implements FieldProvider {
         query.addConditions(Tables.EH_VAR_FIELD_SCOPES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_VAR_FIELD_SCOPES.COMMUNITY_ID.eq(communityId));
         query.addConditions(Tables.EH_VAR_FIELD_SCOPES.MODULE_NAME.eq(moduleName));
-        query.addConditions(Tables.EH_VAR_FIELD_SCOPES.GROUP_PATH.like(groupPath + "%"));
+        query.addConditions(Tables.EH_VAR_FIELD_SCOPES.GROUP_PATH.like(groupPath + "/%"));
         query.addConditions(Tables.EH_VAR_FIELD_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
 
         query.fetch().map((record)-> {

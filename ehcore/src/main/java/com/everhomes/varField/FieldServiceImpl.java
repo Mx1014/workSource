@@ -330,10 +330,37 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public void updateFields(UpdateFieldsCommand cmd) {
         List<ScopeFieldInfo> fields = cmd.getFields();
-        if(fields != null && fields.size() > 0) {
+        if (fields != null && fields.size() > 0) {
+            Long userId = UserContext.currentUserId();
+            List<ScopeField> existFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath());
             fields.forEach(field -> {
-
+                ScopeField scopeField = ConvertHelper.convert(field, ScopeField.class);
+                scopeField.setNamespaceId(cmd.getNamespaceId());
+                scopeField.setCommunityId(cmd.getCommunityId());
+                if (scopeField.getId() == null) {
+                    scopeField.setCreatorUid(userId);
+                    fieldProvider.createScopeField(scopeField);
+                } else {
+                    ScopeField exist = fieldProvider.findScopeField(scopeField.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
+                    if (exist != null) {
+                        scopeField.setCreatorUid(exist.getCreatorUid());
+                        scopeField.setCreateTime(exist.getCreateTime());
+                        scopeField.setOperatorUid(userId);
+                        fieldProvider.updateScopeField(scopeField);
+                        existFields.remove(exist);
+                    } else {
+                        scopeField.setCreatorUid(userId);
+                        fieldProvider.createScopeField(scopeField);
+                    }
+                }
             });
+
+            if(existFields.size() > 0) {
+                existFields.forEach(field -> {
+                    field.setStatus(VarFieldStatus.INACTIVE.getCode());
+                    fieldProvider.updateScopeField(field);
+                });
+            }
         }
     }
 
@@ -342,7 +369,7 @@ public class FieldServiceImpl implements FieldService {
         List<ScopeFieldGroupInfo> groups = cmd.getGroups();
         if(groups != null && groups.size() > 0) {
             Long userId = UserContext.currentUserId();
-            List<ScopeFieldGroup> existGroups = fieldProvider.listScopeFieldGroup(cmd.getModuleName(), cmd.getNamespaceId(), cmd.getCommunityId());
+            List<ScopeFieldGroup> existGroups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
             //查出所有符合的map列表
             //处理 没有id的增加，有的在数据库中查询找到则更新,且在列表中去掉对应的，没找到则增加
             //将map列表中剩下的置为inactive
@@ -360,7 +387,7 @@ public class FieldServiceImpl implements FieldService {
                         scopeFieldGroup.setCreateTime(exist.getCreateTime());
                         scopeFieldGroup.setOperatorUid(userId);
                         fieldProvider.updateScopeFieldGroup(scopeFieldGroup);
-                        existGroups.remove(exist.getId());
+                        existGroups.remove(exist);
                     } else {
                         scopeFieldGroup.setCreatorUid(userId);
                         fieldProvider.createScopeFieldGroup(scopeFieldGroup);
@@ -376,16 +403,41 @@ public class FieldServiceImpl implements FieldService {
                 });
             }
         }
-
     }
 
     @Override
     public void updateFieldItems(UpdateFieldItemsCommand cmd) {
         List<ScopeFieldItemInfo> items = cmd.getItems();
         if(items != null && items.size() > 0) {
+            Long userId = UserContext.currentUserId();
+            List<ScopeFieldItem> existItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId(), cmd.getCommunityId());
             items.forEach(item -> {
-
+                ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
+                scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
+                scopeFieldItem.setCommunityId(cmd.getCommunityId());
+                if(scopeFieldItem.getId() == null) {
+                    scopeFieldItem.setCreatorUid(userId);
+                    fieldProvider.createScopeFieldItem(scopeFieldItem);
+                } else {
+                    ScopeFieldItem exist = fieldProvider.findScopeFieldItem(scopeFieldItem.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
+                    if(exist != null) {
+                        scopeFieldItem.setCreatorUid(exist.getCreatorUid());
+                        scopeFieldItem.setCreateTime(exist.getCreateTime());
+                        scopeFieldItem.setOperatorUid(userId);
+                        fieldProvider.updateScopeFieldItem(scopeFieldItem);
+                        existItems.remove(exist);
+                    } else {
+                        scopeFieldItem.setCreatorUid(userId);
+                        fieldProvider.createScopeFieldItem(scopeFieldItem);
+                    }
+                }
             });
+            if(existItems.size() > 0) {
+                existItems.forEach(item -> {
+                    item.setStatus(VarFieldStatus.INACTIVE.getCode());
+                    fieldProvider.updateScopeFieldItem(item);
+                });
+            }
         }
     }
 
@@ -401,6 +453,23 @@ public class FieldServiceImpl implements FieldService {
         }
         if(namespaceFlag) {
             fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
+        }
+
+        return fieldItem;
+    }
+
+    @Override
+    public ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName) {
+        ScopeFieldItem fieldItem = null;
+        Boolean namespaceFlag = true;
+        if(communityId != null) {
+            fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, displayName);
+            if(fieldItem != null) {
+                namespaceFlag = false;
+            }
+        }
+        if(namespaceFlag) {
+            fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, null, moduleName, displayName);
         }
 
         return fieldItem;

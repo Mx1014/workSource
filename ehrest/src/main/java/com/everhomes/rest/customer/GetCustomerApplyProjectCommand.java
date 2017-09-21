@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *     <li>id: id</li>
  *     <li>customerType: 所属客户类型 参考{@link com.everhomes.rest.customer.CustomerType}</li>
  *     <li>customerId：所属客户id</li>
+ *     <li>communityId：所属项目id</li>
  * </ul>
  * Created by ying.xiong on 2017/8/19.
  */
@@ -16,6 +17,16 @@ public class GetCustomerApplyProjectCommand {
     private Long id;
 
     private Byte customerType;
+
+    private Long communityId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getCustomerId() {
         return customerId;

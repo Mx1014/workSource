@@ -14,10 +14,18 @@ public interface FieldService {
     List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd);
     List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd);
 
+    /**
+     * 更新动态组、字段、选项的方式：
+     * 1、查出所有符合的map列表
+     * 2、处理 没有id的增加，有的在数据库中查询找到则更新,且在列表中去掉对应的，没找到则增加
+     * 3、将map列表中剩下的置为inactive
+     * @param cmd
+     */
     void updateFields(UpdateFieldsCommand cmd);
     void updateFieldGroups(UpdateFieldGroupsCommand cmd);
     void updateFieldItems(UpdateFieldItemsCommand cmd);
 
     ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
+    ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName);
 
 }

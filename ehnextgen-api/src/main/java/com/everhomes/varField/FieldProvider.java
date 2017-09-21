@@ -23,13 +23,12 @@ public interface FieldProvider {
     void createScopeFieldGroup(ScopeFieldGroup scopeGroup);
     void updateScopeFieldGroup(ScopeFieldGroup scopeGroup);
     ScopeFieldGroup findScopeFieldGroup(Long id, Integer namespaceId, Long communityId);
-    List<ScopeFieldGroup> listScopeFieldGroup(String moduleName, Integer namespaceId, Long communityId);
 
     void createScopeField(ScopeField scopeField);
     void updateScopeField(ScopeField scopeField);
-    ScopeField findScopeField(Long id);
+    ScopeField findScopeField(Long id, Integer namespaceId, Long communityId);
 
     void createScopeFieldItem(ScopeFieldItem scopeFieldItem);
     void updateScopeFieldItem(ScopeFieldItem scopeFieldItem);
-    ScopeFieldItem findScopeFieldItem(Long id);
+    ScopeFieldItem findScopeFieldItem(Long id, Integer namespaceId, Long communityId);
 }
