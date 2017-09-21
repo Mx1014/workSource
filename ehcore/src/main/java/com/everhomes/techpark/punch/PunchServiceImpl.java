@@ -6311,8 +6311,8 @@ public class PunchServiceImpl implements PunchService {
         //特殊日期
         if(null != punchGroupDTO.getSpecialDays()){
         	for(PunchSpecialDayDTO specialDayDTO : punchGroupDTO.getSpecialDays()){
-        		PunchSpecialDay psd =ConvertHelper.convert(specialDayDTO, PunchSpecialDay.class);
-        		psd.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+				PunchSpecialDay psd = ConvertHelper.convert(specialDayDTO, PunchSpecialDay.class);
+				psd.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
         		psd.setOwnerId(punchGroupDTO.getOwnerId());
         		psd.setPunchRuleId(pr.getId());
         		psd.setPunchOrganizationId(punchOrgId);
@@ -6610,6 +6610,7 @@ public class PunchServiceImpl implements PunchService {
 				dto.setSpecialDays(new ArrayList<>());
 				for(PunchSpecialDay specialDay : specialDays){
 					PunchSpecialDayDTO dto1 =ConvertHelper.convert(specialDay, PunchSpecialDayDTO.class);
+					dto1.setRuleDate(specialDay.getRuleDate().getTime());
 					if(null != specialDay.getTimeRuleId()){
 						PunchTimeRule timeRule = punchProvider.getPunchTimeRuleById(specialDay.getTimeRuleId());
 						if(null != timeRule){
