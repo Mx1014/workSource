@@ -206,7 +206,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         if(null != cmd.getBuildingName() && cmd.getBuildingName().length() > 8){
             QueryBuilder qb1 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(0, 8)+"*").field("addresses");
             qbs.add(qb1);
-            if(cmd.getBuildingName().length() < 16){
+            if(cmd.getBuildingName().length() > 16){
                 QueryBuilder qb2 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(8, 16)+"*").field("addresses");
                 qbs.add(qb2);
                 if(cmd.getBuildingName().length() > 24){
