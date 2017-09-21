@@ -399,7 +399,8 @@ public class FieldServiceImpl implements FieldService {
                 break;
             case "long":
                 break;
-
+            case "boolean":
+                break;
 
 
 
