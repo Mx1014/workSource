@@ -1,26 +1,25 @@
+/*
 package com.everhomes.sms.plugins;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.sms.SmsBuilder;
 import com.everhomes.sms.SmsChannel;
 import com.everhomes.sms.SmsHandler;
 import com.everhomes.util.Tuple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component("Lsm")
 public class LsmSmsHandler implements SmsHandler {
     protected final static Logger LOGGER = LoggerFactory.getLogger(LsmSmsHandler.class);
-    
+
     private static final String LSM_ACCOUNT_STR = "lsm.account";
 
     private static final String LSM_HOST = "lsm.address";
@@ -41,7 +40,8 @@ public class LsmSmsHandler implements SmsHandler {
         hostAddress = configurationProvider.getValue(LSM_HOST, "");
     }
 
-    @Override
+    */
+/*@Override
     public void doSend(String phoneNumber, String text) {
         sendMessage(phoneNumber, text);
     }
@@ -51,7 +51,8 @@ public class LsmSmsHandler implements SmsHandler {
         for (String phoneNumber : phoneNumbers) {
             sendMessage(phoneNumber, text);
         }
-    }
+    }*//*
+
 
     private void sendMessage(String phoneNumber, String text) {
         Map<String, String> body = new HashMap<>();
@@ -61,17 +62,19 @@ public class LsmSmsHandler implements SmsHandler {
         LOGGER.info("send message success.Return message msg={}", rsp);
     }
 
-    @Override
+    */
+/*@Override
     public void doSend(String phoneNumber, String text, String templateId) {
         doSend(phoneNumber,text);
-        
+
     }
 
     @Override
     public void doSend(String[] phoneNumbers, String text, String templateId) {
         doSend(phoneNumbers,text);
-        
-    }
+
+    }*//*
+
 
     @Override
     public void doSend(Integer namespaceId, String phoneNumber, String templateScope, int templateId,
@@ -85,3 +88,4 @@ public class LsmSmsHandler implements SmsHandler {
         // Lsm厂商已经不支持，故不实现
     }
 }
+*/

@@ -18,9 +18,6 @@ public class SendSmsListener implements ApplicationListener<SendSmsEvent> {
     @Async
     @Override
     public void onApplicationEvent(SendSmsEvent event) {
-        // if (LOGGER.isDebugEnabled()) {
-        //     LOGGER.debug("sms listener listened a sms event...");
-        // }
         ((SmsCallback) event.getSource()).send();
     }
 }
