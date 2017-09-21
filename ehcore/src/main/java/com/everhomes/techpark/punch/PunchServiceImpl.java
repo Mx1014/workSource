@@ -7102,7 +7102,7 @@ public class PunchServiceImpl implements PunchService {
 	private PunchLogDTO getPunchType(Long userId, Long enterpriseId, Date punchTime, java.sql.Date punchDate) {
 		PunchLogDTO result = new PunchLogDTO();
 		// 获取打卡规则->timerule
-		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, userId);
+ 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, userId);
 		if (null == pr  )
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
