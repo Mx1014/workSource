@@ -16,9 +16,11 @@ public interface FieldService {
     List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd);
     List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd);
 
-    void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response);
+    void importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file);
 
     void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
 
-    void importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file);
+    void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response);
+
+    
 }

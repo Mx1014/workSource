@@ -154,10 +154,12 @@ public class FieldController extends ControllerBase {
     @RequestMapping("importFieldsExcel")
     @RestReturn(String.class)
     public RestResponse importFieldsExcel(@Valid ImportFieldExcelCommand cmd, MultipartFile file){
+
         fieldService.importFieldsExcel(cmd,file);
         RestResponse restResponse = new RestResponse();
-        restResponse.setErrorDescription("OK");
         restResponse.setErrorCode(200);
+        restResponse.setErrorDescription("OK");
         return restResponse;
     }
+
 }
