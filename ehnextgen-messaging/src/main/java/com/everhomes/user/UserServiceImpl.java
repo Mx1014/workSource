@@ -4844,9 +4844,19 @@ public class UserServiceImpl implements UserService {
 		String verificationCode = RandomGenerator.getRandomDigitalString(6);
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
 
+
+		//如果这个微信已经绑定过手机，并且和新的手机号一致，直接报错提醒
+		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		if(userIdentifier != null && userIdentifier.getIdentifierToken() != null && userIdentifier.getIdentifierToken().equals(cmd.getPhone())){
+			LOGGER.error("allready bindPhone, phone={}", userIdentifier.getIdentifierToken());
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFIER_ALREADY_CLAIMED, "allready bindPhone, phone=" + userIdentifier.getIdentifierToken());
+		}
+
+
 		//查看该手机是否已经注册
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
+		userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
 		if(userIdentifier != null){
+
 			//手机注册过的或者发过验证码的，更新验证码
 			response.setBindPhoneType(BindPhoneType.WECHATTOPHONE.getCode());
 			userIdentifier.setVerificationCode(verificationCode);
@@ -4859,9 +4869,16 @@ public class UserServiceImpl implements UserService {
 			if (userIdentifier != null) {
 				response.setBindPhoneType(BindPhoneType.ALREADYBIND.getCode());
 				response.setOldPhone(userIdentifier.getIdentifierToken());
-				userIdentifier.setVerificationCode(verificationCode);
-				userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				userProvider.updateIdentifier(userIdentifier);
+
+				UserIdentifierLog log = new  UserIdentifierLog();
+				log.setNamespaceId(namespaceId);
+				log.setOwnerUid(user.getId());
+				log.setIdentifierToken(cmd.getPhone());
+				log.setVerificationCode(verificationCode);
+				log.setRegionCode(cmd.getRegionCode());
+				log.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
+				userIdentifierLogProvider.createUserIdentifierLog(log);
+
 			}else {
 				response.setBindPhoneType(BindPhoneType.PHONETOWECHAT.getCode());
 				//该用户是否已经发过短信
@@ -4897,8 +4914,18 @@ public class UserServiceImpl implements UserService {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
+
+		if( cmd.getPhone() == null){
+			LOGGER.error("phoneNumber param error");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS, "phone param error");
+		}
+
+
+
 		//查看该手机是否已经注册
 		if(cmd.getBindPhoneType().byteValue() == BindPhoneType.WECHATTOPHONE.getCode()){
+
+			//使用传来的手机做查询校验，如果手机是否被篡改，查询和校验都不会通过的
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
 
 			//如果手机已经注册过，则校验验证码，更新微信信息(昵称、头像、性别)到该手机用户
@@ -4929,12 +4956,15 @@ public class UserServiceImpl implements UserService {
 		}else if(cmd.getBindPhoneType().byteValue() == BindPhoneType.ALREADYBIND.getCode()) {
 			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 
-			verificationCode(userIdentifier, cmd.getVerificationCode());
+//			verificationCode(userIdentifier, cmd.getVerificationCode());
 
-			if(userIdentifier.getIdentifierToken() != cmd.getOldPhone()){
-				LOGGER.error("encode password failed");
+			if(userIdentifier == null || userIdentifier.getIdentifierToken() != cmd.getOldPhone()){
+				LOGGER.error("old phone param error");
 				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS, "old phone param error");
 			}
+
+			UserIdentifierLog log = userIdentifierLogProvider.findByUserIdAndIdentifier(user.getId(), cmd.getRegionCode(), cmd.getPhone());
+			verificationCode(log, cmd.getVerificationCode());
 
 			userIdentifier.setIdentifierToken(cmd.getPhone());
 			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -4947,6 +4977,12 @@ public class UserServiceImpl implements UserService {
 			UserIdentifier userIdentifier = this.userProvider.findIdentifierByOwnerAndTypeAndClaimStatus(user.getId(), IdentifierType.MOBILE.getCode(), IdentifierClaimStatus.VERIFYING.getCode());
 
 			verificationCode(userIdentifier, cmd.getVerificationCode());
+
+			//发验证码的手机和绑定的的手机是否相等，检查手机是否被篡改
+			if(!cmd.getPhone().equals(userIdentifier.getIdentifierToken())){
+				LOGGER.error("phoneNumber param error");
+				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS, "phone param error");
+			}
 
 			userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
 			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -4979,6 +5015,11 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	private void verificationCode(UserIdentifierLog userIdentifierlog, String code){
+		if(userIdentifierlog == null || code == null || userIdentifierlog.getVerificationCode() == null || !userIdentifierlog.getVerificationCode().equals(code)){
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE, "Invalid verification code or state");
+		}
+	}
 	@Override
 	public void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd) {
 		assert StringUtils.isNotEmpty(cmd.getVerifyCode());
