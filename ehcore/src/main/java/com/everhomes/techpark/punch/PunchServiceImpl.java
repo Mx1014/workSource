@@ -6322,6 +6322,8 @@ public class PunchServiceImpl implements PunchService {
 					PunchTimeRule ptr2 =ConvertHelper.convert(timeRule, PunchTimeRule.class);
 	        		ptr2.setPunchTimesPerDay((byte) (timeRule.getPunchTimeIntervals().size()*2));
 	        		ptr2.setFlexTimeLong(timeRule.getFlexTime());
+					//固定班次 默认第二天4点
+					ptr2.setDaySplitTimeLong(28*3600*1000L);
 					saveTimerRuleIntervals(timeRule,ptr2);
 //	        		if(timeRule.getPunchTimeIntervals().size()==1){
 //	        			ptr2.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
@@ -7116,6 +7118,11 @@ public class PunchServiceImpl implements PunchService {
             result.setPunchIntervalNo(0);
             return result;
         }
+
+		//发现之前的特殊日期会少了这个字段,手工设置为第二天早上4点
+		if (null == ptr.getDaySplitTimeLong()) {
+			ptr.setDaySplitTimeLong(28*3600*1000L);
+		}
 		Calendar punCalendar = Calendar.getInstance();
 		punCalendar.setTime(punchTime);
 		//把当天的时分秒转换成Long型
