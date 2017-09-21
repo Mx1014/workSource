@@ -808,13 +808,20 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dto.setFieldValue(employeeDynamicMaps.get(dto.getFieldName()));
             }
         }
-
         //  摒弃冗余字段
-        form.setTemplateText(null);
         //  由于业务的特殊性，此处的 formOriginId 由另外的接口去提供
         //  故屏蔽掉此处的返回以免造成误解
+        form.setTemplateText(null);
         form.setFormOriginId(null);
         form.setFormVersion(null);
+
+        //  5.获取档案记录
+        List<ArchivesLogs> logs = archivesProvider.listArchivesLogs(cmd.getOrganizationId(),cmd.getDetailId());
+        if(logs !=null && logs.size()>0)
+            response.setLos(logs.stream().map(r ->{
+                ArchivesLogDTO dto = ConvertHelper.convert(r,ArchivesLogDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
         response.setForm(form);
         return response;
     }

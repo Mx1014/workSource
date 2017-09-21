@@ -9,10 +9,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.EhArchivesConfigurationsRecord;
-import com.everhomes.server.schema.tables.records.EhArchivesDismissEmployeesRecord;
-import com.everhomes.server.schema.tables.records.EhArchivesFormsRecord;
-import com.everhomes.server.schema.tables.records.EhArchivesStickyContactsRecord;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -228,6 +225,23 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         dao.insert(log);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesLogs.class, null);
+    }
+
+    @Override
+    public List<ArchivesLogs> listArchivesLogs(Long organizationId, Long detailId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesLogsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_LOGS);
+        query.addConditions(Tables.EH_ARCHIVES_LOGS.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ARCHIVES_LOGS.DETAIL_ID.eq(detailId));
+        List<ArchivesLogs> results = new ArrayList<>();
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, ArchivesLogs.class));
+            return null;
+        });
+        if (null != results && 0 != results.size()) {
+            return results;
+        }
+        return null;
     }
 
 }

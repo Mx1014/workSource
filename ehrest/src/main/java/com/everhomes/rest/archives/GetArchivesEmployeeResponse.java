@@ -14,6 +14,8 @@ public class GetArchivesEmployeeResponse {
 
     private GeneralFormDTO form;
 
+    public List<ArchivesLogDTO> los;
+
     public GetArchivesEmployeeResponse() {
     }
 
@@ -23,6 +25,14 @@ public class GetArchivesEmployeeResponse {
 
     public void setForm(GeneralFormDTO form) {
         this.form = form;
+    }
+
+    public List<ArchivesLogDTO> getLos() {
+        return los;
+    }
+
+    public void setLos(List<ArchivesLogDTO> los) {
+        this.los = los;
     }
 
     @Override

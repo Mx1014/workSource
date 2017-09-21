@@ -36,4 +36,6 @@ public interface ArchivesProvider {
     List<ArchivesConfigurations> listArchivesConfigurations(Date date);
 
     void createArchivesLogs(ArchivesLogs log);
+
+    List<ArchivesLogs> listArchivesLogs(Long organizationId, Long detailId);
 }
