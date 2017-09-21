@@ -36,3 +36,4 @@ CREATE TABLE `eh_service_alliance_comment_attachments` (
 -- 服务联盟	添加概要描述
 ALTER TABLE `eh_service_alliances` ADD COLUMN `summary_description` VARCHAR(1024) COMMENT '';
 ALTER TABLE `eh_service_alliances` ADD COLUMN `enable_comment` TINYINT DEFAULT 0 COMMENT '1,enable;0,disable';
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `entry_id` INTEGER;

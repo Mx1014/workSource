@@ -67,6 +67,8 @@ import com.everhomes.rest.yellowPage.DeleteServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.DeleteServiceAllianceEnterpriseCommand;
 import com.everhomes.rest.yellowPage.DeleteYellowPageCommand;
 import com.everhomes.rest.yellowPage.DisplayFlagType;
+import com.everhomes.rest.yellowPage.GetCategoryIdByEntryIdCommand;
+import com.everhomes.rest.yellowPage.GetCategoryIdByEntryIdResponse;
 import com.everhomes.rest.yellowPage.GetServiceAllianceCommand;
 import com.everhomes.rest.yellowPage.GetServiceAllianceDisplayModeCommand;
 import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseDetailCommand;
@@ -1637,5 +1639,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 //		}
 //		return idOrderMap;
 		return serviceAllianceList;
+	}
+
+	@Override
+	public GetCategoryIdByEntryIdResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd) {
+		return null;
 	}
 }
