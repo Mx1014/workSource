@@ -4057,6 +4057,9 @@ public class ForumServiceImpl implements ForumService {
     		Community community = communityProvider.findCommunityById(user.getCommunityId());
     		if(community != null){
     			post.setCreatorCommunityName(community.getName());
+    			if(post.getNamespaceId() == null){
+                    post.setNamespaceId(community.getNamespaceId());
+                }
     		}
     	}
     }
