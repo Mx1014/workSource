@@ -133,7 +133,12 @@ public class ArchivesServiceImpl implements ArchivesService {
                     detail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
                     organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
                 }
-                // TODO: 循环添加档案记录
+
+                //  添加档案记录
+                TransferArchivesEmployeesCommand logCommand = ConvertHelper.convert(cmd,TransferArchivesEmployeesCommand.class);
+                logCommand.setEffectiveTime(ArchivesUtil.currentDate());
+                logCommand.setTransferType(ArchivesTransferType.OTHER.getCode());
+                transferArchivesEmployeesLogs(logCommand);
             }
             return null;
         });
@@ -1329,12 +1334,15 @@ public class ArchivesServiceImpl implements ArchivesService {
     public void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd) {
         dbProvider.execute((TransactionStatus status) -> {
             //  1.调整员工部门
-            TransferArchivesContactsCommand transferCommand = new TransferArchivesContactsCommand();
-            transferCommand.setOrganizationId(cmd.getOrganizationId());
-            transferCommand.setDepartmentIds(cmd.getDepartmentIds());
-            transferCommand.setDetailIds(cmd.getDetailIds());
-            transferArchivesContacts(transferCommand);
-            //  TODO:2.调整员工岗位
+            organizationService.transferOrganizationPersonels(cmd);
+            //  2.同步部门名称
+            for (Long detailId : cmd.getDetailIds()) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                detail.setDepartment(getDepartmentName(cmd.getDepartmentIds()));
+                organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+            }
+            //  TODO:3.调整员工岗位
+            //  TODO:4.同步岗位名称
             return null;
         });
     }
@@ -1388,6 +1396,25 @@ public class ArchivesServiceImpl implements ArchivesService {
                 deleteOrganizationPersonnelByContactTokenCommand.setContactToken(detail.getContactToken());
                 deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
                 organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public void deleteArchivesEmployees(DeleteArchivesEmployeesCommand cmd) {
+        dbProvider.execute((TransactionStatus status) ->{
+            for(Long detailId : cmd.getDetailIds()) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                //  1.删除员工权限
+                DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
+                deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(detail.getOrganizationId());
+                deleteOrganizationPersonnelByContactTokenCommand.setContactToken(detail.getContactToken());
+                deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
+                organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
+
+                //  2.删除员工档案
+                organizationProvider.deleteOrganizationMemberDetails(detail);
             }
             return null;
         });

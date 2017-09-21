@@ -58,6 +58,8 @@ public interface ArchivesService {
 
     void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd);
 
+    void deleteArchivesEmployees(DeleteArchivesEmployeesCommand cmd);
+
     GeneralFormDTO updateArchivesForm(UpdateArchivesFormCommand cmd);
 
     GetArchivesFormResponse getArchivesForm(GetArchivesFormCommand cmd);

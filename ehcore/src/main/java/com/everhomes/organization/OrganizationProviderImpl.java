@@ -4415,6 +4415,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return ConvertHelper.convert(memberDetails,OrganizationMemberDetails.class);
     }
 
+    @Override
     public void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long id){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
@@ -4422,7 +4423,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, id);
     }
 
-    public void delateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails){
+    @Override
+    public void deleteOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
         dao.delete(organizationMemberDetails);

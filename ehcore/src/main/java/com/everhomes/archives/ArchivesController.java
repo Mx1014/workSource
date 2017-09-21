@@ -281,6 +281,20 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /archives/deleteArchivesEmployees</b>
+     * <p>11-4.员工批量离职</p>
+     */
+    @RequestMapping("deleteArchivesEmployees")
+    @RestReturn(value = String.class)
+    public RestResponse deleteArchivesEmployees(DeleteArchivesEmployeesCommand cmd){
+        archivesService.deleteArchivesEmployees(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /archives/updateArchivesForm</b>
      * <p>12-1.增加、修改档案字段</p>
      */
