@@ -1,18 +1,25 @@
 package com.everhomes.rest.archives;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
- * <li>remindTime: 提醒时间</li>
- * <li>remindEmails: 邮箱</li>
+ * <li>remindDay: 提醒日</li>
+ * <li>remindTime: 提醒时间点</li>
+ * <li>remindEmails: 邮箱(List)</li>
  * </ul>
  */
 public class RemindArchivesEmployeeCommand {
 
+    private String remindDay;
+
     private String remindTime;
 
-    private String remindEmails;
+    @ItemType(String.class)
+    private List<String> remindEmails;
 
     public RemindArchivesEmployeeCommand() {
     }
@@ -25,11 +32,19 @@ public class RemindArchivesEmployeeCommand {
         this.remindTime = remindTime;
     }
 
-    public String getRemindEmails() {
+    public String getRemindDay() {
+        return remindDay;
+    }
+
+    public void setRemindDay(String remindDay) {
+        this.remindDay = remindDay;
+    }
+
+    public List<String> getRemindEmails() {
         return remindEmails;
     }
 
-    public void setRemindEmails(String remindEmails) {
+    public void setRemindEmails(List<String> remindEmails) {
         this.remindEmails = remindEmails;
     }
 
