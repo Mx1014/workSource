@@ -1643,6 +1643,15 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public GetCategoryIdByEntryIdResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd) {
-		return null;
+		if(cmd.getEntryId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"entryId = null");
+		}
+		ServiceAllianceCategories category = yellowPageProvider.findCategoryByEntryId(UserContext.getCurrentNamespaceId(),cmd.getEntryId());
+		GetCategoryIdByEntryIdResponse resp = new GetCategoryIdByEntryIdResponse();
+		if(category != null){
+			resp.setCategoryId(category.getId());
+		}
+		return resp;
 	}
 }

@@ -11,22 +11,22 @@ import com.everhomes.util.StringHelper;
  *  @author:dengs 2017年9月21日
  */
 public class GetCategoryIdByEntryIdCommand {
-	private Long entryId;
+	private Integer entryId;
 
 	public GetCategoryIdByEntryIdCommand() {
 		super();
 	}
 
-	public GetCategoryIdByEntryIdCommand(Long entryId) {
+	public GetCategoryIdByEntryIdCommand(Integer entryId) {
 		super();
 		this.entryId = entryId;
 	}
 
-	public Long getEntryId() {
+	public Integer getEntryId() {
 		return entryId;
 	}
 
-	public void setEntryId(Long entryId) {
+	public void setEntryId(Integer entryId) {
 		this.entryId = entryId;
 	}
 
