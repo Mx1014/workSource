@@ -2125,7 +2125,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     }
 
-    private ListNearbyMixCommunitiesCommandResponse listMixCommunitiesByDistance(ListNearbyMixCommunitiesCommand cmd
+    @Override
+    public ListNearbyMixCommunitiesCommandResponse listMixCommunitiesByDistance(ListNearbyMixCommunitiesCommand cmd
             , ListingLocator locator, int pageSize) {
         ListNearbyMixCommunitiesCommandResponse resp = new ListNearbyMixCommunitiesCommandResponse();
         List<CommunityDTO> results = new ArrayList<>();

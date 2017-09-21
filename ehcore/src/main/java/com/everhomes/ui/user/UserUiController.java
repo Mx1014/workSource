@@ -408,4 +408,19 @@ public class UserUiController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /ui/user/listAllCommunityScenesIfGeoExist</b>
+	 * <p>列出当前域空间下的相关场景(区分是否传递经纬度)。</p>
+	 */
+	@RequestMapping("listAllCommunityScenes")
+	@RestReturn(value=SceneDTO.class, collection=true)
+	@RequireAuthentication(false)
+	public RestResponse listAllCommunityScenesIfGeoExist(ListAllCommunityScenesIfGeoExistCommand cmd) {
+		List<SceneDTO> sceneDtoList = userService.listAllCommunityScenesIfGeoExist(cmd);
+		RestResponse response = new RestResponse(sceneDtoList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }
