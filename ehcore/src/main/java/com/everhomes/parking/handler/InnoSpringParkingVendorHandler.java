@@ -56,6 +56,8 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 			long expireTime = strToLong(expireDate + "235959");
 			if (checkExpireTime(parkingLot, expireTime)) {
 				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 			}
 			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
 			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());

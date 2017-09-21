@@ -68,6 +68,8 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 			long expireTime = Utils.strToLong(expireDate + "235959", Utils.DateStyle.DATE_TIME_STR);
 			if (checkExpireTime(parkingLot, expireTime)) {
 				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 			}
 			
 			String userName = cardInfo.getUserName();

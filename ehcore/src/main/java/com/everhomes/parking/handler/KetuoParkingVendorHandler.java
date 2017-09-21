@@ -60,6 +60,8 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 
 			if (checkExpireTime(parkingLot, expireTime)) {
 				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 			}
 
 			if (null != card.getName()) {
