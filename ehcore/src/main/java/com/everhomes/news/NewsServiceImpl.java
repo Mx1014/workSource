@@ -1022,19 +1022,19 @@ public class NewsServiceImpl implements NewsService {
 			}
 
 			List<NewsTagDTO> tags = cmd.getTags();
-			for (NewsTagDTO dto : tags){
-				NewsTag tag = ConvertHelper.convert(dto,NewsTag.class);
-				tag.setParentId(parentId);
-				tag.setNamespaceId(parentTag.getNamespaceId());
-				tag.setOwnerType(parentTag.getOwnerType());
-				tag.setOwnerId(parentTag.getOwnerId());
-				if (tag.getId() == null) {
-					newsProvider.createNewsTag(tag);
+			if (tags != null)
+				for (NewsTagDTO dto : tags) {
+					NewsTag tag = ConvertHelper.convert(dto, NewsTag.class);
+					tag.setParentId(parentId);
+					tag.setNamespaceId(parentTag.getNamespaceId());
+					tag.setOwnerType(parentTag.getOwnerType());
+					tag.setOwnerId(parentTag.getOwnerId());
+					if (tag.getId() == null) {
+						newsProvider.createNewsTag(tag);
+					} else
+						newsProvider.updateNewsTag(tag);
 				}
-				else
-					newsProvider.updateNewsTag(tag);
-			}
-		return null;
+			return null;
 		});
 	}
 
