@@ -283,6 +283,20 @@ public class PortalServiceImpl implements PortalService {
 					PortalLayoutJson layoutJson = (PortalLayoutJson)StringHelper.fromJsonString(template.getTemplateJson(), PortalLayoutJson.class);
 					portalLayout.setName(layoutJson.getLayoutName());
 					portalLayout.setLocation(layoutJson.getLocation());
+
+					List<String> names = new ArrayList<>();
+					names.add("ServiceMarketLayout");
+					names.add("SecondServiceMarketLayout");
+					names.add("AssociationLayout");
+					if(names.contains(portalLayout.getName())){
+						PortalLayout layout = portalLayoutProvider.getPortalLayout(namespaceId, portalLayout.getName());
+						if(null != layout){
+							LOGGER.error("The home page sign already exists. name = {}", portalLayout.getName());
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+									"The home page sign already exists.");
+						}
+					}
+
 					portalLayoutProvider.createPortalLayout(portalLayout);
 					if(null != layoutJson.getGroups()){
 						for (PortalItemGroupJson jsonObj: layoutJson.getGroups()) {
@@ -325,6 +339,16 @@ public class PortalServiceImpl implements PortalService {
 	public void deletePortalLayout(DeletePortalLayoutCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalLayout portalLayout = checkPortalLayout(cmd.getId());
+
+		List<String> names = new ArrayList<>();
+		names.add("ServiceMarketLayout");
+		names.add("SecondServiceMarketLayout");
+		names.add("AssociationLayout");
+		if(names.contains(portalLayout.getName())){
+			LOGGER.error("Home page signature cannot be deleted. id = {}, name = {}", portalLayout.getId(), portalLayout.getName());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Home page signature cannot be deleted.");
+		}
 		portalLayout.setStatus(PortalLayoutStatus.INACTIVE.getCode());
 		portalLayout.setOperatorUid(user.getId());
 		portalLayoutProvider.updatePortalLayout(portalLayout);
@@ -1734,12 +1758,21 @@ public class PortalServiceImpl implements PortalService {
 			cmd.setLocation("/home");
 		}
 
+		List<String> names = new ArrayList<>();
+
+		//默认同步三种主页签的layout数据
 		if(StringUtils.isEmpty(cmd.getName())){
-			cmd.setName("ServiceMarketLayout");
+			names.add("ServiceMarketLayout");
+			names.add("SecondServiceMarketLayout");
+			names.add("AssociationLayout");
+		}else{
+			names.add(cmd.getName());
 		}
 
 		dbProvider.execute((status) -> {
-			syncLayout(cmd.getNamespaceId(), cmd.getLocation(), cmd.getName());
+			for (String name: names) {
+				syncLayout(cmd.getNamespaceId(), cmd.getLocation(), name);
+			}
 			return null;
 		});
 	}
