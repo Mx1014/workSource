@@ -1845,9 +1845,10 @@ public class ParkingServiceImpl implements ParkingService {
 			for (ParkingInvoiceType t: types) {
 				if (t.getId().equals(userType.getInvoiceTypeId())) {
 					temp = t;
-					types.remove(temp);
+					break;
 				}
 			}
+			types.remove(temp);
 			types.add(0, temp);
 		}
 
