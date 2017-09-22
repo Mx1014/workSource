@@ -383,6 +383,7 @@ public class FieldServiceImpl implements FieldService {
                         scopeField.setCreatorUid(exist.getCreatorUid());
                         scopeField.setCreateTime(exist.getCreateTime());
                         scopeField.setOperatorUid(userId);
+                        scopeField.setStatus(VarFieldStatus.ACTIVE.getCode());
                         fieldProvider.updateScopeField(scopeField);
                         existFields.remove(exist);
                     } else {
@@ -423,6 +424,7 @@ public class FieldServiceImpl implements FieldService {
                         scopeFieldGroup.setCreatorUid(exist.getCreatorUid());
                         scopeFieldGroup.setCreateTime(exist.getCreateTime());
                         scopeFieldGroup.setOperatorUid(userId);
+                        scopeFieldGroup.setStatus(VarFieldStatus.ACTIVE.getCode());
                         fieldProvider.updateScopeFieldGroup(scopeFieldGroup);
                         existGroups.remove(exist);
                     } else {
@@ -461,6 +463,7 @@ public class FieldServiceImpl implements FieldService {
                         scopeFieldItem.setCreatorUid(exist.getCreatorUid());
                         scopeFieldItem.setCreateTime(exist.getCreateTime());
                         scopeFieldItem.setOperatorUid(userId);
+                        scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
                         fieldProvider.updateScopeFieldItem(scopeFieldItem);
                         existItems.remove(exist);
                     } else {
