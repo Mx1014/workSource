@@ -7528,23 +7528,24 @@ public class PunchServiceImpl implements PunchService {
 			if(null!=log){
 				dto = ConvertHelper.convert(log, MonthDayStatusDTO.class);
 				dto.setPunchDate(log.getPunchDate().getTime());
-				if (null == log.getStatusList()) {
-					dto.setExceptionStatus(log.getStatus().equals(PunchStatus.NORMAL.getCode()) ?
-							ExceptionStatus.NORMAL.getCode() : ExceptionStatus.EXCEPTION.getCode());
-				} else {
-					String[] status = log.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
-					dto.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-					if (status == null) {
-						continue;
-					}
-					else {
-						for (String s1 : status) {
-							if (!s1.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
-								dto.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-							}
-						}
-					}
-				}
+				//异常状态用log的
+//				if (null == log.getStatusList()) {
+//					dto.setExceptionStatus(log.getStatus().equals(PunchStatus.NORMAL.getCode()) ?
+//							ExceptionStatus.NORMAL.getCode() : ExceptionStatus.EXCEPTION.getCode());
+//				} else {
+//					String[] status = log.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+//					dto.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+//					if (status == null) {
+//						continue;
+//					}
+//					else {
+//						for (String s1 : status) {
+//							if (!s1.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+//								dto.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//							}
+//						}
+//					}
+//				}
 			}else{
 				//当天没有打卡也么有计算规则
 				dto.setPunchDate(startCalendar.getTime().getTime());
