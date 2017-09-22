@@ -1234,10 +1234,12 @@ public class ParkingServiceImpl implements ParkingService {
     	ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
 
     	if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getTempFeeDiscountFlag()) {
-			dto.setOriginalPrice(dto.getPrice());
-			BigDecimal newPrice = dto.getPrice().multiply(new BigDecimal(parkingLot.getTempFeeDiscount()))
-					.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
-			dto.setPrice(newPrice);
+    		if (null != dto.getPrice()) {
+				dto.setOriginalPrice(dto.getPrice());
+				BigDecimal newPrice = dto.getPrice().multiply(new BigDecimal(parkingLot.getTempFeeDiscount()))
+						.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+				dto.setPrice(newPrice);
+			}
 		}
 
 		return dto;
