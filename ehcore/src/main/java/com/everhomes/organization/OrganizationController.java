@@ -1,23 +1,6 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import java.io.IOException;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.RuntimeErrorException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -29,12 +12,27 @@ import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/org")
@@ -445,6 +443,23 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /org/getOrganizationDetailById</b>
+     * <p>根据Id查询对应的企业详情信息</p>
+     */
+    //checked
+    @RequestMapping("getOrganizationDetailById")
+    @RestReturn(OrganizationDetailDTO.class)
+    public RestResponse getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd){
+
+        OrganizationDetailDTO org = organizationService.getOrganizationDetailById(cmd);
+        RestResponse response = new RestResponse(org);
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /org/rejectOrganization</b>
      */
     //checked
@@ -839,6 +854,9 @@ public class OrganizationController extends ControllerBase {
     public void verifyEnterpriseContact(@Valid VerifyEnterpriseContactCommand cmd, HttpServletRequest request, HttpServletResponse response) throws IOException {
         String redirectUrl = this.organizationService.verifyEnterpriseContact(cmd);
         response.sendRedirect(redirectUrl);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("controller verifyEnterpriseContact redirectUrl = {}", redirectUrl);
+        }
     }
 
     /**
@@ -1761,4 +1779,5 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
 }

@@ -40,6 +40,8 @@ public class AddressDTO {
     private Byte memberStatus;
     private Double areaSize;
 
+    private Long buildingId;
+
     private Long areaId;
 
     private String areaName;
@@ -49,6 +51,14 @@ public class AddressDTO {
     private String communityName;
 
     private String provinceName;
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
 
     public Double getAreaSize() {
         return areaSize;

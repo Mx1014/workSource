@@ -201,7 +201,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setCreatorName(user.getNickName());
 		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
 		request.setCreatorMobile(identifier.getIdentifierToken());
-		if (OwnerType.COMMUNITY.getCode().equals(flowCase.getProjectType())){
+		if (EntityType.COMMUNITY.getCode().equals(flowCase.getProjectType()) || "community".equals(flowCase.getProjectType())){
 			request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
 			List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
 			request.setOwnerId(communityList.get(0).getId());

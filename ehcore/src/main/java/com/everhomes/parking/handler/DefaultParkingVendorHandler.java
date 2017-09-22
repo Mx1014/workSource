@@ -28,8 +28,7 @@ import java.util.Map;
 /**
  * @author sw on 2017/8/16.
  */
-@Component
-public class DefaultParkingVendorHandler implements ParkingVendorHandler {
+public abstract class DefaultParkingVendorHandler implements ParkingVendorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultParkingVendorHandler.class);
 
@@ -111,17 +110,6 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
         parkingProvider.deleteParkingRechargeRate(rate);
     }
 
-    @Override
-    public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-        ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
-        if(null == rate) {
-            LOGGER.error("Rate not found, cmd={}", order);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Rate not found.");
-        }
-        order.setRateName(rate.getRateName());
-    }
-
     void updateFlowStatus(ParkingRechargeOrder order) {
         User user = UserContext.current().getUser();
         LOGGER.debug("ParkingCardRequest pay callback user={}", user);
@@ -170,6 +158,11 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
     }
 
     @Override
+    public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
+        return null;
+    }
+
+    @Override
     public ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd) {
         return null;
     }
@@ -193,42 +186,10 @@ public class DefaultParkingVendorHandler implements ParkingVendorHandler {
     public void lockParkingCar(LockParkingCarCommand cmd) {
 
     }
+
     @Override
     public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
         return null;
     }
 
-    @Override
-    public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
-        return null;
-    }
-
-    @Override
-    public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
-        return null;
-    }
-
-    @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot, String plateNumber, String cardNo) {
-        return null;
-    }
-
-    @Override
-    public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
-        return null;
-    }
-
-    @Override
-    public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
-        return null;
-    }
-
-//    //是否支持开卡，对接时由项目需求定义
-//    protected boolean getOpenCardFlag() {
-//        return false;
-//    }
-//    //是否支持过期缴费, 目前只支持科兴过期缴费，科兴的过期月卡缴费规则，比较复杂，而且依赖第三方停车系统，不建议这样做
-//    protected boolean getExpiredRechargeFlag() {
-//        return false;
-//    }
 }

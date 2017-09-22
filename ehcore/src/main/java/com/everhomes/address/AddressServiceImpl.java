@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.address;
 
+import com.everhomes.asset.AddressIdAndName;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.community.*;
@@ -24,10 +25,11 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.organization.ExecuteImportTaskCallback;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmContact;
@@ -41,20 +43,13 @@ import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.enterprise.SearchEnterpriseCommunityCommand;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.organization.ImportFileResultLog;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.ImportFileTaskType;
-import com.everhomes.rest.organization.ImportOrganizationContactDataDTO;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
-import com.everhomes.rest.organization.pm.PmAddressMappingStatus;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.region.RegionServiceErrorCode;
@@ -1684,6 +1679,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 	}
 
     @Override
+    public List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName) {
+        return addressProvider.findAddressByPossibleName( currentNamespaceId,  ownerId,  buildingName,  apartmentName);
+    }
+
+    @Override
+    public List<GetApartmentNameByBuildingNameDTO> getApartmentNameByBuildingName(GetApartmentNameByBuildingNameCommand cmd) {
+        return addressProvider.getApartmentNameByBuildingName(cmd.getBuildingName(), cmd.getCommunityId(), UserContext.getCurrentNamespaceId());
+    }
+    @Override
     public ListNearbyMixCommunitiesCommandV2Response listNearbyMixCommunitiesV2(ListNearbyMixCommunitiesCommand cmd) {
         ListNearbyMixCommunitiesCommandV2Response resp = new ListNearbyMixCommunitiesCommandV2Response();
 
@@ -1727,11 +1731,46 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
 
     @Override
-    public ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(SearchEnterpriseCommunityCommand cmd) {
-        if(cmd.getCommunityType() == null){
-            LOGGER.debug("CommunityType Is Invalid" + cmd.getCommunityType());
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
+    public ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(ListNearbyMixCommunitiesCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        ListingLocator locator = new ListingLocator();
+        Integer pageSize = 40;
+        if (cmd.getPageSize() != null) {
+            pageSize = cmd.getPageSize();
+        }
+        List<Community> communities = new ArrayList<>();
+        if (null != cmd.getCommunityType()) {
+            communities = communityProvider.listCommunities(namespaceId, locator, 1000, new ListingQueryBuilderCallback() {
+                @Override
+                public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+                    query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(cmd.getCommunityType()));
+                    return query;
+                }
+            });
+        } else {
+            communities = communityProvider.listCommunities(namespaceId, locator, 1000, null);
+        }
 
+        List<CommunityDTO> dtos = communities.stream().map(r -> {
+            Integer communityUserCount = organizationProvider.countUserOrganization(namespaceId, r.getId(), null);
+            CommunityDTO dto = ConvertHelper.convert(r, CommunityDTO.class);
+            dto.setCommunityUserCount(communityUserCount);
+            return dto;
+        }).collect(Collectors.toList());
+
+        if (dtos != null && dtos.size() > 0) {
+            ListNearbyMixCommunitiesCommandV2Response response = new ListNearbyMixCommunitiesCommandV2Response();
+            Collections.sort(dtos, new Comparator<CommunityDTO>() {
+                public int compare(CommunityDTO arg0, CommunityDTO arg1) {
+                    return arg1.getCommunityUserCount().compareTo(arg0.getCommunityUserCount());
+                }
+            });
+
+            if (pageSize < dtos.size()) {
+                dtos = dtos.subList(0, pageSize - 1);
+            }
+            response.setDtos(dtos);
+            return response;
         }
         return null;
     }
@@ -1812,11 +1851,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setApartmentName(data.getApartmentName());
             address.setAreaSize(areaSize);
             address.setAddress(building.getName() + "-" + data.getApartmentName());
+            address.setNamespaceAddressType(data.getNamespaceAddressType());
+            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setNamespaceId(community.getNamespaceId());
         	addressProvider.createAddress(address);
 		}else {
 			address.setAreaSize(areaSize);
+            address.setNamespaceAddressType(data.getNamespaceAddressType());
+            address.setNamespaceAddressToken(data.getNamespaceAddressToken());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             addressProvider.updateAddress(address);
 		}
@@ -1835,6 +1878,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				data.setApartmentName(trim(r.getB()));
 				data.setStatus(trim(r.getC()));
 				data.setAreaSize(trim(r.getD()));
+                //加上来源第三方和在第三方的唯一标识 没有则不填 by xiongying20170814
+                data.setNamespaceAddressType(trim(r.getE()));
+                data.setNamespaceAddressToken(trim(r.getF()));
 				list.add(data);
 			}
 		}

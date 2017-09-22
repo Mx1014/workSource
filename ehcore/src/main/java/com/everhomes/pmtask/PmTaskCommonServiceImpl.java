@@ -469,7 +469,7 @@ class PmTaskCommonServiceImpl {
 
     String convertStatus(Byte status){
         if(status == 1)
-            return "待处理";
+            return "处理中";
         else if(status == 2)
             return "已分派";
         else if(status == 3)

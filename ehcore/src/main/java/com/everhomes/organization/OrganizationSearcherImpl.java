@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.everhomes.rest.organization.*;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -36,11 +37,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.videoconf.ConfServiceErrorCode;
@@ -280,6 +276,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 //            fb = FilterBuilders.andFilter(fb, adminFlagFilter);
         	fbList.add(adminFlagFilter);
 		}
+
+		if (cmd.getExistAddressFlag() != null && cmd.getExistAddressFlag() == ExistAddressFlag.EXIST.getCode()) {
+            FilterBuilder addressFilter = FilterBuilders.existsFilter("addresses");
+            fbList.add(addressFilter);
+        }
+
         fb = FilterBuilders.andFilter(fbList.toArray(new FilterBuilder[fbList.size()]));
         
         qb = QueryBuilders.filteredQuery(qb, fb);

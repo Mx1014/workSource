@@ -118,6 +118,7 @@ public class EventStatPortalStatStep extends AbstractStatEventStep {
             layoutStat.setTimeInterval(StatEventStatTimeInterval.DAILY.getCode());
             layoutStat.setStatus(StatEventCommonStatus.ACTIVE.getCode());
             layoutStat.setIdentifier(layout.getName());// identifier
+            layoutStat.setSceneType(layout.getSceneType());
             statEventPortalStatisticProvider.createStatEventPortalStatistic(layoutStat);
 
             // 已发布的门户layout item_group
@@ -135,6 +136,8 @@ public class EventStatPortalStatStep extends AbstractStatEventStep {
                 itemGroupStat.setTimeInterval(StatEventStatTimeInterval.DAILY.getCode());
                 itemGroupStat.setStatus(StatEventCommonStatus.ACTIVE.getCode());
                 itemGroupStat.setIdentifier(String.format("%s:%s:%s", layout.getName(), itemGroup.getWidget(), itemGroup.getName()));// identifier
+                itemGroupStat.setSceneType(itemGroup.getSceneType());
+                itemGroupStat.setWidget(itemGroup.getWidget());
                 statEventPortalStatisticProvider.createStatEventPortalStatistic(itemGroupStat);
             }
         }

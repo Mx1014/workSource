@@ -23,29 +23,15 @@ public class DeleteOrganizationAdminCommand {
 	private Long organizationId;
 
 	@NotNull
-	private Long userId;
+	private String contactToken;
 	
-
+	private Long userId;
 	public Long getOrganizationId() {
 		return organizationId;
 	}
 
-
-
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
-	}
-
-
-
-	public Long getUserId() {
-		return userId;
-	}
-
-
-
-	public void setUserId(Long userId) {
-		this.userId = userId;
 	}
 
 	public String getOwnerType() {
@@ -62,6 +48,22 @@ public class DeleteOrganizationAdminCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public String getContactToken() {
+		return contactToken;
+	}
+
+	public void setContactToken(String contactToken) {
+		this.contactToken = contactToken;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 
 	@Override

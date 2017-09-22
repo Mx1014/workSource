@@ -5,7 +5,6 @@ public interface SmsTemplateCode {
     String SCOPE = "sms.default";
 
     String YZX_SUFFIX = "yzx";
-    String SCOPE_YZX = SCOPE + "." + YZX_SUFFIX;
 
     String KEY_VCODE = "vcode";
     
@@ -110,4 +109,7 @@ public interface SmsTemplateCode {
 
     // 申诉修改手机号审核成功
     int RESET_IDENTIFIER_APPEAL_SUCCESS_CODE = 53;// 申诉手机号：【深圳科技园】您的申诉已通过，账号手机已更新为{newIdentifier}，若非本人操作请联系客服，感谢您的使用。
+
+    //物业缴费催款
+    int PAYMENT_NOTICE_CODE = 54;
 }

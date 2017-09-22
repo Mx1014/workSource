@@ -1,17 +1,20 @@
 package com.everhomes.rest.techpark.punch.admin;
 
-import javax.validation.constraints.NotNull;
+import java.util.List;
+
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * 
  * <li>ownerType：organization/user</li>
- * <li>ownerId：id</li>
- * <li>targetType: 填organization/user</li>
- * <li>targetId：对应设置目标的id比如机构比如人的id</li>
- * <li>ruleDate: 日期 时间戳</li>
- * <li>timeRuleId: 班次id --如果没有排班就是null ,休息日</li>
- * <li>timeRuleName: 班次名称</li>
- * <li>timeRuleDescription: 班次描述</li>
+ * <li>ownerId：id</li> 
+ * <li>month：月份时间戳</li>
+ * <li>punchOriganizationId：考勤组id</li> 
+ * <li>employees：每一个人的排班{@link com.everhomes.rest.techpark.punch.admin.PunchSchedulingEmployeeDTO}</li>
+ * 
  * 
  * </ul>
  */
@@ -19,12 +22,17 @@ public class PunchSchedulingDTO {
 
 	private String ownerType;
 	private Long ownerId;
-	private String targetType;
-	private Long targetId;
-	private Long ruleDate;
-	private Long timeRuleId;
-	private String timeRuleName;
-	private String timeRuleDescription;
+	private Long month;
+	private Long punchOriganizationId; 
+	@ItemType(PunchSchedulingEmployeeDTO.class)
+	private List<PunchSchedulingEmployeeDTO> employees;
+
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -37,43 +45,24 @@ public class PunchSchedulingDTO {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	public String getTargetType() {
-		return targetType;
+	public Long getMonth() {
+		return month;
 	}
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
+	public void setMonth(Long month) {
+		this.month = month;
 	}
-	public Long getTargetId() {
-		return targetId;
+	public Long getPunchOriganizationId() {
+		return punchOriganizationId;
 	}
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
+	public void setPunchOriganizationId(Long punchOriganizationId) {
+		this.punchOriganizationId = punchOriganizationId;
 	}
-	public Long getRuleDate() {
-		return ruleDate;
+	public List<PunchSchedulingEmployeeDTO> getEmployees() {
+		return employees;
 	}
-	public void setRuleDate(Long ruleDate) {
-		this.ruleDate = ruleDate;
+	public void setEmployees(List<PunchSchedulingEmployeeDTO> employees) {
+		this.employees = employees;
 	}
-	public Long getTimeRuleId() {
-		return timeRuleId;
-	}
-	public void setTimeRuleId(Long timeRuleId) {
-		this.timeRuleId = timeRuleId;
-	}
-	public String getTimeRuleName() {
-		return timeRuleName;
-	}
-	public void setTimeRuleName(String timeRuleName) {
-		this.timeRuleName = timeRuleName;
-	}
-	public String getTimeRuleDescription() {
-		return timeRuleDescription;
-	}
-	public void setTimeRuleDescription(String timeRuleDescription) {
-		this.timeRuleDescription = timeRuleDescription;
-	}
-	
-	
+
 	
 }

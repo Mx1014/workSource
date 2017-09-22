@@ -67,7 +67,8 @@ public interface ConfigConstants {
     public static final String SCHEDULE_EQUIPMENT_TASK_TIME = "equipment.task.schedule.time";
 
 	public static final String NEWS_PAGE_URL = "news.url";
-	
+	public static final String NEWS_WEB_PAGE_URL = "news.web.url";
+
 	public static final String SYNCH_USER_APP_KEY = "synch.user.app.key"; 
 	public static final String SYNCH_USER_SECRET_KEY = "synch.user.secret.key"; 
 	public static final String OAUTH_SERVER = "oauth.server";
@@ -102,6 +103,8 @@ public interface ConfigConstants {
     String APPLY_ENTRY_DETAIL_URL = "apply.entry.detail.url";
 
     String APPLY_ENTRY_BUILDING_DETAIL_URL = "apply.entry.building.detail.url";
+
+    String APPLY_ENTRY_LEASE_BUILDING_DETAIL_URL = "apply.entry.lease.building.detail.url";
 
     String APP_ROUTE_BROWSER_OUTER_URI = "app.route.browser.outer.uri";
 

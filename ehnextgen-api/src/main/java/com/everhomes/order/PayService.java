@@ -60,7 +60,7 @@ public interface PayService {
      * @param cmd
      */
     void payNotify(OrderPaymentNotificationCommand cmd);
-    
+
 
     Long changePayAmount(BigDecimal amount);
 

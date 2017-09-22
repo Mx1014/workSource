@@ -2,7 +2,7 @@ package com.everhomes.rest.flow;
 
 public enum FlowModuleType {
 
-	NO_MODULE("any-module");
+	NO_MODULE("any-module"),REPAIR_MODULE("repair");
 	
 	private String code;
     private FlowModuleType(String code) {

@@ -5,14 +5,12 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 
 /**
- * <ul>
- * 
- * <li>ownerType：organization/user</li>
- * <li>ownerId：id</li>
- * <li>targetType: 填organization/user</li>
- * <li>targetId：对应设置目标的id比如机构比如人的id</li>
- * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
- * <li>pageSize: 每页的数量</li>
+ * <ul> 
+ * <li>ownerType：所属对象类型organization</li>
+ * <li>ownerId：所属对象id</li> 
+ * <li>pageAnchor：pageAnchor</li> 
+ * <li>pageSize：pageSize </li> 
+ *  
  * </ul>
  */
 public class ListPunchRulesCommonCommand {
