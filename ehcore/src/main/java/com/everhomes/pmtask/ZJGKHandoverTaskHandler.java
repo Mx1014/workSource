@@ -89,7 +89,7 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
             json = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, HTTP.UTF_8);
             Long afterRequest = System.currentTimeMillis();
             if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("request shenzhou url: {}, json: {}, total elapse: {}", url, json, afterRequest-beforeRequest);
+                LOGGER.debug("request shenzhou url: {}, params: {}, json: {}, total elapse: {}", url, params, json, afterRequest-beforeRequest);
             }
         } catch (Exception e) {
             LOGGER.error("sync from shenzhou request error, param={}", params, e);
