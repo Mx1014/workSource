@@ -87,7 +87,7 @@ public class FieldServiceImpl implements FieldService {
     }
 
     private List<FieldDTO> listScopeFields(ListFieldCommand cmd) {
-        List<ScopeField> scopeFields = new ArrayList<>();
+        Map<Long, ScopeField> scopeFields = new HashMap<>();
         Boolean namespaceFlag = true;
         if(cmd.getCommunityId() != null) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath());
@@ -101,7 +101,7 @@ public class FieldServiceImpl implements FieldService {
         if(scopeFields != null && scopeFields.size() > 0) {
             List<Long> fieldIds = new ArrayList<>();
             Map<Long, FieldDTO> dtoMap = new HashMap<>();
-            scopeFields.forEach(field -> {
+            scopeFields.forEach((id, field) -> {
                 fieldIds.add(field.getFieldId());
                 dtoMap.put(field.getFieldId(), ConvertHelper.convert(field, FieldDTO.class));
             });
@@ -146,7 +146,7 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd) {
-        List<ScopeFieldItem> fieldItems = new ArrayList<>();
+        Map<Long, ScopeFieldItem> fieldItems = new HashMap<>();
         Boolean namespaceFlag = true;
         if(cmd.getCommunityId() != null) {
             fieldItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId(), cmd.getCommunityId());
@@ -158,10 +158,11 @@ public class FieldServiceImpl implements FieldService {
             fieldItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId(), null);
         }
         if(fieldItems != null && fieldItems.size() > 0) {
-            List<FieldItemDTO> dtos = fieldItems.stream().map(item -> {
+            List<FieldItemDTO> dtos = new ArrayList<>();
+            fieldItems.forEach((id, item) -> {
                 FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
-                return fieldItem;
-            }).collect(Collectors.toList());
+                dtos.add(fieldItem);
+            });
 
             //按default order排序
             Collections.sort(dtos, (a,b) -> {
@@ -369,7 +370,7 @@ public class FieldServiceImpl implements FieldService {
         List<ScopeFieldInfo> fields = cmd.getFields();
         if (fields != null && fields.size() > 0) {
             Long userId = UserContext.currentUserId();
-            List<ScopeField> existFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath());
+            Map<Long, ScopeField> existFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath());
             fields.forEach(field -> {
                 ScopeField scopeField = ConvertHelper.convert(field, ScopeField.class);
                 scopeField.setNamespaceId(cmd.getNamespaceId());
@@ -385,7 +386,7 @@ public class FieldServiceImpl implements FieldService {
                         scopeField.setOperatorUid(userId);
                         scopeField.setStatus(VarFieldStatus.ACTIVE.getCode());
                         fieldProvider.updateScopeField(scopeField);
-                        existFields.remove(exist);
+                        existFields.remove(exist.getId());
                     } else {
                         scopeField.setCreatorUid(userId);
                         fieldProvider.createScopeField(scopeField);
@@ -394,7 +395,7 @@ public class FieldServiceImpl implements FieldService {
             });
 
             if(existFields.size() > 0) {
-                existFields.forEach(field -> {
+                existFields.forEach((id, field) -> {
                     field.setStatus(VarFieldStatus.INACTIVE.getCode());
                     fieldProvider.updateScopeField(field);
                 });
@@ -407,7 +408,7 @@ public class FieldServiceImpl implements FieldService {
         List<ScopeFieldGroupInfo> groups = cmd.getGroups();
         if(groups != null && groups.size() > 0) {
             Long userId = UserContext.currentUserId();
-            List<ScopeFieldGroup> existGroups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
+            Map<Long, ScopeFieldGroup> existGroups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
             //查出所有符合的map列表
             //处理 没有id的增加，有的在数据库中查询找到则更新,且在列表中去掉对应的，没找到则增加
             //将map列表中剩下的置为inactive
@@ -426,7 +427,7 @@ public class FieldServiceImpl implements FieldService {
                         scopeFieldGroup.setOperatorUid(userId);
                         scopeFieldGroup.setStatus(VarFieldStatus.ACTIVE.getCode());
                         fieldProvider.updateScopeFieldGroup(scopeFieldGroup);
-                        existGroups.remove(exist);
+                        existGroups.remove(exist.getId());
                     } else {
                         scopeFieldGroup.setCreatorUid(userId);
                         fieldProvider.createScopeFieldGroup(scopeFieldGroup);
@@ -436,7 +437,7 @@ public class FieldServiceImpl implements FieldService {
             });
 
             if(existGroups.size() > 0) {
-                existGroups.forEach(group -> {
+                existGroups.forEach((id, group) -> {
                     group.setStatus(VarFieldStatus.INACTIVE.getCode());
                     fieldProvider.updateScopeFieldGroup(group);
                 });
@@ -449,7 +450,7 @@ public class FieldServiceImpl implements FieldService {
         List<ScopeFieldItemInfo> items = cmd.getItems();
         if(items != null && items.size() > 0) {
             Long userId = UserContext.currentUserId();
-            List<ScopeFieldItem> existItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId(), cmd.getCommunityId());
+            Map<Long, ScopeFieldItem> existItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId(), cmd.getCommunityId());
             items.forEach(item -> {
                 ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
                 scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
@@ -465,7 +466,7 @@ public class FieldServiceImpl implements FieldService {
                         scopeFieldItem.setOperatorUid(userId);
                         scopeFieldItem.setStatus(VarFieldStatus.ACTIVE.getCode());
                         fieldProvider.updateScopeFieldItem(scopeFieldItem);
-                        existItems.remove(exist);
+                        existItems.remove(exist.getId());
                     } else {
                         scopeFieldItem.setCreatorUid(userId);
                         fieldProvider.createScopeFieldItem(scopeFieldItem);
@@ -473,7 +474,7 @@ public class FieldServiceImpl implements FieldService {
                 }
             });
             if(existItems.size() > 0) {
-                existItems.forEach(item -> {
+                existItems.forEach((id, item) -> {
                     item.setStatus(VarFieldStatus.INACTIVE.getCode());
                     fieldProvider.updateScopeFieldItem(item);
                 });
@@ -535,7 +536,7 @@ public class FieldServiceImpl implements FieldService {
     }
 
     private List<FieldGroupDTO> listScopeFieldGroups(ListFieldGroupCommand cmd) {
-        List<ScopeFieldGroup> groups = new ArrayList<>();
+        Map<Long, ScopeFieldGroup> groups = new HashMap<>();
         Boolean namespaceFlag = true;
         if(cmd.getCommunityId() != null) {
             groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
@@ -550,7 +551,7 @@ public class FieldServiceImpl implements FieldService {
         if(groups != null && groups.size() > 0) {
             List<Long> groupIds = new ArrayList<>();
             Map<Long, FieldGroupDTO> dtoMap = new HashMap<>();
-            groups.forEach(group -> {
+            groups.forEach((id, group) -> {
                 groupIds.add(group.getGroupId());
                 dtoMap.put(group.getGroupId(), ConvertHelper.convert(group, FieldGroupDTO.class));
             });
