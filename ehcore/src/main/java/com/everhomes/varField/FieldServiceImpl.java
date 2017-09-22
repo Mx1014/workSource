@@ -596,7 +596,7 @@ public class FieldServiceImpl implements FieldService {
             }
 
             LOGGER.info("sheet total row num = {}, first row num = {}, last row num = {}",sheet.getPhysicalNumberOfRows(),sheet.getFirstRowNum(),sheet.getLastRowNum());
-            for(int j = 3; j < sheet.getLastRowNum(); j ++){
+            for(int j = 1; j <= sheet.getLastRowNum(); j ++){
                 Row row = sheet.getRow(j);
                 Object object = null;
                 //每一行迭代，进行set
