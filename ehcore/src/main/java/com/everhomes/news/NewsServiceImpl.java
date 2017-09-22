@@ -511,8 +511,9 @@ public class NewsServiceImpl implements NewsService {
 		
 		// 设置查询关键字
 		JSONObject query = json.getJSONObject("query").getJSONObject("filtered").getJSONObject("query");
-		query.put("query_string",
-				JSONObject.parse("{\"query\":\"" + keyword + "\",\"fields\":[\"title\",\"content\"]}"));
+		if (!StringUtils.isEmpty(keyword))
+			query.put("query_string",
+					JSONObject.parse("{\"query\":\"" + keyword + "\",\"fields\":[\"title\",\"content\"]}"));
 
 		// 设置条件
 		JSONArray must = json.getJSONObject("query").getJSONObject("filtered").getJSONObject("filter")
@@ -539,7 +540,7 @@ public class NewsServiceImpl implements NewsService {
 		JSONArray postTags = new JSONArray();
 		postTags.add("</b>");
 		highLight.put("post_tags",postTags);
-
+		System.out.println(json.toJSONString());
 		return json.toJSONString();
 	}
 	
