@@ -347,6 +347,19 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
+    public List<FieldItem> listFieldItems(Long fieldId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<FieldItem> items = context.select().from(Tables.EH_VAR_FIELD_ITEMS)
+                .where(Tables.EH_VAR_FIELD_ITEMS.FIELD_ID.eq(fieldId))
+                .fetch().map((record)-> {
+                    return ConvertHelper.convert(record, FieldItem.class);
+                });
+
+        return items;
+    }
+
+    @Override
     public List<ScopeFieldItem> listScopeFieldItems(List<Long> fieldIds, Integer namespaceId, Long communityId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
