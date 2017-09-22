@@ -34,10 +34,10 @@ public class SetParkingLotConfigCommand {
 	private Byte expiredRechargeType;
 
 	private Byte monthlyDiscountFlag;
-	private Integer monthlyDiscount;
+	private String monthlyDiscount;
 
 	private Byte tempFeeDiscountFlag;
-	private Integer tempFeeDiscount;
+	private String tempFeeDiscount;
 
 	public Byte getMonthlyDiscountFlag() {
 		return monthlyDiscountFlag;
@@ -45,14 +45,6 @@ public class SetParkingLotConfigCommand {
 
 	public void setMonthlyDiscountFlag(Byte monthlyDiscountFlag) {
 		this.monthlyDiscountFlag = monthlyDiscountFlag;
-	}
-
-	public Integer getMonthlyDiscount() {
-		return monthlyDiscount;
-	}
-
-	public void setMonthlyDiscount(Integer monthlyDiscount) {
-		this.monthlyDiscount = monthlyDiscount;
 	}
 
 	public Byte getTempFeeDiscountFlag() {
@@ -63,11 +55,19 @@ public class SetParkingLotConfigCommand {
 		this.tempFeeDiscountFlag = tempFeeDiscountFlag;
 	}
 
-	public Integer getTempFeeDiscount() {
+	public String getMonthlyDiscount() {
+		return monthlyDiscount;
+	}
+
+	public void setMonthlyDiscount(String monthlyDiscount) {
+		this.monthlyDiscount = monthlyDiscount;
+	}
+
+	public String getTempFeeDiscount() {
 		return tempFeeDiscount;
 	}
 
-	public void setTempFeeDiscount(Integer tempFeeDiscount) {
+	public void setTempFeeDiscount(String tempFeeDiscount) {
 		this.tempFeeDiscount = tempFeeDiscount;
 	}
 

@@ -1848,8 +1848,10 @@ public class ParkingServiceImpl implements ParkingService {
 					break;
 				}
 			}
-			types.remove(temp);
-			types.add(0, temp);
+			if (null != temp) {
+				types.remove(temp);
+				types.add(0, temp);
+			}
 		}
 
 		List<ParkingInvoiceTypeDTO> dtos = types.stream().map(r -> ConvertHelper.convert(r, ParkingInvoiceTypeDTO.class))

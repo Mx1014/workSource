@@ -795,6 +795,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 		query.addConditions(Tables.EH_PARKING_USER_INVOICES.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_PARKING_USER_INVOICES.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_PARKING_USER_INVOICES.PARKING_LOT_ID.eq(parkingLotId));
+		query.addConditions(Tables.EH_PARKING_USER_INVOICES.USER_ID.eq(userId));
 
 		return ConvertHelper.convert(query.fetchOne(), ParkingUserInvoice.class);
 	}
