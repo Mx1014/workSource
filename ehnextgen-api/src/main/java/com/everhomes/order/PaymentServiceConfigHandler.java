@@ -11,6 +11,7 @@ public interface PaymentServiceConfigHandler {
     /**
      * 获取
      */
+
     PaymentServiceConfig findPaymentServiceConfig(Integer namespaceId, String orderType, String resourceType, Long resourceId);
 
 }

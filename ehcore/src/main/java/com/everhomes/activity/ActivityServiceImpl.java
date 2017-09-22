@@ -693,6 +693,7 @@ public class ActivityServiceImpl implements ActivityService {
 	@Override
 	public PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd) {
 
+
 		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
 		if(roster == null){
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
@@ -719,6 +720,7 @@ public class ActivityServiceImpl implements ActivityService {
 		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
 		Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
 
+
 		preOrderCommand.setExpiration(expiredTime);
 
 
@@ -737,6 +739,7 @@ public class ActivityServiceImpl implements ActivityService {
 			User user = UserContext.current().getUser();
 			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
 		}
+
 
 		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
 
@@ -1584,7 +1587,8 @@ public class ActivityServiceImpl implements ActivityService {
 	public void signupOrderRefund(Activity activity, Long userId){
 		long startTime = System.currentTimeMillis();
 		ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), userId, ActivityRosterStatus.NORMAL.getCode());
-		
+
+
 		//只有需要支付并已经支付的才需要退款
 		if(activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() == ActivityChargeFlag.UNCHARGE.getCode() || 
 				roster == null || roster.getPayFlag() == null || roster.getPayFlag().byteValue() != ActivityRosterPayFlag.PAY.getCode()){
@@ -1606,6 +1610,7 @@ public class ActivityServiceImpl implements ActivityService {
 		roster.setRefundTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		activityProvider.updateRoster(roster);
 
+		
 		long endTime = System.currentTimeMillis();
 		LOGGER.debug("Refund from vendor, userId={}, activityId={}, elapse={}", userId, activity.getId(), (endTime - startTime));
 	}

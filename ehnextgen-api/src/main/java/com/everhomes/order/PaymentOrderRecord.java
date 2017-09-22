@@ -8,5 +8,6 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords;
  */
 
 public class PaymentOrderRecord extends EhPaymentOrderRecords {
+
     private static final long serialVersionUID = 9093110315232591665L;
 }

@@ -296,7 +296,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setNamespaceId(parOrg.getNamespaceId());
         organization.setCreatorUid(user.getId());
 
-
         Organization org = dbProvider.execute((TransactionStatus status) -> {
 
             Long directlyEnterpriseId = parOrg.getDirectlyEnterpriseId();
@@ -460,7 +459,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
     }
-
+//SDFSDF
     /**
      * 创建经理组
      *
@@ -508,6 +507,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             return;
         }
 
+
         if (null != roleAssignments && 0 < roleAssignments.size()) {
             for (RoleAssignment assignment : roleAssignments) {
                 if (assignment.getRoleId().equals(cmd.getRoleId())) {
@@ -527,6 +527,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
         });
     }
+
+//SDFD
 
 
     @Override

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 @Component(PaymentServiceConfigHandler.PAYMENT_SERVICE_CONFIG_HANDLER_PREFIX + "DEFAULT")
 public class PaymentDefaultServiceConfigHandler implements PaymentServiceConfigHandler {
 
+
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
 
     @Autowired
@@ -38,6 +39,7 @@ public class PaymentDefaultServiceConfigHandler implements PaymentServiceConfigH
         if(resourceId != null){
             query.addConditions(Tables.EH_PAYMENT_SERVICE_CONFIGS.RESOURCE_ID.eq(resourceId));
         }
+
 
         return  query.fetchOneInto(PaymentServiceConfig.class);
 
