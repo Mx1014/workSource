@@ -6752,15 +6752,18 @@ public class PunchServiceImpl implements PunchService {
 						ErrorCodes.ERROR_INVALID_PARAMETER,
 						"Invalid rule type parameter in the command");
 			//获取考勤组
-			LOGGER.debug("saveUnion Time-2 "+  System.currentTimeMillis());
+			Long t0 = System.currentTimeMillis();
+			LOGGER.debug("saveUnion Time t0 "+  System.currentTimeMillis());
 			Organization punchOrg = this.organizationProvider.findOrganizationById(cmd.getId());
 			punchOrg.setName(cmd.getGroupName());
 			organizationProvider.updateOrganization(punchOrg);
-			LOGGER.debug("saveUnion Time-1 "+  System.currentTimeMillis());
+			Long t1 = System.currentTimeMillis();
+			LOGGER.debug("saveUnion Time1 "+  t1 + "cost: "+ (t1-t0));
 			PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
 
 			List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
-			LOGGER.debug("saveUnion Time0 "+  System.currentTimeMillis());
+			Long t2 = System.currentTimeMillis();
+			LOGGER.debug("saveUnion Time2 "+  t2 + "cost: "+ (t2-t1) + "save start");
 
 
 			//添加关联
@@ -6774,6 +6777,8 @@ public class PunchServiceImpl implements PunchService {
 			} catch (NoNodeAvailableException e) {
 				LOGGER.error("NoNodeAvailableException", e);
 			}
+			Long t7 = System.currentTimeMillis();
+			LOGGER.debug("saveUnion Time7 "+  t7 + "save end");
 			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
 			List<Long> detailIds = new ArrayList<>();
 			if (null == newEmployees)
@@ -6787,6 +6792,8 @@ public class PunchServiceImpl implements PunchService {
 				}
 			}
 
+			Long t8 = System.currentTimeMillis();
+			LOGGER.debug("saveUnion Time8 "+  t8 + "cost: " +(t8-t7));
 			//打卡地点和wifi
 			saveGeopointsAndWifis(punchOrg.getId(), cmd.getPunchGeoPoints(), cmd.getWifis());
 
@@ -6808,6 +6815,8 @@ public class PunchServiceImpl implements PunchService {
 			savePunchTimeRule(cmd, pr);
 			//删除不在考勤组的排班
 			punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndNotInTarget(pr.getId(), detailIds);
+			Long t9 = System.currentTimeMillis();
+			LOGGER.debug("saveUnion Time9 "+  t9 + "cost: " +(t9-t8));
 
 		//发消息 暂时屏蔽
 //		sendMessageToGroupUser(pr,cmd.getTimeRules());
@@ -7519,23 +7528,24 @@ public class PunchServiceImpl implements PunchService {
 			if(null!=log){
 				dto = ConvertHelper.convert(log, MonthDayStatusDTO.class);
 				dto.setPunchDate(log.getPunchDate().getTime());
-				if (null == log.getStatusList()) {
-					dto.setExceptionStatus(log.getStatus().equals(PunchStatus.NORMAL.getCode()) ?
-							ExceptionStatus.NORMAL.getCode() : ExceptionStatus.EXCEPTION.getCode());
-				} else {
-					String[] status = log.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
-					dto.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-					if (status == null) {
-						continue;
-					}
-					else {
-						for (String s1 : status) {
-							if (!s1.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
-								dto.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-							}
-						}
-					}
-				}
+				//异常状态用log的
+//				if (null == log.getStatusList()) {
+//					dto.setExceptionStatus(log.getStatus().equals(PunchStatus.NORMAL.getCode()) ?
+//							ExceptionStatus.NORMAL.getCode() : ExceptionStatus.EXCEPTION.getCode());
+//				} else {
+//					String[] status = log.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+//					dto.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+//					if (status == null) {
+//						continue;
+//					}
+//					else {
+//						for (String s1 : status) {
+//							if (!s1.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+//								dto.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//							}
+//						}
+//					}
+//				}
 			}else{
 				//当天没有打卡也么有计算规则
 				dto.setPunchDate(startCalendar.getTime().getTime());

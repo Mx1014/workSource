@@ -11,7 +11,7 @@ public class ZJEnterprise {
     private String communityIdentifier;
     private Long communityId;
     @ItemType(CommunityAddressDTO.class)
-    private List<CommunityAddressDTO> apartmentIdentifierList;
+    private List<CommunityAddressDTO> addressList;
     private String enterpriseIdentifier;
     private String name;
     private String customerNumber;
@@ -52,12 +52,12 @@ public class ZJEnterprise {
         this.dealed = dealed;
     }
 
-    public List<CommunityAddressDTO> getApartmentIdentifierList() {
-        return apartmentIdentifierList;
+    public List<CommunityAddressDTO> getAddressList() {
+        return addressList;
     }
 
-    public void setApartmentIdentifierList(List<CommunityAddressDTO> apartmentIdentifierList) {
-        this.apartmentIdentifierList = apartmentIdentifierList;
+    public void setAddressList(List<CommunityAddressDTO> addressList) {
+        this.addressList = addressList;
     }
 
     public String getCommunityIdentifier() {
