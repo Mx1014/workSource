@@ -1,5 +1,6 @@
 package com.everhomes.rest.archives;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -23,8 +24,15 @@ public class ArchivesUtil {
      * @return
      */
     public static java.sql.Date currentDate(){
-        Calendar cal = Calendar.getInstance();
-        java.util.Date date = cal.getTime();
-        return new java.sql.Date(date.getTime());
+        java.util.Date now  = new java.util.Date();
+        java.sql.Date date = new java.sql.Date(now.getTime());
+/*        DateFormat df = DateFormat.getDateInstance();
+        String str = df.format(now);*/
+        return date;
     }
+    /*      Date now = new Date();
+      Calendar cal = Calendar.getInstance();
+
+      DateFormat d1 = DateFormat.getDateInstance(); //默认语言（汉语）下的默认风格（MEDIUM风格，比如：2008-6-16 20:54:53）
+      String str1 = d1.format(now);*/
 }
