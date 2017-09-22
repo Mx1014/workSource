@@ -360,12 +360,12 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public List<ScopeFieldItem> listScopeFieldItems(List<Long> fieldIds, Integer namespaceId, Long communityId) {
+    public List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<ScopeFieldItem> items = new ArrayList<>();
         SelectQuery<EhVarFieldItemScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEM_SCOPES);
-        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.in(fieldIds));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.eq(fieldId));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
         if(communityId != null) {
@@ -385,13 +385,13 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public Map<Long, ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId) {
+    public Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds, Integer namespaceId, Long communityId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         Map<Long, ScopeFieldItem> items = new HashMap<>();
         SelectQuery<EhVarFieldItemScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEM_SCOPES);
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.eq(fieldId));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.in(fieldIds));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
 
         if(communityId != null) {

@@ -109,7 +109,7 @@ public class FieldServiceImpl implements FieldService {
             //一把取出scope field对应的所有系统的field 然后把对应信息塞进fielddto中
             //一把取出所有的scope field对应的scope items信息
             List<Field> fields = fieldProvider.listFields(fieldIds);
-            List<ScopeFieldItem> fieldItems = fieldProvider.listScopeFieldItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId());
+            Map<Long, ScopeFieldItem> fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId());
 
             if(fields != null && fields.size() > 0) {
                 List<FieldDTO> dtos = new ArrayList<>();
@@ -119,7 +119,7 @@ public class FieldServiceImpl implements FieldService {
                     dto.setFieldName(field.getName());
                     if(fieldItems != null && fieldItems.size() > 0) {
                         List<FieldItemDTO> items = new ArrayList<FieldItemDTO>();
-                        fieldItems.forEach(item -> {
+                        fieldItems.forEach((id, item) -> {
                             if(field.getId().equals(item.getFieldId())) {
                                 FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
                                 items.add(fieldItem);
@@ -148,14 +148,16 @@ public class FieldServiceImpl implements FieldService {
     public List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd) {
         Map<Long, ScopeFieldItem> fieldItems = new HashMap<>();
         Boolean namespaceFlag = true;
+        List<Long> fieldIds = new ArrayList<>();
+        fieldIds.add(cmd.getFieldId());
         if(cmd.getCommunityId() != null) {
-            fieldItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId(), cmd.getCommunityId());
+            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId());
             if(fieldItems != null && fieldItems.size() > 0) {
                 namespaceFlag = false;
             }
         }
         if(namespaceFlag) {
-            fieldItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId(), null);
+            fieldItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null);
         }
         if(fieldItems != null && fieldItems.size() > 0) {
             List<FieldItemDTO> dtos = new ArrayList<>();
@@ -375,6 +377,8 @@ public class FieldServiceImpl implements FieldService {
                 ScopeField scopeField = ConvertHelper.convert(field, ScopeField.class);
                 scopeField.setNamespaceId(cmd.getNamespaceId());
                 scopeField.setCommunityId(cmd.getCommunityId());
+                scopeField.setGroupPath(cmd.getGroupPath());
+                scopeField.setGroupId(cmd.getGroupId());
                 if (scopeField.getId() == null) {
                     scopeField.setCreatorUid(userId);
                     fieldProvider.createScopeField(scopeField);
@@ -450,7 +454,7 @@ public class FieldServiceImpl implements FieldService {
         List<ScopeFieldItemInfo> items = cmd.getItems();
         if(items != null && items.size() > 0) {
             Long userId = UserContext.currentUserId();
-            Map<Long, ScopeFieldItem> existItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId(), cmd.getCommunityId());
+            Map<Long, ScopeFieldItem> existItems = fieldProvider.listScopeFieldsItems(cmd.getFieldIds(), cmd.getNamespaceId(), cmd.getCommunityId());
             items.forEach(item -> {
                 ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
                 scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
