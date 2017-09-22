@@ -9,6 +9,7 @@ import java.util.List;
 /**
  * <ul>
  *     <li>namespaceId: namespaceId</li>
+ *     <li>communityId: communityId</li>
  *     <li>teamName: teamName</li>
  *     <li>projectType: projectType</li>
  *     <li>projectName: projectName</li>
@@ -24,6 +25,7 @@ import java.util.List;
 public class AddIncubatorApplyCommand {
 
 	Integer namespaceId;
+	Long communityId;
 	String teamName;
 	String projectType;
 	String projectName;
@@ -47,6 +49,14 @@ public class AddIncubatorApplyCommand {
 
 	public String getTeamName() {
 		return teamName;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public void setTeamName(String teamName) {

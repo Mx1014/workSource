@@ -10,6 +10,7 @@ import java.util.List;
  * <ul>
  *     <li>id: 标签ID</li>
  *     <li>namespaceId: namespaceId</li>
+ *     <li>communityId: communityId</li>
  *     <li>applyUserId: applyUserId</li>
  *     <li>teamName: teamName</li>
  *     <li>projectType: projectType</li>
@@ -34,6 +35,7 @@ public class IncubatorApplyDTO {
 
 	Long id;
 	Integer namespaceId;
+	Long communityId;
 	Long applyUserId;
 	String teamName;
 	String projectType;
@@ -70,6 +72,14 @@ public class IncubatorApplyDTO {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public Long getApplyUserId() {
