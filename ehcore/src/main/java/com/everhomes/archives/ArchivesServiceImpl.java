@@ -831,8 +831,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  6.拼接员工状态
         if (cmd.getDismiss() != null) {
             Map<String, Object> map = new LinkedHashMap<>();
-            map.put("firstDate", employee.getCheckInTime());
-            map.put("nextDate", employee.getDismissTime());
+            map.put("firstDate", employee.getCheckInTime().toString());
+            map.put("nextDate", employee.getDismissTime()).toString();
             employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_DISMISS_CASE, "zh_CN", map, "");
         } else {
             if (employee.getEmployeeStatus().equals(EmployeeStatus.ON_THE_JOB.getCode())) {
