@@ -7136,7 +7136,7 @@ public class PunchServiceImpl implements PunchService {
 		punCalendar.setTime(punchTime);
 		//把当天的时分秒转换成Long型
 		Long punchTimeLong = getTimeLong(punCalendar,punchDate);
-		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,enterpriseId, dateSF.get().format(punchTime),
+		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,enterpriseId, dateSF.get().format(punchDate),
 				ClockCode.SUCESS.getCode());
 		int PunchIntervalNo = 1;
 		if(ptr.getPunchTimesPerDay().equals((byte)2)){
