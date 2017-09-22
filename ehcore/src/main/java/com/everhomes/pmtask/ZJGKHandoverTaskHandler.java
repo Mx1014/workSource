@@ -16,6 +16,7 @@ import com.everhomes.flow.FlowEventLog;
 import com.everhomes.flow.FlowEventLogProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pmtask.zjgk.ZjgkJsonEntity;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
@@ -25,6 +26,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,10 +76,10 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
 
 
     @Override
-    public void handoverTaskToTrd(PmTask task) {
+    public void handoverTaskToTrd(PmTask task, String content, List<String> attachments) {
         LOGGER.info("ZJGKHandoverTaskHandler handoverTaskToTrd:");
         String url = configProvider.getValue(task.getNamespaceId(), "shenzhou.host.url", "");
-        Map<String, String> params = generateParams(task);
+        Map<String, String> params = generateParams(task, content, attachments);
         String jsonStr = postToShenzhou(params, url+CREATE_TASK, null);
         ZjgkJsonEntity entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity>(){});
 
@@ -89,7 +91,7 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
             json = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, HTTP.UTF_8);
             Long afterRequest = System.currentTimeMillis();
             if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("request shenzhou url: {}, json: {}, total elapse: {}", url, json, afterRequest-beforeRequest);
+                LOGGER.debug("request shenzhou url: {}, params: {}, json: {}, total elapse: {}", url, params, json, afterRequest-beforeRequest);
             }
         } catch (Exception e) {
             LOGGER.error("sync from shenzhou request error, param={}", params, e);
@@ -100,7 +102,7 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
     }
 
 
-    private Map<String, String> generateParams(PmTask task){
+    private Map<String, String> generateParams(PmTask task, String content, List<String> attachments){
         Map<String, String> params= new HashMap<String,String>();
         params.put("taskNum", task.getId().toString());
         Community community = communityProvider.findCommunityById(task.getOwnerId());
@@ -119,27 +121,41 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
             params.put("taskCategory", "");
         }
 
-        Organization org = organizationProvider.findOrganizationById(task.getOrganizationId());
-        if(org != null) {
-            params.put("organizationName", org.getName());
+//        Organization org = organizationProvider.findOrganizationById(task.getOrganizationId());
+        OrganizationCommunity communityOrg = organizationProvider.findOrganizationProperty(task.getOwnerId());
+        if(communityOrg != null) {
+            Organization org = organizationProvider.findOrganizationById(communityOrg.getOrganizationId());
+            if(org != null) {
+                params.put("organizationName", org.getName());
+            }
         } else {
             params.put("organizationName", "");
         }
 
         String day = sdf.format(task.getCreateTime());
         params.put("createTime", day);
-        params.put("taskName", task.getContent());
-        params.put("taskContent",task.getContent());
+        if(StringUtils.isBlank(content)) {
+            params.put("taskName", task.getContent());
+            params.put("taskContent",task.getContent());
+        } else {
+            params.put("taskName", content);
+            params.put("taskContent",content);
+        }
         if(task.getRemark() != null) {
             params.put("remark", task.getRemark());
         } else {
             params.put("remark", "");
         }
 
-        //查询图片
-        List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
-        String attachmentUrls = convertAttachmentUrl(attachments);
-        params.put("taskAttachmentUrl", attachmentUrls);
+        if(attachments != null && attachments.size() > 0) {
+            params.put("taskAttachmentUrl", StringHelper.toJsonString(attachments));
+        } else {
+            //查询图片
+            List<PmTaskAttachment> taskAttachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
+            String attachmentUrls = convertAttachmentUrl(taskAttachments);
+            params.put("taskAttachmentUrl", attachmentUrls);
+        }
+
         List<FlowEventLog> logs = flowEventLogProvider.findStepEventLogs(task.getFlowCaseId());
         if(logs != null && logs.size() > 0) {
             Collections.sort(logs, (a, b) ->{

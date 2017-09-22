@@ -861,7 +861,7 @@ public class PunchServiceImpl implements PunchService {
 
 	private PunchLogsDay calculateDayLogByeverypunch(Long userId, Long companyId,
                 Calendar logDay, PunchLogsDay pdl, PunchDayLog punchDayLog) throws ParseException {
-		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
+		List<PunchLog> punchLogs =                                                                                                                  punchProvider.listPunchLogsByDate(userId,
 			companyId, dateSF.get().format(logDay.getTime()), ClockCode.SUCESS.getCode());
 		if(null != punchLogs){
 			pdl.setPunchCount(punchLogs.size());
