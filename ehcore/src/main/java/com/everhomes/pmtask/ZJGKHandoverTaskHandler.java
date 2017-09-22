@@ -16,6 +16,7 @@ import com.everhomes.flow.FlowEventLog;
 import com.everhomes.flow.FlowEventLogProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pmtask.zjgk.ZjgkJsonEntity;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
@@ -119,9 +120,13 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
             params.put("taskCategory", "");
         }
 
-        Organization org = organizationProvider.findOrganizationById(task.getOrganizationId());
-        if(org != null) {
-            params.put("organizationName", org.getName());
+//        Organization org = organizationProvider.findOrganizationById(task.getOrganizationId());
+        OrganizationCommunity communityOrg = organizationProvider.findOrganizationProperty(task.getOwnerId());
+        if(communityOrg != null) {
+            Organization org = organizationProvider.findOrganizationById(communityOrg.getOrganizationId());
+            if(org != null) {
+                params.put("organizationName", org.getName());
+            }
         } else {
             params.put("organizationName", "");
         }
