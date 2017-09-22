@@ -147,7 +147,9 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 				//通知第三方 config表中配置api请求地址
-				pmTaskCommonService.handoverTaskToTrd(task);
+				FlowSubjectDTO subjectDTO = flowService.getSubectById(ctx.getCurrentEvent().getSubject().getId());
+				//要求传的是转发项目经理填写的内容和图片 add by xiongying20170922
+				pmTaskCommonService.handoverTaskToTrd(task, subjectDTO.getContent(), subjectDTO.getImages());
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 
