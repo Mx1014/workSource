@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>id: id</li>
+ *     <li>id: 跟进信息id</li>
  *     <li>namespaceId: 域空间id</li>
  *     <li>customerType: 客户类型 参考{@link com.everhomes.rest.customer.CustomerType}</li>
  *     <li>customerId: 客户id</li>

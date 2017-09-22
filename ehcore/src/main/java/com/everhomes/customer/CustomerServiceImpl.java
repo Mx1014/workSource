@@ -25,6 +25,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.openapi.ZJGKOpenServiceImpl;
@@ -70,6 +71,7 @@ import com.everhomes.rest.customer.CustomerTalentStatisticsDTO;
 import com.everhomes.rest.customer.CustomerTalentStatisticsResponse;
 import com.everhomes.rest.customer.CustomerTrackingDTO;
 import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
+import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
 import com.everhomes.rest.customer.CustomerTrademarkDTO;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.DeleteCustomerApplyProjectCommand;
@@ -197,6 +199,9 @@ public class CustomerServiceImpl implements CustomerService {
     
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
 
     private void checkPrivilege() {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -1422,10 +1427,8 @@ public class CustomerServiceImpl implements CustomerService {
 	private CustomerTrackingDTO convertCustomerTrackingDTO(CustomerTracking talent) {
 		CustomerTrackingDTO dto = ConvertHelper.convert(talent, CustomerTrackingDTO.class);
         if(dto.getTrackingType() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getTrackingType());
-            if(scopeFieldItem != null) {
-                dto.setTrackingTypeName(scopeFieldItem.getItemDisplayName());
-            }
+        	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+        	dto.setTrackingTypeName(trackingTypeName);
         }
         if(dto.getTrackingUid() != null) {
         	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
@@ -1498,12 +1501,10 @@ public class CustomerServiceImpl implements CustomerService {
 
 	private CustomerTrackingPlanDTO convertCustomerTrackingPlanDTO(CustomerTrackingPlan plan) {
 		CustomerTrackingPlanDTO dto = ConvertHelper.convert(plan, CustomerTrackingPlanDTO.class);
-//        if(dto.getTrackingType() != null) {
-//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(plan.getNamespaceId(), dto.getTrackingType());
-//            if(scopeFieldItem != null) {
-//                dto.setTrackingTypeName(scopeFieldItem.getItemDisplayName());
-//            }
-//        }
+        if(dto.getTrackingType() != null) {
+        	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+        	dto.setTrackingTypeName(trackingTypeName);
+        }
         return dto;
 	}
 

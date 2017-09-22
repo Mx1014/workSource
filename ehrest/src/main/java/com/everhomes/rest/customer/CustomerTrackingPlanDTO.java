@@ -6,19 +6,19 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>id: id</li>
+ *     <li>id: 计划信息id</li>
  *     <li>namespaceId: 域空间id</li>
  *     <li>customerType: 客户类型 参考{@link com.everhomes.rest.customer.CustomerType}</li>
  *     <li>customerId: 客户id</li>
  *     <li>customerName: 客户名称</li>
  *     <li>contactName: 联系人</li>
  *     <li>trackingType: 跟进方式id</li>
+ *     <li>trackingTypeName: 跟进方式名称</li>
  *     <li>trackingTime: 跟进时间</li>
  *     <li>notifyTime: 提醒时间</li>
  *     <li>title: 标题</li>
  *     <li>content: 内容</li>
  * </ul>
- * Created by shengyue.wang on 2017/9/20.
  */
 public class CustomerTrackingPlanDTO {
     private Long id;

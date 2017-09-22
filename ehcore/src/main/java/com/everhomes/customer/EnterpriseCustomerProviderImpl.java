@@ -93,10 +93,13 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 //        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         dao.insert(customer);
+        //企业客户新增成功,保存客户事件
+        saveCustomerEvent( 1  ,customer);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseCustomers.class, null);
     }
 
-    @Override
+
+	@Override
     public void updateEnterpriseCustomer(EnterpriseCustomer customer) {
         LOGGER.debug("syncDataToDb updateEnterpriseCustomer customer: {}",
                 StringHelper.toJsonString(customer));
@@ -1027,5 +1030,35 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
             return null;
         });
         return result;
+	}
+	
+	private void saveCustomerEvent(int i,  EnterpriseCustomer customer) {
+		switch(i){
+			case 1: 
+				saveCustomerEventWithInsert(customer);
+				break;
+			case 2:
+				saveCustomerEventWithDelete(customer);
+				break;
+			case 3:
+				saveCustomerEventWithUpdate(customer);
+				break;
+			default:break;
+		}
+	}
+
+
+	private void saveCustomerEventWithUpdate(EnterpriseCustomer customer) {
+		
+	}
+
+
+	private void saveCustomerEventWithDelete(EnterpriseCustomer customer) {
+		
+	}
+
+
+	private void saveCustomerEventWithInsert(EnterpriseCustomer customer) {
+		
 	}
 }
