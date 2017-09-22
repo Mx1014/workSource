@@ -17,12 +17,22 @@ public class ExportFieldsExcelCommand {
     private Byte customerType;
     private String includedGroupIds;
 
+    private Long communityId;
+
     public String getModuleName() {
         return moduleName;
     }
 
     public void setModuleName(String moduleName) {
         this.moduleName = moduleName;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public Integer getNamespaceId() {

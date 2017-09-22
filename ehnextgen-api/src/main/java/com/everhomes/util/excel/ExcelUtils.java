@@ -1,5 +1,7 @@
 package com.everhomes.util.excel;
 
+import com.everhomes.user.UserContact;
+import com.everhomes.user.UserContext;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
@@ -382,12 +384,11 @@ public class ExcelUtils {
      * @param cell
      * @return
      */
-    public static Object getCellValue(Cell cell){
-        Object value = null;
+    public static String getCellValue(Cell cell){
+        String value = null;
         DecimalFormat df = new DecimalFormat("0");  //格式化number String字符
         SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd");  //日期格式化
         DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
-
         switch (cell.getCellType()) {
             case Cell.CELL_TYPE_STRING:
                 value = cell.getRichStringCellValue().getString();
@@ -402,7 +403,8 @@ public class ExcelUtils {
                 }
                 break;
             case Cell.CELL_TYPE_BOOLEAN:
-                value = cell.getBooleanCellValue();
+                Boolean booleanCellValue = cell.getBooleanCellValue();
+                value = booleanCellValue.toString();
                 break;
             case Cell.CELL_TYPE_BLANK:
                 value = "";

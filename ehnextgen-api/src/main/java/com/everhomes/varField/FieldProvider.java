@@ -27,6 +27,8 @@ public interface FieldProvider {
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName);
     ScopeField findScopeField(Integer namespaceId, Long communityId, Long fieldId);
 
+    List<FieldItem> listFieldItems(List<Long> fieldIds);
+
     void createScopeFieldGroup(ScopeFieldGroup scopeGroup);
     void updateScopeFieldGroup(ScopeFieldGroup scopeGroup);
     ScopeFieldGroup findScopeFieldGroup(Long id, Integer namespaceId, Long communityId);

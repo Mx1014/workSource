@@ -496,9 +496,11 @@ public class FieldServiceImpl implements FieldService {
         return String.valueOf(invoke);
     }
     private String setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
-        Class<?> clz = dto.getClass();
+        Class<?> clz = dto.getClass().getSuperclass();
         Object val = value;
         String type = clz.getDeclaredField(fieldName).getType().getSimpleName();
+        System.out.println(type);
+        System.out.println("==============");
         switch(type){
             case "BigDecimal":
                 val = new BigDecimal((String)value);
@@ -623,7 +625,9 @@ public class FieldServiceImpl implements FieldService {
             cmd2.setGroupPath(group.getGroupPath());
             List<FieldDTO> fields = listFields(cmd2);
             //获得根据cell顺序的fieldname
-            Row headRow = sheet.getRow(2);
+            Row headRow = sheet.getRow(1);
+            Cell cell1 = headRow.getCell(headRow.getFirstCellNum());
+            System.out.println(ExcelUtils.getCellValue(cell1));
             String[] headers = new String[headRow.getLastCellNum()-headRow.getFirstCellNum()+1];
             HashMap<Integer,String> orderedFieldNames = new HashMap<>();
             for(int j =headRow.getFirstCellNum(); j < headRow.getLastCellNum();j++) {
@@ -642,7 +646,8 @@ public class FieldServiceImpl implements FieldService {
                     }
                 }
                 Cell cell = headRow.getCell(j);
-                headers[j] = cell.getStringCellValue();
+                String cellValue = ExcelUtils.getCellValue(cell);
+                headers[j] = cellValue;
             }
 
 
@@ -660,7 +665,7 @@ public class FieldServiceImpl implements FieldService {
             }
 
             LOGGER.info("sheet total row num = {}, first row num = {}, last row num = {}",sheet.getPhysicalNumberOfRows(),sheet.getFirstRowNum(),sheet.getLastRowNum());
-            for(int j = 1; j <= sheet.getLastRowNum(); j ++){
+            for(int j = 2; j <= sheet.getLastRowNum(); j ++){
                 Row row = sheet.getRow(j);
                 Object object = null;
                 //每一行迭代，进行set
