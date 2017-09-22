@@ -514,6 +514,8 @@ public class NewsServiceImpl implements NewsService {
 		if (!StringUtils.isEmpty(keyword))
 			query.put("query_string",
 					JSONObject.parse("{\"query\":\"" + keyword + "\",\"fields\":[\"title\",\"content\"]}"));
+		else
+			query.put("match_all", JSONObject.parse("{}"));
 
 		// 设置条件
 		JSONArray must = json.getJSONObject("query").getJSONObject("filtered").getJSONObject("filter")
