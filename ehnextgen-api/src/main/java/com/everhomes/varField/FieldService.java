@@ -17,12 +17,6 @@ public interface FieldService {
     List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd);
 
 
-    void importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file);
-
-    void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
-
-    void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response);
-
     
 
 }
