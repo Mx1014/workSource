@@ -968,7 +968,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         SelectQuery<EhCustomerTrackingsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKINGS);
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID.eq(customerId));
         query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-
+        query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_UID.eq(UserContext.currentUserId()));
         List<CustomerTracking> result = new ArrayList<>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, CustomerTracking.class));
@@ -1030,7 +1030,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         SelectQuery<EhCustomerTrackingPlansRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKING_PLANS);
         query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CUSTOMER_ID.eq(customerId));
         query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CREATOR_UID.eq(UserContext.currentUserId()));
+        
         List<CustomerTrackingPlan> result = new ArrayList<CustomerTrackingPlan>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, CustomerTrackingPlan.class));
