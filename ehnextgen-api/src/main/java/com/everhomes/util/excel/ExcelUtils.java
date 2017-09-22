@@ -313,32 +313,36 @@ public class ExcelUtils {
         // 生成一个样式
         HSSFCellStyle style = workbook.createCellStyle();
         // 设置这些样式
-//        style.setFillForegroundColor(HSSFColor.PALE_BLUE.index);
+        style.setFillForegroundColor(HSSFColor.GREEN.index);
 //        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-//        style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-//        style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-//        style.setBorderRight(HSSFCellStyle.BORDER_THIN);
-//        style.setBorderTop(HSSFCellStyle.BORDER_THIN);
-//        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        style.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        style.setBorderTop(HSSFCellStyle.BORDER_THIN);
+        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
         // 生成一个字体
         HSSFFont font = workbook.createFont();
         font.setColor(HSSFColor.BLACK.index);
-        font.setFontHeightInPoints((short) 12);
-//        font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-        // 把字体应用到当前的样式
-        style.setFont(font);
+        font.setFontHeightInPoints((short) 16);
+        HSSFFont font2 = workbook.createFont();
+        font2.setColor(HSSFColor.BLACK.index);
+        font2.setFontHeightInPoints((short) 18);
+        font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 
         // 指定当单元格内容显示不下时自动换行
         style.setWrapText(true);
 
         // 产生表格标题行
         HSSFRow row = sheet.createRow(2);
+        // 把字体应用到当前的样式,标题为加粗的
+        style.setFont(font2);
         for (int i = 0; i < headers.length; i++) {
             HSSFCell cell = row.createCell((short) i);
             cell.setCellStyle(style);
             HSSFRichTextString text = new HSSFRichTextString(headers[i]);
             cell.setCellValue(text.toString());
         }
+        style.setFont(font);
         // 遍历集合数据，产生数据行
         if (result != null) {
             int index = 1;

@@ -2,14 +2,24 @@ package com.everhomes.varField;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.*;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,8 +32,17 @@ import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.bouncycastle.asn1.x509.Target.targetName;
 
 /**
  * Created by ying.xiong on 2017/8/3.
@@ -31,11 +50,18 @@ import java.util.stream.Collectors;
 @Component
 public class FieldServiceImpl implements FieldService {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(FieldServiceImpl.class);
-
+    private static ThreadLocal<Integer> sheetNum = new ThreadLocal<Integer>() {
+        @Override
+        protected Integer initialValue() {
+            return 0;
+        }
+    };
     @Autowired
     private FieldProvider fieldProvider;
     @Autowired
     private CustomerService customerService;
+    @Autowired
+    private SequenceProvider sequenceProvider;
     @Override
     public List<FieldDTO> listFields(ListFieldCommand cmd) {
         List<FieldDTO> dtos = null;

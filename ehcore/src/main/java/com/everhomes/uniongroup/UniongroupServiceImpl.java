@@ -482,9 +482,11 @@ public class UniongroupServiceImpl implements UniongroupService {
         if (uniongroupConfigures != null)
             this.uniongroupConfigureProvider.deleteUniongroupConfigres(uniongroupConfigures);
         UniongroupMemberDetail uniongroupMemberDetail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(namespaceId, detailId, UniongroupType.SALARYGROUP.getCode());
-        this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId));
-        //2.删除搜索引擎中的失效索引
-        this.uniongroupSearcher.deleteById(uniongroupMemberDetail.getId());
+        if(uniongroupMemberDetail != null){
+            this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId));
+            //2.删除搜索引擎中的失效索引
+            this.uniongroupSearcher.deleteById(uniongroupMemberDetail.getId());
+        }
     }
 
     @Override

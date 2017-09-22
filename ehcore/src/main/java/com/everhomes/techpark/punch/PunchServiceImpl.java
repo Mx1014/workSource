@@ -7102,7 +7102,7 @@ public class PunchServiceImpl implements PunchService {
 	private PunchLogDTO getPunchType(Long userId, Long enterpriseId, Date punchTime, java.sql.Date punchDate) {
 		PunchLogDTO result = new PunchLogDTO();
 		// 获取打卡规则->timerule
-		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, userId);
+ 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), enterpriseId, userId);
 		if (null == pr  )
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
@@ -7136,7 +7136,7 @@ public class PunchServiceImpl implements PunchService {
 		punCalendar.setTime(punchTime);
 		//把当天的时分秒转换成Long型
 		Long punchTimeLong = getTimeLong(punCalendar,punchDate);
-		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,enterpriseId, dateSF.get().format(punchTime),
+		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,enterpriseId, dateSF.get().format(punchDate),
 				ClockCode.SUCESS.getCode());
 		int PunchIntervalNo = 1;
 		if(ptr.getPunchTimesPerDay().equals((byte)2)){
@@ -7528,23 +7528,24 @@ public class PunchServiceImpl implements PunchService {
 			if(null!=log){
 				dto = ConvertHelper.convert(log, MonthDayStatusDTO.class);
 				dto.setPunchDate(log.getPunchDate().getTime());
-				if (null == log.getStatusList()) {
-					dto.setExceptionStatus(log.getStatus().equals(PunchStatus.NORMAL.getCode()) ?
-							ExceptionStatus.NORMAL.getCode() : ExceptionStatus.EXCEPTION.getCode());
-				} else {
-					String[] status = log.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
-					dto.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-					if (status == null) {
-						continue;
-					}
-					else {
-						for (String s1 : status) {
-							if (!s1.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
-								dto.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-							}
-						}
-					}
-				}
+				//异常状态用log的
+//				if (null == log.getStatusList()) {
+//					dto.setExceptionStatus(log.getStatus().equals(PunchStatus.NORMAL.getCode()) ?
+//							ExceptionStatus.NORMAL.getCode() : ExceptionStatus.EXCEPTION.getCode());
+//				} else {
+//					String[] status = log.getStatusList().split(PunchConstants.STATUS_SEPARATOR);
+//					dto.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+//					if (status == null) {
+//						continue;
+//					}
+//					else {
+//						for (String s1 : status) {
+//							if (!s1.equals(String.valueOf(PunchStatus.NORMAL.getCode()))) {
+//								dto.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//							}
+//						}
+//					}
+//				}
 			}else{
 				//当天没有打卡也么有计算规则
 				dto.setPunchDate(startCalendar.getTime().getTime());
