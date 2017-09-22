@@ -188,7 +188,6 @@ public class WXAuthController {// extends ControllerBase
         checkRedirectUserIdentifier(request, response, namespaceId, params);
 
         // 登录成功则跳转到原来访问的链接
-        LOGGER.info("Process weixin auth request, loginToken={}", loginToken);
         String sourceUrl = params.get(KEY_SOURCE_URL);
 
         //将参数拼接到链接中传给页面 add by yanjun 20170918

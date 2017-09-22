@@ -1336,8 +1336,7 @@ public class UserController extends ControllerBase {
 			//微信公众号的accessToken过期时间是7200秒，需要设置cookie小于7200。
 			//防止用户在coreserver处于登录状态而accessToken已过期，重新登录之后会刷新accessToken   add by yanjun 20170906
 			WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response, 7000);
-			//TODO
-			LOGGER.info("new token={}", tokenString);
+
 		}
 
 
