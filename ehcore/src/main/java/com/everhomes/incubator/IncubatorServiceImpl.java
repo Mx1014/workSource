@@ -2,6 +2,7 @@ package com.everhomes.incubator;
 
 
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.activity.ActivityServiceImpl;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
@@ -9,6 +10,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.incubator.*;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -19,6 +21,9 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -30,7 +35,7 @@ import java.util.List;
 
 @Component
 public class IncubatorServiceImpl implements IncubatorService {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(ActivityServiceImpl.class);
 	@Autowired
 	IncubatorProvider incubatorProvider;
 	@Autowired
@@ -104,6 +109,13 @@ public class IncubatorServiceImpl implements IncubatorService {
 
 	@Override
 	public IncubatorApplyDTO addIncubatorApply(AddIncubatorApplyCommand cmd) {
+
+		if(cmd.getNamespaceId() == null || cmd.getCommunityId() == null){
+			LOGGER.error("ERROR_INVALID_PARAMS");
+			throw RuntimeErrorException.errorWith(IncubatorServiceErrorCode.SCOPE, IncubatorServiceErrorCode.ERROR_INVALID_PARAMS,
+					"ERROR_INVALID_PARAMS");
+		}
+
 		IncubatorApply incubatorApply = ConvertHelper.convert(cmd, IncubatorApply.class);
 		User user = UserContext.current().getUser();
 		incubatorApply.setApplyUserId(user.getId());
