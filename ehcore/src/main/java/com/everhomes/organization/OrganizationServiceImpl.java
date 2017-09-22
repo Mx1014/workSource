@@ -12992,8 +12992,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         updateOrganizationEmployeeStatusCommand.setRemarks(cmd.getRemarks());
         updateOrganizationEmployeeStatus(updateOrganizationEmployeeStatusCommand);
         //离职时薪酬组相关的改动
-        this.uniongroupService.syncUniongroupAfterLeaveTheJob(cmd.getDetailId());
- 
+        try{
+            this.uniongroupService.syncUniongroupAfterLeaveTheJob(cmd.getDetailId());
+        }finally {
+            return;
+        }
     }
  
 
