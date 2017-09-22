@@ -89,4 +89,6 @@ public interface CustomerService {
 	void deleteCustomerTrackingPlan(DeleteCustomerTrackingPlanCommand cmd);
 	void createCustomerTrackingPlan(CreateCustomerTrackingPlanCommand cmd);
 	
+	List<CustomerEventDTO> listCustomerEvents(ListCustomerEventsCommand cmd);
+	
 }

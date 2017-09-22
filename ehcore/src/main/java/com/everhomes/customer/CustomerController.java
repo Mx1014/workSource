@@ -1085,6 +1085,19 @@ public class CustomerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /customer/listCustomerEvents</b>
+     * <p>列出客户事件</p>
+     */
+    @RequestMapping("listCustomerEvents")
+    @RestReturn(value = CustomerEventDTO.class, collection = true)
+    public RestResponse listCustomerEvents(@Valid ListCustomerEventsCommand cmd) {
+        RestResponse response = new RestResponse(customerService.listCustomerEvents(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 
 }

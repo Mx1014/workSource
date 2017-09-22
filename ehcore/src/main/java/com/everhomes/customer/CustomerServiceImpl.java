@@ -54,6 +54,7 @@ import com.everhomes.rest.customer.CustomerCertificateDTO;
 import com.everhomes.rest.customer.CustomerCommercialDTO;
 import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
 import com.everhomes.rest.customer.CustomerErrorCode;
+import com.everhomes.rest.customer.CustomerEventDTO;
 import com.everhomes.rest.customer.CustomerIndustryStatisticsDTO;
 import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
 import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsDTO;
@@ -101,6 +102,7 @@ import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
 import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
 import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
 import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
+import com.everhomes.rest.customer.ListCustomerEventsCommand;
 import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
 import com.everhomes.rest.customer.ListCustomerPatentsCommand;
 import com.everhomes.rest.customer.ListCustomerTalentsCommand;
@@ -1547,5 +1549,10 @@ public class CustomerServiceImpl implements CustomerService {
 			plan.setNotifyTime(new Timestamp(cmd.getNotifyTime()));
 		}
         enterpriseCustomerProvider.createCustomerTrackingPlan(plan);
+	}
+
+	@Override
+	public List<CustomerEventDTO> listCustomerEvents(ListCustomerEventsCommand cmd) {
+		return null;
 	}
 }
