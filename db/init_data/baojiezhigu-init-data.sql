@@ -1060,3 +1060,10 @@ INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999973','','0','应用','launchpaditem','1',NULL,NULL,'5');
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999973','','0','商家','shop','1',NULL,NULL,'6');
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999973','', '0', '快讯', 'news', '1',NULL,NULL,'6');
+
+-- added by wh 删除信息发布-短信推送
+
+DELETE FROM eh_web_menu_scopes WHERE `menu_id`=12200 AND  `owner_id` =  999973 	 ;
+
+-- added by wh 删掉： 保集e智谷 物业报修-设置-执行人员设置 子菜单
+DELETE FROM eh_web_menu_scopes WHERE `menu_id`=20160 AND  `owner_id` =  999973 	 ;

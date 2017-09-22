@@ -42,21 +42,21 @@ INSERT INTO `eh_organization_community_requests` (id, community_id, member_type,
 INSERT INTO `eh_organization_communities` (`organization_id`, `community_id`) 
 	VALUES (1037001,240111044332059932);
 
-INSERT INTO `eh_organization_members` (id, `namespace_id`, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `group_type`, `group_path`, `detail_id`) 
+INSERT INTO `eh_organization_members` (id, `namespace_id`, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `group_type`, `group_path`, `detail_id`) 
 	VALUES (2169591, 999967, 1037001,'USER',316755,'manager','张守柏',0,'13538020878',3, 'ENTERPRISE', '/1037001', 23501);
 INSERT INTO `eh_organization_member_details`(`id`, `organization_id`, `target_type`, `target_id`, `contact_name`, `contact_type`, `contact_token`, `check_in_time`, `namespace_id`)
 	VALUES (23501, 1037001, 'USER', 316755, '张守柏', 0, '13538020878', UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_user_organizations` (`id`, `user_id`, `organization_id`, `group_path`, `group_type`, `status`, `namespace_id`, `create_time`, `visible_flag`, `update_time`)
 	VALUES (24301, 316755, 1037001, '/1037001', 'ENTERPRISE', 3, @namespace_id, UTC_TIMESTAMP(), 0, UTC_TIMESTAMP());
 
-INSERT INTO `eh_organization_members` (id, `namespace_id`, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `group_type`, `group_path`, `detail_id`) 
+INSERT INTO `eh_organization_members` (id, `namespace_id`, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `group_type`, `group_path`, `detail_id`) 
 	VALUES (2169592, 999967,1037001,'USER',316756,'manager','罗伟祥',0,'18998998669',3, 'ENTERPRISE', '/1037001', 23502);
 INSERT INTO `eh_organization_member_details`(`id`, `organization_id`, `target_type`, `target_id`, `contact_name`, `contact_type`, `contact_token`, `check_in_time`, `namespace_id`)
 	VALUES (23502, 1037001, 'USER', 316756, '罗伟祥', 0, '18998998669', UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_user_organizations` (`id`, `user_id`, `organization_id`, `group_path`, `group_type`, `status`, `namespace_id`, `create_time`, `visible_flag`, `update_time`)
 	VALUES (24302, 316756, 1037001, '/1037001', 'ENTERPRISE', 3, @namespace_id, UTC_TIMESTAMP(), 0, UTC_TIMESTAMP());
 	
-INSERT INTO `eh_organization_members` (id, `namespace_id`, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `group_type`, `group_path`, `detail_id`) 
+INSERT INTO `eh_organization_members` (id, `namespace_id`, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `group_type`, `group_path`, `detail_id`) 
 	VALUES (2169593, 999967,1037001,'USER',316757,'manager','冯小勇',0,'13560749929',3, 'ENTERPRISE', '/1037001', 23503);
 INSERT INTO `eh_organization_member_details`(`id`, `organization_id`, `target_type`, `target_id`, `contact_name`, `contact_type`, `contact_token`, `check_in_time`, `namespace_id`)
 	VALUES (23503, 1037001, 'USER', 316757, '冯小勇', 0, '13560749929', UTC_TIMESTAMP(), @namespace_id);
@@ -888,7 +888,7 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issui
 -- 服务联盟
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES (201228, 'community', 240111044332059932, '0', '服务联盟', '服务联盟', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
-SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);    
+SET @sa_id = (SELECT MAX(id) FROM `eh_service_alliances`);    
 INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`) 
     VALUES ((@sa_id := @sa_id + 1), '0', 'community', 240111044332059932, '服务联盟', '服务联盟', 201228, '', NULL, '企业服务联盟旨在聚集优质服务资源，为园区企业提供专业、高效、有保障的服务。', 'cs://1/image/aW1hZ2UvTVRvMVpEVTFPVGs1Tm1OaU1tVTFNek0zWXpkak1EZG1aVFUyWWpJMU5EUTFOUQ', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 	
@@ -1102,3 +1102,10 @@ INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_ur
 
 
 SET FOREIGN_KEY_CHECKS = 1;	
+
+
+-- added by wh 【大沙河建投】后台招租管理，缺少一个“项目介绍”的菜单
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES ((@menu_scope_id := @menu_scope_id + 1),40800,NULL,'EhNamespaces',999967,2);
