@@ -12,6 +12,10 @@ import java.math.BigDecimal;
  * <li>amountOwed:待缴金额</li>
  * <li>addressName:地址</li>
  * <li>payStatus:清账状态</li>
+ * <li>amountReceivable:应缴金额</li>
+ * <li>dateStrBegin:计费开始时间</li>
+ * <li>dateStrEnd:计费结束时间</li>
+ * <li>dateStr:账期</li>
  *</ul>
  */
 public class ShowBillDetailForClientDTO {
@@ -20,6 +24,9 @@ public class ShowBillDetailForClientDTO {
     private String addressName;
     private String payStatus;
     private BigDecimal amountReceivable;
+    private String dateStrBegin;
+    private String dateStrEnd;
+    private String dateStr;
 
     @Override
     public String toString() {
@@ -68,5 +75,29 @@ public class ShowBillDetailForClientDTO {
 
     public ShowBillDetailForClientDTO() {
 
+    }
+
+    public String getDateStrBegin() {
+        return dateStrBegin;
+    }
+
+    public void setDateStrBegin(String dateStrBegin) {
+        this.dateStrBegin = dateStrBegin;
+    }
+
+    public String getDateStrEnd() {
+        return dateStrEnd;
+    }
+
+    public void setDateStrEnd(String dateStrEnd) {
+        this.dateStrEnd = dateStrEnd;
+    }
+
+    public String getDateStr() {
+        return dateStr;
+    }
+
+    public void setDateStr(String dateStr) {
+        this.dateStr = dateStr;
     }
 }
