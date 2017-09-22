@@ -3,6 +3,7 @@ CREATE TABLE `eh_incubator_applies` (
 `id`  bigint(22) NOT NULL ,
 `uuid`  varchar(128) NOT NULL DEFAULT '' ,
 `namespace_id`  int(11) NULL ,
+`community_id`  bigint(22) NULL,
 `apply_user_id` bigint(22)  NOT NULL,
 `team_name`  varchar(255) NULL ,
 `project_type`  varchar(255) NULL ,
