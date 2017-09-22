@@ -32,7 +32,6 @@ import com.everhomes.openapi.ZJGKOpenServiceImpl;
 import com.everhomes.organization.ExecuteImportTaskCallback;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -222,7 +221,10 @@ public class CustomerServiceImpl implements CustomerService {
         }
         customer.setCreatorUid(UserContext.currentUserId());
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
-
+        
+        //企业客户新增成功,保存客户事件
+        saveCustomerEvent( 1  ,customer ,null);
+        
         OrganizationDTO organizationDTO = createOrganization(customer);
         customer.setOrganizationId(organizationDTO.getId());
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
@@ -277,6 +279,9 @@ public class CustomerServiceImpl implements CustomerService {
         updateCustomer.setStatus(CommonStatus.ACTIVE.getCode());
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         enterpriseCustomerSearcher.feedDoc(customer);
+        
+        //保存客户事件
+        saveCustomerEvent( 3  ,updateCustomer ,customer);
 
         if(customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             UpdateEnterpriseCommand command = new UpdateEnterpriseCommand();
@@ -316,6 +321,9 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setStatus(CommonStatus.INACTIVE.getCode());
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
+        
+        //企业客户新增成功,保存客户事件
+        saveCustomerEvent( 2  ,customer ,null);
 
         if(customer.getOrganizationId() != null) {
             DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
@@ -1552,8 +1560,29 @@ public class CustomerServiceImpl implements CustomerService {
         enterpriseCustomerProvider.createCustomerTrackingPlan(plan);
 	}
 
+	private void saveCustomerEvent(int i,  EnterpriseCustomer customer, EnterpriseCustomer exist) {
+		enterpriseCustomerProvider.saveCustomerEvent(i,customer,exist);
+	}
+	
 	@Override
 	public List<CustomerEventDTO> listCustomerEvents(ListCustomerEventsCommand cmd) {
-		return null;
+		List<CustomerEvent> events = enterpriseCustomerProvider.listCustomerEvents(cmd.getCustomerId());
+        if(events != null && events.size() > 0) {
+            return events.stream().map(event -> {
+                return convertCustomerEventDTO(event);
+            }).collect(Collectors.toList());
+        }
+        return null;
+	}
+
+	private CustomerEventDTO convertCustomerEventDTO(CustomerEvent event) {
+		CustomerEventDTO dto = ConvertHelper.convert(event, CustomerEventDTO.class);
+        if(dto.getCreatorUid() != null) {
+        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
+        	if(null != detail && null != detail.getContactName()){
+        		dto.setCreatorName(detail.getContactName());
+        	}        	
+        }
+        return dto;
 	}
 }

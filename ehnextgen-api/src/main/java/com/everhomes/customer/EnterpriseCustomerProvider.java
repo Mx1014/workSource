@@ -89,4 +89,8 @@ public interface EnterpriseCustomerProvider {
 	void deleteCustomerTrackingPlan(CustomerTrackingPlan plan);
 	void updateCustomerTrackingPlan(CustomerTrackingPlan plan);
 	List<CustomerTrackingPlan> listCustomerTrackingPlans(Long customerId);
+	
+	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist);
+	List<CustomerEvent> listCustomerEvents(Long customerId);
+
 }

@@ -19,15 +19,19 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
+import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
+import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCustomerApplyProjectsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCertificatesDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCommercialsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerEconomicIndicatorsDao;
+import com.everhomes.server.schema.tables.daos.EhCustomerEventsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerInvestmentsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerPatentsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTalentsDao;
@@ -39,6 +43,7 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
 import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicators;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEvents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
 import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
@@ -50,6 +55,7 @@ import com.everhomes.server.schema.tables.records.EhCustomerApplyProjectsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerCertificatesRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerCommercialsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerEconomicIndicatorsRecord;
+import com.everhomes.server.schema.tables.records.EhCustomerEventsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerInvestmentsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerPatentsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTalentsRecord;
@@ -76,6 +82,9 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
     @Autowired
     private SequenceProvider sequenceProvider;
+    
+    @Autowired
+	private LocaleTemplateService localeTemplateService;
 
     @Override
     public void createEnterpriseCustomer(EnterpriseCustomer customer) {
@@ -93,8 +102,6 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 //        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
         dao.insert(customer);
-        //企业客户新增成功,保存客户事件
-        saveCustomerEvent( 1  ,customer);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseCustomers.class, null);
     }
 
@@ -1031,34 +1038,56 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         });
         return result;
 	}
-	
-	private void saveCustomerEvent(int i,  EnterpriseCustomer customer) {
+
+
+	@Override
+	public void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEvents.class));
+		CustomerEvent event = new CustomerEvent(); 
+		event.setId(id);
+		event.setNamespaceId(UserContext.getCurrentNamespaceId());
+		event.setCustomerType(CustomerType.ENTERPRISE.getCode());
+		event.setCustomerId(customer.getId());
+		event.setCustomerName(customer.getName());
+		event.setContactName(customer.getContactName());
+		String content = null;
 		switch(i){
-			case 1: 
-				saveCustomerEventWithInsert(customer);
-				break;
-			case 2:
-				saveCustomerEventWithDelete(customer);
-				break;
-			case 3:
-				saveCustomerEventWithUpdate(customer);
-				break;
-			default:break;
+		case 1 : 
+			content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+			break;
+		case 2 :
+			content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+			break;
+		case 3 :
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("oldData", StringHelper.toJsonString(exist == null ? "" : exist));
+			map.put("newData", StringHelper.toJsonString(customer));
+			content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.UPDATE , UserContext.current().getUser().getLocale(), map, "");
+			break;
+		default :break;
 		}
+		 event.setContent(content);
+		event.setCreatorUid(UserContext.currentUserId());
+		event.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEvents.class, id));
+        EhCustomerEventsDao dao = new EhCustomerEventsDao(context.configuration());
+        LOGGER.info("saveCustomerEventWithInsert: " + event);
+        dao.insert(event);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEvents.class, null);
 	}
 
 
-	private void saveCustomerEventWithUpdate(EnterpriseCustomer customer) {
-		
+	@Override
+	public List<CustomerEvent> listCustomerEvents(Long customerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerEventsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_EVENTS);
+        query.addConditions(Tables.EH_CUSTOMER_EVENTS.CUSTOMER_ID.eq(customerId));
+        List<CustomerEvent> result = new ArrayList<CustomerEvent>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerEvent.class));
+            return null;
+        });
+        return result;
 	}
-
-
-	private void saveCustomerEventWithDelete(EnterpriseCustomer customer) {
-		
-	}
-
-
-	private void saveCustomerEventWithInsert(EnterpriseCustomer customer) {
-		
-	}
+	
 }

@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  *     <li>namespaceId: 域空间id</li>
  *     <li>customerType: 客户类型 参考{@link com.everhomes.rest.customer.CustomerType}</li>
  *     <li>customerId: 客户id</li>
- *     <li>creatorId: 创建人uid</li>
+ *     <li>creatorUid: 创建人uid</li>
  *     <li>creatorName: 创建人真实姓名</li>
  *     <li>createTime: 创建时间</li>
  *     <li>content: 内容</li>
@@ -21,7 +21,7 @@ public class CustomerEventDTO {
     private Integer namespaceId;
     private Byte customerType;
     private Long customerId;
-    private Long creatorId;
+    private Long creatorUid;
     private String creatorName;
     private Timestamp createTime;
     private String content;
@@ -59,12 +59,13 @@ public class CustomerEventDTO {
 		this.customerId = customerId;
 	}
 
-	public Long getCreatorId() {
-		return creatorId;
+	
+	public Long getCreatorUid() {
+		return creatorUid;
 	}
 
-	public void setCreatorId(Long creatorId) {
-		this.creatorId = creatorId;
+	public void setCreatorUid(Long creatorUid) {
+		this.creatorUid = creatorUid;
 	}
 
 	public String getCreatorName() {

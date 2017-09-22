@@ -6,5 +6,10 @@ public class CustomerTrackingTemplateCode {
     public static final int MESSAGE = 2; //短信
     public static final int EMAIL = 3;    //邮件
     public static final int ELSE = 4;   //其他
-
+    
+    
+    public static final int ADD = 10;        //新增
+    public static final int DELETE = 20; 	//删除
+    public static final int UPDATE = 30;    //更改
+    
 }
