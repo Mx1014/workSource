@@ -531,7 +531,7 @@ public class FieldServiceImpl implements FieldService {
     public void importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
         Workbook workbook;
         try {
-            workbook = ExcelUtils.getWorkbook(file.getInputStream(), file.getName());
+            workbook = ExcelUtils.getWorkbook(file.getInputStream(), file.getOriginalFilename());
         } catch (Exception e) {
             LOGGER.error("import excel for import failed for unable to get work book, file name is = {}",file.getName());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"file may not be an invalid excel file");
@@ -541,7 +541,7 @@ public class FieldServiceImpl implements FieldService {
         List<FieldGroupDTO> groups = listFieldGroups(cmd1);
         int numberOfSheets = workbook.getNumberOfSheets();
         for(int i = 0; i < numberOfSheets; i ++){
-            Sheet sheet = workbook.getSheetAt(numberOfSheets);
+            Sheet sheet = workbook.getSheetAt(i);
             //通过sheet名字进行匹配，获得此sheet对应的group
             String sheetName = sheet.getSheetName();
             FieldGroupDTO group = new FieldGroupDTO();
@@ -595,7 +595,7 @@ public class FieldServiceImpl implements FieldService {
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"import failed,class not found exception, group name is = {}",group.getGroupDisplayName());
             }
 
-
+            LOGGER.info("sheet total row num = {}, first row num = {}, last row num = {}",sheet.getPhysicalNumberOfRows(),sheet.getFirstRowNum(),sheet.getLastRowNum());
             for(int j = 3; j < sheet.getLastRowNum(); j ++){
                 Row row = sheet.getRow(j);
                 Object object = null;
