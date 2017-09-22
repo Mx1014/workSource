@@ -78,11 +78,11 @@ public class UpdateArchivesEmployeeCommand {
 
     private String enName;
 
-    private Byte gender;
+    private String gender;
 
     private Date birthday;
 
-    private Byte maritalFlag;
+    private String maritalFlag;
 
     private Date procreative;
 
@@ -124,9 +124,9 @@ public class UpdateArchivesEmployeeCommand {
 
     private Date checkInTime;
 
-    private Byte employeeType;
+    private String employeeType;
 
-    private Byte employeeStatus;
+    private String employeeStatus;
 
     private Date employmentTime;
 
@@ -222,11 +222,11 @@ public class UpdateArchivesEmployeeCommand {
         this.enName = enName;
     }
 
-    public Byte getGender() {
+    public String getGender() {
         return gender;
     }
 
-    public void setGender(Byte gender) {
+    public void setGender(String gender) {
         this.gender = gender;
     }
 
@@ -238,11 +238,11 @@ public class UpdateArchivesEmployeeCommand {
         this.birthday = ArchivesUtil.parseDate(birthday);
     }
 
-    public Byte getMaritalFlag() {
+    public String getMaritalFlag() {
         return maritalFlag;
     }
 
-    public void setMaritalFlag(Byte maritalFlag) {
+    public void setMaritalFlag(String maritalFlag) {
         this.maritalFlag = maritalFlag;
     }
 
@@ -406,19 +406,19 @@ public class UpdateArchivesEmployeeCommand {
         this.checkInTime = ArchivesUtil.parseDate(checkInTime);
     }
 
-    public Byte getEmployeeType() {
+    public String getEmployeeType() {
         return employeeType;
     }
 
-    public void setEmployeeType(Byte employeeType) {
+    public void setEmployeeType(String employeeType) {
         this.employeeType = employeeType;
     }
 
-    public Byte getEmployeeStatus() {
+    public String getEmployeeStatus() {
         return employeeStatus;
     }
 
-    public void setEmployeeStatus(Byte employeeStatus) {
+    public void setEmployeeStatus(String employeeStatus) {
         this.employeeStatus = employeeStatus;
     }
 
