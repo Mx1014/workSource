@@ -704,8 +704,23 @@ public class ActivityServiceImpl implements ActivityService {
 					"no activity.");
 		}
 
-
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
+
+		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+		preOrderCommand.setOrderId(roster.getOrderNo());
+		Long amount = payService.changePayAmount(activity.getChargePrice());
+		preOrderCommand.setAmount(amount);
+
+		preOrderCommand.setPayerId(roster.getUid());
+		preOrderCommand.setNamespaceId(activity.getNamespaceId());
+
+		GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
+		timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
+		Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
+
+		preOrderCommand.setExpiration(expiredTime);
+
 
 		preOrderCommand.setClientAppName(cmd.getClientAppName());
 
@@ -722,27 +737,6 @@ public class ActivityServiceImpl implements ActivityService {
 			User user = UserContext.current().getUser();
 			paymentParamsDTO.setAcct(user.getNamespaceUserToken());
 		}
-
-		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
-		preOrderCommand.setOrderId(roster.getOrderNo());
-		Long amount = payService.changePayAmount(activity.getChargePrice());
-		preOrderCommand.setAmount(amount);
-
-		preOrderCommand.setPayerId(roster.getUid());
-		preOrderCommand.setNamespaceId(activity.getNamespaceId());
-
-		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
-				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_FEE),
-				UserContext.current().getUser().getLocale(),
-				"activity roster pay");
-		preOrderCommand.setSummary(temple);
-
-		GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
-		timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
-		Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
-
-		preOrderCommand.setExpiration(expiredTime);
 
 		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
 

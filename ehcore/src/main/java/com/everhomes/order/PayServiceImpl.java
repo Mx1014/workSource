@@ -75,6 +75,177 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         }
         restClient = new RestClient(payHomeUrl, paymentAccount.getAppKey(), paymentAccount.getSecretKey());
     }
+
+    /**
+     *
+     * @param namespaceId 域空间
+     * @param clientAppName 客户端realm值
+     * @param orderType 订单类型 参考 com.everhomes.rest.order.OrderType
+     * @param orderId 订单Id
+     * @param payerId 卖家用户ID
+     * @param amount 支付金额，BigDecimal转换本类提供了方法changePayAmount
+     * @return
+     */
+    @Override
+    public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount) {
+        return  createAppPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount , null, null, null);
+    }
+
+    /**
+     *
+     * @param namespaceId 域空间
+     * @param clientAppName 客户端realm值
+     * @param orderType 订单类型 参考 com.everhomes.rest.order.OrderType
+     * @param orderId 订单Id
+     * @param payerId 卖家用户ID
+     * @param amount 支付金额，BigDecimal转换本类提供了方法changePayAmount
+     * @param expiration 过期时间
+     * @return
+     */
+    @Override
+    public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, Long expiration) {
+        return  createAppPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount , null, null, expiration);
+    }
+
+    /**
+     *
+     * @param namespaceId 域空间
+     * @param clientAppName 客户端realm值
+     * @param orderType 订单类型 参考 com.everhomes.rest.order.OrderType
+     * @param orderId 订单Id
+     * @param payerId 卖家用户ID
+     * @param amount 支付金额，BigDecimal转换本类提供了方法changePayAmount
+     * @param resourceType 订单资源类型
+     * @param resourceId  订单资源类型ID
+     * @return
+     */
+    @Override
+    public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId) {
+        return  createAppPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount , resourceType, resourceId, null);
+    }
+
+    /**
+     *
+     * @param namespaceId 域空间
+     * @param clientAppName 客户端realm值
+     * @param orderType 订单类型 参考 com.everhomes.rest.order.OrderType
+     * @param orderId 订单Id
+     * @param payerId 卖家用户ID
+     * @param amount 支付金额，BigDecimal转换本类提供了方法changePayAmount
+     * @param resourceType 订单资源类型
+     * @param resourceId  订单资源类型ID
+     * @param expiration 过期时间
+     * @return
+     */
+    @Override
+    public PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId, Long expiration) {
+
+
+        //app支付
+        PreOrderCommand cmd = new PreOrderCommand();
+        cmd.setClientAppName(clientAppName);
+        cmd.setOrderType(orderType);
+        cmd.setOrderId(orderId);
+        cmd.setPayerId(payerId);
+        cmd.setAmount(amount);
+        cmd.setNamespaceId(namespaceId);
+        cmd.setResourceType(resourceType);
+        cmd.setResourceId(resourceId);
+        cmd.setExpiration(expiration);
+
+        return  createPreOrder(cmd);
+    }
+
+    /**
+     *
+     * @param namespaceId 域空间
+     * @param clientAppName 客户端realm值
+     * @param orderType 订单类型 参考 com.everhomes.rest.order.OrderType
+     * @param orderId 订单Id
+     * @param payerId 卖家用户ID
+     * @param amount  支付金额，BigDecimal转换本类提供了方法changePayAmount
+     * @param openid 微信用户的openId
+     * @param paramsDTO 微信支付的参数
+     * @return
+     */
+    @Override
+    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO) {
+        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, null, null, null);
+    }
+
+    /**
+     *
+     * @param namespaceId 域空间
+     * @param clientAppName 客户端realm值
+     * @param orderType 订单类型 参考 com.everhomes.rest.order.OrderType
+     * @param orderId 订单Id
+     * @param payerId 卖家用户ID
+     * @param amount  支付金额，BigDecimal转换本类提供了方法changePayAmount
+     * @param openid 微信用户的openId
+     * @param paramsDTO 微信支付的参数
+     * @param expiration 过期时间
+     * @return
+     */
+    @Override
+    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, Long expiration) {
+        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, null, null, expiration);
+    }
+
+    /**
+     *
+     * @param namespaceId 域空间
+     * @param clientAppName 客户端realm值
+     * @param orderType 订单类型 参考 com.everhomes.rest.order.OrderType
+     * @param orderId 订单Id
+     * @param payerId 卖家用户ID
+     * @param amount  支付金额，BigDecimal转换本类提供了方法changePayAmount
+     * @param openid 微信用户的openId
+     * @param paramsDTO 微信支付的参数
+     * @param resourceType  订单资源类型
+     * @param resourceId 订单资源类型ID
+     * @return
+     */
+    @Override
+    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount,  String openid, PaymentParamsDTO paramsDTO, String resourceType, Long resourceId) {
+        return  createWxJSPreOrder(namespaceId, clientAppName, orderType, orderId, payerId, amount, openid, paramsDTO, resourceType, resourceId, null);
+    }
+
+    /**
+     *
+     * @param namespaceId 域空间
+     * @param clientAppName 客户端realm值
+     * @param orderType 订单类型 参考 com.everhomes.rest.order.OrderType
+     * @param orderId 订单Id
+     * @param payerId 卖家用户ID
+     * @param amount  支付金额，BigDecimal转换本类提供了方法changePayAmount
+     * @param openid 微信用户的openId
+     * @param paramsDTO 微信支付的参数
+     * @param resourceType  订单资源类型
+     * @param resourceId 订单资源类型ID
+     * @param expiration 过期时间
+     * @return
+     */
+    @Override
+    public PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount,  String openid, PaymentParamsDTO paramsDTO, String resourceType, Long resourceId, Long expiration) {
+
+        //app支付
+        PreOrderCommand cmd = new PreOrderCommand();
+        cmd.setClientAppName(clientAppName);
+        cmd.setOrderType(orderType);
+        cmd.setOrderId(orderId);
+        cmd.setPayerId(payerId);
+        cmd.setAmount(amount);
+        cmd.setNamespaceId(namespaceId);
+        cmd.setResourceType(resourceType);
+        cmd.setResourceId(resourceId);
+        cmd.setExpiration(expiration);
+        cmd.setOpenid(openid);
+        cmd.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
+        cmd.setPaymentParams(paramsDTO);
+
+        return  createPreOrder(cmd);
+    }
+
     /**
      * 1、检查是否已经下单
      * 2、检查买方是否有会员，无则创建
