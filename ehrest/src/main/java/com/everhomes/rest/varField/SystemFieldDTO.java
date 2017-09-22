@@ -24,6 +24,15 @@ public class SystemFieldDTO {
     private String groupPath;
     private Byte mandatoryFlag;
     private Integer defaultOrder;
+    private String fieldParam;
+
+    public String getFieldParam() {
+        return fieldParam;
+    }
+
+    public void setFieldParam(String fieldParam) {
+        this.fieldParam = fieldParam;
+    }
 
     public Integer getDefaultOrder() {
         return defaultOrder;
