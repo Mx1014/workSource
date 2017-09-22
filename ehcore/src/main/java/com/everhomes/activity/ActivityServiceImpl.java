@@ -1595,7 +1595,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 		//支付时是不同的版本，此处也要按不同的版本做处理，当前有版本1、2，默认是老版本1 edit by yanjun 20170919
 		if(ActivityRosterPayVersionFlag.fromCode(roster.getPayVersion()) == ActivityRosterPayVersionFlag.V1){
-			refoundOrderNo = refundV1(activity, roster, userId, refoundOrderNo);
+			refundV1(activity, roster, userId, refoundOrderNo);
 		}else{
 			refundV2(activity, roster, userId, refoundOrderNo);
 		}
@@ -1610,7 +1610,7 @@ public class ActivityServiceImpl implements ActivityService {
 		LOGGER.debug("Refund from vendor, userId={}, activityId={}, elapse={}", userId, activity.getId(), (endTime - startTime));
 	}
 
-	private Long refundV1(Activity activity, ActivityRoster roster, Long userId, Long refoundOrderNo){
+	private void refundV1(Activity activity, ActivityRoster roster, Long userId, Long refoundOrderNo){
 		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
 		String refoundApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
 		String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
@@ -1649,8 +1649,6 @@ public class ActivityServiceImpl implements ActivityService {
 					RentalServiceErrorCode.ERROR_REFUND_ERROR,
 					"bill  refound error");
 		}
-
-		return  refoundOrderNo;
 
 	}
 
