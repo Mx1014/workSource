@@ -254,6 +254,9 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	@Autowired
 	private RosterPayTimeoutService rosterPayTimeoutService;
+
+	@Autowired
+	private PayService payService;
 	
 	
     @PostConstruct
