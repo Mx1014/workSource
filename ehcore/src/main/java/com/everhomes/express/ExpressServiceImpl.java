@@ -2,6 +2,7 @@
 package com.everhomes.express;
 
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -52,6 +55,7 @@ import com.everhomes.rest.express.DeleteExpressHotlineCommand;
 import com.everhomes.rest.express.DeleteExpressUserCommand;
 import com.everhomes.rest.express.ExpressActionEnum;
 import com.everhomes.rest.express.ExpressAddressDTO;
+import com.everhomes.rest.express.ExpressClientPayType;
 import com.everhomes.rest.express.ExpressCompanyDTO;
 import com.everhomes.rest.express.ExpressHotlineDTO;
 import com.everhomes.rest.express.ExpressInvoiceFlagType;
@@ -119,11 +123,14 @@ import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProfile;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 
 @Component
@@ -185,6 +192,12 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	@Autowired
     private ConfigurationProvider configProvider;
+	
+	@Autowired
+    private UserActivityProvider userProvider;
+	
+	@Autowired
+    private AppProvider appProvider;
 	
 	@Override
 	public ListServiceAddressResponse listServiceAddress(ListServiceAddressCommand cmd) {
@@ -515,6 +528,7 @@ public class ExpressServiceImpl implements ExpressService {
 		UserContext.current().setUser(new User(1L));
 		Long orderId = Long.valueOf(cmd.getOrderNo());
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + orderId).enter(() -> {
+			//为什么用id，我也不知道。参考下单用的id
 			ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(orderId);
 			if (expressOrder == null) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists order, orderId="+orderId);
@@ -1272,36 +1286,66 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public Map<String,String> prePayExpressOrder(PrePayExpressOrderCommand cmd) {
-		Map<String,Map<String,Object>> params = generatePrePayExpressOrderParams(cmd);
+		ExpressClientPayType clientPayType = ExpressClientPayType.fromCode(cmd.getClientPayType());
+		Map<String,Map<String,String>> params = generatePrePayExpressOrderParams(cmd, clientPayType);
 		String url = configProvider.getValue(ExpressServiceErrorCode.PAYSERVER_URL, "http://pay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/save_payInfo_record");
+		//公众号支付
+		if(clientPayType == ExpressClientPayType.OFFICIAL_ACCOUNTS){
+			url = configProvider.getValue(ExpressServiceErrorCode.OFFICIAL_ACCOUNTS_PAYSERVER_URL, "http://pay.zuolin.com/EDS_PAY/rest/pay_common/payInfo_record/createWechatJsPayOrder");
+		}
+		LOGGER.info("payserver url = {}", url);
 		String result = Utils.post(url, JSONObject.parseObject(StringHelper.toJsonString(params)),null,StandardCharsets.UTF_8);
+		if(result == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "prePayFailed, payresponse = "+result);
+		}
 		PayResponse<Map<String,String>> payresponse = JSONObject.parseObject(result, new TypeReference<PayResponse<Map<String,String>>>(){});
-		if(payresponse.getSuccess()){
-			return payresponse.getData();
+		if(clientPayType == ExpressClientPayType.APP || clientPayType == null){
+			if(payresponse.getSuccess()){
+				return payresponse.getData();
+			}
+		}else if(clientPayType == ExpressClientPayType.OFFICIAL_ACCOUNTS){
+			if(payresponse.getResult()){
+				return payresponse.getBody();
+			}
 		}
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "prePayFailed, payresponse = "+result);
 	}
 
-	private Map<String,Map<String,Object>> generatePrePayExpressOrderParams(PrePayExpressOrderCommand cmd) {
+	private Map<String,Map<String,String>> generatePrePayExpressOrderParams(PrePayExpressOrderCommand cmd,ExpressClientPayType clientPayType) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressOrder order = expressOrderProvider.findExpressOrderById(cmd.getId());
 		if(order == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknown order id = "+cmd.getId());
 		}
 		CommonOrderDTO dto = payExpressOrder(ConvertHelper.convert(cmd, PayExpressOrderCommand.class));
-		Map<String,Map<String,Object>> bodyparams = new HashMap<String,Map<String,Object>>();
-		Map<String,Object> params = new HashMap<String,Object>();
+		Map<String,Map<String,String>> bodyparams = new HashMap<String,Map<String,String>>();
+		Map<String,String> params = new HashMap<String,String>();
 		params.put("realm","Web_Guomao");
 		params.put("orderType",dto.getOrderType());
 		params.put("onlinePayStyleNo","wechat");
 		params.put("orderNo",dto.getOrderNo());
-		params.put("orderAmount",dto.getTotalFee().floatValue());
+		params.put("orderAmount",dto.getTotalFee().floatValue()+"");
 		params.put("subject",dto.getSubject());
 		params.put("body",dto.getBody());
 		params.put("appKey",dto.getAppKey());
-		params.put("timestamp",dto.getTimestamp());
-		params.put("randomNum",dto.getRandomNum());
-		params.put("signature",dto.getSignature());
+		params.put("timestamp",dto.getTimestamp()+"");
+		params.put("randomNum",dto.getRandomNum()+"");
+		if(clientPayType == ExpressClientPayType.OFFICIAL_ACCOUNTS){
+			//这里获取用户的微信的openid，在国贸认证的过程中，存在user_profile中的，参考 ExpressThirdCallController.authReq()
+			UserProfile userProfile = userProvider.findUserProfileBySpecialKey(UserContext.current().getUser().getId(), ExpressServiceErrorCode.USER_PROFILE_KEY);
+			if(userProfile == null){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not find user openId");
+			}
+			params.put("userId", userProfile.getItemValue());
+			params.put("realm", "Wechat_Public_Guomao");
+			String appKey = configurationProvider.getValue("pay.appKey", "7bbb5727-9d37-443a-a080-55bbf37dc8e1");
+			params.put("appKey",appKey);
+			App app = appProvider.findAppByKey(appKey);
+			String signature = SignatureHelper.computeSignature(params, app.getSecretKey());
+			params.put("signature",URLEncoder.encode(signature));
+		}else{
+			params.put("signature",dto.getSignature());
+		}
 		bodyparams.put("body", params);
 		LOGGER.info("request payserver params = {}",bodyparams);
 		return bodyparams;

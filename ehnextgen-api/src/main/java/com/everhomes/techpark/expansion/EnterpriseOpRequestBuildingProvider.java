@@ -15,7 +15,6 @@ public interface EnterpriseOpRequestBuildingProvider {
 
 	EnterpriseOpRequestBuilding getEnterpriseOpRequestBuildingById(Long id);
 
-	List<EnterpriseOpRequestBuilding> queryEnterpriseOpRequestBuildings(ListingLocator locator,
-			int count, ListingQueryBuilderCallback queryBuilderCallback);
+	List<EnterpriseOpRequestBuilding> queryEnterpriseOpRequestBuildings(ListingQueryBuilderCallback queryBuilderCallback);
 
 }

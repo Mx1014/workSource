@@ -5,11 +5,13 @@ import com.everhomes.util.StringHelper;
 /**
 * <ul>  
 * <li>code：</li>
+ * <li>clockStatus：打卡状态 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
 * </ul>
 */
 public class PunchClockResponse {
 	private byte punchCode ;
 	private String punchTime;
+	private Byte clockStatus;
 	
 	
 
@@ -46,5 +48,13 @@ public class PunchClockResponse {
 
 	public void setPunchCode(byte punchCode) {
 		this.punchCode = punchCode;
+	}
+
+	public Byte getClockStatus() {
+		return clockStatus;
+	}
+
+	public void setClockStatus(Byte clockStatus) {
+		this.clockStatus = clockStatus;
 	}
 }

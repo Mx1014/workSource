@@ -1,10 +1,13 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.AllFlagType;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +26,8 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	@Autowired
 	private ActivityProivider activityProvider;
 
+	@Autowired
+	private ContentServerService contentServerService;
 
 	/**
 	 * * 发布具体模块的内容
@@ -114,7 +119,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		//防止老数据可能没有ActivityCategories，先更新保存一下
 		ActivityCategories activityCategory = saveEntry(config, namespaceId, config.getName());
 
-		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, activityCategory.getId());
+		List<ActivityCategories> oldContentCategories = activityProvider.listActivityCategory(namespaceId, activityCategory.getEntryId());
 
 		List<ActivityCategoryDTO> categoryDTOList = new ArrayList<>();
 		config.setCategoryFlag((byte)0);
@@ -271,4 +276,17 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		}
 	}
 
+	@Override
+	public String processInstanceConfig(String instanceConfig) {
+		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(instanceConfig, ActivityEntryConfigulation.class);
+		if(null != config.getCategoryDTOList() && config.getCategoryDTOList().size() > 0){
+			for (ActivityCategoryDTO dto: config.getCategoryDTOList()) {
+				String iconUrl = contentServerService.parserUri(dto.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+				dto.setIconUrl(iconUrl);
+				String selectedIconUrl = contentServerService.parserUri(dto.getSelectedIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+				dto.setSelectedIconUrl(selectedIconUrl);
+			}
+		}
+		return StringHelper.toJsonString(config);
+	}
 }

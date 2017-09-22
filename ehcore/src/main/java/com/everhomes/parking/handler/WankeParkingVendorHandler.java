@@ -2,6 +2,7 @@
 package com.everhomes.parking.handler;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,11 +38,6 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final String GET_TYPES = "/Parking/GetMonthCardList";
 	private static final String GET_TEMP_FEE = "/Parking/GetCost";
 	private static final String PAY_TEMP_FEE = "/Parking/PayCost";
-
-	@Autowired
-	private ParkingProvider parkingProvider;
-	@Autowired
-    private ConfigurationProvider configProvider;
 	
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
@@ -134,7 +130,18 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 			return rechargeMonthlyCard(order);
 		return payTempCardFee(order);
     }
-    
+
+	@Override
+	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
+		if(null == rate) {
+			LOGGER.error("Rate not found, cmd={}", order);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Rate not found.");
+		}
+		order.setRateName(rate.getRateName());
+	}
+
     private void checkExpireDateIsNull(String expireDate,String plateNo) {
 		if(StringUtils.isBlank(expireDate)){
 			LOGGER.error("ExpireDate is null, plateNo={}", plateNo);
@@ -203,7 +210,7 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		param.put("plateNo", order.getPlateNumber());
 		param.put("flag", "2");
-	    param.put("amount", order.getPrice().intValue() * 100); //单位分
+	    param.put("amount", (order.getPrice().multiply(new BigDecimal(100))).intValue()); //单位分
 	    param.put("payMons", String.valueOf(order.getMonthCount().intValue()));
 	    param.put("chargePaidNo", order.getId());
 	    param.put("payTime", Utils.dateToStr(new Date(), Utils.DateStyle.DATE_TIME_STR));
@@ -229,7 +236,7 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 		JSONObject param = new JSONObject();
 
 		param.put("orderNo", order.getOrderToken());
-		param.put("amount", order.getPrice().intValue() * 100);
+		param.put("amount", (order.getPrice().multiply(new BigDecimal(100))).intValue());
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?1:2);
 		String json = post(PAY_TEMP_FEE, param);
 
@@ -267,7 +274,7 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 		dto.setEntryTime(Utils.strToLong(tempFee.getEntryTime(), Utils.DateStyle.DATE_TIME));
 		dto.setParkingTime(Integer.valueOf(tempFee.getParkingTime()));
 		dto.setDelayTime(Integer.valueOf(tempFee.getDelayTime()));
-		dto.setPrice(new BigDecimal(Integer.valueOf(tempFee.getAmount()) / 100));
+		dto.setPrice(new BigDecimal(tempFee.getAmount()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 		dto.setOrderToken(tempFee.getOrderNo());
 		dto.setPayTime(System.currentTimeMillis());
 		return dto;

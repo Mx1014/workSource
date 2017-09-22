@@ -15,6 +15,8 @@ import com.everhomes.util.StringHelper;
  * <li>contactor: 联系人</li>
  * <li>phone: 联系电话</li>
  * <li>description: 楼栋介绍</li>
+ * <li>namespaceBuildingType: 数据来源第三方 参考{@link com.everhomes.rest.address.NamespaceBuildingType}</li>
+ * <li>namespaceBuildingToken: 在第三方的唯一标识</li>
  * </ul>
  */
 public class ImportBuildingDataDTO {
@@ -27,7 +29,25 @@ public class ImportBuildingDataDTO {
 	private String contactor;
 	private String phone;
 	private String description;
-	
+	private String namespaceBuildingType;
+	private String namespaceBuildingToken;
+
+	public String getNamespaceBuildingToken() {
+		return namespaceBuildingToken;
+	}
+
+	public void setNamespaceBuildingToken(String namespaceBuildingToken) {
+		this.namespaceBuildingToken = namespaceBuildingToken;
+	}
+
+	public String getNamespaceBuildingType() {
+		return namespaceBuildingType;
+	}
+
+	public void setNamespaceBuildingType(String namespaceBuildingType) {
+		this.namespaceBuildingType = namespaceBuildingType;
+	}
+
 	public String getName() {
 		return name;
 	}

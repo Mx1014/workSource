@@ -144,7 +144,6 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }*/
-
         List<FilterBuilder> filterBuilders = new ArrayList<>();
         //编号精确搜索 by xiongying20170525
         if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {

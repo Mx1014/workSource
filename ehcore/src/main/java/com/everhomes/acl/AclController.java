@@ -40,14 +40,13 @@ public class AclController extends ControllerBase {
      * <p>创建公司管理员</p>
      */
     @RequestMapping("createOrganizationAdmin")
-    @RestReturn(value=String.class)
+    @RestReturn(value=OrganizationContactDTO.class)
     public RestResponse createOrganizationAdmin(@Valid CreateOrganizationAdminCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
             resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_CREATE);
         }
-        rolePrivilegeService.createOrganizationAdmin(cmd);
-        RestResponse response =  new RestResponse();
+        RestResponse response =  new RestResponse(rolePrivilegeService.createOrganizationAdmin(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -62,8 +61,7 @@ public class AclController extends ControllerBase {
     public RestResponse createOrganizationSuperAdmin(@Valid CreateOrganizationAdminCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_CREATE);
-        rolePrivilegeService.createOrganizationSuperAdmin(cmd);
-        RestResponse response =  new RestResponse();
+        RestResponse response =  new RestResponse(rolePrivilegeService.createOrganizationSuperAdmin(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

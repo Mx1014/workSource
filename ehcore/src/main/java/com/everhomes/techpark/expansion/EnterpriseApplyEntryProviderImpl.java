@@ -18,6 +18,7 @@ import com.everhomes.server.schema.tables.pojos.EhLeaseFormRequests;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotionAttachments;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
 import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -30,6 +31,8 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 @Component
@@ -93,16 +96,22 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 	}
 	
 	@Override
-	public List<LeasePromotion> listLeasePromotions(LeasePromotion leasePromotion,
-			ListingLocator locator, int pageSize) {
+	public List<LeasePromotion> listLeasePromotions(LeasePromotion leasePromotion, ListingLocator locator, int pageSize) {
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		List<LeasePromotion> leasePromotions = new ArrayList<LeasePromotion>();
+
+
+		SelectJoinStep query = context.select(Tables.EH_LEASE_PROMOTIONS.fields()).select(Tables.EH_LEASE_PROMOTION_COMMUNITIES.COMMUNITY_ID).from(Tables.EH_LEASE_PROMOTIONS);
+
+		query.join(Tables.EH_LEASE_PROMOTION_COMMUNITIES).on(Tables.EH_LEASE_PROMOTION_COMMUNITIES.LEASE_PROMOTION_ID
+				.eq(Tables.EH_LEASE_PROMOTIONS.ID));
 
 		Condition cond = Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(leasePromotion.getNamespaceId());
 		cond = cond.and(Tables.EH_LEASE_PROMOTIONS.STATUS.ne(LeasePromotionStatus.INACTIVE.getCode()));
 
 		if(!StringUtils.isEmpty(leasePromotion.getCommunityId())){
-			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(leasePromotion.getCommunityId()));
+
+			cond = cond.and(Tables.EH_LEASE_PROMOTION_COMMUNITIES.COMMUNITY_ID.eq(leasePromotion.getCommunityId()));
 		}
 		if(!StringUtils.isEmpty(leasePromotion.getRentType())){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_TYPE.eq(leasePromotion.getRentType()));
@@ -136,16 +145,13 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		if(null != locator.getAnchor()){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.DEFAULT_ORDER.lt(locator.getAnchor()));
 		}
-		context.select().from(Tables.EH_LEASE_PROMOTIONS)
-						.where(cond)
-						.orderBy(Tables.EH_LEASE_PROMOTIONS.DEFAULT_ORDER.desc())
-						.limit(pageSize)
-						.fetch().map((r) -> {
-							LeasePromotion lease = ConvertHelper.convert(r, LeasePromotion.class);
 
-							leasePromotions.add(lease);
-							return null;
-						});
+		List<LeasePromotion> leasePromotions = query
+				.where(cond)
+				.groupBy(Tables.EH_LEASE_PROMOTIONS.ID)
+				.orderBy(Tables.EH_LEASE_PROMOTIONS.DEFAULT_ORDER.desc())
+				.limit(pageSize)
+				.fetchInto(LeasePromotion.class);
 		
 		if(leasePromotions.size() >= pageSize) {
 			locator.setAnchor(leasePromotions.get(leasePromotions.size() - 1).getDefaultOrder());
@@ -156,11 +162,12 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 	}
 
 	@Override
-	public List<LeasePromotionAttachment> getAttachmentsByLeaseId(Long leaseId){
+	public List<LeasePromotionAttachment> findAttachmentsByOwnerTypeAndOwnerId(String ownerType, Long ownerId){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		
 		List<LeasePromotionAttachment> attachments = context.select().from(Tables.EH_LEASE_PROMOTION_ATTACHMENTS)
-		.where(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.LEASE_ID.eq(leaseId))
+		.where(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.OWNER_ID.eq(ownerId)
+				.and(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.OWNER_TYPE.eq(ownerType)))
 		.fetch().map((t) -> {
 			return ConvertHelper.convert(t, LeasePromotionAttachment.class);
 		});
@@ -169,19 +176,21 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 
 	@Override
-	public LeasePromotion createLeasePromotion(LeasePromotion leasePromotion) {
+	public void createLeasePromotion(LeasePromotion leasePromotion) {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhLeasePromotions.class));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeasePromotions.class));
 		leasePromotion.setId(id);
-		Long now = DateHelper.currentGMTTime().getTime();
+		Long now = System.currentTimeMillis();
 		leasePromotion.setCreateTime(new Timestamp(now));
 		leasePromotion.setDefaultOrder(now);
-		leasePromotion.setUpdateTime(leasePromotion.getCreateTime());
+		leasePromotion.setCreateUid(UserContext.currentUserId());
+		leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
+
 		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
 		dao.insert(leasePromotion);
+
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhLeasePromotions.class, null);
-		return leasePromotion;
 	}
 	
 	@Override
@@ -206,17 +215,19 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
 		leasePromotion.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		leasePromotion.setUpdateUid(UserContext.currentUserId());
 		dao.update(leasePromotion);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLeasePromotions.class, null);
 		return true;
 	}
 	
 	@Override
-	public boolean deleteLeasePromotionAttachment(Long leaseId){
+	public boolean deleteLeasePromotionAttachment(String ownerTYpe, Long ownerId){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		DeleteQuery<EhLeasePromotionAttachmentsRecord> r = context.deleteQuery(Tables.EH_LEASE_PROMOTION_ATTACHMENTS);
-		r.addConditions(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.LEASE_ID.eq(leaseId));
-		r.execute();
+		DeleteQuery<EhLeasePromotionAttachmentsRecord> deleteQuery = context.deleteQuery(Tables.EH_LEASE_PROMOTION_ATTACHMENTS);
+		deleteQuery.addConditions(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.OWNER_TYPE.eq(ownerTYpe));
+		deleteQuery.addConditions(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.OWNER_ID.eq(ownerId));
+		deleteQuery.execute();
 		return true;
 	}
 	
@@ -301,9 +312,10 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 	@Override
 	public LeasePromotion getLeasePromotionByToken(Integer namespaceId, Long communityId, String namespaceType, String namespaceToken) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		Record record = context.select().from(Tables.EH_LEASE_PROMOTIONS)
+		Record record = context.select().from(Tables.EH_LEASE_PROMOTIONS).join(Tables.EH_LEASE_PROMOTION_COMMUNITIES)
+						.on(Tables.EH_LEASE_PROMOTION_COMMUNITIES.LEASE_PROMOTION_ID.eq(Tables.EH_LEASE_PROMOTIONS.ID))
 						.where(Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(namespaceId))
-						.and(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(communityId))
+						.and(Tables.EH_LEASE_PROMOTION_COMMUNITIES.COMMUNITY_ID.eq(communityId))
 						.and(Tables.EH_LEASE_PROMOTIONS.NAMESPACE_TYPE.eq(namespaceType))
 						.and(Tables.EH_LEASE_PROMOTIONS.NAMESPACE_TOKEN.eq(namespaceToken))
 						.fetchOne();

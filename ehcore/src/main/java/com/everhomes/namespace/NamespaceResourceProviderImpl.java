@@ -73,7 +73,35 @@ public class NamespaceResourceProviderImpl implements NamespaceResourceProvider 
         
         return list;
     }
-    
+
+    @Override
+    public List<NamespaceResource> listResourceByNamespaceOrderByDefaultOrder(Integer namespaceId, NamespaceResourceType type) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<NamespaceResource> list = context.select().from(Tables.EH_NAMESPACE_RESOURCES)
+                .where(Tables.EH_NAMESPACE_RESOURCES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_NAMESPACE_RESOURCES.RESOURCE_TYPE.eq(type.getCode()))
+                .orderBy(Tables.EH_NAMESPACE_RESOURCES.RESOURCE_ID.desc())
+                .fetch().map((r) -> {
+                    return ConvertHelper.convert(r, NamespaceResource.class);
+                });
+
+        return list;
+    }
+
+    @Override
+    public List<NamespaceResource> listResourceByNamespace(Integer namespaceId, NamespaceResourceType type, Long resourceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<NamespaceResource> list = context.select().from(Tables.EH_NAMESPACE_RESOURCES)
+                .where(Tables.EH_NAMESPACE_RESOURCES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_NAMESPACE_RESOURCES.RESOURCE_TYPE.eq(type.getCode()))
+                .and(Tables.EH_NAMESPACE_RESOURCES.RESOURCE_ID.eq(resourceId))
+                .fetch().map((r) -> {
+                    return ConvertHelper.convert(r, NamespaceResource.class);
+                });
+
+        return list;
+    }
+
     @Cacheable(value = "listResourceByNamespaceLocator", key="{#namespaceId, #type, #count}", unless="#result.size() == 0")
     @Override
     public List<NamespaceResource> listResourceByNamespace(
@@ -111,5 +139,14 @@ public class NamespaceResourceProviderImpl implements NamespaceResourceProvider 
         } else {
             return null;
         }
+    }
+
+    @Override
+    public void deleteNamespaceResource(NamespaceResource resource) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhNamespaceResourcesDao dao = new EhNamespaceResourcesDao(context.configuration());
+        dao.deleteById(resource.getId());
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhNamespaceResources.class, resource.getId());
     }
 }

@@ -1,18 +1,16 @@
 package com.everhomes.flow;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.util.Tuple;
+import org.springframework.beans.factory.annotation.Autowired;
 
-@Component
+import java.util.ArrayList;
+import java.util.List;
+
+// @Component
 public class FlowModuleListenerDummy2 implements FlowModuleListener {
 	@Autowired
 	private FlowService flowService;

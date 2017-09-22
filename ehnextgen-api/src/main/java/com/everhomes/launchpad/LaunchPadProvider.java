@@ -48,4 +48,8 @@ public interface LaunchPadProvider {
     List<LaunchPadItem> listLaunchPadItemsByScopeType(Integer namespaceId, String itemLocation,String itemGroup, Byte applyPolicy, ListingQueryBuilderCallback queryBuilderCallback);
     List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId);
 	LaunchPadItem searchLaunchPadItemsByItemName(Integer namespaceId, String sceneType, String itemName);
+
+    List<LaunchPadItem> findLaunchPadItem(Integer namespaceId,String itemGroup,String location);
+
+    List<LaunchPadItem> findLaunchPadItem(Integer namespaceId,String itemGroup, String location, String itemName, Byte scopeCode, Long scopeId);
 }

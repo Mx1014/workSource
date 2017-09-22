@@ -8,6 +8,24 @@ public class ImportApartmentDataDTO {
 	private String apartmentName;
 	private String status;
 	private String areaSize;
+	private String namespaceAddressType;
+	private String namespaceAddressToken;
+
+	public String getNamespaceAddressToken() {
+		return namespaceAddressToken;
+	}
+
+	public void setNamespaceAddressToken(String namespaceAddressToken) {
+		this.namespaceAddressToken = namespaceAddressToken;
+	}
+
+	public String getNamespaceAddressType() {
+		return namespaceAddressType;
+	}
+
+	public void setNamespaceAddressType(String namespaceAddressType) {
+		this.namespaceAddressType = namespaceAddressType;
+	}
 
 	public String getBuildingName() {
 		return buildingName;
