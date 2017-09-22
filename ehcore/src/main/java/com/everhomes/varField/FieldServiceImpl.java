@@ -373,11 +373,12 @@ public class FieldServiceImpl implements FieldService {
         if (fields != null && fields.size() > 0) {
             Long userId = UserContext.currentUserId();
             Map<Long, ScopeField> existFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath());
+            String groupPath = cmd.getGroupPath()+ "/";
             fields.forEach(field -> {
                 ScopeField scopeField = ConvertHelper.convert(field, ScopeField.class);
                 scopeField.setNamespaceId(cmd.getNamespaceId());
                 scopeField.setCommunityId(cmd.getCommunityId());
-                scopeField.setGroupPath(cmd.getGroupPath());
+                scopeField.setGroupPath(groupPath);
                 scopeField.setGroupId(cmd.getGroupId());
                 if (scopeField.getId() == null) {
                     scopeField.setCreatorUid(userId);
