@@ -4733,20 +4733,19 @@ public class UserServiceImpl implements UserService {
 
 		//当关联场景不为空，且与参数中的园区id相匹配时，返回关联的场景
 		if (sceneList.size() > 0) {
-			sceneList.stream().filter(r -> {
-				return r.getCommunityId() == cmd.getCommunityId();
-			});
-			if (sceneList.size() > 0) {
-				return sceneList;
+			List<SceneDTO> flist = sceneList.stream().filter(r -> {
+				return r.getCommunityId().longValue() == cmd.getCommunityId().longValue();
+			}).collect(Collectors.toList());
+			if (flist.size() > 0) {
+				return flist;
 			}
 		}
-
 		//当关联场景为空，且没有与参数中的园区id相匹配时，返回参数用的社区场景
 		sceneList.clear();
 		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
 		sceneList.add(convertCommunityToScene(namespaceId, userId, community));
 		return sceneList;
-}
+	}
 
 	@Override
 	public List<SceneDTO> listAllCommunityScenesIfGeoExist(ListAllCommunityScenesIfGeoExistCommand cmd) {
@@ -4766,16 +4765,17 @@ public class UserServiceImpl implements UserService {
 			listNearbyMixCommunitiesCommand.setPageSize(pageSize);
 			listNearbyMixCommunitiesCommand.setPageAnchor(0L);
 
-			ListNearbyMixCommunitiesCommandResponse listNearbyMixCommunitiesCommandResponse = this.addressService.listMixCommunitiesByDistance(listNearbyMixCommunitiesCommand, locator, pageSize);
+			List<Community> communities = this.addressService.listMixCommunitiesByDistanceWithNamespaceId(listNearbyMixCommunitiesCommand, locator, pageSize);
 
 			List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
 
-			listNearbyMixCommunitiesCommandResponse.getDtos().stream().map(r->{
+			communities.stream().map(r->{
+				CommunityDTO dto = ConvertHelper.convert(r,CommunityDTO.class);
 				SceneType sceneType = DEFAULT;
-				if(CommunityType.fromCode(r.getCommunityType()) == CommunityType.COMMERCIAL){
+				if(CommunityType.fromCode(dto.getCommunityType()) == CommunityType.COMMERCIAL){
 					sceneType = PARK_TOURIST;
 				}
-				SceneDTO sceneDTO = this.toCommunitySceneDTO(namespaceId, userId, r, sceneType);
+				SceneDTO sceneDTO = this.toCommunitySceneDTO(namespaceId, userId, dto, sceneType);
 				sceneList.add(sceneDTO);
 				return null;
 			}).collect(Collectors.toList());
@@ -4876,8 +4876,9 @@ public class UserServiceImpl implements UserService {
 		return defalut_community;
 	}
 
+	@Override
 	//把默认community转换成DTO
-	private SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community){
+	public SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community){
 		//把community转换成场景
 		SceneType sceneType = DEFAULT;
 		CommunityType communityType = CommunityType.fromCode(default_community.getCommunityType());

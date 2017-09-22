@@ -149,6 +149,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setAmountReceviable(sourceDto.getAmountReceivable()==null?null:new BigDecimal(sourceDto.getAmountReceivable()));
                     dto.setBillId(sourceDto.getBillID());
                     dto.setDateStr(sourceDto.getBillDate());
+                    dto.setDateStrBegin(sourceDto.getDateStrBegin());
+                    dto.setDateStrEnd(sourceDto.getDateStrEnd());
                     Byte billStatus = sourceDto.getPayFlag();
                     try{
                         String billDate = sourceDto.getBillDate();
@@ -241,6 +243,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     }
                     dto.setAddressName(buildingName+apartmentName);
                     dto.setPayStatus(sourceDto.getStatus()!=null?sourceDto.getStatus().equals(PaymentStatus.SUSPEND.getCode())?PaymentStatus.IN_PROCESS.getCode():null:null);
+                    dto.setDateStr(sourceDto.getBillDate());
+                    dto.setDateStrBegin(sourceDto.getDateStrBegin());
+                    dto.setDateStrEnd(sourceDto.getDateStrEnd());
                     result.setDatestr(sourceDto.getBillDate());
                     list.add(dto);
                 }
@@ -349,6 +354,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     }
                     dto.setAddressName(buildingName+apartmentName);
                     dto.setBillItemName(sourceDto.getFeeName());
+                    dto.setDateStr(sourceDto.getBillDate());
+                    dto.setDateStrBegin(sourceDto.getDateStrBegin());
+                    dto.setDateStrEnd(sourceDto.getDateStrEnd());
                     list.add(dto);
                 }
             }else{

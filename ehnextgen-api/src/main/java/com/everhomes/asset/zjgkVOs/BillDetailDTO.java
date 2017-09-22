@@ -23,6 +23,8 @@ public class BillDetailDTO {
     private String amountOwed;
     private String amountReceived;
     private String status;
+    private String dateStrBegin;
+    private String dateStrEnd;
 
     public String getBillID() {
         return billID;
@@ -118,5 +120,21 @@ public class BillDetailDTO {
 
     public void setAmountReceived(String amountReceived) {
         this.amountReceived = amountReceived;
+    }
+
+    public String getDateStrBegin() {
+        return dateStrBegin;
+    }
+
+    public void setDateStrBegin(String dateStrBegin) {
+        this.dateStrBegin = dateStrBegin;
+    }
+
+    public String getDateStrEnd() {
+        return dateStrEnd;
+    }
+
+    public void setDateStrEnd(String dateStrEnd) {
+        this.dateStrEnd = dateStrEnd;
     }
 }

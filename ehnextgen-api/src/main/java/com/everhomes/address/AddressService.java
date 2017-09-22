@@ -4,9 +4,11 @@ package com.everhomes.address;
 import java.util.List;
 
 import com.everhomes.asset.AddressIdAndName;
+import com.everhomes.community.Community;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.address.*;
 
+import com.everhomes.rest.ui.user.SceneDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
@@ -76,4 +78,6 @@ public interface AddressService {
     ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(ListNearbyMixCommunitiesCommand cmd);
 
     public ListNearbyMixCommunitiesCommandResponse listMixCommunitiesByDistance(ListNearbyMixCommunitiesCommand cmd, ListingLocator locator, int pageSize);
+
+    List<Community> listMixCommunitiesByDistanceWithNamespaceId(ListNearbyMixCommunitiesCommand cmd, ListingLocator locator, int pageSize);
 }

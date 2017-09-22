@@ -206,13 +206,17 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         if(null != cmd.getBuildingName() && cmd.getBuildingName().length() > 8){
             QueryBuilder qb1 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(0, 8)+"*").field("addresses");
             qbs.add(qb1);
-            if(null != cmd.getBuildingName() && cmd.getBuildingName().length() > 16){
+            if(cmd.getBuildingName().length() > 16){
                 QueryBuilder qb2 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(8, 16)+"*").field("addresses");
                 qbs.add(qb2);
-                if(null != cmd.getBuildingName() && cmd.getBuildingName().length() > 24){
+                if(cmd.getBuildingName().length() > 24){
                     QueryBuilder qb3 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(16, 24)+"*").field("addresses");
                     qbs.add(qb3);
+                }else{
+                    qbs.add(QueryBuilders.queryString("*"+cmd.getBuildingName().substring(16)+"*").field("addresses"));
                 }
+            }else{
+                qbs.add(QueryBuilders.queryString("*"+cmd.getBuildingName().substring(8)+"*").field("addresses"));
             }
 
             if(qbs.size() > 1){
@@ -221,6 +225,8 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
                     bqb.must(queryBuilder);
                 }
             }
+        }else if(null != cmd.getBuildingName()){
+            qbs.add(QueryBuilders.queryString("*"+cmd.getBuildingName()+"*").field("addresses"));
         }
 
         if(StringUtils.isEmpty(cmd.getKeyword())) {
@@ -230,7 +236,8 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
                 if(null != bqb){
                     qb = bqb;
                 }else{
-                    qb = qbs.get(0);
+                    if(qbs.size() > 0)
+                        qb = qbs.get(0);
                 }
 //				qb = QueryBuilders.multiMatchQuery(cmd.getBuildingName())
 //	                    .field("addresses", 5.0f);
@@ -241,7 +248,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         	if (cmd.getKeyword().length() > 10) {
 				cmd.setKeyword(cmd.getKeyword().substring(cmd.getKeyword().length() - 10));
 			}
-        	if (StringUtils.isEmpty(cmd.getBuildingName())) {
+        	if (qbs.size() == 0) {
 //        		qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
 //                        .field("name", 5.0f)
 //                        .field("name.pinyin_prefix", 2.0f)

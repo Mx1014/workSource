@@ -727,6 +727,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			newDefaultRule.setResourceCounts(cmd.getSiteCounts());
 			this.rentalv2Provider.updateRentalDefaultRule(newDefaultRule);
 
+			if (NormalFlag.NONEED.getCode() == cmd.getNeedPay()) {
+                cmd.setPriceRules(buildDefaultPriceRule(cmd.getRentalTypes()));
+            }
+
 			//先删除后添加
 			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(PriceRuleType.DEFAULT.getCode(), newDefaultRule.getId());
 			createPriceRules(PriceRuleType.DEFAULT, newDefaultRule.getId(), cmd.getPriceRules());
@@ -748,6 +752,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return null;
 		});
 	}
+
+	private List<PriceRuleDTO> buildDefaultPriceRule(List<Byte> rentalTypes) {
+        List<PriceRuleDTO> priceRules = new ArrayList<>();
+        rentalTypes.forEach(r -> {
+            PriceRuleDTO rule = new PriceRuleDTO();
+            rule.setRentalType(r);
+            rule.setWorkdayPrice(new BigDecimal(0));
+            rule.setWeekendPrice(new BigDecimal(0));
+            rule.setApprovingUserWeekendPrice(new BigDecimal(0));
+            rule.setApprovingUserWorkdayPrice(new BigDecimal(0));
+            rule.setOrgMemberWeekendPrice(new BigDecimal(0));
+            rule.setOrgMemberWorkdayPrice(new BigDecimal(0));
+            priceRules.add(rule);
+        });
+
+        return priceRules;
+    }
 
 	private void setRentalRuleTimeIntervals(String ownerType, Long ownerId, List<TimeIntervalDTO> timeIntervals) {
 
@@ -2556,79 +2577,83 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			rs.setApprovingUserWeekendPrice(approvingUserWeekendPrice);
 //			rs.setApprovingUserWorkdayPrice(approvingUserWorkdayPrice);
 
-			if (cmd.getNeedPay() == NormalFlag.NEED.getCode()) {
-				for (PriceRuleDTO priceRuleDTO : cmd.getPriceRules()) {
-					currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
-					seqNum.set(0L);
-					if (priceRuleDTO.getRentalType().byteValue() == RentalType.HOUR.getCode()) {
-						//删除rentalResource 对应的 timeInterval
-						rentalv2Provider.deleteTimeIntervalsByOwnerId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
-						if(null != cmd.getTimeIntervals()) {
-
-							Double beginTime = null;
-							Double endTime = null;
-							for (TimeIntervalDTO timeInterval: cmd.getTimeIntervals()) {
-
-								if(null == timeInterval.getBeginTime() || null == timeInterval.getEndTime()) {
-									continue;
-								}
-								RentalTimeInterval timeIntervalDB = ConvertHelper.convert(timeInterval, RentalTimeInterval.class);
-
-								timeIntervalDB.setOwnerType(EhRentalv2Resources.class.getSimpleName());
-								timeIntervalDB.setOwnerId(rs.getId());
-								this.rentalv2Provider.createTimeInterval(timeIntervalDB);
-
-								if(beginTime == null || beginTime > timeInterval.getBeginTime()) {
-									beginTime = timeInterval.getBeginTime();
-								}
-								if(endTime == null || endTime < timeInterval.getEndTime()) {
-									endTime = timeInterval.getEndTime();
-								}
-								AddRentalSiteSingleSimpleRule singleCmd = ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
-								singleCmd.setBeginTime(timeInterval.getBeginTime());
-								singleCmd.setEndTime(timeInterval.getEndTime());
-								singleCmd.setTimeStep(timeInterval.getTimeStep());
-								singleCmd.setRentalType(priceRuleDTO.getRentalType());
-								singleCmd.setWeekendPrice(priceRuleDTO.getWeekendPrice());
-								singleCmd.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
-								singleCmd.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
-								singleCmd.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
-								singleCmd.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
-								singleCmd.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
-								addRentalSiteSingleSimpleRule(singleCmd);
-							}
-							if((null != endTime && endTime > 24.0) || (null != beginTime && beginTime < 0)) {
-								throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-										ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter of timeInterval > 24 or < 0");
-							}
-							if (null != beginTime) {
-								rs.setDayBeginTime(convertTime((long) (beginTime*1000*60*60L)));
-							}
-							if (null != endTime) {
-								rs.setDayEndTime(convertTime((long) (endTime*1000*60*60L)));
-							}
-						}
-					}else {
-						if (RentalType.HALFDAY.getCode() == priceRuleDTO.getRentalType().byteValue() || RentalType.THREETIMEADAY.getCode() == priceRuleDTO.getRentalType().byteValue()) {
-							rentalv2Provider.deleteTimeIntervalsByOwnerId(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId());
-							setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId(), cmd.getHalfDayTimeIntervals());
-						}
-						AddRentalSiteSingleSimpleRule singleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class);
-						singleCmd.setRentalType(priceRuleDTO.getRentalType());
-						singleCmd.setWeekendPrice(priceRuleDTO.getWeekendPrice());
-						singleCmd.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
-						singleCmd.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
-						singleCmd.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
-						singleCmd.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
-						singleCmd.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
-						addRentalSiteSingleSimpleRule(singleCmd);
-					}
-
-					Long cellBeginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), seqNum.get());
-					priceRuleDTO.setCellBeginId(cellBeginId);
-					priceRuleDTO.setCellEndId(cellBeginId + seqNum.get()-1);
-				}
+			//用来记录rentalTypes
+			if (NormalFlag.NONEED.getCode() == cmd.getNeedPay()) {
+				cmd.setPriceRules(buildDefaultPriceRule(cmd.getRentalTypes()));
 			}
+
+			for (PriceRuleDTO priceRuleDTO : cmd.getPriceRules()) {
+				currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
+				seqNum.set(0L);
+				if (priceRuleDTO.getRentalType().byteValue() == RentalType.HOUR.getCode()) {
+					//删除rentalResource 对应的 timeInterval
+					rentalv2Provider.deleteTimeIntervalsByOwnerId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
+					if(null != cmd.getTimeIntervals()) {
+
+						Double beginTime = null;
+						Double endTime = null;
+						for (TimeIntervalDTO timeInterval: cmd.getTimeIntervals()) {
+
+							if(null == timeInterval.getBeginTime() || null == timeInterval.getEndTime()) {
+								continue;
+							}
+							RentalTimeInterval timeIntervalDB = ConvertHelper.convert(timeInterval, RentalTimeInterval.class);
+
+							timeIntervalDB.setOwnerType(EhRentalv2Resources.class.getSimpleName());
+							timeIntervalDB.setOwnerId(rs.getId());
+							this.rentalv2Provider.createTimeInterval(timeIntervalDB);
+
+							if(beginTime == null || beginTime > timeInterval.getBeginTime()) {
+								beginTime = timeInterval.getBeginTime();
+							}
+							if(endTime == null || endTime < timeInterval.getEndTime()) {
+								endTime = timeInterval.getEndTime();
+							}
+							AddRentalSiteSingleSimpleRule singleCmd = ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
+							singleCmd.setBeginTime(timeInterval.getBeginTime());
+							singleCmd.setEndTime(timeInterval.getEndTime());
+							singleCmd.setTimeStep(timeInterval.getTimeStep());
+							singleCmd.setRentalType(priceRuleDTO.getRentalType());
+							singleCmd.setWeekendPrice(priceRuleDTO.getWeekendPrice());
+							singleCmd.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
+							singleCmd.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
+							singleCmd.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
+							singleCmd.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
+							singleCmd.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
+							addRentalSiteSingleSimpleRule(singleCmd);
+						}
+						if((null != endTime && endTime > 24.0) || (null != beginTime && beginTime < 0)) {
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+									ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter of timeInterval > 24 or < 0");
+						}
+						if (null != beginTime) {
+							rs.setDayBeginTime(convertTime((long) (beginTime*1000*60*60L)));
+						}
+						if (null != endTime) {
+							rs.setDayEndTime(convertTime((long) (endTime*1000*60*60L)));
+						}
+					}
+				}else {
+					if (RentalType.HALFDAY.getCode() == priceRuleDTO.getRentalType().byteValue() || RentalType.THREETIMEADAY.getCode() == priceRuleDTO.getRentalType().byteValue()) {
+						rentalv2Provider.deleteTimeIntervalsByOwnerId(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId());
+						setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId(), cmd.getHalfDayTimeIntervals());
+					}
+					AddRentalSiteSingleSimpleRule singleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class);
+					singleCmd.setRentalType(priceRuleDTO.getRentalType());
+					singleCmd.setWeekendPrice(priceRuleDTO.getWeekendPrice());
+					singleCmd.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
+					singleCmd.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
+					singleCmd.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
+					singleCmd.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
+					singleCmd.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
+					addRentalSiteSingleSimpleRule(singleCmd);
+				}
+
+				Long cellBeginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), seqNum.get());
+				priceRuleDTO.setCellBeginId(cellBeginId);
+				priceRuleDTO.setCellEndId(cellBeginId + seqNum.get()-1);
+			}
+
 
 //			if(LOGGER.isDebugEnabled()) {
 //	            LOGGER.debug("eh rental cells get next sequence block, id=" + cellBeginId+",block count = "+ seqNum.get()); 
@@ -4730,8 +4755,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 			Long time = rsr.getBeginTime().getTime();
 			if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
-				time -= rs.getRentalStartTime();
-				if (reserveTime.before(new java.util.Date(time))) {
+				if (reserveTime.before(new java.util.Date(time - rs.getRentalStartTime()))) {
 					dto.setStatus(SiteRuleStatus.EARLY.getCode());
 				}
 			}
@@ -4768,8 +4792,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			Long time = rsr.getResourceRentalDate().getTime() + dayBeginTime;
 			if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
-				time -= rs.getRentalStartTime();
-				if (reserveTime.before(new java.util.Date(time))) {
+				if (reserveTime.before(new java.util.Date(time - rs.getRentalStartTime()))) {
 					dto.setStatus(SiteRuleStatus.EARLY.getCode());
 				}
 			}

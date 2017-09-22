@@ -834,26 +834,26 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-//    /**
-//     * <p>测试清单产生</p>
-//     * <b>URL: /asset/xxd</b>
-//     *
-//     * 这个会自动生成一个错误的doctor！restresponse，因为我写的@RequestBody？下次测试下
-//     */
-//    @RequestMapping("doctor!")
-//    @RestReturn(PaymentExpectanciesResponse.class)
-//    public PaymentExpectanciesResponse hi(@RequestBody PaymentExpectanciesCommand cmd){
-//        List<FeeRules> feesRules = cmd.getFeesRules();
-//        for(int i = 0; i < feesRules.size(); i++) {
-//            List<VariableIdAndValue> list = feesRules.get(i).getVariableIdAndValueList();
-//            for(int j = 0; j < list.size(); j++){
-//                Integer variableValue = (Integer)list.get(j).getVariableValue();
-//                BigDecimal c = new BigDecimal(variableValue);
-//                list.get(j).setVariableValue(c);
-//            }
-//        }
-//        return assetService.paymentExpectancies(cmd);
-//    }
+    /**
+     * <p>测试清单产生</p>
+     * <b>URL: /asset/xxd</b>
+     *
+     * 这个会自动生成一个错误的doctor！restresponse，因为我写的@RequestBody？下次测试下
+     */
+    @RequestMapping("doctor!")
+    @RestReturn(PaymentExpectanciesResponse.class)
+    public PaymentExpectanciesResponse hi(@RequestBody PaymentExpectanciesCommand cmd){
+        List<FeeRules> feesRules = cmd.getFeesRules();
+        for(int i = 0; i < feesRules.size(); i++) {
+            List<VariableIdAndValue> list = feesRules.get(i).getVariableIdAndValueList();
+            for(int j = 0; j < list.size(); j++){
+                Integer variableValue = (Integer)list.get(j).getVariableValue();
+                BigDecimal c = new BigDecimal(variableValue);
+                list.get(j).setVariableValue(c);
+            }
+        }
+        return assetService.paymentExpectancies(cmd);
+    }
     /**
      * <p>展示预期的费用清单</p>
      * <b>URL: /asset/listBillExpectanciesOnContract</b>
