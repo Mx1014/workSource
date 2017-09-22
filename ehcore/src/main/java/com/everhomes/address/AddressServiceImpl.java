@@ -29,6 +29,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmContact;
@@ -52,7 +53,6 @@ import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.region.RegionServiceErrorCode;
-import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
@@ -148,9 +148,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Autowired
     private PropertyMgrService propertyMgrService;
-
-    @Autowired
-    private UserService userService;
 
     @PostConstruct
     public void setup() {
@@ -2129,8 +2126,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     }
 
-    @Override
-    public ListNearbyMixCommunitiesCommandResponse listMixCommunitiesByDistance(ListNearbyMixCommunitiesCommand cmd
+    private ListNearbyMixCommunitiesCommandResponse listMixCommunitiesByDistance(ListNearbyMixCommunitiesCommand cmd
             , ListingLocator locator, int pageSize) {
         ListNearbyMixCommunitiesCommandResponse resp = new ListNearbyMixCommunitiesCommandResponse();
         List<CommunityDTO> results = new ArrayList<>();
@@ -2233,28 +2229,5 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 cmd.getBuildingName(), cmd.getApartmentName());
         return ConvertHelper.convert(address, AddressDTO.class);
 
-    }
-
-
-    @Override
-    public List<Community> listMixCommunitiesByDistanceWithNamespaceId(ListNearbyMixCommunitiesCommand cmd, ListingLocator locator, int pageSize){
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        Long userId = UserContext.current().getUser().getId();
-        List<Community> communities = this.communityProvider.listCommunitiesByNamespaceId(namespaceId);
-        if(communities != null){
-            List<Long> communityIds = communities.stream().map(r->{
-                return r.getId();
-            }).collect(Collectors.toList());
-            List<CommunityGeoPoint> pointList = this.communityProvider.listCommunityGeoPointByGeoHashInCommunities(cmd.getLatigtue(), cmd.getLongitude(), 5, communityIds);
-            if(pointList != null && pointList.size() > 0){
-                List<Community> communities_after = pointList.stream().map(r->{
-                    return this.communityProvider.findCommunityById(r.getCommunityId());
-                }).collect(Collectors.toList());
-                return communities_after;
-            }else {
-                return communities;
-            }
-        }
-        return null;
     }
 }

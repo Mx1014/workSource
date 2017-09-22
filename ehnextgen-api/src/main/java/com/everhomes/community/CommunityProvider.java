@@ -126,6 +126,4 @@ public interface CommunityProvider {
     //获取对应的目标communityId
     Long findDefaultCommunityByCommunityId(Integer namespaceId, Long originId);
 
-    //在给予的communityIds的范围内根据参数中的经纬度进行排序
-    List<CommunityGeoPoint> listCommunityGeoPointByGeoHashInCommunities(double latitude, double longitude, int geoHashLength, List<Long> communityIds);
 }

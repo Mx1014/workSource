@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 /**
  * Created by ying.xiong on 2017/7/17.
  */
-@Component(HandoverTaskHandler.HANDOVER_VENDOR_PREFIX + HandoverTaskHandler.ZJGK)
+@Component(ZJGKHandoverTaskHandler.HANDOVER_VENDOR_PREFIX + HandoverTaskHandler.ZJGK)
 public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZJGKHandoverTaskHandler.class);
 
@@ -126,16 +126,10 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
             params.put("organizationName", "");
         }
 
+        params.put("manager","1");
         String day = sdf.format(task.getCreateTime());
         params.put("createTime", day);
-        params.put("taskName", task.getContent());
         params.put("taskContent",task.getContent());
-        if(task.getRemark() != null) {
-            params.put("remark", task.getRemark());
-        } else {
-            params.put("remark", "");
-        }
-
         //查询图片
         List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
         String attachmentUrls = convertAttachmentUrl(attachments);
@@ -153,7 +147,7 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
             FlowEventLog log = logs.get(0);
             params.put("manager", log.getFlowUserName());
         } else {
-            params.put("manager","0");
+            params.put("manager", "");
         }
 
         String appKey = configProvider.getValue(task.getNamespaceId(), "shenzhoushuma.app.key", "");
@@ -162,8 +156,8 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
         params.put("timestamp", String.valueOf(System.currentTimeMillis()));
         Integer randomNum = (int) (Math.random()*1000);
         params.put("nonce",randomNum+"");
-        params.put("crypto", "sssss");
         String signature = SignatureHelper.computeSignature(params, secretKey);
+
         params.put("signature",signature);
         return params;
     }

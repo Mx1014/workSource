@@ -35,8 +35,6 @@ import com.everhomes.util.StringHelper;
  *  <li>serviceUserName: 客服服务人员名称</li>
  *  <li>serviceUserPhone: 客服服务人员电话</li>
  *  <li>adminMembers: 管理员列表，参考{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
- *  <li>website: 企业官网</li>
- *  <li>unifiedSocialCreditCode: 统一社会信用代码</li>
  * </ul>
  *
  */
@@ -58,24 +56,6 @@ public class OrganizationExportDetailDTO {
 	private Long checkinDate;
 	private String checkinDateString;
 	private String description;
-	private String website;
-	private String unifiedSocialCreditCode;
-
-	public String getUnifiedSocialCreditCode() {
-		return unifiedSocialCreditCode;
-	}
-
-	public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
-		this.unifiedSocialCreditCode = unifiedSocialCreditCode;
-	}
-
-	public String getWebsite() {
-		return website;
-	}
-
-	public void setWebsite(String website) {
-		this.website = website;
-	}
 
 	public String getDisplayName() {
 		return displayName;

@@ -139,6 +139,4 @@ public interface UserProvider {
      */
     UserIdentifier findClaimedIdentifierByTokenAndNotUserId(Integer namespaceId, String identifierToken, Long userId);
 
-    int countUserByNamespaceIdAndNamespaceUserType(Integer namespaceId, String namespaceUserType);
-
 }

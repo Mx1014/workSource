@@ -536,17 +536,15 @@ public class ExpressServiceImpl implements ExpressService {
 			if (0!=expressOrder.getPaySummary().compareTo(new BigDecimal(cmd.getPayAmount()))) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "order money error, paySummary="+expressOrder.getPaySummary()+", payAmout="+cmd.getPayAmount());
 			}
-			ExpressOwner owner = new ExpressOwner(expressOrder.getNamespaceId(), ExpressOwnerType.fromCode(expressOrder.getOwnerType()), expressOrder.getOwnerId(), expressOrder.getCreatorUid());
-			createExpressOrderLog(owner, ExpressActionEnum.PAID, expressOrder, "pay success: " + StringHelper.toJsonString(cmd));
 			//modify by dengs,20170817,支付需要干什么，各个快递公司流程不一样
 			ExpressCompany expressCompany = findTopExpressCompany(expressOrder.getExpressCompanyId());
 			ExpressHandler handler = getExpressHandler(expressCompany.getId());
 			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
-			dbProvider.execute(r->{
-				handler.updateOrderStatus(expressOrder, expressCompany);
-				expressOrderProvider.updateExpressOrder(expressOrder);
-				return null;
-			});
+			handler.updateOrderStatus(expressOrder, expressCompany);
+			expressOrderProvider.updateExpressOrder(expressOrder);
+			
+			ExpressOwner owner = new ExpressOwner(expressOrder.getNamespaceId(), ExpressOwnerType.fromCode(expressOrder.getOwnerType()), expressOrder.getOwnerId(), expressOrder.getCreatorUid());
+			createExpressOrderLog(owner, ExpressActionEnum.PAID, expressOrder, "pay success: " + StringHelper.toJsonString(cmd));
 			return null;
 		});
 	}

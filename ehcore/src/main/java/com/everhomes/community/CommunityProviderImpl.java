@@ -1569,25 +1569,4 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         return null;
     }
-
-    @Override
-    public List<CommunityGeoPoint> listCommunityGeoPointByGeoHashInCommunities(double latitude, double longitude, int geoHashLength, List<Long> communityIds) {
-        List<CommunityGeoPoint> l = new ArrayList<>();
-        String geoHashStr = GeoHashUtils.encode(latitude, longitude).substring(0, geoHashLength);
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null,
-                (DSLContext context, Object reducingContext)-> {
-
-                    String likeVal = geoHashStr + "%";
-                    context.select()
-                            .from(Tables.EH_COMMUNITY_GEOPOINTS)
-                            .where(Tables.EH_COMMUNITY_GEOPOINTS.GEOHASH.like(likeVal)).and(Tables.EH_COMMUNITY_GEOPOINTS.COMMUNITY_ID.in(communityIds))
-                            .fetch().map((r) -> {
-                        l.add(ConvertHelper.convert(r, CommunityGeoPoint.class));
-                        return null;
-                    });
-
-                    return true;
-                });
-        return l;
-    }
 }

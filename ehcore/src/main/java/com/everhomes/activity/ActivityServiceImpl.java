@@ -382,9 +382,6 @@ public class ActivityServiceImpl implements ActivityService {
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
 		        }
-
-		        //TODO add log to be delete
-				LOGGER.info("signup start activity signupAttendeeCount log currentUserId={}, count={}", user.getId(), activity.getSignupAttendeeCount());
 		        
 		        //如果有正常的报名，则直接返回， ActivityDTO的处理方法有下面整合   add by yanjun 20170525
 		        ActivityRoster oldRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
@@ -520,11 +517,7 @@ public class ActivityServiceImpl implements ActivityService {
 		        	
 		            sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR_CONFIRM, meta);
 	            }
-
-				//TODO add log to be delete
-				LOGGER.info("signup before commit activity signupAttendeeCount log currentUserId={}, count={}", user.getId(), activity.getSignupAttendeeCount());
-
-				long signupStatEndTime = System.currentTimeMillis();
+	            long signupStatEndTime = System.currentTimeMillis();
 	            LOGGER.debug("Signup success, totalElapse={}, rosterElapse={}, cmd={}", (signupStatEndTime - signupStatStartTime), 
 	            		(signupStatEndTime - rosterStatStartTime), cmd);
 
@@ -1472,10 +1465,9 @@ public class ActivityServiceImpl implements ActivityService {
 	                         ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 	             }
 
-				//TODO add log to be delete
-				LOGGER.info("cancelSignup start activity signupAttendeeCount log currentUserId={}, count={}", user.getId(), activity.getSignupAttendeeCount());
+				LOGGER.info("cancelSignup start activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
 
-				//手动取消 要检查过期时间  add by yanjun 20170519
+	             //手动取消 要检查过期时间  add by yanjun 20170519
 	             if(cmd.getCancelType() == null || cmd.getCancelType().byteValue()== ActivityCancelType.HAND.getCode()){
 	            	 if(activity.getSignupEndTime() != null && activity.getSignupEndTime().getTime() < DateHelper.currentGMTTime().getTime()){
 	            		 LOGGER.error("handle activity error, Can not cancel cause after signupEndTime. id={}", cmd.getActivityId());
@@ -1533,10 +1525,9 @@ public class ActivityServiceImpl implements ActivityService {
 	             long cancelEndTime = System.currentTimeMillis();
 	             LOGGER.debug("Canel the activity signup, elapse={}, cmd={}", (cancelEndTime - cancelStartTime), cmd);
 
-				//TODO add log to be delete
-				LOGGER.info("signup before commit activity signupAttendeeCount log currentUserId={}, count={}", user.getId(), activity.getSignupAttendeeCount());
+				 LOGGER.info("cancelSignup end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
 
-				return dto;
+	             return dto;
 	        	
 	        });
         }).first();
@@ -2082,8 +2073,6 @@ public class ActivityServiceImpl implements ActivityService {
     							+ cmd.getRosterId());
     		}
 
-			//TODO add log to be delete
-			LOGGER.info("confirm start activity signupAttendeeCount log rosterUserId={}, count={}", item.getUid(), activity.getSignupAttendeeCount());
 
     		Post post = forumProvider.findPostById(activity.getPostId());
     		//validate post status
@@ -2210,11 +2199,7 @@ public class ActivityServiceImpl implements ActivityService {
     			}
 
     		}
-
-			//TODO add log to be delete
-			LOGGER.info("confirm after commit before release lock activity signupAttendeeCount log currentUserId={}, count={}", user.getId(), activity.getSignupAttendeeCount());
-
-			return dto;
+    		return dto;
     	}).first();
     }
 

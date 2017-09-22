@@ -16,7 +16,10 @@ import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.ToXContent.Params;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -199,46 +202,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         QueryBuilder qb = null;
-
-        List<QueryBuilder> qbs = new ArrayList<>();
-        BoolQueryBuilder bqb = null;
-        //长度大于8的时候 截取掉一段查询
-        if(null != cmd.getBuildingName() && cmd.getBuildingName().length() > 8){
-            QueryBuilder qb1 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(0, 8)+"*").field("addresses");
-            qbs.add(qb1);
-            if(cmd.getBuildingName().length() > 16){
-                QueryBuilder qb2 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(8, 16)+"*").field("addresses");
-                qbs.add(qb2);
-                if(cmd.getBuildingName().length() > 24){
-                    QueryBuilder qb3 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(16, 24)+"*").field("addresses");
-                    qbs.add(qb3);
-                }else{
-                    qbs.add(QueryBuilders.queryString("*"+cmd.getBuildingName().substring(16)+"*").field("addresses"));
-                }
-            }else{
-                qbs.add(QueryBuilders.queryString("*"+cmd.getBuildingName().substring(8)+"*").field("addresses"));
-            }
-
-            if(qbs.size() > 1){
-                bqb = QueryBuilders.boolQuery();
-                for (QueryBuilder queryBuilder: qbs){
-                    bqb.must(queryBuilder);
-                }
-            }
-        }else if(null != cmd.getBuildingName()){
-            qbs.add(QueryBuilders.queryString("*"+cmd.getBuildingName()+"*").field("addresses"));
-        }
-
+        
         if(StringUtils.isEmpty(cmd.getKeyword())) {
         	if (StringUtils.isEmpty(cmd.getBuildingName())) {
         		qb = QueryBuilders.matchAllQuery();
 			}else {
-                if(null != bqb){
-                    qb = bqb;
-                }else{
-                    if(qbs.size() > 0)
-                        qb = qbs.get(0);
-                }
+				qb = QueryBuilders.queryString("*"+cmd.getBuildingName()+"*").field("addresses");
 //				qb = QueryBuilders.multiMatchQuery(cmd.getBuildingName())
 //	                    .field("addresses", 5.0f);
 			}
@@ -248,7 +217,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         	if (cmd.getKeyword().length() > 10) {
 				cmd.setKeyword(cmd.getKeyword().substring(cmd.getKeyword().length() - 10));
 			}
-        	if (qbs.size() == 0) {
+        	if (StringUtils.isEmpty(cmd.getBuildingName())) {
 //        		qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
 //                        .field("name", 5.0f)
 //                        .field("name.pinyin_prefix", 2.0f)
@@ -261,14 +230,9 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 //                        .field("name.pinyin_prefix", 2.0f)
 //                        .field("name.pinyin_gram", 1.0f)
 //                        .field("addresses", 5.0f);
-                if(null != bqb){
-                    qb = bqb.must(QueryBuilders.queryString("*"+cmd.getKeyword()+"*").field("addresses").field("name"));
-                }else{
-                    qb = QueryBuilders.boolQuery()
-                            .must(qbs.get(0))
-                            .must(QueryBuilders.queryString("*"+cmd.getKeyword()+"*").field("addresses").field("name"));
-                }
-
+				qb = QueryBuilders.boolQuery()
+						.must(QueryBuilders.queryString("*"+cmd.getBuildingName()+"*").field("addresses"))
+						.must(QueryBuilders.queryString("*"+cmd.getKeyword()+"*").field("addresses").field("name"));
 			}
         	
         }
