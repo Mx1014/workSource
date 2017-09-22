@@ -20,6 +20,8 @@ public class ContractBillsDTO {
     private String amountReceived;
     private String amountOwed;
     private String status;
+    private String dateStrBegin;
+    private String dateStrEnd;
 
     public ContractBillsDTO() {
     }
@@ -118,5 +120,21 @@ public class ContractBillsDTO {
 
     public void setAmountOwed(String amountOwed) {
         this.amountOwed = amountOwed;
+    }
+
+    public String getDateStrBegin() {
+        return dateStrBegin;
+    }
+
+    public void setDateStrBegin(String dateStrBegin) {
+        this.dateStrBegin = dateStrBegin;
+    }
+
+    public String getDateStrEnd() {
+        return dateStrEnd;
+    }
+
+    public void setDateStrEnd(String dateStrEnd) {
+        this.dateStrEnd = dateStrEnd;
     }
 }

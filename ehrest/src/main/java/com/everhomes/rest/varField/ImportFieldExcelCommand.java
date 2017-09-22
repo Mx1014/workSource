@@ -6,6 +6,7 @@ package com.everhomes.rest.varField;
  */
 
 public class ImportFieldExcelCommand {
+    
     private Long customerId;
     private String customerType;
     private String moduleName;

@@ -692,11 +692,9 @@ public class AssetServiceImpl implements AssetService {
                 }
                 //自然月的计费方式
                 else if(billingCycle == AssetPaymentStrings.NATRUAL_MONTH){
-                    LOGGER.info("调用开始，开始使用自然月！");
                     NaturalMonthHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
-                    LOGGER.info("调用自然月结束！dtos2的长度为={}",dtos2.size());
                 }else{
-                    throw new RuntimeException("创建账单失败，暂不支持自然月自费周期以外的方式");
+                    LOGGER.info("failed to run natural mode, dtos2 length = {}",dtos2.size());
                 }
                 long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), dtos2.size());
                 long currentBillItemSeq = nextBillItemBlock - dtos2.size() + 1;
@@ -794,7 +792,7 @@ public class AssetServiceImpl implements AssetService {
                         }
                         //if the billing cycle is on quarter or year, just change the way how the billIdentity defines that muliti bills should be merged as one or be independently
                     }else{
-                        throw new RuntimeException("暂只支持按月计费，请联系左邻在账单组设置");
+                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Only natural mode is supported now");
                     }
                 }
 
