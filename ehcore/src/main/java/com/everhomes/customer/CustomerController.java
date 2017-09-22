@@ -979,10 +979,9 @@ public class CustomerController extends ControllerBase {
      * <p>修改跟进信息</p>
      */
     @RequestMapping("updateCustomerTracking")
-    @RestReturn(value = String.class)
+    @RestReturn(value = CustomerTrackingDTO.class)
     public RestResponse updateCustomerTracking(@Valid UpdateCustomerTrackingCommand cmd) {
-        customerService.updateCustomerTracking(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.updateCustomerTracking(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1049,10 +1048,9 @@ public class CustomerController extends ControllerBase {
      * <p>修改计划信息</p>
      */
     @RequestMapping("updateCustomerTrackingPlan")
-    @RestReturn(value = String.class)
+    @RestReturn(value = CustomerTrackingPlanDTO.class)
     public RestResponse updateCustomerTrackingPlan(@Valid UpdateCustomerTrackingPlanCommand cmd) {
-        customerService.updateCustomerTrackingPlan(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(customerService.updateCustomerTrackingPlan(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

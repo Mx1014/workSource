@@ -1453,7 +1453,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public void updateCustomerTracking(UpdateCustomerTrackingCommand cmd) {
+	public CustomerTrackingDTO updateCustomerTracking(UpdateCustomerTrackingCommand cmd) {
 		CustomerTracking exist = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
 		CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
 		if(cmd.getTrackingTime() != null){
@@ -1462,6 +1462,7 @@ public class CustomerServiceImpl implements CustomerService {
 		tracking.setCreateTime(exist.getCreateTime());
 		tracking.setCreatorUid(exist.getCreatorUid());
         enterpriseCustomerProvider.updateCustomerTracking(tracking);
+        return ConvertHelper.convert(tracking, CustomerTrackingDTO.class);
 	}
 
 	@Override
@@ -1517,7 +1518,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public void updateCustomerTrackingPlan(UpdateCustomerTrackingPlanCommand cmd) {
+	public CustomerTrackingPlanDTO updateCustomerTrackingPlan(UpdateCustomerTrackingPlanCommand cmd) {
 		CustomerTrackingPlan exist = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
 		CustomerTrackingPlan plan = ConvertHelper.convert(cmd, CustomerTrackingPlan.class);
 		if(cmd.getTrackingTime() != null){
@@ -1529,6 +1530,7 @@ public class CustomerServiceImpl implements CustomerService {
 		plan.setCreateTime(exist.getCreateTime());
 		plan.setCreatorUid(exist.getCreatorUid());
         enterpriseCustomerProvider.updateCustomerTrackingPlan(plan);
+        return ConvertHelper.convert(plan, CustomerTrackingPlanDTO.class);
 	}
 
 	@Override
