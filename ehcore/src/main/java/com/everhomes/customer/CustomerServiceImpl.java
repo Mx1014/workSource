@@ -1496,12 +1496,12 @@ public class CustomerServiceImpl implements CustomerService {
 
 	private CustomerTrackingPlanDTO convertCustomerTrackingPlanDTO(CustomerTrackingPlan plan) {
 		CustomerTrackingPlanDTO dto = ConvertHelper.convert(plan, CustomerTrackingPlanDTO.class);
-        if(dto.getTrackingType() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(plan.getNamespaceId(), dto.getTrackingType());
-            if(scopeFieldItem != null) {
-                dto.setTrackingTypeName(scopeFieldItem.getItemDisplayName());
-            }
-        }
+//        if(dto.getTrackingType() != null) {
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(plan.getNamespaceId(), dto.getTrackingType());
+//            if(scopeFieldItem != null) {
+//                dto.setTrackingTypeName(scopeFieldItem.getItemDisplayName());
+//            }
+//        }
         return dto;
 	}
 

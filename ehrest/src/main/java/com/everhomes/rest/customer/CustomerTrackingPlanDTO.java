@@ -13,7 +13,6 @@ import com.everhomes.util.StringHelper;
  *     <li>customerName: 客户名称</li>
  *     <li>contactName: 联系人</li>
  *     <li>trackingType: 跟进方式id</li>
- *     <li>trackingTypeName: 跟进方式名称</li>
  *     <li>trackingTime: 跟进时间</li>
  *     <li>notifyTime: 提醒时间</li>
  *     <li>title: 标题</li>
