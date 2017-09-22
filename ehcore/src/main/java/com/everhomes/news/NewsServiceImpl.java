@@ -1254,7 +1254,7 @@ public class NewsServiceImpl implements NewsService {
 					StringBuilder sb = new StringBuilder();
 					list.forEach(n -> {
 						n.setCommunityIds(newsProvider.listNewsCommunities(n.getId()));
-						n.setTagIds(newsProvider.listNewsTagVals(n.getId()).stream().map(r->r.getNewsTagId()).collect(Collectors.toList()));
+						n.setTag(newsProvider.listNewsTagVals(n.getId()).stream().map(r->r.getNewsTagId()).collect(Collectors.toList()));
 						//正则表达式去掉content中的富文本内容 modified by xiongying20160908
 						String content = n.getContent();
 						content = removeTag(content);
@@ -1309,7 +1309,7 @@ public class NewsServiceImpl implements NewsService {
 		News news = newsProvider.findNewsById(id);
 		if (news != null) {
 			news.setCommunityIds(newsProvider.listNewsCommunities(id));
-			news.setTagIds(newsProvider.listNewsTagVals(id).stream().map(r->r.getNewsTagId()).collect(Collectors.toList()));
+			news.setTag(newsProvider.listNewsTagVals(id).stream().map(r->r.getNewsTagId()).collect(Collectors.toList()));
 			//正则表达式去掉content中的富文本内容 modified by xiongying20160908
 			String content = news.getContent();
 			content = removeTag(content);

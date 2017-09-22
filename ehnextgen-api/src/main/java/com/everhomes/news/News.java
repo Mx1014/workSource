@@ -19,7 +19,7 @@ public class News extends EhNews{
 
 	private List<Long> communityIds;
 
-	private List<Long> tagIds;
+	private List<Long> tag;
 
 	public List<Long> getCommunityIds() {
 		return communityIds;
@@ -34,11 +34,11 @@ public class News extends EhNews{
 		return StringHelper.toJsonString(this);
 	}
 
-	public List<Long> getTagIds() {
-		return tagIds;
+	public List<Long> getTag() {
+		return tag;
 	}
 
-	public void setTagIds(List<Long> tagIds) {
-		this.tagIds = tagIds;
+	public void setTag(List<Long> tag) {
+		this.tag = tag;
 	}
 }
