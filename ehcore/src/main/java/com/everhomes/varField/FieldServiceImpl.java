@@ -2,12 +2,15 @@ package com.everhomes.varField;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.*;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
@@ -29,10 +32,17 @@ import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.bouncycastle.asn1.x509.Target.targetName;
 
 /**
  * Created by ying.xiong on 2017/8/3.
@@ -40,11 +50,18 @@ import java.util.stream.Collectors;
 @Component
 public class FieldServiceImpl implements FieldService {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(FieldServiceImpl.class);
-
+    private static ThreadLocal<Integer> sheetNum = new ThreadLocal<Integer>() {
+        @Override
+        protected Integer initialValue() {
+            return 0;
+        }
+    };
     @Autowired
     private FieldProvider fieldProvider;
     @Autowired
     private CustomerService customerService;
+    @Autowired
+    private SequenceProvider sequenceProvider;
     @Override
     public List<FieldDTO> listFields(ListFieldCommand cmd) {
         List<FieldDTO> dtos = null;
@@ -146,10 +163,20 @@ public class FieldServiceImpl implements FieldService {
         //工具类excel
         ExcelUtils excel = new ExcelUtils();
         //注入workbook
-        sheetGenerate(groups, workbook, excel);
+        sheetGenerate(groups, workbook, excel,cmd.getNamespaceId());
         //输出
         ServletOutputStream out;
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        String fileName = "客户数据模板导出"+sdf.format(Calendar.getInstance().getTime());
+        fileName = fileName + ".xls";
+        response.setContentType("application/msexcel");
+        try {
+            response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
         try {
             out = response.getOutputStream();
             workbook.write(byteArray);
@@ -164,7 +191,7 @@ public class FieldServiceImpl implements FieldService {
         }
     }
 
-    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel) {
+    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Integer namespaceId) {
         //循环遍历所有的sheet
         for( int i = 0; i < groups.size(); i++){
             //sheet卡为真的标识
@@ -172,7 +199,7 @@ public class FieldServiceImpl implements FieldService {
             FieldGroupDTO group = groups.get(i);
             //有children的sheet非叶节点，所以获得叶节点，对叶节点进行递归
             if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
-                sheetGenerate(group.getChildrenGroup(),workbook,excel);
+                sheetGenerate(group.getChildrenGroup(),workbook,excel,namespaceId);
                 //对于有子group的，本身为无效的sheet
                 isRealSheet = false;
             }
@@ -180,7 +207,7 @@ public class FieldServiceImpl implements FieldService {
             if(isRealSheet){
                 //使用sheet（group）的参数调用listFields，获得参数
                 ListFieldCommand cmd1 = new ListFieldCommand();
-                cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+                cmd1.setNamespaceId(namespaceId);
                 cmd1.setGroupPath(group.getGroupPath());
                 cmd1.setModuleName(group.getModuleName());
                 List<FieldDTO> fields = listFields(cmd1);
@@ -192,7 +219,8 @@ public class FieldServiceImpl implements FieldService {
                 }
                 try {
                     //向工具中，传递workbook，sheet（group）的名称，headers，数据为null
-                    excel.exportExcel(workbook,i,group.getGroupDisplayName(),headers,null);
+                    excel.exportExcel(workbook,sheetNum.get(),group.getGroupDisplayName(),headers,null);
+                    sheetNum.set(sheetNum.get()+1);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -200,7 +228,7 @@ public class FieldServiceImpl implements FieldService {
         }
         return;
     }
-    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Long customerId,Byte customerType) {
+    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Long customerId,Byte customerType,Integer namespaceId) {
         //遍历筛选过的sheet
         for( int i = 0; i < groups.size(); i++){
             //是否为叶节点的标识
@@ -208,7 +236,7 @@ public class FieldServiceImpl implements FieldService {
             FieldGroupDTO group = groups.get(i);
             //如果有叶节点，则送去轮回
             if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
-                sheetGenerate(group.getChildrenGroup(),workbook,excel,customerId,customerType);
+                sheetGenerate(group.getChildrenGroup(),workbook,excel,customerId,customerType,namespaceId);
                 //母节点的标识改为false，命运从出生就断定，唯有世世代代的延续才能成为永恒的现象
                 isRealSheet = false;
             }
@@ -216,7 +244,7 @@ public class FieldServiceImpl implements FieldService {
             if(isRealSheet){
                 //请求sheet获得字段
                 ListFieldCommand cmd1 = new ListFieldCommand();
-                cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
+                cmd1.setNamespaceId(namespaceId);
                 cmd1.setGroupPath(group.getGroupPath());
                 cmd1.setModuleName(group.getModuleName());
                 //通过字段即获得header，顺序不定
@@ -225,14 +253,15 @@ public class FieldServiceImpl implements FieldService {
                 //根据每个group获得字段,作为header
                 for(int j = 0; j < fields.size(); j++){
                     FieldDTO field = fields.get(j);
-
                     headers[j] = field.getFieldDisplayName();
                 }
                 //获取一个sheet的数据,这里只有叶节点，将header传回作为顺序.传递field来确保顺序
                 List<List<String>> data = getDataOnFields(group,customerId,customerType,fields);
                 try {
                     //写入workbook
-                    excel.exportExcel(workbook,i,group.getGroupDisplayName(),headers,data);
+                    System.out.println(sheetNum.get());
+                    excel.exportExcel(workbook,sheetNum.get(),group.getGroupDisplayName(),headers,data);
+                    sheetNum.set(sheetNum.get()+1);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -256,6 +285,9 @@ public class FieldServiceImpl implements FieldService {
                 cmd1.setCustomerId(customerId);
                 cmd1.setCustomerType(customerType);
                 List<CustomerTalentDTO> customerTalentDTOS = customerService.listCustomerTalents(cmd1);
+                if(customerTalentDTOS==null){
+                    customerTalentDTOS = new ArrayList<>();
+                }
                 //使用双重循环获得具备顺序的rowdata，将其置入data中；污泥放入圣杯，供圣人们世世代代追寻---宝石翁
                 for(int j = 0; j < customerTalentDTOS.size(); j ++){
                     CustomerTalentDTO dto = customerTalentDTOS.get(j);
@@ -268,6 +300,9 @@ public class FieldServiceImpl implements FieldService {
                 cmd2.setCustomerId(customerId);
                 cmd2.setCustomerType(customerType);
                 List<CustomerTrademarkDTO> customerTrademarkDTOS = customerService.listCustomerTrademarks(cmd2);
+                if(customerTrademarkDTOS == null){
+                    customerTrademarkDTOS = new ArrayList<>();
+                }
                 for(int j = 0; j < customerTrademarkDTOS.size(); j ++){
                     CustomerTrademarkDTO dto = customerTrademarkDTOS.get(j);
                     setMutilRowDatas(fields, data, dto);
@@ -277,6 +312,9 @@ public class FieldServiceImpl implements FieldService {
                 cmd3.setCustomerId(customerId);
                 cmd3.setCustomerType(customerType);
                 List<CustomerPatentDTO> customerPatentDTOS = customerService.listCustomerPatents(cmd3);
+                if(customerPatentDTOS==null){
+                    customerPatentDTOS = new ArrayList<>();
+                }
                 for(int j = 0; j < customerPatentDTOS.size(); j ++){
                     CustomerPatentDTO dto = customerPatentDTOS.get(j);
                     setMutilRowDatas(fields, data, dto);
@@ -286,6 +324,9 @@ public class FieldServiceImpl implements FieldService {
                 cmd4.setCustomerId(customerId);
                 cmd4.setCustomerType(customerType);
                 List<CustomerCertificateDTO> customerCertificateDTOS = customerService.listCustomerCertificates(cmd4);
+                if(customerCertificateDTOS == null){
+                    customerCertificateDTOS = new ArrayList<>();
+                }
                 for(int j = 0; j < customerCertificateDTOS.size(); j ++){
                     CustomerCertificateDTO dto = customerCertificateDTOS.get(j);
                     setMutilRowDatas(fields, data, dto);
@@ -296,6 +337,9 @@ public class FieldServiceImpl implements FieldService {
                 cmd5.setCustomerId(customerId);
                 cmd5.setCustomerType(customerType);
                 List<CustomerApplyProjectDTO> customerApplyProjectDTOS = customerService.listCustomerApplyProjects(cmd5);
+                if(customerApplyProjectDTOS == null){
+                    customerApplyProjectDTOS = new ArrayList<>();
+                }
                 for(int j = 0; j < customerApplyProjectDTOS.size(); j ++){
                     CustomerApplyProjectDTO dto = customerApplyProjectDTOS.get(j);
                     setMutilRowDatas(fields, data, dto);
@@ -306,6 +350,9 @@ public class FieldServiceImpl implements FieldService {
                 cmd6.setCustomerId(customerId);
                 cmd6.setCustomerType(customerType);
                 List<CustomerCommercialDTO> customerCommercialDTOS = customerService.listCustomerCommercials(cmd6);
+                if(customerCommercialDTOS == null){
+                    customerCommercialDTOS = new ArrayList<>();
+                }
                 for(int j = 0; j < customerCommercialDTOS.size(); j ++){
                     CustomerCommercialDTO dto = customerCommercialDTOS.get(j);
                     setMutilRowDatas(fields, data, dto);
@@ -316,6 +363,9 @@ public class FieldServiceImpl implements FieldService {
                 cmd7.setCustomerId(customerId);
                 cmd7.setCustomerType(customerType);
                 List<CustomerInvestmentDTO> customerInvestmentDTOS = customerService.listCustomerInvestments(cmd7);
+                if(customerInvestmentDTOS == null){
+                    customerInvestmentDTOS = new ArrayList<>();
+                }
                 for(int j = 0; j < customerInvestmentDTOS.size(); j ++){
                     CustomerInvestmentDTO dto = customerInvestmentDTOS.get(j);
                     setMutilRowDatas(fields, data, dto);
@@ -324,6 +374,9 @@ public class FieldServiceImpl implements FieldService {
             case "经济指标":
                 ListCustomerEconomicIndicatorsCommand cmd8 = new ListCustomerEconomicIndicatorsCommand();
                 List<CustomerEconomicIndicatorDTO> customerEconomicIndicatorDTOS = customerService.listCustomerEconomicIndicators(cmd8);
+                if(customerEconomicIndicatorDTOS == null){
+                    customerEconomicIndicatorDTOS = new ArrayList<>();
+                }
                 for(int j = 0; j < customerEconomicIndicatorDTOS.size(); j ++){
                     CustomerEconomicIndicatorDTO dto = customerEconomicIndicatorDTOS.get(j);
                     setMutilRowDatas(fields, data, dto);
@@ -355,6 +408,9 @@ public class FieldServiceImpl implements FieldService {
         try {
             //获得get方法并使用获得field的值
             String cellData = getFromObj(fieldName, dto);
+            if(cellData==null|| cellData.equalsIgnoreCase("null")){
+                cellData = "";
+            }
             rowDatas.add(cellData);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
@@ -371,35 +427,31 @@ public class FieldServiceImpl implements FieldService {
         Class<?> clz = dto.getClass();
         PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
         Method readMethod = pd.getReadMethod();
+        System.out.println(readMethod.getName());
         Object invoke = readMethod.invoke(dto);
         return String.valueOf(invoke);
     }
     private String setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
         Class<?> clz = dto.getClass();
-        Object val;
+        Object val = value;
         String type = clz.getDeclaredField(fieldName).getType().getSimpleName();
         switch(type){
             case "BigDecimal":
+                val = new BigDecimal((String)value);
                 break;
             case "Long":
+                val = Long.parseLong((String)value);
                 break;
             case "Timestamp":
+                Date date = new Date((String)value);
+                val = new Timestamp(date.getTime());
                 break;
             case "Integer":
-                break;
-            case "int":
-                break;
-            case "byte":
+                val = Integer.parseInt((String)value);
                 break;
             case "Byte":
+                val = Byte.parseByte((String)value);
                 break;
-            case "long":
-                break;
-            case "boolean":
-                break;
-
-
-
         }
         PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
         Method writeMethod = pd.getWriteMethod();
@@ -417,11 +469,11 @@ public class FieldServiceImpl implements FieldService {
         List<FieldGroupDTO> groups = new ArrayList<>();
 
         //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
-        List<String> includedParentSheetNames = cmd.getIncludedParentSheetNames();
-        for(int i = 0 ; i < includedParentSheetNames.size(); i ++){
-            String targetName = includedParentSheetNames.get(i);
+        String[] split = cmd.getIncludedGroupIds().split(",");
+        for(int i = 0 ; i < split.length; i ++){
+            long targetGroupId = Long.parseLong(split[i]);
             for(int j = 0; j < allGroups.size(); j++){
-                if(allGroups.get(j).getGroupDisplayName()!=null && allGroups.get(j).getGroupDisplayName().equals(targetName)){
+                if(allGroups.get(j).getId() == targetGroupId){
                     groups.add(allGroups.get(j));
                 }
             }
@@ -438,10 +490,21 @@ public class FieldServiceImpl implements FieldService {
         //工具excel
         ExcelUtils excel = new ExcelUtils();
         //注入sheet的内容到workbook中
-        sheetGenerate(groups,workbook,excel,cmd.getCustomerId(),cmd.getCustomerType());
+        sheetGenerate(groups,workbook,excel,cmd.getCustomerId(),cmd.getCustomerType(),cmd.getNamespaceId());
         //写入流
         ServletOutputStream out;
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        String fileName = "客户数据导出"+sdf.format(Calendar.getInstance().getTime());
+        fileName = fileName + ".xls";
+        response.setContentType("application/msexcel");
+        try {
+            response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
         try {
             out = response.getOutputStream();
             workbook.write(byteArray);
@@ -535,9 +598,10 @@ public class FieldServiceImpl implements FieldService {
 
             for(int j = 3; j < sheet.getLastRowNum(); j ++){
                 Row row = sheet.getRow(j);
+                Object object = null;
+                //每一行迭代，进行set
                 for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
                     String fieldName = orderedFieldNames.get(k);
-                    Object object = null;
                     try {
                         object = clazz.newInstance();
                     } catch (Exception e) {
@@ -552,11 +616,45 @@ public class FieldServiceImpl implements FieldService {
                         LOGGER.error("set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName());
                         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName(),e);
                     }
-                    objects.add(object);
                 }
+                //然后进行通用字段的set
+                try{
+                    for(java.lang.reflect.Field f : clazz.getDeclaredFields()){
+                        String name = f.getName();
+                        switch(name){
+                            case "createUid":
+                                setToObj("createUid",object,UserContext.currentUserId().toString());
+                                break;
+                            case "moduleName":
+                                setToObj("moduleName",object,cmd.getModuleName());
+                                break;
+                            case "createTime":
+                                Date date = new Date();
+                                setToObj("createTime",object, date.toString());
+                                break;
+                            case "namespaceId":
+                                setToObj("namespaceId",object,cmd.getNamespaceId().toString());
+                                break;
+                            case "customerType":
+                                setToObj("customerType",object,cmd.getCustomerType().toString());
+                                break;
+                            case "customerId":
+                                setToObj("customerId",object,cmd.getCustomerId().toString());
+                                break;
+                            case "id":
+                                Long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(clazz.getSuperclass()));
+                                setToObj("id",object,nextSequence.toString());
+                                break;
+                        }
+                    }
+                }catch(Exception e){
+                    LOGGER.warn("one row invoke set method for obj failed,the clzz is = {}",clazz.getSimpleName());
+                    continue;
+                }
+                objects.add(object);
             }
             //此时获得一个sheet的list对象，进行存储
-
+            fieldProvider.saveFieldGroups(cmd.getCustomerType(),cmd.getCustomerId(),objects,clazz.getSimpleName());
         }
 
     }

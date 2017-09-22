@@ -18,4 +18,8 @@ public interface FieldProvider {
     ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long itemId);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, String moduleName, String displayName);
     ScopeField findScopeField(Integer namespaceId, Long fieldId);
+
+    void saveFieldGroups(String customerType, Long customerId, List<Object> objects, String simpleName);
+
+    String findClassNameByGroupDisplayName(String groupDisplayName);
 }

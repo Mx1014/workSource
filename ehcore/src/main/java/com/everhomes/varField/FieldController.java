@@ -134,9 +134,7 @@ public class FieldController extends ControllerBase {
     @RequestMapping("exportExcelTemplate")
     public void exportExcelTemplate(@Valid ListFieldGroupCommand cmd,HttpServletResponse response){
         fieldService.exportExcelTemplate(cmd,response);
-        RestResponse restResponse = new RestResponse();
-        restResponse.setErrorDescription("OK");
-        restResponse.setErrorCode(200);
+
     }
 
     /**

@@ -15,7 +15,7 @@ public class ExportFieldsExcelCommand {
     private Long customerId;
 
     private Byte customerType;
-    private List<String> includedParentSheetNames;
+    private String includedGroupIds;
 
     public String getModuleName() {
         return moduleName;
@@ -49,11 +49,11 @@ public class ExportFieldsExcelCommand {
         this.customerType = customerType;
     }
 
-    public List<String> getIncludedParentSheetNames() {
-        return includedParentSheetNames;
+    public String getIncludedGroupIds() {
+        return includedGroupIds;
     }
 
-    public void setIncludedParentSheetNames(List<String> includedParentSheetNames) {
-        this.includedParentSheetNames = includedParentSheetNames;
+    public void setIncludedGroupIds(String includedGroupIds) {
+        this.includedGroupIds = includedGroupIds;
     }
 }
