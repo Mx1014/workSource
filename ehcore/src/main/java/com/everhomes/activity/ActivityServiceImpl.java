@@ -5516,8 +5516,11 @@ public class ActivityServiceImpl implements ActivityService {
 	@Override
 	public StatisticsSummaryResponse statisticsSummary(StatisticsSummaryCommand cmd) {
 		StatisticsSummaryResponse response = new StatisticsSummaryResponse();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId == null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+
 		Integer activityCount = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, false);
 		
 		Integer activityDayCountCreate = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesmorning(), this.getTimesnight(), false);
@@ -5563,7 +5566,11 @@ public class ActivityServiceImpl implements ActivityService {
 	public StatisticsActivityResponse statisticsActivity(StatisticsActivityCommand cmd) {
 		StatisticsActivityResponse response = new StatisticsActivityResponse();
 		List<StatisticsActivityDTO> listDto = new ArrayList<StatisticsActivityDTO>();
-		List<Activity> results = activityProvider.statisticsActivity(UserContext.getCurrentNamespaceId(), cmd.getCategoryId(), cmd.getContentCategoryId(), cmd.getStartTime(), cmd.getEndTime(), cmd.getTag());
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId == null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		List<Activity> results = activityProvider.statisticsActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), cmd.getStartTime(), cmd.getEndTime(), cmd.getTag());
 		List<Long> activityIds = new ArrayList<Long>();
 		
 		if(results != null){
@@ -5632,7 +5639,10 @@ public class ActivityServiceImpl implements ActivityService {
 	public StatisticsOrganizationResponse statisticsOrganization(StatisticsOrganizationCommand cmd) {
 		StatisticsOrganizationResponse response = new StatisticsOrganizationResponse();
 		List<StatisticsOrganizationDTO> listDto = new ArrayList<StatisticsOrganizationDTO>();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId == null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
 		
 		List<Object[]> listOrganization = activityProvider.statisticsOrganization(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId());
 		if(listOrganization != null){
@@ -5657,7 +5667,10 @@ public class ActivityServiceImpl implements ActivityService {
 	public StatisticsTagResponse statisticsTag(StatisticsTagCommand cmd) {
 		StatisticsTagResponse response = new StatisticsTagResponse();
 		List<StatisticsTagDTO> listDto = new ArrayList<StatisticsTagDTO>();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId == null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
 		
 		List<Object[]> listActivityTag = activityProvider.statisticsActivityTag(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId());
 		List<Object[]> listRosterTag = activityProvider.statisticsRosterTag(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId());
