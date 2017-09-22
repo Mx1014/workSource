@@ -28,4 +28,7 @@ public interface FieldService {
     ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName);
 
+    List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd);
+    List<SystemFieldDTO> listSystemFields(ListSystemFieldCommand cmd);
+    List<SystemFieldItemDTO> listSystemFieldItems(ListSystemFieldItemCommand cmd);
 }

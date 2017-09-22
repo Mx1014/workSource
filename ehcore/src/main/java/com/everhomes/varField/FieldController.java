@@ -31,7 +31,7 @@ public class FieldController extends ControllerBase {
     @RequestMapping("listSystemFields")
     @RestReturn(value=SystemFieldDTO.class, collection = true)
     public RestResponse listSystemFields(@Valid ListSystemFieldCommand cmd) {
-        List<FieldDTO> fields = fieldService.listSystemFields(cmd);
+        List<SystemFieldDTO> fields = fieldService.listSystemFields(cmd);
         RestResponse res = new RestResponse(fields);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
@@ -46,7 +46,7 @@ public class FieldController extends ControllerBase {
     @RequestMapping("listSystemFieldGroups")
     @RestReturn(value=SystemFieldGroupDTO.class, collection = true)
     public RestResponse listSystemFieldGroups(@Valid ListSystemFieldGroupCommand cmd) {
-        List<FieldGroupDTO> groups = fieldService.listSystemFieldGroups(cmd);
+        List<SystemFieldGroupDTO> groups = fieldService.listSystemFieldGroups(cmd);
         RestResponse res = new RestResponse(groups);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
@@ -61,7 +61,7 @@ public class FieldController extends ControllerBase {
     @RequestMapping("listSystemFieldItems")
     @RestReturn(value=SystemFieldItemDTO.class, collection = true)
     public RestResponse listSystemFieldItems(@Valid ListSystemFieldItemCommand cmd) {
-        List<FieldItemDTO> items = fieldService.listSystemFieldItems(cmd);
+        List<SystemFieldItemDTO> items = fieldService.listSystemFieldItems(cmd);
         RestResponse res = new RestResponse(items);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");

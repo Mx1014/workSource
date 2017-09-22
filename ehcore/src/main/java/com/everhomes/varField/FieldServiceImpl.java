@@ -30,6 +30,43 @@ public class FieldServiceImpl implements FieldService {
     private FieldProvider fieldProvider;
     @Autowired
     private CustomerService customerService;
+
+    @Override
+    public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
+        List<FieldGroup> systemGroups = fieldProvider.listFieldGroups(cmd.getModuleName());
+        if(systemGroups != null && systemGroups.size() > 0) {
+            List<SystemFieldGroupDTO> groups = systemGroups.stream().map(systemGroup -> {
+                return ConvertHelper.convert(systemGroup, SystemFieldGroupDTO.class);
+            }).collect(Collectors.toList());
+            return groups;
+        }
+        return null;
+    }
+
+    @Override
+    public List<SystemFieldItemDTO> listSystemFieldItems(ListSystemFieldItemCommand cmd) {
+        List<FieldItem> systemItems = fieldProvider.listFieldItems(cmd.getFieldId());
+        if(systemItems != null && systemItems.size() > 0) {
+            List<SystemFieldItemDTO> items = systemItems.stream().map(systemItem -> {
+                return ConvertHelper.convert(systemItem, SystemFieldItemDTO.class);
+            }).collect(Collectors.toList());
+            return items;
+        }
+        return null;
+    }
+
+    @Override
+    public List<SystemFieldDTO> listSystemFields(ListSystemFieldCommand cmd) {
+        List<Field> systemFields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
+        if(systemFields != null && systemFields.size() > 0) {
+            List<SystemFieldDTO> fields = systemFields.stream().map(systemField -> {
+                return ConvertHelper.convert(systemField, SystemFieldDTO.class);
+            }).collect(Collectors.toList());
+            return fields;
+        }
+        return null;
+    }
+
     @Override
     public List<FieldDTO> listFields(ListFieldCommand cmd) {
         List<FieldDTO> dtos = null;
