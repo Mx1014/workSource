@@ -613,12 +613,12 @@ public class NewsServiceImpl implements NewsService {
 		List<NewsTagVals> list = newsProvider.listNewsTagVals(newsId);
 		list.forEach(r->{
 			NewsTag newsTag = newsProvider.findNewsTagById(r.getNewsTagId());
-			if (newsTag.getDeleteFlag()!=(byte)0)
+			if (newsTag.getDeleteFlag()!=(byte)1)//未删除
 				r.setValue(newsTag.getValue());
 
 			newsTag = newsProvider.findNewsTagById(newsTag.getParentId());
 
-			if (newsTag.getDeleteFlag()!=(byte)0)
+			if (newsTag.getDeleteFlag()!=(byte)1)
 				r.setName(newsTag.getValue());
 		});
 		GetNewsDetailInfoResponse response = convertNewsToNewsDTO(userId, news);
