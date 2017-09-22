@@ -49,7 +49,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-class PmTaskCommonServiceImpl {
+public class PmTaskCommonServiceImpl {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PmTaskCommonServiceImpl.class);
 

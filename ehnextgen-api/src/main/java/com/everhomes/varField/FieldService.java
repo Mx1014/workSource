@@ -1,6 +1,7 @@
 package com.everhomes.varField;
 
 import com.everhomes.rest.varField.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;

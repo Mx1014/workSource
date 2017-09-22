@@ -12,7 +12,7 @@ import java.util.List;
  * <li>namespaceId: 域空间ID</li>
  * <li>resourceType: 域空间下所管理的小区类型，参考{@link com.everhomes.rest.namespace.NamespaceCommunityType}</li>
  * <li>pmMask : 蒙版信息</li>
-
+ * <li>nameType : 名称显示类型</li>
  * </ul>
  */
 public class NamespaceDetailDTO {
@@ -23,6 +23,7 @@ public class NamespaceDetailDTO {
     @ItemType(MaskDTO.class)
     private List<MaskDTO> pmMasks;
     private Integer maskFlag;
+    private Byte nameType;
 
 
     public Long getId() {
@@ -76,5 +77,13 @@ public class NamespaceDetailDTO {
 
     public void setMaskFlag(Integer maskFlag) {
         this.maskFlag = maskFlag;
+    }
+
+    public Byte getNameType() {
+        return nameType;
+    }
+
+    public void setNameType(Byte nameType) {
+        this.nameType = nameType;
     }
 }
