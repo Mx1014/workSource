@@ -4,7 +4,11 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.customer.*;
+
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
+
+import com.everhomes.rest.launchpad.Item;
+
 import com.everhomes.rest.varField.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
@@ -60,8 +64,48 @@ public class FieldServiceImpl implements FieldService {
     private FieldProvider fieldProvider;
     @Autowired
     private CustomerService customerService;
+
     @Autowired
     private SequenceProvider sequenceProvider;
+
+
+    @Override
+    public List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd) {
+        List<FieldGroup> systemGroups = fieldProvider.listFieldGroups(cmd.getModuleName());
+        if(systemGroups != null && systemGroups.size() > 0) {
+            List<SystemFieldGroupDTO> groups = systemGroups.stream().map(systemGroup -> {
+                return ConvertHelper.convert(systemGroup, SystemFieldGroupDTO.class);
+            }).collect(Collectors.toList());
+            return groups;
+        }
+        return null;
+    }
+
+    @Override
+    public List<SystemFieldItemDTO> listSystemFieldItems(ListSystemFieldItemCommand cmd) {
+        List<FieldItem> systemItems = fieldProvider.listFieldItems(cmd.getFieldId());
+        if(systemItems != null && systemItems.size() > 0) {
+            List<SystemFieldItemDTO> items = systemItems.stream().map(systemItem -> {
+                return ConvertHelper.convert(systemItem, SystemFieldItemDTO.class);
+            }).collect(Collectors.toList());
+            return items;
+        }
+        return null;
+    }
+
+    @Override
+    public List<SystemFieldDTO> listSystemFields(ListSystemFieldCommand cmd) {
+        List<Field> systemFields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
+        if(systemFields != null && systemFields.size() > 0) {
+            List<SystemFieldDTO> fields = systemFields.stream().map(systemField -> {
+                return ConvertHelper.convert(systemField, SystemFieldDTO.class);
+            }).collect(Collectors.toList());
+            return fields;
+        }
+        return null;
+    }
+
+
     @Override
     public List<FieldDTO> listFields(ListFieldCommand cmd) {
         List<FieldDTO> dtos = null;
@@ -82,7 +126,17 @@ public class FieldServiceImpl implements FieldService {
     }
 
     private List<FieldDTO> listScopeFields(ListFieldCommand cmd) {
-        List<ScopeField> scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getModuleName(), cmd.getGroupPath());
+        List<ScopeField> scopeFields = new ArrayList<>();
+        Boolean namespaceFlag = true;
+        if(cmd.getCommunityId() != null) {
+            scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath());
+            if(scopeFields != null && scopeFields.size() > 0) {
+                namespaceFlag = false;
+            }
+        }
+        if(namespaceFlag) {
+            scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, cmd.getModuleName(), cmd.getGroupPath());
+        }
         if(scopeFields != null && scopeFields.size() > 0) {
             List<Long> fieldIds = new ArrayList<>();
             Map<Long, FieldDTO> dtoMap = new HashMap<>();
@@ -94,7 +148,7 @@ public class FieldServiceImpl implements FieldService {
             //一把取出scope field对应的所有系统的field 然后把对应信息塞进fielddto中
             //一把取出所有的scope field对应的scope items信息
             List<Field> fields = fieldProvider.listFields(fieldIds);
-            List<ScopeFieldItem> fieldItems = fieldProvider.listScopeFieldItems(fieldIds, cmd.getNamespaceId());
+            List<ScopeFieldItem> fieldItems = fieldProvider.listScopeFieldItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId());
 
             if(fields != null && fields.size() > 0) {
                 List<FieldDTO> dtos = new ArrayList<>();
@@ -131,7 +185,17 @@ public class FieldServiceImpl implements FieldService {
 
     @Override
     public List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd) {
-        List<ScopeFieldItem> fieldItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId());
+        List<ScopeFieldItem> fieldItems = new ArrayList<>();
+        Boolean namespaceFlag = true;
+        if(cmd.getCommunityId() != null) {
+            fieldItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId(), cmd.getCommunityId());
+            if(fieldItems != null && fieldItems.size() > 0) {
+                namespaceFlag = false;
+            }
+        }
+        if(namespaceFlag) {
+            fieldItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId(), null);
+        }
         if(fieldItems != null && fieldItems.size() > 0) {
             List<FieldItemDTO> dtos = fieldItems.stream().map(item -> {
                 FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
@@ -660,6 +724,154 @@ public class FieldServiceImpl implements FieldService {
     }
 
     @Override
+    public void updateFields(UpdateFieldsCommand cmd) {
+        List<ScopeFieldInfo> fields = cmd.getFields();
+        if (fields != null && fields.size() > 0) {
+            Long userId = UserContext.currentUserId();
+            List<ScopeField> existFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath());
+            fields.forEach(field -> {
+                ScopeField scopeField = ConvertHelper.convert(field, ScopeField.class);
+                scopeField.setNamespaceId(cmd.getNamespaceId());
+                scopeField.setCommunityId(cmd.getCommunityId());
+                if (scopeField.getId() == null) {
+                    scopeField.setCreatorUid(userId);
+                    fieldProvider.createScopeField(scopeField);
+                } else {
+                    ScopeField exist = fieldProvider.findScopeField(scopeField.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
+                    if (exist != null) {
+                        scopeField.setCreatorUid(exist.getCreatorUid());
+                        scopeField.setCreateTime(exist.getCreateTime());
+                        scopeField.setOperatorUid(userId);
+                        fieldProvider.updateScopeField(scopeField);
+                        existFields.remove(exist);
+                    } else {
+                        scopeField.setCreatorUid(userId);
+                        fieldProvider.createScopeField(scopeField);
+                    }
+                }
+            });
+
+            if(existFields.size() > 0) {
+                existFields.forEach(field -> {
+                    field.setStatus(VarFieldStatus.INACTIVE.getCode());
+                    fieldProvider.updateScopeField(field);
+                });
+            }
+        }
+    }
+
+    @Override
+    public void updateFieldGroups(UpdateFieldGroupsCommand cmd) {
+        List<ScopeFieldGroupInfo> groups = cmd.getGroups();
+        if(groups != null && groups.size() > 0) {
+            Long userId = UserContext.currentUserId();
+            List<ScopeFieldGroup> existGroups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
+            //查出所有符合的map列表
+            //处理 没有id的增加，有的在数据库中查询找到则更新,且在列表中去掉对应的，没找到则增加
+            //将map列表中剩下的置为inactive
+            groups.forEach(group -> {
+                ScopeFieldGroup scopeFieldGroup = ConvertHelper.convert(group, ScopeFieldGroup.class);
+                scopeFieldGroup.setNamespaceId(cmd.getNamespaceId());
+                scopeFieldGroup.setCommunityId(cmd.getCommunityId());
+                if(scopeFieldGroup.getId() == null) {
+                    scopeFieldGroup.setCreatorUid(userId);
+                    fieldProvider.createScopeFieldGroup(scopeFieldGroup);
+                } else {
+                    ScopeFieldGroup exist = fieldProvider.findScopeFieldGroup(scopeFieldGroup.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
+                    if(exist != null) {
+                        scopeFieldGroup.setCreatorUid(exist.getCreatorUid());
+                        scopeFieldGroup.setCreateTime(exist.getCreateTime());
+                        scopeFieldGroup.setOperatorUid(userId);
+                        fieldProvider.updateScopeFieldGroup(scopeFieldGroup);
+                        existGroups.remove(exist);
+                    } else {
+                        scopeFieldGroup.setCreatorUid(userId);
+                        fieldProvider.createScopeFieldGroup(scopeFieldGroup);
+                    }
+                }
+
+            });
+
+            if(existGroups.size() > 0) {
+                existGroups.forEach(group -> {
+                    group.setStatus(VarFieldStatus.INACTIVE.getCode());
+                    fieldProvider.updateScopeFieldGroup(group);
+                });
+            }
+        }
+    }
+
+    @Override
+    public void updateFieldItems(UpdateFieldItemsCommand cmd) {
+        List<ScopeFieldItemInfo> items = cmd.getItems();
+        if(items != null && items.size() > 0) {
+            Long userId = UserContext.currentUserId();
+            List<ScopeFieldItem> existItems = fieldProvider.listScopeFieldItems(cmd.getFieldId(), cmd.getNamespaceId(), cmd.getCommunityId());
+            items.forEach(item -> {
+                ScopeFieldItem scopeFieldItem = ConvertHelper.convert(item, ScopeFieldItem.class);
+                scopeFieldItem.setNamespaceId(cmd.getNamespaceId());
+                scopeFieldItem.setCommunityId(cmd.getCommunityId());
+                if(scopeFieldItem.getId() == null) {
+                    scopeFieldItem.setCreatorUid(userId);
+                    fieldProvider.createScopeFieldItem(scopeFieldItem);
+                } else {
+                    ScopeFieldItem exist = fieldProvider.findScopeFieldItem(scopeFieldItem.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
+                    if(exist != null) {
+                        scopeFieldItem.setCreatorUid(exist.getCreatorUid());
+                        scopeFieldItem.setCreateTime(exist.getCreateTime());
+                        scopeFieldItem.setOperatorUid(userId);
+                        fieldProvider.updateScopeFieldItem(scopeFieldItem);
+                        existItems.remove(exist);
+                    } else {
+                        scopeFieldItem.setCreatorUid(userId);
+                        fieldProvider.createScopeFieldItem(scopeFieldItem);
+                    }
+                }
+            });
+            if(existItems.size() > 0) {
+                existItems.forEach(item -> {
+                    item.setStatus(VarFieldStatus.INACTIVE.getCode());
+                    fieldProvider.updateScopeFieldItem(item);
+                });
+            }
+        }
+    }
+
+    @Override
+    public ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId) {
+        ScopeFieldItem fieldItem = null;
+        Boolean namespaceFlag = true;
+        if(communityId != null) {
+            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, itemId);
+            if(fieldItem != null) {
+                namespaceFlag = false;
+            }
+        }
+        if(namespaceFlag) {
+            fieldItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, null, itemId);
+        }
+
+        return fieldItem;
+    }
+
+    @Override
+    public ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName) {
+        ScopeFieldItem fieldItem = null;
+        Boolean namespaceFlag = true;
+        if(communityId != null) {
+            fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, displayName);
+            if(fieldItem != null) {
+                namespaceFlag = false;
+            }
+        }
+        if(namespaceFlag) {
+            fieldItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, null, moduleName, displayName);
+        }
+
+        return fieldItem;
+    }
+
+    @Override
     public List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd) {
         List<FieldGroupDTO> dtos = null;
         if(cmd.getNamespaceId() == null) {
@@ -679,7 +891,18 @@ public class FieldServiceImpl implements FieldService {
     }
 
     private List<FieldGroupDTO> listScopeFieldGroups(ListFieldGroupCommand cmd) {
-        List<ScopeFieldGroup> groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getModuleName());
+        List<ScopeFieldGroup> groups = new ArrayList<>();
+        Boolean namespaceFlag = true;
+        if(cmd.getCommunityId() != null) {
+            groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName());
+            if(groups != null && groups.size() > 0) {
+                namespaceFlag = false;
+            }
+        }
+        if(namespaceFlag) {
+            groups = fieldProvider.listScopeFieldGroups(cmd.getNamespaceId(), null, cmd.getModuleName());
+        }
+
         if(groups != null && groups.size() > 0) {
             List<Long> groupIds = new ArrayList<>();
             Map<Long, FieldGroupDTO> dtoMap = new HashMap<>();
