@@ -116,7 +116,7 @@ CREATE TABLE `eh_asset_payment_order` (
   `pay_amount` decimal(10,2) DEFAULT NULL,
   `paid_time` datetime DEFAULT NULL,
   `refund_order_no` bigint(20) DEFAULT NULL,
-  `status` tinyint(4) DEFAULT '2' COMMENT '0: cancel, 1: reject, 2:normal',
+  `status` tinyint(4) DEFAULT '0' COMMENT '0：新建；1：失败；2：支付成功但张江高科的全部失败；3：支付成功但张江高科的部分成功；4：支付成功张江高科的也全部成功;5：取消',
   `cancel_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -124,7 +124,6 @@ CREATE TABLE `eh_asset_payment_order` (
 -- ----------------------------
 -- Table structure for eh_asset_payment_order_bills
 -- ----------------------------
--- changeSomething
 DROP TABLE IF EXISTS `eh_asset_payment_order_bills`;
 CREATE TABLE `eh_asset_payment_order_bills` (
   `id` bigint(20) NOT NULL,
@@ -133,6 +132,7 @@ CREATE TABLE `eh_asset_payment_order_bills` (
   `order_id` bigint(20) DEFAULT NULL,
   `amount` decimal(10,2) DEFAULT NULL,
   `namespace_id` int(10) DEFAULT NULL,
+  `status` int(11) DEFAULT NULL COMMENT '0:没有支付；1：支付成功；',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
