@@ -42,6 +42,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -509,7 +510,19 @@ public class FieldServiceImpl implements FieldService {
                 val = Long.parseLong((String)value);
                 break;
             case "Timestamp":
-                Date date = new Date((String)value);
+                if(((String)value).length()<1){
+                    val = null;
+                    break;
+                }
+                Date date = new Date();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    date = sdf.parse((String) value);
+                } catch (ParseException e) {
+                    val = null;
+                    break;
+                }
+
                 val = new Timestamp(date.getTime());
                 break;
             case "Integer":
@@ -627,7 +640,7 @@ public class FieldServiceImpl implements FieldService {
             //获得根据cell顺序的fieldname
             Row headRow = sheet.getRow(1);
             Cell cell1 = headRow.getCell(headRow.getFirstCellNum());
-            System.out.println(ExcelUtils.getCellValue(cell1));
+
             String[] headers = new String[headRow.getLastCellNum()-headRow.getFirstCellNum()+1];
             HashMap<Integer,String> orderedFieldNames = new HashMap<>();
             for(int j =headRow.getFirstCellNum(); j < headRow.getLastCellNum();j++) {
@@ -640,11 +653,10 @@ public class FieldServiceImpl implements FieldService {
                         //如果是select，则修改fieldName,在末尾加上Name，减去末尾的Id如果存在的话。由抽象跌入现实，拥有了名字，这是从神降格为人的过程---第六天魔王波旬
                         if(params.getFieldParamType().equals("select")){
                             //对projectSource特例
-                            if(fieldName.equals("projectSource")){
-                                
+                            if(!fieldName.equals("projectSource")){
+                                fieldName = fieldName.split("Id")[0];
+                                fieldName += "Name";
                             }
-                            fieldName = fieldName.split("Id")[0];
-                            fieldName += "Name";
                         }
                         orderedFieldNames.put(j,fieldName);
                     }
@@ -683,8 +695,27 @@ public class FieldServiceImpl implements FieldService {
                     }
                     try {
                         Cell cell = row.getCell(k);
-                        cell.getStringCellValue();
-                        setToObj(fieldName,object,cell.getStringCellValue());
+                        String cellValue = "";
+                        if(cell!=null){
+                            cellValue = ExcelUtils.getCellValue(cell);
+                        }
+                        //处理特例projectSource的导入
+                        StringBuilder sb = new StringBuilder();
+                        if(fieldName.equals("projectSource")){
+                            String[] split = cell.getStringCellValue().split(",");
+                            for(String projectSource : split){
+                                ScopeFieldItem projectSourceItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), projectSource);
+                                if(projectSourceItem!=null){
+                                    sb.append((projectSourceItem.getItemId()==null?"":projectSourceItem.getItemId())+",");
+                                }
+                            }
+                            if(sb.toString().trim().length()>0){
+                                sb.deleteCharAt(sb.length()-1);
+                                cellValue = sb.toString();
+                            }
+                        }
+
+                        setToObj(fieldName,object,cellValue);
                     } catch (Exception e) {
                         LOGGER.error("set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName());
                         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName(),e);
@@ -692,7 +723,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 //然后进行通用字段的set
                 try{
-                    for(java.lang.reflect.Field f : clazz.getDeclaredFields()){
+                    for(java.lang.reflect.Field f : clazz.getSuperclass().getDeclaredFields()){
                         String name = f.getName();
                         switch(name){
                             case "createUid":
@@ -702,8 +733,10 @@ public class FieldServiceImpl implements FieldService {
                                 setToObj("moduleName",object,cmd.getModuleName());
                                 break;
                             case "createTime":
-                                Date date = new Date();
-                                setToObj("createTime",object, date.toString());
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                                Calendar c = Calendar.getInstance();
+                                String format = sdf.format(c.getTime());
+                                setToObj("createTime",object, format);
                                 break;
                             case "namespaceId":
                                 setToObj("namespaceId",object,cmd.getNamespaceId().toString());
