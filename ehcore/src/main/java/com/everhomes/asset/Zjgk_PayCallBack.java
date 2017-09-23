@@ -24,7 +24,7 @@ import static com.everhomes.util.SignatureHelper.computeSignature;
 /**
  * Created by Wentian Wang on 2017/9/13.
  */
-@Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX+ "zjgkrentalcode")
+@Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX+ OrderType.ZJGK_RENTAL_CODE)
 public class Zjgk_PayCallBack implements PaymentCallBackHandler{
     private static final Logger LOGGER = LoggerFactory.getLogger(Zjgk_PayCallBack.class);
     @Autowired
