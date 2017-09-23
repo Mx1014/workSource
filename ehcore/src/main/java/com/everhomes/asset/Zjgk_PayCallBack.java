@@ -110,6 +110,17 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
         });
         // order的状态给为fail
     }
+
+    @Override
+    public void refundSuccess(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
+
+    }
+
+    @Override
+    public void refundFail(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
+
+    }
+
     private String generateJson(Map<String,String> params){
         params.put("appKey", "ee4c8905-9aa4-4d45-973c-ede4cbb3cf21");
         params.put("nonce", "54256");
