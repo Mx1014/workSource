@@ -1868,8 +1868,8 @@ public class AssetProviderImpl implements AssetProvider {
                     list.add(ConvertHelper.convert(r,AssetPaymentOrderBills.class));
                     return null;
                 });
-
-        return null;
+        
+        return list;
     }
 
     @Override
