@@ -143,7 +143,7 @@ public interface AssetProvider {
     String findIdentifierByUid(Long aLong);
 
 
-    Long saveAnOrderCopy(String payerType, String payerId, String amountOwed,  String clientAppName, Long communityId, String contactNum, String openid, String payerName, Long expireTimePeriod);
+    Long saveAnOrderCopy(String payerType, String payerId, String amountOwed,  String clientAppName, Long communityId, String contactNum, String openid, String payerName, Long expireTimePeriod,Integer namespaceId);
 
     Long findAssetOrderByBillIds(List<String> billIds);
 

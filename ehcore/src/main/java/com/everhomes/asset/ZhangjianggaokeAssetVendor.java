@@ -622,15 +622,17 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         for(BillIdAndAmount billIdAndAmount : bills){
             billIds.add(billIdAndAmount.getBillId());
             String amountOwed = billIdAndAmount.getAmountOwed();
-            amountsInCents += Long.parseLong(amountOwed)*100;
+            Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
+            amountsInCents += amountOwedInCents.longValue();
         }
-        Long checkedOrderId = assetProvider.findAssetOrderByBillIds(billIds);
-        if(checkedOrderId !=null){
-            //重复下单的返回
-            return null;
-        }
+        //这种检查的逻辑是不对的
+//        Long checkedOrderId = assetProvider.findAssetOrderByBillIds(billIds);
+//        if(checkedOrderId !=null){
+//            //重复下单的返回
+//            return null;
+//        }
         //如果账单为新的，则进行存储
-        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),cmd.getAmountOwed(),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
+        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId());
         assetProvider.saveOrderBills(bills,orderId);
         Long payerId = Long.parseLong(cmd.getPayerId());
         //检查下单人的类型和id，不能为空
@@ -648,7 +650,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         cmd2pay.setAmount(amountsInCents);
         cmd2pay.setClientAppName(cmd.getClientAppName());
         cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
-        cmd2pay.setNamespaceId(UserContext.getCurrentNamespaceId());
+        cmd2pay.setNamespaceId(cmd.getNamespaceId());
         cmd2pay.setOpenid(cmd.getOpenid());
         cmd2pay.setOrderId(orderId);
         cmd2pay.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());

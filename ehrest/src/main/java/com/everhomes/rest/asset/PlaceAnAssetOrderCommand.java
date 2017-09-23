@@ -20,11 +20,12 @@ import java.util.List;
  * <li>payerName:支付者的名称</li>
  * <li>ownerType:所属者类型，通常为community</li>
  * <li>openid:微信标识</li>
+ * <li>namespaceId：域空间</li>
  *</ul>
  */
 public class PlaceAnAssetOrderCommand {
     private String clientAppName;
-    @ItemType(String.class)
+    @ItemType(BillIdAndAmount.class)
     private List<BillIdAndAmount> bills;
     private String contactNum;
     private String amountOwed;
@@ -34,6 +35,7 @@ public class PlaceAnAssetOrderCommand {
     private String payerName;
     private String ownerType;
     private String openid;
+    private Integer namespaceId;
 
     public String getClientAppName() {
         return clientAppName;
@@ -113,5 +115,13 @@ public class PlaceAnAssetOrderCommand {
 
     public void setPayerName(String payerName) {
         this.payerName = payerName;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 }

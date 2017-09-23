@@ -1151,7 +1151,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
-        AssetVendor vendor = checkAssetVendor(cmd.getOwnerType(),cmd.getCommunityId());
+        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId());
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
         return handler.placeAnAssetOrder(cmd);
     }
