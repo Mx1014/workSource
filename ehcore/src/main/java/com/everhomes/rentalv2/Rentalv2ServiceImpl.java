@@ -43,9 +43,9 @@ import javax.servlet.http.HttpServletResponse;
  
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.order.PayService;
 import com.everhomes.parking.innospring.InnoSpringCardInfo;
-import com.everhomes.rest.order.CommonOrderCommand;
-import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.*;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
@@ -124,7 +124,6 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -229,6 +228,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private UserService userService;
 	@Autowired
 	private Rentalv2PriceRuleProvider rentalv2PriceRuleProvider;
+	@Autowired
+	private PayService payService;
+
 
 	/**cellList : 当前线程用到的单元格 */
 	private static ThreadLocal<List<RentalCell>> cellList = new ThreadLocal<List<RentalCell>>() {
@@ -3360,6 +3362,31 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			response.getSiteItems().add(dto);
 		}
 		return response;
+	}
+
+	public PreOrderDTO addRentalItemBillV2(AddRentalBillItemCommand cmd) {
+		addRentalItemBill(cmd);
+		return null;
+	}
+
+	private PreOrderDTO convertOrderDTOForV2(RentalOrder order, String clientAppName) {
+		PreOrderCommand preOrderCommand = new PreOrderCommand();
+
+		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
+		Long amount = payService.changePayAmount(order.getPayTotalMoney());
+		preOrderCommand.setAmount(amount);
+
+		preOrderCommand.setPayerId(order.getRentalUid());
+		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+
+//        preOrderCommand.setExpiration(expiredTime);
+
+		preOrderCommand.setClientAppName(clientAppName);
+
+		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+
+		return callBack;
 	}
 
 	@Override

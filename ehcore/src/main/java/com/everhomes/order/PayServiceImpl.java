@@ -34,6 +34,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
@@ -741,7 +742,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         if(amount == null){
             return new BigDecimal(0);
         }
-        return  new BigDecimal(amount).divide(new BigDecimal(100));
+        return  new BigDecimal(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
     }
 
     @Override

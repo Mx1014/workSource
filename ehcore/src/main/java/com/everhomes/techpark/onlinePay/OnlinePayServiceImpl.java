@@ -154,9 +154,17 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 	@Override
 	public Long createBillId(Long time) {
 		
-		String bill = String.valueOf(time) + (int) (Math.random()*1000);
+		String bill = String.valueOf(time) + String.valueOf(generateRandomNumber(3));
 		return Long.valueOf(bill);
 	}
-	
+
+	/**
+	 *
+	 * @param n 创建n位随机数
+	 * @return
+	 */
+	private long generateRandomNumber(int n){
+		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
+	}
 
 }
