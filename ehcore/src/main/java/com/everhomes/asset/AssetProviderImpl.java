@@ -12,6 +12,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
@@ -1831,6 +1832,56 @@ public class AssetProviderImpl implements AssetProvider {
         }
         EhAssetPaymentOrderBillsDao dao = new EhAssetPaymentOrderBillsDao();
         dao.insert(orderBills);
+    }
+
+    @Override
+    public AssetPaymentOrder findAssetPaymentById(Long orderId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhAssetPaymentOrder t = Tables.EH_ASSET_PAYMENT_ORDER.as("t");
+        return context.select()
+                .from(t)
+                .where(t.ID.eq(orderId))
+                .fetchOneInto(AssetPaymentOrder.class);
+    }
+
+    @Override
+    public List<AssetPaymentOrderBills> findBillsById(Long orderId) {
+        List<AssetPaymentOrderBills> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t");
+        context.select()
+                .from(t)
+                .where(t.ORDER_ID.eq(orderId))
+                .fetch()
+                .map(r -> {
+                    list.add(ConvertHelper.convert(r,AssetPaymentOrderBills.class));
+                    return null;
+                });
+
+        return null;
+    }
+
+    @Override
+    public void changeOrderStaus(Long orderId, Byte finalOrderStatus) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhAssetPaymentOrder t = Tables.EH_ASSET_PAYMENT_ORDER.as("t");
+        context.update(t)
+                .set(t.STATUS,finalOrderStatus)
+                .where(t.ID.eq(orderId))
+                .execute();
+    }
+
+    @Override
+    public void changeBillStatusOnOrder(Map<String, Integer> billStatuses,Long orderId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t");
+        for(Map.Entry<String,Integer> entry : billStatuses.entrySet()){
+            context.update(t)
+                    .set(t.STATUS,entry.getValue())
+                    .where(t.BILL_ID.eq(entry.getKey()))
+                    .and(t.ORDER_ID.eq(orderId))
+                    .execute();
+        }
     }
 
 }

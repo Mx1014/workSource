@@ -132,7 +132,7 @@ CREATE TABLE `eh_asset_payment_order_bills` (
   `order_id` bigint(20) DEFAULT NULL,
   `amount` decimal(10,2) DEFAULT NULL,
   `namespace_id` int(10) DEFAULT NULL,
-  `status` int(11) DEFAULT NULL COMMENT '0:没有支付；1：支付成功；',
+  `status` int(11) DEFAULT 0 COMMENT '0:没有支付；1：支付成功；',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

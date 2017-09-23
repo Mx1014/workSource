@@ -3,6 +3,7 @@ package com.everhomes.asset;
 
 import com.everhomes.asset.zjgkVOs.NotifyPaymentResponse;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
@@ -14,11 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.everhomes.util.SignatureHelper.computeSignature;
 
@@ -30,6 +29,8 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
     private static final Logger LOGGER = LoggerFactory.getLogger(Zjgk_PayCallBack.class);
     @Autowired
     private AssetProvider assetProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
     /**
      * 请求张江高科的接口进行回调付款，成功后返回200和ok，则修改账单的状态
@@ -40,6 +41,7 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
         Long orderId = cmd.getOrderId();
         AssetPaymentOrder order = assetProvider.findAssetPaymentById(cmd.getOrderId());
         List<AssetPaymentOrderBills> bills = assetProvider.findBillsById(orderId);
+        Map<String,Integer> billStatuses = new HashMap<>();
         for(int i = 0; i < bills.size(); i++){
             params = new HashMap<String,String>();
             params.put("contractNum",order.getContractId());
@@ -70,12 +72,31 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
             //记录哪些订单可以被改状态，persit需要改，由于有成功的，所以无法保证原子性；测试下对一个账单一把付款？
             NotifyPaymentResponse response = (NotifyPaymentResponse)StringHelper.fromJsonString(postJson, NotifyPaymentResponse.class);
             if(response.getErrorCode()==200){
-                //此订单付款成功。统一订单状态：0：取消（默认）；1：失败；2：支付成功但张江高科的全部失败；3：支付成功但张江高科的部分成功；4：支付成功张江高科的也全部成功
-                //5：支付失败; 各个账单的状态：0:没有支付；1：支付成功；2：支付部分成功
+                //此订单付款成功。统一订单状态：0：新建；1：支付失败；2：支付成功但张江高科的全部失败；3：支付成功但张江高科的部分成功；4：支付成功张江高科的也全部成功;5：取消
+                // 各个账单的状态：0:没有支付；1：支付成功；2：支付部分成功
+                billStatuses.put(bills.get(i).getBillId(),1);
+            }else{
+                billStatuses.put(bills.get(i).getBillId(),0);
             }
         }
-        //总的状态修改
-//        params.put();
+        Byte orderStatus = null;
+        //支付成功后统一订单的状态判断
+        if(billStatuses.containsValue(0)&&billStatuses.containsValue(1)){
+            //partly success
+            orderStatus = 3;
+        }else if (! billStatuses.containsValue(1)){
+            // all failed
+            orderStatus = 2;
+        }else if(! billStatuses.containsValue(0)){
+            //all success
+            orderStatus = 4;
+        }
+        Byte finalOrderStatus = orderStatus;
+        this.dbProvider.execute((TransactionStatus status) -> {
+            assetProvider.changeOrderStaus(orderId, finalOrderStatus);
+            assetProvider.changeBillStatusOnOrder(billStatuses,orderId);
+            return null;
+        });
     }
 
     /**
@@ -83,7 +104,10 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
      */
     @Override
     public void payFail(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
-
+        this.dbProvider.execute((TransactionStatus status) -> {
+            assetProvider.changeOrderStaus(cmd.getOrderId(),(byte)1);
+            return null;
+        });
         // order的状态给为fail
     }
     private String generateJson(Map<String,String> params){

@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Wentian on 2017/2/20.
@@ -146,4 +147,12 @@ public interface AssetProvider {
     Long findAssetOrderByBillIds(List<String> billIds);
 
     void saveOrderBills(List<BillIdAndAmount> bills, Long orderId);
+
+    AssetPaymentOrder findAssetPaymentById(Long orderId);
+
+    List<AssetPaymentOrderBills> findBillsById(Long orderId);
+
+    void changeOrderStaus(Long orderId, Byte finalOrderStatus);
+
+    void changeBillStatusOnOrder(Map<String, Integer> billStatuses,Long orderId);
 }
