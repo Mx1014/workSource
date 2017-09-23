@@ -639,7 +639,7 @@ public class FieldServiceImpl implements FieldService {
             List<FieldDTO> fields = listFields(cmd2);
             //获得根据cell顺序的fieldname
             Row headRow = sheet.getRow(1);
-            Cell cell1 = headRow.getCell(headRow.getFirstCellNum());
+
 
             String[] headers = new String[headRow.getLastCellNum()-headRow.getFirstCellNum()+1];
             HashMap<Integer,String> orderedFieldNames = new HashMap<>();
@@ -685,14 +685,14 @@ public class FieldServiceImpl implements FieldService {
                 Row row = sheet.getRow(j);
                 Object object = null;
                 //每一行迭代，进行set
+                try {
+                    object = clazz.newInstance();
+                } catch (Exception e) {
+                    LOGGER.error("sheet class new instance failed,exception= {}",e);
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"sheet class new instance failed",e);
+                }
                 for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
                     String fieldName = orderedFieldNames.get(k);
-                    try {
-                        object = clazz.newInstance();
-                    } catch (Exception e) {
-                        LOGGER.error("sheet class new instance failed,exception= {}",e);
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"sheet class new instance failed",e);
-                    }
                     try {
                         Cell cell = row.getCell(k);
                         String cellValue = "";
