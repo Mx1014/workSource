@@ -26,4 +26,13 @@ public interface PaymentCallBackHandler {
      * 支付失败
      */
     void payFail(OrderPaymentNotificationCommand cmd);
+
+    /**
+     * 退款成功
+     */
+    void refundSuccess(OrderPaymentNotificationCommand cmd);
+    /**
+     * 退款失败
+     */
+    void refundFail(OrderPaymentNotificationCommand cmd);
 }

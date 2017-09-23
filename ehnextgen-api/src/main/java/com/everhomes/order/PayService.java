@@ -1,15 +1,50 @@
 //@formatter:off
 package com.everhomes.order;
 
+
 import com.everhomes.rest.order.OrderPaymentNotificationCommand;
+
+import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.rest.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.order.PaymentParamsDTO;
+
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+
+import java.math.BigDecimal;
 
 /**
  * Created by Wentian Wang on 2017/9/6.
  */
 
 public interface PayService {
+    /**
+     *
+     * @param namespaceId
+     * @param clientAppName
+     * @param orderType
+     * @param orderId
+     * @param payerId
+     * @param amount
+     * @return
+     */
+    PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount);
+
+    PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, Long expiration);
+
+    PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId);
+
+    PreOrderDTO createAppPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String resourceType, Long resourceId, Long expiration);
+
+    PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO);
+
+    PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, Long expiration);
+
+    PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, String resourceType, Long resourceId);
+
+    PreOrderDTO createWxJSPreOrder(Integer namespaceId, String clientAppName, String orderType, Long orderId, Long payerId, Long amount, String openid, PaymentParamsDTO paramsDTO, String resourceType, Long resourceId, Long expiration);
+
     /**
      * 1、检查是否已经下单
      * 2、检查买方是否有会员，无则创建
@@ -29,4 +64,11 @@ public interface PayService {
      * @param cmd
      */
     void payNotify(OrderPaymentNotificationCommand cmd);
+
+
+    Long changePayAmount(BigDecimal amount);
+
+    BigDecimal changePayAmount(Long amount);
+
+    CreateOrderRestResponse refund(String orderType, Long payOrderId, Long refundOrderId, Long amount);
 }
