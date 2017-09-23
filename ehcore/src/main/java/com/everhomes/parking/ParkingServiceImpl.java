@@ -1272,7 +1272,9 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ParkingRequestCardConfigDTO getParkingRequestCardConfig(HttpServletRequest request, GetParkingRequestCardConfigCommand cmd) {
-		
+
+		ParkingRequestCardConfigDTO dto = null;
+
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
     	
 		User user = UserContext.current().getUser();
@@ -1281,6 +1283,9 @@ public class ParkingServiceImpl implements ParkingService {
         	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE, 
         			FlowModuleType.NO_MODULE.getCode(), cmd.getParkingLotId(), FlowOwnerType.PARKING.getCode());
 
+        	if (null == flow) {
+        		return null;
+			}
         	flowId = flow.getFlowMainId();
 //        	LOGGER.error("FlowId cannot be null.");
 //    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -1289,7 +1294,6 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), parkingLot.getId(), flowId);
 
-		ParkingRequestCardConfigDTO dto = null;
 		if(null != parkingFlow) {
 			dto = ConvertHelper.convert(parkingFlow, ParkingRequestCardConfigDTO.class);
 		
