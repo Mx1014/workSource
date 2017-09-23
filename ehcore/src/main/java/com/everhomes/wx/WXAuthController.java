@@ -91,6 +91,10 @@ public class WXAuthController {// extends ControllerBase
     
     /** 用于记录登录后要跳转的源链接 */
     private final static String KEY_SOURCE_URL = "src_url";
+
+    /** 用于记录是否需要检查手机默认0-不检查，1-检查，检查结果是没有绑定的话跳到绑定手机页面 */
+    private final static String BINDPHONE = "bindPhone";
+
     
     /** 用于记录拿到code之后要跳转的链接（由于微信只允许配置一个回调域名，需要通过些配置来把code送到其它域名） */
     private final static String KEY_CODE_URL = "code_url";
@@ -288,6 +292,12 @@ public class WXAuthController {// extends ControllerBase
 
 	private void checkRedirectUserIdentifier(HttpServletRequest request, HttpServletResponse response, Integer namespaceId, Map<String, String> params){
         LOGGER.info("checkUserIdentifier start");
+
+        String bandphone = params.get(BINDPHONE);
+        if(bandphone == null || Byte.valueOf(bandphone).byteValue() == 0){
+            LOGGER.info("checkUserIdentifier do not need checkout bindphone");
+            return;
+        }
 
         //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
         User user = UserContext.current().getUser();
