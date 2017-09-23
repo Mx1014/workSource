@@ -56,6 +56,7 @@ DROP TABLE IF EXISTS `eh_payment_order_records`;
 CREATE TABLE `eh_payment_order_records` (
 	`id` BIGINT NOT NULL,
 	`service_config_id` BIGINT NOT NULL COMMENT '业务服务类型,eh_payment_service.id',
+	`payment_order_type` INTEGER NOT NULL COMMENT '支付系统单据类型,1-充值,2-提现,3-支付,4-退款',
 	`order_type` VARCHAR(64) NOT NULL COMMENT '服务类型,填parking/rentalOrder等',
 	`order_id` BIGINT NOT NULL COMMENT '业务订单编号',
 	`payment_order_id` BIGINT NOT NULL COMMENT '支付系统支付单号',
@@ -86,6 +87,10 @@ CREATE TABLE `eh_payment_types` (
 	`update_time` datetime DEFAULT NULL,
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 活动报名表，添加支付版本，用于退款 add by yanjun 20170919
+ALTER TABLE `eh_activity_roster`ADD COLUMN `pay_version`  tinyint(4) NULL COMMENT '支付版本，用于退款';
 
 DROP TABLE IF EXISTS `eh_asset_payment_order`;
 CREATE TABLE `eh_asset_payment_order` (
@@ -135,6 +140,7 @@ CREATE TABLE `eh_asset_payment_order_bills` (
   `status` int(11) DEFAULT 0 COMMENT '0:没有支付；1：支付成功；',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 -- 增加域空间左上角显示场景名称的配置项
 ALTER TABLE eh_namespace_details ADD COLUMN name_type tinyint(4) DEFAULT 0;
