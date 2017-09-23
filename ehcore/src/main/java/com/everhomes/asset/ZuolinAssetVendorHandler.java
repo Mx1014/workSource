@@ -317,7 +317,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         for(int i = 0; i < billDetailDTOList.size(); i++) {
             BillDetailDTO dto = billDetailDTOList.get(i);
             dateStrFilter.add(dto.getDateStr());
-            amountOwed.add(dto.getAmountOwed());
+            amountOwed = amountOwed.add(dto.getAmountOwed());
         }
         response.setAmountOwed(amountOwed);
         response.setBillPeriodMonths(dateStrFilter.size());

@@ -1872,3 +1872,26 @@ WHERE  wifi_rule_id =350 ;
 SET @config_id = (SELECT MAX(id) FROM eh_configurations);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@config_id :=@config_id+1), 'contractService', '999971', NULL, '999971', NULL);
  
+
+-- 服务广场的模板 add by sfyan 20170918
+delete from eh_portal_layout_templates;
+insert into `eh_portal_layout_templates` (`id`, `namespace_id`, `label`, `template_json`, `show_uri`, `status`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `description`) values('1','0','门户','{\"groups\":[{\"label\":\"banner图片\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Banners\",\"style\":\"Default\",\"defaultOrder\":1},{\"label\":\"公告\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Bulletins\",\"style\":\"Default\",\"defaultOrder\":2,\"description\":\"\"},{\"label\":\"应用\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Navigator\",\"style\":\"Gallery\",\"instanceConfig\":{\"margin\":20,\"padding\":16,\"backgroundColor\":\"#ffffff\",\"titleFlag\":0,\"title\":\"标题\",\"titleUri\":\"\"},\"defaultOrder\":3,\"description\":\"\"}\n]}\n',NULL,'2','2017-09-15 18:53:16','2017-09-15 18:53:16','1','1',NULL);
+insert into `eh_portal_layout_templates` (`id`, `namespace_id`, `label`, `template_json`, `show_uri`, `status`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `description`) values('2','0','门户_分页签','{\"groups\":[{\"label\":\"tabs\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Tab\",\"style\":\"1\",\"defaultOrder\":1}]}\n',NULL,'2','2017-09-15 18:53:16','2017-09-15 18:53:16','1','1',NULL);
+insert into `eh_portal_layout_templates` (`id`, `namespace_id`, `label`, `template_json`, `show_uri`, `status`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `description`) values('3','0','主页签门户_渐变导航栏','{\"layoutName\":\"ServiceMarketLayout\",\"location\":\"/home\",\"groups\":[{\"label\":\"banner图片\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Banners\",\"style\":\"Default\",\"defaultOrder\":1},{\"label\":\"公告\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Bulletins\",\"style\":\"Default\",\"defaultOrder\":2,\"description\":\"\"},{\"label\":\"应用\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Navigator\",\"style\":\"Gallery\",\"instanceConfig\":{\"margin\":20,\"padding\":16,\"backgroundColor\":\"#ffffff\",\"titleFlag\":0,\"title\":\"标题\",\"titleUri\":\"\"},\"defaultOrder\":3,\"description\":\"\"}\n]}\n',NULL,'2','2017-09-15 18:53:16','2017-09-15 18:53:16','1','1',NULL);
+insert into `eh_portal_layout_templates` (`id`, `namespace_id`, `label`, `template_json`, `show_uri`, `status`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `description`) values('4','0','主页签门户_不透明导航栏','{\"layoutName\":\"SecondServiceMarketLayout\",\"location\":\"/home\",\"groups\":[{\"label\":\"banner图片\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Banners\",\"style\":\"Default\",\"defaultOrder\":1},{\"label\":\"公告\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Bulletins\",\"style\":\"Default\",\"defaultOrder\":2,\"description\":\"\"},{\"label\":\"应用\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Navigator\",\"style\":\"Gallery\",\"instanceConfig\":{\"margin\":20,\"padding\":16,\"backgroundColor\":\"#ffffff\",\"titleFlag\":0,\"title\":\"标题\",\"titleUri\":\"\"},\"defaultOrder\":3,\"description\":\"\"}\n]}\n',NULL,'2','2017-09-15 18:53:16','2017-09-15 18:53:16','1','1',NULL);
+insert into `eh_portal_layout_templates` (`id`, `namespace_id`, `label`, `template_json`, `show_uri`, `status`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `description`) values('5','0','主页签门户_分页签','{\"layoutName\":\"AssociationLayout\",\"location\":\"/home\",\"groups\":[{\"label\":\"tabs\", \"separatorFlag\":\"0\", \"separatorHeight\":\"0\",\"widget\":\"Tab\",\"style\":\"1\",\"defaultOrder\":1}]}\n',NULL,'2','2017-09-15 18:53:16','2017-09-15 18:53:16','1','1',NULL);
+
+-- 修改俱乐部的action_type add by sfyan 20170918
+update `eh_service_modules` set action_type = 36 where id = 10750;
+update `eh_service_module_apps` set action_type = 36 where module_id = 10750;
+
+-- 2017.9.18 上线需要修复的数据
+-- 修复detail的数据 by lei.lv
+UPDATE eh_organization_member_details md INNER JOIN (SELECT m.namespace_id,	m.detail_id FROM eh_organization_members m INNER JOIN eh_organization_member_details d ON d.id = m.detail_id AND m.`status` = '3' AND m.namespace_id != '' AND m.organization_id = d.organization_id) AS t1 ON t1.detail_id = md.id SET md.namespace_id = t1.namespace_id;
+
+-- eh_uniongroup_member_details by lei.lv
+UPDATE eh_uniongroup_member_details ud INNER JOIN (SELECT o.namespace_id, d.detail_id FROM eh_organizations o INNER JOIN eh_uniongroup_member_details d ON d.enterprise_id = o.id) AS t1 ON t1.detail_id = ud.detail_id SET ud.namespace_id = t1.namespace_id;
+
+
+-- added by wh 刷错误数据,
+UPDATE  eh_punch_day_logs SET time_rule_id = 0  WHERE time_rule_id =1 OR  time_rule_id IS NULL;
