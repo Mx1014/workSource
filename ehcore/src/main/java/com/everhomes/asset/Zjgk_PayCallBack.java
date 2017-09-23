@@ -46,7 +46,8 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
             params = new HashMap<String,String>();
             params.put("contractNum",order.getContractId());
             params.put("billId",bills.get(i).getBillId());
-            params.put("paidMoney",bills.get(i).getAmount().toString());
+//            params.put("paidMoney",bills.get(i).getAmount().toString());
+            params.put("paidMoney","102125");
             String json = generateJson(params);
             String url;
             if(order.getPayerType().equals("eh_organization")){
