@@ -345,6 +345,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         cmd.setOrderId(orderRecord.getOrderId());
 
         //调用具体业务
+        LOGGER.info("Handler found# handler name = {}",String.valueOf(orderRecord.getOrderType()));
         PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(orderRecord.getOrderType()));
         LOGGER.debug("PaymentCallBackHandler="+handler.getClass().getName());
 

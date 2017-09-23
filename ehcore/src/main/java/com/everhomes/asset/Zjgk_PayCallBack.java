@@ -37,8 +37,10 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
      */
     @Override
     public void paySuccess(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
+        LOGGER.info("ZJGK-PAY-HANDLER START, cmd is = {}",cmd.toString());
         Map<String,String> params = null;
         Long orderId = cmd.getOrderId();
+        LOGGER.info("ZJGK-PAY-HANDLER START, ORDER id = {}",orderId);
         AssetPaymentOrder order = assetProvider.findAssetPaymentById(cmd.getOrderId());
         List<AssetPaymentOrderBills> bills = assetProvider.findBillsById(orderId);
         Map<String,Integer> billStatuses = new HashMap<>();
@@ -60,6 +62,7 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
             }
             String postJson;
             try {
+                LOGGER.info("ready to request shenzhou for paymentnotify, json is = {}",json);
                 postJson = HttpUtils.postJson(url, json, 120, HTTP.UTF_8);
                 LOGGER.info("Get bill items from zjgk success, url={}, param={}, result={}", url, json, postJson);
             } catch (Exception e) {
@@ -93,6 +96,7 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
             orderStatus = 4;
         }
         Byte finalOrderStatus = orderStatus;
+        LOGGER.info("FINAL orderStatus is = {}",finalOrderStatus);
         this.dbProvider.execute((TransactionStatus status) -> {
             assetProvider.changeOrderStaus(orderId, finalOrderStatus);
             assetProvider.changeBillStatusOnOrder(billStatuses,orderId);
@@ -105,6 +109,7 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
      */
     @Override
     public void payFail(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
+        LOGGER.info("pay failed for zjgk, returned notificationCmd = {}",cmd.toString());
         this.dbProvider.execute((TransactionStatus status) -> {
             assetProvider.changeOrderStaus(cmd.getOrderId(),(byte)1);
             return null;

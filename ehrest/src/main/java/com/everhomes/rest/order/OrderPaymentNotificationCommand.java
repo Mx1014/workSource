@@ -1,6 +1,7 @@
 package com.everhomes.rest.order;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.util.Map;
 
@@ -143,5 +144,10 @@ public class OrderPaymentNotificationCommand {
 
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
