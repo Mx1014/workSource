@@ -1295,8 +1295,9 @@ public class ParkingServiceImpl implements ParkingService {
 		
 			String host =  configProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
 
-
-			dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?configId=" + parkingFlow.getId());
+			if (parkingFlow.getCardAgreementFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
+				dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?configId=" + parkingFlow.getId());
+			}
 		}else {
 			dto = ConvertHelper.convert(cmd, ParkingRequestCardConfigDTO.class);
 			dto.setCardAgreementFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
