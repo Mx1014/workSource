@@ -50,6 +50,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private CategoryProvider categoryProvider;
 	@Autowired
 	private UserProvider userProvider;
+	@Autowired
+	private FlowEventLogProvider flowEventLogProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 
@@ -147,8 +149,11 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 				//通知第三方 config表中配置api请求地址
-				FlowSubjectDTO subjectDTO = flowService.getSubectById(ctx.getCurrentEvent().getSubject().getId());
 				//要求传的是转发项目经理填写的内容和图片 add by xiongying20170922
+				FlowEventLog log = flowEventLogProvider.findPefixFireLog(ctx.getFlowCase().getCurrentNodeId(),
+						ctx.getPrefixNode().getFlowNode().getId(), ctx.getFlowCase().getId(), ctx.getFlowCase().getStepCount());
+				FlowSubjectDTO subjectDTO = flowService.getSubectById(log.getSubjectId());
+
 				pmTaskCommonService.handoverTaskToTrd(task, subjectDTO.getContent(), subjectDTO.getImages());
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
