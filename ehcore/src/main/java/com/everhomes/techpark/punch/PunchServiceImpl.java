@@ -28,10 +28,14 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bus.*;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.uniongroup.*;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
@@ -199,6 +203,9 @@ public class PunchServiceImpl implements PunchService {
         }
     };
     private static ThreadLocal<List<PunchTimeRule>> targetTimeRules = new ThreadLocal<List<PunchTimeRule>>() ;
+
+	@Autowired
+	private SequenceProvider sequenceProvider;
 
 	@Autowired
 	private ScheduleProvider scheduleProvider;
@@ -6292,6 +6299,8 @@ public class PunchServiceImpl implements PunchService {
         		ptr.setPunchOrganizationId(punchOrgId);
 				ptr.setStatus(pr.getStatus());
         		ptr.setFlexTimeLong(timeRule.getFlexTime());
+				ptr.setCreatorUid(UserContext.current().getUser().getId());
+				ptr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         		ptrs.add(ptr);
         		if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
         			//固定班次 默认第二天4点
@@ -6358,15 +6367,52 @@ public class PunchServiceImpl implements PunchService {
         	}
         }
         //排班
-        if(punchGroupDTO.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && punchGroupDTO.getSchedulings() != null){
-        	for(PunchSchedulingDTO monthScheduling : punchGroupDTO.getSchedulings()){
-				if (null != monthScheduling.getEmployees()) {
-					for (PunchSchedulingEmployeeDTO r : monthScheduling.getEmployees()) {
-						saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs);
-					}
+
+		if (punchGroupDTO.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && punchGroupDTO.getSchedulings() != null) {
+			List<PunchScheduling> schedulings = new ArrayList<>();
+			for (PunchSchedulingDTO monthScheduling : punchGroupDTO.getSchedulings()) {
+				List<PunchScheduling> psList = saveMonthSchedulings(monthScheduling, pr, ptrs);
+				if (null != psList && psList.size() > 0) {
+					schedulings.addAll(psList);
 				}
 			}
-        }
+			if (schedulings.size() > 0) {
+				//批量保存
+				List<EhPunchSchedulings> ehPsList = new ArrayList<>();
+				Long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), schedulings.size());
+				for (PunchScheduling ps : schedulings) {
+					ps.setId(beginId++);
+					EhPunchSchedulings eps = ConvertHelper.convert(ps, EhPunchSchedulings.class);
+					ehPsList.add(eps);
+				}
+				punchSchedulingProvider.batchCreatePunchSchedulings(ehPsList);
+			}
+		}
+	}
+
+	private List<PunchScheduling> saveMonthSchedulings(PunchSchedulingDTO monthScheduling, PunchRule pr, List<PunchTimeRule> ptrs) {
+
+		//删除今日之后的,并且在monthScheduling的月份的
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(monthScheduling.getMonth());
+		calendar.set(Calendar.DAY_OF_MONTH, 1);
+		Date monthBeginDate = calendar.getTime();
+		calendar.add(Calendar.MONTH, 1);
+		Date monthEndDate = calendar.getTime();
+		punchSchedulingProvider.deleteAfterTodayPunchSchedulingByPunchRuleId(pr.getId(),
+				monthBeginDate,monthEndDate);
+
+
+		List<PunchScheduling> schedulings = new ArrayList<>();
+		if (null != monthScheduling.getEmployees()) {
+			for (PunchSchedulingEmployeeDTO r : monthScheduling.getEmployees()) {
+				List<PunchScheduling> psList = saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs);
+				if (null != psList && psList.size() > 0) {
+					schedulings.addAll(psList);
+				}
+			}
+		}
+		return schedulings;
 	}
 
 	private void deletePunchTimeRules(Long punchOrgId) {
@@ -6410,9 +6456,10 @@ public class PunchServiceImpl implements PunchService {
 
 	}
 
-	private void saveEmployeeScheduling(PunchSchedulingEmployeeDTO r, Long month, PunchRule pr, List<PunchTimeRule> ptrs) {
+	private List<PunchScheduling> saveEmployeeScheduling(PunchSchedulingEmployeeDTO r, Long month, PunchRule pr, List<PunchTimeRule> ptrs) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(month);
+		List<PunchScheduling> schedulings = new ArrayList<>();
 		int i = 1;
 		for(String ruleName : r.getDaySchedulings() ){
 			PunchTimeRule ptr =findPtrByName(ptrs,ruleName);
@@ -6434,12 +6481,10 @@ public class PunchServiceImpl implements PunchService {
 			ps.setTargetType(PunchTargetType.USER.getCode());
 			ps.setTargetId(r.getUserId());
 
-            punchSchedulingProvider.deletePunchSchedulingByPunchRuleId(pr.getId(),ps.getRuleDate(),
-                    ps.getOwnerId(),ps.getTargetId());
-			punchSchedulingProvider.createPunchScheduling(ps);
-
+			schedulings.add(ps);
 			i++;
 		}
+		return schedulings;
 	}
 	private PunchTimeRule findPtrByName(List<PunchTimeRule> ptrs, String ruleName) {
 		for(PunchTimeRule ptr : ptrs){
