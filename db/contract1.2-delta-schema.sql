@@ -2,3 +2,5 @@ ALTER TABLE `eh_var_field_scopes` ADD COLUMN `community_id` BIGINT COMMENT '园�
 ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
 ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
 ALTER TABLE eh_var_fields ADD COLUMN `field_param` VARCHAR(128);
+
+ALTER TABLE `eh_buildings` ADD INDEX building_name ( `name`, `alias_name`);
