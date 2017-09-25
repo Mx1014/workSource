@@ -114,11 +114,38 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
+    private void checkEnterpriseCustomerNumberUnique(Long id, Integer namespaceId, String customerNumber, String customerName) {
+        if(StringUtils.isNotBlank(customerNumber)) {
+            List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndNumber(namespaceId, customerNumber);
+            if(customers != null && customers.size() > 0) {
+                if(id != null && customers.size() == 1 && id.equals(customers.get(0).getId())) {
+                    return;
+                }
+                LOGGER.error("customerNumber {} in namespace {} already exist!", customerNumber, namespaceId);
+                throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NUMBER_IS_EXIST,
+                        "contractNumber is already exist");
+            }
+        }
+        if(StringUtils.isNotBlank(customerName)) {
+            List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, customerName);
+            if(customers != null && customers.size() > 0) {
+                if(id != null && customers.size() == 1 && id.equals(customers.get(0).getId())) {
+                    return;
+                }
+                LOGGER.error("customerName {} in namespace {} already exist!", customerName, namespaceId);
+                throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NAME_IS_EXIST,
+                        "customerName is already exist");
+            }
+        }
+
+    }
+
     @Override
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
         checkPrivilege();
+        checkEnterpriseCustomerNumberUnique(null, cmd.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
-        customer.setNamespaceId(UserContext.getCurrentNamespaceId());
+        customer.setNamespaceId(cmd.getNamespaceId());
         if(cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
@@ -169,6 +196,7 @@ public class CustomerServiceImpl implements CustomerService {
     public EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd) {
         checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        checkEnterpriseCustomerNumberUnique(customer.getId(), customer.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         updateCustomer.setNamespaceId(customer.getNamespaceId());
         updateCustomer.setCommunityId(customer.getCommunityId());

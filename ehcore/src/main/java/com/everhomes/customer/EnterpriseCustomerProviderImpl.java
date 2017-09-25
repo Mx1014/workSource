@@ -119,6 +119,23 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndNumber(Integer namespaceId, String number) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CUSTOMER_NUMBER.eq(number));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
     public EnterpriseCustomer findById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());

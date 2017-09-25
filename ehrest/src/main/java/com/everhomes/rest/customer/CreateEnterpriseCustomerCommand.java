@@ -66,6 +66,7 @@ import java.math.BigDecimal;
  * Created by ying.xiong on 2017/8/1.
  */
 public class CreateEnterpriseCustomerCommand {
+    private Integer namespaceId;
     private String customerNumber;
     private String name;
     private String nickName;
@@ -124,6 +125,14 @@ public class CreateEnterpriseCustomerCommand {
     private String managerPhone;
     private String managerEmail;
     private String remark;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getCommunityId() {
         return communityId;
