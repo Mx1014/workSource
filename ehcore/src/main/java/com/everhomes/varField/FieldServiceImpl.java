@@ -38,7 +38,11 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldGroupDTO> groups = systemGroups.stream().map(systemGroup -> {
                 return ConvertHelper.convert(systemGroup, SystemFieldGroupDTO.class);
             }).collect(Collectors.toList());
-            return groups;
+
+            //处理group的树状结构
+            SystemFieldGroupDTO fieldGroupDTO = processSystemFieldGroupnTree(groups, null);
+            List<SystemFieldGroupDTO> groupDTOs = fieldGroupDTO.getChildren();
+            return groupDTOs;
         }
         return null;
     }
@@ -60,9 +64,22 @@ public class FieldServiceImpl implements FieldService {
         List<Field> systemFields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
         if(systemFields != null && systemFields.size() > 0) {
             List<SystemFieldDTO> fields = systemFields.stream().map(systemField -> {
-                return ConvertHelper.convert(systemField, SystemFieldDTO.class);
+                SystemFieldDTO dto = ConvertHelper.convert(systemField, SystemFieldDTO.class);
+                List<SystemFieldItemDTO> itemDTOs = getSystemFieldItems(systemField.getId());
+                dto.setItems(itemDTOs);
+                return dto;
             }).collect(Collectors.toList());
             return fields;
+        }
+        return null;
+    }
+
+    private List<SystemFieldItemDTO> getSystemFieldItems(Long systemFieldId) {
+        List<FieldItem> items = fieldProvider.listFieldItems(systemFieldId);
+        if(items != null && items.size() > 0) {
+            List<SystemFieldItemDTO> dtos = items.stream().map(item -> {
+                return ConvertHelper.convert(item, SystemFieldItemDTO.class);
+            }).collect(Collectors.toList());
         }
         return null;
     }
@@ -71,14 +88,15 @@ public class FieldServiceImpl implements FieldService {
     public List<FieldDTO> listFields(ListFieldCommand cmd) {
         List<FieldDTO> dtos = null;
         if(cmd.getNamespaceId() == null) {
-            List<Field> fields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
-            if(fields != null && fields.size() > 0) {
-                dtos = fields.stream().map(field -> {
-                    FieldDTO dto = ConvertHelper.convert(field, FieldDTO.class);
-                    dto.setFieldDisplayName(field.getDisplayName());
-                    return dto;
-                }).collect(Collectors.toList());
-            }
+            return null;
+//            List<Field> fields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
+//            if(fields != null && fields.size() > 0) {
+//                dtos = fields.stream().map(field -> {
+//                    FieldDTO dto = ConvertHelper.convert(field, FieldDTO.class);
+//                    dto.setFieldDisplayName(field.getDisplayName());
+//                    return dto;
+//                }).collect(Collectors.toList());
+//            }
         } else {
             dtos = listScopeFields(cmd);
         }
@@ -523,14 +541,15 @@ public class FieldServiceImpl implements FieldService {
     public List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd) {
         List<FieldGroupDTO> dtos = null;
         if(cmd.getNamespaceId() == null) {
-            List<FieldGroup> groups = fieldProvider.listFieldGroups(cmd.getModuleName());
-            if(groups != null && groups.size() > 0) {
-                dtos = groups.stream().map(group -> {
-                    FieldGroupDTO dto = ConvertHelper.convert(group, FieldGroupDTO.class);
-                    dto.setGroupDisplayName(group.getTitle());
-                    return dto;
-                }).collect(Collectors.toList());
-            }
+            return null;
+//            List<FieldGroup> groups = fieldProvider.listFieldGroups(cmd.getModuleName());
+//            if(groups != null && groups.size() > 0) {
+//                dtos = groups.stream().map(group -> {
+//                    FieldGroupDTO dto = ConvertHelper.convert(group, FieldGroupDTO.class);
+//                    dto.setGroupDisplayName(group.getTitle());
+//                    return dto;
+//                }).collect(Collectors.toList());
+//            }
         } else {
             dtos = listScopeFieldGroups(cmd);
         }
@@ -591,22 +610,40 @@ public class FieldServiceImpl implements FieldService {
      * @param dto
      * @return
      */
+    private SystemFieldGroupDTO processSystemFieldGroupnTree(List<SystemFieldGroupDTO> dtos, SystemFieldGroupDTO dto) {
+        List<SystemFieldGroupDTO> trees = new ArrayList<>();
+        if(dto == null) {
+            dto = new SystemFieldGroupDTO();
+            dto.setId(0L);
+        }
+        for (SystemFieldGroupDTO groupTreeDTO : dtos) {
+            if (groupTreeDTO.getParentId().equals(dto.getId())) {
+                SystemFieldGroupDTO fieldGroupTreeDTO = processSystemFieldGroupnTree(dtos, groupTreeDTO);
+                trees.add(fieldGroupTreeDTO);
+            }
+        }
+        dto.setChildren(trees);
+        return dto;
+    }
+
+    /**
+     * 树状结构
+     * @param dtos
+     * @param dto
+     * @return
+     */
     private FieldGroupDTO processFieldGroupnTree(List<FieldGroupDTO> dtos, FieldGroupDTO dto) {
         List<FieldGroupDTO> trees = new ArrayList<>();
-
         if(dto == null) {
             dto = new FieldGroupDTO();
             dto.setGroupId(0L);
         }
-//        FieldGroupDTO allTreeDTO = ConvertHelper.convert(dto, FieldGroupDTO.class);
-//        trees.add(allTreeDTO);
         for (FieldGroupDTO groupTreeDTO : dtos) {
             if (groupTreeDTO.getParentId().equals(dto.getGroupId())) {
-                FieldGroupDTO organizationTreeDTO = processFieldGroupnTree(dtos, groupTreeDTO);
-                trees.add(organizationTreeDTO);
+                FieldGroupDTO fieldGroupTreeDTO = processFieldGroupnTree(dtos, groupTreeDTO);
+                trees.add(fieldGroupTreeDTO);
             }
         }
-
         dto.setChildrenGroup(trees);
         return dto;
     }

@@ -1,5 +1,9 @@
 package com.everhomes.rest.varField;
 
+import com.everhomes.discover.ItemType;
+
+import java.util.List;
+
 /**
  * <ul>
  *     <li>id: 字段在系统中的id</li>
@@ -11,6 +15,7 @@ package com.everhomes.rest.varField;
  *     <li>groupPath: 字段所属组路径</li>
  *     <li>mandatoryFlag: 是否必选</li>
  *     <li>defaultOrder: 显示顺序</li>
+ *     <li>items: 字段选择项 参考{@link com.everhomes.rest.varField.SystemFieldItemDTO}</li>
  * </ul>
  * Created by ying.xiong on 2017/9/21.
  */
@@ -25,6 +30,16 @@ public class SystemFieldDTO {
     private Byte mandatoryFlag;
     private Integer defaultOrder;
     private String fieldParam;
+    @ItemType(SystemFieldItemDTO.class)
+    private List<SystemFieldItemDTO> items;
+
+    public List<SystemFieldItemDTO> getItems() {
+        return items;
+    }
+
+    public void setItems(List<SystemFieldItemDTO> items) {
+        this.items = items;
+    }
 
     public String getFieldParam() {
         return fieldParam;

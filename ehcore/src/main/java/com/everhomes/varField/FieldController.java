@@ -40,7 +40,7 @@ public class FieldController extends ControllerBase {
 
     /**
      * <b>URL: /varField/listSystemFieldGroups</b>
-     * <p>获取域空间模块字段组</p>
+     * <p>获取系统模块字段组</p>
      * @return {@link SystemFieldGroupDTO}
      */
     @RequestMapping("listSystemFieldGroups")
@@ -55,7 +55,7 @@ public class FieldController extends ControllerBase {
 
     /**
      * <b>URL: /varField/listSystemFieldItems</b>
-     * <p>获取域空间模块字段选择项</p>
+     * <p>获取系统模块字段选择项</p>
      * @return {@link SystemFieldItemDTO}
      */
     @RequestMapping("listSystemFieldItems")
