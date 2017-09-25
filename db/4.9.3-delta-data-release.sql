@@ -134,4 +134,6 @@ END
 CALL create_service_alliance_menu_scope;
 DROP PROCEDURE if exists create_service_alliance_menu_scope;
 -- ------------- 新建菜单Scope END--------
+-- 删除服务联盟老菜单
+DELETE from eh_web_menus WHERE id = 40500;
 -- end by dengs, 20170925 服务联盟2.9
