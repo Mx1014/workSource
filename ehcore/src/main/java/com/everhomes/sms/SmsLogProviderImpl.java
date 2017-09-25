@@ -66,13 +66,13 @@ public class SmsLogProviderImpl implements SmsLogProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhSmsLogs.class));
         com.everhomes.server.schema.tables.EhSmsLogs t = Tables.EH_SMS_LOGS;
 
-        Table<EhSmsLogsRecord> subT = context.selectFrom(t)
+        Table<Record4<Long, String, Byte, Timestamp>> subT = context.select(t.ID, t.HANDLER, t.STATUS, t.CREATE_TIME).from(t)
                 // .where(t.NAMESPACE_ID.eq(namespaceId))
                 .where(t.MOBILE.eq(mobile))
                 .and(t.HANDLER.in(handlerNames))
                 .orderBy(t.ID.desc()).asTable();
 
-        return context.selectFrom(subT)
+        return context.select(t.ID, t.HANDLER, t.STATUS, t.CREATE_TIME).from(subT)
                 .groupBy(subT.field(t.HANDLER))
                 .fetchMap(t.HANDLER, SmsLog.class);
     }
