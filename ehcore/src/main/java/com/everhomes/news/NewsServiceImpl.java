@@ -1045,6 +1045,8 @@ public class NewsServiceImpl implements NewsService {
 	@Override
 	public GetNewsTagResponse getNewsTag(GetNewsTagCommand cmd) {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		if (cmd.getPageSize()==null)
+			pageSize = 9999999;
 		List<NewsTag> parentTags = newsProvider.listNewsTag(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getIsSearch(),0l,
 				cmd.getPageAnchor(),pageSize+1);
 		List<NewsTagDTO> result = parentTags.stream().map(r->ConvertHelper.convert(r,NewsTagDTO.class)).
