@@ -359,6 +359,8 @@ import com.everhomes.server.schema.tables.pojos.EhSearchTypes;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApartmentRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceAttachments;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCommentAttachments;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceComments;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceGolfRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceGymRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceInvestRequests;
@@ -2203,6 +2205,15 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhParkingCardTypes.class, Tables.EH_PARKING_CARD_TYPES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PARKING_CARD_TYPES.ID.max()).from(Tables.EH_PARKING_CARD_TYPES).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhServiceAllianceCommentAttachments.class, Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS).fetchOne().value1();
+        });
+        	
+        syncTableSequence(null, EhServiceAllianceComments.class, Tables.EH_SERVICE_ALLIANCE_COMMENTS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENTS).fetchOne().value1();
+        });
+
     }
 
     @SuppressWarnings("rawtypes")

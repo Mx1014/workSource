@@ -150,10 +150,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				pmTaskProvider.updateTask(task);
 				//通知第三方 config表中配置api请求地址
 				//要求传的是转发项目经理填写的内容和图片 add by xiongying20170922
-				FlowEventLog log = flowEventLogProvider.findPefixFireLog(ctx.getFlowCase().getCurrentNodeId(),
-						ctx.getPrefixNode().getFlowNode().getId(), ctx.getFlowCase().getId(), ctx.getFlowCase().getStepCount());
-				FlowSubjectDTO subjectDTO = flowService.getSubectById(log.getSubjectId());
-
+				FlowSubjectDTO subjectDTO = flowService.getSubectById(ctx.getCurrentEvent().getSubject().getId());
 				pmTaskCommonService.handoverTaskToTrd(task, subjectDTO.getContent(), subjectDTO.getImages());
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
@@ -390,7 +387,14 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 										List<Tuple<String, Object>> variables) {
 		FlowCase flowCase = ctx.getFlowCase();
 		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-		Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());
+		Category category = null;
+		//Todo:为科兴与一碑对接
+		if (task.getNamespaceId()==999983 && null!= task.getTaskCategoryId() &&
+				task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			category = new Category();
+			category.setName("物业报修");
+		}else
+			category = categoryProvider.findCategoryById(task.getTaskCategoryId());
 
 		if (SmsTemplateCode.PM_TASK_CREATOR_CODE == templateId) {
 

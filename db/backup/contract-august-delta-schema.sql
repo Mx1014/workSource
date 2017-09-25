@@ -1,4 +1,6 @@
+-- 增加域空间左上角显示场景名称的配置项
+ALTER TABLE eh_namespace_details ADD COLUMN name_type tinyint(4) DEFAULT 0;
 
-
--- 增加联系人职位 add by xiongying 20170914
-ALTER TABLE eh_enterprise_customers ADD COLUMN contact_position VARCHAR(64);
+-- fix 15631 & 15636 add by xiongying20170919
+ALTER TABLE eh_organizations ADD COLUMN website VARCHAR(256);
+ALTER TABLE eh_organizations ADD COLUMN unified_social_credit_code VARCHAR(256);
