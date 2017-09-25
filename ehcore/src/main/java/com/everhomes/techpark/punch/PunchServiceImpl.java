@@ -6400,13 +6400,14 @@ public class PunchServiceImpl implements PunchService {
 		calendar.add(Calendar.MONTH, 1);
 		Date monthEndDate = calendar.getTime();
 		punchSchedulingProvider.deleteAfterTodayPunchSchedulingByPunchRuleId(pr.getId(),
-				monthBeginDate,monthEndDate);
-
+				monthBeginDate, monthEndDate);
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
+		int monthDays = calendar.get(Calendar.DAY_OF_MONTH);
 
 		List<PunchScheduling> schedulings = new ArrayList<>();
 		if (null != monthScheduling.getEmployees()) {
 			for (PunchSchedulingEmployeeDTO r : monthScheduling.getEmployees()) {
-				List<PunchScheduling> psList = saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs);
+				List<PunchScheduling> psList = saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs,monthDays);
 				if (null != psList && psList.size() > 0) {
 					schedulings.addAll(psList);
 				}
@@ -6456,12 +6457,15 @@ public class PunchServiceImpl implements PunchService {
 
 	}
 
-	private List<PunchScheduling> saveEmployeeScheduling(PunchSchedulingEmployeeDTO r, Long month, PunchRule pr, List<PunchTimeRule> ptrs) {
+	private List<PunchScheduling> saveEmployeeScheduling(PunchSchedulingEmployeeDTO r, Long month, PunchRule pr, List<PunchTimeRule> ptrs, int monthDays) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(month);
 		List<PunchScheduling> schedulings = new ArrayList<>();
 		int i = 1;
 		for(String ruleName : r.getDaySchedulings() ){
+			if (i > monthDays) {
+				break;
+			}
 			PunchTimeRule ptr =findPtrByName(ptrs,ruleName);
 			calendar.set(Calendar.DAY_OF_MONTH, i);
 			PunchScheduling ps = ConvertHelper.convert(pr, PunchScheduling.class);
