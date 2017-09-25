@@ -137,7 +137,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
                 //  添加档案记录
                 TransferArchivesEmployeesCommand logCommand = ConvertHelper.convert(cmd, TransferArchivesEmployeesCommand.class);
-                logCommand.setEffectiveTime(ArchivesUtil.currentDate());
+                logCommand.setEffectiveTime(String.valueOf(ArchivesUtil.currentDate()));
                 logCommand.setTransferType(ArchivesTransferType.OTHER.getCode());
                 transferArchivesEmployeesLogs(logCommand);
                 transferArchivesEmployeesLogs(logCommand);
@@ -164,7 +164,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 DismissArchivesEmployeesCommand dismissCommand = new DismissArchivesEmployeesCommand();
                 dismissCommand.setDetailIds(cmd.getDetailIds());
                 dismissCommand.setOrganizationId(cmd.getOrganizationId());
-                dismissCommand.setDismissTime(ArchivesUtil.currentDate());
+                dismissCommand.setDismissTime(String.valueOf(ArchivesUtil.currentDate()));
                 dismissCommand.setDismissType(ArchivesDismissType.OTHER.getCode());
                 dismissCommand.setDismissReason(ArchivesDismissReason.OTHER.getCode());
                 dismissCommand.setDismissRemark("通讯录删除");
