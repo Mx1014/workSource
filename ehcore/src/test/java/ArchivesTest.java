@@ -21,12 +21,13 @@ public class ArchivesTest {
     }
 
     @Test
-    public void testDrive(){
+    public void testDrive(){/*
         String str = "2017-09-20";
         java.sql.Date date = ArchivesUtil.currentDate();
         java.sql.Date dateStr = ArchivesUtil.parseDate(str);
         System.out.println(dateStr);
         System.out.println(date);
-        System.out.println(date.toString().equals(dateStr.toString()));
+        System.out.println(date.toString().equals(dateStr.toString()));*/
+        System.out.println(ArchivesUtil.currentDate());
     }
 }

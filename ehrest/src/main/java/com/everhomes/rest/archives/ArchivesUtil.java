@@ -26,7 +26,7 @@ public class ArchivesUtil {
     public static java.sql.Date currentDate(){
         java.util.Date now  = new java.util.Date();
         java.sql.Date date = new java.sql.Date(now.getTime());
-/*        DateFormat df = DateFormat.getDateInstance();
+/*        DateFormat df = DateFormat.getDateInstance();0
         String str = df.format(now);*/
         return date;
     }
