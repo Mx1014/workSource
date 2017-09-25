@@ -104,10 +104,10 @@ public class CommunityMapController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /community_map/updateCommunityMapShop</b>
-     * <p>修改园区地图店铺</p>
+     * <b>URL: /community_map/createCommunityMapShop</b>
+     * <p>创建园区地图店铺</p>
      */
-    @RequestMapping("updateCommunityMapShop")
+    @RequestMapping("createCommunityMapShop")
     @RestReturn(value=CommunityMapShopDetailDTO.class)
     public RestResponse createCommunityMapShop(CreateCommunityMapShopCommand cmd) {
         RestResponse response = new RestResponse(communityMapService.createCommunityMapShop(cmd));
