@@ -22,6 +22,7 @@ import com.everhomes.app.AppProvider;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.order.PayService;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.order.*;
@@ -1641,7 +1642,7 @@ public class ParkingServiceImpl implements ParkingService {
 
         } else{
             LOGGER.error("Refund failed from vendor, cmd={}, refundCmd={}, response={}",
-                    cmd, refundCmd, refundResponse);
+                    cmd, cmd, refundResponse);
             throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
                     RentalServiceErrorCode.ERROR_REFUND_ERROR,
                     "bill refund error");

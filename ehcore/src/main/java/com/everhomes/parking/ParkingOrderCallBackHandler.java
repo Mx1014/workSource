@@ -17,6 +17,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderType;
@@ -126,7 +127,14 @@ public class ParkingOrderCallBackHandler implements PaymentCallBackHandler {
 			if(order.getStatus() == ParkingRechargeOrderStatus.UNPAID.getCode()) {
 				order.setStatus(ParkingRechargeOrderStatus.PAID.getCode());
 				order.setPaidTime(payTimeStamp);
-//				order.setPaidType(cmd.getVendorType());
+				PaymentType paymentType = PaymentType.fromCode(cmd.getPaymentType());
+				if (null != paymentType) {
+					if (paymentType.name().toUpperCase().startsWith("WECHAT")) {
+						order.setPaidType(VendorType.WEI_XIN.getCode());
+					}else {
+						order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
+					}
+				}
 				parkingProvider.updateParkingRechargeOrder(order);
 			}
 			if(order.getStatus() == ParkingRechargeOrderStatus.PAID.getCode()) {

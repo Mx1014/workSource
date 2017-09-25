@@ -22,6 +22,7 @@ import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.parking.ParkingVendorHandler;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowReferType;
@@ -84,8 +85,17 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 				RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(String.valueOf(cmd.getOrderId()));
 				RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
 				order.setPaidMoney(order.getPaidMoney().add(new java.math.BigDecimal(cmd.getAmount())));
-//				order.setVendorType(cmd.getVendorType());
-//				orderMap.setVendorType(cmd.getVendorType());
+				PaymentType paymentType = PaymentType.fromCode(cmd.getPaymentType());
+				if (null != paymentType) {
+					if (paymentType.name().toUpperCase().startsWith("WECHAT")) {
+						order.setVendorType(VendorType.WEI_XIN.getCode());
+						orderMap.setVendorType(VendorType.WEI_XIN.getCode());
+					}else {
+						order.setVendorType(VendorType.ZHI_FU_BAO.getCode());
+						orderMap.setVendorType(VendorType.ZHI_FU_BAO.getCode());
+					}
+				}
+
 				order.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 				orderMap.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
