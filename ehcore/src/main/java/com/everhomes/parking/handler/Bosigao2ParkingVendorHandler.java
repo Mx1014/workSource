@@ -67,7 +67,9 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 			//计算有效期从当天235959秒计算
 			long expireTime = Utils.strToLong(expireDate + "235959", Utils.DateStyle.DATE_TIME_STR);
 			if (checkExpireTime(parkingLot, expireTime)) {
-				return resultList;
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 			}
 			
 			String userName = cardInfo.getUserName();
@@ -168,6 +170,7 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 		List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
 
 			ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+			dto.setCardTypeId(r.getCardType());
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.BOSIGAO2.getCode());
 			return dto;

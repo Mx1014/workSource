@@ -44,8 +44,11 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 			//格式yyyyMMddHHmmss
 			String validEnd = card.getLimitEnd();
 			Long endTime = strToLong(validEnd);
+
 			if (checkExpireTime(parkingLot, endTime)) {
-				return resultList;
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 			}
 			
 			String plateOwnerName = card.getUserName();
@@ -62,8 +65,9 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 			parkingCardDTO.setEndTime(endTime);
 			parkingCardDTO.setCardType(cardType);
 			parkingCardDTO.setCardNumber(cardNumber);
+			//历史遗留下来，已废弃
 			parkingCardDTO.setIsValid(true);
-			
+
 			resultList.add(parkingCardDTO);
 		}
         return resultList;
@@ -262,6 +266,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
     	
     	List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
 			ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+			dto.setCardTypeId(r.getCardType());
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
 			return dto;
