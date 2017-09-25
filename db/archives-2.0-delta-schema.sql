@@ -82,7 +82,7 @@ CREATE TABLE `eh_archives_logs` (
 	`operation_reason` VARCHAR(64) COMMENT 'the reason of the operation',
 	`operation_remark` VARCHAR(256) COMMENT 'the remark',
 	`operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the operator',
-	`operator_name` VARCHAR(64) NOT NULL DEFAULT 0 COMMENT 'the id of the operator',
+	`operator_name` VARCHAR(64) NOT NULL DEFAULT 0 COMMENT 'the name of the operator',
 	`create_time` DATETIME COMMENT 'create time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;

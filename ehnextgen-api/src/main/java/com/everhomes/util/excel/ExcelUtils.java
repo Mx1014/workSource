@@ -3,10 +3,7 @@ package com.everhomes.util.excel;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -32,6 +29,10 @@ public class ExcelUtils {
     private String fileDir;
     //sheet名
     private String sheetName = "sheet1";
+    //备注内容
+    private String titleRemark;
+    //必填项设置列表
+    private List<Integer> mandatoryTitle;
     //表头字体
     private String titleFontType = "Arial Unicode MS";
     //表头字号
@@ -46,12 +47,12 @@ public class ExcelUtils {
     private short titleRemarkFontSize = 18;
     //首行备注高度
     private short titleRemarkCellHeight = 18;
-    // 是否需要序号列
+    //是否需要序号列
     private boolean needSequenceColumn = true;
-    // 是否需要首行备注
+    //是否需要首行备注
     private boolean needTitleRemark = false;
-    // 备注内容
-    private String titleRemark;
+    //是否需要标注必填项
+    private boolean needMandatoryTitle = false;
 
     private XSSFWorkbook workbook = null;
 
@@ -88,6 +89,11 @@ public class ExcelUtils {
         return this;
     }
 
+    public ExcelUtils setNeedMandatoryTitle(boolean needMandatoryTitle) {
+        this.needMandatoryTitle = needMandatoryTitle;
+        return this;
+    }
+
     /**
      * 设置表头字体大小.
      *
@@ -118,10 +124,19 @@ public class ExcelUtils {
         return this;
     }
 
+    /**
+     * 设置首行备注信息
+     *
+     */
     public ExcelUtils setTitleRemark(String titleRemark, short titleRemarkFontSize, short titleRemarkCellHeight) {
         this.titleRemark = titleRemark;
         this.titleRemarkFontSize = titleRemarkFontSize;
         this.titleRemarkCellHeight = titleRemarkCellHeight;
+        return this;
+    }
+
+    public ExcelUtils setMandatoryTitle(List<Integer> mandatoryTitle) {
+        this.mandatoryTitle = mandatoryTitle;
         return this;
     }
 
@@ -169,9 +184,12 @@ public class ExcelUtils {
         Sheet sheet = workbook.createSheet(this.sheetName);
         // 表头
         Row titleNameRow = sheet.createRow(0);
-        //设置样式
+        // 设置样式
         XSSFCellStyle titleStyle = workbook.createCellStyle();
         setTitleFont(titleStyle);
+        // 若含有必填项的样式
+        XSSFCellStyle mandatoryTitleStyle = workbook.createCellStyle();
+        setMandatoryTitleFont(mandatoryTitleStyle);
 
         if (needSequenceColumn) {
             Cell numberColumn = titleNameRow.createCell(0);
@@ -182,7 +200,11 @@ public class ExcelUtils {
         for (int i = 0; i < titleNames.length; i++) {
             sheet.setColumnWidth(needSequenceColumn ? i + 1 : i, titleSize[i] * 256);    //设置宽度
             Cell cell = titleNameRow.createCell(needSequenceColumn ? i + 1 : i);
-            cell.setCellStyle(titleStyle);
+            if (needMandatoryTitle) {
+                if (mandatoryTitle.get(i) == 1)
+                    cell.setCellStyle(mandatoryTitleStyle);
+            } else
+                cell.setCellStyle(titleStyle);
             cell.setCellValue(titleNames[i]);
         }
 
@@ -289,6 +311,19 @@ public class ExcelUtils {
         XSSFFont font = workbook.createFont();
         font.setFontHeightInPoints(this.titleFontSize);
         font.setFontName(this.titleFontType);
+        font.setBold(true);
+        style.setAlignment(CellStyle.ALIGN_CENTER);
+        style.setFont(font);
+    }
+
+    /**
+     * 设置表头字体
+     */
+    private void setMandatoryTitleFont(CellStyle style) {
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints(this.titleFontSize);
+        font.setFontName(this.titleFontType);
+        font.setColor(IndexedColors.RED.index);
         font.setBold(true);
         style.setAlignment(CellStyle.ALIGN_CENTER);
         style.setFont(font);

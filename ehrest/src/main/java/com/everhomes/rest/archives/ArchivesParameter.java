@@ -2,7 +2,11 @@ package com.everhomes.rest.archives;
 
 public interface ArchivesParameter {
 
+	static final String CONTACT_NAME = "contactName";
+
 	static final String GENDER = "gender";		//	性别
+
+	static final String CONTACT_TOKEN = "contactToken";
 
 	static final String MARITAL_FLAG = "maritalFlag";	//	婚姻状况
 
@@ -13,4 +17,6 @@ public interface ArchivesParameter {
 	static final String DEPARTMENTS = "departments";	//	部门
 
 	static final String DISMISS_REASON = "dismissReason";	//	离职原因
+
+	static final String CHECK_IN_TIME = "checkInTime";
 }

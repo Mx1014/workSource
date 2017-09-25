@@ -23,6 +23,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import javafx.scene.shape.Arc;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1623,13 +1624,12 @@ public class ArchivesServiceImpl implements ArchivesService {
             String name = r.getFieldDisplayName();
             return name;
         }).collect(Collectors.toList());
-        List<Integer> titleSizes = new ArrayList<>();
-        List<String> propertyNames = new ArrayList<>();
-        for (int i = 0; i < form.getFormFields().size(); i++) {
-            titleSizes.add(20);
+        List<Integer> mandatoryTitle = new ArrayList<>();
+        for(int i=0;i<form.getFormFields().size(); i++){
+            mandatoryTitle.add(checkMandatory(form.getFormFields().get(i).getFieldName()));
         }
-        excelUtils.setNeedSequenceColumn(false);
-        excelUtils.setNeedTitleRemark(true);
+        excelUtils.setNeedMandatoryTitle(true);
+        excelUtils.setMandatoryTitle(mandatoryTitle);
         excelUtils.setTitleRemark("填写须知：\n" +
                 "    1、请不要对员工信息类别进行增加、删除或修改，以免无法识别员工信息；\n" +
                 "    2、Excel中红色字段为必填字段,黑色字段为选填字段\n" +
@@ -1639,7 +1639,29 @@ public class ArchivesServiceImpl implements ArchivesService {
                 "    6、手机：支持国内、国际手机号（国内手机号直接输入手机号即可；国际手机号必须包含加号以及国家地区码，格式示例：“+85259****24”）；\n" +
                 "    7、合同公司：合同公司若为空，将默认使用公司全称\n" +
                 "    8、若要删除某行信息，请右键行号，选择删除",(short)18,(short)4480);
-        excelUtils.writeExcel(propertyNames,titleNames,titleSizes,propertyNames);
+        excelUtils.setNeedSequenceColumn(false);
+        excelUtils.setNeedTitleRemark(true);
+        List<String> propertyNames = new ArrayList<>();
+        List<Integer> titleSizes = new ArrayList<>();
+        for (int i = 0; i < form.getFormFields().size(); i++) {
+            titleSizes.add(20);
+        }
+        excelUtils.writeExcel(propertyNames, titleNames, titleSizes, propertyNames);
+    }
+
+    private Integer checkMandatory(String name){
+        if(ArchivesParameter.CONTACT_NAME.equals(name))
+            return 1;
+        else if(ArchivesParameter.CONTACT_TOKEN.equals(name))
+            return 1;
+        else if(ArchivesParameter.CHECK_IN_TIME.equals(name))
+            return 1;
+        else if(ArchivesParameter.EMPLOYEE_TYPE.equals(name))
+            return 1;
+        else if(ArchivesParameter.DEPARTMENTS.equals(name))
+            return 1;
+        else
+            return 0;
     }
 
     @Override
