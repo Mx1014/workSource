@@ -27,6 +27,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.parking.*;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
@@ -1641,8 +1642,8 @@ public class ParkingServiceImpl implements ParkingService {
         if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 
         } else{
-            LOGGER.error("Refund failed from vendor, cmd={}, refundCmd={}, response={}",
-                    cmd, cmd, refundResponse);
+            LOGGER.error("Refund failed from vendor, cmd={}, response={}",
+                    cmd, refundResponse);
             throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
                     RentalServiceErrorCode.ERROR_REFUND_ERROR,
                     "bill refund error");
