@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *     <li>allowTimeoutAction: 是否启动 Timeout 动作</li>
  *     <li>autoStepType: 自动跳转的动作 {@link com.everhomes.rest.flow.FlowStepType}</li>
  *     <li>params: 节点的额外参数</li>
+ *     <li>gotoProcessButtonName: gotoProcessButtonName</li>
  *     <li>needAllProcessorComplete: 节点会签开关</li>
  * </ul>
  */
@@ -23,6 +24,7 @@ public class UpdateFlowNodeCommand {
     private Byte allowTimeoutAction;
     private String autoStepType;
     private String params;
+    private String gotoProcessButtonName;
     private Byte needAllProcessorComplete;
 
     public String getAutoStepType() {
@@ -87,6 +89,14 @@ public class UpdateFlowNodeCommand {
 
     public void setNeedAllProcessorComplete(Byte needAllProcessorComplete) {
         this.needAllProcessorComplete = needAllProcessorComplete;
+    }
+
+    public String getGotoProcessButtonName() {
+        return gotoProcessButtonName;
+    }
+
+    public void setGotoProcessButtonName(String gotoProcessButtonName) {
+        this.gotoProcessButtonName = gotoProcessButtonName;
     }
 
     @Override

@@ -10,6 +10,7 @@ import java.util.List;
  * <ul>
  * <li>nodeId: 节点ID</li>
  * <li>nodeLevel: 节点层数</li>
+ * <li>laneId: 泳道id</li>
  * <li>nodeName: 节点名字</li>
  * <li>allowComment: 是否可以评论</li>
  * <li>logs: 详细日志信息，目前仅有 logContent 有用 </li>
@@ -20,17 +21,19 @@ import java.util.List;
 public class FlowNodeLogDTO {
 
 	private Long nodeId;
-	private Integer nodeLevel;
+    private Long laneId;
+    private Integer nodeLevel;
 	private String nodeName;
 	private Byte allowComment;
 	private Byte isCurrentNode;
 	private Long commentButtonId;
 	private String params;
+    private Byte needSelectNextNode;
 
-	@ItemType(FlowEventLogDTO.class)
+    @ItemType(FlowEventLogDTO.class)
 	private List<FlowEventLogDTO> logs;
 
-	public FlowNodeLogDTO() {
+    public FlowNodeLogDTO() {
 		logs = new ArrayList<>();
 	}
 	
@@ -86,7 +89,15 @@ public class FlowNodeLogDTO {
 		return commentButtonId;
 	}
 
-	public void setCommentButtonId(Long commentButtonId) {
+    public Long getLaneId() {
+        return laneId;
+    }
+
+    public void setLaneId(Long laneId) {
+        this.laneId = laneId;
+    }
+
+    public void setCommentButtonId(Long commentButtonId) {
 		this.commentButtonId = commentButtonId;
 	}
 
@@ -101,5 +112,13 @@ public class FlowNodeLogDTO {
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public void setNeedSelectNextNode(Byte needSelectNextNode) {
+        this.needSelectNextNode = needSelectNextNode;
+    }
+
+    public Byte getNeedSelectNextNode() {
+        return needSelectNextNode;
     }
 }

@@ -10,6 +10,7 @@ public class FlowGraphNodeNormal extends FlowGraphNode {
 	private FlowStateProcessor flowStateProcessor;
 	
 	public FlowGraphNodeNormal() {
+	    super();
 		flowStateProcessor = PlatformContext.getComponent(FlowStateProcessor.class);
 	}
 	

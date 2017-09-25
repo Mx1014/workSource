@@ -4,6 +4,8 @@ import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.user.UserInfo;
 
+import java.util.List;
+
 public interface FlowStateProcessor {
 
     void step(FlowCaseState ctx, FlowGraphEvent event);
@@ -26,5 +28,9 @@ public interface FlowStateProcessor {
 
     FlowCaseState prepareNoStep(FlowAutoStepDTO stepDTO);
 
-    FlowGraphNode rejectToNode(FlowCaseState ctx, Integer gotoLevel, FlowGraphNode current);
+    void rejectToNode(FlowCaseState ctx, Integer gotoLevel, FlowGraphNode currentNode);
+
+    boolean allProcessorCompleteInCurrentNode(FlowCaseState ctx, FlowGraphNode currentNode, UserInfo firedUser);
+
+    List<FlowCase> getAllFlowCase(Long flowCaseId);
 }

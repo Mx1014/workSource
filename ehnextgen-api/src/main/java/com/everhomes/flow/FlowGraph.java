@@ -1,5 +1,7 @@
 package com.everhomes.flow;
 
+import com.everhomes.rest.flow.FlowNodeType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,19 +15,25 @@ public class FlowGraph {
     private List<FlowGraphBranch> branches;
 
     private Map<Long, FlowGraphNode> idToNode;
-    private Map<Integer, FlowGraphNode> levelToNode;
     private Map<Long, FlowGraphLane> idToLane;
+    private Map<Integer, FlowGraphNode> levelToNode;
+    private Map<Integer, FlowGraphLane> levelToLane;
     private Map<Long, FlowGraphButton> idToButton;
     private Map<Long, FlowGraphAction> idToAction;
     private Map<Long, FlowGraphBranch> originalNodeToBranch;
     private Map<Long, FlowGraphBranch> convergenceNodeToBranch;
 
+    private List<FlowEvaluateItem> evaluateItems;
+
     private Long createTime;
+    private FlowGraphNode endNode;
+    private FlowGraphNode startNode;
 
     public FlowGraph() {
         nodes = new ArrayList<>();
         lanes = new ArrayList<>();
         branches = new ArrayList<>();
+        evaluateItems = new ArrayList<>();
         idToNode = new HashMap<>();
         idToButton = new HashMap<>();
         idToAction = new HashMap<>();
@@ -33,6 +41,7 @@ public class FlowGraph {
         originalNodeToBranch = new HashMap<>();
         convergenceNodeToBranch = new HashMap<>();
         levelToNode = new HashMap<>();
+        levelToLane = new HashMap<>();
     }
 
     private void saveNodeIds(FlowGraphNode node) {
@@ -80,6 +89,13 @@ public class FlowGraph {
             if (null != node.getTrackTransferLeave()) {
                 idToAction.put(node.getTrackTransferLeave().getFlowAction().getId(), node.getTrackTransferLeave());
             }
+
+            if (FlowNodeType.fromCode(node.getFlowNode().getNodeType()) == FlowNodeType.END) {
+                this.endNode = node;
+            }
+            if (FlowNodeType.fromCode(node.getFlowNode().getNodeType()) == FlowNodeType.START) {
+                this.startNode = node;
+            }
             idToNode.put(node.getFlowNode().getId(), node);
             levelToNode.put(node.getFlowNode().getNodeLevel(), node);
 
@@ -88,6 +104,7 @@ public class FlowGraph {
 
         for (FlowGraphLane lane : lanes) {
             idToLane.put(lane.getFlowLane().getId(), lane);
+            levelToLane.put(lane.getFlowLane().getLaneLevel(), lane);
         }
         for (FlowGraphBranch branch : branches) {
             originalNodeToBranch.put(branch.getFlowBranch().getOriginalNodeId(), branch);
@@ -155,7 +172,27 @@ public class FlowGraph {
         return idToLane.get(id);
     }
 
+    public FlowGraphLane getGraphLane(Integer level) {
+        return levelToLane.get(level);
+    }
+
     public List<FlowGraphLane> getLanes() {
         return lanes;
+    }
+
+    public List<FlowEvaluateItem> getEvaluateItems() {
+        return evaluateItems;
+    }
+
+    public void setEvaluateItems(List<FlowEvaluateItem> evaluateItems) {
+        this.evaluateItems = evaluateItems;
+    }
+
+    public FlowGraphNode getEndNode() {
+        return endNode;
+    }
+
+    public FlowGraphNode getStartNode() {
+        return startNode;
     }
 }

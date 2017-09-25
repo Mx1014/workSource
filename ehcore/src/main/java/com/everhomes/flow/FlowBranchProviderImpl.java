@@ -17,6 +17,8 @@ import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class FlowBranchProviderImpl implements FlowBranchProvider {
 
@@ -62,7 +64,20 @@ public class FlowBranchProviderImpl implements FlowBranchProvider {
     @Override
     public FlowBranch findBranch(Long originalNodeId) {
         com.everhomes.server.schema.tables.EhFlowBranches t = Tables.EH_FLOW_BRANCHES;
-        return context().selectFrom(t).where(t.ORIGINAL_NODE_ID.eq(originalNodeId)).fetchAnyInto(FlowBranch.class);
+        return context()
+                .selectFrom(t)
+                .where(t.ORIGINAL_NODE_ID.eq(originalNodeId))
+                .fetchAnyInto(FlowBranch.class);
+    }
+
+    @Override
+    public List<FlowBranch> findByFlowId(Long flowId, Integer flowVersion) {
+        com.everhomes.server.schema.tables.EhFlowBranches t = Tables.EH_FLOW_BRANCHES;
+        return context()
+                .selectFrom(t)
+                .where(t.FLOW_MAIN_ID.eq(flowId))
+                .and(t.FLOW_VERSION.eq(flowVersion))
+                .fetchInto(FlowBranch.class);
     }
 
     private EhFlowBranchesDao rwDao() {

@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *     <li>serviceType: 业务类别</li>
  *     <li>keyword: 搜索关键字</li>
  *     <li>pageAnchor: pageAnchor</li>
+ *     <li>pageSize: pageSize</li>
  * </ul>
  */
 public class SearchFlowOperateLogsCommand {
@@ -16,6 +17,7 @@ public class SearchFlowOperateLogsCommand {
     private String serviceType;
     private String keyword;
     private Long pageAnchor;
+    private Integer pageSize;
 
     public String getServiceType() {
         return serviceType;
@@ -47,6 +49,14 @@ public class SearchFlowOperateLogsCommand {
 
     public void setPageAnchor(Long pageAnchor) {
         this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
     @Override

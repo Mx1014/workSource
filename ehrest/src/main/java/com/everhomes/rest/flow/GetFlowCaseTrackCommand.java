@@ -2,6 +2,8 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  *     <li>flowCaseId: flowCaseId</li>
@@ -9,7 +11,7 @@ import com.everhomes.util.StringHelper;
  */
 public class GetFlowCaseTrackCommand {
 
-    private Long flowCaseId;
+    @NotNull private Long flowCaseId;
 
     public Long getFlowCaseId() {
         return flowCaseId;

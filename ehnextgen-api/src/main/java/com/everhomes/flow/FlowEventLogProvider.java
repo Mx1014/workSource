@@ -2,6 +2,7 @@ package com.everhomes.flow;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.flow.FlowOperateLogDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 
@@ -27,8 +28,7 @@ public interface FlowEventLogProvider {
 	List<FlowCaseDetail> findProcessorFlowCases(ListingLocator locator,
 			int count, SearchFlowCaseCommand cmd);
 
-	List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId,
-			Long stepCount, FlowUserType flowUserType);
+	List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId, Long stepCount, List<FlowUserType> flowUserTypes);
 
 	List<FlowEventLog> findStepEventLogs(Long caseId);
 
@@ -76,4 +76,10 @@ public interface FlowEventLogProvider {
      * 查询flowCase的某个节点的最大stepCount
      */
     Long findMaxStepCountByNodeEnterLog(Long nodeId, Long caseId);
+
+    FlowEventLog findNodeLastEnterLogs(Long nodeId, Long caseId);
+
+    List<FlowEventLog> findStepEventLogs(List<Long> flowCaseIdList);
+
+    List<FlowOperateLogDTO> searchOperateLogs(Long userId, String serviceType, String keyword, Integer pageSize, ListingLocator locator);
 }

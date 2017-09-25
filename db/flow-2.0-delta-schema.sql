@@ -163,28 +163,6 @@ CREATE TABLE `eh_flow_predefined_params` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
--- 操作日志
---
-DROP TABLE IF EXISTS `eh_flow_operate_logs`;
-CREATE TABLE `eh_flow_operate_logs` (
-  `id` BIGINT,
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `flow_main_id` BIGINT NOT NULL,
-  `flow_version` INTEGER NOT NULL,
-  `flow_case_id` BIGINT NOT NULL COMMENT 'flow_case id',
-  `flow_case_title` VARCHAR(64),
-  `flow_case_content` TEXT,
-  `flow_node_id` BIGINT NOT NULL,
-  `flow_node_name` VARCHAR(64),
-  `flow_button_id` BIGINT,
-  `flow_button_name` VARCHAR(64),
-  `step_type` VARCHAR(64),
-  `creator_uid` BIGINT,
-  `create_time` DATETIME(3),
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
---
 -- 业务类别
 --
 DROP TABLE IF EXISTS `eh_flow_service_types`;
@@ -200,7 +178,7 @@ ALTER TABLE `eh_flows` ADD COLUMN `description` VARCHAR(128) NOT NULL DEFAULT ''
 ALTER TABLE `eh_flows` ADD COLUMN `allow_flow_case_end_evaluate` TINYINT NOT NULL DEFAULT 0 COMMENT 'allow_flow_case_end_evaluate';
 
 -- 节点类型： 开始，结束，普通节点，前置条件，后置条件
-ALTER TABLE `eh_flow_nodes` ADD COLUMN `node_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'start, end, normal, condition_front, condition_back';
+ALTER TABLE `eh_flow_nodes` ADD COLUMN `node_type` VARCHAR(32) NOT NULL DEFAULT 'normal' COMMENT 'start, end, normal, condition_front, condition_back';
 ALTER TABLE `eh_flow_nodes` ADD COLUMN `goto_process_button_name` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'start, end, normal, condition_front, condition_back';
 
 -- 泳道id
@@ -214,11 +192,13 @@ ALTER TABLE `eh_flow_cases` ADD COLUMN `parent_id` BIGINT NOT NULL DEFAULT 0 COM
 ALTER TABLE `eh_flow_cases` ADD COLUMN `process_mode` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '单一路径：single, 并发执行：concurrent';
 ALTER TABLE `eh_flow_cases` ADD COLUMN `start_node_id` BIGINT NOT NULL COMMENT '开始节点id';
 ALTER TABLE `eh_flow_cases` ADD COLUMN `end_node_id` BIGINT NOT NULL COMMENT '结束节点id';
-ALTER TABLE `eh_flow_cases` ADD COLUMN `start_link_id` BIGINT NOT NULL COMMENT '开始linkId';
-ALTER TABLE `eh_flow_cases` ADD COLUMN `end_link_id` BIGINT NOT NULL COMMENT '结束linkId';
+ALTER TABLE `eh_flow_cases` ADD COLUMN `start_link_id` BIGINT NOT NULL DEFAULT 0 COMMENT '开始linkId';
+ALTER TABLE `eh_flow_cases` ADD COLUMN `end_link_id` BIGINT NOT NULL DEFAULT 0 COMMENT '结束linkId';
 
 ALTER TABLE `eh_flow_buttons` ADD COLUMN `params` VARCHAR(64) COMMENT 'the params from other module';
 ALTER TABLE `eh_flow_buttons` ADD COLUMN `default_order` INTEGER NOT NULL DEFAULT 0 COMMENT 'default order';
 
 ALTER TABLE `eh_flow_event_logs` ADD COLUMN `from_node_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'from_node_id';
 ALTER TABLE `eh_flow_event_logs` ADD COLUMN `from_case_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'from_case_id';
+
+ALTER TABLE `eh_flow_cases` MODIFY COLUMN `last_step_time` DATETIME(3) COMMENT 'state change time';

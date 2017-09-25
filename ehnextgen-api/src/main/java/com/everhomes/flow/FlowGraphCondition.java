@@ -20,5 +20,13 @@ public abstract class FlowGraphCondition {
         this.condition = condition;
     }
 
+    public List<FlowConditionExpression> getExpressions() {
+        return expressions;
+    }
+
+    public void setExpressions(List<FlowConditionExpression> expressions) {
+        this.expressions = expressions;
+    }
+
     abstract public boolean isTrue(FlowCaseState ctx) throws FlowStepErrorException;
 }

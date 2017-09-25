@@ -26,9 +26,9 @@ public class FlowConditionExpressionDTO {
     private Long flowConditionId;
     private String logicOperator;
     private String relationalOperator;
-    private Byte variableType1;
+    private String variableType1;
     private String variable1;
-    private Byte variableType2;
+    private String variableType2;
     private String variable2;
 
     public Long getId() {
@@ -87,14 +87,6 @@ public class FlowConditionExpressionDTO {
         this.relationalOperator = relationalOperator;
     }
 
-    public Byte getVariableType1() {
-        return variableType1;
-    }
-
-    public void setVariableType1(Byte variableType1) {
-        this.variableType1 = variableType1;
-    }
-
     public String getVariable1() {
         return variable1;
     }
@@ -103,20 +95,28 @@ public class FlowConditionExpressionDTO {
         this.variable1 = variable1;
     }
 
-    public Byte getVariableType2() {
-        return variableType2;
-    }
-
-    public void setVariableType2(Byte variableType2) {
-        this.variableType2 = variableType2;
-    }
-
     public String getVariable2() {
         return variable2;
     }
 
     public void setVariable2(String variable2) {
         this.variable2 = variable2;
+    }
+
+    public String getVariableType1() {
+        return variableType1;
+    }
+
+    public void setVariableType1(String variableType1) {
+        this.variableType1 = variableType1;
+    }
+
+    public String getVariableType2() {
+        return variableType2;
+    }
+
+    public void setVariableType2(String variableType2) {
+        this.variableType2 = variableType2;
     }
 
     @Override

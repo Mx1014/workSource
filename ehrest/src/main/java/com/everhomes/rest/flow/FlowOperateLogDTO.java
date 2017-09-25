@@ -2,17 +2,15 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Timestamp;
+
 /**
  * <ul>
- *     <li>id: id</li>
  *     <li>flowCaseId: flowCaseId</li>
- *     <li>flowCaseTitle: flowCaseTitle</li>
- *     <li>flowCaseContent: flowCaseContent</li>
- *     <li>flowNodeId: flowNodeId</li>
- *     <li>flowNodeName: flowNodeName</li>
- *     <li>flowButtonId: flowButtonId</li>
- *     <li>flowButtonName: flowButtonName</li>
- *     <li>stepType: stepType</li>
+ *     <li>flowCaseTitle: 标题</li>
+ *     <li>flowCaseContent: 任务信息</li>
+ *     <li>logContent: 日志内容</li>
+ *     <li>createTime: 创建时间</li>
  * </ul>
  */
 public class FlowOperateLogDTO {
@@ -21,19 +19,8 @@ public class FlowOperateLogDTO {
     private Long flowCaseId;
     private String flowCaseTitle;
     private String flowCaseContent;
-    private Long flowNodeId;
-    private String flowNodeName;
-    private Long flowButtonId;
-    private String flowButtonName;
-    private String stepType;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private String logContent;
+    private Timestamp createTime;
 
     public Long getFlowCaseId() {
         return flowCaseId;
@@ -59,44 +46,28 @@ public class FlowOperateLogDTO {
         this.flowCaseContent = flowCaseContent;
     }
 
-    public Long getFlowNodeId() {
-        return flowNodeId;
+    public String getLogContent() {
+        return logContent;
     }
 
-    public void setFlowNodeId(Long flowNodeId) {
-        this.flowNodeId = flowNodeId;
+    public void setLogContent(String logContent) {
+        this.logContent = logContent;
     }
 
-    public String getFlowNodeName() {
-        return flowNodeName;
+    public Timestamp getCreateTime() {
+        return createTime;
     }
 
-    public void setFlowNodeName(String flowNodeName) {
-        this.flowNodeName = flowNodeName;
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
     }
 
-    public Long getFlowButtonId() {
-        return flowButtonId;
+    public Long getId() {
+        return id;
     }
 
-    public void setFlowButtonId(Long flowButtonId) {
-        this.flowButtonId = flowButtonId;
-    }
-
-    public String getFlowButtonName() {
-        return flowButtonName;
-    }
-
-    public void setFlowButtonName(String flowButtonName) {
-        this.flowButtonName = flowButtonName;
-    }
-
-    public String getStepType() {
-        return stepType;
-    }
-
-    public void setStepType(String stepType) {
-        this.stepType = stepType;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     @Override

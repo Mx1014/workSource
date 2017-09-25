@@ -27,6 +27,7 @@ import java.util.List;
  *     <li>tracker: tracker {@link com.everhomes.rest.flow.FlowNodeTrackerDTO}</li>
  *     <li>flowLaneId: flowLaneId</li>
  *     <li>nodeType: nodeType</li>
+ *     <li>gotoProcessButtonName: gotoProcessButtonName</li>
  *     <li>needAllProcessorComplete: needAllProcessorComplete</li>
  *     <li>branch: branch {@link com.everhomes.rest.flow.FlowBranchDTO}</li>
  *     <li>processors: processors {@link com.everhomes.rest.flow.FlowUserSelectionDTO}</li>
@@ -56,7 +57,8 @@ public class FlowNodeDetailDTO {
 
     private Long flowLaneId;
     private String nodeType;
-    private Long needAllProcessorComplete;
+    private String gotoProcessButtonName;
+    private Byte needAllProcessorComplete;
 
     private FlowBranchDTO branch;
 
@@ -149,6 +151,14 @@ public class FlowNodeDetailDTO {
         this.flowVersion = flowVersion;
     }
 
+    public String getGotoProcessButtonName() {
+        return gotoProcessButtonName;
+    }
+
+    public void setGotoProcessButtonName(String gotoProcessButtonName) {
+        this.gotoProcessButtonName = gotoProcessButtonName;
+    }
+
     public Integer getNodeLevel() {
         return nodeLevel;
     }
@@ -237,11 +247,11 @@ public class FlowNodeDetailDTO {
         this.flowLaneId = flowLaneId;
     }
 
-    public Long getNeedAllProcessorComplete() {
+    public Byte getNeedAllProcessorComplete() {
         return needAllProcessorComplete;
     }
 
-    public void setNeedAllProcessorComplete(Long needAllProcessorComplete) {
+    public void setNeedAllProcessorComplete(Byte needAllProcessorComplete) {
         this.needAllProcessorComplete = needAllProcessorComplete;
     }
 

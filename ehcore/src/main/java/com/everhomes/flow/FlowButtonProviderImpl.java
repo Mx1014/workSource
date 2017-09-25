@@ -107,6 +107,9 @@ public class FlowButtonProviderImpl implements FlowButtonProvider {
     private void prepareObj(FlowButton obj) {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
+        if (obj.getDefaultOrder() == null) {
+            obj.setDefaultOrder(obj.getId().intValue());
+        }
     }
 
     @Override

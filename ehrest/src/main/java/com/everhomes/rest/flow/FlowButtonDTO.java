@@ -24,6 +24,8 @@ import java.sql.Timestamp;
  * <li>description: 描述</li>
  * <li>params: 参数</li>
  * <li>needSelectBranch: 下一个节点是判断节点并且是需要用户选择分支为1，否则为0{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ * <li>conditionNodeId: 下一个条件节点id</li>
+ * <li>evaluateStep: 评价跳转 no_step:不跳转, </li>
  * </ul>
  */
 public class FlowButtonDTO {
@@ -44,9 +46,11 @@ public class FlowButtonDTO {
     private Byte subjectRequiredFlag;
     private Integer remindCount;
     private String description;
+    private String evaluateStep;
     private String params;
 
     private Byte needSelectBranch;
+    private Long conditionNodeId;
 
     public Byte getNeedSelectBranch() {
         return needSelectBranch;
@@ -190,6 +194,22 @@ public class FlowButtonDTO {
 
     public void setParams(String params) {
         this.params = params;
+    }
+
+    public Long getConditionNodeId() {
+        return conditionNodeId;
+    }
+
+    public void setConditionNodeId(Long conditionNodeId) {
+        this.conditionNodeId = conditionNodeId;
+    }
+
+    public String getEvaluateStep() {
+        return evaluateStep;
+    }
+
+    public void setEvaluateStep(String evaluateStep) {
+        this.evaluateStep = evaluateStep;
     }
 
     @Override

@@ -79,6 +79,22 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     }
 
     @Override
+    public FlowCase findFlowCaseByStartLinkId(Long parentId, Long startNodeId, Long endNodeId, Long startLinkId) {
+        List<FlowCase> flowCases = this.queryFlowCases(new ListingLocator(), 1, (locator, query) -> {
+            com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+            query.addConditions(t.PARENT_ID.eq(parentId));
+            query.addConditions(t.START_NODE_ID.eq(startNodeId));
+            query.addConditions(t.END_NODE_ID.eq(endNodeId));
+            query.addConditions(t.START_LINK_ID.eq(startLinkId));
+            return query;
+        });
+        if (flowCases.size() > 0) {
+            return flowCases.get(0);
+        }
+        return null;
+    }
+
+    @Override
     public void updateFlowCase(FlowCase obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowCases.class));
         EhFlowCasesDao dao = new EhFlowCasesDao(context.configuration());
@@ -157,7 +173,8 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
     	if(searchType.equals(FlowCaseSearchType.APPLIER)) {
     		cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));
-    		
+    		cond = cond.and(Tables.EH_FLOW_CASES.PARENT_ID.eq(0L));
+
     	    if(locator.getAnchor() != null) {
     	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
             }
@@ -255,7 +272,10 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     	
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
     	if(searchType.equals(FlowCaseSearchType.ADMIN)) { //enum equal
-    		if(cmd.getUserId() != null) {
+
+            cond = cond.and(Tables.EH_FLOW_CASES.PARENT_ID.eq(0L));
+
+            if(cmd.getUserId() != null) {
     			cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));	
     		}
     		
@@ -292,7 +312,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         		cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
         	}
         	if(cmd.getServiceType() != null) {
-        		cond = cond.and(Tables.EH_FLOW_CASES.TITLE.eq(cmd.getServiceType()));
+        		cond = cond.and(Tables.EH_FLOW_CASES.TITLE.eq(cmd.getServiceType().trim()));
         	}
         	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
         		cond = cond.and(
@@ -302,14 +322,14 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         				);
         	}
     		
-    		List<EhFlowCasesRecord> records = context.select().from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)
+    		List<FlowCaseDetail> objs = context.select(Tables.EH_FLOW_CASES.fields()).from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)
     		    	.on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID).and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
     		    	.where(cond).orderBy(Tables.EH_FLOW_CASES.ID.desc()).limit(count)
-    		    	.fetch().map(new FlowCaseRecordMapper());
+    		    	.fetchInto(FlowCaseDetail.class);
     		
-    		List<FlowCaseDetail> objs = records.stream().map((r) -> {
+    		/*List<FlowCaseDetail> objs = records.stream().map((r) -> {
     			return ConvertHelper.convert(r, FlowCaseDetail.class);
-    		}).collect(Collectors.toList());
+    		}).collect(Collectors.toList());*/
     		
             if(objs.size() >= count) {
                 locator.setAnchor(objs.get(objs.size() - 1).getId());

@@ -3,7 +3,6 @@ package com.everhomes.flow;
 import java.util.List;
 import java.util.Map;
 
-import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
 
@@ -394,8 +393,10 @@ public interface FlowService {
  
 	void processSMSTimeout(FlowTimeout ft);
 
-	String getStepMessageTemplate(FlowStepType fromStep,
-			FlowCaseStatus nextStatus, FlowUserType flowUserType, Map<String, Object> map);
+    String getButtonFireEventContentTemplate(FlowStepType step, Map<String, Object> map);
+
+    String getStepMessageTemplate(FlowStepType fromStep,
+                                  FlowCaseStatus nextStatus, FlowUserType flowUserType, Map<String, Object> map);
 
 	ListSelectUsersResponse listUserSelections(ListSelectUsersCommand cmd);
 
@@ -430,7 +431,17 @@ public interface FlowService {
 
     FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphJsonCommand cmd);
 
-    FlowCaseDetailDTOV2 getFlowCaseDetailByIdV2(GetFlowCaseDetailByIdV2Command cmd);
+    FlowCaseDetailDTOV2 getFlowCaseDetailByIdV2(Long flowCaseId, Long userId, FlowUserType flowUserType, boolean checkProcessor, boolean needButton);
 
-    FlowCaseDetailDTOV2 getFlowCaseDetailByIdV2(Long flowCaseId, Long userId, FlowUserType flowUserType, boolean checkProcessor);
+    FlowCaseTrackDTO getFlowCaseTrack(GetFlowCaseTrackCommand cmd);
+
+    FlowCaseBriefDTO getFlowCaseBrief(GetFlowCaseBriefCommand cmd);
+
+    void deleteFlowButton(DeleteFlowButtonCommand cmd);
+
+    ListFlowServiceTypeResponse listFlowServiceTypes(ListFlowServiceTypesCommand cmd);
+
+    ListNextBranchesResponse listNextBranches(ListNextBranchesCommand cmd);
+
+    SearchFlowOperateLogResponse searchFlowOperateLogs(SearchFlowOperateLogsCommand cmd);
 }

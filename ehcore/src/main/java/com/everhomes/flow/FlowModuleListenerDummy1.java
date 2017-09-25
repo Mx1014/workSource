@@ -2,26 +2,27 @@ package com.everhomes.flow;
 
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.util.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-// @Component
+@Component
 public class FlowModuleListenerDummy1 implements FlowModuleListener {
 	@Autowired
 	private FlowService flowService;
 	
-	private Long moduleId = 111l;
+	private Long moduleId = 40100L;
 	
 	@Override
 	public FlowModuleInfo initModule() {
 		FlowModuleInfo module = new FlowModuleInfo();
-		FlowModuleDTO moduleDTO = flowService.getModuleById(moduleId);
-		module.setModuleName(moduleDTO.getDisplayName());
+		module.setModuleName("Dummy1");
 		module.setModuleId(moduleId);
 		return module;
 	}
@@ -59,7 +60,7 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener {
 	@Override
 	public String onFlowCaseBriefRender(FlowCase flowCase) {
 		// TODO Auto-generated method stub
-		return null;
+		return "testKey1: testValue1\ntestKey2: testValue2";
 	}
 
 	@Override
@@ -129,4 +130,12 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener {
 		
 	}
 
+    @Override
+    public Map<String, String> onFlowPredefinedVariableRender(FlowCaseState ctx, List<String> vars) {
+        Map<String, String> map = new HashMap<>();
+        for (String var : vars) {
+            map.put(var, "1");
+        }
+        return map;
+    }
 }

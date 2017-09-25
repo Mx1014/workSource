@@ -68,13 +68,11 @@ public class FlowController extends ControllerBase {
     @RequestMapping("getFlowCaseDetailByIdV2")
     @RestReturn(value=FlowCaseDetailDTOV2.class)
     public RestResponse getFlowCaseDetailByIdV2(@Valid GetFlowCaseDetailByIdV2Command cmd) {
-        FlowCaseDetailDTOV2 dto = flowService.getFlowCaseDetailByIdV2(cmd);
-
         Long userId = UserContext.current().getUser().getId();
         FlowCaseDetailDTOV2 flowCaseDetail = flowService.getFlowCaseDetailByIdV2(
-                cmd.getFlowCaseId(), userId, FlowUserType.fromCode(cmd.getFlowUserType()), true
-        );
-        RestResponse response = new RestResponse(dto);
+                cmd.getFlowCaseId(), userId, FlowUserType.fromCode(cmd.getFlowUserType()), true,
+                true);
+        RestResponse response = new RestResponse(flowCaseDetail);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -87,7 +85,8 @@ public class FlowController extends ControllerBase {
     @RequestMapping("getFlowCaseBrief")
     @RestReturn(value=FlowCaseBriefDTO.class)
     public RestResponse getFlowCaseBrief(@Valid GetFlowCaseBriefCommand cmd) {
-        RestResponse response = new RestResponse();
+        FlowCaseBriefDTO dto = flowService.getFlowCaseBrief(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -100,7 +99,8 @@ public class FlowController extends ControllerBase {
     @RequestMapping("getFlowCaseTrack")
     @RestReturn(value=FlowCaseTrackDTO.class)
     public RestResponse getFlowCaseTrack(@Valid GetFlowCaseTrackCommand cmd) {
-        RestResponse response = new RestResponse();
+        FlowCaseTrackDTO dto = flowService.getFlowCaseTrack(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -113,7 +113,8 @@ public class FlowController extends ControllerBase {
     @RequestMapping("listFlowServiceTypes")
     @RestReturn(value=ListFlowServiceTypeResponse.class)
     public RestResponse listFlowServiceTypes(@Valid ListFlowServiceTypesCommand cmd) {
-        RestResponse response = new RestResponse();
+        ListFlowServiceTypeResponse resp = flowService.listFlowServiceTypes(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -125,8 +126,9 @@ public class FlowController extends ControllerBase {
      */
     @RequestMapping("listNextBranches")
     @RestReturn(value=ListNextBranchesResponse.class)
-    public RestResponse listNextNodes(@Valid ListNextBranchesCommand cmd) {
-        RestResponse response = new RestResponse();
+    public RestResponse listNextBranches(@Valid ListNextBranchesCommand cmd) {
+        ListNextBranchesResponse resp = flowService.listNextBranches(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -138,8 +140,9 @@ public class FlowController extends ControllerBase {
      */
     @RequestMapping("searchFlowOperateLogs")
     @RestReturn(value=SearchFlowOperateLogResponse.class)
-    public RestResponse listOperateLogs(@Valid SearchFlowOperateLogsCommand cmd) {
-        RestResponse response = new RestResponse();
+    public RestResponse searchFlowOperateLogs(@Valid SearchFlowOperateLogsCommand cmd) {
+        SearchFlowOperateLogResponse resp = flowService.searchFlowOperateLogs(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

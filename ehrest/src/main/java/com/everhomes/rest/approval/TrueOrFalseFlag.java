@@ -29,7 +29,7 @@ public enum TrueOrFalseFlag {
 	public static TrueOrFalseFlag fromCode(Byte code) {
 		if (code != null) {
 			for (TrueOrFalseFlag trueOrFalseFlag : TrueOrFalseFlag.values()) {
-				if (trueOrFalseFlag.getCode() == code.byteValue()) {
+				if (trueOrFalseFlag.getCode() == code) {
 					return trueOrFalseFlag;
 				}
 			}

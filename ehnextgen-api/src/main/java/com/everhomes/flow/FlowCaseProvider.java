@@ -38,4 +38,6 @@ public interface FlowCaseProvider {
     List<FlowCase> findFlowCaseByNode(Long originalNodeId, Long convergenceNodeId);
 
     List<FlowCase> listFlowCaseByParentId(Long parentId);
+
+    FlowCase findFlowCaseByStartLinkId(Long parentId, Long originalNodeId, Long convergenceNodeId, Long startLinkId);
 }

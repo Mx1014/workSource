@@ -2,6 +2,7 @@ package com.everhomes.flow;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.flow.FlowBranchProcessMode;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.util.ConvertHelper;
 
 import java.util.List;
@@ -40,11 +41,24 @@ public class FlowGraphBranchNormal extends FlowGraphBranch {
     }
 
     @Override
-    public FlowCaseState processSubFlowCaseStart(FlowCaseState ctx) {
-        FlowCase flowCase = ConvertHelper.convert(ctx.getFlowCase(), FlowCase.class);
-        flowCase.setParentId(ctx.getFlowCase().getId());
-        flowCase.setStartNodeId(flowBranch.getOriginalNodeId());
-        flowCase.setEndNodeId(flowBranch.getConvergenceNodeId());
-        return flowStateProcessor.prepareSubFlowCaseStart(ctx.getOperator(), flowCase);
+    public FlowCaseState processSubFlowCaseStart(FlowCaseState ctx, FlowGraphNode nextNode) {
+        Long parentId = ctx.getFlowCase().getId();
+        Long startLinkId = nextNode.getLinksIn().get(0).getFlowLink().getId();
+
+        // 查原来是否已经创建了flowCase
+        FlowCase subFlowCase = flowCaseProvider.findFlowCaseByStartLinkId(parentId, flowBranch.getOriginalNodeId(), flowBranch.getConvergenceNodeId(), startLinkId);
+        if (subFlowCase == null) {
+            subFlowCase = ConvertHelper.convert(ctx.getFlowCase(), FlowCase.class);
+            subFlowCase.setId(null);
+            subFlowCase.setParentId(parentId);
+            subFlowCase.setStartNodeId(flowBranch.getOriginalNodeId());
+            subFlowCase.setEndNodeId(flowBranch.getConvergenceNodeId());
+            subFlowCase.setStartLinkId(startLinkId);
+            subFlowCase.setStepCount(0L);
+            subFlowCase.setStatus(FlowCaseStatus.PROCESS.getCode());
+            flowCaseProvider.createFlowCase(subFlowCase);
+        }
+        subFlowCase.setStepCount(subFlowCase.getStepCount() + 1);
+        return flowStateProcessor.prepareSubFlowCaseStart(ctx.getOperator(), subFlowCase);
     }
 }

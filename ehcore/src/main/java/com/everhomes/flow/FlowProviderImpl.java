@@ -304,4 +304,18 @@ public class FlowProviderImpl implements FlowProvider {
         }
         return null;
     }
+
+    @Override
+    public Flow getSnapshotFlow(Long flowId, Byte status) {
+        List<Flow> flows = this.queryFlows(new ListingLocator(), 1, (locator, query) -> {
+            query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(flowId));
+            query.addConditions(Tables.EH_FLOWS.STATUS.eq(status));
+            return query;
+        });
+
+        if (flows != null && flows.size() > 0) {
+            return flows.get(0);
+        }
+        return null;
+    }
 }

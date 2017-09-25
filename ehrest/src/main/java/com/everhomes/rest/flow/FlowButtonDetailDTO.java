@@ -26,6 +26,7 @@ import java.util.List;
  *     <li>remindCount: ??</li>
  *     <li>description: 描述</li>
  *     <li>param: 按钮参数</li>
+ *     <li>evaluateStep: evaluateStep</li>
  *     <li>pushMessage: 发消息动作{@link com.everhomes.rest.flow.FlowActionDTO}</li>
  *     <li>pushSms: 发短信动作{@link com.everhomes.rest.flow.FlowActionDTO}</li>
  *     <li>tracker: 跟踪日志 {@link com.everhomes.rest.flow.FlowActionDTO}</li>
@@ -51,6 +52,7 @@ public class FlowButtonDetailDTO {
     private Integer remindCount;
     private String description;
     private String param;
+    private String evaluateStep;
 
     private FlowActionDTO pushMessage;
     private FlowActionDTO pushSms;
@@ -225,6 +227,14 @@ public class FlowButtonDetailDTO {
 
     public void setTracker(FlowActionDTO tracker) {
         this.tracker = tracker;
+    }
+
+    public String getEvaluateStep() {
+        return evaluateStep;
+    }
+
+    public void setEvaluateStep(String evaluateStep) {
+        this.evaluateStep = evaluateStep;
     }
 
     @Override

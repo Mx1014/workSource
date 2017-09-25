@@ -21,4 +21,7 @@ public interface FlowTemplateCode {
 
 	int COMMENT_STEP_CONTENT_WITH_USERNAME = 10014;// ${userName}：${content}
 	int COMMENT_STEP_CONTENT_WITH_APPLIER = 10015;// 发起人：${content}
+
+    int GENERAL_BUTTON_FIRE_LOG_TEMPLATE = 20001;
+    int TRANSFER_BUTTON_FIRE_LOG_TEMPLATE = 20002;
 }
