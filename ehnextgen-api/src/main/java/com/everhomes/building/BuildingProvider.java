@@ -13,8 +13,6 @@ public interface BuildingProvider {
 
 	List<Building> listBuilding();
 
-	List<Building> listBuildings();
-
 	Building findBuildingByName(Integer namespaceId, Long communityId, String buildingName);
 
 	void deleteBuilding(Building building);
