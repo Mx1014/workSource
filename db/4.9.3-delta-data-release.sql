@@ -130,7 +130,7 @@ BEGIN
 
   END LOOP;
   CLOSE cur;
-END
+END;
 CALL create_service_alliance_menu_scope;
 DROP PROCEDURE if exists create_service_alliance_menu_scope;
 -- ------------- 新建菜单Scope END--------
