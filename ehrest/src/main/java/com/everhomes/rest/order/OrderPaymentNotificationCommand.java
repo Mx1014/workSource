@@ -1,7 +1,9 @@
 package com.everhomes.rest.order;
 
 import com.everhomes.discover.ItemType;
+
 import com.everhomes.util.StringHelper;
+
 
 import java.util.Map;
 
@@ -13,7 +15,8 @@ public class OrderPaymentNotificationCommand {
     private Integer orderType;
     private String bizOrderNum;
     private Integer paymentType;
-    @ItemType(String.class)
+    
+    @ItemType(Map.class)
     private Map<String, String> paymentParams;
     private Long payerUserId;
     private Long amount;
