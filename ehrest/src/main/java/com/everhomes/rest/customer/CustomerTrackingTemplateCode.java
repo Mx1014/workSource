@@ -12,4 +12,10 @@ public class CustomerTrackingTemplateCode {
     public static final int DELETE = 20; 	//删除
     public static final int UPDATE = 30;    //更改
     
+    
+    public static final String MODULE_NAME = "enterprise_customer";
+    public static final String GROUP_PATH = "/1";
+    public static final Integer NAMESPACE = 999971;
+    
+    
 }

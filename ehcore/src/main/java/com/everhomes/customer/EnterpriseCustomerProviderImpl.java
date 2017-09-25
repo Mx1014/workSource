@@ -1,5 +1,7 @@
 package com.everhomes.customer;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -7,26 +9,44 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.constraints.Null;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectOffsetStep;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
 
+import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.daos.EhCustomerApplyProjectsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCertificatesDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCommercialsDao;
@@ -68,7 +88,11 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
+import com.everhomes.varField.ScopeFieldItem;
 
 /**
  * Created by ying.xiong on 2017/8/11.
@@ -85,6 +109,12 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     
     @Autowired
 	private LocaleTemplateService localeTemplateService;
+    
+    @Autowired
+    private FieldService fieldService;
+    
+    @Autowired
+    private FieldProvider fieldProvider;
 
     @Override
     public void createEnterpriseCustomer(EnterpriseCustomer customer) {
@@ -1060,21 +1090,20 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 			content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
 			break;
 		case 3 :
-			Map<String,Object> map = new HashMap<String,Object>();
-			map.put("oldData", StringHelper.toJsonString(exist == null ? "" : exist));
-			map.put("newData", StringHelper.toJsonString(customer));
-			content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.UPDATE , UserContext.current().getUser().getLocale(), map, "");
+			content = compareEnterpriseCustomer(customer,exist);
 			break;
 		default :break;
 		}
-		 event.setContent(content);
-		event.setCreatorUid(UserContext.currentUserId());
-		event.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEvents.class, id));
-        EhCustomerEventsDao dao = new EhCustomerEventsDao(context.configuration());
-        LOGGER.info("saveCustomerEventWithInsert: " + event);
-        dao.insert(event);
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEvents.class, null);
+		if(StringUtils.isNotEmpty(content)){
+			event.setContent(content);
+			event.setCreatorUid(UserContext.currentUserId());
+			event.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEvents.class, id));
+	        EhCustomerEventsDao dao = new EhCustomerEventsDao(context.configuration());
+	        LOGGER.info("saveCustomerEventWithInsert: " + event);
+	        dao.insert(event);
+	        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEvents.class, null);
+		}
 	}
 
 
@@ -1089,6 +1118,113 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
             return null;
         });
         return result;
+	}
+	
+	private String compareEnterpriseCustomer(EnterpriseCustomer customer, EnterpriseCustomer exist) {
+		//查出模板配置的参数
+		ListFieldCommand command = new ListFieldCommand();
+		command.setNamespaceId(CustomerTrackingTemplateCode.NAMESPACE);
+		command.setModuleName(CustomerTrackingTemplateCode.MODULE_NAME);
+		command.setGroupPath(CustomerTrackingTemplateCode.GROUP_PATH);
+		List<FieldDTO> fields = fieldService.listFields(command);
+		String  getPrefix = "get";
+		StringBuffer buffer = new StringBuffer();
+		for(FieldDTO field : fields){
+			String getter = getPrefix + StringUtils.capitalize(field.getFieldName());
+			Method methodNew = ReflectionUtils.findMethod(customer.getClass(), getter);
+			Method methodOld = ReflectionUtils.findMethod(exist.getClass(), getter);
+			Object objNew = null;
+			Object objOld = null;
+			try {
+				if(null != methodNew && null != exist){
+					objNew = methodNew.invoke(customer, new Object[] {});
+					objOld = methodOld.invoke(exist, new Object[] {});
+				}
+			} catch (Exception e) {
+				throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRACKING_NOT_EXIST,
+	                    "reflect exception");
+			}
+			if(null != objNew || null != objOld){
+				if(!(objNew == null ? "" : objNew).equals((objOld == null ? "" : objOld))){
+					String  content = "";
+					String  newData = objNew == null ? "null" : objNew.toString();
+					String  oldData = objOld == null ? "null" : objOld.toString();
+					if(field.getFieldName().lastIndexOf("ItemId") > -1){
+						ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), (objNew == null ? -1l : Long.parseLong(objNew.toString())));
+				        if(levelItemNew != null) {
+				        	newData = levelItemNew.getItemDisplayName();
+				        }
+				        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+				        if(levelItemOld != null) {
+				        	oldData = levelItemOld.getItemDisplayName();
+				        }
+					}
+					Map<String,Object> map = new HashMap<String,Object>();
+					map.put("display", field.getFieldDisplayName());
+					map.put("oldData", oldData);
+					map.put("newData", newData);
+					content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.UPDATE , UserContext.current().getUser().getLocale(), map, "");
+					buffer.append(content);
+					buffer.append(";");
+				}
+			}
+		}
+		return buffer.toString().length() > 0 ? buffer.toString().substring(0,buffer.toString().length() -1) : buffer.toString();
+	}
+
+
+	@Override
+	public void allotEnterpriseCustomer(EnterpriseCustomer customer) {
+		assert(customer.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
+        context.update(Tables.EH_ENTERPRISE_CUSTOMERS)
+        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_UID, customer.getTrackingUid())
+        	   .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(customer.getId()))
+        	   .execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
+	}
+
+
+	@Override
+	public void giveUpEnterpriseCustomer(EnterpriseCustomer customer) {
+		assert(customer.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
+        context.update(Tables.EH_ENTERPRISE_CUSTOMERS)
+        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_UID, -1l)
+        	   .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(customer.getId()))
+        	   .execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
+	}
+
+
+	@Override
+	public List<EnterpriseCustomerDTO> findEnterpriseCustomersByDistance(ListNearbyEnterpriseCustomersCommand cmd , ListingLocator locator , int pageSize) {
+		List<EnterpriseCustomerDTO> list = new ArrayList<EnterpriseCustomerDTO>();
+	        String geoHashStr = GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude()).substring(0, 6);
+	        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhEnterpriseCustomers.class), null,
+	                (DSLContext context, Object reducingContext)-> {
+	                    String likeVal = geoHashStr + "%";
+	                    Condition cond = Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode());
+	                    cond = cond.and(Tables.EH_ENTERPRISE_CUSTOMERS.GEOHASH.like(likeVal));
+	                    cond = cond.and(Tables.EH_ENTERPRISE_CUSTOMERS.ID.ge(locator.getAnchor()));
+	                    SelectOffsetStep<Record> query = context.select().from(Tables.EH_ENTERPRISE_CUSTOMERS)
+	    	        		    .where(cond).limit(pageSize);
+	                    if(LOGGER.isDebugEnabled()) {
+		                    LOGGER.debug("Query enterpriseCustomer nearby, sql=" + query.getSQL());
+		                    LOGGER.debug("Query enterpriseCustomer nearby, bindValues=" + query.getBindValues());
+		                }
+	                    query.fetch().map((r) -> {
+	                    EnterpriseCustomerDTO customerDTO = ConvertHelper.convert(r, EnterpriseCustomerDTO.class);
+	                    list.add(customerDTO);
+	                    	return null;
+	                    });
+
+	                return true;
+	                
+	            });
+	        return list;
 	}
 	
 }

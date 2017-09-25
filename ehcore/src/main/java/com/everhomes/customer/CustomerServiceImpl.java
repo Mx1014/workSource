@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,19 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
+import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.openapi.ZJGKOpenServiceImpl;
@@ -36,8 +42,13 @@ import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.CreateCustomerApplyProjectCommand;
 import com.everhomes.rest.customer.CreateCustomerCertificateCommand;
 import com.everhomes.rest.customer.CreateCustomerCommercialCommand;
@@ -97,6 +108,7 @@ import com.everhomes.rest.customer.GetCustomerTrackingCommand;
 import com.everhomes.rest.customer.GetCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.GetCustomerTrademarkCommand;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.GiveUpEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
 import com.everhomes.rest.customer.ImportEnterpriseCustomerDataDTO;
 import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
@@ -111,6 +123,8 @@ import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
 import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
 import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
 import com.everhomes.rest.customer.ListEnterpriseCustomerStatisticsCommand;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.customer.SyncCustomersCommand;
@@ -137,6 +151,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.ModuleName;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
@@ -201,6 +216,9 @@ public class CustomerServiceImpl implements CustomerService {
 	
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
+	
+	@Autowired
+	private ConfigurationProvider configurationProvider;
 
     private void checkPrivilege() {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -220,6 +238,10 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
         customer.setCreatorUid(UserContext.currentUserId());
+        if(null != customer.getLongitude() && null != customer.getLatitude()){
+        	String geohash  = GeoHashUtils.encode(customer.getLatitude(), customer.getLongitude());
+        	customer.setGeohash(geohash);
+        }
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
         
         //企业客户新增成功,保存客户事件
@@ -277,8 +299,13 @@ public class CustomerServiceImpl implements CustomerService {
             updateCustomer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
         updateCustomer.setStatus(CommonStatus.ACTIVE.getCode());
+        //保存经纬度
+        if(null != updateCustomer.getLongitude() && null != updateCustomer.getLatitude()){
+        	String geohash  = GeoHashUtils.encode(updateCustomer.getLatitude(), updateCustomer.getLongitude());
+        	updateCustomer.setGeohash(geohash);
+        }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
-        enterpriseCustomerSearcher.feedDoc(customer);
+        enterpriseCustomerSearcher.feedDoc(updateCustomer);
         
         //保存客户事件
         saveCustomerEvent( 3  ,updateCustomer ,customer);
@@ -1587,4 +1614,62 @@ public class CustomerServiceImpl implements CustomerService {
         }
         return dto;
 	}
+
+	@Override
+	public void allotEnterpriseCustomer(AllotEnterpriseCustomerCommand cmd) {
+		checkPrivilege();
+        EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        customer.setTrackingUid(cmd.getTrackingUid());
+        enterpriseCustomerProvider.allotEnterpriseCustomer(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
+	}
+
+	@Override
+	public void giveUpEnterpriseCustomer(GiveUpEnterpriseCustomerCommand cmd) {
+		EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+		//查看当前用户是否和跟进人一致
+		if(null == customer.getTrackingUid() || customer.getTrackingUid() != UserContext.currentUserId()){
+			LOGGER.error("enterprise customer do not contains trackingUid or not the same uid. id: {}, customer: {} ,current:{}", cmd.getId(), customer,UserContext.currentUserId());
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NOT_EXIST,
+                        "enterprise customer do not contains trackingUid or not the same uid");
+		}
+		customer.setTrackingUid(-1l);
+        enterpriseCustomerProvider.giveUpEnterpriseCustomer(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
+	}
+
+	@Override
+	public ListNearbyEnterpriseCustomersCommandResponse listNearbyEnterpriseCustomers(ListNearbyEnterpriseCustomersCommand cmd) {
+		ListNearbyEnterpriseCustomersCommandResponse resp = new ListNearbyEnterpriseCustomersCommandResponse();
+        List<EnterpriseCustomerDTO> results = new ArrayList<EnterpriseCustomerDTO>();
+
+        if (cmd.getLatitude() == null || cmd.getLongitude() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter, latitude and longitude have to be both specified or neigher");
+
+
+        if (cmd.getPageAnchor() == null)
+            cmd.setPageAnchor(0L);
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+
+        List<EnterpriseCustomerDTO> customers = this.enterpriseCustomerProvider.findEnterpriseCustomersByDistance(cmd, locator, pageSize +1);
+        if (customers != null) {
+        	for(EnterpriseCustomerDTO customer : customers){
+        		results.add(customer);
+        	}
+        }
+        if (results != null && results.size() > pageSize) {
+        	resp.setNextPageAnchor(results.get(results.size() - 1).getId());
+        	results.remove(results.size() - 1);
+        }
+        if (results != null) {
+            resp.setDtos(results);
+        }
+        return resp;
+	}
+	
+	
 }

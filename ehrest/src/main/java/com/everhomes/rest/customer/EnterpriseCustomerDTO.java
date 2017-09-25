@@ -67,6 +67,13 @@ import java.sql.Timestamp;
  *     <li>managerPhone: 总经理电话</li>
  *     <li>managerEmail: 总经理邮箱</li>
  *     <li>remark: 备注</li>
+ *     <li>trackingUid: 跟进人UID</li>
+ *     <li>trackingName: 跟进人姓名</li>
+ *     <li>propertyArea: 资产面积</li>
+ *     <li>propertyUnitPrice: 资产单价</li>
+ *     <li>propertyType: 资产类型</li>
+ *     <li>longitude: 经度</li>
+ *     <li>latitude: 纬度</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -132,6 +139,14 @@ public class EnterpriseCustomerDTO {
     private String managerPhone;
     private String managerEmail;
     private String remark;
+    
+    private Long trackingUid;
+    private String trackingName;
+    private Double propertyArea;
+    private Double propertyUnitPrice;
+    private Long propertyType;
+    private Double longitude;
+    private Double latitude;
 
     public String getContactAvatarUrl() {
         return contactAvatarUrl;
@@ -620,4 +635,61 @@ public class EnterpriseCustomerDTO {
     public void setSourceItemName(String sourceItemName) {
         this.sourceItemName = sourceItemName;
     }
+
+	public Long getTrackingUid() {
+		return trackingUid;
+	}
+
+	public void setTrackingUid(Long trackingUid) {
+		this.trackingUid = trackingUid;
+	}
+
+	public Double getPropertyArea() {
+		return propertyArea;
+	}
+
+	public void setPropertyArea(Double propertyArea) {
+		this.propertyArea = propertyArea;
+	}
+
+	public Double getPropertyUnitPrice() {
+		return propertyUnitPrice;
+	}
+
+	public void setPropertyUnitPrice(Double propertyUnitPrice) {
+		this.propertyUnitPrice = propertyUnitPrice;
+	}
+
+	public Long getPropertyType() {
+		return propertyType;
+	}
+
+	public void setPropertyType(Long propertyType) {
+		this.propertyType = propertyType;
+	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public Double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getTrackingName() {
+		return trackingName;
+	}
+
+	public void setTrackingName(String trackingName) {
+		this.trackingName = trackingName;
+	}
+    
 }

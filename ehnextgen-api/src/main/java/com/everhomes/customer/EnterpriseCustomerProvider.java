@@ -1,7 +1,10 @@
 package com.everhomes.customer;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 
 import java.util.List;
 import java.util.Map;
@@ -92,5 +95,10 @@ public interface EnterpriseCustomerProvider {
 	
 	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist);
 	List<CustomerEvent> listCustomerEvents(Long customerId);
+	
+	void allotEnterpriseCustomer(EnterpriseCustomer customer);
+	void giveUpEnterpriseCustomer(EnterpriseCustomer customer);
+	
+	List<EnterpriseCustomerDTO> findEnterpriseCustomersByDistance(ListNearbyEnterpriseCustomersCommand cmd , ListingLocator locator , int pageSize);
 
 }

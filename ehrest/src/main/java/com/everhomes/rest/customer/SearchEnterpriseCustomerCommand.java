@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *     <li>communityId: 园区id</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 页面大小</li>
+ *     <li>type: 查询类型;1:全部客户  2:我的客户   3:公共客户</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -26,6 +27,8 @@ public class SearchEnterpriseCustomerCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+    
+    private Integer type;
 
     public Long getCommunityId() {
         return communityId;
@@ -75,7 +78,16 @@ public class SearchEnterpriseCustomerCommand {
         this.pageSize = pageSize;
     }
 
-    @Override
+    
+    public Integer getType() {
+		return type;
+	}
+
+	public void setType(Integer type) {
+		this.type = type;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

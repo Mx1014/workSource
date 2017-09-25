@@ -91,4 +91,9 @@ public interface CustomerService {
 	
 	List<CustomerEventDTO> listCustomerEvents(ListCustomerEventsCommand cmd);
 	
+	void allotEnterpriseCustomer(AllotEnterpriseCustomerCommand cmd);
+	void giveUpEnterpriseCustomer(GiveUpEnterpriseCustomerCommand cmd);
+	
+	ListNearbyEnterpriseCustomersCommandResponse listNearbyEnterpriseCustomers(ListNearbyEnterpriseCustomersCommand cmd);
+	
 }

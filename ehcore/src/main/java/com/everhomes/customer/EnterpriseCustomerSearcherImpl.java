@@ -2,6 +2,8 @@ package com.everhomes.customer;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
@@ -51,6 +53,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     @Autowired
     private FieldProvider fieldProvider;
+    
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
     @Override
     public String getIndexType() {
@@ -98,6 +103,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("categoryItemId", customer.getCategoryItemId());
             builder.field("levelItemId", customer.getLevelItemId());
             builder.field("status", customer.getStatus());
+            builder.field("trackingUid",customer.getTrackingUid());
 
             builder.endObject();
             return builder;
@@ -159,7 +165,15 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
         if(cmd.getLevelId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("levelItemId", cmd.getLevelId()));
-
+        
+        //查询全部客户、我的客户、公共客户
+        if(null != cmd.getType()){
+        	if(2 == cmd.getType()){
+        		fb = FilterBuilders.andFilter(fb ,FilterBuilders.termFilter("trackingUid", UserContext.currentUserId()));
+        	}else if(3 == cmd.getType()){
+        		fb = FilterBuilders.andFilter(fb ,FilterBuilders.termFilter("trackingUid", -1l));
+        	}
+        }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -200,6 +214,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
                 if(levelItem != null) {
                     dto.setLevelItemName(levelItem.getItemDisplayName());
+                }
+                if(dto.getTrackingUid() != null) {
+                	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
+                	if(null != detail && null != detail.getContactName()){
+                		dto.setTrackingName(detail.getContactName());
+                	}        	
                 }
                 dtos.add(dto);
             });
