@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.launchpad;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
 import com.everhomes.business.BusinessService;
@@ -412,7 +413,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
    public GetLaunchPadItemsCommandResponse getLaunchPadItemsByScene(GetLaunchPadItemsBySceneCommand cmd, HttpServletRequest request) {
        User user = UserContext.current().getUser();
        SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
-       
        GetLaunchPadItemsCommand getCmd = new GetLaunchPadItemsCommand();
        getCmd.setItemGroup(cmd.getItemGroup());
        getCmd.setItemLocation(cmd.getItemLocation());
@@ -851,7 +851,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 //		}		
 //		return result;
 		
-		return processLaunchPadItems(token, userId, community.getId(), allItems, request,itemDisplayFlag);
+		return processLaunchPadItems(token, userId, community.getId(), allItems, request,itemDisplayFlag, cmd.getSceneToken());
 	}
 	
     private List<LaunchPadItemDTO> getItemsByOrg(GetLaunchPadItemsByOrgCommand cmd, HttpServletRequest request, ItemDisplayFlag itemDisplayFlag){
@@ -950,7 +950,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 
 
-        return processLaunchPadItems(token, userId, communityId, allItems, request, itemDisplayFlag);
+        return processLaunchPadItems(token, userId, communityId, allItems, request, itemDisplayFlag, cmd.getSceneToken());
     }
 
 	private List<LaunchPadItem> getLaunchPadItemsByScopeType(Integer namespaceId, String itemLocation, String itemGroup, String sceneType, Long organizationId, Long communityId){
@@ -1014,7 +1014,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	}
 
 
-	private List<LaunchPadItemDTO> processLaunchPadItems(String token, Long userId, Long communityId, List<LaunchPadItem> allItems, HttpServletRequest request,ItemDisplayFlag itemDisplayFlag) {
+	private List<LaunchPadItemDTO> processLaunchPadItems(String token, Long userId, Long communityId, List<LaunchPadItem> allItems, HttpServletRequest request,ItemDisplayFlag itemDisplayFlag, String sceneToken) {
         List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
 	    try{
             List<LaunchPadItemDTO> distinctDto = new ArrayList<LaunchPadItemDTO>();
@@ -1137,11 +1137,38 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			}
 
 
+			refreshActionData(result, sceneToken);
+
+
         }catch(Exception e){
             LOGGER.error("Process item aciton data is error.",e);
             return null;
         }
         return result;
+	}
+
+	private void refreshActionData(List<LaunchPadItemDTO> dtos, String sceneToken){
+		if(dtos != null && dtos.size() > 0){
+			dtos.forEach(r ->{
+				if(r.getActionData() != null && !"".equals(r.getActionData().trim())){
+					//调用各个业务的handler处理action
+					JSONObject jsonObject = (JSONObject) JSONValue.parse(r.getActionData());
+					if(jsonObject.get("handler") != null){
+						LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ String.valueOf(jsonObject.get("handler")));
+						if(handler != null){
+							String newActionData = handler.refreshActionData(r.getActionData(), sceneToken);
+							r.setActionData(newActionData);
+						}
+					}
+
+					//调用默认的default_host handler处理url，将{key}等转换成实际的host
+					LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ LaunchPadItemActionDataHandler.DEFAULT);
+					String newActionData = handler.refreshActionData(r.getActionData(), sceneToken);
+					r.setActionData(newActionData);
+				}
+			});
+		}
+
 	}
 
 	private List<BusinessDTO> getBusinessesInfo(List<String> businessIds){
