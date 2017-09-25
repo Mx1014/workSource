@@ -1344,7 +1344,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 
     @Override
     public List<ServiceAllianceCategoryDTO> listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+    	Integer namespaceId = UserContext.getCurrentNamespaceId();
+    	if(cmd.getNamespaceId() != null){
+    		namespaceId = cmd.getNamespaceId();
+    	}
 		List<Byte> displayDestination = new ArrayList<>();
 		if(cmd.getDestination() != null) {
 			displayDestination.add(cmd.getDestination());
