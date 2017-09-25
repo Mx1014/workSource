@@ -15,6 +15,9 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.order.PayService;
+import com.everhomes.rest.activity.ActivityLocalStringCode;
+import com.everhomes.rest.order.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -45,9 +48,6 @@ import com.everhomes.payment.taotaogu.NotifyEntity;
 import com.everhomes.payment.taotaogu.TaotaoguTokenCacheItem;
 import com.everhomes.payment.taotaogu.TaotaoguVendorConstant;
 import com.everhomes.payment.util.DownloadUtil;
-import com.everhomes.rest.order.CommonOrderCommand;
-import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.payment.ApplyCardCommand;
 import com.everhomes.rest.payment.CardInfoDTO;
 import com.everhomes.rest.payment.CardIssuerDTO;
@@ -123,7 +123,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     BigCollectionProvider bigCollectionProvider;
     @Autowired
 	private LocaleStringService localeStringService;
-    
+	@Autowired
+	private PayService payService;
     @Autowired
     private CoordinationProvider coordinationProvider;
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -213,8 +214,54 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	}
     	return dto;
     }
-    
-    @Override
+
+	@Override
+	public PreOrderDTO rechargeCardV2(RechargeCardCommand cmd) {
+		checkParam(cmd.getOwnerType(), cmd.getOwnerId());
+		PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
+		checkPaymentCardIsNull(paymentCard,cmd.getCardId());
+		User user = UserContext.current().getUser();
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+
+		PaymentCardRechargeOrder paymentCardRechargeOrder = new PaymentCardRechargeOrder();
+		paymentCardRechargeOrder.setOwnerType(cmd.getOwnerType());
+		paymentCardRechargeOrder.setOwnerId(cmd.getOwnerId());
+		paymentCardRechargeOrder.setNamespaceId(user.getNamespaceId());
+		paymentCardRechargeOrder.setOrderNo(createOrderNo());
+		paymentCardRechargeOrder.setUserId(user.getId());
+		paymentCardRechargeOrder.setUserName(user.getNickName());
+		paymentCardRechargeOrder.setMobile(userIdentifier.getIdentifierToken());
+		paymentCardRechargeOrder.setCardNo(paymentCard.getCardNo());
+		paymentCardRechargeOrder.setCardId(paymentCard.getId());
+		paymentCardRechargeOrder.setAmount(cmd.getAmount());
+		paymentCardRechargeOrder.setPayerUid(user.getId());
+		paymentCardRechargeOrder.setPayerName(user.getNickName());
+		paymentCardRechargeOrder.setPayStatus(CardOrderStatus.UNPAID.getCode());
+		paymentCardRechargeOrder.setRechargeStatus(CardRechargeStatus.UNRECHARGED.getCode());
+		paymentCardRechargeOrder.setCreatorUid(user.getId());
+		paymentCardRechargeOrder.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		paymentCardProvider.createPaymentCardRechargeOrder(paymentCardRechargeOrder);
+
+		PreOrderCommand preOrderCommand = new PreOrderCommand();
+
+		preOrderCommand.setClientAppName(cmd.getClientAppName());
+		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PAYMENTCARD.getPycode());
+		preOrderCommand.setOrderId(paymentCardRechargeOrder.getOrderNo());
+		preOrderCommand.setAmount(cmd.getAmount().multiply(new BigDecimal(100)).longValue());
+
+		preOrderCommand.setPayerId(user.getId());
+		preOrderCommand.setNamespaceId(user.getNamespaceId());
+//		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
+//				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_FEE),
+//				UserContext.current().getUser().getLocale(),
+//				"activity roster pay");
+//		preOrderCommand.setSummary(temple);
+
+		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		return callBack;
+	}
+
+	@Override
     public GetCardPaidQrCodeDTO getCardPaidQrCode(GetCardPaidQrCodeCommand cmd){
     	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
     	GetCardPaidQrCodeDTO dto = new GetCardPaidQrCodeDTO();
