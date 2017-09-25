@@ -8,15 +8,15 @@ CREATE TABLE `eh_community_map_shops` (
   `business_hours` varchar(512) DEFAULT NULL,
   `contact_name` varchar(128) DEFAULT NULL,
   `contact_phone` varchar(128) DEFAULT NULL,
-  `building_id` bigint(20) DEFAULT NULL,
-  `address_id` bigint(20) DEFAULT NULL,
+  `building_id` bigint(20) NOT NULL,
+  `address_id` bigint(20) NOT NULL,
   `description` text,
-  `shop_Avatar` varchar(1024) DEFAULT NULL,
+  `shop_Avatar_uri` varchar(1024) DEFAULT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: active',
   `creator_uid` bigint(20) NOT NULL DEFAULT 0,
   `create_time` datetime DEFAULT NULL,
-  `delete_uid` bigint(20) NOT NULL DEFAULT 0,
-  `delete_time` datetime DEFAULT NULL,
+  `update_uid` bigint(20) NOT NULL DEFAULT 0,
+  `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
