@@ -118,8 +118,12 @@ public class CustomerServiceImpl implements CustomerService {
         if(StringUtils.isNotBlank(customerNumber)) {
             List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndNumber(namespaceId, customerNumber);
             if(customers != null && customers.size() > 0) {
-                if(id != null && customers.size() == 1 && id.equals(customers.get(0).getId())) {
-                    return;
+                if(id != null) {
+                    for(EnterpriseCustomer customer : customers) {
+                        if(id.equals(customer.getId())) {
+                            return;
+                        }
+                    }
                 }
                 LOGGER.error("customerNumber {} in namespace {} already exist!", customerNumber, namespaceId);
                 throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NUMBER_IS_EXIST,
@@ -129,8 +133,12 @@ public class CustomerServiceImpl implements CustomerService {
         if(StringUtils.isNotBlank(customerName)) {
             List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, customerName);
             if(customers != null && customers.size() > 0) {
-                if(id != null && customers.size() == 1 && id.equals(customers.get(0).getId())) {
-                    return;
+                if(id != null) {
+                    for(EnterpriseCustomer customer : customers) {
+                        if(id.equals(customer.getId())) {
+                            return;
+                        }
+                    }
                 }
                 LOGGER.error("customerName {} in namespace {} already exist!", customerName, namespaceId);
                 throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NAME_IS_EXIST,
