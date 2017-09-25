@@ -111,7 +111,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 	public IncubatorApplyDTO addIncubatorApply(AddIncubatorApplyCommand cmd) {
 
 		if(cmd.getNamespaceId() == null || cmd.getCommunityId() == null){
-			LOGGER.error("ERROR_INVALID_PARAMS");
+			LOGGER.error("ERROR_INVALID_PARAMS, namespaceId or communityId is null, namespaceid={}, communityId={}", cmd.getNamespaceId(), cmd.getCommunityId());
 			throw RuntimeErrorException.errorWith(IncubatorServiceErrorCode.SCOPE, IncubatorServiceErrorCode.ERROR_INVALID_PARAMS,
 					"ERROR_INVALID_PARAMS");
 		}
