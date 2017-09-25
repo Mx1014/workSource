@@ -38,4 +38,13 @@ CREATE TABLE `eh_service_alliance_comment_attachments` (
 ALTER TABLE `eh_service_alliances` ADD COLUMN `summary_description` VARCHAR(1024) COMMENT '';
 ALTER TABLE `eh_service_alliances` ADD COLUMN `enable_comment` TINYINT DEFAULT 0 COMMENT '1,enable;0,disable';
 ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `entry_id` INTEGER;
---end by dengs, 20170925 服务联盟2.9
+-- end by dengs, 20170925 服务联盟2.9
+
+--
+-- 短信日志 add by xq.tian  2017/08/23
+--
+ALTER TABLE `eh_sms_logs` ADD COLUMN `handler` VARCHAR(128) NOT NULL COMMENT 'YunZhiXun, YouXunTong, LianXinTong';
+ALTER TABLE `eh_sms_logs` ADD COLUMN `sms_id` VARCHAR(128) COMMENT 'sms identifier';
+ALTER TABLE `eh_sms_logs` ADD COLUMN `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: send success, 2: send failed, 4: report success, 5: report failed';
+ALTER TABLE `eh_sms_logs` ADD COLUMN `report_text` TEXT COMMENT 'report text';
+ALTER TABLE `eh_sms_logs` ADD COLUMN `report_time` DATETIME(3);
