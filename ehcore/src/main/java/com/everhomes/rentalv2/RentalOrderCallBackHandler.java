@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-@Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.ACTIVITY_SIGNUP_ORDER_CODE )
+@Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.RENTAL_ORDER_CODE )
 public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(RentalOrderCallBackHandler.class);

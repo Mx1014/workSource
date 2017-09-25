@@ -36,7 +36,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Locale;
 
-@Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.ACTIVITY_SIGNUP_ORDER_CODE )
+@Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.PARKING_CODE )
 public class ParkingOrderCallBackHandler implements PaymentCallBackHandler {
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingOrderCallBackHandler.class);
