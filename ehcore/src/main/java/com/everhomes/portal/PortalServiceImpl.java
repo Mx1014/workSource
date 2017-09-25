@@ -283,6 +283,20 @@ public class PortalServiceImpl implements PortalService {
 					PortalLayoutJson layoutJson = (PortalLayoutJson)StringHelper.fromJsonString(template.getTemplateJson(), PortalLayoutJson.class);
 					portalLayout.setName(layoutJson.getLayoutName());
 					portalLayout.setLocation(layoutJson.getLocation());
+
+					List<String> names = new ArrayList<>();
+					names.add("ServiceMarketLayout");
+					names.add("SecondServiceMarketLayout");
+					names.add("AssociationLayout");
+					if(names.contains(portalLayout.getName())){
+						PortalLayout layout = portalLayoutProvider.getPortalLayout(namespaceId, portalLayout.getName());
+						if(null != layout){
+							LOGGER.error("The home page sign already exists. name = {}", portalLayout.getName());
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+									"The home page sign already exists.");
+						}
+					}
+
 					portalLayoutProvider.createPortalLayout(portalLayout);
 					if(null != layoutJson.getGroups()){
 						for (PortalItemGroupJson jsonObj: layoutJson.getGroups()) {
@@ -325,6 +339,16 @@ public class PortalServiceImpl implements PortalService {
 	public void deletePortalLayout(DeletePortalLayoutCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalLayout portalLayout = checkPortalLayout(cmd.getId());
+
+		List<String> names = new ArrayList<>();
+		names.add("ServiceMarketLayout");
+		names.add("SecondServiceMarketLayout");
+		names.add("AssociationLayout");
+		if(names.contains(portalLayout.getName())){
+			LOGGER.error("Home page signature cannot be deleted. id = {}, name = {}", portalLayout.getId(), portalLayout.getName());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Home page signature cannot be deleted.");
+		}
 		portalLayout.setStatus(PortalLayoutStatus.INACTIVE.getCode());
 		portalLayout.setOperatorUid(user.getId());
 		portalLayoutProvider.updatePortalLayout(portalLayout);
@@ -1543,7 +1567,7 @@ public class PortalServiceImpl implements PortalService {
 					item.setItemLabel(portalItem.getLabel());
 					item.setItemName(portalItem.getName());
 					item.setDeleteFlag(DeleteFlagType.YES.getCode());
-					item.setScaleType(ScaleType.TAILOR.getCode());
+					item.setScaleType(ScaleType.NONE.getCode());
 
 					//更多全部不进行分类
 					if(PortalItemActionType.fromCode(portalItem.getActionType()) != PortalItemActionType.ALLORMORE){
@@ -1657,7 +1681,7 @@ public class PortalServiceImpl implements PortalService {
 		List<PortalItem> allItems = getItemAllOrMore(namespaceId, null, AllOrMoreType.ALL);
 		for (PortalItem item: allItems) {
 			AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(item.getActionData(), AllOrMoreActionData.class);
-			List<PortalItemCategory> categorys = portalItemCategoryProvider.listPortalItemCategory(namespaceId, item.getItemGroupId());
+			List<PortalItemCategory> categorys = portalItemCategoryProvider.listPortalItemCategory(namespaceId, item.getItemGroupId(), null);
 			for (PortalItemCategory category: categorys) {
 				List<PortalContentScope> contentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM_CATEGORY.getCode(), category.getId());
 				List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM_CATEGORY.getCode(), category.getId(), null);
@@ -1734,12 +1758,21 @@ public class PortalServiceImpl implements PortalService {
 			cmd.setLocation("/home");
 		}
 
+		List<String> names = new ArrayList<>();
+
+		//默认同步三种主页签的layout数据
 		if(StringUtils.isEmpty(cmd.getName())){
-			cmd.setName("ServiceMarketLayout");
+			names.add("ServiceMarketLayout");
+			names.add("SecondServiceMarketLayout");
+			names.add("AssociationLayout");
+		}else{
+			names.add(cmd.getName());
 		}
 
 		dbProvider.execute((status) -> {
-			syncLayout(cmd.getNamespaceId(), cmd.getLocation(), cmd.getName());
+			for (String name: names) {
+				syncLayout(cmd.getNamespaceId(), cmd.getLocation(), name);
+			}
 			return null;
 		});
 	}
@@ -1765,6 +1798,7 @@ public class PortalServiceImpl implements PortalService {
 				layout.setOperatorUid(user.getId());
 				layout.setCreatorUid(user.getId());
 				portalLayoutProvider.createPortalLayout(layout);
+				Integer defOrder = 1;
 				List<LaunchPadLayoutGroup> padLayoutGroups = layoutJson.getGroups();
 				for (LaunchPadLayoutGroup padLayoutGroup: padLayoutGroups) {
 					PortalItemGroup itemGroup = ConvertHelper.convert(padLayoutGroup, PortalItemGroup.class);
@@ -1774,6 +1808,7 @@ public class PortalServiceImpl implements PortalService {
 					itemGroup.setStatus(layout.getStatus());
 					itemGroup.setCreatorUid(user.getId());
 					itemGroup.setOperatorUid(user.getId());
+					itemGroup.setDefaultOrder(defOrder ++);
 					if(null != padLayoutGroup.getSeparatorFlag()){
 						itemGroup.setSeparatorFlag(padLayoutGroup.getSeparatorFlag().byteValue());
 					}

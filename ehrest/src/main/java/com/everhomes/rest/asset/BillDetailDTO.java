@@ -14,6 +14,8 @@ import java.math.BigDecimal;
  * <li>status:状态,1:待缴;2:缴清</li>
  * <li>billId:账单id</li>
  * <li>payStatus:清账状态</li>
+ * <li>dateStrBegin:计费开始时间</li>
+ * <li>dateStrEnd:计费结束时间</li>
  *</ul>
  */
 public class BillDetailDTO {
@@ -23,6 +25,8 @@ public class BillDetailDTO {
     private Byte status;
     private String billId;
     private String payStatus;
+    private String dateStrBegin;
+    private String dateStrEnd;
 
     @Override
     public String toString() {
@@ -78,5 +82,21 @@ public class BillDetailDTO {
     }
 
     public BillDetailDTO() {
+    }
+
+    public String getDateStrBegin() {
+        return dateStrBegin;
+    }
+
+    public void setDateStrBegin(String dateStrBegin) {
+        this.dateStrBegin = dateStrBegin;
+    }
+
+    public String getDateStrEnd() {
+        return dateStrEnd;
+    }
+
+    public void setDateStrEnd(String dateStrEnd) {
+        this.dateStrEnd = dateStrEnd;
     }
 }
