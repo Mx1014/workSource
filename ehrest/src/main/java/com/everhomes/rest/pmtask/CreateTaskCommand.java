@@ -13,7 +13,6 @@ import com.everhomes.util.StringHelper;
  * <li>address: 服务地点</li>
  * <li>content: 内容</li>
  * <li>organizationId: 公司id</li>
- * <li>companyName: 用户所在公司名</li>
  * <li>taskCategoryId: 服务类型id</li>
  * <li>addressId: 门牌id</li>
  * <li>priority: 客户反映</li>
@@ -31,7 +30,7 @@ public class CreateTaskCommand {
 	private String address;
 	private String content;
 	private Long organizationId;
-	private String companyName;
+
 	
 	private Long taskCategoryId;
 	private Long addressId;
@@ -174,11 +173,5 @@ public class CreateTaskCommand {
 		return StringHelper.toJsonString(this);
 	}
 
-	public String getCompanyName() {
-		return companyName;
-	}
 
-	public void setCompanyName(String companyName) {
-		this.companyName = companyName;
-	}
 }
