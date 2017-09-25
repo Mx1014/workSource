@@ -8,13 +8,13 @@ import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community_map.*;
@@ -23,10 +23,12 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -384,5 +386,100 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         dto.setBuildings(tempBuildings);
 
         return dto;
+    }
+
+    @Override
+    public void deleteCommunityMapShop(DeleteCommunityMapShopCommand cmd) {
+        CommunityMapShopDetail shop = communityMapProvider.getCommunityMapShopDetailById(cmd.getShopId());
+        if (null == shop) {
+            LOGGER.error("Shop not found, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Shop not found.");
+        }
+        shop.setStatus(CommunityMapShopStatus.INACTIVE.getCode());
+        communityMapProvider.updateCommunityMapShop(shop);
+    }
+
+    @Override
+    public CommunityMapShopDetailDTO updateCommunityMapShop(UpdateCommunityMapShopCommand cmd) {
+        CommunityMapShopDetail shop = communityMapProvider.getCommunityMapShopDetailById(cmd.getShopId());
+        if (null == shop) {
+            LOGGER.error("Shop not found, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Shop not found.");
+        }
+        BeanUtils.copyProperties(cmd, shop);
+        communityMapProvider.updateCommunityMapShop(shop);
+        return ConvertHelper.convert(shop, CommunityMapShopDetailDTO.class);
+    }
+
+    @Override
+    public CommunityMapShopDetailDTO createCommunityMapShop(CreateCommunityMapShopCommand cmd) {
+        CommunityMapShopDetail shop = ConvertHelper.convert(cmd, CommunityMapShopDetail.class);
+
+        communityMapProvider.createCommunityMapShop(shop);
+
+        return ConvertHelper.convert(shop, CommunityMapShopDetailDTO.class);
+    }
+
+    @Override
+    public CommunityMapShopDetailDTO getCommunityMapShopDetailById(GetCommunityMapShopDetailByIdCommand cmd) {
+
+        CommunityMapShopDetail shop = communityMapProvider.getCommunityMapShopDetailById(cmd.getShopId());
+
+        if (null == shop) {
+            LOGGER.error("Shop not found, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Shop not found.");
+        }
+        CommunityMapShopDetailDTO dto = ConvertHelper.convert(shop, CommunityMapShopDetailDTO.class);
+        populateShop(dto, shop);
+        return dto;
+    }
+
+    private void populateShop(CommunityMapShopDetailDTO dto, CommunityMapShopDetail shop) {
+        Building building = communityProvider.findBuildingById(shop.getBuildingId());
+
+        if (null != building) {
+            dto.setBuildingName(building.getName());
+        }
+
+        Address address = addressProvider.findAddressById(shop.getAddressId());
+
+        if (null != address) {
+            dto.setApartmentName(address.getApartmentName());
+        }
+        if (null != shop.getShopAvatarUri()) {
+            String url = contentServerService.parserUri(shop.getShopAvatarUri(), EntityType.USER.getCode(), UserContext.currentUserId());
+            dto.setShopAvatarUrl(url);
+        }
+    }
+
+    @Override
+    public SearchCommunityMapShopsResponse searchCommunityMapShops(SearchCommunityMapShopsCommand cmd) {
+        SearchCommunityMapShopsResponse response = new SearchCommunityMapShopsResponse();
+        Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        List<CommunityMapShopDetail> shops = communityMapProvider.searchCommunityMapShops(namespaceId, cmd.getOwnerType(),
+                cmd.getOwnerId(), cmd.getBuildingId(), cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
+
+        int size = shops.size();
+        if(size > 0){
+            response.setShops(shops.stream().map(r -> {
+                CommunityMapShopDetailDTO dto = ConvertHelper.convert(r, CommunityMapShopDetailDTO.class);
+                populateShop(dto, r);
+                return dto;
+            }).collect(Collectors.toList()));
+
+            if(size != pageSize){
+                response.setNextPageAnchor(null);
+            }else{
+                response.setNextPageAnchor(shops.get(size-1).getCreateTime().getTime());
+            }
+        }
+
+        return response;
     }
 }

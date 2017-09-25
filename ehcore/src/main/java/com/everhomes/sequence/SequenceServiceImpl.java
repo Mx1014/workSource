@@ -58,6 +58,7 @@ import com.everhomes.server.schema.tables.pojos.EhCommunityBuildingGeos;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhCommunityMapInfos;
 import com.everhomes.server.schema.tables.pojos.EhCommunityMapSearchTypes;
+import com.everhomes.server.schema.tables.pojos.EhCommunityMapShops;
 import com.everhomes.server.schema.tables.pojos.EhConfAccountCategories;
 import com.everhomes.server.schema.tables.pojos.EhConfAccountHistories;
 import com.everhomes.server.schema.tables.pojos.EhConfAccounts;
@@ -2187,6 +2188,10 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhPmNotifyLogs.class, Tables.EH_PM_NOTIFY_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_NOTIFY_LOGS.ID.max()).from(Tables.EH_PM_NOTIFY_LOGS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhCommunityMapShops.class, Tables.EH_COMMUNITY_MAP_SHOPS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_COMMUNITY_MAP_SHOPS.ID.max()).from(Tables.EH_COMMUNITY_MAP_SHOPS).fetchOne().value1();
         });
     }
 
