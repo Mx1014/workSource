@@ -16,6 +16,7 @@ public interface FieldService {
     List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd);
     List<FieldItemDTO> listFieldItems(ListFieldItemCommand cmd);
 
+    void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
     /**
      * 更新动态组、字段、选项的方式：
      * 1、查出所有符合的map列表
@@ -25,17 +26,24 @@ public interface FieldService {
      */
     void updateFields(UpdateFieldsCommand cmd);
     void updateFieldGroups(UpdateFieldGroupsCommand cmd);
+
+
+
     void updateFieldItems(UpdateFieldItemsCommand cmd);
 
-
-    
-
+    void importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file);
 
     ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
+
+
+
+
+    void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName);
 
     List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd);
     List<SystemFieldDTO> listSystemFields(ListSystemFieldCommand cmd);
     List<SystemFieldItemDTO> listSystemFieldItems(ListSystemFieldItemCommand cmd);
+
 
 }
