@@ -307,7 +307,7 @@ public class ExcelUtils {
      * @throws Exception
      */
     public void exportExcel(HSSFWorkbook workbook, int sheetNum,
-                            String sheetTitle, String[] headers, List<List<String>> result) throws Exception {
+                            String sheetTitle, String[] headers, List<List<String>> result,String[] mandatory) throws Exception {
         // 生成一个表格
         HSSFSheet sheet = workbook.createSheet();
         workbook.setSheetName(sheetNum, sheetTitle);
@@ -316,53 +316,75 @@ public class ExcelUtils {
         // 生成一个样式
         HSSFCellStyle style = workbook.createCellStyle();
         // 设置这些样式
-        style.setFillForegroundColor(HSSFColor.GREEN.index);
+//        style.setFillForegroundColor(HSSFColor.GREEN.index);
 //        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
         style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
         style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
         style.setBorderRight(HSSFCellStyle.BORDER_THIN);
         style.setBorderTop(HSSFCellStyle.BORDER_THIN);
         style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-        // 生成一个字体
+        // 生成一个内容字体
+        HSSFCellStyle style_content = workbook.createCellStyle();
         HSSFFont font = workbook.createFont();
         font.setColor(HSSFColor.BLACK.index);
-        font.setFontHeightInPoints((short) 16);
+        font.setFontHeightInPoints((short) 12);
+        style_content.setFont(font);
+        //非必填的标题的样式
         HSSFFont font2 = workbook.createFont();
         font2.setColor(HSSFColor.BLACK.index);
-        font2.setFontHeightInPoints((short) 18);
+        font2.setFontHeightInPoints((short) 16);
         font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+        style.setFont(font2);
+        //必填的字体和样式
 
+        HSSFCellStyle style_m = workbook.createCellStyle();
+        // 设置这些样式
+//        style.setFillForegroundColor(HSSFColor.GREEN.index);
+//        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        style_m.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+
+        HSSFFont font4 = workbook.createFont();
+        font4.setColor(HSSFColor.RED.index);
+        font4.setFontHeightInPoints((short) 16);
+        font4.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+
+        style_m.setFont(font4);
         // 指定当单元格内容显示不下时自动换行
         style.setWrapText(true);
         //产生说明
         HSSFFont font3 = workbook.createFont();
         font3.setColor(HSSFColor.BLACK.index);
         font3.setFontHeightInPoints((short) 18);
-        font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+        font3.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+
         HSSFCellStyle introStyle = workbook.createCellStyle();
         introStyle.setWrapText(true);
         introStyle.setAlignment(HorizontalAlignment.LEFT);
         introStyle.setFillBackgroundColor(HSSFColor.YELLOW.index);
-        introStyle.setFont(font);
+        introStyle.setFont(font3);
         CellRangeAddress cra = new CellRangeAddress(0,0,0,11);
         sheet.addMergedRegion(cra);
         HSSFRow introRow = sheet.createRow(0);
+        introRow.setHeightInPoints(130);
         HSSFCell introCell = introRow.createCell(0);
         introCell.setCellStyle(introStyle);
         introCell.setCellValue("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
                 "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
                 "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
                 "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
-                "4、带有星号（*）的红色字段为必填项。");
-
+                "4、红色字段为必填项。");
 
         // 产生表格标题行
         HSSFRow row = sheet.createRow(1);
         // 把字体应用到当前的样式,标题为加粗的
-        style.setFont(font2);
+
         for (int i = 0; i < headers.length; i++) {
             HSSFCell cell = row.createCell((short) i);
-            cell.setCellStyle(style);
+            if(mandatory[i].equals("1")){
+                cell.setCellStyle(style_m);
+            }else{
+                cell.setCellStyle(style);
+            }
             HSSFRichTextString text = new HSSFRichTextString(headers[i]);
             cell.setCellValue(text.toString());
         }
@@ -375,6 +397,7 @@ public class ExcelUtils {
                 int cellIndex = 0;
                 for (String str : m) {
                     HSSFCell cell = row.createCell((short) cellIndex);
+                    cell.setCellStyle(style_content);
                     cell.setCellValue(str.toString());
                     cellIndex++;
                 }

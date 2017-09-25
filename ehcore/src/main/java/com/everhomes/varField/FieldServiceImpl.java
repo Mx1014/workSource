@@ -18,6 +18,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -229,6 +230,7 @@ public class FieldServiceImpl implements FieldService {
         ExcelUtils excel = new ExcelUtils();
         //注入workbook
         sheetGenerate(groups, workbook, excel,cmd.getNamespaceId());
+        sheetNum.remove();
         //输出
         ServletOutputStream out;
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
@@ -278,13 +280,18 @@ public class FieldServiceImpl implements FieldService {
                 List<FieldDTO> fields = listFields(cmd1);
                 //使用字段，获得headers
                 String headers[] = new String[fields.size()];
+                String mandatory[] = new String[headers.length];
                 for(int j = 0; j < fields.size(); j++){
                     FieldDTO field = fields.get(j);
+                    mandatory[j] = "0";
+                    if(field.getMandatoryFlag()==(byte)1){
+                        mandatory[j] = "1";
+                    }
                     headers[j] = field.getFieldDisplayName();
                 }
                 try {
                     //向工具中，传递workbook，sheet（group）的名称，headers，数据为null
-                    excel.exportExcel(workbook,sheetNum.get(),group.getGroupDisplayName(),headers,null);
+                    excel.exportExcel(workbook,sheetNum.get(),group.getGroupDisplayName(),headers,null,mandatory);
                     sheetNum.set(sheetNum.get()+1);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -315,9 +322,14 @@ public class FieldServiceImpl implements FieldService {
                 //通过字段即获得header，顺序不定
                 List<FieldDTO> fields = listFields(cmd1);
                 String headers[] = new String[fields.size()];
+                String mandatory[] = new String[headers.length];
                 //根据每个group获得字段,作为header
                 for(int j = 0; j < fields.size(); j++){
                     FieldDTO field = fields.get(j);
+                    mandatory[j] = "0";
+                    if(field.getMandatoryFlag()==(byte)1){
+                        mandatory[j] = "1";
+                    }
                     headers[j] = field.getFieldDisplayName();
                 }
                 //获取一个sheet的数据,这里只有叶节点，将header传回作为顺序.传递field来确保顺序
@@ -325,7 +337,7 @@ public class FieldServiceImpl implements FieldService {
                 try {
                     //写入workbook
                     System.out.println(sheetNum.get());
-                    excel.exportExcel(workbook,sheetNum.get(),group.getGroupDisplayName(),headers,data);
+                    excel.exportExcel(workbook,sheetNum.get(),group.getGroupDisplayName(),headers,data,mandatory);
                     sheetNum.set(sheetNum.get()+1);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -511,40 +523,44 @@ public class FieldServiceImpl implements FieldService {
         String type = clz.getDeclaredField(fieldName).getType().getSimpleName();
         System.out.println(type);
         System.out.println("==============");
-        switch(type){
-            case "BigDecimal":
-                val = new BigDecimal((String)value);
-                break;
-            case "Long":
-                val = Long.parseLong((String)value);
-                break;
-            case "Timestamp":
-                if(((String)value).length()<1){
-                    val = null;
+        if(StringUtils.isEmpty((String)value)){
+            val = null;
+        }else{
+            switch(type){
+                case "BigDecimal":
+                    val = new BigDecimal((String)value);
                     break;
-                }
-                Date date = new Date();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                try {
-                    date = sdf.parse((String) value);
-                } catch (ParseException e) {
-                    val = null;
+                case "Long":
+                    val = Long.parseLong((String)value);
                     break;
-                }
+                case "Timestamp":
+                    if(((String)value).length()<1){
+                        val = null;
+                        break;
+                    }
+                    Date date = new Date();
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    try {
+                        date = sdf.parse((String) value);
+                    } catch (ParseException e) {
+                        val = null;
+                        break;
+                    }
 
-                val = new Timestamp(date.getTime());
-                break;
-            case "Integer":
-                val = Integer.parseInt((String)value);
-                break;
-            case "Byte":
-                val = Byte.parseByte((String)value);
-                break;
-            case "String":
-                if(((String)val).trim().length()<1){
-                    val = null;
+                    val = new Timestamp(date.getTime());
                     break;
-                }
+                case "Integer":
+                    val = Integer.parseInt((String)value);
+                    break;
+                case "Byte":
+                    val = Byte.parseByte((String)value);
+                    break;
+                case "String":
+                    if(((String)val).trim().length()<1){
+                        val = null;
+                        break;
+                    }
+            }
         }
         PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
         Method writeMethod = pd.getWriteMethod();
@@ -584,6 +600,7 @@ public class FieldServiceImpl implements FieldService {
         ExcelUtils excel = new ExcelUtils();
         //注入sheet的内容到workbook中
         sheetGenerate(groups,workbook,excel,cmd.getCustomerId(),cmd.getCustomerType(),cmd.getNamespaceId(),cmd.getCommunityId());
+        sheetNum.remove();
         //写入流
         ServletOutputStream out;
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
@@ -631,13 +648,18 @@ public class FieldServiceImpl implements FieldService {
         }
         //拿到所有的group，进行匹配sheet用
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
+        List<FieldGroupDTO> partGroups = listFieldGroups(cmd1);
         List<FieldGroupDTO> groups = listFieldGroups(cmd1);
+        for(int i = 0; i < partGroups.size(); i++){
+            getAllGroups(partGroups.get(i),groups);
+        }
         int numberOfSheets = workbook.getNumberOfSheets();
         for(int i = 0; i < numberOfSheets; i ++){
             Sheet sheet = workbook.getSheetAt(i);
             //通过sheet名字进行匹配，获得此sheet对应的group
             String sheetName = sheet.getSheetName();
             FieldGroupDTO group = new FieldGroupDTO();
+            //对于children的做不到这种遍历
             for(int i1 = 0; i1 < groups.size(); i1 ++){
                 if(groups.get(i1).getGroupDisplayName().equals(sheetName)){
                     group = groups.get(i1);
@@ -657,6 +679,8 @@ public class FieldServiceImpl implements FieldService {
 
             String[] headers = new String[headRow.getLastCellNum()-headRow.getFirstCellNum()+1];
             HashMap<Integer,String> orderedFieldNames = new HashMap<>();
+            HashMap<Integer,FieldParams> orderedFieldParams = new HashMap<>();
+            HashMap<Integer,String> orderedFieldDisplayNames = new HashMap<>();
             for(int j =headRow.getFirstCellNum(); j < headRow.getLastCellNum();j++) {
                 for(int j1 = 0; j1 < fields.size();j1++){
                     FieldDTO fieldDTO = fields.get(j1);
@@ -665,14 +689,17 @@ public class FieldServiceImpl implements FieldService {
                         String fieldParam = fieldDTO.getFieldParam();
                         FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
                         //如果是select，则修改fieldName,在末尾加上Name，减去末尾的Id如果存在的话。由抽象跌入现实，拥有了名字，这是从神降格为人的过程---第六天魔王波旬
-                        if(params.getFieldParamType().equals("select")){
-                            //对projectSource特例
-                            if(!fieldName.equals("projectSource")){
-                                fieldName = fieldName.split("Id")[0];
-                                fieldName += "Name";
-                            }
-                        }
+//                        导入好像不用耶
+//                          if(params.getFieldParamType().equals("select")){
+//                            //对projectSource特例
+//                            if(!fieldName.equals("projectSource")&&!fieldName.equals("status")){
+//                                fieldName = fieldName.split("Id")[0];
+//                                fieldName += "Name";
+//                            }
+//                        }
                         orderedFieldNames.put(j,fieldName);
+                        orderedFieldParams.put(j,params);
+                        orderedFieldDisplayNames.put(j,fieldDTO.getFieldDisplayName());
                     }
                 }
                 Cell cell = headRow.getCell(j);
@@ -707,27 +734,50 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
                     String fieldName = orderedFieldNames.get(k);
+                    FieldParams param = orderedFieldParams.get(k);
+                    String displayName = orderedFieldDisplayNames.get(k);
                     try {
                         Cell cell = row.getCell(k);
                         String cellValue = "";
+                        //cell不为null时特殊处理status和projectSource
                         if(cell!=null){
                             cellValue = ExcelUtils.getCellValue(cell);
-                        }
-                        //处理特例projectSource的导入
-                        StringBuilder sb = new StringBuilder();
-                        if(fieldName.equals("projectSource")){
-                            String[] split = cell.getStringCellValue().split(",");
-                            for(String projectSource : split){
-                                ScopeFieldItem projectSourceItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), projectSource);
-                                if(projectSourceItem!=null){
-                                    sb.append((projectSourceItem.getItemId()==null?"":projectSourceItem.getItemId())+",");
+                            if(fieldName.equals("status")){
+                                cellValue = "";
+                                //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
+                                ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), fieldName);
+                                if(item!=null&&item.getItemId()!=null){
+                                    cellValue = String.valueOf(item.getItemId());
                                 }
                             }
-                            if(sb.toString().trim().length()>0){
-                                sb.deleteCharAt(sb.length()-1);
-                                cellValue = sb.toString();
+                            //处理特例projectSource的导入
+                            StringBuilder sb = new StringBuilder();
+                            if(fieldName.equals("projectSource")){
+                                cellValue = "";
+                                String[] split = cell.getStringCellValue().split(",");
+                                for(String projectSource : split){
+                                    ScopeFieldItem projectSourceItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), projectSource);
+                                    if(projectSourceItem!=null){
+                                        sb.append((projectSourceItem.getItemId()==null?"":projectSourceItem.getItemId())+",");
+                                    }
+                                }
+                                if(sb.toString().trim().length()>0){
+                                    sb.deleteCharAt(sb.length()-1);
+                                    cellValue = sb.toString();
+                                }
+                            }
+                            //处理其他select的
+                            if(param.getFieldParamType().equals("select")&&!fieldName.equals("projectSource")&&!fieldName.equals("status")){
+                                cellValue = "";
+                                ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), displayName);
+                                if(item!=null&&item.getItemId()!=null){
+                                    cellValue=String.valueOf(item.getItemId());
+                                }
+
+
                             }
                         }
+
 
                         setToObj(fieldName,object,cellValue);
                     } catch (Exception e) {
@@ -777,6 +827,16 @@ public class FieldServiceImpl implements FieldService {
             fieldProvider.saveFieldGroups(cmd.getCustomerType(),cmd.getCustomerId(),objects,clazz.getSimpleName());
         }
 
+    }
+
+    private void getAllGroups(FieldGroupDTO group,List<FieldGroupDTO> allGroups) {
+        if(group.getChildrenGroup()!=null&&group.getChildrenGroup().size()>0){
+            for(int i = 0; i < group.getChildrenGroup().size(); i++){
+                getAllGroups(group.getChildrenGroup().get(i),allGroups);
+            }
+        }else{
+            allGroups.add(group);
+        }
     }
 
     @Override
