@@ -4,58 +4,11 @@ package com.everhomes.express;
 import java.util.Map;
 
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.express.AddExpressUserCommand;
-import com.everhomes.rest.express.CancelExpressOrderCommand;
-import com.everhomes.rest.express.CreateExpressOrderCommand;
-import com.everhomes.rest.express.CreateExpressOrderResponse;
-import com.everhomes.rest.express.CreateOrUpdateExpressAddressCommand;
-import com.everhomes.rest.express.CreateOrUpdateExpressAddressResponse;
-import com.everhomes.rest.express.CreateOrUpdateExpressHotlineCommand;
-import com.everhomes.rest.express.CreateOrUpdateExpressHotlineResponse;
-import com.everhomes.rest.express.DeleteExpressAddressCommand;
-import com.everhomes.rest.express.DeleteExpressHotlineCommand;
-import com.everhomes.rest.express.DeleteExpressUserCommand;
-import com.everhomes.rest.express.GetExpressBusinessNoteCommand;
-import com.everhomes.rest.express.GetExpressBusinessNoteResponse;
-import com.everhomes.rest.express.GetExpressHotlineAndBusinessNoteFlagCommand;
-import com.everhomes.rest.express.GetExpressHotlineAndBusinessNoteFlagResponse;
-import com.everhomes.rest.express.GetExpressInsuredDocumentsCommand;
-import com.everhomes.rest.express.GetExpressInsuredDocumentsResponse;
-import com.everhomes.rest.express.GetExpressLogisticsDetailCommand;
-import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
-import com.everhomes.rest.express.GetExpressOrderDetailCommand;
-import com.everhomes.rest.express.GetExpressOrderDetailResponse;
-import com.everhomes.rest.express.GetExpressParamSettingResponse;
-import com.everhomes.rest.express.ListExpressAddressCommand;
-import com.everhomes.rest.express.ListExpressAddressResponse;
-import com.everhomes.rest.express.ListExpressCompanyCommand;
-import com.everhomes.rest.express.ListExpressCompanyResponse;
-import com.everhomes.rest.express.ListExpressHotlinesCommand;
-import com.everhomes.rest.express.ListExpressHotlinesResponse;
-import com.everhomes.rest.express.ListExpressOrderCommand;
-import com.everhomes.rest.express.ListExpressOrderResponse;
-import com.everhomes.rest.express.ListExpressOrderStatusResponse;
-import com.everhomes.rest.express.ListExpressPackageTypesCommand;
-import com.everhomes.rest.express.ListExpressPackageTypesResponse;
-import com.everhomes.rest.express.ListExpressQueryHistoryResponse;
-import com.everhomes.rest.express.ListExpressSendModesCommand;
-import com.everhomes.rest.express.ListExpressSendModesResponse;
-import com.everhomes.rest.express.ListExpressSendTypesCommand;
-import com.everhomes.rest.express.ListExpressSendTypesResponse;
-import com.everhomes.rest.express.ListExpressUserCommand;
-import com.everhomes.rest.express.ListExpressUserResponse;
-import com.everhomes.rest.express.ListPersonalExpressOrderCommand;
-import com.everhomes.rest.express.ListPersonalExpressOrderResponse;
-import com.everhomes.rest.express.ListServiceAddressCommand;
-import com.everhomes.rest.express.ListServiceAddressResponse;
-import com.everhomes.rest.express.PayExpressOrderCommand;
-import com.everhomes.rest.express.PrePayExpressOrderCommand;
-import com.everhomes.rest.express.PrintExpressOrderCommand;
-import com.everhomes.rest.express.UpdateExpressBusinessNoteCommand;
-import com.everhomes.rest.express.UpdateExpressHotlineFlagCommand;
-import com.everhomes.rest.express.UpdatePaySummaryCommand;
+import com.everhomes.rest.express.*;
 import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.order.PreOrderDTO;
 
 public interface ExpressService {
 
@@ -121,7 +74,6 @@ public interface ExpressService {
 
 	public void payFail(PayCallbackCommand cmd);
 
-
 	String getUrl(String uri);
 	
 	GetExpressParamSettingResponse getExpressParamSetting();
@@ -151,5 +103,7 @@ public interface ExpressService {
 	ListExpressOrderStatusResponse listExpressOrderStatus();
 
 	public Map<String,String> prePayExpressOrder(PrePayExpressOrderCommand cmd);
+
+	public PreOrderDTO payExpressOrderV2(PayExpressOrderCommandV2 cmd);
 
 }
