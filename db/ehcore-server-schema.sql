@@ -559,7 +559,8 @@ CREATE TABLE `eh_addresses` (
   KEY `i_eh_addr_address_alias` (`address_alias`),
   KEY `i_eh_addr_building_apt_name` (`building_name`,`apartment_name`),
   KEY `i_eh_addr_building_alias_apt_name` (`building_alias_name`,`apartment_name`),
-  KEY `i_eh_addr_address` (`address`)
+  KEY `i_eh_addr_address` (`address`),
+  KEY `namespace_address` (`namespace_address_type`,`namespace_address_token`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
@@ -5629,14 +5630,14 @@ CREATE TABLE `eh_messages` (
 
 DROP TABLE IF EXISTS `eh_namespace_details`;
 CREATE TABLE `eh_namespace_details` (
-  `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `resource_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the type of resource in the namespace, community_residential, community_commercial, community_mix',
-  `create_time` DATETIME,
-
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `resource_type` varchar(128) NOT NULL DEFAULT '' COMMENT 'the type of resource in the namespace, community_residential, community_commercial, community_mix',
+  `create_time` datetime DEFAULT NULL,
+  `name_type` tinyint(4) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_namespace_id` (`namespace_id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for eh_namespace_masks
@@ -6871,6 +6872,8 @@ CREATE TABLE `eh_organizations` (
   `operator_uid` BIGINT,
   `set_admin_flag` TINYINT DEFAULT 0,
   `email_content` TEXT COMMENT '工资条发送邮件内容',
+  `website` varchar(256) DEFAULT NULL,
+  `unified_social_credit_code` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `i_eh_org_name_level` (`name`,`level`),
   KEY `i_eh_org_path` (`path`),
