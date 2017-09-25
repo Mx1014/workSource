@@ -164,7 +164,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 		User applyUser = userProvider.findUserById(incubatorApply.getApplyUserId());
 		UserIdentifier applyIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(applyUser.getId(), IdentifierType.MOBILE.getCode());
 		Community community = communityProvider.findCommunityById(incubatorApply.getCommunityId());
-		CommunityGeoPoint communityGeoPoint = communityProvider.findCommunityGeoPointByCommunityId(applyUser.getCommunityId());
+		CommunityGeoPoint communityGeoPoint = communityProvider.findCommunityGeoPointByCommunityId(incubatorApply.getCommunityId());
 		incubatorApply.setApproveStatus(cmd.getApproveStatus());
 		incubatorApply.setApproveOpinion(cmd.getApproveOpinion());
 		incubatorApply.setApproveTime(new Timestamp(System.currentTimeMillis()));
