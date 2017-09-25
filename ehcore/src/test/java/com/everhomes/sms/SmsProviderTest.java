@@ -16,7 +16,7 @@ public class SmsProviderTest extends CoreServerTestCase {
     @Ignore @Test
     public void testSendMessageOK() {
         try {
-            smsProvider.sendSms(new String[]{"15889660710","18565600064"}, "测试修改后发短信");
+            // smsProvider.sendSms(new String[]{"15889660710","18565600064"}, "测试修改后发短信");
         } catch (Throwable e) {
             fail();
         }
