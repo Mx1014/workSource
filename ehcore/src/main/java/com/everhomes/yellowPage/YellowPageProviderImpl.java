@@ -1191,4 +1191,17 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		updatesql.execute();
 	}
 
+
+	@Override
+	public ServiceAllianceCategories findCategoryByEntryId(Integer namespaceId, Integer EntryId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceAllianceCategories.class));
+        SelectQuery<EhServiceAllianceCategoriesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_CATEGORIES);
+        if(null != namespaceId) 
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        if(null != EntryId)
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ENTRY_ID.eq(EntryId));
+        
+        return ConvertHelper.convert(query.fetchOne(), ServiceAllianceCategories.class);
+	}
+
 }
