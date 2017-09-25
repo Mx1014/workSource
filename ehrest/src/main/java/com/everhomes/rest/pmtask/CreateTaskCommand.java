@@ -30,6 +30,7 @@ public class CreateTaskCommand {
 	private String address;
 	private String content;
 	private Long organizationId;
+
 	
 	private Long taskCategoryId;
 	private Long addressId;
@@ -171,4 +172,6 @@ public class CreateTaskCommand {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+
+
 }

@@ -281,7 +281,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
         }
     }
 
-    private EbeiTaskResult createTask(PmTask task, List<AttachmentDescriptor> attachments,String requestorName) {
+    private EbeiTaskResult createTask(PmTask task, List<AttachmentDescriptor> attachments,Long companyId) {
 
         JSONObject param = new JSONObject();
 
@@ -307,11 +307,11 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 
         param.put("buildingId", "");
         //param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
-        if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(task.getOwnerType())){
-            List<Organization> list = organizationProvider.findOrganizationByCommunityId(task.getOwnerId());
-            param.put("companyName",list.get(0).getName());
-        }
-        param.put("submitter",requestorName);
+        if (companyId!=null)
+            param.put("companyName",organizationProvider.getOrganizationNameById(companyId));
+
+
+        param.put("submitter","正中会");
         param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
         param.put("type", "1");
         param.put("remarks", task.getContent());
@@ -459,7 +459,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
             task.setRequestorName(requestorName);
             task.setRequestorPhone(requestorPhone);
             Long time  = System.currentTimeMillis();
-            EbeiTaskResult createTaskResultDTO = createTask(task, cmd.getAttachments(),requestorName);
+            EbeiTaskResult createTaskResultDTO = createTask(task, cmd.getAttachments(),cmd.getFlowOrganizationId());
             LOGGER.info("--------------------------------------timecost:"+(System.currentTimeMillis()-time));
             if(null != createTaskResultDTO) {
                 task.setStringTag1(createTaskResultDTO.getOrderId());
