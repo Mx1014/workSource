@@ -89,30 +89,30 @@ public class HotTagServiceImpl implements HotTagService{
 
 		HotTags tag = hotTagProvider.findByName(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getName());
 		if(tag != null) {
-			if(tag.getStatus() == HotTagStatus.ACTIVE.getCode()) {
-				LOGGER.error("the tag which name = "+cmd.getName()+" and serviceType = "+cmd.getServiceType()+" is already hot tag!");
-				throw RuntimeErrorException
-						.errorWith(
-								HotTagServiceErrorCode.SCOPE,
-								HotTagServiceErrorCode.ERROR_HOTTAG_EXIST,
-								localeStringService.getLocalizedString(
-										String.valueOf(HotTagServiceErrorCode.SCOPE),
-										String.valueOf(HotTagServiceErrorCode.ERROR_HOTTAG_EXIST),
-										UserContext.current().getUser().getLocale(),
-										"the tag is already hot tag!"));
-			} else {
-				tag.setStatus(HotTagStatus.ACTIVE.getCode());
-				tag.setCreateUid(user.getId());
-				tag.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				tag.setDeleteUid(0L);
-				tag.setDeleteTime(null);
-				tag.setNamespaceId(cmd.getNamespaceId());
-				tag.setCategoryId(cmd.getCategoryId());
-				hotTagProvider.updateHotTag(tag);
-				
-				tag.setHotFlag(HotTagStatus.ACTIVE.getCode());
-				hotTagSearcher.feedDoc(tag);
-			}
+//			if(tag.getStatus() == HotTagStatus.ACTIVE.getCode()) {
+//				LOGGER.error("the tag which name = "+cmd.getName()+" and serviceType = "+cmd.getServiceType()+" is already hot tag!");
+//				throw RuntimeErrorException
+//						.errorWith(
+//								HotTagServiceErrorCode.SCOPE,
+//								HotTagServiceErrorCode.ERROR_HOTTAG_EXIST,
+//								localeStringService.getLocalizedString(
+//										String.valueOf(HotTagServiceErrorCode.SCOPE),
+//										String.valueOf(HotTagServiceErrorCode.ERROR_HOTTAG_EXIST),
+//										UserContext.current().getUser().getLocale(),
+//										"the tag is already hot tag!"));
+//			} else {
+			tag.setStatus(HotTagStatus.ACTIVE.getCode());
+//			tag.setCreateUid(user.getId());
+//			tag.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			tag.setDeleteUid(0L);
+//			tag.setDeleteTime(null);
+//			tag.setNamespaceId(cmd.getNamespaceId());
+//			tag.setCategoryId(cmd.getCategoryId());
+			hotTagProvider.updateHotTag(tag);
+
+			tag.setHotFlag(HotTagStatus.ACTIVE.getCode());
+			hotTagSearcher.feedDoc(tag);
+//			}
 		}
 		else {
 			tag = new HotTags();
