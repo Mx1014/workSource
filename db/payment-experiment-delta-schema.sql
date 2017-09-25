@@ -91,3 +91,69 @@ CREATE TABLE `eh_payment_types` (
 
 -- 活动报名表，添加支付版本，用于退款 add by yanjun 20170919
 ALTER TABLE `eh_activity_roster`ADD COLUMN `pay_version`  tinyint(4) NULL COMMENT '支付版本，用于退款';
+
+DROP TABLE IF EXISTS `eh_asset_payment_order`;
+CREATE TABLE `eh_asset_payment_order` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `payer_name` varchar(128) DEFAULT NULL,
+  `payer_type` varchar(32) DEFAULT NULL,
+  `uid` bigint(20) DEFAULT NULL,
+  `contract_id` varchar(2048) DEFAULT NULL,
+  `namespace_id` int(11) DEFAULT NULL,
+  `client_app_name` varchar(128) DEFAULT NULL,
+  `u_name` varchar(64) DEFAULT NULL,
+  `family_id` bigint(20) DEFAULT NULL,
+  `organization_name` varchar(128) DEFAULT NULL,
+  `organization_id` bigint(20) DEFAULT NULL,
+  `community_id` varchar(64) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion policy, user directly managed data',
+  `phone` varchar(32) DEFAULT NULL,
+  `real_name` varchar(128) DEFAULT NULL,
+  `gender` tinyint(4) DEFAULT NULL COMMENT '0:female;1:male',
+  `position` varchar(64) DEFAULT NULL,
+  `email` varchar(128) DEFAULT NULL,
+  `pay_flag` tinyint(4) DEFAULT '0' COMMENT '0: have not paid, 1:have paid',
+  `order_no` bigint(20) DEFAULT NULL,
+  `order_type` varchar(20) DEFAULT NULL,
+  `order_start_time` datetime DEFAULT NULL,
+  `order_expire_time` datetime DEFAULT NULL,
+  `payment_type` varchar(32) DEFAULT NULL COMMENT '10001: alipay, 10002: wechatpay',
+  `pay_amount` decimal(10,2) DEFAULT NULL,
+  `paid_time` datetime DEFAULT NULL,
+  `refund_order_no` bigint(20) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT '0' COMMENT '0：新建；1：失败；2：支付成功但张江高科的全部失败；3：支付成功但张江高科的部分成功；4：支付成功张江高科的也全部成功;5：取消',
+  `cancel_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ----------------------------
+-- Table structure for eh_asset_payment_order_bills
+-- ----------------------------
+DROP TABLE IF EXISTS `eh_asset_payment_order_bills`;
+CREATE TABLE `eh_asset_payment_order_bills` (
+  `id` bigint(20) NOT NULL,
+  `bill_id` varchar(20) DEFAULT NULL,
+  `bill_description` varchar(255) DEFAULT NULL,
+  `order_id` bigint(20) DEFAULT NULL,
+  `amount` decimal(10,2) DEFAULT NULL,
+  `namespace_id` int(10) DEFAULT NULL,
+  `status` int(11) DEFAULT 0 COMMENT '0:没有支付；1：支付成功；',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 增加域空间左上角显示场景名称的配置项
+ALTER TABLE eh_namespace_details ADD COLUMN name_type tinyint(4) DEFAULT 0;
+
+-- fix 15631 & 15636 add by xiongying20170919
+ALTER TABLE eh_organizations ADD COLUMN website VARCHAR(256);
+ALTER TABLE eh_organizations ADD COLUMN unified_social_credit_code VARCHAR(256);
+
+
+ALTER TABLE `eh_var_field_scopes` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
+ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
+ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
+
+
+
+

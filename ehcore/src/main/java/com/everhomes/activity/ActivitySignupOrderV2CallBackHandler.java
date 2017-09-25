@@ -6,7 +6,14 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
+
+import com.everhomes.rest.activity.ActivityCancelSignupCommand;
+import com.everhomes.rest.activity.ActivityCancelType;
+import com.everhomes.rest.activity.ActivityRosterPayFlag;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
+
 import com.everhomes.rest.activity.*;
+
 import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
@@ -62,11 +69,17 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 		roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
 		Long paytime = DateHelper.parseDataString(cmd.getPayDatetime(), "YYYY-MM-DD HH:mm:ss").getTime();
 		roster.setPayTime(new Timestamp(paytime));
+
+		roster.setPayAmount(new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100)));
+		roster.setVendorType(String.valueOf(cmd.getPaymentType()));
+		roster.setOrderType(String.valueOf(cmd.getPaymentType()));
+
 		BigDecimal amount = payService.changePayAmount(cmd.getAmount());
 		roster.setPayAmount(amount);
 		roster.setVendorType(String.valueOf(cmd.getPaymentType()));
 		roster.setOrderType(String.valueOf(cmd.getPaymentType()));
 		roster.setPayVersion(ActivityRosterPayVersionFlag.V2.getCode());
+
 		activityProvider.updateRoster(roster);
 
 	}

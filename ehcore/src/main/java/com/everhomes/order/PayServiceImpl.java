@@ -291,7 +291,9 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         preOrderDTO = orderCommandResponseToDto(orderCommandResponse, cmd, serviceConfig);
 
         //7、保存订单信息
+
         saveOrderRecord(orderCommandResponse, cmd.getOrderId(), serviceConfig.getOrderType(),  serviceConfig.getId(), com.everhomes.pay.order.OrderType.PURCHACE.getCode());
+
 
         //8、返回
         return preOrderDTO;
@@ -323,7 +325,9 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
 
         //校验参数不为空
+
         if(cmd.getOrderId() == null||cmd.getPaymentStatus()==null||cmd.getPaymentType()==null || cmd.getBizOrderNum() == null || cmd.getOrderType() == null){
+
             LOGGER.error("Invalid parameter,orderId,orderType or paymentStatus is null");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter,orderId,orderType or paymentStatus is null");
@@ -342,6 +346,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         cmd.setOrderId(orderRecord.getOrderId());
 
         //调用具体业务
+        LOGGER.info("Handler found# handler name = {}",String.valueOf(orderRecord.getOrderType()));
         PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(orderRecord.getOrderType()));
         LOGGER.debug("PaymentCallBackHandler="+handler.getClass().getName());
 

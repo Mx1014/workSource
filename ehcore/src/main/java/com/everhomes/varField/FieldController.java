@@ -27,13 +27,59 @@ public class FieldController extends ControllerBase {
     private FieldService fieldService;
 
     /**
+     * <b>URL: /varField/listSystemFields</b>
+     * <p>获取系统模块字段</p>
+     * @return {@link SystemFieldDTO}
+     */
+    @RequestMapping("listSystemFields")
+    @RestReturn(value=SystemFieldDTO.class, collection = true)
+    public RestResponse listSystemFields(@Valid ListSystemFieldCommand cmd) {
+        List<SystemFieldDTO> fields = fieldService.listSystemFields(cmd);
+        RestResponse res = new RestResponse(fields);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /varField/listSystemFieldGroups</b>
+     * <p>获取域空间模块字段组</p>
+     * @return {@link SystemFieldGroupDTO}
+     */
+    @RequestMapping("listSystemFieldGroups")
+    @RestReturn(value=SystemFieldGroupDTO.class, collection = true)
+    public RestResponse listSystemFieldGroups(@Valid ListSystemFieldGroupCommand cmd) {
+        List<SystemFieldGroupDTO> groups = fieldService.listSystemFieldGroups(cmd);
+        RestResponse res = new RestResponse(groups);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /varField/listSystemFieldItems</b>
+     * <p>获取域空间模块字段选择项</p>
+     * @return {@link SystemFieldItemDTO}
+     */
+    @RequestMapping("listSystemFieldItems")
+    @RestReturn(value=SystemFieldItemDTO.class, collection = true)
+    public RestResponse listSystemFieldItems(@Valid ListSystemFieldItemCommand cmd) {
+        List<SystemFieldItemDTO> items = fieldService.listSystemFieldItems(cmd);
+        RestResponse res = new RestResponse(items);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
      * <b>URL: /varField/updateFields</b>
-     * <p>更新域空间模块字段</p>
+     * <p>更新域空间or项目模块字段</p>
      * @return {@link String}
      */
     @RequestMapping("updateFields")
     @RestReturn(value=String.class)
     public RestResponse updateFields(@Valid UpdateFieldsCommand cmd) {
+        fieldService.updateFields(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
@@ -63,6 +109,7 @@ public class FieldController extends ControllerBase {
     @RequestMapping("updateFieldGroups")
     @RestReturn(value=String.class)
     public RestResponse updateFieldGroups(@Valid UpdateFieldGroupsCommand cmd) {
+        fieldService.updateFieldGroups(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
@@ -92,6 +139,7 @@ public class FieldController extends ControllerBase {
     @RequestMapping("updateFieldItems")
     @RestReturn(value=String.class)
     public RestResponse updateFieldItems(@Valid UpdateFieldItemsCommand cmd) {
+        fieldService.updateFieldItems(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");

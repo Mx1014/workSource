@@ -11,6 +11,7 @@ public class ImportFieldExcelCommand {
     private String customerType;
     private String moduleName;
     private Integer namespaceId;
+    private Long communityId;
 
     public Long getCustomerId() {
         return customerId;
@@ -42,5 +43,13 @@ public class ImportFieldExcelCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 }
