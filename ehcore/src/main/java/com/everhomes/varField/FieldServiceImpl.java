@@ -293,7 +293,7 @@ public class FieldServiceImpl implements FieldService {
         }
         return;
     }
-    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Long customerId,Byte customerType,Integer namespaceId) {
+    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Long customerId,Byte customerType,Integer namespaceId,Long communityId) {
         //遍历筛选过的sheet
         for( int i = 0; i < groups.size(); i++){
             //是否为叶节点的标识
@@ -301,7 +301,7 @@ public class FieldServiceImpl implements FieldService {
             FieldGroupDTO group = groups.get(i);
             //如果有叶节点，则送去轮回
             if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
-                sheetGenerate(group.getChildrenGroup(),workbook,excel,customerId,customerType,namespaceId);
+                sheetGenerate(group.getChildrenGroup(),workbook,excel,customerId,customerType,namespaceId,communityId);
                 //母节点的标识改为false，命运从出生就断定，唯有世世代代的延续才能成为永恒的现象
                 isRealSheet = false;
             }
@@ -321,7 +321,7 @@ public class FieldServiceImpl implements FieldService {
                     headers[j] = field.getFieldDisplayName();
                 }
                 //获取一个sheet的数据,这里只有叶节点，将header传回作为顺序.传递field来确保顺序
-                List<List<String>> data = getDataOnFields(group,customerId,customerType,fields);
+                List<List<String>> data = getDataOnFields(group,customerId,customerType,fields, communityId);
                 try {
                     //写入workbook
                     System.out.println(sheetNum.get());
@@ -340,7 +340,7 @@ public class FieldServiceImpl implements FieldService {
      * 获取一个sheet的数据，通过sheet的中文名称进行匹配,同一个excel中sheet名称不会重复
      *
      */
-    private List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields) {
+    private List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId) {
         List<List<String>> data = new ArrayList<>();
         //使用groupName来对应不同的接口
         String sheetName = group.getGroupDisplayName();
@@ -349,6 +349,7 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerTalentsCommand cmd1 = new ListCustomerTalentsCommand();
                 cmd1.setCustomerId(customerId);
                 cmd1.setCustomerType(customerType);
+                cmd1.setCommunityId(communityId);
                 List<CustomerTalentDTO> customerTalentDTOS = customerService.listCustomerTalents(cmd1);
                 if(customerTalentDTOS==null){
                     customerTalentDTOS = new ArrayList<>();
@@ -364,6 +365,7 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerTrademarksCommand cmd2 = new ListCustomerTrademarksCommand();
                 cmd2.setCustomerId(customerId);
                 cmd2.setCustomerType(customerType);
+                cmd2.setCommunityId(communityId);
                 List<CustomerTrademarkDTO> customerTrademarkDTOS = customerService.listCustomerTrademarks(cmd2);
                 if(customerTrademarkDTOS == null){
                     customerTrademarkDTOS = new ArrayList<>();
@@ -376,6 +378,7 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerPatentsCommand cmd3 = new ListCustomerPatentsCommand();
                 cmd3.setCustomerId(customerId);
                 cmd3.setCustomerType(customerType);
+                cmd3.setCommunityId(communityId);
                 List<CustomerPatentDTO> customerPatentDTOS = customerService.listCustomerPatents(cmd3);
                 if(customerPatentDTOS==null){
                     customerPatentDTOS = new ArrayList<>();
@@ -401,6 +404,7 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerApplyProjectsCommand cmd5 = new ListCustomerApplyProjectsCommand();
                 cmd5.setCustomerId(customerId);
                 cmd5.setCustomerType(customerType);
+                cmd5.setCommunityId(communityId);
                 List<CustomerApplyProjectDTO> customerApplyProjectDTOS = customerService.listCustomerApplyProjects(cmd5);
                 if(customerApplyProjectDTOS == null){
                     customerApplyProjectDTOS = new ArrayList<>();
@@ -414,6 +418,7 @@ public class FieldServiceImpl implements FieldService {
                 ListCustomerCommercialsCommand cmd6 = new ListCustomerCommercialsCommand();
                 cmd6.setCustomerId(customerId);
                 cmd6.setCustomerType(customerType);
+                cmd6.setCommunityId(communityId);
                 List<CustomerCommercialDTO> customerCommercialDTOS = customerService.listCustomerCommercials(cmd6);
                 if(customerCommercialDTOS == null){
                     customerCommercialDTOS = new ArrayList<>();
@@ -438,6 +443,8 @@ public class FieldServiceImpl implements FieldService {
                 break;
             case "经济指标":
                 ListCustomerEconomicIndicatorsCommand cmd8 = new ListCustomerEconomicIndicatorsCommand();
+                cmd8.setCustomerId(customerId);
+                cmd8.setCustomerType(customerType);
                 List<CustomerEconomicIndicatorDTO> customerEconomicIndicatorDTOS = customerService.listCustomerEconomicIndicators(cmd8);
                 if(customerEconomicIndicatorDTOS == null){
                     customerEconomicIndicatorDTOS = new ArrayList<>();
@@ -569,7 +576,7 @@ public class FieldServiceImpl implements FieldService {
         //工具excel
         ExcelUtils excel = new ExcelUtils();
         //注入sheet的内容到workbook中
-        sheetGenerate(groups,workbook,excel,cmd.getCustomerId(),cmd.getCustomerType(),cmd.getNamespaceId());
+        sheetGenerate(groups,workbook,excel,cmd.getCustomerId(),cmd.getCustomerType(),cmd.getNamespaceId(),cmd.getCommunityId());
         //写入流
         ServletOutputStream out;
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
