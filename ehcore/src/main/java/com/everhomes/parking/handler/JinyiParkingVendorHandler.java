@@ -63,7 +63,9 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 			Long endTime = Timestamp.valueOf(time).getTime();
 
 			if (checkExpireTime(parkingLot, endTime)) {
-				return resultList;
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 			}
 			
 			String plateOwnerName = card.getOwnername();
@@ -258,15 +260,6 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
     	return ret;
     }
 
-	private ParkingCardType createDefaultCardType() {
-		//金溢对接停车 没有月卡类型，默认一个月卡类型
-		ParkingCardType cardType = new ParkingCardType();
-		cardType.setTypeId("月卡");
-		cardType.setTypeName("月卡");
-
-		return cardType;
-	}
-
 	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
 		//什么都不做, 金溢对接，
 	}
@@ -294,6 +287,7 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 				rate.setRateName(rateName);
 
 				ParkingCardType parkingCardType = createDefaultCardType();
+				rate.setCardTypeId(parkingCardType.getTypeId());
 				rate.setCardType(parkingCardType.getTypeName());
 				rate.setMonthCount(new BigDecimal(MONTH_COUNT));
 				rate.setPrice(card.getPaidin());

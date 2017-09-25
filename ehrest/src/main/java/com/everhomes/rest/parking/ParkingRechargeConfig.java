@@ -3,7 +3,7 @@ package com.everhomes.rest.parking;
 /**
  * @author sw on 2017/8/23.
  */
-public class ParkingExpiredRechargeConfig {
+public class ParkingRechargeConfig {
 
     //是否支持过期充值
     private Byte expiredRechargeFlag;
@@ -13,6 +13,44 @@ public class ParkingExpiredRechargeConfig {
     private Integer expiredRechargeMonthCount;
     //支持过期充值时，按照什么模式充值 {@link ParkingCardExpiredRechargeType}
     private Byte expiredRechargeType;
+
+    private Byte monthlyDiscountFlag;
+    private String monthlyDiscount;
+
+    private Byte tempFeeDiscountFlag;
+    private String tempFeeDiscount;
+
+    public Byte getMonthlyDiscountFlag() {
+        return monthlyDiscountFlag;
+    }
+
+    public void setMonthlyDiscountFlag(Byte monthlyDiscountFlag) {
+        this.monthlyDiscountFlag = monthlyDiscountFlag;
+    }
+
+    public String getMonthlyDiscount() {
+        return monthlyDiscount;
+    }
+
+    public void setMonthlyDiscount(String monthlyDiscount) {
+        this.monthlyDiscount = monthlyDiscount;
+    }
+
+    public String getTempFeeDiscount() {
+        return tempFeeDiscount;
+    }
+
+    public void setTempFeeDiscount(String tempFeeDiscount) {
+        this.tempFeeDiscount = tempFeeDiscount;
+    }
+
+    public Byte getTempFeeDiscountFlag() {
+        return tempFeeDiscountFlag;
+    }
+
+    public void setTempFeeDiscountFlag(Byte tempFeeDiscountFlag) {
+        this.tempFeeDiscountFlag = tempFeeDiscountFlag;
+    }
 
     public Byte getExpiredRechargeFlag() {
         return expiredRechargeFlag;

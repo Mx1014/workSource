@@ -3,13 +3,10 @@ package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.*;
 import com.everhomes.parking.innospring.InnoSpringCardInfo;
 import com.everhomes.parking.innospring.InnoSpringCardRate;
-import com.everhomes.parking.innospring.InnoSpringCardType;
 import com.everhomes.parking.innospring.InnoSpringTempFee;
 import com.everhomes.rest.parking.*;
 import com.everhomes.user.User;
@@ -18,7 +15,6 @@ import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -55,7 +51,9 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 			//有效期到当天23点59分59秒
 			long expireTime = strToLong(expireDate + "235959");
 			if (checkExpireTime(parkingLot, expireTime)) {
-				return resultList;
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 			}
 			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
 			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
@@ -65,9 +63,10 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 			parkingCardDTO.setPlateOwnerPhone("");
 			parkingCardDTO.setEndTime(expireTime);
 
-			InnoSpringCardType cardType = createDefaultCardType();
-			parkingCardDTO.setCardTypeId(cardType.getCardTypeId());
-			parkingCardDTO.setCardType(cardType.getCardTypeName());
+			ParkingCardType cardType = createDefaultCardType();
+			parkingCardDTO.setCardTypeId(cardType.getTypeId());
+			parkingCardDTO.setCardType(cardType.getTypeName());
+
 			parkingCardDTO.setCardNumber(card.getCar_id());
 			parkingCardDTO.setIsValid(true);
 
@@ -82,7 +81,7 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
     	List<ParkingRechargeRateDTO> result;
 
 		List<InnoSpringCardRate> rates = getCardRule();
-		InnoSpringCardType cardType = createDefaultCardType();
+		ParkingCardType cardType = createDefaultCardType();
     	result = rates.stream().map( r -> {
 			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
 			dto.setOwnerType(parkingLot.getOwnerType());
@@ -97,7 +96,8 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 			String locale = getLocale();
 			String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 			dto.setRateName(rateName);
-			dto.setCardType(cardType.getCardTypeName());
+			dto.setCardTypeId(cardType.getTypeId());
+			dto.setCardType(cardType.getTypeName());
 			dto.setMonthCount(new BigDecimal(monthCount));
 			dto.setPrice(new BigDecimal(r.getFee()));
 			dto.setVendorName(ParkingLotVendor.INNOSPRING.getCode());
@@ -168,32 +168,12 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 
         List<ParkingCardType> resultTypes = new ArrayList<>();
 
-		List<InnoSpringCardType> list = getCardType();
-		list.forEach(c -> {
-			ParkingCardType parkingCardType = new ParkingCardType();
-			parkingCardType.setTypeId(c.getCardTypeId());
-			parkingCardType.setTypeName(c.getCardTypeName());
-			resultTypes.add(parkingCardType);
-		});
+		ParkingCardType cardType = createDefaultCardType();
+		resultTypes.add(cardType);
 
 		ret.setCardTypes(resultTypes);
     	return ret;
     }
-
-	private List<InnoSpringCardType> getCardType() {
-		List<InnoSpringCardType> result = new ArrayList<>();
-		result.add(createDefaultCardType());
-		return result;
-	}
-
-	private InnoSpringCardType createDefaultCardType() {
-		//创源停车 没有月卡类型，默认一个月卡类型
-		InnoSpringCardType cardType = new InnoSpringCardType();
-		cardType.setCardTypeId("月卡");
-		cardType.setCardTypeName("月卡");
-
-		return cardType;
-	}
 
 	private List<InnoSpringCardRate> getCardRule() {
 		List<InnoSpringCardRate> result = new ArrayList<>();

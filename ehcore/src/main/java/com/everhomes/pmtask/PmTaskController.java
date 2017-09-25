@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.pmtask.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -142,7 +144,22 @@ public class PmTaskController extends ControllerBase {
           response.setErrorDescription("OK");
           return response;
       }
-      
+
+    /**
+     * <b>URL: /pmtask/liskPmtaskBuildings</b>
+     * <p>创建新任务</p>
+     */
+    @RequestMapping("liskPmtaskBuildings")
+    @RestReturn(value=PmTaskDTO.class)
+    public RestResponse liskPmtaskBuildings(ListBuildingCommand cmd) {
+
+        ListBuildingCommandResponse buildings = pmTaskService.listBuildings(cmd);
+        RestResponse response = new RestResponse(buildings);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
       /**
        * <b>URL: /pmtask/createTaskByOrg</b>
        * <p>创建新任务</p>

@@ -10,8 +10,12 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.rest.parking.*;
 import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.user.UserContext;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,23 +27,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhParkingAttachments;
-import com.everhomes.server.schema.tables.pojos.EhParkingCarSeries;
-import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
-import com.everhomes.server.schema.tables.pojos.EhParkingFlow;
-import com.everhomes.server.schema.tables.pojos.EhParkingLots;
-import com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders;
-import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
-import com.everhomes.server.schema.tables.pojos.EhParkingStatistics;
-import com.everhomes.server.schema.tables.pojos.EhParkingVendors;
-import com.everhomes.server.schema.tables.records.EhParkingAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhParkingCarSeriesRecord;
-import com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord;
-import com.everhomes.server.schema.tables.records.EhParkingFlowRecord;
-import com.everhomes.server.schema.tables.records.EhParkingLotsRecord;
-import com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhParkingRechargeRatesRecord;
-import com.everhomes.server.schema.tables.records.EhParkingStatisticsRecord;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -68,6 +55,61 @@ public class ParkingProviderImpl implements ParkingProvider {
 
         return parkingLot;
     }
+
+	@Override
+	public ParkingCardRequestType findParkingCardTypeByTypeId(String cardTypeId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCardTypes.class));
+		EhParkingCardTypesDao dao = new EhParkingCardTypesDao(context.configuration());
+
+		return ConvertHelper.convert(dao.fetchOne(Tables.EH_PARKING_CARD_TYPES.CARD_TYPE_ID, cardTypeId), ParkingCardRequestType.class);
+	}
+
+	@Override
+	public ParkingInvoiceType findParkingInvoiceTypeById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingInvoiceTypes.class));
+		EhParkingInvoiceTypesDao dao = new EhParkingInvoiceTypesDao(context.configuration());
+
+		return ConvertHelper.convert(dao.findById(id), ParkingInvoiceType.class);
+	}
+
+	@Override
+	public List<ParkingInvoiceType> listParkingInvoiceTypes(String ownerType, Long ownerId, Long parkingLotId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingInvoiceTypes.class));
+
+		SelectQuery<EhParkingInvoiceTypesRecord> query = context.selectQuery(Tables.EH_PARKING_INVOICE_TYPES);
+		if (null != parkingLotId) {
+			query.addConditions(Tables.EH_PARKING_INVOICE_TYPES.PARKING_LOT_ID.eq(parkingLotId));
+		}
+		if(StringUtils.isNotBlank(ownerType)) {
+			query.addConditions(Tables.EH_PARKING_INVOICE_TYPES.OWNER_TYPE.eq(ownerType));
+		}
+		if(null != ownerId) {
+			query.addConditions(Tables.EH_PARKING_INVOICE_TYPES.OWNER_ID.eq(ownerId));
+		}
+		query.addConditions(Tables.EH_PARKING_INVOICE_TYPES.STATUS.eq(ParkingCommonStatus.ACTIVE.getCode()));
+		query.addOrderBy(Tables.EH_PARKING_INVOICE_TYPES.ID.asc());
+		return query.fetch().map(r -> ConvertHelper.convert(r, ParkingInvoiceType.class));
+	}
+
+	@Override
+	public List<ParkingCardRequestType> listParkingCardTypes(String ownerType, Long ownerId, Long parkingLotId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCardTypes.class));
+
+		SelectQuery<EhParkingCardTypesRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_TYPES);
+		if (null != parkingLotId) {
+			query.addConditions(Tables.EH_PARKING_CARD_TYPES.PARKING_LOT_ID.eq(parkingLotId));
+		}
+		if(StringUtils.isNotBlank(ownerType)) {
+			query.addConditions(Tables.EH_PARKING_CARD_TYPES.OWNER_TYPE.eq(ownerType));
+		}
+		if(null != ownerId) {
+			query.addConditions(Tables.EH_PARKING_CARD_TYPES.OWNER_ID.eq(ownerId));
+		}
+
+		query.addConditions(Tables.EH_PARKING_CARD_TYPES.STATUS.eq(ParkingCommonStatus.ACTIVE.getCode()));
+
+		return query.fetch().map(r -> ConvertHelper.convert(r, ParkingCardRequestType.class));
+	}
     
     @Override
     public ParkingRechargeOrder findParkingRechargeOrderById(Long id) {
@@ -106,23 +148,29 @@ public class ParkingProviderImpl implements ParkingProvider {
 
     private void populateParkingConfigInfo(ParkingLot parkingLot) {
 		String configJson = parkingLot.getConfigJson();
-		ParkingLot temp = JSONObject.parseObject(configJson, ParkingLot.class);
-		parkingLot.setTempfeeFlag(temp.getTempfeeFlag());
-		parkingLot.setRateFlag(temp.getRateFlag());
-		parkingLot.setLockCarFlag(temp.getLockCarFlag());
-		parkingLot.setSearchCarFlag(temp.getSearchCarFlag());
-		parkingLot.setCurrentInfoType(temp.getCurrentInfoType());
-		parkingLot.setContact(temp.getContact());
+		ParkingLotConfig temp = JSONObject.parseObject(configJson, ParkingLotConfig.class);
+		BeanUtils.copyProperties(temp, parkingLot);
 
-		String expiredRechargeJson = parkingLot.getExpiredRechargeJson();
-		if (null != expiredRechargeJson) {
-			ParkingExpiredRechargeConfig config = JSONObject.parseObject(expiredRechargeJson, ParkingExpiredRechargeConfig.class);
-			parkingLot.setExpiredRechargeFlag(config.getExpiredRechargeFlag());
-			parkingLot.setExpiredRechargeMonthCount(config.getExpiredRechargeMonthCount());
-			parkingLot.setExpiredRechargeType(config.getExpiredRechargeType());
-			parkingLot.setMaxExpiredDay(config.getMaxExpiredDay());
+//		parkingLot.setTempfeeFlag(temp.getTempfeeFlag());
+//		parkingLot.setRateFlag(temp.getRateFlag());
+//		parkingLot.setLockCarFlag(temp.getLockCarFlag());
+//		parkingLot.setSearchCarFlag(temp.getSearchCarFlag());
+//		parkingLot.setCurrentInfoType(temp.getCurrentInfoType());
+//		parkingLot.setContact(temp.getContact());
+
+		String rechargeJson = parkingLot.getRechargeJson();
+		if (null != rechargeJson) {
+			ParkingRechargeConfig config = JSONObject.parseObject(rechargeJson, ParkingRechargeConfig.class);
+			BeanUtils.copyProperties(config, parkingLot);
+//			parkingLot.setExpiredRechargeFlag(config.getExpiredRechargeFlag());
+//			parkingLot.setExpiredRechargeMonthCount(config.getExpiredRechargeMonthCount());
+//			parkingLot.setExpiredRechargeType(config.getExpiredRechargeType());
+//			parkingLot.setMaxExpiredDay(config.getMaxExpiredDay());
 		}else{
+			//默认不开启
 			parkingLot.setExpiredRechargeFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+			parkingLot.setMonthlyDiscountFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+			parkingLot.setTempFeeDiscountFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
 		}
 	}
 
@@ -447,7 +495,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     public List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
                                                               String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate, Timestamp endDate,
                                                               Byte status, String carBrand, String carSeriesName, String plateOwnerEnterpriseName, Long flowId,
-                                                              SortField order, Long pageAnchor, Integer pageSize){
+                                                              SortField order, String cardTypeId,  Long pageAnchor, Integer pageSize){
 
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
@@ -480,6 +528,9 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.ge(startDate));
         if(null != endDate)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.le(endDate));
+		if (StringUtils.isNotBlank(cardTypeId)) {
+			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CARD_TYPE_ID.eq(cardTypeId));
+		}
 
         if (null != order) {
             query.addOrderBy(order);
@@ -735,4 +786,49 @@ public class ParkingProviderImpl implements ParkingProvider {
                 });
 		return count[0];
 	}
+
+	@Override
+	public ParkingUserInvoice findParkingUserInvoiceByUserId(String ownerType, Long ownerId, Long parkingLotId, Long userId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingUserInvoices.class));
+		SelectQuery<EhParkingUserInvoicesRecord> query = context.selectQuery(Tables.EH_PARKING_USER_INVOICES);
+
+		query.addConditions(Tables.EH_PARKING_USER_INVOICES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PARKING_USER_INVOICES.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_PARKING_USER_INVOICES.PARKING_LOT_ID.eq(parkingLotId));
+		query.addConditions(Tables.EH_PARKING_USER_INVOICES.USER_ID.eq(userId));
+
+		return ConvertHelper.convert(query.fetchOne(), ParkingUserInvoice.class);
+	}
+
+	@Override
+	public void updateParkingUserInvoice(ParkingUserInvoice parkingUserInvoice) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingUserInvoicesDao dao = new EhParkingUserInvoicesDao(context.configuration());
+
+		parkingUserInvoice.setUpdateUid(UserContext.currentUserId());
+		parkingUserInvoice.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+		dao.update(parkingUserInvoice);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingUserInvoices.class, null);
+
+	}
+
+	@Override
+	public void createParkingUserInvoice(ParkingUserInvoice parkingUserInvoice) {
+
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhParkingUserInvoices.class));
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingUserInvoices.class));
+		EhParkingUserInvoicesDao dao = new EhParkingUserInvoicesDao(context.configuration());
+
+		parkingUserInvoice.setId(id);
+		parkingUserInvoice.setCreatorUid(UserContext.currentUserId());
+		parkingUserInvoice.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
+		dao.insert(parkingUserInvoice);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingUserInvoices.class, null);
+
+	}
+
 }
