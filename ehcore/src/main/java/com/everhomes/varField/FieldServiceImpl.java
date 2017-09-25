@@ -474,8 +474,10 @@ public class FieldServiceImpl implements FieldService {
         FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
         //如果是select，则修改fieldName,在末尾加上Name，减去末尾的Id如果存在的话。由抽象跌入现实，拥有了名字，这是从神降格为人的过程---第六天天主波旬
         if(params.getFieldParamType().equals("select")){
-            fieldName = fieldName.split("Id")[0];
-            fieldName += "Name";
+            if(!fieldName.equals("projectSource") && !fieldName.equals("status")){
+                fieldName = fieldName.split("Id")[0];
+                fieldName += "Name";
+            }
         }
         try {
             //获得get方法并使用获得field的值
@@ -538,6 +540,11 @@ public class FieldServiceImpl implements FieldService {
             case "Byte":
                 val = Byte.parseByte((String)value);
                 break;
+            case "String":
+                if(((String)val).trim().length()<1){
+                    val = null;
+                    break;
+                }
         }
         PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
         Method writeMethod = pd.getWriteMethod();

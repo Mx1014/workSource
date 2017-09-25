@@ -203,6 +203,7 @@ public class FieldController extends ControllerBase {
     public RestResponse importFieldsExcel(@Valid ImportFieldExcelCommand cmd, MultipartFile file){
 
         fieldService.importFieldsExcel(cmd,file);
+
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
