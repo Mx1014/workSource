@@ -504,7 +504,13 @@ public class WXAuthController {// extends ControllerBase
         wxUser.setGender(gender.getCode());
         
         userService.signupByThirdparkUser(wxUser, request);
-        userService.logonBythirdPartUser(wxUser.getNamespaceId(), wxUser.getNamespaceUserType(), wxUser.getNamespaceUserToken(), request, response);
+        UserLogin userLogin = userService.logonBythirdPartUser(wxUser.getNamespaceId(), wxUser.getNamespaceUserType(), wxUser.getNamespaceUserToken(), request, response);
+
+        // 添加CurrentUser用于后期，检查identifi add by yanjun 20170926
+        if(userLogin != null && userLogin.getUserId() != 0){
+            wxUser.setId(userLogin.getUserId());
+            UserContext.setCurrentUser(wxUser);
+        }
 
         //by dengs,加个communityid参数，加到用户的eh_profiles中,2017.08.28
         String communityId = request.getParameter(COMMUNITY);
