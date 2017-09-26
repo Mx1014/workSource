@@ -755,8 +755,13 @@ public class ParkingServiceImpl implements ParkingService {
     		response.setOrders(list.stream().map(r -> {
 				ParkingRechargeOrderDTO d = ConvertHelper.convert(r, ParkingRechargeOrderDTO.class);
     			d.setVendorName(parkingLot.getName());
-				ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(r.getInvoiceType());
-				d.setInvoiceName(parkingInvoiceType.getName());
+
+				if (null != r.getInvoiceType()) {
+					ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(r.getInvoiceType());
+					if (null != parkingInvoiceType) {
+						d.setInvoiceName(parkingInvoiceType.getName());
+					}
+				}
     			return d;
 			}).collect(Collectors.toList()));
     		if(size != pageSize){

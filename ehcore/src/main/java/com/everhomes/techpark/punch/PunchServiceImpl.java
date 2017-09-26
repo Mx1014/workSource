@@ -6936,10 +6936,11 @@ public class PunchServiceImpl implements PunchService {
 					response.setClockStatus(punchLog.getClockStatus());
 				}
 				response.setPunchDate(pDate.getTime());
+				punchTime = pDate;
 			}
+		}else{
+			punchTime = new Date(cmd.getQueryTime());
 		}
-
-        punchTime = new Date(cmd.getQueryTime());
         response.setIntervals(new ArrayList<>());
         PunchDayLog pdl = punchProvider.findPunchDayLog(userId, cmd.getEnterpriseId(), new java.sql.Date(cmd.getQueryTime()));
         List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,cmd.getEnterpriseId(), dateSF.get().format(punchTime),
