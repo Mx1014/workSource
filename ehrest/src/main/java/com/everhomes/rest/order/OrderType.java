@@ -25,6 +25,7 @@ public class OrderType {
 	public static final int PRINT_ORDER_CODE = 10000008;
 	public static final int ACTIVITY_SIGNUP_ORDER_WECHAT_CODE = 10000009;
 	public static final int ZJGK_RENTAL_CODE = 10000010;
+	public static final int VIDEOCONF_CODE = 10000011;
 
 	public static enum OrderTypeEnum{
 		WUYETEST(OrderType.WU_YE_TEST_CODE,"wuyetest","物业支付-测试用"),
@@ -36,7 +37,8 @@ public class OrderType {
 		ACTIVITYSIGNUPORDER(OrderType.ACTIVITY_SIGNUP_ORDER_CODE,"activitySignupOrder","活动报名缴费"),
 		PRINT_ORDER(OrderType.PRINT_ORDER_CODE,"printOrder","打印订单"),
 		ACTIVITYSIGNUPORDERWECHAT(OrderType.ACTIVITY_SIGNUP_ORDER_WECHAT_CODE,"activitysignuporderwechat","活动报名（微信）缴费"),
-		ZJGK_RENTAL_CODE(OrderType.ZJGK_RENTAL_CODE,"zjgkrentalcode","张江高科租金缴费");
+		ZJGK_RENTAL_CODE(OrderType.ZJGK_RENTAL_CODE,"zjgkrentalcode","张江高科租金缴费"),
+		VIDEOCONF_CODE(OrderType.VIDEOCONF_CODE,"videoConf","视频会议");
 		
 
 		private int code;

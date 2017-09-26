@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.everhomes.scheduler.RunningFlag;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.httpclient.HttpClient;
@@ -47,13 +48,21 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.order.PayService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
+import com.everhomes.rest.activity.ActivityTimeResponse;
+import com.everhomes.rest.activity.GetActivityTimeCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.order.PreOrderCommand;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
@@ -82,6 +91,7 @@ import com.everhomes.rest.videoconf.CountAccountOrdersAndMonths;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineCommand;
+import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineV2Command;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
 import com.everhomes.rest.videoconf.DeleteConfEnterpriseCommand;
@@ -134,6 +144,7 @@ import com.everhomes.rest.videoconf.TaxpayerType;
 import com.everhomes.rest.videoconf.UnassignAccountResponse;
 import com.everhomes.rest.videoconf.UpdateAccountOrderCommand;
 import com.everhomes.rest.videoconf.UpdateConfAccountCategoriesCommand;
+import com.everhomes.rest.videoconf.UpdateConfAccountPeriodV2Command;
 import com.everhomes.rest.videoconf.UpdateContactorCommand;
 import com.everhomes.rest.videoconf.UpdateInvoiceCommand;
 import com.everhomes.rest.videoconf.UpdateVideoConfAccountCommand;
@@ -163,6 +174,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.mysql.jdbc.StringUtils;
 
 
@@ -174,6 +186,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 	private final String BIZCONFPATH = "http://api.bizvideo.cn/openapi";
 
 
+	@Autowired
+	private PayService payService;
+	
 	@Autowired
 	private ScheduleProvider scheduleProvider;
 
@@ -2739,8 +2754,32 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public ConfAccountOrderDTO updateConfAccountPeriod(UpdateConfAccountPeriodCommand cmd) {
+	public PreOrderDTO updateConfAccountPeriodV2(UpdateConfAccountPeriodV2Command cmd) {
+		UpdateConfAccountPeriodCommand cmd1 = ConvertHelper.convert(cmd, UpdateConfAccountPeriodCommand.class);
+		ConfOrders confOrder = createUpdateConfAccountPeriodOrder(cmd1);
+ 
+		Long amount = payService.changePayAmount(confOrder.getAmount()); 
 
+		PreOrderDTO callBack = payService.createAppPreOrder(confOrder.getNamespaceId(), cmd.getClientAppName(),
+				OrderType.OrderTypeEnum.VIDEOCONF_CODE.getPycode(), confOrder.getId(), confOrder.getCreatorUid(), amount);
+		return callBack;
+	}
+
+	@Override
+	public ConfAccountOrderDTO updateConfAccountPeriod(UpdateConfAccountPeriodCommand cmd) {
+		ConfOrders confOrder = createUpdateConfAccountPeriodOrder(cmd);
+
+		ConfAccountOrderDTO dto = new ConfAccountOrderDTO();
+		dto.setBillId(confOrder.getId());
+		dto.setAmount(confOrder.getAmount().doubleValue());
+		dto.setName(cmd.getContactor() + " order");
+		dto.setDescription(cmd.getContactor() + " extend " + cmd.getAccountIds().size() + " accounts " + cmd.getMonths() + " months for " + cmd.getEnterpriseName());
+		dto.setOrderType(OrderType.OrderTypeEnum.VIDEOCONF_CODE.getPycode());
+		this.setSignatureParam(dto);
+		return dto;
+	}
+
+	private ConfOrders createUpdateConfAccountPeriodOrder(UpdateConfAccountPeriodCommand cmd) {
 		int quantity = cmd.getAccountIds().size();
 		CreateConfAccountOrderCommand order = new CreateConfAccountOrderCommand();
 		order.setEnterpriseId(cmd.getEnterpriseId());
@@ -2760,13 +2799,6 @@ public class VideoConfServiceImpl implements VideoConfService {
 		vcProvider.updateConfOrders(confOrder);
 		confOrderSearcher.feedDoc(confOrder);
 
-		ConfAccountOrderDTO dto = new ConfAccountOrderDTO();
-		dto.setBillId(orderId);
-		dto.setAmount(order.getAmount().doubleValue());
-		dto.setName(cmd.getContactor() + " order");
-		dto.setDescription(cmd.getContactor() + " extend " + quantity + " accounts " + cmd.getMonths() + " months for " + cmd.getEnterpriseName());
-		dto.setOrderType("videoConf");
-		this.setSignatureParam(dto);
 
 
 		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
@@ -2780,67 +2812,85 @@ public class VideoConfServiceImpl implements VideoConfService {
 			map.setConfAccountNamespaceId(namespaceId);
 			vcProvider.createConfOrderAccountMap(map);
 		}
-
-		return dto;
+		return confOrder;
 	}
 
 	@Override
+	public PreOrderDTO createConfAccountOrderOnlineV2(
+			CreateConfAccountOrderOnlineV2Command cmd) {
+		CreateConfAccountOrderOnlineCommand cmd1 = ConvertHelper.convert(cmd,CreateConfAccountOrderOnlineCommand.class);
+		ConfOrders confOrder = createConfOnline(cmd1); 
+		 
+		Long amount = payService.changePayAmount(confOrder.getAmount()); 
+
+		PreOrderDTO callBack = payService.createAppPreOrder(confOrder.getNamespaceId(), cmd.getClientAppName(),
+				OrderType.OrderTypeEnum.VIDEOCONF_CODE.getPycode(), confOrder.getId(), confOrder.getCreatorUid(), amount);
+		return callBack;
+
+	}
+	
+	@Override
 	public ConfAccountOrderDTO createConfAccountOrderOnline(
 			CreateConfAccountOrderOnlineCommand cmd) {
-		//0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
-		//账号类型 0-25方 1-100方 2-6方 3-50方
-		Byte confType = null;
-		if(cmd.getConfCapacity() == 0 && cmd.getConfType() == 0) {
-			confType = 0;
-		}
-		if(cmd.getConfCapacity() == 0 && cmd.getConfType() == 1) {
-			confType = 1;
-		}
-		if(cmd.getConfCapacity() == 1 && cmd.getConfType() == 0) {
-			confType = 2;
-		}
-		if(cmd.getConfCapacity() == 1 && cmd.getConfType() == 1) {
-			confType = 3;
-		}
-		if(cmd.getConfCapacity() == 2 && cmd.getConfType() == 0) {
-			confType = 4;
-		}
-		if(cmd.getConfCapacity() == 3 && cmd.getConfType() == 0) {
-			confType = 5;
-		}
-		if(cmd.getConfCapacity() == 3 && cmd.getConfType() == 1) {
-			confType = 6;
-		}
-		List<ConfAccountCategories> categories = vcProvider.listConfAccountCategories(confType, cmd.getBuyChannel(), 0, Integer.MAX_VALUE);
-		CreateConfAccountOrderCommand order = new CreateConfAccountOrderCommand();
-		order.setEnterpriseId(cmd.getEnterpriseId());
-		order.setEnterpriseName(cmd.getEnterpriseName());
-		order.setContactor(cmd.getContactor());
-		order.setMobile(cmd.getMobile());
-		order.setQuantity(cmd.getQuantity());
-		order.setPeriod(cmd.getPeriod());
-		order.setAmount(cmd.getAmount());
-		order.setInvoiceFlag(cmd.getInvoiceReqFlag());
-		order.setBuyChannel(cmd.getBuyChannel());
-		if(categories != null && categories.size() > 0)
-			order.setAccountCategoryId(categories.get(0).getId());
-		order.setMakeOutFlag((byte) 0);
-		order.setInvoice(new InvoiceDTO());
-
-		Long orderId = createConfAccountOrder(order);
-		ConfOrders confOrder = vcProvider.findOredrById(orderId);
-		confOrder.setEmail(cmd.getMailAddress());
-		vcProvider.updateConfOrders(confOrder);
-
+		ConfOrders confOrder = createConfOnline(cmd);
 		ConfAccountOrderDTO dto = new ConfAccountOrderDTO();
-		dto.setBillId(orderId);
-		dto.setAmount(order.getAmount().doubleValue());
+		dto.setBillId(confOrder.getId());
+		dto.setAmount(confOrder.getAmount().doubleValue());
 		dto.setName(cmd.getContactor() + " order");
 		dto.setDescription(cmd.getContactor() + " buy " + cmd.getQuantity() + " accounts " + cmd.getPeriod() + " months for " + cmd.getEnterpriseName());
 		dto.setOrderType("videoConf");
 		this.setSignatureParam(dto);
 		return dto;
 
+	}
+
+	private ConfOrders createConfOnline(CreateConfAccountOrderOnlineCommand cmd) {
+		//0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
+				//账号类型 0-25方 1-100方 2-6方 3-50方
+				Byte confType = null;
+				if(cmd.getConfCapacity() == 0 && cmd.getConfType() == 0) {
+					confType = 0;
+				}
+				if(cmd.getConfCapacity() == 0 && cmd.getConfType() == 1) {
+					confType = 1;
+				}
+				if(cmd.getConfCapacity() == 1 && cmd.getConfType() == 0) {
+					confType = 2;
+				}
+				if(cmd.getConfCapacity() == 1 && cmd.getConfType() == 1) {
+					confType = 3;
+				}
+				if(cmd.getConfCapacity() == 2 && cmd.getConfType() == 0) {
+					confType = 4;
+				}
+				if(cmd.getConfCapacity() == 3 && cmd.getConfType() == 0) {
+					confType = 5;
+				}
+				if(cmd.getConfCapacity() == 3 && cmd.getConfType() == 1) {
+					confType = 6;
+				}
+				List<ConfAccountCategories> categories = vcProvider.listConfAccountCategories(confType, cmd.getBuyChannel(), 0, Integer.MAX_VALUE);
+				CreateConfAccountOrderCommand order = new CreateConfAccountOrderCommand();
+				order.setEnterpriseId(cmd.getEnterpriseId());
+				order.setEnterpriseName(cmd.getEnterpriseName());
+				order.setContactor(cmd.getContactor());
+				order.setMobile(cmd.getMobile());
+				order.setQuantity(cmd.getQuantity());
+				order.setPeriod(cmd.getPeriod());
+				order.setAmount(cmd.getAmount());
+				order.setInvoiceFlag(cmd.getInvoiceReqFlag());
+				order.setBuyChannel(cmd.getBuyChannel());
+				if(categories != null && categories.size() > 0)
+					order.setAccountCategoryId(categories.get(0).getId());
+				order.setMakeOutFlag((byte) 0);
+				order.setInvoice(new InvoiceDTO());
+
+				Long orderId = createConfAccountOrder(order);
+				ConfOrders confOrder = vcProvider.findOredrById(orderId);
+				confOrder.setEmail(cmd.getMailAddress());
+				vcProvider.updateConfOrders(confOrder);
+
+				return confOrder;
 	}
 
 	private void setSignatureParam(ConfAccountOrderDTO dto) {
