@@ -217,7 +217,6 @@ public class YunZhiXunSmsHandler implements SmsHandler {
                 content = strBuilder.toString();
             }
             RspMessage rspMessage = createAndSend(phoneNumbers, content, yzxTemplateId);
-
             return buildSmsLogs(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, content, rspMessage);
         } else {
             String log = "The yzx template id is empty, namespaceId=" + namespaceId + ", templateScope=" + templateScope
@@ -230,29 +229,36 @@ public class YunZhiXunSmsHandler implements SmsHandler {
     private List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                       String templateLocale, String variables, RspMessage rspMessage) {
         List<SmsLog> smsLogs = new ArrayList<>();
+        YzxSmsResult res = new YzxSmsResult();
+        String result = "failed";
+
         if (rspMessage != null) {
-            YzxSmsResult res = (YzxSmsResult) StringHelper.fromJsonString(rspMessage.getMessage(), YzxSmsResult.class);
-            for (String phoneNumber : phoneNumbers) {
-                SmsLog log = new SmsLog();
-                if ("000000".equals(res.resp.respCode)) {
-                    log.setSmsId(res.resp.templateSMS.smsId);
-                    log.setStatus(SmsLogStatus.SEND_SUCCESS.getCode());
-                } else {
-                    log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
-                }
-
-                log.setCreateTime(new Timestamp(System.currentTimeMillis()));
-                log.setNamespaceId(namespaceId);
-                log.setScope(templateScope);
-                log.setCode(templateId);
-                log.setLocale(templateLocale);
-                log.setMobile(phoneNumber);
-                log.setResult(rspMessage.getMessage());
-                log.setHandler(YUN_ZHI_XUN_HANDLER_NAME);
-                log.setText(variables);
-
-                smsLogs.add(log);
+            try {
+                result = rspMessage.getMessage();
+                res = (YzxSmsResult) StringHelper.fromJsonString(rspMessage.getMessage(), YzxSmsResult.class);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+        }
+        for (String phoneNumber : phoneNumbers) {
+            SmsLog log = new SmsLog();
+            if ("000000".equals(res.resp.respCode)) {
+                log.setSmsId(res.resp.templateSMS.smsId);
+                log.setStatus(SmsLogStatus.SEND_SUCCESS.getCode());
+            } else {
+                log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
+            }
+            log.setResult(result);
+            log.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            log.setNamespaceId(namespaceId);
+            log.setScope(templateScope);
+            log.setCode(templateId);
+            log.setLocale(templateLocale);
+            log.setMobile(phoneNumber);
+            log.setHandler(YUN_ZHI_XUN_HANDLER_NAME);
+            log.setText(variables);
+
+            smsLogs.add(log);
         }
         return smsLogs;
     }
@@ -283,16 +289,16 @@ public class YunZhiXunSmsHandler implements SmsHandler {
      * }
      */
     public static class YzxSmsResult {
-        Resp resp;
+        Resp resp = new Resp();
         public static class Resp {
-            String respCode;
+            String respCode = "";
             // Byte failure;
-            Sms templateSMS;
+            Sms templateSMS = new Sms();
         }
 
         public static class Sms {
             // Long createDate;
-            String smsId;
+            String smsId = "";
         }
     }
 

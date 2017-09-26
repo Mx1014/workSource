@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,12 +149,35 @@ public class LianXinTongSmsHandler implements SmsHandler {
     private List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                       String templateLocale, String content, RspMessage rspMessage) {
         List<SmsLog> smsLogs = new ArrayList<>();
+        Rets rets = new Rets();
+        String resultText = "failed";
+
         if (rspMessage != null) {
-            Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-            Rets rets = gson.fromJson(rspMessage.getMessage(), Rets.class);
-            if (rets == null) {
-                return smsLogs;
+            try {
+                resultText = rspMessage.getMessage();
+                Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+                rets = gson.fromJson(rspMessage.getMessage(), Rets.class);
+            } catch (JsonSyntaxException e) {
+                e.printStackTrace();
             }
+        }
+        if (rets.rets.size() == 0) {
+            for (String phoneNumber : phoneNumbers) {
+                SmsLog log = new SmsLog();
+                log.setCreateTime(new Timestamp(System.currentTimeMillis()));
+                log.setNamespaceId(namespaceId);
+                log.setScope(templateScope);
+                log.setCode(templateId);
+                log.setLocale(templateLocale);
+                log.setMobile(phoneNumber);
+                log.setResult(resultText);
+                log.setHandler(LIAN_XIN_TONG_HANDLER_NAME);
+                log.setText(content);
+                log.setSmsId("");
+                log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
+                smsLogs.add(log);
+            }
+        } else {
             for (Result result : rets.rets) {
                 SmsLog log = new SmsLog();
                 log.setCreateTime(new Timestamp(System.currentTimeMillis()));
@@ -162,7 +186,7 @@ public class LianXinTongSmsHandler implements SmsHandler {
                 log.setCode(templateId);
                 log.setLocale(templateLocale);
                 log.setMobile(result.mobile);
-                log.setResult(rspMessage.getMessage());
+                log.setResult(resultText);
                 log.setHandler(LIAN_XIN_TONG_HANDLER_NAME);
                 log.setText(content);
                 log.setSmsId(result.msgId);
@@ -199,13 +223,13 @@ public class LianXinTongSmsHandler implements SmsHandler {
     }
 
     private static class Result {
-        String mobile;
-        String msgId;
-        String rspcod;
+        String mobile = "";
+        String msgId = "";
+        String rspcod = "";
     }
 
     private static class Rets {
-        List<Result> rets;
+        List<Result> rets = new ArrayList<>();
     }
 
     private static class Report {
