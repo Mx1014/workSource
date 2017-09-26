@@ -80,7 +80,7 @@ public class NamespaceResourceProviderImpl implements NamespaceResourceProvider 
         List<NamespaceResource> list = context.select().from(Tables.EH_NAMESPACE_RESOURCES)
                 .where(Tables.EH_NAMESPACE_RESOURCES.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_NAMESPACE_RESOURCES.RESOURCE_TYPE.eq(type.getCode()))
-                .orderBy(Tables.EH_NAMESPACE_RESOURCES.RESOURCE_ID.desc())
+                .orderBy(Tables.EH_NAMESPACE_RESOURCES.DEFAULT_ORDER.desc())
                 .fetch().map((r) -> {
                     return ConvertHelper.convert(r, NamespaceResource.class);
                 });

@@ -3767,6 +3767,31 @@ public class UserServiceImpl implements UserService {
 		return sceneList;
 	}
 
+	@Override
+	public List<SceneDTO> listAllCommunityScenes() {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Long userId = UserContext.current().getUser().getId();
+		// 修改成按照defalutOrder排序 by lei.lv 20170915
+		List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+		List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
+		for (NamespaceResource resource : resources) {
+			Community community = communityProvider.findCommunityById(resource.getResourceId());
+			if(null != community){
+				CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
+				SceneType sceneType = DEFAULT;
+				if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL){
+					sceneType = PARK_TOURIST;
+				}
+				SceneDTO sceneDTO = this.toCommunitySceneDTO(namespaceId, userId, communityDTO, sceneType);
+				sceneList.add(sceneDTO);
+			}
+		}
+		sceneList.stream().filter(r->{
+			return r.getSceneToken() != null;
+		}).collect(Collectors.toList());
+		return sceneList;
+	}
+
 	/**
 	 * 判断是否登录
 	 * @return
