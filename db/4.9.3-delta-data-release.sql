@@ -404,4 +404,5 @@ VALUES ((@apps_id := @apps_id + 1), '466dd353-bdd8-4764-9315-56e6e7151f06', 'Kem
 update `eh_organizations` eo set `set_admin_flag` = (select if(count(*) > 0, 1, 0) from `eh_organization_members` where organization_id = eo.id and `member_group` = 'manager' and status = 3) where `group_type` = 'ENTERPRISE' and status = 2;
 
 
-
+SET @id =(SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'user','400001','zh_CN','手机号码错误');

@@ -45,4 +45,6 @@ public interface UserServiceErrorCode {
 
     static final int DOMAIN_NOT_CONFIGURED = 400000;
 
+    int ERROR_INVALID_PHONE = 400001; //手机号码错误
+
 }

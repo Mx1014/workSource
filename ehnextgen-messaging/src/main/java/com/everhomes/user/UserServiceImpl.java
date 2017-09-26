@@ -5016,7 +5016,7 @@ public class UserServiceImpl implements UserService {
 
 		if( cmd.getPhone() == null){
 			LOGGER.error("phoneNumber param error");
-			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS, "phone param error");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PHONE, "phone param error");
 		}
 
 
@@ -5059,7 +5059,7 @@ public class UserServiceImpl implements UserService {
 
 			if(userIdentifier == null || userIdentifier.getIdentifierToken() != cmd.getOldPhone()){
 				LOGGER.error("old phone param error");
-				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS, "old phone param error");
+				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PHONE, "old phone param error");
 			}
 
 			UserIdentifierLog log = userIdentifierLogProvider.findByUserIdAndIdentifier(user.getId(), cmd.getRegionCode(), cmd.getPhone());
@@ -5080,7 +5080,7 @@ public class UserServiceImpl implements UserService {
 			//发验证码的手机和绑定的的手机是否相等，检查手机是否被篡改
 			if(!cmd.getPhone().equals(userIdentifier.getIdentifierToken())){
 				LOGGER.error("phoneNumber param error");
-				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS, "phone param error");
+				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PHONE, "phone param error");
 			}
 
 			userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
