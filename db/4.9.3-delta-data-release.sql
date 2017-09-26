@@ -130,7 +130,7 @@ BEGIN
 
   END LOOP;
   CLOSE cur;
-END
+END;
 CALL create_service_alliance_menu_scope;
 DROP PROCEDURE if exists create_service_alliance_menu_scope;
 -- ------------- 新建菜单Scope END--------
@@ -358,4 +358,5 @@ update eh_configurations set `value` = '0306A9' where `name` = 'parking.kexing.p
 INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `card_type_id`, `card_type_name`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
   VALUES ('1', '999983', 'community', '240111044331055940', '10006', '2', '月租车', '2', '1', '2017-09-19 10:49:48', NULL, NULL);
 
-
+-- 短信供应商配置  add by xq.tian  2017/08/30
+UPDATE `eh_configurations` SET `value` = 'YZX,YouXunTong' WHERE `name` = 'sms.handler.type' AND `namespace_id` = 0;

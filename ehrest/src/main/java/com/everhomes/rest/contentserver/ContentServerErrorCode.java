@@ -8,5 +8,6 @@ public interface ContentServerErrorCode {
     static final int ERROR_INVALID_USER = 10003;
     static final int ERROR_INVALID_ACTION = 10004;
     static final int ERROR_INVALID_PARAMS = 10005;
+    static final int ERROR_INVALID_UUID = 10006;
 
 }

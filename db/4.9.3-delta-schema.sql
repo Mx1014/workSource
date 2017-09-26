@@ -49,6 +49,8 @@ ALTER TABLE `eh_sms_logs` ADD COLUMN `status` TINYINT NOT NULL DEFAULT 1 COMMENT
 ALTER TABLE `eh_sms_logs` ADD COLUMN `report_text` TEXT COMMENT 'report text';
 ALTER TABLE `eh_sms_logs` ADD COLUMN `report_time` DATETIME(3);
 
+ALTER TABLE `eh_sms_logs` ADD INDEX i_eh_mobile_handler(`mobile`, `handler`);
+
 -- 停车 add by sw 20170925
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN original_price decimal(10,2) DEFAULT NULL;
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN card_request_id bigint(20) DEFAULT NULL;
