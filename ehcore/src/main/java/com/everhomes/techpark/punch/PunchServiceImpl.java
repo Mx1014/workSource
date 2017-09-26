@@ -698,7 +698,7 @@ public class PunchServiceImpl implements PunchService {
 				companyId, dateSF.get().format(logDay.getTime()),
 				ClockCode.SUCESS.getCode());
 		for (PunchLog log : punchLogs){
-			PunchLogDTO dto = new PunchLogDTO();
+			PunchLogDTO dto = ConvertHelper.convert(log, PunchLogDTO.class);
 			dto.setPunchTime(log.getPunchTime().getTime());
 			pdl.getPunchLogs().add(dto);
 		}
