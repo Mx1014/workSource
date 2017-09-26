@@ -5115,7 +5115,7 @@ public class PunchServiceImpl implements PunchService {
 		if (null != members) {
 
 			for(UniongroupMemberDetail member : members) {
-				if(member.getTargetType().equals("USER")){
+				if(member != null && member.getTargetType() != null && member.getTargetType().equals("USER")){
 					refreshDayLogAndMonthStat(member.getTargetId(),pr.getOwnerId(),yesterday);
 				}
 			}

@@ -8,3 +8,6 @@ ALTER TABLE eh_organizations ADD COLUMN unified_social_credit_code VARCHAR(256);
 
 -- 同步数据时为企业添加门牌时太慢，添加索引 add by xiongying20170922
 ALTER TABLE `eh_addresses` ADD INDEX namespace_address ( `namespace_address_type`, `namespace_address_token`);
+
+-- 增加考勤统计字段
+ALTER TABLE eh_punch_statistics ADD COLUMN exception_day_count INT  DEFAULT NULL COMMENT '异常天数';
