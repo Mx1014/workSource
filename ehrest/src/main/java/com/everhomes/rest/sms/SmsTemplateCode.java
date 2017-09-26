@@ -118,4 +118,10 @@ public interface SmsTemplateCode {
 
     //物业缴费催款
     int PAYMENT_NOTICE_CODE = 54;
+
+    //任务消息提醒短信
+    int PM_NOTIFY_BEFORE_TASK = 55;
+    int PM_NOTIFY_BEFORE_TASK_DELAY = 56;
+    int PM_NOTIFY_AFTER_TASK_DELAY = 57;
+
 }
