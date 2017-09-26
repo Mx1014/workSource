@@ -244,6 +244,14 @@ public interface UserService {
     Long getCommunityIdBySceneToken(SceneTokenDTO sceneTokenDTO);
 
     List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd);
+	
+    UserIdentifier getUserIdentifier(Long userId);
+
+    VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
+
+    UserLogin bindPhone(BindPhoneCommand cmd);
+
+    void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd);
 
     SceneDTO getProfileScene();
 
