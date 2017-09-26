@@ -72,9 +72,9 @@ public class SmsLogProviderImpl implements SmsLogProvider {
                 .and(t.HANDLER.in(handlerNames))
                 .orderBy(t.ID.desc()).asTable();
 
-        return context.select(t.ID, t.HANDLER, t.STATUS, t.CREATE_TIME).from(subT)
+        return context.select(subT.field(t.ID), subT.field(t.HANDLER), subT.field(t.STATUS), subT.field(t.CREATE_TIME)).from(subT)
                 .groupBy(subT.field(t.HANDLER))
-                .fetchMap(t.HANDLER, SmsLog.class);
+                .fetchMap(subT.field(t.HANDLER), SmsLog.class);
     }
 
     @Override
