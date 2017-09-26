@@ -2,6 +2,7 @@
 -- -------------------------------------------------------------------------------------------------------------------------------------------------
 -- ------------- entry_id 写入 --------
 DROP PROCEDURE if exists create_service_alliance_entry_id;
+delimiter $$;
 CREATE PROCEDURE `create_service_alliance_entry_id` ()
 BEGIN
   DECLARE ns INTEGER;
@@ -25,8 +26,9 @@ BEGIN
 		SET nsorder = nsorder + 1;
   END LOOP;
   CLOSE cur;
-END;
+END $$;
 
+delimiter ;
 CALL create_service_alliance_entry_id;
 DROP PROCEDURE if exists create_service_alliance_entry_id;
 -- ------------- entry_id 写入 end --------
@@ -91,7 +93,7 @@ begin
 		SELECT CONCAT('exist id = ',ISNULL(@iscreated));
 	END IF;
 end $$;
-
+delimiter ;
 CALL create_service_alliance_menu;
 drop procedure  if exists create_service_alliance_menu;
 
@@ -146,7 +148,7 @@ BEGIN
 	DECLARE ans INTEGER;
 
   DECLARE done INT DEFAULT FALSE;
-  DECLARE cur CURSOR FOR select namespace_id,entry_id*100+41600 from eh_service_alliance_categories WHERE  parent_id =0 AND id NOT IN (SELECT SUBSTRING(action_data,LOCATE('type":',action_data)+6,LOCATE(',',action_data)-6-LOCATE('type":',action_data)) AS categry_id from eh_launch_pad_items WHERE action_type = 33);
+  DECLARE cur CURSOR FOR select namespace_id,entry_id*100+41600 from eh_service_alliance_categories WHERE  parent_id =0 AND id NOT IN (select a.categry_id from (SELECT DISTINCT CAST(SUBSTRING(action_data,LOCATE('type":',action_data)+6,LOCATE(',',action_data)-6-LOCATE('type":',action_data)) AS UNSIGNED) AS categry_id from eh_launch_pad_items WHERE action_type = 33) as a WHERE a.categry_id IS NOT NULL);
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
   OPEN cur;
   read_loop: LOOP
@@ -421,9 +423,9 @@ VALUES ((@max_id := @max_id + 1), 999983, 'ForumLayout', '{"versionCode":"201707
 
 SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
-VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'DISCOVER', '发现', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 62, '', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, NULL, 0, NULL);
+VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'DISCOVER', '图文', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 62, '', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, NULL, 0, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
-VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'DISCOVER', '发现', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 62, '', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 0, NULL, NULL, 0, NULL);
+VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'DISCOVER', '图文', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 62, '', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 0, NULL, NULL, 0, NULL);
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
 VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'TRD_VIDEO', '视频', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 14, '{"url":"https://weishang.movmovie.com/video/zz-zone.html","declareFlag": "1"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, NULL, 0, NULL);
