@@ -147,10 +147,10 @@ public class PmTaskController extends ControllerBase {
 
     /**
      * <b>URL: /pmtask/liskPmtaskBuildings</b>
-     * <p>创建新任务</p>
+     * <p>查询报修楼栋</p>
      */
     @RequestMapping("liskPmtaskBuildings")
-    @RestReturn(value=PmTaskDTO.class)
+    @RestReturn(value=ListBuildingCommandResponse.class)
     public RestResponse liskPmtaskBuildings(ListBuildingCommand cmd) {
 
         ListBuildingCommandResponse buildings = pmTaskService.listBuildings(cmd);
