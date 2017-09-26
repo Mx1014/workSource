@@ -265,8 +265,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 					"Invalid itemGroup paramter,itemGroup is null");
 		}
 		long startTime = System.currentTimeMillis();
+		OrganizationDTO org = organizationService.getOrganizationById(cmd.getOrganizationId());
+		Long communityId = null;
+		if(null != org)
+			communityId = org.getCommunityId();
 		List<CategryItemDTO> categryItemDTOs = new ArrayList<CategryItemDTO>();
-		List<ItemServiceCategry> categries = getItemServiceCategriesByScopeType(namespaceId, cmd.getItemLocation(), cmd.getItemGroup(), cmd.getCurrentSceneType(), cmd.getOrganizationId(), null);
+		List<ItemServiceCategry> categries = getItemServiceCategriesByScopeType(namespaceId, cmd.getItemLocation(), cmd.getItemGroup(), cmd.getCurrentSceneType(), cmd.getOrganizationId(), communityId);
 		for (ItemServiceCategry categry: categries) {
 			CategryItemDTO categryItemDTO = new CategryItemDTO();
 			categryItemDTO.setCategryId(categry.getId());
