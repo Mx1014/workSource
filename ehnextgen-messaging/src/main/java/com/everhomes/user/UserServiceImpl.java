@@ -4767,7 +4767,7 @@ public class UserServiceImpl implements UserService {
 		//当关联场景不为空，且与参数中的园区id相匹配时，返回关联的场景
 		if (sceneList.size() > 0) {
 			List<SceneDTO> flist = sceneList.stream().filter(r -> {
-				return r.getCommunityId().longValue() == cmd.getCommunityId().longValue();
+				return r.getCommunityId().equals(cmd.getCommunityId());
 			}).collect(Collectors.toList());
 			if (flist.size() > 0) {
 				return flist;

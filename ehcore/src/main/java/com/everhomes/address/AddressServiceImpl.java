@@ -1770,7 +1770,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             });
 
             if (pageSize < dtos.size()) {
-                dtos = dtos.subList(0, pageSize - 1);
+                dtos = dtos.subList(0, pageSize);
             }
             response.setDtos(dtos);
             return response;
