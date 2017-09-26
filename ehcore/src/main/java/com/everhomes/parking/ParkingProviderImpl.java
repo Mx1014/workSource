@@ -169,8 +169,8 @@ public class ParkingProviderImpl implements ParkingProvider {
 		}else{
 			//默认不开启
 			parkingLot.setExpiredRechargeFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
-//			parkingLot.setMonthlyDiscountFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
-//			parkingLot.setTempFeeDiscountFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+			parkingLot.setMonthlyDiscountFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
+			parkingLot.setTempFeeDiscountFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
 		}
 	}
 
