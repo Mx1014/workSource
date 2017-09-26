@@ -21,6 +21,7 @@ import com.everhomes.server.schema.tables.records.EhUniongroupMemberDetailsRecor
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RecordHelper;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -275,7 +276,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
                 .fetch().map(r -> {
-                    return ConvertHelper.convert(r, UniongroupMemberDetail.class);
+                    return RecordHelper.convert(r, UniongroupMemberDetail.class);
                 });
         if (list != null && list.size() != 0) {
             return list;
@@ -301,7 +302,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                 .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
                 .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
                 .fetch().map(r -> {
-                    return ConvertHelper.convert(r, UniongroupMemberDetail.class);
+                    return RecordHelper.convert(r, UniongroupMemberDetail.class);
                 });
         if (list != null && list.size() != 0) {
             return list;
@@ -358,7 +359,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                     .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
                     .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
                     .fetch().map(r -> {
-                        return ConvertHelper.convert(r, UniongroupMemberDetail.class);
+                        return RecordHelper.convert(r, UniongroupMemberDetail.class);
                     });
         } else {
             list = context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
@@ -378,7 +379,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                     .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType))
                     .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
                     .fetch().map(r -> {
-                        return ConvertHelper.convert(r, UniongroupMemberDetail.class);
+                        return RecordHelper.convert(r, UniongroupMemberDetail.class);
                     });
         }
 
