@@ -166,6 +166,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getLevelId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("levelItemId", cmd.getLevelId()));
         
+        //查询制定跟进人客户
+        if(null != cmd.getTrackingUid()){
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("trackingUid", cmd.getTrackingUid()));
+        }
         //查询全部客户、我的客户、公共客户
         if(null != cmd.getType()){
         	if(2 == cmd.getType()){

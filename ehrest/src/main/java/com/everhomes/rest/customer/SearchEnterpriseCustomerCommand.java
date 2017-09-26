@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *     <li>communityId: 园区id</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 页面大小</li>
+ *     <li>trackingUid: 跟进人uid</li>
  *     <li>type: 查询类型;1:全部客户  2:我的客户   3:公共客户</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
@@ -27,6 +28,8 @@ public class SearchEnterpriseCustomerCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+    
+    private Long trackingUid;
     
     private Integer type;
 
@@ -77,9 +80,17 @@ public class SearchEnterpriseCustomerCommand {
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
-
     
-    public Integer getType() {
+    
+    public Long getTrackingUid() {
+		return trackingUid;
+	}
+
+	public void setTrackingUid(Long trackingUid) {
+		this.trackingUid = trackingUid;
+	}
+
+	public Integer getType() {
 		return type;
 	}
 
