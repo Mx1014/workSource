@@ -583,7 +583,7 @@ public class ContentServerServiceImpl implements ContentServerService {
     public String newUploadId() {
         for(int i = 0; i < 5; i++) {
             String uuid = UUID.randomUUID().toString();
-            uuid = uuid.replace("-", "");
+            uuid = "evhUploader-" + uuid.replace("-", "");
             boolean ok = checkAndSetUploadId(uuid);
             if(ok) {
                 return uuid;    
