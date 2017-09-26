@@ -5106,16 +5106,20 @@ public class PunchServiceImpl implements PunchService {
 
         }
         for (PunchRule pr : punchRules) {
-            refreshGroupDayLogAndMonthStat(pr, yesterday);
+			try {
+				refreshGroupDayLogAndMonthStat(pr, yesterday);
+			}catch (Exception e ){
+				LOGGER.error("this is something wrong with pr + "+JSON.toJSONString(pr),e);
+			}
         }
     }
     /**刷固定排班*/
     private void refreshGroupDayLogAndMonthStat(PunchRule pr, Calendar yesterday) {
         List<UniongroupMemberDetail> members = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
-		if (null != members) {
+		if (null != members && members.size()>0) {
 
 			for(UniongroupMemberDetail member : members) {
-				if(member.getTargetType().equals("USER")){
+				if(member.getTargetType() !=null && member.getTargetType().equals("USER")){
 					refreshDayLogAndMonthStat(member.getTargetId(),pr.getOwnerId(),yesterday);
 				}
 			}
