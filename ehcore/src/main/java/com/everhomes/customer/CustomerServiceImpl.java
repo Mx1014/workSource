@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,12 +15,16 @@ import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.PmNotify.PmNotifytJob;
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.activity.Activity;
+import com.everhomes.activity.WarnActivityBeginningAction;
+import com.everhomes.activity.WarningSetting;
 import com.everhomes.community.Community;
-import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -31,7 +36,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.openapi.ZJGKOpenServiceImpl;
@@ -42,12 +46,8 @@ import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.CreateCustomerApplyProjectCommand;
 import com.everhomes.rest.customer.CreateCustomerCertificateCommand;
@@ -141,6 +141,7 @@ import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
@@ -149,12 +150,16 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.ModuleName;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -162,6 +167,8 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
+
+import net.greghaines.jesque.Job;
 
 /**
  * Created by ying.xiong on 2017/8/15.
@@ -219,6 +226,12 @@ public class CustomerServiceImpl implements CustomerService {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+	
+    private static final  String queueDelay = "trackingPlanTaskDelays";
+    private static final  String  queueNoDelay = "trackingPlanTaskNoDelays";
 
     private void checkPrivilege() {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -1691,6 +1704,57 @@ public class CustomerServiceImpl implements CustomerService {
             resp.setDtos(results);
         }
         return resp;
+	}
+
+	
+	//每10分钟执行一次，找出待n~n+10分钟内提醒时间的跟进计划
+	//@Scheduled(cron="0 */1 * * * ?")
+	@Override
+	public void trackingPlanWarningSchedule() {
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+			//使用tryEnter方法可以防止分布式部署时重复执行
+			coordinationProvider.getNamedLock(CoordinationLocks.TRACKING_PLAN_WARNING_SCHEDULE.getCode()).tryEnter(() -> {
+				Date now = DateHelper.currentGMTTime();
+				Timestamp queryStartTime = new Timestamp(now.getTime());
+				Timestamp queryEndTime = new Timestamp(now.getTime() + 600 * 1000);
+				List<CustomerTrackingPlan> plans = null;
+						//enterpriseCustomerProvider.listWaitNotifyTrackingPlans(queryStartTime,queryEndTime);
+				if(null != plans && plans.size() > 0){
+					plans.forEach(plan ->{
+						pushPlanIntoEnqueue(plan);
+					});
+				}
+			});
+		}
+	}
+
+	private void pushPlanIntoEnqueue(CustomerTrackingPlan plan) {
+		 Map<String, Object> map = new HashMap<>();
+         map.put("trackingPlanId", plan.getId());
+		if (plan.getNotifyTime().getTime() > (DateHelper.currentGMTTime().getTime() + 10L)) {
+            scheduleProvider.scheduleSimpleJob(
+                    queueDelay + plan.getId(),
+                    queueDelay + plan.getId(),
+                    new Date(plan.getNotifyTime().getTime()),
+                    TrackingPlanNotifytJob.class,
+                    map
+            );
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("pushTrackingPlanNotify delayedEnqueue trackingPlan = {}", plan);
+            }
+        } else {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("pushTrackingPlanNotify noDelayedenqueue trackingPlan = {}", plan);
+            }
+            scheduleProvider.scheduleSimpleJob(
+                    queueNoDelay + plan.getId(),
+                    queueNoDelay + plan.getId(),
+                    new Date(System.currentTimeMillis() + 1000),
+                    TrackingPlanNotifytJob.class,
+                    map
+            );
+        }
 	}
 	
 	

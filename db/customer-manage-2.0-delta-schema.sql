@@ -38,6 +38,7 @@ CREATE TABLE `eh_customer_tracking_plans` (
   `update_time` DATETIME   COMMENT '修改时间',
   `delete_uid`  BIGINT     COMMENT '删除人uid',
   `delete_time` DATETIME   COMMENT '删除时间',
+  `notify_status` TINYINT  DEFAULT NULL COMMENT '提醒状态  0:无需提醒   1:待提醒   2:已提醒',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -67,6 +68,19 @@ CREATE TABLE `eh_customer_trackings` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+
+DROP TABLE IF EXISTS `eh_tracking_notify_logs`;
+
+CREATE TABLE `eh_tracking_notify_logs` (
+  `id` BIGINT NOT NULL,
+  `customer_type` TINYINT  NOT NULL,
+  `customer_id`  BIGINT  NOT NULL,
+  `notify_text` TEXT,
+  `receiver_id` BIGINT NOT NULL,
+  `create_time` DATETIME NOT NULL ,
+  `status` TINYINT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
