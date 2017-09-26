@@ -55,6 +55,7 @@ public interface YellowPageProvider {
 	
 	ServiceAllianceCategories findCategoryById(Long id);
 	ServiceAllianceCategories findCategoryByName(Integer namespaceId, String name);
+	ServiceAllianceCategories findCategoryByEntryId(Integer namespaceId, Integer EntryId);
 	void createCategory(ServiceAllianceCategories category);
 	void updateCategory(ServiceAllianceCategories category);
 	void createServiceAlliances(ServiceAlliances sa);
