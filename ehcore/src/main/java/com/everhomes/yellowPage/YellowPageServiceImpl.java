@@ -767,20 +767,17 @@ public class YellowPageServiceImpl implements YellowPageService {
         	 }
         	
         }else{
-//			if (cmd.getOwnerType().equals(ServiceAllianceBelongType.ORGANAIZATION.getCode())) {
-//				List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
-//				for (OrganizationCommunity organizationCommunity : communityList) {
-//					Condition condition = Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(organizationCommunity.getCommunityId())
-//							.and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
-//					if (conditionOR == null) {
-//						conditionOR = condition;
-//					} else {
-//						conditionOR = conditionOR.or(condition);
-//					}
-//				}
-//			}
+        	Condition conditionOR = null;
+			if (cmd.getOwnerType().equals(ServiceAllianceBelongType.ORGANAIZATION.getCode())) {
+				conditionOR = Tables.EH_SERVICE_ALLIANCES.RANGE.eq("all");
+				List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+				for (OrganizationCommunity orgcommunity : communityList) {
+					conditionOR = conditionOR.or(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+orgcommunity.getCommunityId()+"%"));
+					
+				}
+			}
         	sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
- 	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
+ 	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords(),conditionOR );
 
         }
 
