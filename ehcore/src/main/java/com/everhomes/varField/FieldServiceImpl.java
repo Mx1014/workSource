@@ -870,8 +870,8 @@ public class FieldServiceImpl implements FieldService {
                 ScopeField scopeField = ConvertHelper.convert(field, ScopeField.class);
                 scopeField.setNamespaceId(cmd.getNamespaceId());
                 scopeField.setCommunityId(cmd.getCommunityId());
-                scopeField.setGroupPath(scopeField.getGroupPath() + "/");
                 if (scopeField.getId() == null) {
+                    scopeField.setGroupPath(scopeField.getGroupPath() + "/");
                     scopeField.setCreatorUid(userId);
                     fieldProvider.createScopeField(scopeField);
                 } else {
@@ -884,6 +884,7 @@ public class FieldServiceImpl implements FieldService {
                         fieldProvider.updateScopeField(scopeField);
                         existFields.remove(exist.getId());
                     } else {
+                        scopeField.setGroupPath(scopeField.getGroupPath() + "/");
                         scopeField.setCreatorUid(userId);
                         fieldProvider.createScopeField(scopeField);
                     }
