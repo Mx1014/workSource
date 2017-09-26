@@ -250,7 +250,7 @@ public class FieldServiceImpl implements FieldService {
         //工具类excel
         ExcelUtils excel = new ExcelUtils();
         //注入workbook
-        sheetGenerate(groups, workbook, excel,cmd.getNamespaceId());
+        sheetGenerate(groups, workbook, excel,cmd.getNamespaceId(),cmd.getCommunityId());
         sheetNum.remove();
         //输出
         ServletOutputStream out;
@@ -279,7 +279,7 @@ public class FieldServiceImpl implements FieldService {
         }
     }
 
-    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Integer namespaceId) {
+    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Integer namespaceId,Long communityId) {
         //循环遍历所有的sheet
         for( int i = 0; i < groups.size(); i++){
             //sheet卡为真的标识
@@ -287,7 +287,7 @@ public class FieldServiceImpl implements FieldService {
             FieldGroupDTO group = groups.get(i);
             //有children的sheet非叶节点，所以获得叶节点，对叶节点进行递归
             if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
-                sheetGenerate(group.getChildrenGroup(),workbook,excel,namespaceId);
+                sheetGenerate(group.getChildrenGroup(),workbook,excel,namespaceId,communityId);
                 //对于有子group的，本身为无效的sheet
                 isRealSheet = false;
             }
@@ -298,6 +298,7 @@ public class FieldServiceImpl implements FieldService {
                 cmd1.setNamespaceId(namespaceId);
                 cmd1.setGroupPath(group.getGroupPath());
                 cmd1.setModuleName(group.getModuleName());
+                cmd1.setCommunityId(communityId);
                 List<FieldDTO> fields = listFields(cmd1);
                 //使用字段，获得headers
                 String headers[] = new String[fields.size()];
@@ -340,6 +341,7 @@ public class FieldServiceImpl implements FieldService {
                 cmd1.setNamespaceId(namespaceId);
                 cmd1.setGroupPath(group.getGroupPath());
                 cmd1.setModuleName(group.getModuleName());
+                cmd1.setCommunityId(communityId);
                 //通过字段即获得header，顺序不定
                 List<FieldDTO> fields = listFields(cmd1);
                 String headers[] = new String[fields.size()];
@@ -693,6 +695,7 @@ public class FieldServiceImpl implements FieldService {
             cmd2.setModuleName(group.getModuleName());
             cmd2.setNamespaceId(group.getNamespaceId());
             cmd2.setGroupPath(group.getGroupPath());
+            cmd2.setCommunityId(cmd.getCommunityId());
             List<FieldDTO> fields = listFields(cmd2);
             //获得根据cell顺序的fieldname
             Row headRow = sheet.getRow(1);
