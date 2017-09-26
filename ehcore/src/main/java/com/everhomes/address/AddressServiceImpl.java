@@ -403,7 +403,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                                             .or(Tables.EH_BUILDINGS.ALIAS_NAME.like(likeVal))
                                     ))
                             .and(Tables.EH_BUILDINGS.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
-                            .orderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER)
+                            .orderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc())
                             .fetch().map((r) -> {
                         BuildingDTO building = new BuildingDTO();
                         building.setBuildingName(r.getValue(Tables.EH_BUILDINGS.NAME));
