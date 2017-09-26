@@ -398,3 +398,10 @@ VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'TRD_
 SET @apps_id = IFNULL((SELECT MAX(id) FROM `eh_apps`), 1);
 INSERT INTO `eh_apps` (`creator_uid`, `app_key`, `secret_key`, `name`, `description`, `status`, `create_time`, `update_uid`, `update_time`)
 VALUES ((@apps_id := @apps_id + 1), '466dd353-bdd8-4764-9315-56e6e7151f06', 'KemccuJycjKbnYnBUIzQLU0LNB5S8aDpeMNIT0mxKVFGtz8pKj83spLELs1y49mAY89hzGqVdODsgiyTaKveig==', 'kexing.qipai', 'kexing qipai app', 1, NOW(), NULL, NULL);
+
+
+-- 重新刷新organization的setAdminFlag字段的值 add by sfyan 20170926
+update `eh_organizations` eo set `set_admin_flag` = (select if(count(*) > 0, 1, 0) from `eh_organization_members` where organization_id = eo.id and `member_group` = 'manager' and status = 3) where `group_type` = 'ENTERPRISE' and status = 2;
+
+
+
