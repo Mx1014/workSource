@@ -211,13 +211,15 @@ public class ParkingServiceImpl implements ParkingService {
         List<ParkingRechargeRateDTO> parkingRechargeRateList = handler.getParkingRechargeRates(parkingLot,
 				cmd.getPlateNumber(), cmd.getCardNo());
 
-		if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()) {
-			parkingRechargeRateList.forEach(r -> {
-				r.setOriginalPrice(r.getPrice());
-				BigDecimal newPrice = r.getPrice().multiply(new BigDecimal(parkingLot.getMonthlyDiscount()))
-						.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
-				r.setPrice(newPrice);
-			});
+        if (null != parkingLot.getMonthlyDiscountFlag()) {
+			if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()) {
+				parkingRechargeRateList.forEach(r -> {
+					r.setOriginalPrice(r.getPrice());
+					BigDecimal newPrice = r.getPrice().multiply(new BigDecimal(parkingLot.getMonthlyDiscount()))
+							.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+					r.setPrice(newPrice);
+				});
+			}
 		}
 
         return parkingRechargeRateList;
@@ -588,11 +590,14 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setInvoiceType(cmd.getInvoiceType());
 
 		parkingRechargeOrder.setPrice(cmd.getPrice());
-		if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getTempFeeDiscountFlag()) {
-			parkingRechargeOrder.setOriginalPrice(cmd.getPrice());
-			BigDecimal newPrice = cmd.getPrice().multiply(new BigDecimal(parkingLot.getTempFeeDiscount()))
-					.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
-			parkingRechargeOrder.setPrice(newPrice);
+
+		if (null != parkingLot.getMonthlyDiscountFlag()) {
+			if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()) {
+				parkingRechargeOrder.setOriginalPrice(cmd.getPrice());
+				BigDecimal newPrice = cmd.getPrice().multiply(new BigDecimal(parkingLot.getMonthlyDiscount()))
+						.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+				parkingRechargeOrder.setPrice(newPrice);
+			}
 		}
 
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
@@ -1233,12 +1238,14 @@ public class ParkingServiceImpl implements ParkingService {
     	
     	ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
 
-    	if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getTempFeeDiscountFlag()) {
-    		if (null != dto.getPrice()) {
-				dto.setOriginalPrice(dto.getPrice());
-				BigDecimal newPrice = dto.getPrice().multiply(new BigDecimal(parkingLot.getTempFeeDiscount()))
-						.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
-				dto.setPrice(newPrice);
+    	if (null != parkingLot.getTempFeeDiscountFlag()) {
+			if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getTempFeeDiscountFlag()) {
+				if (null != dto.getPrice()) {
+					dto.setOriginalPrice(dto.getPrice());
+					BigDecimal newPrice = dto.getPrice().multiply(new BigDecimal(parkingLot.getTempFeeDiscount()))
+							.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+					dto.setPrice(newPrice);
+				}
 			}
 		}
 
