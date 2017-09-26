@@ -137,7 +137,7 @@ public class YouXunTongSmsHandler implements SmsHandler {
                 message.put("sign", sign.getText());
 
                 RspMessage rspMessage = createAndSend(message);
-                smsLogList.addAll(buildSmsLogs(namespaceId, phonesPart, templateScope, templateId, templateLocale, content, rspMessage));
+                smsLogList.addAll(buildSmsLogs(namespaceId, phonesPart, templateScope, templateId, templateLocale, sign.getText()+content, rspMessage));
             }
             return smsLogList;
         }
