@@ -49,7 +49,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-class PmTaskCommonServiceImpl {
+public class PmTaskCommonServiceImpl {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PmTaskCommonServiceImpl.class);
 
@@ -482,11 +482,11 @@ class PmTaskCommonServiceImpl {
             return "";
     }
 
-    void handoverTaskToTrd(PmTask task) {
+    void handoverTaskToTrd(PmTask task, String content, List<String> attachments) {
         String handlerPrefix = HandoverTaskHandler.HANDOVER_VENDOR_PREFIX;
         HandoverTaskHandler handler = PlatformContext.getComponent(handlerPrefix + task.getNamespaceId());
         if(handler != null)
-            handler.handoverTaskToTrd(task);
+            handler.handoverTaskToTrd(task, content, attachments);
     }
 
 }

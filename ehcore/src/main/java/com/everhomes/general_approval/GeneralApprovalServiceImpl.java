@@ -554,7 +554,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	}
 
 	@Override
-	public GeneralFormDTO getApprovalForm(ApprovalFormIdCommand cmd) {
+	public GeneralFormDTO  getApprovalForm(ApprovalFormIdCommand cmd) {
 		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
 				.getFormOriginId());
 		return processGeneralFormDTO(form);

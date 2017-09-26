@@ -27,6 +27,8 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
  *  <li>serviceUserId: 客服服务人员id</li>
  *  <li>longitude: 经度</li>
  *  <li>latitude: 纬度</li>
+ *  <li>website: 企业官网</li>
+ *  <li>unifiedSocialCreditCode: 统一社会信用代码</li>
  * </ul>
  *
  */
@@ -57,7 +59,25 @@ public class UpdateEnterpriseCommand {
 	private Double   longitude;
 	
 	private Double   latitude;
-    
+	private String website;
+	private String unifiedSocialCreditCode;
+
+	public String getUnifiedSocialCreditCode() {
+		return unifiedSocialCreditCode;
+	}
+
+	public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
+		this.unifiedSocialCreditCode = unifiedSocialCreditCode;
+	}
+
+	public String getWebsite() {
+		return website;
+	}
+
+	public void setWebsite(String website) {
+		this.website = website;
+	}
+
 	public Long getServiceUserId() {
 		return serviceUserId;
 	}
