@@ -69,12 +69,24 @@ public class LaunchPadItemActionDataDefaultHandler implements LaunchPadItemActio
             return;
         }
 
-        Map<String, String> result = getConfigsByKeys(keys, namespaceId);
+        Map<String, String> model = getConfigsByKeys(keys, namespaceId);
+        if(model == null || model.size() == 0){
+            return;
+        }
 
         try {
-            Configuration templateConfig = Configuration.getDefaultConfiguration();
-            Template freeMarkerTemplate = Template.getPlainTextTemplate("url", url, templateConfig);
-            url = FreeMarkerTemplateUtils.processTemplateIntoString(freeMarkerTemplate, result);
+
+            //将model和url中的“.”替换成“_”，防止FreeMarker报错
+            Map<String, String> newModel = new HashMap<>();
+            for(String key: model.keySet()){
+                String value = model.get(key);
+                String newKey = key.replaceAll("\\.", "_");
+                url = url.replaceAll( "\\$\\{" + key + "\\}","\\$\\{" + newKey + "\\}");
+                newModel.put(key.replaceAll("\\.", "_"), value);
+            }
+
+            Template freeMarkerTemplate = new Template("url", url, null);
+            url = FreeMarkerTemplateUtils.processTemplateIntoString(freeMarkerTemplate, newModel);
         } catch (Exception e) {
             e.printStackTrace();
         }

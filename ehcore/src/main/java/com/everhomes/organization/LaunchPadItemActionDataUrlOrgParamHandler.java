@@ -42,7 +42,7 @@ public class LaunchPadItemActionDataUrlOrgParamHandler implements LaunchPadItemA
         if(UserCurrentEntityType.ORGANIZATION.equals(entityType) ||UserCurrentEntityType.ENTERPRISE.equals(entityType) ){
             Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
 
-            if(organization != null){
+            if(organization != null && organization.getUnifiedSocialCreditCode() != null){
                 if(url.contains("?")){
                     url = url + "&id=";
                 }else {
