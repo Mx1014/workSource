@@ -20,8 +20,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserLogin;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.controller.WebRequestInterceptor;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.wx.CheckAuthCommand;
+import com.everhomes.rest.wx.CheckAuthResponse;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
 import org.apache.http.Consts;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
@@ -63,12 +68,6 @@ import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.NamespaceUserType;
 import com.everhomes.rest.user.UserGender;
-import com.everhomes.user.User;
-import com.everhomes.user.UserService;
-import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SimpleConvertHelper;
-import com.everhomes.util.StringHelper;
 
 /**
  * 由于要使拦截器工作，URL必须有serverContenxt(如evh），为了符合此规则，需要为微信申请授权及授权回调定义两个接口；
@@ -91,6 +90,10 @@ public class WXAuthController {// extends ControllerBase
     
     /** 用于记录登录后要跳转的源链接 */
     private final static String KEY_SOURCE_URL = "src_url";
+
+    /** 用于记录是否需要检查手机默认0-不检查，1-检查，检查结果是没有绑定的话跳到绑定手机页面 */
+    private final static String BINDPHONE = "bindPhone";
+
     
     /** 用于记录拿到code之后要跳转的链接（由于微信只允许配置一个回调域名，需要通过些配置来把code送到其它域名） */
     private final static String KEY_CODE_URL = "code_url";
@@ -118,7 +121,10 @@ public class WXAuthController {// extends ControllerBase
     private CloseableHttpClient httpClient;
     
     private HttpContext httpClientContext;
-    
+
+    @Autowired
+    private ContentServerService contentServerService;
+
     @PostConstruct
     private CloseableHttpClient openHttpClient() {
         if (isHttpClientOpen()) {
@@ -183,18 +189,55 @@ public class WXAuthController {// extends ControllerBase
             sendAuthRequestToWeixin(namespaceId, sessionId, params, response);
             return;
         }
-        
+
+        //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
+        checkRedirectUserIdentifier(request, response, namespaceId, params);
+
         // 登录成功则跳转到原来访问的链接
-        LOGGER.info("Process weixin auth request, loginToken={}", loginToken);
         String sourceUrl = params.get(KEY_SOURCE_URL);
+
+        //将参数拼接到链接中传给页面 add by yanjun 20170918
+        params.remove(KEY_SOURCE_URL);
+        sourceUrl = appendParamToUrl(sourceUrl, params);
+
         redirectByWx(response, sourceUrl);
         long endTime = System.currentTimeMillis();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(req calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
 	}
+
+
+    /**
+     * <b>URL: /wxauth/checkAuth</b>
+     * <p>检查用户是否已经登录，由于公众号是公用的，此处要带上ns</p>
+     */
+    @RequestMapping("checkAuth")
+    @RestReturn(CheckAuthResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse checkAuth(CheckAuthCommand cmd, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+        CheckAuthResponse checkAuthResponse = new CheckAuthResponse();
+
+        LoginToken loginToken = userService.getLoginToken(request);
+        if(!userService.isValid(loginToken) || !checkUserNamespaceId(cmd.getNs())) {
+            checkAuthResponse.setStatus((byte)0);
+            WebRequestInterceptor.setCookieInResponse("token", "", request, response);
+        }else {
+            checkAuthResponse.setStatus((byte)1);
+            String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
+            checkAuthResponse.setLoginToken(tokenString);
+            checkAuthResponse.setUid(loginToken.getUserId());
+            checkAuthResponse.setContentServer(contentServerService.getContentServer());
+        }
+
+        RestResponse res = new RestResponse(checkAuthResponse);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
 	/**
-	 * <b>URL: /wx/authCallback</b>
+	 * <b>URL: /wxauth/authCallback</b>
 	 * <p>微信授权后回调，回调包含了code，通过code可换取access_token，通过access_token可获取用户信息。</p>
 	 */
 	@RequestMapping("authCallback")
@@ -237,7 +280,14 @@ public class WXAuthController {// extends ControllerBase
                 processUserInfo(namespaceId, request, response);
             }
 
+            //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
+            checkRedirectUserIdentifier(request, response, namespaceId, params);
+
             String sourceUrl = params.get(KEY_SOURCE_URL);
+            //将参数拼接到链接中传给页面 add by yanjun 20170918
+            params.remove(KEY_SOURCE_URL);
+            sourceUrl = appendParamToUrl(sourceUrl, params);
+
             redirectByWx(response, sourceUrl);
             
         }
@@ -247,6 +297,43 @@ public class WXAuthController {// extends ControllerBase
             LOGGER.info("Process weixin auth request(callback calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
 	}
+
+	private void checkRedirectUserIdentifier(HttpServletRequest request, HttpServletResponse response, Integer namespaceId, Map<String, String> params){
+        LOGGER.info("checkUserIdentifier start");
+
+        String bandphone = params.get(BINDPHONE);
+        if(bandphone == null || Byte.valueOf(bandphone).byteValue() == 0){
+            LOGGER.info("checkUserIdentifier do not need checkout bindphone");
+            return;
+        }
+
+        //检查Identifier数据或者手机是否存在，不存在则跳到手机绑定页面  add by yanjun 20170831
+        User user = UserContext.current().getUser();
+        if(user == null){
+            LOGGER.error("checkUserIdentifier exception, it should be in logon status, but it is logoff");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "Failed to get usercontent");
+        }
+        UserIdentifier identifier = userService.getUserIdentifier(user.getId());
+        if( identifier == null || identifier.getIdentifierToken() == null){
+
+            LOGGER.info("checkUserIdentifier fail user={},identifier={}", StringHelper.toJsonString(user), StringHelper.toJsonString(identifier));
+            String homeUrl = configurationProvider.getValue(namespaceId, "home.url", "");
+            String bindPhoneUrl = configurationProvider.getValue(namespaceId, WeChatConstant.WX_BIND_PHONE_URL, "");
+            LOGGER.info("checkUserIdentifier fail redirect to bind phone Url, homeUrl={}, url={}", homeUrl, bindPhoneUrl);
+            String url =homeUrl + bindPhoneUrl;
+            try{
+                url = appendParamToUrl(url, params);
+            }catch (Exception ex){
+                LOGGER.error("checkUserIdentifier exception, append param to url error");
+            }
+
+            redirectByWx(response, url);
+        }else {
+            LOGGER.info("checkUserIdentifier success");
+        }
+
+    }
 	
 	private Map<String, String> getRequestParams(HttpServletRequest request) {
 	    Map<String, String> params = new HashMap<String, String>();
@@ -418,7 +505,7 @@ public class WXAuthController {// extends ControllerBase
         
         userService.signupByThirdparkUser(wxUser, request);
         userService.logonBythirdPartUser(wxUser.getNamespaceId(), wxUser.getNamespaceUserType(), wxUser.getNamespaceUserToken(), request, response);
-        
+
         //by dengs,加个communityid参数，加到用户的eh_profiles中,2017.08.28
         String communityId = request.getParameter(COMMUNITY);
         if(wxUser.getId()!=null && communityId!=null){

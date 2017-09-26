@@ -263,6 +263,14 @@ public class ZJContractHandler implements ContractService{
         pv.setVariableValue(zjContract.getPropertyFeeUnit());
         item.setChargingVariables(pv.toString());
         items.add(item);
+
+        ContractChargingItemDTO itemRent = new ContractChargingItemDTO();
+        itemRent.setChargingItemName("租金");
+        PaymentVariable pvRent = new PaymentVariable();
+        pvRent.setVariableName("租金");
+        pvRent.setVariableValue(zjContract.getRent());
+        itemRent.setChargingVariables(pvRent.toString());
+        items.add(itemRent);
         dto.setChargingItems(items);
         if(zjContract.getApartments() != null && zjContract.getApartments().size() > 0) {
             List<BuildingApartmentDTO> apartments = new ArrayList<>();

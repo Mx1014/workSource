@@ -164,6 +164,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 				entity.setErrorDescription("请求失败");
 			}
 		}
+		replaceCommunityNameByMappingRule(entity);
 		//请求成功，返回承租地址，那么创建家庭。
 		AuthorizationThirdPartyRecord record = createFamily(cmd,entity,params,type);
 		//创建工作流
@@ -175,6 +176,19 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		return processGeneralFormDTO(cmd,entity,type,flowCase);
 	}
 
+	private void replaceCommunityNameByMappingRule(ZjgkJsonEntity<List<ZjgkResponse>> entity) {
+		List<ZjgkResponse> list = entity.getResponse();
+		if(entity.isSuccess() && list != null && list.size() > 0){
+			String mappingjson = configProvider.getValue("zj_community_name_mapping","{\"天子骄子北块\":\"天子骄子专家楼\"}");
+			Map<String,String> communityMap = JSONObject.parseObject(mappingjson,new TypeReference<Map<String, String>>(){});
+			for (ZjgkResponse zjgkResponse : list) {
+				String mapingName = communityMap.get(zjgkResponse.getCommunityName());
+				if(mapingName != null){
+					zjgkResponse.setCommunityName(mapingName);
+				}
+			}
+		}
+	}
 	//生成调试对象。
 	private ZjgkJsonEntity<List<ZjgkResponse>> generateBebugEntity(ZjgkJsonEntity<List<ZjgkResponse>> entity) {
 		List<ZjgkResponse> responses = new ArrayList<>();

@@ -207,6 +207,7 @@
         eh_punch_special_days | eh_punch_time_intervals |
             eh_parking_invoice_types | eh_parking_card_types | eh_parking_user_invoices |
         eh_service_alliance_comment_attachments | eh_service_alliance_comments |
+	eh_incubator_applies | eh_incubator_project_types | eh_incubator_apply_attachments |
         </includes>
 
             <!-- All elements that are excluded from your schema
