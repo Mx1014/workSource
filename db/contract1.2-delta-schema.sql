@@ -4,3 +4,4 @@ ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `community_id` BIGINT COMMENT
 ALTER TABLE eh_var_fields ADD COLUMN `field_param` VARCHAR(128);
 
 ALTER TABLE `eh_buildings` ADD INDEX building_name ( `name`, `alias_name`);
+

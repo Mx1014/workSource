@@ -1,5 +1,6 @@
 package com.everhomes.varField;
 
+import com.everhomes.customer.CustomerTalent;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -9,6 +10,19 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.varField.VarFieldStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+
+import com.everhomes.server.schema.tables.*;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
+import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
+import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicators;
+import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
+import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
+import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
+
 import com.everhomes.server.schema.tables.daos.EhVarFieldGroupScopesDao;
 import com.everhomes.server.schema.tables.daos.EhVarFieldItemScopesDao;
 import com.everhomes.server.schema.tables.daos.EhVarFieldScopesDao;
@@ -16,6 +30,7 @@ import com.everhomes.server.schema.tables.pojos.EhVarFieldGroupScopes;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldItemScopes;
 import com.everhomes.server.schema.tables.pojos.EhVarFieldScopes;
 import com.everhomes.server.schema.tables.records.EhVarFieldGroupScopesRecord;
+
 import com.everhomes.server.schema.tables.records.EhVarFieldItemScopesRecord;
 import com.everhomes.server.schema.tables.records.EhVarFieldScopesRecord;
 import com.everhomes.util.ConvertHelper;
@@ -304,6 +319,91 @@ public class FieldProviderImpl implements FieldProvider {
             return null;
         }
         return fields.get(0);
+    }
+
+    /**
+     *
+     *
+     */
+    @Override
+    public void saveFieldGroups(String customerType, Long customerId, List<Object> objects, String simpleName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        switch(simpleName){
+            case "CustomerTalent":
+                EhCustomerTalentsDao dao = new EhCustomerTalentsDao(context.configuration());
+                List<EhCustomerTalents> list = new ArrayList<>();
+                for(int i = 0; i < objects.size(); i ++){
+                    list.add((EhCustomerTalents)objects.get(i));
+                }
+                dao.insert(list);
+                break;
+            case "CustomerTrademark":
+                EhCustomerTrademarksDao dao1 = new EhCustomerTrademarksDao(context.configuration());
+                List<EhCustomerTrademarks> list1 = new ArrayList<>();
+                for(int i = 0; i < objects.size(); i ++){
+                    list1.add((EhCustomerTrademarks)objects.get(i));
+                }
+                dao1.insert(list1);
+                break;
+            case "CustomerApplyProject":
+                EhCustomerApplyProjectsDao dao2 = new EhCustomerApplyProjectsDao(context.configuration());
+                List<EhCustomerApplyProjects> list2 = new ArrayList<>();
+                for(int i = 0; i < objects.size(); i ++){
+                    list2.add((EhCustomerApplyProjects)objects.get(i));
+                }
+                dao2.insert(list2);
+                break;
+            case "CustomerCommercial":
+                EhCustomerCommercialsDao dao3 = new EhCustomerCommercialsDao(context.configuration());
+                List<EhCustomerCommercials> list3 = new ArrayList<>();
+                for(int i = 0; i < objects.size(); i ++){
+                    list3.add((EhCustomerCommercials)objects.get(i));
+                }
+                dao3.insert(list3);
+                break;
+            case "CustomerInvestment":
+                EhCustomerInvestmentsDao dao4 = new EhCustomerInvestmentsDao(context.configuration());
+                List<EhCustomerInvestments> list4 = new ArrayList<>();
+                for(int i = 0; i < objects.size(); i ++){
+                    list4.add((EhCustomerInvestments)objects.get(i));
+                }
+                dao4.insert(list4);
+                break;
+            case "CustomerEconomicIndicator":
+                EhCustomerEconomicIndicatorsDao dao5 = new EhCustomerEconomicIndicatorsDao(context.configuration());
+                List<EhCustomerEconomicIndicators> list5 = new ArrayList<>();
+                for(int i = 0; i < objects.size(); i ++){
+                    list5.add((EhCustomerEconomicIndicators)objects.get(i));
+                }
+                dao5.insert(list5);
+                break;
+            case "EnterpriseCustomer":
+                EhEnterpriseCustomersDao dao6 = new EhEnterpriseCustomersDao(context.configuration());
+                List<EhEnterpriseCustomers> list6 = new ArrayList<>();
+                for(int i = 0; i < objects.size(); i ++){
+                    list6.add((EhEnterpriseCustomers)objects.get(i));
+                }
+                dao6.insert(list6);
+                break;
+            case "CustomerPatent":
+                EhCustomerPatentsDao dao7 = new EhCustomerPatentsDao(context.configuration());
+                List<EhCustomerPatents> list7 = new ArrayList<>();
+                for(int i = 0; i < objects.size(); i ++){
+                    list7.add((EhCustomerPatents)objects.get(i));
+                }
+                dao7.insert(list7);
+                break;
+        }
+    }
+
+    @Override
+    public String findClassNameByGroupDisplayName(String groupDisplayName) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhVarFieldGroups t = Tables.EH_VAR_FIELD_GROUPS.as("t");
+        return context.select(t.NAME)
+                .from(t)
+                .where(t.TITLE.eq(groupDisplayName))
+                .fetchOne(t.NAME);
     }
 
     @Override

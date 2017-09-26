@@ -1,11 +1,14 @@
 package com.everhomes.util.excel;
 
+import com.everhomes.user.UserContact;
+import com.everhomes.user.UserContext;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -16,6 +19,8 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -293,7 +298,7 @@ public class ExcelUtils {
     /**
      * @Title: exportExcel
      * @Description: 导出Excel的方法
-     * @author: evan @ 2014-01-09
+     * @Author from internet
      * @param workbook
      * @param sheetNum (sheet的位置，0表示第一个表格中的第一个sheet)
      * @param sheetTitle  （sheet的名称）
@@ -302,7 +307,7 @@ public class ExcelUtils {
      * @throws Exception
      */
     public void exportExcel(HSSFWorkbook workbook, int sheetNum,
-                            String sheetTitle, String[] headers, List<List<String>> result) throws Exception {
+                            String sheetTitle, String[] headers, List<List<String>> result,String[] mandatory) throws Exception {
         // 生成一个表格
         HSSFSheet sheet = workbook.createSheet();
         workbook.setSheetName(sheetNum, sheetTitle);
@@ -311,46 +316,148 @@ public class ExcelUtils {
         // 生成一个样式
         HSSFCellStyle style = workbook.createCellStyle();
         // 设置这些样式
-//        style.setFillForegroundColor(HSSFColor.PALE_BLUE.index);
+//        style.setFillForegroundColor(HSSFColor.GREEN.index);
 //        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-//        style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-//        style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-//        style.setBorderRight(HSSFCellStyle.BORDER_THIN);
-//        style.setBorderTop(HSSFCellStyle.BORDER_THIN);
-//        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-        // 生成一个字体
+        style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        style.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        style.setBorderTop(HSSFCellStyle.BORDER_THIN);
+        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        // 生成一个内容字体
+        HSSFCellStyle style_content = workbook.createCellStyle();
         HSSFFont font = workbook.createFont();
         font.setColor(HSSFColor.BLACK.index);
         font.setFontHeightInPoints((short) 12);
-//        font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-        // 把字体应用到当前的样式
-        style.setFont(font);
+        style_content.setFont(font);
+        //非必填的标题的样式
+        HSSFFont font2 = workbook.createFont();
+        font2.setColor(HSSFColor.BLACK.index);
+        font2.setFontHeightInPoints((short) 16);
+        font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+        style.setFont(font2);
+        //必填的字体和样式
 
+        HSSFCellStyle style_m = workbook.createCellStyle();
+        // 设置这些样式
+//        style.setFillForegroundColor(HSSFColor.GREEN.index);
+//        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        style_m.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+
+        HSSFFont font4 = workbook.createFont();
+        font4.setColor(HSSFColor.RED.index);
+        font4.setFontHeightInPoints((short) 16);
+        font4.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+
+        style_m.setFont(font4);
         // 指定当单元格内容显示不下时自动换行
         style.setWrapText(true);
+        //产生说明
+        HSSFFont font3 = workbook.createFont();
+        font3.setColor(HSSFColor.BLACK.index);
+        font3.setFontHeightInPoints((short) 18);
+        font3.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+
+        HSSFCellStyle introStyle = workbook.createCellStyle();
+        introStyle.setWrapText(true);
+        introStyle.setAlignment(HorizontalAlignment.LEFT);
+        introStyle.setFillBackgroundColor(HSSFColor.YELLOW.index);
+        introStyle.setFont(font3);
+        CellRangeAddress cra = new CellRangeAddress(0,0,0,11);
+        sheet.addMergedRegion(cra);
+        HSSFRow introRow = sheet.createRow(0);
+        introRow.setHeightInPoints(130);
+        HSSFCell introCell = introRow.createCell(0);
+        introCell.setCellStyle(introStyle);
+        introCell.setCellValue("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
+                "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
+                "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
+                "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
+                "4、红色字段为必填项。");
 
         // 产生表格标题行
-        HSSFRow row = sheet.createRow(2);
+        HSSFRow row = sheet.createRow(1);
+        // 把字体应用到当前的样式,标题为加粗的
+
         for (int i = 0; i < headers.length; i++) {
             HSSFCell cell = row.createCell((short) i);
-            cell.setCellStyle(style);
+            if(mandatory[i].equals("1")){
+                cell.setCellStyle(style_m);
+            }else{
+                cell.setCellStyle(style);
+            }
             HSSFRichTextString text = new HSSFRichTextString(headers[i]);
             cell.setCellValue(text.toString());
         }
+        style.setFont(font);
         // 遍历集合数据，产生数据行
         if (result != null) {
             int index = 1;
             for (List<String> m : result) {
-                row = sheet.createRow(index+2);
+                row = sheet.createRow(index+1);
                 int cellIndex = 0;
                 for (String str : m) {
                     HSSFCell cell = row.createCell((short) cellIndex);
+                    cell.setCellStyle(style_content);
                     cell.setCellValue(str.toString());
                     cellIndex++;
                 }
                 index++;
             }
         }
+    }
+    /**
+     * 描述：根据文件后缀，自适应上传文件的版本
+     * @param inStr,fileName
+     * @return
+     * @throws Exception
+     */
+    public static Workbook getWorkbook(InputStream inStr,String fileName) throws Exception{
+        Workbook wb = null;
+        String fileType = fileName.substring(fileName.lastIndexOf("."));
+        if(".xls".equals(fileType)){
+            wb = new HSSFWorkbook(inStr);  //2003-
+        }else if(".xlsx".equals(fileType)){
+            wb = new XSSFWorkbook(inStr);  //2007+
+        }else{
+            throw new Exception("解析的文件格式有误！");
+        }
+        return wb;
+    }
+
+    /**
+     * 描述：对表格中数值进行格式化
+     * @param cell
+     * @return
+     */
+    public static String getCellValue(Cell cell){
+        String value = null;
+        DecimalFormat df = new DecimalFormat("0");  //格式化number String字符
+        SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd");  //日期格式化
+        DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
+        switch (cell.getCellType()) {
+            case Cell.CELL_TYPE_STRING:
+                value = cell.getRichStringCellValue().getString();
+                break;
+            case Cell.CELL_TYPE_NUMERIC:
+                if("General".equals(cell.getCellStyle().getDataFormatString())){
+                    value = df.format(cell.getNumericCellValue());
+                }else if("m/d/yy".equals(cell.getCellStyle().getDataFormatString())){
+                    value = sdf.format(cell.getDateCellValue());
+                }else{
+                    value = df2.format(cell.getNumericCellValue());
+                }
+                break;
+            case Cell.CELL_TYPE_BOOLEAN:
+                Boolean booleanCellValue = cell.getBooleanCellValue();
+                value = booleanCellValue.toString();
+                break;
+            case Cell.CELL_TYPE_BLANK:
+                value = "";
+                break;
+            default:
+                break;
+        }
+        return value;
     }
 
     public ExcelUtils() {

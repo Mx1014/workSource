@@ -48,8 +48,8 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Override
     public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        dbProvider.execute((TransactionStatus status) -> {
-
+//        this.dbProvider.execute((TransactionStatus status) -> {
+            LOGGER.debug("saveUnion Time1 "+  System.currentTimeMillis());
 
             //已存在（即已分配薪酬组的）的部门集合
             List<Long> old_ids = this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfigures(namespaceId, cmd.getEnterpriseId());
@@ -76,19 +76,6 @@ public class UniongroupServiceImpl implements UniongroupService {
                         //如果有重复的配置项，则删除前一个配置项
                         this.uniongroupConfigureProvider.deleteUniongroupConfigres(old_uc);
                     }
-//                //覆盖去重
-//                if(r.getType().equals(UniongroupTargetType.ORGANIZATION.getCode())){
-//                    //找到配置表中已经被分配薪酬组的 这个部门的 子部门
-//                    Organization org = this.organizationProvider.findOrganizationById(r.getId());
-//                    List<Long> old_atGroup_ids = this.uniongroupConfigureProvider.listOrgCurrentIdsOfUniongroupConfiguresByGroupId(namespaceId, cmd.getEnterpriseId(), cmd.getGroupId());
-//                    List<Organization> old_atGroup_orgs = this.organizationProvider.listOrganizationsByIds(old_atGroup_ids);
-//                    List<Long> under_atGroup_OrgIds = checkUnderOrganizationIdsAtConfigures(org.getPath(), old_atGroup_orgs);
-//                    if(under_atGroup_OrgIds.size() > 0){
-//                        //如果在『同一个groupId』中且有包含的配置项，删除被包含的部门的记录
-//                        this.uniongroupConfigureProvider.deleteUniongroupConfigresByOrgIds(namespaceId, under_atGroup_OrgIds);
-//                    }
-//                }
-
                     UniongroupConfigures uc = new UniongroupConfigures();
                     uc.setNamespaceId(namespaceId);
                     uc.setEnterpriseId(cmd.getEnterpriseId());
@@ -188,8 +175,10 @@ public class UniongroupServiceImpl implements UniongroupService {
                 return null;
             }).collect(Collectors.toList());
 
+            LOGGER.debug("saveUnion Time2 "+  System.currentTimeMillis());
+
             //4.保存
-            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
+//            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
 
                 //--------------------------1.保存配置表--------------------------
                 if (configureList.size() > 0) {
@@ -201,21 +190,29 @@ public class UniongroupServiceImpl implements UniongroupService {
                 }
                 if (unionDetailsList.size() > 0) {
                     //--------------------------2.保存关系表--------------------------
-                    this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(new ArrayList(detailIds));
+
+                    List detailIdsArray =  detailIds.stream().map(r->{
+                        return r.longValue();
+                    }).collect(Collectors.toList());
+
+                    this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(detailIdsArray);
+                    LOGGER.debug("saveUnion Time3 "+  System.currentTimeMillis());
+                    LOGGER.debug("deleteUniongroupMemberDetailsByDetailIds size :" + detailIdsArray.size());
                     //后保存
                     this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(unionDetailsList);
                 }
 
-                return null;
-            });
-            return null;
-        });
+//                return null;
+//            });
+//            return null;
+//        });
 
-
+        LOGGER.debug("saveUnion Time4 "+  System.currentTimeMillis());
         //5.同步搜索引擎
         this.uniongroupSearcher.deleteAll();
         this.uniongroupSearcher.syncUniongroupDetailsAtOrg(checkOrganization(cmd.getEnterpriseId()), UniongroupType.SALARYGROUP.getCode());
         this.uniongroupSearcher.refresh();
+        LOGGER.debug("saveUnion Time5 "+  System.currentTimeMillis());
     }
 
     @Override
