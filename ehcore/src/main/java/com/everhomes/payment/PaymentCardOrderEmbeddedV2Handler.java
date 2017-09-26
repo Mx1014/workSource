@@ -3,7 +3,7 @@ package com.everhomes.payment;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.order.PaymentCallBackHandler;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.payment.CardOrderStatus;
 import com.everhomes.rest.payment.CardRechargeStatus;
@@ -26,6 +26,8 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
 
     @Autowired
     private PaymentCardProvider paymentCardProvider;
+
+
 
     @Override
     public void paySuccess(OrderPaymentNotificationCommand cmd) {
@@ -52,7 +54,7 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
     }
 
     @Override
-    public void payFail(OrderPaymentNotificationCommand cmd) {
+     public void payFail(OrderPaymentNotificationCommand cmd) {
         this.checkOrderNoIsNull(cmd.getOrderId());
         PaymentCardRechargeOrder order = checkOrder(cmd.getOrderId());
         Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
@@ -62,6 +64,16 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
         order.setPaidTime(payTimeStamp);
         order.setPaidType(String.valueOf(cmd.getPaymentType()));
         paymentCardProvider.updatePaymentCardRechargeOrder(order);
+    }
+
+    @Override
+    public void refundSuccess(OrderPaymentNotificationCommand cmd) {
+
+    }
+
+    @Override
+    public void refundFail(OrderPaymentNotificationCommand cmd) {
+
     }
 
     private PaymentCardRechargeOrder checkOrder(Long orderId) {
@@ -93,4 +105,6 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
                     "orderNo is null or empty.");
         }
     }
+
+
 }
