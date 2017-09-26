@@ -34,7 +34,9 @@ public interface UserProvider {
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
     UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerId, byte identifierType);
-    
+
+    UserIdentifier findIdentifierByOwnerAndTypeAndClaimStatus(long ownerUid, byte identifierType, byte claimStatus);
+
     void createUserGroup(UserGroup userGroup);
     void updateUserGroup(UserGroup userGroup);
     void deleteUserGroup(UserGroup userGroup);

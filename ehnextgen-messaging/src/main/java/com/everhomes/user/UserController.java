@@ -12,6 +12,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.device.DeviceProvider;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
@@ -29,10 +30,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
-import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
-import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
-import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
-import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
+import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.scene.SceneService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -1302,6 +1300,65 @@ public class UserController extends ControllerBase {
 	@RestReturn(value = TargetDTO.class)
 	public RestResponse findTargetByNameAndAddress(FindTargetByNameAndAddressCommand cmd) {
 		RestResponse resp = new RestResponse(userService.findTargetByNameAndAddress(cmd.getContractNum(),cmd.getTargetName(),cmd.getOwnerId(),cmd.getTel(),cmd.getOwnerType(),cmd.getTargetType()));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+/**
+	 * <b>URL: /user/verificationCodeForBindPhone</b>
+	 * <p>发送验证码</p>
+	 */
+	@RequestMapping("verificationCodeForBindPhone")
+	@RestReturn(value = VerificationCodeForBindPhoneResponse.class)
+	public RestResponse verificationCodeForBindPhone(@Valid VerificationCodeForBindPhoneCommand cmd) {
+		VerificationCodeForBindPhoneResponse response = userService.verificationCodeForBindPhone(cmd);
+		RestResponse resp = new RestResponse(response);
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+
+
+	/**
+	 * <b>URL: /user/bindPhone</b>
+	 * <p>验证并登录</p>
+	 * @return
+	 */
+	@RequestMapping("bindPhone")
+	@RestReturn(String.class)
+	public RestResponse bindPhone(@Valid BindPhoneCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+		UserLogin login = this.userService.bindPhone(cmd);
+		if(login != null){
+
+			LoginToken loginToken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId());
+			String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
+			
+			//微信公众号的accessToken过期时间是7200秒，需要设置cookie小于7200。
+			//防止用户在coreserver处于登录状态而accessToken已过期，重新登录之后会刷新accessToken   add by yanjun 20170906
+			WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response, 7000);
+
+		}
+
+
+//		LogonCommandResponse cmdResponse = new LogonCommandResponse(login.getUserId(), tokenString);
+//		cmdResponse.setAccessPoints(listAllBorderAccessPoints());
+//		cmdResponse.setContentServer(contentServerService.getContentServer());
+
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
+	/**
+	 * <b>URL: /user/checkVerifyCodeAndResetPassword</b>
+	 * <p>校验验证码并重置密码</p>
+	 * @return  OK
+	 */
+	@RequestMapping(value = "checkVerifyCodeAndResetPassword")
+	@RestReturn(String.class)
+	public RestResponse checkVerifyCodeAndResetPassword(@Valid CheckVerifyCodeAndResetPasswordCommand cmd) {
+		userService.checkVerifyCodeAndResetPassword(cmd);
+		RestResponse resp = new RestResponse();
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");
 		return resp;

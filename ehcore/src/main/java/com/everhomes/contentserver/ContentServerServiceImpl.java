@@ -1,5 +1,6 @@
 package com.everhomes.contentserver;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bus.BusBridgeProvider;
@@ -582,8 +583,8 @@ public class ContentServerServiceImpl implements ContentServerService {
     public String newUploadId() {
         for(int i = 0; i < 5; i++) {
             String uuid = UUID.randomUUID().toString();
-            uuid = uuid.replace("-", "");
-            boolean ok = checkAndSetUploadId("evhUploader-" + uuid);
+            uuid = "evhUploader-" + uuid.replace("-", "");
+            boolean ok = checkAndSetUploadId(uuid);
             if(ok) {
                 return uuid;    
             }
