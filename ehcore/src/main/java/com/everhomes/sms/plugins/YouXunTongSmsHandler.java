@@ -155,28 +155,37 @@ public class YouXunTongSmsHandler implements SmsHandler {
     private List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                       String templateLocale, String content, RspMessage rspMessage) {
         List<SmsLog> smsLogs = new ArrayList<>();
-        if (rspMessage != null) {
-            Result result = (Result) StringHelper.fromJsonString(rspMessage.getMessage(), Result.class);
-            for (String phoneNumber : phoneNumbers) {
-                SmsLog log = new SmsLog();
-                log.setCreateTime(new Timestamp(System.currentTimeMillis()));
-                log.setNamespaceId(namespaceId);
-                log.setScope(templateScope);
-                log.setCode(templateId);
-                log.setLocale(templateLocale);
-                log.setMobile(phoneNumber);
-                log.setResult(rspMessage.getMessage());
-                log.setHandler(YOU_XUN_TONG_HANDLER_NAME);
-                log.setText(content);
-                log.setSmsId(result.msgid);
+        Result res = new Result();
+        String result = "failed";
 
-                if ("0".equals(result.result)) {
-                    log.setStatus(SmsLogStatus.SEND_SUCCESS.getCode());
-                } else {
-                    log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
-                }
-                smsLogs.add(log);
+        if (rspMessage != null) {
+            try {
+                result = rspMessage.getMessage();
+                res = (Result) StringHelper.fromJsonString(rspMessage.getMessage(), Result.class);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+        }
+
+        for (String phoneNumber : phoneNumbers) {
+            SmsLog log = new SmsLog();
+            log.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            log.setNamespaceId(namespaceId);
+            log.setScope(templateScope);
+            log.setCode(templateId);
+            log.setLocale(templateLocale);
+            log.setMobile(phoneNumber);
+            log.setResult(result);
+            log.setHandler(YOU_XUN_TONG_HANDLER_NAME);
+            log.setText(content);
+            log.setSmsId(res.msgid);
+
+            if ("0".equals(res.result)) {
+                log.setStatus(SmsLogStatus.SEND_SUCCESS.getCode());
+            } else {
+                log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
+            }
+            smsLogs.add(log);
         }
         return smsLogs;
     }
@@ -210,13 +219,13 @@ public class YouXunTongSmsHandler implements SmsHandler {
     }
 
     private static class Report {
-        String msgid;
-        String status;
+        String msgid = "";
+        String status = "";
     }
 
     private static class Result {
-        String msgid;
-        String result;
+        String msgid = "";
+        String result = "";
         // String desc;
         // String blacklist;
     }
