@@ -242,6 +242,12 @@ public class CustomerServiceImpl implements CustomerService {
         	String geohash  = GeoHashUtils.encode(customer.getLatitude(), customer.getLongitude());
         	customer.setGeohash(geohash);
         }
+        if(null != customer && customer.getTrackingUid() != -1){
+	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(customer.getTrackingUid());
+	    	if(null != detail && null != detail.getContactName()){
+	    		customer.setTrackingName(detail.getContactName());
+	    	}
+        }
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
         
         //企业客户新增成功,保存客户事件
@@ -264,6 +270,16 @@ public class CustomerServiceImpl implements CustomerService {
         ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
         if(levelItem != null) {
             dto.setLevelItemName(levelItem.getItemDisplayName());
+        }
+        
+        if(dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
+        	dto.setTrackingName(dto.getTrackingName());
+        }
+        if(null != dto.getPropertyType()){
+        	ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), dto.getPropertyType());
+        	if(null != propertyTypeItem){
+        		dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
+        	}
         }
 
         return dto;
@@ -303,6 +319,12 @@ public class CustomerServiceImpl implements CustomerService {
         if(null != updateCustomer.getLongitude() && null != updateCustomer.getLatitude()){
         	String geohash  = GeoHashUtils.encode(updateCustomer.getLatitude(), updateCustomer.getLongitude());
         	updateCustomer.setGeohash(geohash);
+        }
+        if(null != updateCustomer && updateCustomer.getTrackingUid() != -1){
+	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(updateCustomer.getTrackingUid());
+	    	if(null != detail && null != detail.getContactName()){
+	    		updateCustomer.setTrackingName(detail.getContactName());
+	    	}
         }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         enterpriseCustomerSearcher.feedDoc(updateCustomer);
@@ -1628,7 +1650,7 @@ public class CustomerServiceImpl implements CustomerService {
 	public void giveUpEnterpriseCustomer(GiveUpEnterpriseCustomerCommand cmd) {
 		EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
 		//查看当前用户是否和跟进人一致
-		if(null == customer.getTrackingUid() || customer.getTrackingUid() != UserContext.currentUserId()){
+		if(null == customer.getTrackingUid() || !(customer.getTrackingUid().toString()).equals(UserContext.currentUserId()== null ? "" : UserContext.currentUserId().toString())){
 			LOGGER.error("enterprise customer do not contains trackingUid or not the same uid. id: {}, customer: {} ,current:{}", cmd.getId(), customer,UserContext.currentUserId());
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NOT_EXIST,
                         "enterprise customer do not contains trackingUid or not the same uid");

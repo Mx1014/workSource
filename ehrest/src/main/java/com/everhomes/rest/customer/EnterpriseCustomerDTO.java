@@ -145,6 +145,7 @@ public class EnterpriseCustomerDTO {
     private Double propertyArea;
     private Double propertyUnitPrice;
     private Long propertyType;
+    private String  propertyTypeName;
     private Double longitude;
     private Double latitude;
 
@@ -691,5 +692,14 @@ public class EnterpriseCustomerDTO {
 	public void setTrackingName(String trackingName) {
 		this.trackingName = trackingName;
 	}
+
+	public String getPropertyTypeName() {
+		return propertyTypeName;
+	}
+
+	public void setPropertyTypeName(String propertyTypeName) {
+		this.propertyTypeName = propertyTypeName;
+	}
+	
     
 }

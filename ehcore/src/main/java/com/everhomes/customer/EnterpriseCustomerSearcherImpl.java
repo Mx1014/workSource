@@ -104,6 +104,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("levelItemId", customer.getLevelItemId());
             builder.field("status", customer.getStatus());
             builder.field("trackingUid",customer.getTrackingUid());
+            builder.field("trackingName",customer.getTrackingName());
 
             builder.endObject();
             return builder;
@@ -148,11 +149,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                     .field("contactName", 1.2f)
                     .field("contactAddress", 1.2f)
                     .field("contactMobile", 1.0f)
-                    .field("trackingName" , 1.2f);
+                    .field("trackingName" , 1.0f);
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("name").addHighlightedField("contactName").addHighlightedField("contactAddress").addHighlightedField("contactMobile");
+            builder.addHighlightedField("name").addHighlightedField("contactName").addHighlightedField("contactAddress").addHighlightedField("contactMobile")
+            		.addHighlightedField("trackingName");
         }
 
         FilterBuilder fb = null;
@@ -167,10 +169,6 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getLevelId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("levelItemId", cmd.getLevelId()));
         
-        //查询制定跟进人客户
-        if(null != cmd.getTrackingUid()){
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("trackingUid", cmd.getTrackingUid()));
-        }
         //查询全部客户、我的客户、公共客户
         if(null != cmd.getType()){
         	if(2 == cmd.getType()){
@@ -220,11 +218,14 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 if(levelItem != null) {
                     dto.setLevelItemName(levelItem.getItemDisplayName());
                 }
-                if(dto.getTrackingUid() != null) {
-                	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
-                	if(null != detail && null != detail.getContactName()){
-                		dto.setTrackingName(detail.getContactName());
-                	}        	
+                if(dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
+                	dto.setTrackingName(dto.getTrackingName());
+                }
+                if(null != dto.getPropertyType()){
+                	ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), dto.getPropertyType());
+                	if(null != propertyTypeItem){
+                		dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
+                	}
                 }
                 dtos.add(dto);
             });
