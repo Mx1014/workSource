@@ -2496,7 +2496,7 @@ public class PunchServiceImpl implements PunchService {
 //			}
 			processPunchListCount(dayLogList, statistic);
 			//对于2017年9月的数据特殊处理 --- 兼容之前的
-			if(startCalendar.before(new java.sql.Date(2017,9,31))){
+			if(startCalendar.before(new java.sql.Date(2017,10,1))){
 				statistic.setWorkDayCount((int) (statistic.getExceptionDayCount()+statistic.getWorkCount()));
 			}
 	        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/"+ownerId + "%", null);
