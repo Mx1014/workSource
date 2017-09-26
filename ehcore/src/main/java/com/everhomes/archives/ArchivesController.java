@@ -362,6 +362,17 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /archives/exportArchivesEmployeesTemplate</b>
+     * <p>13-2.导出人事档案导入模板</p>
+     */
+    @RequestMapping("exportArchivesEmployeesTemplate")
+    @RestReturn(value = String.class)
+    public RestResponse exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd, HttpServletResponse httpResponse){
+        archivesService.exportArchivesEmployeesTemplate(cmd,httpResponse);
+        return new RestResponse();
+    }
+
+    /**
      * <b>URL: /archives/remindArchivesEmployee</b>
      * <p>14.为员工做提醒设置</p>
      */

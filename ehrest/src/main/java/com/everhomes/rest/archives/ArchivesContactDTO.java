@@ -52,6 +52,8 @@ public class ArchivesContactDTO {
 
     private String stick;
 
+    private Byte visibleFlag;
+
 
     //  export
     private String genderString;
@@ -165,6 +167,14 @@ public class ArchivesContactDTO {
 
     public void setStick(String stick) {
         this.stick = stick;
+    }
+
+    public Byte getVisibleFlag() {
+        return visibleFlag;
+    }
+
+    public void setVisibleFlag(Byte visibleFlag) {
+        this.visibleFlag = visibleFlag;
     }
 
     public String getGenderString() {

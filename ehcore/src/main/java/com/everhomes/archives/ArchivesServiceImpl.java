@@ -282,6 +282,10 @@ public class ArchivesServiceImpl implements ArchivesService {
             for(OrganizationDTO : positions)
         }*/
 
+        //	设置隐私保护值
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(dto.getContactToken(),dto.getOrganizationId());
+        dto.setVisibleFlag(member.getVisibleFlag());
+
         //  设置置顶
         dto.setStick("1");
 
@@ -312,6 +316,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             dto.setContactToken(r.getContactToken());
             dto.setContactShortToken(r.getContactShortToken());
             dto.setWorkEmail(r.getWorkEmail());
+            dto.setVisibleFlag(r.getVisibleFlag());
             dto.setStick("0");
             contacts.add(dto);
         });
@@ -1609,6 +1614,11 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd, HttpServletResponse httpResponse) {
+
+    }
+
+    @Override
+    public void exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd, HttpServletResponse httpResponse) {
         IdentifyArchivesFormCommand formCommand = new IdentifyArchivesFormCommand();
         formCommand.setOrganizationId(cmd.getOrganizationId());
         ArchivesFromsDTO dto = identifyArchivesForm(formCommand);
@@ -1668,6 +1678,4 @@ public class ArchivesServiceImpl implements ArchivesService {
     public void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd) {
 
     }
-
-
 }
