@@ -63,6 +63,7 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -5428,6 +5429,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgLog.setContactDescription(m.getContactDescription());
                 this.organizationProvider.createOrganizationMemberLog(orgLog);
 
+                if(OrganizationMemberGroupType.fromCode(m.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+                    List<OrganizationMember> managers = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(m.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(), null);
+
+                    //删除人员是管理员的时候 需要检查公司是否还有管理员，没有的话需要变更公司的flag
+                    if(managers.size() == 0){
+                        Organization o = organizationProvider.findOrganizationById(m.getOrganizationId());
+                        if(null != o) {
+                            o.setSetAdminFlag(TrueOrFalseFlag.FALSE.getCode());
+                            organizationProvider.updateOrganization(o);
+                            organizationSearcher.feedDoc(o);
+                        }
+                    }
+                }
+
                 Integer namespaceId = UserContext.getCurrentNamespaceId();
                 if (OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER) {
                     //Remove door auth, by Janon 2016-12-15
@@ -5470,6 +5485,20 @@ public class OrganizationServiceImpl implements OrganizationService {
         orgLog.setOperatorUid(UserContext.current().getUser().getId());
         orgLog.setContactDescription(member.getContactDescription());
         this.organizationProvider.createOrganizationMemberLog(orgLog);
+
+        if(OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+            List<OrganizationMember> managers = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(member.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(), null);
+
+            //添加人员是管理员的时候 需要检查公司是否还有管理员，有的话需要变更公司的flag
+            if(managers.size() > 0){
+                Organization o = organizationProvider.findOrganizationById(member.getOrganizationId());
+                if(null != o){
+                    o.setSetAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+                    organizationProvider.updateOrganization(o);
+                    organizationSearcher.feedDoc(o);
+                }
+            }
+        }
 
         //自动加入公司
         this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
