@@ -777,7 +777,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				Condition conditionOR = DSL.trueCondition();
 				List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
 				for (OrganizationCommunity orgcommunity : communityList) {
-					conditionOR = conditionOR.and(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+orgcommunity.getCommunityId()+"%"));
+					conditionOR = conditionOR.and(Tables.EH_SERVICE_ALLIANCES.RANGE.contains(orgcommunity.getCommunityId()+""));
 				}
 				condition.or(conditionOR);
 			}
