@@ -169,4 +169,6 @@ public interface VideoConfService {
 	GetVideoConfHelpUrlResponse getVideoConfHelpUrl(); 
 	PreOrderDTO updateConfAccountPeriodV2(UpdateConfAccountPeriodV2Command cmd);
 	PreOrderDTO createConfAccountOrderOnlineV2(CreateConfAccountOrderOnlineV2Command cmd);
+	ConfOrders onlinePayBillSuccess(OnlinePayBillCommand cmd);
+	ConfOrders onlinePayBillFail(OnlinePayBillCommand cmd);
 }

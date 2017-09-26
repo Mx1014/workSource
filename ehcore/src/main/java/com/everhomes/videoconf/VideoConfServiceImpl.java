@@ -2139,7 +2139,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	}
 
-	private ConfOrders onlinePayBillFail(OnlinePayBillCommand cmd) {
+	@Override
+	public ConfOrders onlinePayBillFail(OnlinePayBillCommand cmd) {
 
 		if(LOGGER.isDebugEnabled())
 			LOGGER.error("confPayBillFail");
@@ -2155,13 +2156,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 		return order;
 	}
-
-	private ConfOrders onlinePayBillSuccess(OnlinePayBillCommand cmd) {
+	@Override
+	public ConfOrders onlinePayBillSuccess(OnlinePayBillCommand cmd) {
 
 		if(LOGGER.isDebugEnabled())
 			LOGGER.error("confPayBillSuccess");
 		this.checkOrderNoIsNull(cmd.getOrderNo());
-		this.checkVendorTypeIsNull(cmd.getVendorType());
+//		this.checkVendorTypeIsNull(cmd.getVendorType());
 		this.checkPayAmountIsNull(cmd.getPayAmount());
 
 		Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
@@ -2170,7 +2171,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		Long payTime = System.currentTimeMillis();
 		Timestamp payTimeStamp = new Timestamp(payTime);
 
-		this.checkVendorTypeFormat(cmd.getVendorType());
+//		this.checkVendorTypeFormat(cmd.getVendorType());
 		this.checkPayAmount(order.getAmount(), new BigDecimal(cmd.getPayAmount()));
 
 		if(order.getStatus().byteValue() == PayStatus.WAITING_FOR_PAY.getCode()) {
