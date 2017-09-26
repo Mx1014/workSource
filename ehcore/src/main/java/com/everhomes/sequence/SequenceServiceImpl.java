@@ -168,6 +168,7 @@ import com.everhomes.server.schema.tables.pojos.EhGroupSettings;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhHotTags;
 import com.everhomes.server.schema.tables.pojos.EhImportFileTasks;
+import com.everhomes.server.schema.tables.pojos.EhIncubatorApplies;
 import com.everhomes.server.schema.tables.pojos.EhItemServiceCategries;
 import com.everhomes.server.schema.tables.pojos.EhJournalConfigs;
 import com.everhomes.server.schema.tables.pojos.EhJournals;
@@ -319,6 +320,7 @@ import com.everhomes.server.schema.tables.pojos.EhQuestionnaireOptions;
 import com.everhomes.server.schema.tables.pojos.EhQuestionnaireQuestions;
 import com.everhomes.server.schema.tables.pojos.EhQuestionnaires;
 import com.everhomes.server.schema.tables.pojos.EhRechargeInfo;
+import com.everhomes.server.schema.tables.pojos.EhRegions;
 import com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments;
 import com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap;
 import com.everhomes.server.schema.tables.pojos.EhRentalBills;
@@ -455,6 +457,7 @@ import com.everhomes.server.schema.tables.pojos.EhWarehouseUnits;
 import com.everhomes.server.schema.tables.pojos.EhWarehouses;
 import com.everhomes.server.schema.tables.pojos.EhWarningContacts;
 import com.everhomes.server.schema.tables.pojos.EhWarningSettings;
+import com.everhomes.server.schema.tables.pojos.EhWebMenuScopes;
 import com.everhomes.server.schema.tables.pojos.EhWebMenus;
 import com.everhomes.server.schema.tables.pojos.EhWifiSettings;
 import com.everhomes.server.schema.tables.pojos.EhYellowPageAttachments;
@@ -2178,6 +2181,10 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_EXPRESS_COMPANY_BUSINESSES.ID.max()).from(Tables.EH_EXPRESS_COMPANY_BUSINESSES).fetchOne().value1();
         });
         
+        syncTableSequence(null, EhIncubatorApplies.class, Tables.EH_INCUBATOR_APPLIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_INCUBATOR_APPLIES.ID.max()).from(Tables.EH_INCUBATOR_APPLIES).fetchOne().value1();
+        });
+
         syncTableSequence(null, EhExpressHotlines.class, Tables.EH_EXPRESS_HOTLINES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EXPRESS_HOTLINES.ID.max()).from(Tables.EH_EXPRESS_HOTLINES).fetchOne().value1();
         });
@@ -2212,6 +2219,15 @@ public class SequenceServiceImpl implements SequenceService {
         	
         syncTableSequence(null, EhServiceAllianceComments.class, Tables.EH_SERVICE_ALLIANCE_COMMENTS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENTS).fetchOne().value1();
+        });
+
+
+        syncTableSequence(null, EhRegions.class, Tables.EH_REGIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_REGIONS.ID.max()).from(Tables.EH_REGIONS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhWebMenuScopes.class, Tables.EH_WEB_MENU_SCOPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WEB_MENU_SCOPES.ID.max()).from(Tables.EH_WEB_MENU_SCOPES).fetchOne().value1();
         });
 
     }

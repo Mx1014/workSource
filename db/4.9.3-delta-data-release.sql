@@ -362,3 +362,39 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 -- 短信供应商配置  add by xq.tian  2017/08/30
 UPDATE `eh_configurations` SET `value` = 'YZX,YouXunTong' WHERE `name` = 'sms.handler.type' AND `namespace_id` = 0;
+
+-- 企业统一信用代码校验 add by xiongying 20170926
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '900026', 'zh_CN', '统一社会信用代码已存在');
+
+
+
+-- merge from incubator-1.0 成都孵化器 start  by yanjun
+
+-- 微信绑定手机页面url   add by yanjun 20170901
+SET @eh_configurations_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES((@eh_configurations_id := @eh_configurations_id + 1),'wx.bind.phone.url','/service-hub/build/#/register','微信用户绑定手机页面_默认','0',NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES((@eh_configurations_id := @eh_configurations_id + 1),'wx.bind.phone.url','/service-hub/build/#/register','微信用户绑定手机页面_成都孵化器','999964',NULL);
+
+-- merge from incubator-1.0 成都孵化器 end by yanjun
+
+-- 科兴的论坛 2.1 add by xq.tian 2017/09/26
+SET @max_id = (SELECT max(id) FROM `eh_launch_pad_layouts`);
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`)
+VALUES ((@max_id := @max_id + 1), 999983, 'ForumLayout', '{"versionCode":"2017071201","versionName":"4.7.3","layoutName":"ForumLayout","displayName":"论坛","groups":[{"groupName":"","widget":"Tab","instanceConfig":{"itemGroup":"TabGroup"},"style":"1","defaultOrder":1,"separatorFlag":0,"separatorHeight":0}]}', 2017071201, 2017071201, 2, NOW(), 'park_tourist', 0, 0, 0);
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`)
+VALUES ((@max_id := @max_id + 1), 999983, 'ForumLayout', '{"versionCode":"2017071201","versionName":"4.7.3","layoutName":"ForumLayout","displayName":"论坛","groups":[{"groupName":"","widget":"Tab","instanceConfig":{"itemGroup":"TabGroup"},"style":"1","defaultOrder":1,"separatorFlag":0,"separatorHeight":0}]}', 2017071201, 2017071201, 2, NOW(), 'pm_admin', 0, 0, 0);
+
+SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'DISCOVER', '发现', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 62, '', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, NULL, 0, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'DISCOVER', '发现', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 62, '', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 0, NULL, NULL, 0, NULL);
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'TRD_VIDEO', '视频', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 14, '{"url":"https://weishang.movmovie.com/video/zz-zone.html","declareFlag": "1"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, NULL, 0, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'TRD_VIDEO', '视频', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 14, '{"url":"https://weishang.movmovie.com/video/zz-zone.html","declareFlag": "1"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 0, NULL, NULL, 0, NULL);
+
+SET @apps_id = IFNULL((SELECT MAX(id) FROM `eh_apps`), 1);
+INSERT INTO `eh_apps` (`creator_uid`, `app_key`, `secret_key`, `name`, `description`, `status`, `create_time`, `update_uid`, `update_time`)
+VALUES ((@apps_id := @apps_id + 1), '466dd353-bdd8-4764-9315-56e6e7151f06', 'KemccuJycjKbnYnBUIzQLU0LNB5S8aDpeMNIT0mxKVFGtz8pKj83spLELs1y49mAY89hzGqVdODsgiyTaKveig==', 'kexing.qipai', 'kexing qipai app', 1, NOW(), NULL, NULL);

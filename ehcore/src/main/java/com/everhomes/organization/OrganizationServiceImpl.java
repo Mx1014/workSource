@@ -1062,13 +1062,32 @@ public class OrganizationServiceImpl implements OrganizationService {
         return phoneSet;
     }
 
+    private void checkUnifiedSocialCreditCode(String unifiedSocialCreditCode, Integer namespaceId, Long organizationId) {
+        List<Organization> organizations =  organizationProvider.findNamespaceUnifiedSocialCreditCode(unifiedSocialCreditCode, namespaceId);
+        if(organizations != null && organizations.size() > 0) {
+            if(organizationId != null) {
+                for(Organization org : organizations) {
+                    if(organizationId.equals(org.getId())) {
+                        return;
+                    }
+                }
+            }
+            LOGGER.error("unifiedSocialCreditCode:{} already exist in namespace:{}", unifiedSocialCreditCode, namespaceId);
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_UNIFIEDSOCIALCREDITCODE_EXIST,
+                    "unifiedSocialCreditCode already exist.");
+        }
+
+    }
+
     @Override
     public OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd) {
-
         User user = UserContext.current().getUser();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
+        if(org.apache.commons.lang.StringUtils.isNotBlank(cmd.getUnifiedSocialCreditCode())) {
+            checkUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode(), namespaceId, null);
+        }
         Organization organization = new Organization();
 
         dbProvider.execute((TransactionStatus status) -> {
@@ -1243,7 +1262,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         //先判断，后台管理员才能创建。状态直接设为正常
         Organization organization = checkOrganization(cmd.getId());
         User user = UserContext.current().getUser();
-
+        if(org.apache.commons.lang.StringUtils.isNotBlank(cmd.getUnifiedSocialCreditCode())) {
+            checkUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode(), cmd.getNamespaceId(), cmd.getId());
+        }
         dbProvider.execute((TransactionStatus status) -> {
             organization.setId(cmd.getId());
             organization.setName(cmd.getName());

@@ -588,7 +588,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
 	@Override
-	public List<ActivityRoster> findRostersByUid(Long uid, CrossShardListingLocator locator, int count) {
+	public List<ActivityRoster> findRostersByUid(Long uid, CrossShardListingLocator locator, int count, Byte rosterStatus) {
 		List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
 		
         if (locator.getShardIterator() == null) {
@@ -603,7 +603,11 @@ public class ActivityProviderImpl implements ActivityProivider {
                 query.addConditions(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.ge(new Timestamp(locator.getAnchor())));
             
             query.addConditions(Tables.EH_ACTIVITY_ROSTER.UID.eq(uid));
-            
+
+            if(rosterStatus != null){
+                query.addConditions(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(rosterStatus.byteValue()));
+            }
+
             query.addOrderBy(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.asc());
             query.addLimit(count - rosters.size());
 
