@@ -365,3 +365,14 @@ UPDATE `eh_configurations` SET `value` = 'YZX,YouXunTong' WHERE `name` = 'sms.ha
 
 -- 企业统一信用代码校验 add by xiongying 20170926
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '900026', 'zh_CN', '统一社会信用代码已存在');
+
+
+
+-- merge from incubator-1.0 成都孵化器 start  by yanjun
+
+-- 微信绑定手机页面url   add by yanjun 20170901
+SET @eh_configurations_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES((@eh_configurations_id := @eh_configurations_id + 1),'wx.bind.phone.url','/service-hub/build/#/register','微信用户绑定手机页面_默认','0',NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES((@eh_configurations_id := @eh_configurations_id + 1),'wx.bind.phone.url','/service-hub/build/#/register','微信用户绑定手机页面_成都孵化器','999964',NULL);
+
+-- merge from incubator-1.0 成都孵化器 end by yanjun
