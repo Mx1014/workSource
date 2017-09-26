@@ -316,6 +316,8 @@ public class WXAuthController {// extends ControllerBase
         }
         UserIdentifier identifier = userService.getUserIdentifier(user.getId());
         if( identifier == null || identifier.getIdentifierToken() == null){
+
+            LOGGER.info("checkUserIdentifier fail user={},identifier={}", StringHelper.toJsonString(user), StringHelper.toJsonString(identifier));
             String homeUrl = configurationProvider.getValue(namespaceId, "home.url", "");
             String bindPhoneUrl = configurationProvider.getValue(namespaceId, WeChatConstant.WX_BIND_PHONE_URL, "");
             LOGGER.info("checkUserIdentifier fail redirect to bind phone Url, homeUrl={}, url={}", homeUrl, bindPhoneUrl);
