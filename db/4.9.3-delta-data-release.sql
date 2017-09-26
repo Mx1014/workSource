@@ -362,3 +362,6 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 -- 短信供应商配置  add by xq.tian  2017/08/30
 UPDATE `eh_configurations` SET `value` = 'YZX,YouXunTong' WHERE `name` = 'sms.handler.type' AND `namespace_id` = 0;
+
+-- 企业统一信用代码校验 add by xiongying 20170926
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '900026', 'zh_CN', '统一社会信用代码已存在');

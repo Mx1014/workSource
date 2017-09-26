@@ -5396,4 +5396,24 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.and(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID.eq(ownerId)).execute();
  
 	}
+
+	@Override
+	public List<Organization> findNamespaceUnifiedSocialCreditCode(String unifiedSocialCreditCode, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizations.class));
+
+		List<Organization> result = new ArrayList<Organization>();
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.UNIFIED_SOCIAL_CREDIT_CODE.eq(unifiedSocialCreditCode));
+
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Organization.class));
+			return null;
+		});
+
+		return result;
+	}
 }

@@ -489,4 +489,6 @@ public interface OrganizationProvider {
 
 	List<OrganizationMember> listOrganizationMembersByOrgIdAndMemberGroup(
 			Long orgId, String memberGroup, Long userId);
+
+	List<Organization> findNamespaceUnifiedSocialCreditCode(String unifiedSocialCreditCode, Integer namespaceId);
 }
