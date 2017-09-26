@@ -147,7 +147,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                     .field("name", 1.5f)
                     .field("contactName", 1.2f)
                     .field("contactAddress", 1.2f)
-                    .field("contactMobile", 1.0f);
+                    .field("contactMobile", 1.0f)
+                    .field("trackingName" , 1.2f);
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);

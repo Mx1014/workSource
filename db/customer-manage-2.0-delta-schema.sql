@@ -71,8 +71,9 @@ CREATE TABLE `eh_customer_trackings` (
 
 
 ALTER TABLE `eh_enterprise_customers`
-ADD COLUMN `tracking_uid`  BIGINT  NULL COMMENT '跟进人uid' AFTER `update_time`,
-ADD COLUMN `property_area`  DOUBLE NULL COMMENT '资产面积' AFTER `tracking_uid`,
+ADD COLUMN `tracking_uid`  BIGINT  NULL DEFAULT -1 COMMENT '跟进人uid' AFTER `update_time`,
+ADD COLUMN `tracking_name`   VARCHAR(32) NULL COMMENT '跟进人姓名' AFTER `tracking_uid`,
+ADD COLUMN `property_area`  DOUBLE NULL COMMENT '资产面积' AFTER `tracking_name`,
 ADD COLUMN `property_unit_price`  DOUBLE NULL COMMENT '资产单价' AFTER `property_area`,
 ADD COLUMN `property_type`  BIGINT NULL COMMENT '资产类型' AFTER `property_unit_price`,
 ADD COLUMN `longitude`  DOUBLE NULL COMMENT '经度' AFTER `property_type`,
