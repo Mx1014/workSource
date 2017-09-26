@@ -109,10 +109,11 @@ public class SmsChannel {
                 mut.put(header.getName(), header.getValue());
             }
             return new RspMessage(result, rsp.getStatusLine().getStatusCode(), mut);
-        } catch (IOException e) {
+        } catch (Throwable e) {
             logger.error("send sms message error", e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "send sms message error");
+            // throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            //         "send sms message error");
+            return new RspMessage(e.getMessage(), -1, null);
         } finally {
             try {
                 client.close();
