@@ -1,6 +1,5 @@
 package com.everhomes.customer;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -8,8 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.validation.constraints.Null;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -24,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
-import com.everhomes.community.CommunityGeoPoint;
+import com.everhomes.activity.Activity;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -34,7 +31,6 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.CommunityAdminStatus;
-import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
@@ -42,11 +38,12 @@ import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
+import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.daos.EhCustomerApplyProjectsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCertificatesDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerCommercialsDao;
@@ -59,6 +56,7 @@ import com.everhomes.server.schema.tables.daos.EhCustomerTrackingPlansDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrackingsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrademarksDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
+import com.everhomes.server.schema.tables.daos.EhPmNotifyLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
@@ -71,6 +69,8 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerTrackingPlans;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrackings;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
+import com.everhomes.server.schema.tables.pojos.EhPmNotifyLogs;
+import com.everhomes.server.schema.tables.pojos.EhTrackingNotifyLogs;
 import com.everhomes.server.schema.tables.records.EhCustomerApplyProjectsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerCertificatesRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerCommercialsRecord;
@@ -84,6 +84,7 @@ import com.everhomes.server.schema.tables.records.EhCustomerTrackingsRecord;
 import com.everhomes.server.schema.tables.records.EhCustomerTrademarksRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCustomersRecord;
 import com.everhomes.sharding.ShardIterator;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -1225,6 +1226,67 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 	                
 	            });
 	        return list;
+	}
+
+
+	@Override
+	public boolean updateTrackingPlanNotify(Long recordId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackingPlans.class));
+
+        int effect = context.update(Tables.EH_CUSTOMER_TRACKING_PLANS)
+                .set(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_STATUS, TrackingPlanNotifyStatus.ALREADY_SENDED.getCode())
+                .where(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_STATUS.eq(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode())
+                .and(Tables.EH_CUSTOMER_TRACKING_PLANS.ID.eq(recordId)))
+                .execute();
+
+        if(effect > 0) {
+            return true;
+        }
+
+        return false;
+	}
+
+
+	@Override
+	public List<CustomerTrackingPlan> listWaitNotifyTrackingPlans(Timestamp queryStartTime, Timestamp queryEndTime) {
+		List<CustomerTrackingPlan> plans = new ArrayList<>();
+		List<CustomerTrackingPlan> futurePlan =  dbProvider.getDslContext(AccessSpec.readOnly())
+				.select()
+				.from(Tables.EH_CUSTOMER_TRACKING_PLANS)
+				.where(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_STATUS.eq(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode()))
+				.and(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_TIME.gt(queryStartTime))
+				.and(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_TIME.le(queryEndTime))
+				.fetch()
+				.map(r->ConvertHelper.convert(r, CustomerTrackingPlan.class));
+		List<CustomerTrackingPlan> passPlan =  dbProvider.getDslContext(AccessSpec.readOnly())
+				.select()
+				.from(Tables.EH_CUSTOMER_TRACKING_PLANS)
+				.where(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_STATUS.eq(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode()))
+				.and(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_CUSTOMER_TRACKING_PLANS.NOTIFY_TIME.le(queryStartTime))
+				.fetch()
+				.map(r->ConvertHelper.convert(r, CustomerTrackingPlan.class));
+		plans.addAll(futurePlan);
+		plans.addAll(passPlan);
+		return plans;
+	}
+
+
+	@Override
+	public void createTrackingNotifyLog(TrackingNotifyLog log) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTrackingNotifyLogs.class));
+
+        log.setId(id);
+        log.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
+        log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        LOGGER.info("createTrackingNotifyLog: " + log);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//        EhTrackingNotifyLogsDao dao = new EhTrackingNotifyLogsDao(context.configuration());
+//        dao.insert(log);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerTrackingPlans.class, null);
 	}
 	
 }

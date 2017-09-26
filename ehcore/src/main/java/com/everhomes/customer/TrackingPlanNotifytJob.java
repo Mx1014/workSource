@@ -1,8 +1,5 @@
 package com.everhomes.customer;
 
-import com.everhomes.pmNotify.PmNotifyProvider;
-import com.everhomes.pmNotify.PmNotifyRecord;
-import com.everhomes.pmNotify.PmNotifyService;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -29,17 +26,17 @@ public class TrackingPlanNotifytJob extends QuartzJobBean {
 
             Long recordId = (Long)jobMap.get("trackingPlanId");
 
-//            if (pmNotifyProvider.updateIfUnsend(recordId)) {
-//                PmNotifyRecord record = pmNotifyProvider.findRecordById(recordId);
-//
-//                if (LOGGER.isDebugEnabled()) {
-//                    LOGGER.debug("TrackingPlanNotifytJob.run success record = {}", record);
-//                }
-//                //update ok, means we take it's owner
-//                pmNotifyService.processPmNotifyRecord(record);
-//            } else {
-//                LOGGER.warn("TrackingPlanNotifytJob.run failure recordId = {}", recordId);
-//            }
+            if (enterpriseCustomerProvider.updateTrackingPlanNotify(recordId)) {
+            	CustomerTrackingPlan plan = enterpriseCustomerProvider.findCustomerTrackingPlanById(recordId);
+
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("TrackingPlanNotifytJob.run success record = {}", plan);
+                }
+                //update ok, means we take it's owner
+                customerService.processTrackingPlanNotify(plan);
+            } else {
+                LOGGER.warn("TrackingPlanNotifytJob.run failure recordId = {}", recordId);
+            }
         } catch (Exception e) {
             LOGGER.error("TrackingPlanNotifytJob error", e);
         }

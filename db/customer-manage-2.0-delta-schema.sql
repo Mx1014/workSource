@@ -79,9 +79,9 @@ CREATE TABLE `eh_tracking_notify_logs` (
   `notify_text` TEXT,
   `receiver_id` BIGINT NOT NULL,
   `create_time` DATETIME NOT NULL ,
-  `status` TINYINT NOT NULL
+  `status` TINYINT NOT NULL ,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 
 ALTER TABLE `eh_enterprise_customers`

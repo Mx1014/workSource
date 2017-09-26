@@ -6,6 +6,7 @@ import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -100,5 +101,8 @@ public interface EnterpriseCustomerProvider {
 	void giveUpEnterpriseCustomer(EnterpriseCustomer customer);
 	
 	List<EnterpriseCustomerDTO> findEnterpriseCustomersByDistance(ListNearbyEnterpriseCustomersCommand cmd , ListingLocator locator , int pageSize);
+	boolean updateTrackingPlanNotify(Long recordId);
+	List<CustomerTrackingPlan> listWaitNotifyTrackingPlans(Timestamp queryStartTime, Timestamp queryEndTime);
+	void createTrackingNotifyLog(TrackingNotifyLog log);
 
 }

@@ -3,11 +3,13 @@ package com.everhomes.customer;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -32,10 +34,12 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.openapi.ZJGKOpenServiceImpl;
@@ -45,7 +49,9 @@ import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.pmNotify.PmNotifyLog;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
@@ -128,6 +134,8 @@ import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.customer.SyncCustomersCommand;
+import com.everhomes.rest.customer.TrackingNotifyTemplateCode;
+import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
 import com.everhomes.rest.customer.UpdateCustomerApplyProjectCommand;
 import com.everhomes.rest.customer.UpdateCustomerCertificateCommand;
 import com.everhomes.rest.customer.UpdateCustomerCommercialCommand;
@@ -141,12 +149,22 @@ import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.equipment.EquipmentNotificationTemplateCode;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.pmNotify.PmNotifyMode;
+import com.everhomes.rest.pmNotify.PmNotifyReceiverList;
+import com.everhomes.rest.pmNotify.PmNotifyType;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.ModuleName;
@@ -155,7 +173,9 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -163,6 +183,7 @@ import com.everhomes.util.DateUtils;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
@@ -232,6 +253,9 @@ public class CustomerServiceImpl implements CustomerService {
 	
     private static final  String queueDelay = "trackingPlanTaskDelays";
     private static final  String  queueNoDelay = "trackingPlanTaskNoDelays";
+    
+    @Autowired
+    private MessagingService messagingService;
 
     private void checkPrivilege() {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -1586,8 +1610,10 @@ public class CustomerServiceImpl implements CustomerService {
 		if(cmd.getTrackingTime() != null){
 			plan.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
 		}
+		plan.setNotifyStatus(TrackingPlanNotifyStatus.INVAILD.getCode());
 		if(cmd.getNotifyTime() != null){
 			plan.setNotifyTime(new Timestamp(cmd.getNotifyTime()));
+			plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
 		}
 		plan.setCreateTime(exist.getCreateTime());
 		plan.setCreatorUid(exist.getCreatorUid());
@@ -1618,8 +1644,10 @@ public class CustomerServiceImpl implements CustomerService {
 		if(cmd.getTrackingTime() != null){
 			plan.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
 		}
+		plan.setNotifyStatus(TrackingPlanNotifyStatus.INVAILD.getCode());
 		if(cmd.getNotifyTime() != null ){
 			plan.setNotifyTime(new Timestamp(cmd.getNotifyTime()));
+			plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
 		}
         enterpriseCustomerProvider.createCustomerTrackingPlan(plan);
 	}
@@ -1717,8 +1745,7 @@ public class CustomerServiceImpl implements CustomerService {
 				Date now = DateHelper.currentGMTTime();
 				Timestamp queryStartTime = new Timestamp(now.getTime());
 				Timestamp queryEndTime = new Timestamp(now.getTime() + 600 * 1000);
-				List<CustomerTrackingPlan> plans = null;
-						//enterpriseCustomerProvider.listWaitNotifyTrackingPlans(queryStartTime,queryEndTime);
+				List<CustomerTrackingPlan> plans = enterpriseCustomerProvider.listWaitNotifyTrackingPlans(queryStartTime,queryEndTime);
 				if(null != plans && plans.size() > 0){
 					plans.forEach(plan ->{
 						pushPlanIntoEnqueue(plan);
@@ -1756,6 +1783,57 @@ public class CustomerServiceImpl implements CustomerService {
             );
         }
 	}
+
+	@Override
+	public void processTrackingPlanNotify(CustomerTrackingPlan plan) {
+		Long userId = plan.getCreatorUid();
+		LOGGER.info("processTrackingPlanNotify userId:{}", userId);
+        if(userId != null) {
+            String taskName = "";
+            Timestamp time = null;
+            int code = TrackingNotifyTemplateCode.TRACKING_NEARLY_REACH_NOTIFY;
+            String scope = TrackingNotifyTemplateCode.SCOPE;
+            String locale = "zh_CN";
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("processPmNotifyRecord, userId={}, recordId={}", userId, plan.getId());
+            }
+            TrackingNotifyLog log = new TrackingNotifyLog();
+            log.setCustomerType(plan.getCustomerType());
+            log.setCustomerId(plan.getCustomerId());
+            log.setReceiverId(userId);
+            String notifyTextForApplicant = getMessage(taskName, time, scope, locale, code);
+            sendMessageToUser(userId, notifyTextForApplicant);
+            log.setNotifyText(notifyTextForApplicant);
+            enterpriseCustomerProvider.createTrackingNotifyLog(log);
+        }
+	}
+
+	private String getMessage(String taskName, Timestamp time, String scope, String locale, int code) {
+		Map<String, Object> notifyMap = new HashMap<String, Object>();
+        notifyMap.put("taskName", taskName);
+        notifyMap.put("time", timeToStr(time));
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+        return notifyTextForApplicant;
+	}
+	
+	 private String timeToStr(Timestamp time) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(time);
+	 }
+	 
+	 private void sendMessageToUser(Long userId, String content) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+	                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+	 }
 	
 	
 }
