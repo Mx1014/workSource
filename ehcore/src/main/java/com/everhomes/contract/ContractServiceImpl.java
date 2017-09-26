@@ -36,7 +36,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.openapi.ContractBuildingMapping;
-import com.everhomes.organization.OrganizationOwner;
+import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.approval.CommonStatus;
@@ -74,9 +74,6 @@ import com.everhomes.coordinator.NamedLock;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
-import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.organization.OrganizationServiceUser;
@@ -1068,6 +1065,16 @@ public class ContractServiceImpl implements ContractService {
 		User creator = userProvider.findUserById(dto.getCreateUid());
 		if(creator != null) {
 			dto.setCreatorName(creator.getNickName());
+		}
+
+		if(contract.getPartyAId() != null && contract.getPartyAType() != null) {
+			if(0 == contract.getPartyAType()) {
+				Organization organization = organizationProvider.findOrganizationById(contract.getPartyAId());
+				if(organization != null) {
+					dto.setPartyAName(organization.getName());
+				}
+			}
+
 		}
 
 		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(dto.getCustomerType()))) {
