@@ -72,6 +72,7 @@ import java.sql.Timestamp;
  *     <li>propertyArea: 资产面积</li>
  *     <li>propertyUnitPrice: 资产单价</li>
  *     <li>propertyType: 资产类型</li>
+ *     <li>propertyTypeName: 资产类型名称</li>
  *     <li>longitude: 经度</li>
  *     <li>latitude: 纬度</li>
  * </ul>
