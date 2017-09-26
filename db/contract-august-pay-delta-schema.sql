@@ -1,7 +1,7 @@
 -- 用途:请求左邻支付系统接口,需要使用到如下4个字段
 -- 支付分配的账号信息,accountId/systemId/appKey/secretKey
 -- system_id园区系统填1,电商系统填2
-DROP TABLE IF EXISTS `eh_payment_accounts`;
+-- DROP TABLE IF EXISTS `eh_payment_accounts`;
 CREATE TABLE `eh_payment_accounts` (
 	`id` BIGINT NOT NULL,
 	`name` VARCHAR(128) DEFAULT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE `eh_payment_accounts` (
 -- 用途:为每个owner生成一个唯一的id,作为暴露给支付系统的用户id,用户创建会员
 -- ownerType为普通用户/企业/商家等,ownerId填对应的owner编号
 -- id为支付系统的会员bizUserId,paymentUserId为支付系统User表的id
-DROP TABLE IF EXISTS `eh_payment_users`;
+-- DROP TABLE IF EXISTS `eh_payment_users`;
 CREATE TABLE `eh_payment_users` (
 	`id` BIGINT NOT NULL,
 	`owner_type` VARCHAR(64) NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE `eh_payment_users` (
 -- 用途:根据业务需求,设置不同分账规则
 -- 将id传给支付系统的createOrder接口的orderRemark1参数,后续根据业务需求查账单数据用到
 -- 按namespaceId/owner/resource三个维度,满足不同业务需求设置不同分账规则
-DROP TABLE IF EXISTS `eh_payment_service_configs`;
+-- DROP TABLE IF EXISTS `eh_payment_service_configs`;
 CREATE TABLE `eh_payment_service_configs` (
 	`id` BIGINT NOT NULL,
 	`name` VARCHAR(256) DEFAULT NULL COMMENT '服务名称',
@@ -52,7 +52,7 @@ CREATE TABLE `eh_payment_service_configs` (
 -- 用途:记录业务订单/业务类型/支付单关联关系,便于支付成功回调接口通过支付单号找到业务订单及后续特定业务订单处理
 -- 记录这4个参数值,用于重新支付:order_commit_url,order_commit_token,order_commit_nonce,order_commit_timestamp
 -- 记录微信公众号支付,扫码支付等支付信息: pay_info
-DROP TABLE IF EXISTS `eh_payment_order_records`;
+-- DROP TABLE IF EXISTS `eh_payment_order_records`;
 CREATE TABLE `eh_payment_order_records` (
 	`id` BIGINT NOT NULL,
 	`service_config_id` BIGINT NOT NULL COMMENT '业务服务类型,eh_payment_service.id',
@@ -70,7 +70,7 @@ CREATE TABLE `eh_payment_order_records` (
 	UNIQUE KEY `u_payment_order_id` (`payment_order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_payment_types`;
+-- DROP TABLE IF EXISTS `eh_payment_types`;
 CREATE TABLE `eh_payment_types` (
 	`id` BIGINT NOT NULL,
 	`order_type` VARCHAR(64) DEFAULT NULL COMMENT '服务类型,填parking/rentalOrder等',
@@ -92,7 +92,7 @@ CREATE TABLE `eh_payment_types` (
 -- 活动报名表，添加支付版本，用于退款 add by yanjun 20170919
 ALTER TABLE `eh_activity_roster`ADD COLUMN `pay_version`  tinyint(4) NULL COMMENT '支付版本，用于退款';
 
-DROP TABLE IF EXISTS `eh_asset_payment_order`;
+-- DROP TABLE IF EXISTS `eh_asset_payment_order`;
 CREATE TABLE `eh_asset_payment_order` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `payer_name` varchar(128) DEFAULT NULL,
@@ -129,7 +129,7 @@ CREATE TABLE `eh_asset_payment_order` (
 -- ----------------------------
 -- Table structure for eh_asset_payment_order_bills
 -- ----------------------------
-DROP TABLE IF EXISTS `eh_asset_payment_order_bills`;
+-- DROP TABLE IF EXISTS `eh_asset_payment_order_bills`;
 CREATE TABLE `eh_asset_payment_order_bills` (
   `id` bigint(20) NOT NULL,
   `bill_id` varchar(20) DEFAULT NULL,
