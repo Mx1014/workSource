@@ -878,8 +878,20 @@ public class YellowPageServiceImpl implements YellowPageService {
 		boolean enableComment = true;
 		if(sourceRequestType == ServiceAllianceSourceRequestType.CLIENT || sourceRequestType == null){//客户端请求
 			//查询当前机构的服务联盟应用入口是否允许评论
-			ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(ownerType,ownerId,type);
-			if(sa == null || CommonStatus.ACTIVE != CommonStatus.fromCode(sa.getEnableComment())){
+			String finalOwnerType = null;
+			Long finalOwnerId = null;
+			if (ownerType.equals(ServiceAllianceBelongType.COMMUNITY.getCode())){
+				finalOwnerType = ServiceAllianceBelongType.ORGANAIZATION.getCode();
+				List<Organization> organizationList= this.organizationProvider.findOrganizationByCommunityId(ownerId);
+				if(organizationList!=null && organizationList.size()>0){
+					finalOwnerId = organizationList.get(0).getId();
+				}
+			}
+			
+			ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(finalOwnerType,finalOwnerId,type);
+			ServiceAlliances sa2 = this.yellowPageProvider.queryServiceAllianceTopic(ownerType,ownerId,type);
+			if((sa == null || CommonStatus.ACTIVE != CommonStatus.fromCode(sa.getEnableComment()))
+					&& (sa2 == null || CommonStatus.ACTIVE != CommonStatus.fromCode(sa2.getEnableComment()))){
 				enableComment = false;
 			}
 		}
