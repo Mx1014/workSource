@@ -20,10 +20,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.controller.WebRequestInterceptor;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.wx.CheckAuthCommand;
 import com.everhomes.rest.wx.CheckAuthResponse;
 import com.everhomes.user.*;
+import com.everhomes.util.*;
 import org.apache.http.Consts;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
@@ -65,10 +68,6 @@ import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.NamespaceUserType;
 import com.everhomes.rest.user.UserGender;
-import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SimpleConvertHelper;
-import com.everhomes.util.StringHelper;
 
 /**
  * 由于要使拦截器工作，URL必须有serverContenxt(如evh），为了符合此规则，需要为微信申请授权及授权回调定义两个接口；
@@ -122,7 +121,10 @@ public class WXAuthController {// extends ControllerBase
     private CloseableHttpClient httpClient;
     
     private HttpContext httpClientContext;
-    
+
+    @Autowired
+    private ContentServerService contentServerService;
+
     @PostConstruct
     private CloseableHttpClient openHttpClient() {
         if (isHttpClientOpen()) {
@@ -213,14 +215,20 @@ public class WXAuthController {// extends ControllerBase
     @RequestMapping("checkAuth")
     @RestReturn(CheckAuthResponse.class)
     @RequireAuthentication(false)
-    public RestResponse checkAuth(CheckAuthCommand cmd, HttpServletRequest request) throws Exception {
+    public RestResponse checkAuth(CheckAuthCommand cmd, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         CheckAuthResponse checkAuthResponse = new CheckAuthResponse();
-        checkAuthResponse.setStatus((byte)1);
 
         LoginToken loginToken = userService.getLoginToken(request);
         if(!userService.isValid(loginToken) || !checkUserNamespaceId(cmd.getNs())) {
             checkAuthResponse.setStatus((byte)0);
+            WebRequestInterceptor.setCookieInResponse("token", "", request, response);
+        }else {
+            checkAuthResponse.setStatus((byte)1);
+            String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
+            checkAuthResponse.setLoginToken(tokenString);
+            checkAuthResponse.setUid(loginToken.getUserId());
+            checkAuthResponse.setContentServer(contentServerService.getContentServer());
         }
 
         RestResponse res = new RestResponse(checkAuthResponse);
