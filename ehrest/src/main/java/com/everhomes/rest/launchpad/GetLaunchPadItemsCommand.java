@@ -15,7 +15,6 @@ import com.everhomes.util.StringHelper;
  * 	<li>siteUri: 链接</li>
  * 	<li>namespaceId: 域空间</li>
  * 	<li>sceneType: 场景类型，{@link com.everhomes.rest.ui.user.SceneType}</li>
- * 	<li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数）</li>
  * 	<li>categryId: item类别</li>
  * </ul>
  */
@@ -31,8 +30,6 @@ public class GetLaunchPadItemsCommand {
     private Integer namespaceId;
     
     private String sceneType;
-
-    private String sceneToken;
 
     private Long categryId;
 
@@ -79,14 +76,6 @@ public class GetLaunchPadItemsCommand {
 
     public void setSceneType(String sceneType) {
         this.sceneType = sceneType;
-    }
-
-    public String getSceneToken() {
-        return sceneToken;
-    }
-
-    public void setSceneToken(String sceneToken) {
-        this.sceneToken = sceneToken;
     }
 
     public String getCurrentSceneType() {

@@ -21,7 +21,7 @@ public class LaunchPadItemActionDataUrlOrgParamHandler implements LaunchPadItemA
     private UserService userService;
 
     @Override
-    public String refreshActionData(String actionData, Long userId, String sceneToken) {
+    public String refreshActionData(String actionData, SceneTokenDTO sceneToken) {
         if(actionData == null || "".equals(actionData)){
             return actionData;
         }
@@ -31,16 +31,19 @@ public class LaunchPadItemActionDataUrlOrgParamHandler implements LaunchPadItemA
             return actionData;
         }
 
+        if(sceneToken == null){
+            return actionData;
+        }
+
         String url = (String)jsonObject.get("url");
 
         if(url == null){
             return actionData;
         }
 
-        SceneTokenDTO sceneTokenDto = userService.checkSceneToken(userId, sceneToken);
-        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneTokenDto.getEntityType());
+        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
         if(UserCurrentEntityType.ORGANIZATION.equals(entityType) ||UserCurrentEntityType.ENTERPRISE.equals(entityType) ){
-            Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
+            Organization organization = organizationProvider.findOrganizationById(sceneToken.getEntityId());
 
             if(organization != null && organization.getUnifiedSocialCreditCode() != null){
                 if(url.contains("?")){

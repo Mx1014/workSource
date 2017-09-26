@@ -38,7 +38,7 @@ public class LaunchPadItemActionDataDefaultHandler implements LaunchPadItemActio
     private UserService userService;
 
     @Override
-    public String refreshActionData(String actionData, Long userId, String sceneToken) {
+    public String refreshActionData(String actionData, SceneTokenDTO sceneToken) {
         if(actionData == null || "".equals(actionData)){
             return actionData;
         }
@@ -47,11 +47,12 @@ public class LaunchPadItemActionDataDefaultHandler implements LaunchPadItemActio
         if(jsonObject == null){
             return actionData;
         }
-
-        SceneTokenDTO sceneTokenDto = userService.checkSceneToken(userId, sceneToken);
+        if(sceneToken == null){
+            return actionData;
+        }
 
         //替换url中的{key}
-        refeshActionDataKey(jsonObject, sceneTokenDto.getNamespaceId());
+        refeshActionDataKey(jsonObject, sceneToken.getNamespaceId());
 
         return jsonObject.toJSONString();
     }
