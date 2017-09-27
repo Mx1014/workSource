@@ -5,6 +5,9 @@ ALTER TABLE eh_var_fields ADD COLUMN `field_param` VARCHAR(128);
 
 ALTER TABLE `eh_buildings` ADD INDEX building_name ( `name`, `alias_name`);
 
+ALTER TABLE `eh_contracts` ADD COLUMN `settled` VARCHAR(128);
+ALTER TABLE `eh_contracts` ADD COLUMN `layout` VARCHAR(128);
+
 ALTER TABLE `eh_addresses` ADD COLUMN `apartment_number` VARCHAR(32);
 ALTER TABLE `eh_addresses` ADD COLUMN `address_unit` VARCHAR(32);
 ALTER TABLE `eh_addresses` ADD COLUMN `address_ownership_id` BIGINT COMMENT '产权归属: 自有、出售、非产权..., refer to the id of eh_var_field_items';
