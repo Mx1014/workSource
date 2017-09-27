@@ -2845,8 +2845,17 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setSceneType(SceneType.FAMILY.getCode());
 
 		sceneDto.setEntityType(UserCurrentEntityType.FAMILY.getCode());
-		StringBuffer fullName = new StringBuffer();
-		StringBuffer aliasName = new StringBuffer();
+
+
+		String fullName =  familyDto.getName();
+		String aliasName = familyDto.getName();
+		StringBuffer titlieName = new StringBuffer();
+		String 	communityName = "";
+		if(familyDto.getCommunityAliasName() != null && !familyDto.getCommunityAliasName().equals("")){
+			communityName = familyDto.getCommunityAliasName();
+		}else{
+			communityName = familyDto.getCommunityName();
+		}
 
 		// 处理名称
 		GetNamespaceDetailCommand cmd = new GetNamespaceDetailCommand();
@@ -2855,16 +2864,13 @@ public class UserServiceImpl implements UserService {
 		NamespaceNameType namespaceNameType = NamespaceNameType.fromCode(namespaceDetail.getNameType());
 		switch (namespaceNameType){
 			case ONLY_COMPANY_NAME:
-				fullName.append(familyDto.getName());
-				aliasName.append(familyDto.getName());
+				titlieName.append(familyDto.getName());
 				break;
 			case ONLY_COMMUNITY_NAME:
-				fullName.append(familyDto.getCommunityName());
-				aliasName.append(familyDto.getCommunityName());
+				titlieName.append(communityName);
 				break;
 			case COMMUNITY_COMPANY_NAME:
-				fullName.append(familyDto.getName()).append(familyDto.getCommunityName());
-				aliasName.append(familyDto.getName()).append(familyDto.getCommunityName());
+				titlieName.append(communityName).append(familyDto.getName());
 				break;
 		}
 
@@ -2884,9 +2890,9 @@ public class UserServiceImpl implements UserService {
 //		}
 
 
-
-		sceneDto.setName(fullName.toString());
-		sceneDto.setAliasName(aliasName.toString());
+		sceneDto.setTitleName(titlieName.toString());
+		sceneDto.setName(fullName);
+		sceneDto.setAliasName(aliasName);
 		sceneDto.setAvatar(familyDto.getAvatarUri());
 		sceneDto.setAvatarUrl(familyDto.getAvatarUrl());
 
@@ -2951,8 +2957,15 @@ public class UserServiceImpl implements UserService {
 
 		sceneDto.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
 
-		StringBuffer fullName = new StringBuffer();
-		StringBuffer aliasName = new StringBuffer();
+		String fullName =  organizationDto.getName();
+		String aliasName = organizationDto.getName();
+		StringBuffer titlieName = new StringBuffer();
+		String 	communityName = "";
+		if(organizationDto.getCommunityAliasName() != null && !organizationDto.getCommunityAliasName().equals("")){
+			communityName = organizationDto.getCommunityAliasName();
+		}else{
+			communityName = organizationDto.getCommunityName();
+		}
 		// 处理名称
 		GetNamespaceDetailCommand cmd = new GetNamespaceDetailCommand();
 		cmd.setNamespaceId(namespaceId);
@@ -2960,19 +2973,15 @@ public class UserServiceImpl implements UserService {
 		NamespaceNameType namespaceNameType = NamespaceNameType.fromCode(namespaceDetail.getNameType());
 		switch (namespaceNameType){
 			case ONLY_COMPANY_NAME:
-				fullName.append(organizationDto.getName());
-				aliasName.append(organizationDto.getName());
+				titlieName.append(organizationDto.getName());
 				break;
 			case ONLY_COMMUNITY_NAME:
-				fullName.append(organizationDto.getCommunityName());
-				aliasName.append(organizationDto.getCommunityName());
+				titlieName.append(communityName);
 				break;
 			case COMMUNITY_COMPANY_NAME:
-				fullName.append(organizationDto.getName()).append(organizationDto.getCommunityName());
-				aliasName.append(organizationDto.getName()).append(organizationDto.getCommunityName());
+				titlieName.append(communityName).append(organizationDto.getName());
 				break;
 		}
-
 //		sceneDto.setName(organizationDto.getName().trim());
 		// 在园区先暂时优先显示园区名称，后面再考虑怎样显示公司名称 by lqs 20160514
 //		String aliasName = organizationDto.getDisplayName();
@@ -2988,9 +2997,9 @@ public class UserServiceImpl implements UserService {
 //        if (aliasName == null || aliasName.trim().isEmpty()) {
 //            aliasName = organizationDto.getName().trim();
 //        }
-
-		sceneDto.setName(fullName.toString());
-        sceneDto.setAliasName(aliasName.toString());
+		sceneDto.setTitleName(titlieName.toString());
+		sceneDto.setName(fullName);
+        sceneDto.setAliasName(aliasName);
 		sceneDto.setAvatar(organizationDto.getAvatarUri());
 		sceneDto.setAvatarUrl(organizationDto.getAvatarUrl());
 
@@ -3159,29 +3168,20 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public SceneDTO toCommunitySceneDTO(Integer namespaceId, Long userId, CommunityDTO community, SceneType sceneType) {
-		StringBuffer fullName = new StringBuffer();
-		StringBuffer aliasName = new StringBuffer();
-
+		String fullName =  community.getName();
+		String aliasName = community.getAliasName();
+		String communityName = "";
+		if(community.getAliasName() != null && !community.getAliasName().equals("")){
+			communityName = community.getAliasName();
+		}else{
+			communityName = community.getName();
+		}
 
 		// 处理名称
 		GetNamespaceDetailCommand cmd = new GetNamespaceDetailCommand();
 		cmd.setNamespaceId(namespaceId);
 		NamespaceDetailDTO namespaceDetail= this.namespaceResourceService.getNamespaceDetail(cmd);
 		NamespaceNameType namespaceNameType = NamespaceNameType.fromCode(namespaceDetail.getNameType());
-		switch (namespaceNameType){
-			case ONLY_COMPANY_NAME:
-				fullName.append(community.getName());
-				aliasName.append(community.getAliasName());
-				break;
-			case ONLY_COMMUNITY_NAME:
-				fullName.append(community.getName());
-				aliasName.append(community.getAliasName());
-				break;
-			case COMMUNITY_COMPANY_NAME:
-				fullName.append(community.getName());
-				aliasName.append(community.getAliasName());
-				break;
-		}
 //
 //		if(!StringUtils.isEmpty(community.getCityName())){
 //			fullName.append(community.getCityName());
@@ -3195,10 +3195,11 @@ public class UserServiceImpl implements UserService {
 //		}
 
 		SceneDTO sceneDto = new SceneDTO();
+		sceneDto.setTitleName(communityName);
 		sceneDto.setSceneType(sceneType.getCode());
 		sceneDto.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
-		sceneDto.setName(fullName.toString());
-		sceneDto.setAliasName(aliasName.toString());
+		sceneDto.setName(fullName);
+		sceneDto.setAliasName(aliasName);
 
 		String entityContent = StringHelper.toJsonString(community);
 		sceneDto.setEntityContent(entityContent);
@@ -5152,5 +5153,28 @@ public class UserServiceImpl implements UserService {
 		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", cmd.getNewPassword(), user.getSalt())));
 		userProvider.updateUser(user);
 
+	}
+
+	@Override
+	public UserTemporaryToken checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd) {
+		if(StringUtils.isEmpty(cmd.getUserToken())){
+			LOGGER.error("userToken is empty");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
+		}
+
+		UserTemporaryToken token  = WebTokenGenerator.getInstance().fromWebToken(cmd.getUserToken(), UserTemporaryToken.class);
+		if(token == null || token.getStartTime() == null || token.getInterval() == null){
+			LOGGER.error("userToken is invalid");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
+		}
+
+		if(System.currentTimeMillis() > token.getStartTime() + token.getInterval()){
+			LOGGER.error("time expired");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
+		}
+		return token;
 	}
 }

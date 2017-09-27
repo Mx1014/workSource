@@ -5,10 +5,14 @@ import com.everhomes.launchpad.LaunchPadItemActionDataHandler;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.UserService;
+import com.everhomes.user.UserTemporaryToken;
+import com.everhomes.util.WebTokenGenerator;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Random;
 
 
 @Component(LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX + LaunchPadItemActionDataHandler.URL_ORG_PARAM)
@@ -43,21 +47,58 @@ public class LaunchPadItemActionDataUrlOrgParamHandler implements LaunchPadItemA
 
         UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
         if(UserCurrentEntityType.ORGANIZATION.equals(entityType) ||UserCurrentEntityType.ENTERPRISE.equals(entityType) ){
-            Organization organization = organizationProvider.findOrganizationById(sceneToken.getEntityId());
+            String unifiedSocialCreditCode = addUnifiedSocialCreditCode(jsonObject, sceneToken.getEntityId());
 
-            if(organization != null && organization.getUnifiedSocialCreditCode() != null){
-                if(url.contains("?")){
-                    url = url + "&id=";
-                }else {
-                    url = url + "?id=";
-                }
-                url = url +  organization.getUnifiedSocialCreditCode();
-                jsonObject.put("url", url);
-            }
+            addUserTemporaryToken(jsonObject, unifiedSocialCreditCode, sceneToken.getUserId(), sceneToken.getNamespaceId());
         }
 
         return jsonObject.toJSONString();
     }
 
+    private String addUnifiedSocialCreditCode(JSONObject jsonObject, Long orgId){
+        Organization organization = organizationProvider.findOrganizationById(orgId);
+
+        if(organization != null && organization.getUnifiedSocialCreditCode() != null){
+
+            String url = (String)jsonObject.get("url");
+
+            if(url.contains("?")){
+                url = url + "&id=";
+            }else {
+                url = url + "?id=";
+            }
+            url = url +  organization.getUnifiedSocialCreditCode();
+
+            jsonObject.put("url", url);
+
+            return organization.getUnifiedSocialCreditCode();
+        }
+        return null;
+    }
+
+    private String addUserTemporaryToken(JSONObject jsonObject, String unifiedSocialCreditCode, Long userId, Integer namespaceId){
+
+        if(unifiedSocialCreditCode == null){
+            return null;
+        }
+        UserTemporaryToken  userToken = new UserTemporaryToken();
+        userToken.setUserId(userId);
+        userToken.setNamespaceId(namespaceId);
+        userToken.setStartTime(System.currentTimeMillis());
+        userToken.setInterval(24 * 60 * 60 * 1000L);
+        userToken.setInfo(unifiedSocialCreditCode);
+
+        String userTokenString  = WebTokenGenerator.getInstance().toWebToken(userToken);
+
+        String url = (String)jsonObject.get("url");
+        if(url.contains("?")){
+            url = url + "&userToken=";
+        }else {
+            url = url + "?userToken=";
+        }
+        url = url + userTokenString;
+        jsonObject.put("url", url);
+        return userTokenString;
+    }
 
 }

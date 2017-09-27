@@ -2029,13 +2029,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 				task.setExecutiveExpireTime(expiredTime);
 				long now = System.currentTimeMillis();
 				//标准名称+巡检/保养+当日日期6位(年的后两位+月份+天)+两位序号（系统从01开始生成）
+				//改为：设备名称+巡检/保养+当日日期6位(年的后两位+月份+天)+两位序号（系统从01开始生成）by xiongying20170927
 				if (i < 10) {
 
-					String taskName = standard.getName() + type.getName() +
+					String taskName = equipment.getName() + type.getName() +
 							timestampToStr(new Timestamp(now)).substring(2) + "0" + i;
 					task.setTaskName(taskName);
 				} else {
-					String taskName = standard.getName() + type.getName() +
+					String taskName = equipment.getName() + type.getName() +
 							timestampToStr(new Timestamp(now)).substring(2) + i;
 					task.setTaskName(taskName);
 				}
