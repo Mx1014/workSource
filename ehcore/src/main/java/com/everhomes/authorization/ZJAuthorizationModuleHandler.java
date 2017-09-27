@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jooq.exception.DataAccessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,7 +53,7 @@ import com.everhomes.util.StringHelper;
 
 @Component(AuthorizationModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX+"EhNamespaces"+999971)
 public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler {
-//	private static final Logger LOGGER = LoggerFactory.getLogger(ZJAuthorizationModuleHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ZJAuthorizationModuleHandler.class);
 
 
 	private String url = "http://139.129.220.146:3578/openapi/Authenticate";
@@ -156,6 +158,8 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 			String jsonStr = null;
 			try {
 				jsonStr = HttpUtils.post(url, params, 20, "UTF-8");
+				LOGGER.info("params = "+StringHelper.toJsonString(params));
+				LOGGER.info("result = "+jsonStr);
 				//向第张江认证。
 				entity = JSONObject.parseObject(jsonStr,new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
 			} catch (Exception e) {
