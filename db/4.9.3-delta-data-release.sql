@@ -98,6 +98,7 @@ drop procedure  if exists create_service_alliance_menu;
 -- ------------- 新建菜单、权限、等 END--------
 -- ------------- 新建菜单Scope --------
 DROP PROCEDURE if exists create_service_alliance_menu_scope;
+delimiter //
 CREATE PROCEDURE `create_service_alliance_menu_scope` ()
 BEGIN
   DECLARE aid LONG;
@@ -130,7 +131,9 @@ BEGIN
 
   END LOOP;
   CLOSE cur;
-END;
+END
+//
+delimiter ;
 CALL create_service_alliance_menu_scope;
 DROP PROCEDURE if exists create_service_alliance_menu_scope;
 -- ------------- 新建菜单Scope END--------

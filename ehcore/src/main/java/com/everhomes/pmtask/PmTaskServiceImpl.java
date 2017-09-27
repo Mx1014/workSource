@@ -642,7 +642,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public ListBuildingCommandResponse listBuildings(ListBuildingCommand cmd) {
 		ListBuildingCommandResponse response = communityService.listBuildings(cmd);
 		//增加公共区域
-		if (response.getNextPageAnchor()!=null && cmd.getNamespaceId()==999983) {
+		if (response.getNextPageAnchor()==null && cmd.getNamespaceId()==999983) {
 			BuildingDTO buildingDTO = new BuildingDTO();
 			buildingDTO.setName(EbeiBuildingType.publicArea);
 			buildingDTO.setBuildingName(EbeiBuildingType.publicArea);
