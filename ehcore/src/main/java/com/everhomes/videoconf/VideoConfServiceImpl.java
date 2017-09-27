@@ -2076,7 +2076,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setInvoiceReqFlag(cmd.getInvoiceFlag());
 		order.setInvoiceIssueFlag(cmd.getMakeOutFlag());
 		order.setOnlineFlag(cmd.getBuyChannel());
-
+		order.setNamespaceId(UserContext.getCurrentNamespaceId());
 		order.setAccountCategoryId(cmd.getAccountCategoryId());
 
 		order.setBuyerName(cmd.getContactor());
