@@ -1792,6 +1792,7 @@ public class CustomerServiceImpl implements CustomerService {
         if(userId != null && null != plan.getTrackingTime()) {
             String taskName = plan.getTitle() == null ? "" : plan.getTitle();
             Timestamp time = plan.getTrackingTime();
+            String customerName = plan.getCustomerName();
             int code = TrackingNotifyTemplateCode.TRACKING_NEARLY_REACH_NOTIFY;
             String scope = TrackingNotifyTemplateCode.SCOPE;
             String locale = "zh_CN";
@@ -1802,17 +1803,18 @@ public class CustomerServiceImpl implements CustomerService {
             log.setCustomerType(plan.getCustomerType());
             log.setCustomerId(plan.getCustomerId());
             log.setReceiverId(userId);
-            String notifyTextForApplicant = getMessage(taskName, time, scope, locale, code);
+            String notifyTextForApplicant = getMessage(customerName,taskName, time, scope, locale, code);
             sendMessageToUser(userId, notifyTextForApplicant);
             log.setNotifyText(notifyTextForApplicant);
             enterpriseCustomerProvider.createTrackingNotifyLog(log);
         }
 	}
 
-	private String getMessage(String taskName, Timestamp time, String scope, String locale, int code) {
+	private String getMessage(String  customerName , String taskName, Timestamp time, String scope, String locale, int code) {
 		Map<String, Object> notifyMap = new HashMap<String, Object>();
         notifyMap.put("taskName", taskName);
         notifyMap.put("time", timeToStr(time));
+        notifyMap.put("customerName", customerName);
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
         return notifyTextForApplicant;
 	}
