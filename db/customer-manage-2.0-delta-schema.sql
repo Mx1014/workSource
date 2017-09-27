@@ -39,6 +39,7 @@ CREATE TABLE `eh_customer_tracking_plans` (
   `delete_uid`  BIGINT     COMMENT '删除人uid',
   `delete_time` DATETIME   COMMENT '删除时间',
   `notify_status` TINYINT  DEFAULT NULL COMMENT '提醒状态  0:无需提醒   1:待提醒   2:已提醒',
+  `read_status` TINYINT DEFAULT '0' COMMENT 'is read?  0:no  1:yes',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
