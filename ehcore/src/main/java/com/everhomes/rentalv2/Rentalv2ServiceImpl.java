@@ -1901,6 +1901,27 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	}
 
+	public PreOrderDTO getRentalBillPayInfoV2(GetRentalBillPayInfoCommand cmd) {
+		RentalOrder order = rentalv2Provider.findRentalBillById(cmd.getId());
+		PreOrderCommand preOrderCommand = new PreOrderCommand();
+
+		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
+		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
+		Long amount = payService.changePayAmount(order.getPayTotalMoney());
+		preOrderCommand.setAmount(amount);
+
+		preOrderCommand.setPayerId(order.getRentalUid());
+		preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+
+//        preOrderCommand.setExpiration(expiredTime);
+
+		preOrderCommand.setClientAppName(cmd.getClientAppName());
+
+		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+
+		return callBack;
+	}
+
 	@Override
 	public void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag){
 
@@ -3364,15 +3385,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return response;
 	}
 
-	public PreOrderDTO addRentalItemBillV2(AddRentalBillItemCommand cmd) {
-		addRentalItemBill(cmd);
+	@Override
+	public AddRentalBillItemV2Response addRentalItemBillV2(AddRentalBillItemCommand cmd) {
+		AddRentalBillItemCommandResponse resp = addRentalItemBill(cmd);
 		return null;
 	}
 
-	private PreOrderDTO convertOrderDTOForV2(RentalOrder order, String clientAppName) {
+	private AddRentalBillItemV2Response convertOrderDTOForV2(RentalOrder order, String clientAppName, String flowCaseUrl) {
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
-		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
 		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
 		Long amount = payService.changePayAmount(order.getPayTotalMoney());
 		preOrderCommand.setAmount(amount);
@@ -3386,7 +3408,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
 
-		return callBack;
+		AddRentalBillItemV2Response response = new AddRentalBillItemV2Response();
+		response.setPreOrderDTO(callBack);
+		response.setFlowCaseUrl(flowCaseUrl);
+
+		return response;
 	}
 
 	@Override

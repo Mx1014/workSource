@@ -516,7 +516,7 @@ public class ParkingServiceImpl implements ParkingService {
     	return response;
     }
 
-//    @Override
+    @Override
     public PreOrderDTO createParkingRechargeOrderV2(CreateParkingRechargeOrderCommand cmd){
 
         if(null == cmd.getMonthCount() || cmd.getMonthCount() ==0) {
@@ -528,7 +528,7 @@ public class ParkingServiceImpl implements ParkingService {
         return (PreOrderDTO) createGeneralOrder(cmd, ParkingRechargeType.MONTHLY.getCode(), ActivityRosterPayVersionFlag.V2);
     }
 
-//    @Override
+    @Override
     public PreOrderDTO createParkingTempOrderV2(CreateParkingTempOrderCommand cmd) {
         checkOrderToken(cmd.getOrderToken());
         CreateParkingRechargeOrderCommand param = new CreateParkingRechargeOrderCommand();

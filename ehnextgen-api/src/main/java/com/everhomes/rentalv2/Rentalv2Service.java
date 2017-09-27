@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 
@@ -54,6 +55,8 @@ public interface Rentalv2Service {
 			GetItemListAdminCommand cmd);
 
 	AddRentalBillItemCommandResponse addRentalItemBill(AddRentalBillItemCommand cmd);
+
+	AddRentalBillItemV2Response addRentalItemBillV2(AddRentalBillItemCommand cmd);
 
 	ListRentalBillsCommandResponse listRentalBills(ListRentalBillsCommand cmd);
 
@@ -185,6 +188,7 @@ public interface Rentalv2Service {
 
 	CommonOrderDTO getRentalBillPayInfo(GetRentalBillPayInfoCommand cmd);
 
+	PreOrderDTO getRentalBillPayInfoV2(GetRentalBillPayInfoCommand cmd);
 
 	FindRentalSiteYearStatusCommandResponse findRentalSiteYearStatus(FindRentalSiteYearStatusCommand cmd);
 
