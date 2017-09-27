@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static com.everhomes.util.SignatureHelper.computeSignature;
@@ -43,13 +44,15 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
         LOGGER.info("ZJGK-PAY-HANDLER START, ORDER id = {}",orderId);
         AssetPaymentOrder order = assetProvider.findAssetPaymentById(cmd.getOrderId());
         List<AssetPaymentOrderBills> bills = assetProvider.findBillsById(orderId);
+        BigDecimal amount = new BigDecimal("0");
+
         Map<String,Integer> billStatuses = new HashMap<>();
         for(int i = 0; i < bills.size(); i++){
             params = new HashMap<String,String>();
             params.put("contractNum",order.getContractId());
             params.put("billId",bills.get(i).getBillId());
 //            params.put("paidMoney",bills.get(i).getAmount().toString());
-            params.put("paidMoney","102125");
+            params.put("paidMoney",bills.get(i).getAmount().toString());
             params.put("paidStatus","1");
             String json = generateJson(params);
             String url;
