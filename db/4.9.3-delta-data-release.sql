@@ -178,6 +178,32 @@ DELETE FROM eh_web_menus WHERE id in (40510,40520,40530,40541,40542);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('40500', '服务联盟', '40000', NULL, NULL, '1', '2', '/40000/40500', 'park', '450', '40500', '2', NULL, 'module');
 UPDATE eh_web_menus SET path = CONCAT('/40000/40500/',parent_id,'/',id),`level`=4 WHERE id >=41700 AND id <=44660 AND `level` =3;
 UPDATE eh_web_menus SET parent_id = 40500,path = CONCAT('/40000/40500/',id),`level`=3 WHERE id >=41700 AND id <=44660 AND `level` =2;
+
+-- 调整审批的moduleid,mouuleType---
+DROP PROCEDURE if exists modify_approval_module;
+delimiter //
+CREATE PROCEDURE `modify_approval_module` ()
+BEGIN
+  DECLARE aid LONG;
+	DECLARE ans INTEGER;
+
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR select DISTINCT sa.parent_id,CAST(SUBSTRING(module_url,33,LOCATE('&',module_url)-33) AS UNSIGNED) as approval_id from eh_service_alliances sa LEFT JOIN eh_service_alliance_categories sac ON sa.category_id = sac.id WHERE module_url REGEXP 'zl://approval/create' ORDER BY approval_id;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+    FETCH cur INTO ans,aid;
+    IF done THEN
+      LEAVE read_loop;
+    END IF;
+		UPDATE eh_general_approvals SET module_id = ans, module_type = 'service_alliance' WHERE id = aid;
+  END LOOP;
+  CLOSE cur;
+END
+//
+delimiter ;
+CALL modify_approval_module;
+DROP PROCEDURE if exists modify_approval_module;
 -- end by dengs, 20170925 服务联盟2.9
 
 
