@@ -1735,7 +1735,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	
-	//每10分钟执行一次，找出待n~n+15分钟内提醒时间的跟进计划 
+	//每15分钟执行一次，找出待n~n+15分钟内提醒时间的跟进计划 
 	@Scheduled(cron="0 0/15 * * * ?")
 	@Override
 	public void trackingPlanWarningSchedule() {
