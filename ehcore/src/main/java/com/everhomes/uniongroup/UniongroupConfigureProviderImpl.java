@@ -351,8 +351,6 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         return null;
     }
 
-    ;
-
     @Override
     public List<UniongroupMemberDetail> listUniongroupMemberDetail(Long groupId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
