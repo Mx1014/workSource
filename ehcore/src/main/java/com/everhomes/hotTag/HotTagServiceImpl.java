@@ -142,6 +142,7 @@ public class HotTagServiceImpl implements HotTagService{
 		listCmd.setNamespaceId(cmd.getNamespaceId());
 		listCmd.setCategoryId(cmd.getCategoryId());
 		listCmd.setServiceType(cmd.getServiceType());
+		listCmd.setCategoryId(cmd.getCategoryId());
 		listCmd.setPageSize(10000);
 
 		dbProvider.execute((status) -> {
@@ -167,13 +168,15 @@ public class HotTagServiceImpl implements HotTagService{
 					SetHotTagCommand setCmd = new SetHotTagCommand();
 					setCmd.setNamespaceId(cmd.getNamespaceId());
 					setCmd.setServiceType(cmd.getServiceType());
+					setCmd.setCategoryId(cmd.getCategoryId());
 					setCmd.setName(r);
 					this.setHotTag(setCmd);
 
-					//如果0域空间没有加一条数据
-					HotTags tag = hotTagProvider.findByName(0, cmd.getCategoryId(), cmd.getServiceType(), r);
+					//如果0域空间(标签库)没有加一条数据
+					HotTags tag = hotTagProvider.findByName(0, null, cmd.getServiceType(), r);
 					if(tag == null){
 						setCmd.setNamespaceId(0);
+						setCmd.setCategoryId(null);
 						this.setHotTag(setCmd);
 					}
 				});
