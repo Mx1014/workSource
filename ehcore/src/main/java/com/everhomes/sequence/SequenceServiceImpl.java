@@ -10,6 +10,7 @@ import com.everhomes.rest.admin.GetSequenceDTO;
 import com.everhomes.schema.tables.pojos.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.*;
+import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAclinkFirmware;
 import com.everhomes.server.schema.tables.pojos.EhAclinkLogs;
@@ -39,6 +40,7 @@ import com.everhomes.server.schema.tables.pojos.EhApprovalRules;
 import com.everhomes.server.schema.tables.pojos.EhApprovalTimeRanges;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
 import com.everhomes.server.schema.tables.pojos.EhAuthorizationRelations;
 import com.everhomes.server.schema.tables.pojos.EhAuthorizations;
 import com.everhomes.server.schema.tables.pojos.EhBroadcasts;
@@ -2228,6 +2230,16 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhWebMenuScopes.class, Tables.EH_WEB_MENU_SCOPES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_WEB_MENU_SCOPES.ID.max()).from(Tables.EH_WEB_MENU_SCOPES).fetchOne().value1();
+        });
+
+        syncTableSequence(EhAssetPaymentOrderBills.class, EhAssetPaymentOrderBills.class, Tables.EH_ASSET_PAYMENT_ORDER_BILLS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.ID.max())
+                    .from(Tables.EH_ASSET_PAYMENT_ORDER_BILLS).fetchOne().value1();
+        });
+
+        syncTableSequence(com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrder.class, com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrder.class, Tables.EH_ASSET_PAYMENT_ORDER.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ASSET_PAYMENT_ORDER.ID.max())
+                    .from(Tables.EH_ASSET_PAYMENT_ORDER).fetchOne().value1();
         });
 
     }

@@ -428,19 +428,6 @@ public class ParkingServiceImpl implements ParkingService {
     	
     	ParkingCardRequestDTO dto = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
     	
-//    	if(null != parkingCardRequest.getCarSerieId()) {
-//			ParkingCarSerie carSerie = parkingProvider.findParkingCarSerie(parkingCardRequest.getCarSerieId());
-//			if(null != carSerie) {
-//    			ParkingCarSerie secondCarSerie = parkingProvider.findParkingCarSerie(carSerie.getParentId());
-//    			if(null != secondCarSerie) {
-//    				ParkingCarSerie carBrand = parkingProvider.findParkingCarSerie(secondCarSerie.getParentId());
-//    				dto.setCarSerieName(carSerie.getName());
-//    				if(null != carBrand)
-//    					dto.setCarBrand(carBrand.getName());
-//    			}
-//			}
-//		}
-    	
     	List<ParkingAttachment> attachments = parkingProvider.listParkingAttachments(parkingCardRequest.getId(), 
     			ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
     	
@@ -589,37 +576,42 @@ public class ParkingServiceImpl implements ParkingService {
 
 		parkingRechargeOrder.setInvoiceType(cmd.getInvoiceType());
 
-		parkingRechargeOrder.setPrice(cmd.getPrice());
-
-		if (null != parkingLot.getMonthlyDiscountFlag()) {
-			if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()) {
-				parkingRechargeOrder.setOriginalPrice(cmd.getPrice());
-				BigDecimal newPrice = cmd.getPrice().multiply(new BigDecimal(parkingLot.getMonthlyDiscount()))
-						.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
-				parkingRechargeOrder.setPrice(newPrice);
-			}
-		}
-
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
     		ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
 
-    		if (null != dto ) {
-				if(null != dto.getPrice() && 0 != dto.getPrice().compareTo(cmd.getPrice())) {
-					LOGGER.error("Overdue fees, cmd={}", cmd);
-					throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
-							"Overdue fees");
-				}
-				parkingRechargeOrder.setOrderToken(dto.getOrderToken());
-				parkingRechargeOrder.setParkingTime(dto.getParkingTime());
-				parkingRechargeOrder.setStartPeriod(new Timestamp(dto.getEntryTime()));
-				parkingRechargeOrder.setEndPeriod(new Timestamp(dto.getPayTime()));
-				parkingRechargeOrder.setDelayTime(dto.getDelayTime());
+    		if (null == dto || null == dto.getPrice()) {
+				LOGGER.error("Parking request temp fee failed, cmd={}", cmd);
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REQUEST_SERVER,
+						"Parking request temp fee failed");
 			}
+
+			BigDecimal tempFee = dto.getPrice();
+			if (null != parkingLot.getTempFeeDiscountFlag()) {
+				if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getTempFeeDiscountFlag()) {
+					tempFee = dto.getPrice().multiply(new BigDecimal(parkingLot.getTempFeeDiscount()))
+							.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+				}
+			}
+			if(0 != tempFee.compareTo(cmd.getPrice())) {
+				LOGGER.error("Overdue fees, cmd={}", cmd);
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
+						"Overdue fees");
+			}
+
+			parkingRechargeOrder.setOriginalPrice(dto.getPrice());
+			parkingRechargeOrder.setPrice(cmd.getPrice());
+			parkingRechargeOrder.setOrderToken(dto.getOrderToken());
+			parkingRechargeOrder.setParkingTime(dto.getParkingTime());
+			parkingRechargeOrder.setStartPeriod(new Timestamp(dto.getEntryTime()));
+			parkingRechargeOrder.setEndPeriod(new Timestamp(dto.getPayTime()));
+			parkingRechargeOrder.setDelayTime(dto.getDelayTime());
 		}else if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
 			//查询rate
 			parkingRechargeOrder.setRateToken(cmd.getRateToken());
     		parkingRechargeOrder.setMonthCount(new BigDecimal(cmd.getMonthCount()));
-    		handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
+    		//先设置客户端传进来的价格，在updateParkingRechargeOrderRate方法中校验价格,根据费率设置originalPrice
+			parkingRechargeOrder.setPrice(cmd.getPrice());
+    		handler.updateParkingRechargeOrderRate(parkingLot, parkingRechargeOrder);
 
     	}
 

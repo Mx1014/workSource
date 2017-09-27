@@ -178,6 +178,32 @@ DELETE FROM eh_web_menus WHERE id in (40510,40520,40530,40541,40542);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('40500', '服务联盟', '40000', NULL, NULL, '1', '2', '/40000/40500', 'park', '450', '40500', '2', NULL, 'module');
 UPDATE eh_web_menus SET path = CONCAT('/40000/40500/',parent_id,'/',id),`level`=4 WHERE id >=41700 AND id <=44660 AND `level` =3;
 UPDATE eh_web_menus SET parent_id = 40500,path = CONCAT('/40000/40500/',id),`level`=3 WHERE id >=41700 AND id <=44660 AND `level` =2;
+
+-- 调整审批的moduleid,mouuleType---
+DROP PROCEDURE if exists modify_approval_module;
+delimiter //
+CREATE PROCEDURE `modify_approval_module` ()
+BEGIN
+  DECLARE aid LONG;
+	DECLARE ans INTEGER;
+
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR select DISTINCT sa.parent_id,CAST(SUBSTRING(module_url,33,LOCATE('&',module_url)-33) AS UNSIGNED) as approval_id from eh_service_alliances sa LEFT JOIN eh_service_alliance_categories sac ON sa.category_id = sac.id WHERE module_url REGEXP 'zl://approval/create' ORDER BY approval_id;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+    FETCH cur INTO ans,aid;
+    IF done THEN
+      LEAVE read_loop;
+    END IF;
+		UPDATE eh_general_approvals SET module_id = ans, module_type = 'service_alliance' WHERE id = aid;
+  END LOOP;
+  CLOSE cur;
+END
+//
+delimiter ;
+CALL modify_approval_module;
+DROP PROCEDURE if exists modify_approval_module;
 -- end by dengs, 20170925 服务联盟2.9
 
 
@@ -402,6 +428,11 @@ INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ('parking.default.card.type', '[{\"typeId\":\"普通月卡\", \"typeName\":\"普通月卡\"}]', NULL, '0', NULL);
 
+delete from eh_parking_lots where id = 10006;
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`)
+	VALUES ('10006', 'community', '240111044331055940', '科兴科学园停车场', 'KETUO2', NULL, '2', '1025', '2016-12-16 17:07:20', '0', '{\"expiredRechargeFlag\":1,\"expiredRechargeMonthCount\":2,\"expiredRechargeType\":2,\"maxExpiredDay\":365,\"monthlyDiscountFlag\":0,\"tempFeeDiscountFlag\":0}', '{\"tempfeeFlag\": 0, \"rateFlag\": 0, \"lockCarFlag\": 0, \"searchCarFlag\": 1, \"currentInfoType\": 2, \"contact\": \"18718523489\",\"invoiceFlag\":1}');
+
+
 -- 短信供应商配置  add by xq.tian  2017/08/30
 UPDATE `eh_configurations` SET `value` = 'YZX,YouXunTong' WHERE `name` = 'sms.handler.type' AND `namespace_id` = 0;
 
@@ -453,3 +484,9 @@ INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@i
 -- 检验用户的临时token。报错信息-无效的用户token    add by yanjun 20170927
 SET @id =(SELECT MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'user','400002','zh_CN','无效的userToken');
+
+
+-- 修改园区快讯模块默认参数 add by sfyan 20170927
+update `eh_service_modules` set instance_config = '{"timeWidgetStyle":"date","entityCount":0,"subjectHeight":0,"descriptionHeight":0}' where id = 10800;
+
+

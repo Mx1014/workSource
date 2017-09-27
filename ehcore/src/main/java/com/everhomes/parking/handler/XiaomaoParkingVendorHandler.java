@@ -59,7 +59,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
             }
 
             parkingCardDTO.setPlateNumber(plateNumber);
-
+            parkingCardDTO.setPlateOwnerName(card.getUserName());
             //parkingCardDTO.setStartTime(startTime);
             parkingCardDTO.setEndTime(expireTime);
 
@@ -294,7 +294,8 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     }
 
     @Override
-    public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+    public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
+        updateParkingRechargeOrderRateInfo(parkingLot, order);
 
     }
 

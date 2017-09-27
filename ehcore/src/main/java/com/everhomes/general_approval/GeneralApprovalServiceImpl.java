@@ -517,6 +517,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
 		ListGeneralApprovalResponse resp = new ListGeneralApprovalResponse();
 		resp.setDtos(gas.stream().map((r) -> {
+			if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(r.getModuleType())){
+				long oid = r.getModuleId();
+				r.setModuleId(40500L);
+				r.setModuleType(FlowModuleType.NO_MODULE.getCode());
+				GeneralApprovalDTO dto = processApproval(r);
+				dto.setModuleId(oid);
+				dto.setModuleType(FlowModuleType.SERVICE_ALLIANCE.getCode());
+				return dto;
+			}
 			return processApproval(r);
 		}).collect(Collectors.toList()));
 		return resp;
