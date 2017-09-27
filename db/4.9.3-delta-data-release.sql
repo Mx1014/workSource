@@ -173,6 +173,11 @@ DROP PROCEDURE if exists delete_service_alliance_menu_scope;
 -- ------------- 删除服务广场没有使用的应用入口的菜单Scope end--------
 -- 删除服务联盟老菜单
 DELETE from eh_web_menus WHERE id = 40500;
+-- 菜单位置调整
+DELETE FROM eh_web_menus WHERE id in (40510,40520,40530,40541,40542);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('40500', '服务联盟', '40000', NULL, NULL, '1', '2', '/40000/40500', 'park', '450', '40500', '2', NULL, 'module');
+UPDATE eh_web_menus SET path = CONCAT('/40000/40500/',parent_id,'/',id),`level`=4 WHERE id >=41700 AND id <=44660 AND `level` =3;
+UPDATE eh_web_menus SET parent_id = 40500,path = CONCAT('/40000/40500/',id),`level`=3 WHERE id >=41700 AND id <=44660 AND `level` =2;
 -- end by dengs, 20170925 服务联盟2.9
 
 
@@ -443,3 +448,8 @@ update `eh_organizations` eo set `set_admin_flag` = (select if(count(*) > 0, 1, 
 
 SET @id =(SELECT MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'user','400001','zh_CN','手机号码错误');
+
+
+-- 检验用户的临时token。报错信息-无效的用户token    add by yanjun 20170927
+SET @id =(SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'user','400002','zh_CN','无效的userToken');
