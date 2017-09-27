@@ -443,3 +443,8 @@ update `eh_organizations` eo set `set_admin_flag` = (select if(count(*) > 0, 1, 
 
 SET @id =(SELECT MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'user','400001','zh_CN','手机号码错误');
+
+
+-- 检验用户的临时token。报错信息-无效的用户token    add by yanjun 20170927
+SET @id =(SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'user','400002','zh_CN','无效的userToken');
