@@ -457,7 +457,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public void updateServiceAllianceCategory(UpdateServiceAllianceCategoryCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
+    	if(cmd.getNamespaceId() != null){
+    		namespaceId = cmd.getNamespaceId();
+    	}
 		ServiceAllianceCategories category = new ServiceAllianceCategories();
 		ServiceAllianceCategories parent = yellowPageProvider.findCategoryById(cmd.getParentId());
 		
