@@ -239,6 +239,9 @@ public class FieldServiceImpl implements FieldService {
     public void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response){
         List<FieldGroupDTO> groups = listFieldGroups(cmd);
         //先去掉 名为“基本信息” 的sheet，建议使用stream的方式
+        if(groups==null){
+            groups = new ArrayList<FieldGroupDTO>();
+        }
         for( int i = 0; i < groups.size(); i++){
             FieldGroupDTO group = groups.get(i);
             if(group.getGroupDisplayName().equals("基本信息")){
@@ -250,7 +253,7 @@ public class FieldServiceImpl implements FieldService {
         //工具类excel
         ExcelUtils excel = new ExcelUtils();
         //注入workbook
-        sheetGenerate(groups, workbook, excel,cmd.getNamespaceId());
+        sheetGenerate(groups, workbook, excel,cmd.getNamespaceId(),cmd.getCommunityId());
         sheetNum.remove();
         //输出
         ServletOutputStream out;
@@ -279,7 +282,8 @@ public class FieldServiceImpl implements FieldService {
         }
     }
 
-    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Integer namespaceId) {
+
+    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Integer namespaceId,Long communityId) {
         //循环遍历所有的sheet
         for( int i = 0; i < groups.size(); i++){
             //sheet卡为真的标识
@@ -287,7 +291,7 @@ public class FieldServiceImpl implements FieldService {
             FieldGroupDTO group = groups.get(i);
             //有children的sheet非叶节点，所以获得叶节点，对叶节点进行递归
             if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
-                sheetGenerate(group.getChildrenGroup(),workbook,excel,namespaceId);
+                sheetGenerate(group.getChildrenGroup(),workbook,excel,namespaceId,communityId);
                 //对于有子group的，本身为无效的sheet
                 isRealSheet = false;
             }
@@ -298,7 +302,10 @@ public class FieldServiceImpl implements FieldService {
                 cmd1.setNamespaceId(namespaceId);
                 cmd1.setGroupPath(group.getGroupPath());
                 cmd1.setModuleName(group.getModuleName());
+                cmd1.setCommunityId(communityId);
                 List<FieldDTO> fields = listFields(cmd1);
+                if(fields==null) fields = new ArrayList<FieldDTO>();
+
                 //使用字段，获得headers
                 String headers[] = new String[fields.size()];
                 String mandatory[] = new String[headers.length];
@@ -310,6 +317,7 @@ public class FieldServiceImpl implements FieldService {
                     }
                     headers[j] = field.getFieldDisplayName();
                 }
+
                 try {
                     //向工具中，传递workbook，sheet（group）的名称，headers，数据为null
                     excel.exportExcel(workbook,sheetNum.get(),group.getGroupDisplayName(),headers,null,mandatory);
@@ -340,8 +348,10 @@ public class FieldServiceImpl implements FieldService {
                 cmd1.setNamespaceId(namespaceId);
                 cmd1.setGroupPath(group.getGroupPath());
                 cmd1.setModuleName(group.getModuleName());
+                cmd1.setCommunityId(communityId);
                 //通过字段即获得header，顺序不定
                 List<FieldDTO> fields = listFields(cmd1);
+                if(fields==null) fields = new ArrayList<FieldDTO>();
                 String headers[] = new String[fields.size()];
                 String mandatory[] = new String[headers.length];
                 //根据每个group获得字段,作为header
@@ -596,9 +606,11 @@ public class FieldServiceImpl implements FieldService {
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
         //获得客户所拥有的sheet
         List<FieldGroupDTO> allGroups = listFieldGroups(cmd1);
+        if(allGroups==null) allGroups= new ArrayList<>();
         List<FieldGroupDTO> groups = new ArrayList<>();
 
         //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
+        if(cmd.getIncludedGroupIds()==null) cmd.setIncludedGroupIds("");
         String[] split = cmd.getIncludedGroupIds().split(",");
         for(int i = 0 ; i < split.length; i ++){
             long targetGroupId = Long.parseLong(split[i]);
@@ -670,7 +682,9 @@ public class FieldServiceImpl implements FieldService {
         //拿到所有的group，进行匹配sheet用
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
         List<FieldGroupDTO> partGroups = listFieldGroups(cmd1);
+        if(partGroups==null) partGroups = new ArrayList<>();
         List<FieldGroupDTO> groups = listFieldGroups(cmd1);
+        if(groups == null) groups = new ArrayList<>();
         for(int i = 0; i < partGroups.size(); i++){
             getAllGroups(partGroups.get(i),groups);
         }
@@ -693,7 +707,9 @@ public class FieldServiceImpl implements FieldService {
             cmd2.setModuleName(group.getModuleName());
             cmd2.setNamespaceId(group.getNamespaceId());
             cmd2.setGroupPath(group.getGroupPath());
+            cmd2.setCommunityId(cmd.getCommunityId());
             List<FieldDTO> fields = listFields(cmd2);
+            if(fields == null) fields = new ArrayList<>();
             //获得根据cell顺序的fieldname
             Row headRow = sheet.getRow(1);
 
