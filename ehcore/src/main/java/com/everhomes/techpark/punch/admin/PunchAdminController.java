@@ -727,7 +727,24 @@ public class PunchAdminController extends ControllerBase {
 		return response;
 	}
 
-	
+	/**
+	 * <b>URL: punch/getPunchGroupsCount</b>
+	 * <p>
+	 * 获取某公司总人数和关联人数
+	 * </p>
+	 */
+	@RequestMapping("getPunchGroupsCount")
+	@RestReturn(value = GetPunchGroupsCountResponse.class)
+	public RestResponse getPunchGroupsCount(@Valid GetPunchGroupsCountCommand cmd) {
+		GetPunchGroupsCountResponse commandResponse = punchService.getPunchGroupsCount(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+
 	/**
 	 * <b>URL: punch/updatePunchGroup</b>
 	 * <p>

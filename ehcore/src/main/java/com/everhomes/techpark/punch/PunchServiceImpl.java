@@ -32,6 +32,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.techpark.punch.*;
+import com.everhomes.rest.techpark.punch.admin.*;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
@@ -113,49 +114,6 @@ import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.techpark.punch.admin.AddPunchGroupCommand;
-import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
-import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
-import com.everhomes.rest.techpark.punch.admin.AddPunchWiFiCommand;
-import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
-import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
-import com.everhomes.rest.techpark.punch.admin.GetPunchGroupCommand;
-import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
-import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchGroupsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchGroupsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchPointsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchPointsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRulesCommonCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRulesResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchWiFisResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
-import com.everhomes.rest.techpark.punch.admin.PunchDayDetailDTO;
-import com.everhomes.rest.techpark.punch.admin.PunchGroupDTO;
-import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
-import com.everhomes.rest.techpark.punch.admin.PunchSchedulingDTO;
-import com.everhomes.rest.techpark.punch.admin.PunchSchedulingEmployeeDTO;
-import com.everhomes.rest.techpark.punch.admin.PunchSpecialDayDTO;
-import com.everhomes.rest.techpark.punch.admin.PunchTargetType;
-import com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO;
-import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
-import com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO;
-import com.everhomes.rest.techpark.punch.admin.QryPunchLocationRuleListResponse;
-import com.everhomes.rest.techpark.punch.admin.UpdatePunchPointCommand;
-import com.everhomes.rest.techpark.punch.admin.UpdatePunchSchedulingMonthCommand;
-import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
-import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
-import com.everhomes.rest.techpark.punch.admin.UserMonthLogsDTO;
-import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -6542,25 +6500,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd) {
 		ListPunchGroupsResponse response = new ListPunchGroupsResponse();
-        Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
-        Integer allOrganizationInteger = organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
-		response.setAllEmployeeCount(allOrganizationInteger);
-		// 未关联人数
-		List<OrganizationMemberDetails> details = uniongroupConfigureProvider.listDetailNotInUniongroup(org.getNamespaceId(), org.getId());
-		if (null != details && details.size()>0)
-			response.setUnjoinPunchGroupEmployees(details.stream().map(r ->{
-				OrganizationMemberDetailDTO dto = ConvertHelper.convert(r, OrganizationMemberDetailDTO.class);
-				Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(org.getNamespaceId(),r.getId(),OrganizationGroupType.DEPARTMENT.getCode());
-		        String department = "";
-		        if(!StringUtils.isEmpty(departMap)){
-		            for(Long k : departMap.keySet()){
-		                department += (departMap.get(k) + ",");
-		            }
-		            department = department.substring(0,department.length()-1);
-		        }
-		        dto.setDepartment(department);
-				return dto;
-			}).collect(Collectors.toList()));
+
 
         //  获取所有批次
 		if (cmd.getPageAnchor() == null)
@@ -7795,6 +7735,33 @@ public class PunchServiceImpl implements PunchService {
 		String key = cmd.getQrToken().trim();
 		deleteValueOperations(key);
 	}
+
+	@Override
+	public GetPunchGroupsCountResponse getPunchGroupsCount(GetPunchGroupsCountCommand cmd) {
+		GetPunchGroupsCountResponse response = new GetPunchGroupsCountResponse();
+		Organization org = organizationProvider.findOrganizationById(cmd.getOwnerId());
+		Integer allOrganizationInteger = organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
+		response.setAllEmployeeCount(allOrganizationInteger);
+		// 未关联人数
+		List<OrganizationMemberDetails> details = uniongroupConfigureProvider.listDetailNotInUniongroup(org.getNamespaceId(), org.getId());
+//		if (null != details && details.size()>0)
+//			response.setUnjoinPunchGroupEmployees(details.stream().map(r ->{
+//				OrganizationMemberDetailDTO dto = ConvertHelper.convert(r, OrganizationMemberDetailDTO.class);
+//				Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(org.getNamespaceId(),r.getId(),OrganizationGroupType.DEPARTMENT.getCode());
+//				String department = "";
+//				if(!StringUtils.isEmpty(departMap)){
+//					for(Long k : departMap.keySet()){
+//						department += (departMap.get(k) + ",");
+//					}
+//					department = department.substring(0,department.length()-1);
+//				}
+//				dto.setDepartment(department);
+//				return dto;
+//			}).collect(Collectors.toList()));
+		response.setUnjoinPunchGroupCount(details == null ? 0 : details.size());
+		return response;
+	}
+
 	/**
 	 * 获取key在redis操作的valueOperations
 	 */
