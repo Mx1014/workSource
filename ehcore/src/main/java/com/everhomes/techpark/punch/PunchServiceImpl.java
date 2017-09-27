@@ -6400,14 +6400,24 @@ public class PunchServiceImpl implements PunchService {
 			}
 			if (schedulings.size() > 0) {
 				//批量保存
+
+				Long t1 = System.currentTimeMillis();
 				List<EhPunchSchedulings> ehPsList = new ArrayList<>();
 				Long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), schedulings.size());
+
 				for (PunchScheduling ps : schedulings) {
 					ps.setId(beginId++);
 					EhPunchSchedulings eps = ConvertHelper.convert(ps, EhPunchSchedulings.class);
 					ehPsList.add(eps);
 				}
+				Long t2 = System.currentTimeMillis();
+
+				LOGGER.debug("for schedulings time "+  t2 + "cost: " +(t2-t1));
+
 				punchSchedulingProvider.batchCreatePunchSchedulings(ehPsList);
+				Long t3 = System.currentTimeMillis();
+
+				LOGGER.debug("batch save schedulings time "+  t3 + "cost: " +(t3-t2));
 			}
 		}
 	}
