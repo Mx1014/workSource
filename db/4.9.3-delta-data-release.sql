@@ -453,3 +453,9 @@ INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@i
 -- 检验用户的临时token。报错信息-无效的用户token    add by yanjun 20170927
 SET @id =(SELECT MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'user','400002','zh_CN','无效的userToken');
+
+
+-- 修改园区快讯模块默认参数 add by sfyan 20170927
+update `eh_service_modules` set instance_config = '{"timeWidgetStyle":"date","entityCount":0,"subjectHeight":0,"descriptionHeight":0}' where id = 10800;
+
+
