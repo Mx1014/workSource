@@ -2,6 +2,7 @@
 -- -------------------------------------------------------------------------------------------------------------------------------------------------
 -- ------------- entry_id 写入 --------
 DROP PROCEDURE if exists create_service_alliance_entry_id;
+delimiter $$;
 CREATE PROCEDURE `create_service_alliance_entry_id` ()
 BEGIN
   DECLARE ns INTEGER;
@@ -25,8 +26,9 @@ BEGIN
 		SET nsorder = nsorder + 1;
   END LOOP;
   CLOSE cur;
-END;
+END $$;
 
+delimiter ;
 CALL create_service_alliance_entry_id;
 DROP PROCEDURE if exists create_service_alliance_entry_id;
 -- ------------- entry_id 写入 end --------
@@ -91,7 +93,7 @@ begin
 		SELECT CONCAT('exist id = ',ISNULL(@iscreated));
 	END IF;
 end $$;
-
+delimiter ;
 CALL create_service_alliance_menu;
 drop procedure  if exists create_service_alliance_menu;
 
