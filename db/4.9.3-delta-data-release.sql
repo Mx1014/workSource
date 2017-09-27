@@ -2,6 +2,7 @@
 -- -------------------------------------------------------------------------------------------------------------------------------------------------
 -- ------------- entry_id 写入 --------
 DROP PROCEDURE if exists create_service_alliance_entry_id;
+delimiter $$;
 CREATE PROCEDURE `create_service_alliance_entry_id` ()
 BEGIN
   DECLARE ns INTEGER;
@@ -25,8 +26,9 @@ BEGIN
 		SET nsorder = nsorder + 1;
   END LOOP;
   CLOSE cur;
-END;
+END $$;
 
+delimiter ;
 CALL create_service_alliance_entry_id;
 DROP PROCEDURE if exists create_service_alliance_entry_id;
 -- ------------- entry_id 写入 end --------
@@ -91,7 +93,7 @@ begin
 		SELECT CONCAT('exist id = ',ISNULL(@iscreated));
 	END IF;
 end $$;
-
+delimiter ;
 CALL create_service_alliance_menu;
 drop procedure  if exists create_service_alliance_menu;
 
@@ -171,6 +173,11 @@ DROP PROCEDURE if exists delete_service_alliance_menu_scope;
 -- ------------- 删除服务广场没有使用的应用入口的菜单Scope end--------
 -- 删除服务联盟老菜单
 DELETE from eh_web_menus WHERE id = 40500;
+-- 菜单位置调整
+DELETE FROM eh_web_menus WHERE id in (40510,40520,40530,40541,40542);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('40500', '服务联盟', '40000', NULL, NULL, '1', '2', '/40000/40500', 'park', '450', '40500', '2', NULL, 'module');
+UPDATE eh_web_menus SET path = CONCAT('/40000/40500/',parent_id,'/',id),`level`=4 WHERE id >=41700 AND id <=44660 AND `level` =3;
+UPDATE eh_web_menus SET parent_id = 40500,path = CONCAT('/40000/40500/',id),`level`=3 WHERE id >=41700 AND id <=44660 AND `level` =2;
 -- end by dengs, 20170925 服务联盟2.9
 
 
@@ -421,9 +428,9 @@ VALUES ((@max_id := @max_id + 1), 999983, 'ForumLayout', '{"versionCode":"201707
 
 SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
-VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'DISCOVER', '发现', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 62, '', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, NULL, 0, NULL);
+VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'DISCOVER', '图文', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 62, '', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, NULL, 0, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
-VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'DISCOVER', '发现', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 62, '', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 0, NULL, NULL, 0, NULL);
+VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'DISCOVER', '图文', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 62, '', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 0, NULL, NULL, 0, NULL);
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
 VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'TRD_VIDEO', '视频', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 14, '{"url":"https://weishang.movmovie.com/video/zz-zone.html","declareFlag": "1"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, NULL, 0, NULL);
@@ -441,3 +448,8 @@ update `eh_organizations` eo set `set_admin_flag` = (select if(count(*) > 0, 1, 
 
 SET @id =(SELECT MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'user','400001','zh_CN','手机号码错误');
+
+
+-- 检验用户的临时token。报错信息-无效的用户token    add by yanjun 20170927
+SET @id =(SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'user','400002','zh_CN','无效的userToken');

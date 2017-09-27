@@ -47,4 +47,7 @@ public interface UserServiceErrorCode {
 
     int ERROR_INVALID_PHONE = 400001; //手机号码错误
 
+    int ERROR_INVALID_USERTOKEN = 400002; //无效的用户token
+
+
 }

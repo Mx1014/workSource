@@ -42,6 +42,7 @@ import com.everhomes.util.StringHelper;
  */
 public class OrganizationExportDetailDTO {
 
+	private String name;
 	private String displayName;
 	private String emailDomain;
 	@ItemType(value = AddressDTO.class)
@@ -60,6 +61,14 @@ public class OrganizationExportDetailDTO {
 	private String description;
 	private String website;
 	private String unifiedSocialCreditCode;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public String getUnifiedSocialCreditCode() {
 		return unifiedSocialCreditCode;

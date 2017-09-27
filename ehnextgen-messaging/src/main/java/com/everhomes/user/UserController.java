@@ -1363,4 +1363,22 @@ public class UserController extends ControllerBase {
 		resp.setErrorDescription("OK");
 		return resp;
 	}
+
+	/**
+	 * <b>URL: /user/checkUserTemporaryToken</b>
+	 * 检验用户临时token，标准是：1、是本系统加密的token，2、token未过期
+	 * 成功会返回改token内容
+	 * @return  OK
+	 */
+	@RequestMapping(value = "checkUserTemporaryToken")
+	@RequireAuthentication(false)
+	@RestReturn(UserTemporaryToken.class)
+	public RestResponse checkUserTemporaryToken(@Valid CheckUserTemporaryTokenCommand cmd) {
+		UserTemporaryToken token =  userService.checkUserTemporaryToken(cmd);
+		RestResponse resp = new RestResponse(token);
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+
+	}
 }
