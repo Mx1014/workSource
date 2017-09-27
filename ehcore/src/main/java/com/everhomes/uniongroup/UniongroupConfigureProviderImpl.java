@@ -8,7 +8,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationMemberDetailsMapper;
-import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.sequence.SequenceProvider;
@@ -22,6 +21,7 @@ import com.everhomes.server.schema.tables.records.EhUniongroupMemberDetailsRecor
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RecordHelper;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -259,21 +259,27 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     @Override
     public List<UniongroupMemberDetail> listUniongroupMemberDetail(Integer namespaceId, Long groupId, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-//        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
-        SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId));
-        List<EhUniongroupMemberDetailsRecord> records = query.fetch();
-        List<UniongroupMemberDetail> result = new ArrayList<>();
-        if (records != null) {
-            records.stream().map(r -> {
-                result.add(ConvertHelper.convert(r, UniongroupMemberDetail.class));
-                return null;
-            }).collect(Collectors.toList());
-        }
-        if (result != null && result.size() != 0) {
-            return result;
+        List<UniongroupMemberDetail> list = context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.UPDATE_TIME,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.OPERATOR_UID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_TYPE,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).leftOuterJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
+                .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
+                .fetch().map(r -> {
+                    return RecordHelper.convert(r, UniongroupMemberDetail.class);
+                });
+        if (list != null && list.size() != 0) {
+            return list;
         }
         return null;
     }
@@ -281,22 +287,44 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     @Override
     public List<UniongroupMemberDetail> listUniongroupMemberDetail(Long groupId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-//        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
-        SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
-        List<EhUniongroupMemberDetailsRecord> records = query.fetch();
-        List<UniongroupMemberDetail> result = new ArrayList<>();
-        if (records != null) {
-            records.stream().map(r -> {
-                result.add(ConvertHelper.convert(r, UniongroupMemberDetail.class));
-                return null;
-            }).collect(Collectors.toList());
-        }
-        if (result != null && result.size() != 0) {
-            return result;
+        List<UniongroupMemberDetail> list = context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.UPDATE_TIME,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.OPERATOR_UID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_TYPE,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).leftOuterJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
+                .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
+                .fetch().map(r -> {
+                    return RecordHelper.convert(r, UniongroupMemberDetail.class);
+                });
+        if (list != null && list.size() != 0) {
+            return list;
         }
         return null;
+//        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
+//        SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
+//        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
+//        List<EhUniongroupMemberDetailsRecord> records = query.fetch();
+//        List<UniongroupMemberDetail> result = new ArrayList<>();
+//        if (records != null) {
+//            records.stream().map(r -> {
+//                result.add(ConvertHelper.convert(r, UniongroupMemberDetail.class));
+//                return null;
+//            }).collect(Collectors.toList());
+//        }
+//        if (result != null && result.size() != 0) {
+//            return result;
+//        }
+//        return null;
     }
+
 
     @Override
     public void deleteUniongroupMemberDetailsByDetailIds(List<Long> detailIds) {
@@ -311,24 +339,52 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     @Override
     public List<UniongroupMemberDetail> listUniongroupMemberDetailByGroupType(Integer namespaceId, Long ownerId, Long groupId, String groupType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-//        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
-        SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType));
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId));
+        List<UniongroupMemberDetail> list = null;
         if (groupId != null && groupId != 0L) {
-            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
+            list = context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.UPDATE_TIME,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.OPERATOR_UID,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_TYPE,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).leftOuterJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                    .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
+                    .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                    .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType))
+                    .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
+                    .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
+                    .fetch().map(r -> {
+                        return RecordHelper.convert(r, UniongroupMemberDetail.class);
+                    });
+        } else {
+            list = context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.UPDATE_TIME,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.OPERATOR_UID,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_TYPE,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).leftOuterJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                    .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
+                    .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                    .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType))
+                    .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
+                    .fetch().map(r -> {
+                        return RecordHelper.convert(r, UniongroupMemberDetail.class);
+                    });
         }
-        List<EhUniongroupMemberDetailsRecord> records = query.fetch();
-        List<UniongroupMemberDetail> result = new ArrayList<>();
-        if (records != null) {
-            records.stream().map(r -> {
-                result.add(ConvertHelper.convert(r, UniongroupMemberDetail.class));
-                return null;
-            }).collect(Collectors.toList());
-        }
-        if (result != null && result.size() != 0) {
-            return result;
+
+        if (list != null && list.size() != 0) {
+            return list;
         }
         return null;
     }
@@ -415,7 +471,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         TableLike t2 = Tables.EH_UNIONGROUP_MEMBER_DETAILS.as("t2");
         SelectJoinStep step = context.select(t1.fields()).from(t1).leftOuterJoin(t2).on(t2.field("detail_id").eq(t1.field("id")));
         Condition condition = t1.field("organization_id").eq(organizationId).and(t1.field("namespace_id").eq(namespaceId)).and(t2.field("detail_id").isNull());
-        condition = condition.and(t1.field("contact_token").in(context.selectDistinct(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN).from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))));
+        condition = condition.and(t1.field("id").in(context.selectDistinct(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))));
         List<OrganizationMemberDetails> details = step.where(condition).fetch().map(new OrganizationMemberDetailsMapper());
         LOGGER.debug("listDetailNotInUniongroup 's sql is :" + step.where(condition).getSQL());
         step.close();

@@ -6,7 +6,16 @@ import java.util.List;
 /**
  * Created by Wentian Wang on 2017/9/13.
  */
-
+/**
+ *<ul>
+ * <li>moduleName：module name</li>
+ * <li>namespaceId：域空间</li>
+ * <li>customerId：客户id</li>
+ * <li>customerType：客户类型</li>
+ * <li>includedGroupIds：导出需要的group的id，用逗号相连接</li>
+ * <li>communityId：园区id</li>
+ *</ul>
+ */
 public class ExportFieldsExcelCommand {
 
     private String moduleName;
@@ -17,12 +26,22 @@ public class ExportFieldsExcelCommand {
     private Byte customerType;
     private String includedGroupIds;
 
+    private Long communityId;
+
     public String getModuleName() {
         return moduleName;
     }
 
     public void setModuleName(String moduleName) {
         this.moduleName = moduleName;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public Integer getNamespaceId() {

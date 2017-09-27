@@ -120,9 +120,7 @@ public class SmsLogProviderImpl implements SmsLogProvider {
     }
 
     private void ifNotNull(Object condition, Callback callback) {
-        if (condition instanceof String && condition.toString().trim().length() > 0) {
-            callback.condition();
-        } else if (condition != null) {
+        if (condition != null && condition.toString().trim().length() > 0) {
             callback.condition();
         }
     }

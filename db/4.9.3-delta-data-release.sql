@@ -98,6 +98,7 @@ drop procedure  if exists create_service_alliance_menu;
 -- ------------- 新建菜单、权限、等 END--------
 -- ------------- 新建菜单Scope --------
 DROP PROCEDURE if exists create_service_alliance_menu_scope;
+delimiter //
 CREATE PROCEDURE `create_service_alliance_menu_scope` ()
 BEGIN
   DECLARE aid LONG;
@@ -130,10 +131,44 @@ BEGIN
 
   END LOOP;
   CLOSE cur;
-END;
+END
+//
+delimiter ;
 CALL create_service_alliance_menu_scope;
 DROP PROCEDURE if exists create_service_alliance_menu_scope;
 -- ------------- 新建菜单Scope END--------
+-- ------------- 删除服务广场没有使用的应用入口的菜单Scope --------
+DROP PROCEDURE if exists delete_service_alliance_menu_scope;
+delimiter //
+CREATE PROCEDURE `delete_service_alliance_menu_scope` ()
+BEGIN
+  DECLARE aid LONG;
+	DECLARE ans INTEGER;
+
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR select namespace_id,entry_id*100+41600 from eh_service_alliance_categories WHERE  parent_id =0 AND id NOT IN (select a.categry_id from (SELECT DISTINCT CAST(SUBSTRING(action_data,LOCATE('type":',action_data)+6,LOCATE(',',action_data)-6-LOCATE('type":',action_data)) AS UNSIGNED) AS categry_id from eh_launch_pad_items WHERE action_type = 33) as a WHERE a.categry_id IS NOT NULL);
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+    FETCH cur INTO ans,aid;
+    IF done THEN
+      LEAVE read_loop;
+    END IF;
+		DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid;
+	  DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid+10;
+	  DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid+20;
+	  DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid+30;
+	  DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid+40;
+	  DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid+50;
+		DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid+60;
+  END LOOP;
+  CLOSE cur;
+END
+//
+delimiter ;
+CALL delete_service_alliance_menu_scope;
+DROP PROCEDURE if exists delete_service_alliance_menu_scope;
+-- ------------- 删除服务广场没有使用的应用入口的菜单Scope end--------
 -- 删除服务联盟老菜单
 DELETE from eh_web_menus WHERE id = 40500;
 -- end by dengs, 20170925 服务联盟2.9
@@ -376,3 +411,33 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES((@eh_configurations_id := @eh_configurations_id + 1),'wx.bind.phone.url','/service-hub/build/#/register','微信用户绑定手机页面_成都孵化器','999964',NULL);
 
 -- merge from incubator-1.0 成都孵化器 end by yanjun
+
+-- 科兴的论坛 2.1 add by xq.tian 2017/09/26
+SET @max_id = (SELECT max(id) FROM `eh_launch_pad_layouts`);
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`)
+VALUES ((@max_id := @max_id + 1), 999983, 'ForumLayout', '{"versionCode":"2017071201","versionName":"4.7.3","layoutName":"ForumLayout","displayName":"论坛","groups":[{"groupName":"","widget":"Tab","instanceConfig":{"itemGroup":"TabGroup"},"style":"1","defaultOrder":1,"separatorFlag":0,"separatorHeight":0}]}', 2017071201, 2017071201, 2, NOW(), 'park_tourist', 0, 0, 0);
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`)
+VALUES ((@max_id := @max_id + 1), 999983, 'ForumLayout', '{"versionCode":"2017071201","versionName":"4.7.3","layoutName":"ForumLayout","displayName":"论坛","groups":[{"groupName":"","widget":"Tab","instanceConfig":{"itemGroup":"TabGroup"},"style":"1","defaultOrder":1,"separatorFlag":0,"separatorHeight":0}]}', 2017071201, 2017071201, 2, NOW(), 'pm_admin', 0, 0, 0);
+
+SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'DISCOVER', '发现', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 62, '', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, NULL, 0, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'DISCOVER', '发现', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 62, '', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 0, NULL, NULL, 0, NULL);
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'TRD_VIDEO', '视频', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 14, '{"url":"https://weishang.movmovie.com/video/zz-zone.html","declareFlag": "1"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, NULL, 0, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES ((@item_id := @item_id + 1), 999983, 0, 0, 0, '/forum', 'TabGroup', 'TRD_VIDEO', '视频', 'cs://1/image/aW1hZ2UvTVRveU1ESTRabVJrTVRRek56ZGhOV1kyT0RCaU1tRTJZekEwTVdNMU9URmxPQQ', 1, 1, 14, '{"url":"https://weishang.movmovie.com/video/zz-zone.html","declareFlag": "1"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 0, NULL, NULL, 0, NULL);
+
+SET @apps_id = IFNULL((SELECT MAX(id) FROM `eh_apps`), 1);
+INSERT INTO `eh_apps` (`creator_uid`, `app_key`, `secret_key`, `name`, `description`, `status`, `create_time`, `update_uid`, `update_time`)
+VALUES ((@apps_id := @apps_id + 1), '466dd353-bdd8-4764-9315-56e6e7151f06', 'KemccuJycjKbnYnBUIzQLU0LNB5S8aDpeMNIT0mxKVFGtz8pKj83spLELs1y49mAY89hzGqVdODsgiyTaKveig==', 'kexing.qipai', 'kexing qipai app', 1, NOW(), NULL, NULL);
+
+
+-- 重新刷新organization的setAdminFlag字段的值 add by sfyan 20170926
+update `eh_organizations` eo set `set_admin_flag` = (select if(count(*) > 0, 1, 0) from `eh_organization_members` where organization_id = eo.id and `member_group` = 'manager' and status = 3) where `group_type` = 'ENTERPRISE' and status = 2;
+
+
+SET @id =(SELECT MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'user','400001','zh_CN','手机号码错误');

@@ -564,6 +564,11 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         assetProvider.updateBillsToSettled(cmd.getContractId(),cmd.getOwnerType(),cmd.getOwnerId());
     }
 
+    @Override
+    public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
+        return null;
+    }
+
 
     @Override
     public ShowBillDetailForClientResponse getBillDetailForClient(String billId,String targetType) {

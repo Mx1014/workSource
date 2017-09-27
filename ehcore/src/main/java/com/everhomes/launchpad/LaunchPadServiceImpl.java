@@ -433,8 +433,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
            LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
        }
        getCmd.setSceneType(baseScene);
-       getCmd.setSceneToken(cmd.getSceneToken());
-       
+
        Community community = null;
        GetLaunchPadItemsCommandResponse cmdResponse = null;
        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
@@ -476,7 +475,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
            orgCmd.setItemLocation(cmd.getItemLocation());
            orgCmd.setNamespaceId(sceneToken.getNamespaceId());
            orgCmd.setSceneType(baseScene);
-           orgCmd.setSceneToken(cmd.getSceneToken());
            orgCmd.setOrganizationId(sceneToken.getEntityId());
            cmdResponse = getLaunchPadItems(orgCmd, request);
            break;
@@ -484,7 +482,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
            break;
        }
-       
+
+	   refreshActionData(cmdResponse.getLaunchPadItems(), sceneToken);
        return cmdResponse;
    }
    
@@ -554,6 +553,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
            break;
        }
+
+	   refreshActionData(cmdResponse.getLaunchPadItems(), sceneToken);
        
        return cmdResponse;
    }
@@ -624,6 +625,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
 				break;
 		}
+
+		//刷新actionData
+		if(categryItemDTOs != null && categryItemDTOs.size() > 0){
+			List<LaunchPadItemDTO> dtos  = new ArrayList<>();
+			categryItemDTOs.forEach(r ->
+				dtos.addAll(r.getLaunchPadItems())
+			);
+			refreshActionData(dtos, sceneToken);
+		}
+
 
 		return categryItemDTOs;
 	}
@@ -857,7 +868,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 //		}		
 //		return result;
 		
-		return processLaunchPadItems(token, userId, community.getId(), allItems, request,itemDisplayFlag, cmd.getSceneToken());
+		return processLaunchPadItems(token, userId, community.getId(), allItems, request,itemDisplayFlag);
 	}
 	
     private List<LaunchPadItemDTO> getItemsByOrg(GetLaunchPadItemsByOrgCommand cmd, HttpServletRequest request, ItemDisplayFlag itemDisplayFlag){
@@ -956,7 +967,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 
 
-        return processLaunchPadItems(token, userId, communityId, allItems, request, itemDisplayFlag, cmd.getSceneToken());
+        return processLaunchPadItems(token, userId, communityId, allItems, request, itemDisplayFlag);
     }
 
 	private List<LaunchPadItem> getLaunchPadItemsByScopeType(Integer namespaceId, String itemLocation, String itemGroup, String sceneType, Long organizationId, Long communityId){
@@ -1020,7 +1031,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	}
 
 
-	private List<LaunchPadItemDTO> processLaunchPadItems(String token, Long userId, Long communityId, List<LaunchPadItem> allItems, HttpServletRequest request,ItemDisplayFlag itemDisplayFlag, String sceneToken) {
+	private List<LaunchPadItemDTO> processLaunchPadItems(String token, Long userId, Long communityId, List<LaunchPadItem> allItems, HttpServletRequest request,ItemDisplayFlag itemDisplayFlag) {
         List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
 	    try{
             List<LaunchPadItemDTO> distinctDto = new ArrayList<LaunchPadItemDTO>();
@@ -1142,10 +1153,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 					});
 			}
 
-
-			refreshActionData(result, userId, sceneToken);
-
-
         }catch(Exception e){
             LOGGER.error("Process item aciton data is error.",e);
             return null;
@@ -1153,7 +1160,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         return result;
 	}
 
-	private void refreshActionData(List<LaunchPadItemDTO> dtos, Long userId, String sceneToken){
+	private void refreshActionData(List<LaunchPadItemDTO> dtos, SceneTokenDTO sceneToken){
 		if(dtos != null && dtos.size() > 0){
 			dtos.forEach(r ->{
 				if(r.getActionData() != null && !"".equals(r.getActionData().trim())){
@@ -1162,14 +1169,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 					if(jsonObject.get("handler") != null){
 						LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ String.valueOf(jsonObject.get("handler")));
 						if(handler != null){
-							String newActionData = handler.refreshActionData(r.getActionData(), userId, sceneToken);
+							String newActionData = handler.refreshActionData(r.getActionData(), sceneToken);
 							r.setActionData(newActionData);
 						}
 					}
 
 					//调用默认的default_host handler处理url，将{key}等转换成实际的host
 					LaunchPadItemActionDataHandler handler = PlatformContext.getComponent(LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX+ LaunchPadItemActionDataHandler.DEFAULT);
-					String newActionData = handler.refreshActionData(r.getActionData(), userId, sceneToken);
+					String newActionData = handler.refreshActionData(r.getActionData(), sceneToken);
 					r.setActionData(newActionData);
 				}
 			});
@@ -2443,7 +2450,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	           LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
 	           break;
 	       }
-	       
+
 	       return ConvertHelper.convert(userItem, UserLaunchPadItemDTO.class);
 	}
 

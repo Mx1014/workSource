@@ -5,14 +5,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.everhomes.general_approval.GeneralApproval;
-import com.everhomes.general_approval.GeneralApprovalProvider;
-import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.server.schema.Tables;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -24,6 +24,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,13 +45,16 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
-import com.everhomes.forum.Post;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.reserver.ReserverEntity;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
@@ -111,6 +115,7 @@ import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.YellowPageType;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.user.RequestTemplates;
@@ -767,20 +772,17 @@ public class YellowPageServiceImpl implements YellowPageService {
         	 }
         	
         }else{
-//			if (cmd.getOwnerType().equals(ServiceAllianceBelongType.ORGANAIZATION.getCode())) {
-//				List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
-//				for (OrganizationCommunity organizationCommunity : communityList) {
-//					Condition condition = Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(organizationCommunity.getCommunityId())
-//							.and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
-//					if (conditionOR == null) {
-//						conditionOR = condition;
-//					} else {
-//						conditionOR = conditionOR.or(condition);
-//					}
-//				}
-//			}
+        	Condition condition =  Tables.EH_SERVICE_ALLIANCES.RANGE.eq("all");
+			if (cmd.getOwnerType().equals(ServiceAllianceBelongType.ORGANAIZATION.getCode())) {
+				Condition conditionOR = DSL.trueCondition();
+				List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+				for (OrganizationCommunity orgcommunity : communityList) {
+					conditionOR = conditionOR.and(Tables.EH_SERVICE_ALLIANCES.RANGE.contains(orgcommunity.getCommunityId()+""));
+				}
+				condition.or(conditionOR);
+			}
         	sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
- 	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
+ 	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords(),condition );
 
         }
 
@@ -878,8 +880,20 @@ public class YellowPageServiceImpl implements YellowPageService {
 		boolean enableComment = true;
 		if(sourceRequestType == ServiceAllianceSourceRequestType.CLIENT || sourceRequestType == null){//客户端请求
 			//查询当前机构的服务联盟应用入口是否允许评论
-			ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(ownerType,ownerId,type);
-			if(sa == null || CommonStatus.ACTIVE != CommonStatus.fromCode(sa.getEnableComment())){
+			String finalOwnerType = null;
+			Long finalOwnerId = null;
+			if (ownerType.equals(ServiceAllianceBelongType.COMMUNITY.getCode())){
+				finalOwnerType = ServiceAllianceBelongType.ORGANAIZATION.getCode();
+				List<Organization> organizationList= this.organizationProvider.findOrganizationByCommunityId(ownerId);
+				if(organizationList!=null && organizationList.size()>0){
+					finalOwnerId = organizationList.get(0).getId();
+				}
+			}
+			
+			ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(finalOwnerType,finalOwnerId,type);
+			ServiceAlliances sa2 = this.yellowPageProvider.queryServiceAllianceTopic(ownerType,ownerId,type);
+			if((sa == null || CommonStatus.ACTIVE != CommonStatus.fromCode(sa.getEnableComment()))
+					&& (sa2 == null || CommonStatus.ACTIVE != CommonStatus.fromCode(sa2.getEnableComment()))){
 				enableComment = false;
 			}
 		}
