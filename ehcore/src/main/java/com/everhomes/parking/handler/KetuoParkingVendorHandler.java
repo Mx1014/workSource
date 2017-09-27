@@ -339,7 +339,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 	}
 
 	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
 		String plateNumber = order.getPlateNumber();
 
 		KetuoCard cardInfo = getCard(plateNumber);
@@ -347,11 +347,10 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		String cardType = CAR_TYPE;
 
 		if(null != cardInfo) {
-			long expireTime = strToLong(cardInfo.getValidTo());
-			ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
-			if (!checkExpireTime(parkingLot, expireTime)) {
+//			long expireTime = strToLong(cardInfo.getValidTo());
+//			if (!checkExpireTime(parkingLot, expireTime)) {
 				cardType = cardInfo.getCarType();
-			}
+//			}
 		}
 		for(KetuoCardRate rate: getCardRule(cardType)) {
 			if(rate.getRuleId().equals(order.getRateToken())) {
@@ -364,6 +363,11 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 					"Rate not found.");
 		}
 		order.setRateName(ketuoCardRate.getRuleName());
+
+		BigDecimal ratePrice = new BigDecimal(ketuoCardRate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+
+		checkAndSetOrderPrice(parkingLot, order, ratePrice);
+
 	}
 
 	private KetuoTempFee getTempFee(String plateNumber) {

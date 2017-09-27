@@ -163,7 +163,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	}
 
 	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
 		String plateNumber = order.getPlateNumber();
 		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(order.getRateToken())) {
 			order.setRateName(EXPIRE_CUSTOM_RATE_TOKEN);
@@ -174,12 +174,8 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			String cardType = CAR_TYPE;
 			Integer freeMoney = 0;
 			if(null != cardInfo) {
-				long expireTime = strToLong(cardInfo.getValidTo());
-				ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
-				if (!checkExpireTime(parkingLot, expireTime)) {
-					cardType = cardInfo.getCarType();
-					freeMoney = cardInfo.getFreeMoney();
-				}
+				cardType = cardInfo.getCarType();
+				freeMoney = cardInfo.getFreeMoney();
 			}
 			for(KetuoCardRate rate: getCardRule(cardType)) {
 				if(rate.getRuleId().equals(order.getRateToken())) {
@@ -193,8 +189,12 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			}
 			order.setRateName(ketuoCardRate.getRuleName());
 
-			order.setPrice(new BigDecimal(order.getPrice().intValue() * 100 - (freeMoney * order.getMonthCount().intValue()))
-							.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
+			BigDecimal ratePrice = new BigDecimal(ketuoCardRate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+
+			checkAndSetOrderPrice(parkingLot, order, ratePrice);
+
+//			order.setPrice(new BigDecimal(order.getPrice().intValue() * 100 - (freeMoney * order.getMonthCount().intValue()))
+//							.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 		}
 
 	}

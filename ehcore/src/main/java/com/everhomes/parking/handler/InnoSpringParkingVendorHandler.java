@@ -77,7 +77,7 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
     }
 
     @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot, String plateNumber, String cardNo) {
     	List<ParkingRechargeRateDTO> result;
 
 		List<InnoSpringCardRate> rates = getCardRule();
@@ -108,7 +108,18 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
     }
 
 	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
+		List<InnoSpringCardRate> rates = getCardRule();
+		InnoSpringCardRate rate = null;
+		String cardType = convertMonthCount(order.getMonthCount().intValue());
+		for (InnoSpringCardRate r: rates) {
+			if (r.getCard_type().equals(cardType)) {
+				rate = r;
+			}
+		}
+		BigDecimal ratePrice = new BigDecimal(rate.getFee());
+
+		checkAndSetOrderPrice(parkingLot, order, ratePrice);
 
 	}
 
@@ -127,6 +138,16 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 			case "3": return 6;
 			case "4": return 12;
 			default:  return 1;
+		}
+	}
+
+	private String convertMonthCount(Integer monthCount) {
+		switch (monthCount) {
+			case 1: return "1";
+			case 3: return "2";
+			case 6: return "3";
+			case 12: return "4";
+			default:  return "1";
 		}
 	}
 

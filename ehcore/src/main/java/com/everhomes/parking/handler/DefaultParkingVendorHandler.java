@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +74,36 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         parkingCardDTO.setIsValid(true);//兼容历史app
 
         return parkingCardDTO;
+    }
+
+    void updateParkingRechargeOrderRateInfo(ParkingLot parkingLot, ParkingRechargeOrder order) {
+        ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
+        if(null == rate) {
+            LOGGER.error("Rate not found, cmd={}", order);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Rate not found.");
+        }
+        order.setRateName(rate.getRateName());
+
+        checkAndSetOrderPrice(parkingLot, order, rate.getPrice());
+
+    }
+
+    void checkAndSetOrderPrice(ParkingLot parkingLot, ParkingRechargeOrder order, BigDecimal ratePrice) {
+
+        BigDecimal originalPrice = ratePrice;
+        if (null != parkingLot.getMonthlyDiscountFlag()) {
+            if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()) {
+                ratePrice = ratePrice.multiply(new BigDecimal(parkingLot.getMonthlyDiscount()))
+                        .divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+            }
+        }
+        if (order.getPrice().compareTo(ratePrice) != 0) {
+            LOGGER.error("Invalid order price, orderPrice={}, ratePrice={}", order.getPrice(), ratePrice);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid order price.");
+        }
+        order.setOriginalPrice(originalPrice);
     }
 
     /**
