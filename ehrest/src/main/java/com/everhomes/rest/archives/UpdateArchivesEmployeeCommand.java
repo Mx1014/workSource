@@ -9,61 +9,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>formOriginId: 表单 id</li>
- * <li>detailId: 员工 id</li>
- * <li>organizationId: 公司 id</li>
- * <li>contactName: 姓名</li>
- * <li>enName: 英文名</li>
- * <li>gender: 性别</li>
- * <li>birthday: 生日</li>
- * <li>maritalFlag: 婚姻状况</li>
- * <li>procreative: 生育状况</li>
- * <li>ethnicity: 民族</li>
- * <li>politicalFlag: 政治面貌</li>
- * <li>nativePlace: 籍贯</li>
- * <li>idType: 证件类型</li>
- * <li>idNumber: 证件号码</li>
- * <li>idExpiryDate: 证件有效期</li>
- * <li>degree: 学历</li>
- * <li>graduationSchool: 毕业学校</li>
- * <li>graduationTime: 毕业时间</li>
- * <li>regionCode: 区号</li>
- * <li>contactToken: 手机号码</li>
- * <li>email: 个人邮箱</li>
- * <li>wechat: 微信</li>
- * <li>qq: qq号码</li>
- * <li>address: 现住址</li>
- * <li>emergencyName: 紧急联系人</li>
- * <li>emergencyRelationship: 联系人关系</li>
- * <li>emergencyContact: 紧急联系方式</li>
- * <li>checkInTime: 入职日期</li>
- * <li>employeeType: 员工类型</li>
- * <li>employeeStatus: 员工状态</li>
- * <li>employmentTime: 转正日期</li>
- * <li>department: 部门(待定)</li>
- * <li>jobPosition: 职务(待定)</li>
- * <li>reportTarget: 汇报对象(待定)</li>
- * <li>employeeNo: 工号</li>
- * <li>contactShortToken: 短号</li>
- * <li>workEmail: 工作邮箱</li>
- * <li>contractPartyId: 合同主体id </li>
- * <li>workStartTime: 参加工作日期</li>
- * <li>contractStartTime: 合同开始日期</li>
- * <li>contractEndTime: 合同终止日期</li>
- * <li>salaryCardNumber: 工资卡号</li>
- * <li>salaryCardBank: 开户行</li>
- * <li>socialSecurityNumber: 社保号码</li>
- * <li>providentFundNumber: 公积金卡号</li>
- * <li>regResidenceType: 户籍类型</li>
- * <li>regResidence: 户籍地址</li>
- * <li>idPhoto: 身份证照片</li>
- * <li>visaPhoto: 一寸免冠照</li>
- * <li>lifePhoto: 生活照</li>
- * <li>entryForm: 入职登记表</li>
- * <li>graduationCertificate: 毕业证书</li>
- * <li>degreeCertificate:  学位证书</li>
- * <li>contractCertificate: 劳动合同</li>
- * <li>values: 非系统字段值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>values: (List)被修改的字段及值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
  * </ul>
  */
 public class UpdateArchivesEmployeeCommand {
