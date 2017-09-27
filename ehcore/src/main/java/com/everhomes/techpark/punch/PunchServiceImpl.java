@@ -2680,7 +2680,7 @@ public class PunchServiceImpl implements PunchService {
 		row.createCell(++i).setCellValue(statistic.getPunchOrgName());
 		row.createCell(++i).setCellValue(statistic.getWorkDayCount());
 		row.createCell(++i).setCellValue(statistic.getWorkCount());
-		row.createCell(++i).setCellValue(statistic.getWorkDayCount() - statistic.getWorkCount());
+		row.createCell(++i).setCellValue(statistic.getExceptionDayCount());
 		row.createCell(++i).setCellValue(statistic.getUnpunchCount());
 		row.createCell(++i).setCellValue(statistic.getBelateCount());
 		row.createCell(++i).setCellValue(statistic.getLeaveEarlyCount());
