@@ -5157,24 +5157,36 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserTemporaryToken checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd) {
+
 		if(StringUtils.isEmpty(cmd.getUserToken())){
 			LOGGER.error("userToken is empty");
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
 					UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
 		}
 
-		UserTemporaryToken token  = WebTokenGenerator.getInstance().fromWebToken(cmd.getUserToken(), UserTemporaryToken.class);
-		if(token == null || token.getStartTime() == null || token.getInterval() == null){
+		try{
+			UserTemporaryToken token  = WebTokenGenerator.getInstance().fromWebToken(cmd.getUserToken(), UserTemporaryToken.class);
+
+
+			if(token == null || token.getStartTime() == null || token.getInterval() == null){
+				LOGGER.error("userToken is invalid");
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+						UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
+			}
+
+			if(System.currentTimeMillis() > token.getStartTime() + token.getInterval()){
+				LOGGER.error("time expired");
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+						UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
+			}
+
+			return token;
+
+		}catch (Exception ex){
 			LOGGER.error("userToken is invalid");
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
 					UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
 		}
 
-		if(System.currentTimeMillis() > token.getStartTime() + token.getInterval()){
-			LOGGER.error("time expired");
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
-					UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
-		}
-		return token;
 	}
 }

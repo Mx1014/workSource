@@ -458,4 +458,6 @@ INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@i
 -- 修改园区快讯模块默认参数 add by sfyan 20170927
 update `eh_service_modules` set instance_config = '{"timeWidgetStyle":"date","entityCount":0,"subjectHeight":0,"descriptionHeight":0}' where id = 10800;
 
-
+-- 诚信园临时token有效时长 add by yanjun 201709272015
+SET @eh_configurations_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES((@eh_configurations_id := @eh_configurations_id + 1),'chengxinyuan.token.interval','86400000','诚信园临时token有效期时长（毫秒）','0',NULL);
