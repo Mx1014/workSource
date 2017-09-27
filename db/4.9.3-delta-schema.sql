@@ -319,6 +319,7 @@ ALTER TABLE `eh_var_field_scopes` ADD COLUMN `community_id` BIGINT COMMENT '园�
 ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
 ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `community_id` BIGINT COMMENT '园区id';
 
+ALTER TABLE `eh_asset_payment_order_bills` modify COLUMN `bill_id` varchar(255);
 -- wentian‘s first script end here
 
 
