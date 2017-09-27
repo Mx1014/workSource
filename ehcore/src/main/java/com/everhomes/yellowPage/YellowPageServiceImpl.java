@@ -457,7 +457,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public void updateServiceAllianceCategory(UpdateServiceAllianceCategoryCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
+    	if(cmd.getNamespaceId() != null){
+    		namespaceId = cmd.getNamespaceId();
+    	}
 		ServiceAllianceCategories category = new ServiceAllianceCategories();
 		ServiceAllianceCategories parent = yellowPageProvider.findCategoryById(cmd.getParentId());
 		
@@ -777,7 +779,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				Condition conditionOR = DSL.trueCondition();
 				List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
 				for (OrganizationCommunity orgcommunity : communityList) {
-					conditionOR = conditionOR.and(Tables.EH_SERVICE_ALLIANCES.RANGE.contains(orgcommunity.getCommunityId()+""));
+					conditionOR = conditionOR.or(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+orgcommunity.getCommunityId()+"%"));
 				}
 				condition.or(conditionOR);
 			}
