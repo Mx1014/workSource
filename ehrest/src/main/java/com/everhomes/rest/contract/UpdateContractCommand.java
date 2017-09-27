@@ -50,6 +50,8 @@ import java.util.List;
  *     <li>attachments: 合同附件 参考{@link com.everhomes.rest.contract.ContractAttachmentDTO}</li>
  *     <li>status: 合同状态 1 待发起；3 审批中 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  *     <li>remark: 备注</li>
+ *     <li>settled: 入住方</li>
+ *     <li>layout: 房型</li>
  * </ul>
  * Created by ying.xiong on 2017/8/5.
  */
@@ -94,6 +96,8 @@ public class UpdateContractCommand {
     private String denunciationReason;
     private String remark;
     private Long createUid;
+    private String layout;
+    private String settled;
 
     @ItemType(BuildingApartmentDTO.class)
     private List<BuildingApartmentDTO> apartments;
@@ -121,6 +125,22 @@ public class UpdateContractCommand {
     }
 
     private Byte status;
+
+    public String getLayout() {
+        return layout;
+    }
+
+    public void setLayout(String layout) {
+        this.layout = layout;
+    }
+
+    public String getSettled() {
+        return settled;
+    }
+
+    public void setSettled(String settled) {
+        this.settled = settled;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;
