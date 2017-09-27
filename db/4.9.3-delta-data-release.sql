@@ -402,6 +402,11 @@ INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ('parking.default.card.type', '[{\"typeId\":\"普通月卡\", \"typeName\":\"普通月卡\"}]', NULL, '0', NULL);
 
+delete from eh_parking_lots where id = 10006;
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`)
+	VALUES ('10006', 'community', '240111044331055940', '科兴科学园停车场', 'KETUO2', NULL, '2', '1025', '2016-12-16 17:07:20', '0', '{\"expiredRechargeFlag\":1,\"expiredRechargeMonthCount\":2,\"expiredRechargeType\":2,\"maxExpiredDay\":365,\"monthlyDiscountFlag\":0,\"tempFeeDiscountFlag\":0}', '{\"tempfeeFlag\": 0, \"rateFlag\": 0, \"lockCarFlag\": 0, \"searchCarFlag\": 1, \"currentInfoType\": 2, \"contact\": \"18718523489\",\"invoiceFlag\":1}');
+
+
 -- 短信供应商配置  add by xq.tian  2017/08/30
 UPDATE `eh_configurations` SET `value` = 'YZX,YouXunTong' WHERE `name` = 'sms.handler.type' AND `namespace_id` = 0;
 

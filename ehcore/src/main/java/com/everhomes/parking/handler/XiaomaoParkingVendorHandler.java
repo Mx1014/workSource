@@ -294,7 +294,8 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     }
 
     @Override
-    public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+    public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
+        updateParkingRechargeOrderRateInfo(parkingLot, order);
 
     }
 

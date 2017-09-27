@@ -589,17 +589,6 @@ public class ParkingServiceImpl implements ParkingService {
 
 		parkingRechargeOrder.setInvoiceType(cmd.getInvoiceType());
 
-		parkingRechargeOrder.setPrice(cmd.getPrice());
-
-		if (null != parkingLot.getMonthlyDiscountFlag()) {
-			if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()) {
-				parkingRechargeOrder.setOriginalPrice(cmd.getPrice());
-				BigDecimal newPrice = cmd.getPrice().multiply(new BigDecimal(parkingLot.getMonthlyDiscount()))
-						.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
-				parkingRechargeOrder.setPrice(newPrice);
-			}
-		}
-
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
     		ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
 
@@ -619,7 +608,9 @@ public class ParkingServiceImpl implements ParkingService {
 			//查询rate
 			parkingRechargeOrder.setRateToken(cmd.getRateToken());
     		parkingRechargeOrder.setMonthCount(new BigDecimal(cmd.getMonthCount()));
-    		handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
+    		//先设置客户端传进来的价格，在updateParkingRechargeOrderRate方法中校验价格,根据费率重新设置价格
+			parkingRechargeOrder.setPrice(cmd.getPrice());
+    		handler.updateParkingRechargeOrderRate(parkingLot, parkingRechargeOrder);
 
     	}
 
