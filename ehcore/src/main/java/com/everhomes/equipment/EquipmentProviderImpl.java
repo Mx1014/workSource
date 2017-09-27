@@ -425,9 +425,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.TARGET_TYPE.eq(targetType));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.TARGET_ID.eq(targetId));
-		
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
-		 
+
+		//只展示带审核的关联标准和审核通过的 add by xiongying20170927
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_STATUS.eq(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode())
+				.or(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_STATUS.eq(EquipmentReviewStatus.REVIEWED.getCode()).and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()))));
 		List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
