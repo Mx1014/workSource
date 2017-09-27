@@ -13,6 +13,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -51,6 +52,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     @Autowired
     private FieldProvider fieldProvider;
+
+    @Autowired
+    private FieldService fieldService;
 
     @Override
     public String getIndexType() {
@@ -193,11 +197,13 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             ids.forEach(id -> {
                 EnterpriseCustomer customer = customers.get(id);
                 EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
-                ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
+//                ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
+                ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
                 if(categoryItem != null) {
                     dto.setCategoryItemName(categoryItem.getItemDisplayName());
                 }
-                ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
+//                ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
+                ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
                 if(levelItem != null) {
                     dto.setLevelItemName(levelItem.getItemDisplayName());
                 }

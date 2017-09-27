@@ -85,6 +85,7 @@ import com.everhomes.util.excel.handler.ProcessBillModel1;
 import com.everhomes.util.excel.handler.PropMgrBillHandler;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import net.greghaines.jesque.Job;
 import org.apache.poi.ss.usermodel.*;
@@ -238,6 +239,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Autowired
 	private FieldProvider fieldProvider;
+
+	@Autowired
+	private FieldService fieldService;
 
 	@Autowired
 	private ContractSearcher contractSearcher;
@@ -2096,7 +2100,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			address.setSharedArea(cmd.getSharedArea());
 			if(cmd.getCategoryItemId() != null) {
 				address.setCategoryItemId(cmd.getCategoryItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
 				if(item != null) {
 					address.setCategoryItemName(item.getItemDisplayName());
 				}
@@ -2104,7 +2109,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 			if(cmd.getSourceItemId() != null) {
 				address.setSourceItemId(cmd.getSourceItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getSourceItemId());
 				if(item != null) {
 					address.setSourceItemName(item.getItemDisplayName());
 				}
@@ -2124,7 +2130,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			address.setSharedArea(cmd.getSharedArea());
 			if(cmd.getCategoryItemId() != null) {
 				address.setCategoryItemId(cmd.getCategoryItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
 				if(item != null) {
 					address.setCategoryItemName(item.getItemDisplayName());
 				}
@@ -2132,7 +2139,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 			if(cmd.getSourceItemId() != null) {
 				address.setSourceItemId(cmd.getSourceItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getSourceItemId());
 				if(item != null) {
 					address.setSourceItemName(item.getItemDisplayName());
 				}
@@ -2238,13 +2246,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				address.setChargeArea(cmd.getChargeArea());
 			}else if (cmd.getCategoryItemId() != null) {
 				address.setCategoryItemId(cmd.getCategoryItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), address.getCommunityId(), cmd.getCategoryItemId());
 				if(item != null) {
 					address.setCategoryItemName(item.getItemDisplayName());
 				}
 			}else if (cmd.getSourceItemId() != null) {
 				address.setSourceItemId(cmd.getSourceItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), address.getCommunityId(), cmd.getSourceItemId());
 				if(item != null) {
 					address.setSourceItemName(item.getItemDisplayName());
 				}
