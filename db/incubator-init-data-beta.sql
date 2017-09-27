@@ -101,87 +101,87 @@ INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
 INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
 	VALUES (676,382,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116324,10000,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116325,10100,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116326,10400,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116327,10200,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116328,10600,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116329,10750,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116330,10800,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116331,11000,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116332,12200,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116333,40500,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116334,40510,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116335,40520,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116336,40530,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116337,40541,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116338,40542,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116339,41300,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116340,40750,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116341,40751,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116342,40700,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116343,30000,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116344,30500,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116345,31000,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116346,32000,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116347,33000,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116348,34000,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116349,35000,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116350,30600,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116351,50000,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116352,50100,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116353,50110,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116354,50200,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116355,50210,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116356,50220,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116357,50300,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116358,50400,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116359,50500,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116360,60000,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116361,60100,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES (116362,60200,NULL,'EhNamespaces',999964,2);
-INSERT INTO `eh_organization_communities` (`organization_id`, `community_id`) 
-	VALUES (1039090,240111044332059971);
 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116895,10000,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116896,10100,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116897,10400,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116898,10200,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116899,10600,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116900,10750,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116901,10800,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116902,11000,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116903,12200,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116904,40500,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116905,40510,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116906,40520,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116907,40530,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116908,40541,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116909,40542,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116910,41300,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116911,40750,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116912,40751,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116913,40700,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116914,30000,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116915,30500,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116916,31000,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116917,32000,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116918,33000,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116919,34000,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116920,35000,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116921,30600,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116922,50000,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116923,50100,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116924,50110,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116925,50200,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116926,50210,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116927,50220,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116928,50300,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116929,50400,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116930,50500,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116931,60000,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116361,60100,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116362,60200,NULL,'EhNamespaces',999964,2);
+INSERT INTO `eh_organization_communities` (`organization_id`, `community_id`)
+	VALUES (1039090,240111044332059971);
 
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999964, 'sms.default.yzx', 1, 'zh_CN', '验证码-创业场', '150446');
