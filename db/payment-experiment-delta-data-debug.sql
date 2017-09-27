@@ -22,3 +22,15 @@ INSERT INTO `eh_payment_types` (`id`, `order_type`, `namespace_id`, `owner_type`
 INSERT INTO `eh_payment_types` (`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`) VALUES ('15047780545380002', 'activitySignupOrder', '0', 'EhOrganizations', '147248', '1', '1001', '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', '2017-09-08 15:01:38', NULL);
 INSERT INTO `eh_payment_types` (`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`) VALUES ('15047780545380003', 'activitySignupOrder', '0', 'EhOrganizations', '147248', '1', '1001', '9', '微信公众号支付', 'cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw', '{\"payType\":\"no_credit\"}', '2017-09-08 15:01:38', NULL);
 
+-- 吴寒的视频会议 by wentian
+
+-- 添加收款方的会员
+set @eh_payment_user_id = (select max(id) from `eh_payment_users`);
+INSERT INTO `eh_payment_users` VALUES (@eh_payment_user_id:=@eh_payment_user_id+1, 'EhOrganizations', '1023080', '2', '1087', UTC_TIMESTAMP());
+-- 添加收款方
+set @eh_payment_service_configs_id = (select max(id) from `eh_payment_service_configs`);
+INSERT INTO `eh_payment_service_configs` VALUES (@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '视频会议', 'videoConf', '1', 'EhOrganizations', '1023080', '1', null, NULL, '2', '1087', UTC_TIMESTAMP(), null);
+-- 增加支付的方式
+set @eh_payment_types_id = (select max(id) from `eh_payment_types`);
+INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_id+1, 'videoConf', '1', 'EhOrganizations', '1023080', '1', null, '1', '微信', 'cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw', '{\"payType\":\"no_credit\"}', UTC_TIMESTAMP(), null);
+INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_id+1, 'videoConf', '1', 'EhOrganizations', '1023080', '1', null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), null);
