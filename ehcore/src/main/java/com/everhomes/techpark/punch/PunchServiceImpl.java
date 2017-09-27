@@ -6551,7 +6551,7 @@ public class PunchServiceImpl implements PunchService {
 		// 关联 人员和机构
 		GetUniongroupConfiguresCommand cmd1 = new GetUniongroupConfiguresCommand();
 		cmd1.setGroupId(r.getId());
-		List<UniongroupConfiguresDTO> resp = uniongroupService.getConfiguresListByGroupId(cmd1);
+		List<UniongroupConfiguresDTO> resp = uniongroupService.getConfiguresInfosListByGroupId(cmd1);
 		dto.setTargets(new ArrayList<UniongroupTarget>());
 		if(null != resp){
 			for (UniongroupConfiguresDTO obj : resp){
