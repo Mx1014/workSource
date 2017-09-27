@@ -109,10 +109,10 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
 				return rechargeMonthlyCard(order);
 			}
-			return payTempCardFee(order);
 		}else {
 			return openMonthCard(order);
 		}
+		return false;
 	}
 
 	private KetuoCardRate getExpiredRate(KetuoCard cardInfo, ParkingLot parkingLot, long now) {
@@ -372,6 +372,12 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
+		//TODO: 正中会没有临时车
+		return null;
 	}
 
 	@Override
