@@ -146,7 +146,7 @@ BEGIN
 	DECLARE ans INTEGER;
 
   DECLARE done INT DEFAULT FALSE;
-  DECLARE cur CURSOR FOR select namespace_id,entry_id*100+41600 from eh_service_alliance_categories WHERE  parent_id =0 AND id NOT IN (SELECT SUBSTRING(action_data,LOCATE('type":',action_data)+6,LOCATE(',',action_data)-6-LOCATE('type":',action_data)) AS categry_id from eh_launch_pad_items WHERE action_type = 33);
+  DECLARE cur CURSOR FOR select namespace_id,entry_id*100+41600 from eh_service_alliance_categories WHERE  parent_id =0 AND id NOT IN (select a.categry_id from (SELECT DISTINCT CAST(SUBSTRING(action_data,LOCATE('type":',action_data)+6,LOCATE(',',action_data)-6-LOCATE('type":',action_data)) AS UNSIGNED) AS categry_id from eh_launch_pad_items WHERE action_type = 33) as a WHERE a.categry_id IS NOT NULL);
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
   OPEN cur;
   read_loop: LOOP
