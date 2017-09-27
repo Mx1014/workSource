@@ -1735,16 +1735,17 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	
-	//每10分钟执行一次，找出待n~n+10分钟内提醒时间的跟进计划
-	//@Scheduled(cron="0 */1 * * * ?")
+	//每10分钟执行一次，找出待n~n+15分钟内提醒时间的跟进计划
+	@Scheduled(cron="0 0/15 * * * ?")
 	@Override
 	public void trackingPlanWarningSchedule() {
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+			LOGGER.info("trackingPlanWarningSchedule is running...");
 			//使用tryEnter方法可以防止分布式部署时重复执行
 			coordinationProvider.getNamedLock(CoordinationLocks.TRACKING_PLAN_WARNING_SCHEDULE.getCode()).tryEnter(() -> {
 				Date now = DateHelper.currentGMTTime();
 				Timestamp queryStartTime = new Timestamp(now.getTime());
-				Timestamp queryEndTime = new Timestamp(now.getTime() + 600 * 1000);
+				Timestamp queryEndTime = new Timestamp(now.getTime() + 900 * 1000);
 				List<CustomerTrackingPlan> plans = enterpriseCustomerProvider.listWaitNotifyTrackingPlans(queryStartTime,queryEndTime);
 				if(null != plans && plans.size() > 0){
 					plans.forEach(plan ->{
@@ -1788,9 +1789,9 @@ public class CustomerServiceImpl implements CustomerService {
 	public void processTrackingPlanNotify(CustomerTrackingPlan plan) {
 		Long userId = plan.getCreatorUid();
 		LOGGER.info("processTrackingPlanNotify userId:{}", userId);
-        if(userId != null) {
-            String taskName = "";
-            Timestamp time = null;
+        if(userId != null && null != plan.getTrackingTime()) {
+            String taskName = plan.getTitle() == null ? "" : plan.getTitle();
+            Timestamp time = plan.getTrackingTime();
             int code = TrackingNotifyTemplateCode.TRACKING_NEARLY_REACH_NOTIFY;
             String scope = TrackingNotifyTemplateCode.SCOPE;
             String locale = "zh_CN";

@@ -57,6 +57,7 @@ import com.everhomes.server.schema.tables.daos.EhCustomerTrackingsDao;
 import com.everhomes.server.schema.tables.daos.EhCustomerTrademarksDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
 import com.everhomes.server.schema.tables.daos.EhPmNotifyLogsDao;
+import com.everhomes.server.schema.tables.daos.EhTrackingNotifyLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
@@ -1283,8 +1284,8 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         LOGGER.info("createTrackingNotifyLog: " + log);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-//        EhTrackingNotifyLogsDao dao = new EhTrackingNotifyLogsDao(context.configuration());
-//        dao.insert(log);
+        EhTrackingNotifyLogsDao dao = new EhTrackingNotifyLogsDao(context.configuration());
+        dao.insert(log);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerTrackingPlans.class, null);
 	}
