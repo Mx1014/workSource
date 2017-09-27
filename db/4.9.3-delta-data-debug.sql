@@ -11,10 +11,10 @@ INSERT INTO `eh_payment_accounts` VALUES ('1', 'biz-test-account-20170914-2', '1
 
 INSERT INTO `eh_payment_service_configs` VALUES ('1', '左邻APP-测试限时折扣-from-jw店铺服务', 'zjgkrentalcode', '999971', 'EhOrganizations', '147248', '1', '1001', '5', '1', '1004', '2017-09-08 15:01:30', null);
 
-
-INSERT INTO `eh_payment_types` VALUES ('15047780545380001', 'zjgkrentalcode', '999971', 'EhOrganizations', '147248', '1', '1001', '1', '微信', 'cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw', '{\"payType\":\"no_credit\"}', '2017-09-08 15:01:37', null);
-INSERT INTO `eh_payment_types` VALUES ('15047780545380002', 'zjgkrentalcode', '999971', 'EhOrganizations', '147248', '1', '1001', '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', '2017-09-08 15:01:38', null);
-INSERT INTO `eh_payment_types` VALUES ('15047780545380003', 'zjgkrentalcode', '999971', 'EhOrganizations', '147248', '1', '1001', '9', '微信公众号支付', 'cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw', '{\"payType\":\"no_credit\"}', '2017-09-08 15:01:38', null);
+SET @eh_payment_types_id = (SELECT MAX(id) from `eh_payment_types`);
+INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_id+1, 'zjgkrentalcode', '999971', 'EhOrganizations', '147248', '1', '1001', '1', '微信', 'cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw', '{\"payType\":\"no_credit\"}', '2017-09-08 15:01:37', null);
+INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_id+1, 'zjgkrentalcode', '999971', 'EhOrganizations', '147248', '1', '1001', '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', '2017-09-08 15:01:38', null);
+INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_id+1, 'zjgkrentalcode', '999971', 'EhOrganizations', '147248', '1', '1001', '9', '微信公众号支付', 'cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw', '{\"payType\":\"no_credit\"}', '2017-09-08 15:01:38', null);
 
 
 INSERT INTO `eh_payment_users` VALUES ('1', 'EhOrganizations', '147248', '1', '19030100', '2017-09-08 14:58:52');
