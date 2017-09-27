@@ -877,7 +877,9 @@ public class FieldServiceImpl implements FieldService {
                 getAllGroups(group.getChildrenGroup().get(i),allGroups);
             }
         }else{
-            allGroups.add(group);
+            if(group.getChildrenGroup()==null||group.getChildrenGroup().size()<1){
+                allGroups.add(group);
+            }
         }
     }
 
