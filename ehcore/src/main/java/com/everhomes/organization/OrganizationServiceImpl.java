@@ -5476,20 +5476,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public Long updateOrganizationMemberInfoByDetailId(UpdateArchivesEmployeeCommand cmd) {
-        if (cmd.getContactName() == null && cmd.getContactToken() == null && cmd.getGender() == null)
-            return cmd.getDetailId();
-        else {
-            Byte gender;
-            if ("男".equals(cmd.getGender()))
-                gender = 1;
-            else if ("女".equals(cmd.getGender()))
-                gender = 2;
-            else
-                gender = null;
-            this.organizationProvider.updateOrganizationMemberByDetailId(cmd.getDetailId(), cmd.getContactToken(), cmd.getContactName(), gender);
-            return cmd.getDetailId();
-        }
+    public Long updateOrganizationMemberInfoByDetailId(Long detailId, String contactToken, String contactName, Byte gender) {
+            this.organizationProvider.updateOrganizationMemberByDetailId(detailId, contactToken, contactName, gender);
+            return detailId;
     }
 
     /**

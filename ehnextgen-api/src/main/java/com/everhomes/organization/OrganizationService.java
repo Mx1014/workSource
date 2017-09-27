@@ -547,6 +547,5 @@ public interface OrganizationService {
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd);
 
 	/**根据detailId更新通用信息**/
-	Long updateOrganizationMemberInfoByDetailId(UpdateArchivesEmployeeCommand cmd);
-
+	Long updateOrganizationMemberInfoByDetailId(Long detailId, String contactToken, String contactName, Byte gender);
 }
