@@ -605,8 +605,12 @@ public class FieldServiceImpl implements FieldService {
         //将command转换为listFieldGroup的参数command
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
         //获得客户所拥有的sheet
+        List<FieldGroupDTO> allGroupsf = listFieldGroups(cmd1);
+        if(allGroupsf==null) allGroupsf= new ArrayList<>();
         List<FieldGroupDTO> allGroups = listFieldGroups(cmd1);
-        if(allGroups==null) allGroups= new ArrayList<>();
+        for(int i = 0; i < allGroupsf.size(); i ++){
+            getAllGroups(allGroupsf.get(i),allGroups);
+        }
         List<FieldGroupDTO> groups = new ArrayList<>();
 
         //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
@@ -615,7 +619,8 @@ public class FieldServiceImpl implements FieldService {
         for(int i = 0 ; i < split.length; i ++){
             long targetGroupId = Long.parseLong(split[i]);
             for(int j = 0; j < allGroups.size(); j++){
-                if(allGroups.get(j).getId() == targetGroupId){
+                Long id = allGroups.get(j).getGroupId();
+                if(id.compareTo(targetGroupId) == 0){
                     groups.add(allGroups.get(j));
                 }
             }
