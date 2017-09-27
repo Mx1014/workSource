@@ -527,6 +527,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 		params.put("name","dsf");
 		params.put("certificateType","1");
 		params.put("certificateNo","321201199307070219");
+		params.put("crypto","sss");
 		for (PostApprovalFormItem item : values) {
 			GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(item.getFieldType());
 			switch (fieldType) {
