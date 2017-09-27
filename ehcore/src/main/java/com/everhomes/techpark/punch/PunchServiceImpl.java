@@ -28,10 +28,14 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bus.*;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.uniongroup.*;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
@@ -199,6 +203,9 @@ public class PunchServiceImpl implements PunchService {
         }
     };
     private static ThreadLocal<List<PunchTimeRule>> targetTimeRules = new ThreadLocal<List<PunchTimeRule>>() ;
+
+	@Autowired
+	private SequenceProvider sequenceProvider;
 
 	@Autowired
 	private ScheduleProvider scheduleProvider;
@@ -691,7 +698,7 @@ public class PunchServiceImpl implements PunchService {
 				companyId, dateSF.get().format(logDay.getTime()),
 				ClockCode.SUCESS.getCode());
 		for (PunchLog log : punchLogs){
-			PunchLogDTO dto = new PunchLogDTO();
+			PunchLogDTO dto = ConvertHelper.convert(log, PunchLogDTO.class);
 			dto.setPunchTime(log.getPunchTime().getTime());
 			pdl.getPunchLogs().add(dto);
 		}
@@ -2489,6 +2496,13 @@ public class PunchServiceImpl implements PunchService {
 //			}
 			processPunchListCount(dayLogList, statistic);
 
+			//对于2017年9月的数据特殊处理 --- 兼容之前的
+			Calendar sepCalendar = Calendar.getInstance();
+			//设置为9月31日23点59分
+			sepCalendar.setTimeInMillis(1506873599000L);
+			if(startCalendar.before(sepCalendar)){
+				statistic.setWorkDayCount((int) (statistic.getExceptionDayCount()+statistic.getWorkCount()));
+			}
 	        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/"+ownerId + "%", null);
 	        List<Long> orgIds = new ArrayList();
 	        if(null!=organizations)
@@ -2517,6 +2531,8 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setBelateCount(0);
 		statistic.setAbsenceCount(0.0);
 		statistic.setOverTimeSum(0L);
+		statistic.setExceptionDayCount(0);
+
 		statistic.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 		for (PunchDayLog pdl : list) {
             if (pdl.getTimeRuleId() != null && pdl.getTimeRuleId().longValue() != 0L) {
@@ -2538,9 +2554,12 @@ public class PunchServiceImpl implements PunchService {
                         isNormal = countOneDayStatistic(pdl.getStatusList(),statistic,isNormal,1,pdl.getTimeRuleId());
                     }
                 }
-                if (NormalFlag.fromCode(isNormal).equals(NormalFlag.YES)) {
-                    statistic.setWorkCount(statistic.getWorkCount() + 1);
-                }
+				if (NormalFlag.fromCode(isNormal).equals(NormalFlag.YES)) {
+					statistic.setWorkCount(statistic.getWorkCount() + 1);
+				} else {
+					statistic.setExceptionDayCount(statistic.getExceptionDayCount() + 1);
+				}
+
             }
 		}
 
@@ -4034,6 +4053,12 @@ public class PunchServiceImpl implements PunchService {
 		List<Long> absenceUserIdList = new ArrayList<>();
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
+			if (dto.getExceptionDayCount() == null) {
+				dto.setExceptionDayCount((int) (dto.getWorkDayCount() - dto.getWorkCount()));
+				if (dto.getExceptionDayCount() < 0) {
+					dto.setExceptionDayCount(0);
+				}
+			}
 			dto.setPunchOrgName(null);
 			PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), statistic.getOwnerId(), statistic.getUserId());
 			if (null != pr) {
@@ -5104,10 +5129,13 @@ public class PunchServiceImpl implements PunchService {
         startCalendar.setTime(punCalendar.getTime());
         startCalendar.set(Calendar.HOUR_OF_DAY, 0);
         startCalendar.set(Calendar.DAY_OF_MONTH, 1);
-
-        OrganizationDTO dept = findUserDepartment(userId, ownerId);
-        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, dept.getId());
-        refreshDayLogAndMonthStat(ConvertHelper.convert(member, OrganizationMemberDTO.class), dept.getId(), punCalendar, startCalendar);
+		try {
+			OrganizationDTO dept = findUserDepartment(userId, ownerId);
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, dept.getId());
+			refreshDayLogAndMonthStat(ConvertHelper.convert(member, OrganizationMemberDTO.class), dept.getId(), punCalendar, startCalendar);
+		} catch (Exception e) {
+			LOGGER.error("refresh day log and month stat Wrong", e);
+		}
 
     }
     /**刷新punCalendar 当天日数据 和 start到pun 之间的月数据*/
@@ -5123,12 +5151,12 @@ public class PunchServiceImpl implements PunchService {
             }
 			//刷月报
 
+			addPunchStatistics(member, orgId, startCalendar, punCalendar);
 
 		} catch (Exception e) {
 			LOGGER.error("#####refresh day log error!! userid:["+member.getTargetId()
 					+"] organization id :["+orgId+"] ",e);
 		}
-		addPunchStatistics(member, orgId, startCalendar, punCalendar);
 	}
 	@Override
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd) {
@@ -6289,6 +6317,8 @@ public class PunchServiceImpl implements PunchService {
         		ptr.setPunchOrganizationId(punchOrgId);
 				ptr.setStatus(pr.getStatus());
         		ptr.setFlexTimeLong(timeRule.getFlexTime());
+				ptr.setCreatorUid(UserContext.current().getUser().getId());
+				ptr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         		ptrs.add(ptr);
         		if(pr.getRuleType().equals(PunchRuleType.GUDING.getCode())){
         			//固定班次 默认第二天4点
@@ -6355,15 +6385,53 @@ public class PunchServiceImpl implements PunchService {
         	}
         }
         //排班
-        if(punchGroupDTO.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && punchGroupDTO.getSchedulings() != null){
-        	for(PunchSchedulingDTO monthScheduling : punchGroupDTO.getSchedulings()){
-				if (null != monthScheduling.getEmployees()) {
-					for (PunchSchedulingEmployeeDTO r : monthScheduling.getEmployees()) {
-						saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs);
-					}
+
+		if (punchGroupDTO.getRuleType().equals(PunchRuleType.PAIBAN.getCode()) && punchGroupDTO.getSchedulings() != null) {
+			List<PunchScheduling> schedulings = new ArrayList<>();
+			for (PunchSchedulingDTO monthScheduling : punchGroupDTO.getSchedulings()) {
+				List<PunchScheduling> psList = saveMonthSchedulings(monthScheduling, pr, ptrs);
+				if (null != psList && psList.size() > 0) {
+					schedulings.addAll(psList);
 				}
 			}
-        }
+			if (schedulings.size() > 0) {
+				//批量保存
+				List<EhPunchSchedulings> ehPsList = new ArrayList<>();
+				Long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), schedulings.size());
+				for (PunchScheduling ps : schedulings) {
+					ps.setId(beginId++);
+					EhPunchSchedulings eps = ConvertHelper.convert(ps, EhPunchSchedulings.class);
+					ehPsList.add(eps);
+				}
+				punchSchedulingProvider.batchCreatePunchSchedulings(ehPsList);
+			}
+		}
+	}
+
+	private List<PunchScheduling> saveMonthSchedulings(PunchSchedulingDTO monthScheduling, PunchRule pr, List<PunchTimeRule> ptrs) {
+
+		//删除今日之后的,并且在monthScheduling的月份的
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(monthScheduling.getMonth());
+		calendar.set(Calendar.DAY_OF_MONTH, 1);
+		Date monthBeginDate = calendar.getTime();
+		calendar.add(Calendar.MONTH, 1);
+		Date monthEndDate = calendar.getTime();
+		punchSchedulingProvider.deleteAfterTodayPunchSchedulingByPunchRuleId(pr.getId(),
+				monthBeginDate, monthEndDate);
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
+		int monthDays = calendar.get(Calendar.DAY_OF_MONTH);
+
+		List<PunchScheduling> schedulings = new ArrayList<>();
+		if (null != monthScheduling.getEmployees()) {
+			for (PunchSchedulingEmployeeDTO r : monthScheduling.getEmployees()) {
+				List<PunchScheduling> psList = saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs,monthDays);
+				if (null != psList && psList.size() > 0) {
+					schedulings.addAll(psList);
+				}
+			}
+		}
+		return schedulings;
 	}
 
 	private void deletePunchTimeRules(Long punchOrgId) {
@@ -6407,11 +6475,15 @@ public class PunchServiceImpl implements PunchService {
 
 	}
 
-	private void saveEmployeeScheduling(PunchSchedulingEmployeeDTO r, Long month, PunchRule pr, List<PunchTimeRule> ptrs) {
+	private List<PunchScheduling> saveEmployeeScheduling(PunchSchedulingEmployeeDTO r, Long month, PunchRule pr, List<PunchTimeRule> ptrs, int monthDays) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(month);
+		List<PunchScheduling> schedulings = new ArrayList<>();
 		int i = 1;
 		for(String ruleName : r.getDaySchedulings() ){
+			if (i > monthDays) {
+				break;
+			}
 			PunchTimeRule ptr =findPtrByName(ptrs,ruleName);
 			calendar.set(Calendar.DAY_OF_MONTH, i);
 			PunchScheduling ps = ConvertHelper.convert(pr, PunchScheduling.class);
@@ -6431,12 +6503,10 @@ public class PunchServiceImpl implements PunchService {
 			ps.setTargetType(PunchTargetType.USER.getCode());
 			ps.setTargetId(r.getUserId());
 
-            punchSchedulingProvider.deletePunchSchedulingByPunchRuleId(pr.getId(),ps.getRuleDate(),
-                    ps.getOwnerId(),ps.getTargetId());
-			punchSchedulingProvider.createPunchScheduling(ps);
-
+			schedulings.add(ps);
 			i++;
 		}
+		return schedulings;
 	}
 	private PunchTimeRule findPtrByName(List<PunchTimeRule> ptrs, String ruleName) {
 		for(PunchTimeRule ptr : ptrs){
