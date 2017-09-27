@@ -166,8 +166,9 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
 		String plateNumber = order.getPlateNumber();
 		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(order.getRateToken())) {
+			//过期没有优惠
 			order.setRateName(EXPIRE_CUSTOM_RATE_TOKEN);
-
+			order.setOriginalPrice(order.getPrice());
 		}else {
 			KetuoCard cardInfo = getCard(plateNumber);
 			KetuoCardRate ketuoCardRate = null;
@@ -193,8 +194,11 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 			checkAndSetOrderPrice(parkingLot, order, ratePrice);
 
-//			order.setPrice(new BigDecimal(order.getPrice().intValue() * 100 - (freeMoney * order.getMonthCount().intValue()))
-//							.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
+			//正中会对接停车长支持优惠
+			order.setPrice(new BigDecimal(order.getPrice().intValue() * 100 - (freeMoney * order.getMonthCount().intValue()))
+							.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
+			order.setOriginalPrice(new BigDecimal(order.getOriginalPrice().intValue() * 100 - (freeMoney * order.getMonthCount().intValue()))
+					.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 		}
 
 	}
@@ -292,6 +296,14 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		param.put("startTime", validStart);
 		//续费结束时间 yyyy-MM-dd HH:mm:ss 每月最后一天的23点59分59秒
 		param.put("endTime", validEnd);
+		if (null != originalOrder.getInvoiceType()) {
+			ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(originalOrder.getInvoiceType());
+			if (null != parkingInvoiceType) {
+				param.put("invType", parkingInvoiceType.getInvoiceToken());
+			}
+		}else {
+			param.put("invType", "-1");
+		}
 		param.put("freeMoney", card.getFreeMoney() * tempOrder.getMonthCount().intValue());
 		param.put("payType", VendorType.WEI_XIN.getCode().equals(originalOrder.getPaidType()) ? 4 : 5);
 

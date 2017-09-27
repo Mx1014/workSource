@@ -59,7 +59,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
             }
 
             parkingCardDTO.setPlateNumber(plateNumber);
-
+            parkingCardDTO.setPlateOwnerName(card.getUserName());
             //parkingCardDTO.setStartTime(startTime);
             parkingCardDTO.setEndTime(expireTime);
 
