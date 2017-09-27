@@ -413,12 +413,12 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     private void importArchivesContactsFiles(List<ImportArchivesContactsDTO> datas, ImportFileResponse response, Long organizationId, Long departmentId) {
 
-        ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
+        ImportFileResultLog<ImportArchivesContactsDTO> log;
         List<ImportFileResultLog<ImportArchivesContactsDTO>> errorDataLogs = new ArrayList<>();
         Long coverCount = 0L;
         for (ImportArchivesContactsDTO data : datas) {
             //  1.校验数据
-            log = checkArchivesContactsdatas(data);
+            log = checkArchivesContactsDatas(data);
             if (log != null) {
                 errorDataLogs.add(log);
                 continue;
@@ -464,7 +464,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         return null;
     }
 
-    private ImportFileResultLog<ImportArchivesContactsDTO> checkArchivesContactsdatas(ImportArchivesContactsDTO data) {
+    private ImportFileResultLog<ImportArchivesContactsDTO> checkArchivesContactsDatas(ImportArchivesContactsDTO data) {
 
         ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
 
@@ -776,12 +776,12 @@ public class ArchivesServiceImpl implements ArchivesService {
             organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
 
             //  2.更新 member 表信息
-            organizationService.updateOrganizationMemberInfoByDetailId(detail.getId(),detail.getContactToken(),detail.getContactName(),detail.getGender());
+            organizationService.updateOrganizationMemberInfoByDetailId(detail.getId(), detail.getContactToken(), detail.getContactName(), detail.getGender());
 
             //  3.更新自定义字段值
-            List<PostApprovalFormItem> dynamicItems = cmd.getValues().stream().filter(r ->{
+            List<PostApprovalFormItem> dynamicItems = cmd.getValues().stream().filter(r -> {
                 return !GeneralFormFieldAttributeType.DEFAULT.getCode().equals(r.getFieldAttribute());
-            }).map(r ->{
+            }).map(r -> {
                 return r;
             }).collect(Collectors.toList());
             addGeneralFormValuesCommand formCommand = new addGeneralFormValuesCommand();
@@ -929,6 +929,14 @@ public class ArchivesServiceImpl implements ArchivesService {
             if (!GeneralFormFieldAttributeType.DEFAULT.getCode().equals(itemValue.getFieldAttribute()))
                 continue;
             else {
+                switch (itemValue.getFieldName()) {
+                    case ArchivesParameter.BIRTHDAY:
+                        employee.setBirthday(ArchivesUtil.parseDate(itemValue.getFieldValue()));
+                        break;
+                    case ArchivesParameter.CONTACT_NAME:
+                        employee.setContactName(itemValue.getFieldValue());
+                        break;
+                }
                 if (itemValue.getFieldName().equals(ArchivesParameter.BIRTHDAY)) {
                     employee.setBirthday(ArchivesUtil.parseDate(itemValue.getFieldValue()));
                     continue;
@@ -1138,7 +1146,7 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     private Map<String, String> handleEmployeeDefaultVal(OrganizationMemberDetails employee) {
         Map<String, String> valueMap = new HashMap<>();
-        valueMap.put("contactName", employee.getContactName());
+        valueMap.put(ArchivesParameter.CONTACT_NAME, employee.getContactName());
         valueMap.put("enName", employee.getEnName());
         valueMap.put("gender", convertToArchivesInfo(employee.getGender(), ArchivesParameter.GENDER));
         if (employee.getBirthday() != null)
@@ -1753,15 +1761,31 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     private void importArchivesEmployeesFiles(List<ImportArchivesEmployeesDTO> datas, ImportFileResponse response, Long organizationId, Long departmentId, List<GeneralFormFieldDTO> formValues) {
+        ImportFileResultLog<ImportArchivesEmployeesDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
+        List<ImportFileResultLog<ImportArchivesEmployeesDTO>> errorDataLogs = new ArrayList<>();
+        Long coverCount = 0L;
+
         for (ImportArchivesEmployeesDTO data : datas) {
+
+            list<log> logs
             List<PostApprovalFormItem> itemValues = new ArrayList<>();
             for (int i = 0; i < formValues.size(); i++) {
                 PostApprovalFormItem itemValue = ConvertHelper.convert(formValues.get(i), PostApprovalFormItem.class);
                 itemValue.setFieldValue(data.getValues().get(i));
+                checkArchivesEmployeesDatas(logs, itemValue);
+                if (log...)
+                break;
                 itemValues.add(itemValue);
             }
+
+
             //  导入数据
         }
+    }
+
+    private ImportFileResultLog<ImportArchivesEmployeesDTO> checkArchivesEmployeesDatas(PostApprovalFormItem itemValue) {
+        if (itemValue.getFieldName().equals())
+            return null;
     }
 
     @Override
