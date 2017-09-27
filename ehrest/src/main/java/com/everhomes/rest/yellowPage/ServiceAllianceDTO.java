@@ -133,7 +133,37 @@ public class ServiceAllianceDTO {
 	private Integer descriptionHeight;
 	
 	private Byte displayFlag;
-	
+
+	private Integer commentCount;
+
+	private String commentToken;
+
+	private String summaryDescription;
+
+	public Integer getCommentCount() {
+		return commentCount;
+	}
+
+	public void setCommentCount(Integer commentCount) {
+		this.commentCount = commentCount;
+	}
+
+	public String getCommentToken() {
+		return commentToken;
+	}
+
+	public void setCommentToken(String commentToken) {
+		this.commentToken = commentToken;
+	}
+
+	public String getSummaryDescription() {
+		return summaryDescription;
+	}
+
+	public void setSummaryDescription(String summaryDescription) {
+		this.summaryDescription = summaryDescription;
+	}
+
 	public Byte getDisplayFlag() {
 		return displayFlag;
 	}
