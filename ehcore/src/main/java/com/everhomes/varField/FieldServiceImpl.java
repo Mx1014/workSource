@@ -706,7 +706,7 @@ public class FieldServiceImpl implements FieldService {
             getAllGroups(partGroups.get(i),groups);
         }
         int numberOfSheets = workbook.getNumberOfSheets();
-        for(int i = 0; i < numberOfSheets; i ++){
+        sheet:for(int i = 0; i < numberOfSheets; i ++){
             Sheet sheet = workbook.getSheetAt(i);
             //通过sheet名字进行匹配，获得此sheet对应的group
             String sheetName = sheet.getSheetName();
@@ -715,9 +715,11 @@ public class FieldServiceImpl implements FieldService {
             for(int i1 = 0; i1 < groups.size(); i1 ++){
                 if(groups.get(i1).getGroupDisplayName().equals(sheetName)){
                     group = groups.get(i1);
-                }else{
-                    continue;
+                    break;
                 }
+            }
+            if(group.getGroupDisplayName()==null){
+                continue sheet;
             }
             //通过目标group拿到请求所有字段的command，然后请求获得所有字段
             ListFieldCommand cmd2 = new ListFieldCommand();
