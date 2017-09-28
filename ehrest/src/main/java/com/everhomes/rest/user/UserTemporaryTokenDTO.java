@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.user;
+package com.everhomes.rest.user;
 
 import com.everhomes.util.StringHelper;
 
@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  *
  */
-public class UserTemporaryToken implements Serializable {
+public class UserTemporaryTokenDTO {
 
     private Long userId;
     private Integer namespaceId;
