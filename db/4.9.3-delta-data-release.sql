@@ -139,38 +139,6 @@ delimiter ;
 CALL create_service_alliance_menu_scope;
 DROP PROCEDURE if exists create_service_alliance_menu_scope;
 -- ------------- 新建菜单Scope END--------
--- ------------- 删除服务广场没有使用的应用入口的菜单Scope --------
-DROP PROCEDURE if exists delete_service_alliance_menu_scope;
-delimiter //
-CREATE PROCEDURE `delete_service_alliance_menu_scope` ()
-BEGIN
-  DECLARE aid LONG;
-	DECLARE ans INTEGER;
-
-  DECLARE done INT DEFAULT FALSE;
-  DECLARE cur CURSOR FOR select namespace_id,entry_id*100+41600 from eh_service_alliance_categories WHERE  parent_id =0 AND id NOT IN (select a.categry_id from (SELECT DISTINCT CAST(SUBSTRING(action_data,LOCATE('type":',action_data)+6,LOCATE(',',action_data)-6-LOCATE('type":',action_data)) AS UNSIGNED) AS categry_id from eh_launch_pad_items WHERE action_type = 33) as a WHERE a.categry_id IS NOT NULL);
-  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-  OPEN cur;
-  read_loop: LOOP
-    FETCH cur INTO ans,aid;
-    IF done THEN
-      LEAVE read_loop;
-    END IF;
-		DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid;
-	  DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid+10;
-	  DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid+20;
-	  DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid+30;
-	  DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid+40;
-	  DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid+50;
-		DELETE FROM eh_web_menu_scopes WHERE owner_id = ans AND menu_id = aid+60;
-  END LOOP;
-  CLOSE cur;
-END
-//
-delimiter ;
-CALL delete_service_alliance_menu_scope;
-DROP PROCEDURE if exists delete_service_alliance_menu_scope;
--- ------------- 删除服务广场没有使用的应用入口的菜单Scope end--------
 -- 删除服务联盟老菜单
 DELETE from eh_web_menus WHERE id = 40500;
 -- 菜单位置调整
