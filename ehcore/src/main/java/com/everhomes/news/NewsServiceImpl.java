@@ -626,7 +626,12 @@ public class NewsServiceImpl implements NewsService {
 				r.setName(newsTag.getValue());
 		});
 		GetNewsDetailInfoResponse response = convertNewsToNewsDTO(userId, news);
-		response.setTags(list.stream().map(r->ConvertHelper.convert(r,NewsTagValsDTO.class)).collect(Collectors.toList()));
+		response.setTags(list.stream().map(r-> {
+			if (StringUtils.isEmpty(r.getName()))
+				return null;
+			else
+				return ConvertHelper.convert(r,NewsTagValsDTO.class);
+	  }).collect(Collectors.toList()));
 		return response;
 	}
 
