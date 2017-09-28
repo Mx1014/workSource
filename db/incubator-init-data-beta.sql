@@ -323,11 +323,11 @@ INSERT INTO `eh_incubator_project_types` (`id`, `uuid`, `name`, `create_time`) V
 
 -- 增加入孵申请菜单
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`,`level`,`condition_type`,`category`)
-	VALUES (39000, '入孵申请', 30000, null, 'react:/enter-apply/apply-management', 0, 2, '/30000/39000', 'park', 600, 39000, 2, null, 'module');
+	VALUES (36000, '入孵申请', 30000, null, 'react:/enter-apply/apply-management', 0, 2, '/30000/39000', 'park', 600, 39000, 2, null, 'module');
 -- 给成都项目配入孵申请菜单
 SET @eh_web_menu_scopes_id = (SELECT MAX(id) from eh_web_menu_scopes);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-	VALUES ((@eh_web_menu_scopes_id := @eh_web_menu_scopes_id + 1),39000,NULL,'EhNamespaces',999964,2);
+	VALUES ((@eh_web_menu_scopes_id := @eh_web_menu_scopes_id + 1),36000,NULL,'EhNamespaces',999964,2);
 
 -- 园区快讯配置
 set @id = (select max(id) from eh_launch_pad_items);

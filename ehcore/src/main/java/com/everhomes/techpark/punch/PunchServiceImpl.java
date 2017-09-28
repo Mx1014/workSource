@@ -907,7 +907,7 @@ public class PunchServiceImpl implements PunchService {
 			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
-			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+			pdl.setExceptionStatus(null);
 			return pdl;
 		}
 
@@ -2577,7 +2577,7 @@ public class PunchServiceImpl implements PunchService {
                 PunchTimeIntervalDTO interval = dto1.getPunchTimeIntervals().get(punchTimeNo - 1);
 				BigDecimal b = new BigDecimal(statistic.getUnpunchCount()
 						+ (interval.getLeaveTime() - interval.getArriveTime()));
-				statistic.setUnpunchCount(b.divide(new BigDecimal(3600000), 2, RoundingMode.HALF_UP).doubleValue());
+				statistic.setUnpunchCount(statistic.getUnpunchCount()+b.divide(new BigDecimal(3600000), 2, RoundingMode.HALF_UP).doubleValue());
             }
         }  else if (status.equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
             statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
