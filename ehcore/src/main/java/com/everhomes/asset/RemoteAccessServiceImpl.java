@@ -43,14 +43,14 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
     @Autowired
     private PaymentService paymentService;
 
-    @PostConstruct
-    void init() throws Exception {
-        //写死
-        String payHomeUrl = "http://paytest.zuolin.com:8080/pay/api";
-        PaymentAccountResp account = paymentService.findPaymentAccount();
-        restClient = new RestClient(payHomeUrl, account.getAppKey(), account.getSecretKey());
-    }
-    private RestClient restClient = null;
+//    @PostConstruct
+//    void init() throws Exception {
+//        //写死
+//        String payHomeUrl = "http://paytest.zuolin.com:8080/pay/api";
+//        PaymentAccountResp account = paymentService.findPaymentAccount();
+//        restClient = new RestClient(payHomeUrl, account.getAppKey(), account.getSecretKey());
+//    }
+//    private RestClient restClient = null;
 
 
     @Override
@@ -210,7 +210,9 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                             + ",uri=" + uri
                             + ",cmd=" + GsonUtil.toJson(cmd));
         }
-
+        String payHomeUrl = "http://paytest.zuolin.com:8080/pay/api";
+        PaymentAccountResp account = paymentService.findPaymentAccount();
+        RestClient restClient = new RestClient(payHomeUrl, account.getAppKey(), account.getSecretKey());
         com.everhomes.rest.RestResponseBase response = (com.everhomes.rest.RestResponseBase) restClient.restCall(
                 method,
                 uri,
