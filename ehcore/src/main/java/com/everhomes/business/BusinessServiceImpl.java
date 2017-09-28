@@ -41,6 +41,8 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.CheckPaymentUserCommand;
+import com.everhomes.rest.asset.CheckPaymentUserResponse;
 import com.everhomes.rest.business.*;
 import com.everhomes.rest.business.admin.*;
 import com.everhomes.rest.category.CategoryDTO;
@@ -1763,6 +1765,11 @@ public class BusinessServiceImpl implements BusinessService {
 			}
 		}
 		return dtos;
+	}
+
+	@Override
+	public CheckPaymentUserResponse checkPaymentUser(CheckPaymentUserCommand cmd) {
+		return null;
 	}
 
 	@Override
