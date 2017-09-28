@@ -305,6 +305,7 @@ VALUES ((@max_template_id := @max_template_id + 1), 'sms.default.sign', 0, 'zh_C
 --
 -- 短信模板
 --
+DELETE FROM eh_locale_templates WHERE scope = 'sms.default';
 SET @max_template_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 1);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 1, 'zh_CN', '验证码', '您的验证码为${vcode}，10分钟内有效，感谢您的使用。', 0);
@@ -318,9 +319,15 @@ VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 3, 'zh_CN', '
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 7, 'zh_CN', '新报修', '${createUName}(手机号：${createUToken})已发布了新的报修任务，主题为：${subject}，请立即处理。', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '门禁', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：${link}/aclink/v?id=${id} （24小时有效）。', 0);
+VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '门禁', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：https://core.zuolin.com/evh/aclink/v?id=${id}（24小时有效）', 1000000);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '门禁', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：http://core.zuolin.com/aclink/v?id=${id} （24小时有效）。', 0);
+VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '门禁', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：https://core.zuolin.com/evh/aclink/v?id=${id}（24小时有效）', 999974);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '门禁', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：https://core.zuolin.com/evh/aclink/v?id=${id}（24小时有效）', 1);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '门禁', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：https://core.zuolin.com/evh/aclink/v?id=${id}（24小时有效）', 999993);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '门禁', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：${link}/aclink/v?id=${id}（24小时有效）', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 9, 'zh_CN', '看楼申请', '用户${userName}（手机号：${userPhone}）于${applyTime}提交了预约${applyType}申请：参观位置：${location}\n面积需求：${area}\n公司名称：${enterpriseName}\n备注：${description}', 1000000);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
@@ -426,7 +433,7 @@ update eh_configurations set `value` = '0306A9' where `name` = 'parking.kexing.p
 INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `card_type_id`, `card_type_name`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
   VALUES ('1', '999983', 'community', '240111044331055940', '10006', '2', '月租车', '2', '1', '2017-09-19 10:49:48', NULL, NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
-	VALUES ('parking.default.card.type', '[{\"typeId\":\"普通月卡\", \"typeName\":\"普通月卡\"}]', NULL, '0', NULL);
+	VALUES ('parking.default.card.type', '{\"typeId\":\"普通月卡\", \"typeName\":\"普通月卡\"}', NULL, '0', NULL);
 
 delete from eh_parking_lots where id = 10006;
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`)
