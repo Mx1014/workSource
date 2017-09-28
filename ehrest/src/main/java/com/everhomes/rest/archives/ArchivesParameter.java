@@ -98,7 +98,11 @@ public interface ArchivesParameter {
 
     static final String CONTRACT_CERTIFICATE = "contractCertificate";
 
-    static final String DEPARTMENTS = "departments";    //	部门
+    static final String DEPARTMENT = "department";    //	部门
+
+    static final String JOB_POSITION = "jobPosition";
+
+    static final String JOB_LEVEL = "jobLevel";
 
     static final String DISMISS_REASON = "dismissReason";    //	离职原因
 

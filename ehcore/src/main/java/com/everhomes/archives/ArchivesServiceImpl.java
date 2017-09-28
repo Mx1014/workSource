@@ -571,10 +571,10 @@ public class ArchivesServiceImpl implements ArchivesService {
     private ArchivesContactDTO convertArchivesContactForExcel(ArchivesContactDTO dto) {
 
         //  性别转化
-        dto.setGenderString(convertToArchivesInfo(dto.getGender(), "gender"));
+        dto.setGenderString(convertToArchivesInfo(dto.getGender(), ArchivesParameter.GENDER));
 
         //  部门转化
-        dto.setDepartmentString(convertToArchivesInfo(dto.getDepartments(), "departments"));
+        dto.setDepartmentString(convertToArchivesInfo(dto.getDepartments(), ArchivesParameter.DEPARTMENT));
 
         //  TODO:岗位的导出
 
@@ -1096,64 +1096,64 @@ public class ArchivesServiceImpl implements ArchivesService {
     private Map<String, String> handleEmployeeDefaultVal(OrganizationMemberDetails employee) {
         Map<String, String> valueMap = new HashMap<>();
         valueMap.put(ArchivesParameter.CONTACT_NAME, employee.getContactName());
-        valueMap.put("enName", employee.getEnName());
-        valueMap.put("gender", convertToArchivesInfo(employee.getGender(), ArchivesParameter.GENDER));
+        valueMap.put(ArchivesParameter.EN_NAME, employee.getEnName());
+        valueMap.put(ArchivesParameter.GENDER, convertToArchivesInfo(employee.getGender(), ArchivesParameter.GENDER));
         if (employee.getBirthday() != null)
-            valueMap.put("birthday", String.valueOf(employee.getBirthday()));
-        valueMap.put("maritalFlag", convertToArchivesInfo(employee.getMaritalFlag(), ArchivesParameter.MARITAL_FLAG));
+            valueMap.put(ArchivesParameter.BIRTHDAY, String.valueOf(employee.getBirthday()));
+        valueMap.put(ArchivesParameter.MARITAL_FLAG, convertToArchivesInfo(employee.getMaritalFlag(), ArchivesParameter.MARITAL_FLAG));
         if (employee.getProcreative() != null)
-            valueMap.put("procreative", String.valueOf(employee.getProcreative()));
-        valueMap.put("ethnicity", employee.getEthnicity());
-        valueMap.put("politicalFlag", employee.getPoliticalFlag());
-        valueMap.put("nativePlace", employee.getNativePlace());
-        valueMap.put("idType", employee.getIdType());
-        valueMap.put("idNumber", employee.getIdNumber());
+            valueMap.put(ArchivesParameter.PROCREATIVE, String.valueOf(employee.getProcreative()));
+        valueMap.put(ArchivesParameter.ETHNICITY, employee.getEthnicity());
+        valueMap.put(ArchivesParameter.POLITICAL_FLAG, employee.getPoliticalFlag());
+        valueMap.put(ArchivesParameter.NATIVE_PLACE, employee.getNativePlace());
+        valueMap.put(ArchivesParameter.ID_TYPE, employee.getIdType());
+        valueMap.put(ArchivesParameter.ID_NUMBER, employee.getIdNumber());
         if (employee.getIdExpiryDate() != null)
-            valueMap.put("idExpiryDate", String.valueOf(employee.getIdExpiryDate()));
-        valueMap.put("degree", employee.getDegree());
-        valueMap.put("graduationSchool", employee.getGraduationSchool());
+            valueMap.put(ArchivesParameter.ID_EXPIRY_DATE, String.valueOf(employee.getIdExpiryDate()));
+        valueMap.put(ArchivesParameter.DEGREE, employee.getDegree());
+        valueMap.put(ArchivesParameter.GRADUATION_SCHOOL, employee.getGraduationSchool());
         if (employee.getGraduationTime() != null)
-            valueMap.put("graduationTime", String.valueOf(employee.getGraduationTime()));
-        valueMap.put("contactToken", employee.getContactToken());
-        valueMap.put("email", employee.getEmail());
-        valueMap.put("wechat", employee.getWechat());
-        valueMap.put("qq", employee.getQq());
-        valueMap.put("address", employee.getAddress());
-        valueMap.put("emergencyName", employee.getEmergencyName());
-        valueMap.put("emergencyRelationship", employee.getEmergencyRelationship());
-        valueMap.put("emergencyContact", employee.getEmergencyContact());
+            valueMap.put(ArchivesParameter.GRADUATION_TIME, String.valueOf(employee.getGraduationTime()));
+        valueMap.put(ArchivesParameter.CONTACT_TOKEN, employee.getContactToken());
+        valueMap.put(ArchivesParameter.EMAIL, employee.getEmail());
+        valueMap.put(ArchivesParameter.WECHAT, employee.getWechat());
+        valueMap.put(ArchivesParameter.QQ, employee.getQq());
+        valueMap.put(ArchivesParameter.ADDRESS, employee.getAddress());
+        valueMap.put(ArchivesParameter.EMERGENCY_NAME, employee.getEmergencyName());
+        valueMap.put(ArchivesParameter.EMERGENCY_RELATIONSHIP, employee.getEmergencyRelationship());
+        valueMap.put(ArchivesParameter.EMERGENCY_CONTACT, employee.getEmergencyContact());
         if (employee.getCheckInTime() != null)
-            valueMap.put("checkInTime", String.valueOf(employee.getCheckInTime()));
-        valueMap.put("employeeType", convertToArchivesInfo(employee.getEmployeeType(), ArchivesParameter.EMPLOYEE_TYPE));
-        valueMap.put("employeeStatus", convertToArchivesInfo(employee.getEmployeeStatus(), ArchivesParameter.EMPLOYEE_STATUS));
-        valueMap.put("employmentTime", String.valueOf(employee.getEmploymentTime()));
+            valueMap.put(ArchivesParameter.CHECK_IN_TIME, String.valueOf(employee.getCheckInTime()));
+        valueMap.put(ArchivesParameter.EMPLOYEE_TYPE, convertToArchivesInfo(employee.getEmployeeType(), ArchivesParameter.EMPLOYEE_TYPE));
+        valueMap.put(ArchivesParameter.EMPLOYEE_STATUS, convertToArchivesInfo(employee.getEmployeeStatus(), ArchivesParameter.EMPLOYEE_STATUS));
+        valueMap.put(ArchivesParameter.EMPLOYMEN_TTIME, String.valueOf(employee.getEmploymentTime()));
         //  TODO:部门的同步，岗位的修改
 //        valueMap.put("department", employee.getEnName());
 //        valueMap.put("jobPosition", employee.getJobPosition());
-        valueMap.put("employeeNo", employee.getEmployeeNo());
-        valueMap.put("contactShortToken", employee.getContactShortToken());
-        valueMap.put("workEmail", employee.getWorkEmail());
+        valueMap.put(ArchivesParameter.EMPLOYEE_NO, employee.getEmployeeNo());
+        valueMap.put(ArchivesParameter.CONTACT_SHORT_TOKEN, employee.getContactShortToken());
+        valueMap.put(ArchivesParameter.WORK_EMAIL, employee.getWorkEmail());
         //  TODO:合同主体的转化
-        valueMap.put("contractPartyId", String.valueOf(employee.getContractPartyId()));
+        valueMap.put(ArchivesParameter.CONTRACT_PARTY_ID, String.valueOf(employee.getContractPartyId()));
         if (employee.getWorkStartTime() != null)
-            valueMap.put("workStartTime", String.valueOf(employee.getWorkStartTime()));
+            valueMap.put(ArchivesParameter.WORK_START_TIME, String.valueOf(employee.getWorkStartTime()));
         if (employee.getContractStartTime() != null)
-            valueMap.put("contractStartTime", String.valueOf(employee.getContractStartTime()));
+            valueMap.put(ArchivesParameter.CONTRACT_START_TIME, String.valueOf(employee.getContractStartTime()));
         if (employee.getContractEndTime() != null)
-            valueMap.put("contractEndTime", String.valueOf(employee.getContractEndTime()));
-        valueMap.put("salaryCardNumber", employee.getSalaryCardNumber());
-        valueMap.put("salaryCardBank", employee.getSalaryCardBank());
-        valueMap.put("socialSecurityNumber", employee.getSocialSecurityNumber());
-        valueMap.put("providentFundNumber", employee.getProvidentFundNumber());
-        valueMap.put("regResidenceType", employee.getRegResidenceType());
-        valueMap.put("regResidence", employee.getRegResidence());
-        valueMap.put("idPhoto", employee.getIdPhoto());
-        valueMap.put("visaPhoto", employee.getVisaPhoto());
-        valueMap.put("lifePhoto", employee.getLifePhoto());
-        valueMap.put("entryForm", employee.getEntryForm());
-        valueMap.put("graduationCertificate", employee.getGraduationCertificate());
-        valueMap.put("degreeCertificate", employee.getDegreeCertificate());
-        valueMap.put("contractCertificate", employee.getContractCertificate());
+            valueMap.put(ArchivesParameter.CONTRACT_END_TIME, String.valueOf(employee.getContractEndTime()));
+        valueMap.put(ArchivesParameter.SALARY_CARD_NUMBER, employee.getSalaryCardNumber());
+        valueMap.put(ArchivesParameter.SALARY_CARD_BANK, employee.getSalaryCardBank());
+        valueMap.put(ArchivesParameter.SOCIAL_SECURITY_NUMBER, employee.getSocialSecurityNumber());
+        valueMap.put(ArchivesParameter.PROVIDENT_FUND_NUMBER, employee.getProvidentFundNumber());
+        valueMap.put(ArchivesParameter.REG_RESIDENCE_TYPE, employee.getRegResidenceType());
+        valueMap.put(ArchivesParameter.REG_RESIDENCE, employee.getRegResidence());
+        valueMap.put(ArchivesParameter.ID_PHOTO, employee.getIdPhoto());
+        valueMap.put(ArchivesParameter.VISA_PHOTO, employee.getVisaPhoto());
+        valueMap.put(ArchivesParameter.LIFE_PHOTO, employee.getLifePhoto());
+        valueMap.put(ArchivesParameter.ENTRY_FORM, employee.getEntryForm());
+        valueMap.put(ArchivesParameter.GRADUATION_CERTIFICATE, employee.getGraduationCertificate());
+        valueMap.put(ArchivesParameter.DEGREE_CERTIFICATE, employee.getDegreeCertificate());
+        valueMap.put(ArchivesParameter.CONTRACT_CERTIFICATE, employee.getContractCertificate());
         return valueMap;
     }
 
@@ -1267,7 +1267,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 return "实习";
         }
 
-        if (type.equals(ArchivesParameter.DEPARTMENTS)) {
+        if (type.equals(ArchivesParameter.DEPARTMENT)) {
             List<OrganizationDTO> departments = (List<OrganizationDTO>) obj;
             if (departments != null && departments.size() > 0) {
                 String departmentString = "";
@@ -1823,7 +1823,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             }
         }
 
-        if (ArchivesParameter.DEPARTMENTS.equals(itemValue.getFieldName())) {
+        if (ArchivesParameter.DEPARTMENT.equals(itemValue.getFieldName())) {
             if (StringUtils.isEmpty(itemValue.getFieldValue())) {
                 realDepartmentId = departmentId;
             } else {
@@ -1957,7 +1957,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             return 1;
         else if (ArchivesParameter.EMPLOYEE_TYPE.equals(name))
             return 1;
-        else if (ArchivesParameter.DEPARTMENTS.equals(name))
+        else if (ArchivesParameter.DEPARTMENT.equals(name))
             return 1;
         else
             return 0;
