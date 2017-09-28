@@ -59,6 +59,7 @@ CREATE TABLE `eh_payment_order_records` (
 	`payment_order_type` INTEGER NOT NULL COMMENT '支付系统单据类型,1-充值,2-提现,3-支付,4-退款',
 	`order_type` VARCHAR(64) NOT NULL COMMENT '服务类型,填parking/rentalOrder等',
 	`order_id` BIGINT NOT NULL COMMENT '业务订单编号',
+	`order_num` VARCHAR(255) DEFAULT NULL COMMENT '订单的编号',
 	`payment_order_id` BIGINT NOT NULL COMMENT '支付系统支付单号',
 	`order_commit_url` VARCHAR(1024) DEFAULT NULL COMMENT '支付接口',
 	`order_commit_token` VARCHAR(1024) DEFAULT NULL COMMENT '支付token',
