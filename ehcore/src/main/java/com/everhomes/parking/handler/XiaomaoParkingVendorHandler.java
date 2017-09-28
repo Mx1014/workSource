@@ -6,10 +6,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.parking.ParkingLot;
-import com.everhomes.parking.ParkingRechargeOrder;
-import com.everhomes.parking.ParkingRechargeRate;
-import com.everhomes.parking.ParkingVendorHandler;
+import com.everhomes.parking.*;
 import com.everhomes.parking.xiaomao.XiaomaoCard;
 import com.everhomes.parking.xiaomao.XiaomaoJsonEntity;
 import com.everhomes.rest.parking.*;
@@ -59,7 +56,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
             }
 
             parkingCardDTO.setPlateNumber(plateNumber);
-
+            parkingCardDTO.setPlateOwnerName(card.getUserName());
             //parkingCardDTO.setStartTime(startTime);
             parkingCardDTO.setEndTime(expireTime);
 
@@ -185,20 +182,24 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
             ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
 
-            ParkingCardType temp = null;
-            for(ParkingCardType t: types) {
-                if(t.getTypeId().equals(r.getCardType())) {
-                    temp = t;
-                }
-            }
-            dto.setCardTypeId(temp.getTypeId());
-            dto.setCardType(temp.getTypeName());
-            dto.setRateToken(r.getId().toString());
-            dto.setVendorName(ParkingLotVendor.XIAOMAO.getCode());
+            populaterate(types, dto, r);
             return dto;
         }).collect(Collectors.toList());
 
         return result;
+    }
+
+    private void populaterate(List<ParkingCardType> types, ParkingRechargeRateDTO dto, ParkingRechargeRate r) {
+        ParkingCardType temp = null;
+        for(ParkingCardType t: types) {
+            if(t.getTypeId().equals(r.getCardType())) {
+                temp = t;
+            }
+        }
+        dto.setCardTypeId(temp.getTypeId());
+        dto.setCardType(temp.getTypeName());
+        dto.setRateToken(r.getId().toString());
+        dto.setVendorName(ParkingLotVendor.XIAOMAO.getCode());
     }
 
     @Override
@@ -294,22 +295,25 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
     }
 
     @Override
-    public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+    public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
+        updateParkingRechargeOrderRateInfo(parkingLot, order);
 
     }
 
-    @Override
-    public ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd) {
-        String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
-        ParkingVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "Mybay");
-        return handler.getFreeSpaceNum(cmd);
-    }
+    ParkingRechargeRateDTO getOpenCardRate(ParkingCardRequest parkingCardRequest) {
 
-    @Override
-    public ParkingCarLocationDTO getCarLocation(ParkingLot parkingLot, GetCarLocationCommand cmd) {
-        String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
-        ParkingVendorHandler handler = PlatformContext.getComponent(handlerPrefix + "Mybay");
-        return handler.getCarLocation(parkingLot, cmd);
-    }
+        ParkingRechargeRate rate = parkingProvider.findParkingRechargeRateByMonthCount(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
+                parkingCardRequest.getId(), parkingCardRequest.getCardTypeId(), new BigDecimal(1));
 
+        if (null == rate) {
+            //TODO:
+            return null;
+        }
+        List<ParkingCardType> types = getCardTypes(parkingCardRequest.getParkingLotId());
+        ParkingRechargeRateDTO dto = ConvertHelper.convert(rate, ParkingRechargeRateDTO.class);
+
+        populaterate(types, dto, rate);
+
+        return dto;
+    }
 }

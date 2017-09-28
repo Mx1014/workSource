@@ -63,6 +63,7 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -903,7 +904,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             ExcelUtils excelUtils = new ExcelUtils(response, fileName, "企业信息");
 //
             List<OrganizationExportDetailDTO> data = organizationDetailDTOs.stream().map(this::convertToExportDetail).collect(Collectors.toList());
-            String[] propertyNames = {"displayName", "emailDomain", "apartments", "signupCount", "memberCount", "serviceUserName", "admins", "address", "contact", "checkinDateString", "description", "unifiedSocialCreditCode"};
+            String[] propertyNames = {"name", "emailDomain", "apartments", "signupCount", "memberCount", "serviceUserName", "admins", "address", "contact", "checkinDateString", "description", "unifiedSocialCreditCode"};
             String[] titleNames = {"企业名称", "邮箱域名", "楼栋门牌", "注册人数", "企业人数", "客服经理", "企业管理员", "地址", "咨询电话", "入驻时间", "企业介绍", "统一社会信用代码"};
             int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
             excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
@@ -1063,13 +1064,32 @@ public class OrganizationServiceImpl implements OrganizationService {
         return phoneSet;
     }
 
+    private void checkUnifiedSocialCreditCode(String unifiedSocialCreditCode, Integer namespaceId, Long organizationId) {
+        List<Organization> organizations =  organizationProvider.findNamespaceUnifiedSocialCreditCode(unifiedSocialCreditCode, namespaceId);
+        if(organizations != null && organizations.size() > 0) {
+            if(organizationId != null) {
+                for(Organization org : organizations) {
+                    if(organizationId.equals(org.getId())) {
+                        return;
+                    }
+                }
+            }
+            LOGGER.error("unifiedSocialCreditCode:{} already exist in namespace:{}", unifiedSocialCreditCode, namespaceId);
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_UNIFIEDSOCIALCREDITCODE_EXIST,
+                    "unifiedSocialCreditCode already exist.");
+        }
+
+    }
+
     @Override
     public OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd) {
-
         User user = UserContext.current().getUser();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
+        if(org.apache.commons.lang.StringUtils.isNotBlank(cmd.getUnifiedSocialCreditCode())) {
+            checkUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode(), namespaceId, null);
+        }
         Organization organization = new Organization();
 
         dbProvider.execute((TransactionStatus status) -> {
@@ -1244,7 +1264,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         //先判断，后台管理员才能创建。状态直接设为正常
         Organization organization = checkOrganization(cmd.getId());
         User user = UserContext.current().getUser();
-
+        if(org.apache.commons.lang.StringUtils.isNotBlank(cmd.getUnifiedSocialCreditCode())) {
+            checkUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode(), cmd.getNamespaceId(), cmd.getId());
+        }
         dbProvider.execute((TransactionStatus status) -> {
             organization.setId(cmd.getId());
             organization.setName(cmd.getName());
@@ -2683,6 +2705,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (community != null) {
                 organizationDto.setCommunityId(communityId);
                 organizationDto.setCommunityName(community.getName());
+                organizationDto.setCommunityAliasName(community.getAliasName());
                 organizationDto.setCommunityType(community.getCommunityType());
                 organizationDto.setDefaultForumId(community.getDefaultForumId());
                 organizationDto.setFeedbackForumId(community.getFeedbackForumId());
@@ -5430,6 +5453,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgLog.setContactDescription(m.getContactDescription());
                 this.organizationProvider.createOrganizationMemberLog(orgLog);
 
+                if(OrganizationMemberGroupType.fromCode(m.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+                    List<OrganizationMember> managers = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(m.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(), null);
+
+                    //删除人员是管理员的时候 需要检查公司是否还有管理员，没有的话需要变更公司的flag
+                    if(managers.size() == 0){
+                        Organization o = organizationProvider.findOrganizationById(m.getOrganizationId());
+                        if(null != o) {
+                            o.setSetAdminFlag(TrueOrFalseFlag.FALSE.getCode());
+                            organizationProvider.updateOrganization(o);
+                            organizationSearcher.feedDoc(o);
+                        }
+                    }
+                }
+
                 Integer namespaceId = UserContext.getCurrentNamespaceId();
                 if (OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER) {
                     //Remove door auth, by Janon 2016-12-15
@@ -5472,6 +5509,20 @@ public class OrganizationServiceImpl implements OrganizationService {
         orgLog.setOperatorUid(UserContext.current().getUser().getId());
         orgLog.setContactDescription(member.getContactDescription());
         this.organizationProvider.createOrganizationMemberLog(orgLog);
+
+        if(OrganizationMemberGroupType.fromCode(member.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
+            List<OrganizationMember> managers = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(member.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(), null);
+
+            //添加人员是管理员的时候 需要检查公司是否还有管理员，有的话需要变更公司的flag
+            if(managers.size() > 0){
+                Organization o = organizationProvider.findOrganizationById(member.getOrganizationId());
+                if(null != o){
+                    o.setSetAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+                    organizationProvider.updateOrganization(o);
+                    organizationSearcher.feedDoc(o);
+                }
+            }
+        }
 
         //自动加入公司
         this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());

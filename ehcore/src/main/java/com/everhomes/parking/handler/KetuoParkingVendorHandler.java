@@ -38,8 +38,6 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 	private static final String PAY_TEMP_FEE = "/api/pay/PayParkingFee";
 	//只显示ruleType = 1时的充值项
 	static final String RULE_TYPE = "1";
-	//科托系统：按30天计算
-	static final int DAY_COUNT = 30;
 	//月租车 : 2
 	static final String CAR_TYPE = "2";
     
@@ -339,7 +337,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 	}
 
 	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
 		String plateNumber = order.getPlateNumber();
 
 		KetuoCard cardInfo = getCard(plateNumber);
@@ -347,11 +345,10 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		String cardType = CAR_TYPE;
 
 		if(null != cardInfo) {
-			long expireTime = strToLong(cardInfo.getValidTo());
-			ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
-			if (!checkExpireTime(parkingLot, expireTime)) {
+//			long expireTime = strToLong(cardInfo.getValidTo());
+//			if (!checkExpireTime(parkingLot, expireTime)) {
 				cardType = cardInfo.getCarType();
-			}
+//			}
 		}
 		for(KetuoCardRate rate: getCardRule(cardType)) {
 			if(rate.getRuleId().equals(order.getRateToken())) {
@@ -364,6 +361,11 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 					"Rate not found.");
 		}
 		order.setRateName(ketuoCardRate.getRuleName());
+
+		BigDecimal ratePrice = new BigDecimal(ketuoCardRate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+
+		checkAndSetOrderPrice(parkingLot, order, ratePrice);
+
 	}
 
 	private KetuoTempFee getTempFee(String plateNumber) {
@@ -434,7 +436,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		OpenCardInfoDTO dto = new OpenCardInfoDTO();
 
 		//月租车
-		List<KetuoCardRate> rates = getCardRule(CAR_TYPE);
+		List<KetuoCardRate> rates = getCardRule(parkingCardRequest.getCardTypeId());
 		if(null != rates && !rates.isEmpty()) {
 			
 			KetuoCardRate rate = null;

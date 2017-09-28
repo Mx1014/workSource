@@ -591,7 +591,6 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         createOrderCmd.setBizOrderNum(BizOrderNum);
 
         createOrderCmd.setOrderRemark1(String.valueOf(serviceConfig.getId()));
-
         createOrderCmd.setOrderRemark2(null);
         createOrderCmd.setOrderRemark3(null);
         createOrderCmd.setOrderRemark4(null);

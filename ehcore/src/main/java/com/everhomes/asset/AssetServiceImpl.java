@@ -731,7 +731,8 @@ public class AssetServiceImpl implements AssetService {
                     item.setBillGroupId(billGroupId);
                     item.setBillId(nextBillId);
                     item.setChargingItemName(groupRule.getChargingItemName());
-                    item.setChargingItemsId(rule.getChargingItemId());
+//                    item.setChargingItemsId(rule.getChargingItemId());
+                    item.setChargingItemsId(groupRule.getChargingItemId());
                     item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setCreatorUid(UserContext.currentUserId());
                     item.setDateStr(dateStr);

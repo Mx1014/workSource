@@ -196,7 +196,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     }
                     dto.setStatus(billStatus);
                     String szsm_status = sourceDto.getStatus();
-                    if(szsm_status.equals(PaymentStatus.SUSPEND)){
+                    if(szsm_status.equals(PaymentStatus.SUSPEND.getCode())){
                         dto.setPayStatus(PaymentStatus.IN_PROCESS.getCode());
                     }
                     dtos.add(dto);
@@ -647,7 +647,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 
         //组装command ， 请求支付模块的下预付单
         PreOrderCommand cmd2pay = new PreOrderCommand();
-        cmd2pay.setAmount(10l);
+//        cmd2pay.setAmount(amountsInCents);
+        cmd2pay.setAmount(1l);
         cmd2pay.setClientAppName(cmd.getClientAppName());
         cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
         cmd2pay.setNamespaceId(cmd.getNamespaceId());

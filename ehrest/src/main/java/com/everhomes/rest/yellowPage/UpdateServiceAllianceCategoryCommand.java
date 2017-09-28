@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *  <li> selectedLogoUrl: 类型logo被选中时的url地址</li>
  *  <li> displayMode: 显示类型 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode}</li>
  *  <li> displayDestination: 展示端 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayDestination}</li>
+ *  <li> namespaceId: 域空间id</li>
  * </ul>
  */
 public class UpdateServiceAllianceCategoryCommand {
@@ -34,6 +35,8 @@ public class UpdateServiceAllianceCategoryCommand {
     private Byte displayMode;
 
 	private Byte displayDestination;
+	
+	private Integer namespaceId;
 
 	public Byte getDisplayDestination() {
 		return displayDestination;
@@ -105,6 +108,14 @@ public class UpdateServiceAllianceCategoryCommand {
 
 	public void setSelectedLogoUrl(String selectedLogoUrl) {
 		this.selectedLogoUrl = selectedLogoUrl;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

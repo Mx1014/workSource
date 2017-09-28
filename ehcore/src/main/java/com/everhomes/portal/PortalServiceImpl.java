@@ -1393,8 +1393,9 @@ public class PortalServiceImpl implements PortalService {
 				OPPushInstanceConfig config = new OPPushInstanceConfig();
 				config.setItemGroup(itemGroup.getName());
 				config.setNewsSize(instanceConfig.getNewsSize());
-//				config.setDescriptionHeight();
-//				config.setSubjectHeight();
+				config.setDescriptionHeight(0);
+				config.setSubjectHeight(0);
+				config.setEntityCount(0);
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.ACTIVITY){
 					itemGroup.setName("OPPushActivity");
 				}
@@ -1683,7 +1684,6 @@ public class PortalServiceImpl implements PortalService {
 			AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(item.getActionData(), AllOrMoreActionData.class);
 			List<PortalItemCategory> categorys = portalItemCategoryProvider.listPortalItemCategory(namespaceId, item.getItemGroupId(), null);
 			for (PortalItemCategory category: categorys) {
-				List<PortalContentScope> contentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM_CATEGORY.getCode(), category.getId());
 				List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM_CATEGORY.getCode(), category.getId(), null);
 				if(null != mappings && mappings.size() > 0){
 					for (PortalLaunchPadMapping mapping: mappings) {
@@ -1691,51 +1691,55 @@ public class PortalServiceImpl implements PortalService {
 						portalLaunchPadMappingProvider.deletePortalLaunchPadMapping(mapping.getId());
 					}
 				}
-				for (PortalContentScope scope: contentScopes) {
-					ItemServiceCategry itemCategory = ConvertHelper.convert(category, ItemServiceCategry.class);
-					if(PortalScopeType.RESIDENTIAL == PortalScopeType.fromCode(scope.getScopeType())){
-						itemCategory.setSceneType(SceneType.DEFAULT.getCode());
-						itemCategory.setScopeCode(ScopeType.RESIDENTIAL.getCode());
-					}else if(PortalScopeType.COMMERCIAL == PortalScopeType.fromCode(scope.getScopeType())){
-						itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
-						itemCategory.setScopeCode(ScopeType.COMMUNITY.getCode());
-					}else if(PortalScopeType.PM == PortalScopeType.fromCode(scope.getScopeType())){
-						itemCategory.setSceneType(SceneType.PM_ADMIN.getCode());
-						itemCategory.setScopeCode(ScopeType.PM.getCode());
-					}else if(PortalScopeType.ORGANIZATION == PortalScopeType.fromCode(scope.getScopeType())){
-						itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
-						itemCategory.setScopeCode(ScopeType.ORGANIZATION.getCode());
-					}
-					itemCategory.setScopeId(scope.getScopeId());
-					itemCategory.setStatus(ItemServiceCategryStatus.ACTIVE.getCode());
-					itemCategory.setCreatorUid(user.getId());
 
-					if(StringUtils.isEmpty(category.getIconUri()) && null != actionData){
-						itemCategory.setIconUri(actionData.getDefUri());
-					}
+				if(PortalItemCategoryStatus.fromCode(category.getStatus()) == PortalItemCategoryStatus.ACTIVE){
+					List<PortalContentScope> contentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM_CATEGORY.getCode(), category.getId());
+					for (PortalContentScope scope: contentScopes) {
+						ItemServiceCategry itemCategory = ConvertHelper.convert(category, ItemServiceCategry.class);
+						if(PortalScopeType.RESIDENTIAL == PortalScopeType.fromCode(scope.getScopeType())){
+							itemCategory.setSceneType(SceneType.DEFAULT.getCode());
+							itemCategory.setScopeCode(ScopeType.RESIDENTIAL.getCode());
+						}else if(PortalScopeType.COMMERCIAL == PortalScopeType.fromCode(scope.getScopeType())){
+							itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
+							itemCategory.setScopeCode(ScopeType.COMMUNITY.getCode());
+						}else if(PortalScopeType.PM == PortalScopeType.fromCode(scope.getScopeType())){
+							itemCategory.setSceneType(SceneType.PM_ADMIN.getCode());
+							itemCategory.setScopeCode(ScopeType.PM.getCode());
+						}else if(PortalScopeType.ORGANIZATION == PortalScopeType.fromCode(scope.getScopeType())){
+							itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
+							itemCategory.setScopeCode(ScopeType.ORGANIZATION.getCode());
+						}
+						itemCategory.setScopeId(scope.getScopeId());
+						itemCategory.setStatus(ItemServiceCategryStatus.ACTIVE.getCode());
+						itemCategory.setCreatorUid(user.getId());
 
-					if(AlignType.CENTER == AlignType.fromCode(category.getAlign()))
-						itemCategory.setAlign(ItemServiceCategryAlign.CENTER.getCode());
-					else if(AlignType.LEFT == AlignType.fromCode(category.getAlign()))
-						itemCategory.setAlign(ItemServiceCategryAlign.LEFT.getCode());
+						if(StringUtils.isEmpty(category.getIconUri()) && null != actionData){
+							itemCategory.setIconUri(actionData.getDefUri());
+						}
 
-					if(null == ItemServiceCategryAlign.fromCode(itemCategory.getAlign())  && null != actionData){
-						if(AlignType.CENTER == AlignType.fromCode(actionData.getAlign()))
+						if(AlignType.CENTER == AlignType.fromCode(category.getAlign()))
 							itemCategory.setAlign(ItemServiceCategryAlign.CENTER.getCode());
-						else if(AlignType.LEFT == AlignType.fromCode(actionData.getAlign()))
+						else if(AlignType.LEFT == AlignType.fromCode(category.getAlign()))
 							itemCategory.setAlign(ItemServiceCategryAlign.LEFT.getCode());
-					}
-					itemCategory.setOrder(category.getDefaultOrder());
-					itemCategory.setItemLocation(item.getItemLocation());
-					itemCategory.setItemGroup(item.getGroupName());
-					launchPadProvider.createItemServiceCategry(itemCategory);
 
-					PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
-					mapping.setContentType(EntityType.PORTAL_ITEM_CATEGORY.getCode());
-					mapping.setPortalContentId(category.getId());
-					mapping.setLaunchPadContentId(itemCategory.getId());
-					mapping.setCreatorUid(user.getId());
-					portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
+						if(null == ItemServiceCategryAlign.fromCode(itemCategory.getAlign())  && null != actionData){
+							if(AlignType.CENTER == AlignType.fromCode(actionData.getAlign()))
+								itemCategory.setAlign(ItemServiceCategryAlign.CENTER.getCode());
+							else if(AlignType.LEFT == AlignType.fromCode(actionData.getAlign()))
+								itemCategory.setAlign(ItemServiceCategryAlign.LEFT.getCode());
+						}
+						itemCategory.setOrder(category.getDefaultOrder());
+						itemCategory.setItemLocation(item.getItemLocation());
+						itemCategory.setItemGroup(item.getGroupName());
+						launchPadProvider.createItemServiceCategry(itemCategory);
+
+						PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
+						mapping.setContentType(EntityType.PORTAL_ITEM_CATEGORY.getCode());
+						mapping.setPortalContentId(category.getId());
+						mapping.setLaunchPadContentId(itemCategory.getId());
+						mapping.setCreatorUid(user.getId());
+						portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
+					}
 				}
 			}
 		}

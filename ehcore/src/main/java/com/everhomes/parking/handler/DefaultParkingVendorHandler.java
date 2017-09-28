@@ -21,11 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author sw on 2017/8/16.
@@ -33,6 +32,9 @@ import java.util.Map;
 public abstract class DefaultParkingVendorHandler implements ParkingVendorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultParkingVendorHandler.class);
+
+    //开卡按30天计算
+    static final int DAY_COUNT = 30;
 
     @Autowired
     ParkingProvider parkingProvider;
@@ -72,6 +74,36 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         parkingCardDTO.setIsValid(true);//兼容历史app
 
         return parkingCardDTO;
+    }
+
+    void updateParkingRechargeOrderRateInfo(ParkingLot parkingLot, ParkingRechargeOrder order) {
+        ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
+        if(null == rate) {
+            LOGGER.error("Rate not found, cmd={}", order);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Rate not found.");
+        }
+        order.setRateName(rate.getRateName());
+
+        checkAndSetOrderPrice(parkingLot, order, rate.getPrice());
+
+    }
+
+    void checkAndSetOrderPrice(ParkingLot parkingLot, ParkingRechargeOrder order, BigDecimal ratePrice) {
+
+        BigDecimal originalPrice = ratePrice;
+        if (null != parkingLot.getMonthlyDiscountFlag()) {
+            if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()) {
+                ratePrice = ratePrice.multiply(new BigDecimal(parkingLot.getMonthlyDiscount()))
+                        .divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+            }
+        }
+        if (order.getPrice().compareTo(ratePrice) != 0) {
+            LOGGER.error("Invalid order price, orderPrice={}, ratePrice={}", order.getPrice(), ratePrice);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid order price.");
+        }
+        order.setOriginalPrice(originalPrice);
     }
 
     /**
@@ -188,7 +220,62 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
 
     @Override
     public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
-        return null;
+
+        ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getParkingRequestId());
+
+        FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
+
+        ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(),
+                cmd.getParkingLotId(), flowCase.getFlowMainId());
+
+        Integer requestMonthCount = REQUEST_MONTH_COUNT;
+        Byte requestRechargeType = REQUEST_RECHARGE_TYPE;
+
+        if(null != parkingFlow) {
+            requestMonthCount = parkingFlow.getRequestMonthCount();
+            requestRechargeType = parkingFlow.getRequestRechargeType();
+        }
+
+        ParkingRechargeRateDTO rate = getOpenCardRate(parkingCardRequest);
+
+        OpenCardInfoDTO dto = ConvertHelper.convert(rate, OpenCardInfoDTO.class);
+//            dto.setOwnerId(cmd.getOwnerId());
+//            dto.setOwnerType(cmd.getOwnerType());
+//            dto.setParkingLotId(cmd.getParkingLotId());
+//            dto.setRateToken(rate.getRuleId());
+//            Map<String, Object> map = new HashMap<String, Object>();
+//            map.put("count", rate.getRuleAmount());
+//            String scope = ParkingNotificationTemplateCode.SCOPE;
+//            int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
+//            String locale = "zh_CN";
+//            String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//            dto.setRateName(rateName);
+//            dto.setCardType(typeName);
+//            dto.setMonthCount(new BigDecimal(rate.getRuleAmount()));
+//            dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
+
+            dto.setPlateNumber(cmd.getPlateNumber());
+            long now = System.currentTimeMillis();
+            dto.setOpenDate(now);
+            dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
+            if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
+                dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
+            }else {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(now);
+                int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+                int today = calendar.get(Calendar.DAY_OF_MONTH);
+
+                BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount - 1))
+                        .add(dto.getPrice().multiply(new BigDecimal(maxDay-today + 1))
+                                .divide(new BigDecimal(DAY_COUNT), 2, RoundingMode.HALF_UP));
+                dto.setPayMoney(price);
+            }
+
+            dto.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
+
+
+        return dto;
     }
 
     @Override
@@ -206,4 +293,12 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         return null;
     }
 
+    /**
+     * 需要开卡的停车场，需要实现这个方法
+     * @param parkingCardRequest
+     * @return
+     */
+    ParkingRechargeRateDTO getOpenCardRate(ParkingCardRequest parkingCardRequest) {
+        return null;
+    }
 }

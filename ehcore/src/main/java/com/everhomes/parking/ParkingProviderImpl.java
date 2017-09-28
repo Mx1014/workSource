@@ -57,11 +57,16 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
 
 	@Override
-	public ParkingCardRequestType findParkingCardTypeByTypeId(String cardTypeId) {
+	public ParkingCardRequestType findParkingCardTypeByTypeId(String ownerType, Long ownerId, Long parkingLotId, String cardTypeId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCardTypes.class));
-		EhParkingCardTypesDao dao = new EhParkingCardTypesDao(context.configuration());
 
-		return ConvertHelper.convert(dao.fetchOne(Tables.EH_PARKING_CARD_TYPES.CARD_TYPE_ID, cardTypeId), ParkingCardRequestType.class);
+		SelectQuery<EhParkingCardTypesRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_TYPES);
+		query.addConditions(Tables.EH_PARKING_CARD_TYPES.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_PARKING_CARD_TYPES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PARKING_CARD_TYPES.PARKING_LOT_ID.eq(parkingLotId));
+		query.addConditions(Tables.EH_PARKING_CARD_TYPES.CARD_TYPE_ID.eq(cardTypeId));
+
+		return ConvertHelper.convert(query.fetchOne(), ParkingCardRequestType.class);
 	}
 
 	@Override
@@ -193,6 +198,23 @@ public class ParkingProviderImpl implements ParkingProvider {
          
         return result;
     }
+
+	@Override
+	public ParkingRechargeRate findParkingRechargeRateByMonthCount(String ownerType, Long ownerId, Long parkingLotId,
+															  String cardType, BigDecimal monthCount) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeRates.class));
+
+		SelectQuery<EhParkingRechargeRatesRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_RATES);
+
+		query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.PARKING_LOT_ID.eq(parkingLotId));
+		query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.CARD_TYPE.eq(cardType));
+		query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.MONTH_COUNT.eq(monthCount));
+
+		return ConvertHelper.convert(query.fetchOne(), ParkingRechargeRate.class);
+	}
     
     @Override
     public void createParkingRechargeRate(ParkingRechargeRate parkingRechargeRate){

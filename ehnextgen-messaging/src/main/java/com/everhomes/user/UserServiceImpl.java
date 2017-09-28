@@ -2845,8 +2845,17 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setSceneType(SceneType.FAMILY.getCode());
 
 		sceneDto.setEntityType(UserCurrentEntityType.FAMILY.getCode());
-		StringBuffer fullName = new StringBuffer();
-		StringBuffer aliasName = new StringBuffer();
+
+
+		String fullName =  familyDto.getName();
+		String aliasName = familyDto.getName();
+		StringBuffer titlieName = new StringBuffer();
+		String 	communityName = "";
+		if(familyDto.getCommunityAliasName() != null && !familyDto.getCommunityAliasName().equals("")){
+			communityName = familyDto.getCommunityAliasName();
+		}else{
+			communityName = familyDto.getCommunityName();
+		}
 
 		// 处理名称
 		GetNamespaceDetailCommand cmd = new GetNamespaceDetailCommand();
@@ -2855,16 +2864,13 @@ public class UserServiceImpl implements UserService {
 		NamespaceNameType namespaceNameType = NamespaceNameType.fromCode(namespaceDetail.getNameType());
 		switch (namespaceNameType){
 			case ONLY_COMPANY_NAME:
-				fullName.append(familyDto.getName());
-				aliasName.append(familyDto.getName());
+				titlieName.append(familyDto.getName());
 				break;
 			case ONLY_COMMUNITY_NAME:
-				fullName.append(familyDto.getCommunityName());
-				aliasName.append(familyDto.getCommunityName());
+				titlieName.append(communityName);
 				break;
 			case COMMUNITY_COMPANY_NAME:
-				fullName.append(familyDto.getName()).append(familyDto.getCommunityName());
-				aliasName.append(familyDto.getName()).append(familyDto.getCommunityName());
+				titlieName.append(communityName).append(familyDto.getName());
 				break;
 		}
 
@@ -2884,9 +2890,9 @@ public class UserServiceImpl implements UserService {
 //		}
 
 
-
-		sceneDto.setName(fullName.toString());
-		sceneDto.setAliasName(aliasName.toString());
+		sceneDto.setTitleName(titlieName.toString());
+		sceneDto.setName(fullName);
+		sceneDto.setAliasName(aliasName);
 		sceneDto.setAvatar(familyDto.getAvatarUri());
 		sceneDto.setAvatarUrl(familyDto.getAvatarUrl());
 
@@ -2951,8 +2957,15 @@ public class UserServiceImpl implements UserService {
 
 		sceneDto.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
 
-		StringBuffer fullName = new StringBuffer();
-		StringBuffer aliasName = new StringBuffer();
+		String fullName =  organizationDto.getName();
+		String aliasName = organizationDto.getName();
+		StringBuffer titlieName = new StringBuffer();
+		String 	communityName = "";
+		if(organizationDto.getCommunityAliasName() != null && !organizationDto.getCommunityAliasName().equals("")){
+			communityName = organizationDto.getCommunityAliasName();
+		}else{
+			communityName = organizationDto.getCommunityName();
+		}
 		// 处理名称
 		GetNamespaceDetailCommand cmd = new GetNamespaceDetailCommand();
 		cmd.setNamespaceId(namespaceId);
@@ -2960,19 +2973,15 @@ public class UserServiceImpl implements UserService {
 		NamespaceNameType namespaceNameType = NamespaceNameType.fromCode(namespaceDetail.getNameType());
 		switch (namespaceNameType){
 			case ONLY_COMPANY_NAME:
-				fullName.append(organizationDto.getName());
-				aliasName.append(organizationDto.getName());
+				titlieName.append(organizationDto.getName());
 				break;
 			case ONLY_COMMUNITY_NAME:
-				fullName.append(organizationDto.getCommunityName());
-				aliasName.append(organizationDto.getCommunityName());
+				titlieName.append(communityName);
 				break;
 			case COMMUNITY_COMPANY_NAME:
-				fullName.append(organizationDto.getName()).append(organizationDto.getCommunityName());
-				aliasName.append(organizationDto.getName()).append(organizationDto.getCommunityName());
+				titlieName.append(communityName).append(organizationDto.getName());
 				break;
 		}
-
 //		sceneDto.setName(organizationDto.getName().trim());
 		// 在园区先暂时优先显示园区名称，后面再考虑怎样显示公司名称 by lqs 20160514
 //		String aliasName = organizationDto.getDisplayName();
@@ -2988,9 +2997,9 @@ public class UserServiceImpl implements UserService {
 //        if (aliasName == null || aliasName.trim().isEmpty()) {
 //            aliasName = organizationDto.getName().trim();
 //        }
-
-		sceneDto.setName(fullName.toString());
-        sceneDto.setAliasName(aliasName.toString());
+		sceneDto.setTitleName(titlieName.toString());
+		sceneDto.setName(fullName);
+        sceneDto.setAliasName(aliasName);
 		sceneDto.setAvatar(organizationDto.getAvatarUri());
 		sceneDto.setAvatarUrl(organizationDto.getAvatarUrl());
 
@@ -3159,29 +3168,20 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public SceneDTO toCommunitySceneDTO(Integer namespaceId, Long userId, CommunityDTO community, SceneType sceneType) {
-		StringBuffer fullName = new StringBuffer();
-		StringBuffer aliasName = new StringBuffer();
-
+		String fullName =  community.getName();
+		String aliasName = community.getAliasName();
+		String communityName = "";
+		if(community.getAliasName() != null && !community.getAliasName().equals("")){
+			communityName = community.getAliasName();
+		}else{
+			communityName = community.getName();
+		}
 
 		// 处理名称
 		GetNamespaceDetailCommand cmd = new GetNamespaceDetailCommand();
 		cmd.setNamespaceId(namespaceId);
 		NamespaceDetailDTO namespaceDetail= this.namespaceResourceService.getNamespaceDetail(cmd);
 		NamespaceNameType namespaceNameType = NamespaceNameType.fromCode(namespaceDetail.getNameType());
-		switch (namespaceNameType){
-			case ONLY_COMPANY_NAME:
-				fullName.append(community.getName());
-				aliasName.append(community.getAliasName());
-				break;
-			case ONLY_COMMUNITY_NAME:
-				fullName.append(community.getName());
-				aliasName.append(community.getAliasName());
-				break;
-			case COMMUNITY_COMPANY_NAME:
-				fullName.append(community.getName());
-				aliasName.append(community.getAliasName());
-				break;
-		}
 //
 //		if(!StringUtils.isEmpty(community.getCityName())){
 //			fullName.append(community.getCityName());
@@ -3195,10 +3195,11 @@ public class UserServiceImpl implements UserService {
 //		}
 
 		SceneDTO sceneDto = new SceneDTO();
+		sceneDto.setTitleName(communityName);
 		sceneDto.setSceneType(sceneType.getCode());
 		sceneDto.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
-		sceneDto.setName(fullName.toString());
-		sceneDto.setAliasName(aliasName.toString());
+		sceneDto.setName(fullName);
+		sceneDto.setAliasName(aliasName);
 
 		String entityContent = StringHelper.toJsonString(community);
 		sceneDto.setEntityContent(entityContent);
@@ -3668,8 +3669,12 @@ public class UserServiceImpl implements UserService {
 		String tokenString = WebTokenGenerator.getInstance().toWebToken(token);
 
 		LOGGER.debug(String.format("Return login info. token: %s, login info: ", tokenString, StringHelper.toJsonString(login)));
-		WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response);
 
+		//微信公众号的accessToken过期时间是7200秒，需要设置cookie小于7200。
+		//防止用户在coreserver处于登录状态而accessToken已过期，重新登录之后会刷新accessToken   add by yanjun 20170906
+		WebRequestInterceptor.setCookieInResponse("token", tokenString, request, response, 7000);
+
+		WebRequestInterceptor.setCookieInResponse("namespace_id", String.valueOf(namespaceId), request, response);
 		return login;
 	}
 
@@ -3703,6 +3708,10 @@ public class UserServiceImpl implements UserService {
 		List<User> userList = userProvider.findThirdparkUserByTokenAndType(namespaceId, namespaceUserType, namespaceUserToken);
 		if(userList == null || userList.size() == 0) {
 			userProvider.createUser(user);
+
+			//设定默认园区  add by  yanjun 20170915
+			setDefaultCommunity(user.getId(), namespaceId);
+
 			return true;
 		} else {
 			LOGGER.warn("User already existed, namespaceId={}, userType={}, userToken={}", namespaceId, namespaceUserType, namespaceUserToken);
@@ -3740,6 +3749,31 @@ public class UserServiceImpl implements UserService {
 		Long userId = UserContext.current().getUser().getId();
 		// 修改成按照defalutOrder排序 by lei.lv 20170915
 		List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespaceOrderByDefaultOrder(namespaceId, NamespaceResourceType.COMMUNITY);
+		List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
+		for (NamespaceResource resource : resources) {
+			Community community = communityProvider.findCommunityById(resource.getResourceId());
+			if(null != community){
+				CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
+				SceneType sceneType = DEFAULT;
+				if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL){
+					sceneType = PARK_TOURIST;
+				}
+				SceneDTO sceneDTO = this.toCommunitySceneDTO(namespaceId, userId, communityDTO, sceneType);
+				sceneList.add(sceneDTO);
+			}
+		}
+		sceneList.stream().filter(r->{
+			return r.getSceneToken() != null;
+		}).collect(Collectors.toList());
+		return sceneList;
+	}
+
+	@Override
+	public List<SceneDTO> listAllCommunityScenes() {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Long userId = UserContext.current().getUser().getId();
+		// 修改成按照defalutOrder排序 by lei.lv 20170915
+		List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
 		List<SceneDTO> sceneList = new ArrayList<SceneDTO>();
 		for (NamespaceResource resource : resources) {
 			Community community = communityProvider.findCommunityById(resource.getResourceId());
@@ -4734,7 +4768,7 @@ public class UserServiceImpl implements UserService {
 		//当关联场景不为空，且与参数中的园区id相匹配时，返回关联的场景
 		if (sceneList.size() > 0) {
 			List<SceneDTO> flist = sceneList.stream().filter(r -> {
-				return r.getCommunityId().longValue() == cmd.getCommunityId().longValue();
+				return r.getCommunityId().equals(cmd.getCommunityId());
 			}).collect(Collectors.toList());
 			if (flist.size() > 0) {
 				return flist;
@@ -4891,5 +4925,268 @@ public class UserServiceImpl implements UserService {
 		default_communityScene.setStatus(SCENE_EXAMPLE);
 		return default_communityScene;
 	}
+	@Override
+	public UserIdentifier getUserIdentifier(Long userId) {
+		if(userId == null){
+			return null;
+		}
+		return userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+	}
 
+	@Override
+	public VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd){
+
+		verifySmsTimes("verificationCodeForWechat", cmd.getPhone(), "");
+		VerificationCodeForBindPhoneResponse response = new VerificationCodeForBindPhoneResponse();
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		String verificationCode = RandomGenerator.getRandomDigitalString(6);
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
+
+
+		//如果这个微信已经绑定过手机，并且和新的手机号一致，直接报错提醒
+		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		if(userIdentifier != null && userIdentifier.getIdentifierToken() != null && userIdentifier.getIdentifierToken().equals(cmd.getPhone())){
+			LOGGER.error("allready bindPhone, phone={}", userIdentifier.getIdentifierToken());
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_IDENTIFIER_ALREADY_CLAIMED, "allready bindPhone, phone=" + userIdentifier.getIdentifierToken());
+		}
+
+
+		//查看该手机是否已经注册
+		userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
+		if(userIdentifier != null){
+
+			//手机注册过的或者发过验证码的，更新验证码
+			response.setBindPhoneType(BindPhoneType.WECHATTOPHONE.getCode());
+			userIdentifier.setVerificationCode(verificationCode);
+			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			userProvider.updateIdentifier(userIdentifier);
+		}else {
+
+			//查看该用户是否已绑定手机
+			userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+			if (userIdentifier != null) {
+				response.setBindPhoneType(BindPhoneType.ALREADYBIND.getCode());
+				response.setOldPhone(userIdentifier.getIdentifierToken());
+
+				UserIdentifierLog log = new  UserIdentifierLog();
+				log.setNamespaceId(namespaceId);
+				log.setOwnerUid(user.getId());
+				log.setIdentifierToken(cmd.getPhone());
+				log.setVerificationCode(verificationCode);
+				log.setRegionCode(cmd.getRegionCode());
+				log.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
+				userIdentifierLogProvider.createUserIdentifierLog(log);
+
+			}else {
+				response.setBindPhoneType(BindPhoneType.PHONETOWECHAT.getCode());
+				//该用户是否已经发过短信
+				userIdentifier = this.userProvider.findIdentifierByOwnerAndTypeAndClaimStatus(user.getId(), IdentifierType.MOBILE.getCode(), IdentifierClaimStatus.VERIFYING.getCode());
+				if (userIdentifier == null) {
+					//用户没发送过验证码的，新建一条验证状态的userIdentifier
+					userIdentifier = new UserIdentifier();
+					userIdentifier.setOwnerUid(user.getId());
+					userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+					userIdentifier.setIdentifierToken(cmd.getPhone());
+					userIdentifier.setNamespaceId(namespaceId);
+
+					userIdentifier.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
+					userIdentifier.setVerificationCode(verificationCode);
+					userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					userIdentifier.setRegionCode(cmd.getRegionCode());
+					userProvider.createIdentifier(userIdentifier);
+				} else {
+					//该用户发送过验证，更新验证码和时间
+					userIdentifier.setVerificationCode(verificationCode);
+					userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					userProvider.updateIdentifier(userIdentifier);
+				}
+			}
+		}
+		smsProvider.sendSms(namespaceId, cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.VERIFICATION_CODE, user.getLocale(), variables);
+
+		return response;
+	}
+
+	@Override
+	public UserLogin bindPhone(BindPhoneCommand cmd){
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+
+		if( cmd.getPhone() == null){
+			LOGGER.error("phoneNumber param error");
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PHONE, "phone param error");
+		}
+
+
+
+		//查看该手机是否已经注册
+		if(cmd.getBindPhoneType().byteValue() == BindPhoneType.WECHATTOPHONE.getCode()){
+
+			//使用传来的手机做查询校验，如果手机是否被篡改，查询和校验都不会通过的
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
+
+			//如果手机已经注册过，则校验验证码，更新微信信息(昵称、头像、性别)到该手机用户
+
+			verificationCode(userIdentifier, cmd.getVerificationCode());
+
+			User existUser = userProvider.findUserById(userIdentifier.getOwnerUid());
+			existUser.setNickName(user.getNickName());
+			existUser.setAvatar(user.getAvatar());
+			existUser.setGender(user.getGender());
+
+			userProvider.updateUser(existUser);
+			//防止自己将自己绑定，被设置成无效
+			if(user.getId() != existUser.getId()){
+				user.setStatus(UserStatus.INACTIVE.getCode());
+				userProvider.updateUser(user);
+			}
+//
+			UserLogin oldLogin = UserContext.current().getLogin();
+			if(oldLogin != null){
+				this.logoff(oldLogin);
+			}
+
+			UserLogin login = createLogin(namespaceId, existUser, null, null);
+			login.setStatus(UserLoginStatus.LOGGED_IN);
+
+			return login;
+		}else if(cmd.getBindPhoneType().byteValue() == BindPhoneType.ALREADYBIND.getCode()) {
+			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+
+//			verificationCode(userIdentifier, cmd.getVerificationCode());
+
+			if(userIdentifier == null || userIdentifier.getIdentifierToken() != cmd.getOldPhone()){
+				LOGGER.error("old phone param error");
+				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PHONE, "old phone param error");
+			}
+
+			UserIdentifierLog log = userIdentifierLogProvider.findByUserIdAndIdentifier(user.getId(), cmd.getRegionCode(), cmd.getPhone());
+			verificationCode(log, cmd.getVerificationCode());
+
+			userIdentifier.setIdentifierToken(cmd.getPhone());
+			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			userProvider.updateIdentifier(userIdentifier);
+
+			return null;
+
+		}else{
+			//校验新验证码，更新状态正式启用绑定该手机号码
+			UserIdentifier userIdentifier = this.userProvider.findIdentifierByOwnerAndTypeAndClaimStatus(user.getId(), IdentifierType.MOBILE.getCode(), IdentifierClaimStatus.VERIFYING.getCode());
+
+			verificationCode(userIdentifier, cmd.getVerificationCode());
+
+			//发验证码的手机和绑定的的手机是否相等，检查手机是否被篡改
+			if(!cmd.getPhone().equals(userIdentifier.getIdentifierToken())){
+				LOGGER.error("phoneNumber param error");
+				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PHONE, "phone param error");
+			}
+
+			userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+			userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+			user = userProvider.findUserById(user.getId());
+			String salt=EncryptionUtils.createRandomSalt();
+			user.setSalt(salt);
+			try {
+				String randomCode = RandomGenerator.getRandomDigitalString(6);
+				if(cmd.getPassword() != null && cmd.getPassword().length() > 0){
+					randomCode = cmd.getPassword();
+				}
+				user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s",randomCode,salt)));
+			} catch (Exception e) {
+				LOGGER.error("encode password failed", e);
+				throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+
+			}
+
+			userProvider.updateUser(user);
+			userProvider.updateIdentifier(userIdentifier);
+			return null;
+		}
+
+	}
+
+	private void verificationCode(UserIdentifier userIdentifier, String code){
+		if(userIdentifier == null || code == null || userIdentifier.getVerificationCode() == null || !userIdentifier.getVerificationCode().equals(code)){
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE, "Invalid verification code or state");
+		}
+	}
+
+	private void verificationCode(UserIdentifierLog userIdentifierlog, String code){
+		if(userIdentifierlog == null || code == null || userIdentifierlog.getVerificationCode() == null || !userIdentifierlog.getVerificationCode().equals(code)){
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE, "Invalid verification code or state");
+		}
+	}
+	@Override
+	public void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd) {
+		assert StringUtils.isNotEmpty(cmd.getVerifyCode());
+		assert StringUtils.isNotEmpty(cmd.getIdentifierToken());
+		assert StringUtils.isNotEmpty(cmd.getNewPassword());
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		UserIdentifier identifier = userProvider.findIdentifierByVerifyCode(cmd.getVerifyCode(),
+				cmd.getIdentifierToken());
+		if (null == identifier) {
+			LOGGER.error("invalid operation,can not find verify information");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
+					"invalid params");
+		}
+
+		// check the expire time
+		if (DateHelper.currentGMTTime().getTime() - identifier.getNotifyTime().getTime() > 10 * 60000) {
+			LOGGER.error("the verifycode is invalid with timeout");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
+		}
+
+		if(namespaceId == null || identifier.getNamespaceId() == null || namespaceId.intValue() != identifier.getNamespaceId().intValue()){
+			LOGGER.error("the namespaceId is invalid");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_INVALID_PARAMS, "Invalid namespaceId");
+		}
+
+
+		// find user by uid
+		User user = userProvider.findUserById(identifier.getOwnerUid());
+		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", cmd.getNewPassword(), user.getSalt())));
+		userProvider.updateUser(user);
+
+	}
+
+	@Override
+	public UserTemporaryTokenDTO checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd) {
+
+		if(StringUtils.isEmpty(cmd.getUserToken())){
+			LOGGER.error("userToken is empty");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
+		}
+
+		try{
+			UserTemporaryTokenDTO token  = WebTokenGenerator.getInstance().fromWebToken(cmd.getUserToken(), UserTemporaryTokenDTO.class);
+
+
+			if(token == null || token.getStartTime() == null || token.getInterval() == null){
+				LOGGER.error("userToken is invalid");
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+						UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
+			}
+
+			if(System.currentTimeMillis() > token.getStartTime() + token.getInterval()){
+				LOGGER.error("time expired");
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+						UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
+			}
+
+			return token;
+
+		}catch (Exception ex){
+			LOGGER.error("userToken is invalid");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+					UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
+		}
+
+	}
 }

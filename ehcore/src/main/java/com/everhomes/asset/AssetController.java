@@ -836,6 +836,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
+
 //    /**
 //     * <p>测试清单产生</p>
 //     * <b>URL: /asset/xxd</b>
@@ -856,6 +857,7 @@ public class AssetController extends ControllerBase {
 //        }
 //        return assetService.paymentExpectancies(cmd);
 //    }
+
     /**
      * <p>展示预期的费用清单</p>
      * <b>URL: /asset/listBillExpectanciesOnContract</b>

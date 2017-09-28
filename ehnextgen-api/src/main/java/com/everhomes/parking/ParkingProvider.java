@@ -93,7 +93,7 @@ public interface ParkingProvider {
 
     ParkingInvoiceType findParkingInvoiceTypeById(Long id);
 
-    ParkingCardRequestType findParkingCardTypeByTypeId(String cardTypeId);
+    ParkingCardRequestType findParkingCardTypeByTypeId(String ownerType, Long ownerId, Long parkingLotId, String cardTypeId);
 
     List<ParkingInvoiceType> listParkingInvoiceTypes(String ownerType, Long ownerId, Long parkingLotId);
 
@@ -104,4 +104,7 @@ public interface ParkingProvider {
     void updateParkingUserInvoice(ParkingUserInvoice parkingUserInvoice);
 
     ParkingUserInvoice findParkingUserInvoiceByUserId(String ownerType, Long ownerId, Long parkingLotId, Long userId);
+
+    ParkingRechargeRate findParkingRechargeRateByMonthCount(String ownerType, Long ownerId, Long parkingLotId,
+                                                            String cardType, BigDecimal monthCount);
 }

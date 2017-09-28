@@ -103,14 +103,9 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
     }
 
 	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
-		if(null == rate) {
-			LOGGER.error("Rate not found, cmd={}", order);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Rate not found.");
-		}
-		order.setRateName(rate.getRateName());
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
+		updateParkingRechargeOrderRateInfo(parkingLot, order);
+
 	}
 
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){

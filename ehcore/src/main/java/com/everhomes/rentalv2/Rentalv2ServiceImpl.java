@@ -1463,7 +1463,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalBillDTO billDTO = ConvertHelper.convert(rs , RentalBillDTO.class);
 		proccessCells(rs);
 		RentalResourceType rsType = this.rentalv2Provider.getRentalResourceTypeById(rs.getResourceTypeId());
-		this.dbProvider.execute((TransactionStatus status) -> {
 			java.util.Date reserveTime = new java.util.Date();
 			List<RentalCell> rentalSiteRules = new ArrayList<>();
 
@@ -1497,7 +1496,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			else
 				rentalBill.setPayMode(rsType.getPayMode());
 //			rentalBill.setRentalCount(cmd.getRentalCount());
-			java.math.BigDecimal siteTotalMoney = new java.math.BigDecimal(0);
+		BigDecimal[] siteTotalMoneys = new BigDecimal[1];
+		siteTotalMoneys[0] = new BigDecimal(0);
 			Map<java.sql.Date, Map<String,Set<Byte>>> dayMap= new HashMap<>();
 			List<Long> siteRuleIds = new ArrayList<>();
 			for (RentalBillRuleDTO siteRule : cmd.getRules()) {
@@ -1614,11 +1614,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						//有半个
 						//整数部分计算
 						if(siteRule.getRentalCount().intValue()>0)
-							siteTotalMoney = siteTotalMoney.add(amount.multiply(new BigDecimal(siteRule.getRentalCount().intValue())));
+							siteTotalMoneys[0] = siteTotalMoneys[0].add(amount.multiply(new BigDecimal(siteRule.getRentalCount().intValue())));
 						//小数部分计算
-						siteTotalMoney = siteTotalMoney.add(halfPrice);
+						siteTotalMoneys[0] = siteTotalMoneys[0].add(halfPrice);
 					}else{
-						siteTotalMoney = siteTotalMoney.add(amount.multiply(new BigDecimal(siteRule.getRentalCount())));
+						siteTotalMoneys[0] = siteTotalMoneys[0].add(amount.multiply(new BigDecimal(siteRule.getRentalCount())));
 			 
 					}
 
@@ -1634,8 +1634,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //				int multiple =  siteTotalMoney.divide(rs.getFullPrice()).intValue();
 //				siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
 					//满了多少次,都只减一个
-					if(siteTotalMoney.compareTo(rs.getFullPrice())>= 0) {
-						siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice());
+					if(siteTotalMoneys[0].compareTo(rs.getFullPrice())>= 0) {
+						siteTotalMoneys[0] = siteTotalMoneys[0].subtract(rs.getCutPrice());
 					}
 				}else if(DiscountType.FULL_DAY_CUT_MONEY.getCode().equals(rs.getDiscountType()) ){
 					double multiple =0.0;
@@ -1657,7 +1657,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							}
 						}
 					}
-					siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
+					siteTotalMoneys[0] = siteTotalMoneys[0].subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
 				}
 			}
 			
@@ -1685,8 +1685,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			// for (SiteItemDTO siDto : cmd.getRentalItems()) {
 			// totalMoney += siDto.getItemPrice() * siDto.getCounts();
 			// }
-			rentalBill.setResourceTotalMoney(siteTotalMoney);
-			rentalBill.setPayTotalMoney(siteTotalMoney);
+			rentalBill.setResourceTotalMoney(siteTotalMoneys[0]);
+			rentalBill.setPayTotalMoney(siteTotalMoneys[0]);
 			rentalBill.setReserveTime(Timestamp.valueOf(datetimeSF.get().format(reserveTime)));
 
 			rentalBill.setPaidMoney(new java.math.BigDecimal (0));
@@ -1766,83 +1766,88 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					.getTime()));
 			rentalBill.setCreatorUid(userId);
 			rentalBill.setVisibleFlag(VisibleFlag.VISIBLE.getCode());
-	 
-			//用基于服务器平台的锁添加订单（包括验证和添加）
-			Tuple<Long, Boolean> tuple = this.coordinationProvider
-					.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode())
-					.enter(() -> {
-						// this.groupProvider.updateGroup(group);
-						this.valiRentalBill(cmd.getRules());
-						return this.rentalv2Provider.createRentalOrder(rentalBill);
-					});
-			Long rentalBillId = tuple.first();
-			 
-			for (RentalBillRuleDTO siteRule : cmd.getRules())  {
-				BigDecimal money = new BigDecimal(0);
-				RentalCell rsr = findRentalSiteRuleById(siteRule.getRuleId());
 
-				if (null == rsr) {
-					continue;
-				}
+			synchronized (this) {
+				this.dbProvider.execute((TransactionStatus status) -> {
 
-				if((siteRule.getRentalCount()-siteRule.getRentalCount().intValue())>0){
-					//有半个
-					//整数部分计算
-					if(siteRule.getRentalCount().intValue()>0)
-						money = money.add(  (null == rsr.getPrice()?new java.math.BigDecimal(0):rsr.getPrice()).multiply(
-								new   java.math.BigDecimal(siteRule.getRentalCount().intValue() )));
-					//小数部分计算
-					siteTotalMoney = siteTotalMoney.add(  (null == rsr.getHalfresourcePrice()?new java.math.BigDecimal(0):rsr.getPrice()));
-				}
-				else{
-					siteTotalMoney = siteTotalMoney.add(  (null == rsr.getPrice()?new java.math.BigDecimal(0):rsr.getPrice()).multiply(
-							new   java.math.BigDecimal(siteRule.getRentalCount() )));
-		 
-				}
-				RentalResourceOrder rsb = ConvertHelper.convert(rsr, RentalResourceOrder.class);
-				rsb.setRentalOrderId(rentalBillId);
-				rsb.setAmorpm(rsr.getAmorpm()); 
-				rsb.setEndTime(rsr.getEndTime());
-				rsb.setBeginTime(rsr.getBeginTime());
-				rsb.setTotalMoney(money);
-				rsb.setRentalCount(siteRule.getRentalCount());
-				rsb.setRentalResourceRuleId(rsr.getId());
-				rsb.setResourceRentalDate(new Date(cmd.getRentalDate()));
-				rsb.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-						.getTime()));
-				rsb.setCreatorUid(userId);
-				rsb.setStatus(ResourceOrderStatus.NORMAL.getCode());
-	
-				rentalv2Provider.createRentalSiteBill(rsb);
-				//对于锁住整个group的关联资源
-				if(rsr.getGroupLockFlag() != null && rsr.getGroupLockFlag() == NormalFlag.NEED.getCode()){
-					List<RentalCell>  rsrs =  findGroupRentalSiteRules(rsr);
-					if(rsrs.size()>0){
-						for(RentalCell rsrCell : rsrs){
-							RentalResourceOrder rsbDisploy = ConvertHelper.convert(rsrCell, RentalResourceOrder.class);
-							rsbDisploy.setRentalOrderId(rentalBillId);
-							rsbDisploy.setAmorpm(rsr.getAmorpm()); 
-							rsbDisploy.setEndTime(rsr.getEndTime());
-							rsbDisploy.setBeginTime(rsr.getBeginTime());
-							rsbDisploy.setTotalMoney( new BigDecimal(0));
-							rsbDisploy.setRentalCount(siteRule.getRentalCount());
-							rsbDisploy.setRentalResourceRuleId(rsr.getId());
-							rsbDisploy.setResourceRentalDate(new Date(cmd.getRentalDate()));
-							rsbDisploy.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-									.getTime()));
-							rsbDisploy.setCreatorUid(userId);
-							rsbDisploy.setStatus(ResourceOrderStatus.DISPLOY.getCode());
-							
+					//用基于服务器平台的锁添加订单（包括验证和添加）
+					Tuple<Long, Boolean> tuple = this.coordinationProvider
+							.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode())
+							.enter(() -> {
+								// this.groupProvider.updateGroup(group);
+								this.valiRentalBill(cmd.getRules());
+								return this.rentalv2Provider.createRentalOrder(rentalBill);
+							});
+					Long rentalBillId = tuple.first();
+
+					for (RentalBillRuleDTO siteRule : cmd.getRules())  {
+						BigDecimal money = new BigDecimal(0);
+						RentalCell rsr = findRentalSiteRuleById(siteRule.getRuleId());
+
+						if (null == rsr) {
+							continue;
 						}
+
+						if((siteRule.getRentalCount()-siteRule.getRentalCount().intValue())>0){
+							//有半个
+							//整数部分计算
+							if(siteRule.getRentalCount().intValue()>0)
+								money = money.add(  (null == rsr.getPrice()?new java.math.BigDecimal(0):rsr.getPrice()).multiply(
+										new   java.math.BigDecimal(siteRule.getRentalCount().intValue() )));
+							//小数部分计算
+							siteTotalMoneys[0] = siteTotalMoneys[0].add(  (null == rsr.getHalfresourcePrice()?new java.math.BigDecimal(0):rsr.getPrice()));
+						}
+						else{
+							siteTotalMoneys[0] = siteTotalMoneys[0].add(  (null == rsr.getPrice()?new java.math.BigDecimal(0):rsr.getPrice()).multiply(
+									new   java.math.BigDecimal(siteRule.getRentalCount() )));
+
+						}
+						RentalResourceOrder rsb = ConvertHelper.convert(rsr, RentalResourceOrder.class);
+						rsb.setRentalOrderId(rentalBillId);
+						rsb.setAmorpm(rsr.getAmorpm());
+						rsb.setEndTime(rsr.getEndTime());
+						rsb.setBeginTime(rsr.getBeginTime());
+						rsb.setTotalMoney(money);
+						rsb.setRentalCount(siteRule.getRentalCount());
+						rsb.setRentalResourceRuleId(rsr.getId());
+						rsb.setResourceRentalDate(new Date(cmd.getRentalDate()));
+						rsb.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+								.getTime()));
+						rsb.setCreatorUid(userId);
+						rsb.setStatus(ResourceOrderStatus.NORMAL.getCode());
+
+						rentalv2Provider.createRentalSiteBill(rsb);
+						//对于锁住整个group的关联资源
+						if(rsr.getGroupLockFlag() != null && rsr.getGroupLockFlag() == NormalFlag.NEED.getCode()){
+							List<RentalCell>  rsrs =  findGroupRentalSiteRules(rsr);
+							if(rsrs.size()>0){
+								for(RentalCell rsrCell : rsrs){
+									RentalResourceOrder rsbDisploy = ConvertHelper.convert(rsrCell, RentalResourceOrder.class);
+									rsbDisploy.setRentalOrderId(rentalBillId);
+									rsbDisploy.setAmorpm(rsr.getAmorpm());
+									rsbDisploy.setEndTime(rsr.getEndTime());
+									rsbDisploy.setBeginTime(rsr.getBeginTime());
+									rsbDisploy.setTotalMoney( new BigDecimal(0));
+									rsbDisploy.setRentalCount(siteRule.getRentalCount());
+									rsbDisploy.setRentalResourceRuleId(rsr.getId());
+									rsbDisploy.setResourceRentalDate(new Date(cmd.getRentalDate()));
+									rsbDisploy.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+											.getTime()));
+									rsbDisploy.setCreatorUid(userId);
+									rsbDisploy.setStatus(ResourceOrderStatus.DISPLOY.getCode());
+
+								}
+							}
+						}
+
 					}
-				}
-				
+
+					mappingRentalBillDTO(billDTO, rentalBill);
+
+					return null;
+				});
 			}
 
-			mappingRentalBillDTO(billDTO, rentalBill);
-			
-			return billDTO;
-		});
 		return billDTO;
 	}
 

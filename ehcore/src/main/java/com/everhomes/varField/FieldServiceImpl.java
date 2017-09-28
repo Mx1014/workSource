@@ -18,6 +18,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -42,6 +43,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -212,521 +214,632 @@ public class FieldServiceImpl implements FieldService {
         return null;
     }
 
-    @Override
-    public void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response){
-        List<FieldGroupDTO> groups = listFieldGroups(cmd);
-        //先去掉 名为“基本信息” 的sheet，建议使用stream的方式
-        for( int i = 0; i < groups.size(); i++){
-            FieldGroupDTO group = groups.get(i);
-            if(group.getGroupDisplayName().equals("基本信息")){
-                groups.remove(i);
-            }
-        }
-        //创建一个要导出的workbook，将sheet放入其中
-        org.apache.poi.hssf.usermodel.HSSFWorkbook workbook = new HSSFWorkbook();
-        //工具类excel
-        ExcelUtils excel = new ExcelUtils();
-        //注入workbook
-        sheetGenerate(groups, workbook, excel,cmd.getNamespaceId());
-        //输出
-        ServletOutputStream out;
-        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        String fileName = "客户数据模板导出"+sdf.format(Calendar.getInstance().getTime());
-        fileName = fileName + ".xls";
-        response.setContentType("application/msexcel");
-        try {
-            response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            out = response.getOutputStream();
-            workbook.write(byteArray);
-            out.write(byteArray.toByteArray());
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if(byteArray!=null){
-                byteArray = null;
-            }
-        }
-    }
-
-    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Integer namespaceId) {
-        //循环遍历所有的sheet
-        for( int i = 0; i < groups.size(); i++){
-            //sheet卡为真的标识
-            boolean isRealSheet = true;
-            FieldGroupDTO group = groups.get(i);
-            //有children的sheet非叶节点，所以获得叶节点，对叶节点进行递归
-            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
-                sheetGenerate(group.getChildrenGroup(),workbook,excel,namespaceId);
-                //对于有子group的，本身为无效的sheet
-                isRealSheet = false;
-            }
-            //当sheet节点为叶节点时，为真sheet，进行字段封装
-            if(isRealSheet){
-                //使用sheet（group）的参数调用listFields，获得参数
-                ListFieldCommand cmd1 = new ListFieldCommand();
-                cmd1.setNamespaceId(namespaceId);
-                cmd1.setGroupPath(group.getGroupPath());
-                cmd1.setModuleName(group.getModuleName());
-                List<FieldDTO> fields = listFields(cmd1);
-                //使用字段，获得headers
-                String headers[] = new String[fields.size()];
-                for(int j = 0; j < fields.size(); j++){
-                    FieldDTO field = fields.get(j);
-                    headers[j] = field.getFieldDisplayName();
-                }
-                try {
-                    //向工具中，传递workbook，sheet（group）的名称，headers，数据为null
-                    excel.exportExcel(workbook,sheetNum.get(),group.getGroupDisplayName(),headers,null);
-                    sheetNum.set(sheetNum.get()+1);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return;
-    }
-    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Long customerId,Byte customerType,Integer namespaceId) {
-        //遍历筛选过的sheet
-        for( int i = 0; i < groups.size(); i++){
-            //是否为叶节点的标识
-            boolean isRealSheet = true;
-            FieldGroupDTO group = groups.get(i);
-            //如果有叶节点，则送去轮回
-            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
-                sheetGenerate(group.getChildrenGroup(),workbook,excel,customerId,customerType,namespaceId);
-                //母节点的标识改为false，命运从出生就断定，唯有世世代代的延续才能成为永恒的现象
-                isRealSheet = false;
-            }
-            //通行证为真，真是神奇的一天！----弗里德里希
-            if(isRealSheet){
-                //请求sheet获得字段
-                ListFieldCommand cmd1 = new ListFieldCommand();
-                cmd1.setNamespaceId(namespaceId);
-                cmd1.setGroupPath(group.getGroupPath());
-                cmd1.setModuleName(group.getModuleName());
-                //通过字段即获得header，顺序不定
-                List<FieldDTO> fields = listFields(cmd1);
-                String headers[] = new String[fields.size()];
-                //根据每个group获得字段,作为header
-                for(int j = 0; j < fields.size(); j++){
-                    FieldDTO field = fields.get(j);
-                    headers[j] = field.getFieldDisplayName();
-                }
-                //获取一个sheet的数据,这里只有叶节点，将header传回作为顺序.传递field来确保顺序
-                List<List<String>> data = getDataOnFields(group,customerId,customerType,fields);
-                try {
-                    //写入workbook
-                    System.out.println(sheetNum.get());
-                    excel.exportExcel(workbook,sheetNum.get(),group.getGroupDisplayName(),headers,data);
-                    sheetNum.set(sheetNum.get()+1);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return;
-    }
-
-    /**
-     *
-     * 获取一个sheet的数据，通过sheet的中文名称进行匹配,同一个excel中sheet名称不会重复
-     *
-     */
-    private List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields) {
-        List<List<String>> data = new ArrayList<>();
-        //使用groupName来对应不同的接口
-        String sheetName = group.getGroupDisplayName();
-        switch (sheetName){
-            case "人才团队信息":
-                ListCustomerTalentsCommand cmd1 = new ListCustomerTalentsCommand();
-                cmd1.setCustomerId(customerId);
-                cmd1.setCustomerType(customerType);
-                List<CustomerTalentDTO> customerTalentDTOS = customerService.listCustomerTalents(cmd1);
-                if(customerTalentDTOS==null){
-                    customerTalentDTOS = new ArrayList<>();
-                }
-                //使用双重循环获得具备顺序的rowdata，将其置入data中；污泥放入圣杯，供圣人们世世代代追寻---宝石翁
-                for(int j = 0; j < customerTalentDTOS.size(); j ++){
-                    CustomerTalentDTO dto = customerTalentDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
-                }
-                break;
-            //母节点已经不在，全部使用叶节点
-            case "商标信息":
-                ListCustomerTrademarksCommand cmd2 = new ListCustomerTrademarksCommand();
-                cmd2.setCustomerId(customerId);
-                cmd2.setCustomerType(customerType);
-                List<CustomerTrademarkDTO> customerTrademarkDTOS = customerService.listCustomerTrademarks(cmd2);
-                if(customerTrademarkDTOS == null){
-                    customerTrademarkDTOS = new ArrayList<>();
-                }
-                for(int j = 0; j < customerTrademarkDTOS.size(); j ++){
-                    CustomerTrademarkDTO dto = customerTrademarkDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
-                }
-            case "专利信息":
-                ListCustomerPatentsCommand cmd3 = new ListCustomerPatentsCommand();
-                cmd3.setCustomerId(customerId);
-                cmd3.setCustomerType(customerType);
-                List<CustomerPatentDTO> customerPatentDTOS = customerService.listCustomerPatents(cmd3);
-                if(customerPatentDTOS==null){
-                    customerPatentDTOS = new ArrayList<>();
-                }
-                for(int j = 0; j < customerPatentDTOS.size(); j ++){
-                    CustomerPatentDTO dto = customerPatentDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
-                }
-            case "证书":
-                ListCustomerCertificatesCommand cmd4 = new ListCustomerCertificatesCommand();
-                cmd4.setCustomerId(customerId);
-                cmd4.setCustomerType(customerType);
-                List<CustomerCertificateDTO> customerCertificateDTOS = customerService.listCustomerCertificates(cmd4);
-                if(customerCertificateDTOS == null){
-                    customerCertificateDTOS = new ArrayList<>();
-                }
-                for(int j = 0; j < customerCertificateDTOS.size(); j ++){
-                    CustomerCertificateDTO dto = customerCertificateDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
-                }
-                break;
-            case "申报项目":
-                ListCustomerApplyProjectsCommand cmd5 = new ListCustomerApplyProjectsCommand();
-                cmd5.setCustomerId(customerId);
-                cmd5.setCustomerType(customerType);
-                List<CustomerApplyProjectDTO> customerApplyProjectDTOS = customerService.listCustomerApplyProjects(cmd5);
-                if(customerApplyProjectDTOS == null){
-                    customerApplyProjectDTOS = new ArrayList<>();
-                }
-                for(int j = 0; j < customerApplyProjectDTOS.size(); j ++){
-                    CustomerApplyProjectDTO dto = customerApplyProjectDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
-                }
-                break;
-            case "工商信息":
-                ListCustomerCommercialsCommand cmd6 = new ListCustomerCommercialsCommand();
-                cmd6.setCustomerId(customerId);
-                cmd6.setCustomerType(customerType);
-                List<CustomerCommercialDTO> customerCommercialDTOS = customerService.listCustomerCommercials(cmd6);
-                if(customerCommercialDTOS == null){
-                    customerCommercialDTOS = new ArrayList<>();
-                }
-                for(int j = 0; j < customerCommercialDTOS.size(); j ++){
-                    CustomerCommercialDTO dto = customerCommercialDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
-                }
-                break;
-            case "投融情况":
-                ListCustomerInvestmentsCommand cmd7 = new ListCustomerInvestmentsCommand();
-                cmd7.setCustomerId(customerId);
-                cmd7.setCustomerType(customerType);
-                List<CustomerInvestmentDTO> customerInvestmentDTOS = customerService.listCustomerInvestments(cmd7);
-                if(customerInvestmentDTOS == null){
-                    customerInvestmentDTOS = new ArrayList<>();
-                }
-                for(int j = 0; j < customerInvestmentDTOS.size(); j ++){
-                    CustomerInvestmentDTO dto = customerInvestmentDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
-                }
-                break;
-            case "经济指标":
-                ListCustomerEconomicIndicatorsCommand cmd8 = new ListCustomerEconomicIndicatorsCommand();
-                List<CustomerEconomicIndicatorDTO> customerEconomicIndicatorDTOS = customerService.listCustomerEconomicIndicators(cmd8);
-                if(customerEconomicIndicatorDTOS == null){
-                    customerEconomicIndicatorDTOS = new ArrayList<>();
-                }
-                for(int j = 0; j < customerEconomicIndicatorDTOS.size(); j ++){
-                    CustomerEconomicIndicatorDTO dto = customerEconomicIndicatorDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
-                }
-                break;
-        }
-        return data;
-    }
-
-    private void setMutilRowDatas(List<FieldDTO> fields, List<List<String>> data, Object dto) {
-        List<String> rowDatas = new ArrayList<>();
-        for(int i = 0; i <  fields.size(); i++) {
-            FieldDTO field = fields.get(i);
-            setRowData(dto, rowDatas, field);
-        }
-        //一个dto，获得一行数据后置入data中
-        data.add(rowDatas);
-    }
-
-    private void setRowData(Object dto, List<String> rowDatas, FieldDTO field) {
-        String fieldName = field.getFieldName();
-        String fieldParam = field.getFieldParam();
-        FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
-        //如果是select，则修改fieldName,在末尾加上Name，减去末尾的Id如果存在的话。由抽象跌入现实，拥有了名字，这是从神降格为人的过程---第六天天主波旬
-        if(params.getFieldParamType().equals("select")){
-            fieldName = fieldName.split("Id")[0];
-            fieldName += "Name";
-        }
-        try {
-            //获得get方法并使用获得field的值
-            String cellData = getFromObj(fieldName, dto);
-            if(cellData==null|| cellData.equalsIgnoreCase("null")){
-                cellData = "";
-            }
-            rowDatas.add(cellData);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IntrospectionException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String getFromObj(String fieldName, Object dto) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
-        Class<?> clz = dto.getClass();
-        PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
-        Method readMethod = pd.getReadMethod();
-        System.out.println(readMethod.getName());
-        Object invoke = readMethod.invoke(dto);
-        return String.valueOf(invoke);
-    }
-    private String setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
-        Class<?> clz = dto.getClass().getSuperclass();
-        Object val = value;
-        String type = clz.getDeclaredField(fieldName).getType().getSimpleName();
-        System.out.println(type);
-        System.out.println("==============");
-        switch(type){
-            case "BigDecimal":
-                val = new BigDecimal((String)value);
-                break;
-            case "Long":
-                val = Long.parseLong((String)value);
-                break;
-            case "Timestamp":
-                Date date = new Date((String)value);
-                val = new Timestamp(date.getTime());
-                break;
-            case "Integer":
-                val = Integer.parseInt((String)value);
-                break;
-            case "Byte":
-                val = Byte.parseByte((String)value);
-                break;
-        }
-        PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
-        Method writeMethod = pd.getWriteMethod();
-        Object invoke = writeMethod.invoke(dto,val);
-        return String.valueOf(invoke);
-    }
 
 
-    @Override
-    public void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
-        //将command转换为listFieldGroup的参数command
-        ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
-        //获得客户所拥有的sheet
-        List<FieldGroupDTO> allGroups = listFieldGroups(cmd1);
-        List<FieldGroupDTO> groups = new ArrayList<>();
-
-        //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
-        String[] split = cmd.getIncludedGroupIds().split(",");
-        for(int i = 0 ; i < split.length; i ++){
-            long targetGroupId = Long.parseLong(split[i]);
-            for(int j = 0; j < allGroups.size(); j++){
-                if(allGroups.get(j).getId() == targetGroupId){
-                    groups.add(allGroups.get(j));
-                }
-            }
-        }
-        //去掉基本信息的sheet吗
+//    @Override
+//    public void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response){
+//        List<FieldGroupDTO> groups = listFieldGroups(cmd);
+//        //先去掉 名为“基本信息” 的sheet，建议使用stream的方式
 //        for( int i = 0; i < groups.size(); i++){
 //            FieldGroupDTO group = groups.get(i);
 //            if(group.getGroupDisplayName().equals("基本信息")){
 //                groups.remove(i);
 //            }
 //        }
-        //创建workbook
-        org.apache.poi.hssf.usermodel.HSSFWorkbook workbook = new HSSFWorkbook();
-        //工具excel
-        ExcelUtils excel = new ExcelUtils();
-        //注入sheet的内容到workbook中
-        sheetGenerate(groups,workbook,excel,cmd.getCustomerId(),cmd.getCustomerType(),cmd.getNamespaceId());
-        //写入流
-        ServletOutputStream out;
-        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        String fileName = "客户数据导出"+sdf.format(Calendar.getInstance().getTime());
-        fileName = fileName + ".xls";
-        response.setContentType("application/msexcel");
-        try {
-            response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            out = response.getOutputStream();
-            workbook.write(byteArray);
-            out.write(byteArray.toByteArray());
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if(byteArray!=null){
-                byteArray = null;
-            }
-        }
-    }
-
-    /**
-     *
-     * FILE的结构为多个sheet，每个sheet从第三行为header。
-     * 1.转为workbook
-     * 2.匹配sheet
-     * 3.匹配字段
-     * 4.存入目标客户的记录
-     */
-    @Override
-    public void importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
-        Workbook workbook;
-        try {
-            workbook = ExcelUtils.getWorkbook(file.getInputStream(), file.getOriginalFilename());
-        } catch (Exception e) {
-            LOGGER.error("import excel for import failed for unable to get work book, file name is = {}",file.getName());
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"file may not be an invalid excel file");
-        }
-        //拿到所有的group，进行匹配sheet用
-        ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
-        List<FieldGroupDTO> groups = listFieldGroups(cmd1);
-        int numberOfSheets = workbook.getNumberOfSheets();
-        for(int i = 0; i < numberOfSheets; i ++){
-            Sheet sheet = workbook.getSheetAt(i);
-            //通过sheet名字进行匹配，获得此sheet对应的group
-            String sheetName = sheet.getSheetName();
-            FieldGroupDTO group = new FieldGroupDTO();
-            for(int i1 = 0; i1 < groups.size(); i1 ++){
-                if(groups.get(i1).getGroupDisplayName().equals(sheetName)){
-                    group = groups.get(i1);
-                }else{
-                    continue;
-                }
-            }
-            //通过目标group拿到请求所有字段的command，然后请求获得所有字段
-            ListFieldCommand cmd2 = new ListFieldCommand();
-            cmd2.setModuleName(group.getModuleName());
-            cmd2.setNamespaceId(group.getNamespaceId());
-            cmd2.setGroupPath(group.getGroupPath());
-            List<FieldDTO> fields = listFields(cmd2);
-            //获得根据cell顺序的fieldname
-            Row headRow = sheet.getRow(1);
-            Cell cell1 = headRow.getCell(headRow.getFirstCellNum());
-            System.out.println(ExcelUtils.getCellValue(cell1));
-            String[] headers = new String[headRow.getLastCellNum()-headRow.getFirstCellNum()+1];
-            HashMap<Integer,String> orderedFieldNames = new HashMap<>();
-            for(int j =headRow.getFirstCellNum(); j < headRow.getLastCellNum();j++) {
-                for(int j1 = 0; j1 < fields.size();j1++){
-                    FieldDTO fieldDTO = fields.get(j1);
-                    if(fieldDTO.getFieldDisplayName().equals(headRow.getCell(j).getStringCellValue())){
-                        String fieldName = fieldDTO.getFieldName();
-                        String fieldParam = fieldDTO.getFieldParam();
-                        FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
-                        //如果是select，则修改fieldName,在末尾加上Name，减去末尾的Id如果存在的话。由抽象跌入现实，拥有了名字，这是从神降格为人的过程---第六天魔王波旬
-                        if(params.getFieldParamType().equals("select")){
-                            fieldName = fieldName.split("Id")[0];
-                            fieldName += "Name";
-                        }
-                        orderedFieldNames.put(j,fieldName);
-                    }
-                }
-                Cell cell = headRow.getCell(j);
-                String cellValue = ExcelUtils.getCellValue(cell);
-                headers[j] = cellValue;
-            }
-
-
-            //通过row的个数，除去header，获得对象的个数
-            int objectsNum = sheet.getLastRowNum() - 3;
-            List<Object> objects = new ArrayList<>();
-            //获得对象的名称，通过表查到对象名，mapping为object隐藏起来。隐藏自身，消灭暴露者---安静的诀窍就是这个
-            String className = fieldProvider.findClassNameByGroupDisplayName(group.getGroupDisplayName());
-            Class<?> clazz = null;
-            try {
-                clazz = Class.forName(className);
-            } catch (ClassNotFoundException e) {
-                LOGGER.error("import failed,class not found exception, group name is = {}",group.getGroupDisplayName());
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"import failed,class not found exception, group name is = {}",group.getGroupDisplayName());
-            }
-
-            LOGGER.info("sheet total row num = {}, first row num = {}, last row num = {}",sheet.getPhysicalNumberOfRows(),sheet.getFirstRowNum(),sheet.getLastRowNum());
-            for(int j = 2; j <= sheet.getLastRowNum(); j ++){
-                Row row = sheet.getRow(j);
-                Object object = null;
-                //每一行迭代，进行set
-                for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
-                    String fieldName = orderedFieldNames.get(k);
-                    try {
-                        object = clazz.newInstance();
-                    } catch (Exception e) {
-                        LOGGER.error("sheet class new instance failed,exception= {}",e);
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"sheet class new instance failed",e);
-                    }
-                    try {
-                        Cell cell = row.getCell(k);
-                        cell.getStringCellValue();
-                        setToObj(fieldName,object,cell.getStringCellValue());
-                    } catch (Exception e) {
-                        LOGGER.error("set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName());
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName(),e);
-                    }
-                }
-                //然后进行通用字段的set
-                try{
-                    for(java.lang.reflect.Field f : clazz.getDeclaredFields()){
-                        String name = f.getName();
-                        switch(name){
-                            case "createUid":
-                                setToObj("createUid",object,UserContext.currentUserId().toString());
-                                break;
-                            case "moduleName":
-                                setToObj("moduleName",object,cmd.getModuleName());
-                                break;
-                            case "createTime":
-                                Date date = new Date();
-                                setToObj("createTime",object, date.toString());
-                                break;
-                            case "namespaceId":
-                                setToObj("namespaceId",object,cmd.getNamespaceId().toString());
-                                break;
-                            case "customerType":
-                                setToObj("customerType",object,cmd.getCustomerType().toString());
-                                break;
-                            case "customerId":
-                                setToObj("customerId",object,cmd.getCustomerId().toString());
-                                break;
-                            case "id":
-                                Long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(clazz.getSuperclass()));
-                                setToObj("id",object,nextSequence.toString());
-                                break;
-                        }
-                    }
-                }catch(Exception e){
-                    LOGGER.warn("one row invoke set method for obj failed,the clzz is = {}",clazz.getSimpleName());
-                    continue;
-                }
-                objects.add(object);
-            }
-            //此时获得一个sheet的list对象，进行存储
-            fieldProvider.saveFieldGroups(cmd.getCustomerType(),cmd.getCustomerId(),objects,clazz.getSimpleName());
-        }
-
-    }
+//        //创建一个要导出的workbook，将sheet放入其中
+//        org.apache.poi.hssf.usermodel.HSSFWorkbook workbook = new HSSFWorkbook();
+//        //工具类excel
+//        ExcelUtils excel = new ExcelUtils();
+//        //注入workbook
+//        sheetGenerate(groups, workbook, excel,cmd.getNamespaceId());
+//        sheetNum.remove();
+//        //输出
+//        ServletOutputStream out;
+//        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+//        String fileName = "客户数据模板导出"+sdf.format(Calendar.getInstance().getTime());
+//        fileName = fileName + ".xls";
+//        response.setContentType("application/msexcel");
+//        try {
+//            response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+//
+//        try {
+//            out = response.getOutputStream();
+//            workbook.write(byteArray);
+//            out.write(byteArray.toByteArray());
+//            out.flush();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if(byteArray!=null){
+//                byteArray = null;
+//            }
+//        }
+//    }
+//
+//    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Integer namespaceId) {
+//        //循环遍历所有的sheet
+//        for( int i = 0; i < groups.size(); i++){
+//            //sheet卡为真的标识
+//            boolean isRealSheet = true;
+//            FieldGroupDTO group = groups.get(i);
+//            //有children的sheet非叶节点，所以获得叶节点，对叶节点进行递归
+//            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
+//                sheetGenerate(group.getChildrenGroup(),workbook,excel,namespaceId);
+//                //对于有子group的，本身为无效的sheet
+//                isRealSheet = false;
+//            }
+//            //当sheet节点为叶节点时，为真sheet，进行字段封装
+//            if(isRealSheet){
+//                //使用sheet（group）的参数调用listFields，获得参数
+//                ListFieldCommand cmd1 = new ListFieldCommand();
+//                cmd1.setNamespaceId(namespaceId);
+//                cmd1.setGroupPath(group.getGroupPath());
+//                cmd1.setModuleName(group.getModuleName());
+//                List<FieldDTO> fields = listFields(cmd1);
+//                //使用字段，获得headers
+//                String headers[] = new String[fields.size()];
+//                String mandatory[] = new String[headers.length];
+//                for(int j = 0; j < fields.size(); j++){
+//                    FieldDTO field = fields.get(j);
+//                    mandatory[j] = "0";
+//                    if(field.getMandatoryFlag()==(byte)1){
+//                        mandatory[j] = "1";
+//                    }
+//                    headers[j] = field.getFieldDisplayName();
+//                }
+//                try {
+//                    //向工具中，传递workbook，sheet（group）的名称，headers，数据为null
+//                    excel.exportExcel(workbook,sheetNum.get(),group.getGroupDisplayName(),headers,null,mandatory);
+//                    sheetNum.set(sheetNum.get()+1);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//        return;
+//    }
+//    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Long customerId,Byte customerType,Integer namespaceId,Long communityId) {
+//        //遍历筛选过的sheet
+//        for( int i = 0; i < groups.size(); i++){
+//            //是否为叶节点的标识
+//            boolean isRealSheet = true;
+//            FieldGroupDTO group = groups.get(i);
+//            //如果有叶节点，则送去轮回
+//            if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
+//                sheetGenerate(group.getChildrenGroup(),workbook,excel,customerId,customerType,namespaceId,communityId);
+//                //母节点的标识改为false，命运从出生就断定，唯有世世代代的延续才能成为永恒的现象
+//                isRealSheet = false;
+//            }
+//            //通行证为真，真是神奇的一天！----弗里德里希
+//            if(isRealSheet){
+//                //请求sheet获得字段
+//                ListFieldCommand cmd1 = new ListFieldCommand();
+//                cmd1.setNamespaceId(namespaceId);
+//                cmd1.setGroupPath(group.getGroupPath());
+//                cmd1.setModuleName(group.getModuleName());
+//                //通过字段即获得header，顺序不定
+//                List<FieldDTO> fields = listFields(cmd1);
+//                String headers[] = new String[fields.size()];
+//                String mandatory[] = new String[headers.length];
+//                //根据每个group获得字段,作为header
+//                for(int j = 0; j < fields.size(); j++){
+//                    FieldDTO field = fields.get(j);
+//                    mandatory[j] = "0";
+//                    if(field.getMandatoryFlag()==(byte)1){
+//                        mandatory[j] = "1";
+//                    }
+//                    headers[j] = field.getFieldDisplayName();
+//                }
+//                //获取一个sheet的数据,这里只有叶节点，将header传回作为顺序.传递field来确保顺序
+//                List<List<String>> data = getDataOnFields(group,customerId,customerType,fields, communityId);
+//                try {
+//                    //写入workbook
+//                    System.out.println(sheetNum.get());
+//                    excel.exportExcel(workbook,sheetNum.get(),group.getGroupDisplayName(),headers,data,mandatory);
+//                    sheetNum.set(sheetNum.get()+1);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//        return;
+//    }
+//
+//    /**
+//     *
+//     * 获取一个sheet的数据，通过sheet的中文名称进行匹配,同一个excel中sheet名称不会重复
+//     *
+//     */
+//    private List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId) {
+//        List<List<String>> data = new ArrayList<>();
+//        //使用groupName来对应不同的接口
+//        String sheetName = group.getGroupDisplayName();
+//        switch (sheetName){
+//            case "人才团队信息":
+//                ListCustomerTalentsCommand cmd1 = new ListCustomerTalentsCommand();
+//                cmd1.setCustomerId(customerId);
+//                cmd1.setCustomerType(customerType);
+//                cmd1.setCommunityId(communityId);
+//                List<CustomerTalentDTO> customerTalentDTOS = customerService.listCustomerTalents(cmd1);
+//                if(customerTalentDTOS==null){
+//                    customerTalentDTOS = new ArrayList<>();
+//                }
+//                //使用双重循环获得具备顺序的rowdata，将其置入data中；污泥放入圣杯，供圣人们世世代代追寻---宝石翁
+//                for(int j = 0; j < customerTalentDTOS.size(); j ++){
+//                    CustomerTalentDTO dto = customerTalentDTOS.get(j);
+//                    setMutilRowDatas(fields, data, dto);
+//                }
+//                break;
+//            //母节点已经不在，全部使用叶节点
+//            case "商标信息":
+//                ListCustomerTrademarksCommand cmd2 = new ListCustomerTrademarksCommand();
+//                cmd2.setCustomerId(customerId);
+//                cmd2.setCustomerType(customerType);
+//                cmd2.setCommunityId(communityId);
+//                List<CustomerTrademarkDTO> customerTrademarkDTOS = customerService.listCustomerTrademarks(cmd2);
+//                if(customerTrademarkDTOS == null){
+//                    customerTrademarkDTOS = new ArrayList<>();
+//                }
+//                for(int j = 0; j < customerTrademarkDTOS.size(); j ++){
+//                    CustomerTrademarkDTO dto = customerTrademarkDTOS.get(j);
+//                    setMutilRowDatas(fields, data, dto);
+//                }
+//            case "专利信息":
+//                ListCustomerPatentsCommand cmd3 = new ListCustomerPatentsCommand();
+//                cmd3.setCustomerId(customerId);
+//                cmd3.setCustomerType(customerType);
+//                cmd3.setCommunityId(communityId);
+//                List<CustomerPatentDTO> customerPatentDTOS = customerService.listCustomerPatents(cmd3);
+//                if(customerPatentDTOS==null){
+//                    customerPatentDTOS = new ArrayList<>();
+//                }
+//                for(int j = 0; j < customerPatentDTOS.size(); j ++){
+//                    CustomerPatentDTO dto = customerPatentDTOS.get(j);
+//                    setMutilRowDatas(fields, data, dto);
+//                }
+//            case "证书":
+//                ListCustomerCertificatesCommand cmd4 = new ListCustomerCertificatesCommand();
+//                cmd4.setCustomerId(customerId);
+//                cmd4.setCustomerType(customerType);
+//                List<CustomerCertificateDTO> customerCertificateDTOS = customerService.listCustomerCertificates(cmd4);
+//                if(customerCertificateDTOS == null){
+//                    customerCertificateDTOS = new ArrayList<>();
+//                }
+//                for(int j = 0; j < customerCertificateDTOS.size(); j ++){
+//                    CustomerCertificateDTO dto = customerCertificateDTOS.get(j);
+//                    setMutilRowDatas(fields, data, dto);
+//                }
+//                break;
+//            case "申报项目":
+//                ListCustomerApplyProjectsCommand cmd5 = new ListCustomerApplyProjectsCommand();
+//                cmd5.setCustomerId(customerId);
+//                cmd5.setCustomerType(customerType);
+//                cmd5.setCommunityId(communityId);
+//                List<CustomerApplyProjectDTO> customerApplyProjectDTOS = customerService.listCustomerApplyProjects(cmd5);
+//                if(customerApplyProjectDTOS == null){
+//                    customerApplyProjectDTOS = new ArrayList<>();
+//                }
+//                for(int j = 0; j < customerApplyProjectDTOS.size(); j ++){
+//                    CustomerApplyProjectDTO dto = customerApplyProjectDTOS.get(j);
+//                    setMutilRowDatas(fields, data, dto);
+//                }
+//                break;
+//            case "工商信息":
+//                ListCustomerCommercialsCommand cmd6 = new ListCustomerCommercialsCommand();
+//                cmd6.setCustomerId(customerId);
+//                cmd6.setCustomerType(customerType);
+//                cmd6.setCommunityId(communityId);
+//                List<CustomerCommercialDTO> customerCommercialDTOS = customerService.listCustomerCommercials(cmd6);
+//                if(customerCommercialDTOS == null){
+//                    customerCommercialDTOS = new ArrayList<>();
+//                }
+//                for(int j = 0; j < customerCommercialDTOS.size(); j ++){
+//                    CustomerCommercialDTO dto = customerCommercialDTOS.get(j);
+//                    setMutilRowDatas(fields, data, dto);
+//                }
+//                break;
+//            case "投融情况":
+//                ListCustomerInvestmentsCommand cmd7 = new ListCustomerInvestmentsCommand();
+//                cmd7.setCustomerId(customerId);
+//                cmd7.setCustomerType(customerType);
+//                List<CustomerInvestmentDTO> customerInvestmentDTOS = customerService.listCustomerInvestments(cmd7);
+//                if(customerInvestmentDTOS == null){
+//                    customerInvestmentDTOS = new ArrayList<>();
+//                }
+//                for(int j = 0; j < customerInvestmentDTOS.size(); j ++){
+//                    CustomerInvestmentDTO dto = customerInvestmentDTOS.get(j);
+//                    setMutilRowDatas(fields, data, dto);
+//                }
+//                break;
+//            case "经济指标":
+//                ListCustomerEconomicIndicatorsCommand cmd8 = new ListCustomerEconomicIndicatorsCommand();
+//                cmd8.setCustomerId(customerId);
+//                cmd8.setCustomerType(customerType);
+//                List<CustomerEconomicIndicatorDTO> customerEconomicIndicatorDTOS = customerService.listCustomerEconomicIndicators(cmd8);
+//                if(customerEconomicIndicatorDTOS == null){
+//                    customerEconomicIndicatorDTOS = new ArrayList<>();
+//                }
+//                for(int j = 0; j < customerEconomicIndicatorDTOS.size(); j ++){
+//                    CustomerEconomicIndicatorDTO dto = customerEconomicIndicatorDTOS.get(j);
+//                    setMutilRowDatas(fields, data, dto);
+//                }
+//                break;
+//        }
+//        return data;
+//    }
+//
+//    private void setMutilRowDatas(List<FieldDTO> fields, List<List<String>> data, Object dto) {
+//        List<String> rowDatas = new ArrayList<>();
+//        for(int i = 0; i <  fields.size(); i++) {
+//            FieldDTO field = fields.get(i);
+//            setRowData(dto, rowDatas, field);
+//        }
+//        //一个dto，获得一行数据后置入data中
+//        data.add(rowDatas);
+//    }
+//
+//    private void setRowData(Object dto, List<String> rowDatas, FieldDTO field) {
+//        String fieldName = field.getFieldName();
+//        String fieldParam = field.getFieldParam();
+//        FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
+//        //如果是select，则修改fieldName,在末尾加上Name，减去末尾的Id如果存在的话。由抽象跌入现实，拥有了名字，这是从神降格为人的过程---第六天天主波旬
+//        if(params.getFieldParamType().equals("select")){
+//            if(!fieldName.equals("projectSource") && !fieldName.equals("status")){
+//                fieldName = fieldName.split("Id")[0];
+//                fieldName += "Name";
+//            }
+//        }
+//        try {
+//            //获得get方法并使用获得field的值
+//            String cellData = getFromObj(fieldName, dto);
+//            if(cellData==null|| cellData.equalsIgnoreCase("null")){
+//                cellData = "";
+//            }
+//            rowDatas.add(cellData);
+//        } catch (NoSuchFieldException e) {
+//            e.printStackTrace();
+//        } catch (IntrospectionException e) {
+//            e.printStackTrace();
+//        } catch (InvocationTargetException e) {
+//            e.printStackTrace();
+//        } catch (IllegalAccessException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    private String getFromObj(String fieldName, Object dto) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
+//        Class<?> clz = dto.getClass();
+//        PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
+//        Method readMethod = pd.getReadMethod();
+//        System.out.println(readMethod.getName());
+//        Object invoke = readMethod.invoke(dto);
+//        return String.valueOf(invoke);
+//    }
+//    private String setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
+//        Class<?> clz = dto.getClass().getSuperclass();
+//        Object val = value;
+//        String type = clz.getDeclaredField(fieldName).getType().getSimpleName();
+//        System.out.println(type);
+//        System.out.println("==============");
+//        if(StringUtils.isEmpty((String)value)){
+//            val = null;
+//        }else{
+//            switch(type){
+//                case "BigDecimal":
+//                    val = new BigDecimal((String)value);
+//                    break;
+//                case "Long":
+//                    val = Long.parseLong((String)value);
+//                    break;
+//                case "Timestamp":
+//                    if(((String)value).length()<1){
+//                        val = null;
+//                        break;
+//                    }
+//                    Date date = new Date();
+//                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//                    try {
+//                        date = sdf.parse((String) value);
+//                    } catch (ParseException e) {
+//                        val = null;
+//                        break;
+//                    }
+//
+//                    val = new Timestamp(date.getTime());
+//                    break;
+//                case "Integer":
+//                    val = Integer.parseInt((String)value);
+//                    break;
+//                case "Byte":
+//                    val = Byte.parseByte((String)value);
+//                    break;
+//                case "String":
+//                    if(((String)val).trim().length()<1){
+//                        val = null;
+//                        break;
+//                    }
+//            }
+//        }
+//        PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
+//        Method writeMethod = pd.getWriteMethod();
+//        Object invoke = writeMethod.invoke(dto,val);
+//        return String.valueOf(invoke);
+//    }
+//
+//
+//    @Override
+//    public void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response) {
+//        //将command转换为listFieldGroup的参数command
+//        ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
+//        //获得客户所拥有的sheet
+//        List<FieldGroupDTO> allGroups = listFieldGroups(cmd1);
+//        List<FieldGroupDTO> groups = new ArrayList<>();
+//
+//        //双重循环匹配浏览器所传的sheetName，获得目标sheet集合
+//        String[] split = cmd.getIncludedGroupIds().split(",");
+//        for(int i = 0 ; i < split.length; i ++){
+//            long targetGroupId = Long.parseLong(split[i]);
+//            for(int j = 0; j < allGroups.size(); j++){
+//                if(allGroups.get(j).getId() == targetGroupId){
+//                    groups.add(allGroups.get(j));
+//                }
+//            }
+//        }
+//        //去掉基本信息的sheet吗
+////        for( int i = 0; i < groups.size(); i++){
+////            FieldGroupDTO group = groups.get(i);
+////            if(group.getGroupDisplayName().equals("基本信息")){
+////                groups.remove(i);
+////            }
+////        }
+//        //创建workbook
+//        org.apache.poi.hssf.usermodel.HSSFWorkbook workbook = new HSSFWorkbook();
+//        //工具excel
+//        ExcelUtils excel = new ExcelUtils();
+//        //注入sheet的内容到workbook中
+//        sheetGenerate(groups,workbook,excel,cmd.getCustomerId(),cmd.getCustomerType(),cmd.getNamespaceId(),cmd.getCommunityId());
+//        sheetNum.remove();
+//        //写入流
+//        ServletOutputStream out;
+//        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+//
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+//        String fileName = "客户数据导出"+sdf.format(Calendar.getInstance().getTime());
+//        fileName = fileName + ".xls";
+//        response.setContentType("application/msexcel");
+//        try {
+//            response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+//
+//        try {
+//            out = response.getOutputStream();
+//            workbook.write(byteArray);
+//            out.write(byteArray.toByteArray());
+//            out.flush();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if(byteArray!=null){
+//                byteArray = null;
+//            }
+//        }
+//    }
+//
+//    /**
+//     *
+//     * FILE的结构为多个sheet，每个sheet从第三行为header。
+//     * 1.转为workbook
+//     * 2.匹配sheet
+//     * 3.匹配字段
+//     * 4.存入目标客户的记录
+//     */
+//    @Override
+//    public void importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
+//        Workbook workbook;
+//        try {
+//            workbook = ExcelUtils.getWorkbook(file.getInputStream(), file.getOriginalFilename());
+//        } catch (Exception e) {
+//            LOGGER.error("import excel for import failed for unable to get work book, file name is = {}",file.getName());
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"file may not be an invalid excel file");
+//        }
+//        //拿到所有的group，进行匹配sheet用
+//        ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
+//        List<FieldGroupDTO> partGroups = listFieldGroups(cmd1);
+//        List<FieldGroupDTO> groups = listFieldGroups(cmd1);
+//        for(int i = 0; i < partGroups.size(); i++){
+//            getAllGroups(partGroups.get(i),groups);
+//        }
+//        int numberOfSheets = workbook.getNumberOfSheets();
+//        for(int i = 0; i < numberOfSheets; i ++){
+//            Sheet sheet = workbook.getSheetAt(i);
+//            //通过sheet名字进行匹配，获得此sheet对应的group
+//            String sheetName = sheet.getSheetName();
+//            FieldGroupDTO group = new FieldGroupDTO();
+//            //对于children的做不到这种遍历
+//            for(int i1 = 0; i1 < groups.size(); i1 ++){
+//                if(groups.get(i1).getGroupDisplayName().equals(sheetName)){
+//                    group = groups.get(i1);
+//                }else{
+//                    continue;
+//                }
+//            }
+//            //通过目标group拿到请求所有字段的command，然后请求获得所有字段
+//            ListFieldCommand cmd2 = new ListFieldCommand();
+//            cmd2.setModuleName(group.getModuleName());
+//            cmd2.setNamespaceId(group.getNamespaceId());
+//            cmd2.setGroupPath(group.getGroupPath());
+//            List<FieldDTO> fields = listFields(cmd2);
+//            //获得根据cell顺序的fieldname
+//            Row headRow = sheet.getRow(1);
+//
+//
+//            String[] headers = new String[headRow.getLastCellNum()-headRow.getFirstCellNum()+1];
+//            HashMap<Integer,String> orderedFieldNames = new HashMap<>();
+//            HashMap<Integer,FieldParams> orderedFieldParams = new HashMap<>();
+//            HashMap<Integer,String> orderedFieldDisplayNames = new HashMap<>();
+//            for(int j =headRow.getFirstCellNum(); j < headRow.getLastCellNum();j++) {
+//                for(int j1 = 0; j1 < fields.size();j1++){
+//                    FieldDTO fieldDTO = fields.get(j1);
+//                    if(fieldDTO.getFieldDisplayName().equals(headRow.getCell(j).getStringCellValue())){
+//                        String fieldName = fieldDTO.getFieldName();
+//                        String fieldParam = fieldDTO.getFieldParam();
+//                        FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
+//                        //如果是select，则修改fieldName,在末尾加上Name，减去末尾的Id如果存在的话。由抽象跌入现实，拥有了名字，这是从神降格为人的过程---第六天魔王波旬
+////                        导入好像不用耶
+////                          if(params.getFieldParamType().equals("select")){
+////                            //对projectSource特例
+////                            if(!fieldName.equals("projectSource")&&!fieldName.equals("status")){
+////                                fieldName = fieldName.split("Id")[0];
+////                                fieldName += "Name";
+////                            }
+////                        }
+//                        orderedFieldNames.put(j,fieldName);
+//                        orderedFieldParams.put(j,params);
+//                        orderedFieldDisplayNames.put(j,fieldDTO.getFieldDisplayName());
+//                    }
+//                }
+//                Cell cell = headRow.getCell(j);
+//                String cellValue = ExcelUtils.getCellValue(cell);
+//                headers[j] = cellValue;
+//            }
+//
+//
+//            //通过row的个数，除去header，获得对象的个数
+//            int objectsNum = sheet.getLastRowNum() - 3;
+//            List<Object> objects = new ArrayList<>();
+//            //获得对象的名称，通过表查到对象名，mapping为object隐藏起来。隐藏自身，消灭暴露者---安静的诀窍就是这个
+//            String className = fieldProvider.findClassNameByGroupDisplayName(group.getGroupDisplayName());
+//            Class<?> clazz = null;
+//            try {
+//                clazz = Class.forName(className);
+//            } catch (ClassNotFoundException e) {
+//                LOGGER.error("import failed,class not found exception, group name is = {}",group.getGroupDisplayName());
+//                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"import failed,class not found exception, group name is = {}",group.getGroupDisplayName());
+//            }
+//
+//            LOGGER.info("sheet total row num = {}, first row num = {}, last row num = {}",sheet.getPhysicalNumberOfRows(),sheet.getFirstRowNum(),sheet.getLastRowNum());
+//            for(int j = 2; j <= sheet.getLastRowNum(); j ++){
+//                Row row = sheet.getRow(j);
+//                Object object = null;
+//                //每一行迭代，进行set
+//                try {
+//                    object = clazz.newInstance();
+//                } catch (Exception e) {
+//                    LOGGER.error("sheet class new instance failed,exception= {}",e);
+//                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"sheet class new instance failed",e);
+//                }
+//                for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
+//                    String fieldName = orderedFieldNames.get(k);
+//                    FieldParams param = orderedFieldParams.get(k);
+//                    String displayName = orderedFieldDisplayNames.get(k);
+//                    try {
+//                        Cell cell = row.getCell(k);
+//                        String cellValue = "";
+//                        //cell不为null时特殊处理status和projectSource
+//                        if(cell!=null){
+//                            cellValue = ExcelUtils.getCellValue(cell);
+//                            if(fieldName.equals("status")){
+//                                cellValue = "";
+//                                //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
+//                                ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), fieldName);
+//                                if(item!=null&&item.getItemId()!=null){
+//                                    cellValue = String.valueOf(item.getItemId());
+//                                }
+//                            }
+//                            //处理特例projectSource的导入
+//                            StringBuilder sb = new StringBuilder();
+//                            if(fieldName.equals("projectSource")){
+//                                cellValue = "";
+//                                String[] split = cell.getStringCellValue().split(",");
+//                                for(String projectSource : split){
+//                                    ScopeFieldItem projectSourceItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), projectSource);
+//                                    if(projectSourceItem!=null){
+//                                        sb.append((projectSourceItem.getItemId()==null?"":projectSourceItem.getItemId())+",");
+//                                    }
+//                                }
+//                                if(sb.toString().trim().length()>0){
+//                                    sb.deleteCharAt(sb.length()-1);
+//                                    cellValue = sb.toString();
+//                                }
+//                            }
+//                            //处理其他select的
+//                            if(param.getFieldParamType().equals("select")&&!fieldName.equals("projectSource")&&!fieldName.equals("status")){
+//                                cellValue = "";
+//                                ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), displayName);
+//                                if(item!=null&&item.getItemId()!=null){
+//                                    cellValue=String.valueOf(item.getItemId());
+//                                }
+//
+//
+//                            }
+//                        }
+//
+//
+//                        setToObj(fieldName,object,cellValue);
+//                    } catch (Exception e) {
+//                        LOGGER.error("set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName());
+//                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName(),e);
+//                    }
+//                }
+//                //然后进行通用字段的set
+//                try{
+//                    for(java.lang.reflect.Field f : clazz.getSuperclass().getDeclaredFields()){
+//                        String name = f.getName();
+//                        switch(name){
+//                            case "createUid":
+//                                setToObj("createUid",object,UserContext.currentUserId().toString());
+//                                break;
+//                            case "moduleName":
+//                                setToObj("moduleName",object,cmd.getModuleName());
+//                                break;
+//                            case "createTime":
+//                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//                                Calendar c = Calendar.getInstance();
+//                                String format = sdf.format(c.getTime());
+//                                setToObj("createTime",object, format);
+//                                break;
+//                            case "namespaceId":
+//                                setToObj("namespaceId",object,cmd.getNamespaceId().toString());
+//                                break;
+//                            case "customerType":
+//                                setToObj("customerType",object,cmd.getCustomerType().toString());
+//                                break;
+//                            case "customerId":
+//                                setToObj("customerId",object,cmd.getCustomerId().toString());
+//                                break;
+//                            case "id":
+//                                Long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(clazz.getSuperclass()));
+//                                setToObj("id",object,nextSequence.toString());
+//                                break;
+//                        }
+//                    }
+//                }catch(Exception e){
+//                    LOGGER.warn("one row invoke set method for obj failed,the clzz is = {}",clazz.getSimpleName());
+//                    continue;
+//                }
+//                objects.add(object);
+//            }
+//            //此时获得一个sheet的list对象，进行存储
+//            fieldProvider.saveFieldGroups(cmd.getCustomerType(),cmd.getCustomerId(),objects,clazz.getSimpleName());
+//        }
+//
+//    }
+//
+//    private void getAllGroups(FieldGroupDTO group,List<FieldGroupDTO> allGroups) {
+//        if(group.getChildrenGroup()!=null&&group.getChildrenGroup().size()>0){
+//            for(int i = 0; i < group.getChildrenGroup().size(); i++){
+//                getAllGroups(group.getChildrenGroup().get(i),allGroups);
+//            }
+//        }else{
+//            allGroups.add(group);
+//        }
+//    }
 
     @Override
     public void updateFields(UpdateFieldsCommand cmd) {
@@ -875,6 +988,7 @@ public class FieldServiceImpl implements FieldService {
 
         return fieldItem;
     }
+
 
     @Override
     public List<FieldGroupDTO> listFieldGroups(ListFieldGroupCommand cmd) {

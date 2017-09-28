@@ -159,7 +159,11 @@ public interface AssetProvider {
 
     void changeBillStatusOnOrder(Map<String, Integer> billStatuses,Long orderId);
 
+
     PaymentUser findByOwner(String userType, Long id);
 
     PaymentAccount findPaymentAccount();
+
+    void changeBillStatusOnPaiedOff(List<Long> billIds);
+
 }
