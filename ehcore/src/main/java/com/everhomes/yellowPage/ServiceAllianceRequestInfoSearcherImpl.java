@@ -218,7 +218,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 //                List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
 //                request.setOwnerId(communityList.get(0).getId());
             }else{
-                request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+                request.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
                 request.setOwnerId(request.getCreatorOrganizationId());
             }
             request.setFlowCaseId(flowCase.getId());
