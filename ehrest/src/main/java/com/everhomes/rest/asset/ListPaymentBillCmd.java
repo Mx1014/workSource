@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.Date;
 import java.util.List;
 
@@ -18,6 +20,7 @@ public class ListPaymentBillCmd {
     private String paymentOrderNum;
     private Integer paymentType;
     private Integer transactionType;
+    @ItemType(Integer.class)
     private List<Integer> transactionTypes;
     private Integer paymentStatus;
     private Integer settlementStatus;
