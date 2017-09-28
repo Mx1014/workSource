@@ -23,6 +23,7 @@ import org.hibernate.engine.config.spi.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
@@ -36,6 +37,7 @@ import java.util.Map;
  * Created by Wentian Wang on 2017/9/28.
  */
 
+@Service
 public class RemoteAccessServiceImpl implements RemoteAccessService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoteAccessServiceImpl.class);
     @Autowired
