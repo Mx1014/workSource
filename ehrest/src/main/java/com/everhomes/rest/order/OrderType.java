@@ -34,11 +34,11 @@ public class OrderType {
 		PAYMENTCARD(OrderType.PAYMENT_CARD_CODE,"paymentCard","一卡通",""),
 		RENTALORDER(OrderType.RENTAL_ORDER_CODE,"rentalOrder","资源预订",""),
 		EXPRESS_ORDER(OrderType.EXPRESS_ORDER_CODE,"expressOrder","快递订单",""),
-		ACTIVITYSIGNUPORDER(OrderType.ACTIVITY_SIGNUP_ORDER_CODE,"activitySignupOrder","活动报名缴费",""),
+		ACTIVITYSIGNUPORDER(OrderType.ACTIVITY_SIGNUP_ORDER_CODE,"activitySignupOrder","活动报名缴费","act"),
 		PRINT_ORDER(OrderType.PRINT_ORDER_CODE,"printOrder","打印订单",""),
-		ACTIVITYSIGNUPORDERWECHAT(OrderType.ACTIVITY_SIGNUP_ORDER_WECHAT_CODE,"activitysignuporderwechat","活动报名（微信）缴费",""),
+		ACTIVITYSIGNUPORDERWECHAT(OrderType.ACTIVITY_SIGNUP_ORDER_WECHAT_CODE,"activitysignuporderwechat","活动报名（微信）缴费","acw"),
 		ZJGK_RENTAL_CODE(OrderType.ZJGK_RENTAL_CODE,"zjgkrentalcode","张江高科租金缴费",""),
-		VIDEOCONF_CODE(OrderType.VIDEOCONF_CODE,"videoConf","视频会议","vid");
+		VIDEOCONF_CODE(OrderType.VIDEOCONF_CODE,"videoConf","视频会议","vmt");
 		
 
 		private int code;
