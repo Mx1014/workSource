@@ -1,6 +1,7 @@
 package com.everhomes.rest.customer;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import com.everhomes.util.StringHelper;
 
@@ -19,8 +20,8 @@ import com.everhomes.util.StringHelper;
  *     <li>intentionGrade: 意向等级</li>
  *     <li>trackingTime: 跟进时间</li>
  *     <li>content: 跟进内容</li>
- *     <li>contentImgUri: 跟进内容图片uri</li>
- *     <li>contentImgUrl: 跟进内容图片url</li>
+ *     <li>contentImgUriList: 跟进内容图片uri</li>
+ *     <li>contentImgUrlList: 跟进内容图片url</li>
  * </ul>
  * Created by shengyue.wang on 2017/9/20.
  */
@@ -38,8 +39,8 @@ public class CustomerTrackingDTO {
     private Integer intentionGrade;
     private Timestamp trackingTime;
     private String content;
-    private String  contentImgUri;
-    private String contentImgUrl;
+    private List<String>  contentImgUriList;
+    private List<String> contentImgUrlList;
     
 
     public Long getId() {
@@ -147,20 +148,20 @@ public class CustomerTrackingDTO {
 	}
 
 	
-	public String getContentImgUri() {
-		return contentImgUri;
+	public List<String> getContentImgUriList() {
+		return contentImgUriList;
 	}
 
-	public void setContentImgUri(String contentImgUri) {
-		this.contentImgUri = contentImgUri;
+	public void setContentImgUriList(List<String> contentImgUriList) {
+		this.contentImgUriList = contentImgUriList;
 	}
 
-	public String getContentImgUrl() {
-		return contentImgUrl;
+	public List<String> getContentImgUrlList() {
+		return contentImgUrlList;
 	}
 
-	public void setContentImgUrl(String contentImgUrl) {
-		this.contentImgUrl = contentImgUrl;
+	public void setContentImgUrlList(List<String> contentImgUrlList) {
+		this.contentImgUrlList = contentImgUrlList;
 	}
 
 	@Override

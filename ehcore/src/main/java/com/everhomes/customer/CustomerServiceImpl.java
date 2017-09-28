@@ -1521,10 +1521,18 @@ public class CustomerServiceImpl implements CustomerService {
             	}
         	}
         }
-        if(null != dto.getContentImgUri()){
-        	 String contentUrl = contentServerService.parserUri(dto.getContentImgUri(), EntityType.CUSTOMER_TRACKING.getCode(), dto.getId());
-             dto.setContentImgUrl(contentUrl);
+        List<String> urlList = new ArrayList<>();
+        List<String> uriList = new ArrayList<>();
+        if(StringUtils.isNotEmpty(talent.getContentImgUri())){
+        	String[] uriArray = talent.getContentImgUri().split(",");
+        	for(String  uri : uriArray){
+        		uriList.add(uri);
+        		String contentUrl = contentServerService.parserUri(uri, EntityType.CUSTOMER_TRACKING.getCode(), dto.getId());
+        		urlList.add(contentUrl);
+        	}
         }
+        dto.setContentImgUriList(uriList);
+        dto.setContentImgUrlList(urlList);
         return dto;
 	}
 

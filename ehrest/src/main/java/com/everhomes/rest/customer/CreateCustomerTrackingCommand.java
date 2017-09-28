@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  *     <li>intentionGrade: 意向等级</li>
  *     <li>trackingTime: 跟进时间</li>
  *     <li>content: 跟进内容</li>
- *     <li>contentImgUri: 跟进内容图片uri</li>
+ *     <li>contentImgUri: 跟进内容图片uri,如果有多个,用英文逗号分隔</li>
  * </ul>
  * Created by shegnyue.wang on 2017/9/20.
  */
