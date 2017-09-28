@@ -4681,22 +4681,6 @@ public class PunchServiceImpl implements PunchService {
 		response.setPunchDayDetails(new ArrayList<PunchDayDetailDTO>());
 		for(PunchDayLog r : results){
 			PunchDayDetailDTO dto =convertToPunchDayDetailDTO(r);
-			if(null!= r.getArriveTime())
-				dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
-
-			if(null!= r.getLeaveTime())
-				dto.setLeaveTime( convertTimeToGMTMillisecond(r.getLeaveTime()));
-
-			if(null!= r.getWorkTime())
-				dto.setWorkTime( convertTimeToGMTMillisecond( r.getWorkTime()));
-
-			if(null!= r.getNoonLeaveTime())
-				dto.setNoonLeaveTime(  convertTimeToGMTMillisecond(r.getNoonLeaveTime()));
-
-			if(null!= r.getAfternoonArriveTime())
-				dto.setAfternoonArriveTime(  convertTimeToGMTMillisecond(r.getAfternoonArriveTime()));
-			if(null!= r.getPunchDate())
-				dto.setPunchDate(r.getPunchDate().getTime());
 
 
 			response.getPunchDayDetails().add(dto);
@@ -4745,6 +4729,8 @@ public class PunchServiceImpl implements PunchService {
 				dto.setPunchOrgName(punchGroup.getName());
 		}
 
+
+
 		if(null!= r.getArriveTime())
 			dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
 
@@ -4755,6 +4741,7 @@ public class PunchServiceImpl implements PunchService {
 			dto.setWorkTime( convertTimeToGMTMillisecond( r.getWorkTime()));
 		else
 			dto.setWorkTime(0L);
+
 		if(null!= r.getNoonLeaveTime())
 			dto.setNoonLeaveTime(  convertTimeToGMTMillisecond(r.getNoonLeaveTime()));
 
@@ -4762,20 +4749,21 @@ public class PunchServiceImpl implements PunchService {
 			dto.setAfternoonArriveTime(  convertTimeToGMTMillisecond(r.getAfternoonArriveTime()));
 		if(null!= r.getPunchDate())
 			dto.setPunchDate(r.getPunchDate().getTime());
+
 		dto.setPunchTimesPerDay(r.getPunchTimesPerDay());
 		// modify by wh 2017年6月22日 现在都是挂总公司下,用户未必都能通过这种方式查到
 //			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId() );
 
 
-        List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(r.getUserId(),r.getEnterpriseId(), dateSF.get().format(r.getPunchDate()),
-                ClockCode.SUCESS.getCode());
-        if(null!=punchLogs){
-            dto.setPunchLogs(new ArrayList<>());
-            for (PunchLog pl : punchLogs) {
-                PunchLogDTO plDTO = convertPunchLog2DTO(pl);
-                dto.getPunchLogs().add(plDTO);
-            }
-        }
+//        List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(r.getUserId(),r.getEnterpriseId(), dateSF.get().format(r.getPunchDate()),
+//                ClockCode.SUCESS.getCode());
+//        if(null!=punchLogs){
+//            dto.setPunchLogs(new ArrayList<>());
+//            for (PunchLog pl : punchLogs) {
+//                PunchLogDTO plDTO = convertPunchLog2DTO(pl);
+//                dto.getPunchLogs().add(plDTO);
+//            }
+//        }
 		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId());
 
 		if (null != member) {
