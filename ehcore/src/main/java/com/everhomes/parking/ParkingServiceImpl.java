@@ -599,9 +599,8 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
 
 		parkingRechargeOrder.setOrderNo(createOrderNo(System.currentTimeMillis()));
-
+		parkingRechargeOrder.setPaidVersion(version.getCode());
 		parkingRechargeOrder.setInvoiceType(cmd.getInvoiceType());
-
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
     		ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
 
@@ -662,23 +661,26 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
     private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName) {
-        PreOrderCommand preOrderCommand = new PreOrderCommand();
-
-        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
-        preOrderCommand.setOrderId(parkingRechargeOrder.getOrderNo());
+//        PreOrderCommand preOrderCommand = new PreOrderCommand();
+//
+//        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+//        preOrderCommand.setOrderId(parkingRechargeOrder.getOrderNo());
         Long amount = payService.changePayAmount(parkingRechargeOrder.getPrice());
-        preOrderCommand.setAmount(amount);
+//        preOrderCommand.setAmount(amount);
+//
+//        preOrderCommand.setPayerId(parkingRechargeOrder.getPayerUid());
+//        preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+//
+////        preOrderCommand.setExpiration(expiredTime);
+//
+//        preOrderCommand.setClientAppName(clientAppName);
+//
+//        PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
+				parkingRechargeOrder.getOrderNo(), parkingRechargeOrder.getPayerUid(), amount);
 
-        preOrderCommand.setPayerId(parkingRechargeOrder.getPayerUid());
-        preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
 
-//        preOrderCommand.setExpiration(expiredTime);
-
-        preOrderCommand.setClientAppName(clientAppName);
-
-        PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
-
-        return callBack;
+		return callBack;
     }
 
     private CommonOrderDTO convertOrderDTOForV1(ParkingRechargeOrder parkingRechargeOrder, Byte rechargeType) {
@@ -1660,7 +1662,12 @@ public class ParkingServiceImpl implements ParkingService {
 		if(order.getStatus() < ParkingRechargeOrderStatus.PAID.getCode()){
 			return;
 		}
-//        refundParkingOrderV2
+		if (ActivityRosterPayVersionFlag.V1.getCode() == order.getPaidVersion()) {
+			refundParkingOrderV1(cmd, order);
+		}else {
+			refundParkingOrderV2(cmd, order);
+		}
+
         order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
         order.setRefundTime(new Timestamp(System.currentTimeMillis()));
         parkingProvider.updateParkingRechargeOrder(order);
