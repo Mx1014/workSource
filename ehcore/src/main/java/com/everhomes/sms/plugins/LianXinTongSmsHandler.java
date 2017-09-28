@@ -90,6 +90,8 @@ public class LianXinTongSmsHandler implements SmsHandler {
     public List<SmsLog> doSend(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                String templateLocale, List<Tuple<String, Object>> variables) {
 
+        List<SmsLog> smsLogList = new ArrayList<>();
+
         Map<String, Object> model = new HashMap<>();
         if (variables != null) {
             model = variables.stream().collect(Collectors.toMap(Tuple::first, Tuple::second));
@@ -97,6 +99,12 @@ public class LianXinTongSmsHandler implements SmsHandler {
 
         String signScope = SmsTemplateCode.SCOPE + ".sign";
         LocaleTemplate sign = localeTemplateService.getLocalizedTemplate(namespaceId, signScope, SmsTemplateCode.SIGN_CODE, templateLocale);
+        if (sign == null) {
+            LOGGER.error("can not found sign content by LianXinTong handler, namespaceId = {}", namespaceId);
+            SmsLog log = getSmsErrorLog(namespaceId, phoneNumbers[0], templateScope, templateId, templateLocale, "sms sign is empty");
+            smsLogList.add(log);
+            return smsLogList;
+        }
 
         templateScope = templateScope + "." + SmsTemplateCode.LIAN_XIN_TONG_SUFFIX;
         String content = localeTemplateService.getLocaleTemplateString(namespaceId, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
@@ -111,7 +119,6 @@ public class LianXinTongSmsHandler implements SmsHandler {
         }
 
         if (content != null && content.trim().length() > 0) {
-            List<SmsLog> smsLogList = new ArrayList<>();
             for (int i = 0; i < phoneNumbers.length; i += MAX_LIMIT) {
                 int length = MAX_LIMIT;
                 if (i + MAX_LIMIT > phoneNumbers.length) {
@@ -129,8 +136,27 @@ public class LianXinTongSmsHandler implements SmsHandler {
                 smsLogList.addAll(buildSmsLogs(namespaceId, phonesPart, templateScope, templateId, templateLocale, content, rspMessage));
             }
             return smsLogList;
+        } else {
+            SmsLog log = getSmsErrorLog(namespaceId, phoneNumbers[0], templateScope, templateId, templateLocale, "sms content is empty");
+            smsLogList.add(log);
+            LOGGER.error("can not found sms content by LianXinTong handler, namespaceId = {}, templateId = {}", namespaceId, templateId);
         }
-        return null;
+        return smsLogList;
+    }
+
+    private SmsLog getSmsErrorLog(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, String error) {
+        SmsLog log = new SmsLog();
+        log.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        log.setNamespaceId(namespaceId);
+        log.setScope(templateScope);
+        log.setCode(templateId);
+        log.setLocale(templateLocale);
+        log.setMobile(phoneNumber);
+        log.setResult(error);
+        log.setHandler(YUN_ZHI_XUN_HANDLER_NAME);
+        log.setText("");
+        log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
+        return log;
     }
 
     /*
