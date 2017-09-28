@@ -151,8 +151,14 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 				form.setStatus(GeneralFormStatus.RUNNING.getCode());
 				this.generalFormProvider.updateGeneralForm(form);
 			}
-			Flow flow = flowService.getEnabledFlow(ga.getNamespaceId(), ga.getModuleId(),
-					ga.getModuleType(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
+			Flow flow = null;
+			if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(ga.getModuleType())){
+				flow = flowService.getEnabledFlow(ga.getNamespaceId(), 40500L,
+						FlowModuleType.NO_MODULE.getCode(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
+			}else{
+				flow = flowService.getEnabledFlow(ga.getNamespaceId(), ga.getModuleId(),
+						ga.getModuleType(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
+			}
 
 			CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
 			cmd21.setApplyUserId(userId);
