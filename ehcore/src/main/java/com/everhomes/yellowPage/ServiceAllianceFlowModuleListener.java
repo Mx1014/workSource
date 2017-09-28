@@ -209,7 +209,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 //			List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
 //			request.setOwnerId(communityList.get(0).getId());
 		}else{
-			request.setOwnerType(flowCase.getProjectType());
+			ServiceAllianceBelongType.ORGANAIZATION.getCode();
 			request.setOwnerId(flowCase.getProjectId());
 		}
 		request.setFlowCaseId(flowCase.getId());
