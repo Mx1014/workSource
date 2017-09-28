@@ -2193,6 +2193,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public void valiRentalBill(List<RentalBillRuleDTO> ruleDTOs) {
 		// 如果有一个规则，剩余的数量少于预定的数量
+		LOGGER.info(com.alibaba.fastjson.JSONObject.toJSONString(cellList.get()));
 		for (RentalBillRuleDTO dto : ruleDTOs) {
 			if (dto.getRuleId() == null)
 				continue;
