@@ -96,7 +96,7 @@ public interface ArchivesParameter {
 
     static final String DEGREE_CERTIFICATE = "degreeCertificate";
 
-    static final String CONTRA_CTCERTIFICATE = "emergencyRelationship";
+    static final String CONTRACT_CERTIFICATE = "contractCertificate";
 
     static final String DEPARTMENTS = "departments";    //	部门
 

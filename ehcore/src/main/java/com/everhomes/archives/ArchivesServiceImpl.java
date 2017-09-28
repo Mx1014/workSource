@@ -23,7 +23,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import javafx.scene.shape.Arc;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -424,7 +423,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 continue;
             }
             //  2.导入数据库
-            boolean flag = saveArchivesContactsdatas(data, organizationId, departmentId);
+            boolean flag = saveArchivesContactsDatas(data, organizationId, departmentId);
             if (flag)
                 coverCount++;
         }
@@ -490,13 +489,13 @@ public class ArchivesServiceImpl implements ArchivesService {
             LOGGER.warn("Contact token is empty. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact token is empty");
-            log.setCode(ArchivesServiceErrorCode.ERROR_CONTACTTOKEN_ISEMPTY);
+            log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_ISEMPTY);
             return log;
         }
         return null;
     }
 
-    private boolean saveArchivesContactsdatas(ImportArchivesContactsDTO data, Long organizationId, Long departmentId) {
+    private boolean saveArchivesContactsDatas(ImportArchivesContactsDTO data, Long organizationId, Long departmentId) {
         AddArchivesContactCommand addCommand = new AddArchivesContactCommand();
         addCommand.setOrganizationId(organizationId);
         addCommand.setContactName(data.getContactName());
@@ -519,15 +518,19 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
         //  TODO:部门、岗位中文查询
         addCommand.setVisibleFlag(VisibleFlag.SHOW.getCode());
+        addArchivesContact(addCommand);
+        return verifyPersonnelByPhone(organizationId, addCommand.getContactToken());
+    }
+
+    private boolean verifyPersonnelByPhone(Long organizationId, String contactToken) {
         //  TODO:手机号存在的话则累积数目+1
         VerifyPersonnelByPhoneCommand verifyCommand = new VerifyPersonnelByPhoneCommand();
         verifyCommand.setEnterpriseId(organizationId);
         verifyCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
-        verifyCommand.setPhone(addCommand.getContactToken());
+        verifyCommand.setPhone(contactToken);
         VerifyPersonnelByPhoneCommandResponse verifyRes = organizationService.verifyPersonnelByPhone(verifyCommand);
 
         if (null != verifyRes && null != verifyRes.getDto()) {
-            addArchivesContact(addCommand);
             return true;
         } else
             return false;
@@ -936,205 +939,151 @@ public class ArchivesServiceImpl implements ArchivesService {
                     case ArchivesParameter.CONTACT_NAME:
                         employee.setContactName(itemValue.getFieldValue());
                         break;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.BIRTHDAY)) {
-                    employee.setBirthday(ArchivesUtil.parseDate(itemValue.getFieldValue()));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.CONTACT_NAME)) {
-                    employee.setContactName(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.CONTACT_TOKEN)) {
-                    employee.setContactToken(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.REGION_CODE)) {
-                    employee.setRegionCode(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.EMPLOYEE_NO)) {
-                    employee.setEmployeeNo(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.GENDER)) {
-                    employee.setGender(convertToArchivesEnum(itemValue.getFieldValue(), ArchivesParameter.GENDER));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.MARITAL_FLAG)) {
-                    employee.setMaritalFlag(convertToArchivesEnum(itemValue.getFieldValue(), ArchivesParameter.MARITAL_FLAG));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.POLITICAL_FLAG)) {
-                    employee.setPoliticalFlag(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.NATIVE_PLACE)) {
-                    employee.setNativePlace(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.EN_NAME)) {
-                    employee.setEnName(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.REG_RESIDENCE)) {
-                    employee.setRegResidence(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.ID_NUMBER)) {
-                    employee.setIdNumber(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.EMAIL)) {
-                    employee.setEmail(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.WECHAT)) {
-                    employee.setWechat(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.QQ)) {
-                    employee.setQq(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.EMERGENCY_NAME)) {
-                    employee.setEmergencyName(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.EMERGENCY_CONTACT)) {
-                    employee.setEmergencyContact(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.ADDRESS)) {
-                    employee.setAddress(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.EMPLOYEE_TYPE)) {
-                    employee.setEmployeeType(convertToArchivesEnum(itemValue.getFieldValue(), ArchivesParameter.EMPLOYEE_TYPE));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.EMPLOYEE_STATUS)) {
-                    employee.setEmployeeStatus(convertToArchivesEnum(itemValue.getFieldValue(), ArchivesParameter.EMPLOYEE_STATUS));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.EMPLOYMEN_TTIME)) {
-                    employee.setEmploymentTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.SALARY_CARD_NUMBER)) {
-                    employee.setSalaryCardNumber(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.SOCIAL_SECURITY_NUMBER)) {
-                    employee.setSocialSecurityNumber(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.PROVIDENT_FUND_NUMBER)) {
-                    employee.setProvidentFundNumber(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.CHECK_IN_TIME)) {
-                    employee.setCheckInTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.PROCREATIVE)) {
-                    employee.setProcreative(ArchivesUtil.parseDate(itemValue.getFieldValue()));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.ETHNICITY)) {
-                    employee.setEthnicity(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.ID_TYPE)) {
-                    employee.setIdType(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.ID_EXPIRY_DATE)) {
-                    employee.setIdExpiryDate(ArchivesUtil.parseDate(itemValue.getFieldValue()));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.DEGREE)) {
-                    employee.setDegree(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.GRADUATION_SCHOOL)) {
-                    employee.setGraduationSchool(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.GRADUATION_TIME)) {
-                    employee.setGraduationTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.EMERGENCY_RELATIONSHIP)) {
-                    employee.setEmergencyRelationship(itemValue.getFieldValue());
-                    continue;
-                }
-/*        if(cmd.getDepartment() !=null)
-            employee.setDepartment(cmd.getDepartment());
-        if(cmd.getJobPosition() !=null)
-            employee.setJobPosition(cmd.getJobPosition());
-        if(cmd.getReportTarget() !=null)
-            employee.setReportTarget(cmd.getReportTarget());*/
-//  TODO:汇报对象
-                if (itemValue.getFieldName().equals(ArchivesParameter.CONTACT_SHORT_TOKEN)) {
-                    employee.setContactShortToken(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.WORK_EMAIL)) {
-                    employee.setWorkEmail(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.CONTRACT_PARTY_ID)) {
-                    employee.setContractPartyId(Long.valueOf(itemValue.getFieldValue()));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.WORK_START_TIME)) {
-                    employee.setWorkStartTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.CONTRACT_START_TIME)) {
-                    employee.setContractStartTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.CONTRACT_END_TIME)) {
-                    employee.setContractEndTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.SALARY_CARD_BANK)) {
-                    employee.setSalaryCardBank(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.REG_RESIDENCE_TYPE)) {
-                    employee.setRegResidenceType(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.ID_PHOTO)) {
-                    employee.setIdPhoto(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.VISA_PHOTO)) {
-                    employee.setVisaPhoto(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.LIFE_PHOTO)) {
-                    employee.setLifePhoto(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.ENTRY_FORM)) {
-                    employee.setEntryForm(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.GRADUATION_CERTIFICATE)) {
-                    employee.setGraduationCertificate(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.DEGREE_CERTIFICATE)) {
-                    employee.setDegreeCertificate(itemValue.getFieldValue());
-                    continue;
-                }
-                if (itemValue.getFieldName().equals(ArchivesParameter.CONTRA_CTCERTIFICATE)) {
-                    employee.setContractCertificate(itemValue.getFieldValue());
-                    continue;
+                    case ArchivesParameter.CONTACT_TOKEN:
+                        employee.setContactToken(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.REGION_CODE:
+                        employee.setRegionCode(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.EMPLOYEE_NO:
+                        employee.setEmployeeNo(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.GENDER:
+                        employee.setGender(convertToArchivesEnum(itemValue.getFieldValue(), ArchivesParameter.GENDER));
+                        break;
+                    case ArchivesParameter.MARITAL_FLAG:
+                        employee.setMaritalFlag(convertToArchivesEnum(itemValue.getFieldValue(), ArchivesParameter.MARITAL_FLAG));
+                        break;
+                    case ArchivesParameter.POLITICAL_FLAG:
+                        employee.setPoliticalFlag(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.NATIVE_PLACE:
+                        employee.setNativePlace(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.EN_NAME:
+                        employee.setEnName(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.REG_RESIDENCE:
+                        employee.setRegResidence(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.ID_NUMBER:
+                        employee.setIdNumber(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.EMAIL:
+                        employee.setEmail(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.WECHAT:
+                        employee.setWechat(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.QQ:
+                        employee.setQq(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.EMERGENCY_NAME:
+                        employee.setEmergencyName(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.EMERGENCY_CONTACT:
+                        employee.setEmergencyContact(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.ADDRESS:
+                        employee.setAddress(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.EMPLOYEE_TYPE:
+                        employee.setEmployeeType(convertToArchivesEnum(itemValue.getFieldValue(), ArchivesParameter.EMPLOYEE_TYPE));
+                        break;
+                    case ArchivesParameter.EMPLOYEE_STATUS:
+                        employee.setEmployeeStatus(convertToArchivesEnum(itemValue.getFieldValue(), ArchivesParameter.EMPLOYEE_STATUS));
+                        break;
+                    case ArchivesParameter.EMPLOYMEN_TTIME:
+                        employee.setEmploymentTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
+                        break;
+                    case ArchivesParameter.SALARY_CARD_NUMBER:
+                        employee.setSalaryCardNumber(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.SOCIAL_SECURITY_NUMBER:
+                        employee.setSocialSecurityNumber(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.PROVIDENT_FUND_NUMBER:
+                        employee.setProvidentFundNumber(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.CHECK_IN_TIME:
+                        employee.setCheckInTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
+                        break;
+                    case ArchivesParameter.PROCREATIVE:
+                        employee.setProcreative(ArchivesUtil.parseDate(itemValue.getFieldValue()));
+                        break;
+                    case ArchivesParameter.ETHNICITY:
+                        employee.setEthnicity(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.ID_TYPE:
+                        employee.setIdType(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.ID_EXPIRY_DATE:
+                        employee.setIdExpiryDate(ArchivesUtil.parseDate(itemValue.getFieldValue()));
+                        break;
+                    case ArchivesParameter.DEGREE:
+                        employee.setDegree(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.GRADUATION_SCHOOL:
+                        employee.setGraduationSchool(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.GRADUATION_TIME:
+                        employee.setGraduationTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
+                        break;
+                    case ArchivesParameter.EMERGENCY_RELATIONSHIP:
+                        employee.setEmergencyRelationship(itemValue.getFieldValue());
+                        break;
+                    /*        if(cmd.getDepartment() !=null)
+                                   employee.setDepartment(cmd.getDepartment());
+                              if(cmd.getJobPosition() !=null)
+                                   employee.setJobPosition(cmd.getJobPosition());
+                              if(cmd.getReportTarget() !=null)
+                                   employee.setReportTarget(cmd.getReportTarget());*/
+                    //  TODO:汇报对象
+                    case ArchivesParameter.CONTACT_SHORT_TOKEN:
+                        employee.setContactShortToken(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.WORK_EMAIL:
+                        employee.setWorkEmail(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.CONTRACT_PARTY_ID:
+                        employee.setContractPartyId(Long.valueOf(itemValue.getFieldValue()));
+                        break;
+                    case ArchivesParameter.WORK_START_TIME:
+                        employee.setWorkStartTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
+                        break;
+                    case ArchivesParameter.CONTRACT_START_TIME:
+                        employee.setContractStartTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
+                        break;
+                    case ArchivesParameter.CONTRACT_END_TIME:
+                        employee.setContractEndTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
+                        break;
+                    case ArchivesParameter.SALARY_CARD_BANK:
+                        employee.setSalaryCardBank(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.REG_RESIDENCE_TYPE:
+                        employee.setRegResidenceType(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.ID_PHOTO:
+                        employee.setIdPhoto(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.VISA_PHOTO:
+                        employee.setVisaPhoto(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.LIFE_PHOTO:
+                        employee.setLifePhoto(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.ENTRY_FORM:
+                        employee.setEntryForm(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.GRADUATION_CERTIFICATE:
+                        employee.setGraduationCertificate(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.DEGREE_CERTIFICATE:
+                        employee.setDegreeCertificate(itemValue.getFieldValue());
+                        break;
+                    case ArchivesParameter.CONTRACT_CERTIFICATE:
+                        employee.setContractCertificate(itemValue.getFieldValue());
+                        break;
                 }
             }
         }
@@ -1724,7 +1673,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 }
 
                 //  开始导入，同时设置导入结果
-                importArchivesEmployeesFiles(datas, response, cmd.getOrganizationId(), cmd.getDepartmentId(), form.getFormFields());
+                importArchivesEmployeesFiles(datas, response, cmd.getFormOriginId(), cmd.getOrganizationId(), cmd.getDepartmentId(), form.getFormFields());
                 //  返回结果
                 return response;
             }
@@ -1760,32 +1709,165 @@ public class ArchivesServiceImpl implements ArchivesService {
         return null;
     }
 
-    private void importArchivesEmployeesFiles(List<ImportArchivesEmployeesDTO> datas, ImportFileResponse response, Long organizationId, Long departmentId, List<GeneralFormFieldDTO> formValues) {
-        ImportFileResultLog<ImportArchivesEmployeesDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
-        List<ImportFileResultLog<ImportArchivesEmployeesDTO>> errorDataLogs = new ArrayList<>();
+    private void importArchivesEmployeesFiles(
+            List<ImportArchivesEmployeesDTO> datas, ImportFileResponse response, Long formOriginId, Long organizationId,
+            Long departmentId, List<GeneralFormFieldDTO> formValues) {
+        ImportFileResultLog<Map> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
+        List<ImportFileResultLog<Map>> errorDataLogs = new ArrayList<>();
         Long coverCount = 0L;
 
         for (ImportArchivesEmployeesDTO data : datas) {
-
-            list<log> logs
             List<PostApprovalFormItem> itemValues = new ArrayList<>();
+            String contactName = "", contactToken = "";
+            Long realDepartmentId = 0L, detailId = null;
+            Byte gender = null;
+            boolean flag = false;
+
+
+            //  1.在校验的时候保存需要单独调用add的值,可以节省一次循环获取的时间
             for (int i = 0; i < formValues.size(); i++) {
                 PostApprovalFormItem itemValue = ConvertHelper.convert(formValues.get(i), PostApprovalFormItem.class);
                 itemValue.setFieldValue(data.getValues().get(i));
-                checkArchivesEmployeesDatas(logs, itemValue);
-                if (log...)
-                break;
+                //  2.校验导入数据
+                log = checkArchivesEmployeesDatas(data, itemValue, departmentId, contactName, gender, contactToken, realDepartmentId);
+                if (log != null) {
+                    errorDataLogs.add(log);
+                    break;
+                }
                 itemValues.add(itemValue);
             }
-
-
-            //  导入数据
+            //  3.导入基础数据
+            detailId = saveArchivesEmployeesMember(organizationId, contactName, gender, departmentId, contactToken, flag);
+            //  4.导入详细信息
+            if (detailId == null)
+                continue;
+            saveArchivesEmployeesDetail(formOriginId, detailId, organizationId, itemValues);
+            //  5.记录重复数据
+            if (flag)
+                coverCount++;
         }
+        //  6.存储所有数据行数
+        response.setTotalCount((long) datas.size());
+        //  7.存储覆盖数据行数
+        response.setCoverCount(coverCount);
+        //  8.存储错误数据行数
+        response.setFailCount((long) errorDataLogs.size());
+        //  9.存储错误数据
+        response.setLogs(errorDataLogs);
     }
 
-    private ImportFileResultLog<ImportArchivesEmployeesDTO> checkArchivesEmployeesDatas(PostApprovalFormItem itemValue) {
-        if (itemValue.getFieldName().equals())
-            return null;
+    private ImportFileResultLog<Map> checkArchivesEmployeesDatas(
+            ImportArchivesEmployeesDTO data, PostApprovalFormItem itemValue, Long departmentId, String contactName,
+            Byte gender, String contactToken, Long realDepartmentId) {
+        ImportFileResultLog<Map> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
+
+        if (ArchivesParameter.CONTACT_NAME.equals(itemValue.getFieldName())) {
+            if (StringUtils.isEmpty(itemValue.getFieldValue())) {
+                LOGGER.warn("Employee name is empty. data = {}", data);
+                log.setData(convertListStringToMap(data));
+                log.setErrorLog("Employee name is empty.");
+                log.setCode(ArchivesServiceErrorCode.ERROR_NAME_ISEMPTY);
+                return log;
+            } else {
+                if (itemValue.getFieldValue().length() > 40) {
+                    LOGGER.warn("Employee name is too long. data = {}", data);
+                    log.setData(convertListStringToMap(data));
+                    log.setErrorLog("Employee name is too long.");
+                    log.setCode(ArchivesServiceErrorCode.ERROR_NAME_TOOLONG);
+                    return log;
+                } else
+                    contactName = itemValue.getFieldValue();
+            }
+        }
+
+        if (ArchivesParameter.CONTACT_TOKEN.equals(itemValue.getFieldName())) {
+            if (StringUtils.isEmpty(itemValue.getFieldValue())) {
+                LOGGER.warn("Employee token is empty. data = {}", data);
+                log.setData(convertListStringToMap(data));
+                log.setErrorLog("Employee token is empty.");
+                log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_ISEMPTY);
+                return log;
+            } else {
+                if (itemValue.getFieldValue().length() != 11) {
+                    LOGGER.warn("Employee token wrong format. data = {}", data);
+                    log.setData(convertListStringToMap(data));
+                    log.setErrorLog("Employee token wrong format.");
+                    log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_WRONGFORMAT);
+                } else {
+                    contactToken = itemValue.getFieldValue();
+                }
+            }
+        }
+
+        if (ArchivesParameter.GENDER.equals(itemValue.getFieldName())) {
+            gender = convertToArchivesEnum(itemValue.getFieldValue(), ArchivesParameter.GENDER);
+        }
+
+        if (ArchivesParameter.CHECK_IN_TIME.equals(itemValue.getFieldName())) {
+            if (StringUtils.isEmpty(itemValue.getFieldValue())) {
+                LOGGER.warn("Employee checkInTime is empty. data = {}", data);
+                log.setData(convertListStringToMap(data));
+                log.setErrorLog("Employee checkInTime is empty.");
+                log.setCode(ArchivesServiceErrorCode.ERROR_CHECK_IN_TIME_ISEMPTY);
+                return log;
+            }
+        }
+
+        if (ArchivesParameter.EMPLOYEE_TYPE.equals(itemValue.getFieldName())) {
+            if (StringUtils.isEmpty(itemValue.getFieldValue())) {
+                LOGGER.warn("Employee employeeType is empty. data = {}", data);
+                log.setData(convertListStringToMap(data));
+                log.setErrorLog("Employee employeeType is empty.");
+                log.setCode(ArchivesServiceErrorCode.ERROR_EMPLOYEE_TYPE_ISEMPTY);
+                return log;
+            }
+        }
+
+        if (ArchivesParameter.DEPARTMENTS.equals(itemValue.getFieldName())) {
+            if (StringUtils.isEmpty(itemValue.getFieldValue())) {
+                realDepartmentId = departmentId;
+            } else {
+                // TODO: 根据部门名称获取id
+
+            }
+        }
+        return null;
+    }
+
+    //  为了能够成功的解析得转换成为 map
+    private Map convertListStringToMap(ImportArchivesEmployeesDTO data) {
+        Map<String, String> map = new HashMap<>();
+        for (int i = 0; i < data.getValues().size(); i++) {
+            map.put(String.valueOf(i), data.getValues().get(i));
+        }
+        return map;
+    }
+
+    private Long saveArchivesEmployeesMember(
+            Long organizationId, String contactName, Byte gender, Long departmentId, String contactToken, boolean flag) {
+        AddArchivesEmployeeCommand addCommand = new AddArchivesEmployeeCommand();
+        addCommand.setOrganizationId(organizationId);
+        addCommand.setContactName(contactName);
+        addCommand.setGender(gender);
+        List<Long> departmentIds = new ArrayList<>();
+        departmentIds.add(departmentId);
+        addCommand.setDepartmentIds(departmentIds);
+        addCommand.setContactToken(contactToken);
+        ArchivesEmployeeDTO dto = addArchivesEmployee(addCommand);
+        flag = verifyPersonnelByPhone(organizationId, addCommand.getContactToken());
+        Long detailId = null;
+        if (dto != null)
+            detailId = dto.getDetailId();
+        return detailId;
+    }
+
+    private void saveArchivesEmployeesDetail(Long formOriginId, Long organizationId, Long detailId, List<PostApprovalFormItem> itemValues) {
+        UpdateArchivesEmployeeCommand updateCommand = new UpdateArchivesEmployeeCommand();
+        updateCommand.setFormOriginId(formOriginId);
+        updateCommand.setDetailId(detailId);
+        updateCommand.setOrganizationId(organizationId);
+        updateCommand.setValues(itemValues);
+        updateArchivesEmployee(updateCommand);
     }
 
     @Override
