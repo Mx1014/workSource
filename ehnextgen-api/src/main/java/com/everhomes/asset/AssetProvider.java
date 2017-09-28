@@ -1,6 +1,8 @@
 package com.everhomes.asset;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.asset.*;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
@@ -156,4 +158,8 @@ public interface AssetProvider {
     void changeOrderStaus(Long orderId, Byte finalOrderStatus);
 
     void changeBillStatusOnOrder(Map<String, Integer> billStatuses,Long orderId);
+
+    PaymentUser findByOwner(String userType, Long id);
+
+    PaymentAccount findPaymentAccount();
 }

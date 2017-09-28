@@ -6,6 +6,8 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.sequence.SequenceProvider;
@@ -16,6 +18,7 @@ import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
+import com.everhomes.server.schema.tables.EhPaymentAccounts;
 import com.everhomes.server.schema.tables.EhPaymentBillGroups;
 import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
@@ -26,6 +29,7 @@ import com.everhomes.server.schema.tables.EhPaymentChargingStandards;
 import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
 import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
+import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
@@ -1893,6 +1897,40 @@ public class AssetProviderImpl implements AssetProvider {
                     .and(t.ORDER_ID.eq(orderId))
                     .execute();
         }
+    }
+
+    @Override
+    public PaymentUser findByOwner(String userType, Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentUsers t = Tables.EH_PAYMENT_USERS.as("t");
+        List<PaymentUser> list = new ArrayList<>();
+        context.select()
+                .from(t)
+                .where(t.OWNER_ID.eq(id))
+                .and(t.OWNER_TYPE.eq(userType))
+                .fetch()
+                .map(r -> {
+                    PaymentUser convert = ConvertHelper.convert(r, PaymentUser.class);
+                    list.add(convert);
+                    return null;
+                });
+        return list.size()>0?list.get(0):null;
+    }
+
+    @Override
+    public PaymentAccount findPaymentAccount() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<PaymentAccount> list = new ArrayList<>();
+        EhPaymentAccounts t = Tables.EH_PAYMENT_ACCOUNTS.as("t");
+        context.select()
+                .from(t)
+                .fetch()
+                .map(r -> {
+                    PaymentAccount convert = ConvertHelper.convert(r, PaymentAccount.class);
+                    list.add(convert);
+                    return null;
+                });
+        return list.size()>0?list.get(0):null;
     }
 
 }
