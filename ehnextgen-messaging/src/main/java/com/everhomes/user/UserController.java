@@ -1372,9 +1372,9 @@ public class UserController extends ControllerBase {
 	 */
 	@RequestMapping(value = "checkUserTemporaryToken")
 	@RequireAuthentication(false)
-	@RestReturn(UserTemporaryToken.class)
+	@RestReturn(UserTemporaryTokenDTO.class)
 	public RestResponse checkUserTemporaryToken(@Valid CheckUserTemporaryTokenCommand cmd) {
-		UserTemporaryToken token =  userService.checkUserTemporaryToken(cmd);
+		UserTemporaryTokenDTO token =  userService.checkUserTemporaryToken(cmd);
 		RestResponse resp = new RestResponse(token);
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");

@@ -1895,4 +1895,20 @@ public class AssetProviderImpl implements AssetProvider {
         }
     }
 
+    @Override
+    public void changeBillStatusOnPaiedOff(List<Long> billIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
+        context.update(t)
+                .set(t.STATUS,(byte)1)
+                .where(t.ID.in(billIds))
+                .execute();
+        context.update(t1)
+                .set(t1.STATUS,(byte)1)
+                .where(t1.BILL_ID.in(billIds))
+                .execute();
+
+    }
+
 }
