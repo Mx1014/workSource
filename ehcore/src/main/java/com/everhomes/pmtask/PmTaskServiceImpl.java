@@ -641,6 +641,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public ListBuildingCommandResponse listBuildings(ListBuildingCommand cmd) {
 		ListBuildingCommandResponse response = communityService.listBuildings(cmd);
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 		//增加公共区域
 		if (response.getNextPageAnchor()==null && cmd.getNamespaceId()==999983) {
 			BuildingDTO buildingDTO = new BuildingDTO();
