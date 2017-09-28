@@ -75,7 +75,9 @@ public enum EntityType {
 
 	EQUIPMENT_TASK(EhEquipmentInspectionTasks.class.getSimpleName()),
     CHILD_PROJECT("child_project"),
-    LEASE_BUILDING(EhLeaseBuildings.class.getSimpleName());
+    LEASE_BUILDING(EhLeaseBuildings.class.getSimpleName()),
+	
+	CUSTOMER_TRACKING(EhCustomerTrackings.class.getSimpleName());
 
 
     private String code;

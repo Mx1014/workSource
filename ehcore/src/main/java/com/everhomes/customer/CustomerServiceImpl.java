@@ -1521,6 +1521,10 @@ public class CustomerServiceImpl implements CustomerService {
             	}
         	}
         }
+        if(null != dto.getContentImgUri()){
+        	 String contentUrl = contentServerService.parserUri(dto.getContentImgUri(), EntityType.CUSTOMER_TRACKING.getCode(), dto.getId());
+             dto.setContentImgUrl(contentUrl);
+        }
         return dto;
 	}
 
@@ -1533,6 +1537,9 @@ public class CustomerServiceImpl implements CustomerService {
 		}
 		tracking.setCreateTime(exist.getCreateTime());
 		tracking.setCreatorUid(exist.getCreatorUid());
+		if(null != cmd.getContentImgUri()){
+			tracking.setContentImgUri(cmd.getContentImgUri());
+		}
         enterpriseCustomerProvider.updateCustomerTracking(tracking);
         return ConvertHelper.convert(tracking, CustomerTrackingDTO.class);
 	}

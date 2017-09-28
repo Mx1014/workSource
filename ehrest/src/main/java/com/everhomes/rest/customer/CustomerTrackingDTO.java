@@ -19,6 +19,8 @@ import com.everhomes.util.StringHelper;
  *     <li>intentionGrade: 意向等级</li>
  *     <li>trackingTime: 跟进时间</li>
  *     <li>content: 跟进内容</li>
+ *     <li>contentImgUri: 跟进内容图片uri</li>
+ *     <li>contentImgUrl: 跟进内容图片url</li>
  * </ul>
  * Created by shengyue.wang on 2017/9/20.
  */
@@ -36,6 +38,8 @@ public class CustomerTrackingDTO {
     private Integer intentionGrade;
     private Timestamp trackingTime;
     private String content;
+    private String  contentImgUri;
+    private String contentImgUrl;
     
 
     public Long getId() {
@@ -140,6 +144,23 @@ public class CustomerTrackingDTO {
 
 	public void setTrackingUidName(String trackingUidName) {
 		this.trackingUidName = trackingUidName;
+	}
+
+	
+	public String getContentImgUri() {
+		return contentImgUri;
+	}
+
+	public void setContentImgUri(String contentImgUri) {
+		this.contentImgUri = contentImgUri;
+	}
+
+	public String getContentImgUrl() {
+		return contentImgUrl;
+	}
+
+	public void setContentImgUrl(String contentImgUrl) {
+		this.contentImgUrl = contentImgUrl;
 	}
 
 	@Override
