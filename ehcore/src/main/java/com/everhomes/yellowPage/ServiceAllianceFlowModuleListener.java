@@ -12,6 +12,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.admin.MessagingAdminController;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
@@ -209,8 +210,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 //			List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
 //			request.setOwnerId(communityList.get(0).getId());
 		}else{
-			ServiceAllianceBelongType.ORGANAIZATION.getCode();
-			request.setOwnerId(flowCase.getProjectId());
+			OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getProjectId());
+            request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+            request.setOwnerId(ocr.getCommunityId());
 		}
 		request.setFlowCaseId(flowCase.getId());
 		request.setId(flowCase.getId());
