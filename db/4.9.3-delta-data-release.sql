@@ -426,7 +426,7 @@ update eh_configurations set `value` = '0306A9' where `name` = 'parking.kexing.p
 INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `card_type_id`, `card_type_name`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
   VALUES ('1', '999983', 'community', '240111044331055940', '10006', '2', '月租车', '2', '1', '2017-09-19 10:49:48', NULL, NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
-	VALUES ('parking.default.card.type', '[{\"typeId\":\"普通月卡\", \"typeName\":\"普通月卡\"}]', NULL, '0', NULL);
+	VALUES ('parking.default.card.type', '{\"typeId\":\"普通月卡\", \"typeName\":\"普通月卡\"}', NULL, '0', NULL);
 
 delete from eh_parking_lots where id = 10006;
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`)
