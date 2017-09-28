@@ -907,7 +907,7 @@ public class PunchServiceImpl implements PunchService {
 			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
-			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+			pdl.setExceptionStatus(null);
 			return pdl;
 		}
 
