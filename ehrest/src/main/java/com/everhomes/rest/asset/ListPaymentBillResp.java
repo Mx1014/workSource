@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.List;
 
 /**
@@ -10,6 +12,7 @@ import java.util.List;
 public class ListPaymentBillResp {
     private Long offset;
     private Long limit;
+    @ItemType(PaymentBillResp.class)
     private List<PaymentBillResp> list;
 
     public ListPaymentBillResp() {
