@@ -169,4 +169,12 @@ public class PayProviderImpl implements PayProvider {
 
         return payMethodDTOS;
     }
+
+    @Override
+    public PaymentOrderRecord findOrderRecordByOrderNum(String bizOrderNum) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhPaymentOrderRecordsRecord>  query = context.selectQuery(Tables.EH_PAYMENT_ORDER_RECORDS);
+        query.addConditions(Tables.EH_PAYMENT_ORDER_RECORDS.ORDER_NUM.eq(bizOrderNum));
+        return query.fetchOneInto(PaymentOrderRecord.class);
+    }
 }
