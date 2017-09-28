@@ -208,6 +208,7 @@ ALTER TABLE `eh_sms_logs` ADD INDEX i_eh_mobile_handler(`mobile`, `handler`);
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN original_price DECIMAL(10,2) DEFAULT NULL;
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN card_request_id BIGINT(20) DEFAULT NULL;
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN invoice_type BIGINT(4) DEFAULT NULL;
+ALTER TABLE eh_parking_recharge_orders ADD COLUMN paid_version tinyint(4) DEFAULT NULL;
 
 ALTER TABLE eh_parking_card_requests ADD COLUMN card_type_id VARCHAR(64) DEFAULT NULL;
 ALTER TABLE eh_parking_card_requests ADD COLUMN address_id BIGINT(20) DEFAULT NULL;
