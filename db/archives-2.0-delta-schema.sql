@@ -18,6 +18,7 @@ CREATE TABLE `eh_archives_dismiss_employees` (
 	`contact_name` VARCHAR (32) COMMENT 'the name of the employee',
 	`employee_status` TINYINT NOT NULL COMMENT 'the status of the employee before dismissing',
 	`department` VARCHAR (32) COMMENT 'department',
+	`contract_party_id` BIGINT COMMENT '合同主体',
 	`check_in_time` DATE COMMENT '入职日期',
 	`dismiss_time` DATE COMMENT '离职日期',
 	`dismiss_type` TINYINT COMMENT '离职类型',
