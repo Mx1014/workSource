@@ -6,6 +6,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.CheckPaymentUserCommand;
+import com.everhomes.rest.asset.CheckPaymentUserResponse;
 import com.everhomes.rest.business.*;
 import com.everhomes.util.RequireAuthentication;
 
@@ -209,5 +211,19 @@ public class BusinessController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+    /**
+     * <p>查看付款方是否有会员</p>
+     * <b>URL: /business/checkPaymentUser</b>
+     */
+    @RequestMapping("checkPaymentUser")
+    @RestReturn(value = CheckPaymentUserResponse.class)
+    public RestResponse checkPaymentUser(CheckPaymentUserCommand cmd){
+        CheckPaymentUserResponse response = businessService.checkPaymentUser(cmd);
+        RestResponse restResponse = new RestResponse(response);
+        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+        restResponse.setErrorDescription("OK");
+        return restResponse;
     }
 }
