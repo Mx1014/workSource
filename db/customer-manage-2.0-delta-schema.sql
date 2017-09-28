@@ -58,7 +58,8 @@ CREATE TABLE `eh_customer_trackings` (
   `tracking_uid` BIGINT     COMMENT '跟进人uid ',
   `intention_grade` INTEGER    COMMENT '意向等级',
   `tracking_time` DATETIME   COMMENT '跟进时间',
-  `content` text COMMENT '跟进内容',
+  `content` TEXT COMMENT '跟进内容',
+  `content_img_uri` VARCHAR(2048) COMMENT '跟进内容图片uri',
   `status` TINYINT NOT NULL COMMENT '0: inactive; 1: waiting for approval; 2: active',
   `creator_uid` BIGINT     COMMENT '创建人uid',
   `create_time` DATETIME   COMMENT '创建时间',
@@ -83,6 +84,8 @@ CREATE TABLE `eh_tracking_notify_logs` (
   `status` TINYINT NOT NULL ,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 
 
 ALTER TABLE `eh_enterprise_customers`
