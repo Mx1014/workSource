@@ -463,7 +463,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 						List<OrganizationCommunity> communityList = null;
 						
 						//modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
-						if(EntityType.ORGANIZATIONS.getCode().equals(cmd.getOwnerType())){
+						if(EntityType.ORGANIZATIONS.getCode().equals(cmd.getOwnerType()) 
+								&& FlowModuleType.SERVICE_ALLIANCE.getCode().equals(cmd.getModuleType())){
 							 communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
 							 Condition conditionOR = null;
 							 for (OrganizationCommunity organizationCommunity : communityList) {
