@@ -843,7 +843,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ParkingCardType getParkingCardType(String ownerType, Long ownerId, Long parkingLotId, String cardTypeId) {
-		if (null != cardTypeId) {
+		if (StringUtils.isNotBlank(cardTypeId)) {
 			ParkingCardRequestType parkingCardRequestType = parkingProvider.findParkingCardTypeByTypeId(ownerType,
 					ownerId, parkingLotId, cardTypeId);
 			if (null != parkingCardRequestType) {
