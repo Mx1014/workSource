@@ -16,7 +16,7 @@ public class SmsLogDTO {
     private String text;
     private String variables;
     private String result;
-    private Timestamp createTime;
+    private String createTime;
     private String handler;
     private String smsId;
     private Byte status;
@@ -96,14 +96,6 @@ public class SmsLogDTO {
         this.result = result;
     }
 
-    public Timestamp getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Timestamp createTime) {
-        this.createTime = createTime;
-    }
-
     public String getHandler() {
         return handler;
     }
@@ -126,6 +118,14 @@ public class SmsLogDTO {
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
     }
 
     public Integer getHttpStatusCode() {

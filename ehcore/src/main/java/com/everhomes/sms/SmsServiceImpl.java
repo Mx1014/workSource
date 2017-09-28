@@ -117,6 +117,8 @@ public class SmsServiceImpl implements SmsService {
     }
 
     private SmsLogDTO toSmsLogDTO(SmsLog smsLog) {
-        return ConvertHelper.convert(smsLog, SmsLogDTO.class);
+        SmsLogDTO dto = ConvertHelper.convert(smsLog, SmsLogDTO.class);
+        dto.setCreateTime(smsLog.getCreateTime().toLocalDateTime().toString());
+        return dto;
     }
 }
