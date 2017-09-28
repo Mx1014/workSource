@@ -728,7 +728,9 @@ public class FieldServiceImpl implements FieldService {
             cmd2.setGroupPath(group.getGroupPath());
             cmd2.setCommunityId(cmd.getCommunityId());
             List<FieldDTO> fields = listFields(cmd2);
-            if(fields == null) fields = new ArrayList<>();
+            if(fields == null) {
+                continue sheet;
+            }
             //获得根据cell顺序的fieldname
             Row headRow = sheet.getRow(1);
 
