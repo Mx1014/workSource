@@ -5,15 +5,13 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.launchpad.LaunchPadItemActionDataHandler;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.user.UserTemporaryTokenDTO;
 import com.everhomes.user.UserService;
-import com.everhomes.user.UserTemporaryToken;
 import com.everhomes.util.WebTokenGenerator;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Random;
 
 
 @Component(LaunchPadItemActionDataHandler.LAUNCH_PAD_ITEM_ACTIONDATA_RESOLVER_PREFIX + LaunchPadItemActionDataHandler.URL_ORG_PARAM)
@@ -85,7 +83,7 @@ public class LaunchPadItemActionDataUrlOrgParamHandler implements LaunchPadItemA
         if(unifiedSocialCreditCode == null){
             return null;
         }
-        UserTemporaryToken  userToken = new UserTemporaryToken();
+        UserTemporaryTokenDTO userToken = new UserTemporaryTokenDTO();
         userToken.setUserId(userId);
         userToken.setNamespaceId(namespaceId);
         userToken.setStartTime(System.currentTimeMillis());

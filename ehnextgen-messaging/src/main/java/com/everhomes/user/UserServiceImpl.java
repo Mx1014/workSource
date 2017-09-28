@@ -5156,7 +5156,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserTemporaryToken checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd) {
+	public UserTemporaryTokenDTO checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd) {
 
 		if(StringUtils.isEmpty(cmd.getUserToken())){
 			LOGGER.error("userToken is empty");
@@ -5165,7 +5165,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		try{
-			UserTemporaryToken token  = WebTokenGenerator.getInstance().fromWebToken(cmd.getUserToken(), UserTemporaryToken.class);
+			UserTemporaryTokenDTO token  = WebTokenGenerator.getInstance().fromWebToken(cmd.getUserToken(), UserTemporaryTokenDTO.class);
 
 
 			if(token == null || token.getStartTime() == null || token.getInterval() == null){
