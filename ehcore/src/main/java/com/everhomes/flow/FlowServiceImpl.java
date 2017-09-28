@@ -1900,7 +1900,9 @@ public class FlowServiceImpl implements FlowService {
         }
 
         FlowModuleDTO moduleDTO = this.getModuleById(snapshotFlow.getModuleId());
-
+        if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(snapshotFlow.getModuleType())){
+        	moduleDTO = this.getModuleById(40500L);
+        }
         flowCase.setNamespaceId(snapshotFlow.getNamespaceId());
         flowCase.setModuleId(snapshotFlow.getModuleId());
         flowCase.setModuleName(moduleDTO.getDisplayName());
