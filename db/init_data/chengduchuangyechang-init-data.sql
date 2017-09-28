@@ -209,7 +209,8 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `ow
 	VALUES (116973,800000,NULL,'EhNamespaces',999964,2);
 INSERT INTO `eh_organization_communities` (`organization_id`, `community_id`) 
 	VALUES (1038421,240111044332059954);
-
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES (116974,40000,NULL,'EhNamespaces',999964,2);
 set @community_id = 240111044332059954;
 
 
