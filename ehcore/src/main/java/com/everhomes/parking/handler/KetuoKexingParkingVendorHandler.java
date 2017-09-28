@@ -413,6 +413,15 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 				return true;
 			}
 		}
+
+		Calendar calendar = Calendar.getInstance();
+		int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+		calendar.set(Calendar.DAY_OF_MONTH, d);
+		calendar.set(Calendar.HOUR_OF_DAY, 23);
+		calendar.set(Calendar.MINUTE, 59);
+		calendar.set(Calendar.SECOND, 59);
+		order.setEndPeriod(new Timestamp(calendar.getTimeInMillis()));
+
 		return false;
 	}
 
