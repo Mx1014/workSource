@@ -59,6 +59,8 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	private UserProvider userProvider;
 	@Autowired
 	private AddressProvider addressProvider;
+	@Autowired
+	private ParkingService parkingService;
 
 	@Override
 	public FlowModuleInfo initModule() {
@@ -163,12 +165,12 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 				parkingCardRequest.getParkingLotId(), parkingCardRequest.getCreateTime());
 		dto.setRanking(count + 1);
 
-		if (null != parkingCardRequest.getCardTypeId()) {
-			ParkingCardRequestType parkingCardRequestType = parkingProvider.findParkingCardTypeByTypeId(parkingCardRequest.getCardTypeId());
-			if (null != parkingCardRequestType) {
-				dto.setCardTypeName(parkingCardRequestType.getCardTypeName());
-			}
+		ParkingCardType cardType = parkingService.getParkingCardType(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
+				parkingCardRequest.getParkingLotId(), parkingCardRequest.getCardTypeId());
+		if (null != cardType) {
+			dto.setCardTypeName(cardType.getTypeName());
 		}
+
 		if (null != parkingCardRequest.getInvoiceType()) {
 			ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(parkingCardRequest.getInvoiceType());
 			if (null != parkingInvoiceType) {

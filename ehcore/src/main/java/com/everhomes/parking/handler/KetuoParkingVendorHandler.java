@@ -38,8 +38,6 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 	private static final String PAY_TEMP_FEE = "/api/pay/PayParkingFee";
 	//只显示ruleType = 1时的充值项
 	static final String RULE_TYPE = "1";
-	//科托系统：按30天计算
-	static final int DAY_COUNT = 30;
 	//月租车 : 2
 	static final String CAR_TYPE = "2";
     
@@ -438,7 +436,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		OpenCardInfoDTO dto = new OpenCardInfoDTO();
 
 		//月租车
-		List<KetuoCardRate> rates = getCardRule(CAR_TYPE);
+		List<KetuoCardRate> rates = getCardRule(parkingCardRequest.getCardTypeId());
 		if(null != rates && !rates.isEmpty()) {
 			
 			KetuoCardRate rate = null;
