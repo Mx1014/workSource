@@ -818,11 +818,11 @@ public class ParkingServiceImpl implements ParkingService {
     	if(size > 0){
     		response.setRequests(list.stream().map(r -> {
     			ParkingCardRequestDTO dto = ConvertHelper.convert(r, ParkingCardRequestDTO.class);
-				if (null != r.getCardTypeId()) {
-					ParkingCardRequestType parkingCardRequestType = parkingProvider.findParkingCardTypeByTypeId(r.getCardTypeId());
-					if (null != parkingCardRequestType) {
-						dto.setCardTypeName(parkingCardRequestType.getCardTypeName());
-					}
+
+				ParkingCardType cardType =getParkingCardType(cmd.getOwnerType(), cmd.getOwnerId(),
+						cmd.getParkingLotId(), r.getCardTypeId());
+				if (null != cardType) {
+					dto.setCardTypeName(cardType.getTypeName());
 				}
     			return dto;
     		}).collect(Collectors.toList()));
@@ -834,6 +834,27 @@ public class ParkingServiceImpl implements ParkingService {
         	}
     	}
     	return response;
+	}
+
+	@Override
+	public ParkingCardType getParkingCardType(String ownerType, Long ownerId, Long parkingLotId, String cardTypeId) {
+		if (null != cardTypeId) {
+			ParkingCardRequestType parkingCardRequestType = parkingProvider.findParkingCardTypeByTypeId(ownerType,
+					ownerId, parkingLotId, cardTypeId);
+			if (null != parkingCardRequestType) {
+				ParkingCardType cardType = new ParkingCardType();
+				cardType.setTypeId(parkingCardRequestType.getCardTypeId());
+				cardType.setTypeName(parkingCardRequestType.getCardTypeName());
+				return cardType;
+			}else {
+				String json = configProvider.getValue("parking.default.card.type", "");
+				ParkingCardType cardType = JSONObject.parseObject(json, ParkingCardType.class);
+				if (cardTypeId.equals(cardType.getTypeId())) {
+					return cardType;
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override
