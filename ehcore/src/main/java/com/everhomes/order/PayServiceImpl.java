@@ -335,7 +335,9 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
 
         //检查订单是否存在
+        //TODO
         PaymentOrderRecord orderRecord = payProvider.findOrderRecordById(Long.valueOf(cmd.getBizOrderNum()));
+        PaymentOrderRecord orderRecord = payProvider.findOrderRecordByOrderNum(cmd.getBizOrderNum());
         if(orderRecord == null){
             LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -582,8 +584,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         createOrderCmd.setIndustryName(null);
         createOrderCmd.setSourceType(SourceType.MOBILE.getCode());
 
-        //BizOrderNum需要传PaymentOrderRecords表记录的id，此处先申请id，在返回值中使用BizOrderNum做为record的id
-        Long orderRecordId = payProvider.getNewPaymentOrderRecordId();
+//        //BizOrderNum需要传PaymentOrderRecords表记录的id，此处先申请id，在返回值中使用BizOrderNum做为record的id
+//        Long orderRecordId = payProvider.getNewPaymentOrderRecordId();
+
+        String BizOrderNum  ="asdfasd f d";
         createOrderCmd.setBizOrderNum(String.valueOf(orderRecordId));
 
         createOrderCmd.setOrderRemark1(String.valueOf(serviceConfig.getId()));
@@ -614,7 +618,9 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         PaymentOrderRecord record = ConvertHelper.convert(orderCommandResponse, PaymentOrderRecord.class);
 
         //下预付单时，BizOrderNum需要传PaymentOrderRecords表记录的id，此处先申请id，在返回值中使用BizOrderNum做为record的id
-        record.setId(Long.valueOf(orderCommandResponse.getBizOrderNum()));
+        this
+        record.setId(Long.valueOf());
+        record.setOrderNum(orderCommandResponse.getBizOrderNum());
 
         record.setOrderId(orderId);
         //PaymentOrderId为支付系统传来的orderId
