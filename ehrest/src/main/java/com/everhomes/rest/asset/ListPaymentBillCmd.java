@@ -29,7 +29,7 @@ public class ListPaymentBillCmd {
     private String userType;
 
     private Long userId;
-
+    @ItemType(ReSortCmd.class)
     private List<ReSortCmd> sorts;
 
     public Long getOffset() {
