@@ -183,7 +183,7 @@ public class ZJAuthorizationModuleHandler implements AuthorizationModuleHandler 
 	private void replaceCommunityNameByMappingRule(ZjgkJsonEntity<List<ZjgkResponse>> entity) {
 		List<ZjgkResponse> list = entity.getResponse();
 		if(entity.isSuccess() && list != null && list.size() > 0){
-			String mappingjson = configProvider.getValue("zj_community_name_mapping","{\"天子骄子北块\":\"天子骄子专家楼\"}");
+			String mappingjson = configProvider.getValue("zj_community_name_mapping","{\"天之骄子北块\":\"天之骄子专家楼\"}");
 			Map<String,String> communityMap = JSONObject.parseObject(mappingjson,new TypeReference<Map<String, String>>(){});
 			for (ZjgkResponse zjgkResponse : list) {
 				String mapingName = communityMap.get(zjgkResponse.getCommunityName());
