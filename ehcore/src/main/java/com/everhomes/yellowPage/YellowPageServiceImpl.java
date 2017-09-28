@@ -774,14 +774,13 @@ public class YellowPageServiceImpl implements YellowPageService {
         	 }
         	
         }else{
-        	Condition condition =  Tables.EH_SERVICE_ALLIANCES.RANGE.eq("all");
-			if (cmd.getOwnerType().equals(ServiceAllianceBelongType.ORGANAIZATION.getCode())) {
-				Condition conditionOR = DSL.trueCondition();
+        	Condition condition =  DSL.trueCondition();
+			if (ServiceAllianceBelongType.ORGANAIZATION.getCode().equals(cmd.getOwnerType())) {
 				List<OrganizationCommunity> communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
 				for (OrganizationCommunity orgcommunity : communityList) {
-					conditionOR = conditionOR.or(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+orgcommunity.getCommunityId()+"%"));
+					condition = condition.or(Tables.EH_SERVICE_ALLIANCES.RANGE.like("%"+orgcommunity.getCommunityId()+"%"));
 				}
-				condition.or(conditionOR);
+				condition = condition.or(Tables.EH_SERVICE_ALLIANCES.RANGE.eq("all"));
 			}
         	sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
  	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords(),condition );
