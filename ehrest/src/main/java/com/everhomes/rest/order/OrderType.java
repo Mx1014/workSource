@@ -25,7 +25,7 @@ public class OrderType {
 	public static final int PRINT_ORDER_CODE = 10000008;
 	public static final int ACTIVITY_SIGNUP_ORDER_WECHAT_CODE = 10000009;
 	public static final int ZJGK_RENTAL_CODE = 10000010;
-	public static final int WUYE_CODE = 10000010;
+	public static final int WUYE_CODE = 10000011;
 
 	public static enum OrderTypeEnum{
 		WUYETEST(OrderType.WU_YE_TEST_CODE,"wuyetest","物业支付-测试用"),
