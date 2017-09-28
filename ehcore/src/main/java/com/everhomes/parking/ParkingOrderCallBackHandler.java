@@ -221,7 +221,7 @@ public class ParkingOrderCallBackHandler implements PaymentCallBackHandler {
 	}
 
 	private ParkingRechargeOrder checkOrder(Long orderId) {
-		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(orderId);
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByOrderNo(orderId);
 
 		if(order == null){
 			LOGGER.error("the order {} not found.",orderId);
