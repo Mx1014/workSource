@@ -37,8 +37,10 @@ import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
+import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.pmNotify.PmNotifyConfigurationStatus;
 import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
@@ -1288,6 +1290,39 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         dao.insert(log);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerTrackingPlans.class, null);
+	}
+
+
+	@Override
+	public void updateTrackingPlanReadStatus(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerTrackingPlans.class, id));
+		context.update(Tables.EH_CUSTOMER_TRACKING_PLANS)
+				.set(Tables.EH_CUSTOMER_TRACKING_PLANS.READ_STATUS , TrackingPlanReadStatus.READED.getCode())
+				.where(Tables.EH_CUSTOMER_TRACKING_PLANS.ID.eq(id))
+				.execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhCustomerTrackingPlans.class, id);
+	}
+
+
+	@Override
+	public List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd) {
+		List<CustomerTrackingPlan> result = new ArrayList<CustomerTrackingPlan>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTrackingPlansRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKING_PLANS);
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CREATOR_UID.eq(UserContext.currentUserId()));
+        if(StringUtils.isNotEmpty(cmd.getCustomerName())){
+			String customerName = "%" + cmd.getCustomerName() + "%";
+			query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CUSTOMER_NAME.like(customerName));
+		}
+        if(null != cmd.getCustomerId()){
+        	query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CUSTOMER_ID.eq(cmd.getCustomerId()));
+        }
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTrackingPlan.class));
+            return null;
+        });
+        return result;
 	}
 	
 }

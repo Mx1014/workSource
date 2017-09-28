@@ -1,5 +1,7 @@
 package com.everhomes.customer;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
@@ -91,6 +94,7 @@ import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
 import com.everhomes.rest.customer.ListCustomerPatentsCommand;
 import com.everhomes.rest.customer.ListCustomerTalentsCommand;
 import com.everhomes.rest.customer.ListCustomerTaxesCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
 import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
 import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
 import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
@@ -1238,6 +1242,21 @@ public class CustomerController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /customer/listCustomerTrackingPlansByDate</b>
+     * <p>列出跟进计划--给APP</p>
+     */
+    @RequestMapping("listCustomerTrackingPlansByDate")
+    @RestReturn(value = List.class, collection = true)
+    public RestResponse listCustomerTrackingPlansByDate(@Valid ListCustomerTrackingPlansByDateCommand cmd) {
+ 		
+ 		RestResponse response = new RestResponse(customerService.listCustomerTrackingPlansByDate(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 
 
 }

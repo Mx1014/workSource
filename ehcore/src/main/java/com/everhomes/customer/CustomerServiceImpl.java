@@ -5,11 +5,12 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -21,11 +22,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.PmNotify.PmNotifytJob;
 import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.activity.Activity;
-import com.everhomes.activity.WarnActivityBeginningAction;
-import com.everhomes.activity.WarningSetting;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -34,7 +31,6 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -49,7 +45,6 @@ import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.pmNotify.PmNotifyLog;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
@@ -125,6 +120,7 @@ import com.everhomes.rest.customer.ListCustomerEventsCommand;
 import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
 import com.everhomes.rest.customer.ListCustomerPatentsCommand;
 import com.everhomes.rest.customer.ListCustomerTalentsCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
 import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
 import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
 import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
@@ -136,6 +132,7 @@ import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.customer.TrackingNotifyTemplateCode;
 import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
+import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.customer.UpdateCustomerApplyProjectCommand;
 import com.everhomes.rest.customer.UpdateCustomerCertificateCommand;
 import com.everhomes.rest.customer.UpdateCustomerCommercialCommand;
@@ -149,21 +146,15 @@ import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
-import com.everhomes.rest.equipment.EquipmentNotificationTemplateCode;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.pmNotify.PmNotifyMode;
-import com.everhomes.rest.pmNotify.PmNotifyReceiverList;
-import com.everhomes.rest.pmNotify.PmNotifyType;
-import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -175,21 +166,16 @@ import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.DateUtils;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
-
-import net.greghaines.jesque.Job;
 
 /**
  * Created by ying.xiong on 2017/8/15.
@@ -1591,7 +1577,10 @@ public class CustomerServiceImpl implements CustomerService {
 	@Override
 	public CustomerTrackingPlanDTO getCustomerTrackingPlan(GetCustomerTrackingPlanCommand cmd) {
 		CustomerTrackingPlan plan = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
-        return convertCustomerTrackingPlanDTO(plan);
+        CustomerTrackingPlanDTO  customerTrackingPlanDTO = convertCustomerTrackingPlanDTO(plan);
+        //更新状态为已读
+        enterpriseCustomerProvider.updateTrackingPlanReadStatus(cmd.getId());
+        return customerTrackingPlanDTO;
 	}
 
 	private CustomerTrackingPlanDTO convertCustomerTrackingPlanDTO(CustomerTrackingPlan plan) {
@@ -1649,6 +1638,7 @@ public class CustomerServiceImpl implements CustomerService {
 			plan.setNotifyTime(new Timestamp(cmd.getNotifyTime()));
 			plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
 		}
+		plan.setReadStatus(TrackingPlanReadStatus.UNREAD.getCode());
         enterpriseCustomerProvider.createCustomerTrackingPlan(plan);
 	}
 
@@ -1837,6 +1827,58 @@ public class CustomerServiceImpl implements CustomerService {
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
 	                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	 }
+
+	@Override
+	public List<List<CustomerTrackingPlanDTO>> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd) {
+		List<List<CustomerTrackingPlanDTO>> planList = new ArrayList<>();
+		List<CustomerTrackingPlanDTO> todayPlan = new ArrayList<>();
+		List<CustomerTrackingPlanDTO> futurePlan = new ArrayList<>();
+		List<CustomerTrackingPlanDTO> passPlan = new ArrayList<>();
+		List<CustomerTrackingPlan> plans = enterpriseCustomerProvider.listCustomerTrackingPlansByDate(cmd);
+		Long todayFirst = gettodayFirstTimestamp();
+		Long todayLast = gettodayLastTimestamp();
+		if(null != plans){
+			plans.forEach(plan -> {
+				if(null != plan.getTrackingTime()){
+					Long trackingTime = plan.getTrackingTime().getTime();
+					if(trackingTime > todayLast){
+						futurePlan.add(convertCustomerTrackingPlanDTO(plan));
+					}else if(trackingTime < todayFirst){
+						passPlan.add(convertCustomerTrackingPlanDTO(plan));
+					}else{
+						todayPlan.add(convertCustomerTrackingPlanDTO(plan));
+					}
+				}
+			});
+		}
+		Collections.sort(todayPlan);
+		Collections.sort(futurePlan);
+		Collections.sort(passPlan);
+		planList.add(todayPlan);
+		planList.add(futurePlan);
+		planList.add(passPlan);
+		return planList;
+	}
+
+	private Long gettodayFirstTimestamp() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+	    calendar.set(Calendar.HOUR_OF_DAY, 0);
+	    calendar.set(Calendar.MINUTE, 0);
+	    calendar.set(Calendar.SECOND, 0);
+	    calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTime().getTime();
+	}
+
+	private Long gettodayLastTimestamp() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+	    calendar.set(Calendar.HOUR_OF_DAY, 23);
+	    calendar.set(Calendar.MINUTE, 59);
+	    calendar.set(Calendar.SECOND, 59);
+	    calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTime().getTime();
+	}
 	
 	
 }

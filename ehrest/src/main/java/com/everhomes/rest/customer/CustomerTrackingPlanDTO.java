@@ -18,9 +18,10 @@ import com.everhomes.util.StringHelper;
  *     <li>notifyTime: 提醒时间</li>
  *     <li>title: 标题</li>
  *     <li>content: 内容</li>
+ *     <li>readStatus: 是否已读, 0:未读   1:已读</li>
  * </ul>
  */
-public class CustomerTrackingPlanDTO {
+public class CustomerTrackingPlanDTO  implements Comparable<CustomerTrackingPlanDTO>{
     private Long id;
     private Integer namespaceId;
     private Byte customerType;
@@ -33,6 +34,7 @@ public class CustomerTrackingPlanDTO {
     private Timestamp notifyTime;
     private String title;
     private String content;
+    private Byte readStatus;
     
 
     public Long getId() {
@@ -131,9 +133,26 @@ public class CustomerTrackingPlanDTO {
 	public void setTitle(String title) {
 		this.title = title;
 	}
+	
+	
+
+	public Byte getReadStatus() {
+		return readStatus;
+	}
+
+	public void setReadStatus(Byte readStatus) {
+		this.readStatus = readStatus;
+	}
 
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	@Override
+	public int compareTo(CustomerTrackingPlanDTO o) {
+		Long timestamp = this.getTrackingTime().getTime() - o.getTrackingTime().getTime();
+		int flag = timestamp >= 0  ?  1 : -1;
+		return flag; 
+	}
 }

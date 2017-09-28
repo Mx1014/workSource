@@ -4,6 +4,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 
 import java.sql.Timestamp;
@@ -104,5 +105,9 @@ public interface EnterpriseCustomerProvider {
 	boolean updateTrackingPlanNotify(Long recordId);
 	List<CustomerTrackingPlan> listWaitNotifyTrackingPlans(Timestamp queryStartTime, Timestamp queryEndTime);
 	void createTrackingNotifyLog(TrackingNotifyLog log);
+	
+	void updateTrackingPlanReadStatus(Long id);
+	
+	List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd);
 
 }

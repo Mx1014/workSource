@@ -98,4 +98,6 @@ public interface CustomerService {
 	
 	void  trackingPlanWarningSchedule();
 	void processTrackingPlanNotify(CustomerTrackingPlan plan);
+	
+	List<List<CustomerTrackingPlanDTO>> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd);
 }
