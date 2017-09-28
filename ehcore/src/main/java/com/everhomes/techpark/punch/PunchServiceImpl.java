@@ -6336,6 +6336,13 @@ public class PunchServiceImpl implements PunchService {
 	        					+timeRule.getEndPunchTime());
         			}
         		}
+				//前端有跨日少一天的bug
+				for(PunchTimeIntervalDTO interval : timeRule.getPunchTimeIntervals()){
+					if (interval.getLeaveTime() < interval.getArriveTime()) {
+						interval.setLeaveTime(interval.getLeaveTime() + ONE_DAY_MS);
+					}
+
+				}
 				saveTimerRuleIntervals(timeRule,ptr);
         	}
         }
