@@ -237,7 +237,7 @@ public class UniongroupServiceImpl implements UniongroupService {
         List<UniongroupConfigures> configures = this.uniongroupConfigureProvider.listUniongroupConfiguresByGroupId(namespaceId, cmd.getGroupId());
         if (configures != null) {
             return configures.stream().map(r -> {
-                if(r.getCurrentType() == UniongroupTargetType.MEMBERDETAIL.getCode()){
+                if(r.getCurrentType().equals(UniongroupTargetType.MEMBERDETAIL.getCode())){
                     OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(r.getCurrentId());
                     if(detail != null){
                         r.setCurrentName(detail.getContactName());
@@ -340,7 +340,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public List listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd) {
-        return this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizaitonId());
+        return this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizaitonId(), cmd.getContactName());
     }
 
     private Organization checkOrganization(Long orgId) {

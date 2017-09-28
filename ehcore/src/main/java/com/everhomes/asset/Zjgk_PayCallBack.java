@@ -80,7 +80,7 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
             //记录哪些订单可以被改状态，persit需要改，由于有成功的，所以无法保证原子性；测试下对一个账单一把付款？
             NotifyPaymentResponse response = (NotifyPaymentResponse)StringHelper.fromJsonString(postJson, NotifyPaymentResponse.class);
             if(response.getErrorCode()==200){
-                //此订单付款成功。统一订单状态：0：新建；1：支付失败；2：支付成功但张江高科的全部失败；3：支付成功但张江高科的部分成功；4：支付成功张江高科的也全部成功;5：取消
+            //此订单付款成功。统一订单状态：0：新建；1：支付失败；2：支付成功但张江高科的全部失败；3：支付成功但张江高科的部分成功；4：支付成功张江高科的也全部成功;5：取消;6:退款成功；7：退款失败
                 // 各个账单的状态：0:没有支付；1：支付成功；2：支付部分成功
                 billStatuses.put(bills.get(i).getBillId(),1);
             }else{
@@ -123,12 +123,20 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
 
     @Override
     public void refundSuccess(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
-
+        LOGGER.info("pay failed for zjgk, returned notificationCmd = {}",cmd.toString());
+        this.dbProvider.execute((TransactionStatus status) -> {
+            assetProvider.changeOrderStaus(cmd.getOrderId(),(byte)6);
+            return null;
+        });
     }
 
     @Override
     public void refundFail(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
-
+        LOGGER.info("pay failed for zjgk, returned notificationCmd = {}",cmd.toString());
+        this.dbProvider.execute((TransactionStatus status) -> {
+            assetProvider.changeOrderStaus(cmd.getOrderId(),(byte)7);
+            return null;
+        });
     }
 
     private String generateJson(Map<String,String> params){

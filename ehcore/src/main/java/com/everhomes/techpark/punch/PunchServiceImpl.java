@@ -907,7 +907,7 @@ public class PunchServiceImpl implements PunchService {
 			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
-			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+			pdl.setExceptionStatus(null);
 			return pdl;
 		}
 
@@ -2577,7 +2577,7 @@ public class PunchServiceImpl implements PunchService {
                 PunchTimeIntervalDTO interval = dto1.getPunchTimeIntervals().get(punchTimeNo - 1);
 				BigDecimal b = new BigDecimal(statistic.getUnpunchCount()
 						+ (interval.getLeaveTime() - interval.getArriveTime()));
-				statistic.setUnpunchCount(b.divide(new BigDecimal(3600000), 2, RoundingMode.HALF_UP).doubleValue());
+				statistic.setUnpunchCount(statistic.getUnpunchCount()+b.divide(new BigDecimal(3600000), 2, RoundingMode.HALF_UP).doubleValue());
             }
         }  else if (status.equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
             statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
@@ -6400,14 +6400,24 @@ public class PunchServiceImpl implements PunchService {
 			}
 			if (schedulings.size() > 0) {
 				//批量保存
+
+				Long t1 = System.currentTimeMillis();
 				List<EhPunchSchedulings> ehPsList = new ArrayList<>();
 				Long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), schedulings.size());
+
 				for (PunchScheduling ps : schedulings) {
 					ps.setId(beginId++);
 					EhPunchSchedulings eps = ConvertHelper.convert(ps, EhPunchSchedulings.class);
 					ehPsList.add(eps);
 				}
+				Long t2 = System.currentTimeMillis();
+
+				LOGGER.debug("for schedulings time "+  t2 + "cost: " +(t2-t1));
+
 				punchSchedulingProvider.batchCreatePunchSchedulings(ehPsList);
+				Long t3 = System.currentTimeMillis();
+
+				LOGGER.debug("batch save schedulings time "+  t3 + "cost: " +(t3-t2));
 			}
 		}
 	}

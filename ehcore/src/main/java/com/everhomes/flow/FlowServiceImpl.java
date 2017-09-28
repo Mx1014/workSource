@@ -1957,7 +1957,9 @@ public class FlowServiceImpl implements FlowService {
         }
 
         FlowModuleDTO moduleDTO = this.getModuleById(ga.getModuleId());
-
+        if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(ga.getModuleType())){
+        	moduleDTO = this.getModuleById(40500L);
+        }
         flowCase.setFlowMainId(0l);
         flowCase.setFlowVersion(0);
         flowCase.setNamespaceId(ga.getNamespaceId());
