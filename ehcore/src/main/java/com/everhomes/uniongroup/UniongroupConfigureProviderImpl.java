@@ -22,6 +22,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.util.StringUtil;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -465,12 +467,20 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
     @Override
     public List listDetailNotInUniongroup(Integer namespaceId, Long organizationId) {
+        return  this.listDetailNotInUniongroup(namespaceId,organizationId,null);
+    }
+
+    @Override
+    public List listDetailNotInUniongroup(Integer namespaceId, Long organizationId, String contactName) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
         TableLike t1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t1");
         TableLike t2 = Tables.EH_UNIONGROUP_MEMBER_DETAILS.as("t2");
         SelectJoinStep step = context.select(t1.fields()).from(t1).leftOuterJoin(t2).on(t2.field("detail_id").eq(t1.field("id")));
         Condition condition = t1.field("organization_id").eq(organizationId).and(t1.field("namespace_id").eq(namespaceId)).and(t2.field("detail_id").isNull());
+        if(StringUtils.isNotEmpty(contactName)){
+            condition = condition.and(t1.field("contact_name").like(contactName +"%"));
+        }
         condition = condition.and(t1.field("id").in(context.selectDistinct(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))));
         List<OrganizationMemberDetails> details = step.where(condition).fetch().map(new OrganizationMemberDetailsMapper());
         LOGGER.debug("listDetailNotInUniongroup 's sql is :" + step.where(condition).getSQL());
