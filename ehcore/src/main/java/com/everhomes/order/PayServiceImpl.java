@@ -336,7 +336,6 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
         //检查订单是否存在
         //TODO
-        PaymentOrderRecord orderRecord = payProvider.findOrderRecordById(Long.valueOf(cmd.getBizOrderNum()));
         PaymentOrderRecord orderRecord = payProvider.findOrderRecordByOrderNum(cmd.getBizOrderNum());
         if(orderRecord == null){
             LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
@@ -587,7 +586,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 //        //BizOrderNum需要传PaymentOrderRecords表记录的id，此处先申请id，在返回值中使用BizOrderNum做为record的id
 //        Long orderRecordId = payProvider.getNewPaymentOrderRecordId();
 
-        String BizOrderNum  ="asdfasd f d";
+        String BizOrderNum;
         createOrderCmd.setBizOrderNum(String.valueOf(orderRecordId));
 
         createOrderCmd.setOrderRemark1(String.valueOf(serviceConfig.getId()));

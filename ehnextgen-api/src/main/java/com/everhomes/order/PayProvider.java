@@ -27,4 +27,6 @@ public interface PayProvider {
     Long getNewPaymentUserId();
 
     List<PayMethodDTO> listPayMethods(Integer namespaceId, Integer paymentType, String orderType, String ownerType, Long ownerId, String resourceType, Long resourceId);
+
+    PaymentOrderRecord findOrderRecordByOrderNum(String bizOrderNum);
 }
