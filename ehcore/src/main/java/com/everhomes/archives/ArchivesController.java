@@ -373,6 +373,19 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /archives/getImportEmployeesResult</b>
+     * <p>13-3.查询人事档案导入结果</p>
+     */
+    @RequestMapping("getImportEmployeesResult")
+    @RestReturn(value = ImportFileResponse.class)
+    public RestResponse getImportEmployeesResult(GetImportFileResultCommand cmd) {
+        RestResponse response = new RestResponse(archivesService.getImportEmployeesResult(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /archives/remindArchivesEmployee</b>
      * <p>14.为员工做提醒设置</p>
      */

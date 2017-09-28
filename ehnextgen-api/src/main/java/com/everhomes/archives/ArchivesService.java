@@ -72,5 +72,7 @@ public interface ArchivesService {
 
     void exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd,HttpServletResponse httpResponse);
 
+    ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd);
+
     void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd);
 }

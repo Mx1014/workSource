@@ -14,7 +14,6 @@ import java.util.List;
  * <li>targetType: targetType</li>
  * <li>contactName: 姓名</li>
  * <li>employeeStatus: 成员状态: 0-试用, 1-正式</li>
- * <li>jobPosition: jobPosition</li>
  * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>regionCode: 区号</li>
  * <li>contactToken: 手机号</li>
@@ -22,6 +21,7 @@ import java.util.List;
  * <li>checkInTime: 入职日期</li>
  * <li>employmentTime: 转正日期</li>
  * <li>contractTime: 合同日期</li>
+ * <li>employeeNo: 工号</li>
  * </ul>
  */
 public class ArchivesEmployeeDTO {
@@ -52,6 +52,8 @@ public class ArchivesEmployeeDTO {
     private Date employmentTime;
 
     private Date contractTime;
+
+    private String employeeNo;
 
     public ArchivesEmployeeDTO() {
     }
@@ -158,6 +160,14 @@ public class ArchivesEmployeeDTO {
 
     public void setContractTime(Date contractTime) {
         this.contractTime = contractTime;
+    }
+
+    public String getEmployeeNo() {
+        return employeeNo;
+    }
+
+    public void setEmployeeNo(String employeeNo) {
+        this.employeeNo = employeeNo;
     }
 
     @Override

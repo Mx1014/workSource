@@ -18,11 +18,12 @@ import java.util.List;
  * <li>employeeStatus: 工状态, 0: 试用 1: 在职 2: 离职 {@link com.everhomes.rest.organization.EmployeeStatus}</li>
  * <li>employmentTime: 转正时间</li>
  * <li>departmentIds: 部门 ids</li>
- * <li>jobPosition: jobPosition</li>
+ * <li>jobPositionIds: 岗位 ids</li>
+ * <li>jobLevelIds: 职级 ids</li>
  * <li>employeeNo: 工号</li>
  * <li>contactShortToken: 手机短号</li>
  * <li>workEmail: 工作邮箱</li>
- * <li>contractId: 合同主体</li>
+ * <li>contractPartyId: 合同主体</li>
  * <li>regionCode: 手机区号</li>
  * <li>contactToken: 手机号</li>
  * </ul>
@@ -48,7 +49,11 @@ public class AddArchivesEmployeeCommand {
     @ItemType(Long.class)
     private List<Long> departmentIds;
 
-    private String jobPosition;
+    @ItemType(Long.class)
+    private List<Long> jobPositionIds;
+
+    @ItemType(Long.class)
+    private List<Long> jobLevelIds;
 
     private String employeeNo;
 
@@ -56,7 +61,7 @@ public class AddArchivesEmployeeCommand {
 
     private String workEmail;
 
-    private Long contractId;
+    private Long contractPartyId;
 
     private String regionCode;
 
@@ -118,7 +123,7 @@ public class AddArchivesEmployeeCommand {
     }
 
     public void setEmploymentTime(String employmentTime) {
-        this.employmentTime =  ArchivesUtil.parseDate(employmentTime);
+        this.employmentTime = ArchivesUtil.parseDate(employmentTime);
     }
 
     public List<Long> getDepartmentIds() {
@@ -129,12 +134,20 @@ public class AddArchivesEmployeeCommand {
         this.departmentIds = departmentIds;
     }
 
-    public String getJobPosition() {
-        return jobPosition;
+    public List<Long> getJobPositionIds() {
+        return jobPositionIds;
     }
 
-    public void setJobPosition(String jobPosition) {
-        this.jobPosition = jobPosition;
+    public void setJobPositionIds(List<Long> jobPositionIds) {
+        this.jobPositionIds = jobPositionIds;
+    }
+
+    public List<Long> getJobLevelIds() {
+        return jobLevelIds;
+    }
+
+    public void setJobLevelIds(List<Long> jobLevelIds) {
+        this.jobLevelIds = jobLevelIds;
     }
 
     public String getEmployeeNo() {
@@ -161,12 +174,12 @@ public class AddArchivesEmployeeCommand {
         this.workEmail = workEmail;
     }
 
-    public Long getContractId() {
-        return contractId;
+    public Long getContractPartyId() {
+        return contractPartyId;
     }
 
-    public void setContractId(Long contractId) {
-        this.contractId = contractId;
+    public void setContractPartyId(Long contractPartyId) {
+        this.contractPartyId = contractPartyId;
     }
 
     public Long getOrganizationId() {

@@ -37,10 +37,11 @@ public class ArchivesContactDTO {
 
     private Byte gender;
 
-    private String jobPositions;
-
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> departments;
+
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> jobPositions;
 
     private String regionCode;
 
@@ -113,11 +114,11 @@ public class ArchivesContactDTO {
         this.gender = gender;
     }
 
-    public String getJobPositions() {
+    public List<OrganizationDTO> getJobPositions() {
         return jobPositions;
     }
 
-    public void setJobPositions(String jobPositions) {
+    public void setJobPositions(List<OrganizationDTO> jobPositions) {
         this.jobPositions = jobPositions;
     }
 

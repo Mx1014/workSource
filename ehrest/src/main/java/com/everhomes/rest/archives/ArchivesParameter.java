@@ -106,4 +106,8 @@ public interface ArchivesParameter {
 
     static final String DISMISS_REASON = "dismissReason";    //	离职原因
 
+    static final String DEPARTMENT_IDS = "departmentIds";
+
+    static final String JOB_POSITION_IDS = "jobPositionIds";
+
 }
