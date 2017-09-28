@@ -2895,6 +2895,7 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setAliasName(aliasName);
 		sceneDto.setAvatar(familyDto.getAvatarUri());
 		sceneDto.setAvatarUrl(familyDto.getAvatarUrl());
+		sceneDto.setCommunityName(communityName);
 
 		String entityContent = StringHelper.toJsonString(familyDto);
 		sceneDto.setEntityContent(entityContent);
@@ -2908,7 +2909,7 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setCommunityId(familyDto.getCommunityId());
 		if(familyDto.getCommunityId() != null){
 			Community community = this.communityProvider.findCommunityById(familyDto.getCommunityId());
-			sceneDto.setCommunityName(community.getName());
+			sceneDto.setCommunityName(communityName);
 		}
 
 		return sceneDto;
@@ -3002,6 +3003,7 @@ public class UserServiceImpl implements UserService {
         sceneDto.setAliasName(aliasName);
 		sceneDto.setAvatar(organizationDto.getAvatarUri());
 		sceneDto.setAvatarUrl(organizationDto.getAvatarUrl());
+		sceneDto.setCommunityName(communityName);
 
 		String entityContent = StringHelper.toJsonString(organizationDto);
 		sceneDto.setEntityContent(entityContent);
@@ -3022,7 +3024,7 @@ public class UserServiceImpl implements UserService {
 		if(organizationCommunityRequest != null){
 			sceneDto.setCommunityId(organizationCommunityRequest.getCommunityId());
 			Community community = this.communityProvider.findCommunityById(organizationCommunityRequest.getCommunityId());
-			sceneDto.setCommunityName(community.getName());
+			sceneDto.setCommunityName(communityName);
 		}
 
 		return sceneDto;
