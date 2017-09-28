@@ -393,6 +393,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 				}
 			}
 			if (null != request.getInvoiceType()) {
+				order.setInvoiceType(request.getInvoiceType());
 				ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(request.getInvoiceType());
 				if (null != parkingInvoiceType) {
 					param.put("invType", parkingInvoiceType.getInvoiceToken());
