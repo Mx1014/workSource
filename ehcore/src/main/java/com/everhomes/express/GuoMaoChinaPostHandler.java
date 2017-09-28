@@ -153,10 +153,10 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 		if(expressOrder.getSendType().byteValue() == ExpressSendType.CITY_EMPTIES.getCode().byteValue()){
 			ExpressPackageType packageType = ExpressPackageType.fromCode(expressOrder.getPackageType());
 			expressOrder.setPaySummary(new BigDecimal(packageType.getPrice()));
-			boolean isdebug = configProvider.getBooleanValue("debug.flag",false);
-			if(isdebug){
-				expressOrder.setPaySummary(new BigDecimal(0.01));
-			}
+//			boolean isdebug = configProvider.getBooleanValue("debug.flag",false);
+//			if(isdebug){
+//				expressOrder.setPaySummary(new BigDecimal(0.01));
+//			}
 			return ;
 		}
 		transferOrderToChinaPost(expressOrder, expressCompany);
@@ -398,10 +398,10 @@ public class GuoMaoChinaPostHandler implements ExpressHandler{
 			 if(entity.getResponse().getPaySummary() != null){
 				isUpdateOrder = true;
 				expressOrder.setPaySummary(new BigDecimal(entity.getResponse().getPaySummary()));
-				boolean isdebug = configProvider.getBooleanValue("debug.flag",false);
-				if(isdebug){
-					expressOrder.setPaySummary(new BigDecimal(0.01));
-				}
+//				boolean isdebug = configProvider.getBooleanValue("debug.flag",false);
+//				if(isdebug){
+//					expressOrder.setPaySummary(new BigDecimal(0.01));
+//				}
 			 }
 		 }
 		 if(entity.getResponse().getStatus()!=null && entity.getResponse().getStatus().trim().length()>0){
