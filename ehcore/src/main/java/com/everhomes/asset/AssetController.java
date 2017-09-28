@@ -11,6 +11,7 @@ import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
@@ -19,12 +20,10 @@ import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.math.BigDecimal;
@@ -936,5 +935,36 @@ public class AssetController extends ControllerBase {
         restResponse.setErrorDescription("OK");
         return restResponse;
     }
+
+//    /**
+//     * <b>URL: /asset/listPaymentBill</b>
+//     * <p>结算-账单明细</p>
+//     */
+//    @RequestMapping(value = "listPaymentBill", produces = "application/json; charset=UTF-8")
+//    @ResponseBody
+//    public String listPaymentBill(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
+//        UserInfo user = (UserInfo) request.getSession().getAttribute(SessionConstants.MC_LOGIN_USER);
+//        ListPaymentBillResp result = paymentService.listPaymentBill(cmd, user);
+//        RestResponseBase response = new RestResponseBase(result);
+//        return McGsonUtil.toJson(response);
+//    }
+//
+//    /**
+//     * @api {POST}/zl-ec/mc/payment/findPaymentBillDetail 结算-账单明细-分账详情
+//     */
+//    /**
+//     * <b>URL: /asset/findPaymentBillDetail</b>
+//     * <p>结算-账单明细-分账详情</p>
+//     */
+//    @RequestMapping(value = "findPaymentBillDetail", produces = "application/json; charset=UTF-8")
+//    @ResponseBody
+//    public String findPaymentBillDetail(FindPaymentBillDetailCmd cmd, HttpServletRequest request) throws Exception {
+//        UserInfo user = (UserInfo) request.getSession().getAttribute(SessionConstants.MC_LOGIN_USER);
+//
+//        FindPaymentBillDetailResp result = paymentService.findPaymentBillDetail(cmd, user);
+//        RestResponseBase response = new RestResponseBase(result);
+//        return McGsonUtil.toJson(response);
+//    }
+
 
 }
