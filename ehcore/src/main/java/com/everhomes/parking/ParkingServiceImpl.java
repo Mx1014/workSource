@@ -611,8 +611,13 @@ public class ParkingServiceImpl implements ParkingService {
     		parkingRechargeOrder.setMonthCount(new BigDecimal(cmd.getMonthCount()));
     		//先设置客户端传进来的价格，在updateParkingRechargeOrderRate方法中校验价格,根据费率设置originalPrice
 			parkingRechargeOrder.setPrice(cmd.getPrice());
-    		handler.updateParkingRechargeOrderRate(parkingLot, parkingRechargeOrder);
 
+			if (parkingRechargeOrder.getOrderType() == ParkingOrderType.RECHARGE.getCode()) {
+				handler.updateParkingRechargeOrderRate(parkingLot, parkingRechargeOrder);
+			}else {
+				//TODO:开卡校验
+				parkingRechargeOrder.setOriginalPrice(cmd.getPrice());
+			}
     	}
 
     	dbProvider.execute(status -> {
