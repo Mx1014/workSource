@@ -5,11 +5,23 @@ import com.everhomes.customer.CustomerService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.customer.*;
 
-import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.field.*;
 
 import com.everhomes.rest.launchpad.Item;
 
 import com.everhomes.rest.varField.*;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.varField.ListFieldItemCommand;
+import com.everhomes.rest.varField.ScopeFieldGroupInfo;
+import com.everhomes.rest.varField.ScopeFieldInfo;
+import com.everhomes.rest.varField.ScopeFieldItemInfo;
+import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
+import com.everhomes.rest.varField.UpdateFieldItemsCommand;
+import com.everhomes.rest.varField.UpdateFieldsCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -18,6 +30,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
+import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
@@ -688,8 +701,7 @@ public class FieldServiceImpl implements FieldService {
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
         List<FieldGroupDTO> partGroups = listFieldGroups(cmd1);
         if(partGroups==null) partGroups = new ArrayList<>();
-        List<FieldGroupDTO> groups = listFieldGroups(cmd1);
-        if(groups == null) groups = new ArrayList<>();
+        List<FieldGroupDTO> groups = new ArrayList<>();
         for(int i = 0; i < partGroups.size(); i++){
             getAllGroups(partGroups.get(i),groups);
         }
@@ -879,6 +891,7 @@ public class FieldServiceImpl implements FieldService {
         }else{
             if(group.getChildrenGroup()==null||group.getChildrenGroup().size()<1){
                 allGroups.add(group);
+                return;
             }
         }
     }
