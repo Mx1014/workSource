@@ -1393,8 +1393,9 @@ public class PortalServiceImpl implements PortalService {
 				OPPushInstanceConfig config = new OPPushInstanceConfig();
 				config.setItemGroup(itemGroup.getName());
 				config.setNewsSize(instanceConfig.getNewsSize());
-//				config.setDescriptionHeight();
-//				config.setSubjectHeight();
+				config.setDescriptionHeight(0);
+				config.setSubjectHeight(0);
+				config.setEntityCount(0);
 				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.ACTIVITY){
 					itemGroup.setName("OPPushActivity");
 				}

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.launchpad.LaunchPadItemActionDataHandler;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.UserCurrentEntityType;
@@ -23,6 +24,9 @@ public class LaunchPadItemActionDataUrlOrgParamHandler implements LaunchPadItemA
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public String refreshActionData(String actionData, SceneTokenDTO sceneToken) {
@@ -85,7 +89,9 @@ public class LaunchPadItemActionDataUrlOrgParamHandler implements LaunchPadItemA
         userToken.setUserId(userId);
         userToken.setNamespaceId(namespaceId);
         userToken.setStartTime(System.currentTimeMillis());
-        userToken.setInterval(24 * 60 * 60 * 1000L);
+
+        Long interval = configurationProvider.getLongValue(namespaceId, "chengxinyuan.token.interval", 24 * 60 * 60 * 1000L);
+        userToken.setInterval(interval);
         userToken.setInfo(unifiedSocialCreditCode);
 
         String userTokenString  = WebTokenGenerator.getInstance().toWebToken(userToken);
