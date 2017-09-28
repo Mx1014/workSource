@@ -108,7 +108,7 @@ public class NewsProviderImpl implements NewsProvider {
 		return id;
 	}
 
-	@Caching(evict = { @CacheEvict(value="findNewsTagById", key="#newsTag.id")})
+	@Caching(evict={@CacheEvict(value="findNewsTagById", key="#newsTag.id")})
 	@Override
 	public void updateNewsTag(NewsTag newsTag) {
 		new EhNewsTagDao(getContext(AccessSpec.readWrite()).configuration()).update(newsTag);
