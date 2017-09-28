@@ -7,6 +7,9 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.parking.*;
 import com.everhomes.parking.ketuo.*;
@@ -39,6 +42,8 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	private LocaleStringService localeStringService;
 	@Autowired
 	private AddressProvider addressProvider;
+	@Autowired
+	private FlowProvider flowProvider;
 
 	private static final String GET_PARKINGS = "/api/find/GetParkingLotList";
 	private static final String GET_FREE_SPACE_NUM = "/api/find/GetFreeSpaceNum";
@@ -349,27 +354,51 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		param.put("plateNo", plateNo);
 		param.put("money", money);
 		param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
-		if (null != order.getCardRequestId()) {
-			ParkingCardRequest request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
-			if (null != request) {
-				param.put("userName", request.getPlateOwnerName());
-				param.put("userTel", request.getPlateOwnerPhone());
-				param.put("company", request.getPlateOwnerEntperiseName());
 
-				if (null != request.getAddressId()) {
-					Address address = addressProvider.findAddressById(request.getAddressId());
-					if (null != address) {
-						param.put("doorplate", address.getAddress());
-					}
+		ParkingCardRequest request = null;
+		if (null != order.getCardRequestId()) {
+			request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
+
+		}else {
+			List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(order.getCreatorUid(), order.getOwnerType(),
+					order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber(), ParkingCardRequestStatus.SUCCEED.getCode(),
+					null, null, null, null);
+
+			for(ParkingCardRequest p: list) {
+				FlowCase flowCase = flowCaseProvider.getFlowCaseById(p.getFlowCaseId());
+
+				Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+				String tag1 = flow.getStringTag1();
+				if(null == tag1) {
+					LOGGER.error("Flow tag is null, flow={}", flow);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+							"Flow tag is null.");
 				}
-				if (null != request.getInvoiceType()) {
-					ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(request.getInvoiceType());
-					if (null != parkingInvoiceType) {
-						param.put("invType", parkingInvoiceType.getInvoiceToken());
-					}
-				}else {
-					param.put("invType", "-1");
+				if(ParkingRequestFlowType.INTELLIGENT.getCode().equals(Integer.valueOf(tag1))) {
+					request = p;
+					break;
 				}
+			}
+		}
+
+		if (null != request) {
+			param.put("userName", request.getPlateOwnerName());
+			param.put("userTel", request.getPlateOwnerPhone());
+			param.put("company", request.getPlateOwnerEntperiseName());
+
+			if (null != request.getAddressId()) {
+				Address address = addressProvider.findAddressById(request.getAddressId());
+				if (null != address) {
+					param.put("doorplate", address.getAddress());
+				}
+			}
+			if (null != request.getInvoiceType()) {
+				ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(request.getInvoiceType());
+				if (null != parkingInvoiceType) {
+					param.put("invType", parkingInvoiceType.getInvoiceToken());
+				}
+			}else {
+				param.put("invType", "-1");
 			}
 		}
 
