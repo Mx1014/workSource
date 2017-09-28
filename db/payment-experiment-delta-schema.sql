@@ -204,6 +204,9 @@ ALTER TABLE `eh_sms_logs` ADD COLUMN `report_time` DATETIME(3);
 
 ALTER TABLE `eh_sms_logs` ADD INDEX i_eh_mobile_handler(`mobile`, `handler`);
 
+-- 资源预约 add by sw 20170925
+ALTER TABLE eh_rentalv2_orders ADD COLUMN paid_version tinyint(4) DEFAULT NULL;
+
 -- 停车 add by sw 20170925
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN original_price DECIMAL(10,2) DEFAULT NULL;
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN card_request_id BIGINT(20) DEFAULT NULL;
