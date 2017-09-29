@@ -2,6 +2,7 @@
 package com.everhomes.asset;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.pay.base.RestClient;
 import com.everhomes.pay.order.OrderPaymentStatus;
 import com.everhomes.pay.order.PaymentAttributes;
@@ -19,6 +20,7 @@ import com.everhomes.util.GsonUtil;
 import com.everhomes.util.IntegerUtil;
 import com.everhomes.util.LongUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.protocol.HTTP;
 import org.hibernate.engine.config.spi.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
 
     @Override
     public ListPaymentBillResp listOrderPayment(ListPaymentBillCmd cmd) throws Exception {
+
+//        HttpUtils.postJson("http://paytest.zuolin.com:8080/pay/", json, 120, HTTP.UTF_8);
         cmd.setDistributionRemarkIsNull(true);
         cmd.setPaymentStatus(OrderPaymentStatus.SUCCESS.getCode());
 
@@ -210,7 +214,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                             + ",uri=" + uri
                             + ",cmd=" + GsonUtil.toJson(cmd));
         }
-        String payHomeUrl = "http://paytest.zuolin.com:8080/pay/api";
+        String payHomeUrl = "http://paytest.zuolin.com:8080/pay";
         PaymentAccountResp account = paymentService.findPaymentAccount();
         RestClient restClient = new RestClient(payHomeUrl, account.getAppKey(), account.getSecretKey());
         com.everhomes.rest.RestResponseBase response = (com.everhomes.rest.RestResponseBase) restClient.restCall(

@@ -16,15 +16,25 @@ public class ListPaymentBillCmd {
 
     private Date startPayTime;
     private Date endPayTime;
+
+    //交易时间
+    private String payTime;
+    //流水号？
     private String orderNo;
+    //订单编号
     private String paymentOrderNum;
+    //支付类型
     private Integer paymentType;
+    //交易类型
     private Integer transactionType;
     @ItemType(Integer.class)
     private List<Integer> transactionTypes;
     private Integer paymentStatus;
+    //结算状态
     private Integer settlementStatus;
     private Boolean distributionRemarkIsNull;
+    //账单类型
+    private String orderType;
 
     private String userType;
 
