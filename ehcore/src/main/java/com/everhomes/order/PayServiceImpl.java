@@ -326,7 +326,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
         //校验参数不为空
 
-        if(cmd.getOrderId() == null||cmd.getPaymentStatus()==null||cmd.getPaymentType()==null || cmd.getBizOrderNum() == null || cmd.getOrderType() == null){
+        if(cmd.getOrderId() == null||cmd.getPaymentStatus()==null || cmd.getBizOrderNum() == null || cmd.getOrderType() == null){
 
             LOGGER.error("Invalid parameter,orderId,orderType or paymentStatus is null");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -424,7 +424,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
         Long id = payProvider.getNewPaymentUserId();
 
-        RegisterBusinessUserRestResponse restResponse = registerPayV2User(businessUserType, id + "");
+        RegisterBusinessUserRestResponse restResponse = registerPayV2User(businessUserType,  ownerType+String.valueOf(ownerId));
 
         if(restResponse == null || restResponse.getErrorCode() == null || restResponse.getErrorCode() != 200 ){
             LOGGER.error("register user fail, businessUserType={}, ownerType={}, ownerId={}", businessUserType, ownerType, ownerId);

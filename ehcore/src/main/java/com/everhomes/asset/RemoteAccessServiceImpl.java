@@ -128,6 +128,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }else{
             result.setNextPageAnchor(null);
         }
+
         return result;
     }
 
@@ -188,7 +189,10 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
 
         Long payTimeMill = LongUtil.convert(map.get("createTime"));
         if(payTimeMill != null) {
-            paymentBill.setPayTime(new Date(payTimeMill));
+            Date date = new Date(payTimeMill);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String format = sdf.format(date);
+            paymentBill.setPayTime(format);
         }
         return paymentBill;
     }
