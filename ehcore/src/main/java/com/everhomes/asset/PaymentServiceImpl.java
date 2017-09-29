@@ -54,7 +54,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
         //payeeUserId
         PaymentUser paymentUser = assetProvider.findByOwner(cmd.getUserType(),cmd.getUserId());
-        if(paymentUser != null) {
+        if(paymentUser == null) {
             return new ListPaymentBillResp(cmd.getNextPageAnchor(), cmd.getPageSize());
         }
         cmd.setUserId(paymentUser.getPaymentUserId());
