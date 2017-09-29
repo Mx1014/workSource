@@ -85,4 +85,6 @@ public interface UniongroupConfigureProvider {
     Integer countUnionGroupMemberDetailsByGroupId(Integer namespaceId, Long groupId);
 
     public void deleteUniongroupConfigresByCurrentIdAndGroupTypeAndVersion(Long detailId, String groupType, Integer versionCode);
+
+    List<UniongroupMemberDetail> listUniongroupMemberDetailsByUserName(Long ownerId, String userName);
 }

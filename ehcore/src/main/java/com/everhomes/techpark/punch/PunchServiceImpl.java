@@ -37,6 +37,7 @@ import com.everhomes.rest.uniongroup.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
+import com.everhomes.uniongroup.UniongroupConfigures;
 import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
@@ -6533,11 +6534,30 @@ public class PunchServiceImpl implements PunchService {
         //  获取所有批次
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(0L);
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int pageSize = cmd.getPageSize() == null ? 5 : cmd.getPageSize();
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
+		List<Long> orgIds = null;
+		//员工姓名和部门
+		if(null!=cmd.getDeptId()){
+			orgIds = new ArrayList<>();
+			UniongroupConfigures unc = uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(
+					UserContext.getCurrentNamespaceId(), cmd.getDeptId(), UniongroupType.PUNCHGROUP.getCode());
+			orgIds.add(unc.getGroupId());
 
-        List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.PUNCHGROUP.getCode(), cmd.getOwnerId(),locator,pageSize + 1 );
+		}else if(null != cmd.getUserName()){
+			orgIds = new ArrayList<>();
+			List<UniongroupMemberDetail> details = uniongroupConfigureProvider.listUniongroupMemberDetailsByUserName(cmd.getOwnerId(), cmd.getUserName());
+			if (null != details && details.size() > 0) {
+				for (UniongroupMemberDetail detail : details) {
+					orgIds.add(detail.getId());
+				}
+			}
+
+		}
+
+		List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType(UniongroupType.PUNCHGROUP.getCode(), cmd.getOwnerId(),
+				orgIds, cmd.getGroupName(), locator, pageSize + 1);
 
         if (null == organizations)
 			return response;
