@@ -408,8 +408,8 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         }
         return paymentUser;
     }
-
-    private PaymentUser createPaymentUser(int businessUserType, String ownerType, Long ownerId){
+    @Override
+    public PaymentUser createPaymentUser(int businessUserType, String ownerType, Long ownerId){
 
         Long id = payProvider.getNewPaymentUserId();
 

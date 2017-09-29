@@ -10,8 +10,8 @@ import java.sql.Timestamp;
 public class CheckPaymentUserResponse {
     private Long id;
     private String ownerType;
-    private String ownerId;
-    private Byte paymentUserType;
+    private Long ownerId;
+    private Integer paymentUserType;
     private Long payment_user_id;
     private Timestamp createTime;
 
@@ -31,19 +31,19 @@ public class CheckPaymentUserResponse {
         this.ownerType = ownerType;
     }
 
-    public String getOwnerId() {
+    public Long getOwnerId() {
         return ownerId;
     }
 
-    public void setOwnerId(String ownerId) {
+    public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
     }
 
-    public Byte getPaymentUserType() {
+    public Integer getPaymentUserType() {
         return paymentUserType;
     }
 
-    public void setPaymentUserType(Byte paymentUserType) {
+    public void setPaymentUserType(Integer paymentUserType) {
         this.paymentUserType = paymentUserType;
     }
 
