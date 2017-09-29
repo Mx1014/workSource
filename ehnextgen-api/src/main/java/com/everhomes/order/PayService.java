@@ -2,10 +2,7 @@
 package com.everhomes.order;
 
 
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
-
-import com.everhomes.pay.order.OrderCommandResponse;
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.PaymentParamsDTO;
 
 import com.everhomes.rest.order.PreOrderCommand;

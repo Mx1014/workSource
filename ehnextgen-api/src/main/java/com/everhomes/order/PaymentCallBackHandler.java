@@ -6,7 +6,7 @@ package com.everhomes.order;
  * Created by Wentian on 2017/9/7.
  */
 
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 
 /**
  * <p>订单支付回调处理类<p>
@@ -21,18 +21,18 @@ public interface PaymentCallBackHandler {
     /**
      * 支付成功
      */
-    void paySuccess(OrderPaymentNotificationCommand cmd);
+    void paySuccess(SrvOrderPaymentNotificationCommand cmd);
     /**
      * 支付失败
      */
-    void payFail(OrderPaymentNotificationCommand cmd);
+    void payFail(SrvOrderPaymentNotificationCommand cmd);
 
     /**
      * 退款成功
      */
-    void refundSuccess(OrderPaymentNotificationCommand cmd);
+    void refundSuccess(SrvOrderPaymentNotificationCommand cmd);
     /**
      * 退款失败
      */
-    void refundFail(OrderPaymentNotificationCommand cmd);
+    void refundFail(SrvOrderPaymentNotificationCommand cmd);
 }

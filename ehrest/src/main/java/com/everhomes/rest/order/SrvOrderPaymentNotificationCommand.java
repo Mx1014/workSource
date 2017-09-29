@@ -1,17 +1,16 @@
 package com.everhomes.rest.order;
 
 import com.everhomes.discover.ItemType;
-
-
 import com.everhomes.util.StringHelper;
+
 import java.util.Map;
 
 /**
  * Created by Administrator on 2017/9/19.
  */
-public class OrderPaymentNotificationCommand {
+public class SrvOrderPaymentNotificationCommand {
     private Long orderId;
-    private Integer orderType;
+    private String orderType;
     private String bizOrderNum;
     private Integer paymentType;
 
@@ -36,11 +35,11 @@ public class OrderPaymentNotificationCommand {
         this.orderId = orderId;
     }
 
-    public Integer getOrderType() {
+    public String getOrderType() {
         return orderType;
     }
 
-    public void setOrderType(Integer orderType) {
+    public void setOrderType(String orderType) {
         this.orderType = orderType;
     }
 

@@ -2,9 +2,7 @@
 package com.everhomes.parking;
 
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.activity.Activity;
 import com.everhomes.activity.ActivityProivider;
-import com.everhomes.activity.ActivityRoster;
 import com.everhomes.activity.ActivityService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.BusBridgeProvider;
@@ -19,8 +17,8 @@ import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rest.activity.*;
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
@@ -59,7 +57,7 @@ public class ParkingOrderCallBackHandler implements PaymentCallBackHandler {
 	private BusBridgeProvider busBridgeProvider;
 
 	@Override
-	public void paySuccess(OrderPaymentNotificationCommand cmd) {
+	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
 
 //		ActivityRoster roster = activityProvider.findRosterByOrderNo(cmd.getOrderId());
 //		if(roster == null){
@@ -176,13 +174,13 @@ public class ParkingOrderCallBackHandler implements PaymentCallBackHandler {
 	}
 
 	@Override
-	public void payFail(OrderPaymentNotificationCommand cmd) {
+	public void payFail(SrvOrderPaymentNotificationCommand cmd) {
 		//TODO: 失败
 		LOGGER.error("Parking pay failed, cmd={}", cmd);
 	}
 
 	@Override
-	public void refundSuccess(OrderPaymentNotificationCommand cmd) {
+	public void refundSuccess(SrvOrderPaymentNotificationCommand cmd) {
 		//when you refund, i can do nothing.
 		Long orderId = cmd.getOrderId();
 
@@ -194,7 +192,7 @@ public class ParkingOrderCallBackHandler implements PaymentCallBackHandler {
 	}
 
 	@Override
-	public void refundFail(OrderPaymentNotificationCommand cmd) {
+	public void refundFail(SrvOrderPaymentNotificationCommand cmd) {
 		//when you refund, i can do nothing.
 	}
 
