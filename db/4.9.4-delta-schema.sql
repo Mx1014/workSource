@@ -6,6 +6,7 @@ ALTER TABLE `eh_payment_order_records` ADD COLUMN `order_num` varchar(255) DEFAU
 ALTER TABLE `eh_payment_service_configs` modify COLUMN `payment_split_rule_id` bigint default null;
 
 
+
 -- 支付2.0 init data by wentian
 
 
@@ -273,6 +274,15 @@ set @eh_payment_types_id = (select max(id) from `eh_payment_types`);
 INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_id+1, 'rentalOrder', '1', 'EhOrganizations', '1023080', null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), null);
 
 
+-- 添加收款方的会员
+set @eh_payment_user_id = (select max(id) from `eh_payment_users`);
+INSERT INTO `eh_payment_users` VALUES (@eh_payment_user_id:=@eh_payment_user_id+1, 'EhOrganizations', '1008900', '2', '1149', UTC_TIMESTAMP());
+-- 添加收款方
+set @eh_payment_service_configs_id = (select max(id) from `eh_payment_service_configs`);
+INSERT INTO `eh_payment_service_configs` VALUES (@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '停车充值', 'parking', '999983', 'EhOrganizations', '1008900', null, null, NULL, '2', '1149', UTC_TIMESTAMP(), null);
+-- 增加支付的方式
+set @eh_payment_types_id = (select max(id) from `eh_payment_types`);
+INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_id+1, 'parking', '999983', 'EhOrganizations', '1008900', null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), null);
 
 
 
@@ -287,3 +297,8 @@ INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_i
 
 
 -- end of 支付2.0 init data by wentian
+
+-- by sun wen 20170929
+ALTER TABLE eh_parking_recharge_orders ADD COLUMN paid_version tinyint(4) DEFAULT NULL;
+ALTER TABLE eh_rentalv2_orders ADD COLUMN paid_version tinyint(4) DEFAULT NULL;
+
