@@ -10,36 +10,35 @@ import java.util.List;
  */
 
 public class ListPaymentBillResp {
-    private Long offset;
-    private Long limit;
+    private Long nextPageAnchor;
+    private Long pageSize;
     @ItemType(PaymentBillResp.class)
     private List<PaymentBillResp> list;
 
     public ListPaymentBillResp() {
 
     }
-
-    public ListPaymentBillResp(Long limit) {
-        this.limit = limit;
+    public ListPaymentBillResp(Long nextPageAnchor,Long pageSize) {
+        this.nextPageAnchor = nextPageAnchor;
+        this.pageSize = pageSize;
     }
 
-    public ListPaymentBillResp(Long offset, Long limit) {
-        this.limit = limit;
-        this.offset = offset;
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
     }
 
-    public Long getOffset() {
-        return offset;
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
     }
-    public void setOffset(Long offset) {
-        this.offset = offset;
+
+    public Long getPageSize() {
+        return pageSize;
     }
-    public Long getLimit() {
-        return limit;
+
+    public void setPageSize(Long pageSize) {
+        this.pageSize = pageSize;
     }
-    public void setLimit(Long limit) {
-        this.limit = limit;
-    }
+
     public List<PaymentBillResp> getList() {
         return list;
     }

@@ -11,8 +11,8 @@ import java.util.List;
  */
 
 public class ListPaymentBillCmd {
-    private Long offset;
-    private Long limit;
+    private Long nextPageAnchor;
+    private Long pageSize;
 
     private String startPayTime;
     private String endPayTime;
@@ -42,17 +42,20 @@ public class ListPaymentBillCmd {
     @ItemType(ReSortCmd.class)
     private List<ReSortCmd> sorts;
 
-    public Long getOffset() {
-        return offset;
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
     }
-    public void setOffset(Long offset) {
-        this.offset = offset;
+
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
     }
-    public Long getLimit() {
-        return limit;
+
+    public Long getPageSize() {
+        return pageSize;
     }
-    public void setLimit(Long limit) {
-        this.limit = limit;
+
+    public void setPageSize(Long pageSize) {
+        this.pageSize = pageSize;
     }
 
     public String getStartPayTime() {
