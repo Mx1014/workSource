@@ -697,7 +697,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 
         //  1.查询该人员之前的 salaryGroupId 并保存
-        UniongroupMemberDetailsDTO dto = this.uniongroupService.findUniongroupMemberDetailByDetailId(UserContext.getCurrentNamespaceId(), cmd.getDetailId());
+        UniongroupMemberDetailsDTO dto = this.uniongroupService.findUniongroupMemberDetailByDetailId(UserContext.getCurrentNamespaceId(), cmd.getDetailId(), UniongroupType.SALARYGROUP.getCode());
 
         //  2.更新该员工在组织架构的关联及configure
         this.uniongroupService.distributionUniongroupToDetail(cmd.getOwnerId(), cmd.getDetailId(), cmd.getSalaryGroupId());
@@ -825,7 +825,7 @@ public class SalaryServiceImpl implements SalaryService {
         Organization salaryOrg = organizationProvider.findOrganizationById(salaryGroupId);
         Calendar periodCalendar = Calendar.getInstance();
         //  通过 cmd 的信息拿 memberDTO
-        UniongroupMemberDetailsDTO member = uniongroupService.findUniongroupMemberDetailByDetailId(namespaceId,detailId);
+        UniongroupMemberDetailsDTO member = uniongroupService.findUniongroupMemberDetailByDetailId(namespaceId,detailId,UniongroupType.SALARYGROUP.getCode());
         for(int i = 0;i<=5;i++){
             String period = monthSF.get().format(periodCalendar.getTime());
             SalaryGroup oldGroup = salaryGroupProvider.findSalaryGroupByOrgId(salaryGroupId, period);

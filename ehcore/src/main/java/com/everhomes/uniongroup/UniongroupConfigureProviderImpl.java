@@ -45,6 +45,8 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UniongroupConfigureProviderImpl.class);
 
+    private Integer DEFAULT_VERSION_CODE = 0;
+
     /**
      * UniongroupConfigures
      **/
@@ -74,11 +76,24 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
-    public UniongroupConfigures findUniongroupConfiguresByCurrentId(Integer namespaceId, Long currentId) {
+    public UniongroupConfigures findUniongroupConfiguresByCurrentId(Integer namespaceId, Long currentId, String groupType) {
+        return this.findUniongroupConfiguresByCurrentId(namespaceId, currentId, groupType, null);
+    }
+
+    @Override
+    public UniongroupConfigures findUniongroupConfiguresByCurrentId(Integer namespaceId, Long currentId, String groupType, Integer versionCode) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhUniongroupConfiguresRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_CONFIGURES);
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
+        if (groupType != null) {
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUP_TYPE.eq(groupType));
+        }
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_ID.eq(currentId));
+        if (versionCode != null) {
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(versionCode));
+        } else {
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(DEFAULT_VERSION_CODE));
+        }
         EhUniongroupConfiguresRecord record = query.fetchOne();
         if (record != null) {
             return ConvertHelper.convert(record, UniongroupConfigures.class);
@@ -126,11 +141,22 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
-    public List<Long> listOrgCurrentIdsOfUniongroupConfigures(Integer namespaceId, Long enterpriseId) {
+    public List<Long> listOrgCurrentIdsOfUniongroupConfigures(Integer namespaceId, Long enterpriseId, String groupType) {
+        return this.listOrgCurrentIdsOfUniongroupConfigures(namespaceId, enterpriseId, groupType, null);
+    }
+
+    @Override
+    public List<Long> listOrgCurrentIdsOfUniongroupConfigures(Integer namespaceId, Long enterpriseId, String groupType, Integer versionCode) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhUniongroupConfiguresRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_CONFIGURES);
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_TYPE.eq(UniongroupTargetType.ORGANIZATION.getCode()));
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUP_TYPE.eq(groupType));
+        if (versionCode != null) {
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(versionCode));
+        } else {
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(DEFAULT_VERSION_CODE));
+        }
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.ENTERPRISE_ID.eq(enterpriseId));
         Result result = query.fetch();
         if (result != null) {
@@ -155,12 +181,23 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
-    public List<Long> listDetailCurrentIdsOfUniongroupConfigures(Integer namespaceId, Long enterpriseId) {
+    public List<Long> listDetailCurrentIdsOfUniongroupConfigures(Integer namespaceId, Long enterpriseId, String groupType) {
+        return this.listDetailCurrentIdsOfUniongroupConfigures(namespaceId, enterpriseId, groupType, null);
+    }
+
+    @Override
+    public List<Long> listDetailCurrentIdsOfUniongroupConfigures(Integer namespaceId, Long enterpriseId, String groupType, Integer versionCode) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhUniongroupConfiguresRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_CONFIGURES);
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_TYPE.eq(UniongroupTargetType.MEMBERDETAIL.getCode()));
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.ENTERPRISE_ID.eq(enterpriseId));
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUP_TYPE.eq(groupType));
+        if (versionCode != null) {
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(versionCode));
+        } else {
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(DEFAULT_VERSION_CODE));
+        }
         Result result = query.fetch();
         if (result != null) {
             return result.getValues("current_id", Long.class);
@@ -175,6 +212,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         dao.delete(uniongroupConfigures);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUniongroupConfiguresDao.class, uniongroupConfigures.getId());
     }
+
 
     @Override
     public void deleteUniongroupConfigresByOrgIds(Integer namespaceId, List<Long> orgIds) {
@@ -242,13 +280,45 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
+    public List<UniongroupMemberDetail> findUniongroupMemberDetailByDetailIdWithoutGroupType(Integer namespaceId, Long detailId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
+        SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(detailId));
+//        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
+        List<EhUniongroupMemberDetailsRecord> records = query.fetch();
+        List<UniongroupMemberDetail> result = new ArrayList<>();
+        if (records != null) {
+            records.stream().map(r -> {
+                result.add(ConvertHelper.convert(r, UniongroupMemberDetail.class));
+                return null;
+            }).collect(Collectors.toList());
+        }
+        if (result != null && result.size() != 0) {
+            return result;
+        }
+        return null;
+    }
+
+    @Override
     public UniongroupMemberDetail findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId, String groupType) {
+        return this.findUniongroupMemberDetailByDetailId(namespaceId, detailId, groupType, null);
+    }
+
+    @Override
+    public UniongroupMemberDetail findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId, String groupType, Integer versionCode) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 //        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
         SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(detailId));
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType));
+        if (versionCode == null) {
+            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(DEFAULT_VERSION_CODE));
+        } else {
+            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(versionCode));
+        }
         EhUniongroupMemberDetailsRecord record = query.fetchAny();
         if (record != null) {
             return ConvertHelper.convert(record, UniongroupMemberDetail.class);
@@ -259,21 +329,27 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     @Override
     public List<UniongroupMemberDetail> listUniongroupMemberDetail(Integer namespaceId, Long groupId, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-//        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
-        SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId));
-        List<EhUniongroupMemberDetailsRecord> records = query.fetch();
-        List<UniongroupMemberDetail> result = new ArrayList<>();
-        if (records != null) {
-            records.stream().map(r -> {
-                result.add(ConvertHelper.convert(r, UniongroupMemberDetail.class));
-                return null;
-            }).collect(Collectors.toList());
-        }
-        if (result != null && result.size() != 0) {
-            return result;
+        List<UniongroupMemberDetail> list = context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.UPDATE_TIME,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.OPERATOR_UID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_TYPE,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).leftOuterJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
+                .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
+                .fetch().map(r -> {
+                    return ConvertHelper.convert(r, UniongroupMemberDetail.class);
+                });
+        if (list != null && list.size() != 0) {
+            return list;
         }
         return null;
     }
@@ -281,28 +357,63 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     @Override
     public List<UniongroupMemberDetail> listUniongroupMemberDetail(Long groupId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-//        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
-        SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
-        List<EhUniongroupMemberDetailsRecord> records = query.fetch();
-        List<UniongroupMemberDetail> result = new ArrayList<>();
-        if (records != null) {
-            records.stream().map(r -> {
-                result.add(ConvertHelper.convert(r, UniongroupMemberDetail.class));
-                return null;
-            }).collect(Collectors.toList());
-        }
-        if (result != null && result.size() != 0) {
-            return result;
+        List<UniongroupMemberDetail> list = context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.UPDATE_TIME,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.OPERATOR_UID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_TYPE,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).leftOuterJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
+                .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
+                .fetch().map(r -> {
+                    return ConvertHelper.convert(r, UniongroupMemberDetail.class);
+                });
+        if (list != null && list.size() != 0) {
+            return list;
         }
         return null;
+//        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
+//        SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
+//        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
+//        List<EhUniongroupMemberDetailsRecord> records = query.fetch();
+//        List<UniongroupMemberDetail> result = new ArrayList<>();
+//        if (records != null) {
+//            records.stream().map(r -> {
+//                result.add(ConvertHelper.convert(r, UniongroupMemberDetail.class));
+//                return null;
+//            }).collect(Collectors.toList());
+//        }
+//        if (result != null && result.size() != 0) {
+//            return result;
+//        }
+//        return null;
     }
 
     @Override
-    public void deleteUniongroupMemberDetailsByDetailIds(List<Long> detailIds) {
+    public void deleteUniongroupMemberDetailsByDetailIds(List<Long> detailIds, String groupType) {
+        this.deleteUniongroupMemberDetailsByDetailIds(detailIds, groupType, null);
+    }
+
+    @Override
+    public void deleteUniongroupMemberDetailsByDetailIds(List<Long> detailIds, String groupType, Integer versionCode) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 //        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
         DeleteQuery<EhUniongroupMemberDetailsRecord> query = context.deleteQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
+        if (versionCode == null) {
+            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(DEFAULT_VERSION_CODE));
+        } else {
+            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(versionCode));
+        }
+        if (groupType != null) {
+            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType));
+
+        }
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.in(detailIds));
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUniongroupConfiguresDao.class, null);
@@ -311,24 +422,52 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     @Override
     public List<UniongroupMemberDetail> listUniongroupMemberDetailByGroupType(Integer namespaceId, Long ownerId, Long groupId, String groupType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-//        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
-        SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType));
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId));
+        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
         if (groupId != null && groupId != 0L) {
-            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
+            list = context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.UPDATE_TIME,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.OPERATOR_UID,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_TYPE,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).leftOuterJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                    .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
+                    .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                    .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType))
+                    .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
+                    .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
+                    .fetch().map(r -> {
+                        return ConvertHelper.convert(r, UniongroupMemberDetail.class);
+                    });
+        } else {
+            list = context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.UPDATE_TIME,
+                    Tables.EH_UNIONGROUP_MEMBER_DETAILS.OPERATOR_UID,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_TYPE,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME,
+                    Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).leftOuterJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                    .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
+                    .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                    .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType))
+                    .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
+                    .fetch().map(r -> {
+                        return ConvertHelper.convert(r, UniongroupMemberDetail.class);
+                    });
         }
-        List<EhUniongroupMemberDetailsRecord> records = query.fetch();
-        List<UniongroupMemberDetail> result = new ArrayList<>();
-        if (records != null) {
-            records.stream().map(r -> {
-                result.add(ConvertHelper.convert(r, UniongroupMemberDetail.class));
-                return null;
-            }).collect(Collectors.toList());
-        }
-        if (result != null && result.size() != 0) {
-            return result;
+
+        if (list != null && list.size() != 0) {
+            return list;
         }
         return null;
     }
@@ -380,21 +519,70 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
-    public void deleteUniongroupConfigresByGroupId(Long groupId, Long organizationId) {
+    public void deleteUniongroupConfigresByCurrentIdAndGroupTypeAndVersion(Long detailId, String groupType, Integer versionCode) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        context.delete(Tables.EH_UNIONGROUP_CONFIGURES)
-                .where(Tables.EH_UNIONGROUP_CONFIGURES.GROUP_ID.eq(groupId))
-                .and(Tables.EH_UNIONGROUP_CONFIGURES.ENTERPRISE_ID.eq(organizationId))
-                .execute();
+        EhUniongroupConfiguresDao dao = new EhUniongroupConfiguresDao(context.configuration());
+        DeleteQuery<EhUniongroupConfiguresRecord> query = context.deleteQuery(Tables.EH_UNIONGROUP_CONFIGURES);
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_ID.eq(detailId));
+        if (groupType != null) {
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUP_TYPE.eq(groupType));
+        }
+        if (versionCode != null) {
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(versionCode));
+        } else {
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(DEFAULT_VERSION_CODE));
+        }
+        query.execute();
+    }
+
+    @Override
+    public void deleteUniongroupConfigresByGroupId(Long groupId, Long organizationId) {
+        this.deleteUniongroupConfigresByGroupId(groupId, organizationId, null);
+    }
+
+    @Override
+    public void deleteUniongroupConfigresByGroupId(Long groupId, Long organizationId, Integer versionCode) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhUniongroupConfiguresDao dao = new EhUniongroupConfiguresDao(context.configuration());
+        DeleteQuery<EhUniongroupConfiguresRecord> query = context.deleteQuery(Tables.EH_UNIONGROUP_CONFIGURES);
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUP_ID.eq(groupId));
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.ENTERPRISE_ID.eq(organizationId));
+        if (versionCode != null) {
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(versionCode));
+        } else {
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(DEFAULT_VERSION_CODE));
+        }
+        query.execute();
     }
 
     @Override
     public void deleteUniongroupMemberDetailByGroupId(Long groupId, Long organizationId) {
+        this.deleteUniongroupMemberDetailByGroupId(groupId, organizationId, null);
+    }
+
+    @Override
+    public void deleteUniongroupMemberDetailByGroupId(Long groupId, Long organizationId, Integer versionCode) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        context.delete(Tables.EH_UNIONGROUP_MEMBER_DETAILS)
-                .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
-                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(organizationId))
-                .execute();
+        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
+        DeleteQuery<EhUniongroupMemberDetailsRecord> query = context.deleteQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
+        if (versionCode == null) {
+            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(DEFAULT_VERSION_CODE));
+        } else {
+            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(versionCode));
+        }
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(organizationId));
+        query.execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUniongroupConfiguresDao.class, null);
+    }
+
+
+    @Override
+    public void deleteUniongroupMemberDetails(UniongroupMemberDetail uniongroupMemberDetail) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
+        dao.delete(uniongroupMemberDetail);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUniongroupConfiguresDao.class, uniongroupMemberDetail.getId());
     }
 
     @Override
