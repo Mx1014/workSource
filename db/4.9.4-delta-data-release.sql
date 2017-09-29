@@ -268,13 +268,13 @@ INSERT INTO `eh_payment_types`
 VALUES
 (@eh_payment_types_id:=@eh_payment_types_id+1, 'activitySignupOrder', 1, 'EhOrganizations', '1023080', null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
 
-
--- 收款方
-set @eh_payment_users_id = (select MAX(id) from `eh_payment_users`);
-INSERT INTO `eh_payment_users`
-(`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
-VALUES
-(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', '1023080', '2', '1087', UTC_TIMESTAMP());
+-- DUPLICATED -- ANNOTATED BY WENTIAN
+-- -- 收款方
+-- set @eh_payment_users_id = (select MAX(id) from `eh_payment_users`);
+-- INSERT INTO `eh_payment_users`
+-- (`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
+-- VALUES
+-- (@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', '1023080', '2', '1087', UTC_TIMESTAMP());
 
 
 
@@ -283,9 +283,9 @@ VALUES
 
 -- 吴寒
 
--- 添加收款方的会员
-set @eh_payment_user_id = (select max(id) from `eh_payment_users`);
-INSERT INTO `eh_payment_users` VALUES (@eh_payment_user_id:=@eh_payment_user_id+1, 'EhOrganizations', '1023080', '2', '1087', UTC_TIMESTAMP());
+-- -- 添加收款方的会员
+-- set @eh_payment_user_id = (select max(id) from `eh_payment_users`);
+-- INSERT INTO `eh_payment_users` VALUES (@eh_payment_user_id:=@eh_payment_user_id+1, 'EhOrganizations', '1023080', '2', '1087', UTC_TIMESTAMP());
 -- 添加收款方
 set @eh_payment_service_configs_id = (select max(id) from `eh_payment_service_configs`);
 INSERT INTO `eh_payment_service_configs` VALUES (@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '视频会议', 'videoConf', '1', 'EhOrganizations', '1023080', null, null, NULL, '2', '1087', UTC_TIMESTAMP(), null);
@@ -296,10 +296,10 @@ INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_i
 
 -- wenge
 
-
--- 添加收款方的会员
-set @eh_payment_user_id = (select max(id) from `eh_payment_users`);
-INSERT INTO `eh_payment_users` VALUES (@eh_payment_user_id:=@eh_payment_user_id+1, 'EhOrganizations', '1023080', '2', '1087', UTC_TIMESTAMP());
+-- DUPLICATE
+-- -- 添加收款方的会员
+-- set @eh_payment_user_id = (select max(id) from `eh_payment_users`);
+-- INSERT INTO `eh_payment_users` VALUES (@eh_payment_user_id:=@eh_payment_user_id+1, 'EhOrganizations', '1023080', '2', '1087', UTC_TIMESTAMP());
 -- 添加收款方
 set @eh_payment_service_configs_id = (select max(id) from `eh_payment_service_configs`);
 INSERT INTO `eh_payment_service_configs` VALUES (@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '资源预约', 'rentalOrder', '1', 'EhOrganizations', '1023080', null, null, NULL, '2', '1087', UTC_TIMESTAMP(), null);

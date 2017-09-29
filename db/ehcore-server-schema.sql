@@ -7863,7 +7863,6 @@ CREATE TABLE `eh_payment_users` (
   UNIQUE KEY `i_owner` (`owner_type`,`owner_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
 DROP TABLE IF EXISTS `eh_payment_variables`;
 CREATE TABLE `eh_payment_variables` (
   `id` BIGINT NOT NULL,
