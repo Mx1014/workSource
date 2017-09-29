@@ -6,6 +6,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
+import com.everhomes.order.PaymentServiceConfigHandler;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderType;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
-@Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.VIDEOCONF_CODE )
+@Component(PaymentServiceConfigHandler.PAYMENT_SERVICE_CONFIG_HANDLER_PREFIX + OrderType.VIDEOCONF_CODE )
 public class VideoConfV2CallBackHandler implements PaymentCallBackHandler {
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(VideoConfV2CallBackHandler.class);
