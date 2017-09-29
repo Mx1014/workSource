@@ -3,6 +3,7 @@ package com.everhomes.rest.customer;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -39,7 +40,11 @@ public class CustomerTrackingDTO {
     private Integer intentionGrade;
     private Timestamp trackingTime;
     private String content;
+    
+    @ItemType(String.class)
     private List<String>  contentImgUriList;
+    
+    @ItemType(String.class)
     private List<String> contentImgUrlList;
     
 
