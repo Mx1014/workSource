@@ -77,6 +77,9 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 	private FlowCaseProvider flowCaseProvider;
 	@Autowired
 	private SmsProvider smsProvider;
+
+	@Autowired
+	private PayService payService;
 	@Override
 	public void paySuccess(OrderPaymentNotificationCommand cmd) {
 
@@ -84,7 +87,10 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 
 				RentalOrderPayorderMap orderMap= rentalProvider.findRentalBillPaybillMapByOrderNo(String.valueOf(cmd.getOrderId()));
 				RentalOrder order = rentalProvider.findRentalBillById(orderMap.getOrderId());
-				order.setPaidMoney(order.getPaidMoney().add(new java.math.BigDecimal(cmd.getAmount())));
+
+				BigDecimal payAmount = payService.changePayAmount(cmd.getAmount());
+
+				order.setPaidMoney(order.getPaidMoney().add(payAmount));
 				PaymentType paymentType = PaymentType.fromCode(cmd.getPaymentType());
 				if (null != paymentType) {
 					if (paymentType.name().toUpperCase().startsWith("WECHAT")) {
@@ -105,7 +111,7 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 					order.setStatus(SiteBillStatus.RESERVED.getCode());
 				}else if(order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
 					//判断支付金额与订单金额是否相同
-					if (order.getPaidMoney().compareTo(new BigDecimal(cmd.getAmount())) == 0
+					if (order.getPaidMoney().multiply(new BigDecimal(100)).compareTo(new BigDecimal(cmd.getAmount())) == 0
 							&& order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
 
 						if (order.getPayMode().equals(PayMode.ONLINE_PAY.getCode())) {
