@@ -2242,6 +2242,15 @@ public class SequenceServiceImpl implements SequenceService {
                     .from(Tables.EH_ASSET_PAYMENT_ORDER).fetchOne().value1();
         });
 
+        syncTableSequence(com.everhomes.server.schema.tables.pojos.EhPaymentUsers.class, com.everhomes.server.schema.tables.pojos.EhPaymentUsers.class, Tables.EH_PAYMENT_USERS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_USERS.ID.max())
+                    .from(Tables.EH_PAYMENT_USERS).fetchOne().value1();
+        });
+        syncTableSequence(com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords.class, com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords.class, Tables.EH_PAYMENT_ORDER_RECORDS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_ORDER_RECORDS.ID.max())
+                    .from(Tables.EH_PAYMENT_ORDER_RECORDS).fetchOne().value1();
+        });
+
     }
 
     @SuppressWarnings("rawtypes")
