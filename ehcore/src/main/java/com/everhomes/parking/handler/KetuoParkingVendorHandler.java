@@ -27,7 +27,7 @@ import com.everhomes.util.RuntimeErrorException;
 /**
  * 停车对接
  */
-public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler implements ParkingVendorHandler {
+public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(KetuoParkingVendorHandler.class);
 
 	static final String RECHARGE = "/api/pay/CardRecharge";
@@ -500,8 +500,6 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		return dto;
 	}
 
-	protected KetuoRequestConfig getKetuoRequestConfig() {
-		return null;
-	}
+	abstract protected KetuoRequestConfig getKetuoRequestConfig();
 
 }
