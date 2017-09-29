@@ -38,8 +38,6 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 	private static final String PAY_TEMP_FEE = "/api/pay/PayParkingFee";
 	//只显示ruleType = 1时的充值项
 	static final String RULE_TYPE = "1";
-	//科托系统：按30天计算
-	static final int DAY_COUNT = 30;
 	//月租车 : 2
 	static final String CAR_TYPE = "2";
     
@@ -56,11 +54,14 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 
 			long expireTime = strToLong(expireDate);
 
-			if (checkExpireTime(parkingLot, expireTime)) {
-				return resultList;
-			}
-
 			ParkingCardDTO parkingCardDTO = convertCardInfo(parkingLot);
+
+			if (checkExpireTime(parkingLot, expireTime)) {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
+
+			}
 
 			if (null != card.getName()) {
 				String plateOwnerName = card.getName();
@@ -102,31 +103,31 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 
     	if(StringUtils.isBlank(plateNumber)) {
     		for(KetuoCardType k: types) {
-				populateRateInfo(k.getCarType(), k.getTypeName(), list);
+				populateRateInfo(k.getCarType(), k, list);
     		}
     	}else{
     		KetuoCard cardInfo = getCard(plateNumber);
     		if(null != cardInfo) {
 				String carType = cardInfo.getCarType();
-				String typeName = null;
+				KetuoCardType type = null;
 				for(KetuoCardType kt: types) {
 					if(carType.equals(kt.getCarType())) {
-						typeName = kt.getTypeName();
+						type = kt;
 						break;
 					}
 				}
-				populateRateInfo(carType, typeName, list);
+				populateRateInfo(carType, type, list);
     		}
     	}
 
 		return list.stream().map(r -> convertParkingRechargeRateDTO(parkingLot, r)).collect(Collectors.toList());
     }
 
-	void populateRateInfo(String carType, String typeName, List<KetuoCardRate> result) {
+	void populateRateInfo(String carType, KetuoCardType type, List<KetuoCardRate> result) {
 		for(KetuoCardRate rate: getCardRule(carType)) {
 			if(RULE_TYPE.equals(rate.getRuleType())) {
 				rate.setCarType(carType);
-				rate.setTypeName(typeName);
+				rate.setTypeName(type.getTypeName());
 				result.add(rate);
 			}
 		}
@@ -145,6 +146,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		String locale = Locale.SIMPLIFIED_CHINESE.toString();
 		String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 		dto.setRateName(rateName);
+		dto.setCardTypeId(rate.getCarType());
 		dto.setCardType(rate.getTypeName());
 		dto.setMonthCount(new BigDecimal(rate.getRuleAmount()));
 		dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
@@ -241,9 +243,9 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 
 		JSONObject param = new JSONObject();
 		param.put("orderNo", order.getOrderToken());
-		param.put("amount", (order.getPrice().multiply(new BigDecimal(100))).intValue());
+		param.put("amount", (order.getOriginalPrice().multiply(new BigDecimal(100))).intValue());
 	    param.put("discount", 0);
-	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?4:5);
+	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
 		String json = post(param, PAY_TEMP_FEE);
 
         JSONObject jsonObject = JSONObject.parseObject(json);
@@ -332,7 +334,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 	}
 
 	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
 		String plateNumber = order.getPlateNumber();
 
 		KetuoCard cardInfo = getCard(plateNumber);
@@ -340,11 +342,10 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		String cardType = CAR_TYPE;
 
 		if(null != cardInfo) {
-			long expireTime = strToLong(cardInfo.getValidTo());
-			ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
-			if (!checkExpireTime(parkingLot, expireTime)) {
+//			long expireTime = strToLong(cardInfo.getValidTo());
+//			if (!checkExpireTime(parkingLot, expireTime)) {
 				cardType = cardInfo.getCarType();
-			}
+//			}
 		}
 		for(KetuoCardRate rate: getCardRule(cardType)) {
 			if(rate.getRuleId().equals(order.getRateToken())) {
@@ -357,6 +358,11 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 					"Rate not found.");
 		}
 		order.setRateName(ketuoCardRate.getRuleName());
+
+		BigDecimal ratePrice = new BigDecimal(ketuoCardRate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+
+		checkAndSetOrderPrice(parkingLot, order, ratePrice);
+
 	}
 
 	private KetuoTempFee getTempFee(String plateNumber) {
@@ -372,6 +378,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 				tempFee = list.get(0);
 			}
 		}
+
         return tempFee;
     }
 
@@ -415,7 +422,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 		OpenCardInfoDTO dto = new OpenCardInfoDTO();
 
 		//月租车
-		List<KetuoCardRate> rates = getCardRule(CAR_TYPE);
+		List<KetuoCardRate> rates = getCardRule(parkingCardRequest.getCardTypeId());
 		if(null != rates && !rates.isEmpty()) {
 			
 			KetuoCardRate rate = null;

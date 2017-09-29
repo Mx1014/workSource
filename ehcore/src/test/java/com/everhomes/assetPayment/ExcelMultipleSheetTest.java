@@ -32,9 +32,9 @@ public class ExcelMultipleSheetTest {
             String[] headers = { "ID", "用户名" };
             ExcelUtils eeu = new ExcelUtils();
             HSSFWorkbook workbook = new HSSFWorkbook();
-            eeu.exportExcel(workbook, 0, "上海", headers, data);
-            eeu.exportExcel(workbook, 1, "深圳", headers, data);
-            eeu.exportExcel(workbook, 2, "广州", headers, data);
+//            eeu.exportExcel(workbook, 0, "上海", headers, data);
+//            eeu.exportExcel(workbook, 1, "深圳", headers, data);
+//            eeu.exportExcel(workbook, 2, "广州", headers, data);
             //原理就是将所有的数据一起写入，然后再关闭输入流。
             workbook.write(out);
             out.close();
