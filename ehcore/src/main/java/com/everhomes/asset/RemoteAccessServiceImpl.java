@@ -102,7 +102,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         );
         queryBuilder.where(getListOrderPaymentCondition(cmd));
         queryBuilder.sortBy(getListOrderPaymentSorts(cmd.getSorts()));
-        queryBuilder.limit(cmd.getLimit()).offset(cmd.getOffset());
+        queryBuilder.limit(cmd.getPageSize()).offset(cmd.getNextPageAnchor());
 
         MapListRestResponse response = (MapListRestResponse) callPaymentMethod(
                 "POST",
@@ -110,7 +110,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 payCmd.done(),
                 MapListRestResponse.class);
 
-        ListPaymentBillResp result = new ListPaymentBillResp(cmd.getOffset(), cmd.getLimit());
+        ListPaymentBillResp result = new ListPaymentBillResp(cmd.getNextPageAnchor(), cmd.getPageSize());
         result.setList(new ArrayList<PaymentBillResp>());
 
         if(response.getResponse() != null && !response.getResponse().isEmpty()) {
@@ -122,11 +122,11 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 }
             }
         }
-        if(result.getList()!=null && result.getList().size() >= (cmd.getLimit())){
-            result.setOffset(result.getOffset()+1);
+        if(result.getList()!=null && result.getList().size() >= (cmd.getPageSize())){
+            result.setNextPageAnchor(result.getNextPageAnchor()+cmd.getPageSize());
             result.getList().remove(result.getList().size()-1);
         }else{
-            result.setOffset(0l);
+            result.setNextPageAnchor(null);
         }
         return result;
     }
