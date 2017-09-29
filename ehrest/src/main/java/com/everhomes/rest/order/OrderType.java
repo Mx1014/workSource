@@ -32,7 +32,7 @@ public class OrderType {
 		WUYETEST(OrderType.WU_YE_TEST_CODE,"wuyetest","物业支付-测试用",""),
 		PARKING(OrderType.PARKING_CODE,"parking","停车充值支付",""),
 		PMSIYUAN(OrderType.PM_SIYUAN_CODE,"pmsy","思源物业",""),
-		PAYMENTCARD(OrderType.PAYMENT_CARD_CODE,"paymentCard","一卡通",""),
+		PAYMENTCARD(OrderType.PAYMENT_CARD_CODE,"paymentCard","一卡通","pcc"),
 		RENTALORDER(OrderType.RENTAL_ORDER_CODE,"rentalOrder","资源预订",""),
 		EXPRESS_ORDER(OrderType.EXPRESS_ORDER_CODE,"expressOrder","快递订单",""),
 		ACTIVITYSIGNUPORDER(OrderType.ACTIVITY_SIGNUP_ORDER_CODE,"activitySignupOrder","活动报名缴费","act"),
