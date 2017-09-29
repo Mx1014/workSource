@@ -103,7 +103,6 @@ ALTER TABLE eh_organization_member_details ADD COLUMN emergency_relationship VAR
 ALTER TABLE eh_organization_member_details ADD COLUMN department VARCHAR(256) COMMENT '部门';
 ALTER TABLE eh_organization_member_details ADD COLUMN job_position VARCHAR(256) COMMENT '岗位';
 ALTER TABLE eh_organization_member_details ADD COLUMN job_level VARCHAR(256) COMMENT '职级';
-ALTER TABLE eh_organization_member_details ADD COLUMN report_target VARCHAR(128) COMMENT '汇报对象';
 ALTER TABLE eh_organization_member_details ADD COLUMN contact_short_token VARCHAR(128) COMMENT '短号';
 ALTER TABLE eh_organization_member_details ADD COLUMN work_email VARCHAR(128) COMMENT '工作邮箱';
 ALTER TABLE eh_organization_member_details ADD COLUMN contract_party_id BIGINT COMMENT '合同主体';
