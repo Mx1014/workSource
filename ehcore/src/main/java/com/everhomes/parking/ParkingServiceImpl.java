@@ -21,18 +21,19 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.order.PayService;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
+import com.everhomes.rest.order.*;
 import com.everhomes.rest.parking.*;
+import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 
 import com.everhomes.server.schema.Tables;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -81,10 +82,6 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.order.CommonOrderCommand;
-import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -134,6 +131,8 @@ public class ParkingServiceImpl implements ParkingService {
     private AppProvider appProvider;
 	@Autowired
 	private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
+    @Autowired
+    private PayService payService;
 
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -505,7 +504,34 @@ public class ParkingServiceImpl implements ParkingService {
     	
     	return response;
     }
-	
+
+    @Override
+    public PreOrderDTO createParkingRechargeOrderV2(CreateParkingRechargeOrderCommand cmd){
+
+        if(null == cmd.getMonthCount() || cmd.getMonthCount() ==0) {
+            LOGGER.error("Invalid MonthCount, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "Invalid MonthCount.");
+        }
+
+        return (PreOrderDTO) createGeneralOrder(cmd, ParkingRechargeType.MONTHLY.getCode(), ActivityRosterPayVersionFlag.V2);
+    }
+
+    @Override
+    public PreOrderDTO createParkingTempOrderV2(CreateParkingTempOrderCommand cmd) {
+        checkOrderToken(cmd.getOrderToken());
+        CreateParkingRechargeOrderCommand param = new CreateParkingRechargeOrderCommand();
+        param.setOwnerType(cmd.getOwnerType());
+        param.setOwnerId(cmd.getOwnerId());
+        param.setParkingLotId(cmd.getParkingLotId());
+        param.setPlateNumber(cmd.getPlateNumber());
+        param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
+        param.setPrice(cmd.getPrice());
+
+        return (PreOrderDTO) createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode(), ActivityRosterPayVersionFlag.V2);
+
+    }
+
 	@Override
 	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
 		
@@ -515,7 +541,7 @@ public class ParkingServiceImpl implements ParkingService {
 					"Invalid MonthCount.");
 		}
 		
-		return createGeneralOrder(cmd, ParkingRechargeType.MONTHLY.getCode());
+		return (CommonOrderDTO) createGeneralOrder(cmd, ParkingRechargeType.MONTHLY.getCode(), ActivityRosterPayVersionFlag.V1);
 	}
 	
 	@Override
@@ -529,11 +555,11 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
 		
-		return createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode());
+		return (CommonOrderDTO) createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode(), ActivityRosterPayVersionFlag.V1);
 
 	}
 	
-	private CommonOrderDTO createGeneralOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType) {
+	private Object createGeneralOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType, ActivityRosterPayVersionFlag version) {
 		checkPlateNumber(cmd.getPlateNumber());
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
@@ -573,9 +599,8 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
 
 		parkingRechargeOrder.setOrderNo(createOrderNo(System.currentTimeMillis()));
-
+		parkingRechargeOrder.setPaidVersion(version.getCode());
 		parkingRechargeOrder.setInvoiceType(cmd.getInvoiceType());
-
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
     		ParkingTempFeeDTO dto = handler.getParkingTempFee(parkingLot, cmd.getPlateNumber());
 
@@ -628,35 +653,67 @@ public class ParkingServiceImpl implements ParkingService {
 			return null;
 		});
 
-		//调用统一处理订单接口，返回统一订单格式
-		CommonOrderCommand orderCmd = new CommonOrderCommand();
-		orderCmd.setBody(ParkingRechargeType.fromCode(parkingRechargeOrder.getRechargeType()).toString());
-		orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
-		orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
-		if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
-			orderCmd.setSubject("停车缴费（月卡车：" + parkingRechargeOrder.getPlateNumber() + "）");
-		}else {
-			orderCmd.setSubject("停车缴费（临时车：" + parkingRechargeOrder.getPlateNumber() + "）");
-		}
-		
-		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
-		if(flag) {
-			orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
-		} else {
-			orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
-		}
-
-		CommonOrderDTO dto = null;
-		try {
-			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
-		} catch (Exception e) {
-			LOGGER.error("convertToCommonOrder is fail.",e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"convertToCommonOrder is fail.");
-		}
-    	
-		return dto;
+		if (ActivityRosterPayVersionFlag.V1 == version) {
+		    return convertOrderDTOForV1(parkingRechargeOrder, rechargeType);
+        }else {
+		    return convertOrderDTOForV2(parkingRechargeOrder, cmd.getClientAppName());
+        }
 	}
+
+    private PreOrderDTO convertOrderDTOForV2(ParkingRechargeOrder parkingRechargeOrder, String clientAppName) {
+//        PreOrderCommand preOrderCommand = new PreOrderCommand();
+//
+//        preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+//        preOrderCommand.setOrderId(parkingRechargeOrder.getOrderNo());
+        Long amount = payService.changePayAmount(parkingRechargeOrder.getPrice());
+//        preOrderCommand.setAmount(amount);
+//
+//        preOrderCommand.setPayerId(parkingRechargeOrder.getPayerUid());
+//        preOrderCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+//
+////        preOrderCommand.setExpiration(expiredTime);
+//
+//        preOrderCommand.setClientAppName(clientAppName);
+//
+//        PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
+		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
+				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount);
+
+
+		return callBack;
+    }
+
+    private CommonOrderDTO convertOrderDTOForV1(ParkingRechargeOrder parkingRechargeOrder, Byte rechargeType) {
+        //调用统一处理订单接口，返回统一订单格式
+        CommonOrderCommand orderCmd = new CommonOrderCommand();
+        orderCmd.setBody(ParkingRechargeType.fromCode(parkingRechargeOrder.getRechargeType()).toString());
+        orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
+        orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+        if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
+            orderCmd.setSubject("停车缴费（月卡车：" + parkingRechargeOrder.getPlateNumber() + "）");
+        }else {
+            orderCmd.setSubject("停车缴费（临时车：" + parkingRechargeOrder.getPlateNumber() + "）");
+        }
+
+        boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+        if(flag) {
+            orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+        } else {
+            orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
+        }
+
+        CommonOrderDTO dto = null;
+        try {
+            dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
+        } catch (Exception e) {
+            LOGGER.error("convertToCommonOrder is fail.",e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "convertToCommonOrder is fail.");
+        }
+
+        return dto;
+
+    }
 
 	private void createParkingUserInvoice(Long invoiceType, ParkingLot parkingLot, User user) {
 		if (null != invoiceType) {
@@ -1605,45 +1662,74 @@ public class ParkingServiceImpl implements ParkingService {
 		if(order.getStatus() < ParkingRechargeOrderStatus.PAID.getCode()){
 			return;
 		}
-
-		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
-		String refundApi =  configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
-		String appKey = configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
-		refundCmd.setAppKey(appKey);
-		Long timestamp = System.currentTimeMillis();
-		refundCmd.setTimestamp(timestamp);
-		Integer randomNum = (int) (Math.random()*1000);
-		refundCmd.setNonce(randomNum);
-
-		refundCmd.setRefundOrderNo(String.valueOf(order.getOrderNo()));
-		refundCmd.setOrderNo(String.valueOf(order.getId()));
-
-		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(order.getPaidType()).getStyleNo());
-
-		refundCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
-		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
-		if (flag) {
-			refundCmd.setRefundAmount(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+		if (ActivityRosterPayVersionFlag.V1.getCode() == order.getPaidVersion()) {
+			refundParkingOrderV1(cmd, order);
 		}else {
-			refundCmd.setRefundAmount(order.getPrice());
+			refundParkingOrderV2(cmd, order);
 		}
 
-		refundCmd.setRefundMsg("停车缴费退款");
-		this.setSignatureParam(refundCmd);
-
-		PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refundApi, refundCmd, PayZuolinRefundResponse.class);
-		if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
-			order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
-			order.setRefundTime(new Timestamp(System.currentTimeMillis()));
-			parkingProvider.updateParkingRechargeOrder(order);
-		} else{
-			LOGGER.error("Refund failed from vendor, cmd={}, refundCmd={}, response={}",
-					cmd, refundCmd, refundResponse);
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_REFUND_ERROR,
-					"bill refund error");
-		}
+        order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
+        order.setRefundTime(new Timestamp(System.currentTimeMillis()));
+        parkingProvider.updateParkingRechargeOrder(order);
 	}
+
+    private void refundParkingOrderV2 (UpdateParkingOrderCommand cmd, ParkingRechargeOrder order) {
+
+        Long refoundOrderNo = createOrderNo(System.currentTimeMillis());
+
+        Long amount = payService.changePayAmount(order.getPrice());
+        CreateOrderRestResponse refundResponse = payService.refund(OrderType.OrderTypeEnum.PARKING.getPycode(), order.getOrderNo(), refoundOrderNo, amount);
+
+        if(refundResponse != null || refundResponse.getErrorCode() != null && refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+
+        } else{
+            LOGGER.error("Refund failed from vendor, cmd={}, response={}",
+                    cmd, refundResponse);
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                    "bill refund error");
+        }
+    }
+
+	private void refundParkingOrderV1 (UpdateParkingOrderCommand cmd, ParkingRechargeOrder order) {
+        PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
+        String refundApi =  configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
+        String appKey = configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
+        refundCmd.setAppKey(appKey);
+        Long timestamp = System.currentTimeMillis();
+        refundCmd.setTimestamp(timestamp);
+        Integer randomNum = (int) (Math.random()*1000);
+        refundCmd.setNonce(randomNum);
+
+        refundCmd.setRefundOrderNo(String.valueOf(order.getOrderNo()));
+        refundCmd.setOrderNo(String.valueOf(order.getId()));
+
+        refundCmd.setOnlinePayStyleNo(VendorType.fromCode(order.getPaidType()).getStyleNo());
+
+        refundCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+        boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+        if (flag) {
+            refundCmd.setRefundAmount(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+        }else {
+            refundCmd.setRefundAmount(order.getPrice());
+        }
+
+        refundCmd.setRefundMsg("停车缴费退款");
+        this.setSignatureParam(refundCmd);
+
+        PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refundApi, refundCmd, PayZuolinRefundResponse.class);
+        if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+            order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
+            order.setRefundTime(new Timestamp(System.currentTimeMillis()));
+            parkingProvider.updateParkingRechargeOrder(order);
+        } else{
+            LOGGER.error("Refund failed from vendor, cmd={}, refundCmd={}, response={}",
+                    cmd, refundCmd, refundResponse);
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                    "bill refund error");
+        }
+    }
 
 	/***给支付相关的参数签名*/
 	private void setSignatureParam(PayZuolinRefundCommand cmd) {

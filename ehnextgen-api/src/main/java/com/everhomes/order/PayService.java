@@ -2,10 +2,7 @@
 package com.everhomes.order;
 
 
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
-
-import com.everhomes.pay.order.OrderCommandResponse;
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.PaymentParamsDTO;
 
 import com.everhomes.rest.order.PreOrderCommand;
@@ -71,4 +68,6 @@ public interface PayService {
     BigDecimal changePayAmount(Long amount);
 
     CreateOrderRestResponse refund(String orderType, Long payOrderId, Long refundOrderId, Long amount);
+    //把这个方法暴露出来，方便我的模块。--闻天
+    PaymentUser createPaymentUser(int businessUserType, String ownerType, Long ownerId);
 }

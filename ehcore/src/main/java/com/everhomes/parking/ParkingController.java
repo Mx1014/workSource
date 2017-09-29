@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
 import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -219,6 +220,36 @@ public class ParkingController extends ControllerBase {
     public RestResponse createParkingTempOrder(CreateParkingTempOrderCommand cmd) {
         CommonOrderDTO dto = parkingService.createParkingTempOrder(cmd);
         
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/createParkingRechargeOrderV2</b>
+     * <p>创建充值订单</p>
+     */
+    @RequestMapping("createParkingRechargeOrderV2")
+    @RestReturn(value=PreOrderDTO.class)
+    public RestResponse createParkingRechargeOrderV2(CreateParkingRechargeOrderCommand cmd) {
+
+        PreOrderDTO dto = parkingService.createParkingRechargeOrderV2(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/createParkingTempOrderV2</b>
+     * <p>创建临时订单</p>
+     */
+    @RequestMapping("createParkingTempOrderV2")
+    @RestReturn(value=PreOrderDTO.class)
+    public RestResponse createParkingTempOrderV2(CreateParkingTempOrderCommand cmd) {
+        PreOrderDTO dto = parkingService.createParkingTempOrderV2(cmd);
+
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

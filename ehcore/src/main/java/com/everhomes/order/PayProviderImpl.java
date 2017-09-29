@@ -80,7 +80,7 @@ public class PayProviderImpl implements PayProvider {
     @Override
     public void createPaymentOrderRecord(PaymentOrderRecord orderRecord) {
 
-        //下预付单时，BizOrderNum需要传PaymentOrderRecords表记录的id，此处先申请id，在返回值中使用BizOrderNum做为record的id
+
         if(orderRecord.getId() == null){
             long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentOrderRecords.class));
             orderRecord.setId(id);
@@ -168,5 +168,13 @@ public class PayProviderImpl implements PayProvider {
         });
 
         return payMethodDTOS;
+    }
+
+    @Override
+    public PaymentOrderRecord findOrderRecordByOrderNum(String bizOrderNum) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhPaymentOrderRecordsRecord>  query = context.selectQuery(Tables.EH_PAYMENT_ORDER_RECORDS);
+        query.addConditions(Tables.EH_PAYMENT_ORDER_RECORDS.ORDER_NUM.eq(bizOrderNum));
+        return query.fetchOneInto(PaymentOrderRecord.class);
     }
 }

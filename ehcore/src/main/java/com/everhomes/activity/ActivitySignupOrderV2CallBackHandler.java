@@ -1,9 +1,7 @@
 // @formatter:off
 package com.everhomes.activity;
 
-import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 
@@ -14,14 +12,11 @@ import com.everhomes.rest.activity.ActivityServiceErrorCode;
 
 import com.everhomes.rest.activity.*;
 
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PayCallbackCommand;
-import com.everhomes.rest.order.PaymentCallBackCommand;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +43,7 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 	private PayService payService;
 
 	@Override
-	public void paySuccess(OrderPaymentNotificationCommand cmd) {
+	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
 		LOGGER.info("ActivitySignupOrderV2CallBackHandler paySuccess start cmd = {}", StringHelper.toJsonString(cmd));
 
 		ActivityRoster roster = activityProvider.findRosterByOrderNo(cmd.getOrderId());
@@ -85,7 +80,7 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 	}
 
 	@Override
-	public void payFail(OrderPaymentNotificationCommand cmd) {
+	public void payFail(SrvOrderPaymentNotificationCommand cmd) {
 		LOGGER.info("ActivitySignupOrderV2CallBackHandler payFail cmd = {}", cmd);
 
 		if(LOGGER.isDebugEnabled())
@@ -104,12 +99,12 @@ public class ActivitySignupOrderV2CallBackHandler implements PaymentCallBackHand
 	}
 
 	@Override
-	public void refundSuccess(OrderPaymentNotificationCommand cmd) {
+	public void refundSuccess(SrvOrderPaymentNotificationCommand cmd) {
 		//when you refund, i can do nothing.
 	}
 
 	@Override
-	public void refundFail(OrderPaymentNotificationCommand cmd) {
+	public void refundFail(SrvOrderPaymentNotificationCommand cmd) {
 		//when you refund, i can do nothing.
 	}
 
