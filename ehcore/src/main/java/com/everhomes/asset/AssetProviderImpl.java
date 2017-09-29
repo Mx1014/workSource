@@ -1805,7 +1805,7 @@ public class AssetProviderImpl implements AssetProvider {
         order.setUid(UserContext.currentUserId());
         order.setPayAmount(new BigDecimal(amountOwed));
         order.setPayerType(payerType);
-
+        order.setStatus((byte)0);
         EhAssetPaymentOrderDao dao = new EhAssetPaymentOrderDao(context.configuration());
         dao.insert(order);
         return nextOrderId;
@@ -1843,6 +1843,7 @@ public class AssetProviderImpl implements AssetProvider {
             orderBill.setAmount(new BigDecimal(billIdAndAmount.getAmountOwed()));
             orderBill.setBillId(billIdAndAmount.getBillId());
             orderBill.setOrderId(orderId);
+            orderBill.setStatus(0);
             orderBills.add(orderBill);
         }
         EhAssetPaymentOrderBillsDao dao = new EhAssetPaymentOrderBillsDao(dslContext.configuration());
