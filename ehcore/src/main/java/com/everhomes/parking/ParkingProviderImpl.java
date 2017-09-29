@@ -221,6 +221,8 @@ public class ParkingProviderImpl implements ParkingProvider {
 		query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.MONTH_COUNT.eq(monthCount));
 
 		LOGGER.debug(query.getSQL());
+		LOGGER.debug(JSONObject.toJSONString(query.getBindValues()));
+
 		return ConvertHelper.convert(query.fetchOne(), ParkingRechargeRate.class);
 	}
     
