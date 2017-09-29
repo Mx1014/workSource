@@ -43,7 +43,6 @@ VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 9999
 
 -- 支付2.0 init data by wentian
 
-
 -- 基础
 -- -- 支付方式
 -- SET @eh_configurations_id = (SELECT MAX(id) from eh_configurations);
@@ -56,7 +55,10 @@ UPDATE `eh_configurations` SET `value` = 'https://payv2.zuolin.com/pay' where na
 -- INSERT INTO `eh_payment_accounts` (`id`, `name`, `account_id`, `system_id`, `app_key`, `secret_key`, `create_time`)
 -- VALUES
 -- ('1', 'payv2-account-20170929', '10000', '1', '136890e5-41f9-4494-8dc2-46d63ff015b7', 'fgFUqv7/GPfx1zZX9I3cHSt5+zJNKNKHiSDuLFoMC8WFIeOaZqTDps8zIWPZioRx/XGta5anMlDpM6NBlCwabg==', '2017-09-08 14:58:46');
-
+delete from `eh_payment_accounts` where account_id='10000';
+INSERT INTO `eh_payment_accounts` (`id`, `name`, `account_id`, `system_id`, `app_key`, `secret_key`, `create_time`)
+VALUES
+('1', 'zuolinAccount', '10000', '1', '402bca3f-e1be-4c9a-a975-cfa28d9b9e12', '566HI0h7GiloRywFYobfP+Wy2gFTygxdwK/VQGRkB8PNz0AHhMrfvExLiYYGLUCIXHdOnFRvr//gyND0sgLBag==', UTC_123123);
 
 
 
@@ -68,7 +70,7 @@ TRUNCATE `eh_payment_users`;
 -- config
 INSERT INTO `eh_payment_service_configs` (`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
 VALUES
-('1', '张江高科缴费', 'zjgkrentalcode','999971', 'EhOrganizations', '1012516', null, null, null, '2', '1145', UTC_TIMESTAMP(), NULL);
+('1', '张江高科缴费', 'zjgkrentalcode','999971', 'EhOrganizations', '1012516', null, null, null, '2', '1000', UTC_TIMESTAMP(), NULL);
 
 
 -- 支付类型
@@ -83,7 +85,7 @@ VALUES
 INSERT INTO `eh_payment_users`
 (`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
 VALUES
-('1', 'EhOrganizations', '1012516', '2', '1145', UTC_TIMESTAMP());
+('1', 'EhOrganizations', '1012516', '2', '1000', UTC_TIMESTAMP());
 
 
 
@@ -93,7 +95,7 @@ VALUES
 set @eh_payment_service_configs_id = (select MAX(id) from `eh_payment_service_configs`);
 INSERT INTO `eh_payment_service_configs` (`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
 VALUES
-(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '快递订单','expressOrder', 999985, 'EhOrganizations', 1007144, null, null, null, '2', '1141', UTC_TIMESTAMP(), NULL);
+(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '快递订单','expressOrder', 999985, 'EhOrganizations', '1007144', null, null, null, '2', '1001', UTC_TIMESTAMP(), NULL);
 
 
 -- 支付类型
@@ -101,7 +103,7 @@ set @eh_payment_types_id = (select max(id) from `eh_payment_types`);
 INSERT INTO `eh_payment_types`
 (`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
 VALUES
-(@eh_payment_types_id:=@eh_payment_types_id+1, 'expressOrder', 999985, 'EhOrganizations', 1007144, null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
+(@eh_payment_types_id:=@eh_payment_types_id+1, 'expressOrder', 999985, 'EhOrganizations', '1007144', null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
 
 
 -- 收款方
@@ -109,14 +111,14 @@ set @eh_payment_users_id = (select MAX(id) from `eh_payment_users`);
 INSERT INTO `eh_payment_users`
 (`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
 VALUES
-(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', 1007144, '2', '1141', UTC_TIMESTAMP());
+(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', 1007144, '2', '1001', UTC_TIMESTAMP());
 
 
 -- config
 set @eh_payment_service_configs_id = (select MAX(id) from `eh_payment_service_configs`);
 INSERT INTO `eh_payment_service_configs` (`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
 VALUES
-(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '打印订单','printOrder', 1, 'EhOrganizations', 1023080, null, null, null, '2', '1142', UTC_TIMESTAMP(), NULL);
+(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '打印订单','printOrder', 1, 'EhOrganizations', 1023080, null, null, null, '2', '1002', UTC_TIMESTAMP(), NULL);
 
 
 -- 支付类型
@@ -124,7 +126,7 @@ set @eh_payment_types_id = (select max(id) from `eh_payment_types`);
 INSERT INTO `eh_payment_types`
 (`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
 VALUES
-(@eh_payment_types_id:=@eh_payment_types_id+1, 'printOrder', 1, 'EhOrganizations', 1023080, null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
+(@eh_payment_types_id:=@eh_payment_types_id+1, 'printOrder', 1, 'EhOrganizations', '1023080', null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
 
 
 -- 收款方
@@ -132,7 +134,7 @@ set @eh_payment_users_id = (select MAX(id) from `eh_payment_users`);
 INSERT INTO `eh_payment_users`
 (`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
 VALUES
-(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', 1023080, '2', '1142', UTC_TIMESTAMP());
+(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', '1023080', '2', '1002', UTC_TIMESTAMP());
 
 
 
@@ -142,7 +144,7 @@ VALUES
 set @eh_payment_service_configs_id = (select MAX(id) from `eh_payment_service_configs`);
 INSERT INTO `eh_payment_service_configs` (`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
 VALUES
-(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '一卡通','paymentCard', 999990, 'EhOrganizations', 179043, null, null, null, '2', '1143', UTC_TIMESTAMP(), NULL);
+(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '一卡通','paymentCard', 999990, 'EhOrganizations', '179043', null, null, null, '2', '1003', UTC_TIMESTAMP(), NULL);
 
 
 -- 支付类型
@@ -150,7 +152,7 @@ set @eh_payment_types_id = (select max(id) from `eh_payment_types`);
 INSERT INTO `eh_payment_types`
 (`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
 VALUES
-(@eh_payment_types_id:=@eh_payment_types_id+1, 'paymentCard', 999990, 'EhOrganizations', 179043, null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
+(@eh_payment_types_id:=@eh_payment_types_id+1, 'paymentCard', 999990, 'EhOrganizations', '179043', null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
 
 
 -- 收款方
@@ -158,7 +160,7 @@ set @eh_payment_users_id = (select MAX(id) from `eh_payment_users`);
 INSERT INTO `eh_payment_users`
 (`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
 VALUES
-(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', 179043, '2', '1143', UTC_TIMESTAMP());
+(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', 179043, '2', '1003', UTC_TIMESTAMP());
 
 
 
@@ -174,7 +176,7 @@ VALUES
 set @eh_payment_service_configs_id = (select MAX(id) from `eh_payment_service_configs`);
 INSERT INTO `eh_payment_service_configs` (`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
 VALUES
-(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '活动','activitySignupOrder', 999973, 'EhOrganizations', '1010579', null, null, null, '2', '1144', UTC_TIMESTAMP(), NULL);
+(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '活动','activitySignupOrder', 999973, 'EhOrganizations', '1010579', null, null, null, '2', '1004', UTC_TIMESTAMP(), NULL);
 
 
 -- 支付类型
@@ -190,7 +192,7 @@ set @eh_payment_users_id = (select MAX(id) from `eh_payment_users`);
 INSERT INTO `eh_payment_users`
 (`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
 VALUES
-(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', '1010579', '2', '1144', UTC_TIMESTAMP());
+(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', '1010579', '2', '1004', UTC_TIMESTAMP());
 
 
 
@@ -203,7 +205,7 @@ VALUES
 set @eh_payment_service_configs_id = (select MAX(id) from `eh_payment_service_configs`);
 INSERT INTO `eh_payment_service_configs` (`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
 VALUES
-(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '活动','activitySignupOrder', 999971, 'EhOrganizations', '1012516', null, null, null, '2', '1145', UTC_TIMESTAMP(), NULL);
+(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '活动','activitySignupOrder', 999971, 'EhOrganizations', '1012516', null, null, null, '2', '1000', UTC_TIMESTAMP(), NULL);
 
 
 -- 支付类型
@@ -232,7 +234,7 @@ VALUES
 set @eh_payment_service_configs_id = (select MAX(id) from `eh_payment_service_configs`);
 INSERT INTO `eh_payment_service_configs` (`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
 VALUES
-(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '活动','activitySignupOrder', 999966, 'EhOrganizations', '1035830', null, null, null, '2', '1146', UTC_TIMESTAMP(), NULL);
+(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '活动','activitySignupOrder', 999966, 'EhOrganizations', '1035830', null, null, null, '2', '1005', UTC_TIMESTAMP(), NULL);
 
 
 -- 支付类型
@@ -248,7 +250,7 @@ set @eh_payment_users_id = (select MAX(id) from `eh_payment_users`);
 INSERT INTO `eh_payment_users`
 (`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
 VALUES
-(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', '1035830', '2', '1146', UTC_TIMESTAMP());
+(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', '1035830', '2', '1005', UTC_TIMESTAMP());
 
 
 
@@ -259,7 +261,7 @@ VALUES
 set @eh_payment_service_configs_id = (select MAX(id) from `eh_payment_service_configs`);
 INSERT INTO `eh_payment_service_configs` (`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
 VALUES
-(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '活动','activitySignupOrder', 1, 'EhOrganizations', '1023080', null, null, null, '2', '1087', UTC_TIMESTAMP(), NULL);
+(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '活动','activitySignupOrder', 1, 'EhOrganizations', '1023080', null, null, null, '2', '1002', UTC_TIMESTAMP(), NULL);
 
 
 -- 支付类型
@@ -289,7 +291,7 @@ VALUES
 -- INSERT INTO `eh_payment_users` VALUES (@eh_payment_user_id:=@eh_payment_user_id+1, 'EhOrganizations', '1023080', '2', '1087', UTC_TIMESTAMP());
 -- 添加收款方
 set @eh_payment_service_configs_id = (select max(id) from `eh_payment_service_configs`);
-INSERT INTO `eh_payment_service_configs` VALUES (@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '视频会议', 'videoConf', '1', 'EhOrganizations', '1023080', null, null, NULL, '2', '1087', UTC_TIMESTAMP(), null);
+INSERT INTO `eh_payment_service_configs` VALUES (@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '视频会议', 'videoConf', '1', 'EhOrganizations', '1023080', null, null, NULL, '2', '1002', UTC_TIMESTAMP(), null);
 -- 增加支付的方式
 set @eh_payment_types_id = (select max(id) from `eh_payment_types`);
 INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_id+1, 'videoConf', '1', 'EhOrganizations', '1023080', null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), null);
@@ -303,7 +305,7 @@ INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_i
 -- INSERT INTO `eh_payment_users` VALUES (@eh_payment_user_id:=@eh_payment_user_id+1, 'EhOrganizations', '1023080', '2', '1087', UTC_TIMESTAMP());
 -- 添加收款方
 set @eh_payment_service_configs_id = (select max(id) from `eh_payment_service_configs`);
-INSERT INTO `eh_payment_service_configs` VALUES (@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '资源预约', 'rentalOrder', '1', 'EhOrganizations', '1023080', null, null, NULL, '2', '1087', UTC_TIMESTAMP(), null);
+INSERT INTO `eh_payment_service_configs` VALUES (@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '资源预约', 'rentalOrder', '1', 'EhOrganizations', '1023080', null, null, NULL, '2', '1002', UTC_TIMESTAMP(), null);
 -- 增加支付的方式
 set @eh_payment_types_id = (select max(id) from `eh_payment_types`);
 INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_id+1, 'rentalOrder', '1', 'EhOrganizations', '1023080', null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), null);
@@ -311,13 +313,16 @@ INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_i
 
 -- 添加收款方的会员
 set @eh_payment_user_id = (select max(id) from `eh_payment_users`);
-INSERT INTO `eh_payment_users` VALUES (@eh_payment_user_id:=@eh_payment_user_id+1, 'EhOrganizations', '1008900', '2', '1149', UTC_TIMESTAMP());
+INSERT INTO `eh_payment_users` VALUES (@eh_payment_user_id:=@eh_payment_user_id+1, 'EhOrganizations', '1008900', '2', '1006', UTC_TIMESTAMP());
 -- 添加收款方
 set @eh_payment_service_configs_id = (select max(id) from `eh_payment_service_configs`);
-INSERT INTO `eh_payment_service_configs` VALUES (@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '停车充值', 'parking', '999983', 'EhOrganizations', '1008900', null, null, NULL, '2', '1149', UTC_TIMESTAMP(), null);
+INSERT INTO `eh_payment_service_configs` VALUES (@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '停车充值', 'parking', '999983', 'EhOrganizations', '1008900', null, null, NULL, '2', '1006', UTC_TIMESTAMP(), null);
 -- 增加支付的方式
 set @eh_payment_types_id = (select max(id) from `eh_payment_types`);
 INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_id+1, 'parking', '999983', 'EhOrganizations', '1008900', null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), null);
+
+
+-- wentian's script done here
 
 
 
