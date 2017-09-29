@@ -12,7 +12,7 @@ public class PaymentBillResp {
     private Long userId;
     private String orderNo;
     private String paymentOrderNum;
-    private Date payTime;
+    private String payTime;
     private Integer paymentType;
     private Integer transactionType;
     private BigDecimal orderAmount;
@@ -29,12 +29,15 @@ public class PaymentBillResp {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
-    public Date getPayTime() {
+
+    public String getPayTime() {
         return payTime;
     }
-    public void setPayTime(Date payTime) {
+
+    public void setPayTime(String payTime) {
         this.payTime = payTime;
     }
+
     public String getOrderNo() {
         return orderNo;
     }
