@@ -65,6 +65,8 @@ VALUES
 TRUNCATE `eh_payment_service_configs`;
 TRUNCATE `eh_payment_users`;
 
+delete from `eh_payment_types` where `order_type` = 'zjgkrentalcode';
+
 -- 闻天
 
 -- config
