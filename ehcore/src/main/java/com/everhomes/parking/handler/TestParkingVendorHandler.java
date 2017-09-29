@@ -4,10 +4,7 @@ package com.everhomes.parking.handler;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.parking.ParkingLot;
-import com.everhomes.parking.ParkingRechargeOrder;
-import com.everhomes.parking.ParkingRechargeRate;
-import com.everhomes.parking.ParkingVendorHandler;
+import com.everhomes.parking.*;
 import com.everhomes.parking.bosigao2.ParkWebService;
 import com.everhomes.parking.bosigao2.ParkWebServiceSoap;
 import com.everhomes.parking.bosigao2.rest.Bosigao2CardInfo;
@@ -125,5 +122,24 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
 		return true;
 
+	}
+
+	ParkingRechargeRateDTO getOpenCardRate(ParkingCardRequest parkingCardRequest) {
+
+		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRateByMonthCount(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
+				parkingCardRequest.getId(), parkingCardRequest.getCardTypeId(), new BigDecimal(1));
+
+		if (null == rate) {
+			//TODO:
+			return null;
+		}
+		ParkingRechargeRateDTO dto = ConvertHelper.convert(rate, ParkingRechargeRateDTO.class);
+
+		dto.setCardTypeId("普通月卡");
+		dto.setCardType("普通月卡");
+		dto.setRateToken(rate.getId().toString());
+		dto.setVendorName(ParkingLotVendor.TEST.getCode());
+
+		return dto;
 	}
 }
