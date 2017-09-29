@@ -243,7 +243,7 @@ public class KetuoParkingVendorHandler extends DefaultParkingVendorHandler imple
 
 		JSONObject param = new JSONObject();
 		param.put("orderNo", order.getOrderToken());
-		param.put("amount", (order.getPrice().multiply(new BigDecimal(100))).intValue());
+		param.put("amount", (order.getOriginalPrice().multiply(new BigDecimal(100))).intValue());
 	    param.put("discount", 0);
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
 		String json = post(param, PAY_TEMP_FEE);

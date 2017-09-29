@@ -185,7 +185,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 		String parkingId = configProvider.getValue("parking.techpark.parkingId", "");
 		if (verifyParkingCar(order.getPlateNumber(), parkingId)) {
 			String url = configProvider.getValue("parking.techpark.url", "");
-			String cost = String.valueOf((order.getPrice().multiply(new BigDecimal(100))).intValue());
+			String cost = String.valueOf((order.getOriginalPrice().multiply(new BigDecimal(100))).intValue());
 
 			JSONObject jsonParam = new JSONObject();
 			jsonParam.put("OrderID", order.getOrderToken());
