@@ -220,7 +220,7 @@ VALUES
 -- (`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
 -- VALUES
 -- (@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', '1012516', '2', '1145', UTC_TIMESTAMP());
--- 
+--
 
 
 
