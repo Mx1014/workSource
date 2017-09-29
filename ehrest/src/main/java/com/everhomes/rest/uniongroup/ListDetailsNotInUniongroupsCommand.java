@@ -14,6 +14,7 @@ public class ListDetailsNotInUniongroupsCommand {
     private Long organizaitonId;
     private Integer namespaceId;
     private String contactName;
+    private Integer versionCode;
 
     public Long getOrganizaitonId() {
         return organizaitonId;
@@ -42,5 +43,13 @@ public class ListDetailsNotInUniongroupsCommand {
 
     public void setContactName(String contactName) {
         this.contactName = contactName;
+    }
+
+    public Integer getVersionCode() {
+        return versionCode;
+    }
+
+    public void setVersionCode(Integer versionCode) {
+        this.versionCode = versionCode;
     }
 }
