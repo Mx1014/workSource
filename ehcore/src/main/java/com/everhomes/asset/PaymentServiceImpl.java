@@ -26,7 +26,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private RemoteAccessService remoteAccessService;
     @Override
-    public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd, UserInfo user) throws Exception {
+    public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd) throws Exception {
         if (cmd.getLimit() == null) {
             cmd.setLimit(20l);
         }
@@ -45,7 +45,7 @@ public class PaymentServiceImpl implements PaymentService {
             cmd.setSorts(sorts);
         }
         //payeeUserId
-        PaymentUser paymentUser = assetProvider.findByOwner(cmd.getUserType(),user.getId());
+        PaymentUser paymentUser = assetProvider.findByOwner(cmd.getUserType(),cmd.getUserId());
         if(paymentUser == null) {
             return new ListPaymentBillResp(cmd.getOffset(), cmd.getLimit());
         }

@@ -31,10 +31,13 @@ import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.oauth2.Clients;
+import com.everhomes.order.PayService;
+import com.everhomes.order.PaymentUser;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pay.user.BusinessUserType;
 import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -144,7 +147,8 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
-
+	@Autowired
+	private PayService payService;
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
 		if(cmd.getUserId() == null){
@@ -1769,7 +1773,18 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Override
 	public CheckPaymentUserResponse checkPaymentUser(CheckPaymentUserCommand cmd) {
-		return null;
+		CheckPaymentUserResponse res = businessProvider.checkoutPaymentUser(cmd.getUserId());
+		if(res==null){
+			res = new CheckPaymentUserResponse();
+			PaymentUser paymentUser = payService.createPaymentUser(BusinessUserType.PERSONAL.getCode(), cmd.getOwnerType(), cmd.getUserId());
+			res.setCreateTime(paymentUser.getCreateTime());
+			res.setId(paymentUser.getId());
+			res.setOwnerId(paymentUser.getOwnerId());
+			res.setOwnerType(paymentUser.getOwnerType());
+			res.setPayment_user_id(paymentUser.getPaymentUserId());
+			res.setPaymentUserType(paymentUser.getPaymentUserType());
+		}
+		return res;
 	}
 
 	@Override
