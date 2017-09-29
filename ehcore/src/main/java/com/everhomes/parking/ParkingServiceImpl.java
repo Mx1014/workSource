@@ -677,7 +677,7 @@ public class ParkingServiceImpl implements ParkingService {
 //
 //        PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
 		PreOrderDTO callBack = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(), clientAppName, OrderType.OrderTypeEnum.PARKING.getPycode(),
-				parkingRechargeOrder.getOrderNo(), parkingRechargeOrder.getPayerUid(), amount);
+				parkingRechargeOrder.getId(), parkingRechargeOrder.getPayerUid(), amount);
 
 
 		return callBack;

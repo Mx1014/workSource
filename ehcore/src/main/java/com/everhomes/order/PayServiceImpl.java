@@ -670,6 +670,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         dto.setPayMethod(payMethods);
         Long expiredIntervalTime = getExpiredIntervalTime(cmd.getExpiration());
         dto.setExpiredIntervalTime(expiredIntervalTime);
+        dto.setOrderId(cmd.getOrderId());
         return dto;
     }
 
