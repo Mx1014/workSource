@@ -1897,7 +1897,13 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd, HttpServletResponse httpResponse) {
-
+        GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
+        formCommand.setFormOriginId(getRealFormOriginId(cmd.getFormOriginId()));
+        GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
+        ExcelUtils excelUtils = new ExcelUtils(httpResponse, "人员档案成员列表", "人员档案成员列表");
+        List<String> titleNames = form.getFormFields().stream().map(r -> {
+            return r.getFieldDisplayName();
+        }).collect(Collectors.toList());
     }
 
     @Override

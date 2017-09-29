@@ -5305,12 +5305,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 			// 合同主体
 			if(listCommand.getContractPartyId() != null){
-				cond = cond.and(t2.field("contract_id").eq(listCommand.getContractPartyId()));
-			}
-
-			//工作地点
-			if(listCommand.getWorkPlaceId() != null){
-				cond = cond.and(t2.field("work_place").eq(listCommand.getWorkPlaceId()));
+				cond = cond.and(t2.field("contract_party_id").eq(listCommand.getContractPartyId()));
 			}
 
 			//入职日期
