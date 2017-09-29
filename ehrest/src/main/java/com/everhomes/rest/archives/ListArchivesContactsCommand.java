@@ -46,6 +46,14 @@ public class ListArchivesContactsCommand {
         this.keywords = keywords;
     }
 
+    public List<String> getFilterScopeTypes() {
+        return filterScopeTypes;
+    }
+
+    public void setFilterScopeTypes(List<String> filterScopeTypes) {
+        this.filterScopeTypes = filterScopeTypes;
+    }
+
     public Long getPageAnchor() {
         return pageAnchor;
     }
