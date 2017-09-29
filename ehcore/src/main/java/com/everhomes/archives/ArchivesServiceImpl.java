@@ -1277,14 +1277,16 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (type.equals(ArchivesParameter.DEPARTMENT_IDS)) {
             List<Long> ids = (List<Long>) obj;
             String departmentName = "";
-            for (Long id : ids) {
-                Organization org = organizationProvider.findOrganizationById(id);
-                if (org != null) {
-                    departmentName += org.getName() + ",";
+            if (ids != null && ids.size() > 0) {
+                for (Long id : ids) {
+                    Organization org = organizationProvider.findOrganizationById(id);
+                    if (org != null) {
+                        departmentName += org.getName() + ",";
+                    }
                 }
+                departmentName = departmentName.substring(0, departmentName.length() - 1);
+                return departmentName;
             }
-            departmentName = departmentName.substring(0, departmentName.length() - 1);
-            return departmentName;
         }
 
         if (type.equals(ArchivesParameter.CONTRACT_PARTY_ID)) {
