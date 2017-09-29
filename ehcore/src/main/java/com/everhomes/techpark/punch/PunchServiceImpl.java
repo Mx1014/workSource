@@ -4625,7 +4625,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid owner type or  Id parameter in the command");
 		}
-
+		Long t0= System.currentTimeMillis();
 		ListPunchDetailsResponse response = new ListPunchDetailsResponse();
 		response.setPunchDayDetails(new ArrayList<>());
 
@@ -4651,6 +4651,9 @@ public class PunchServiceImpl implements PunchService {
 //			if(organizationId.equals(0L))
 //				organizationId = org.getId();
 		}
+		Long t1= System.currentTimeMillis();
+
+		LOGGER.debug("get userids "+  t1 + "cost: "+ (t1-t0));
 		String startDay=null;
 		if(null!=cmd.getStartDay())
 			startDay =  dateSF.get().format(new Date(cmd.getStartDay()));
@@ -4664,6 +4667,9 @@ public class PunchServiceImpl implements PunchService {
 				convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
 				convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize+1 );
 
+		Long t2= System.currentTimeMillis();
+
+		LOGGER.debug("query punchDayLogs  "+  t2 + "cost: "+ (t2-t1));
 		if (null == results)
 			return response;
 		if(results.size() == pageSize+1){
@@ -4695,6 +4701,10 @@ public class PunchServiceImpl implements PunchService {
 
 			response.getPunchDayDetails().add(dto);
 		}
+
+		Long t3= System.currentTimeMillis();
+
+		LOGGER.debug("process pdls   "+  t3 + "cost: "+ (t3-t2));
 		return response;
 	}
 	String processStatus(String statuList ){
