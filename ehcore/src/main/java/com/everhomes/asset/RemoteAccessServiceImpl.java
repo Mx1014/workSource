@@ -1,6 +1,7 @@
 //@formatter:off
 package com.everhomes.asset;
 
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.pay.base.RestClient;
@@ -30,6 +31,8 @@ import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,6 +47,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoteAccessServiceImpl.class);
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
 //    @PostConstruct
 //    void init() throws Exception {
@@ -60,7 +65,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
 
 //        HttpUtils.postJson("http://paytest.zuolin.com:8080/pay/", json, 120, HTTP.UTF_8);
         cmd.setDistributionRemarkIsNull(true);
-        cmd.setPaymentStatus(OrderPaymentStatus.SUCCESS.getCode());
+        //支付状态不限定
+        //        cmd.setPaymentStatus(OrderPaymentStatus.SUCCESS.getCode());
 
         QueryOrderPaymentsCommand payCmd = new QueryOrderPaymentsCommand();
         QueryBuilder queryBuilder = payCmd.builder();
@@ -214,7 +220,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                             + ",uri=" + uri
                             + ",cmd=" + GsonUtil.toJson(cmd));
         }
-        String payHomeUrl = "http://paytest.zuolin.com:8080/pay";
+//        String payHomeUrl = "http://paytest.zuolin.com:8080/pay";
+        String payHomeUrl = configurationProvider.getValue(0, ConfigConstants.PAY_V2_HOME_URL, "");
         PaymentAccountResp account = paymentService.findPaymentAccount();
         RestClient restClient = new RestClient(payHomeUrl, account.getAppKey(), account.getSecretKey());
         com.everhomes.rest.RestResponseBase response = (com.everhomes.rest.RestResponseBase) restClient.restCall(
@@ -232,7 +239,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             LOGGER.error("request payment error");
         }
     }
-    private QueryCondition getListOrderPaymentCondition(ListPaymentBillCmd cmd) {
+    private QueryCondition getListOrderPaymentCondition(ListPaymentBillCmd cmd) throws ParseException {
         QueryCondition condition = null;
         if(cmd.getUserId() != null) {
             QueryCondition tempCondition = PaymentAttributes.USER_ID.eq(cmd.getUserId());
@@ -255,7 +262,9 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             }
         }
         if(cmd.getStartPayTime() != null) {
-            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.ge(cmd.getStartPayTime().getTime());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date start = sdf.parse(cmd.getStartPayTime());
+            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.ge(start.getTime());
             if(condition == null) {
                 condition = tempCondition;
             } else {
@@ -263,7 +272,9 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             }
         }
         if(cmd.getEndPayTime() != null) {
-            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.le(cmd.getEndPayTime().getTime());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date end = sdf.parse(cmd.getEndPayTime());
+            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.le(end.getTime());
             if(condition == null) {
                 condition = tempCondition;
             } else {

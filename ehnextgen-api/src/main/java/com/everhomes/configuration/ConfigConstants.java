@@ -118,5 +118,6 @@ public interface ConfigConstants {
     public static final String PORTAL_MODULE_APP_TITLE = "portal.module.app.title";
     public static final String PORTAL_ITEM_ALL_TITLE = "portal.item.all.title";
     public static final String PORTAL_ITEM_MORE_TITLE = "portal.item.more.title";
+    public static final String PAY_V2_HOME_URL = "pay.v2.home.url";
 
 }
