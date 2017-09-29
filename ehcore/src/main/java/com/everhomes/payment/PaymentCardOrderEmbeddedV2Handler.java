@@ -2,6 +2,8 @@ package com.everhomes.payment;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.rest.order.OrderType;
@@ -28,7 +30,8 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
     private PaymentCardProvider paymentCardProvider;
     @Autowired
     private PayService payservice;
-
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
     @Override
     public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
@@ -40,20 +43,20 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "Order amount is not equal to payAmount.");
         }
-        if (CardOrderStatus.UNPAID.getCode()!=order.getPayStatus()) {
-            LOGGER.info("PaymentCardOrderEmbeddedV2Handler order has been paid cmd = {}", cmd);
-            return;
-        }
-        PaymentCard paymentCard = paymentCardProvider.findPaymentCardById(order.getCardId());
-        PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
 
-        Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
-        order.setPayStatus(CardOrderStatus.PAID.getCode());
-        order.setPaidTime(payTimeStamp);
-        order.setPaidType(String.valueOf(cmd.getPaymentType()));
-        paymentCardProvider.updatePaymentCardRechargeOrder(order);
+        this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode()+cmd.getOrderId()).tryEnter(()-> {
+            PaymentCard paymentCard = paymentCardProvider.findPaymentCardById(order.getCardId());
+            PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
 
-        handler.rechargeCard(order, paymentCard);
+            Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
+            order.setPayStatus(CardOrderStatus.PAID.getCode());
+            order.setPaidTime(payTimeStamp);
+            order.setPaidType(String.valueOf(cmd.getPaymentType()));
+            paymentCardProvider.updatePaymentCardRechargeOrder(order);
+
+            handler.rechargeCard(order, paymentCard);
+        });
+
         LOGGER.info("PaymentCardOrderEmbeddedV2Handler paySuccess end");
     }
 
