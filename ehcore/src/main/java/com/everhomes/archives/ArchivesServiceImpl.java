@@ -1117,7 +1117,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put(ArchivesParameter.EMPLOYEE_STATUS, convertToArchivesInfo(employee.getEmployeeStatus(), ArchivesParameter.EMPLOYEE_STATUS));
         valueMap.put(ArchivesParameter.EMPLOYMEN_TTIME, String.valueOf(employee.getEmploymentTime()));
         //  TODO:部门、岗位、职级的同步
-        valueMap.put(ArchivesParameter.DEPARTMENT, employee.getEnName());
+        valueMap.put(ArchivesParameter.DEPARTMENT, employee.getDepartment());
         valueMap.put(ArchivesParameter.JOB_POSITION, employee.getJobPosition());
         valueMap.put(ArchivesParameter.JOB_LEVEL, employee.getJobLevel());
         valueMap.put(ArchivesParameter.EMPLOYEE_NO, employee.getEmployeeNo());
