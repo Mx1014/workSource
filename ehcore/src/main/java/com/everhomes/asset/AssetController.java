@@ -945,7 +945,7 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/listPaymentBill</b>
      * <p>结算-账单明细</p>
      */
-    @RequestMapping(value = "listPaymentBill", produces = "application/json; charset=UTF-8")
+    @RequestMapping(value = "listPaymentBill")
     @RestReturn(ListPaymentBillResp.class)
     public RestResponse listPaymentBill(ListPaymentBillCmd cmd, HttpServletRequest request) throws Exception {
         UserInfo user = (UserInfo) request.getSession().getAttribute(SessionConstants.MC_LOGIN_USER);
