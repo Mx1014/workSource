@@ -234,7 +234,7 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 		JSONObject param = new JSONObject();
 
 		param.put("orderNo", order.getOrderToken());
-		param.put("amount", (order.getPrice().multiply(new BigDecimal(100))).intValue());
+		param.put("amount", (order.getOriginalPrice().multiply(new BigDecimal(100))).intValue());
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?1:2);
 		String json = post(PAY_TEMP_FEE, param);
 

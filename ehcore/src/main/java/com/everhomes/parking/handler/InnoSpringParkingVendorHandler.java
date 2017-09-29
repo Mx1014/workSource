@@ -338,7 +338,7 @@ public class InnoSpringParkingVendorHandler extends DefaultParkingVendorHandler 
 		param.put("version", version);
 		param.put("licensekey", licensekey);
 	    param.put("car_id", order.getPlateNumber());
-	    param.put("amt", order.getPrice().setScale(2, RoundingMode.HALF_UP));
+	    param.put("amt", order.getOriginalPrice().setScale(2, RoundingMode.HALF_UP));
 
 		JSONObject newParam = createRequestParam(PAY_TEMP_FEE, param);
 		String json = post(newParam);

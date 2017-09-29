@@ -201,7 +201,11 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		JinyiCard card = getCardInfo(order.getPlateNumber());
 
+
 		if (null != card) {
+
+			String startTime = card.getMaxuseddate() + " 23:59:59";
+
 			//根据查询月卡时的计费id来创建订单
 			order.setOrderToken(card.getCalcid());
 
@@ -229,15 +233,15 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 				JinyiCard newCard = getCardInfo(order.getPlateNumber());
 
 				if (null != newCard) {
-					String expiredate = newCard.getExpiredate() + " 23:59:59";
-					String effectdate = newCard.getEffectdate() + " 00:00:00";
-					LocalDateTime expireTime = LocalDateTime.parse(expiredate, dtf2);
-					LocalDateTime effectTime = LocalDateTime.parse(effectdate, dtf2);
+					String endTime = newCard.getMaxuseddate() + " 23:59:59";
+					LocalDateTime tempStartTime = LocalDateTime.parse(startTime, dtf2);
+					tempStartTime = tempStartTime.plusSeconds(1L);
+					LocalDateTime tempEndTime = LocalDateTime.parse(endTime, dtf2);
 
 					order.setErrorDescriptionJson(notifyJson);
 
-					order.setStartPeriod(Timestamp.valueOf(effectTime));
-					order.setEndPeriod(Timestamp.valueOf(expireTime));
+					order.setStartPeriod(Timestamp.valueOf(tempStartTime));
+					order.setEndPeriod(Timestamp.valueOf(tempEndTime));
 				}
 
 				if(notifyEntity.isSuccess()) {

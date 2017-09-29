@@ -4625,7 +4625,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid owner type or  Id parameter in the command");
 		}
-
+		Long t0= System.currentTimeMillis();
 		ListPunchDetailsResponse response = new ListPunchDetailsResponse();
 		response.setPunchDayDetails(new ArrayList<>());
 
@@ -4651,6 +4651,9 @@ public class PunchServiceImpl implements PunchService {
 //			if(organizationId.equals(0L))
 //				organizationId = org.getId();
 		}
+		Long t1= System.currentTimeMillis();
+
+		LOGGER.debug("get userids "+  t1 + "cost: "+ (t1-t0));
 		String startDay=null;
 		if(null!=cmd.getStartDay())
 			startDay =  dateSF.get().format(new Date(cmd.getStartDay()));
@@ -4664,6 +4667,9 @@ public class PunchServiceImpl implements PunchService {
 				convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
 				convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize+1 );
 
+		Long t2= System.currentTimeMillis();
+
+		LOGGER.debug("query punchDayLogs  "+  t2 + "cost: "+ (t2-t1));
 		if (null == results)
 			return response;
 		if(results.size() == pageSize+1){
@@ -4675,26 +4681,14 @@ public class PunchServiceImpl implements PunchService {
 		response.setPunchDayDetails(new ArrayList<PunchDayDetailDTO>());
 		for(PunchDayLog r : results){
 			PunchDayDetailDTO dto =convertToPunchDayDetailDTO(r);
-			if(null!= r.getArriveTime())
-				dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
-
-			if(null!= r.getLeaveTime())
-				dto.setLeaveTime( convertTimeToGMTMillisecond(r.getLeaveTime()));
-
-			if(null!= r.getWorkTime())
-				dto.setWorkTime( convertTimeToGMTMillisecond( r.getWorkTime()));
-
-			if(null!= r.getNoonLeaveTime())
-				dto.setNoonLeaveTime(  convertTimeToGMTMillisecond(r.getNoonLeaveTime()));
-
-			if(null!= r.getAfternoonArriveTime())
-				dto.setAfternoonArriveTime(  convertTimeToGMTMillisecond(r.getAfternoonArriveTime()));
-			if(null!= r.getPunchDate())
-				dto.setPunchDate(r.getPunchDate().getTime());
 
 
 			response.getPunchDayDetails().add(dto);
 		}
+
+		Long t3= System.currentTimeMillis();
+
+		LOGGER.debug("process pdls   "+  t3 + "cost: "+ (t3-t2));
 		return response;
 	}
 	String processStatus(String statuList ){
@@ -4735,6 +4729,8 @@ public class PunchServiceImpl implements PunchService {
 				dto.setPunchOrgName(punchGroup.getName());
 		}
 
+
+
 		if(null!= r.getArriveTime())
 			dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
 
@@ -4745,6 +4741,7 @@ public class PunchServiceImpl implements PunchService {
 			dto.setWorkTime( convertTimeToGMTMillisecond( r.getWorkTime()));
 		else
 			dto.setWorkTime(0L);
+
 		if(null!= r.getNoonLeaveTime())
 			dto.setNoonLeaveTime(  convertTimeToGMTMillisecond(r.getNoonLeaveTime()));
 
@@ -4752,20 +4749,21 @@ public class PunchServiceImpl implements PunchService {
 			dto.setAfternoonArriveTime(  convertTimeToGMTMillisecond(r.getAfternoonArriveTime()));
 		if(null!= r.getPunchDate())
 			dto.setPunchDate(r.getPunchDate().getTime());
+
 		dto.setPunchTimesPerDay(r.getPunchTimesPerDay());
 		// modify by wh 2017年6月22日 现在都是挂总公司下,用户未必都能通过这种方式查到
 //			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId() );
 
 
-        List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(r.getUserId(),r.getEnterpriseId(), dateSF.get().format(r.getPunchDate()),
-                ClockCode.SUCESS.getCode());
-        if(null!=punchLogs){
-            dto.setPunchLogs(new ArrayList<>());
-            for (PunchLog pl : punchLogs) {
-                PunchLogDTO plDTO = convertPunchLog2DTO(pl);
-                dto.getPunchLogs().add(plDTO);
-            }
-        }
+//        List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(r.getUserId(),r.getEnterpriseId(), dateSF.get().format(r.getPunchDate()),
+//                ClockCode.SUCESS.getCode());
+//        if(null!=punchLogs){
+//            dto.setPunchLogs(new ArrayList<>());
+//            for (PunchLog pl : punchLogs) {
+//                PunchLogDTO plDTO = convertPunchLog2DTO(pl);
+//                dto.getPunchLogs().add(plDTO);
+//            }
+//        }
 		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId());
 
 		if (null != member) {
@@ -6338,6 +6336,13 @@ public class PunchServiceImpl implements PunchService {
 	        					+timeRule.getEndPunchTime());
         			}
         		}
+				//前端有跨日少一天的bug
+				for(PunchTimeIntervalDTO interval : timeRule.getPunchTimeIntervals()){
+					if (interval.getLeaveTime() < interval.getArriveTime()) {
+						interval.setLeaveTime(interval.getLeaveTime() + ONE_DAY_MS);
+					}
+
+				}
 				saveTimerRuleIntervals(timeRule,ptr);
         	}
         }
@@ -6401,7 +6406,7 @@ public class PunchServiceImpl implements PunchService {
 			if (schedulings.size() > 0) {
 				//批量保存
 
-				Long t1 = System.currentTimeMillis();
+//				Long t1 = System.currentTimeMillis();
 				List<EhPunchSchedulings> ehPsList = new ArrayList<>();
 				Long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), schedulings.size());
 
@@ -6410,14 +6415,14 @@ public class PunchServiceImpl implements PunchService {
 					EhPunchSchedulings eps = ConvertHelper.convert(ps, EhPunchSchedulings.class);
 					ehPsList.add(eps);
 				}
-				Long t2 = System.currentTimeMillis();
+//				Long t2 = System.currentTimeMillis();
 
-				LOGGER.debug("for schedulings time "+  t2 + "cost: " +(t2-t1));
+//				LOGGER.debug("for schedulings time "+  t2 + "cost: " +(t2-t1));
 
 				punchSchedulingProvider.batchCreatePunchSchedulings(ehPsList);
-				Long t3 = System.currentTimeMillis();
+//				Long t3 = System.currentTimeMillis();
 
-				LOGGER.debug("batch save schedulings time "+  t3 + "cost: " +(t3-t2));
+//				LOGGER.debug("batch save schedulings time "+  t3 + "cost: " +(t3-t2));
 			}
 		}
 	}
@@ -6439,7 +6444,10 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchScheduling> schedulings = new ArrayList<>();
 		if (null != monthScheduling.getEmployees()) {
 			for (PunchSchedulingEmployeeDTO r : monthScheduling.getEmployees()) {
-				List<PunchScheduling> psList = saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs,monthDays);
+				if (r.getUserId() == null) {
+					continue;
+				}
+				List<PunchScheduling> psList = saveEmployeeScheduling(r, monthScheduling.getMonth(), pr, ptrs, monthDays);
 				if (null != psList && psList.size() > 0) {
 					schedulings.addAll(psList);
 				}
