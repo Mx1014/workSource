@@ -1771,6 +1771,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
 		rentalBill.setOrderNo(String.valueOf(orderNo));
 
+		LOGGER.info("create orderNo={}", orderNo);
 			synchronized (this) {
 				this.dbProvider.execute((TransactionStatus status) -> {
 
