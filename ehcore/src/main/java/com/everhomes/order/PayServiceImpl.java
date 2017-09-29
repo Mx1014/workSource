@@ -602,9 +602,10 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         LOGGER.info("BizOrderNum is = {} "+BizOrderNum);
         createOrderCmd.setBizOrderNum(BizOrderNum);
 
-        createOrderCmd.setOrderRemark1(String.valueOf(serviceConfig.getId()));
+        createOrderCmd.setOrderRemark1(String.valueOf(cmd.getOrderType()));
+//        createOrderCmd.setOrderRemark1(String.valueOf(serviceConfig.getId()));
         createOrderCmd.setOrderRemark2(String.valueOf(cmd.getOrderId()));
-        createOrderCmd.setOrderRemark3(String.valueOf(cmd.getOrderType()));
+        createOrderCmd.setOrderRemark3(null);
         createOrderCmd.setOrderRemark4(null);
         createOrderCmd.setOrderRemark5(null);
         createOrderCmd.setCommitFlag(0);

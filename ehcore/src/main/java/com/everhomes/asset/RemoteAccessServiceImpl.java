@@ -350,7 +350,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             }
         }
         if(cmd.getOrderType() != null) {
-            QueryCondition tempCondition = PaymentAttributes.REMARK3.eq(cmd.getOrderType());
+            QueryCondition tempCondition = PaymentAttributes.REMARK1.eq(cmd.getOrderType());
             if(condition == null) {
                 condition = tempCondition;
             } else {
