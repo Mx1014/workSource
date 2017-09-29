@@ -3,6 +3,7 @@ package com.everhomes.techpark.onlinePay;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import com.everhomes.util.DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,6 +157,12 @@ public class OnlinePayServiceImpl implements OnlinePayService {
 		
 		String bill = String.valueOf(time) + String.valueOf(generateRandomNumber(3));
 		return Long.valueOf(bill);
+	}
+
+	public static void main(String[] args) {
+		OnlinePayServiceImpl o = new OnlinePayServiceImpl();
+
+		System.out.println(o.createBillId(DateHelper.currentGMTTime().getTime()));
 	}
 
 	/**
