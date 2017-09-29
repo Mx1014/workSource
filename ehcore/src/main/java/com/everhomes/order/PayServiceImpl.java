@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -603,8 +604,9 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
     private String getOrderNum(Long orderId, String orderType) {
         String v2code = OrderType.OrderTypeEnum.getV2codeByPyCode(orderType);
-        String orderIdStr = String.valueOf(orderId);
-        if(orderIdStr.length()>17){
+        DecimalFormat df = new DecimalFormat("00000000000000000");
+        String orderIdStr = df.format(orderId);
+        if(orderIdStr!=null && orderIdStr.length()>17){
             orderIdStr = orderIdStr.substring(2);
         }
         return v2code+orderIdStr;

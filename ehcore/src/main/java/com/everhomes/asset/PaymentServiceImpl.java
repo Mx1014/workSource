@@ -28,7 +28,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd) throws Exception {
         if (cmd.getLimit() == null) {
-            cmd.setLimit(20l);
+            cmd.setLimit(21l);
         }
         if (cmd.getTransactionType() == null) {
             List<Integer> transactionTypes = new ArrayList<Integer>();
