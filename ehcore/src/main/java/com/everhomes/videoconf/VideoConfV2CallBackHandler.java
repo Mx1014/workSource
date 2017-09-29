@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
-@Component(PaymentServiceConfigHandler.PAYMENT_SERVICE_CONFIG_HANDLER_PREFIX + OrderType.VIDEOCONF_CODE )
+@Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX  + OrderType.VIDEOCONF_CODE )
 public class VideoConfV2CallBackHandler implements PaymentCallBackHandler {
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(VideoConfV2CallBackHandler.class);
