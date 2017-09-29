@@ -40,7 +40,10 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "Order amount is not equal to payAmount.");
         }
-
+        if (CardOrderStatus.UNPAID.getCode()!=order.getPayStatus()) {
+            LOGGER.info("PaymentCardOrderEmbeddedV2Handler order has been paid cmd = {}", cmd);
+            return;
+        }
         PaymentCard paymentCard = paymentCardProvider.findPaymentCardById(order.getCardId());
         PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
 
