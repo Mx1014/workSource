@@ -26,6 +26,7 @@ import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -526,7 +527,15 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     }
 
     private PaymentServiceConfigHandler getServiceConfigHandler(String orderType) {
-        PaymentServiceConfigHandler handler = PlatformContext.getComponent(PaymentServiceConfigHandler.PAYMENT_SERVICE_CONFIG_HANDLER_PREFIX +this.getOrderTypeCode(orderType));
+        PaymentServiceConfigHandler handler = null;
+        String handlerName = PaymentServiceConfigHandler.PAYMENT_SERVICE_CONFIG_HANDLER_PREFIX +this.getOrderTypeCode(orderType);
+        
+        // 收款方不一定实现handler，此时会找不到handler而抛异常，为了减少日志这些不必要的堆栈打印，故只打一行warning by lqs 20170930
+        try {
+            handler = PlatformContext.getComponent(handlerName);
+        } catch (NoSuchBeanDefinitionException e) {
+            LOGGER.warn("Failed to find handler, orderType={}, handlerName={}", orderType, handlerName);
+        }
 
         if(handler == null){
             handler = PlatformContext.getComponent(PaymentServiceConfigHandler.PAYMENT_SERVICE_CONFIG_HANDLER_PREFIX +"DEFAULT");
