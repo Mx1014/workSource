@@ -122,6 +122,12 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 }
             }
         }
+        if(result.getList()!=null && result.getList().size() >= (cmd.getLimit())){
+            result.setOffset(result.getOffset()+1);
+            result.getList().remove(result.getList().size()-1);
+        }else{
+            result.setOffset(0l);
+        }
         return result;
     }
 
