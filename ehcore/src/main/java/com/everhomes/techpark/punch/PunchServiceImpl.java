@@ -6406,7 +6406,7 @@ public class PunchServiceImpl implements PunchService {
 			if (schedulings.size() > 0) {
 				//批量保存
 
-				Long t1 = System.currentTimeMillis();
+//				Long t1 = System.currentTimeMillis();
 				List<EhPunchSchedulings> ehPsList = new ArrayList<>();
 				Long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), schedulings.size());
 
@@ -6415,14 +6415,14 @@ public class PunchServiceImpl implements PunchService {
 					EhPunchSchedulings eps = ConvertHelper.convert(ps, EhPunchSchedulings.class);
 					ehPsList.add(eps);
 				}
-				Long t2 = System.currentTimeMillis();
+//				Long t2 = System.currentTimeMillis();
 
-				LOGGER.debug("for schedulings time "+  t2 + "cost: " +(t2-t1));
+//				LOGGER.debug("for schedulings time "+  t2 + "cost: " +(t2-t1));
 
 				punchSchedulingProvider.batchCreatePunchSchedulings(ehPsList);
-				Long t3 = System.currentTimeMillis();
+//				Long t3 = System.currentTimeMillis();
 
-				LOGGER.debug("batch save schedulings time "+  t3 + "cost: " +(t3-t2));
+//				LOGGER.debug("batch save schedulings time "+  t3 + "cost: " +(t3-t2));
 			}
 		}
 	}
@@ -6444,7 +6444,10 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchScheduling> schedulings = new ArrayList<>();
 		if (null != monthScheduling.getEmployees()) {
 			for (PunchSchedulingEmployeeDTO r : monthScheduling.getEmployees()) {
-				List<PunchScheduling> psList = saveEmployeeScheduling(r,monthScheduling.getMonth(),pr,ptrs,monthDays);
+				if (r.getUserId() == null) {
+					continue;
+				}
+				List<PunchScheduling> psList = saveEmployeeScheduling(r, monthScheduling.getMonth(), pr, ptrs, monthDays);
 				if (null != psList && psList.size() > 0) {
 					schedulings.addAll(psList);
 				}
