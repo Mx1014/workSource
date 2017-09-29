@@ -44,6 +44,7 @@ public class VideoConfV2CallBackHandler implements PaymentCallBackHandler {
 	@Override
 	public void paySuccess(OrderPaymentNotificationCommand cmd) {
 		OnlinePayBillCommand cmd1 = new OnlinePayBillCommand();
+		cmd1.setPayAmount(payService.changePayAmount(cmd.getAmount()).toString());
 		cmd1.setOrderNo(String.valueOf(cmd.getOrderId()));
 		cmd1.setPayAccount(cmd.getAmount().toString());
 		cmd1.setPayStatus("success");
@@ -55,6 +56,7 @@ public class VideoConfV2CallBackHandler implements PaymentCallBackHandler {
 	public void payFail(OrderPaymentNotificationCommand cmd) {
 
 		OnlinePayBillCommand cmd1 = new OnlinePayBillCommand();
+		cmd1.setPayAmount(payService.changePayAmount(cmd.getAmount()).toString());
 		cmd1.setOrderNo(String.valueOf(cmd.getOrderId()));
 		cmd1.setPayAccount(cmd.getAmount().toString());
 		cmd1.setPayStatus("fail");
