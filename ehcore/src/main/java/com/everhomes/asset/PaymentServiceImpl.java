@@ -10,6 +10,8 @@ import com.everhomes.rest.asset.PaymentAccountResp;
 import com.everhomes.rest.asset.ReSortCmd;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.util.ConvertHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ public class PaymentServiceImpl implements PaymentService {
     private AssetProvider assetProvider;
     @Autowired
     private RemoteAccessService remoteAccessService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(PaymentServiceImpl.class);
     @Override
     public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd) throws Exception {
         if (cmd.getPageSize() == null) {
@@ -52,10 +55,10 @@ public class PaymentServiceImpl implements PaymentService {
         //payeeUserId
         PaymentUser paymentUser = assetProvider.findByOwner(cmd.getUserType(),cmd.getUserId());
         if(paymentUser != null) {
-//            return new ListPaymentBillResp(cmd.getOffset(), cmd.getLimit());
-            cmd.setUserId(paymentUser.getPaymentUserId());
+            return new ListPaymentBillResp(cmd.getNextPageAnchor(), cmd.getPageSize());
         }
-
+        cmd.setUserId(paymentUser.getPaymentUserId());
+        LOGGER.info("payee user payer id is = {}",paymentUser.getPaymentUserId());
         return remoteAccessService.listOrderPayment(cmd);
     }
 
