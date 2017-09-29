@@ -229,10 +229,7 @@ public class IncubatorServiceImpl implements IncubatorService {
 		List<IncubatorApplyAttachmentDTO> businessLicenceDto = new ArrayList<>();
 		if(businessLicence != null){
 			businessLicence.forEach(r -> {
-				IncubatorApplyAttachmentDTO temp = ConvertHelper.convert(r, IncubatorApplyAttachmentDTO.class);
-				String contentUrl = contentServerService.parserUri(temp.getContentUri(), IncubatorApplyAttachment.class.getSimpleName(), 1L);
-				temp.setContentUrl(contentUrl);
-				businessLicenceDto.add(temp);
+				businessLicenceDto.add(convertIncubatorApplyAttachment(r));
 			});
 		}
 		dto.setBusinessLicenceAttachments(businessLicenceDto);
@@ -241,12 +238,16 @@ public class IncubatorServiceImpl implements IncubatorService {
 		List<IncubatorApplyAttachmentDTO> planBookDto = new ArrayList<>();
 		if(planBook != null){
 			planBook.forEach(r -> {
-				IncubatorApplyAttachmentDTO temp = ConvertHelper.convert(r, IncubatorApplyAttachmentDTO.class);
-				String contentUrl = contentServerService.parserUri(temp.getContentUri(), IncubatorApplyAttachment.class.getSimpleName(), 1L);
-				temp.setContentUrl(contentUrl);
-				planBookDto.add(temp);
+				planBookDto.add(convertIncubatorApplyAttachment(r));
 			});
 		}
 		dto.setPlanBookAttachments(planBookDto);
+	}
+
+	private IncubatorApplyAttachmentDTO convertIncubatorApplyAttachment(IncubatorApplyAttachment r){
+		IncubatorApplyAttachmentDTO temp = ConvertHelper.convert(r, IncubatorApplyAttachmentDTO.class);
+		String contentUrl = contentServerService.parserUri(temp.getContentUri(), IncubatorApplyAttachment.class.getSimpleName(), 1L);
+		temp.setContentUrl(contentUrl);
+		return temp;
 	}
 }
