@@ -33,10 +33,7 @@ import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Wentian Wang on 2017/9/28.
@@ -123,7 +120,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             }
         }
         if(result.getList()!=null && result.getList().size() >= (cmd.getPageSize())){
-            result.setNextPageAnchor(result.getNextPageAnchor()+cmd.getPageSize());
+            result.setNextPageAnchor(result.getNextPageAnchor()+(cmd.getPageSize()-1));
             result.getList().remove(result.getList().size()-1);
         }else{
             result.setNextPageAnchor(null);
@@ -293,12 +290,31 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
 //        }
         if(cmd.getPayTime() != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date end = sdf.parse(cmd.getEndPayTime());
-            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.eq(end.getTime());
+            Date time = sdf.parse(cmd.getEndPayTime());
+            Calendar todayStart = Calendar.getInstance();
+            todayStart.setTime(time);
+            todayStart.set(Calendar.HOUR_OF_DAY, 0);
+            todayStart.set(Calendar.MINUTE, 0);
+            todayStart.set(Calendar.SECOND, 0);
+            todayStart.set(Calendar.MILLISECOND, 0);
+            Calendar todayEnd = Calendar.getInstance();
+            todayEnd.setTime(time);
+            todayEnd.set(Calendar.HOUR_OF_DAY, 23);
+            todayEnd.set(Calendar.MINUTE, 59);
+            todayEnd.set(Calendar.SECOND, 59);
+            todayEnd.set(Calendar.MILLISECOND, 999);
+            todayStart.setTime(time);
+            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.le(todayEnd.getTime().getTime());
+            QueryCondition tempCondition1 = PaymentAttributes.CREATE_TIME.gt(todayStart.getTime().getTime());
             if(condition == null) {
                 condition = tempCondition;
             } else {
                 condition = condition.and(tempCondition);
+            }
+            if(condition == null) {
+                condition = tempCondition1;
+            } else {
+                condition = condition.and(tempCondition1);
             }
         }
         if(StringUtils.isNotBlank(cmd.getOrderNo())) {
