@@ -110,7 +110,7 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 
 			ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
 			dto.setCardTypeId("普通月卡");
-			dto.setRateToken("");
+			dto.setRateToken(String.valueOf(r.getId()));
 			dto.setVendorName(ParkingLotVendor.TEST.getCode());
 			return dto;
 		}
