@@ -298,5 +298,7 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
      * @param parkingCardRequest
      * @return
      */
-    abstract ParkingRechargeRateDTO getOpenCardRate(ParkingCardRequest parkingCardRequest);
+    ParkingRechargeRateDTO getOpenCardRate(ParkingCardRequest parkingCardRequest) {
+        return null;
+    }
 }

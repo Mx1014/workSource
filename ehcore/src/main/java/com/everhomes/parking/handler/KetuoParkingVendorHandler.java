@@ -502,8 +502,4 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 
 	abstract protected KetuoRequestConfig getKetuoRequestConfig();
 
-	@Override
-	ParkingRechargeRateDTO getOpenCardRate(ParkingCardRequest parkingCardRequest) {
-		return null;
-	}
 }
