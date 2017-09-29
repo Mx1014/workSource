@@ -1825,7 +1825,7 @@ public class PortalServiceImpl implements PortalService {
 						itemGroup.setName(instanceConfig.getItemGroup());
 						ItemGroupInstanceConfig config = ConvertHelper.convert(instanceConfig, ItemGroupInstanceConfig.class);
 						if(Style.fromCode(padLayoutGroup.getStyle()) == Style.GALLERY){
-							if(StringUtils.isEmpty(padLayoutGroup.getTitle()) || StringUtils.isEmpty(padLayoutGroup.getIconUrl())){
+							if(!StringUtils.isEmpty(padLayoutGroup.getTitle()) || !StringUtils.isEmpty(padLayoutGroup.getIconUrl())){
 								config.setTitleFlag(TitleFlag.TRUE.getCode());
 								config.setTitle(padLayoutGroup.getTitle());
 								config.setTitleUri(padLayoutGroup.getIconUrl());
