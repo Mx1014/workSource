@@ -7,7 +7,9 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
@@ -53,6 +55,10 @@ public class IncubatorServiceImpl implements IncubatorService {
 	private CommunityProvider communityProvider;
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
+
+	@Autowired
+	private ContentServerService contentServerService;
+
 	@Override
 	public ListIncubatorApplyResponse listIncubatorApply(ListIncubatorApplyCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId();
@@ -222,18 +228,24 @@ public class IncubatorServiceImpl implements IncubatorService {
 		List<IncubatorApplyAttachment> businessLicence= incubatorProvider.listAttachmentsByApplyId(dto.getId(), IncubatorApplyAttachmentType.BUSINESS_LICENCE.getCode());
 		List<IncubatorApplyAttachmentDTO> businessLicenceDto = new ArrayList<>();
 		if(businessLicence != null){
-			businessLicence.forEach(r ->
-				businessLicenceDto.add(ConvertHelper.convert(r, IncubatorApplyAttachmentDTO.class))
-			);
+			businessLicence.forEach(r -> {
+				IncubatorApplyAttachmentDTO temp = ConvertHelper.convert(r, IncubatorApplyAttachmentDTO.class);
+				String contentUrl = contentServerService.parserUri(temp.getContentUri(), IncubatorApplyAttachment.class.getSimpleName(), 1L);
+				temp.setContentUrl(contentUrl);
+				businessLicenceDto.add(temp);
+			});
 		}
 		dto.setBusinessLicenceAttachments(businessLicenceDto);
 
 		List<IncubatorApplyAttachment> planBook= incubatorProvider.listAttachmentsByApplyId(dto.getId(), IncubatorApplyAttachmentType.PLAN_BOOK.getCode());
 		List<IncubatorApplyAttachmentDTO> planBookDto = new ArrayList<>();
 		if(planBook != null){
-			planBook.forEach(r ->
-				planBookDto.add(ConvertHelper.convert(r, IncubatorApplyAttachmentDTO.class))
-			);
+			planBook.forEach(r -> {
+				IncubatorApplyAttachmentDTO temp = ConvertHelper.convert(r, IncubatorApplyAttachmentDTO.class);
+				String contentUrl = contentServerService.parserUri(temp.getContentUri(), IncubatorApplyAttachment.class.getSimpleName(), 1L);
+				temp.setContentUrl(contentUrl);
+				planBookDto.add(temp);
+			});
 		}
 		dto.setPlanBookAttachments(planBookDto);
 	}
