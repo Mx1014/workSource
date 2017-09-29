@@ -215,12 +215,12 @@ VALUES
 
 
 -- 收款方
-set @eh_payment_users_id = (select MAX(id) from `eh_payment_users`);
-INSERT INTO `eh_payment_users`
-(`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
-VALUES
-(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', '1012516', '2', '1145', UTC_TIMESTAMP());
-
+-- set @eh_payment_users_id = (select MAX(id) from `eh_payment_users`);
+-- INSERT INTO `eh_payment_users`
+-- (`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
+-- VALUES
+-- (@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', '1012516', '2', '1145', UTC_TIMESTAMP());
+-- 
 
 
 
