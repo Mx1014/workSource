@@ -1768,6 +1768,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalBill.setCreatorUid(userId);
 			rentalBill.setVisibleFlag(VisibleFlag.VISIBLE.getCode());
 
+		Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
+		rentalBill.setOrderNo(String.valueOf(orderNo));
+
+		LOGGER.info("create orderNo={}", orderNo);
 			synchronized (this) {
 				this.dbProvider.execute((TransactionStatus status) -> {
 
@@ -1777,8 +1781,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							.enter(() -> {
 								// this.groupProvider.updateGroup(group);
 								this.valiRentalBill(cmd.getRules());
-								Long orderNo = onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
-								rentalBill.setOrderNo(String.valueOf(orderNo));
+
 								return this.rentalv2Provider.createRentalOrder(rentalBill);
 							});
 					Long rentalBillId = tuple.first();
@@ -3540,18 +3543,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			}
 
 			String orderNo = bill.getOrderNo();
+			response.setOrderNo(bill.getOrderNo());
 
 			if (bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
 				response.setAmount(bill.getReserveMoney());
-				response.setOrderNo(bill.getOrderNo());
 
 			}else if (bill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
 				response.setAmount(bill.getPayTotalMoney().subtract(bill.getPaidMoney()));
-				response.setOrderNo(String.valueOf(orderNo));
 			} else {
 				response.setAmount(bill.getPayTotalMoney());
 			}
-			bill.setOrderNo(String.valueOf(orderNo));
 //			rentalv2Provider.updateRentalBill(bill);
 			// save bill and online pay bill
 			RentalOrderPayorderMap billmap = new RentalOrderPayorderMap();
