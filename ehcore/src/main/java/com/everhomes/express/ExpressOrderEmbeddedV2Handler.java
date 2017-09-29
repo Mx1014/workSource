@@ -40,7 +40,7 @@ public class ExpressOrderEmbeddedV2Handler implements PaymentCallBackHandler {
 
 	public PayCallbackCommand changeCmd(SrvOrderPaymentNotificationCommand from){
 		PayCallbackCommand cmd = new PayCallbackCommand();
-		cmd.setOrderNo(from.getBizOrderNum());
+		cmd.setOrderNo(String.valueOf(from.getOrderId()));
 		cmd.setPayAmount(payService.changePayAmount(from.getAmount()).toString());
 		return cmd;
 	}

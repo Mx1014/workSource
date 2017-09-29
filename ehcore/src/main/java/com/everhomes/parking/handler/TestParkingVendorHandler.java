@@ -48,25 +48,27 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 
+		if (plateNumber.startsWith("粤B")) {
+			parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 
-		parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
+			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
+			parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
+			parkingCardDTO.setParkingLotId(parkingLot.getId());
 
-		parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
-		parkingCardDTO.setOwnerId(parkingLot.getOwnerId());
-		parkingCardDTO.setParkingLotId(parkingLot.getId());
+			parkingCardDTO.setPlateOwnerName("测试");
+			parkingCardDTO.setPlateNumber(plateNumber);
 
-		parkingCardDTO.setPlateOwnerName("测试");
-		parkingCardDTO.setPlateNumber(plateNumber);
+			long expireTime = Utils.strToLong("20171029235959", Utils.DateStyle.DATE_TIME_STR);
 
-		long expireTime = Utils.strToLong("20171029235959", Utils.DateStyle.DATE_TIME_STR);
+			parkingCardDTO.setEndTime(expireTime);
+			parkingCardDTO.setCardType("普通月卡");
+			parkingCardDTO.setCardNumber("");
+			parkingCardDTO.setPlateOwnerPhone("12345679812");
+			parkingCardDTO.setIsValid(true);
 
-		parkingCardDTO.setEndTime(expireTime);
-		parkingCardDTO.setCardType("普通月卡");
-		parkingCardDTO.setCardNumber("");
-		parkingCardDTO.setPlateOwnerPhone("12345679812");
-		parkingCardDTO.setIsValid(true);
+			resultList.add(parkingCardDTO);
+		}
 
-		resultList.add(parkingCardDTO);
 
         
         return resultList;
