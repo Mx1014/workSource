@@ -1,11 +1,17 @@
 package com.everhomes.rest.archives;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
  * <li>organizationId: 公司或部门id</li>
  * <li>keywords: 搜索关键词</li>
+ * <li>filterScopeTypes: 过滤范围类型{@link com.everhomes.rest.organization.FilterOrganizationContactScopeType}</li>
+ * <li>pageAnchor: 分页锚点</li>
+ * <li>pageSize: 每页大小</li>
  * </ul>
  */
 public class ListArchivesContactsCommand {
@@ -13,6 +19,9 @@ public class ListArchivesContactsCommand {
     private Long organizationId;
 
     private String keywords;
+
+    @ItemType(String.class)
+    private List<String> filterScopeTypes;
 
     private Long pageAnchor;
 
