@@ -6,7 +6,6 @@ import java.util.Map;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.express.*;
 import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 

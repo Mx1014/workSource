@@ -3,9 +3,9 @@ package com.everhomes.express;
 
 import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,26 +19,26 @@ public class ExpressOrderEmbeddedV2Handler implements PaymentCallBackHandler {
 	private PayService payService;
 
 	@Override
-	public void paySuccess(OrderPaymentNotificationCommand cmd) {
+	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
 		expressService.paySuccess(changeCmd(cmd));
 	}
 
 	@Override
-	public void payFail(OrderPaymentNotificationCommand cmd) {
+	public void payFail(SrvOrderPaymentNotificationCommand cmd) {
 		expressService.payFail(changeCmd(cmd));
 	}
 
 	@Override
-	public void refundSuccess(OrderPaymentNotificationCommand cmd) {
+	public void refundSuccess(SrvOrderPaymentNotificationCommand cmd) {
 
 	}
 
 	@Override
-	public void refundFail(OrderPaymentNotificationCommand cmd) {
+	public void refundFail(SrvOrderPaymentNotificationCommand cmd) {
 
 	}
 
-	public PayCallbackCommand changeCmd(OrderPaymentNotificationCommand from){
+	public PayCallbackCommand changeCmd(SrvOrderPaymentNotificationCommand from){
 		PayCallbackCommand cmd = new PayCallbackCommand();
 		cmd.setOrderNo(from.getBizOrderNum());
 		cmd.setPayAmount(payService.changePayAmount(from.getAmount()).toString());

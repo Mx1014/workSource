@@ -8,6 +8,7 @@ import com.everhomes.http.HttpUtils;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.apache.http.protocol.HTTP;
@@ -37,7 +38,7 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
      * 请求张江高科的接口进行回调付款，成功后返回200和ok，则修改账单的状态
      */
     @Override
-    public void paySuccess(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
+    public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
         LOGGER.info("ZJGK-PAY-HANDLER START, cmd is = {}",cmd.toString());
         Map<String,String> params = null;
         Long orderId = cmd.getOrderId();
@@ -112,7 +113,7 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
      * 修改账单状态为fail
      */
     @Override
-    public void payFail(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
+    public void payFail(SrvOrderPaymentNotificationCommand cmd) {
         LOGGER.info("pay failed for zjgk, returned notificationCmd = {}",cmd.toString());
         this.dbProvider.execute((TransactionStatus status) -> {
             assetProvider.changeOrderStaus(cmd.getOrderId(),(byte)1);
@@ -122,7 +123,7 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
     }
 
     @Override
-    public void refundSuccess(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
+    public void refundSuccess(SrvOrderPaymentNotificationCommand cmd) {
         LOGGER.info("pay failed for zjgk, returned notificationCmd = {}",cmd.toString());
         this.dbProvider.execute((TransactionStatus status) -> {
             assetProvider.changeOrderStaus(cmd.getOrderId(),(byte)6);
@@ -131,7 +132,7 @@ public class Zjgk_PayCallBack implements PaymentCallBackHandler{
     }
 
     @Override
-    public void refundFail(com.everhomes.rest.order.OrderPaymentNotificationCommand cmd) {
+    public void refundFail(SrvOrderPaymentNotificationCommand cmd) {
         LOGGER.info("pay failed for zjgk, returned notificationCmd = {}",cmd.toString());
         this.dbProvider.execute((TransactionStatus status) -> {
             assetProvider.changeOrderStaus(cmd.getOrderId(),(byte)7);

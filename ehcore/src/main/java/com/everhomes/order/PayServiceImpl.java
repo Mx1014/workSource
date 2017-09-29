@@ -15,7 +15,6 @@ import com.everhomes.pay.user.BusinessUserType;
 import com.everhomes.pay.user.RegisterBusinessUserCommand;
 import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.order.*;
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
@@ -352,25 +351,36 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(orderRecord.getOrderType()));
         LOGGER.debug("PaymentCallBackHandler="+handler.getClass().getName());
 
-        if(cmd.getOrderType().intValue() == com.everhomes.pay.order.OrderType.PURCHACE.getCode()){
-            if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
-                //支付成功
-                handler.paySuccess(cmd);
+        SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
+        srvCmd.setOrderType(orderRecord.getOrderType());
+        com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(cmd.getOrderType());
+        if(orderType != null) {
+            switch (orderType) {
+                case PURCHACE:
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                        //支付成功
+                        handler.paySuccess(srvCmd);
+                    }
+                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                        //支付失败
+                        handler.payFail(srvCmd);
+                    }
+                    break;
+                case REFUND:
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                        //退款成功
+                        handler.refundSuccess(srvCmd);
+                    }
+                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                        //退款失败
+                        handler.refundFail(srvCmd);
+                    }
+                    break;
+                default:
+                    LOGGER.error("unsupport orderType, orderType={}, cmd={}", orderType.getCode(), StringHelper.toJsonString(cmd));
             }
-            if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
-                //支付失败
-                handler.payFail(cmd);
-            }
-        }else if(cmd.getOrderType().intValue() == com.everhomes.pay.order.OrderType.REFUND.getCode()){
-
-            if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
-                //退款成功
-                handler.refundSuccess(cmd);
-            }
-            if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
-                //退款失败
-                handler.refundFail(cmd);
-            }
+        }else {
+            LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
         }
 
     }

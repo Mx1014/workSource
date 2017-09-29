@@ -1,38 +1,18 @@
 // @formatter:off
 package com.everhomes.rentalv2;
 
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.activity.ActivityProivider;
-import com.everhomes.activity.ActivityService;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.bus.BusBridgeProvider;
-import com.everhomes.bus.LocalBus;
-import com.everhomes.bus.LocalBusSubscriber;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
-import com.everhomes.parking.ParkingProvider;
-import com.everhomes.parking.ParkingRechargeOrder;
-import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.pay.order.PaymentType;
-import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import com.everhomes.rest.organization.VendorType;
-import com.everhomes.rest.parking.ParkingErrorCode;
-import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
-import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.PayMode;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -41,7 +21,6 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +31,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 @Component(PaymentCallBackHandler.ORDER_PAYMENT_BACK_HANDLER_PREFIX + OrderType.RENTAL_ORDER_CODE )
@@ -78,7 +56,7 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 	@Autowired
 	private SmsProvider smsProvider;
 	@Override
-	public void paySuccess(OrderPaymentNotificationCommand cmd) {
+	public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
 
 			this.dbProvider.execute((TransactionStatus status) -> {
 
@@ -174,18 +152,18 @@ public class RentalOrderCallBackHandler implements PaymentCallBackHandler {
 	}
 
 	@Override
-	public void payFail(OrderPaymentNotificationCommand cmd) {
+	public void payFail(SrvOrderPaymentNotificationCommand cmd) {
 		//TODO: 失败
 		LOGGER.error("Parking pay failed, cmd={}", cmd);
 	}
 
 	@Override
-	public void refundSuccess(OrderPaymentNotificationCommand cmd) {
+	public void refundSuccess(SrvOrderPaymentNotificationCommand cmd) {
 
 	}
 
 	@Override
-	public void refundFail(OrderPaymentNotificationCommand cmd) {
+	public void refundFail(SrvOrderPaymentNotificationCommand cmd) {
 		//when you refund, i can do nothing.
 	}
 

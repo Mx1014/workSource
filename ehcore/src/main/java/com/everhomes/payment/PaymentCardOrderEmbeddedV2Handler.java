@@ -3,12 +3,11 @@ package com.everhomes.payment;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.order.PaymentCallBackHandler;
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import com.everhomes.rest.payment.CardOrderStatus;
 import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.util.RuntimeErrorException;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,7 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
 
 
     @Override
-    public void paySuccess(OrderPaymentNotificationCommand cmd) {
+    public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
         this.checkOrderNoIsNull(cmd.getOrderId());
         LOGGER.info("PaymentCardOrderEmbeddedV2Handler paySuccess start cmd = {}", cmd);
         PaymentCardRechargeOrder order = checkOrder(cmd.getOrderId());
@@ -54,7 +53,7 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
     }
 
     @Override
-     public void payFail(OrderPaymentNotificationCommand cmd) {
+     public void payFail(SrvOrderPaymentNotificationCommand cmd) {
         this.checkOrderNoIsNull(cmd.getOrderId());
         PaymentCardRechargeOrder order = checkOrder(cmd.getOrderId());
         Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
@@ -67,12 +66,12 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
     }
 
     @Override
-    public void refundSuccess(OrderPaymentNotificationCommand cmd) {
+    public void refundSuccess(SrvOrderPaymentNotificationCommand cmd) {
 
     }
 
     @Override
-    public void refundFail(OrderPaymentNotificationCommand cmd) {
+    public void refundFail(SrvOrderPaymentNotificationCommand cmd) {
 
     }
 
