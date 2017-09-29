@@ -30,13 +30,13 @@ public class OrderType {
 
 	public static enum OrderTypeEnum{
 		WUYETEST(OrderType.WU_YE_TEST_CODE,"wuyetest","物业支付-测试用",""),
-		PARKING(OrderType.PARKING_CODE,"parking","停车充值支付",""),
+		PARKING(OrderType.PARKING_CODE,"parking","停车充值支付","pak"),
 		PMSIYUAN(OrderType.PM_SIYUAN_CODE,"pmsy","思源物业",""),
-		PAYMENTCARD(OrderType.PAYMENT_CARD_CODE,"paymentCard","一卡通",""),
-		RENTALORDER(OrderType.RENTAL_ORDER_CODE,"rentalOrder","资源预订",""),
-		EXPRESS_ORDER(OrderType.EXPRESS_ORDER_CODE,"expressOrder","快递订单",""),
+		PAYMENTCARD(OrderType.PAYMENT_CARD_CODE,"paymentCard","一卡通","pac"),
+		RENTALORDER(OrderType.RENTAL_ORDER_CODE,"rentalOrder","资源预订","rto"),
+		EXPRESS_ORDER(OrderType.EXPRESS_ORDER_CODE,"expressOrder","快递订单","exo"),
 		ACTIVITYSIGNUPORDER(OrderType.ACTIVITY_SIGNUP_ORDER_CODE,"activitySignupOrder","活动报名缴费","act"),
-		PRINT_ORDER(OrderType.PRINT_ORDER_CODE,"printOrder","打印订单",""),
+		PRINT_ORDER(OrderType.PRINT_ORDER_CODE,"printOrder","打印订单","pro"),
 		ACTIVITYSIGNUPORDERWECHAT(OrderType.ACTIVITY_SIGNUP_ORDER_WECHAT_CODE,"activitysignuporderwechat","活动报名（微信）缴费","acw"),
 		ZJGK_RENTAL_CODE(OrderType.ZJGK_RENTAL_CODE,"zjgkrentalcode","张江高科租金缴费",""),
 		VIDEOCONF_CODE(OrderType.VIDEOCONF_CODE,"videoConf","视频会议","vmt"),
