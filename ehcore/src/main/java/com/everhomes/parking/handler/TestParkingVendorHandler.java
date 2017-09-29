@@ -128,7 +128,7 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 		LOGGER.info(TestParkingVendorHandler.class.getName());
 
 		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRateByMonthCount(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
-				parkingCardRequest.getId(), parkingCardRequest.getCardTypeId(), new BigDecimal(1));
+				parkingCardRequest.getParkingLotId(), parkingCardRequest.getCardTypeId(), new BigDecimal(1));
 
 		if (null == rate) {
 			//TODO:
