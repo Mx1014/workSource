@@ -12,14 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
 import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.CreateCustomerAccountCommand;
 import com.everhomes.rest.customer.CreateCustomerApplyProjectCommand;
@@ -82,7 +79,6 @@ import com.everhomes.rest.customer.GetCustomerTrackingCommand;
 import com.everhomes.rest.customer.GetCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.GetCustomerTrademarkCommand;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.GetImgUrlByUriCommand;
 import com.everhomes.rest.customer.GiveUpEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
 import com.everhomes.rest.customer.ListCustomerAccountsCommand;
@@ -1258,20 +1254,6 @@ public class CustomerController extends ControllerBase {
         return response;
     }
     
-    
-    /**
-     * <b>URL: /customer/getImgUrlByUri</b>
-     * <p>根据uri获取url</p>
-     */
-    @RequestMapping("getImgUrlByUri")
-    @RestReturn(value = JSONObject.class)
-    public RestResponse getImgUrlByUri(@Valid GetImgUrlByUriCommand cmd) {
- 		
- 		RestResponse response = new RestResponse(customerService.getImgUrlByUri(cmd));
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
     
 
 

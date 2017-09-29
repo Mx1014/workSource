@@ -22,7 +22,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -110,7 +109,6 @@ import com.everhomes.rest.customer.GetCustomerTrackingCommand;
 import com.everhomes.rest.customer.GetCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.GetCustomerTrademarkCommand;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.GetImgUrlByUriCommand;
 import com.everhomes.rest.customer.GiveUpEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
 import com.everhomes.rest.customer.ImportEnterpriseCustomerDataDTO;
@@ -1897,23 +1895,5 @@ public class CustomerServiceImpl implements CustomerService {
 		return calendar.getTime().getTime();
 	}
 
-	@Override
-	public JSONObject getImgUrlByUri(GetImgUrlByUriCommand cmd) {
-		JSONObject json = new JSONObject();
-		List<String> uriList = new ArrayList<>();
-		List<String> urlList = new ArrayList<>();
-		if(StringUtils.isNotEmpty(cmd.getUri())){
-        	String[] uriArray = cmd.getUri().split(",");
-        	for(String  uri : uriArray){
-        		uriList.add(uri);
-        		String contentUrl = contentServerService.parserUri(uri, EntityType.CUSTOMER_TRACKING.getCode(), -1L);
-        		urlList.add(contentUrl);
-        	}
-        }
-		json.put("uriList", uriList);
-		json.put("urlList", urlList);
-		return json;
-	}
-	
 	
 }

@@ -102,5 +102,4 @@ public interface CustomerService {
 	
 	List<List<CustomerTrackingPlanDTO>> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd);
 	
-	JSONObject getImgUrlByUri(GetImgUrlByUriCommand cmd);
 }
