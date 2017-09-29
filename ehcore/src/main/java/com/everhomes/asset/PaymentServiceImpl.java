@@ -29,6 +29,11 @@ public class PaymentServiceImpl implements PaymentService {
     public ListPaymentBillResp listPaymentBill(ListPaymentBillCmd cmd) throws Exception {
         if (cmd.getLimit() == null) {
             cmd.setLimit(21l);
+        }else{
+            cmd.setLimit(cmd.getLimit()+1l);
+        }
+        if(cmd.getOffset() == null){
+            cmd.setOffset(0l);
         }
         if (cmd.getTransactionType() == null) {
             List<Integer> transactionTypes = new ArrayList<Integer>();
@@ -46,9 +51,8 @@ public class PaymentServiceImpl implements PaymentService {
         }
         //payeeUserId
         PaymentUser paymentUser = assetProvider.findByOwner(cmd.getUserType(),cmd.getUserId());
-        if(paymentUser == null) {
-            return new ListPaymentBillResp(cmd.getOffset(), cmd.getLimit());
-        }else{
+        if(paymentUser != null) {
+//            return new ListPaymentBillResp(cmd.getOffset(), cmd.getLimit());
             cmd.setUserId(paymentUser.getPaymentUserId());
         }
 
