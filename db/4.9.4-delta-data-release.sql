@@ -45,17 +45,12 @@ VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 9999
 
 -- 基础
 -- -- 支付方式
--- SET @eh_configurations_id = (SELECT MAX(id) from eh_configurations);
--- INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.callback.url', '/pay/payNotify', '新支付回调接口url', '0', NULL);
--- INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'default.bind.phone', '12100001111', '绑手机号默认值', '0', NULL);
--- INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.orderPaymentStatusQueryUri', '/order/queryOrderPaymentStatus', '查询支付单信息', '0', NULL);
--- INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.home.url', 'http://paytest.zuolin.com:8080/pay', '新支付homeUrl', '0', NULL);
-UPDATE `eh_configurations` SET `value` = 'https://payv2.zuolin.com/pay' where name = 'pay.v2.home.url';
--- 园区账号, review app_id, xxxx ...
--- INSERT INTO `eh_payment_accounts` (`id`, `name`, `account_id`, `system_id`, `app_key`, `secret_key`, `create_time`)
--- VALUES
--- ('1', 'payv2-account-20170929', '10000', '1', '136890e5-41f9-4494-8dc2-46d63ff015b7', 'fgFUqv7/GPfx1zZX9I3cHSt5+zJNKNKHiSDuLFoMC8WFIeOaZqTDps8zIWPZioRx/XGta5anMlDpM6NBlCwabg==', '2017-09-08 14:58:46');
-delete from `eh_payment_accounts` where account_id='10000';
+SET @eh_configurations_id = (SELECT MAX(id) from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.callback.url', '/pay/payNotify', '新支付回调接口url', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'default.bind.phone', '12100001111', '绑手机号默认值', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.orderPaymentStatusQueryUri', '/order/queryOrderPaymentStatus', '查询支付单信息', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.home.url', 'https://payv2.zuolin.com/pay', '新支付homeUrl', '0', NULL);
+
 INSERT INTO `eh_payment_accounts` (`id`, `name`, `account_id`, `system_id`, `app_key`, `secret_key`, `create_time`)
 VALUES
 ('1', 'zuolinAccount', '10000', '1', '402bca3f-e1be-4c9a-a975-cfa28d9b9e12', '566HI0h7GiloRywFYobfP+Wy2gFTygxdwK/VQGRkB8PNz0AHhMrfvExLiYYGLUCIXHdOnFRvr//gyND0sgLBag==', UTC_123123);
@@ -64,8 +59,6 @@ VALUES
 
 TRUNCATE `eh_payment_service_configs`;
 TRUNCATE `eh_payment_users`;
-
-delete from `eh_payment_types` where `order_type` = 'zjgkrentalcode';
 
 -- 闻天
 
