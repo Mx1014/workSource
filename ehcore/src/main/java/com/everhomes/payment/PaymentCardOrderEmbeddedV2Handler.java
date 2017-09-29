@@ -2,6 +2,7 @@ package com.everhomes.payment;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.order.PayService;
 import com.everhomes.order.PaymentCallBackHandler;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
@@ -25,7 +26,8 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
 
     @Autowired
     private PaymentCardProvider paymentCardProvider;
-
+    @Autowired
+    private PayService payservice;
 
 
     @Override
@@ -33,7 +35,7 @@ public class PaymentCardOrderEmbeddedV2Handler implements PaymentCallBackHandler
         this.checkOrderNoIsNull(cmd.getOrderId());
         LOGGER.info("PaymentCardOrderEmbeddedV2Handler paySuccess start cmd = {}", cmd);
         PaymentCardRechargeOrder order = checkOrder(cmd.getOrderId());
-        if (0 != order.getAmount().compareTo(new BigDecimal(cmd.getAmount()))) {
+        if (0 != order.getAmount().compareTo(payservice.changePayAmount(cmd.getAmount()))) {
             LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "Order amount is not equal to payAmount.");
