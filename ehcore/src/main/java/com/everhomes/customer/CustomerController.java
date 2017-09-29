@@ -82,6 +82,7 @@ import com.everhomes.rest.customer.GetCustomerTrackingCommand;
 import com.everhomes.rest.customer.GetCustomerTrackingPlanCommand;
 import com.everhomes.rest.customer.GetCustomerTrademarkCommand;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.GetImgUrlByUriCommand;
 import com.everhomes.rest.customer.GiveUpEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
 import com.everhomes.rest.customer.ListCustomerAccountsCommand;
@@ -1252,6 +1253,21 @@ public class CustomerController extends ControllerBase {
     public RestResponse listCustomerTrackingPlansByDate(@Valid ListCustomerTrackingPlansByDateCommand cmd) {
  		
  		RestResponse response = new RestResponse(customerService.listCustomerTrackingPlansByDate(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
+    /**
+     * <b>URL: /customer/getImgUrlByUri</b>
+     * <p>根据uri获取url</p>
+     */
+    @RequestMapping("getImgUrlByUri")
+    @RestReturn(value = JSONObject.class)
+    public RestResponse getImgUrlByUri(@Valid GetImgUrlByUriCommand cmd) {
+ 		
+ 		RestResponse response = new RestResponse(customerService.getImgUrlByUri(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

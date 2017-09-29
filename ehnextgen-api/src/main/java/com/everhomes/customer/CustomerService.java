@@ -1,5 +1,6 @@
 package com.everhomes.customer;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import org.springframework.web.multipart.MultipartFile;
@@ -100,4 +101,6 @@ public interface CustomerService {
 	void processTrackingPlanNotify(CustomerTrackingPlan plan);
 	
 	List<List<CustomerTrackingPlanDTO>> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd);
+	
+	JSONObject getImgUrlByUri(GetImgUrlByUriCommand cmd);
 }
