@@ -48,9 +48,10 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentUser paymentUser = assetProvider.findByOwner(cmd.getUserType(),cmd.getUserId());
         if(paymentUser == null) {
             return new ListPaymentBillResp(cmd.getOffset(), cmd.getLimit());
+        }else{
+            cmd.setUserId(paymentUser.getPaymentUserId());
         }
 
-        cmd.setUserId(paymentUser.getPaymentUserId());
         return remoteAccessService.listOrderPayment(cmd);
     }
 
