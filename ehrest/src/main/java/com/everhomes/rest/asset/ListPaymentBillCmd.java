@@ -14,8 +14,8 @@ public class ListPaymentBillCmd {
     private Long offset;
     private Long limit;
 
-    private Date startPayTime;
-    private Date endPayTime;
+    private String startPayTime;
+    private String endPayTime;
 
     //交易时间
     private String payTime;
@@ -54,18 +54,39 @@ public class ListPaymentBillCmd {
     public void setLimit(Long limit) {
         this.limit = limit;
     }
-    public Date getStartPayTime() {
+
+    public String getStartPayTime() {
         return startPayTime;
     }
-    public void setStartPayTime(Date startPayTime) {
+
+    public void setStartPayTime(String startPayTime) {
         this.startPayTime = startPayTime;
     }
-    public Date getEndPayTime() {
+
+    public String getEndPayTime() {
         return endPayTime;
     }
-    public void setEndPayTime(Date endPayTime) {
+
+    public void setEndPayTime(String endPayTime) {
         this.endPayTime = endPayTime;
     }
+
+    public String getPayTime() {
+        return payTime;
+    }
+
+    public void setPayTime(String payTime) {
+        this.payTime = payTime;
+    }
+
+    public String getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(String orderType) {
+        this.orderType = orderType;
+    }
+
     public String getOrderNo() {
         return orderNo;
     }
