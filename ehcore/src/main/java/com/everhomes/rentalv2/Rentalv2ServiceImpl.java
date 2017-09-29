@@ -3556,7 +3556,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			RentalOrderPayorderMap billmap = new RentalOrderPayorderMap();
 
 			billmap.setOrderId(cmd.getRentalBillId());
-			billmap.setOrderNo(orderNo);
+			billmap.setOrderNo(Long.valueOf(orderNo));
 			billmap.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			billmap.setCreatorUid(userId);
