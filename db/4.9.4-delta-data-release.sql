@@ -53,7 +53,7 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 INSERT INTO `eh_payment_accounts` (`id`, `name`, `account_id`, `system_id`, `app_key`, `secret_key`, `create_time`)
 VALUES
-('1', 'zuolinAccount', '10000', '1', '402bca3f-e1be-4c9a-a975-cfa28d9b9e12', '566HI0h7GiloRywFYobfP+Wy2gFTygxdwK/VQGRkB8PNz0AHhMrfvExLiYYGLUCIXHdOnFRvr//gyND0sgLBag==', UTC_123123);
+('1', 'zuolinAccount', '10000', '1', '402bca3f-e1be-4c9a-a975-cfa28d9b9e12', '566HI0h7GiloRywFYobfP+Wy2gFTygxdwK/VQGRkB8PNz0AHhMrfvExLiYYGLUCIXHdOnFRvr//gyND0sgLBag==', UTC_TIMESTAMP());
 
 
 
