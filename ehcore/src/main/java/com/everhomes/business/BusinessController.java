@@ -213,17 +213,4 @@ public class BusinessController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <p>查看付款方是否有会员</p>
-     * <b>URL: /business/checkPaymentUser</b>
-     */
-    @RequestMapping("checkPaymentUser")
-    @RestReturn(value = CheckPaymentUserResponse.class)
-    public RestResponse checkPaymentUser(CheckPaymentUserCommand cmd){
-        CheckPaymentUserResponse response = businessService.checkPaymentUser(cmd);
-        RestResponse restResponse = new RestResponse(response);
-        restResponse.setErrorCode(ErrorCodes.SUCCESS);
-        restResponse.setErrorDescription("OK");
-        return restResponse;
-    }
 }
