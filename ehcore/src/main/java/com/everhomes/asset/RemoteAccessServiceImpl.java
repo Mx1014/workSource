@@ -267,20 +267,30 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 condition = condition.and(tempCondition);
             }
         }
-        if(cmd.getStartPayTime() != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date start = sdf.parse(cmd.getStartPayTime());
-            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.ge(start.getTime());
-            if(condition == null) {
-                condition = tempCondition;
-            } else {
-                condition = condition.and(tempCondition);
-            }
-        }
-        if(cmd.getEndPayTime() != null) {
+//        if(cmd.getStartPayTime() != null) {
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//            Date start = sdf.parse(cmd.getStartPayTime());
+//            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.ge(start.getTime());
+//            if(condition == null) {
+//                condition = tempCondition;
+//            } else {
+//                condition = condition.and(tempCondition);
+//            }
+//        }
+//        if(cmd.getEndPayTime() != null) {
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//            Date end = sdf.parse(cmd.getEndPayTime());
+//            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.le(end.getTime());
+//            if(condition == null) {
+//                condition = tempCondition;
+//            } else {
+//                condition = condition.and(tempCondition);
+//            }
+//        }
+        if(cmd.getPayTime() != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date end = sdf.parse(cmd.getEndPayTime());
-            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.le(end.getTime());
+            QueryCondition tempCondition = PaymentAttributes.CREATE_TIME.eq(end.getTime());
             if(condition == null) {
                 condition = tempCondition;
             } else {

@@ -39,12 +39,6 @@ public class ParkingOrderCallBackHandler implements PaymentCallBackHandler {
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingOrderCallBackHandler.class);
 
-    @Autowired
-    private ActivityProivider activityProvider;
-    
-    @Autowired
-    private ActivityService activityService;
-
 	@Autowired
 	private PayService payService;
 
