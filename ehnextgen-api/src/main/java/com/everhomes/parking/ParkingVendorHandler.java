@@ -62,7 +62,7 @@ public interface ParkingVendorHandler {
      * 创建订单时，更新费率信息
      * @param order
      */
-    void updateParkingRechargeOrderRate(ParkingRechargeOrder order);
+    void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order);
     /**
      * 获取临时车费用
      * @param parkingLot

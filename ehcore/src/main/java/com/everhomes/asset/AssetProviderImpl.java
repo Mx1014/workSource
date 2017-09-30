@@ -12,6 +12,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
@@ -32,6 +33,8 @@ import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+
+import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
 
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
@@ -1764,5 +1767,148 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchOne(0,String.class);
     }
 
+
+    @Override
+    public Long saveAnOrderCopy(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //TO SAVE A PRE ORDER COPY IN THE ORDER TABLE WITH STATUS BEING NOT BEING PAID YET
+        long nextOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_ASSET_PAYMENT_ORDER.getClass()));
+        AssetPaymentOrder order = new AssetPaymentOrder();
+        order.setClientAppName(clientAppName);
+        order.setCommunityId(String.valueOf(communityId));
+        order.setContractId(contactNum);
+        order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        order.setId(nextOrderId);
+        order.setNamespaceId(namespaceId);
+        // GET THE START TIME AND EXPIRTIME
+        Timestamp startTime = new Timestamp(DateHelper.currentGMTTime().getTime());
+        Calendar c = Calendar.getInstance();
+        //expiretime为妙，所以乘以1000得到milliseconds
+        long l = startTime.getTime() + expireTimePeriod*1000l;
+
+        Timestamp endTime = new Timestamp(l);
+        order.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        order.setOrderExpireTime(endTime);
+        order.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
+
+        Random r = new Random();
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < 17; i++){
+               sb.append(r.nextInt(10));
+        }
+        order.setOrderNo(Long.parseLong(sb.toString()));
+        order.setUid(UserContext.currentUserId());
+        order.setPayAmount(new BigDecimal(amountOwed));
+        order.setPayerType(payerType);
+
+        EhAssetPaymentOrderDao dao = new EhAssetPaymentOrderDao(context.configuration());
+        dao.insert(order);
+        return nextOrderId;
+    }
+
+
+    @Override
+    public Long findAssetOrderByBillIds(List<String> billIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        HashSet<Long> idSet = new HashSet<>();
+        Long id = null;
+        context.select(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.ORDER_ID)
+                .from(Tables.EH_ASSET_PAYMENT_ORDER_BILLS)
+                .where(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.BILL_ID.in(billIds))
+                .fetch()
+                .map(r -> {
+                    idSet.add(r.getValue(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.ORDER_ID));
+                    return null;});
+        if(idSet.size()==1){
+            id = idSet.iterator().next();
+        }
+        return id;
+    }
+
+    @Override
+    public void saveOrderBills(List<BillIdAndAmount> bills, Long orderId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.getClass()),bills.size());
+        long nextSequence = nextBlockSequence - bills.size()+1;
+        List<EhAssetPaymentOrderBills> orderBills = new ArrayList<>();
+        for(int i = 0; i < bills.size(); i ++){
+            EhAssetPaymentOrderBills orderBill  = new EhAssetPaymentOrderBills();
+            BillIdAndAmount billIdAndAmount = bills.get(i);
+            orderBill.setId(nextSequence++);
+            orderBill.setAmount(new BigDecimal(billIdAndAmount.getAmountOwed()));
+            orderBill.setBillId(billIdAndAmount.getBillId());
+            orderBill.setOrderId(orderId);
+            orderBills.add(orderBill);
+        }
+        EhAssetPaymentOrderBillsDao dao = new EhAssetPaymentOrderBillsDao(dslContext.configuration());
+        dao.insert(orderBills);
+    }
+
+    @Override
+    public AssetPaymentOrder findAssetPaymentById(Long orderId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhAssetPaymentOrder t = Tables.EH_ASSET_PAYMENT_ORDER.as("t");
+        return context.select()
+                .from(t)
+                .where(t.ID.eq(orderId))
+                .fetchOneInto(AssetPaymentOrder.class);
+    }
+
+    @Override
+    public List<AssetPaymentOrderBills> findBillsById(Long orderId) {
+        List<AssetPaymentOrderBills> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t");
+        context.select()
+                .from(t)
+                .where(t.ORDER_ID.eq(orderId))
+                .fetch()
+                .map(r -> {
+                    list.add(ConvertHelper.convert(r,AssetPaymentOrderBills.class));
+                    return null;
+                });
+
+        return list;
+    }
+
+    @Override
+    public void changeOrderStaus(Long orderId, Byte finalOrderStatus) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhAssetPaymentOrder t = Tables.EH_ASSET_PAYMENT_ORDER.as("t");
+        context.update(t)
+                .set(t.STATUS,finalOrderStatus)
+                .where(t.ID.eq(orderId))
+                .execute();
+    }
+
+    @Override
+    public void changeBillStatusOnOrder(Map<String, Integer> billStatuses,Long orderId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t");
+        for(Map.Entry<String,Integer> entry : billStatuses.entrySet()){
+            context.update(t)
+                    .set(t.STATUS,entry.getValue())
+                    .where(t.BILL_ID.eq(entry.getKey()))
+                    .and(t.ORDER_ID.eq(orderId))
+                    .execute();
+        }
+    }
+
+    @Override
+    public void changeBillStatusOnPaiedOff(List<Long> billIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
+        context.update(t)
+                .set(t.STATUS,(byte)1)
+                .where(t.ID.in(billIds))
+                .execute();
+        context.update(t1)
+                .set(t1.STATUS,(byte)1)
+                .where(t1.BILL_ID.in(billIds))
+                .execute();
+
+    }
 
 }

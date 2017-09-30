@@ -1948,6 +1948,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      **/
     @Override
     public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         pageSize = pageSize + 1;
         List<OrganizationMember> result = new ArrayList<>();
@@ -1955,7 +1956,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
         TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
         SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-        Condition condition = t1.field("id").gt(0L);
+        Condition condition = t1.field("id").gt(0L).and(t1.field("namespace_id").eq(namespaceId));
 
         Condition cond = t1.field("organization_id").eq(orgCommoand.getId()).and(t1.field("status").eq(orgCommoand.getStatus()));
 
@@ -2029,13 +2030,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public Integer countOrganizationPersonnels(Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<OrganizationMember> result = new ArrayList<>();
 		/**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
 		TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
 		TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-		Condition condition = t1.field("id").gt(0L);
+		Condition condition = t1.field("id").gt(0L).and(t1.field("namespace_id").eq(namespaceId));
 		Condition cond = t1.field("organization_id").eq(orgCommoand.getId()).and(t1.field("status").eq(orgCommoand.getStatus()));
 		if (contactSignedupStatus != null && contactSignedupStatus == ContactSignUpStatus.SIGNEDUP.getCode()) {
 			cond = cond.and(t1.field("target_id").ne(0L));
@@ -5376,8 +5378,28 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.and(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID.eq(ownerId)).execute();
  
 	}
-	
+
 	@Override
+	public List<Organization> findNamespaceUnifiedSocialCreditCode(String unifiedSocialCreditCode, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizations.class));
+
+		List<Organization> result = new ArrayList<Organization>();
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.UNIFIED_SOCIAL_CREDIT_CODE.eq(unifiedSocialCreditCode));
+
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Organization.class));
+			return null;
+		});
+
+		return result;
+	}
+
+@Override
 	public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;

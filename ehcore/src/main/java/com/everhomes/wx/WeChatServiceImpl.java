@@ -286,8 +286,6 @@ public class WeChatServiceImpl implements WeChatService {
             
         keys.put(UserContext.getCurrentNamespaceId() + JSAPI_TICKENT, resp.getTicket());
 
-        LOGGER.debug("makeJsApiTicket return keys={}", keys);
-        
         return keys;
 	}
 	
@@ -330,8 +328,6 @@ public class WeChatServiceImpl implements WeChatService {
                   "&timestamp=" + timestamp +
                   "&url=" + url;
         System.out.println(string1);
-        //TODO delete Log
-        LOGGER.debug(string1);
 
         try
         {

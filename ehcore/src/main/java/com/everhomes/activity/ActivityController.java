@@ -97,6 +97,19 @@ public class ActivityController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /activity/createSignupOrderV2</b>
+     * <p>支付2.0</p>
+     */
+    @RequestMapping("createSignupOrderV2")
+    @RestReturn(value=PreOrderDTO.class)
+    public RestResponse createSignupOrderV2(@Valid CreateSignupOrderV2Command cmd) {
+        PreOrderDTO dto = activityService.createSignupOrderV2(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      *

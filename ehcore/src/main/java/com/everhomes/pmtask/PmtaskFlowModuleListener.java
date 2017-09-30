@@ -387,7 +387,14 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 										List<Tuple<String, Object>> variables) {
 		FlowCase flowCase = ctx.getFlowCase();
 		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-		Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());
+		Category category = null;
+		//Todo:为科兴与一碑对接
+		if (task.getNamespaceId()==999983 && null!= task.getTaskCategoryId() &&
+				task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			category = new Category();
+			category.setName("物业报修");
+		}else
+			category = categoryProvider.findCategoryById(task.getTaskCategoryId());
 
 		if (SmsTemplateCode.PM_TASK_CREATOR_CODE == templateId) {
 

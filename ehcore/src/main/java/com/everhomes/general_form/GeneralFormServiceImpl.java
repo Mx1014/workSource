@@ -14,6 +14,7 @@ import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
+import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
@@ -21,8 +22,11 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+
+import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -529,10 +533,14 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(cmd.getOwnerId()));
 						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(cmd
 								.getOwnerType()));
-						if (cmd.getModuleId()!=null)
-							query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(cmd.getModuleId()));
-						if (cmd.getModuleType()!=null)
-							query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(cmd.getModuleType()));
+						Condition condititon = DSL.trueCondition();
+						if (cmd.getModuleId()!=null && cmd.getModuleType()!=null){
+							condititon = condititon.or(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(cmd.getModuleId()).and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(cmd.getModuleType())));
+							if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(cmd.getModuleType())){
+								condititon = condititon.or(Tables.EH_GENERAL_FORMS.MODULE_ID.isNull().and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.isNull()));
+							}
+						}
+						query.addConditions(condititon);
 						query.addConditions(Tables.EH_GENERAL_FORMS.STATUS
 								.ne(GeneralFormStatus.INVALID.getCode()));
 						return query;

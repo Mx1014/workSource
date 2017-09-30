@@ -224,19 +224,21 @@ public class ContractProviderImpl implements ContractProvider {
     }
 
 	public List<Contract> listContractByCustomerId(Long communityId, Long customerId, byte customerType) {
-		Result<Record> result = getReadOnlyContext().select()
-				.from(Tables.EH_CONTRACTS)
-				.where(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(customerId))
-//				.and(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId))
-				.and(Tables.EH_CONTRACTS.CUSTOMER_TYPE.eq(customerType))
-				.and(Tables.EH_CONTRACTS.STATUS.ne(ContractStatus.INACTIVE.getCode()))
-				.fetch();
-
-		if (result != null) {
-			return result.map(r->ConvertHelper.convert(r, Contract.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
+		query.addConditions(Tables.EH_CONTRACTS.CUSTOMER_ID.eq(customerId));
+		if(communityId != null) {
+			query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
 		}
+		query.addConditions(Tables.EH_CONTRACTS.CUSTOMER_TYPE.eq(customerType));
+		query.addConditions(Tables.EH_CONTRACTS.STATUS.ne(ContractStatus.INACTIVE.getCode()));
 
-		return new ArrayList<Contract>();
+		List<Contract> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Contract.class));
+			return null;
+		});
+		return result;
 	}
 
 	@Override

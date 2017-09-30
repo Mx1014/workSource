@@ -63,4 +63,6 @@ public interface YellowPageService {
 	 * 交换cmd中两个服务联盟的sortOrder
 	 */
 	ServiceAllianceListResponse updateServiceAllianceEnterpriseDefaultOrder(UpdateServiceAllianceEnterpriseDefaultOrderCommand cmd);
+
+	GetCategoryIdByEntryIdResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd);
 }

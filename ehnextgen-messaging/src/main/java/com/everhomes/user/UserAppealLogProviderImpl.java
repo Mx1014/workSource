@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -74,11 +73,11 @@ public class UserAppealLogProviderImpl implements UserAppealLogProvider {
 
         if (logList != null && logList.size() > pageSize) {
             locator.setAnchor(logList.get(logList.size() - 1).getId());
-            return logList.subList(0, pageSize);
+            logList = logList.subList(0, pageSize);
         } else {
             locator.setAnchor(null);
         }
-        return new ArrayList<>();
+        return logList;
     }
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());

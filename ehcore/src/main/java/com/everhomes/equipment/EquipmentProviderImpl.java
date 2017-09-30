@@ -425,9 +425,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		SelectQuery<EhEquipmentInspectionEquipmentStandardMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP);
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.TARGET_TYPE.eq(targetType));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.TARGET_ID.eq(targetId));
-		
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
-		 
+
+		//只展示带审核的关联标准和审核通过的 add by xiongying20170927
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_STATUS.eq(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode())
+				.or(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_STATUS.eq(EquipmentReviewStatus.REVIEWED.getCode()).and(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()))));
 		List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
@@ -1634,7 +1636,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             if(locator.getAnchor() != null && locator.getAnchor() != 0L){
             	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.ID.lt(locator.getAnchor()));
             }
-            
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
             query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.ID.desc());
             query.addLimit(pageSize - maps.size());
             
@@ -1675,7 +1677,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			Condition conExecutive = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(current);
 			conExecutive = conExecutive.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 			
-			Condition conMaintenance = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.lt(current);
+			Condition conMaintenance = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.lt(current).and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(current));
 			conMaintenance = conMaintenance.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()));
 			
 			conExecutive = conExecutive.or(conMaintenance);
@@ -1747,7 +1749,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
 		
 		task.setStatus(EquipmentTaskStatus.DELAY.getCode());
-		task.setReviewResult(ReviewResult.NONE.getCode());
+//		task.setReviewResult(ReviewResult.NONE.getCode());
 //		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
 		EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);
 		EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
@@ -2207,7 +2209,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 //		if(executeStandardIds == null && reviewStandardIds == null) {
 		if(AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
-			Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.CLOSE.getCode());
+			Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(), EquipmentTaskStatus.DELAY.getCode());
 			con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
 
 			Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
@@ -2238,7 +2240,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds);
 
 			//巡检完成关闭的任务
-			Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.CLOSE.getCode());
+			Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(EquipmentTaskStatus.CLOSE.getCode(), EquipmentTaskStatus.DELAY.getCode());
 			con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
 			//需维修待审核的任务
 			Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());

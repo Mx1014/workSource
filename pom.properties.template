@@ -1,7 +1,7 @@
 ehapp.version=master-SNAPSHOT
 codegen.version=0.0.3-SNAPSHOT
 ehutil.version=0.0.7-SNAPSHOT
-ehutil-common.version=0.0.2-SNAPSHOT
+ehutil-common.version=1.0.0-SNAPSHOT
 ehplatform.version=0.1.0-SNAPSHOT
 ehplatform-persist.version=0.1.0-SNAPSHOT
 ehcodegen.version=0.0.3-SNAPSHOT
@@ -79,3 +79,6 @@ simple-java-mail.version = 4.1.1
 logback-kafka-appender.version = 0.1.1-SNAPSHOT
 logstash-logback-encoder.version = 2.4
 kafka.version = 0.10.1.0
+
+ehpay-rest.version=1.0.0-SNAPSHOT
+ehpay-rest-response.version=1.0.0-SNAPSHOT
