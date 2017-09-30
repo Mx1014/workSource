@@ -394,10 +394,6 @@ INSERT INTO `eh_parking_invoice_types` (`id`, `namespace_id`, `owner_type`, `own
   VALUES ('2', '999983', 'community', '240111044331055940', '10006', '个人', '2', '1', '2017-09-19 10:46:18', NULL, NULL, '1');
 INSERT INTO `eh_parking_invoice_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `name`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`, `invoice_token`)
   VALUES ('3', '999983', 'community', '240111044331055940', '10006', '车牌号码', '2', '1', '2017-09-19 10:46:18', NULL, NULL, '2');
-update eh_configurations set `value` = 'http://220.160.111.114:9090' where `name` = 'parking.kexing.url';
-update eh_configurations set `value` = 'F7A0B971B199FD2A1017CEC5' where `name` = 'parking.kexing.key';
-update eh_configurations set `value` = 'ktapi' where `name` = 'parking.kexing.user';
-update eh_configurations set `value` = '0306A9' where `name` = 'parking.kexing.pwd';
 INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `card_type_id`, `card_type_name`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
   VALUES ('1', '999983', 'community', '240111044331055940', '10006', '2', '月租车', '2', '1', '2017-09-19 10:49:48', NULL, NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
