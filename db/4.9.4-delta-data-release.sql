@@ -319,7 +319,8 @@ INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_i
 
 -- wentian's script done here
 
-
+-- 修改一碑接口 by st.zheng
+update `eh_configurations` set `value`='http://101.37.179.25:5802' where id=1331;
 
 
 
