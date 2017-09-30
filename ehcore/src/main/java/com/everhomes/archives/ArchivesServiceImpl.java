@@ -552,18 +552,22 @@ public class ArchivesServiceImpl implements ArchivesService {
         listCommand.setPageSize(10000);
         ListArchivesContactsResponse response = listArchivesContacts(listCommand);
         if (response.getContacts() != null && response.getContacts().size() > 0) {
+            //  1.设置导出文件名与 sheet 名
+            ExcelUtils excelUtils = new ExcelUtils(httpResponse, "通讯录成员列表", "通讯录成员列表");
+            //  2.设置导出标题栏
+            List<String> titleNames = new ArrayList<String>(Arrays.asList("姓名", "性别", "手机", "短号", "工作邮箱", "部门", "职务"));
+            //  3.设置格式长度
+            List<Integer> cellSizes = new ArrayList<Integer>(Arrays.asList(20, 10, 20, 20, 30, 30, 20));
+            //  4.设置导出变量名
+            List<String> propertyNames = new ArrayList<String>(Arrays.asList("contactName", "genderString", "contactToken",
+                    "contactShortToken", "workEmail", "departmentString", "jobPositionString"));
+            excelUtils.setNeedSequenceColumn(false);
+            //  5.处理导出变量的值并导出
             List<ArchivesContactDTO> contacts = response.getContacts().stream().map(r -> {
                 ArchivesContactDTO dto = convertArchivesContactForExcel(r);
                 return r;
             }).collect(Collectors.toList());
-            String fileName = "通讯录成员列表";
-            ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, "通讯录成员列表");
-            List<String> propertyNames = new ArrayList<String>(Arrays.asList("contactName", "genderString", "contactToken",
-                    "contactShortToken", "workEmail", "departmentString", "jobPositionString"));
-            List<String> titleNames = new ArrayList<String>(Arrays.asList("姓名", "性别", "手机", "短号", "工作邮箱", "部门", "职务"));
-            List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 10, 20, 20, 30, 30, 20));
-            excelUtils.setNeedSequenceColumn(false);
-            excelUtils.writeExcel(propertyNames, titleNames, titleSizes, contacts);
+            excelUtils.writeExcel(propertyNames, titleNames, cellSizes, contacts);
         }
     }
 
@@ -1901,9 +1905,28 @@ public class ArchivesServiceImpl implements ArchivesService {
         formCommand.setFormOriginId(getRealFormOriginId(cmd.getFormOriginId()));
         GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
         ExcelUtils excelUtils = new ExcelUtils(httpResponse, "人员档案成员列表", "人员档案成员列表");
+        //  1.设置导出标题
         List<String> titleNames = form.getFormFields().stream().map(r -> {
             return r.getFieldDisplayName();
         }).collect(Collectors.toList());
+        //  2.设置导出格式大小
+        List<Integer> cellSizes = form.getFormFields().stream().map(r -> {
+            return 20;
+        }).collect(Collectors.toList());
+        Long detailId = 13157L;
+        //  3.设置导出变量名
+        List<String> propertyNames = form.getFormFields().stream().map(r ->{
+            return "fields.getFieldValue()";
+        }).collect(Collectors.toList());
+        //  4.设置导出变量值
+        GetArchivesEmployeeCommand getCommand = new GetArchivesEmployeeCommand(cmd.getFormOriginId(),cmd.getOrganizationId(),detailId);
+        GetArchivesEmployeeResponse response = getArchivesEmployee(getCommand);
+        List<ExportArchivesEmployeesDTO> employeeLists = new ArrayList<>();
+        ExportArchivesEmployeesDTO dto = new ExportArchivesEmployeesDTO();
+        dto.setFields(response.getForm().getFormFields());
+        employeeLists.add(dto);
+        excelUtils.writeExcel(propertyNames, titleNames, cellSizes, employeeLists);
+
     }
 
     @Override

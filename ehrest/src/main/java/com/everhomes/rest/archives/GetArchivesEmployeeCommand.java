@@ -23,6 +23,12 @@ public class GetArchivesEmployeeCommand {
     public GetArchivesEmployeeCommand() {
     }
 
+    public GetArchivesEmployeeCommand(Long formOriginId, Long organizationId, Long detailId) {
+        this.formOriginId = formOriginId;
+        this.organizationId = organizationId;
+        this.detailId = detailId;
+    }
+
     public Long getFormOriginId() {
         return formOriginId;
     }

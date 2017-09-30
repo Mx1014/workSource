@@ -324,7 +324,7 @@ public class ExcelUtils {
     }
 
     /**
-     * 设置表头字体
+     * 设置表头字体（包含必填项）
      */
     private void setMandatoryTitleFont(CellStyle style) {
         XSSFFont font = workbook.createFont();
