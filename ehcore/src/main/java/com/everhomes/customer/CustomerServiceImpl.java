@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.tomcat.jni.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1847,35 +1848,46 @@ public class CustomerServiceImpl implements CustomerService {
 	public List<List<CustomerTrackingPlanDTO>> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd) {
 		List<List<CustomerTrackingPlanDTO>> planList = new ArrayList<>();
 		List<CustomerTrackingPlanDTO> todayPlan = new ArrayList<>();
-		List<CustomerTrackingPlanDTO> futurePlan = new ArrayList<>();
-		List<CustomerTrackingPlanDTO> passPlan = new ArrayList<>();
-		List<CustomerTrackingPlan> plans = enterpriseCustomerProvider.listCustomerTrackingPlansByDate(cmd);
-		Long todayFirst = gettodayFirstTimestamp();
-		Long todayLast = gettodayLastTimestamp();
-		if(null != plans){
+		List<CustomerTrackingPlanDTO> tomorrowPlan = new ArrayList<>();
+		List<CustomerTrackingPlanDTO> passOrFuturePlan = new ArrayList<>();
+		List<CustomerTrackingPlan> plans = null;
+		Long todayFirst = getTodayFirstTimestamp();
+		Long todayLast = getTodayLastTimestamp();
+		Long tomorrowLast = getTomorrowLastTimestamp();
+		//历史记录
+		if(StringUtils.isNotEmpty(cmd.getGetHistory()) && "1".equals(cmd.getGetHistory())){
+			plans = enterpriseCustomerProvider.listCustomerTrackingPlansByDate(cmd,todayFirst);
 			plans.forEach(plan -> {
-				if(null != plan.getTrackingTime()){
-					Long trackingTime = plan.getTrackingTime().getTime();
-					if(trackingTime > todayLast){
-						futurePlan.add(convertCustomerTrackingPlanDTO(plan));
-					}else if(trackingTime < todayFirst){
-						passPlan.add(convertCustomerTrackingPlanDTO(plan));
-					}else{
-						todayPlan.add(convertCustomerTrackingPlanDTO(plan));
-					}
-				}
+				passOrFuturePlan.add(convertCustomerTrackingPlanDTO(plan));
 			});
+			Collections.sort(passOrFuturePlan);
+			planList.add(passOrFuturePlan);
+			return planList;
 		}
+		//今天 & 明天  & 以后
+		plans = enterpriseCustomerProvider.listCustomerTrackingPlansByDate(cmd , new Timestamp(todayFirst));
+		plans.forEach(plan -> {
+			if(null != plan.getTrackingTime()){
+				Long trackingTime = plan.getTrackingTime().getTime();
+				if(trackingTime <= todayLast && trackingTime >= todayFirst){
+					todayPlan.add(convertCustomerTrackingPlanDTO(plan));
+				}else if(trackingTime > tomorrowLast){
+					passOrFuturePlan.add(convertCustomerTrackingPlanDTO(plan));
+				}else{
+					tomorrowPlan.add(convertCustomerTrackingPlanDTO(plan));
+				}
+			}
+		});
 		Collections.sort(todayPlan);
-		Collections.sort(futurePlan);
-		Collections.sort(passPlan);
+		Collections.sort(tomorrowPlan);
+		Collections.sort(passOrFuturePlan);
 		planList.add(todayPlan);
-		planList.add(futurePlan);
-		planList.add(passPlan);
+		planList.add(tomorrowPlan);
+		planList.add(passOrFuturePlan);
 		return planList;
 	}
 
-	private Long gettodayFirstTimestamp() {
+	private Long getTodayFirstTimestamp() {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(new Date());
 	    calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -1885,7 +1897,7 @@ public class CustomerServiceImpl implements CustomerService {
 		return calendar.getTime().getTime();
 	}
 
-	private Long gettodayLastTimestamp() {
+	private Long getTodayLastTimestamp() {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(new Date());
 	    calendar.set(Calendar.HOUR_OF_DAY, 23);
@@ -1894,6 +1906,17 @@ public class CustomerServiceImpl implements CustomerService {
 	    calendar.set(Calendar.MILLISECOND, 0);
 		return calendar.getTime().getTime();
 	}
-
+	
+	private Long getTomorrowLastTimestamp() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		calendar.add(Calendar.DAY_OF_MONTH, +1);
+	    calendar.set(Calendar.HOUR_OF_DAY, 23);
+	    calendar.set(Calendar.MINUTE, 59);
+	    calendar.set(Calendar.SECOND, 59);
+	    calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTime().getTime();
+	}
+	
 	
 }

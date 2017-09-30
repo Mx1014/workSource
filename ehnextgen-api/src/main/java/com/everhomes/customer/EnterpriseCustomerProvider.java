@@ -108,6 +108,7 @@ public interface EnterpriseCustomerProvider {
 	
 	void updateTrackingPlanReadStatus(Long id);
 	
-	List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd);
+	List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd ,Timestamp timestamp);
+	List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd, Long todayFirst);
 
 }

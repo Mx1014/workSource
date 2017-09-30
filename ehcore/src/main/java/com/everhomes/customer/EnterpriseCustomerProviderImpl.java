@@ -4,6 +4,8 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1305,12 +1307,40 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
 
 	@Override
-	public List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd) {
+	public List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd , Timestamp todayFirst) {
 		List<CustomerTrackingPlan> result = new ArrayList<CustomerTrackingPlan>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhCustomerTrackingPlansRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKING_PLANS);
         query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CREATOR_UID.eq(UserContext.currentUserId()));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.TRACKING_TIME.ge(todayFirst));
+        if(StringUtils.isNotEmpty(cmd.getCustomerName())){
+			String customerName = "%" + cmd.getCustomerName() + "%";
+			query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CUSTOMER_NAME.like(customerName));
+		}
+        if(null != cmd.getCustomerId()){
+        	query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CUSTOMER_ID.eq(cmd.getCustomerId()));
+        }
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, CustomerTrackingPlan.class));
+            return null;
+        });
+        return result;
+	}
+
+
+	@Override
+	public List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd,Long todayFirst) {
+		List<CustomerTrackingPlan> result = new ArrayList<CustomerTrackingPlan>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTrackingPlansRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKING_PLANS);
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CREATOR_UID.eq(UserContext.currentUserId()));
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.TRACKING_TIME.lt(new Timestamp(todayFirst)));
+        Calendar calc =Calendar.getInstance(); 
+        calc.setTime(new Date(todayFirst));
+        calc.add(Calendar.DAY_OF_MONTH, -30);
+        query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.TRACKING_TIME.gt(new Timestamp(calc.getTime().getTime())));
         if(StringUtils.isNotEmpty(cmd.getCustomerName())){
 			String customerName = "%" + cmd.getCustomerName() + "%";
 			query.addConditions(Tables.EH_CUSTOMER_TRACKING_PLANS.CUSTOMER_NAME.like(customerName));
