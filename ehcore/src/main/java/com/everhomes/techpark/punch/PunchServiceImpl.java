@@ -6542,7 +6542,7 @@ public class PunchServiceImpl implements PunchService {
 		if(null!=cmd.getDeptId()){
 			orgIds = new ArrayList<>();
 			UniongroupConfigures unc = uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(
-					UserContext.getCurrentNamespaceId(), cmd.getDeptId(), UniongroupType.PUNCHGROUP.getCode());
+					UserContext.getCurrentNamespaceId(), cmd.getDeptId(), UniongroupType.PUNCHGROUP.getCode(),null,UniongroupTargetType.ORGANIZATION.getCode());
 			orgIds.add(unc.getGroupId());
 
 		}else if(null != cmd.getUserName()){
@@ -7791,7 +7791,7 @@ public class PunchServiceImpl implements PunchService {
 		Integer allOrganizationInteger = organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
 		response.setAllEmployeeCount(allOrganizationInteger);
 		// 未关联人数
-		List<OrganizationMemberDetails> details = uniongroupConfigureProvider.listDetailNotInUniongroup(org.getNamespaceId(), org.getId(), null, versionCode);
+		List<OrganizationMemberDetails> details = uniongroupConfigureProvider.listDetailNotInUniongroup(org.getNamespaceId(), org.getId(), null, 0);
 //		if (null != details && details.size()>0)
 //			response.setUnjoinPunchGroupEmployees(details.stream().map(r ->{
 //				OrganizationMemberDetailDTO dto = ConvertHelper.convert(r, OrganizationMemberDetailDTO.class);
