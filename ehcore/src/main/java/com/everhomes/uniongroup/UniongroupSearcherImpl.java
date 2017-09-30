@@ -142,7 +142,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
 
     @Override
     public void syncUniongroupDetailsAtOrg(Organization org, String groupType) {
-        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(org.getNamespaceId(), org.getId(), null, UniongroupType.fromCode(groupType).getCode());
+        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(org.getNamespaceId(), org.getId(), UniongroupType.fromCode(groupType).getCode());
         if (details != null && details.size() > 0) {
             //查询部门和岗位和工号
             for (UniongroupMemberDetail detail : details) {
