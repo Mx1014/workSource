@@ -631,7 +631,7 @@ public class NewsServiceImpl implements NewsService {
 				return null;
 			else
 				return ConvertHelper.convert(r,NewsTagValsDTO.class);
-	  }).collect(Collectors.toList()));
+	  }).filter(r-> r!=null).collect(Collectors.toList()));
 		return response;
 	}
 
