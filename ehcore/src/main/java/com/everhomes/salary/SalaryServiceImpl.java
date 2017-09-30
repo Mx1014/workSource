@@ -1823,9 +1823,9 @@ public class SalaryServiceImpl implements SalaryService {
             returnFlag = true;
         }
         OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
-        if (memberDetail.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB.getCode())) {
+        /*if (memberDetail.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB.getCode())) {
             return;
-        }
+        }*/
         SalaryEmployee oldEmployee = salaryEmployeeProvider.findSalaryEmployee(salaryGroup.getOwnerId(), member.getDetailId(), salaryGroup.getId());
         if (returnFlag && null != oldEmployee && oldEmployee.equals(SalaryGroupStatus.CHECKED.getCode())) {
             return;

@@ -9777,7 +9777,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             organizationMember.setEmploymentTime(checkInTime);
         }*/
-        organizationMember.setEmployeeStatus(cmd.getEmployeeStatus() !=null ? cmd.getEmployeeStatus():EmployeeStatus.ONTHEJOB.getCode());
         organizationMember.setEmployeeStatus(cmd.getEmployeeStatus() != null ? cmd.getEmployeeStatus() : EmployeeStatus.ON_THE_JOB.getCode());
         organizationMember.setCheckInTime(checkInTime);
         organizationMember.setEmploymentTime(checkInTime);
