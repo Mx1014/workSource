@@ -157,12 +157,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 //			});
 		}
 
-		Long notifyTime = System.currentTimeMillis() + 300000;
-		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
-		String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
-		String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
-		scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
-				notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
+//		Long notifyTime = System.currentTimeMillis() + 300000;
+//		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
+//		String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
+//		String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
+//		scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
+//				notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
 
 
 	}
@@ -940,7 +940,44 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		return result;
 	}
 
-    @Cacheable(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'", unless="#result.size() == 0")
+	@Override
+	public List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> standards, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime) {
+		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.DELAY.getCode()));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.eq(targetId));
+
+		if(inspectionCategoryId != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
+		}
+
+		if(AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standards));
+		}
+
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(startTime));
+		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.desc());
+//        query.addLimit(pageSize);
+		//由于app端没做分页 去掉limit条件
+//		query.addLimit(offset * (pageSize-1), pageSize);
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Query tasks by count, sql=" + query.getSQL());
+			LOGGER.debug("Query tasks by count, bindValues=" + query.getBindValues());
+		}
+
+		query.fetch().map((EhEquipmentInspectionTasksRecord record) -> {
+			result.add(ConvertHelper.convert(record, EquipmentInspectionTasks.class));
+			return null;
+		});
+
+		return result;
+	}
+
+	@Cacheable(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'", unless="#result.size() == 0")
 	@Override
 	public List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments() {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2142,8 +2179,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
 			List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds,
 			Integer offset, Integer pageSize, String cacheKey, Byte adminFlag) {
-
-
 		long startTime = System.currentTimeMillis();
 		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 

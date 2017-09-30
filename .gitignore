@@ -14,6 +14,8 @@ ehtest-integration/target/
 *.project
 *.iml
 
+.DS_Store
+/.DS_Store
 ehcore/atomikos
 ehrest/target
 .gitignore

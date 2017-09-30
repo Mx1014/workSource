@@ -119,7 +119,6 @@ public class ActivityProviderImpl implements ActivityProivider {
         dao.insert(activity);
     }
 
-    @Cacheable(value = "findActivityById", key = "#id",unless="#result==null")
     @Override
     public Activity findActivityById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivities.class, id));

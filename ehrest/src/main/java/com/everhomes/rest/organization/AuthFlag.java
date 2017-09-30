@@ -2,7 +2,7 @@ package com.everhomes.rest.organization;
 
 public enum AuthFlag {
 
-	ALL(0), YES(1), NO(2);
+	ALL(0), AUTHENTICATED(1), UNAUTHORIZED(2), PENDING_AUTHENTICATION(3);
 
 	private Integer code;
 

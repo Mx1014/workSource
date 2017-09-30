@@ -2,10 +2,8 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -34,8 +32,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespacesProvider;
-import com.everhomes.order.OrderEmbeddedHandler;
-import com.everhomes.order.OrderUtil;
+import com.everhomes.order.*;
 import com.everhomes.organization.*;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
@@ -63,14 +60,12 @@ import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
-import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
@@ -98,8 +93,6 @@ import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -122,7 +115,6 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -259,7 +251,6 @@ public class ActivityServiceImpl implements ActivityService {
 	private RosterPayTimeoutService rosterPayTimeoutService;
 	
 	
-	
     @PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(WarnActivityBeginningAction.QUEUE_NAME);
@@ -371,13 +362,7 @@ public class ActivityServiceImpl implements ActivityService {
     	
     	//先删除已经过期未支付的活动 add by yanjun 20170417
     	this.cancelExpireRosters(cmd.getActivityId());
-    	
-    	LOGGER.debug("Before  enter.");
-    	this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
-    		LOGGER.debug("Enter Success.");
-    		return null;
-    	});
-    	LOGGER.debug("Exit Enter.");
+
     	// 把锁放在查询语句的外面，update by tt, 20170210
     	return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
@@ -391,14 +376,15 @@ public class ActivityServiceImpl implements ActivityService {
 		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 		        }
 
-				LOGGER.info("signup start activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
-        
 		        Post post = forumProvider.findPostById(activity.getPostId());
 		        if (post == null) {
 		            LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
 		        }
+
+		        //TODO add log to be delete
+				LOGGER.info("signup start activity signupAttendeeCount log currentUserId={}, count={}", user.getId(), activity.getSignupAttendeeCount());
 		        
 		        //如果有正常的报名，则直接返回， ActivityDTO的处理方法有下面整合   add by yanjun 20170525
 		        ActivityRoster oldRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
@@ -534,11 +520,13 @@ public class ActivityServiceImpl implements ActivityService {
 		        	
 		            sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR_CONFIRM, meta);
 	            }
-	            long signupStatEndTime = System.currentTimeMillis();
+
+				//TODO add log to be delete
+				LOGGER.info("signup before commit activity signupAttendeeCount log currentUserId={}, count={}", user.getId(), activity.getSignupAttendeeCount());
+
+				long signupStatEndTime = System.currentTimeMillis();
 	            LOGGER.debug("Signup success, totalElapse={}, rosterElapse={}, cmd={}", (signupStatEndTime - signupStatStartTime), 
 	            		(signupStatEndTime - rosterStatStartTime), cmd);
-
-				LOGGER.info("signup end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
 
 	            return dto;
 	        });
@@ -695,6 +683,7 @@ public class ActivityServiceImpl implements ActivityService {
 		
 		return dto;
 	}
+
 
 	@Override
 	public CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd) {
@@ -1483,9 +1472,10 @@ public class ActivityServiceImpl implements ActivityService {
 	                         ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 	             }
 
-				LOGGER.info("cancelSignup start activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+				//TODO add log to be delete
+				LOGGER.info("cancelSignup start activity signupAttendeeCount log currentUserId={}, count={}", user.getId(), activity.getSignupAttendeeCount());
 
-	             //手动取消 要检查过期时间  add by yanjun 20170519
+				//手动取消 要检查过期时间  add by yanjun 20170519
 	             if(cmd.getCancelType() == null || cmd.getCancelType().byteValue()== ActivityCancelType.HAND.getCode()){
 	            	 if(activity.getSignupEndTime() != null && activity.getSignupEndTime().getTime() < DateHelper.currentGMTTime().getTime()){
 	            		 LOGGER.error("handle activity error, Can not cancel cause after signupEndTime. id={}", cmd.getActivityId());
@@ -1543,9 +1533,10 @@ public class ActivityServiceImpl implements ActivityService {
 	             long cancelEndTime = System.currentTimeMillis();
 	             LOGGER.debug("Canel the activity signup, elapse={}, cmd={}", (cancelEndTime - cancelStartTime), cmd);
 
-				 LOGGER.info("cancelSignup end activityId: " + activity.getId() + " userId: " + user.getId() + " signupAttendeeCount: " + activity.getSignupAttendeeCount());
+				//TODO add log to be delete
+				LOGGER.info("signup before commit activity signupAttendeeCount log currentUserId={}, count={}", user.getId(), activity.getSignupAttendeeCount());
 
-	             return dto;
+				return dto;
 	        	
 	        });
         }).first();
@@ -2091,6 +2082,8 @@ public class ActivityServiceImpl implements ActivityService {
     							+ cmd.getRosterId());
     		}
 
+			//TODO add log to be delete
+			LOGGER.info("confirm start activity signupAttendeeCount log rosterUserId={}, count={}", item.getUid(), activity.getSignupAttendeeCount());
 
     		Post post = forumProvider.findPostById(activity.getPostId());
     		//validate post status
@@ -2217,7 +2210,11 @@ public class ActivityServiceImpl implements ActivityService {
     			}
 
     		}
-    		return dto;
+
+			//TODO add log to be delete
+			LOGGER.info("confirm after commit before release lock activity signupAttendeeCount log currentUserId={}, count={}", user.getId(), activity.getSignupAttendeeCount());
+
+			return dto;
     	}).first();
     }
 

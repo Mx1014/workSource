@@ -48,6 +48,7 @@ public interface EnterpriseCustomerProvider {
     void deleteCustomerCertificate(CustomerCertificate certificate);
     CustomerCertificate findCustomerCertificateById(Long id);
     List<CustomerCertificate> listCustomerCertificatesByCustomerId(Long customerId);
+    Long countCertificatesByCustomerIds(List<Long> customerIds);
 
     void createCustomerApplyProject(CustomerApplyProject project);
     void updateCustomerApplyProject(CustomerApplyProject project);

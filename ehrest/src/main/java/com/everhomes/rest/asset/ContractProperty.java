@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * Created by Wentian Wang on 2017/8/29.
  */
@@ -41,5 +43,10 @@ public class ContractProperty {
 
     public void setAddressId(Long addressId) {
         this.addressId = addressId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

@@ -75,6 +75,20 @@ public class NamespaceResourceProviderImpl implements NamespaceResourceProvider 
     }
 
     @Override
+    public List<NamespaceResource> listResourceByNamespaceOrderByDefaultOrder(Integer namespaceId, NamespaceResourceType type) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<NamespaceResource> list = context.select().from(Tables.EH_NAMESPACE_RESOURCES)
+                .where(Tables.EH_NAMESPACE_RESOURCES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_NAMESPACE_RESOURCES.RESOURCE_TYPE.eq(type.getCode()))
+                .orderBy(Tables.EH_NAMESPACE_RESOURCES.RESOURCE_ID.desc())
+                .fetch().map((r) -> {
+                    return ConvertHelper.convert(r, NamespaceResource.class);
+                });
+
+        return list;
+    }
+
+    @Override
     public List<NamespaceResource> listResourceByNamespace(Integer namespaceId, NamespaceResourceType type, Long resourceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         List<NamespaceResource> list = context.select().from(Tables.EH_NAMESPACE_RESOURCES)

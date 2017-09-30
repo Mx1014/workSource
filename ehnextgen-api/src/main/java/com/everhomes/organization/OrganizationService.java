@@ -530,7 +530,13 @@ public interface OrganizationService {
 	List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path,
 			Long userId);
 	String checkIfLastOnNode(DeleteOrganizationPersonnelByContactTokenCommand cmd);
-
+ 
+	 
+	// added by R, for salaryGroup 20170630
+	public Organization createSalaryGroupOrganization(Long organizationId, String name);
+	public ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize);
+	Organization createUniongroupOrganization(Long organizationId, String name, String groupType);
+	 
 	/**人事管理-离职**/
 	void leaveTheJob(LeaveTheJobCommand cmd);
 
@@ -539,8 +545,10 @@ public interface OrganizationService {
 	OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd);
 
 	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken);
-
-	/**组织架构批量调整**/
+ 
+	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
+ 
+ 	/**组织架构批量调整**/
 	void transferOrganizationPersonels(TransferArchivesEmployeesCommand cmd);
 
 	/**通讯录查询接口**/

@@ -60,6 +60,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -275,28 +276,49 @@ public class PortalServiceImpl implements PortalService {
 		portalLayout.setStatus(PortalLayoutStatus.ACTIVE.getCode());
 
 		this.dbProvider.execute((status) -> {
-			portalLayoutProvider.createPortalLayout(portalLayout);
 			if(null != cmd.getLayoutTemplateId()){
 				PortalLayoutTemplate template = portalLayoutTemplateProvider.findPortalLayoutTemplateById(cmd.getLayoutTemplateId());
 				if(null != template && !StringUtils.isEmpty(template.getTemplateJson())){
 					List<PortalItemGroup> groups = new ArrayList<>();
-					PortalItemGroupJson[] jsonObjs = (PortalItemGroupJson[])StringHelper.fromJsonString(template.getTemplateJson(), PortalItemGroupJson[].class);
-					for (PortalItemGroupJson jsonObj: jsonObjs) {
-						PortalItemGroup portalItemGroup = ConvertHelper.convert(jsonObj, PortalItemGroup.class);
-						String instanceConfig = StringHelper.toJsonString(jsonObj.getInstanceConfig());
-						if(!StringUtils.isEmpty(instanceConfig) && !"null".equals(instanceConfig)){
-							portalItemGroup.setInstanceConfig(instanceConfig);
-						}
-						portalItemGroup.setStatus(PortalItemGroupStatus.ACTIVE.getCode());
-						portalItemGroup.setLayoutId(portalLayout.getId());
-						portalItemGroup.setCreatorUid(user.getId());
-						portalItemGroup.setOperatorUid(user.getId());
-						groups.add(portalItemGroup);
+					PortalLayoutJson layoutJson = (PortalLayoutJson)StringHelper.fromJsonString(template.getTemplateJson(), PortalLayoutJson.class);
+					portalLayout.setName(layoutJson.getLayoutName());
+					portalLayout.setLocation(layoutJson.getLocation());
 
+					List<String> names = new ArrayList<>();
+					names.add("ServiceMarketLayout");
+					names.add("SecondServiceMarketLayout");
+					names.add("AssociationLayout");
+					if(names.contains(portalLayout.getName())){
+						PortalLayout layout = portalLayoutProvider.getPortalLayout(namespaceId, portalLayout.getName());
+						if(null != layout){
+							LOGGER.error("The home page sign already exists. name = {}", portalLayout.getName());
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+									"The home page sign already exists.");
+						}
 					}
-					portalItemGroupProvider.createPortalItemGroups(groups);
+
+					portalLayoutProvider.createPortalLayout(portalLayout);
+					if(null != layoutJson.getGroups()){
+						for (PortalItemGroupJson jsonObj: layoutJson.getGroups()) {
+							PortalItemGroup portalItemGroup = ConvertHelper.convert(jsonObj, PortalItemGroup.class);
+							String instanceConfig = StringHelper.toJsonString(jsonObj.getInstanceConfig());
+							if(!StringUtils.isEmpty(instanceConfig) && !"null".equals(instanceConfig)){
+								portalItemGroup.setInstanceConfig(instanceConfig);
+							}
+							portalItemGroup.setStatus(PortalItemGroupStatus.ACTIVE.getCode());
+							portalItemGroup.setLayoutId(portalLayout.getId());
+							portalItemGroup.setCreatorUid(user.getId());
+							portalItemGroup.setOperatorUid(user.getId());
+							groups.add(portalItemGroup);
+						}
+						portalItemGroupProvider.createPortalItemGroups(groups);
+					}
+
 				}
+			}else{
+				portalLayoutProvider.createPortalLayout(portalLayout);
 			}
+
 			return null;
 		});
 		return processPortalLayoutDTO(portalLayout);
@@ -317,6 +339,16 @@ public class PortalServiceImpl implements PortalService {
 	public void deletePortalLayout(DeletePortalLayoutCommand cmd) {
 		User user = UserContext.current().getUser();
 		PortalLayout portalLayout = checkPortalLayout(cmd.getId());
+
+		List<String> names = new ArrayList<>();
+		names.add("ServiceMarketLayout");
+		names.add("SecondServiceMarketLayout");
+		names.add("AssociationLayout");
+		if(names.contains(portalLayout.getName())){
+			LOGGER.error("Home page signature cannot be deleted. id = {}, name = {}", portalLayout.getId(), portalLayout.getName());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Home page signature cannot be deleted.");
+		}
 		portalLayout.setStatus(PortalLayoutStatus.INACTIVE.getCode());
 		portalLayout.setOperatorUid(user.getId());
 		portalLayoutProvider.updatePortalLayout(portalLayout);
@@ -536,6 +568,7 @@ public class PortalServiceImpl implements PortalService {
 		portalItem.setActionData(cmd.getActionData());
 		portalItem.setDescription(cmd.getDescription());
 		portalItem.setIconUri(cmd.getIconUri());
+		portalItem.setBgcolor(cmd.getBgcolor());
 		portalItem.setSelectedIconUri(cmd.getSelectedIconUri());
 		this.dbProvider.execute((status) -> {
 			portalItemProvider.updatePortalItem(portalItem);
@@ -703,7 +736,7 @@ public class PortalServiceImpl implements PortalService {
 		return dto;
 	}
 
-		@Override
+	@Override
 	public void reorderPortalItem(ReorderPortalItemCommand cmd) {
 		if(null == cmd.getReorders() && cmd.getReorders().size() == 0){
 			LOGGER.error("Params reorders is null.cmd = {}", cmd);
@@ -1283,6 +1316,14 @@ public class PortalServiceImpl implements PortalService {
 		for (PortalItemGroup itemGroup: itemGroups) {
 			LaunchPadLayoutGroup group = ConvertHelper.convert(itemGroup, LaunchPadLayoutGroup.class);
 			group.setGroupName(itemGroup.getLabel());
+			if(null != itemGroup.getSeparatorFlag()){
+				group.setSeparatorFlag(itemGroup.getSeparatorFlag().intValue());
+			}
+
+			if(null != itemGroup.getSeparatorHeight()){
+				group.setSeparatorHeight(itemGroup.getSeparatorHeight().doubleValue());
+			}
+
 			ItemGroupInstanceConfig instanceConfig = new ItemGroupInstanceConfig();
 			if(!StringUtils.isEmpty(itemGroup.getInstanceConfig())){
 				instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
@@ -1307,7 +1348,11 @@ public class PortalServiceImpl implements PortalService {
 				}
 
 				if(null == instanceConfig.getMargin()){
-					instanceConfig.setPadding(1);
+					instanceConfig.setMargin(1);
+				}
+
+				if(null == instanceConfig.getBackgroundColor()){
+					instanceConfig.setBackgroundColor("#FFFFFF");
 				}
 				config.setPaddingBottom(instanceConfig.getPadding());
 				config.setPaddingLeft(instanceConfig.getPadding());
@@ -1522,7 +1567,7 @@ public class PortalServiceImpl implements PortalService {
 					item.setItemLabel(portalItem.getLabel());
 					item.setItemName(portalItem.getName());
 					item.setDeleteFlag(DeleteFlagType.YES.getCode());
-					item.setScaleType(ScaleType.TAILOR.getCode());
+					item.setScaleType(ScaleType.NONE.getCode());
 
 					//更多全部不进行分类
 					if(PortalItemActionType.fromCode(portalItem.getActionType()) != PortalItemActionType.ALLORMORE){
@@ -1636,9 +1681,8 @@ public class PortalServiceImpl implements PortalService {
 		List<PortalItem> allItems = getItemAllOrMore(namespaceId, null, AllOrMoreType.ALL);
 		for (PortalItem item: allItems) {
 			AllOrMoreActionData actionData = (AllOrMoreActionData)StringHelper.fromJsonString(item.getActionData(), AllOrMoreActionData.class);
-			List<PortalItemCategory> categorys = portalItemCategoryProvider.listPortalItemCategory(namespaceId, item.getItemGroupId());
+			List<PortalItemCategory> categorys = portalItemCategoryProvider.listPortalItemCategory(namespaceId, item.getItemGroupId(), null);
 			for (PortalItemCategory category: categorys) {
-				List<PortalContentScope> contentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM_CATEGORY.getCode(), category.getId());
 				List<PortalLaunchPadMapping> mappings = portalLaunchPadMappingProvider.listPortalLaunchPadMapping(EntityType.PORTAL_ITEM_CATEGORY.getCode(), category.getId(), null);
 				if(null != mappings && mappings.size() > 0){
 					for (PortalLaunchPadMapping mapping: mappings) {
@@ -1646,51 +1690,55 @@ public class PortalServiceImpl implements PortalService {
 						portalLaunchPadMappingProvider.deletePortalLaunchPadMapping(mapping.getId());
 					}
 				}
-				for (PortalContentScope scope: contentScopes) {
-					ItemServiceCategry itemCategory = ConvertHelper.convert(category, ItemServiceCategry.class);
-					if(PortalScopeType.RESIDENTIAL == PortalScopeType.fromCode(scope.getScopeType())){
-						itemCategory.setSceneType(SceneType.DEFAULT.getCode());
-						itemCategory.setScopeCode(ScopeType.RESIDENTIAL.getCode());
-					}else if(PortalScopeType.COMMERCIAL == PortalScopeType.fromCode(scope.getScopeType())){
-						itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
-						itemCategory.setScopeCode(ScopeType.COMMUNITY.getCode());
-					}else if(PortalScopeType.PM == PortalScopeType.fromCode(scope.getScopeType())){
-						itemCategory.setSceneType(SceneType.PM_ADMIN.getCode());
-						itemCategory.setScopeCode(ScopeType.PM.getCode());
-					}else if(PortalScopeType.ORGANIZATION == PortalScopeType.fromCode(scope.getScopeType())){
-						itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
-						itemCategory.setScopeCode(ScopeType.ORGANIZATION.getCode());
-					}
-					itemCategory.setScopeId(scope.getScopeId());
-					itemCategory.setStatus(ItemServiceCategryStatus.ACTIVE.getCode());
-					itemCategory.setCreatorUid(user.getId());
 
-					if(StringUtils.isEmpty(category.getIconUri()) && null != actionData){
-						itemCategory.setIconUri(actionData.getDefUri());
-					}
+				if(PortalItemCategoryStatus.fromCode(category.getStatus()) == PortalItemCategoryStatus.ACTIVE){
+					List<PortalContentScope> contentScopes = portalContentScopeProvider.listPortalContentScope(EntityType.PORTAL_ITEM_CATEGORY.getCode(), category.getId());
+					for (PortalContentScope scope: contentScopes) {
+						ItemServiceCategry itemCategory = ConvertHelper.convert(category, ItemServiceCategry.class);
+						if(PortalScopeType.RESIDENTIAL == PortalScopeType.fromCode(scope.getScopeType())){
+							itemCategory.setSceneType(SceneType.DEFAULT.getCode());
+							itemCategory.setScopeCode(ScopeType.RESIDENTIAL.getCode());
+						}else if(PortalScopeType.COMMERCIAL == PortalScopeType.fromCode(scope.getScopeType())){
+							itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
+							itemCategory.setScopeCode(ScopeType.COMMUNITY.getCode());
+						}else if(PortalScopeType.PM == PortalScopeType.fromCode(scope.getScopeType())){
+							itemCategory.setSceneType(SceneType.PM_ADMIN.getCode());
+							itemCategory.setScopeCode(ScopeType.PM.getCode());
+						}else if(PortalScopeType.ORGANIZATION == PortalScopeType.fromCode(scope.getScopeType())){
+							itemCategory.setSceneType(SceneType.PARK_TOURIST.getCode());
+							itemCategory.setScopeCode(ScopeType.ORGANIZATION.getCode());
+						}
+						itemCategory.setScopeId(scope.getScopeId());
+						itemCategory.setStatus(ItemServiceCategryStatus.ACTIVE.getCode());
+						itemCategory.setCreatorUid(user.getId());
 
-					if(AlignType.CENTER == AlignType.fromCode(category.getAlign()))
-						itemCategory.setAlign(ItemServiceCategryAlign.CENTER.getCode());
-					else if(AlignType.LEFT == AlignType.fromCode(category.getAlign()))
-						itemCategory.setAlign(ItemServiceCategryAlign.LEFT.getCode());
+						if(StringUtils.isEmpty(category.getIconUri()) && null != actionData){
+							itemCategory.setIconUri(actionData.getDefUri());
+						}
 
-					if(null == ItemServiceCategryAlign.fromCode(itemCategory.getAlign())  && null != actionData){
-						if(AlignType.CENTER == AlignType.fromCode(actionData.getAlign()))
+						if(AlignType.CENTER == AlignType.fromCode(category.getAlign()))
 							itemCategory.setAlign(ItemServiceCategryAlign.CENTER.getCode());
-						else if(AlignType.LEFT == AlignType.fromCode(actionData.getAlign()))
+						else if(AlignType.LEFT == AlignType.fromCode(category.getAlign()))
 							itemCategory.setAlign(ItemServiceCategryAlign.LEFT.getCode());
-					}
-					itemCategory.setOrder(category.getDefaultOrder());
-					itemCategory.setItemLocation(item.getItemLocation());
-					itemCategory.setItemGroup(item.getGroupName());
-					launchPadProvider.createItemServiceCategry(itemCategory);
 
-					PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
-					mapping.setContentType(EntityType.PORTAL_ITEM_CATEGORY.getCode());
-					mapping.setPortalContentId(category.getId());
-					mapping.setLaunchPadContentId(itemCategory.getId());
-					mapping.setCreatorUid(user.getId());
-					portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
+						if(null == ItemServiceCategryAlign.fromCode(itemCategory.getAlign())  && null != actionData){
+							if(AlignType.CENTER == AlignType.fromCode(actionData.getAlign()))
+								itemCategory.setAlign(ItemServiceCategryAlign.CENTER.getCode());
+							else if(AlignType.LEFT == AlignType.fromCode(actionData.getAlign()))
+								itemCategory.setAlign(ItemServiceCategryAlign.LEFT.getCode());
+						}
+						itemCategory.setOrder(category.getDefaultOrder());
+						itemCategory.setItemLocation(item.getItemLocation());
+						itemCategory.setItemGroup(item.getGroupName());
+						launchPadProvider.createItemServiceCategry(itemCategory);
+
+						PortalLaunchPadMapping mapping = new PortalLaunchPadMapping();
+						mapping.setContentType(EntityType.PORTAL_ITEM_CATEGORY.getCode());
+						mapping.setPortalContentId(category.getId());
+						mapping.setLaunchPadContentId(itemCategory.getId());
+						mapping.setCreatorUid(user.getId());
+						portalLaunchPadMappingProvider.createPortalLaunchPadMapping(mapping);
+					}
 				}
 			}
 		}
@@ -1713,12 +1761,21 @@ public class PortalServiceImpl implements PortalService {
 			cmd.setLocation("/home");
 		}
 
+		List<String> names = new ArrayList<>();
+
+		//默认同步三种主页签的layout数据
 		if(StringUtils.isEmpty(cmd.getName())){
-			cmd.setName("ServiceMarketLayout");
+			names.add("ServiceMarketLayout");
+			names.add("SecondServiceMarketLayout");
+			names.add("AssociationLayout");
+		}else{
+			names.add(cmd.getName());
 		}
 
 		dbProvider.execute((status) -> {
-			syncLayout(cmd.getNamespaceId(), cmd.getLocation(), cmd.getName());
+			for (String name: names) {
+				syncLayout(cmd.getNamespaceId(), cmd.getLocation(), name);
+			}
 			return null;
 		});
 	}
@@ -1744,6 +1801,7 @@ public class PortalServiceImpl implements PortalService {
 				layout.setOperatorUid(user.getId());
 				layout.setCreatorUid(user.getId());
 				portalLayoutProvider.createPortalLayout(layout);
+				Integer defOrder = 1;
 				List<LaunchPadLayoutGroup> padLayoutGroups = layoutJson.getGroups();
 				for (LaunchPadLayoutGroup padLayoutGroup: padLayoutGroups) {
 					PortalItemGroup itemGroup = ConvertHelper.convert(padLayoutGroup, PortalItemGroup.class);
@@ -1753,6 +1811,14 @@ public class PortalServiceImpl implements PortalService {
 					itemGroup.setStatus(layout.getStatus());
 					itemGroup.setCreatorUid(user.getId());
 					itemGroup.setOperatorUid(user.getId());
+					itemGroup.setDefaultOrder(defOrder ++);
+					if(null != padLayoutGroup.getSeparatorFlag()){
+						itemGroup.setSeparatorFlag(padLayoutGroup.getSeparatorFlag().byteValue());
+					}
+
+					if(null != padLayoutGroup.getSeparatorHeight()){
+						itemGroup.setSeparatorHeight(new BigDecimal(padLayoutGroup.getSeparatorHeight()));
+					}
 					if(Widget.fromCode(padLayoutGroup.getWidget()) == Widget.NAVIGATOR){
 						NavigatorInstanceConfig instanceConfig = (NavigatorInstanceConfig)StringHelper.fromJsonString(StringHelper.toJsonString(padLayoutGroup.getInstanceConfig()), NavigatorInstanceConfig.class);
 						itemGroup.setName(instanceConfig.getItemGroup());
@@ -2059,7 +2125,11 @@ public class PortalServiceImpl implements PortalService {
 	public static void main(String[] args) {
 //		PortalItemGroupJson[] jsons = (PortalItemGroupJson[])StringHelper.fromJsonString("[{\"label\":\"应用\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Navigator\",\"style\":\"Metro\",\"instanceConfig\":{\"margin\":20,\"padding\":16,\"backgroundColor\":\"#ffffff\",\"titleFlag\":0,\"title\":\"标题\",\"titleUri\":\"cs://\"},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"横幅广告\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Banners\",\"style\":\"Default\",\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"公告\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Bulletins\",\"style\":\"Default\",\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"运营模块\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"OPPush\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"titleFlag\":0,\"title\":\"标题\",\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"无时间轴\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"News_Flash\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"时间轴\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"News\",\"style\":\"Default\",\"instanceConfig\":{\"newsSize\":20,\"timeWidgetStyle\":\"date\",\"moduleAppId\":1},\"defaultOrder\":0,\"description\":\"描述\"},{\"label\":\"分页签\", \"separatorFlag\":\"1\", \"separatorHeight\":\"12\",\"widget\":\"Tabs\",\"style\":\"Pure_text\",\"defaultOrder\":0,\"description\":\"描述\"}]", PortalItemGroupJson[].class);
 //		for (PortalItemGroupJson json: jsons) {
-			System.out.println(GeoHashUtils.encode(113.952532, 22.550182));
+		Byte b = 1;
+		System.out.println("int：" +b.intValue());
 //		}
+		BigDecimal bd = new BigDecimal(1);
+		System.out.println("Double：" +bd.doubleValue());
+
 	}
 }

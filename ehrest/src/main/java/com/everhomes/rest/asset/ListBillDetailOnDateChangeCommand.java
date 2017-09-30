@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  *<ul>
  * <li>dateStr:账期</li>
+ * <li>billStatus:账单状态，0：待缴；1：已缴</li>
  * <li>OwnerId:所属者ID</li>
  * <li>OwnerType:所属者类型</li>
  * <li>targetType:客户类型</li>
@@ -18,6 +19,7 @@ import com.everhomes.util.StringHelper;
  *</ul>
  */
 public class ListBillDetailOnDateChangeCommand {
+    private Byte billStatus;
     private String dateStr;
     private Long OwnerId;
     private String OwnerType;
@@ -31,6 +33,14 @@ public class ListBillDetailOnDateChangeCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Byte getBillStatus() {
+        return billStatus;
+    }
+
+    public void setBillStatus(Byte billStatus) {
+        this.billStatus = billStatus;
     }
 
     public String getDateStr() {

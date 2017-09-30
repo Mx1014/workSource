@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.*;
 import com.everhomes.parking.bosigao.*;
 import com.everhomes.rest.organization.VendorType;
@@ -30,11 +31,6 @@ import com.everhomes.util.RuntimeErrorException;
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO3")
 public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Bosigao3ParkingVendorHandler.class);
-
-	@Autowired
-	private ParkingProvider parkingProvider;
-	@Autowired
-    private ConfigurationProvider configProvider;
 	
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
@@ -101,6 +97,17 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
         }
     	return card;
     }
+
+	@Override
+	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
+		if(null == rate) {
+			LOGGER.error("Rate not found, cmd={}", order);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Rate not found.");
+		}
+		order.setRateName(rate.getRateName());
+	}
 
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
 
@@ -239,7 +246,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
     }
     
     @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot, String plateNumber, String cardNo) {
     	
     	List<ParkingRechargeRate> parkingRechargeRateList;
     	

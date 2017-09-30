@@ -246,6 +246,8 @@ public class CommunityServiceImpl implements CommunityService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid areaId parameter,area is not found.");
 		}
+		community.setName(cmd.getName());
+		community.setAliasName(cmd.getAliasName());
 		community.setAreaId(cmd.getAreaId());
 		community.setCityId(cmd.getCityId());
 		community.setOperatorUid(userId);
@@ -1886,6 +1888,13 @@ public class CommunityServiceImpl implements CommunityService {
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
 				}
 
+
+				if(UserSourceType.WEIXIN == UserSourceType.fromCode(cmd.getUserSourceType())){
+					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
+				}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
+					query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.isNotNull());
+				}
+
 				if(null != cmd.getCommunityId()){
 					query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 				}
@@ -1904,15 +1913,21 @@ public class CommunityServiceImpl implements CommunityService {
 					query.addConditions(Tables.EH_USERS.EXECUTIVE_TAG.eq(cmd.getExecutiveFlag()));
 				}
 
-				if(AuthFlag.YES == AuthFlag.fromCode(cmd.getIsAuth())){
+				if(AuthFlag.AUTHENTICATED == AuthFlag.fromCode(cmd.getIsAuth())){
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.ACTIVE.getCode()));
+				}else if(AuthFlag.PENDING_AUTHENTICATION == AuthFlag.fromCode(cmd.getIsAuth())){
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode()));
+				}else if(AuthFlag.UNAUTHORIZED == AuthFlag.fromCode(cmd.getIsAuth())){
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.isNull());
 				}
 
 				query.addGroupBy(Tables.EH_USERS.ID);
 
 				Condition cond = Tables.EH_USERS.ID.isNotNull();
-				if(AuthFlag.NO == AuthFlag.fromCode(cmd.getIsAuth())){
-					cond = cond.and("`eh_user_organizations`.`status` is null or (`eh_user_organizations`.`status` <> " + UserOrganizationStatus.ACTIVE.getCode() + " and `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + "))");
+				if(AuthFlag.UNAUTHORIZED == AuthFlag.fromCode(cmd.getIsAuth())){
+					cond = cond.and(" `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + " or status = " + UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode() + ")");
+				}else if(AuthFlag.PENDING_AUTHENTICATION == AuthFlag.fromCode(cmd.getIsAuth())){
+					cond = cond.and(" `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + ")");
 				}
 				query.addHaving(cond);
 
@@ -1937,23 +1952,32 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 
 			LOGGER.debug("user,userName:{}/userPhone:{}/userStatus:{}",r.getNickName(), r.getPhoneNumber(),r.getStatus());
-			dto.setIsAuth(AuthFlag.NO.getCode());
+			dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 
 			if (UserOrganizationStatus.WAITING_FOR_APPROVAL == UserOrganizationStatus.fromCode(r.getStatus()) || UserOrganizationStatus.ACTIVE == UserOrganizationStatus.fromCode(r.getStatus())) {
 				List<OrganizationMember> ms = new ArrayList<>();
 				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
+				dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
 				for (OrganizationMember member : members) {
 					if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
-						dto.setOrganizationMemberName(member.getContactName());
-						ms.add(member);
-						dto.setIsAuth(AuthFlag.YES.getCode());
+						dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 					}
+					dto.setOrganizationMemberName(member.getContactName());
+					ms.add(member);
 				}
 				List<OrganizationDetailDTO> organizations = new ArrayList<>();
 				organizations.addAll(populateOrganizationDetails(ms));
 				dto.setOrganizations(organizations);
 			} else {
-				dto.setIsAuth(AuthFlag.NO.getCode());
+				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+			}
+
+			if(NamespaceUserType.fromCode(r.getNamespaceUserType()) == NamespaceUserType.WX){
+				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+			}
+
+			if(null != dto.getPhone()){
+				dto.setUserSourceType(UserSourceType.APP.getCode());
 			}
 			userCommunities.add(dto);
 		}
@@ -2015,7 +2039,7 @@ public class CommunityServiceImpl implements CommunityService {
 			tempRow.createCell(1).setCellValue(UserGender.fromCode(dto.getGender()).getText());
 			tempRow.createCell(2).setCellValue(dto.getPhone());
 			tempRow.createCell(3).setCellValue(null != dto.getApplyTime() ? sdf.format(dto.getApplyTime()) : "");
-			tempRow.createCell(4).setCellValue(dto.getIsAuth() == 1 ? "认证" : "非认证");
+			tempRow.createCell(4).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
 			tempRow.createCell(5).setCellValue(enterprises.toString());
 			tempRow.createCell(6).setCellValue(null == dto.getExecutiveFlag() ? "否" : (dto.getExecutiveFlag() == 0 ? "否" : "是"));
 			tempRow.createCell(7).setCellValue(null == dto.getPosition() ? "无" : dto.getPosition());
@@ -2087,6 +2111,8 @@ public class CommunityServiceImpl implements CommunityService {
 				CountCommunityUserResponse resp = new CountCommunityUserResponse();
 				resp.setCommunityUsers(allCount);
 				resp.setAuthUsers(authCount);
+				resp.setWxUserCount(authCount);
+				resp.setAppUserCount(allCount - authCount);
 				resp.setNotAuthUsers(allCount - authCount);
 				
 				return resp;
@@ -2094,6 +2120,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 			}
 		}
+
+
 		int authUserCount = 0;
 		if(namespaceId == Namespace.DEFAULT_NAMESPACE){
 			if(null == cmd.getOrganizationId() && null == cmd.getCommunityId()){
@@ -2108,9 +2136,17 @@ public class CommunityServiceImpl implements CommunityService {
 			if(null == cmd.getCommunityId())
 				communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
 			else
-				communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
+				communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId());
 
-			authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
+			if(CommunityUserStatisticsType.fromCode(cmd.getStatisticsType()) == CommunityUserStatisticsType.AUTHENTICATION){
+				authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
+			}else{
+				if(null == cmd.getCommunityId())
+					authUserCount = userProvider.countUserByNamespaceIdAndNamespaceUserType(namespaceId, NamespaceUserType.WX.getCode());
+				else
+					authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null, NamespaceUserType.WX.getCode());
+
+			}
 
 		}
 
@@ -2119,6 +2155,8 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
 		resp.setCommunityUsers(communityUserCount);
+		resp.setWxUserCount(authUserCount);
+		resp.setAppUserCount(notAuthUsers);
 		resp.setAuthUsers(authUserCount);
 		resp.setNotAuthUsers(notAuthUsers);
 

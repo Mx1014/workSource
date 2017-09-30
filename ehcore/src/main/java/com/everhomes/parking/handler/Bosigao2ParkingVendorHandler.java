@@ -52,11 +52,6 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 	
 	private static final String FLAG2 = "2"; //2:车牌
 	
-	@Autowired
-	private ParkingProvider parkingProvider;
-	@Autowired
-    private ConfigurationProvider configProvider;
-	
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
@@ -124,7 +119,18 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 		}
     	return ret;
     }
-    
+
+	@Override
+	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
+		if(null == rate) {
+			LOGGER.error("Rate not found, cmd={}", order);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Rate not found.");
+		}
+		order.setRateName(rate.getRateName());
+	}
+
     private Bosigao2ResultEntity getCard(String plateNumber){
     	Bosigao2GetCardCommand cmd = new Bosigao2GetCardCommand();
     	cmd.setClientID(configProvider.getValue("parking.shenye.projectId", ""));

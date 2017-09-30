@@ -3,8 +3,10 @@ package com.everhomes.customer;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.ContractService;
+import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleStringService;
@@ -31,7 +33,9 @@ import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
@@ -97,13 +101,24 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
 
+    private void checkPrivilege() {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if(namespaceId == 999971) {
+            LOGGER.error("Insufficient privilege, zjgk modify data");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
+    }
+
     @Override
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
+        checkPrivilege();
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setNamespaceId(UserContext.getCurrentNamespaceId());
         if(cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
+        customer.setCreatorUid(UserContext.currentUserId());
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
         OrganizationDTO organizationDTO = createOrganization(customer);
@@ -146,6 +161,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd) {
+        checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         updateCustomer.setNamespaceId(customer.getNamespaceId());
@@ -193,6 +209,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd) {
+        checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         customer.setStatus(CommonStatus.INACTIVE.getCode());
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
@@ -629,7 +646,7 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerApplyProject checkCustomerApplyProject(Long id, Long customerId) {
         CustomerApplyProject project = enterpriseCustomerProvider.findCustomerApplyProjectById(id);
         if(project == null || !project.getCustomerId().equals(customerId)
-                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(project.getStatus()))) {
+                || CommonStatus.INACTIVE.equals(CommonStatus.fromCode(project.getStatus()))) {
             LOGGER.error("enterprise customer project is not exist or active. id: {}, project: {}", id, project);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PROJECT_NOT_EXIST,
                     "customer project is not exist or active");
@@ -1093,7 +1110,7 @@ public class CustomerServiceImpl implements CustomerService {
         response.setPropertyTotalCount(0L);
         List<CustomerIntellectualPropertyStatisticsDTO> dtos = new ArrayList<>();
         Long trademarks = enterpriseCustomerProvider.countTrademarksByCustomerIds(customerIds);
-        if(trademarks != null) {
+        if(trademarks != null && trademarks != 0) {
             response.setPropertyTotalCount(response.getPropertyTotalCount() + trademarks);
 
             CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
@@ -1102,6 +1119,15 @@ public class CustomerServiceImpl implements CustomerService {
             dtos.add(dto);
         }
 
+        Long certificates = enterpriseCustomerProvider.countCertificatesByCustomerIds(customerIds);
+        if(certificates != null && certificates != 0) {
+            response.setPropertyTotalCount(response.getPropertyTotalCount() + certificates);
+
+            CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
+            dto.setPropertyType("证书");
+            dto.setPropertyCount(certificates);
+            dtos.add(dto);
+        }
 
         Map<Long, Long> properties = enterpriseCustomerProvider.listCustomerPatentsByCustomerIds(customerIds);
         properties.forEach((categoryId, count) -> {
@@ -1132,6 +1158,10 @@ public class CustomerServiceImpl implements CustomerService {
         response.setProjectTotalCount(0L);
 
         Map<Long, CustomerProjectStatisticsDTO> statistics = enterpriseCustomerProvider.listCustomerApplyProjectsByCustomerIds(customerIds);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listCustomerProjectStatistics customer ids : {}, statistics: {}", customerIds, StringHelper.toJsonString(statistics));
+        }
+
         statistics.forEach((itemId, statistic) -> {
             CustomerProjectStatisticsDTO dto = statistic;
             ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), itemId);
@@ -1142,6 +1172,7 @@ public class CustomerServiceImpl implements CustomerService {
             response.setProjectTotalAmount(response.getProjectTotalAmount().add(dto.getProjectAmount()));
             response.setProjectTotalCount(response.getProjectTotalCount() + dto.getProjectCount());
         });
+        response.setDtos(dtos);
         return response;
     }
 
@@ -1223,15 +1254,28 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
         if(cmd.getNamespaceId() == 999971) {
-            if(cmd.getCommunityId() == null) {
-                zjgkOpenService.syncEnterprises("0", null);
-            } else {
-                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-                if(community != null) {
-                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
-                }
+            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode()).tryEnter(()-> {
+                ExecutorUtil.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+                            if(cmd.getCommunityId() == null) {
+                                zjgkOpenService.syncEnterprises("0", null);
+                            } else {
+                                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                                if(community != null) {
+                                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
+                                }
 
-            }
+                            }
+                        }catch (Exception e){
+                            LOGGER.error("syncEnterpriseCustomers error.", e);
+                        }
+                    }
+                });
+            });
+
+
         }
 
     }
@@ -1239,14 +1283,24 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void syncIndividualCustomers(SyncCustomersCommand cmd) {
         if(cmd.getNamespaceId() == 999971) {
-            if(cmd.getCommunityId() == null) {
-                zjgkOpenService.syncIndividuals("0", null);
-            } else {
-                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-                if(community != null) {
-                    zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken());
+            ExecutorUtil.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        if(cmd.getCommunityId() == null) {
+                            zjgkOpenService.syncIndividuals("0", null);
+                        } else {
+                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                            if(community != null) {
+                                zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken());
+                            }
+                        }
+                    }catch (Exception e){
+                        LOGGER.error("syncIndividualCustomers error.", e);
+                    }
                 }
-            }
+            });
+
         }
     }
 }

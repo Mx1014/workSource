@@ -57,6 +57,7 @@ import java.util.List;
  *     <li>attachments: 合同附件 参考{@link com.everhomes.rest.contract.ContractAttachmentDTO}</li>
  *     <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  *     <li>remark: 备注</li>
+ *     <li>layout: 房型</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -110,7 +111,7 @@ public class ContractDetailDTO {
     private String remark;
     private Long createUid;
     private String creatorName;
-
+    private String layout;
     private Byte status;
 
     public Byte getStatus() {
@@ -119,6 +120,14 @@ public class ContractDetailDTO {
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public String getLayout() {
+        return layout;
+    }
+
+    public void setLayout(String layout) {
+        this.layout = layout;
     }
 
     @ItemType(BuildingApartmentDTO.class)

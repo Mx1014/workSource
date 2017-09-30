@@ -2687,47 +2687,6 @@ public class FlowServiceImpl implements FlowService {
 
     @Override
     public FlowModuleDTO getModuleById(Long moduleId) {
-        if (moduleId.equals(111l)) {
-            FlowModuleDTO dto = new FlowModuleDTO();
-            dto.setModuleId(111l);
-            dto.setModuleName("yuanqu");
-            dto.setDisplayName("园区入驻");
-            return dto;
-        }
-
-        if (moduleId.equals(112l)) {
-            FlowModuleDTO dto = new FlowModuleDTO();
-            dto.setModuleId(112l);
-            dto.setModuleName("testwuye");
-            dto.setDisplayName("testwuye");
-            return dto;
-        }
-        
-        if (moduleId.equals(FlowConstants.TALENT_REQUEST)) {
-        	FlowModuleDTO dto = new FlowModuleDTO();
-        	dto.setModuleId(FlowConstants.TALENT_REQUEST);
-        	dto.setModuleName("企业人才");
-        	dto.setDisplayName("企业人才");
-        	return dto;
-        }
-
-//
-//		if(moduleId.equals(113l)) {
-//			FlowModuleDTO dto = new FlowModuleDTO();
-//			dto.setModuleId(113l);
-//			dto.setModuleName("yueka");
-//			dto.setDisplayName("月卡申请");
-//			return dto;
-//		}
-//
-//		if(moduleId.equals(114l)) {
-//			FlowModuleDTO dto = new FlowModuleDTO();
-//			dto.setModuleId(114l);
-//			dto.setModuleName("jiaoliu");
-//			dto.setDisplayName("交流大厅");
-//			return dto;
-//		}
-
         ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(moduleId);
         if (serviceModule != null) {
             FlowModuleDTO dto = new FlowModuleDTO();
@@ -2736,17 +2695,6 @@ public class FlowServiceImpl implements FlowService {
             dto.setModuleId(moduleId);
             return dto;
         }
-
-//
-//    Only for test. by Janson
-//		if(moduleId.equals(41500L)) {
-//			FlowModuleDTO dto = new FlowModuleDTO();
-//			dto.setModuleId(41500L);
-//			dto.setModuleName("车辆放行");
-//			dto.setDisplayName("车辆放行");
-//			return dto;
-//		}
-
         return null;
     }
 
@@ -2755,30 +2703,6 @@ public class FlowServiceImpl implements FlowService {
         ListFlowModulesResponse resp = new ListFlowModulesResponse();
         List<FlowModuleDTO> modules = new ArrayList<>();
         resp.setModules(modules);
-
-//		FlowModuleDTO dto = new FlowModuleDTO();
-//		dto.setModuleId(111l);
-//		dto.setModuleName("yuanqu");
-//		dto.setDisplayName("园区入驻");
-//		modules.add(dto);
-//
-//		dto = new FlowModuleDTO();
-//		dto.setModuleId(112l);
-//		dto.setModuleName("wuye");
-//		dto.setDisplayName("物业保修");
-//		modules.add(dto);
-//
-//		dto = new FlowModuleDTO();
-//		dto.setModuleId(113l);
-//		dto.setModuleName("yueka");
-//		dto.setDisplayName("月卡申请");
-//		modules.add(dto);
-//
-//		dto = new FlowModuleDTO();
-//		dto.setModuleId(114l);
-//		dto.setModuleName("jiaoliu");
-//		dto.setDisplayName("交流大厅");
-//		modules.add(dto);
 
         flowListenerManager.getModules().forEach(m -> {
             FlowModuleDTO dto = new FlowModuleDTO();

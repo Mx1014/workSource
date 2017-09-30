@@ -24,10 +24,19 @@ public class SearchEnterpriseBillsDTO {
     private String amountReceivable;
     private String amountOwed;
     private String amountReceived;
+    private String contractNum;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getContractNum() {
+        return contractNum;
+    }
+
+    public void setContractNum(String contractNum) {
+        this.contractNum = contractNum;
     }
 
     public String getBillID() {

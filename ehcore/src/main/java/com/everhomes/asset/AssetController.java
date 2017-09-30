@@ -1,5 +1,7 @@
 package com.everhomes.asset;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -7,6 +9,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
@@ -35,6 +38,8 @@ public class AssetController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(AssetController.class);
     @Autowired
     private AssetService assetService;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
 //    根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
     /**
@@ -649,6 +654,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("importBills")
     @RestReturn(value = String.class)
     public RestResponse importBills(HttpServletResponse response) {
+        // unfinished, under plan
         RestResponse restResponse = new RestResponse();
         restResponse.setErrorDescription("OK");
         restResponse.setErrorCode(ErrorCodes.SUCCESS);
@@ -828,26 +834,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-//    /**
-//     * <p>测试清单产生</p>
-//     * <b>URL: /asset/xxd</b>
-//     *
-//     * 这个会自动生成一个错误的doctor！restresponse，因为我写的@RequestBody？下次测试下
-//     */
-//    @RequestMapping("doctor!")
-//    @RestReturn(PaymentExpectanciesResponse.class)
-//    public PaymentExpectanciesResponse hi(@RequestBody PaymentExpectanciesCommand cmd){
-//        List<FeeRules> feesRules = cmd.getFeesRules();
-//        for(int i = 0; i < feesRules.size(); i++) {
-//            List<VariableIdAndValue> list = feesRules.get(i).getVariableIdAndValueList();
-//            for(int j = 0; j < list.size(); j++){
-//                Integer variableValue = (Integer)list.get(j).getVariableValue();
-//                BigDecimal c = new BigDecimal(variableValue);
-//                list.get(j).setVariableValue(c);
-//            }
-//        }
-//        return assetService.paymentExpectancies(cmd);
-//    }
+   
     /**
      * <p>展示预期的费用清单</p>
      * <b>URL: /asset/listBillExpectanciesOnContract</b>
@@ -896,7 +883,7 @@ public class AssetController extends ControllerBase {
      */
     @RequestMapping("getAreaAndAddressByContract")
     @RestReturn(value=GetAreaAndAddressByContractDTO.class,collection=true)
-    public RestResponse getAreaAndAddressByContract(FindContractCommand cmd) {
+    public RestResponse getAreaAndAddressByContract(GetAreaAndAddressByContractCommand cmd) {
         GetAreaAndAddressByContractDTO dto = this.assetService.getAreaAndAddressByContract(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);

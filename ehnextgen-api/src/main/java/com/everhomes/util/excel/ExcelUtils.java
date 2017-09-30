@@ -8,12 +8,15 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.boot.test.IntegrationTest;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -388,4 +391,127 @@ public class ExcelUtils {
             this.time = time;
         }
     }*/
+    /**
+     * @Title: exportExcel
+     * @Description: 导出Excel的方法
+     * @Author from internet
+     * @param workbook
+     * @param sheetNum (sheet的位置，0表示第一个表格中的第一个sheet)
+     * @param sheetTitle  （sheet的名称）
+     * @param headers    （表格的标题）
+     * @param result   （表格的数据）
+     * @throws Exception
+     */
+    public void exportExcel(HSSFWorkbook workbook, int sheetNum,
+                            String sheetTitle, String[] headers, List<List<String>> result) throws Exception {
+        // 生成一个表格
+        HSSFSheet sheet = workbook.createSheet();
+        workbook.setSheetName(sheetNum, sheetTitle);
+        // 设置表格默认列宽度为20个字节
+        sheet.setDefaultColumnWidth((short) 20);
+        // 生成一个样式
+        HSSFCellStyle style = workbook.createCellStyle();
+        // 设置这些样式
+        style.setFillForegroundColor(HSSFColor.GREEN.index);
+//        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        style.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        style.setBorderTop(HSSFCellStyle.BORDER_THIN);
+        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        // 生成一个字体
+        HSSFFont font = workbook.createFont();
+        font.setColor(HSSFColor.BLACK.index);
+        font.setFontHeightInPoints((short) 16);
+        HSSFFont font2 = workbook.createFont();
+        font2.setColor(HSSFColor.BLACK.index);
+        font2.setFontHeightInPoints((short) 18);
+        font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+
+        // 指定当单元格内容显示不下时自动换行
+        style.setWrapText(true);
+
+        // 产生表格标题行
+        HSSFRow row = sheet.createRow(2);
+        // 把字体应用到当前的样式,标题为加粗的
+        style.setFont(font2);
+        for (int i = 0; i < headers.length; i++) {
+            HSSFCell cell = row.createCell((short) i);
+            cell.setCellStyle(style);
+            HSSFRichTextString text = new HSSFRichTextString(headers[i]);
+            cell.setCellValue(text.toString());
+        }
+        style.setFont(font);
+        // 遍历集合数据，产生数据行
+        if (result != null) {
+            int index = 1;
+            for (List<String> m : result) {
+                row = sheet.createRow(index+2);
+                int cellIndex = 0;
+                for (String str : m) {
+                    HSSFCell cell = row.createCell((short) cellIndex);
+                    cell.setCellValue(str.toString());
+                    cellIndex++;
+                }
+                index++;
+            }
+        }
+    }
+    /**
+     * 描述：根据文件后缀，自适应上传文件的版本
+     * @param inStr,fileName
+     * @return
+     * @throws Exception
+     */
+    public static Workbook getWorkbook(InputStream inStr,String fileName) throws Exception{
+        Workbook wb = null;
+        String fileType = fileName.substring(fileName.lastIndexOf("."));
+        if(".xls".equals(fileType)){
+            wb = new HSSFWorkbook(inStr);  //2003-
+        }else if(".xlsx".equals(fileType)){
+            wb = new XSSFWorkbook(inStr);  //2007+
+        }else{
+            throw new Exception("解析的文件格式有误！");
+        }
+        return wb;
+    }
+
+    /**
+     * 描述：对表格中数值进行格式化
+     * @param cell
+     * @return
+     */
+    public static Object getCellValue(Cell cell){
+        Object value = null;
+        DecimalFormat df = new DecimalFormat("0");  //格式化number String字符
+        SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd");  //日期格式化
+        DecimalFormat df2 = new DecimalFormat("0.00");  //格式化数字
+
+        switch (cell.getCellType()) {
+            case Cell.CELL_TYPE_STRING:
+                value = cell.getRichStringCellValue().getString();
+                break;
+            case Cell.CELL_TYPE_NUMERIC:
+                if("General".equals(cell.getCellStyle().getDataFormatString())){
+                    value = df.format(cell.getNumericCellValue());
+                }else if("m/d/yy".equals(cell.getCellStyle().getDataFormatString())){
+                    value = sdf.format(cell.getDateCellValue());
+                }else{
+                    value = df2.format(cell.getNumericCellValue());
+                }
+                break;
+            case Cell.CELL_TYPE_BOOLEAN:
+                value = cell.getBooleanCellValue();
+                break;
+            case Cell.CELL_TYPE_BLANK:
+                value = "";
+                break;
+            default:
+                break;
+        }
+        return value;
+    }
+
+    public ExcelUtils() {
+    }
 }

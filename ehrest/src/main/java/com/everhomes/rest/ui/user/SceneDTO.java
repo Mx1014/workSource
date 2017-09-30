@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  *     根据场景类型中的定义{@link com.everhomes.rest.ui.user.SceneType}</li>
  * <li>communityType : 园区类型</li>
  * <li>status : 认证状态</li>
+ * <li>communityId : 园区ID</li>
  * </ul>
  */
 public class SceneDTO {
@@ -32,6 +33,8 @@ public class SceneDTO {
     private String sceneType;
     private Byte communityType;
     private Byte status;
+    private Long communityId;
+    private String communityName;
 
     public String getSceneToken() {
         return sceneToken;
@@ -116,5 +119,21 @@ public class SceneDTO {
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
     }
 }

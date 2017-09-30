@@ -716,6 +716,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if (null==cmd.getRentType()) {
 			cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
 		}
+		//兼容app，4.9.0之前的园区入驻项目介绍列表是项目管理中的楼栋列表，BuildingId是楼栋管理的楼栋id，
+		// 现在项目介绍列表是招租管理中的楼栋列表，LeaseBuildingId是招租管理楼栋的id
+		if (null != cmd.getLeaseBuildingId()) {
+			cmd.setBuildingId(cmd.getLeaseBuildingId());
+		}else{
+			LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(cmd.getBuildingId());
+			if (null != leaseBuilding) {
+				cmd.setBuildingId(leaseBuilding.getId());
+			}
+		}
+
 		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
 		leasePromotion.setCreateUid(cmd.getUserId());
 
@@ -774,6 +785,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			LeaseBuilding building = enterpriseApplyBuildingProvider.findLeaseBuildingById(dto.getBuildingId());
 			if(null != building){
 				dto.setBuildingName(building.getName());
+				dto.setCommunityId(building.getCommunityId());
 			}
 		}
 		//兼容历史app，rentPosition字段值返回的就是楼栋名称

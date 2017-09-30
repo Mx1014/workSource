@@ -7,11 +7,14 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.order.OrderType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.EhCommunities;
+import com.everhomes.server.schema.tables.EhOrganizationOwners;
+import com.everhomes.server.schema.tables.EhOrganizations;
 import com.everhomes.server.schema.tables.EhPaymentBillGroups;
 import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
@@ -23,10 +26,13 @@ import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
 import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
+import com.everhomes.server.schema.tables.EhUserIdentifiers;
+import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -526,17 +532,17 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillDTO> dtos = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
+//        EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
         EhAddresses t2 = Tables.EH_ADDRESSES.as("t2");
         context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME)
                 .from(t)
-                .leftOuterJoin(t1)
-                .on(t.CHARGING_ITEMS_ID.eq(t1.ID))
+//                .leftOuterJoin(t1)
+//                .on(t.CHARGING_ITEMS_ID.eq(t1.ID))
                 .leftOuterJoin(t2)
                 .on(t.ADDRESS_ID.eq(t2.ID))
                 .where(t.BILL_ID.eq(billId))
-                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
-                .orderBy(t1.DEFAULT_ORDER)
+//                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+//                .orderBy(t1.DEFAULT_ORDER)
                 .limit(pageOffSet,pageSize+1)
                 .fetch()
                 .map(r ->{
@@ -565,7 +571,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
                 .fetch().map(r -> {
                     NoticeInfo info = new NoticeInfo();
-                    info.setPhoneNum(r.getValue(Tables.EH_PAYMENT_BILLS.NOTICETEL));
+                    info.setPhoneNums(r.getValue(Tables.EH_PAYMENT_BILLS.NOTICETEL));
                     info.setAmountRecevable(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE));
                     info.setAmountOwed(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED));
                     info.setTargetId(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_ID));
@@ -618,7 +624,7 @@ public class AssetProviderImpl implements AssetProvider {
                     BillDetailDTO dto = new BillDetailDTO();
                     dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setAmountReceviable(r.getValue(t.AMOUNT_RECEIVABLE));
-                    dto.setBillId(r.getValue(t.ID));
+                    dto.setBillId(String.valueOf(r.getValue(t.ID)));
                     dto.setDateStr(r.getValue(t.DATE_STR));
                     dto.setStatus(r.getValue(t.STATUS));
                     dtos.add(dto);
@@ -635,15 +641,16 @@ public class AssetProviderImpl implements AssetProvider {
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        dslContext.select(t.AMOUNT_RECEIVABLE,t.CHARGING_ITEM_NAME,t.DATE_STR,t.AMOUNT_OWED,t.APARTMENT_NAME,t.BUILDING_NAME)
+        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.AMOUNT_OWED,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
                 .map(r -> {
                     ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
-                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
                     dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dtos.add(dto);
                     dateStr[0] = r.getValue(t.DATE_STR);
                     amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
@@ -709,28 +716,33 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId) {
+    public ShowBillDetailForClientResponse getBillDetailByDateStr(Byte billStatus,Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId) {
         ShowBillDetailForClientResponse response = new ShowBillDetailForClientResponse();
         final BigDecimal[] amountOwed = {new BigDecimal("0")};
         final BigDecimal[] amountReceivable = {new BigDecimal("0")};
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        // 多个账期账单，总待缴从账单里拿，这里有减免项也许，还是？
+
+        SelectQuery<Record> query = dslContext.selectQuery();
+        query.addSelect(t.AMOUNT_RECEIVABLE, t.CHARGING_ITEM_NAME, t.DATE_STR, t.AMOUNT_OWED, t.AMOUNT_RECEIVABLE);
+        query.addFrom(t);
+        query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        query.addConditions(t.OWNER_ID.eq(ownerId));
+        query.addConditions(t.TARGET_TYPE.eq(targetType));
+        query.addConditions(t.TARGET_ID.eq(targetId));
+        query.addConditions(t.DATE_STR.eq(dateStr));
+        query.addConditions(t.CONTRACT_ID.eq(contractId));
+        if(billStatus!=null){
+            query.addConditions(t.STATUS.eq(billStatus));
+        }
         try {
-            dslContext.select(t.AMOUNT_RECEIVABLE, t.CHARGING_ITEM_NAME, t.DATE_STR, t.AMOUNT_OWED, t.AMOUNT_RECEIVABLE)
-                    .from(t)
-                    .where(t.OWNER_TYPE.eq(ownerType))
-                    .and(t.OWNER_ID.eq(ownerId))
-                    .and(t.TARGET_TYPE.eq(targetType))
-                    .and(t.TARGET_ID.eq(targetId))
-                    .and(t.DATE_STR.eq(dateStr))
-                    .and(t.CONTRACT_ID.eq(contractId))
-                    .fetch()
+            query.fetch()
                     .map(r -> {
                         ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
-                        dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                        dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                         dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
+                        dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                         dtos.add(dto);
                         amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
                         amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
@@ -1009,6 +1021,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
         query.addConditions(r.OWNER_ID.eq(ownerId));
         query.addConditions(r.OWNER_TYPE.eq(ownerType));
+        query.addConditions(r.SWITCH.eq((byte)1));
         query.addGroupBy(r.DATE_STR);
         query.addOrderBy(r.DATE_STR);
         query.fetch()
@@ -1029,11 +1042,19 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillStaticsDTO> list = new ArrayList<>();
         EhPaymentBillItems o = Tables.EH_PAYMENT_BILL_ITEMS.as("o");
         EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
+        EhPaymentBills t1 = Tables.EH_PAYMENT_BILLS.as("t1");
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> settledBillIds = context.select(t1.ID)
+                .from(t1)
+                .where(t1.SWITCH.eq((byte) 1))
+                .fetch(t1.ID);
         SelectQuery<Record> query = context.selectQuery();
         query.addSelect(DSL.sum(o.AMOUNT_RECEIVABLE),DSL.sum(o.AMOUNT_RECEIVED),DSL.sum(o.AMOUNT_OWED),o.CHARGING_ITEM_NAME);
         query.addFrom(t,o);
 //        query.addJoin(o);
+        if(settledBillIds!=null&& settledBillIds.size()>0){
+            query.addConditions(o.BILL_ID.in(settledBillIds));
+        }
         query.addConditions(o.OWNER_TYPE.eq(ownerType));
         query.addConditions(o.OWNER_ID.eq(ownerId));
         query.addConditions(o.CHARGING_ITEMS_ID.eq(t.ID));
@@ -1089,6 +1110,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(dateStrEnd!=null){
             query.addConditions(t.DATE_STR.lessOrEqual(dateStrEnd));
         }
+        query.addConditions(t.SWITCH.eq((byte)1));
         Table<Record> r = query.asTable("r");
 
         context.select(DSL.sum(r.field(t.AMOUNT_RECEIVED)), DSL.sum(r.field(t.AMOUNT_RECEIVABLE)), DSL.sum(r.field(t.AMOUNT_OWED)), o.NAME)
@@ -1308,7 +1330,8 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListBillExemptionItemsDTO> listBillExemptionItems(Long billId, int pageOffSet, Integer pageSize, String dateStr, String targetName) {
+    public List<ListBillExemptionItemsDTO> listBillExemptionItems(String billIdstr, int pageOffSet, Integer pageSize, String dateStr, String targetName) {
+        Long billId = Long.parseLong(billIdstr);
         List<ListBillExemptionItemsDTO> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentExemptionItems t = Tables.EH_PAYMENT_EXEMPTION_ITEMS.as("t");
@@ -1398,13 +1421,15 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId) {
+    public List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId,Long ownerId,String ownerType) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<VariableIdAndValue> list = new ArrayList<>();
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         String variableJson = context.select(t.VARIABLES_JSON_STRING)
                 .from(t)
                 .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+                .and(t.OWNERID.eq(ownerId))
+                .and(t.OWNERTYPE.eq(ownerType))
                 .fetchOne(0, String.class);
         Gson gson = new Gson();
         Map<String,String> map = gson.fromJson(variableJson, Map.class);
@@ -1477,6 +1502,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(t)
                 .where(t.CHARGING_ITEM_ID.eq(chargingItemId))
                 .and(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+                .and(t.OWNERTYPE.eq(ownerType))
+                .and(t.OWNERID.eq(ownerId))
                 .fetch()
                 .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
         return rules.get(0);
@@ -1664,5 +1691,78 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(t.SWITCH.eq((byte)0))
                 .execute();
     }
+
+    @Override
+    public String findZjgkCommunityIdentifierById(Long ownerId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCommunities t = Tables.EH_COMMUNITIES.as("t");
+        return context.select(t.NAMESPACE_COMMUNITY_TOKEN)
+                .from(t)
+                .where(t.ID.eq(ownerId))
+                .fetchAny(0,String.class);
+    }
+
+    @Override
+    public Long findTargetIdByIdentifier(String customerIdentifier) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhUserIdentifiers t1 = Tables.EH_USER_IDENTIFIERS.as("t1");
+        EhOrganizationOwners t2 = Tables.EH_ORGANIZATION_OWNERS.as("t2");
+        return context.select(t1.OWNER_UID)
+                .from(t1,t2)
+                .where(t2.CONTACT_TOKEN.eq(t1.IDENTIFIER_TOKEN))
+                .and(t2.NAMESPACE_CUSTOMER_TOKEN.eq(customerIdentifier))
+                .fetchOne(0,Long.class);
+    }
+
+    @Override
+    public String findAppName(Integer currentNamespaceId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<String> fetch = dslContext.select(Tables.EH_APP_URLS.NAME)
+                .from(Tables.EH_APP_URLS)
+                .where(Tables.EH_APP_URLS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
+                .fetch(Tables.EH_APP_URLS.NAME);
+        if(fetch!=null && fetch.size()>0){
+            return fetch.get(0);
+        }
+        return "";
+    }
+
+    @Override
+    public Long findOrganizationIdByIdentifier(String targetId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhOrganizations t = Tables.EH_ORGANIZATIONS.as("t");
+        return context.select(t.ID)
+                .from(t)
+                .where(t.NAMESPACE_ORGANIZATION_TOKEN.eq(targetId))
+                .fetchOne(0,Long.class);
+    }
+
+    @Override
+    public AssetVendor findAssetVendorByNamespace(Integer namespaceId) {
+        List<AssetVendor> list = new ArrayList<>();
+        dbProvider.getDslContext(AccessSpec.readOnly()).selectFrom(Tables.EH_ASSET_VENDOR)
+                .where(Tables.EH_ASSET_VENDOR.NAMESPACE_ID.eq(namespaceId))
+                .fetch()
+                .map(r -> {
+                    list.add(ConvertHelper.convert(r, AssetVendor.class));
+                    return null;
+                });
+        if(list!=null&&list.size()>0){
+            return (AssetVendor)list.get(0);
+        }else{
+            return null;
+        }
+    }
+
+    @Override
+    public String findIdentifierByUid(Long aLong) {
+        DSLContext con = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhUserIdentifiers t = Tables.EH_USER_IDENTIFIERS.as("t");
+        return con.select(t.IDENTIFIER_TOKEN)
+                .from(t)
+                .where(t.OWNER_UID.eq(aLong))
+                .fetchOne(0,String.class);
+    }
+
 
 }

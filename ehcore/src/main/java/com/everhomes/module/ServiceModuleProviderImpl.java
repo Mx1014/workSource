@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.module.ServiceModuleActionTypeFlag;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import org.jooq.Condition;
@@ -305,7 +306,12 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
-    public List<ServiceModule> listServiceModule(Integer level, Byte type) {
+    public List<ServiceModule> listServiceModule(Integer level, Byte type){
+        return listServiceModule(level, type, null);
+    }
+
+    @Override
+    public List<ServiceModule> listServiceModule(Integer level, Byte type, Byte actionTypeFlag) {
         List<ServiceModule> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
         SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
@@ -315,6 +321,11 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
             cond = cond.and(Tables.EH_SERVICE_MODULES.LEVEL.eq(level));
         if (null != type)
             cond = cond.and(Tables.EH_SERVICE_MODULES.TYPE.eq(type));
+        if(ServiceModuleActionTypeFlag.YES == ServiceModuleActionTypeFlag.fromCode(actionTypeFlag))
+            cond = cond.and(Tables.EH_SERVICE_MODULES.ACTION_TYPE.isNotNull());
+        else if(ServiceModuleActionTypeFlag.NO == ServiceModuleActionTypeFlag.fromCode(actionTypeFlag))
+            cond = cond.and(Tables.EH_SERVICE_MODULES.ACTION_TYPE.isNull());
+
 
         query.addConditions(cond);
         query.fetch().map((r) -> {

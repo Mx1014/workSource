@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  *</ul>
  */
 public class listBillExemtionItemsCommand {
-    private Long billId;
+    private String billId;
     private String targetName;
     private String dateStr;
     private Integer pageSize;
@@ -29,11 +29,11 @@ public class listBillExemtionItemsCommand {
         return targetName;
     }
 
-    public Long getBillId() {
+    public String getBillId() {
         return billId;
     }
 
-    public void setBillId(Long billId) {
+    public void setBillId(String billId) {
         this.billId = billId;
     }
 
