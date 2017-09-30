@@ -1344,7 +1344,12 @@ INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`
 
 -- 新支付 copy from 4.9.4 by lqs 20170930
 -- 支付服务器链接
-UPDATE `eh_configurations` SET `value` = 'https://payv2.zuolin.com/pay' where name = 'pay.v2.home.url';
+SET @eh_configurations_id = (SELECT MAX(id) from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.callback.url', '/pay/payNotify', '新支付回调接口url', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'default.bind.phone', '12100001111', '绑手机号默认值', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.orderPaymentStatusQueryUri', '/order/queryOrderPaymentStatus', '查询支付单信息', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.home.url', 'https://payv2.zuolin.com/pay', '新支付homeUrl', '0', NULL);
+
 
 INSERT INTO `eh_payment_accounts` (`id`, `name`, `account_id`, `system_id`, `app_key`, `secret_key`, `create_time`)
 	VALUES(1, 'MyBayAccount', '10001', '1', 'cffd7a0a-cf59-41d3-9140-773161fc7047', 'y6Yc0xJ3ZgMVUuHWkWyXkn5FVB0pryqUMKVWJSwIXizHnP+TQzm0jPuU8z69imooQzAU3iWHZKtqJOr5IGZpCg==', UTC_TIMESTAMP());
