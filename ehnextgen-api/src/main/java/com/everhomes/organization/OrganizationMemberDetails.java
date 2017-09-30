@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 
-public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
+public class  OrganizationMemberDetails extends EhOrganizationMemberDetails {
 
     @Autowired
     private OrganizationProvider organizationProvider;
