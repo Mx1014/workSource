@@ -422,7 +422,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     @Override
     public List<UniongroupMemberDetail> listUniongroupMemberDetailByGroupType(Integer namespaceId, Long ownerId, Long groupId, String groupType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
+        List<UniongroupMemberDetail> list = new ArrayList<>();
         if (groupId != null && groupId != 0L) {
             list = context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
                     Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE,
@@ -543,7 +543,6 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     @Override
     public void deleteUniongroupConfigresByGroupId(Long groupId, Long organizationId, Integer versionCode) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhUniongroupConfiguresDao dao = new EhUniongroupConfiguresDao(context.configuration());
         DeleteQuery<EhUniongroupConfiguresRecord> query = context.deleteQuery(Tables.EH_UNIONGROUP_CONFIGURES);
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUP_ID.eq(groupId));
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.ENTERPRISE_ID.eq(organizationId));
@@ -563,7 +562,6 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     @Override
     public void deleteUniongroupMemberDetailByGroupId(Long groupId, Long organizationId, Integer versionCode) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
         DeleteQuery<EhUniongroupMemberDetailsRecord> query = context.deleteQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
         if (versionCode == null) {
             query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(DEFAULT_VERSION_CODE));
