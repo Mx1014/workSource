@@ -35,6 +35,7 @@ public class SceneDTO {
     private Byte status;
     private Long communityId;
     private String communityName;
+    private String titleName;
 
     public String getSceneToken() {
         return sceneToken;
@@ -135,5 +136,13 @@ public class SceneDTO {
 
     public void setCommunityName(String communityName) {
         this.communityName = communityName;
+    }
+
+    public String getTitleName() {
+        return titleName;
+    }
+
+    public void setTitleName(String titleName) {
+        this.titleName = titleName;
     }
 }

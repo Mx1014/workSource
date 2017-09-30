@@ -80,7 +80,9 @@ public interface UniongroupConfigureProvider {
 
     List listDetailNotInUniongroup(Integer namespaceId, Long organizationId);
 
-	Integer countUnionGroupMemberDetailsByGroupId(Integer namespaceId, Long groupId);
+    List listDetailNotInUniongroup(Integer namespaceId, Long organizationId, String contactName);
+
+    Integer countUnionGroupMemberDetailsByGroupId(Integer namespaceId, Long groupId);
 
     public void deleteUniongroupConfigresByCurrentIdAndGroupTypeAndVersion(Long detailId, String groupType, Integer versionCode);
 }

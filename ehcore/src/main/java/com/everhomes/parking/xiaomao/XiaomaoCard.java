@@ -18,6 +18,15 @@ public class XiaomaoCard {
     private Date createTime;
     private Date beginTime;
     private Date endTime;
+    private String userName;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
     public Integer getFlag() {
         return flag;
