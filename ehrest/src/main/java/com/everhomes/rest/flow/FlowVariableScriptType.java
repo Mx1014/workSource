@@ -4,12 +4,12 @@ package com.everhomes.rest.flow;
 /**
  * <ul>
  *     <li>BEAN_ID("bean_id"): BEAN_ID</li>
- *     <li>MODULE("module"): MODULE</li>
+ *     <li>MODULE_ID("module_id"): MODULE_ID</li>
  * </ul>
  */
 public enum FlowVariableScriptType {
 
-    BEAN_ID("bean_id"), MODULE("module");
+    BEAN_ID("bean_id"), MODULE_ID("module_id");
 
     private String code;
 

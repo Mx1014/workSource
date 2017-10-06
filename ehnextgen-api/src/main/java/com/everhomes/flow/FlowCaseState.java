@@ -3,18 +3,15 @@ package com.everhomes.flow;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.user.UserInfo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class FlowCaseState {
 
     private FlowCaseState parentState;
     private List<FlowCaseState> childStates;
     private FlowModuleInfo module;
-    private FlowListenerManager listenerManager;
     private FlowCase flowCase;
     private UserInfo operator;
     private FlowGraph flowGraph;
@@ -22,9 +19,7 @@ public class FlowCaseState {
     private FlowGraphNode prefixNode;
     private FlowGraphNode currentNode;
     private FlowGraphNode nextNode;
-    // private List<FlowGraphNode> currentNode;
     private FlowGraphEvent currentEvent;
-    private FlowGraphWay currentWay;
     private FlowGraphLane currentLane;
     private Map<String, Object> extra;
     private List<FlowEventLog> logs;
@@ -150,14 +145,6 @@ public class FlowCaseState {
         this.stepType = stepType;
     }
 
-    public FlowGraphWay getCurrentWay() {
-        return currentWay;
-    }
-
-    public void setCurrentWay(FlowGraphWay currentWay) {
-        this.currentWay = currentWay;
-    }
-
     public List<FlowEventLog> getLogs() {
         return logs;
     }
@@ -176,14 +163,6 @@ public class FlowCaseState {
 
     public void addUpdateLogs(FlowEventLog updateLog) {
         this.updateLogs.add(updateLog);
-    }
-
-    public FlowListenerManager getListenerManager() {
-        return listenerManager;
-    }
-
-    public void setListenerManager(FlowListenerManager listenerManager) {
-        this.listenerManager = listenerManager;
     }
 
     public List<FlowEventLog> getUpdateLogs() {
@@ -225,54 +204,6 @@ public class FlowCaseState {
         return childStates;
     }
 
-    /*private List<FlowEventLog> getChildLogs(FlowCaseState parentState) {
-        List<FlowEventLog> childLogs = new ArrayList<>();
-        childLogs.addAll(parentState.getLogs());
-        if (parentState.getChildStates() != null) {
-            for (FlowCaseState childState : parentState.getChildStates()) {
-                childLogs.addAll(getChildLogs(childState));
-            }
-        }
-        return childLogs;
-    }
-
-    private List<FlowEventLog> getChildUpdateLogs(FlowCaseState parentState) {
-        List<FlowEventLog> childLogs = new ArrayList<>();
-        childLogs.addAll(parentState.getUpdateLogs());
-        if (parentState.getChildStates() != null) {
-            for (FlowCaseState childState : parentState.getChildStates()) {
-                childLogs.addAll(getChildUpdateLogs(childState));
-            }
-        }
-        return childLogs;
-    }*/
-
-    /*private List<FlowTimeout> getTimeouts(FlowCaseState parentState) {
-        List<FlowTimeout> timeouts = new ArrayList<>();
-        timeouts.addAll(parentState.getTimeouts());
-        if (parentState.getChildStates() != null) {
-            for (FlowCaseState childState : parentState.getChildStates()) {
-                timeouts.addAll(getTimeouts(childState));
-            }
-        }
-        return timeouts;
-    }*/
-
-    /*public List<FlowEventLog> getAllLogs() {
-        FlowCaseState tempParentState = getGrantParentState();
-        return getChildLogs(tempParentState);
-    }
-
-    public List<FlowEventLog> getAllUpdateLogs() {
-        FlowCaseState tempParentState = getGrantParentState();
-        return getChildUpdateLogs(tempParentState);
-    }*/
-
-   /* public List<FlowTimeout> getAllTimeouts() {
-        FlowCaseState tempParentState = getGrantParentState();
-        return getTimeouts(tempParentState);
-    }*/
-
     public List<FlowCase> getAllFlowCases() {
         FlowCaseState tempParentState = getGrantParentState();
         return getChildFlowCases(tempParentState);
@@ -300,5 +231,27 @@ public class FlowCaseState {
             tempParentState = tempParentState.getParentState();
         }
         return tempParentState;
+    }
+
+    public List<FlowCase> getFlowCaseByBranch(FlowBranch branch) {
+        return getAllFlowCases().stream().map(r -> {
+            if (r.getStartNodeId().equals(branch.getOriginalNodeId())
+                    && r.getEndNodeId().equals(branch.getConvergenceNodeId())) {
+                return r;
+            }
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    public void incrStepCount() {
+        this.flowCase.incrStepCount();
+    }
+
+    public List<FlowCase> getSiblingFlowCase() {
+        FlowCaseState parentState = this.getParentState();
+        if (parentState != null) {
+            return parentState.getChildStates().stream().map(FlowCaseState::getFlowCase).collect(Collectors.toList());
+        }
+        return null;
     }
 }

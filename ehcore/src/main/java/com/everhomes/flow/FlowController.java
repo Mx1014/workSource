@@ -238,7 +238,7 @@ public class FlowController extends ControllerBase {
      */
     @RequestMapping("getEvaluateInfo")
     @RestReturn(value=FlowEvaluateDTO.class)
-    public RestResponse getEvaluateInfo(@Valid GetFlowCaseDetailByIdCommand cmd) {
+    public RestResponse getEvaluateInfo(@Valid GetEvaluateInfoCommand cmd) {
         RestResponse response = new RestResponse(flowService.getEvaluateInfo(cmd.getFlowCaseId()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

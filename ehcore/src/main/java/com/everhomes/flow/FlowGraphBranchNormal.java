@@ -3,7 +3,10 @@ package com.everhomes.flow;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.flow.FlowBranchProcessMode;
 import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowNodeType;
+import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 
 import java.util.List;
 
@@ -54,11 +57,36 @@ public class FlowGraphBranchNormal extends FlowGraphBranch {
             subFlowCase.setStartNodeId(flowBranch.getOriginalNodeId());
             subFlowCase.setEndNodeId(flowBranch.getConvergenceNodeId());
             subFlowCase.setStartLinkId(startLinkId);
+
+            FlowLink endFlowLink = getEndFlowLink(ctx, nextNode, subFlowCase.getStartLinkId());
+            subFlowCase.setEndLinkId(endFlowLink.getId());
+
             subFlowCase.setStepCount(0L);
             subFlowCase.setStatus(FlowCaseStatus.PROCESS.getCode());
             flowCaseProvider.createFlowCase(subFlowCase);
         }
         subFlowCase.setStepCount(subFlowCase.getStepCount() + 1);
         return flowStateProcessor.prepareSubFlowCaseStart(ctx.getOperator(), subFlowCase);
+    }
+
+    private FlowLink getEndFlowLink(FlowCaseState ctx, FlowGraphNode node, Long linkId) {
+        FlowGraphLink flowLink = node.getFlowLink(linkId);
+        if (flowLink == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_LINK_IS_EMPTY,
+                    "flow node link is empty, node = %s", node.getFlowNode().getId());
+        }
+
+        FlowGraphNode toNode = flowLink.getToNode(ctx, null);
+        if (toNode == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS,
+                    "flow node not exists, link = %s", flowLink.getFlowLink().getId());
+        }
+
+        if (FlowNodeType.END.getCode().equals(toNode.getFlowNode().getNodeType())
+                || toNode.getFlowNode().getId().equals(this.getFlowBranch().getConvergenceNodeId())) {
+            return flowLink.getFlowLink();
+        }
+        List<FlowGraphLink> linksOut = toNode.getLinksOut();
+        return getEndFlowLink(ctx, toNode, linksOut.get(0).getFlowLink().getId());
     }
 }

@@ -1,16 +1,17 @@
 package com.everhomes.rest.flow;
 
 /**
- * <ul> 暂时用不到
+ * <ul>
  * <li>step_start: 进入节点的日志</li>
  * <li>step_timeout: 节点超时的日志</li>
+ * <li>step_module: 业务触发的事件</li>
  * <li>button_fired: 按钮响应的日志</li>
  * </ul>
  * @author janson
  *
  */
 public enum FlowEventType {
-	STEP_START("step_start"), STEP_TIMEOUT("step_timeout"), BUTTON_FIRED("button_fired");
+	STEP_START("step_start"), STEP_TIMEOUT("step_timeout"), STEP_MODULE("step_module"), BUTTON_FIRED("button_fired");
 	
 	private String code;
     private FlowEventType(String code) {

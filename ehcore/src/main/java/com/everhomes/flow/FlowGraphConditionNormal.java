@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.flow.FlowConditionExpressionVarType;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.slf4j.Logger;
@@ -20,9 +21,11 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowGraphConditionNormal.class);
 
     private ScriptEngineFactory scriptEngineFactory;
+    private FlowListenerManager listenerManager;
 
     public FlowGraphConditionNormal() {
         scriptEngineFactory = new NashornScriptEngineFactory();
+        listenerManager = PlatformContext.getComponent(FlowListenerManager.class);
     }
 
     public boolean isTrue(FlowCaseState ctx) throws FlowStepErrorException {
@@ -44,7 +47,7 @@ public class FlowGraphConditionNormal extends FlowGraphCondition {
 
         Map<String, String> varNameToValueMap = null;
         if (vars.size() > 0) {
-            varNameToValueMap = ctx.getListenerManager().onFlowPredefinedVariableRender(ctx, vars);
+            varNameToValueMap = listenerManager.onFlowVariableRender(ctx, vars);
         }
         if (varNameToValueMap == null) {
             return false;

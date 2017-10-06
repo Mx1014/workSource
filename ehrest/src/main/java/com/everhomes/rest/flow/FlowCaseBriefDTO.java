@@ -28,6 +28,7 @@ import java.util.List;
  *     <li>createTime: createTime</li>
  *     <li>moduleId: 模块id</li>
  *     <li>moduleName: 模块名称</li>
+ *     <li>caseType: 任务类型 {@link com.everhomes.rest.flow.FlowCaseType}</li>
  *     <li>currentNodeId: 当前节点id</li>
  *     <li>moduleLink: moduleLink</li>
  *     <li>evaluateScore: 评价分值</li>
@@ -63,6 +64,7 @@ public class FlowCaseBriefDTO {
     private Timestamp createTime;
     private Long moduleId;
     private String moduleName;
+    private String caseType;
     private Long currentNodeId;
     private String moduleLink;
     private Integer evaluateScore;
@@ -81,6 +83,9 @@ public class FlowCaseBriefDTO {
 
     @ItemType(FlowButtonDTO.class)
     private List<FlowButtonDTO> buttons = new ArrayList<>();
+
+    @ItemType(FlowButtonDTO.class)
+    private List<FlowButtonDTO> moreButtons = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -336,6 +341,22 @@ public class FlowCaseBriefDTO {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public List<FlowButtonDTO> getMoreButtons() {
+        return moreButtons;
+    }
+
+    public void setMoreButtons(List<FlowButtonDTO> moreButtons) {
+        this.moreButtons = moreButtons;
+    }
+
+    public String getCaseType() {
+        return caseType;
+    }
+
+    public void setCaseType(String caseType) {
+        this.caseType = caseType;
     }
 
     @Override

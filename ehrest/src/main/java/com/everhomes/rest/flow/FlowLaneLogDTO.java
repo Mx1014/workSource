@@ -14,6 +14,7 @@ import java.util.List;
  *     <li>isCurrentLane: 是否是当前泳道</li>
  *     <li>logs: 详细日志信息，目前仅有 logContent 有用 {@link com.everhomes.rest.flow.FlowEventLogDTO}</li>
  *     <li>needSelectNextNode: 下个节点需要处理人选择</li>
+ *     <li>laneEnterTime: 进入泳道的时间</li>
  * </ul>
  */
 public class FlowLaneLogDTO {
@@ -23,6 +24,7 @@ public class FlowLaneLogDTO {
     private String laneName;
     private Byte isCurrentLane;
     private Byte needSelectNextNode;
+    private Long laneEnterTime;
 
     @ItemType(FlowEventLogDTO.class)
     private List<FlowEventLogDTO> logs;
@@ -77,6 +79,14 @@ public class FlowLaneLogDTO {
 
     public void setNeedSelectNextNode(Byte needSelectNextNode) {
         this.needSelectNextNode = needSelectNextNode;
+    }
+
+    public Long getLaneEnterTime() {
+        return laneEnterTime;
+    }
+
+    public void setLaneEnterTime(Long laneEnterTime) {
+        this.laneEnterTime = laneEnterTime;
     }
 
     @Override

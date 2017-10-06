@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
  *     <li>nodeId: 节点id</li>
  *     <li>stepType: 按钮类型 {@link com.everhomes.rest.flow.FlowStepType}</li>
  *     <li>userType: 用户类型 {@link com.everhomes.rest.flow.FlowUserType}</li>
- *     <li>defaultOrder: 排序</li>
+ *     <li>buttonsCount: 按钮数量</li>
  * </ul>
  */
 public class CreateFlowButtonCommand {
@@ -24,7 +24,7 @@ public class CreateFlowButtonCommand {
     private String stepType;
     @NotNull
     private String userType;
-    private Integer defaultOrder;
+    private Integer buttonsCount;
 
     public Long getFlowId() {
         return flowId;
@@ -58,12 +58,12 @@ public class CreateFlowButtonCommand {
         this.userType = userType;
     }
 
-    public Integer getDefaultOrder() {
-        return defaultOrder;
+    public Integer getButtonsCount() {
+        return buttonsCount;
     }
 
-    public void setDefaultOrder(Integer defaultOrder) {
-        this.defaultOrder = defaultOrder;
+    public void setButtonsCount(Integer buttonsCount) {
+        this.buttonsCount = buttonsCount;
     }
 
     @Override

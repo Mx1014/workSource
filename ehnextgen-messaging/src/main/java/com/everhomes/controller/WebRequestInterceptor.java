@@ -123,9 +123,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 //			}
 //		}else
 //			LOGGER.debug("preHandle-parameter is null");
-
+        Map<String, String> userAgents = getUserAgent(request);
         try {
-            Map<String, String> userAgents = getUserAgent(request);
             // 由于服务器注册接口被攻击，从日志分析来看IP和手机号都不一样，但useragent并没有按标准的形式，故可以通过useragent来做限制，
             // 通过配置一黑名单，含黑名单关键字的useragent会被禁止掉 by lqs 20170516
             checkUserAgent(request.getRequestURI(), userAgents);
@@ -227,7 +226,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 }
                 sb.append("}");
 
-                LOGGER.debug("Pre handling request: {}, headers: {}", getRequestInfo(request, true), sb.toString());
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Pre handling request: {}, headers: {}", getRequestInfo(request, true), sb.toString());
+                    LOGGER.debug("User Agents: {}", userAgents);
+                }
             }
         }
     }
@@ -256,18 +258,18 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     }
 
     private void setupScheme(Map<String, String> userAgents) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setupScheme userAgents = {}", userAgents);
-        }
+        // if (LOGGER.isDebugEnabled()) {
+        //     LOGGER.debug("Setup userAgents = {}", userAgents);
+        // }
         UserContext context = UserContext.current();
         if(org.springframework.util.StringUtils.isEmpty(context.getVersion()) || context.getVersion().equals("0.0.0")){
             context.setScheme(userAgents.get("scheme"));
         }else{
             VersionRange versionRange = new VersionRange("[" + context.getVersion() + "," + context.getVersion() + ")");
 
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("setup scheme, version={}, versionUpperBound={}", context.getVersion(), versionRange.getUpperBound());
-            }
+            // if (LOGGER.isDebugEnabled()) {
+            //     LOGGER.debug("setup scheme, version={}, versionUpperBound={}", context.getVersion(), versionRange.getUpperBound());
+            // }
             if (versionRange.getUpperBound() < VERSION_UPPERBOUND) {
                 context.setScheme(HTTP);
             } else {
@@ -377,17 +379,17 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         }
         // String scheme = request.getScheme();
         String scheme = request.getHeader("X-Forwarded-Scheme");
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Strip the scheme from header, X-Forwarded-Scheme={}, scheme={}", scheme, request.getScheme());
-        }
+        // if (LOGGER.isDebugEnabled()) {
+        //     LOGGER.debug("Strip the scheme from header, X-Forwarded-Scheme={}, scheme={}", scheme, request.getScheme());
+        // }
         // 当请求没有过nginx的时候scheme为null，则需要根据数据库的content server配置项来决定scheme by sfyan 20170221
         if (scheme == null || scheme.isEmpty()) {
             try {
                 ContentServer server = contentServerService.selectContentServer();
                 Integer port = server.getPublicPort();
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Final selectContentServer port = {}", port);
-                }
+                // if (LOGGER.isDebugEnabled()) {
+                //     LOGGER.debug("Final selectContentServer port = {}", port);
+                // }
                 if (80 == port || 443 == port) {
                     scheme = HTTPS;
                 } else {
@@ -398,9 +400,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 scheme = HTTP;
             }
         }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Final parsed schema = {}", scheme);
-        }
+        // if (LOGGER.isDebugEnabled()) {
+        //     LOGGER.debug("Final parsed schema = {}", scheme);
+        // }
         map.put("scheme", scheme);
         return map;
     }

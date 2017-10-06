@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *     <li>subjectRequiredFlag: 文字及图片必须填写 {@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  *     <li>needProcessor: 指定目标节点处理人 {@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  *     <li>remindCount: ??</li>
+ *     <li>remindMsgAction: 催办消息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
  *     <li>messageAction: 消息信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
  *     <li>smsAction: 短信信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
  *     <li>tracker: 跟踪 {@link com.everhomes.rest.flow.FlowActionInfo}</li>
@@ -33,6 +34,7 @@ public class UpdateFlowButtonCommand {
     private Byte needProcessor;
     private Integer remindCount;
 
+    private FlowActionInfo remindMsgAction;
     private FlowActionInfo messageAction;
     private FlowActionInfo smsAction;
     private FlowActionInfo tracker;
@@ -150,6 +152,14 @@ public class UpdateFlowButtonCommand {
 
     public void setEvaluateStep(String evaluateStep) {
         this.evaluateStep = evaluateStep;
+    }
+
+    public FlowActionInfo getRemindMsgAction() {
+        return remindMsgAction;
+    }
+
+    public void setRemindMsgAction(FlowActionInfo remindMsgAction) {
+        this.remindMsgAction = remindMsgAction;
     }
 
     @Override

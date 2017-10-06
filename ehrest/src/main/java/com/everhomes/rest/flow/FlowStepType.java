@@ -11,6 +11,7 @@ package com.everhomes.rest.flow;
  * <li>reminder_step: 催办</li>
  * <li>evaluate_step: 评价</li>
  * <li>go_to_process: 去处理</li>
+ * <li>supervise: 去处理</li>
  * </ul>
  * @author janson
  *
@@ -27,6 +28,7 @@ public enum FlowStepType {
     EVALUATE_STEP("evaluate_step"),
     END_STEP("end_step"),
     GO_TO_PROCESS("go_to_process"),
+    SUPERVISE("supervise"),
     ;
 
 	private String code;

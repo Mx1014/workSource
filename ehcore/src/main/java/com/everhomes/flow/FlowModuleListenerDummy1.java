@@ -130,7 +130,7 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener {
     }
 
     @Override
-    public Map<String, String> onFlowPredefinedVariableRender(FlowCaseState ctx, List<String> vars) {
+    public Map<String, String> onFlowVariableRender(FlowCaseState ctx, List<String> vars) {
         Map<String, String> map = new HashMap<>();
         for (String var : vars) {
             map.put(var, "1");

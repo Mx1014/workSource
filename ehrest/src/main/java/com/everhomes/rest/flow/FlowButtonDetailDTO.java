@@ -54,6 +54,7 @@ public class FlowButtonDetailDTO {
     private String param;
     private String evaluateStep;
 
+    private FlowActionDTO remindMsg;
     private FlowActionDTO pushMessage;
     private FlowActionDTO pushSms;
     private FlowActionDTO tracker;
@@ -235,6 +236,14 @@ public class FlowButtonDetailDTO {
 
     public void setEvaluateStep(String evaluateStep) {
         this.evaluateStep = evaluateStep;
+    }
+
+    public FlowActionDTO getRemindMsg() {
+        return remindMsg;
+    }
+
+    public void setRemindMsg(FlowActionDTO remindMsg) {
+        this.remindMsg = remindMsg;
     }
 
     @Override

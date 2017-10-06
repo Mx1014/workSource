@@ -26,7 +26,7 @@ public interface FlowEventLogProvider {
 	void createFlowEventLogs(List<FlowEventLog> objs);
 
 	List<FlowCaseDetail> findProcessorFlowCases(ListingLocator locator,
-			int count, SearchFlowCaseCommand cmd);
+                                                int count, SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback);
 
 	List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId, Long stepCount, List<FlowUserType> flowUserTypes);
 
@@ -77,9 +77,11 @@ public interface FlowEventLogProvider {
      */
     Long findMaxStepCountByNodeEnterLog(Long nodeId, Long caseId);
 
-    FlowEventLog findNodeLastEnterLogs(Long nodeId, Long caseId);
+    FlowEventLog findNodeLastStepTrackerLog(Long nodeId, Long caseId);
 
     List<FlowEventLog> findStepEventLogs(List<Long> flowCaseIdList);
 
-    List<FlowOperateLogDTO> searchOperateLogs(Long userId, String serviceType, String keyword, Integer pageSize, ListingLocator locator);
+    List<FlowOperateLogDTO> searchOperateLogs(Long flowCaseId, Long userId, String serviceType, String keyword, Integer pageSize, ListingLocator locator);
+
+    FlowEventLog isSupervisors(Long userId, FlowCase flowCase);
 }

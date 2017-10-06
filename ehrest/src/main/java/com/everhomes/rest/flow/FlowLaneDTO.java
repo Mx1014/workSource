@@ -9,8 +9,11 @@ import com.everhomes.util.StringHelper;
  *     <li>flowMainId: flowMainId</li>
  *     <li>flowVersion: flowVersion</li>
  *     <li>displayName: 泳道名称</li>
+ *     <li>displayNameAbsort: 终止状态下的泳道名称</li>
  *     <li>laneLevel: 泳道level</li>
  *     <li>flowNodeLevel: 第一个节点level</li>
+ *     <li>identifierNodeLevel: 申请人按钮节点level</li>
+ *     <li>identifierNodeId: 申请人按钮节点id</li>
  * </ul>
  */
 public class FlowLaneDTO {
@@ -20,8 +23,11 @@ public class FlowLaneDTO {
     private Long flowMainId;
     private Integer flowVersion;
     private String displayName;
+    private String displayNameAbsort;
     private Integer laneLevel;
     private Integer flowNodeLevel;
+    private Integer identifierNodeLevel;
+    private Long identifierNodeId;
 
     public Long getId() {
         return id;
@@ -77,6 +83,30 @@ public class FlowLaneDTO {
 
     public void setFlowNodeLevel(Integer flowNodeLevel) {
         this.flowNodeLevel = flowNodeLevel;
+    }
+
+    public Integer getIdentifierNodeLevel() {
+        return identifierNodeLevel;
+    }
+
+    public void setIdentifierNodeLevel(Integer identifierNodeLevel) {
+        this.identifierNodeLevel = identifierNodeLevel;
+    }
+
+    public Long getIdentifierNodeId() {
+        return identifierNodeId;
+    }
+
+    public void setIdentifierNodeId(Long identifierNodeId) {
+        this.identifierNodeId = identifierNodeId;
+    }
+
+    public String getDisplayNameAbsort() {
+        return displayNameAbsort;
+    }
+
+    public void setDisplayNameAbsort(String displayNameAbsort) {
+        this.displayNameAbsort = displayNameAbsort;
     }
 
     @Override

@@ -11,5 +11,5 @@ public interface FlowPredefinedParamProvider {
 
 	FlowPredefinedParam findById(Long id);
 
-    List<FlowPredefinedParam> listPredefinedParam(String moduleType, Long moduleId, String ownerType, Long ownerId, String entityType);
+    List<FlowPredefinedParam> listPredefinedParam(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId, String entityType);
 }

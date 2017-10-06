@@ -1,6 +1,8 @@
 package com.everhomes.flow;
 
+import com.everhomes.rest.flow.FlowActionStatus;
 import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowNodeType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +29,7 @@ public abstract class FlowGraphNode {
 
     private List<FlowGraphButton> processorButtons;
     private List<FlowGraphButton> applierButtons;
+    private List<FlowGraphButton> supervisorButtons;
 
     private List<FlowGraphAction> enterActions;
     private List<FlowGraphAction> leaveActions;
@@ -35,6 +38,7 @@ public abstract class FlowGraphNode {
     public FlowGraphNode() {
         processorButtons = new ArrayList<>();
         applierButtons = new ArrayList<>();
+        supervisorButtons = new ArrayList<>();
         enterActions = new ArrayList<>();
         leaveActions = new ArrayList<>();
         timeoutActions = new ArrayList<>();
@@ -49,14 +53,40 @@ public abstract class FlowGraphNode {
     public abstract void stepLeave(FlowCaseState ctx, FlowGraphNode to) throws FlowStepErrorException;
 
     public FlowCaseStatus getExpectStatus() {
-        //TODO better for this
         FlowNode fn = this.flowNode;
-        if (fn.getNodeName().equals("START")) {
+        if (FlowNodeType.START.getCode().equals(fn.getNodeType())) {
             return FlowCaseStatus.INITIAL;
-        } else if (fn.getNodeName().equals("END")) {
+        } else if (FlowNodeType.END.getCode().equals(fn.getNodeType())) {
             return FlowCaseStatus.FINISHED;
         } else {
             return FlowCaseStatus.PROCESS;
+        }
+    }
+    
+    public void fireAction(FlowCaseState ctx) {
+        if (this.getMessageAction() != null) {
+            Byte status = this.getMessageAction().getFlowAction().getStatus();
+            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
+                this.getMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+            }
+        }
+        if (this.getSmsAction() != null) {
+            Byte status = this.getSmsAction().getFlowAction().getStatus();
+            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
+                this.getSmsAction().fireAction(ctx, ctx.getCurrentEvent());
+            }
+        }
+        if (this.getTickMessageAction() != null) {
+            Byte status = this.getTickMessageAction().getFlowAction().getStatus();
+            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
+                this.getTickMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+            }
+        }
+        if (this.getTickSMSAction() != null) {
+            Byte status = this.getTickSMSAction().getFlowAction().getStatus();
+            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
+                this.getTickSMSAction().fireAction(ctx, ctx.getCurrentEvent());
+            }
         }
     }
 
@@ -186,6 +216,14 @@ public abstract class FlowGraphNode {
 
     public void setLinksOut(List<FlowGraphLink> linksOut) {
         this.linksOut = linksOut;
+    }
+
+    public List<FlowGraphButton> getSupervisorButtons() {
+        return supervisorButtons;
+    }
+
+    public void setSupervisorButtons(List<FlowGraphButton> supervisorButtons) {
+        this.supervisorButtons = supervisorButtons;
     }
 
     @Override

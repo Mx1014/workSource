@@ -4,6 +4,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.flow.*;
 import com.everhomes.rest.flow.FlowBranchDecider;
 import com.everhomes.rest.flow.FlowLogType;
+import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -20,6 +21,10 @@ public class FlowGraphNodeCondition extends FlowGraphNode {
 
     @Override
     public void stepEnter(FlowCaseState ctx, FlowGraphNode from) throws FlowStepErrorException {
+        ctx.getFlowCase().setCurrentNodeId(this.getFlowNode().getId());
+        ctx.getFlowCase().setCurrentLaneId(this.getFlowNode().getFlowLaneId());
+        ctx.getFlowCase().setStepCount(ctx.getFlowCase().getStepCount() + 1);
+
         FlowGraph flowGraph = ctx.getFlowGraph();
         FlowGraphBranch branch = flowGraph.getBranchByOriginalNode(this.getFlowNode().getId());
         if (branch.isConcurrent()) {
@@ -40,7 +45,8 @@ public class FlowGraphNodeCondition extends FlowGraphNode {
                     FlowGraphNode next = flowGraph.getGraphNode(ctx.getCurrentEvent().getNextNodeId());
                     processCtx(ctx, branch, next);
                 } else {
-                    throw RuntimeErrorException.errorWith("", 1, "please update your app");
+                    throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_NEED_SELECT_NEXT_NODE,
+                            "need next node id, please update your app");
                 }
             } else if (flowBranchDecider == FlowBranchDecider.CONDITION) {
                 FlowGraphCondition trueCond = null;
@@ -73,19 +79,30 @@ public class FlowGraphNodeCondition extends FlowGraphNode {
         log.setFlowCaseId(ctx.getFlowCase().getId());
         log.setFlowUserId(ctx.getOperator().getId());
         log.setStepCount(ctx.getFlowCase().getStepCount());
-        log.setLogType(FlowLogType.NODE_ENTER.getCode());
+        log.setLogType(FlowLogType.STEP_TRACKER.getCode());
         log.setLogTitle("");
         ctx.getLogs().add(log);
     }
 
     private void processCtx(FlowCaseState ctx, FlowGraphBranch branch, FlowGraphNode nextNode) {
         FlowCaseState subCtx = branch.processSubFlowCaseStart(ctx, nextNode);
+
+        boolean found = false;
+        for (FlowCaseState flowCaseState : ctx.getAllFlowState()) {
+            if (flowCaseState.getFlowCase().getId().equals(subCtx.getFlowCase().getId())) {
+                subCtx = flowCaseState;
+                found = true;
+                break;
+            }
+        }
         subCtx.setCurrentNode(this);
         subCtx.setNextNode(nextNode);
         subCtx.setParentState(ctx);
         subCtx.setStepType(FlowStepType.APPROVE_STEP);
         subCtx.setCurrentLane(ctx.getFlowGraph().getGraphLane(nextNode.getFlowNode().getFlowLaneId()));
-        ctx.getChildStates().add(subCtx);
+        if (!found) {
+            ctx.getChildStates().add(subCtx);
+        }
     }
 
     @Override

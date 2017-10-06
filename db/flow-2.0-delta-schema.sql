@@ -56,7 +56,10 @@ CREATE TABLE `eh_flow_lanes` (
   `flow_main_id` BIGINT NOT NULL,
   `flow_version` INTEGER NOT NULL,
   `display_name` VARCHAR(128) COMMENT 'lane name',
+  `display_name_absort` VARCHAR(128) COMMENT 'when flowCase absort display this',
   `flow_node_level` INTEGER COMMENT 'flow_node_level',
+  `identifier_node_level` INTEGER COMMENT '标识这个用泳道里的那个节点里的申请人按钮',
+  `identifier_node_id` BIGINT COMMENT '标识这个用泳道里的那个节点里的申请人按钮',
   `lane_level` INTEGER COMMENT 'lane level',
   `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
   `creator_uid` BIGINT,
@@ -82,33 +85,6 @@ CREATE TABLE `eh_flow_links` (
   `to_node_id` BIGINT NOT NULL,
   `to_node_level` INTEGER NOT NULL,
   `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME(3),
-  `update_uid` BIGINT,
-  `update_time` DATETIME(3),
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
---
--- 路径
---
-DROP TABLE IF EXISTS `eh_flow_ways`;
-CREATE TABLE `eh_flow_ways` (
-  `id` BIGINT,
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `flow_main_id` BIGINT NOT NULL,
-  `flow_version` INTEGER NOT NULL,
-  `parent_id` BIGINT NOT NULL COMMENT 'parent way id',
-  `flow_case_id` BIGINT NOT NULL COMMENT 'flow_case id',
-  `start_node_id` BIGINT NOT NULL COMMENT '开始节点id',
-  `start_node_level` INTEGER NOT NULL COMMENT '开始节点level',
-  `current_node_id` BIGINT NOT NULL COMMENT '当前节点id',
-  `current_node_level` INTEGER NOT NULL COMMENT '当前节点level',
-  `end_node_id` BIGINT NOT NULL COMMENT '结束节点id',
-  `end_node_level` INTEGER NOT NULL COMMENT '结束节点level',
-  `step_count` INTEGER NOT NULL COMMENT 'step count',
-  `process_mode` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '单一路径：single, 并发执行：concurrent',
-  `status` TINYINT NOT NULL COMMENT 'processing, finish, invalid',
   `creator_uid` BIGINT,
   `create_time` DATETIME(3),
   `update_uid` BIGINT,
@@ -174,31 +150,46 @@ CREATE TABLE `eh_flow_service_types` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 描述字段
-ALTER TABLE `eh_flows` ADD COLUMN `description` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'flow description';
+ALTER TABLE `eh_flows` ADD COLUMN `description` VARCHAR(128) COMMENT 'flow description';
 ALTER TABLE `eh_flows` ADD COLUMN `allow_flow_case_end_evaluate` TINYINT NOT NULL DEFAULT 0 COMMENT 'allow_flow_case_end_evaluate';
 
 -- 节点类型： 开始，结束，普通节点，前置条件，后置条件
 ALTER TABLE `eh_flow_nodes` ADD COLUMN `node_type` VARCHAR(32) NOT NULL DEFAULT 'normal' COMMENT 'start, end, normal, condition_front, condition_back';
 ALTER TABLE `eh_flow_nodes` ADD COLUMN `goto_process_button_name` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'start, end, normal, condition_front, condition_back';
-
--- 泳道id
 ALTER TABLE `eh_flow_nodes` ADD COLUMN `flow_lane_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_flow_lanes';
 ALTER TABLE `eh_flow_nodes` ADD COLUMN `flow_lane_level` INTEGER NOT NULL DEFAULT 0 COMMENT 'ref eh_flow_lanes';
 -- 节点会签开关
-ALTER TABLE `eh_flow_nodes` ADD COLUMN `need_all_processor_complete` TINYINT NOT NULL DEFAULT 0 COMMENT 'need_all_processor_complete';
+ALTER TABLE `eh_flow_nodes` ADD COLUMN `need_all_processor_complete` TINYINT NOT NULL DEFAULT 0 COMMENT '节点会签开关';
 --
 ALTER TABLE `eh_flow_cases` ADD COLUMN `current_lane_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_flow_lanes';
 ALTER TABLE `eh_flow_cases` ADD COLUMN `parent_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'parentId, ref eh_flow_cases';
-ALTER TABLE `eh_flow_cases` ADD COLUMN `process_mode` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '单一路径：single, 并发执行：concurrent';
-ALTER TABLE `eh_flow_cases` ADD COLUMN `start_node_id` BIGINT NOT NULL COMMENT '开始节点id';
-ALTER TABLE `eh_flow_cases` ADD COLUMN `end_node_id` BIGINT NOT NULL COMMENT '结束节点id';
+ALTER TABLE `eh_flow_cases` ADD COLUMN `start_node_id` BIGINT NOT NULL DEFAULT 0 COMMENT '开始节点id';
+ALTER TABLE `eh_flow_cases` ADD COLUMN `end_node_id` BIGINT NOT NULL DEFAULT 0 COMMENT '结束节点id';
 ALTER TABLE `eh_flow_cases` ADD COLUMN `start_link_id` BIGINT NOT NULL DEFAULT 0 COMMENT '开始linkId';
 ALTER TABLE `eh_flow_cases` ADD COLUMN `end_link_id` BIGINT NOT NULL DEFAULT 0 COMMENT '结束linkId';
+ALTER TABLE `eh_flow_cases` ADD COLUMN `evaluate_status` TINYINT NOT NULL DEFAULT 0 COMMENT '评价状态，一般指结束后还可以评价的情况';
+ALTER TABLE `eh_flow_cases` ADD COLUMN `service_type` VARCHAR(64) COMMENT 'service type';
 
-ALTER TABLE `eh_flow_buttons` ADD COLUMN `params` VARCHAR(64) COMMENT 'the params from other module';
+ALTER TABLE `eh_flow_buttons` ADD COLUMN `param` VARCHAR(64) COMMENT 'the params from other module';
 ALTER TABLE `eh_flow_buttons` ADD COLUMN `default_order` INTEGER NOT NULL DEFAULT 0 COMMENT 'default order';
-
-ALTER TABLE `eh_flow_event_logs` ADD COLUMN `from_node_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'from_node_id';
-ALTER TABLE `eh_flow_event_logs` ADD COLUMN `from_case_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'from_case_id';
+ALTER TABLE `eh_flow_buttons` ADD COLUMN `evaluate_step` VARCHAR(64) COMMENT 'default order';
 
 ALTER TABLE `eh_flow_cases` MODIFY COLUMN `last_step_time` DATETIME(3) COMMENT 'state change time';
+
+-- flowCase增加附加字段，给业务使用
+ALTER TABLE `eh_flow_cases` ADD COLUMN `string_tag6` VARCHAR(128);
+ALTER TABLE `eh_flow_cases` ADD COLUMN `string_tag7` VARCHAR(128);
+ALTER TABLE `eh_flow_cases` ADD COLUMN `string_tag8` VARCHAR(128);
+ALTER TABLE `eh_flow_cases` ADD COLUMN `string_tag9` VARCHAR(128);
+ALTER TABLE `eh_flow_cases` ADD COLUMN `string_tag10` VARCHAR(128);
+ALTER TABLE `eh_flow_cases` ADD COLUMN `string_tag11` VARCHAR(128);
+ALTER TABLE `eh_flow_cases` ADD COLUMN `string_tag12` VARCHAR(128);
+ALTER TABLE `eh_flow_cases` ADD COLUMN `string_tag13` VARCHAR(128);
+ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag6` BIGINT;
+ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag7` BIGINT;
+ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag8` BIGINT;
+ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag9` BIGINT;
+ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag10` BIGINT;
+ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag11` BIGINT;
+ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag12` BIGINT;
+ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag13` BIGINT;

@@ -4,6 +4,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -75,13 +76,15 @@ public class FlowCaseDetailDTOV2 {
     private Long organizationId;
 
     @ItemType(FlowCaseEntity.class)
-    private List<FlowCaseEntity> entities;
+    private List<FlowCaseEntity> entities = new ArrayList<>();
 
     @ItemType(FlowLaneLogDTO.class)
-    private List<FlowLaneLogDTO> lanes;
+    private List<FlowLaneLogDTO> lanes = new ArrayList<>();
 
     @ItemType(FlowButtonDTO.class)
-    private List<FlowButtonDTO> buttons;
+    private List<FlowButtonDTO> buttons = new ArrayList<>();
+    @ItemType(FlowButtonDTO.class)
+    private List<FlowButtonDTO> moreButtons = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -337,6 +340,14 @@ public class FlowCaseDetailDTOV2 {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public List<FlowButtonDTO> getMoreButtons() {
+        return moreButtons;
+    }
+
+    public void setMoreButtons(List<FlowButtonDTO> moreButtons) {
+        this.moreButtons = moreButtons;
     }
 
     @Override

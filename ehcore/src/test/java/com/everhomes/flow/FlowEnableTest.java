@@ -268,7 +268,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
         items.add(evaluateItemDTO);
         // items.add("test item1");
     	// items.add("test item2");
-    	evaluateCmd.setItems(items);
+    	// evaluateCmd.setItems(items);
     	FlowEvaluateDetailDTO evaDTO = flowService.updateFlowEvaluate(evaluateCmd);
     	Assert.assertTrue(evaDTO.getItems().size() == 2);
     	
@@ -1134,7 +1134,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
         items.add(evaluateItemDTO);
         // items.add("test item1");
         // items.add("test item2");
-        evaluateCmd.setItems(items);
+        // evaluateCmd.setItems(items);
     	
     	FlowEvaluateDetailDTO evaDTO = flowService.updateFlowEvaluate(evaluateCmd);
     	Assert.assertTrue(evaDTO.getEvaluateStart().equals(flowGraph.getNodes().get(1).getFlowNode().getId()));
@@ -1270,7 +1270,6 @@ public class FlowEnableTest  extends LoginAuthTestCase {
         FlowCaseState ctx = new FlowCaseState();
         FlowModuleInfo module = flowListenerManager.getModule(111L);
         ctx.setModule(module);
-        ctx.setListenerManager(flowListenerManager);
 
         boolean ok = condition.isTrue(ctx);
         assertTrue(ok);
