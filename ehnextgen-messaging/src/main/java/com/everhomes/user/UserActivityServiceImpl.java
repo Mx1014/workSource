@@ -1180,7 +1180,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<ActivityRoster> result = activityProivider.findRostersByUid(uid, locator, pageSize + 1);
+        List<ActivityRoster> result = activityProivider.findRostersByUid(uid, locator, pageSize + 1, ActivityRosterStatus.NORMAL.getCode());
         
         if (CollectionUtils.isEmpty(result)) {
             return new ListActivitiesReponse(null, new ArrayList<ActivityDTO>());
@@ -1397,7 +1397,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         gm.setNamespaceId(UserContext.getCurrentNamespaceId());
         gm.setOrganizationId(cmd.getCreatorOrganizationId());
         gm.setProjectId(cmd.getOwnerId());
-        gm.setProjectType(EhCommunities.class.getName());
+        gm.setProjectType(EntityType.COMMUNITY.getCode());
         gm.setOwnerType(FlowOwnerType.CUSTOM_REQUEST.getCode());
         gm.setOwnerId(template.getId());
         gm.setModuleId(40500l);//服务联盟id

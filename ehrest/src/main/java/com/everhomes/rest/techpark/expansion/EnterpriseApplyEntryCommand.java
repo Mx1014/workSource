@@ -31,7 +31,8 @@ import java.util.List;
  * </ul>
  */
 public class EnterpriseApplyEntryCommand {
-	
+
+	private Long leaseBuildingId;
 	private Long sourceId ; 
 	
 	private String sourceType;
@@ -60,7 +61,6 @@ public class EnterpriseApplyEntryCommand {
 	private Long contractId;
 
 	private Long addressId;
-	private Long buildingId;
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
@@ -89,14 +89,6 @@ public class EnterpriseApplyEntryCommand {
 
 	public void setAddressId(Long addressId) {
 		this.addressId = addressId;
-	}
-
-	public Long getBuildingId() {
-		return buildingId;
-	}
-
-	public void setBuildingId(Long buildingId) {
-		this.buildingId = buildingId;
 	}
 
 	public String getSourceType() {
@@ -244,7 +236,13 @@ public class EnterpriseApplyEntryCommand {
 		this.contactPhone = contactPhone;
 	}
 
+	public Long getLeaseBuildingId() {
+		return leaseBuildingId;
+	}
 
+	public void setLeaseBuildingId(Long leaseBuildingId) {
+		this.leaseBuildingId = leaseBuildingId;
+	}
 
 	@Override
     public String toString() {

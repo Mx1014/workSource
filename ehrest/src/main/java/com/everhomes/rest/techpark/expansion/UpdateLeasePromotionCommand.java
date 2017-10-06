@@ -14,7 +14,6 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id：要修改的招租信息id</li>
  * <li>buildingId：楼栋ID</li>
- * <li>rentPosition：招租位置</li>
  * <li>posterUri：封面uri，标题图 </li>
  * <li>attachments：banner图，列表 {@link com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO} </li>
  * <li>rentAreas：招租面积</li>
@@ -41,9 +40,8 @@ public class UpdateLeasePromotionCommand {
 	private Long id;
 	@NotNull
 	private Long     buildingId;
-	private String   rentPosition;
+	private String buildingName;
 	private String   posterUri;
-//	private String   subject;
 	private String   rentAreas;
 	private String   contacts;
 	private String   contactPhone;
@@ -52,6 +50,7 @@ public class UpdateLeasePromotionCommand {
 
 	private Byte enterTimeFlag;
 	private Long addressId;
+	private String apartmentName;
 	private String orientation;
 	private BigDecimal rentAmount;
 
@@ -66,6 +65,33 @@ public class UpdateLeasePromotionCommand {
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
+
+	@ItemType(Long.class)
+	private List<Long> communityIds;
+
+	public List<Long> getCommunityIds() {
+		return communityIds;
+	}
+
+	public void setCommunityIds(List<Long> communityIds) {
+		this.communityIds = communityIds;
+	}
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
 
 	public String getAddress() {
 		return address;
@@ -158,12 +184,6 @@ public class UpdateLeasePromotionCommand {
 	}
 	public void setBuildingId(Long buildingId) {
 		this.buildingId = buildingId;
-	}
-	public String getRentPosition() {
-		return rentPosition;
-	}
-	public void setRentPosition(String rentPosition) {
-		this.rentPosition = rentPosition;
 	}
 	public String getPosterUri() {
 		return posterUri;

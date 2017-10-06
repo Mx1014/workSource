@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -77,6 +78,7 @@ public class SmsProviderImpl implements SmsProvider {
                         SmsLog smsLog = new SmsLog();
                         smsLog.setStatus(SmsLogStatus.UNKNOWN.getCode());
                         smsLog.setHandler(handlerName);
+                        smsLog.setCreateTime(new Timestamp(System.currentTimeMillis() - 100 * 60 * 1000));
                         handlerToSmsLogMap.put(handlerName, smsLog);
                     }
                 }
@@ -94,7 +96,15 @@ public class SmsProviderImpl implements SmsProvider {
         for (Map.Entry<String, SmsLog> entry : entries) {
             SmsLog smsLog = entry.getValue();
 
+            long interval = System.currentTimeMillis() - (smsLog.getCreateTime() != null ? smsLog.getCreateTime().getTime() : 0);
+
             SmsLogStatus status = SmsLogStatus.fromCode(smsLog.getStatus());
+            if (status == expectStatus && interval > 3 * 60 * 1000) {
+                selectedHandlerName = smsLog.getHandler();
+                break;
+            }
+
+            /*SmsLogStatus status = SmsLogStatus.fromCode(smsLog.getStatus());
             if (status == expectStatus) {
                 if (smsLog.getCreateTime() != null) {
                     if ((System.currentTimeMillis() - smsLog.getCreateTime().getTime()) > 3 * 60 * 1000) {
@@ -105,7 +115,7 @@ public class SmsProviderImpl implements SmsProvider {
                     selectedHandlerName = smsLog.getHandler();
                     break;
                 }
-            }
+            }*/
         }
         if (selectedHandlerName == null && expectStatus.ordinal() < SmsLogStatus.values().length - 1) {
             return selectHandler(entries, SmsLogStatus.values()[expectStatus.ordinal() + 1]);

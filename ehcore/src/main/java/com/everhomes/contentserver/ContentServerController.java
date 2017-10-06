@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.AclProvider;
@@ -19,6 +20,9 @@ import com.everhomes.rest.contentserver.AddConfigItemCommand;
 import com.everhomes.rest.contentserver.AddContentServerCommand;
 import com.everhomes.rest.contentserver.ContentServerDTO;
 import com.everhomes.rest.contentserver.UploadCsFileResponse;
+import com.everhomes.rest.contentserver.UploadFileInfoCommand;
+import com.everhomes.rest.contentserver.UploadFileInfoDTO;
+import com.everhomes.rest.contentserver.UploadIdCommand;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.util.RequireAuthentication;
 
@@ -98,6 +102,101 @@ public class ContentServerController extends ControllerBase {
         List<UploadCsFileResponse> csFileResponseList = contentService.uploadFileToContentServer(files);
         
         RestResponse response = new RestResponse(csFileResponseList);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /contentServer/queryUploadId</b>
+     * <p>获取二维码 Id</p>
+     * @return uploadId 的字符串
+     */
+    @RequestMapping("queryUploadId")
+    @RequireAuthentication(false)
+    @RestReturn(value = String.class)
+    public RestResponse queryUploadId() {
+        String id = contentService.newUploadId();
+        RestResponse response = new RestResponse(id);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /contentServer/waitScan</b>
+     * <p>等待二维码被扫描</p>
+     * @return OK 成功
+     */
+    @RequestMapping("waitScan")
+    @RequireAuthentication(false)
+    @RestReturn(value = UploadFileInfoDTO.class)
+    public DeferredResult<RestResponse> waitScan(@Valid UploadIdCommand cmd) {  
+        return contentService.waitScan(cmd.getUploadId());
+    }
+
+    /**
+     * 
+     * <b>URL: /contentServer/signalScanEvent</b>
+     * <p>通知服务器有人扫描，并带上相关的参数；如果出现 uploadId 过期 等错误，会在外层 errorCode 中有相关错误</p>
+     * @return OK 成功
+     */
+    @RequestMapping("signalScanEvent")
+    @RestReturn(value = String.class)
+    public RestResponse signalScanEvent(UploadFileInfoCommand cmd) {
+        String ok = contentService.signalScanEvent(cmd);
+        RestResponse response = new RestResponse(ok);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * 
+     * <b>URL: /contentServer/waitComplete</b>
+     * <p> 进到界面之后，一致调用这个函数等 app/WX 的通知；
+     * 如果出现 uploadId 过期 等错误，会在外层 errorCode 中有相关错误;
+     * 如果返回值：complete，则上传完成；continue 则可继续上传；timeout 则超时；
+     * </p>
+     * @return OK 成功
+     */
+    @RequestMapping("waitComplete")
+    @RestReturn(value = String.class)
+    public DeferredResult<RestResponse> waitComplete(@Valid UploadIdCommand cmd) {
+        return contentService.waitComplete(cmd.getUploadId());
+    }
+    
+    /**
+     * 
+     * <b>URL: /contentServer/updateUploadInfo</b>
+     * <p>更新上传信息，每上传完成一个文件，都要调用这个函数；
+     * 如果出现 uploadId 过期 等错误，会在外层 errorCode 中有相关错误;
+     * </p>
+     * @return OK 成功
+     */
+    @RequestMapping("updateUploadInfo")
+    @RestReturn(value = String.class)
+    public RestResponse updateUploadInfo(@Valid UploadFileInfoCommand cmd) {
+        String ok = contentService.updateUploadInfo(cmd);
+        RestResponse response = new RestResponse(ok);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * 
+     * <b>URL: /contentServer/queryUploadResult</b>
+     * <p>获取上传文件的结果</p>
+     * @return OK 成功
+     */
+    @RequestMapping("queryUploadResult")
+    @RestReturn(value = UploadFileInfoDTO.class)
+    public RestResponse queryUploadResult(@Valid UploadIdCommand cmd) {    
+        UploadFileInfoDTO dto = contentService.queryUploadResult(cmd.getUploadId());
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

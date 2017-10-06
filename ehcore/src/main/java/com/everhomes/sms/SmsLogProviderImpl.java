@@ -66,15 +66,15 @@ public class SmsLogProviderImpl implements SmsLogProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhSmsLogs.class));
         com.everhomes.server.schema.tables.EhSmsLogs t = Tables.EH_SMS_LOGS;
 
-        Table<EhSmsLogsRecord> subT = context.selectFrom(t)
+        Table<Record4<Long, String, Byte, Timestamp>> subT = context.select(t.ID, t.HANDLER, t.STATUS, t.CREATE_TIME).from(t)
                 // .where(t.NAMESPACE_ID.eq(namespaceId))
                 .where(t.MOBILE.eq(mobile))
                 .and(t.HANDLER.in(handlerNames))
                 .orderBy(t.ID.desc()).asTable();
 
-        return context.selectFrom(subT)
+        return context.select(subT.field(t.ID), subT.field(t.HANDLER), subT.field(t.STATUS), subT.field(t.CREATE_TIME)).from(subT)
                 .groupBy(subT.field(t.HANDLER))
-                .fetchMap(t.HANDLER, SmsLog.class);
+                .fetchMap(subT.field(t.HANDLER), SmsLog.class);
     }
 
     @Override
@@ -120,9 +120,7 @@ public class SmsLogProviderImpl implements SmsLogProvider {
     }
 
     private void ifNotNull(Object condition, Callback callback) {
-        if (condition instanceof String && condition.toString().trim().length() > 0) {
-            callback.condition();
-        } else if (condition != null) {
+        if (condition != null && condition.toString().trim().length() > 0) {
             callback.condition();
         }
     }

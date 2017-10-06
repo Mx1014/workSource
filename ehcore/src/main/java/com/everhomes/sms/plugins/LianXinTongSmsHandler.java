@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,6 +90,8 @@ public class LianXinTongSmsHandler implements SmsHandler {
     public List<SmsLog> doSend(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                String templateLocale, List<Tuple<String, Object>> variables) {
 
+        List<SmsLog> smsLogList = new ArrayList<>();
+
         Map<String, Object> model = new HashMap<>();
         if (variables != null) {
             model = variables.stream().collect(Collectors.toMap(Tuple::first, Tuple::second));
@@ -96,6 +99,12 @@ public class LianXinTongSmsHandler implements SmsHandler {
 
         String signScope = SmsTemplateCode.SCOPE + ".sign";
         LocaleTemplate sign = localeTemplateService.getLocalizedTemplate(namespaceId, signScope, SmsTemplateCode.SIGN_CODE, templateLocale);
+        if (sign == null) {
+            LOGGER.error("can not found sign content by LianXinTong handler, namespaceId = {}", namespaceId);
+            SmsLog log = getSmsErrorLog(namespaceId, phoneNumbers[0], templateScope, templateId, templateLocale, "sms sign is empty");
+            smsLogList.add(log);
+            return smsLogList;
+        }
 
         templateScope = templateScope + "." + SmsTemplateCode.LIAN_XIN_TONG_SUFFIX;
         String content = localeTemplateService.getLocaleTemplateString(namespaceId, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
@@ -110,7 +119,6 @@ public class LianXinTongSmsHandler implements SmsHandler {
         }
 
         if (content != null && content.trim().length() > 0) {
-            List<SmsLog> smsLogList = new ArrayList<>();
             for (int i = 0; i < phoneNumbers.length; i += MAX_LIMIT) {
                 int length = MAX_LIMIT;
                 if (i + MAX_LIMIT > phoneNumbers.length) {
@@ -128,8 +136,27 @@ public class LianXinTongSmsHandler implements SmsHandler {
                 smsLogList.addAll(buildSmsLogs(namespaceId, phonesPart, templateScope, templateId, templateLocale, content, rspMessage));
             }
             return smsLogList;
+        } else {
+            SmsLog log = getSmsErrorLog(namespaceId, phoneNumbers[0], templateScope, templateId, templateLocale, "sms content is empty");
+            smsLogList.add(log);
+            LOGGER.error("can not found sms content by LianXinTong handler, namespaceId = {}, templateId = {}", namespaceId, templateId);
         }
-        return null;
+        return smsLogList;
+    }
+
+    private SmsLog getSmsErrorLog(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, String error) {
+        SmsLog log = new SmsLog();
+        log.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        log.setNamespaceId(namespaceId);
+        log.setScope(templateScope);
+        log.setCode(templateId);
+        log.setLocale(templateLocale);
+        log.setMobile(phoneNumber);
+        log.setResult(error);
+        log.setHandler(YUN_ZHI_XUN_HANDLER_NAME);
+        log.setText("");
+        log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
+        return log;
     }
 
     /*
@@ -148,12 +175,35 @@ public class LianXinTongSmsHandler implements SmsHandler {
     private List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                       String templateLocale, String content, RspMessage rspMessage) {
         List<SmsLog> smsLogs = new ArrayList<>();
+        Rets rets = new Rets();
+        String resultText = "failed";
+
         if (rspMessage != null) {
-            Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-            Rets rets = gson.fromJson(rspMessage.getMessage(), Rets.class);
-            if (rets == null) {
-                return smsLogs;
+            try {
+                resultText = rspMessage.getMessage();
+                Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+                rets = gson.fromJson(rspMessage.getMessage(), Rets.class);
+            } catch (JsonSyntaxException e) {
+                e.printStackTrace();
             }
+        }
+        if (rets.rets.size() == 0) {
+            for (String phoneNumber : phoneNumbers) {
+                SmsLog log = new SmsLog();
+                log.setCreateTime(new Timestamp(System.currentTimeMillis()));
+                log.setNamespaceId(namespaceId);
+                log.setScope(templateScope);
+                log.setCode(templateId);
+                log.setLocale(templateLocale);
+                log.setMobile(phoneNumber);
+                log.setResult(resultText);
+                log.setHandler(LIAN_XIN_TONG_HANDLER_NAME);
+                log.setText(content);
+                log.setSmsId("");
+                log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
+                smsLogs.add(log);
+            }
+        } else {
             for (Result result : rets.rets) {
                 SmsLog log = new SmsLog();
                 log.setCreateTime(new Timestamp(System.currentTimeMillis()));
@@ -162,7 +212,7 @@ public class LianXinTongSmsHandler implements SmsHandler {
                 log.setCode(templateId);
                 log.setLocale(templateLocale);
                 log.setMobile(result.mobile);
-                log.setResult(rspMessage.getMessage());
+                log.setResult(resultText);
                 log.setHandler(LIAN_XIN_TONG_HANDLER_NAME);
                 log.setText(content);
                 log.setSmsId(result.msgId);
@@ -199,13 +249,13 @@ public class LianXinTongSmsHandler implements SmsHandler {
     }
 
     private static class Result {
-        String mobile;
-        String msgId;
-        String rspcod;
+        String mobile = "";
+        String msgId = "";
+        String rspcod = "";
     }
 
     private static class Rets {
-        List<Result> rets;
+        List<Result> rets = new ArrayList<>();
     }
 
     private static class Report {

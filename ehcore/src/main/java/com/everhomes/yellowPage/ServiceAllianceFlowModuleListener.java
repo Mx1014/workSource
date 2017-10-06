@@ -12,6 +12,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.admin.MessagingAdminController;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
@@ -201,13 +202,22 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setCreatorName(user.getNickName());
 		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
 		request.setCreatorMobile(identifier.getIdentifierToken());
-		if (OwnerType.COMMUNITY.getCode().equals(flowCase.getProjectType())){
-			request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-			List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
-			request.setOwnerId(communityList.get(0).getId());
+		if (EntityType.COMMUNITY.getCode().equals(flowCase.getProjectType()) || "community".equals(flowCase.getProjectType())){
+			// bydengs,修改owner
+	       	request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+	       	request.setOwnerId(flowCase.getProjectId());
+//			request.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+//			List<Organization> communityList = organizationProvider.findOrganizationByCommunityId(flowCase.getProjectId());
+//			request.setOwnerId(communityList.get(0).getId());
 		}else{
-			request.setOwnerType(flowCase.getProjectType());
-			request.setOwnerId(flowCase.getProjectId());
+			OrganizationCommunityRequest ocr =organizationProvider.getOrganizationCommunityRequestByOrganizationId(flowCase.getProjectId());
+        	if(ocr != null){
+        		request.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+            	request.setOwnerId(ocr.getCommunityId());
+        	}else{
+        		request.setOwnerType(flowCase.getProjectType());
+            	request.setOwnerId(flowCase.getProjectId());
+        	}
 		}
 		request.setFlowCaseId(flowCase.getId());
 		request.setId(flowCase.getId());

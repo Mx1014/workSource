@@ -8,12 +8,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+
+import com.everhomes.rest.address.ApartmentAbstractDTO;
+import org.apache.commons.lang.StringUtils;
+
+import com.everhomes.asset.AddressIdAndName;
+
+import com.everhomes.rest.address.*;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record2;
 import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
+import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +39,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.rest.address.AddressAdminStatus;
-import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -335,6 +340,7 @@ public class AddressProviderImpl implements AddressProvider {
         return context.select().from(Tables.EH_ADDRESSES)
                 .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ADDRESSES.ID.in(ids))
+                .and(Tables.EH_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
                 .fetchInto(Address.class);
     }
 
@@ -365,7 +371,58 @@ public class AddressProviderImpl implements AddressProvider {
 		return null;
 	}
 
-	@Override
+    @Override
+    public List<ApartmentAbstractDTO> listAddressByBuildingApartmentName(Integer namespaceId, Long communityId,
+                String buildingName, String apartmentName, Byte livingStatus, CrossShardListingLocator locator, int count) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<ApartmentAbstractDTO> addresses = new ArrayList<>();
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_ADDRESSES);
+        if(locator.getAnchor() != null)
+            query.addConditions(Tables.EH_ADDRESSES.ID.gt(locator.getAnchor()));
+
+        query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()));
+        if(StringUtils.isNotBlank(buildingName)) {
+            query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.equal(buildingName)
+                    .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(buildingName)));
+        }
+        if(StringUtils.isNotBlank(apartmentName)) {
+            query.addConditions(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%" + apartmentName + "%"));
+        }
+        //按状态筛选
+        if(livingStatus != null) {
+            query.addJoin(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS
+                    , Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID));
+            query.addConditions(Tables.EH_ADDRESSES.LIVING_STATUS.eq(livingStatus)
+                    .or(Tables.EH_ADDRESSES.LIVING_STATUS.isNull()
+                            .and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.LIVING_STATUS.eq(livingStatus))));
+        }
+
+        query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());
+        query.addLimit(count - addresses.size());
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listAddressByBuildingApartmentName, sql=" + query.getSQL());
+            LOGGER.debug("listAddressByBuildingApartmentName, bindValues=" + query.getBindValues());
+        }
+
+        query.fetch().map((r) -> {
+            ApartmentAbstractDTO dto = new ApartmentAbstractDTO();
+            dto.setId(r.getValue(Tables.EH_ADDRESSES.ID));
+            dto.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
+            dto.setChargeArea(r.getValue(Tables.EH_ADDRESSES.CHARGE_AREA));
+            dto.setLivingStatus(r.getValue(Tables.EH_ADDRESSES.LIVING_STATUS));
+            dto.setName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
+            dto.setOrientation(r.getValue(Tables.EH_ADDRESSES.ORIENTATION));
+            addresses.add(dto);
+            return null;
+        });
+        return addresses;
+    }
+
+    @Override
 	public List<Address> listAddressByNamespaceType(Integer namespaceId, Long communityId, String namespaceType) {
 		return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ADDRESSES)
 	        .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
@@ -375,7 +432,16 @@ public class AddressProviderImpl implements AddressProvider {
 	        .map(r->ConvertHelper.convert(r, Address.class));
 	}
 
-	@Override
+    @Override
+    public List<Address> listAddressByNamespaceType(Integer namespaceId, String namespaceType) {
+        return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE.eq(namespaceType))
+                .fetch()
+                .map(r->ConvertHelper.convert(r, Address.class));
+    }
+
+    @Override
 	public Map<Byte, Integer> countApartmentByLivingStatus(Long communityId) {
 		Map<Byte, Integer> map = new HashMap<>();
 		dbProvider.getDslContext(AccessSpec.readOnly())
@@ -428,5 +494,77 @@ public class AddressProviderImpl implements AddressProvider {
 			.where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
 			.execute();
 	}
-    
+
+    @Override
+    public Address findAddressByNamespaceTypeAndName(String namespaceType, String namespaceToken) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhAddresses.class));
+        List<Address> addresses = new ArrayList<>();
+        SelectQuery<EhAddressesRecord> query = context.selectQuery(Tables.EH_ADDRESSES);
+        query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE.eq(namespaceType));
+        query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TOKEN.eq(namespaceToken));
+        query.fetch().map(r ->{
+            addresses.add(ConvertHelper.convert(r, Address.class));
+            return null;
+        });
+        if(addresses == null || addresses.size() == 0) {
+            return null;
+        }
+        return addresses.get(0);
+    }
+
+    public List<AddressIdAndName> findAddressByPossibleName(Integer currentNamespaceId, Long ownerId, String buildingName, String apartmentName) {
+        List<AddressIdAndName> list = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhAddresses r = Tables.EH_ADDRESSES.as("r");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(r);
+        query.addSelect(r.ID,r.BUILDING_NAME,r.APARTMENT_NAME);
+        if (buildingName != null && buildingName.trim().length()>0){
+            query.addConditions(r.BUILDING_NAME.eq(buildingName));
+        }
+        if (apartmentName != null && apartmentName.trim().length()>0){
+            query.addConditions(r.APARTMENT_NAME.eq(apartmentName));
+        }
+        query.addConditions(r.NAMESPACE_ID.eq(currentNamespaceId));
+        query.addConditions(r.COMMUNITY_ID.eq(ownerId));
+
+        try {
+            query.fetch()
+                    .map(f -> {
+                        AddressIdAndName ian = new AddressIdAndName();
+                        ian.setApartmentName(f.getValue(r.APARTMENT_NAME));
+                        ian.setAddressId(f.getValue(r.ID));
+                        ian.setBuildingName(f.getValue(r.BUILDING_NAME));
+                        list.add(ian);
+                        return null;
+                    });
+        } catch (DataAccessException e) {
+
+        }
+
+        return list;
+    }
+
+
+    @Override
+    public List<GetApartmentNameByBuildingNameDTO> getApartmentNameByBuildingName(String buildingName, Long communityId, Integer currentNamespaceId) {
+        List<GetApartmentNameByBuildingNameDTO> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhAddresses t = Tables.EH_ADDRESSES.as("t");
+        context.select(t.ID,t.APARTMENT_NAME)
+                .from(t)
+                .where(t.NAMESPACE_ID.eq(currentNamespaceId))
+                .and(t.COMMUNITY_ID.eq(communityId))
+                .and(t.BUILDING_NAME.eq(buildingName))
+                .fetch()
+                .map(r -> {
+                    GetApartmentNameByBuildingNameDTO dto = new GetApartmentNameByBuildingNameDTO();
+                    dto.setAddressId(r.getValue(t.ID));
+                    dto.setApartmentName(r.getValue(t.APARTMENT_NAME));
+                    list.add(dto);
+                    return null;
+                });
+        return list;
+    }
+
 }

@@ -3,6 +3,7 @@ package com.everhomes.rest.parking;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 /**
@@ -31,6 +32,12 @@ public class ParkingLotDTO {
     //支持过期充值时，按照什么模式充值 {@link ParkingCardExpiredRechargeType}
     private Byte expiredRechargeType;
 
+    private Byte monthlyDiscountFlag;
+    private String monthlyDiscount;
+
+    private Byte tempFeeDiscountFlag;
+    private String tempFeeDiscount;
+
     //申请月卡的模式
     private Integer flowMode;
 
@@ -46,6 +53,49 @@ public class ParkingLotDTO {
     private Byte currentInfoType;
     //停车场客服联系方式
     private String contact;
+
+    private Byte invoiceFlag;
+
+    public Byte getInvoiceFlag() {
+        return invoiceFlag;
+    }
+
+    public void setInvoiceFlag(Byte invoiceFlag) {
+        this.invoiceFlag = invoiceFlag;
+    }
+
+    public Byte getMonthlyDiscountFlag() {
+        return monthlyDiscountFlag;
+    }
+
+    public void setMonthlyDiscountFlag(Byte monthlyDiscountFlag) {
+        this.monthlyDiscountFlag = monthlyDiscountFlag;
+    }
+
+    public String getMonthlyDiscount() {
+        return monthlyDiscount;
+    }
+
+    public void setMonthlyDiscount(String monthlyDiscount) {
+        this.monthlyDiscount = monthlyDiscount;
+    }
+
+    public String getTempFeeDiscount() {
+        return tempFeeDiscount;
+    }
+
+    public void setTempFeeDiscount(String tempFeeDiscount) {
+        this.tempFeeDiscount = tempFeeDiscount;
+    }
+
+    public Byte getTempFeeDiscountFlag() {
+        return tempFeeDiscountFlag;
+    }
+
+    public void setTempFeeDiscountFlag(Byte tempFeeDiscountFlag) {
+        this.tempFeeDiscountFlag = tempFeeDiscountFlag;
+    }
+
 
     public Byte getCurrentInfoType() {
         return currentInfoType;

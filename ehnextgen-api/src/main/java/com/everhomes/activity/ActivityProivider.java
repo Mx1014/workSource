@@ -55,7 +55,7 @@ public interface ActivityProivider {
     
     Activity findActivityByUuid(String uuid);
     
-    List<ActivityRoster> findRostersByUid(Long uid, CrossShardListingLocator locator, int count);
+    List<ActivityRoster> findRostersByUid(Long uid, CrossShardListingLocator locator, int count, Byte rosterStatus);
     
     List<Activity> listNewActivities(CrossShardListingLocator locator, int count, Timestamp lastViewedTime, Condition condition);
 

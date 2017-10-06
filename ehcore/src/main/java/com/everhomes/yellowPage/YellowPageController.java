@@ -460,6 +460,16 @@ public class YellowPageController  extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+   	 * <b>URL: /yellowPage/getCategoryIdByEntryId</b> 
+   	 * <p> 通过机构 </p>
+   	 */
+   	@RequestMapping("getCategoryIdByEntryId")
+   	@RestReturn(value = GetCategoryIdByEntryIdResponse.class)
+   	public RestResponse listServiceAllianceCategories(GetCategoryIdByEntryIdCommand cmd) {
+   		return new RestResponse(yellowPageService.getCategoryIdByEntryId(cmd));
+   	}
 
     /**
    	 * <b>URL: /yellowPage/syncSARequestInfo</b>

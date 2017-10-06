@@ -6,3 +6,5 @@ ALTER TABLE `eh_sms_logs` ADD COLUMN `sms_id` VARCHAR(128) COMMENT 'sms identifi
 ALTER TABLE `eh_sms_logs` ADD COLUMN `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: send success, 2: send failed, 4: report success, 5: report failed';
 ALTER TABLE `eh_sms_logs` ADD COLUMN `report_text` TEXT COMMENT 'report text';
 ALTER TABLE `eh_sms_logs` ADD COLUMN `report_time` DATETIME(3);
+
+ALTER TABLE eh_sms_logs ADD INDEX i_eh_mobile_handler(`mobile`, `handler`);

@@ -1,6 +1,21 @@
 /*
 package com.everhomes.sms.plugins;
 
+<<<<<<< HEAD
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Component;
+
+=======
+>>>>>>> sms-3.0
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.sms.SmsBuilder;
 import com.everhomes.sms.SmsChannel;
@@ -17,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component("Lsm")
+@DependsOn("platformContext")
 public class LsmSmsHandler implements SmsHandler {
     protected final static Logger LOGGER = LoggerFactory.getLogger(LsmSmsHandler.class);
 

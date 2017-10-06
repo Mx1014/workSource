@@ -202,3 +202,6 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 	VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 53, 'zh_CN', '申诉', '您的申诉已通过，账号手机已更新为${newIdentifier}，若非本人操作请联系客服，感谢您的使用。', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 54, 'zh_CN', '物业催缴', '${targetName}先生/女士，您好，您的物业账单已出，账期${dateStr}，使用"${appName} APP"可及时查看账单并支持在线付款。', 0);
+
+-- 短信供应商配置  add by xq.tian  2017/08/30
+UPDATE `eh_configurations` SET `value` = 'YZX,YouXunTong' WHERE `name` = 'sms.handler.type' AND `namespace_id` = 0;

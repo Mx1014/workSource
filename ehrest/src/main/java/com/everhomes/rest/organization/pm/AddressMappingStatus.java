@@ -8,11 +8,13 @@ package com.everhomes.rest.organization.pm;
  *	<li>FREE : 3, 待租</li>
  *	<li>SALED : 4, 已售</li>
  *	<li>UNSALE : 5, 待售</li>
+ *	<li>OCCUPIED : 6, 已占用</li>
  *</ul>
  *
  */
 public enum AddressMappingStatus {
-    DEFAULT((byte)0, "其他"), LIVING((byte)1, "自用"), RENT((byte)2, "出租"), FREE((byte)3, "待租"), SALED((byte)4, "已售"), UNSALE((byte)5, "待售");
+    DEFAULT((byte)0, "其他"), LIVING((byte)1, "自用"), RENT((byte)2, "出租"), FREE((byte)3, "待租"), SALED((byte)4, "已售"), UNSALE((byte)5, "待售"),
+    OCCUPIED((byte)6, "已占用");
     
     private byte code;
     private String desc;

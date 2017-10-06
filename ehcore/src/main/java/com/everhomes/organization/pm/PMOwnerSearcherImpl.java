@@ -217,10 +217,12 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                 dto.setAddresses(addresses.stream().map(r2 -> {
                 	OrganizationOwnerAddressDTO d = ConvertHelper.convert(r2, OrganizationOwnerAddressDTO.class);
                 	Address address = addressProvider.findAddressById(r2.getAddressId());
-                	d.setAddressId(address.getId());
-                	d.setAddress(address.getAddress());
-                	d.setApartment(address.getApartmentName());
-                	d.setBuilding(address.getBuildingName());
+                    if(address != null) {
+                        d.setAddressId(address.getId());
+                        d.setAddress(address.getAddress());
+                        d.setApartment(address.getApartmentName());
+                        d.setBuilding(address.getBuildingName());
+                    }
                 	return d;
                 }).collect(Collectors.toList()));
                 
@@ -254,7 +256,16 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("contactToken", owner.getContactToken());
             b.field("contactName", owner.getContactName());
-            b.field("communityId", owner.getCommunityId());
+//            b.field("communityId", owner.getCommunityId());
+            //一个个人用户可能会有多个地址 所以communityId字段变成用逗号分隔的id列表 by xiongying20170829
+            //如果是同一个field下多个值，则全部加入到同一个field下
+            if(owner.getCommunityId() != null) {
+                String[] communities = owner.getCommunityId().split(",");
+                if(null != communities && communities.length > 0) {
+                    b.array("communityId", communities);
+                }
+            }
+
             b.field("orgOwnerTypeId", owner.getOrgOwnerTypeId());
 
             b.endObject();

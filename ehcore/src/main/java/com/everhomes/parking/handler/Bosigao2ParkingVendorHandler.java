@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,11 +53,6 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 	
 	private static final String FLAG2 = "2"; //2:车牌
 	
-	@Autowired
-	private ParkingProvider parkingProvider;
-	@Autowired
-    private ConfigurationProvider configProvider;
-	
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
@@ -71,7 +68,9 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 			//计算有效期从当天235959秒计算
 			long expireTime = Utils.strToLong(expireDate + "235959", Utils.DateStyle.DATE_TIME_STR);
 			if (checkExpireTime(parkingLot, expireTime)) {
-				return resultList;
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 			}
 			
 			String userName = cardInfo.getUserName();
@@ -123,7 +122,13 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 		}
     	return ret;
     }
-    
+
+	@Override
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
+		updateParkingRechargeOrderRateInfo(parkingLot, order);
+
+	}
+
     private Bosigao2ResultEntity getCard(String plateNumber){
     	Bosigao2GetCardCommand cmd = new Bosigao2GetCardCommand();
     	cmd.setClientID(configProvider.getValue("parking.shenye.projectId", ""));
@@ -161,6 +166,7 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 		List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
 
 			ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+			dto.setCardTypeId(r.getCardType());
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.BOSIGAO2.getCode());
 			return dto;
@@ -183,8 +189,9 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 		cmd.setCardCode("");
 		cmd.setPlateNo(order.getPlateNumber());
 		cmd.setFlag(FLAG2);
-		cmd.setPayMos(order.getMonthCount().intValue()+"");
-		cmd.setAmount((order.getPrice().intValue()*100) + "");
+		cmd.setPayMos(String.valueOf(order.getMonthCount().intValue()));
+		int amount = (order.getPrice().multiply(new BigDecimal(100))).intValue();
+		cmd.setAmount(String.valueOf(amount));
 		cmd.setPayDate(timeFormat.get().format(order.getPaidTime()));
 		cmd.setChargePaidNo(order.getId().toString());
 

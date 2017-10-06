@@ -139,8 +139,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     @Override
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
+        LOGGER.debug("enter flow onFlowCaseDetailRender flowCase={}, flowUserType={}, inst={}", flowCase, flowUserType, inst);
         if (inst != null) {
             FlowModuleListener listener = inst.getListener();
+            LOGGER.debug("enter flow onFlowCaseDetailRender flowCase={}, flowUserType={}, listener={}", flowCase, flowUserType, listener);
+
             return listener.onFlowCaseDetailRender(flowCase, flowUserType);
         }
         return null;

@@ -8,6 +8,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
+import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.UserInvitationsDTO;
 
@@ -21,6 +22,7 @@ public interface UserProvider {
     List<User> queryUsers(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
     
     List<UserIdentifier> listUserIdentifiersOfUser(long userId);
+    UserIdentifier findUserIdentifiersOfUser(long userId, Integer namespaceId);
 
     void createIdentifier(UserIdentifier userIdentifier);
     void updateIdentifier(UserIdentifier userIdentifier);
@@ -32,7 +34,9 @@ public interface UserProvider {
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
     UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerId, byte identifierType);
-    
+
+    UserIdentifier findIdentifierByOwnerAndTypeAndClaimStatus(long ownerUid, byte identifierType, byte claimStatus);
+
     void createUserGroup(UserGroup userGroup);
     void updateUserGroup(UserGroup userGroup);
     void deleteUserGroup(UserGroup userGroup);
@@ -78,11 +82,6 @@ public interface UserProvider {
 	
 	/**
 	 * Added by Janson
-	 * @param namespaceId
-	 * @param organizationId
-	 * @param buildingId
-	 * @param isAuth
-	 * @param keyword
 	 * @param locator
 	 * @param pageSize
 	 * @return
@@ -128,6 +127,11 @@ public interface UserProvider {
      */
     long createUserNotificationSetting(UserNotificationSetting setting);
 
+
+    List<TargetDTO> findUesrIdByNameAndAddressId(String targetName, List<Long> ids, String tel);
+
+    TargetDTO findUserByTokenAndName(String tel, String targetName);
+
     /**
      * 查询非当前userId的正常用户数据
      * @param namespaceId
@@ -136,4 +140,7 @@ public interface UserProvider {
      * @return
      */
     UserIdentifier findClaimedIdentifierByTokenAndNotUserId(Integer namespaceId, String identifierToken, Long userId);
+
+    int countUserByNamespaceIdAndNamespaceUserType(Integer namespaceId, String namespaceUserType);
+
 }

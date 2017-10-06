@@ -100,6 +100,7 @@ public class YouXunTongSmsHandler implements SmsHandler {
     @Override
     public List<SmsLog> doSend(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                String templateLocale, List<Tuple<String, Object>> variables) {
+        List<SmsLog> smsLogList = new ArrayList<>();
 
         Map<String, Object> model = new HashMap<>();
         if (variables != null) {
@@ -108,6 +109,12 @@ public class YouXunTongSmsHandler implements SmsHandler {
 
         String signScope = SmsTemplateCode.SCOPE + ".sign";
         LocaleTemplate sign = localeTemplateService.getLocalizedTemplate(namespaceId, signScope, SmsTemplateCode.SIGN_CODE, templateLocale);
+        if (sign == null) {
+            LOGGER.error("can not found sign content by YouXunTong handler, namespaceId = {}", namespaceId);
+            SmsLog log = getSmsErrorLog(namespaceId, phoneNumbers[0], templateScope, templateId, templateLocale, "sms sign is empty");
+            smsLogList.add(log);
+            return smsLogList;
+        }
 
         templateScope = templateScope + "." + SmsTemplateCode.YOU_XUN_TONG_SUFFIX;
         String content = localeTemplateService.getLocaleTemplateString(namespaceId, SmsTemplateCode.SCOPE, templateId, templateLocale, model, "");
@@ -122,7 +129,6 @@ public class YouXunTongSmsHandler implements SmsHandler {
         }
 
         if (content != null && content.trim().length() > 0) {
-            List<SmsLog> smsLogList = new ArrayList<>();
             for (int i = 0; i < phoneNumbers.length; i += MAX_LIMIT) {
                 int length = MAX_LIMIT;
                 if (i + MAX_LIMIT > phoneNumbers.length) {
@@ -137,11 +143,29 @@ public class YouXunTongSmsHandler implements SmsHandler {
                 message.put("sign", sign.getText());
 
                 RspMessage rspMessage = createAndSend(message);
-                smsLogList.addAll(buildSmsLogs(namespaceId, phonesPart, templateScope, templateId, templateLocale, content, rspMessage));
+                smsLogList.addAll(buildSmsLogs(namespaceId, phonesPart, templateScope, templateId, templateLocale, sign.getText()+content, rspMessage));
             }
-            return smsLogList;
+        } else {
+            SmsLog log = getSmsErrorLog(namespaceId, phoneNumbers[0], templateScope, templateId, templateLocale, "sms content is empty");
+            smsLogList.add(log);
+            LOGGER.error("can not found sms content by YouXunTong handler, namespaceId = {}, templateId = {}", namespaceId, templateId);
         }
-        return null;
+        return smsLogList;
+    }
+
+    private SmsLog getSmsErrorLog(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, String error) {
+        SmsLog log = new SmsLog();
+        log.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        log.setNamespaceId(namespaceId);
+        log.setScope(templateScope);
+        log.setCode(templateId);
+        log.setLocale(templateLocale);
+        log.setMobile(phoneNumber);
+        log.setResult(error);
+        log.setHandler(YOU_XUN_TONG_HANDLER_NAME);
+        log.setText("");
+        log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
+        return log;
     }
 
     /*
@@ -155,28 +179,37 @@ public class YouXunTongSmsHandler implements SmsHandler {
     private List<SmsLog> buildSmsLogs(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
                                       String templateLocale, String content, RspMessage rspMessage) {
         List<SmsLog> smsLogs = new ArrayList<>();
-        if (rspMessage != null) {
-            Result result = (Result) StringHelper.fromJsonString(rspMessage.getMessage(), Result.class);
-            for (String phoneNumber : phoneNumbers) {
-                SmsLog log = new SmsLog();
-                log.setCreateTime(new Timestamp(System.currentTimeMillis()));
-                log.setNamespaceId(namespaceId);
-                log.setScope(templateScope);
-                log.setCode(templateId);
-                log.setLocale(templateLocale);
-                log.setMobile(phoneNumber);
-                log.setResult(rspMessage.getMessage());
-                log.setHandler(YOU_XUN_TONG_HANDLER_NAME);
-                log.setText(content);
-                log.setSmsId(result.msgid);
+        Result res = new Result();
+        String result = "failed";
 
-                if ("0".equals(result.result)) {
-                    log.setStatus(SmsLogStatus.SEND_SUCCESS.getCode());
-                } else {
-                    log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
-                }
-                smsLogs.add(log);
+        if (rspMessage != null) {
+            try {
+                result = rspMessage.getMessage();
+                res = (Result) StringHelper.fromJsonString(rspMessage.getMessage(), Result.class);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+        }
+
+        for (String phoneNumber : phoneNumbers) {
+            SmsLog log = new SmsLog();
+            log.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            log.setNamespaceId(namespaceId);
+            log.setScope(templateScope);
+            log.setCode(templateId);
+            log.setLocale(templateLocale);
+            log.setMobile(phoneNumber);
+            log.setResult(result);
+            log.setHandler(YOU_XUN_TONG_HANDLER_NAME);
+            log.setText(content);
+            log.setSmsId(res.msgid);
+
+            if ("0".equals(res.result)) {
+                log.setStatus(SmsLogStatus.SEND_SUCCESS.getCode());
+            } else {
+                log.setStatus(SmsLogStatus.SEND_FAILED.getCode());
+            }
+            smsLogs.add(log);
         }
         return smsLogs;
     }
@@ -210,13 +243,13 @@ public class YouXunTongSmsHandler implements SmsHandler {
     }
 
     private static class Report {
-        String msgid;
-        String status;
+        String msgid = "";
+        String status = "";
     }
 
     private static class Result {
-        String msgid;
-        String result;
+        String msgid = "";
+        String result = "";
         // String desc;
         // String blacklist;
     }

@@ -111,7 +111,7 @@ public class AclinkUtils {
             data[11] = 0x3a;
             byte[] keyIdBytes = DataUtil.shortToByteArray(keyId.shortValue());
             System.arraycopy(keyIdBytes, 0, data, 12, keyIdBytes.length);
-            byte[] checkSum = DataUtil.shortToByteArray(CmdUtil.getCheckSum(data));
+            byte[] checkSum = DataUtil.shortToByteArray(CmdUtil.getCheckSum(data, data.length));
             System.arraycopy(checkSum, 0, data, 14, checkSum.length);
             
             return Base64.encodeBase64String(cipher.doFinal(data));   
