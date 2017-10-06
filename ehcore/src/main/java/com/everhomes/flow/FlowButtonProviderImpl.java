@@ -141,6 +141,25 @@ public class FlowButtonProviderImpl implements FlowButtonProvider {
     }
 
     @Override
+    public FlowButton findFlowButtonByStepType(Long flowMainId, Long flowNodeId, Integer flowVer, String flowStepType, String userType) {
+        List<FlowButton> buttons = this.queryFlowButtons(new ListingLocator(), 100, (locator, query) -> {
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_MAIN_ID.eq(flowMainId));
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_NODE_ID.eq(flowNodeId));
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_VERSION.eq(flowVer));
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_STEP_TYPE.eq(flowStepType));
+            if (userType != null) {
+                query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_USER_TYPE.eq(userType));
+            }
+            query.addConditions(Tables.EH_FLOW_BUTTONS.STATUS.ne(FlowButtonStatus.INVALID.getCode()));
+            return query;
+        });
+        if (buttons == null || buttons.size() == 0) {
+            return null;
+        }
+        return buttons.get(0);
+    }
+
+    @Override
     public List<FlowButton> findFlowButtonsByUserType(Long flowNodeId, Integer flowVer, String userType) {
         ListingLocator locator = new ListingLocator();
 
@@ -157,6 +176,20 @@ public class FlowButtonProviderImpl implements FlowButtonProvider {
                 query.addConditions(Tables.EH_FLOW_BUTTONS.STATUS.ne(FlowButtonStatus.INVALID.getCode()));
                 return query;
             }
+        });
+    }
+
+    @Override
+    public List<FlowButton> findFlowButtonsByUserType(Long flowMainId, Long flowNodeId, Integer flowVer, String userType) {
+        return this.queryFlowButtons(new ListingLocator(), 20, (locator1, query) -> {
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_MAIN_ID.eq(flowMainId));
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_NODE_ID.eq(flowNodeId));
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_VERSION.eq(flowVer));
+            if (userType != null) {
+                query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_USER_TYPE.eq(userType));
+            }
+            query.addConditions(Tables.EH_FLOW_BUTTONS.STATUS.ne(FlowButtonStatus.INVALID.getCode()));
+            return query;
         });
     }
 }

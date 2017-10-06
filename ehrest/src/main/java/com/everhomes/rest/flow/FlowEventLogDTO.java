@@ -16,6 +16,7 @@ public class FlowEventLogDTO {
     private Long flowMainId;
     private String logType;
     private String logContent;
+    private String buttonFiredStep;
     private Long flowActionId;
     private String logTitle;
     private Long flowUserId;
@@ -164,6 +165,14 @@ public class FlowEventLogDTO {
 
     public void setIsEvaluate(Byte isEvaluate) {
         this.isEvaluate = isEvaluate;
+    }
+
+    public String getButtonFiredStep() {
+        return buttonFiredStep;
+    }
+
+    public void setButtonFiredStep(String buttonFiredStep) {
+        this.buttonFiredStep = buttonFiredStep;
     }
 
     @Override

@@ -189,7 +189,7 @@ public class FlowProviderImpl implements FlowProvider {
                     query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(cmd.getFlowMainId()));
                     query.addConditions(Tables.EH_FLOWS.FLOW_VERSION.eq(cmd.getFlowVersion()));
                 } else {
-                    query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(0l)); // Got a main flow, not snapshot flow.
+                    query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(0L)); // Got a main flow, not snapshot flow.
                 }
 
                 return query;

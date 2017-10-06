@@ -21,7 +21,7 @@ public interface FlowCaseProvider {
 			ListingQueryBuilderCallback queryBuilderCallback);
 
 	List<FlowCaseDetail> findApplierFlowCases(ListingLocator locator,
-			int count, SearchFlowCaseCommand cmd);
+                                              int count, SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback);
 
 	List<FlowCaseDetail> listFlowCasesByModuleId(ListingLocator locator,
 											  int count, SearchFlowCaseCommand cmd);
@@ -29,7 +29,7 @@ public interface FlowCaseProvider {
 	boolean updateIfValid(Long flowCaseId, Timestamp last, Timestamp now);
 
 	List<FlowCaseDetail> findAdminFlowCases(ListingLocator locator, int count,
-			SearchFlowCaseCommand cmd);
+                                            SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback);
 
 	FlowCase findFlowCaseByReferId(Long referId, String referType, Long moduleId);
 

@@ -3,7 +3,7 @@ package com.everhomes.rest.flow;
 /**
  * <ul>
  * <li>inner: 工作流内部的 Case </li>
- * <li>dumb: 哑工作流 </li>
+ * <li>dumb: 哑工作流,没有任务跟踪,没有处理人等 </li>
  * </ul>
  * @author janson
  *

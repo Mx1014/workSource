@@ -14,6 +14,7 @@ import java.util.List;
  * <li>nodeName: 节点名字</li>
  * <li>allowComment: 是否可以评论</li>
  * <li>logs: 详细日志信息，目前仅有 logContent 有用 </li>
+ * <li>nodeEnterTime: 节点进入时间 </li>
  * </ul>
  * @author janson
  *
@@ -29,6 +30,7 @@ public class FlowNodeLogDTO {
 	private Long commentButtonId;
 	private String params;
     private Byte needSelectNextNode;
+    private Long nodeEnterTime;
 
     @ItemType(FlowEventLogDTO.class)
 	private List<FlowEventLogDTO> logs;
@@ -120,5 +122,13 @@ public class FlowNodeLogDTO {
 
     public Byte getNeedSelectNextNode() {
         return needSelectNextNode;
+    }
+
+    public Long getNodeEnterTime() {
+        return nodeEnterTime;
+    }
+
+    public void setNodeEnterTime(Long nodeEnterTime) {
+        this.nodeEnterTime = nodeEnterTime;
     }
 }

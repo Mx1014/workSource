@@ -2,6 +2,7 @@ package com.everhomes.flow;
 
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
+import com.everhomes.rest.flow.FlowServiceTypeDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.Tuple;
@@ -12,6 +13,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -139,22 +141,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     @Override
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
-        LOGGER.debug("enter flow onFlowCaseDetailRender flowCase={}, flowUserType={}, inst={}", flowCase, flowUserType, inst);
+        // LOGGER.debug("enter flow onFlowCaseDetailRender flowCase={}, flowUserType={}, inst={}", flowCase, flowUserType, inst);
         if (inst != null) {
             FlowModuleListener listener = inst.getListener();
-            LOGGER.debug("enter flow onFlowCaseDetailRender flowCase={}, flowUserType={}, listener={}", flowCase, flowUserType, listener);
-
+            // LOGGER.debug("enter flow onFlowCaseDetailRender flowCase={}, flowUserType={}, listener={}", flowCase, flowUserType, listener);
             return listener.onFlowCaseDetailRender(flowCase, flowUserType);
-        }
-        return null;
-    }
-
-    @Override
-    public String onFlowVariableRender(FlowCaseState ctx, String variable) {
-        FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
-        if (inst != null) {
-            FlowModuleListener listener = inst.getListener();
-            return listener.onFlowVariableRender(ctx, variable);
         }
         return null;
     }
@@ -179,14 +170,27 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
-    public Map<String, String> onFlowPredefinedVariableRender(FlowCaseState ctx, List<String> vars) {
+    public Map<String, String> onFlowVariableRender(FlowCaseState ctx, List<String> vars) {
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
             FlowModuleListener listener = inst.getListener();
-            return listener.onFlowPredefinedVariableRender(ctx, vars);
+            return listener.onFlowVariableRender(ctx, vars);
         }
         return null;
+    }
+
+    @Override
+    public List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId) {
+        List<FlowServiceTypeDTO> serviceTypes = new ArrayList<>();
+        moduleMap.forEach((k, v) -> {
+            FlowModuleListener listener = v.getListener();
+            List<FlowServiceTypeDTO> types = listener.listServiceTypes(namespaceId);
+            if (types != null) {
+                serviceTypes.addAll(types);
+            }
+        });
+        return serviceTypes;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.everhomes.flow;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
 
@@ -193,7 +194,13 @@ public interface FlowService {
 	 */
 	FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd);
 
-	/**
+    FlowCase getFlowCaseById(Long flowCaseId);
+
+    List<UserInfo> getCurrentProcessors(Long flowCaseId);
+
+    List<UserInfo> getSupervisor(FlowCase flowCase);
+
+    /**
 	 * 搜索 FlowCase 的信息
 	 * @param cmd
 	 * @return
@@ -302,7 +309,9 @@ public interface FlowService {
 
 	FlowModuleDTO getModuleById(Long moduleId);
 
-	/**
+    SearchFlowCaseResponse searchFlowCases(SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback);
+
+    /**
 	 * 获取 FlowCase 的详细日志信息
 	 * @param flowCaseId
 	 * @return
@@ -395,8 +404,7 @@ public interface FlowService {
 
     String getButtonFireEventContentTemplate(FlowStepType step, Map<String, Object> map);
 
-    String getStepMessageTemplate(FlowStepType fromStep,
-                                  FlowCaseStatus nextStatus, FlowUserType flowUserType, Map<String, Object> map);
+    String getStepMessageTemplate(FlowStepType fromStep, FlowCaseStatus nextStatus, FlowGraphEvent event, Map<String, Object> map);
 
 	ListSelectUsersResponse listUserSelections(ListSelectUsersCommand cmd);
 
@@ -444,4 +452,12 @@ public interface FlowService {
     ListNextBranchesResponse listNextBranches(ListNextBranchesCommand cmd);
 
     SearchFlowOperateLogResponse searchFlowOperateLogs(SearchFlowOperateLogsCommand cmd);
+
+    FlowEvaluateItemDTO createFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
+
+    void deleteFlowEvaluateItem(DeleteFlowEvaluateItemCommand cmd);
+
+    FlowEvaluateItemDTO updateFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
+
+    List<FlowCase> getAllFlowCase(Long flowCaseId);
 }

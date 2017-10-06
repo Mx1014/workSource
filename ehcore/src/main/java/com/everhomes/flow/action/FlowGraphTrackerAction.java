@@ -58,7 +58,6 @@ public class FlowGraphTrackerAction extends FlowGraphAction {
 				log.setSubjectId(0L);
 			}
 		}
-		
 		ctx.getLogs().add(log);
 	}
 }

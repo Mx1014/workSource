@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 按钮里面的 本节点处理人
@@ -29,22 +30,27 @@ public class FlowVarsButtonMsgCurrentProcessors implements FlowVariableUserResol
                                           Map<String, Long> processedEntities, FlowEntityType fromEntity,
                                           Long entityId, FlowUserSelection userSelection, int loopCnt) {
 
-        //stepCount-1 的原因是，当前节点处理人是上一个 stepCount 计算的 node_enter 的值
-        long stepCount = ctx.getFlowCase().getStepCount() - 1L;
-        // 如果下一个节点还是当前节点，说明stepCount也没变，所以不用减 1
-        if (ctx.getCurrentNode() != null && ctx.getCurrentNode().equals(ctx.getNextNode())) {
-            stepCount = ctx.getFlowCase().getStepCount();
-        }
-        List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(
-                ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId(), stepCount);
-        List<Long> users = new ArrayList<>();
-        if (logs != null && logs.size() > 0) {
-            for (FlowEventLog log : logs) {
-                if (log.getFlowUserId() != null && log.getFlowUserId() > 0) {
-                    users.add(log.getFlowUserId());
-                }
+        List<FlowEventLog> logs = new ArrayList<>();
+        for (FlowCaseState flowCaseState : ctx.getAllFlowState()) {
+            //stepCount-1 的原因是，当前节点处理人是上一个 stepCount 计算的 node_enter 的值
+            long stepCount = flowCaseState.getFlowCase().getStepCount() - 1L;
+            // 如果下一个节点还是当前节点，说明stepCount也没变，所以不用减 1
+            FlowGraphNode currentNode = flowCaseState.getCurrentNode();
+            if (currentNode != null && currentNode.equals(flowCaseState.getNextNode())) {
+                stepCount = flowCaseState.getFlowCase().getStepCount();
+            }
+            if (currentNode != null) {
+                logs.addAll(flowEventLogProvider.findCurrentNodeEnterLogs(
+                        currentNode.getFlowNode().getId(), flowCaseState.getFlowCase().getId(), stepCount));
             }
         }
-        return users;
+
+        List<Long> users = new ArrayList<>();
+        for (FlowEventLog log : logs) {
+            if (log.getFlowUserId() != null && log.getFlowUserId() > 0 && log.getStepCount() > -1) {
+                users.add(log.getFlowUserId());
+            }
+        }
+        return users.stream().distinct().collect(Collectors.toList());
     }
 }

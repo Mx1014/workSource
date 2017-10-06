@@ -22,6 +22,12 @@ public interface FlowTemplateCode {
 	int COMMENT_STEP_CONTENT_WITH_USERNAME = 10014;// ${userName}：${content}
 	int COMMENT_STEP_CONTENT_WITH_APPLIER = 10015;// 发起人：${content}
 
-    int GENERAL_BUTTON_FIRE_LOG_TEMPLATE = 20001;
-    int TRANSFER_BUTTON_FIRE_LOG_TEMPLATE = 20002;
+    int GENERAL_BUTTON_FIRE_LOG_TEMPLATE = 20001;// 在 ${nodeName} 执行 ${buttonName}
+
+    int TIMEOUT_ABSORT = 20003;// 任务超时 已取消任务
+    int DEFAULT_APPROVAL_BUTTON_TRACK_TEXT = 20004;// ${text_tracker_curr_node_name} 已完成
+    int DEFAULT_REJECT_BUTTON_TRACK_TEXT = 20005;// 任务已被 ${text_tracker_curr_processors_name} 驳回
+    int DEFAULT_SUPERVISE_MESSAGE_TEXT = 20006;// 你有1个 ${text_button_msg_flow_case_title} 任务尚未处理
+    int DEFAULT_REMIND_MESSAGE_TEXT = 20007;// 你有1个任务尚未处理
+
 }

@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>userId: 用户ID，为空则为当前用户</li>
+ *     <li>flowCaseId: flowCaseId</li>
  *     <li>serviceType: 业务类别</li>
  *     <li>keyword: 搜索关键字</li>
  *     <li>pageAnchor: pageAnchor</li>
@@ -14,6 +15,7 @@ import com.everhomes.util.StringHelper;
 public class SearchFlowOperateLogsCommand {
 
     private Long userId;
+    private Long flowCaseId;
     private String serviceType;
     private String keyword;
     private Long pageAnchor;
@@ -57,6 +59,14 @@ public class SearchFlowOperateLogsCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
+
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
     }
 
     @Override

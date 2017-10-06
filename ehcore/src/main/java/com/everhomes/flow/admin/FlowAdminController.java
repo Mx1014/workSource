@@ -34,10 +34,11 @@ public class FlowAdminController extends ControllerBase {
     	RestResponse response = new RestResponse();
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
-    	
-    	Byte admin = FlowCaseSearchType.ADMIN.getCode();
-    	cmd.setFlowCaseSearchType(admin);
-    	
+
+        if (cmd.getFlowCaseSearchType() == null) {
+            Byte admin = FlowCaseSearchType.ADMIN.getCode();
+            cmd.setFlowCaseSearchType(admin);
+        }
     	response.setResponseObject(flowService.searchFlowCases(cmd));
     	
     	return response;
@@ -56,7 +57,7 @@ public class FlowAdminController extends ControllerBase {
         RestResponse response = new RestResponse(flowService.getFlowCaseDetailByIdV2(cmd.getFlowCaseId()
         		, userId
         		, FlowUserType.fromCode(cmd.getFlowUserType())
-        		, false, needFlowButton));
+        		, true, needFlowButton));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -440,9 +441,51 @@ public class FlowAdminController extends ControllerBase {
      * <p> 修改工作流评分项 </p>
      */
     @RequestMapping("updateFlowEvaluate")
-    @RestReturn(value=FlowEvaluateDetailDTO.class)
+    @RestReturn(value=String.class)
     public RestResponse updateFlowEvaluate(@Valid UpdateFlowEvaluateCommand cmd) {
         RestResponse response = new RestResponse(flowService.updateFlowEvaluate(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/createFlowEvaluateItem</b>
+     * <p> 新增评价项 </p>
+     */
+    @RequestMapping("createFlowEvaluateItem")
+    @RestReturn(value=FlowEvaluateItemDTO.class)
+    public RestResponse createFlowEvaluateItem(@Valid CreateFlowEvaluateItemCommand cmd) {
+        FlowEvaluateItemDTO dto = flowService.createFlowEvaluateItem(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/updateFlowEvaluateItem</b>
+     * <p> 修改评价项 </p>
+     */
+    @RequestMapping("updateFlowEvaluateItem")
+    @RestReturn(value=FlowEvaluateItemDTO.class)
+    public RestResponse updateFlowEvaluateItem(@Valid CreateFlowEvaluateItemCommand cmd) {
+        FlowEvaluateItemDTO dto = flowService.updateFlowEvaluateItem(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/deleteFlowEvaluateItem</b>
+     * <p> 删除评价项 </p>
+     */
+    @RequestMapping("deleteFlowEvaluateItem")
+    @RestReturn(value=String.class)
+    public RestResponse deleteFlowEvaluateItem(@Valid DeleteFlowEvaluateItemCommand cmd) {
+        flowService.deleteFlowEvaluateItem(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

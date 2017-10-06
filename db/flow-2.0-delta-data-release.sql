@@ -5,6 +5,8 @@ SET @configurations_id = IFNULL((SELECT MAX(id) FROM `eh_configurations`), 1);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
   VALUES ((@configurations_id := @configurations_id + 1), 'flow.stepname.no_step', '自定义', 'no-step', 0, NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ((@configurations_id := @configurations_id + 1), 'flow.stepname.supervise', '督办', 'supervise', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
   VALUES ((@configurations_id := @configurations_id + 1), 'flow.stepname.go_to_process', '去处理', 'go_to_process', 0, NULL);
 
 
@@ -31,4 +33,38 @@ SET @locale_templates_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 1
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
   VALUES ((@locale_templates_id := @locale_templates_id + 1), 'flow', 20001, 'zh_CN', '在 ${nodeName} 执行 ${buttonName}', '工作流通用按钮触发描述', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-  VALUES ((@locale_templates_id := @locale_templates_id + 1), 'flow', 20002, 'zh_CN', '在 ${nodeName} 转交给 ${transferUser}', '工作流转交按钮触发描述', 0);
+  VALUES ((@locale_templates_id := @locale_templates_id + 1), 'flow', 20003, 'zh_CN', '任务超时 已取消任务', '超时取消任务', 0);
+
+SET @locale_strings_id = IFNULL((SELECT MAX(id) FROM `eh_locale_strings`), 1);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100012', 'zh_CN', '泳道不存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100013', 'zh_CN', '节点链接为空');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100014', 'zh_CN', '需要指定下一步节点，请升级App');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100015', 'zh_CN', '驳回失败');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '100016', 'zh_CN', '获取详情失败');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '20004', 'zh_CN', '${text_tracker_curr_node_name} 已完成');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '20005', 'zh_CN', '任务已被 ${text_tracker_curr_processors_name} 驳回');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '20006', 'zh_CN', '你有1个 ${text_button_msg_flow_case_title} 任务尚未处理');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@locale_strings_id := @locale_strings_id + 1), 'flow', '20007', 'zh_CN', '你有1个任务尚未处理');
+
+SET @flow_variables_id = IFNULL((SELECT MAX(id) FROM `eh_flow_variables`), 1);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+  VALUES ((@flow_variables_id := @flow_variables_id + 1), 0, 0, '', 0, '', 'text_tracker_curr_node_name', '本节点名称', 'text_tracker', 'bean_id', 'flow-variable-text-tracker-curr-node-name', 1);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+  VALUES ((@flow_variables_id := @flow_variables_id + 1), 0, 0, '', 0, '', 'text_tracker_curr_node_name', '本节点名称', 'text_button_msg', 'bean_id', 'flow-variable-text-tracker-curr-node-name', 1);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+  VALUES ((@flow_variables_id := @flow_variables_id + 1), 0, 0, '', 0, '', 'text_tracker_curr_node_name', '本节点名称', 'text_remind', 'bean_id', 'flow-variable-text-tracker-curr-node-name', 1);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+  VALUES ((@flow_variables_id := @flow_variables_id + 1), 0, 0, '', 0, '', 'text_button_msg_flow_case_title', '工作流标题', 'text_hidden', 'bean_id', 'text-hidden-button-msg-flow-case-title', 1);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+  VALUES ((@flow_variables_id := @flow_variables_id + 1), 0, 0, '', 0, '', 'all_current_node_processors', '所有任务的当前处理人', 'flow_var_hidden', 'bean_id', 'flow-variable-hidden-button-msg-all-current-processors', 1);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+  VALUES ((@flow_variables_id := @flow_variables_id + 1), 0, 0, '', 0, '', 'text_tracker_curr_operator_name', '操作执行人姓名', 'text_tracker', 'bean_id', 'flow-variable-curr-processor-name', 1);

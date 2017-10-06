@@ -96,7 +96,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
             FlowGraphLane currentLane = flowGraph.getLanes().get(0);
             ctx.setCurrentLane(currentLane);
         } else {
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_LANE_NOEXISTS,
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_LANE_NOT_EXISTS,
                     "flowLane not exists, flowLaneId=" + flowCase.getCurrentLaneId());
         }
         flowService.createSnapshotSupervisors(ctx);
@@ -164,6 +164,16 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
             }
             ctx.setCurrentNode(node);
 
+            FlowGraphLane currentLane = flowGraph.getGraphLane(flowCase.getCurrentLaneId());
+            if (currentLane == null) {
+                currentLane = flowGraph.getGraphLane(ctx.getCurrentNode().getFlowNode().getNodeLevel());
+            }
+            if (currentLane == null) {
+                throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_LANE_NOT_EXISTS,
+                        "flowLane not exists, flowLaneId=" + flowCase.getCurrentLaneId());
+            }
+            ctx.setCurrentLane(currentLane);
+
             UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(user.getId());//current user
             ctx.setOperator(userInfo);
             FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
@@ -178,6 +188,13 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                 ctx.setStepType(stepType);
             }
 
+            // parent ctx
+            if (flowCase.getParentId() != 0) {
+                prepareParentState(ctx, userInfo, flowCase, event);
+            }
+            // child ctx
+            prepareChildState(ctx.getGrantParentState(), userInfo, flowCase, event);
+
             return ctx;
         }
         return null;
@@ -188,7 +205,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         FlowCaseState ctx = new FlowCaseState();
         FlowCase flowCase = flowCaseProvider.getFlowCaseById(stepDTO.getFlowCaseId());
 
-        User user = null;
+        User user;
         if (stepDTO.getOperatorId() != null) {
             user = userProvider.findUserById(stepDTO.getOperatorId());
             //force to set context user
@@ -222,16 +239,34 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         }
         ctx.setCurrentNode(node);
 
+        FlowGraphLane currentLane = flowGraph.getGraphLane(flowCase.getCurrentLaneId());
+        if (currentLane == null) {
+            currentLane = flowGraph.getGraphLane(ctx.getCurrentNode().getFlowNode().getNodeLevel());
+        }
+        if (currentLane == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_LANE_NOT_EXISTS,
+                    "flowLane not exists, flowLaneId=" + flowCase.getCurrentLaneId());
+        }
+        ctx.setCurrentLane(currentLane);
+
         if (stepDTO.getFlowTargetId() != null) {
             FlowGraphNode targetNode = flowGraph.getGraphNode(stepDTO.getFlowTargetId());
             ctx.setNextNode(targetNode);
         }
 
         UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(user.getId());
+        flowService.fixupUserInfoInContext(ctx, userInfo);
         ctx.setOperator(userInfo);
         FlowGraphNoStepEvent event = new FlowGraphNoStepEvent(stepDTO);
         ctx.setCurrentEvent(event);
         ctx.setStepType(FlowStepType.NO_STEP);
+
+        // parent ctx
+        if (flowCase.getParentId() != 0) {
+            prepareParentState(ctx, userInfo, flowCase, event);
+        }
+        // child ctx
+        prepareChildState(ctx.getGrantParentState(), userInfo, flowCase, event);
 
         return ctx;
     }
@@ -243,13 +278,13 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
             Map<FlowEventLog, FlowCaseState> logToFlowCaseStateMap = getFlowEventLog(ctx, link);
             for (Map.Entry<FlowEventLog, FlowCaseState> entry : logToFlowCaseStateMap.entrySet()) {
                 FlowEventLog log = entry.getKey();
-                ctx = entry.getValue();
-                FlowCase flowCase = ctx.getFlowCase();
+                FlowCaseState logCtx = entry.getValue();
+                FlowCase flowCase = logCtx.getFlowCase();
 
-                current = ctx.getFlowGraph().getGraphNode(log.getFlowNodeId());
+                current = logCtx.getFlowGraph().getGraphNode(log.getFlowNodeId());
 
                 if (FlowNodeType.fromCode(current.getFlowNode().getNodeType()) == FlowNodeType.CONDITION_FRONT) {
-                    List<FlowCase> allFlowCases = ctx.getAllFlowCases();
+                    List<FlowCase> allFlowCases = logCtx.getAllFlowCases();
                     for (FlowGraphLink graphLink : current.getLinksOut()) {
                         if (!Objects.equals(flowCase.getStartLinkId(), graphLink.getFlowLink().getId())) {
                             final FlowGraphNode tmpCurrent = current;
@@ -262,11 +297,11 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                 }
                 if ((current.getFlowNode().getNodeLevel().equals(gotoLevel) || gotoLevel == 0)
                         && FlowNodeType.fromCode(current.getFlowNode().getNodeType()) != FlowNodeType.CONDITION_FRONT) {
-                    ctx.setNextNode(current);
-                    ctx.setStepType(FlowStepType.REJECT_STEP);
-                    flowCase.setStepCount(flowCase.getStepCount() + 1);
+                    logCtx.setNextNode(current);
+                    logCtx.setStepType(FlowStepType.REJECT_STEP);
+                    flowCase.incrStepCount();
                 } else {
-                    rejectToNode(ctx, gotoLevel, current);
+                    rejectToNode(logCtx, gotoLevel, current);
                 }
             }
         }
@@ -285,85 +320,28 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         return allComplete;
     }
 
-    @Override
-    public List<FlowCase> getAllFlowCase(Long flowCaseId) {
-        FlowCase grantParentCase = flowCaseProvider.getFlowCaseById(flowCaseId);
-        while (grantParentCase.getParentId() != 0) {
-            grantParentCase = flowCaseProvider.getFlowCaseById(grantParentCase.getParentId());
-        }
-        return getAllChildFlowCase(grantParentCase);
-    }
-
-    private List<FlowCase> getAllChildFlowCase(FlowCase parentCase) {
-        List<FlowCase> subFlowCases = flowCaseProvider.listFlowCaseByParentId(parentCase.getId());
-        List<FlowCase> flowCases = new ArrayList<>();
-        flowCases.add(parentCase);
-        for (FlowCase flowCase : subFlowCases) {
-            flowCases.addAll(getAllChildFlowCase(flowCase));
-        }
-        return flowCases;
-    }
-
     private Map<FlowEventLog, FlowCaseState> getFlowEventLog(FlowCaseState ctx, FlowGraphLink link) {
         Map<FlowEventLog, FlowCaseState> map = new HashMap<>();
-        FlowEventLog log = flowEventLogProvider.findNodeLastEnterLogs(link.getFlowLink().getFromNodeId(), ctx.getFlowCase().getId());
+        FlowEventLog log = flowEventLogProvider.findNodeLastStepTrackerLog(link.getFlowLink().getFromNodeId(), ctx.getFlowCase().getId());
         if (log != null) {
             map.put(log, ctx);
         }
         FlowCaseState parentState = ctx.getParentState();
         if (parentState != null) {
-            log = flowEventLogProvider.findNodeLastEnterLogs(link.getFlowLink().getFromNodeId(), parentState.getFlowCase().getId());
+            log = flowEventLogProvider.findNodeLastStepTrackerLog(link.getFlowLink().getFromNodeId(), parentState.getFlowCase().getId());
             if (log != null) {
                 map.put(log, parentState);
             }
         }
         List<FlowCaseState> childStates = ctx.getChildStates();
         for (FlowCaseState childState : childStates) {
-            log = flowEventLogProvider.findNodeLastEnterLogs(link.getFlowLink().getFromNodeId(), childState.getFlowCase().getId());
+            log = flowEventLogProvider.findNodeLastStepTrackerLog(link.getFlowLink().getFromNodeId(), childState.getFlowCase().getId());
             if (log != null) {
                 map.put(log, childState);
             }
         }
         return map;
     }
-
-    /*private FlowGraphNode findPrefixNodes(FlowCaseState ctx, FlowGraphNode current, Integer gotoLevel) {
-
-
-        FlowGraphNode prefixNode = link.getFromNode(ctx, null);
-
-        List<FlowEventLog> enterLogs = flowEventLogProvider.findCurrentNodeEnterLogs(prefixNode.getFlowNode().getId(),
-                ctx.getFlowCase().getId(), ctx.getFlowCase().getStepCount() - 1);
-        if (enterLogs.isEmpty()) {
-            continue;
-        }
-
-        if (prefixNode.getFlowNode().getNodeLevel().equals(gotoLevel)) {
-            return prefixNode;
-        } else if (prefixNode.getFlowNode().getNodeType().equals(FlowNodeType.CONDITION_FRONT.getCode())) {
-
-            ctx = ctx.getParentState();
-        }
-        return rejectToNode(ctx, gotoLevel, prefixNode);
-    }*/
-
-    /*private FlowGraphNode findPrefixNode(FlowCaseState ctx, FlowGraphLink link, Integer gotoLevel) {
-        FlowGraphNode prefixNode = link.getFromNode(ctx, null);
-
-        List<FlowEventLog> enterLogs = flowEventLogProvider.findCurrentNodeEnterLogs(prefixNode.getFlowNode().getId(),
-                ctx.getFlowCase().getId(), ctx.getFlowCase().getStepCount() - 1);
-        if (enterLogs.isEmpty()) {
-            return null;
-        }
-
-        if (prefixNode.getFlowNode().getNodeLevel().equals(gotoLevel)) {
-            return prefixNode;
-        } else if (prefixNode.getFlowNode().getNodeType().equals(FlowNodeType.CONDITION_FRONT.getCode())) {
-
-            ctx = ctx.getParentState();
-        }
-        return rejectToNode(ctx, gotoLevel, prefixNode);
-    }*/
 
     @Override
     public FlowCaseState prepareButtonFire(UserInfo logonUser, FlowFireButtonCommand cmd) {
@@ -377,15 +355,15 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                     "flowcase noexists, flowCaseId=" + cmd.getFlowCaseId());
         }
 
-        if (cmd.getStepCount() != null && !cmd.getStepCount().equals(flowCase.getStepCount())) {
+        if (cmd.getStepCount() == null || !cmd.getStepCount().equals(flowCase.getStepCount())) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR,
                     "step busy");
         }
 
         ctx.setFlowCase(flowCase);
         ctx.setModule(flowListenerManager.getModule(flowCase.getModuleId()));
+
         ctx.setOperator(logonUser);
-        ctx.setListenerManager(flowListenerManager);
 
         FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
         ctx.setFlowGraph(flowGraph);
@@ -402,7 +380,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
             currentLane = flowGraph.getGraphLane(ctx.getCurrentNode().getFlowNode().getNodeLevel());
         }
         if (currentLane == null) {
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_LANE_NOEXISTS,
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_LANE_NOT_EXISTS,
                     "flowLane not exists, flowLaneId=" + flowCase.getCurrentLaneId());
         }
         ctx.setCurrentLane(currentLane);
@@ -432,8 +410,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                     attachments.add(attach);
                 }
                 attachmentProvider.createAttachments(EhFlowAttachments.class, attachments);
+                subject.setAttachments(attachments);
             }
-
             event.setSubject(subject);
         }
 
@@ -444,12 +422,11 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 
         // parent ctx
         if (flowCase.getParentId() != 0) {
-            prepareParentState(ctx, logonUser, flowCase);
+            prepareParentState(ctx, logonUser, flowCase, event);
         }
         // child ctx
-        prepareChildState(ctx.getGrantParentState(), logonUser, flowCase);
+        prepareChildState(ctx.getGrantParentState(), logonUser, flowCase, event);
 
-        //fire button actions
         FlowGraphButton btn = flowGraph.getGraphButton(cmd.getButtonId());
         if (btn != null) {
             FlowStepType stepType = FlowStepType.fromCode(btn.getFlowButton().getFlowStepType());
@@ -461,41 +438,42 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         return ctx;
     }
 
-    private void prepareChildState(FlowCaseState ctx, UserInfo logonUser, FlowCase flowCase) {
+    private void prepareChildState(FlowCaseState ctx, UserInfo logonUser, FlowCase flowCase, FlowGraphEvent event) {
         List<FlowCase> childFlowCases = flowCaseProvider.listFlowCaseByParentId(ctx.getFlowCase().getId());
-
-        List<Long> childFlowCaseIdList = ctx.getChildStates().stream().map(r -> r.getFlowCase().getId()).collect(Collectors.toList());
-
+        Map<Long, FlowCaseState> flowCaseIdToStateMap = ctx.getChildStates().stream().collect(Collectors.toMap(r -> r.getFlowCase().getId(), r -> r));
         for (FlowCase childFlowCase : childFlowCases) {
-            if (childFlowCaseIdList.contains(childFlowCase.getId())) {
+            if (flowCaseIdToStateMap.containsKey(childFlowCase.getId())) {
+                prepareChildState(flowCaseIdToStateMap.get(childFlowCase.getId()), logonUser, childFlowCase, event);
                 continue;
             }
             FlowCaseState childCtx = new FlowCaseState();
+            childCtx.setCurrentEvent(event);
             childCtx.setFlowCase(childFlowCase);
             childCtx.setModule(flowListenerManager.getModule(flowCase.getModuleId()));
             childCtx.setOperator(logonUser);
-            childCtx.setListenerManager(flowListenerManager);
             FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
             childCtx.setFlowGraph(flowGraph);
             childCtx.setParentState(ctx);
+            childCtx.setCurrentNode(ctx.getFlowGraph().getGraphNode(childFlowCase.getCurrentNodeId()));
             ctx.getChildStates().add(childCtx);
-            prepareChildState(childCtx, logonUser, childFlowCase);
+            prepareChildState(childCtx, logonUser, childFlowCase, event);
         }
     }
 
-    private void prepareParentState(FlowCaseState ctx, UserInfo logonUser, FlowCase flowCase) {
+    private void prepareParentState(FlowCaseState ctx, UserInfo logonUser, FlowCase flowCase, FlowGraphEvent event) {
         FlowCase parentFlowCase = flowCaseProvider.getFlowCaseById(flowCase.getParentId());
         if (parentFlowCase != null) {
             FlowCaseState parentCtx = new FlowCaseState();
             parentCtx.setFlowCase(parentFlowCase);
             parentCtx.setModule(flowListenerManager.getModule(flowCase.getModuleId()));
             parentCtx.setOperator(logonUser);
-            parentCtx.setListenerManager(flowListenerManager);
             parentCtx.setFlowGraph(ctx.getFlowGraph());
+            parentCtx.setCurrentEvent(event);
+            parentCtx.setCurrentNode(ctx.getFlowGraph().getGraphNode(parentFlowCase.getCurrentNodeId()));
             ctx.setParentState(parentCtx);
             parentCtx.getChildStates().add(ctx);
             if (parentFlowCase.getParentId() != 0) {
-                prepareParentState(parentCtx, logonUser, parentFlowCase);
+                prepareParentState(parentCtx, logonUser, parentFlowCase, event);
             }
         }
     }
@@ -503,14 +481,11 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
     @Override
     public void step(FlowCaseState ctx, FlowGraphEvent event) {
         boolean stepOK = true;
-
         if (event != null) {
             event.fire(ctx);
         }
-
         FlowGraphNode nextNode = ctx.getNextNode();
         FlowGraphNode currentNode = ctx.getCurrentNode();
-
         if (isValidNextFlowNode(ctx, currentNode, nextNode)) {
             try {
                 //Only leave once time
@@ -518,20 +493,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                     currentNode.stepLeave(ctx, nextNode);
                 }
 
-                // if reject step, prefixNode is currentNode ?
-                // ctx.setPrefixNode(currentNode);
-                // ctx.setCurrentNode(nextNode);
-                // ctx.setNextNode(null);
-
-                // create processor's
-                // flowService.createSnapshotNodeProcessors(ctx, );
-
-                // 普通进入
-                /*if (nextNode != null) {
-                    nextNode.stepEnter(ctx, currentNode);
-                }*/
-
-                // 分支进入
+                // 节点进入
                 for (FlowCaseState subCtx : ctx.getAllFlowState()) {
                     FlowGraphNode subNextNode = subCtx.getNextNode();
                     subCtx.setPrefixNode(currentNode);
@@ -568,66 +530,11 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         FlowStepType fromStep = ctx.getStepType();
         FlowGraphNode currentNode = ctx.getCurrentNode();
 
-        ctx.getFlowCase().setCurrentNodeId(currentNode.getFlowNode().getId());
         boolean logStep = false;
-
         FlowEventLog log = null;
-
-        FlowGraphBranch branch = ctx.getFlowGraph().getBranchByConvergenceNode(currentNode.getFlowNode().getId());
-        if (branch != null && ctx.getParentState() != null) {
-            List<FlowCaseState> childStates = ctx.getParentState().getChildStates();
-            boolean allFinish = childStates.stream().allMatch(r -> Objects.equals(r.getFlowCase().getCurrentNodeId(), currentNode.getFlowNode().getId()));
-            // 在汇总节点，只有当所有流程都走完才进入当前节点，不管是concurrent或者single
-            if (!allFinish) {
-                ctx.getFlowCase().setStepCount(ctx.getFlowCase().getStepCount() - 1);
-                log = flowEventLogProvider.getValidEnterStep(ctx.getOperator().getId(), ctx.getFlowCase());
-                if (null != log) {
-                    log.setStepCount(-1L); // mark as invalid
-                    ctx.getUpdateLogs().add(log);
-                    log = null;
-                }
-                ctx.getFlowCase().setStepCount(ctx.getFlowCase().getStepCount() + 1);
-                return;
-            }
-        }
-
-        flowListenerManager.onFlowCaseStateChanged(ctx);
 
         //create processor's
         flowService.createSnapshotNodeProcessors(ctx, currentNode);
-
-        ctx.getGrantParentState().setCurrentLane(ctx.getFlowGraph().getGraphLane(currentNode.getFlowNode().getFlowLaneId()));
-        ctx.getGrantParentState().getFlowCase().setCurrentLaneId(currentNode.getFlowNode().getFlowLaneId());
-
-        ctx.getFlowCase().setCurrentLaneId(currentNode.getFlowNode().getFlowLaneId());
-
-        //TODO use schedule ? scheduler.execute();
-
-        //TODO do build in a delay thread
-        if (currentNode.getMessageAction() != null) {
-            Byte status = currentNode.getMessageAction().getFlowAction().getStatus();
-            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
-                currentNode.getMessageAction().fireAction(ctx, ctx.getCurrentEvent());
-            }
-        }
-        if (currentNode.getSmsAction() != null) {
-            Byte status = currentNode.getSmsAction().getFlowAction().getStatus();
-            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
-                currentNode.getSmsAction().fireAction(ctx, ctx.getCurrentEvent());
-            }
-        }
-        if (currentNode.getTickMessageAction() != null) {
-            Byte status = currentNode.getTickMessageAction().getFlowAction().getStatus();
-            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
-                currentNode.getTickMessageAction().fireAction(ctx, ctx.getCurrentEvent());
-            }
-        }
-        if (currentNode.getTickSMSAction() != null) {
-            Byte status = currentNode.getTickSMSAction().getFlowAction().getStatus();
-            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
-                currentNode.getTickSMSAction().fireAction(ctx, ctx.getCurrentEvent());
-            }
-        }
 
         switch (fromStep) {
             case NO_STEP:
@@ -659,6 +566,16 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                 break;
         }
 
+        ctx.getGrantParentState().setCurrentLane(ctx.getFlowGraph().getGraphLane(currentNode.getFlowNode().getFlowLaneId()));
+        ctx.getGrantParentState().getFlowCase().setCurrentLaneId(currentNode.getFlowNode().getFlowLaneId());
+
+        ctx.getFlowCase().setCurrentNodeId(currentNode.getFlowNode().getId());
+        ctx.getFlowCase().setCurrentLaneId(currentNode.getFlowNode().getFlowLaneId());
+
+        flowListenerManager.onFlowCaseStateChanged(ctx);
+
+        currentNode.fireAction(ctx);
+
         //create step timeout
         if (!currentNode.getFlowNode().getAllowTimeoutAction().equals((byte) 0)) {
             FlowTimeout ft = new FlowTimeout();
@@ -675,13 +592,11 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
             stepDTO.setFlowNodeId(currentNode.getFlowNode().getId());
             stepDTO.setAutoStepType(currentNode.getFlowNode().getAutoStepType());
             stepDTO.setOperatorId(User.SYSTEM_UID);
+            stepDTO.setEventType(FlowEventType.STEP_TIMEOUT.getCode());
             ft.setJson(stepDTO.toString());
 
             Long timeoutTick = DateHelper.currentGMTTime().getTime() + currentNode.getFlowNode().getAutoStepMinute() * 60 * 1000L;
-//			Long timeoutTick = DateHelper.currentGMTTime().getTime() + 6000;
             ft.setTimeoutTick(new Timestamp(timeoutTick));
-
-//			flowTimeoutService.pushTimeout(ft);
             ctx.getTimeouts().add(ft);
         }
 
@@ -739,6 +654,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         ctx.getFlowCase().setCurrentLaneId(curr.getFlowNode().getFlowLaneId());
         ctx.setCurrentLane(ctx.getFlowGraph().getGraphLane(curr.getFlowNode().getFlowLaneId()));
 
+        FlowEventLog tracker = null;
+
         boolean logStep = false;
         flowListenerManager.onFlowCaseStateChanged(ctx);
         switch (fromStep) {
@@ -746,12 +663,17 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                 break;
             case APPROVE_STEP:
             case END_STEP:
+                logStep = true;
                 ctx.getFlowCase().setStatus(FlowCaseStatus.FINISHED.getCode());
                 for (FlowCase flowCase : ctx.getAllFlowCases()) {
                     flowCase.setCurrentNodeId(curr.getFlowNode().getId());
                     flowCase.setCurrentLaneId(curr.getFlowNode().getFlowLaneId());
                     flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());
                 }
+
+                tracker = new FlowEventLog();
+                tracker.setLogContent(flowService.getStepMessageTemplate(fromStep, FlowCaseStatus.FINISHED, ctx.getCurrentEvent(), null));
+                tracker.setStepCount(ctx.getFlowCase().getStepCount());
                 break;
             case EVALUATE_STEP:
                 break;
@@ -764,9 +686,45 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
                     flowCase.setStatus(FlowCaseStatus.ABSORTED.getCode());
                 }
                 flowListenerManager.onFlowCaseAbsorted(ctx);
+
+                tracker = new FlowEventLog();
+                Map<String, Object> templateMap = new HashMap<>();
+                if (ctx.getOperator() != null) {
+                    templateMap.put("applierName", ctx.getOperator().getNickName());
+                }
+
+                tracker.setLogContent(flowService.getStepMessageTemplate(fromStep, FlowCaseStatus.ABSORTED, ctx.getCurrentEvent(), templateMap));
+                tracker.setStepCount(ctx.getFlowCase().getStepCount());
+                FlowSubject subject = ctx.getCurrentEvent().getSubject();
+                if (subject != null) {
+                    tracker.setSubjectId(subject.getId());
+                }
                 break;
             default:
                 break;
+        }
+
+        if (tracker != null) {
+            FlowGraph flowGraph = ctx.getFlowGraph();
+            tracker.setId(flowEventLogProvider.getNextId());
+            tracker.setFlowMainId(flowGraph.getFlow().getFlowMainId());
+            tracker.setFlowVersion(flowGraph.getFlow().getFlowVersion());
+            tracker.setNamespaceId(flowGraph.getFlow().getNamespaceId());
+            tracker.setFlowNodeId(ctx.getCurrentNode().getFlowNode().getId());
+            tracker.setParentId(0L);
+            tracker.setFlowCaseId(ctx.getFlowCase().getId());
+            tracker.setFlowUserId(ctx.getOperator().getId());
+            tracker.setFlowUserName(ctx.getOperator().getNickName());
+            if (tracker.getSubjectId() == null) {
+                tracker.setSubjectId(0L);// BUG #5431
+            }
+
+            tracker.setLogType(FlowLogType.NODE_TRACKER.getCode());
+
+            tracker.setButtonFiredStep(fromStep.getCode());
+            tracker.setTrackerApplier(1L);
+            tracker.setTrackerProcessor(1L);
+            ctx.getLogs().add(tracker);
         }
 
         flowListenerManager.onFlowCaseEnd(ctx);

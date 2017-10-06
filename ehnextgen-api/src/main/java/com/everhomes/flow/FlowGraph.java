@@ -1,7 +1,5 @@
 package com.everhomes.flow;
 
-import com.everhomes.rest.flow.FlowNodeType;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +19,7 @@ public class FlowGraph {
     private Map<Long, FlowGraphButton> idToButton;
     private Map<Long, FlowGraphAction> idToAction;
     private Map<Long, FlowGraphBranch> originalNodeToBranch;
-    private Map<Long, FlowGraphBranch> convergenceNodeToBranch;
+    private Map<Long, List<FlowGraphBranch>> convergenceNodeToBranches;
 
     private List<FlowEvaluateItem> evaluateItems;
 
@@ -39,7 +37,7 @@ public class FlowGraph {
         idToAction = new HashMap<>();
         idToLane = new HashMap<>();
         originalNodeToBranch = new HashMap<>();
-        convergenceNodeToBranch = new HashMap<>();
+        convergenceNodeToBranches = new HashMap<>();
         levelToNode = new HashMap<>();
         levelToLane = new HashMap<>();
     }
@@ -62,6 +60,9 @@ public class FlowGraph {
         }
 
         for (FlowGraphButton btn : node.getProcessorButtons()) {
+            idToButton.put(btn.getFlowButton().getId(), btn);
+        }
+        for (FlowGraphButton btn : node.getSupervisorButtons()) {
             idToButton.put(btn.getFlowButton().getId(), btn);
         }
     }
@@ -90,12 +91,14 @@ public class FlowGraph {
                 idToAction.put(node.getTrackTransferLeave().getFlowAction().getId(), node.getTrackTransferLeave());
             }
 
-            if (FlowNodeType.fromCode(node.getFlowNode().getNodeType()) == FlowNodeType.END) {
+            /*if (FlowNodeType.fromCode(node.getFlowNode().getNodeType()) == FlowNodeType.END
+                    || node.getFlowNode().getNodeName().equals("END")) {
                 this.endNode = node;
             }
-            if (FlowNodeType.fromCode(node.getFlowNode().getNodeType()) == FlowNodeType.START) {
+            if (FlowNodeType.fromCode(node.getFlowNode().getNodeType()) == FlowNodeType.START
+                    || node.getFlowNode().getNodeName().equals("START")) {
                 this.startNode = node;
-            }
+            }*/
             idToNode.put(node.getFlowNode().getId(), node);
             levelToNode.put(node.getFlowNode().getNodeLevel(), node);
 
@@ -108,7 +111,13 @@ public class FlowGraph {
         }
         for (FlowGraphBranch branch : branches) {
             originalNodeToBranch.put(branch.getFlowBranch().getOriginalNodeId(), branch);
-            convergenceNodeToBranch.put(branch.getFlowBranch().getConvergenceNodeId(), branch);
+            convergenceNodeToBranches.compute(branch.getFlowBranch().getConvergenceNodeId(), (k, v) -> {
+                if (v == null) {
+                    v = new ArrayList<>();
+                }
+                v.add(branch);
+                return v;
+            });
         }
     }
 
@@ -160,8 +169,8 @@ public class FlowGraph {
         return originalNodeToBranch.get(originalNodeId);
     }
 
-    public FlowGraphBranch getBranchByConvergenceNode(Long convergenceNodeId) {
-        return convergenceNodeToBranch.get(convergenceNodeId);
+    public List<FlowGraphBranch> getBranchByConvergenceNode(Long convergenceNodeId) {
+        return convergenceNodeToBranches.get(convergenceNodeId);
     }
 
     public FlowGraphButton getGraphButton(Long id) {
@@ -194,5 +203,23 @@ public class FlowGraph {
 
     public FlowGraphNode getStartNode() {
         return startNode;
+    }
+
+    public void setEndNode(FlowGraphNode endNode) {
+        this.endNode = endNode;
+    }
+
+    public void setStartNode(FlowGraphNode startNode) {
+        this.startNode = startNode;
+    }
+
+    public FlowGraphBranch getBranchByOriginalAndConvNode(Long startNodeId, Long targetNodeId) {
+        for (FlowGraphBranch branch : branches) {
+            if (branch.getFlowBranch().getOriginalNodeId().equals(startNodeId)
+                    && branch.getFlowBranch().getConvergenceNodeId().equals(targetNodeId)) {
+                return branch;
+            }
+        }
+        return null;
     }
 }

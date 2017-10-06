@@ -44,17 +44,18 @@ public class FlowGraphStartEvent extends AbstractFlowGraphEvent {
             next = ctx.getFlowGraph().getNodes().get(1);
         }
 
+        ctx.setCurrentNode(startNode);
+        ctx.setNextNode(next);
+        ctx.setStepType(FlowStepType.APPROVE_STEP);
+        ctx.getFlowCase().setStatus(FlowCaseStatus.PROCESS.getCode());
+        ctx.getFlowCase().setStepCount(ctx.getFlowCase().getStepCount() + 1L);
+        ctx.getFlowCase().setCurrentNodeId(startNode.getFlowNode().getId());
+        ctx.getFlowCase().setCurrentLaneId(startNode.getFlowNode().getFlowLaneId());
+
         if (FlowNodeType.fromCode(next.getFlowNode().getNodeType()) == FlowNodeType.CONDITION_FRONT) {
             next.stepEnter(ctx, startNode);
-            next = null;
+            ctx.setNextNode(null);
         }
-
-		ctx.setCurrentNode(startNode);
-		ctx.setNextNode(next);
-		ctx.setStepType(FlowStepType.APPROVE_STEP);
-		ctx.getFlowCase().setStatus(FlowCaseStatus.PROCESS.getCode());
-		ctx.getFlowCase().setStepCount(ctx.getFlowCase().getStepCount() + 1L);
-		ctx.getFlowCase().setCurrentNodeId(startNode.getFlowNode().getId());
 	}
 
 	@Override
@@ -69,8 +70,6 @@ public class FlowGraphStartEvent extends AbstractFlowGraphEvent {
 
 	@Override
 	public FlowSubject getSubject() {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
 }
