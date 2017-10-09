@@ -294,6 +294,12 @@ public class OrganizationServiceImpl implements OrganizationService {
         Organization organization = ConvertHelper.convert(cmd, Organization.class);
         Organization parOrg = this.checkOrganization(cmd.getParentId());
 
+        //同级重名校验
+        Organization down_organization = organizationProvider.findOrganizationByParentAndName(parOrg.getId(),cmd.getName());
+        if(down_organization == null){
+            return null;
+        }
+
         //default show navi, add by sfyan 20160505
         if (null == cmd.getNaviFlag()) {
             cmd.setNaviFlag(OrganizationNaviFlag.SHOW_NAVI.getCode());
@@ -2209,7 +2215,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public void deleteOrganization(DeleteOrganizationIdCommand cmd) {
+    public Boolean deleteOrganization(DeleteOrganizationIdCommand cmd) {
 
         User user = UserContext.current().getUser();
 
@@ -2219,9 +2225,16 @@ public class OrganizationServiceImpl implements OrganizationService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
         Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-        LOGGER.debug("delete Start: " + sdf.format(now));
-        Long startMili = System.currentTimeMillis();
 
+        //1 判断该机构（子公司/部门/岗位/职级）是否有活动状态的人员
+        //查询需要失效的所有人
+        List<OrganizationMember> if_empty_members = organizationProvider.listOrganizationMemberByPath(organization.getPath(), null, "");
+        //2.如果仍有活动的人员,直接返回false
+        if(if_empty_members.size() != 0){
+            return false;
+        }
+
+        //3.如果没有活动的
         List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "%", null);
 
         List<Long> organizationIds = organizations.stream().map(r -> r.getId()).collect(Collectors.toList());
@@ -2268,11 +2281,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             return null;
         });
-
-        Timestamp end = new Timestamp(DateHelper.currentGMTTime().getTime());
-        Long endMili = System.currentTimeMillis();
-        LOGGER.debug("Delete Transction End :" + sdf.format(end));
-        LOGGER.debug("Delete Transction Total Spend :" + String.valueOf(endMili - startMili));
+        return true;
     }
 
     @Override
@@ -10664,8 +10673,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public void deleteChildrenOrganizationJobLevel(DeleteOrganizationIdCommand cmd) {
-        deleteOrganization(cmd);
+    public Boolean deleteChildrenOrganizationJobLevel(DeleteOrganizationIdCommand cmd) {
+       return deleteOrganization(cmd);
 
     }
 
@@ -10728,8 +10737,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public void deleteChildrenOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
-        deleteOrganization(cmd);
+    public Boolean deleteChildrenOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
+        return deleteOrganization(cmd);
     }
 
     @Override

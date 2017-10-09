@@ -1749,7 +1749,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result.get(0);
     }
 
-
     @Override
     public int countDepartments(String superiorPath) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

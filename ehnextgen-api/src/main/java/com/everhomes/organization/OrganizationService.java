@@ -15,6 +15,7 @@ import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
 import com.everhomes.rest.community_map.SearchCommunityMapContentsResponse;
 import com.everhomes.rest.organization.*;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -66,7 +67,7 @@ public interface OrganizationService {
 	OrganizationDTO getUserCurrentOrganization();
 
 	OrganizationDTO createChildrenOrganization(CreateOrganizationCommand cmd);
-	void deleteOrganization(DeleteOrganizationIdCommand cmd);
+	Boolean deleteOrganization(DeleteOrganizationIdCommand cmd);
 	void createOrganizationMember(CreateOrganizationMemberCommand cmd);
 	void deleteOrganizationMember(DeleteOrganizationIdCommand cmd);
 	void createOrganizationCommunity(CreateOrganizationCommunityCommand cmd);
@@ -380,13 +381,13 @@ public interface OrganizationService {
 	
 	void updateChildrenOrganizationJobPosition(UpdateOrganizationsCommand cmd);
 	
-	void deleteChildrenOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
+	Boolean deleteChildrenOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
 	
 	void createChildrenOrganizationJobLevel(CreateOrganizationCommand cmd);
 	
 	void updateChildrenOrganizationJobLevel(UpdateOrganizationsCommand cmd);
 
-	void deleteChildrenOrganizationJobLevel(DeleteOrganizationIdCommand cmd);
+	Boolean deleteChildrenOrganizationJobLevel(DeleteOrganizationIdCommand cmd);
 	
 	ListChildrenOrganizationJobLevelResponse listChildrenOrganizationJobLevels(ListAllChildrenOrganizationsCommand cmd);
 	

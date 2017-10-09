@@ -1081,8 +1081,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("deleteChildrenOrganizationJobPosition")
     @RestReturn(value = String.class)
     public RestResponse deleteChildrenOrganizationJobPosition(@Valid DeleteOrganizationIdCommand cmd) {
-        organizationService.deleteChildrenOrganizationJobPosition(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.deleteChildrenOrganizationJobPosition(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1194,8 +1193,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("deleteChildrenOrganizationJobLevel")
     @RestReturn(value = String.class)
     public RestResponse deleteChildrenOrganizationJobLevel(@Valid DeleteOrganizationIdCommand cmd) {
-        organizationService.deleteChildrenOrganizationJobLevel(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.deleteChildrenOrganizationJobLevel(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
