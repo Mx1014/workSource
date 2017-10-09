@@ -155,7 +155,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 			path = menu.getPath() + "/%";
 		}
 		Boolean isAdmin = resolver.checkOrganizationAdmin(userId, organizationId);
-		LOGGER.debug("userId: {}, organizationId: {}, isAdmin: {}", userId, organizationId, isAdmin);
+		LOGGER.debug("listEnterpriseWebMenu: userId: {}, organizationId: {}, isAdmin: {}", userId, organizationId, isAdmin);
 		if(isAdmin){
 			menus = webMenuProvider.listWebMenuByType(WebMenuType.ORGANIZATION.getCode(), categories, path, null);
 		}
