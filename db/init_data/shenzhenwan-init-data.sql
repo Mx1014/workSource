@@ -1361,3 +1361,32 @@ update `eh_launch_pad_items` set icon_uri='cs://1/image/aW1hZ2UvTVRveE56Y3lOREk1
 
 
 
+
+
+
+-- 新支付 copy from 4.9.4 by lqs 20170930
+-- 支付服务器链接
+SET @eh_configurations_id = (SELECT MAX(id) from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.callback.url', '/pay/payNotify', '新支付回调接口url', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'default.bind.phone', '12100001111', '绑手机号默认值', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.orderPaymentStatusQueryUri', '/order/queryOrderPaymentStatus', '查询支付单信息', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.home.url', 'https://payv2.zuolin.com/pay', '新支付homeUrl', '0', NULL);
+
+
+INSERT INTO `eh_payment_accounts` (`id`, `name`, `account_id`, `system_id`, `app_key`, `secret_key`, `create_time`)
+	VALUES(1, 'MyBayAccount', '10001', '1', 'cffd7a0a-cf59-41d3-9140-773161fc7047', 'y6Yc0xJ3ZgMVUuHWkWyXkn5FVB0pryqUMKVWJSwIXizHnP+TQzm0jPuU8z69imooQzAU3iWHZKtqJOr5IGZpCg==', UTC_TIMESTAMP());
+
+
+-- 支付方式、收款方、付款方
+INSERT INTO `eh_payment_users`(`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
+	VALUES (30001, 'EhOrganizations', 1035830, '2', 1020, UTC_TIMESTAMP());
+
+INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
+	VALUES (10001, 'parking', 999966, 'EhOrganizations', 1035830, null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), null);
+INSERT INTO `eh_payment_service_configs`(`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
+	VALUES (20001, '停车充值', 'parking', 999966, 'EhOrganizations', 1035830, null, null, NULL, 1, 1020, UTC_TIMESTAMP(), null);
+
+INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
+	VALUES (10002, 'rentalOrder', 999966, 'EhOrganizations', 1035830, null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), null);
+INSERT INTO `eh_payment_service_configs`(`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
+	VALUES (20002, '资源预约', 'rentalOrder', 999966, 'EhOrganizations', 1035830, null, null, NULL, 1, 1020, UTC_TIMESTAMP(), null);
