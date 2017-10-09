@@ -13269,7 +13269,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
     }
-	
+
+    /*
      * 删除公司级别以下及退出公司的记录
      **/
     private void deleteOrganizaitonMemberUnderEnterprise(List<Long> enterpriseIds, List<String> groupTypes, List<OrganizationMember> leaveMembers, String token) {
