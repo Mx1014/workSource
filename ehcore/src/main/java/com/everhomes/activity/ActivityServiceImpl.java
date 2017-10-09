@@ -4260,7 +4260,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         Condition orgCondition = null;
         if(organizationId != null) {
-            orgCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
+            orgCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ORGANIZATION.getCode());
             orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.eq(organizationId));
 
 			//范围帖子会在各个目标发一个clone帖子，同时有一个发送到全部clone帖子，还有一个发送到全部的real真身帖子  add by yanjun 20170807
