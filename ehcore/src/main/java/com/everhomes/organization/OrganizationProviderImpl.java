@@ -5285,7 +5285,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		SelectConditionStep<Record> step = context.select().from(Tables.EH_ORGANIZATIONS)
 				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
 		if (null != orgIds) {
-			step.and(Tables.EH_ORGANIZATIONS.GROUP_ID.in(orgIds));
+			step.and(Tables.EH_ORGANIZATIONS.ID.in(orgIds));
 		}
 		if (!StringUtils.isEmpty(groupName)) {
 			step.and(Tables.EH_ORGANIZATIONS.NAME.like("%" + groupName + "%"));

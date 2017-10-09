@@ -528,11 +528,24 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     @Override
     public List<UniongroupMemberDetail> listUniongroupMemberDetailsByUserName(Long ownerId, String userName) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        return context.select().from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).join(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+        return context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.UPDATE_TIME,
+                Tables.EH_UNIONGROUP_MEMBER_DETAILS.OPERATOR_UID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_TYPE,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME,
+                Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).join(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                 .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
                 .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.CONTACT_NAME.like("%"+userName+"%"))
-                .fetch().map(r -> ConvertHelper.convert(r, UniongroupMemberDetail.class));
+                .fetch().map(r -> {
+                    return RecordHelper.convert(r, UniongroupMemberDetail.class);
+                });
     }
 
     @Override
