@@ -28,6 +28,16 @@ public class AddRentalBillItemCommand {
 	@ItemType(AttachmentDTO.class)
 	private List<AttachmentDTO> rentalAttachments;
 
+	private String clientAppName;
+
+	public String getClientAppName() {
+		return clientAppName;
+	}
+
+	public void setClientAppName(String clientAppName) {
+		this.clientAppName = clientAppName;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

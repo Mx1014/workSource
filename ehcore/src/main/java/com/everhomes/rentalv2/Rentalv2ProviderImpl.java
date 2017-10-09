@@ -344,14 +344,14 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.getSequenceDomainFromTablePojo(EhRentalv2Orders.class));
 		rentalBill.setId(id);
 		//生成订单编号
-		SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMddHHmmssSSS");
-		String numberEnd = String.valueOf(id%1000);
-		if(numberEnd.length()==1)
-			numberEnd="00"+numberEnd;
-		if(numberEnd.length()==2)
-			numberEnd="0"+numberEnd;
-		String orderNo = sdf.format(new java.util.Date())+numberEnd;
-		rentalBill.setOrderNo(orderNo);
+//		SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMddHHmmssSSS");
+//		String numberEnd = String.valueOf(id%1000);
+//		if(numberEnd.length()==1)
+//			numberEnd="00"+numberEnd;
+//		if(numberEnd.length()==2)
+//			numberEnd="0"+numberEnd;
+//		String orderNo = sdf.format(new java.util.Date())+numberEnd;
+//		rentalBill.setOrderNo(orderNo);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2OrdersRecord record = ConvertHelper.convert(rentalBill,
 				EhRentalv2OrdersRecord.class);

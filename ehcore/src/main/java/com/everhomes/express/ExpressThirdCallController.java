@@ -1,6 +1,7 @@
 package com.everhomes.express;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -29,10 +30,12 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.discover.RestDoc;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.openapi.AppNamespaceMapping;
 import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.rest.express.ExpressServiceErrorCode;
+import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.NamespaceUserType;
 import com.everhomes.user.User;
@@ -95,8 +98,10 @@ public class ExpressThirdCallController {// extends ControllerBase
 	
 	@Autowired
     private UserProvider userProvider;
-    
 	
+    @Autowired
+    private LocaleStringService localeStringService;
+    
     
 	/**
 	 * <b>URL: /expressauth/authReq</b>
@@ -123,7 +128,9 @@ public class ExpressThirdCallController {// extends ControllerBase
         	try{
         		vaildParams(params, namespaceId);
         	}catch(Exception e){
-        		 response.sendRedirect(ERROR_REDIRECT_URL+URLEncoder.encode(e.getMessage(), "UTF-8"));
+        		 String homeurl =  configProvider.getValue(namespaceId, "home.url", "");
+        		 String content = ERROR_REDIRECT_URL+URLEncoder.encode(e.getMessage(), "UTF-8");
+        		 redirect(response, homeurl+content);
         		 return ;
         	}
         	//验证通过了，那么如果没有注册，则注册
@@ -133,8 +140,10 @@ public class ExpressThirdCallController {// extends ControllerBase
         		userId = list.get(0).getId();
         	}
         }
+        String homeurl =  configProvider.getValue(namespaceId, "home.url", "");
         if(userId == null){
-        	 response.sendRedirect(ERROR_REDIRECT_URL+"用户创建失败");
+    		 String content = ERROR_REDIRECT_URL+"用户创建失败";
+    		 redirect(response, homeurl+content);
         	 return ;
         }
         
@@ -144,7 +153,7 @@ public class ExpressThirdCallController {// extends ControllerBase
         LOGGER.info("Process express auth request, loginToken={}", loginToken);
         long endTime = System.currentTimeMillis();
         //重定向到快递的地址。
-        response.sendRedirect(SUCCESS_REDIRECT_URL);
+		redirect(response, homeurl+SUCCESS_REDIRECT_URL);
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process express auth request(req calculate), elspse={}, endTime={}", (endTime - startTime), endTime);
         }
@@ -365,10 +374,53 @@ public class ExpressThirdCallController {// extends ControllerBase
 		}
 	}
 	
+	/**
+	 * 重定向到https，因为后台重定向会道http
+	 * @param response
+	 * @param redirectUrl
+	 */
+	private void redirect(HttpServletResponse response, String redirectUrl) {
+	    if(LOGGER.isDebugEnabled()) {
+	        LOGGER.debug("Process weixin auth request(redirect), redirectUrl={}", redirectUrl);
+	    }
+	    
+	    response.setContentType("text/html; charset=utf8");  
+	    PrintWriter out = null;
+	    try {
+	        User user = new User();
+	        String title = localeStringService.getLocalizedString(OAuth2ServiceErrorCode.SCOPE, 
+	            String.valueOf(OAuth2ServiceErrorCode.ERROR_REDIRECTING), user.getLocale(), "Redirecting...");
+	        out = response.getWriter();
+	        out.println("<!DOCTYPE html>"); 
+	        out.println("<html lang=\"en\">"); 
+	        out.println("<head>"); 
+	        out.println("<meta charset=\"UTF-8\">"); 
+	        out.println("<title>" + title + "</title>"); 
+	        out.println("</head>"); 
+	        out.println("<body>"); 
+	        out.println("<script>"); 
+	        out.println("location.href=\"" + redirectUrl + "\";"); 
+	        out.println("</script>"); 
+	        out.println("</body>"); 
+	        out.println("</html>"); 
+	    } catch(Exception e) {
+	        LOGGER.error("Failed to print ouput by response, redirectUrl={}", redirectUrl, e);
+	    } finally {
+	        if(out != null) {
+	            try {
+	                out.close();
+	            } catch(Exception e) {
+	                LOGGER.error("Failed to close response writer, redirectUrl={}", redirectUrl, e);
+	            }
+	        }
+	    }
+	}
+	
 	public static void main(String[] args) {
 		 Map<String, String> params = new HashMap<String, String>();
 		 params.put("ns",999968+"");
 		 params.put("appkey","de875e40-1c5f-4a0c-94a6-0b37421b8554");
+		 params.put("appkey","24e4f946-a195-4165-b690-8498eb10a24b");
 		 params.put("nick","邓爽2");
 		 params.put("mobile","12345678902");
 		 params.put("uid","1234567xxxx");
@@ -384,6 +436,7 @@ public class ExpressThirdCallController {// extends ControllerBase
 			e.printStackTrace();
 		}
 		 byte[] bytes = md.digest((params.get("timestamp")+params.get("mobile")+"k9+3iUUSlUah1Uggv5ZKbTEktcIuvs7834ZThJS/CmA4eVBR2msOBak9uvut1Io0gZ9tdFJ0LpJ9ELfes8XXZw==").getBytes());
+		 bytes = md.digest((params.get("timestamp")+params.get("mobile")+"tz0itFqwTGsQ8tT9QYC06i03T8SEBrof8p3+U2C4lXdbCl/FO6gfQ40y9hdJ86cfGj0AwUKpi4btFcq0uuoOvQ==").getBytes());
 		 params.put("checksum",Hex.encodeHexString(bytes));
 		 StringBuffer buffer = new StringBuffer();
 		 for (Iterator iterator = params.keySet().iterator(); iterator.hasNext();) {
@@ -391,6 +444,7 @@ public class ExpressThirdCallController {// extends ControllerBase
 			buffer.append("&").append(key).append("=").append(params.get(key));
 		}
 		System.out.println("http://printtest.zuolin.com/evh/expressauth/authReq?"+buffer.toString().substring(1));
+		System.out.println("https://core.zuolin.com/evh/expressauth/authReq?"+buffer.toString().substring(1));
 		System.out.println("http://10.1.10.90/evh/expressauth/authReq?"+buffer.toString().substring(1));
 	}
 }

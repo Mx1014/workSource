@@ -742,15 +742,18 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         this.createDoorAuthLog(doorAuth);
 
         User tmpUser = new User();
-        tmpUser.setNickName(getRealName(currUser));
-        List<OrganizationDTO> dtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), currUser.getId(), OrganizationGroupType.ENTERPRISE);
-        if(dtos != null && !dtos.isEmpty()) {
-        		OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), dtos.get(0).getId());
-            if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
-            		tmpUser.setNickName(om.getContactName());
-            	}	
-        	}
-		
+        tmpUser.setNickName(user.getNickName());
+        if (currUser != null && currUser.getId() != 0) {
+            tmpUser.setNickName(getRealName(currUser));
+            List<OrganizationDTO> dtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), currUser.getId(), OrganizationGroupType.ENTERPRISE);
+            if(dtos != null && !dtos.isEmpty()) {
+                OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), dtos.get(0).getId());
+                if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
+                    tmpUser.setNickName(om.getContactName());
+                }
+            }
+        }
+
         tmpUser.setId(user.getId());
         tmpUser.setAccountName(user.getAccountName());
         //Send messages

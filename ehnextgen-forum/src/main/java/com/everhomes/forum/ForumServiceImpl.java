@@ -3830,25 +3830,31 @@ public class ForumServiceImpl implements ForumService {
         String creatorAvatar = post.getCreatorAvatar();
         
         Long forumId = post.getForumId();
+        Forum forum = null;
+        Group group = null;
+        GroupMember member = null;
+
         if(forumId != null) {
             // 普通圈使用圈成员的信息
-            Forum forum = forumProvider.findForumById(forumId);
-            if(forum != null && EntityType.GROUP.getCode().equalsIgnoreCase(forum.getOwnerType())) {
-                GroupMember member = groupProvider.findGroupMemberByMemberInfo(forum.getOwnerId(), 
-                    EntityType.USER.getCode(), post.getCreatorUid());
-                if(member != null) {
-                    creatorNickName = member.getMemberNickName();
-                    creatorAvatar = member.getMemberAvatar();
-                    if(creatorNickName == null || creatorNickName.trim().length() == 0) {
-                        creatorNickName = member.getMemberNickName();
-                    }
-                    if(creatorAvatar == null || creatorAvatar.trim().length() == 0){
-                        creatorAvatar = member.getMemberAvatar();
-                    }
-                }
+            forum = forumProvider.findForumById(forumId);
+        }
+
+        if(forum != null && EntityType.GROUP.getCode().equalsIgnoreCase(forum.getOwnerType())) {
+            group = groupProvider.findGroupById(forum.getOwnerId());
+            member = groupProvider.findGroupMemberByMemberInfo(forum.getOwnerId(), EntityType.USER.getCode(), post.getCreatorUid());
+        }
+
+        if(member != null) {
+            creatorNickName = member.getMemberNickName();
+            creatorAvatar = member.getMemberAvatar();
+            if(creatorNickName == null || creatorNickName.trim().length() == 0) {
+                creatorNickName = member.getMemberNickName();
+            }
+            if(creatorAvatar == null || creatorAvatar.trim().length() == 0){
+                creatorAvatar = member.getMemberAvatar();
             }
         }
-        
+
         // 无昵称时直接使用USER表中的信息作为发帖人的信息
         User creator = userProvider.findUserById(post.getCreatorUid());
         if(creator != null) {
@@ -3857,6 +3863,12 @@ public class ForumServiceImpl implements ForumService {
                 creatorNickName = creator.getNickName();
             }
             if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
+                creatorAvatar = creator.getAvatar();
+            }
+
+            // 在俱乐部里发帖的时候显示的昵称和头像用eh_users表里的   add by xq.tian  2017/09/18
+            if (group != null && PrivateFlag.fromCode(group.getPrivateFlag()) == PrivateFlag.PUBLIC) {
+                creatorNickName = creator.getNickName();
                 creatorAvatar = creator.getAvatar();
             }
         }

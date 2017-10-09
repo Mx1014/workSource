@@ -87,8 +87,9 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
 
-@Component
+@Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContractServiceImpl.class);
@@ -178,11 +179,11 @@ public class ContractServiceImpl implements ContractService {
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 
-		if(namespaceId == 999971) {
-			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
-			ListContractsResponse response = handler.listContracts(cmd);
-			return response;
-		}
+//		if(namespaceId == 999971) {
+//			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+//			ListContractsResponse response = handler.listContracts(cmd);
+//			return response;
+//		}
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null?0L:cmd.getPageAnchor();
 		int from = (int) (pageAnchor * pageSize);
@@ -453,10 +454,10 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public List<Object> findCustomerByContractNum(String contractNum,Long ownerId,String ownerType) {
-		if(UserContext.getCurrentNamespaceId()== 999971){
-			//找张江高科
-//			return null;
-		}
+//		if(UserContext.getCurrentNamespaceId()== 999971){
+//			//找张江高科
+////			return null;
+//		}
 		return contractProvider.findCustomerByContractNum(contractNum);
 	}
 
@@ -671,6 +672,7 @@ public class ContractServiceImpl implements ContractService {
 					mapping.setNamespaceId(contract.getNamespaceId());
 //					mapping.setOrganizationName(contract.getCustomerName());
 					mapping.setContractId(contract.getId());
+					mapping.setAreaSize(buildingApartment.getChargeArea());
 					mapping.setContractNumber(contract.getContractNumber());
 					mapping.setStatus(CommonStatus.ACTIVE.getCode());
 					mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -922,12 +924,14 @@ public class ContractServiceImpl implements ContractService {
 
 				List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
 				if(mappings != null && mappings.size() > 0) {
-					//先检查是否全是待租的，不是的话报错
-					for(CommunityAddressMapping mapping : mappings) {
-						if(!AddressMappingStatus.FREE.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
-							LOGGER.error("contract apartment is not all free! mapping: {}", mapping);
-							throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_APARTMENT_IS_NOT_FREE,
-									"contract apartment is not all free!");
+					//对于审批不通过合同 先检查是否全是待租的，不是的话报错
+					if(ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))){
+						for(CommunityAddressMapping mapping : mappings) {
+							if(!AddressMappingStatus.FREE.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
+								LOGGER.error("contract apartment is not all free! mapping: {}", mapping);
+								throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_CONTRACT_APARTMENT_IS_NOT_FREE,
+										"contract apartment is not all free!");
+							}
 						}
 					}
 
@@ -940,8 +944,9 @@ public class ContractServiceImpl implements ContractService {
 
 			contract.setStatus(cmd.getResult());
 			contractProvider.updateContract(contract);
-			addToFlowCase(contract);
 			contractSearcher.feedDoc(contract);
+			addToFlowCase(contract);
+
 		}
 
 	}
@@ -1052,12 +1057,12 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public ContractDetailDTO findContract(FindContractCommand cmd) {
-		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
-		if(namespaceId == 999971) {
-			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
-			ContractDetailDTO response = handler.findContract(cmd);
-			return response;
-		}
+//		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+//		if(namespaceId == 999971) {
+//			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+//			ContractDetailDTO response = handler.findContract(cmd);
+//			return response;
+//		}
 		Contract contract = checkContract(cmd.getId());
 		ContractDetailDTO dto = ConvertHelper.convert(contract, ContractDetailDTO.class);
 		User creator = userProvider.findUserById(dto.getCreateUid());
@@ -1111,16 +1116,16 @@ public class ContractServiceImpl implements ContractService {
 		} else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getTargetType()))) {
 			UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(cmd.getTargetId(), cmd.getNamespaceId());
 			if(userIdentifier != null) {
-				Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
-				if(namespaceId == 999971) {
-					ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
-					ListIndividualCustomerContractsCommand command = new ListIndividualCustomerContractsCommand();
-					command.setNamespaceId(cmd.getNamespaceId());
-					command.setCommunityId(cmd.getCommunityId());
-					command.setContactToken(userIdentifier.getIdentifierToken());
-					List<ContractDTO> response = handler.listIndividualCustomerContracts(command);
-					return response;
-				}
+//				Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+//				if(namespaceId == 999971) {
+//					ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+//					ListIndividualCustomerContractsCommand command = new ListIndividualCustomerContractsCommand();
+//					command.setNamespaceId(cmd.getNamespaceId());
+//					command.setCommunityId(cmd.getCommunityId());
+//					command.setContactToken(userIdentifier.getIdentifierToken());
+//					List<ContractDTO> response = handler.listIndividualCustomerContracts(command);
+//					return response;
+//				}
 				List<OrganizationOwner> owners = organizationProvider.findOrganizationOwnerByTokenOrNamespaceId(userIdentifier.getIdentifierToken(), cmd.getNamespaceId());
 				if(owners != null && owners.size() > 0) {
 					List<ContractDTO> contracts = new ArrayList<>();
@@ -1145,11 +1150,11 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public List<ContractDTO> listEnterpriseCustomerContracts(ListEnterpriseCustomerContractsCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
-		if(namespaceId == 999971) {
-			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
-			List<ContractDTO> response = handler.listEnterpriseCustomerContracts(cmd);
-			return response;
-		}
+//		if(namespaceId == 999971) {
+//			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+//			List<ContractDTO> response = handler.listEnterpriseCustomerContracts(cmd);
+//			return response;
+//		}
 
 		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getEnterpriseCustomerId(), CustomerType.ENTERPRISE.getCode());
 		if(contracts != null && contracts.size() > 0) {
@@ -1166,17 +1171,17 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public List<ContractDTO> listIndividualCustomerContracts(ListIndividualCustomerContractsCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
-		if(namespaceId == 999971) {
-			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
-			if(cmd.getIndividualCustomerId() != null) {
-				OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(cmd.getIndividualCustomerId());
-				if(owner != null) {
-					cmd.setContactToken(owner.getContactToken());
-				}
-			}
-			List<ContractDTO> response = handler.listIndividualCustomerContracts(cmd);
-			return response;
-		}
+//		if(namespaceId == 999971) {
+//			ContractHandler handler = PlatformContext.getComponent(ContractHandler.CONTRACT_PREFIX + namespaceId);
+//			if(cmd.getIndividualCustomerId() != null) {
+//				OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(cmd.getIndividualCustomerId());
+//				if(owner != null) {
+//					cmd.setContactToken(owner.getContactToken());
+//				}
+//			}
+//			List<ContractDTO> response = handler.listIndividualCustomerContracts(cmd);
+//			return response;
+//		}
 
 		List<Contract> contracts = contractProvider.listContractByCustomerId(cmd.getCommunityId(), cmd.getIndividualCustomerId(), CustomerType.INDIVIDUAL.getCode());
 		if(contracts != null && contracts.size() > 0) {
@@ -1200,6 +1205,7 @@ public class ContractServiceImpl implements ContractService {
 		if(contractApartments != null && contractApartments.size() > 0) {
 			List<BuildingApartmentDTO> apartmentDtos = contractApartments.stream().map(apartment -> {
 				BuildingApartmentDTO apartmentDto = ConvertHelper.convert(apartment, BuildingApartmentDTO.class);
+				apartmentDto.setChargeArea(apartment.getAreaSize());
 				return apartmentDto;
 			}).collect(Collectors.toList());
 			dto.setApartments(apartmentDtos);

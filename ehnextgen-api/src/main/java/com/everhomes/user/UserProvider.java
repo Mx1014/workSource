@@ -34,7 +34,9 @@ public interface UserProvider {
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
     UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerId, byte identifierType);
-    
+
+    UserIdentifier findIdentifierByOwnerAndTypeAndClaimStatus(long ownerUid, byte identifierType, byte claimStatus);
+
     void createUserGroup(UserGroup userGroup);
     void updateUserGroup(UserGroup userGroup);
     void deleteUserGroup(UserGroup userGroup);
@@ -138,5 +140,7 @@ public interface UserProvider {
      * @return
      */
     UserIdentifier findClaimedIdentifierByTokenAndNotUserId(Integer namespaceId, String identifierToken, Long userId);
+
+    int countUserByNamespaceIdAndNamespaceUserType(Integer namespaceId, String namespaceUserType);
 
 }

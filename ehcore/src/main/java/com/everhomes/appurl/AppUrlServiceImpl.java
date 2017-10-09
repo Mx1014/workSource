@@ -31,6 +31,11 @@ public class AppUrlServiceImpl implements AppUrlService {
 	public AppUrlDTO getAppInfo(GetAppInfoCommand cmd) {
 		
 		AppUrls appUrls = appUrlProvider.findByNamespaceIdAndOSType(cmd.getNamespaceId(), cmd.getOsType());
+
+		//成都的项目没有app  add by yanjun 20170921
+		if(appUrls == null){
+			return null;
+		}
 		AppUrlDTO dto = ConvertHelper.convert(appUrls, AppUrlDTO.class);
 		dto.setLogoUrl(null);
 		

@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <p>
  * <ul>
+ * <li>name: 小区名称</li>
+ * <li>aliasName: 小区别称</li>
  * <li>communityId: 被更新的小区Id</li>
  * <li>address: 小区地址</li>
  * <li>cityId: 小区所在城市IdId</li>
@@ -21,6 +23,11 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UpdateCommunityAdminCommand {
+
+    private String name;
+
+    private String aliasName;
+
     @NotNull
     private Long communityId;
     
@@ -36,6 +43,22 @@ public class UpdateCommunityAdminCommand {
     private List<CommunityGeoPointDTO> geoPointList;
     
     public UpdateCommunityAdminCommand() {
+    }
+
+    public String getAliasName() {
+        return aliasName;
+    }
+
+    public void setAliasName(String aliasName) {
+        this.aliasName = aliasName;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Long getCommunityId() {

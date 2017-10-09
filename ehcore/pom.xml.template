@@ -338,6 +338,18 @@
 			<version>2.2.1</version>
 		</dependency>-->
 
+        <dependency>
+            <groupId>com.everhomes.pay</groupId>
+            <artifactId>ehpay-rest</artifactId>
+            <version>${ehpay-rest.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.everhomes.pay</groupId>
+            <artifactId>ehpay-rest-response</artifactId>
+            <version>${ehpay-rest-response.version}</version>
+        </dependency>
+
 	</dependencies>
 
 	<build>

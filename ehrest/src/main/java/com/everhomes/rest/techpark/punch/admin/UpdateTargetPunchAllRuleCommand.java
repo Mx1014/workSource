@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdateTargetPunchAllRuleCommand {
 
+	
 	@NotNull
 	private String ownerType;
 	@NotNull

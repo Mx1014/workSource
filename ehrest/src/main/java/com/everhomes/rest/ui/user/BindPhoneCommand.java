@@ -1,0 +1,84 @@
+package com.everhomes.rest.ui.user;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ *     <li>phone: phone</li>
+ *     <li>regionCode: regionCode</li>
+ *     <li>verificationCode: verificationCode</li>
+ *     <li>bindPhoneType: 绑定方式 0-微信用户绑定到已有手机用户，1-手机绑定到微信用户，2-微信用户已经和手机绑定过将更新手机  参考{@link BindPhoneType}</li>
+ *     <li>password: password，不填则后台随机生成一个</li>
+ *     <li>oldPhone: oldPhone</li>
+ * </ul>
+ */
+public class BindPhoneCommand {
+
+	private String phone;
+
+	private Integer regionCode;
+
+	private String verificationCode;
+
+	private Byte bindPhoneType;
+
+	private String password;
+
+	private String oldPhone;
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public BindPhoneCommand() {
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getVerificationCode() {
+		return verificationCode;
+	}
+
+	public void setVerificationCode(String verificationCode) {
+		this.verificationCode = verificationCode;
+	}
+
+	public Byte getBindPhoneType() {
+		return bindPhoneType;
+	}
+
+	public void setBindPhoneType(Byte bindPhoneType) {
+		this.bindPhoneType = bindPhoneType;
+	}
+
+	public String getOldPhone() {
+		return oldPhone;
+	}
+
+	public void setOldPhone(String oldPhone) {
+		this.oldPhone = oldPhone;
+	}
+
+	public Integer getRegionCode() {
+		return regionCode;
+	}
+
+	public void setRegionCode(Integer regionCode) {
+		this.regionCode = regionCode;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+}

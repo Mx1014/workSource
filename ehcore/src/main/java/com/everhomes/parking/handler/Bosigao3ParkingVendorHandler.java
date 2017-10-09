@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.*;
 import com.everhomes.parking.bosigao.*;
 import com.everhomes.rest.organization.VendorType;
@@ -30,11 +31,6 @@ import com.everhomes.util.RuntimeErrorException;
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO3")
 public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Bosigao3ParkingVendorHandler.class);
-
-	@Autowired
-	private ParkingProvider parkingProvider;
-	@Autowired
-    private ConfigurationProvider configProvider;
 	
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
@@ -48,8 +44,11 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 			//格式yyyyMMddHHmmss
 			String validEnd = card.getLimitEnd();
 			Long endTime = strToLong(validEnd);
+
 			if (checkExpireTime(parkingLot, endTime)) {
-				return resultList;
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 			}
 			
 			String plateOwnerName = card.getUserName();
@@ -66,8 +65,9 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 			parkingCardDTO.setEndTime(endTime);
 			parkingCardDTO.setCardType(cardType);
 			parkingCardDTO.setCardNumber(cardNumber);
+			//历史遗留下来，已废弃
 			parkingCardDTO.setIsValid(true);
-			
+
 			resultList.add(parkingCardDTO);
 		}
         return resultList;
@@ -101,6 +101,12 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
         }
     	return card;
     }
+
+	@Override
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
+		updateParkingRechargeOrderRateInfo(parkingLot, order);
+
+	}
 
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
 
@@ -179,7 +185,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 		String parkingId = configProvider.getValue("parking.techpark.parkingId", "");
 		if (verifyParkingCar(order.getPlateNumber(), parkingId)) {
 			String url = configProvider.getValue("parking.techpark.url", "");
-			String cost = String.valueOf((order.getPrice().multiply(new BigDecimal(100))).intValue());
+			String cost = String.valueOf((order.getOriginalPrice().multiply(new BigDecimal(100))).intValue());
 
 			JSONObject jsonParam = new JSONObject();
 			jsonParam.put("OrderID", order.getOrderToken());
@@ -239,7 +245,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
     }
     
     @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot, String plateNumber, String cardNo) {
     	
     	List<ParkingRechargeRate> parkingRechargeRateList;
     	
@@ -255,6 +261,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
     	
     	List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
 			ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+			dto.setCardTypeId(r.getCardType());
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
 			return dto;

@@ -3,12 +3,13 @@ package com.everhomes.contract;
 
 import com.everhomes.rest.contract.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 import java.util.List;
 
 public interface ContractService {
-
+	String CONTRACT_PREFIX = "contract-";
 
 	public ListContractsResponse listContracts(ListContractsCommand cmd);
 
@@ -36,6 +37,5 @@ public interface ContractService {
 	ContractParamDTO getContractParam(GetContractParamCommand cmd);
 
 	String generateContractNumber();
-
 
 }

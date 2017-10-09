@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.pmtask.*;
 
 public interface PmTaskService {
@@ -24,6 +26,8 @@ public interface PmTaskService {
 	PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd);
 	
 	PmTaskDTO createTask(CreateTaskCommand cmd);
+
+	ListBuildingCommandResponse listBuildings(ListBuildingCommand cmd);
 	
 	PmTaskDTO createTaskByOrg(CreateTaskCommand cmd);
 	

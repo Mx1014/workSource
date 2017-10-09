@@ -1,6 +1,8 @@
 package com.everhomes.asset;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.asset.*;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
@@ -10,6 +12,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Wentian on 2017/2/20.
@@ -57,7 +60,7 @@ public interface AssetProvider {
 
     ShowCreateBillDTO showCreateBill(Long billGroupId);
 
-    ShowBillDetailForClientResponse getBillDetailByDateStr(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId);
+    ShowBillDetailForClientResponse getBillDetailByDateStr(Byte billStatus,Long ownerId, String ownerType, Long targetId, String targetType, String dateStr,Long contractId);
 
     ListBillsDTO creatPropertyBill(BillGroupDTO billGroupDTO,String dateStr, Byte isSettled, String noticeTel, Long ownerId, String ownerType, String targetName,Long targetId,String targetType,String contractNum,Long contractId);
 
@@ -77,7 +80,7 @@ public interface AssetProvider {
 
     void modifyNotSettledBill(Long billId, BillGroupDTO billGroupDTO,String targetType,Long targetId,String targetName);
 
-    List<ListBillExemptionItemsDTO> listBillExemptionItems(Long billId, int pageOffSet, Integer pageSize, String dateStr, String targetName);
+    List<ListBillExemptionItemsDTO> listBillExemptionItems(String billId, int pageOffSet, Integer pageSize, String dateStr, String targetName);
 
     void deleteBill(Long billId);
 
@@ -91,7 +94,7 @@ public interface AssetProvider {
 
     void saveContractVariables(List<EhPaymentContractReceiver> contractDateList);
 
-    List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId);
+    List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId,Long ownerId,String ownerType);
 
     void increaseNoticeTime(List<Long> billIds);
 
@@ -128,4 +131,39 @@ public interface AssetProvider {
     List<PaymentBillGroup> listAllBillGroups();
 
     void updateBillSwitchOnTime(String billDateStr);
+
+    String findZjgkCommunityIdentifierById(Long ownerId);
+
+    Long findTargetIdByIdentifier(String customerIdentifier);
+
+    String findAppName(Integer currentNamespaceId);
+
+    Long findOrganizationIdByIdentifier(String targetId);
+
+    AssetVendor findAssetVendorByNamespace(Integer namespaceId);
+
+    String findIdentifierByUid(Long aLong);
+
+
+    Long saveAnOrderCopy(String payerType, String payerId, String amountOwed,  String clientAppName, Long communityId, String contactNum, String openid, String payerName, Long expireTimePeriod,Integer namespaceId);
+
+    Long findAssetOrderByBillIds(List<String> billIds);
+
+    void saveOrderBills(List<BillIdAndAmount> bills, Long orderId);
+
+    AssetPaymentOrder findAssetPaymentById(Long orderId);
+
+    List<AssetPaymentOrderBills> findBillsById(Long orderId);
+
+    void changeOrderStaus(Long orderId, Byte finalOrderStatus);
+
+    void changeBillStatusOnOrder(Map<String, Integer> billStatuses,Long orderId);
+
+
+    PaymentUser findByOwner(String userType, Long id);
+
+    PaymentAccount findPaymentAccount();
+
+    void changeBillStatusOnPaiedOff(List<Long> billIds);
+
 }

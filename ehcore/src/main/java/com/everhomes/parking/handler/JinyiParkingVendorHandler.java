@@ -48,10 +48,6 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 	DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-	@Autowired
-    private ConfigurationProvider configProvider;
-	@Autowired
-	private LocaleTemplateService localeTemplateService;
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
@@ -67,7 +63,9 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 			Long endTime = Timestamp.valueOf(time).getTime();
 
 			if (checkExpireTime(parkingLot, endTime)) {
-				return resultList;
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 			}
 			
 			String plateOwnerName = card.getOwnername();
@@ -203,7 +201,11 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		JinyiCard card = getCardInfo(order.getPlateNumber());
 
+
 		if (null != card) {
+
+			String startTime = card.getMaxuseddate() + " 23:59:59";
+
 			//根据查询月卡时的计费id来创建订单
 			order.setOrderToken(card.getCalcid());
 
@@ -231,15 +233,15 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 				JinyiCard newCard = getCardInfo(order.getPlateNumber());
 
 				if (null != newCard) {
-					String expiredate = newCard.getExpiredate() + " 23:59:59";
-					String effectdate = newCard.getEffectdate() + " 00:00:00";
-					LocalDateTime expireTime = LocalDateTime.parse(expiredate, dtf2);
-					LocalDateTime effectTime = LocalDateTime.parse(effectdate, dtf2);
+					String endTime = newCard.getMaxuseddate() + " 23:59:59";
+					LocalDateTime tempStartTime = LocalDateTime.parse(startTime, dtf2);
+					tempStartTime = tempStartTime.plusSeconds(1L);
+					LocalDateTime tempEndTime = LocalDateTime.parse(endTime, dtf2);
 
 					order.setErrorDescriptionJson(notifyJson);
 
-					order.setStartPeriod(Timestamp.valueOf(effectTime));
-					order.setEndPeriod(Timestamp.valueOf(expireTime));
+					order.setStartPeriod(Timestamp.valueOf(tempStartTime));
+					order.setEndPeriod(Timestamp.valueOf(tempEndTime));
 				}
 
 				if(notifyEntity.isSuccess()) {
@@ -262,18 +264,16 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
     	return ret;
     }
 
-	private ParkingCardType createDefaultCardType() {
-		//金溢对接停车 没有月卡类型，默认一个月卡类型
-		ParkingCardType cardType = new ParkingCardType();
-		cardType.setTypeId("月卡");
-		cardType.setTypeName("月卡");
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
 
-		return cardType;
+		JinyiCard card = getCardInfo(order.getPlateNumber());
+
+		BigDecimal ratePrice = card.getPaidin();
+
+		checkAndSetOrderPrice(parkingLot, order, ratePrice);
+
 	}
 
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-		//什么都不做, 金溢对接，
-	}
     @Override
     public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
     	
@@ -298,6 +298,7 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 				rate.setRateName(rateName);
 
 				ParkingCardType parkingCardType = createDefaultCardType();
+				rate.setCardTypeId(parkingCardType.getTypeId());
 				rate.setCardType(parkingCardType.getTypeName());
 				rate.setMonthCount(new BigDecimal(MONTH_COUNT));
 				rate.setPrice(card.getPaidin());

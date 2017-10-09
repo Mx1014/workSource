@@ -10,8 +10,8 @@ import java.util.List;
 public class ZJEnterprise {
     private String communityIdentifier;
     private Long communityId;
-    @ItemType(String.class)
-    private List<String> apartmentIdentifierList;
+    @ItemType(CommunityAddressDTO.class)
+    private List<CommunityAddressDTO> addressList;
     private String enterpriseIdentifier;
     private String name;
     private String customerNumber;
@@ -21,6 +21,7 @@ public class ZJEnterprise {
     private String contactGender;
     private String contactMobile;
     private String contactPhone;
+    private String contactPosition;
     private String contactAddress;
     private String contactOffficePhone;
     private String contactFamilyPhone;
@@ -51,12 +52,12 @@ public class ZJEnterprise {
         this.dealed = dealed;
     }
 
-    public List<String> getApartmentIdentifierList() {
-        return apartmentIdentifierList;
+    public List<CommunityAddressDTO> getAddressList() {
+        return addressList;
     }
 
-    public void setApartmentIdentifierList(List<String> apartmentIdentifierList) {
-        this.apartmentIdentifierList = apartmentIdentifierList;
+    public void setAddressList(List<CommunityAddressDTO> addressList) {
+        this.addressList = addressList;
     }
 
     public String getCommunityIdentifier() {
@@ -137,6 +138,14 @@ public class ZJEnterprise {
 
     public void setContactPhone(String contactPhone) {
         this.contactPhone = contactPhone;
+    }
+
+    public String getContactPosition() {
+        return contactPosition;
+    }
+
+    public void setContactPosition(String contactPosition) {
+        this.contactPosition = contactPosition;
     }
 
     public String getCorpEmail() {

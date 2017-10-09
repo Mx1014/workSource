@@ -22,6 +22,8 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.family.FamilyUtils;
 import com.everhomes.group.Group;
+import com.everhomes.group.GroupAdminStatus;
+import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -29,7 +31,6 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
-import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmContact;
@@ -148,6 +149,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Autowired
     private PropertyMgrService propertyMgrService;
+
+    @Autowired
+    private UserService userService;
 
     @PostConstruct
     public void setup() {
@@ -1734,7 +1738,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     public ListNearbyMixCommunitiesCommandV2Response listPopularCommunitiesWithType(ListNearbyMixCommunitiesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         ListingLocator locator = new ListingLocator();
-        Integer pageSize = 20;
+        Integer pageSize = 40;
         if (cmd.getPageSize() != null) {
             pageSize = cmd.getPageSize();
         }
@@ -1751,37 +1755,50 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             communities = communityProvider.listCommunities(namespaceId, locator, 1000, null);
         }
 
-        Map<Integer, CommunityDTO> sortMap = new TreeMap<Integer, CommunityDTO>(new Comparator<Integer>() {
-            public int compare(Integer o1, Integer o2) {
-                //降序
-                return o2.compareTo(o1);
-            }
-        });
-        communities.forEach(r -> {
-            List<OrganizationCommunityRequest> organizationCommunityRequests = this.organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, r.getId(), 1000, null);
-            Integer communityUserCount = organizationProvider.countUserOrganization(namespaceId, r.getId(), null);
-            sortMap.put(communityUserCount, ConvertHelper.convert(r, CommunityDTO.class));
-//            if(organizationCommunityRequests != null && organizationCommunityRequests.size() > 0){
-//                organizationCommunityRequests.forEach(x -> {
-////                Organization org = this.organizationProvider.findOrganizationById(x.getMemberId());
-////                if(org.getGroupType() ==  OrganizationGroupType.ENTERPRISE.getCode()){
-////                    Integer communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
-////                }
-//                    Integer communityUserCount = organizationProvider.countUserOrganization(namespaceId, x.getCommunityId(), null);
-//                    Community community = this.communityProvider.findCommunityById(x.getCommunityId());
-//                    sortMap.put(communityUserCount, ConvertHelper.convert(community, CommunityDTO.class));
-//                });
-//            }else{
-//                sortMap.put(0, ConvertHelper.convert(r, CommunityDTO.class));
-//            }
-        });
+        List<CommunityDTO> dtos = communities.stream().map(r -> {
+            Integer communityUserCount = 0;
+            if (r.getCommunityType() == CommunityType.RESIDENTIAL.getCode()) {
+                List<Group> groups = groupProvider.listGroupByCommunityId(r.getId(), (loc, query) -> {
+                    Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
+                    query.addConditions(c);
+                    return query;
+                });
 
-        if (sortMap != null) {
+                List<Long> groupIds = new ArrayList<Long>();
+                for (Group group : groups) {
+                    groupIds.add(group.getId());
+                }
+
+                CrossShardListingLocator locator_g = new CrossShardListingLocator();
+                List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds, locator_g, null, (loc, query) -> {
+                    Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+                    c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
+                    query.addConditions(c);
+                    query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
+                    return query;
+                });
+
+                communityUserCount = groupMembers.size();
+
+            } else {
+                communityUserCount = organizationProvider.countUserOrganization(namespaceId, r.getId(), null);
+            }
+
+            CommunityDTO dto = ConvertHelper.convert(r, CommunityDTO.class);
+            dto.setCommunityUserCount(communityUserCount);
+            return dto;
+        }).collect(Collectors.toList());
+
+        if (dtos != null && dtos.size() > 0) {
             ListNearbyMixCommunitiesCommandV2Response response = new ListNearbyMixCommunitiesCommandV2Response();
-            List<CommunityDTO> dtos = new ArrayList<>();
-            dtos.addAll(sortMap.values());
-            if(pageSize < dtos.size()){
-                dtos = dtos.subList(0, pageSize - 1);
+            Collections.sort(dtos, new Comparator<CommunityDTO>() {
+                public int compare(CommunityDTO arg0, CommunityDTO arg1) {
+                    return arg1.getCommunityUserCount().compareTo(arg0.getCommunityUserCount());
+                }
+            });
+
+            if (pageSize < dtos.size()) {
+                dtos = dtos.subList(0, pageSize);
             }
             response.setDtos(dtos);
             return response;
@@ -2140,7 +2157,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     }
 
-    private ListNearbyMixCommunitiesCommandResponse listMixCommunitiesByDistance(ListNearbyMixCommunitiesCommand cmd
+    @Override
+    public ListNearbyMixCommunitiesCommandResponse listMixCommunitiesByDistance(ListNearbyMixCommunitiesCommand cmd
             , ListingLocator locator, int pageSize) {
         ListNearbyMixCommunitiesCommandResponse resp = new ListNearbyMixCommunitiesCommandResponse();
         List<CommunityDTO> results = new ArrayList<>();
@@ -2243,5 +2261,28 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 cmd.getBuildingName(), cmd.getApartmentName());
         return ConvertHelper.convert(address, AddressDTO.class);
 
+    }
+
+
+    @Override
+    public List<Community> listMixCommunitiesByDistanceWithNamespaceId(ListNearbyMixCommunitiesCommand cmd, ListingLocator locator, int pageSize){
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Long userId = UserContext.current().getUser().getId();
+        List<Community> communities = this.communityProvider.listCommunitiesByNamespaceId(namespaceId);
+        if(communities != null){
+            List<Long> communityIds = communities.stream().map(r->{
+                return r.getId();
+            }).collect(Collectors.toList());
+            List<CommunityGeoPoint> pointList = this.communityProvider.listCommunityGeoPointByGeoHashInCommunities(cmd.getLatigtue(), cmd.getLongitude(), 5, communityIds);
+            if(pointList != null && pointList.size() > 0){
+                List<Community> communities_after = pointList.stream().map(r->{
+                    return this.communityProvider.findCommunityById(r.getCommunityId());
+                }).collect(Collectors.toList());
+                return communities_after;
+            }else {
+                return communities;
+            }
+        }
+        return null;
     }
 }

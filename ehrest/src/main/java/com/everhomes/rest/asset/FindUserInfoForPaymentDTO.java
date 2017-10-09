@@ -17,7 +17,7 @@ import java.util.List;
  *</ul>
  */
 public class FindUserInfoForPaymentDTO {
-    private Long contractId;
+    private String contractId;
     private String contractNum;
 
 
@@ -29,12 +29,11 @@ public class FindUserInfoForPaymentDTO {
         this.contractNum = contractNum;
     }
 
-    public Long getContractId() {
-
+    public String getContractId() {
         return contractId;
     }
 
-    public void setContractId(Long contractId) {
+    public void setContractId(String contractId) {
         this.contractId = contractId;
     }
 }

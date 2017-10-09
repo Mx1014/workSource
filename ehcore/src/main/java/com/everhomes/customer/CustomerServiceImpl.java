@@ -3,8 +3,10 @@ package com.everhomes.customer;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.ContractService;
+import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleStringService;
@@ -31,10 +33,13 @@ import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -97,13 +102,27 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
 
+    @Autowired
+    private FieldService fieldService;
+
+    private void checkPrivilege() {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if(namespaceId == 999971) {
+            LOGGER.error("Insufficient privilege, zjgk modify data");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Insufficient privilege");
+        }
+    }
+
     @Override
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
+        checkPrivilege();
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setNamespaceId(UserContext.getCurrentNamespaceId());
         if(cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
+        customer.setCreatorUid(UserContext.currentUserId());
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
 
         OrganizationDTO organizationDTO = createOrganization(customer);
@@ -116,11 +135,13 @@ public class CustomerServiceImpl implements CustomerService {
 
     private EnterpriseCustomerDTO convertToDTO(EnterpriseCustomer customer) {
         EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
-        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
+//        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
+        ScopeFieldItem categoryItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getCategoryItemId());
         if(categoryItem != null) {
             dto.setCategoryItemName(categoryItem.getItemDisplayName());
         }
-        ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
+//        ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
+        ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
         if(levelItem != null) {
             dto.setLevelItemName(levelItem.getItemDisplayName());
         }
@@ -146,6 +167,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd) {
+        checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         updateCustomer.setNamespaceId(customer.getNamespaceId());
@@ -193,6 +215,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteEnterpriseCustomer(DeleteEnterpriseCustomerCommand cmd) {
+        checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         customer.setStatus(CommonStatus.INACTIVE.getCode());
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
@@ -304,7 +327,8 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setContactPhone(str.getContactPhone());
             customer.setContactAddress(str.getContactAddress());
     //产品期望改为不存在的导入失败 by xiongying20170904
-            ScopeFieldItem scopeCategoryFieldItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getCategoryItemName());
+//            ScopeFieldItem scopeCategoryFieldItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getCategoryItemName());
+            ScopeFieldItem scopeCategoryFieldItem = fieldService.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getCategoryItemName());
             if(scopeCategoryFieldItem == null) {
                 LOGGER.error("enterpirse customer category is null, data = {}", str);
                 log.setData(str);
@@ -314,7 +338,8 @@ public class CustomerServiceImpl implements CustomerService {
                 continue;
             }
             customer.setCategoryItemId(scopeCategoryFieldItem.getItemId());
-            ScopeFieldItem scopeLevelFieldItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getLevelItemName());
+//            ScopeFieldItem scopeLevelFieldItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getLevelItemName());
+            ScopeFieldItem scopeLevelFieldItem = fieldService.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), ModuleName.ENTERPRISE_CUSTOMER.getName(), str.getLevelItemName());
             if(scopeLevelFieldItem == null) {
                 LOGGER.error("enterpirse customer level is null, data = {}", str);
                 log.setData(str);
@@ -478,49 +503,56 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerTalentDTO getCustomerTalent(GetCustomerTalentCommand cmd) {
         CustomerTalent talent = checkCustomerTalent(cmd.getId(), cmd.getCustomerId());
-        return convertCustomerTalentDTO(talent);
+        return convertCustomerTalentDTO(talent, cmd.getCommunityId());
     }
 
-    private CustomerTalentDTO convertCustomerTalentDTO(CustomerTalent talent) {
+    private CustomerTalentDTO convertCustomerTalentDTO(CustomerTalent talent, Long communityId) {
         CustomerTalentDTO dto = ConvertHelper.convert(talent, CustomerTalentDTO.class);
         if(dto.getGender() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getGender());
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getGender());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getGender());
             if(scopeFieldItem != null) {
                 dto.setGenderName(scopeFieldItem.getItemDisplayName());
             }
         }
         if(dto.getReturneeFlag() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getReturneeFlag());
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getReturneeFlag());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getReturneeFlag());
             if(scopeFieldItem != null) {
                 dto.setReturneeFlagName(scopeFieldItem.getItemDisplayName());
             }
         }
         if(dto.getAbroadItemId() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getAbroadItemId());
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getAbroadItemId());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getAbroadItemId());
             if(scopeFieldItem != null) {
                 dto.setAbroadItemName(scopeFieldItem.getItemDisplayName());
             }
         }
         if(dto.getDegreeItemId() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getDegreeItemId());
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getDegreeItemId());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getDegreeItemId());
             if(scopeFieldItem != null) {
                 dto.setDegreeItemName(scopeFieldItem.getItemDisplayName());
             }
         }
         if(dto.getNationalityItemId() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getNationalityItemId());
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getNationalityItemId());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getNationalityItemId());
             if(scopeFieldItem != null) {
                 dto.setNationalityItemName(scopeFieldItem.getItemDisplayName());
             }
         }
         if(dto.getIndividualEvaluationItemId() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getIndividualEvaluationItemId());
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getIndividualEvaluationItemId());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getIndividualEvaluationItemId());
             if(scopeFieldItem != null) {
                 dto.setIndividualEvaluationItemName(scopeFieldItem.getItemDisplayName());
             }
         }
         if(dto.getTechnicalTitleItemId() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getTechnicalTitleItemId());
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), dto.getTechnicalTitleItemId());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(talent.getNamespaceId(), communityId, dto.getTechnicalTitleItemId());
             if(scopeFieldItem != null) {
                 dto.setTechnicalTitleItemName(scopeFieldItem.getItemDisplayName());
             }
@@ -533,7 +565,7 @@ public class CustomerServiceImpl implements CustomerService {
         List<CustomerTalent> talents = enterpriseCustomerProvider.listCustomerTalentsByCustomerId(cmd.getCustomerId());
         if(talents != null && talents.size() > 0) {
             return talents.stream().map(talent -> {
-                return convertCustomerTalentDTO(talent);
+                return convertCustomerTalentDTO(talent, cmd.getCommunityId());
             }).collect(Collectors.toList());
         }
         return null;
@@ -629,7 +661,7 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerApplyProject checkCustomerApplyProject(Long id, Long customerId) {
         CustomerApplyProject project = enterpriseCustomerProvider.findCustomerApplyProjectById(id);
         if(project == null || !project.getCustomerId().equals(customerId)
-                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(project.getStatus()))) {
+                || CommonStatus.INACTIVE.equals(CommonStatus.fromCode(project.getStatus()))) {
             LOGGER.error("enterprise customer project is not exist or active. id: {}, project: {}", id, project);
             throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_PROJECT_NOT_EXIST,
                     "customer project is not exist or active");
@@ -691,18 +723,19 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerApplyProjectDTO getCustomerApplyProject(GetCustomerApplyProjectCommand cmd) {
         CustomerApplyProject project = checkCustomerApplyProject(cmd.getId(), cmd.getCustomerId());
-        return convertCustomerApplyProjectDTO(project);
+        return convertCustomerApplyProjectDTO(project, cmd.getCommunityId());
     }
 
-    private CustomerApplyProjectDTO convertCustomerApplyProjectDTO(CustomerApplyProject project) {
+    private CustomerApplyProjectDTO convertCustomerApplyProjectDTO(CustomerApplyProject project, Long communityId) {
         CustomerApplyProjectDTO dto = ConvertHelper.convert(project, CustomerApplyProjectDTO.class);
-
+        //PROJECTGSOURCE不是必填项目，这里没有判断 为空字符串
         if(dto.getProjectSource() != null) {
             String[] ids = dto.getProjectSource().split(",");
             LOGGER.info("project source: {}", ids);
             StringBuilder sb = new StringBuilder();
             for(String id : ids) {
-                ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(project.getNamespaceId(), Long.valueOf(id));
+//                ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(project.getNamespaceId(), Long.valueOf(id));
+                ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(project.getNamespaceId(), communityId, Long.valueOf(id));
                 LOGGER.info("project source scopeFieldItem: {}", scopeFieldItem);
                 if(scopeFieldItem != null) {
                     if(sb.length() == 0) {
@@ -722,26 +755,29 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerCommercialDTO getCustomerCommercial(GetCustomerCommercialCommand cmd) {
         CustomerCommercial commercial = checkCustomerCommercial(cmd.getId(), cmd.getCustomerId());
-        return convertCustomerCommercialDTO(commercial);
+        return convertCustomerCommercialDTO(commercial, cmd.getCommunityId());
     }
 
-    private CustomerCommercialDTO convertCustomerCommercialDTO(CustomerCommercial commercial) {
+    private CustomerCommercialDTO convertCustomerCommercialDTO(CustomerCommercial commercial, Long communityId) {
         CustomerCommercialDTO dto = ConvertHelper.convert(commercial, CustomerCommercialDTO.class);
 
         if(dto.getEnterpriseTypeItemId() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), dto.getEnterpriseTypeItemId());
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), dto.getEnterpriseTypeItemId());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), communityId, dto.getEnterpriseTypeItemId());
             if(scopeFieldItem != null) {
                 dto.setEnterpriseTypeItemName(scopeFieldItem.getItemDisplayName());
             }
         }
         if(dto.getShareTypeItemId() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), dto.getShareTypeItemId());
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), dto.getShareTypeItemId());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), communityId, dto.getShareTypeItemId());
             if(scopeFieldItem != null) {
                 dto.setShareTypeItemName(scopeFieldItem.getItemDisplayName());
             }
         }
         if(dto.getPropertyType() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), dto.getPropertyType());
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), dto.getPropertyType());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(commercial.getNamespaceId(), communityId, dto.getPropertyType());
             if(scopeFieldItem != null) {
                 dto.setPropertyTypeName(scopeFieldItem.getItemDisplayName());
             }
@@ -752,20 +788,22 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerPatentDTO getCustomerPatent(GetCustomerPatentCommand cmd) {
         CustomerPatent patent = checkCustomerPatent(cmd.getId(), cmd.getCustomerId());
-        return convertCustomerPatentDTO(patent);
+        return convertCustomerPatentDTO(patent, cmd.getCommunityId());
     }
 
-    private CustomerPatentDTO convertCustomerPatentDTO(CustomerPatent patent) {
+    private CustomerPatentDTO convertCustomerPatentDTO(CustomerPatent patent, Long communityId) {
         CustomerPatentDTO dto = ConvertHelper.convert(patent, CustomerPatentDTO.class);
 
         if(dto.getPatentStatusItemId() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(patent.getNamespaceId(), dto.getPatentStatusItemId());
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(patent.getNamespaceId(), dto.getPatentStatusItemId());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(patent.getNamespaceId(), communityId, dto.getPatentStatusItemId());
             if(scopeFieldItem != null) {
                 dto.setPatentStatusItemName(scopeFieldItem.getItemDisplayName());
             }
         }
         if(dto.getPatentTypeItemId() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(patent.getNamespaceId(), dto.getPatentTypeItemId());
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(patent.getNamespaceId(), dto.getPatentTypeItemId());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(patent.getNamespaceId(), communityId, dto.getPatentTypeItemId());
             if(scopeFieldItem != null) {
                 dto.setPatentTypeItemName(scopeFieldItem.getItemDisplayName());
             }
@@ -776,14 +814,15 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerTrademarkDTO getCustomerTrademark(GetCustomerTrademarkCommand cmd) {
         CustomerTrademark trademark = checkCustomerTrademark(cmd.getId(), cmd.getCustomerId());
-        return convertCustomerTrademarkDTO(trademark);
+        return convertCustomerTrademarkDTO(trademark, cmd.getCommunityId());
     }
 
-    private CustomerTrademarkDTO convertCustomerTrademarkDTO(CustomerTrademark trademark) {
+    private CustomerTrademarkDTO convertCustomerTrademarkDTO(CustomerTrademark trademark, Long communityId) {
         CustomerTrademarkDTO dto = ConvertHelper.convert(trademark, CustomerTrademarkDTO.class);
 
         if(dto.getTrademarkTypeItemId() != null) {
-            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(trademark.getNamespaceId(), dto.getTrademarkTypeItemId());
+//            ScopeFieldItem scopeFieldItem = fieldProvider.findScopeFieldItemByFieldItemId(trademark.getNamespaceId(), dto.getTrademarkTypeItemId());
+            ScopeFieldItem scopeFieldItem = fieldService.findScopeFieldItemByFieldItemId(trademark.getNamespaceId(), communityId, dto.getTrademarkTypeItemId());
             if(scopeFieldItem != null) {
                 dto.setTrademarkTypeItemName(scopeFieldItem.getItemDisplayName());
             }
@@ -796,7 +835,7 @@ public class CustomerServiceImpl implements CustomerService {
         List<CustomerApplyProject> projects = enterpriseCustomerProvider.listCustomerApplyProjectsByCustomerId(cmd.getCustomerId());
         if(projects != null && projects.size() > 0) {
             return projects.stream().map(project -> {
-                return convertCustomerApplyProjectDTO(project);
+                return convertCustomerApplyProjectDTO(project, cmd.getCommunityId());
             }).collect(Collectors.toList());
         }
         return null;
@@ -807,7 +846,7 @@ public class CustomerServiceImpl implements CustomerService {
         List<CustomerCommercial> commercials = enterpriseCustomerProvider.listCustomerCommercialsByCustomerId(cmd.getCustomerId());
         if(commercials != null && commercials.size() > 0) {
             return commercials.stream().map(commercial -> {
-                return convertCustomerCommercialDTO(commercial);
+                return convertCustomerCommercialDTO(commercial, cmd.getCommunityId());
             }).collect(Collectors.toList());
         }
         return null;
@@ -818,7 +857,7 @@ public class CustomerServiceImpl implements CustomerService {
         List<CustomerPatent> patents = enterpriseCustomerProvider.listCustomerPatentsByCustomerId(cmd.getCustomerId());
         if(patents != null && patents.size() > 0) {
             return patents.stream().map(patent -> {
-                return convertCustomerPatentDTO(patent);
+                return convertCustomerPatentDTO(patent, cmd.getCommunityId());
             }).collect(Collectors.toList());
         }
         return null;
@@ -829,7 +868,7 @@ public class CustomerServiceImpl implements CustomerService {
         List<CustomerTrademark> trademarks = enterpriseCustomerProvider.listCustomerTrademarksByCustomerId(cmd.getCustomerId());
         if(trademarks != null && trademarks.size() > 0) {
             return trademarks.stream().map(trademark -> {
-                return convertCustomerTrademarkDTO(trademark);
+                return convertCustomerTrademarkDTO(trademark, cmd.getCommunityId());
             }).collect(Collectors.toList());
         }
         return null;
@@ -1071,7 +1110,8 @@ public class CustomerServiceImpl implements CustomerService {
             CustomerIndustryStatisticsDTO dto = new CustomerIndustryStatisticsDTO();
             dto.setCorpIndustryItemId(categoryId);
             dto.setCustomerCount(count);
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
+//            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
             if(item != null) {
                 dto.setItemName(item.getItemDisplayName());
             }
@@ -1093,7 +1133,7 @@ public class CustomerServiceImpl implements CustomerService {
         response.setPropertyTotalCount(0L);
         List<CustomerIntellectualPropertyStatisticsDTO> dtos = new ArrayList<>();
         Long trademarks = enterpriseCustomerProvider.countTrademarksByCustomerIds(customerIds);
-        if(trademarks != null) {
+        if(trademarks != null && trademarks != 0) {
             response.setPropertyTotalCount(response.getPropertyTotalCount() + trademarks);
 
             CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
@@ -1102,12 +1142,22 @@ public class CustomerServiceImpl implements CustomerService {
             dtos.add(dto);
         }
 
+        Long certificates = enterpriseCustomerProvider.countCertificatesByCustomerIds(customerIds);
+        if(certificates != null && certificates != 0) {
+            response.setPropertyTotalCount(response.getPropertyTotalCount() + certificates);
+
+            CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
+            dto.setPropertyType("证书");
+            dto.setPropertyCount(certificates);
+            dtos.add(dto);
+        }
 
         Map<Long, Long> properties = enterpriseCustomerProvider.listCustomerPatentsByCustomerIds(customerIds);
         properties.forEach((categoryId, count) -> {
             CustomerIntellectualPropertyStatisticsDTO dto = new CustomerIntellectualPropertyStatisticsDTO();
             dto.setPropertyCount(count);
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
+//            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
             if(item != null) {
                 dto.setPropertyType(item.getItemDisplayName());
             }
@@ -1132,9 +1182,14 @@ public class CustomerServiceImpl implements CustomerService {
         response.setProjectTotalCount(0L);
 
         Map<Long, CustomerProjectStatisticsDTO> statistics = enterpriseCustomerProvider.listCustomerApplyProjectsByCustomerIds(customerIds);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listCustomerProjectStatistics customer ids : {}, statistics: {}", customerIds, StringHelper.toJsonString(statistics));
+        }
+
         statistics.forEach((itemId, statistic) -> {
             CustomerProjectStatisticsDTO dto = statistic;
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), itemId);
+//            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), itemId);
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), itemId);
             if(item != null) {
                 dto.setItemName(item.getItemDisplayName());
             }
@@ -1142,6 +1197,7 @@ public class CustomerServiceImpl implements CustomerService {
             response.setProjectTotalAmount(response.getProjectTotalAmount().add(dto.getProjectAmount()));
             response.setProjectTotalCount(response.getProjectTotalCount() + dto.getProjectCount());
         });
+        response.setDtos(dtos);
         return response;
     }
 
@@ -1155,7 +1211,8 @@ public class CustomerServiceImpl implements CustomerService {
             CustomerSourceStatisticsDTO dto = new CustomerSourceStatisticsDTO();
             dto.setSourceItemId(categoryId);
             dto.setCustomerCount(count);
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
+//            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
             if(item != null) {
                 dto.setItemName(item.getItemDisplayName());
             }
@@ -1182,7 +1239,8 @@ public class CustomerServiceImpl implements CustomerService {
             CustomerTalentStatisticsDTO dto = new CustomerTalentStatisticsDTO();
             dto.setTalentCategoryId(categoryId);
             dto.setCustomerMemberCount(count);
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
+//            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), categoryId);
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), categoryId);
             if(item != null) {
                 dto.setCategoryName(item.getItemDisplayName());
             }
@@ -1223,15 +1281,28 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void syncEnterpriseCustomers(SyncCustomersCommand cmd) {
         if(cmd.getNamespaceId() == 999971) {
-            if(cmd.getCommunityId() == null) {
-                zjgkOpenService.syncEnterprises("0", null);
-            } else {
-                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-                if(community != null) {
-                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
-                }
+            this.coordinationProvider.getNamedLock(CoordinationLocks.SYNC_ENTERPRISE_CUSTOMER.getCode()).tryEnter(()-> {
+                ExecutorUtil.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+                            if(cmd.getCommunityId() == null) {
+                                zjgkOpenService.syncEnterprises("0", null);
+                            } else {
+                                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                                if(community != null) {
+                                    zjgkOpenService.syncEnterprises("0", community.getNamespaceCommunityToken());
+                                }
 
-            }
+                            }
+                        }catch (Exception e){
+                            LOGGER.error("syncEnterpriseCustomers error.", e);
+                        }
+                    }
+                });
+            });
+
+
         }
 
     }
@@ -1239,14 +1310,24 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void syncIndividualCustomers(SyncCustomersCommand cmd) {
         if(cmd.getNamespaceId() == 999971) {
-            if(cmd.getCommunityId() == null) {
-                zjgkOpenService.syncIndividuals("0", null);
-            } else {
-                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-                if(community != null) {
-                    zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken());
+            ExecutorUtil.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        if(cmd.getCommunityId() == null) {
+                            zjgkOpenService.syncIndividuals("0", null);
+                        } else {
+                            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                            if(community != null) {
+                                zjgkOpenService.syncIndividuals("0", community.getNamespaceCommunityToken());
+                            }
+                        }
+                    }catch (Exception e){
+                        LOGGER.error("syncIndividualCustomers error.", e);
+                    }
                 }
-            }
+            });
+
         }
     }
 }

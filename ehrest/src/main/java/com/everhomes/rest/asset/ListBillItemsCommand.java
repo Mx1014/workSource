@@ -11,15 +11,17 @@ import com.everhomes.util.StringHelper;
  * <li>targetName:客户名称</li>
  * <li>pageAnchor:锚点</li>
  * <li>pageSize:每页数量</li>
+ * <li>targetType:客户类型</li>
  *</ul>
  */
 public class ListBillItemsCommand {
-    private Long billId;
+    private String billId;
     private Long ownerId;
     private String ownerType;
     private String targetName;
     private Long pageAnchor;
     private Integer pageSize;
+    private String targetType;
 
     @Override
     public String toString() {
@@ -28,6 +30,14 @@ public class ListBillItemsCommand {
 
     public Long getOwnerId() {
         return ownerId;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
     }
 
     public void setOwnerId(Long ownerId) {
@@ -42,11 +52,11 @@ public class ListBillItemsCommand {
         this.ownerType = ownerType;
     }
 
-    public Long getBillId() {
+    public String getBillId() {
         return billId;
     }
 
-    public void setBillId(Long billId) {
+    public void setBillId(String billId) {
         this.billId = billId;
     }
 

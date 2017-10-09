@@ -84,15 +84,20 @@ public enum CoordinationLocks {
     PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
 
     USER_APPEAL_LOG("user.appeal.log"),
-	SALARY_GROUP_LOCK("salary.group"),
+	SALARY_GROUP_LOCK("salary.group"), 
+    UNION_GROUP_LOCK("union.group"),
 
+    PAY_CREATE_PREORDER("pay.create.preorder"),
 
 
     BILL_STATUS_UPDATE("bill.status.update"),
+    SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
 
-    EVENT_STAT_SCHEDULE("event.stat.schedule");
+    EVENT_STAT_SCHEDULE("event.stat.schedule"),
 
+    ADD_ORGANIZATION_PERSONEL("add.organization.personel");
 
+    ; 
     private String code;
     private CoordinationLocks(String code) {
         this.code = code;

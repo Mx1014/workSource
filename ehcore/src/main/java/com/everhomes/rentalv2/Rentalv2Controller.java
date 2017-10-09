@@ -5,6 +5,7 @@ import javax.validation.Valid;
 
 import com.everhomes.oauth2.RequireOAuth2Authentication;
 import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
@@ -255,6 +256,22 @@ public class Rentalv2Controller extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /rental/addRentalItemBillV2</b>
+	 * <p>
+	 * 添加场所商品订单(支付2.0)
+	 * </p>
+	 */
+	@RequestMapping("addRentalItemBillV2")
+	@RestReturn(value = AddRentalBillItemV2Response.class)
+	public RestResponse addRentalItemBillV2(@Valid AddRentalBillItemCommand cmd) {
+		AddRentalBillItemV2Response result = rentalService.addRentalItemBillV2(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /rental/getRentalBillPayInfo</b>
 	 * <p>
 	 * 获取订单支付信息
@@ -269,7 +286,23 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <b>URL: /rental/getRentalBillPayInfoV2</b>
+	 * <p>
+	 * 获取订单支付信息
+	 * </p>
+	 */
+	@RequestMapping("getRentalBillPayInfoV2")
+	@RestReturn(value = PreOrderDTO.class)
+	public RestResponse getRentalBillPayInfoV2(GetRentalBillPayInfoCommand cmd) {
+		PreOrderDTO result = rentalService.getRentalBillPayInfoV2(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /rental/cancelRentalBill</b>
 	 * <p>

@@ -7,22 +7,22 @@ package com.everhomes.rest.asset;
 
 /**
  *<ul>
- * <li>targeType:客户的类型，个人:eh_user----default; 企业:eh_organization---park_tourist</li>
+ * <li>targetType:客户的类型，个人:eh_user----default; 企业:eh_organization---park_tourist</li>
  * <li>targetId:客户id</li>
  * <li>communityId:园区id</li>
  *</ul>
  */
 public class FindUserInfoForPaymentCommand {
-    private String targeType;
+    private String targetType;
     private Long targetId;
     private Long communityId;
 
-    public String getTargeType() {
-        return targeType;
+    public String getTargetType() {
+        return targetType;
     }
 
-    public void setTargeType(String targeType) {
-        this.targeType = targeType;
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
     }
 
     public Long getTargetId() {

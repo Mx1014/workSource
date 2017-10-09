@@ -13,6 +13,9 @@ import java.math.BigDecimal;
  * <li>amountOwed:待缴金额</li>
  * <li>status:状态,1:待缴;2:缴清</li>
  * <li>billId:账单id</li>
+ * <li>payStatus:清账状态</li>
+ * <li>dateStrBegin:计费开始时间</li>
+ * <li>dateStrEnd:计费结束时间</li>
  *</ul>
  */
 public class BillDetailDTO {
@@ -20,7 +23,10 @@ public class BillDetailDTO {
     private BigDecimal amountReceviable;
     private BigDecimal amountOwed;
     private Byte status;
-    private Long billId;
+    private String billId;
+    private String payStatus;
+    private String dateStrBegin;
+    private String dateStrEnd;
 
     @Override
     public String toString() {
@@ -29,6 +35,14 @@ public class BillDetailDTO {
 
     public String getDateStr() {
         return dateStr;
+    }
+
+    public String getPayStatus() {
+        return payStatus;
+    }
+
+    public void setPayStatus(String payStatus) {
+        this.payStatus = payStatus;
     }
 
     public void setDateStr(String dateStr) {
@@ -59,14 +73,30 @@ public class BillDetailDTO {
         this.status = status;
     }
 
-    public Long getBillId() {
+    public String getBillId() {
         return billId;
     }
 
-    public void setBillId(Long billId) {
+    public void setBillId(String billId) {
         this.billId = billId;
     }
 
     public BillDetailDTO() {
+    }
+
+    public String getDateStrBegin() {
+        return dateStrBegin;
+    }
+
+    public void setDateStrBegin(String dateStrBegin) {
+        this.dateStrBegin = dateStrBegin;
+    }
+
+    public String getDateStrEnd() {
+        return dateStrEnd;
+    }
+
+    public void setDateStrEnd(String dateStrEnd) {
+        this.dateStrEnd = dateStrEnd;
     }
 }

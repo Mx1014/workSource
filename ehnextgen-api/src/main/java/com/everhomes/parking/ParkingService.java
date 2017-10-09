@@ -8,11 +8,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 public interface ParkingService {
 	List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
+
+    List<ParkingCardDTO> getParkingCards(ListParkingCardsCommand cmd);
 
     List<ParkingLotDTO> listParkingLots(ListParkingLotsCommand cmd);
     
@@ -25,6 +28,10 @@ public interface ParkingService {
     ListParkingCardRequestResponse listParkingCardRequests(ListParkingCardRequestsCommand cmd);
     
     CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd);
+
+    PreOrderDTO createParkingRechargeOrderV2(CreateParkingRechargeOrderCommand cmd);
+
+    PreOrderDTO createParkingTempOrderV2(CreateParkingTempOrderCommand cmd);
     
     ListParkingRechargeOrdersResponse listParkingRechargeOrders(ListParkingRechargeOrdersCommand cmd);
     
@@ -84,4 +91,10 @@ public interface ParkingService {
     ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd);
 
     ParkingCarLocationDTO getCarLocation(GetCarLocationCommand cmd);
+
+    List<ParkingCardRequestTypeDTO> listParkingCardRequestTypes(ListParkingCardRequestTypesCommand cmd);
+
+    List<ParkingInvoiceTypeDTO> listParkingInvoiceTypes(ListParkingInvoiceTypesCommand cmd);
+
+    ParkingCardType getParkingCardType(String ownerType, Long ownerId, Long parkingLotId, String cardTypeId);
 }

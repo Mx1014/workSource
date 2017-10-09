@@ -10,11 +10,12 @@ import java.util.List;
  */
 
 public class SearchBillsResponse {
+    private String nextPageOffset;
+    private String version;
     private String errorScope;
     private Integer errorCode;
     private String errorDescription;
     private String errorDetails;
-    private Integer NextPageOffset;
     private List<SearchEnterpriseBillsDTO> response;
 
     public String getErrorScope() {
@@ -24,6 +25,14 @@ public class SearchBillsResponse {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public void setErrorScope(String errorScope) {
@@ -54,12 +63,12 @@ public class SearchBillsResponse {
         this.errorDetails = errorDetails;
     }
 
-    public Integer getNextPageOffset() {
-        return NextPageOffset;
+    public String getNextPageOffset() {
+        return nextPageOffset;
     }
 
-    public void setNextPageOffset(Integer nextPageOffset) {
-        NextPageOffset = nextPageOffset;
+    public void setNextPageOffset(String nextPageOffset) {
+        this.nextPageOffset = nextPageOffset;
     }
 
     public List<SearchEnterpriseBillsDTO> getResponse() {

@@ -433,6 +433,8 @@ public interface OrganizationService {
 	List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, Long jobPositionId);
 
     List<OrgAddressDTO> listUserRelatedOrganizationAddresses(ListUserRelatedOrganizationAddressesCommand cmd);
+
+	List<OrgAddressDTO> listOrganizationAddresses(ListOrganizationAddressesCommand cmd);
 	ContractDTO processContract(Contract contract, Integer namespaceId);
 	ContractDTO processContract(Contract contract);
 
@@ -530,7 +532,13 @@ public interface OrganizationService {
 	List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path,
 			Long userId);
 	String checkIfLastOnNode(DeleteOrganizationPersonnelByContactTokenCommand cmd);
-
+ 
+	 
+	// added by R, for salaryGroup 20170630
+	public Organization createSalaryGroupOrganization(Long organizationId, String name);
+	public ListOrganizationMemberCommandResponse listOrganizationMemberByPathHavingDetailId(String keywords, Long pageAnchorLong, Long organizationId, Integer pageSize);
+	Organization createUniongroupOrganization(Long organizationId, String name, String groupType);
+	 
 	/**人事管理-离职**/
 	void leaveTheJob(LeaveTheJobCommand cmd);
 
@@ -545,5 +553,5 @@ public interface OrganizationService {
 
 	/**通讯录查询接口**/
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd);
-
+	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
 }
