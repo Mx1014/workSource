@@ -605,7 +605,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
             condition = condition.and(t1.field("contact_name").like(contactName +"%"));
         }
         if(versionCode != null){
-            condition = condition.and(t2.field("version_coe").eq(versionCode));
+            condition = condition.and(t2.field("version_code").eq(versionCode));
         }
         condition = condition.and(t1.field("id").in(context.selectDistinct(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))));
         List<OrganizationMemberDetails> details = step.where(condition).fetch().map(new OrganizationMemberDetailsMapper());
