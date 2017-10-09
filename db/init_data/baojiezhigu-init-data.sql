@@ -1067,3 +1067,7 @@ DELETE FROM eh_web_menu_scopes WHERE `menu_id`=12200 AND  `owner_id` =  999973 	
 
 -- added by wh 删掉： 保集e智谷 物业报修-设置-执行人员设置 子菜单
 DELETE FROM eh_web_menu_scopes WHERE `menu_id`=20160 AND  `owner_id` =  999973 	 ;
+
+-- added by wh 4.9.0 保集release 分享微信logo配置错误
+UPDATE eh_app_urls SET logo_url = 'cs://1/image/aW1hZ2UvTVRvMVptWTNNVEpoWmpjMlpqaGhOV00xWVRRMVlXSXlPR1poTUdNeVpEUm1aUQ' WHERE namespace_id = 999973;
+
