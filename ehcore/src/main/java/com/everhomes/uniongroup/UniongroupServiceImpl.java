@@ -530,7 +530,7 @@ public class UniongroupServiceImpl implements UniongroupService {
         //1.查询本次保存中所有勾选部门的所有人员detailId集合detailIds
         List<Long> orgIds = cmd.getTargets().stream().filter((r) -> {
             //控制organization只能是部门
-            return r.getType().equals(UniongroupTargetType.ORGANIZATION.getCode()) && (this.organizationProvider.findOrganizationById(r.getId()).getGroupType() == OrganizationGroupType.DEPARTMENT.getCode());
+            return r.getType().equals(UniongroupTargetType.ORGANIZATION.getCode()) && (this.organizationProvider.findOrganizationById(r.getId()).getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()));
         }).map((r) -> {
             return r.getId();
         }).collect(Collectors.toList());
