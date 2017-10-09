@@ -442,7 +442,7 @@ public class CommunityMapServiceImpl implements CommunityMapService {
     @Override
     public CommunityMapShopDetailDTO createCommunityMapShop(CreateCommunityMapShopCommand cmd) {
         CommunityMapShopDetail shop = ConvertHelper.convert(cmd, CommunityMapShopDetail.class);
-
+        shop.setNamespaceId(UserContext.getCurrentNamespaceId());
         communityMapProvider.createCommunityMapShop(shop);
 
         return ConvertHelper.convert(shop, CommunityMapShopDetailDTO.class);
