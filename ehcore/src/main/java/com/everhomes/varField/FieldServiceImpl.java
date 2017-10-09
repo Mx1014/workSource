@@ -936,8 +936,10 @@ public class FieldServiceImpl implements FieldService {
     }
 
     private void inactiveScopeField(Map<Long, ScopeField> scopeFields) {
+        LOGGER.info("inactiveScopeField");
         if(scopeFields.size() > 0) {
             scopeFields.forEach((id, field) -> {
+                LOGGER.info("inactiveScopeField field: {}", field);
                 field.setStatus(VarFieldStatus.INACTIVE.getCode());
                 fieldProvider.updateScopeField(field);
                 //删除字段的选项 如果有
