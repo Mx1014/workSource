@@ -8,27 +8,38 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>organizationId: 公司id</li>
  * <li>detailIds: (List)员工detailId</li>
- * <li>dismissType: 离职类型: 1-辞职,2-解雇,3-其他 参考{@link com.everhomes.rest.archives.DismissType}</li>
- * <li>dismissReason: 离职原因 参考{@link com.everhomes.rest.archives.DismissReason}</li>
+ * <li>dismissType: 离职类型: 0-辞职,1-解雇,2-其他 参考{@link com.everhomes.rest.archives.ArchivesDismissType}</li>
+ * <li>dismissReason: 离职原因 参考{@link com.everhomes.rest.archives.ArchivesDismissReason}</li>
  * <li>dismissTime: 离职日期</li>
  * <li>dismissRemark: 离职备注</li>
  * </ul>
  */
 public class DismissArchivesEmployeesCommand {
 
+    private Long organizationId;
+
     @ItemType(Long.class)
     private List<Long> detailIds;
 
     private Byte dismissType;
 
-    private String dismissReason;
+    private Byte dismissReason;
 
     private Date dismissTime;
 
     private String dismissRemark;
 
     public DismissArchivesEmployeesCommand() {
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public List<Long> getDetailIds() {
@@ -47,11 +58,11 @@ public class DismissArchivesEmployeesCommand {
         this.dismissType = dismissType;
     }
 
-    public String getDismissReason() {
+    public Byte getDismissReason() {
         return dismissReason;
     }
 
-    public void setDismissReason(String dismissReason) {
+    public void setDismissReason(Byte dismissReason) {
         this.dismissReason = dismissReason;
     }
 
@@ -59,9 +70,15 @@ public class DismissArchivesEmployeesCommand {
         return dismissTime;
     }
 
+    public void setDismissTime(String dismissTime) {
+        this.dismissTime = ArchivesUtil.parseDate(dismissTime);
+    }
+
+/*
     public void setDismissTime(Date dismissTime) {
         this.dismissTime = dismissTime;
     }
+*/
 
     public String getDismissRemark() {
         return dismissRemark;

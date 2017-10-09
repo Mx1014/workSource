@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
+import com.everhomes.rest.archives.UpdateArchivesEmployeeCommand;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
@@ -554,4 +555,6 @@ public interface OrganizationService {
 	/**通讯录查询接口**/
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd);
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
+	Long updateOrganizationMemberInfoByDetailId(Long detailId, String contactToken, String contactName, Byte gender);
+
 }

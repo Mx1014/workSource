@@ -38,10 +38,11 @@ import com.everhomes.server.schema.tables.pojos.EhApprovalRequests;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRuleFlowMap;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRules;
 import com.everhomes.server.schema.tables.pojos.EhApprovalTimeRanges;
+import com.everhomes.server.schema.tables.pojos.EhArchivesConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhArchivesDismissEmployees;
 import com.everhomes.server.schema.tables.pojos.EhArchivesForms;
+import com.everhomes.server.schema.tables.pojos.EhArchivesLogs;
 import com.everhomes.server.schema.tables.pojos.EhArchivesStickyContacts;
-import com.everhomes.server.schema.tables.pojos.EhArchivesWorkingPlaces;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
@@ -2200,25 +2201,6 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhExpressHotlines.class, Tables.EH_EXPRESS_HOTLINES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EXPRESS_HOTLINES.ID.max()).from(Tables.EH_EXPRESS_HOTLINES).fetchOne().value1();
         });
-        syncTableSequence(null, EhArchivesStickyContacts.class, Tables.EH_ARCHIVES_STICKY_CONTACTS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_ARCHIVES_STICKY_CONTACTS.ID.max()).from(Tables.EH_ARCHIVES_STICKY_CONTACTS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhArchivesDismissEmployees.class, Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.ID.max()).from(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhGeneralFormGroups.class, Tables.EH_GENERAL_FORM_GROUPS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_GENERAL_FORM_GROUPS.ID.max()).from(Tables.EH_GENERAL_FORM_GROUPS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhArchivesForms.class, Tables.EH_ARCHIVES_FORMS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_ARCHIVES_FORMS.ID.max()).from(Tables.EH_ARCHIVES_FORMS).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhArchivesWorkingPlaces.class, Tables.EH_ARCHIVES_WORKING_PLACES.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_ARCHIVES_WORKING_PLACES.ID.max()).from(Tables.EH_ARCHIVES_WORKING_PLACES).fetchOne().value1();
-        });
 
         syncTableSequence(null, EhPmNotifyConfigurations.class, Tables.EH_PM_NOTIFY_CONFIGURATIONS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_NOTIFY_CONFIGURATIONS.ID.max()).from(Tables.EH_PM_NOTIFY_CONFIGURATIONS).fetchOne().value1();
@@ -2231,7 +2213,6 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhPmNotifyLogs.class, Tables.EH_PM_NOTIFY_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_NOTIFY_LOGS.ID.max()).from(Tables.EH_PM_NOTIFY_LOGS).fetchOne().value1();
         });
-
         syncTableSequence(null, EhParkingUserInvoices.class, Tables.EH_PARKING_USER_INVOICES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PARKING_USER_INVOICES.ID.max()).from(Tables.EH_PARKING_USER_INVOICES).fetchOne().value1();
         });
@@ -2290,6 +2271,30 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhPaymentServiceConfigs.class, Tables.EH_PAYMENT_SERVICE_CONFIGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PAYMENT_SERVICE_CONFIGS.ID.max())
                     .from(Tables.EH_PAYMENT_SERVICE_CONFIGS).fetchOne().value1();
+        });
+
+		syncTableSequence(null, EhArchivesStickyContacts.class, Tables.EH_ARCHIVES_STICKY_CONTACTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ARCHIVES_STICKY_CONTACTS.ID.max()).from(Tables.EH_ARCHIVES_STICKY_CONTACTS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhArchivesDismissEmployees.class, Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.ID.max()).from(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhGeneralFormGroups.class, Tables.EH_GENERAL_FORM_GROUPS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_GENERAL_FORM_GROUPS.ID.max()).from(Tables.EH_GENERAL_FORM_GROUPS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhArchivesForms.class, Tables.EH_ARCHIVES_FORMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ARCHIVES_FORMS.ID.max()).from(Tables.EH_ARCHIVES_FORMS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhArchivesConfigurations.class, Tables.EH_ARCHIVES_CONFIGURATIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ARCHIVES_CONFIGURATIONS.ID.max()).from(Tables.EH_ARCHIVES_CONFIGURATIONS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhArchivesLogs.class, Tables.EH_ARCHIVES_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ARCHIVES_LOGS.ID.max()).from(Tables.EH_ARCHIVES_LOGS).fetchOne().value1();
         });
 
     }

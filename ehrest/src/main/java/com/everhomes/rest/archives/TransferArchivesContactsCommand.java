@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>detailIds: 成员 detailId 列表</li>
- * <li>departmentId: 部门 id 列表</li>
+ * <li>departmentIds: 部门 id</li>
  * <li>organizationId: 公司 id</li>
  * </ul>
  */

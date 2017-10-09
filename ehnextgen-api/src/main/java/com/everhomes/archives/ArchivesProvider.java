@@ -2,21 +2,22 @@ package com.everhomes.archives;
 
 import org.jooq.Condition;
 
+import java.sql.Date;
 import java.util.List;
 
 public interface ArchivesProvider {
 
-    void createArchivesContactsSticky(ArchivesStickyContacts archivesContactsSticky);
+    void createArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky);
 
-    void updateArchivesContactsSticky(ArchivesStickyContacts archivesContactsSticky);
+    void updateArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky);
 
-    void deleteArchivesContactsSticky(ArchivesStickyContacts archivesContactsSticky);
+    void deleteArchivesStickyContacts(ArchivesStickyContacts archivesContactsSticky);
 
-    ArchivesStickyContacts findArchivesContactsStickyById(Long id);
+    ArchivesStickyContacts findArchivesStickyContactsById(Long id);
 
-    List<Long> listArchivesContactsStickyIds(Integer namespaceId, Long organizationId, Integer stickCount);
+    List<Long> listArchivesStickyContactsIds(Integer namespaceId, Long organizationId, Integer stickCount);
 
-    ArchivesStickyContacts findArchivesContactsStickyByDetailIdAndOrganizationId(Integer namespaceId, Long organizationId, Long detailId);
+    ArchivesStickyContacts findArchivesStickyContactsByDetailIdAndOrganizationId(Integer namespaceId, Long organizationId, Long detailId);
 
     void createArchivesDismissEmployee(ArchivesDismissEmployees archivesDismissEmployee);
 
@@ -27,4 +28,14 @@ public interface ArchivesProvider {
     void updateArchivesForm(ArchivesFroms form);
 
     ArchivesFroms findArchivesFormOriginId(Integer namespaceId, Long organizationId);
+
+    void createArchivesConfigurations(ArchivesConfigurations configuration);
+
+    void updateArchivesConfigurations(ArchivesConfigurations configuration);
+
+    List<ArchivesConfigurations> listArchivesConfigurations(Date date);
+
+    void createArchivesLogs(ArchivesLogs log);
+
+    List<ArchivesLogs> listArchivesLogs(Long organizationId, Long detailId);
 }

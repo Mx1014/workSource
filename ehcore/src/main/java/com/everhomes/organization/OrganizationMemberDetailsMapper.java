@@ -27,7 +27,7 @@ public class OrganizationMemberDetailsMapper implements RecordMapper<Record, EhO
         detail.setAvatar(r.getValue((Field<String>) r.field("avatar")));
         detail.setGender(r.getValue((Field<Byte>) r.field("gender")));
         detail.setMaritalFlag(r.getValue((Field<Byte>) r.field("marital_flag")));
-        detail.setPoliticalStatus(r.getValue((Field<String>) r.field("political_status")));
+        detail.setPoliticalFlag(r.getValue((Field<String>) r.field("political_flag")));
         detail.setNativePlace(r.getValue((Field<String>) r.field("native_place")));
         detail.setEnName(r.getValue((Field<String>) r.field("en_name")));
         detail.setRegResidence(r.getValue((Field<String>) r.field("reg_residence")));
@@ -41,7 +41,7 @@ public class OrganizationMemberDetailsMapper implements RecordMapper<Record, EhO
         detail.setEmployeeType(r.getValue((Field<Byte>) r.field("employee_type")));
         detail.setEmployeeStatus(r.getValue((Field<Byte>) r.field("employee_status")));
         detail.setEmploymentTime(r.getValue((Field<Date>) r.field("employment_time")));
-        detail.setDimissionTime(r.getValue((Field<Date>) r.field("dimission_time")));
+        detail.setDismissTime(r.getValue((Field<Date>) r.field("dimission_time")));
         detail.setSalaryCardNumber(r.getValue((Field<String>) r.field("salary_card_number")));
         detail.setSocialSecurityNumber(r.getValue((Field<String>) r.field("social_security_number")));
         detail.setProvidentFundNumber(r.getValue((Field<String>) r.field("provident_fund_number")));

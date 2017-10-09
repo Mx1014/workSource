@@ -13,10 +13,13 @@ import java.util.List;
  * <li>targetId: 用户id</li>
  * <li>targetType: 用户类型</li>
  * <li>contactName: 姓名</li>
+ * <li>gender: 性别: 1-男, 2-女</li>
  * <li>jobPositions: 职务</li>
  * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * <li>regionCode: 区号</li>
  * <li>contactToken: 手机号</li>
- * <li>email: 邮箱</li>
+ * <li>contactShortToken: 短号</li>
+ * <li>workEmail: 工作邮箱</li>
  * <li>stick: 置顶状态: 0-未置顶 1-置顶</li>
  * </ul>
  */
@@ -32,16 +35,33 @@ public class ArchivesContactDTO {
 
     private String contactName;
 
-    private String jobPositions;
+    private Byte gender;
 
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> departments;
 
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> jobPositions;
+
+    private String regionCode;
+
     private String contactToken;
 
-    private String email;
+    private String contactShortToken;
+
+    private String workEmail;
 
     private String stick;
+
+    private Byte visibleFlag;
+
+
+    //  export
+    private String genderString;
+
+    private String departmentString;
+
+    private String jobPositionString;
 
     public ArchivesContactDTO() {
     }
@@ -86,11 +106,19 @@ public class ArchivesContactDTO {
         this.contactName = contactName;
     }
 
-    public String getJobPositions() {
+    public Byte getGender() {
+        return gender;
+    }
+
+    public void setGender(Byte gender) {
+        this.gender = gender;
+    }
+
+    public List<OrganizationDTO> getJobPositions() {
         return jobPositions;
     }
 
-    public void setJobPositions(String jobPositions) {
+    public void setJobPositions(List<OrganizationDTO> jobPositions) {
         this.jobPositions = jobPositions;
     }
 
@@ -102,6 +130,14 @@ public class ArchivesContactDTO {
         this.departments = departments;
     }
 
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
+    }
+
     public String getContactToken() {
         return contactToken;
     }
@@ -110,12 +146,20 @@ public class ArchivesContactDTO {
         this.contactToken = contactToken;
     }
 
-    public String getEmail() {
-        return email;
+    public String getContactShortToken() {
+        return contactShortToken;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setContactShortToken(String contactShortToken) {
+        this.contactShortToken = contactShortToken;
+    }
+
+    public String getWorkEmail() {
+        return workEmail;
+    }
+
+    public void setWorkEmail(String workEmail) {
+        this.workEmail = workEmail;
     }
 
     public String getStick() {
@@ -124,6 +168,38 @@ public class ArchivesContactDTO {
 
     public void setStick(String stick) {
         this.stick = stick;
+    }
+
+    public Byte getVisibleFlag() {
+        return visibleFlag;
+    }
+
+    public void setVisibleFlag(Byte visibleFlag) {
+        this.visibleFlag = visibleFlag;
+    }
+
+    public String getGenderString() {
+        return genderString;
+    }
+
+    public void setGenderString(String genderString) {
+        this.genderString = genderString;
+    }
+
+    public String getDepartmentString() {
+        return departmentString;
+    }
+
+    public void setDepartmentString(String departmentString) {
+        this.departmentString = departmentString;
+    }
+
+    public String getJobPositionString() {
+        return jobPositionString;
+    }
+
+    public void setJobPositionString(String jobPositionString) {
+        this.jobPositionString = jobPositionString;
     }
 
     @Override

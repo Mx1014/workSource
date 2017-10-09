@@ -9,6 +9,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>detailIds: (List)员工detailId</li>
+ * <li>organizationId: 公司 id</li>
  * <li>employmentTime: 转正日期</li>
  * <li>employmentEvaluation: 转正评价</li>
  * </ul>
@@ -17,6 +18,8 @@ public class EmployArchivesEmployeesCommand {
 
     @ItemType(Long.class)
     private List<Long> detailIds;
+
+    private Long organizationId;
 
     private Date employmentTime;
 
@@ -33,12 +36,20 @@ public class EmployArchivesEmployeesCommand {
         this.detailIds = detailIds;
     }
 
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
     public Date getEmploymentTime() {
         return employmentTime;
     }
 
-    public void setEmploymentTime(Date employmentTime) {
-        this.employmentTime = employmentTime;
+    public void setEmploymentTime(String employmentTime) {
+        this.employmentTime = ArchivesUtil.parseDate(employmentTime);
     }
 
     public String getEmploymentEvaluation() {

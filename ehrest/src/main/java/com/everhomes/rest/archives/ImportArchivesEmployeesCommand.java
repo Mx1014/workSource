@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>organizationId: 公司 id</li>
  * <li>departmentId: 部门 id</li>
+ * <li>formOriginId: 表单 id</li>
  * </ul>
  */
 public class ImportArchivesEmployeesCommand {
@@ -13,6 +14,8 @@ public class ImportArchivesEmployeesCommand {
     private Long organizationId;
 
     private Long departmentId;
+
+    private Long formOriginId;
 
     public ImportArchivesEmployeesCommand() {
     }
@@ -31,6 +34,14 @@ public class ImportArchivesEmployeesCommand {
 
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
+    }
+
+    public Long getFormOriginId() {
+        return formOriginId;
+    }
+
+    public void setFormOriginId(Long formOriginId) {
+        this.formOriginId = formOriginId;
     }
 
     @Override

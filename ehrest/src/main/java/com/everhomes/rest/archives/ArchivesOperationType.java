@@ -1,20 +1,21 @@
 package com.everhomes.rest.archives;
 
-import com.everhomes.rest.servicehotline.LayoutType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>QUIT((byte) 1): 辞职</li>
- * <li>FIRE((byte) 2): 解雇</li>
- * <li>OTHER((byte) 3): 其它</li>
+ * <li>CHECK_IN((byte) 0): 入职</li>
+ * <li>EMPLOY((byte) 1): 转正</li>
+ * <li>TRANSFER((byte) 2): 调整</li>
+ * <li>DISMISS((byte)3): 离职</li>
  * </ul>
  */
-public enum DismissType {
-    QUIT((byte) 1), FIRE((byte) 2), OTHER((byte) 3);
+public enum ArchivesOperationType {
+
+    CHECK_IN((byte) 0), EMPLOY((byte) 1), TRANSFER((byte) 2), DISMISS((byte) 3);
     private Byte code;
 
-    private DismissType(Byte code) {
+    private ArchivesOperationType(Byte code) {
         this.code = code;
     }
 
@@ -27,9 +28,9 @@ public enum DismissType {
         return StringHelper.toJsonString(this);
     }
 
-    public static LayoutType fromCode(Byte code) {
+    public static ArchivesOperationType fromCode(Byte code) {
         if (code != null) {
-            for (LayoutType a : LayoutType.values()) {
+            for (ArchivesOperationType a : ArchivesOperationType.values()) {
                 if (code.byteValue() == a.getCode().byteValue()) {
                     return a;
                 }

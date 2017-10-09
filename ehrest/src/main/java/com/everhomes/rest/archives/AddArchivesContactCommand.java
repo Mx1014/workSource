@@ -15,8 +15,9 @@ import java.util.List;
  * <li>contactToken: 联系号码</li>
  * <li>contactShortToken: 手机短号</li>
  * <li>workEmail: 工作邮箱</li>
- * <li>departmentIds: 选择的部门</li>
- * <li>jobPosition: 填写职位</li>
+ * <li>departmentIds: 部门 id</li>
+ * <li>jobPositionIds: 岗位 id</li>
+ * <li>jobLevelIds: 职级 id</li>
  * <li>visibleFlag: 隐私设置: 0-显示, 1-隐藏</li>
  * </ul>
  */
@@ -41,7 +42,11 @@ public class AddArchivesContactCommand {
     @ItemType(Long.class)
     private List<Long> departmentIds;
 
-    private String jobPosition;
+    @ItemType(Long.class)
+    private List<Long> jobPositionIds;
+
+    @ItemType(Long.class)
+    private List<Long> jobLevelIds;
 
     private Byte visibleFlag;
 
@@ -120,12 +125,20 @@ public class AddArchivesContactCommand {
         this.departmentIds = departmentIds;
     }
 
-    public String getJobPosition() {
-        return jobPosition;
+    public List<Long> getJobPositionIds() {
+        return jobPositionIds;
     }
 
-    public void setJobPosition(String jobPosition) {
-        this.jobPosition = jobPosition;
+    public void setJobPositionIds(List<Long> jobPositionIds) {
+        this.jobPositionIds = jobPositionIds;
+    }
+
+    public List<Long> getJobLevelIds() {
+        return jobLevelIds;
+    }
+
+    public void setJobLevelIds(List<Long> jobLevelIds) {
+        this.jobLevelIds = jobLevelIds;
     }
 
     public Byte getVisibleFlag() {

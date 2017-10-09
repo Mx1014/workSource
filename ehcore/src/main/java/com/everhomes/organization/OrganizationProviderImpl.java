@@ -1,5 +1,6 @@
 // @formatter:off
 package com.everhomes.organization;
+
 import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
@@ -29,35 +30,8 @@ import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhImportFileTasks;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAttachments;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunityRequests;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationDetails;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositionMaps;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositions;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberContracts;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberDetails;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberEducations;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberInsurances;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberLogs;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberProfileLogs;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberWorkExperiences;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
@@ -4520,6 +4494,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return ConvertHelper.convert(memberDetails,OrganizationMemberDetails.class);
     }
 
+    @Override
     public void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long id){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
@@ -4527,7 +4502,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, id);
     }
 
-    public void delateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails){
+    @Override
+    public void deleteOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
         dao.delete(organizationMemberDetails);
@@ -5282,7 +5258,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	    return context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID)
                 .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                 .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId))
-                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.notEqual(EmployeeStatus.LEAVETHEJOB.getCode()))
+//                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.notEqual(EmployeeStatus.LEAVETHEJOB.getCode()))
+				//	TODO:离职状态人员查询逻辑
                 .fetchInto(Long.class);
     }
 
@@ -5397,8 +5374,37 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return list;
 	}
-	
 	@Override
+	public void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.EMAIL_CONTENT, emailContent)
+				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(UniongroupType.SALARYGROUP.getCode()))
+				.and(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID.eq(ownerId)).execute();
+ 
+	}
+
+	@Override
+	public List<Organization> findNamespaceUnifiedSocialCreditCode(String unifiedSocialCreditCode, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizations.class));
+
+		List<Organization> result = new ArrayList<Organization>();
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.UNIFIED_SOCIAL_CREDIT_CODE.eq(unifiedSocialCreditCode));
+
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Organization.class));
+			return null;
+		});
+
+		return result;
+	}
+
+@Override
 	public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
@@ -5438,7 +5444,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 			// 合同主体
 			if(listCommand.getContractPartyId() != null){
-				cond = cond.and(t2.field("contract_id").eq(listCommand.getContractPartyId()));
+				cond = cond.and(t2.field("contract_party_id").eq(listCommand.getContractPartyId()));
 			}
 
 			//工作地点
@@ -5548,5 +5554,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 
 		return result;
+	}
+	
+	@Override
+	public void updateOrganizationMemberByDetailId(Long detailId, String contactToken, String contactName, Byte gender) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		UpdateQuery<EhOrganizationMembersRecord> query = context.updateQuery(Tables.EH_ORGANIZATION_MEMBERS);
+
+		if (contactToken != null)
+			query.addValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN, contactToken);
+		if (contactName != null)
+			query.addValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME, contactName);
+		if (gender != null)
+			query.addValue(Tables.EH_ORGANIZATION_MEMBERS.GENDER, gender);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId));
+		query.execute();
+
 	}
 }

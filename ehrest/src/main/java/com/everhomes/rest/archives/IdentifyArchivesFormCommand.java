@@ -15,6 +15,10 @@ public class IdentifyArchivesFormCommand {
     public IdentifyArchivesFormCommand() {
     }
 
+    public IdentifyArchivesFormCommand(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
     public Long getOrganizationId() {
         return organizationId;
     }

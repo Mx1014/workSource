@@ -9,11 +9,12 @@ import java.util.List;
 /**
  * <ul>
  * <li>detailIds: (List)员工 detailId</li>
- * <li>departmentId: 部门 id</li>
- * <li>jobPositionId: 职务 id</li>
- * <li>organizationId: 工作地点 id</li>
+ * <li>departmentIds: 部门 id(以数组形式传参)</li>
+ * <li>jobPositionIds: 岗位 ids</li>
+ * <li>jobLevelIds: 职级 ids</li>
+ * <li>organizationId: 公司 id</li>
  * <li>effectiveTime: 生效时间</li>
- * <li>transferType: 调整类型: 1-晋升,2-调整,3-其他</li>
+ * <li>transferType: 调整类型: 0-晋升,1-调整,2-其他 参考{@link com.everhomes.rest.archives.ArchivesTransferType}</li>
  * <li>transferReason: 调整原因</li>
  * </ul>
  */
@@ -25,7 +26,11 @@ public class TransferArchivesEmployeesCommand {
     @ItemType(Long.class)
     private List<Long> departmentIds;
 
-    private String jobPosition;
+    @ItemType(Long.class)
+    private List<Long> jobPositionIds;
+
+    @ItemType(Long.class)
+    private List<Long> jobLevelIds;
 
     private Long organizationId;
 
@@ -46,14 +51,6 @@ public class TransferArchivesEmployeesCommand {
         this.detailIds = detailIds;
     }
 
-    public String getJobPosition() {
-        return jobPosition;
-    }
-
-    public void setJobPosition(String jobPosition) {
-        this.jobPosition = jobPosition;
-    }
-
     public Long getOrganizationId() {
         return organizationId;
     }
@@ -66,8 +63,8 @@ public class TransferArchivesEmployeesCommand {
         return effectiveTime;
     }
 
-    public void setEffectiveTime(Date effectiveTime) {
-        this.effectiveTime = effectiveTime;
+    public void setEffectiveTime(String effectiveTime) {
+        this.effectiveTime = ArchivesUtil.parseDate(effectiveTime);
     }
 
     public Byte getTransferType() {
@@ -86,16 +83,32 @@ public class TransferArchivesEmployeesCommand {
         this.transferReason = transferReason;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
     public List<Long> getDepartmentIds() {
         return departmentIds;
     }
 
     public void setDepartmentIds(List<Long> departmentIds) {
         this.departmentIds = departmentIds;
+    }
+
+    public List<Long> getJobPositionIds() {
+        return jobPositionIds;
+    }
+
+    public void setJobPositionIds(List<Long> jobPositionIds) {
+        this.jobPositionIds = jobPositionIds;
+    }
+
+    public List<Long> getJobLevelIds() {
+        return jobLevelIds;
+    }
+
+    public void setJobLevelIds(List<Long> jobLevelIds) {
+        this.jobLevelIds = jobLevelIds;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

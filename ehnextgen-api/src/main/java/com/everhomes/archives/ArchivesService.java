@@ -1,7 +1,9 @@
 package com.everhomes.archives;
 
 import com.everhomes.rest.archives.*;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,7 +19,7 @@ public interface ArchivesService {
 
     void stickArchivesContact(StickArchivesContactCommand cmd);
 
-    ArchivesContactDTO getArchivesContact(ArchivesIdCommand cmd);
+//    ArchivesContactDTO getArchivesContact(ArchivesIdCommand cmd);
 
     ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd);
 
@@ -27,6 +29,10 @@ public interface ArchivesService {
     void exportArchivesContacts(ExportArchivesContactsCommand cmd, HttpServletResponse httpResponse);
 
     void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd);
+
+    ImportFileResponse<ImportArchivesContactsDTO> getImportContactsResult(GetImportFileResultCommand cmd);
+
+    void exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
 
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
 
@@ -38,11 +44,21 @@ public interface ArchivesService {
 
     ListArchivesDismissEmployeesResponse listArchivesDismissEmployees(ListArchivesDismissEmployeesCommand cmd);
 
+    void executeArchivesConfiguration();
+
+    void employArchivesEmployeesConfig(EmployArchivesEmployeesCommand cmd);
+
     void employArchivesEmployees(EmployArchivesEmployeesCommand cmd);
+
+    void transferArchivesEmployeesConfig(TransferArchivesEmployeesCommand cmd);
 
     void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd);
 
+    void dismissArchivesEmployeesConfig(DismissArchivesEmployeesCommand cmd);
+
     void dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd);
+
+    void deleteArchivesEmployees(DeleteArchivesEmployeesCommand cmd);
 
     GeneralFormDTO updateArchivesForm(UpdateArchivesFormCommand cmd);
 
@@ -53,6 +69,10 @@ public interface ArchivesService {
     ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, Long userId, Integer namespaceId, ImportArchivesEmployeesCommand cmd);
 
     void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd, HttpServletResponse httpResponse);
+
+    void exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd,HttpServletResponse httpResponse);
+
+    ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd);
 
     void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd);
 }

@@ -10,14 +10,18 @@ import java.util.List;
 /**
  * <ul>
  * <li>detailId: 成员 detailId</li>
+ * <li>targetId: targetId</li>
+ * <li>targetType: targetType</li>
  * <li>contactName: 姓名</li>
  * <li>employeeStatus: 成员状态: 0-试用, 1-正式</li>
- * <li>jobPositions: 职务</li>
  * <li>departments: 部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * <li>regionCode: 区号</li>
  * <li>contactToken: 手机号</li>
  * <li>workEmail: 工作邮箱</li>
+ * <li>checkInTime: 入职日期</li>
  * <li>employmentTime: 转正日期</li>
  * <li>contractTime: 合同日期</li>
+ * <li>employeeNo: 工号</li>
  * </ul>
  */
 public class ArchivesEmployeeDTO {
@@ -37,13 +41,19 @@ public class ArchivesEmployeeDTO {
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> departments;
 
+    private String regionCode;
+
     private String contactToken;
 
     private String workEmail;
 
+    private Date checkInTime;
+
     private Date employmentTime;
 
     private Date contractTime;
+
+    private String employeeNo;
 
     public ArchivesEmployeeDTO() {
     }
@@ -104,6 +114,14 @@ public class ArchivesEmployeeDTO {
         this.departments = departments;
     }
 
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
+    }
+
     public String getContactToken() {
         return contactToken;
     }
@@ -120,6 +138,14 @@ public class ArchivesEmployeeDTO {
         this.workEmail = workEmail;
     }
 
+    public Date getCheckInTime() {
+        return checkInTime;
+    }
+
+    public void setCheckInTime(Date checkInTime) {
+        this.checkInTime = checkInTime;
+    }
+
     public Date getEmploymentTime() {
         return employmentTime;
     }
@@ -134,6 +160,14 @@ public class ArchivesEmployeeDTO {
 
     public void setContractTime(Date contractTime) {
         this.contractTime = contractTime;
+    }
+
+    public String getEmployeeNo() {
+        return employeeNo;
+    }
+
+    public void setEmployeeNo(String employeeNo) {
+        this.employeeNo = employeeNo;
     }
 
     @Override

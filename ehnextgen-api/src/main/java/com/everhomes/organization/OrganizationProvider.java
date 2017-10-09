@@ -363,6 +363,7 @@ public interface OrganizationProvider {
 	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId);
 	Long createOrganizationMemberDetails(OrganizationMemberDetails memberDetails);
 	void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId);
+	void deleteOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails);
 	void createOrganizationMemberV2(OrganizationMember organizationMember, Long detailId);
 
 
@@ -483,6 +484,7 @@ public interface OrganizationProvider {
 	// path查询接口
 	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, List<String> tokens);
 
+	void updateOrganizationMemberByDetailId(Long detailId, String contactToken, String contactName, Byte gender);
 
 	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType);
 

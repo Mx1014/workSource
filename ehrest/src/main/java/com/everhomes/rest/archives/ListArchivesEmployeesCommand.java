@@ -3,6 +3,8 @@ package com.everhomes.rest.archives;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 /**
  * <ul>
@@ -15,7 +17,7 @@ import java.sql.Date;
  * <li>contractTimeEnd: 合同结束日期</li>
  * <li>employeeStatus: 员工状态</li>
  * <li>contractPartyId: 合同主体 id</li>
- * <li>contactName: 姓名</li>
+ * <li>keywords: 搜索关键词</li>
  * <li>departmentId: 部门 id</li>
  * <li>workingPlaceId: 工作地点 id</li>
  * <li>pageAnchor: 锚点值</li>
@@ -42,7 +44,7 @@ public class ListArchivesEmployeesCommand {
 
     private Long contractPartyId;
 
-    private String contactName;
+    private String keywords;
 
     private Long departmentId;
 
@@ -52,6 +54,8 @@ public class ListArchivesEmployeesCommand {
 
     private Integer pageSize;
 
+    SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
     public ListArchivesEmployeesCommand() {
     }
 
@@ -59,48 +63,48 @@ public class ListArchivesEmployeesCommand {
         return checkInTimeStart;
     }
 
-    public void setCheckInTimeStart(Date checkInTimeStart) {
-        this.checkInTimeStart = checkInTimeStart;
+    public void setCheckInTimeStart(String checkInTimeStart) {
+        this.checkInTimeStart = ArchivesUtil.parseDate(checkInTimeStart);
     }
 
     public Date getCheckInTimeEnd() {
         return checkInTimeEnd;
     }
 
-    public void setCheckInTimeEnd(Date checkInTimeEnd) {
-        this.checkInTimeEnd = checkInTimeEnd;
+    public void setCheckInTimeEnd(String checkInTimeEnd) {
+        this.checkInTimeEnd = ArchivesUtil.parseDate(checkInTimeEnd);
     }
 
     public Date getEmploymentTimeStart() {
         return employmentTimeStart;
     }
 
-    public void setEmploymentTimeStart(Date employmentTimeStart) {
-        this.employmentTimeStart = employmentTimeStart;
+    public void setEmploymentTimeStart(String employmentTimeStart) {
+        this.employmentTimeStart =  ArchivesUtil.parseDate(employmentTimeStart);
     }
 
     public Date getEmploymentTimeEnd() {
         return employmentTimeEnd;
     }
 
-    public void setEmploymentTimeEnd(Date employmentTimeEnd) {
-        this.employmentTimeEnd = employmentTimeEnd;
+    public void setEmploymentTimeEnd(String employmentTimeEnd) {
+        this.employmentTimeEnd =  ArchivesUtil.parseDate(employmentTimeEnd);
     }
 
     public Date getContractTimeStart() {
         return contractTimeStart;
     }
 
-    public void setContractTimeStart(Date contractTimeStart) {
-        this.contractTimeStart = contractTimeStart;
+    public void setContractTimeStart(String contractTimeStart) {
+        this.contractTimeStart =  ArchivesUtil.parseDate(contractTimeStart);
     }
 
     public Date getContractTimeEnd() {
         return contractTimeEnd;
     }
 
-    public void setContractTimeEnd(Date contractTimeEnd) {
-        this.contractTimeEnd = contractTimeEnd;
+    public void setContractTimeEnd(String contractTimeEnd) {
+        this.contractTimeEnd =  ArchivesUtil.parseDate(contractTimeEnd);
     }
 
     public Byte getEmployeeStatus() {
@@ -127,12 +131,12 @@ public class ListArchivesEmployeesCommand {
         this.contractPartyId = contractPartyId;
     }
 
-    public String getContactName() {
-        return contactName;
+    public String getKeywords() {
+        return keywords;
     }
 
-    public void setContactName(String contactName) {
-        this.contactName = contactName;
+    public void setKeywords(String keywords) {
+        this.keywords = keywords;
     }
 
     public Long getDepartmentId() {

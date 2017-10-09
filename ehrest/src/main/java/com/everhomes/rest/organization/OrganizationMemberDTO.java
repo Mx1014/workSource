@@ -119,10 +119,13 @@ public class OrganizationMemberDTO {
     private Long approveTime;
     private String operatorName;
     private String operatorPhone;
+
+    //  added for archives-2.0
     private String email;
     private String workEmail;
     private String regionCode;
-    private Timestamp contractEndTime;
+    private Date contractEndTime;
+    private String contactShortToken;
 
     public OrganizationMemberDTO() {
     }
@@ -514,11 +517,20 @@ public class OrganizationMemberDTO {
         this.regionCode = regionCode;
     }
 
-    public Timestamp getContractEndTime() {
+    public Date getContractEndTime() {
         return contractEndTime;
     }
 
-    public void setContractEndTime(Timestamp contractEndTime) {
+    public void setContractEndTime(Date contractEndTime) {
         this.contractEndTime = contractEndTime;
     }
+
+    public String getContactShortToken() {
+        return contactShortToken;
+    }
+
+    public void setContactShortToken(String contactShortToken) {
+        this.contactShortToken = contactShortToken;
+    }
+
 }

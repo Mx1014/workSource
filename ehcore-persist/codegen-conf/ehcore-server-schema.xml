@@ -209,7 +209,7 @@
         eh_service_alliance_comment_attachments | eh_service_alliance_comments |
 	eh_incubator_applies | eh_incubator_project_types | eh_incubator_apply_attachments |
             eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types | eh_asset_payment_order | eh_asset_payment_order_bills |
-
+	    eh_archives_sticky_contacts | eh_archives_dismiss_employees | eh_general_form_groups | eh_archives_forms | eh_archives_configurations | eh_archives_logs |
         </includes>
 
             <!-- All elements that are excluded from your schema

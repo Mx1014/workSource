@@ -1,23 +1,29 @@
 package com.everhomes.rest.archives;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.sql.Date;
+import java.util.List;
 
 
 /**
  * <ul>
  * <li>organizationId: 公司 id</li>
  * <li>contactName: 员工姓名</li>
+ * <li>enName: 英文名</li>
+ * <li>gender: 性别: 1-男, 2-女</li>
  * <li>checkInTime: 入职日期</li>
  * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣 {@link com.everhomes.rest.organization.EmployeeType}</li>
  * <li>employeeStatus: 工状态, 0: 试用 1: 在职 2: 离职 {@link com.everhomes.rest.organization.EmployeeStatus}</li>
  * <li>employmentTime: 转正时间</li>
- * <li>departmentId: 部门 id</li>
- * <li>jobPositionId: 职务</li>
+ * <li>departmentIds: 部门 ids</li>
+ * <li>jobPositionIds: 岗位 ids</li>
+ * <li>jobLevelIds: 职级 ids</li>
  * <li>employeeNo: 工号</li>
  * <li>contactShortToken: 手机短号</li>
  * <li>workEmail: 工作邮箱</li>
- * <li>workingPlace: 工作地点</li>
- * <li>contractId: 合同主体</li>
+ * <li>contractPartyId: 合同主体</li>
  * <li>regionCode: 手机区号</li>
  * <li>contactToken: 手机号</li>
  * </ul>
@@ -32,17 +38,22 @@ public class AddArchivesEmployeeCommand {
 
     private Byte gender;
 
-    private String checkInTime;
+    private Date checkInTime;
 
     private Byte employeeType;
 
     private Byte employeeStatus;
 
-    private String employmentTime;
+    private Date employmentTime;
 
-    private Long departmentId;
+    @ItemType(Long.class)
+    private List<Long> departmentIds;
 
-    private String jobPosition;
+    @ItemType(Long.class)
+    private List<Long> jobPositionIds;
+
+    @ItemType(Long.class)
+    private List<Long> jobLevelIds;
 
     private String employeeNo;
 
@@ -50,9 +61,7 @@ public class AddArchivesEmployeeCommand {
 
     private String workEmail;
 
-    private Long workingPlaceId;
-
-    private Long contractId;
+    private Long contractPartyId;
 
     private String regionCode;
 
@@ -85,12 +94,12 @@ public class AddArchivesEmployeeCommand {
         this.gender = gender;
     }
 
-    public String getCheckInTime() {
+    public Date getCheckInTime() {
         return checkInTime;
     }
 
     public void setCheckInTime(String checkInTime) {
-        this.checkInTime = checkInTime;
+        this.checkInTime = ArchivesUtil.parseDate(checkInTime);
     }
 
     public Byte getEmployeeType() {
@@ -109,28 +118,36 @@ public class AddArchivesEmployeeCommand {
         this.employeeStatus = employeeStatus;
     }
 
-    public String getEmploymentTime() {
+    public Date getEmploymentTime() {
         return employmentTime;
     }
 
     public void setEmploymentTime(String employmentTime) {
-        this.employmentTime = employmentTime;
+        this.employmentTime = ArchivesUtil.parseDate(employmentTime);
     }
 
-    public Long getDepartmentId() {
-        return departmentId;
+    public List<Long> getDepartmentIds() {
+        return departmentIds;
     }
 
-    public void setDepartmentId(Long departmentId) {
-        this.departmentId = departmentId;
+    public void setDepartmentIds(List<Long> departmentIds) {
+        this.departmentIds = departmentIds;
     }
 
-    public String getJobPosition() {
-        return jobPosition;
+    public List<Long> getJobPositionIds() {
+        return jobPositionIds;
     }
 
-    public void setJobPosition(String jobPosition) {
-        this.jobPosition = jobPosition;
+    public void setJobPositionIds(List<Long> jobPositionIds) {
+        this.jobPositionIds = jobPositionIds;
+    }
+
+    public List<Long> getJobLevelIds() {
+        return jobLevelIds;
+    }
+
+    public void setJobLevelIds(List<Long> jobLevelIds) {
+        this.jobLevelIds = jobLevelIds;
     }
 
     public String getEmployeeNo() {
@@ -157,20 +174,12 @@ public class AddArchivesEmployeeCommand {
         this.workEmail = workEmail;
     }
 
-    public Long getWorkingPlaceId() {
-        return workingPlaceId;
+    public Long getContractPartyId() {
+        return contractPartyId;
     }
 
-    public void setWorkingPlaceId(Long workingPlaceId) {
-        this.workingPlaceId = workingPlaceId;
-    }
-
-    public Long getContractId() {
-        return contractId;
-    }
-
-    public void setContractId(Long contractId) {
-        this.contractId = contractId;
+    public void setContractPartyId(Long contractPartyId) {
+        this.contractPartyId = contractPartyId;
     }
 
     public Long getOrganizationId() {

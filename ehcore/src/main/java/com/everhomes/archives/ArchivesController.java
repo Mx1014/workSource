@@ -5,7 +5,9 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.archives.*;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -46,12 +48,26 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/transferArchivesContacts</b>
-     * <p>2.调整通讯录成员</p>
+     * <p>2-1.调整通讯录成员</p>
      */
     @RequestMapping("transferArchivesContacts")
     @RestReturn(value = String.class)
     public RestResponse transferArchivesContacts(TransferArchivesContactsCommand cmd){
         archivesService.transferArchivesContacts(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /archives/deleteArchivesContacts</b>
+     * <p>2-2.批量删除通讯录、员工</p>
+     */
+    @RequestMapping("deleteArchivesContacts")
+    @RestReturn(value = String.class)
+    public RestResponse deleteArchivesContacts(DeleteArchivesContactsCommand cmd){
+        archivesService.deleteArchivesContacts(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -126,13 +142,26 @@ public class ArchivesController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /archives/deleteArchivesContacts</b>
-     * <p>6.批量删除通讯录、员工</p>
+     * <b>URL: /archives/getImportContactsResult</b>
+     * <p>5-4.查询通讯录导入结果</p>
      */
-    @RequestMapping("deleteArchivesContacts")
+    @RequestMapping("getImportContactsResult")
+    @RestReturn(value = ImportFileResponse.class)
+    public RestResponse getImportContactsResult(GetImportFileResultCommand cmd) {
+        RestResponse response = new RestResponse(archivesService.getImportContactsResult(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /archives/exportImportFileFailResults</b>
+     * <p>6.查询通讯录导入结果</p>
+     */
+    @RequestMapping("exportImportFileFailResults")
     @RestReturn(value = String.class)
-    public RestResponse deleteArchivesContacts(DeleteArchivesContactsCommand cmd){
-        archivesService.deleteArchivesContacts(cmd);
+    public RestResponse exportImportFileFailResults(GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
+        archivesService.exportImportFileFailResults(cmd, httpResponse);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -216,7 +245,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("employArchivesEmployees")
     @RestReturn(value = String.class)
     public RestResponse employArchivesEmployees(EmployArchivesEmployeesCommand cmd){
-        archivesService.employArchivesEmployees(cmd);
+        archivesService.employArchivesEmployeesConfig(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -230,7 +259,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("transferArchivesEmployees")
     @RestReturn(value = String.class)
     public RestResponse transferArchivesEmployees(TransferArchivesEmployeesCommand cmd){
-        archivesService.transferArchivesEmployees(cmd);
+        archivesService.transferArchivesEmployeesConfig(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -244,7 +273,21 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("dismissArchivesEmployees")
     @RestReturn(value = String.class)
     public RestResponse dismissArchivesEmployees(DismissArchivesEmployeesCommand cmd){
-        archivesService.dismissArchivesEmployees(cmd);
+        archivesService.dismissArchivesEmployeesConfig(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /archives/deleteArchivesEmployees</b>
+     * <p>11-4.员工批量删除</p>
+     */
+    @RequestMapping("deleteArchivesEmployees")
+    @RestReturn(value = String.class)
+    public RestResponse deleteArchivesEmployees(DeleteArchivesEmployeesCommand cmd){
+        archivesService.deleteArchivesEmployees(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -316,6 +359,30 @@ public class ArchivesController extends ControllerBase{
     public RestResponse exportArchivesEmployees(ExportArchivesEmployeesCommand cmd, HttpServletResponse httpResponse){
         archivesService.exportArchivesEmployees(cmd,httpResponse);
         return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /archives/exportArchivesEmployeesTemplate</b>
+     * <p>13-3.导出人事档案导入模板</p>
+     */
+    @RequestMapping("exportArchivesEmployeesTemplate")
+    @RestReturn(value = String.class)
+    public RestResponse exportArchivesEmployeesTemplate(ExportArchivesEmployeesTemplateCommand cmd, HttpServletResponse httpResponse){
+        archivesService.exportArchivesEmployeesTemplate(cmd,httpResponse);
+        return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /archives/getImportEmployeesResult</b>
+     * <p>13-4.查询人事档案导入结果</p>
+     */
+    @RequestMapping("getImportEmployeesResult")
+    @RestReturn(value = ImportFileResponse.class)
+    public RestResponse getImportEmployeesResult(GetImportFileResultCommand cmd) {
+        RestResponse response = new RestResponse(archivesService.getImportEmployeesResult(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
     /**

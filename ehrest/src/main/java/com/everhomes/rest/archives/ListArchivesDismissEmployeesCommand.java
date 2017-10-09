@@ -11,10 +11,11 @@ import java.sql.Date;
  * <li>dismissTimeEnd: 离职结束日期</li>
  * <li>checkInTimeStart: 入职起始日期</li>
  * <li>checkInTimeEnd: 入职结束日期</li>
- * <li>dismissType: 离职类型： 1-辞职 2-解雇 3-其他 参考{@link com.everhomes.rest.archives.DismissType}</li>
- * <li>dismissReason: 离职原因 参考{@link com.everhomes.rest.archives.DismissReason}</li>
+ * <li>contractPartyId: 合同主体id</li>
+ * <li>dismissType: 离职类型： 0-辞职 1-解雇 2-其他 参考{@link com.everhomes.rest.archives.ArchivesDismissType}</li>
+ * <li>dismissReason: 离职原因 参考{@link com.everhomes.rest.archives.ArchivesDismissReason}</li>
  * <li>contactName: 姓名</li>
- * <li>pageOffset: 页码(不能为null)</li>
+ * <li>pageAnchor: 页码(不能为null)</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
@@ -30,13 +31,15 @@ public class ListArchivesDismissEmployeesCommand {
 
     private Date checkInTimeEnd;
 
+    private Long contractPartyId;
+
     private Byte dismissType;
 
-    private String dismissReason;
+    private Byte dismissReason;
 
     private String contactName;
 
-    private Integer pageOffset;
+    private Integer pageAnchor;
 
     private Integer pageSize;
 
@@ -56,7 +59,7 @@ public class ListArchivesDismissEmployeesCommand {
     }
 
     public void setDismissTimeStart(String dismissTimeStart) {
-        this.dismissTimeStart = ArchivesDateUtil.parseDate(dismissTimeStart);
+        this.dismissTimeStart = ArchivesUtil.parseDate(dismissTimeStart);
     }
 
     public Date getDismissTimeEnd() {
@@ -64,7 +67,7 @@ public class ListArchivesDismissEmployeesCommand {
     }
 
     public void setDismissTimeEnd(String dismissTimeEnd) {
-        this.dismissTimeEnd = ArchivesDateUtil.parseDate(dismissTimeEnd);
+        this.dismissTimeEnd = ArchivesUtil.parseDate(dismissTimeEnd);
     }
 
     public Date getCheckInTimeStart() {
@@ -72,7 +75,7 @@ public class ListArchivesDismissEmployeesCommand {
     }
 
     public void setCheckInTimeStart(String checkInTimeStart) {
-        this.checkInTimeStart = ArchivesDateUtil.parseDate(checkInTimeStart);
+        this.checkInTimeStart = ArchivesUtil.parseDate(checkInTimeStart);
     }
 
     public Date getCheckInTimeEnd() {
@@ -80,7 +83,15 @@ public class ListArchivesDismissEmployeesCommand {
     }
 
     public void setCheckInTimeEnd(String checkInTimeEnd) {
-        this.checkInTimeEnd = ArchivesDateUtil.parseDate(checkInTimeEnd);
+        this.checkInTimeEnd = ArchivesUtil.parseDate(checkInTimeEnd);
+    }
+
+    public Long getContractPartyId() {
+        return contractPartyId;
+    }
+
+    public void setContractPartyId(Long contractPartyId) {
+        this.contractPartyId = contractPartyId;
     }
 
     public Byte getDismissType() {
@@ -91,11 +102,11 @@ public class ListArchivesDismissEmployeesCommand {
         this.dismissType = dismissType;
     }
 
-    public String getDismissReason() {
+    public Byte getDismissReason() {
         return dismissReason;
     }
 
-    public void setDismissReason(String dismissReason) {
+    public void setDismissReason(Byte dismissReason) {
         this.dismissReason = dismissReason;
     }
 
@@ -107,12 +118,12 @@ public class ListArchivesDismissEmployeesCommand {
         this.contactName = contactName;
     }
 
-    public Integer getPageOffset() {
-        return pageOffset;
+    public Integer getPageAnchor() {
+        return pageAnchor;
     }
 
-    public void setPageOffset(Integer pageOffset) {
-        this.pageOffset = pageOffset;
+    public void setPageAnchor(Integer pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
 
     public Integer getPageSize() {

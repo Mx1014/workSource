@@ -5,6 +5,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -47,12 +48,12 @@ public class ListOrganizationContactCommand {
     @ItemType(String.class)
     private List<String> filterScopeTypes;
 
-    private Timestamp checkInTimeStart;//入职日期
-    private Timestamp checkInTimeEnd;
-    private Timestamp employmentTimeStart;//转正日期
-    private Timestamp employmentTimeEnd;
-    private Timestamp contractEndTimeStart;//合同结束日期
-    private Timestamp contractEndTimeEnd;
+    private Date checkInTimeStart;//入职日期
+    private Date checkInTimeEnd;
+    private Date employmentTimeStart;//转正日期
+    private Date employmentTimeEnd;
+    private Date contractEndTimeStart;//合同结束日期
+    private Date contractEndTimeEnd;
     private Byte employeeStatus;//员工状态
     private Long contractPartyId;//合同主体
     private Long workPlaceId;//工作地点
@@ -180,51 +181,51 @@ public class ListOrganizationContactCommand {
         this.workPlaceId = workPlaceId;
     }
 
-    public Timestamp getCheckInTimeStart() {
+    public Date getCheckInTimeStart() {
         return checkInTimeStart;
     }
 
-    public void setCheckInTimeStart(Timestamp checkInTimeStart) {
+    public void setCheckInTimeStart(Date checkInTimeStart) {
         this.checkInTimeStart = checkInTimeStart;
     }
 
-    public Timestamp getCheckInTimeEnd() {
+    public Date getCheckInTimeEnd() {
         return checkInTimeEnd;
     }
 
-    public void setCheckInTimeEnd(Timestamp checkInTimeEnd) {
+    public void setCheckInTimeEnd(Date checkInTimeEnd) {
         this.checkInTimeEnd = checkInTimeEnd;
     }
 
-    public Timestamp getEmploymentTimeStart() {
+    public Date getEmploymentTimeStart() {
         return employmentTimeStart;
     }
 
-    public void setEmploymentTimeStart(Timestamp employmentTimeStart) {
+    public void setEmploymentTimeStart(Date employmentTimeStart) {
         this.employmentTimeStart = employmentTimeStart;
     }
 
-    public Timestamp getEmploymentTimeEnd() {
+    public Date getEmploymentTimeEnd() {
         return employmentTimeEnd;
     }
 
-    public void setEmploymentTimeEnd(Timestamp employmentTimeEnd) {
+    public void setEmploymentTimeEnd(Date employmentTimeEnd) {
         this.employmentTimeEnd = employmentTimeEnd;
     }
 
-    public Timestamp getContractEndTimeStart() {
+    public Date getContractEndTimeStart() {
         return contractEndTimeStart;
     }
 
-    public void setContractEndTimeStart(Timestamp contractEndTimeStart) {
+    public void setContractEndTimeStart(Date contractEndTimeStart) {
         this.contractEndTimeStart = contractEndTimeStart;
     }
 
-    public Timestamp getContractEndTimeEnd() {
+    public Date getContractEndTimeEnd() {
         return contractEndTimeEnd;
     }
 
-    public void setContractEndTimeEnd(Timestamp contractEndTimeEnd) {
+    public void setContractEndTimeEnd(Date contractEndTimeEnd) {
         this.contractEndTimeEnd = contractEndTimeEnd;
     }
 
