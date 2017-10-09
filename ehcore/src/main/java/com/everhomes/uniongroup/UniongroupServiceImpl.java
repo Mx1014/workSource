@@ -168,7 +168,7 @@ public class UniongroupServiceImpl implements UniongroupService {
     public List<UniongroupMemberDetailsDTO> listUniongroupMemberDetailsByGroupId(Long groupId) {
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(groupId);
+        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(groupId,null);
         if (details != null) {
             return details.stream().map(r -> {
                 UniongroupMemberDetailsDTO dto = convertUniongroupMemberToDTO(r);

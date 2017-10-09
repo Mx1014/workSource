@@ -132,6 +132,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import scala.Int;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -5078,7 +5079,7 @@ public class PunchServiceImpl implements PunchService {
     }
     /**刷固定排班*/
     private void refreshGroupDayLogAndMonthStat(PunchRule pr, Calendar yesterday) {
-        List<UniongroupMemberDetail> members = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
+        List<UniongroupMemberDetail> members = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),0);
 		if (null != members && members.size()>0) {
 
 			for(UniongroupMemberDetail member : members) {
@@ -6197,6 +6198,8 @@ public class PunchServiceImpl implements PunchService {
 	        command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
 	        command.setEnterpriseId(cmd.getOwnerId());
 	        command.setTargets(cmd.getTargets());
+			//次日生效的versioncode为1
+			command.setVersionCode(1);
             try {
                 this.uniongroupService.saveUniongroupConfigures(command);
             }catch(NoNodeAvailableException e){
@@ -6204,7 +6207,7 @@ public class PunchServiceImpl implements PunchService {
             }
 
 			//删除新增人员之前的考勤排班
-			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(punchOrg.getId());
+			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(punchOrg.getId(),1);
 			if (null != newEmployees)
 				for (UniongroupMemberDetail employee : newEmployees) {
 					//删除新增人员之前的排班
@@ -6595,7 +6598,11 @@ public class PunchServiceImpl implements PunchService {
 			dto.setOperatorUid(pr.getOperatorUid());
 		}
 		dto.setId(pr.getPunchOrganizationId());
-		List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(r.getId());
+		Integer versionCode = 0;
+		if (pr.getStatus().equals(PunchRuleStatus.NEW.getCode()) || pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
+			versionCode = 1;
+		}
+		List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(r.getId(),versionCode);
 		dto.setEmployeeCount(employees == null ? 0: employees.size());
 		if (null != employees) {
 			dto.setEmployees(new ArrayList<>());
@@ -6820,8 +6827,11 @@ public class PunchServiceImpl implements PunchService {
 			Long t1 = System.currentTimeMillis();
 			LOGGER.debug("saveUnion Time1 "+  t1 + "cost: "+ (t1-t0));
 			PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
-
-			List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
+			Integer versionCode = 0;
+			if (pr.getStatus().equals(PunchRuleStatus.NEW.getCode()) || pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
+				versionCode = 1;
+			}
+			List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),versionCode);
 			Long t2 = System.currentTimeMillis();
 			LOGGER.debug("saveUnion Time2 "+  t2 + "cost: "+ (t2-t1) + "save start");
 
@@ -6832,6 +6842,8 @@ public class PunchServiceImpl implements PunchService {
 			command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
 			command.setEnterpriseId(cmd.getOwnerId());
 			command.setTargets(cmd.getTargets());
+			//次日生效的versioncode为1
+			command.setVersionCode(1);
 			try {
 				this.uniongroupService.saveUniongroupConfigures(command);
 			} catch (NoNodeAvailableException e) {
@@ -6839,7 +6851,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 			Long t7 = System.currentTimeMillis();
 			LOGGER.debug("saveUnion Time7 "+  t7 + "save end");
-			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
+			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),1);
 			List<Long> detailIds = new ArrayList<>();
 			if (null == newEmployees)
 				newEmployees = new ArrayList<>();
@@ -6897,9 +6909,9 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	/**给组下面所有人发消息通知*/
-	private void sendMessageToGroupUser(PunchRule pr, List<PunchTimeRuleDTO> timeRules) {
+	private void sendMessageToGroupUser(PunchRule pr, List<PunchTimeRuleDTO> timeRules, Integer versionCode) {
 		//捞人
-		List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId());
+		List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),versionCode);
 		StringBuilder timeRuleSB = new StringBuilder();
 		//拼班次信息
 		for (PunchTimeRuleDTO timeRule : timeRules) {

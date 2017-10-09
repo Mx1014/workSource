@@ -52,13 +52,15 @@ public interface UniongroupConfigureProvider {
 
     List<UniongroupMemberDetail> listUniongroupMemberDetail(Integer namespaceId, Long groupId, Long ownerId, Integer versionCode);
 
+    //获取当前版本
+    List<UniongroupMemberDetail> listUniongroupMemberDetail(Long groupId, Integer versionCode);
+
     void deleteUniongroupMemberDetailsByDetailIds(List<Long> detailIds, String groupType);
 
     void deleteUniongroupMemberDetailsByDetailIds(List<Long> detailIds, String groupType, Integer versionCode);
 
     List<UniongroupMemberDetail> listUniongroupMemberDetailByGroupType(Integer namespaceId, Long ownerId, String groupType);
 
-    List<UniongroupMemberDetail> listUniongroupMemberDetail(Long groupId);
 
     public Integer countUnionGroupMemberDetailsByOrgId(Integer namespaceId, Long ownerId);
 

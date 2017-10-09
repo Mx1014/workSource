@@ -367,7 +367,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
     //获取当前版本
     @Override
-    public List<UniongroupMemberDetail> listUniongroupMemberDetail(Long groupId) {
+    public List<UniongroupMemberDetail> listUniongroupMemberDetail(Long groupId,Integer versionCode) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         List<UniongroupMemberDetail> list = context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
                 Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE,
@@ -383,7 +383,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                 Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN).from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).leftOuterJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                 .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
                 .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId))
-                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(DEFAULT_VERSION_CODE))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(versionCode == null ? DEFAULT_VERSION_CODE:versionCode))
                 .fetch().map(r -> {
                     return RecordHelper.convert(r, UniongroupMemberDetail.class);
                 });
