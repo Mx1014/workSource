@@ -6551,7 +6551,7 @@ public class PunchServiceImpl implements PunchService {
 			List<UniongroupMemberDetail> details = uniongroupConfigureProvider.listUniongroupMemberDetailsByUserName(cmd.getOwnerId(), cmd.getUserName());
 			if (null != details && details.size() > 0) {
 				for (UniongroupMemberDetail detail : details) {
-					orgIds.add(detail.getId());
+					orgIds.add(detail.getGroupId());
 				}
 			}
 

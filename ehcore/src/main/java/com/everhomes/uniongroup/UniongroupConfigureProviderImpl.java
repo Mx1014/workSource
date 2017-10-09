@@ -531,7 +531,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         return context.select().from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).join(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                 .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
                 .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
-                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.CONTACT_NAME.eq(userName))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.CONTACT_NAME.like("%"+userName+"%"))
                 .fetch().map(r -> ConvertHelper.convert(r, UniongroupMemberDetail.class));
     }
 
