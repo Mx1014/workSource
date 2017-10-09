@@ -59,7 +59,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 
         dbProvider.execute((TransactionStatus status) -> {
             UnionPolicyObject unionPolicyObject = new UnionPolicyObject();
-            if(callBack != null){
+            if(callBack == null){
                 unionPolicyObject = this.originPolicyAlgorithm(cmd);
             }else{
                 unionPolicyObject = callBack.policyProcess(cmd);
