@@ -9829,9 +9829,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             organizationMember.setEmploymentTime(checkInTime);
         }*/
-        if (cmd.getCheckInTime() != null)
+        if (cmd.getCheckInTime() != null){
             organizationMember.setCheckInTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
-        organizationMember.setEmploymentTime(checkInTime);
+            organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
+        }
 
         //手机号已注册，就把user id 跟通讯录关联起来
         if (null != userIdentifier) {
