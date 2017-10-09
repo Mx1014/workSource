@@ -25,6 +25,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.WebTokenGenerator;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,45 +144,70 @@ public class CommunityMapServiceImpl implements CommunityMapService {
             response.setNextPageAnchor(resp.getNextPageAnchor());
             response.getShops().addAll(resp.getShopDTOs().stream().map(r -> {
                 CommunityMapShopDTO shop = ConvertHelper.convert(r, CommunityMapShopDTO.class);
-
+                Long buildingId = null;
+                Long apartmentId = null;
                 if (StringUtils.isNotBlank(r.getBuildingId())) {
-                    List<CommunityMapBuildingDTO> buildings = new ArrayList<>();
-
-                    Building building = communityProvider.findBuildingById(Long.valueOf(r.getBuildingId()));
-                    if (null != building) {
-                        CommunityMapBuildingDTO dto = ConvertHelper.convert(building, CommunityMapBuildingDTO.class);
-
-                        List<CommunityBuildingGeo> geos = communityMapProvider.listCommunityBuildingGeos(building.getId());
-
-                        if (!geos.isEmpty()) {
-                            CommunityBuildingGeo centerGeo = geos.get(geos.size() - 1);
-                            geos.remove(centerGeo);
-                            dto.setCenterLatitude(centerGeo.getLatitude());
-                            dto.setCenterLongitude(centerGeo.getLongitude());
-                            dto.setGeos(geos.stream().map(g -> ConvertHelper.convert(g, CommunityMapBuildingGeoDTO.class))
-                                    .collect(Collectors.toList()));
-                        }
-
-                        if (StringUtils.isNotBlank(r.getApartmentId())) {
-                            List<ApartmentDTO> apartmentDTOS = new ArrayList<ApartmentDTO>();
-                            Address address = addressProvider.findAddressById(Long.valueOf(r.getApartmentId()));
-                            ApartmentDTO apartmentDTO = new ApartmentDTO();
-                            apartmentDTO.setApartmentName(address.getApartmentName());
-                            apartmentDTO.setAddressId(address.getId());
-                            apartmentDTOS.add(apartmentDTO);
-                            dto.setApartments(apartmentDTOS);
-                        }
-
-                        buildings.add(dto);
-                        shop.setBuildings(buildings);
-                    }
+                    buildingId = Long.valueOf(r.getBuildingId());
                 }
-
+                if (StringUtils.isNotBlank(r.getApartmentId())) {
+                    apartmentId = Long.valueOf(r.getApartmentId());
+                }
+                populateShopAddressInfo(shop, buildingId, apartmentId);
+                shop.setShopFlag(CommunityMapShopFlag.OPEN_IN_BIZ.getCode());
                 return shop;
             }).collect(Collectors.toList()));
         }
 
+        SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+        Integer namespaceId = sceneTokenDto.getNamespaceId();
+
+        List<CommunityMapShopDetail> shops = communityMapProvider.searchCommunityMapShops(namespaceId, null,
+                null, cmd.getBuildingId(), cmd.getKeyword(), cmd.getPageAnchor(), 5);
+        response.getShops().addAll(shops.stream().map(r -> {
+            CommunityMapShopDTO shop = new CommunityMapShopDTO();
+            shop.setShopNo(String.valueOf(r.getId()));
+
+            populateShopAddressInfo(shop, r.getBuildingId(), r.getAddressId());
+            shop.setShopFlag(CommunityMapShopFlag.NOT_OPEN_IN_BIZ.getCode());
+            return shop;
+        }).collect(Collectors.toList()));
+
         return response;
+    }
+
+    private void populateShopAddressInfo(CommunityMapShopDTO shop, Long buildingId, Long apartmentId) {
+        if (null != buildingId) {
+            List<CommunityMapBuildingDTO> buildings = new ArrayList<>();
+
+            Building building = communityProvider.findBuildingById(buildingId);
+            if (null != building) {
+                CommunityMapBuildingDTO dto = ConvertHelper.convert(building, CommunityMapBuildingDTO.class);
+
+                List<CommunityBuildingGeo> geos = communityMapProvider.listCommunityBuildingGeos(building.getId());
+
+                if (!geos.isEmpty()) {
+                    CommunityBuildingGeo centerGeo = geos.get(geos.size() - 1);
+                    geos.remove(centerGeo);
+                    dto.setCenterLatitude(centerGeo.getLatitude());
+                    dto.setCenterLongitude(centerGeo.getLongitude());
+                    dto.setGeos(geos.stream().map(g -> ConvertHelper.convert(g, CommunityMapBuildingGeoDTO.class))
+                            .collect(Collectors.toList()));
+                }
+
+                if (null != apartmentId) {
+                    List<ApartmentDTO> apartmentDTOS = new ArrayList<ApartmentDTO>();
+                    Address address = addressProvider.findAddressById(apartmentId);
+                    ApartmentDTO apartmentDTO = new ApartmentDTO();
+                    apartmentDTO.setApartmentName(address.getApartmentName());
+                    apartmentDTO.setAddressId(address.getId());
+                    apartmentDTOS.add(apartmentDTO);
+                    dto.setApartments(apartmentDTOS);
+                }
+
+                buildings.add(dto);
+                shop.setBuildings(buildings);
+            }
+        }
     }
 
     private SearchCommunityMapContentsResponse searchBuildings(SearchCommunityMapContentsCommand cmd) {
