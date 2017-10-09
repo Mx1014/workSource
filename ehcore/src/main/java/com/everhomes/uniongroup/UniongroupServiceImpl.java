@@ -620,11 +620,11 @@ public class UniongroupServiceImpl implements UniongroupService {
         }).collect(Collectors.toList());
 
         UnionPolicyObject unionPolicyObject = new UnionPolicyObject();
-        if(configureList != null && configureList.size() > 0)
+        if(configureList != null)
             unionPolicyObject.setConfigureList(configureList);
-        if(unionDetailsList != null && unionDetailsList.size() > 0)
+        if(unionDetailsList != null)
             unionPolicyObject.setUnionDetailsList(unionDetailsList);
-        if(detailIds != null && detailIds.size() > 0)
+        if(detailIds != null)
             unionPolicyObject.setDetailIds(detailIds);
 
         return unionPolicyObject;
