@@ -16,6 +16,7 @@ import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.parking.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.MD5Utils;
 import com.everhomes.util.WebTokenGenerator;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -257,7 +258,7 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 		params.forEach((key, value) -> sb.append(key).append("=").append(value).append("&"));
 		String p = sb.substring(0,sb.length() - 1);
 
-		String md5Sign = Utils.md5(p);
+		String md5Sign = MD5Utils.getMD5(p);
 		params.put("SignString", md5Sign);
 
 		return params;
