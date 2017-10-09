@@ -133,4 +133,7 @@ public interface CommunityService {
      * 修改用户认证弹窗设置
      */
     CommunityAuthPopupConfigDTO updateCommunityAuthPopupConfig(UpdateCommunityAuthPopupConfigCommand cmd);
+	
+	ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd);
+
 }

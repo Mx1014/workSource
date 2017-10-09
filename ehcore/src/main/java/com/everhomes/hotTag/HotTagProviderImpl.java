@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.util.RecordHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRe
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import scala.Int;
 
 @Component
 public class HotTagProviderImpl implements HotTagProvider {
@@ -45,21 +47,50 @@ public class HotTagProviderImpl implements HotTagProvider {
 	private DbProvider dbProvider;
 
 	@Override
-	public List<TagDTO> listHotTag(String serviceType, Integer pageSize) {
+	public List<TagDTO> listHotTag(Integer nameSpaceId, Long categoryId, String serviceType, Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhHotTagsRecord> query = context.selectQuery(Tables.EH_HOT_TAGS);
 		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
-		
+		query.addConditions(Tables.EH_HOT_TAGS.NAMESPACE_ID.eq(nameSpaceId));
+		if(categoryId != null){
+			query.addConditions(Tables.EH_HOT_TAGS.CATEGORY_ID.eq(categoryId));
+		}
 		query.addConditions(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode()));
 		query.addOrderBy(Tables.EH_HOT_TAGS.DEFAULT_ORDER.desc());
-		query.addLimit(pageSize);
-		
+
+		if(pageSize != null){
+			query.addLimit(pageSize);
+		}
+
 		List<TagDTO> result = new ArrayList<TagDTO>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, TagDTO.class));
 			return null;
 		});
 		
+		return result;
+	}
+
+	@Override
+	public List<TagDTO> listDistinctAllHotTag(String serviceType, Integer pageSize, Integer pageOffset) {
+		List<TagDTO> result = new ArrayList<TagDTO>();
+
+		if(pageOffset == null){
+			pageOffset = 1;
+		}
+		Integer offset =  (int) ((pageOffset - 1 ) * (pageSize-1));
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		context.selectDistinct(Tables.EH_HOT_TAGS.NAME)
+				.from(Tables.EH_HOT_TAGS)
+				.where(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType)
+						.and(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode())))
+				.limit(offset, pageSize)
+				.fetch().map(r ->{
+					result.add(RecordHelper.convert(r, TagDTO.class));
+					return null;
+				});
+
 		return result;
 	}
 
@@ -104,12 +135,17 @@ public class HotTagProviderImpl implements HotTagProvider {
 	}
 
 	@Override
-	public HotTags findByName(String serviceType, String name) {
+	public HotTags findByName(Integer namespaceId, Long categoryId, String serviceType, String name) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhHotTagsRecord> query = context.selectQuery(Tables.EH_HOT_TAGS);
 		query.addConditions(Tables.EH_HOT_TAGS.NAME.eq(name));
 		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
-		 
+		query.addConditions(Tables.EH_HOT_TAGS.NAMESPACE_ID.eq(namespaceId));
+
+		if(categoryId != null){
+			query.addConditions(Tables.EH_HOT_TAGS.CATEGORY_ID.eq(categoryId));
+		}
+
 		List<HotTags> result = new ArrayList<HotTags>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, HotTags.class));

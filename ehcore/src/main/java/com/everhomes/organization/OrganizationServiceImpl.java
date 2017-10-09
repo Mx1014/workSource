@@ -1792,8 +1792,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
+        if(cmd.getForumId() == null){
+            Forum forum = forumService.findFourmByNamespaceId(cmd.getNamespaceId());
+            if(forum != null){
+                cmd.setForumId(forum.getId());
+            }
+
+        }
+
         if (cmd.getForumId() == null ||
-                cmd.getVisibleRegionId() == null ||
                 cmd.getVisibleRegionType() == null ||
                 cmd.getContentCategory() == null ||
                 cmd.getCreatorTag() == null || cmd.getCreatorTag().equals("") ||
@@ -1804,12 +1811,14 @@ public class OrganizationServiceImpl implements OrganizationService {
                     "ForumId or visibleRegionId or visibleRegionType or creatorTag or targetTag or subject is null or empty.");
         }
         this.convertNewTopicCommand(cmd);
-        Organization organization = getOrganization(cmd);
-        if (organization == null) {
-            LOGGER.error("Unable to find the organization.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
-                    "Unable to find the organization.");
-        }
+
+        //不检查org，新的发布方式可以发布到几个园区、公司和全部，不方便检查 edit by yanjun 20170823
+//        Organization organization = getOrganization(cmd);
+//        if (organization == null) {
+//            LOGGER.error("Unable to find the organization.");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
+//                    "Unable to find the organization.");
+//        }
         //Temporarily do not check, delete by sfyan, 20160511
 //		this.checkUserHaveRightToNewTopic(cmd,organization);
         /*if(cmd.getEmbeddedAppId() == null)

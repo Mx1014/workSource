@@ -57,9 +57,10 @@ public class WarningSettingProviderImpl implements WarningSettingProvider {
 	}
 	
 	@Override
-	public WarningSetting findWarningSettingByNamespaceAndType(Integer namespaceId, String type) {
+	public WarningSetting findWarningSettingByNamespaceAndType(Integer namespaceId, Long categoryId, String type) {
 		Record record = getReadOnlyContext().select().from(Tables.EH_WARNING_SETTINGS)
 				.where(Tables.EH_WARNING_SETTINGS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_WARNING_SETTINGS.CATEGORY_ID.eq(categoryId))
 				.and(Tables.EH_WARNING_SETTINGS.TYPE.eq(type))
 				.fetchOne();
 		if (record != null) {
