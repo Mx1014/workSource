@@ -3,6 +3,7 @@ package com.everhomes.hotTag;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.everhomes.db.DbProvider;
 import com.everhomes.namespace.Namespace;
@@ -52,9 +53,10 @@ public class HotTagServiceImpl implements HotTagService{
 
 		List<TagDTO> tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getPageSize());
 
-		//查询没有标签，则使用0域空间、不分入口的数据，即以前默认的数据
+		//查询没有标签，则使用0域空间、入口为null的数据，即以前默认的数据
 		if(tags == null || tags.size() == 0){
 			tags = hotTagProvider.listHotTag(0, null, cmd.getServiceType(), cmd.getPageSize());
+			tags = tags.stream().filter(r -> r.getCategoryId() == null).collect(Collectors.toList());
 		}
 
 		return tags;
@@ -160,11 +162,11 @@ public class HotTagServiceImpl implements HotTagService{
 					setCmd.setName(r);
 					this.setHotTag(setCmd);
 
-					//如果0域空间(标签库)没有加一条数据
+					//如果0域空间(标签库)没有加一条数据，加数据的时候在其他入口加，0域空间、categoryId为null是默认标签
 					HotTags tag = hotTagProvider.findByName(0, null, cmd.getServiceType(), r);
 					if(tag == null){
 						setCmd.setNamespaceId(0);
-						setCmd.setCategoryId(null);
+						setCmd.setCategoryId(cmd.getCategoryId());
 						this.setHotTag(setCmd);
 					}
 				});
