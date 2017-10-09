@@ -2582,8 +2582,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		Integer namespaceId = sceneTokenDto.getNamespaceId();
 		String sceneType = sceneTokenDto.getScene();
 		
-		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
-		
+		SearchTypes searchType = userService.getSearchTypes(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
+
 		//根据场景获取应用scope：配置为all和user的固定选择，配置为organization和community的根据场景sceneType获取 
 		//switch内的逻辑根据this.getLaunchPadItemsByScene方法改编
 		//add by yanjun 20170419

@@ -5832,11 +5832,7 @@ public class ForumServiceImpl implements ForumService {
     	
     	List<ContentBriefDTO> dtos  = new ArrayList<ContentBriefDTO>();
 
-        SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(UserContext.getCurrentNamespaceId(), searchContentType);
-        //找不到就找0域空间的
-        if(searchType == null){
-            searchType = userActivityProvider.findByContentAndNamespaceId(0, searchContentType);
-        }
+        SearchTypes searchType = userService.getSearchTypes(UserContext.getCurrentNamespaceId(), searchContentType);
 
         //找不到直接返回，没有searchType客户端会报错的。 add by yanjun 20170816
         if(searchType == null){

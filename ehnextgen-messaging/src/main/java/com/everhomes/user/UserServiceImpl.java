@@ -3549,7 +3549,8 @@ public class UserServiceImpl implements UserService {
 		return response;
 	}
 
-	private SearchTypes getSearchTypes(Integer namespaceId, String searchContentType){
+	@Override
+	public SearchTypes getSearchTypes(Integer namespaceId, String searchContentType){
 		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, searchContentType);
 		//找不到就找0域空间的
 		if(searchType == null){
