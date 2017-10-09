@@ -6543,7 +6543,8 @@ public class PunchServiceImpl implements PunchService {
 			orgIds = new ArrayList<>();
 			UniongroupConfigures unc = uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(
 					UserContext.getCurrentNamespaceId(), cmd.getDeptId(), UniongroupType.PUNCHGROUP.getCode(),null,UniongroupTargetType.ORGANIZATION.getCode());
-			orgIds.add(unc.getGroupId());
+			if(null != unc)
+				orgIds.add(unc.getGroupId());
 
 		}else if(null != cmd.getUserName()){
 			orgIds = new ArrayList<>();
