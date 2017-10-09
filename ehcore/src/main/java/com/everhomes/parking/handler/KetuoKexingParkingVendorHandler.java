@@ -3,11 +3,17 @@ package com.everhomes.parking.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.parking.*;
 import com.everhomes.parking.ketuo.*;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -34,6 +40,10 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 	@Autowired
 	private LocaleStringService localeStringService;
+	@Autowired
+	private AddressProvider addressProvider;
+	@Autowired
+	private FlowProvider flowProvider;
 
 	private static final String GET_PARKINGS = "/api/find/GetParkingLotList";
 	private static final String GET_FREE_SPACE_NUM = "/api/find/GetFreeSpaceNum";
@@ -66,7 +76,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 		if(StringUtils.isBlank(plateNumber)) {
 			for(KetuoCardType k: types) {
-				populateRateInfo(k.getCarType(), k.getTypeName(), list);
+				populateRateInfo(k.getCarType(), k, list);
 			}
 		}else{
 			KetuoCard cardInfo = getCard(plateNumber);
@@ -82,14 +92,14 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 					}
 				}else {
 					String carType = cardInfo.getCarType();
-					String typeName = null;
+					KetuoCardType type = null;
 					for(KetuoCardType kt: types) {
 						if(carType.equals(kt.getCarType())) {
-							typeName = kt.getTypeName();
+							type = kt;
 							break;
 						}
 					}
-					populateRateInfo(carType, typeName, list);
+					populateRateInfo(carType, type, list);
 
 				}
 			}
@@ -104,10 +114,10 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
 				return rechargeMonthlyCard(order);
 			}
-			return payTempCardFee(order);
 		}else {
-			return addMonthCard(order);
+			return openMonthCard(order);
 		}
+		return false;
 	}
 
 	private KetuoCardRate getExpiredRate(KetuoCard cardInfo, ParkingLot parkingLot, long now) {
@@ -158,23 +168,20 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	}
 
 	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
 		String plateNumber = order.getPlateNumber();
 		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(order.getRateToken())) {
+			//过期没有优惠
 			order.setRateName(EXPIRE_CUSTOM_RATE_TOKEN);
-
+			order.setOriginalPrice(order.getPrice());
 		}else {
 			KetuoCard cardInfo = getCard(plateNumber);
 			KetuoCardRate ketuoCardRate = null;
 			String cardType = CAR_TYPE;
 			Integer freeMoney = 0;
 			if(null != cardInfo) {
-				long expireTime = strToLong(cardInfo.getValidTo());
-				ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
-				if (!checkExpireTime(parkingLot, expireTime)) {
-					cardType = cardInfo.getCarType();
-					freeMoney = cardInfo.getFreeMoney();
-				}
+				cardType = cardInfo.getCarType();
+				freeMoney = cardInfo.getFreeMoney();
 			}
 			for(KetuoCardRate rate: getCardRule(cardType)) {
 				if(rate.getRuleId().equals(order.getRateToken())) {
@@ -188,13 +195,20 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			}
 			order.setRateName(ketuoCardRate.getRuleName());
 
+			BigDecimal ratePrice = new BigDecimal(ketuoCardRate.getRuleMoney()).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+
+			checkAndSetOrderPrice(parkingLot, order, ratePrice);
+
+			//正中会对接停车长支持优惠
 			order.setPrice(new BigDecimal(order.getPrice().intValue() * 100 - (freeMoney * order.getMonthCount().intValue()))
 							.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
+			order.setOriginalPrice(new BigDecimal(order.getOriginalPrice().intValue() * 100 - (freeMoney * order.getMonthCount().intValue()))
+					.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP));
 		}
 
 	}
 
-	boolean addMonthCard(ParkingRechargeOrder order){
+	boolean openMonthCard(ParkingRechargeOrder order){
 
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -219,7 +233,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		Integer payMoney = (order.getPrice().multiply(new BigDecimal(100))).intValue() - Integer.parseInt(ketuoCardRate.getRuleMoney())
 				* (order.getMonthCount().intValue() - 1);
 
-		if(addMonthCard(order.getPlateNumber(), payMoney)) {
+		if(addMonthCard(order, payMoney)) {
 			Integer count = order.getMonthCount().intValue();
 
 			LOGGER.debug("Parking addMonthCard,count={}", count);
@@ -287,7 +301,16 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		param.put("startTime", validStart);
 		//续费结束时间 yyyy-MM-dd HH:mm:ss 每月最后一天的23点59分59秒
 		param.put("endTime", validEnd);
+		if (null != originalOrder.getInvoiceType()) {
+			ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(originalOrder.getInvoiceType());
+			if (null != parkingInvoiceType) {
+				param.put("invType", parkingInvoiceType.getInvoiceToken());
+			}
+		}else {
+			param.put("invType", "-1");
+		}
 		param.put("freeMoney", card.getFreeMoney() * tempOrder.getMonthCount().intValue());
+		param.put("payType", VendorType.WEI_XIN.getCode().equals(originalOrder.getPaidType()) ? 4 : 5);
 
 		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(tempOrder.getRateToken())) {
 			ParkingLot parkingLot = parkingProvider.findParkingLotById(tempOrder.getParkingLotId());
@@ -322,13 +345,64 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		return false;
 	}
 
-	private boolean addMonthCard(String plateNo, Integer money){
+	private boolean addMonthCard(ParkingRechargeOrder order, Integer money){
 
 		JSONObject param = new JSONObject();
+		String plateNo = order.getPlateNumber();
 		plateNo = plateNo.substring(1, plateNo.length());
 
 		param.put("plateNo", plateNo);
 		param.put("money", money);
+		param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType()) ? 4 : 5);
+
+		ParkingCardRequest request = null;
+		if (null != order.getCardRequestId()) {
+			request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
+
+		}else {
+			List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(order.getCreatorUid(), order.getOwnerType(),
+					order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber(), ParkingCardRequestStatus.SUCCEED.getCode(),
+					null, null, null, null);
+
+			for(ParkingCardRequest p: list) {
+				FlowCase flowCase = flowCaseProvider.getFlowCaseById(p.getFlowCaseId());
+
+				Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+				String tag1 = flow.getStringTag1();
+				if(null == tag1) {
+					LOGGER.error("Flow tag is null, flow={}", flow);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+							"Flow tag is null.");
+				}
+				if(ParkingRequestFlowType.INTELLIGENT.getCode().equals(Integer.valueOf(tag1))) {
+					request = p;
+					break;
+				}
+			}
+		}
+
+		if (null != request) {
+			param.put("userName", request.getPlateOwnerName());
+			param.put("userTel", request.getPlateOwnerPhone());
+			param.put("company", request.getPlateOwnerEntperiseName());
+
+			if (null != request.getAddressId()) {
+				Address address = addressProvider.findAddressById(request.getAddressId());
+				if (null != address) {
+					param.put("doorplate", address.getAddress());
+				}
+			}
+			if (null != request.getInvoiceType()) {
+				order.setInvoiceType(request.getInvoiceType());
+				ParkingInvoiceType parkingInvoiceType = parkingProvider.findParkingInvoiceTypeById(request.getInvoiceType());
+				if (null != parkingInvoiceType) {
+					param.put("invType", parkingInvoiceType.getInvoiceToken());
+				}
+			}else {
+				param.put("invType", "-1");
+			}
+		}
+
 		String json = post(param, ADD_MONTH_CARD);
 
 		JSONObject jsonObject = JSONObject.parseObject(json);
@@ -339,7 +413,22 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 				return true;
 			}
 		}
+
+		Calendar calendar = Calendar.getInstance();
+		int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+		calendar.set(Calendar.DAY_OF_MONTH, d);
+		calendar.set(Calendar.HOUR_OF_DAY, 23);
+		calendar.set(Calendar.MINUTE, 59);
+		calendar.set(Calendar.SECOND, 59);
+		order.setEndPeriod(new Timestamp(calendar.getTimeInMillis()));
+
 		return false;
+	}
+
+	@Override
+	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
+		//TODO: 正中会没有临时车
+		return null;
 	}
 
 	@Override

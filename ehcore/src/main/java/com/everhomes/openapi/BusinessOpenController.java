@@ -16,6 +16,8 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.CheckPaymentUserCommand;
+import com.everhomes.rest.asset.CheckPaymentUserResponse;
 import com.everhomes.rest.business.*;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
@@ -800,4 +802,18 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
     	return response;
     }
+
+	/**
+	 * <p>查看付款方是否有会员</p>
+	 * <b>URL: /business/checkPaymentUser</b>
+	 */
+	@RequestMapping("checkPaymentUser")
+	@RestReturn(value = CheckPaymentUserResponse.class)
+	public RestResponse checkPaymentUser(CheckPaymentUserCommand cmd){
+		CheckPaymentUserResponse response = businessService.checkPaymentUser(cmd);
+		RestResponse restResponse = new RestResponse(response);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
 }

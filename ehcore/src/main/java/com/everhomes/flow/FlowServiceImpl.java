@@ -1900,7 +1900,9 @@ public class FlowServiceImpl implements FlowService {
         }
 
         FlowModuleDTO moduleDTO = this.getModuleById(snapshotFlow.getModuleId());
-
+        if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(snapshotFlow.getModuleType())){
+        	moduleDTO = this.getModuleById(40500L);
+        }
         flowCase.setNamespaceId(snapshotFlow.getNamespaceId());
         flowCase.setModuleId(snapshotFlow.getModuleId());
         flowCase.setModuleName(moduleDTO.getDisplayName());
@@ -1957,7 +1959,9 @@ public class FlowServiceImpl implements FlowService {
         }
 
         FlowModuleDTO moduleDTO = this.getModuleById(ga.getModuleId());
-
+        if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(ga.getModuleType())){
+        	moduleDTO = this.getModuleById(40500L);
+        }
         flowCase.setFlowMainId(0l);
         flowCase.setFlowVersion(0);
         flowCase.setNamespaceId(ga.getNamespaceId());

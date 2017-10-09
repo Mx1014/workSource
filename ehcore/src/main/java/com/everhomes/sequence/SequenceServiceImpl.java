@@ -10,6 +10,7 @@ import com.everhomes.rest.admin.GetSequenceDTO;
 import com.everhomes.schema.tables.pojos.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.*;
+import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAclinkFirmware;
 import com.everhomes.server.schema.tables.pojos.EhAclinkLogs;
@@ -39,6 +40,7 @@ import com.everhomes.server.schema.tables.pojos.EhApprovalRules;
 import com.everhomes.server.schema.tables.pojos.EhApprovalTimeRanges;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
 import com.everhomes.server.schema.tables.pojos.EhAuthorizationRelations;
 import com.everhomes.server.schema.tables.pojos.EhAuthorizations;
 import com.everhomes.server.schema.tables.pojos.EhBroadcasts;
@@ -169,6 +171,7 @@ import com.everhomes.server.schema.tables.pojos.EhGroupSettings;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhHotTags;
 import com.everhomes.server.schema.tables.pojos.EhImportFileTasks;
+import com.everhomes.server.schema.tables.pojos.EhIncubatorApplies;
 import com.everhomes.server.schema.tables.pojos.EhItemServiceCategries;
 import com.everhomes.server.schema.tables.pojos.EhJournalConfigs;
 import com.everhomes.server.schema.tables.pojos.EhJournals;
@@ -190,6 +193,8 @@ import com.everhomes.server.schema.tables.pojos.EhNews;
 import com.everhomes.server.schema.tables.pojos.EhNewsComment;
 import com.everhomes.server.schema.tables.pojos.EhNewsCommentRule;
 import com.everhomes.server.schema.tables.pojos.EhNewsCommunities;
+import com.everhomes.server.schema.tables.pojos.EhNewsTag;
+import com.everhomes.server.schema.tables.pojos.EhNewsTagVals;
 import com.everhomes.server.schema.tables.pojos.EhOauth2ClientTokens;
 import com.everhomes.server.schema.tables.pojos.EhOauth2Codes;
 import com.everhomes.server.schema.tables.pojos.EhOauth2Servers;
@@ -236,19 +241,27 @@ import com.everhomes.server.schema.tables.pojos.EhParkingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhParkingCarSeries;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardCategories;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
+import com.everhomes.server.schema.tables.pojos.EhParkingCardTypes;
 import com.everhomes.server.schema.tables.pojos.EhParkingClearanceLogs;
 import com.everhomes.server.schema.tables.pojos.EhParkingClearanceOperators;
 import com.everhomes.server.schema.tables.pojos.EhParkingFlow;
+import com.everhomes.server.schema.tables.pojos.EhParkingInvoiceTypes;
 import com.everhomes.server.schema.tables.pojos.EhParkingLots;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
 import com.everhomes.server.schema.tables.pojos.EhParkingStatistics;
+import com.everhomes.server.schema.tables.pojos.EhParkingUserInvoices;
 import com.everhomes.server.schema.tables.pojos.EhParkingVendors;
+import com.everhomes.server.schema.tables.pojos.EhPaymentAccounts;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuerCommunities;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuers;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCards;
+import com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords;
+import com.everhomes.server.schema.tables.pojos.EhPaymentServiceConfigs;
+import com.everhomes.server.schema.tables.pojos.EhPaymentTypes;
+import com.everhomes.server.schema.tables.pojos.EhPaymentUsers;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyLogs;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyRecords;
@@ -317,6 +330,7 @@ import com.everhomes.server.schema.tables.pojos.EhQuestionnaireOptions;
 import com.everhomes.server.schema.tables.pojos.EhQuestionnaireQuestions;
 import com.everhomes.server.schema.tables.pojos.EhQuestionnaires;
 import com.everhomes.server.schema.tables.pojos.EhRechargeInfo;
+import com.everhomes.server.schema.tables.pojos.EhRegions;
 import com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments;
 import com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap;
 import com.everhomes.server.schema.tables.pojos.EhRentalBills;
@@ -357,6 +371,8 @@ import com.everhomes.server.schema.tables.pojos.EhSearchTypes;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApartmentRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceAttachments;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCommentAttachments;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceComments;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceGolfRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceGymRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceInvestRequests;
@@ -451,6 +467,7 @@ import com.everhomes.server.schema.tables.pojos.EhWarehouseUnits;
 import com.everhomes.server.schema.tables.pojos.EhWarehouses;
 import com.everhomes.server.schema.tables.pojos.EhWarningContacts;
 import com.everhomes.server.schema.tables.pojos.EhWarningSettings;
+import com.everhomes.server.schema.tables.pojos.EhWebMenuScopes;
 import com.everhomes.server.schema.tables.pojos.EhWebMenus;
 import com.everhomes.server.schema.tables.pojos.EhWifiSettings;
 import com.everhomes.server.schema.tables.pojos.EhYellowPageAttachments;
@@ -2174,6 +2191,10 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_EXPRESS_COMPANY_BUSINESSES.ID.max()).from(Tables.EH_EXPRESS_COMPANY_BUSINESSES).fetchOne().value1();
         });
         
+        syncTableSequence(null, EhIncubatorApplies.class, Tables.EH_INCUBATOR_APPLIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_INCUBATOR_APPLIES.ID.max()).from(Tables.EH_INCUBATOR_APPLIES).fetchOne().value1();
+        });
+
         syncTableSequence(null, EhExpressHotlines.class, Tables.EH_EXPRESS_HOTLINES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EXPRESS_HOTLINES.ID.max()).from(Tables.EH_EXPRESS_HOTLINES).fetchOne().value1();
         });
@@ -2191,7 +2212,75 @@ public class SequenceServiceImpl implements SequenceService {
         });
 
         syncTableSequence(null, EhCommunityMapShops.class, Tables.EH_COMMUNITY_MAP_SHOPS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_COMMUNITY_MAP_SHOPS.ID.max()).from(Tables.EH_COMMUNITY_MAP_SHOPS).fetchOne().value1();
+                    return dbContext.select(Tables.EH_COMMUNITY_MAP_SHOPS.ID.max()).from(Tables.EH_COMMUNITY_MAP_SHOPS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhParkingUserInvoices.class, Tables.EH_PARKING_USER_INVOICES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PARKING_USER_INVOICES.ID.max()).from(Tables.EH_PARKING_USER_INVOICES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhParkingInvoiceTypes.class, Tables.EH_PARKING_INVOICE_TYPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PARKING_INVOICE_TYPES.ID.max()).from(Tables.EH_PARKING_INVOICE_TYPES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhParkingCardTypes.class, Tables.EH_PARKING_CARD_TYPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PARKING_CARD_TYPES.ID.max()).from(Tables.EH_PARKING_CARD_TYPES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhServiceAllianceCommentAttachments.class, Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhServiceAllianceComments.class, Tables.EH_SERVICE_ALLIANCE_COMMENTS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENTS).fetchOne().value1();
+        });
+
+
+        syncTableSequence(null, EhRegions.class, Tables.EH_REGIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_REGIONS.ID.max()).from(Tables.EH_REGIONS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhWebMenuScopes.class, Tables.EH_WEB_MENU_SCOPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WEB_MENU_SCOPES.ID.max()).from(Tables.EH_WEB_MENU_SCOPES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhAssetPaymentOrderBills.class, Tables.EH_ASSET_PAYMENT_ORDER_BILLS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.ID.max())
+                    .from(Tables.EH_ASSET_PAYMENT_ORDER_BILLS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhAssetPaymentOrder.class, Tables.EH_ASSET_PAYMENT_ORDER.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ASSET_PAYMENT_ORDER.ID.max())
+                    .from(Tables.EH_ASSET_PAYMENT_ORDER).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhPaymentUsers.class, Tables.EH_PAYMENT_USERS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_USERS.ID.max())
+                    .from(Tables.EH_PAYMENT_USERS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentOrderRecords.class, Tables.EH_PAYMENT_ORDER_RECORDS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_ORDER_RECORDS.ID.max())
+                    .from(Tables.EH_PAYMENT_ORDER_RECORDS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentTypes.class, Tables.EH_PAYMENT_TYPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_TYPES.ID.max())
+                    .from(Tables.EH_PAYMENT_TYPES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentAccounts.class, Tables.EH_PAYMENT_ACCOUNTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_ACCOUNTS.ID.max())
+                    .from(Tables.EH_PAYMENT_ACCOUNTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentServiceConfigs.class, Tables.EH_PAYMENT_SERVICE_CONFIGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_SERVICE_CONFIGS.ID.max())
+                    .from(Tables.EH_PAYMENT_SERVICE_CONFIGS).fetchOne().value1();
+        });
+
+
+        syncTableSequence(null, EhNewsTag.class, Tables.EH_NEWS_TAG.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_NEWS_TAG.ID.max()).from(Tables.EH_NEWS_TAG).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhNewsTagVals.class, Tables.EH_NEWS_TAG_VALS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_NEWS_TAG_VALS.ID.max()).from(Tables.EH_NEWS_TAG_VALS).fetchOne().value1();
         });
     }
 

@@ -24,7 +24,7 @@ public interface YellowPageProvider {
 	
 	
 	List<ServiceAlliances> queryServiceAlliance(CrossShardListingLocator locator, int pageSize,
-												String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords);
+												String ownerType, Long ownerId, Long parentId, Long categoryId, String keywords,Condition conditionOR );
 
 	/**
 	 * add by dengs,20170428 不仅查小区，也查询物业公司下的 服务联盟机构
@@ -55,6 +55,7 @@ public interface YellowPageProvider {
 	
 	ServiceAllianceCategories findCategoryById(Long id);
 	ServiceAllianceCategories findCategoryByName(Integer namespaceId, String name);
+	ServiceAllianceCategories findCategoryByEntryId(Integer namespaceId, Integer EntryId);
 	void createCategory(ServiceAllianceCategories category);
 	void updateCategory(ServiceAllianceCategories category);
 	void createServiceAlliances(ServiceAlliances sa);

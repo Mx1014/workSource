@@ -21,7 +21,17 @@ public class CreateParkingTempOrderCommand {
     private String orderToken;
 	@NotNull
     private BigDecimal price;
-	
+
+	private String clientAppName;
+
+	public String getClientAppName() {
+		return clientAppName;
+	}
+
+	public void setClientAppName(String clientAppName) {
+		this.clientAppName = clientAppName;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}

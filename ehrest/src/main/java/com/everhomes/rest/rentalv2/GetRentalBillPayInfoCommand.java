@@ -10,6 +10,16 @@ import com.everhomes.util.StringHelper;
 public class GetRentalBillPayInfoCommand {
     private Long id;
 
+    private String clientAppName;
+
+    public String getClientAppName() {
+        return clientAppName;
+    }
+
+    public void setClientAppName(String clientAppName) {
+        this.clientAppName = clientAppName;
+    }
+
     public Long getId() {
         return id;
     }

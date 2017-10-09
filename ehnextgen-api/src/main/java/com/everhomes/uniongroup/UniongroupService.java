@@ -18,6 +18,8 @@ public interface UniongroupService {
      **/
     public List getConfiguresListByGroupId(GetUniongroupConfiguresCommand cmd);
 
+    List<UniongroupConfiguresDTO> getConfiguresInfosListByGroupId(GetUniongroupConfiguresCommand cmd);
+
     /**
      * 根据组Id获取组内人员记录
      **/

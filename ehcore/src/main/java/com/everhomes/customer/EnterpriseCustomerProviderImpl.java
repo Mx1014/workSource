@@ -49,15 +49,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
     @Override
     public void createEnterpriseCustomer(EnterpriseCustomer customer) {
-        LOGGER.info("syncDataToDb create customer: {}", StringHelper.toJsonString(customer));
+        LOGGER.info("create customer: {}", StringHelper.toJsonString(customer));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
-        LOGGER.info("syncDataToDb create customer id: {}", id);
         customer.setId(id);
-        LOGGER.info("syncDataToDb create customer setId");
         customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        LOGGER.info("syncDataToDb create customer setCreateTime");
         customer.setStatus(CommonStatus.ACTIVE.getCode());
-        LOGGER.info("createEnterpriseCustomer: " + customer);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 //        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
@@ -68,15 +64,12 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
     @Override
     public void updateEnterpriseCustomer(EnterpriseCustomer customer) {
-        LOGGER.debug("syncDataToDb updateEnterpriseCustomer customer: {}",
+        LOGGER.debug("updateEnterpriseCustomer customer: {}",
                 StringHelper.toJsonString(customer));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
-        LOGGER.debug("syncDataToDb updateEnterpriseCustomer dao");
         customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        LOGGER.debug("syncDataToDb updateEnterpriseCustomer setUpdateTime");
         dao.update(customer);
-        LOGGER.debug("syncDataToDb updateEnterpriseCustomer update");
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
     }
 

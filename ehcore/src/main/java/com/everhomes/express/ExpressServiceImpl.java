@@ -13,7 +13,10 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import com.everhomes.order.PayService;
 import com.everhomes.parking.handler.Utils;
+import com.everhomes.rest.express.*;
+import com.everhomes.rest.order.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,85 +44,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.express.AddExpressUserCommand;
-import com.everhomes.rest.express.CancelExpressOrderCommand;
-import com.everhomes.rest.express.CreateExpressOrderCommand;
-import com.everhomes.rest.express.CreateExpressOrderResponse;
-import com.everhomes.rest.express.CreateExpressUserDTO;
-import com.everhomes.rest.express.CreateOrUpdateExpressAddressCommand;
-import com.everhomes.rest.express.CreateOrUpdateExpressAddressResponse;
-import com.everhomes.rest.express.CreateOrUpdateExpressHotlineCommand;
-import com.everhomes.rest.express.CreateOrUpdateExpressHotlineResponse;
-import com.everhomes.rest.express.DeleteExpressAddressCommand;
-import com.everhomes.rest.express.DeleteExpressHotlineCommand;
-import com.everhomes.rest.express.DeleteExpressUserCommand;
-import com.everhomes.rest.express.ExpressActionEnum;
-import com.everhomes.rest.express.ExpressAddressDTO;
-import com.everhomes.rest.express.ExpressClientPayType;
-import com.everhomes.rest.express.ExpressCompanyDTO;
-import com.everhomes.rest.express.ExpressHotlineDTO;
-import com.everhomes.rest.express.ExpressInvoiceFlagType;
-import com.everhomes.rest.express.ExpressOrderDTO;
-import com.everhomes.rest.express.ExpressOrderStatus;
-import com.everhomes.rest.express.ExpressOrderStatusDTO;
-import com.everhomes.rest.express.ExpressOwner;
-import com.everhomes.rest.express.ExpressOwnerType;
-import com.everhomes.rest.express.ExpressPackageType;
-import com.everhomes.rest.express.ExpressPackageTypeDTO;
-import com.everhomes.rest.express.ExpressQueryHistoryDTO;
-import com.everhomes.rest.express.ExpressSendMode;
-import com.everhomes.rest.express.ExpressSendModeDTO;
-import com.everhomes.rest.express.ExpressSendType;
-import com.everhomes.rest.express.ExpressSendTypeDTO;
-import com.everhomes.rest.express.ExpressServiceAddressDTO;
-import com.everhomes.rest.express.ExpressServiceErrorCode;
-import com.everhomes.rest.express.ExpressShowType;
-import com.everhomes.rest.express.ExpressUserDTO;
-import com.everhomes.rest.express.GetExpressBusinessNoteCommand;
-import com.everhomes.rest.express.GetExpressBusinessNoteResponse;
-import com.everhomes.rest.express.GetExpressHotlineAndBusinessNoteFlagCommand;
-import com.everhomes.rest.express.GetExpressHotlineAndBusinessNoteFlagResponse;
-import com.everhomes.rest.express.GetExpressInsuredDocumentsCommand;
-import com.everhomes.rest.express.GetExpressInsuredDocumentsResponse;
-import com.everhomes.rest.express.GetExpressLogisticsDetailCommand;
-import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
-import com.everhomes.rest.express.GetExpressOrderDetailCommand;
-import com.everhomes.rest.express.GetExpressOrderDetailResponse;
-import com.everhomes.rest.express.GetExpressParamSettingResponse;
-import com.everhomes.rest.express.ListExpressAddressCommand;
-import com.everhomes.rest.express.ListExpressAddressResponse;
-import com.everhomes.rest.express.ListExpressCompanyCommand;
-import com.everhomes.rest.express.ListExpressCompanyResponse;
-import com.everhomes.rest.express.ListExpressHotlinesCommand;
-import com.everhomes.rest.express.ListExpressHotlinesResponse;
-import com.everhomes.rest.express.ListExpressOrderCommand;
-import com.everhomes.rest.express.ListExpressOrderCondition;
-import com.everhomes.rest.express.ListExpressOrderResponse;
-import com.everhomes.rest.express.ListExpressOrderStatusResponse;
-import com.everhomes.rest.express.ListExpressPackageTypesCommand;
-import com.everhomes.rest.express.ListExpressPackageTypesResponse;
-import com.everhomes.rest.express.ListExpressQueryHistoryResponse;
-import com.everhomes.rest.express.ListExpressSendModesCommand;
-import com.everhomes.rest.express.ListExpressSendModesResponse;
-import com.everhomes.rest.express.ListExpressSendTypesCommand;
-import com.everhomes.rest.express.ListExpressSendTypesResponse;
-import com.everhomes.rest.express.ListExpressUserCommand;
-import com.everhomes.rest.express.ListExpressUserCondition;
-import com.everhomes.rest.express.ListExpressUserResponse;
-import com.everhomes.rest.express.ListPersonalExpressOrderCommand;
-import com.everhomes.rest.express.ListPersonalExpressOrderResponse;
-import com.everhomes.rest.express.ListServiceAddressCommand;
-import com.everhomes.rest.express.ListServiceAddressResponse;
-import com.everhomes.rest.express.PayExpressOrderCommand;
-import com.everhomes.rest.express.PrePayExpressOrderCommand;
-import com.everhomes.rest.express.PrintExpressOrderCommand;
-import com.everhomes.rest.express.UpdateExpressBusinessNoteCommand;
-import com.everhomes.rest.express.UpdateExpressHotlineFlagCommand;
-import com.everhomes.rest.express.UpdatePaySummaryCommand;
-import com.everhomes.rest.order.CommonOrderCommand;
-import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -198,7 +122,10 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	@Autowired
     private AppProvider appProvider;
-	
+
+	@Autowired
+	private PayService payService;
+
 	@Override
 	public ListServiceAddressResponse listServiceAddress(ListServiceAddressCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
@@ -1351,6 +1278,38 @@ public class ExpressServiceImpl implements ExpressService {
 		bodyparams.put("body", params);
 		LOGGER.info("request payserver params = {}",bodyparams);
 		return bodyparams;
+	}
+
+	@Override
+	public PreOrderDTO payExpressOrderV2(PayExpressOrderCommandV2 cmd) {
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		return (PreOrderDTO)coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
+			ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
+			if (expressOrder == null || expressOrder.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressOrder.getOwnerType().equals(owner.getOwnerType().getCode())
+					|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue() || expressOrder.getCreatorUid().longValue() != owner.getUserId().longValue()) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+			}
+			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY) {
+				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
+			}
+			if (expressOrder.getPaySummary() == null) {
+				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
+			}
+			if (TrueOrFalseFlag.fromCode(expressOrder.getPaidFlag()) != TrueOrFalseFlag.TRUE) {
+				expressOrder.setPaidFlag(TrueOrFalseFlag.TRUE.getCode());
+				expressOrderProvider.updateExpressOrder(expressOrder);
+			}
+
+			createExpressOrderLog(owner, ExpressActionEnum.PAYING, expressOrder, null);
+
+			Long paysummay = payService.changePayAmount(expressOrder.getPaySummary());
+			PreOrderDTO dto = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(),cmd.getClientAppName(),
+					OrderType.OrderTypeEnum.EXPRESS_ORDER.getPycode(),expressOrder.getId(),UserContext.current().getUser().getId(),paysummay);
+			return dto;
+		}).first();
 	}
 
 }

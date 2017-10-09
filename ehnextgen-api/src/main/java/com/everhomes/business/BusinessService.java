@@ -7,6 +7,8 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.address.ListApartmentFloorCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
+import com.everhomes.rest.asset.CheckPaymentUserCommand;
+import com.everhomes.rest.asset.CheckPaymentUserResponse;
 import com.everhomes.rest.business.*;
 import com.everhomes.rest.business.admin.*;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
@@ -102,4 +104,6 @@ public interface BusinessService {
 	UserAddressDTO getUserAddress(GetUserDefaultAddressCommand cmd);
 
 	List<OrganizationDTO> getUserOrganizations(GetUserDefaultAddressCommand cmd);
+
+    CheckPaymentUserResponse checkPaymentUser(CheckPaymentUserCommand cmd);
 }

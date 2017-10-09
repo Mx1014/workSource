@@ -1108,4 +1108,4 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`); 
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES ((@menu_scope_id := @menu_scope_id + 1),40800,NULL,'EhNamespaces',999967,2);
+	VALUES ((@menu_scope_id := @menu_scope_id + 1),40105,NULL,'EhNamespaces',999967,2);

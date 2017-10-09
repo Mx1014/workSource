@@ -3,7 +3,9 @@ package com.everhomes.rest.uniongroup;
 import com.everhomes.util.StringHelper;
 
 /**
- * Created by Administrator on 2017/8/4.
+ * <li>organizaitonId 公司id</li>
+ * <li>namespaceId 域空间</li>
+ * <li>contactName 联系人</li>
  */
 public class ListDetailsNotInUniongroupsCommand {
 
@@ -13,6 +15,7 @@ public class ListDetailsNotInUniongroupsCommand {
 
     private Long organizaitonId;
     private Integer namespaceId;
+    private String contactName;
 
     public Long getOrganizaitonId() {
         return organizaitonId;
@@ -33,5 +36,13 @@ public class ListDetailsNotInUniongroupsCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
     }
 }
