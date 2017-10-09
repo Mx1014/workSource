@@ -989,7 +989,7 @@ public class FieldServiceImpl implements FieldService {
                     fieldProvider.updateScopeFieldGroup(group);
 
                     //删除组下的字段和选项
-                    Map<Long, ScopeField> scopeFieldMap = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), "/"+group.getId());
+                    Map<Long, ScopeField> scopeFieldMap = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), "/%"+group.getId());
                     inactiveScopeField(scopeFieldMap);
                 });
             }
