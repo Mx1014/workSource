@@ -166,7 +166,7 @@ public class HotTagServiceImpl implements HotTagService{
 					HotTags tag = hotTagProvider.findByName(0, null, cmd.getServiceType(), r);
 					if(tag == null){
 						setCmd.setNamespaceId(0);
-						setCmd.setCategoryId(cmd.getCategoryId());
+						setCmd.setCategoryId(0L);
 						this.setHotTag(setCmd);
 					}
 				});
