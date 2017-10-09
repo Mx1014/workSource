@@ -5,11 +5,23 @@ import com.everhomes.customer.CustomerService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.customer.*;
 
-import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.field.*;
 
 import com.everhomes.rest.launchpad.Item;
 
 import com.everhomes.rest.varField.*;
+import com.everhomes.rest.varField.FieldDTO;
+import com.everhomes.rest.varField.FieldGroupDTO;
+import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.varField.ListFieldItemCommand;
+import com.everhomes.rest.varField.ScopeFieldGroupInfo;
+import com.everhomes.rest.varField.ScopeFieldInfo;
+import com.everhomes.rest.varField.ScopeFieldItemInfo;
+import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
+import com.everhomes.rest.varField.UpdateFieldItemsCommand;
+import com.everhomes.rest.varField.UpdateFieldsCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -18,6 +30,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
+import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
@@ -688,13 +701,12 @@ public class FieldServiceImpl implements FieldService {
         ListFieldGroupCommand cmd1 = ConvertHelper.convert(cmd, ListFieldGroupCommand.class);
         List<FieldGroupDTO> partGroups = listFieldGroups(cmd1);
         if(partGroups==null) partGroups = new ArrayList<>();
-        List<FieldGroupDTO> groups = listFieldGroups(cmd1);
-        if(groups == null) groups = new ArrayList<>();
+        List<FieldGroupDTO> groups = new ArrayList<>();
         for(int i = 0; i < partGroups.size(); i++){
             getAllGroups(partGroups.get(i),groups);
         }
         int numberOfSheets = workbook.getNumberOfSheets();
-        for(int i = 0; i < numberOfSheets; i ++){
+        sheet:for(int i = 0; i < numberOfSheets; i ++){
             Sheet sheet = workbook.getSheetAt(i);
             //通过sheet名字进行匹配，获得此sheet对应的group
             String sheetName = sheet.getSheetName();
@@ -703,9 +715,11 @@ public class FieldServiceImpl implements FieldService {
             for(int i1 = 0; i1 < groups.size(); i1 ++){
                 if(groups.get(i1).getGroupDisplayName().equals(sheetName)){
                     group = groups.get(i1);
-                }else{
-                    continue;
+                    break;
                 }
+            }
+            if(group.getGroupDisplayName()==null){
+                continue sheet;
             }
             //通过目标group拿到请求所有字段的command，然后请求获得所有字段
             ListFieldCommand cmd2 = new ListFieldCommand();
@@ -714,7 +728,9 @@ public class FieldServiceImpl implements FieldService {
             cmd2.setGroupPath(group.getGroupPath());
             cmd2.setCommunityId(cmd.getCommunityId());
             List<FieldDTO> fields = listFields(cmd2);
-            if(fields == null) fields = new ArrayList<>();
+            if(fields == null) {
+                continue sheet;
+            }
             //获得根据cell顺序的fieldname
             Row headRow = sheet.getRow(1);
 
@@ -877,7 +893,10 @@ public class FieldServiceImpl implements FieldService {
                 getAllGroups(group.getChildrenGroup().get(i),allGroups);
             }
         }else{
-            allGroups.add(group);
+            if(group.getChildrenGroup()==null||group.getChildrenGroup().size()<1){
+                allGroups.add(group);
+                return;
+            }
         }
     }
 

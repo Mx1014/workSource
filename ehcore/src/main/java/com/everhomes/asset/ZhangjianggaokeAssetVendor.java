@@ -181,7 +181,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     }
                     dto.setStatus(billStatus);
                     String szsm_status = sourceDto.getStatus();
-                    if(szsm_status.equals(PaymentStatus.SUSPEND)){
+                    if(szsm_status.equals(PaymentStatus.SUSPEND.getCode())){
                         dto.setPayStatus(PaymentStatus.IN_PROCESS.getCode());
                     }
                     dtos.add(dto);
