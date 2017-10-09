@@ -1351,17 +1351,13 @@ update `eh_web_menu_scopes` set menu_name = '融资申请' where menu_id = 43300
 -- 修改、删除服务广场内容图标等 by st.zheng
 update `eh_launch_pad_items` set action_data = '{"type":37,"parentId":37,"displayType": "grid"}' where namespace_id = 999966 and item_name like '%孵化器%' ;
 
-delete from `eh_launch_pad_items` where namespace_id = 999966 and item_label = '创业入驻' ;
+
 delete from `eh_launch_pad_items` where namespace_id = 999966 and item_label = '创客交流' ;
 update `eh_launch_pad_items` set item_name='创业入驻' ,item_label='创业入驻',icon_uri='cs://1/image/aW1hZ2UvTVRvNVlXWTRaR1UyWVdNd1ptVTBaakl5T0RFelpESTNNV05qWmpZeU1HVXdOdw' where namespace_id = 999966 and item_name = '创业服务' and item_group!='Gallery' ;
 update `eh_launch_pad_items`  set item_name='融资申请',item_label='融资申请' where namespace_id = 999966 and item_label = '众创机构';
 update `eh_launch_pad_items`  set item_name='企业商务服务',item_label='企业商务服务' where namespace_id = 999966 and item_label = '银行超市';
 update `eh_launch_pad_items` set icon_uri='cs://1/image/aW1hZ2UvTVRveE56Y3lOREk1TURSalpEazNOVEl5T0dVNFptTmlPRFJrTkdaa09XVTFOZw' where namespace_id = 999966 and item_label = '投诉建议' ;
 
--- 修改物业缴费菜单 by st.zheng
-update `eh_web_menu_scopes`set menu_id = 204011 where menu_id=20410 and owner_id = 999970;
-update `eh_web_menu_scopes`set menu_id = 204021 where menu_id=20420 and owner_id = 999970;
-update `eh_web_menu_scopes`set menu_id = 204011 where menu_id=20410 and owner_id = 999967;
-update `eh_web_menu_scopes`set menu_id = 204021 where menu_id=20420 and owner_id = 999967;
+
 
 
