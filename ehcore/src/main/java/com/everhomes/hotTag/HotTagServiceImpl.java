@@ -52,9 +52,9 @@ public class HotTagServiceImpl implements HotTagService{
 
 		List<TagDTO> tags = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getServiceType(), cmd.getPageSize());
 
-		//查询没有标签，则使用0域空间的数据
+		//查询没有标签，则使用0域空间、不分入口的数据，即以前默认的数据
 		if(tags == null || tags.size() == 0){
-			tags = hotTagProvider.listHotTag(0, cmd.getCategoryId(), cmd.getServiceType(), cmd.getPageSize());
+			tags = hotTagProvider.listHotTag(0, null, cmd.getServiceType(), cmd.getPageSize());
 		}
 
 		return tags;
@@ -138,22 +138,10 @@ public class HotTagServiceImpl implements HotTagService{
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
-		ListHotTagCommand listCmd = new ListHotTagCommand();
-		listCmd.setNamespaceId(cmd.getNamespaceId());
-		listCmd.setCategoryId(cmd.getCategoryId());
-		listCmd.setServiceType(cmd.getServiceType());
-		listCmd.setCategoryId(cmd.getCategoryId());
-		listCmd.setPageSize(10000);
-
 		dbProvider.execute((status) -> {
-			List<TagDTO> oldHotTag = listHotTag(listCmd);
+			List<TagDTO> oldHotTag = hotTagProvider.listHotTag(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getServiceType(), 1000);
 			if (oldHotTag != null) {
 				oldHotTag.forEach(r -> {
-					//list接口，如果找不到标签，会传默认域空间的标签。这种标签不用删除
-					if(r.getNamespaceId() == null || r.getNamespaceId() == 0){
-						return;
-					}
-
 					DeleteHotTagByNameCommand deleteCmd = new DeleteHotTagByNameCommand();
 					deleteCmd.setNamespaceId(cmd.getNamespaceId());
 					deleteCmd.setServiceType(cmd.getServiceType());
