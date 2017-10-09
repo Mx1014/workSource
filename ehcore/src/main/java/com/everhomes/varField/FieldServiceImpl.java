@@ -912,12 +912,22 @@ public class FieldServiceImpl implements FieldService {
                 }
             });
 
-            if(existFields.size() > 0) {
-                existFields.forEach((id, field) -> {
-                    field.setStatus(VarFieldStatus.INACTIVE.getCode());
-                    fieldProvider.updateScopeField(field);
+            inactiveScopeField(existFields);
+        }
+    }
+
+    private void inactiveScopeField(Map<Long, ScopeField> scopeFields) {
+        if(scopeFields.size() > 0) {
+            scopeFields.forEach((id, field) -> {
+                field.setStatus(VarFieldStatus.INACTIVE.getCode());
+                fieldProvider.updateScopeField(field);
+                //删除字段的选项 如果有
+                List<ScopeFieldItem> scopeFieldItems = fieldProvider.listScopeFieldItems(field.getFieldId(), field.getNamespaceId(), field.getCommunityId());
+                scopeFieldItems.forEach(item -> {
+                    item.setStatus(VarFieldStatus.INACTIVE.getCode());
+                    fieldProvider.updateScopeFieldItem(item);
                 });
-            }
+            });
         }
     }
 
@@ -958,6 +968,10 @@ public class FieldServiceImpl implements FieldService {
                 existGroups.forEach((id, group) -> {
                     group.setStatus(VarFieldStatus.INACTIVE.getCode());
                     fieldProvider.updateScopeFieldGroup(group);
+
+                    //删除组下的字段和选项
+                    Map<Long, ScopeField> scopeFieldMap = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), "/"+group.getId());
+                    inactiveScopeField(scopeFieldMap);
                 });
             }
         }
