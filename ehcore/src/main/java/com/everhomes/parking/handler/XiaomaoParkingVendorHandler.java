@@ -11,6 +11,7 @@ import com.everhomes.parking.xiaomao.XiaomaoCard;
 import com.everhomes.parking.xiaomao.XiaomaoJsonEntity;
 import com.everhomes.rest.parking.*;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.MD5Utils;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -159,7 +160,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
         }
         stringBuilder.append("accessKeyValue=").append(key);
         String s = stringBuilder.toString();
-        return Utils.md5(s);
+        return MD5Utils.getMD5(s);
     }
 
     @Override

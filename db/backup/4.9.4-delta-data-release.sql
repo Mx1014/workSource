@@ -327,5 +327,7 @@ set @id=(select max(id) from `eh_service_alliance_skip_rule`);
 insert into eh_service_alliance_skip_rule (id,namespace_id,service_alliance_category_id) values (@id:=@id+1,999966,190);
 insert into eh_service_alliance_skip_rule (id,namespace_id,service_alliance_category_id) values (@id:=@id+1,999966,179);
 
+-- 停车 add by sw 20171009
+UPDATE eh_parking_recharge_orders set paid_version = 1 where paid_version IS NULL;
 
 

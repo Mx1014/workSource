@@ -16,6 +16,7 @@ import com.everhomes.parking.ketuo.*;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.MD5Utils;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -482,7 +483,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		}
 
 		String str = sb.append(sdf.format(new Date())).append(appkey).toString();
-		String key = Utils.md5(str);
+		String key = MD5Utils.getMD5(str);
 
 		JSONObject params = new JSONObject();
 		params.put("appId", appId);
@@ -504,7 +505,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 
 		String str = sdf.format(new Date()) + appkey;
-		String key = Utils.md5(str);
+		String key = MD5Utils.getMD5(str);
 
 		JSONObject params = new JSONObject();
 		params.put("appId", appId );
