@@ -286,6 +286,11 @@ public class FieldProviderImpl implements FieldProvider {
         if(communityId == null) {
             query.addConditions(Tables.EH_VAR_FIELD_SCOPES.COMMUNITY_ID.isNull());
         }
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listScopeFields, sql=" + query.getSQL());
+            LOGGER.debug("listScopeFields, bindValues=" + query.getBindValues());
+        }
         query.fetch().map((record)-> {
             fields.put(record.getId(), ConvertHelper.convert(record, ScopeField.class));
             return null;
