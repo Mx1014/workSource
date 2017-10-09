@@ -50,6 +50,7 @@ import java.util.List;
  *  <li>commentCount : 评论数量</li>
  *  <li>commentToken : 评论token，评论当前机构需要使用此参数。</li>
  *  <li>summaryDescription : 概要描述字段。</li>
+ *  <li>jumpServiceAllianceRouting : "grid" 样式下，点击服务联盟的banner图跳转到其他服务联盟的路由</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -142,6 +143,8 @@ public class ServiceAllianceDTO {
 	private String commentToken;
 	
 	private String summaryDescription;
+	
+	private String jumpServiceAllianceRouting;
 	
 	public String getCommentToken() {
 		return commentToken;
@@ -439,6 +442,14 @@ public class ServiceAllianceDTO {
 
 	public void setSummaryDescription(String summaryDescription) {
 		this.summaryDescription = summaryDescription;
+	}
+
+	public String getJumpServiceAllianceRouting() {
+		return jumpServiceAllianceRouting;
+	}
+
+	public void setJumpServiceAllianceRouting(String jumpServiceAllianceRouting) {
+		this.jumpServiceAllianceRouting = jumpServiceAllianceRouting;
 	}
 
 	@Override
