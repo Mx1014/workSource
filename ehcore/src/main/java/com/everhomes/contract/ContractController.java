@@ -109,7 +109,7 @@ public class ContractController extends ControllerBase {
 	 * <b>URL: /contract/updateContract</b>
 	 */
 	@RequestMapping("updateContract")
-	@RestReturn(ContractDTO.class)
+	@RestReturn(ContractDetailDTO.class)
 	public RestResponse updateContract(UpdateContractCommand cmd){
 		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		ContractService contractService = getContractService(namespaceId);

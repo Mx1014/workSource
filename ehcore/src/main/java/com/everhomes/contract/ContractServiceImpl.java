@@ -804,7 +804,7 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	public ContractDTO updateContract(UpdateContractCommand cmd) {
+	public ContractDetailDTO updateContract(UpdateContractCommand cmd) {
 		Contract exist = checkContract(cmd.getId());
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
 		Contract existContract = contractProvider.findActiveContractByContractNumber(cmd.getNamespaceId(), cmd.getContractNumber());
@@ -857,7 +857,7 @@ public class ContractServiceImpl implements ContractService {
 			}
 		});
 
-		return ConvertHelper.convert(contract, ContractDTO.class);
+		return ConvertHelper.convert(contract, ContractDetailDTO.class);
 	}
 
 	@Override
