@@ -89,3 +89,14 @@ INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`
 UPDATE eh_service_modules set instance_config = '{"publishPrivilege":1,"livePrivilege":0,"listStyle":2,"scope":3,"style":4,"title": "活动管理"}'  where id = 10600;
 
 -- merge from activity-3.4.0 by yanjun 20171009 end
+
+-- 园区地图菜单 add by sw 20171010
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('40070', '园区地图', '40000', NULL, NULL, '1', '2', '/40000/40070', 'park', '407', '40070', '2', NULL, 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('40071', '商户管理', '40070', NULL, 'react:/community-map/merchant-management', '0', '2', '/40000/40070/40071', 'park', '407', '40070', '3', NULL, 'module');
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),40070,'', 'EhNamespaces', 999981,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES((@menu_scope_id := @menu_scope_id + 1),40071,'', 'EhNamespaces', 999981,2);
