@@ -15,8 +15,8 @@ import com.everhomes.util.StringHelper;
  *     
  *     <li>lastTrackingTime: 最近跟进时间（天）</li>
  *     <li>propertyType: 资产类型   String类型,如果多选用英文逗号分隔,eg: 1,2</li>
- *     <li>propertyUnitPrice: 资产单价区间  String类型,eg: 0~10 </li>
- *     <li>propertyArea: 资产面积区间  String类型,eg: 0~10 </li>
+ *     <li>propertyUnitPrice: 资产单价区间  String类型,eg: 0,10  或者    @,10   或者   0,@ </li>
+ *     <li>propertyArea: 资产面积区间  String类型,eg: 0,10 或者  @,10  或者   0,@ </li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */

@@ -16,6 +16,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.ScopeFieldItem;
+
+import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -36,6 +38,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -198,12 +201,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         
         if(null != cmd.getPropertyArea()){
         	RangeFilterBuilder rf = new RangeFilterBuilder("propertyArea");
-        	if(cmd.getPropertyArea().indexOf("~") > -1){
-        		if(null != cmd.getPropertyArea().split("~")[0]){
-        			rf.gte(Double.parseDouble(cmd.getPropertyArea().split("~")[0]));
+        	if(cmd.getPropertyArea().indexOf(",") > -1 && cmd.getPropertyArea().split(",").length == 2){
+        		if(null != cmd.getPropertyArea().split(",")[0] && !"@".equals(cmd.getPropertyArea().split(",")[0])){
+        			rf.gte(Double.parseDouble(cmd.getPropertyArea().split(",")[0]));
         		}
-        		if(null != cmd.getPropertyArea().split("~")[1]){
-        			rf.lte(Double.parseDouble(cmd.getPropertyArea().split("~")[1]));
+        		if(null != cmd.getPropertyArea().split(",")[1] && !"@".equals(cmd.getPropertyArea().split(",")[1])){
+        			rf.lte(Double.parseDouble(cmd.getPropertyArea().split(",")[1]));
         		}
         		fb = FilterBuilders.andFilter(fb, rf); 
         	}
@@ -211,12 +214,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }
         if(null != cmd.getPropertyUnitPrice()){
         	RangeFilterBuilder rf = new RangeFilterBuilder("propertyUnitPrice");
-        	if(cmd.getPropertyUnitPrice().indexOf("~") > -1){
-        		if(null != cmd.getPropertyUnitPrice().split("~")[0]){
-        			rf.gte(Double.parseDouble(cmd.getPropertyUnitPrice().split("~")[0]));
+        	if(cmd.getPropertyUnitPrice().indexOf(",") > -1 && cmd.getPropertyUnitPrice().split(",").length == 2){
+        		if(null != cmd.getPropertyUnitPrice().split(",")[0] && !"@".equals(cmd.getPropertyUnitPrice().split(",")[0])){
+        			rf.gte(Double.parseDouble(cmd.getPropertyUnitPrice().split(",")[0]));
         		}
-        		if(null != cmd.getPropertyUnitPrice().split("~")[1]){
-        			rf.lte(Double.parseDouble(cmd.getPropertyUnitPrice().split("~")[1]));
+        		if(null != cmd.getPropertyUnitPrice().split(",")[1] && !"@".equals(cmd.getPropertyUnitPrice().split(",")[1])){
+        			rf.lte(Double.parseDouble(cmd.getPropertyUnitPrice().split(",")[1]));
         		}
         		fb = FilterBuilders.andFilter(fb, rf); 
         	}
