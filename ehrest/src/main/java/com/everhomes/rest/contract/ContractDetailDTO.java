@@ -59,6 +59,8 @@ import java.util.List;
  *     <li>remark: 备注</li>
  *     <li>layout: 房型（房型改为了选项类型）</li>
  *     <li>layoutName: 房型名</li>
+ *     <li>adjusts: 调租计划列表 参考{@link com.everhomes.rest.contract.ContractChargingChangeDTO}</li>
+ *     <li>frees: 免租计划列表 参考{@link com.everhomes.rest.contract.ContractChargingChangeDTO}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -116,6 +118,27 @@ public class ContractDetailDTO {
     private String layoutName;
     private String settled;
     private Byte status;
+
+    @ItemType(ContractChargingChangeDTO.class)
+    private List<ContractChargingChangeDTO> adjusts;
+    @ItemType(ContractChargingChangeDTO.class)
+    private List<ContractChargingChangeDTO> frees;
+
+    public List<ContractChargingChangeDTO> getAdjusts() {
+        return adjusts;
+    }
+
+    public void setAdjusts(List<ContractChargingChangeDTO> adjusts) {
+        this.adjusts = adjusts;
+    }
+
+    public List<ContractChargingChangeDTO> getFrees() {
+        return frees;
+    }
+
+    public void setFrees(List<ContractChargingChangeDTO> frees) {
+        this.frees = frees;
+    }
 
     public String getLayoutName() {
         return layoutName;

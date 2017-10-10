@@ -52,6 +52,8 @@ import java.util.List;
  *     <li>remark: 备注</li>
  *     <li>settled: 入住方</li>
  *     <li>layout: 房型</li>
+ *     <li>adjusts: 调租计划列表 参考{@link com.everhomes.rest.contract.ContractChargingChangeDTO}</li>
+ *     <li>frees: 免租计划列表 参考{@link com.everhomes.rest.contract.ContractChargingChangeDTO}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/5.
  */
@@ -107,6 +109,27 @@ public class UpdateContractCommand {
 
     @ItemType(ContractAttachmentDTO.class)
     private List<ContractAttachmentDTO> attachments;
+
+    @ItemType(ContractChargingChangeDTO.class)
+    private List<ContractChargingChangeDTO> adjusts;
+    @ItemType(ContractChargingChangeDTO.class)
+    private List<ContractChargingChangeDTO> frees;
+
+    public List<ContractChargingChangeDTO> getAdjusts() {
+        return adjusts;
+    }
+
+    public void setAdjusts(List<ContractChargingChangeDTO> adjusts) {
+        this.adjusts = adjusts;
+    }
+
+    public List<ContractChargingChangeDTO> getFrees() {
+        return frees;
+    }
+
+    public void setFrees(List<ContractChargingChangeDTO> frees) {
+        this.frees = frees;
+    }
 
     public Long getCreateUid() {
         return createUid;

@@ -7,6 +7,20 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
+ * <ul>
+ *     <li>id: id</li>
+ *     <li>chargingItemId: 收费项id</li>
+ *     <li>chargingItemName: 收费项名称</li>
+ *     <li>changeType: 计划类型 参考{@link com.everhomes.rest.contract.ChangeType}</li>
+ *     <li>changeMethod: 调整类型 参考{@link com.everhomes.rest.contract.ChangeMethod}</li>
+ *     <li>changePeriod: 调整时间</li>
+ *     <li>periodUnit: 调整时间单位 参考{@link com.everhomes.rest.contract.PeriodUnit}</li>
+ *     <li>changeRange: 调整幅度</li>
+ *     <li>changeStartTime: 执行开始日期</li>
+ *     <li>changeExpiredTime: 执行结束日期</li>
+ *     <li>remark: 备注</li>
+ *     <li>apartments: 计划适用资产列表 参考{@link com.everhomes.rest.contract.BuildingApartmentDTO}</li>
+ * </ul>
  * Created by ying.xiong on 2017/10/10.
  */
 public class ContractChargingChangeDTO {

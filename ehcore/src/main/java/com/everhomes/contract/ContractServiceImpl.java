@@ -530,6 +530,7 @@ public class ContractServiceImpl implements ContractService {
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 
+
 		contract.setRentSize(totalSize);
 		contractProvider.updateContract(contract);
 		contractSearcher.feedDoc(contract);

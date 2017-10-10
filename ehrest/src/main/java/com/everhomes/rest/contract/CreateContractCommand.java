@@ -112,6 +112,22 @@ public class CreateContractCommand {
     @ItemType(ContractChargingChangeDTO.class)
     private List<ContractChargingChangeDTO> frees;
 
+    public List<ContractChargingChangeDTO> getAdjusts() {
+        return adjusts;
+    }
+
+    public void setAdjusts(List<ContractChargingChangeDTO> adjusts) {
+        this.adjusts = adjusts;
+    }
+
+    public List<ContractChargingChangeDTO> getFrees() {
+        return frees;
+    }
+
+    public void setFrees(List<ContractChargingChangeDTO> frees) {
+        this.frees = frees;
+    }
+
     private Byte status;
 
     public String getLayout() {

@@ -801,7 +801,7 @@ public class FieldServiceImpl implements FieldService {
                         if(cell!=null){
                             cellValue = ExcelUtils.getCellValue(cell);
                             if(fieldName.equals("status")){
-                                cellValue = "2";//status默认值为2
+                                cellValue = "";
                                 //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
                                 ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), fieldName);
                                 if(item!=null&&item.getItemId()!=null){
@@ -834,6 +834,8 @@ public class FieldServiceImpl implements FieldService {
 
 
                             }
+                        } else {//不填默认状态为2
+                            setToObj("status",object,"2");
                         }
 
 
