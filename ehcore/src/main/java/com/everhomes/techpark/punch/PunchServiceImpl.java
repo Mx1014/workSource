@@ -6069,7 +6069,8 @@ public class PunchServiceImpl implements PunchService {
 			for(int rowIndex=3;rowIndex<list.size();rowIndex++){
 				RowResult r = (RowResult)list.get(rowIndex);
 				PunchSchedulingEmployeeDTO dto = new PunchSchedulingEmployeeDTO();
-				dto.setContactName(r.getCells().get("A"));
+				// 名字去空格
+				dto.setContactName(r.getCells().get("A").replace(" ",""));
 				dto.setDaySchedulings(new ArrayList<>());
 				for(int i = 1 ; i<=days;i++){
 					String val = r.getCells().get(GetExcelLetter(i + 1));
