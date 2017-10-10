@@ -54,6 +54,8 @@ import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
@@ -162,6 +164,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private IndividualCustomerProvider individualCustomerProvider;
+
+	@Autowired
+	private FieldProvider fieldProvider;
 
 	@PostConstruct
 	public void setup(){
@@ -831,8 +836,11 @@ public class ContractServiceImpl implements ContractService {
 		}
 		contract.setCreateTime(exist.getCreateTime());
 
-		Double rentSize = dealContractApartments(contract, cmd.getApartments());
-		contract.setRentSize(rentSize);
+		if(cmd.getRentSize() == null) {
+			Double rentSize = dealContractApartments(contract, cmd.getApartments());
+			contract.setRentSize(rentSize);
+		}
+
 		contractProvider.updateContract(contract);
 
 		dealContractChargingItems(contract, cmd.getChargingItems());
@@ -1100,6 +1108,13 @@ public class ContractServiceImpl implements ContractService {
 			Contract rootContract = contractProvider.findContractById(contract.getRootParentId());
 			if(rootContract != null) {
 				dto.setRootContractNumber(rootContract.getContractNumber());
+			}
+		}
+
+		if(contract.getLayout() != null && StringUtils.isNotBlank(contract.getLayout()) && StringUtils.isNumeric(contract.getLayout())) {
+			ScopeFieldItem item =  fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(), Long.valueOf(contract.getLayout()));
+			if(item != null) {
+				dto.setLayoutName(item.getItemDisplayName());
 			}
 		}
 		processContractApartments(dto);

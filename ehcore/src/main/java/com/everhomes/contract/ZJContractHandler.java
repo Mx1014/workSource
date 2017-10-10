@@ -249,7 +249,7 @@ public class ZJContractHandler implements ContractService{
         ContractDetailDTO dto = new ContractDetailDTO();
         dto.setPartyAId(0L);
         dto.setContractNumber(zjContract.getContractNum());
-        dto.setLayout(zjContract.getLayout());
+        dto.setLayoutName(zjContract.getLayout());
         //张江高科合同名和合同编号一样
         dto.setName(zjContract.getContractNum());
         dto.setCustomerName(zjContract.getLessee());

@@ -57,7 +57,8 @@ import java.util.List;
  *     <li>attachments: 合同附件 参考{@link com.everhomes.rest.contract.ContractAttachmentDTO}</li>
  *     <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  *     <li>remark: 备注</li>
- *     <li>layout: 房型</li>
+ *     <li>layout: 房型（房型改为了选项类型）</li>
+ *     <li>layoutName: 房型名</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -112,7 +113,25 @@ public class ContractDetailDTO {
     private Long createUid;
     private String creatorName;
     private String layout;
+    private String layoutName;
+    private String settled;
     private Byte status;
+
+    public String getLayoutName() {
+        return layoutName;
+    }
+
+    public void setLayoutName(String layoutName) {
+        this.layoutName = layoutName;
+    }
+
+    public String getSettled() {
+        return settled;
+    }
+
+    public void setSettled(String settled) {
+        this.settled = settled;
+    }
 
     public Byte getStatus() {
         return status;
