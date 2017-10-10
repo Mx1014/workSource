@@ -22,6 +22,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.*;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -41,7 +43,7 @@ import java.util.Map;
 
 @Component
 public class PropertyMgrProviderImpl implements PropertyMgrProvider {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(PropertyMgrProviderImpl.class);
 	@Autowired
 	private DbProvider dbProvider;
 	
@@ -1387,6 +1389,10 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
         query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.like("%"+communityId+"%"));
 		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listCommunityPmOwnersByToken, sql=" + query.getSQL());
+			LOGGER.debug("listCommunityPmOwnersByToken, bindValues=" + query.getBindValues());
+		}
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, CommunityPmOwner.class));
 			return null;
