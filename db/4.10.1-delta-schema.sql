@@ -73,3 +73,8 @@ ALTER TABLE `eh_roster_order_settings` ADD COLUMN `category_id`  bigint(22) NULL
 ALTER TABLE `eh_hot_tags` ADD COLUMN `category_id`  bigint(22) NULL ;
 
 -- merge from activity-3.4.0 by yanjun 20171009 end
+
+-- merge form archives-1.4 by R 20171010 start
+ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE;
+ALTER TABLE eh_organization_member_details ADD COLUMN region_code VARCHAR(64) COMMENT '手机区号';
+-- merge form archives-1.4 by R 20171010 end
