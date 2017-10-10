@@ -17,7 +17,16 @@ import com.everhomes.util.StringHelper;
  * <li>description: 描述</li>
  * <li>collectionCount: 收集量</li>
  * <li>status: 状态，1草稿，2已发布</li>
+ * <li>collectFlag: 问卷收集状态（收集中，收集完成），参考 {@link com.everhomes.rest.questionnaire.QuestionnaireCollectFlagType}</li>
+ * <li>targetUserNum: 目标用户数量</li>
+ * <li>percentComplete: 完成收集量的百分比</li>
+ * <li>posterUrl: 封面图url地址</li>
+ * <li>respondent: 面向对象，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireRespondentType}</li>
+ * <li>ranges: 对象范围，参考{@link com.everhomes.rest.questionnaire.QuestionnaireRangeDTO}</li>
+ * <li>supportAnonymous: 是否支持匿名，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireCommonStatus}</li>
+ * <li>supportShare: 是否支持分享，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireCommonStatus}</li>
  * <li>publishTime: 发布时间</li>
+ * <li>cutOffTime: 截止时间</li>
  * <li>createTime: 创建时间</li>
  * <li>submitTime: 企业问卷提交时间</li>
  * <li>questions: 题目列表，参考{@link com.everhomes.rest.questionnaire.QuestionnaireQuestionDTO}</li>
@@ -32,7 +41,17 @@ public class QuestionnaireDTO {
 	private String description;
 	private Integer collectionCount;
 	private Byte status;
+	private Byte collectFlag;
+	private Integer targetUserNum;
+	private String percentComplete;
+	private String posterUrl;
+	private Byte respondent;
+	@ItemType(QuestionnaireRangeDTO.class)
+	private List<QuestionnaireRangeDTO> ranges;
+	private Byte supportAnonymous;
+	private Byte supportShare;
 	private Long publishTime;
+	private Long cutOffTime;
 	private Long createTime;
 	private Long submitTime;
 	@ItemType(QuestionnaireQuestionDTO.class)
@@ -108,6 +127,78 @@ public class QuestionnaireDTO {
 
 	public void setQuestions(List<QuestionnaireQuestionDTO> questions) {
 		this.questions = questions;
+	}
+
+	public Byte getCollectFlag() {
+		return collectFlag;
+	}
+
+	public void setCollectFlag(Byte collectFlag) {
+		this.collectFlag = collectFlag;
+	}
+
+	public Integer getTargetUserNum() {
+		return targetUserNum;
+	}
+
+	public void setTargetUserNum(Integer targetUserNum) {
+		this.targetUserNum = targetUserNum;
+	}
+
+	public String getPercentComplete() {
+		return percentComplete;
+	}
+
+	public void setPercentComplete(String percentComplete) {
+		this.percentComplete = percentComplete;
+	}
+
+	public String getPosterUrl() {
+		return posterUrl;
+	}
+
+	public void setPosterUrl(String posterUrl) {
+		this.posterUrl = posterUrl;
+	}
+
+	public Byte getRespondent() {
+		return respondent;
+	}
+
+	public void setRespondent(Byte respondent) {
+		this.respondent = respondent;
+	}
+
+	public List<QuestionnaireRangeDTO> getRanges() {
+		return ranges;
+	}
+
+	public void setRanges(List<QuestionnaireRangeDTO> ranges) {
+		this.ranges = ranges;
+	}
+
+	public Byte getSupportAnonymous() {
+		return supportAnonymous;
+	}
+
+	public void setSupportAnonymous(Byte supportAnonymous) {
+		this.supportAnonymous = supportAnonymous;
+	}
+
+	public Byte getSupportShare() {
+		return supportShare;
+	}
+
+	public void setSupportShare(Byte supportShare) {
+		this.supportShare = supportShare;
+	}
+
+	public Long getCutOffTime() {
+		return cutOffTime;
+	}
+
+	public void setCutOffTime(Long cutOffTime) {
+		this.cutOffTime = cutOffTime;
 	}
 
 	public Long getPublishTime() {

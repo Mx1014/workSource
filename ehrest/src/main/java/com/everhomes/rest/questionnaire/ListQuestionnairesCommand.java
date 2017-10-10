@@ -9,6 +9,11 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 所属类型，community</li>
  * <li>ownerId: 所属id，communityId</li>
+ * <li>startTime: 起始时间搓</li>
+ * <li>endTime: 结束时间搓</li>
+ * <li>respondent: 收集对象，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireRespondentType}</li>
+ * <li>status: 问卷状态（已发布，草稿），参考 {@link com.everhomes.rest.questionnaire.QuestionnaireStatus}</li>
+ * <li>collectFlag: 问卷收集状态（收集中，收集完成），参考 {@link com.everhomes.rest.questionnaire.QuestionnaireCollectFlagType}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
@@ -21,6 +26,16 @@ public class ListQuestionnairesCommand {
 
 	private Long ownerId;
 
+	private Long startTime;
+
+	private Long endTime;
+
+	private Byte respondent;
+
+	private Byte status;
+
+	private Byte collectFlag;
+
 	private Long pageAnchor;
 
 	private Integer pageSize;
@@ -29,11 +44,15 @@ public class ListQuestionnairesCommand {
 
 	}
 
-	public ListQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, Long pageAnchor, Integer pageSize) {
-		super();
+	public ListQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, Long startTime, Long endTime, Byte respondent, Byte status, Byte collectFlag, Long pageAnchor, Integer pageSize) {
 		this.namespaceId = namespaceId;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
+		this.startTime = startTime;
+		this.endTime = endTime;
+		this.respondent = respondent;
+		this.status = status;
+		this.collectFlag = collectFlag;
 		this.pageAnchor = pageAnchor;
 		this.pageSize = pageSize;
 	}
@@ -76,6 +95,46 @@ public class ListQuestionnairesCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
+	public Byte getRespondent() {
+		return respondent;
+	}
+
+	public void setRespondent(Byte respondent) {
+		this.respondent = respondent;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	public Byte getCollectFlag() {
+		return collectFlag;
+	}
+
+	public void setCollectFlag(Byte collectFlag) {
+		this.collectFlag = collectFlag;
 	}
 
 	@Override
