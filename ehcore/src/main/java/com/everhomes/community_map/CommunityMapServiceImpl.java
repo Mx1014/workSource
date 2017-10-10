@@ -133,16 +133,20 @@ public class CommunityMapServiceImpl implements CommunityMapService {
     }
 
     private SearchCommunityMapContentsResponse searchShops(SearchCommunityMapContentsCommand cmd) {
+
+        Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
         SearchCommunityMapContentsResponse response = new SearchCommunityMapContentsResponse();
 
         SearchContentsBySceneCommand cmd2 = ConvertHelper.convert(cmd, SearchContentsBySceneCommand.class);
+        cmd2.setPageSize(pageSize);
         SearchContentsBySceneReponse resp = businessService.searchShops(cmd2);
 
-        response.setShops(new ArrayList<>());
+        List<CommunityMapShopDTO> result = new ArrayList<>();
 
         if (null != resp) {
             response.setNextPageAnchor(resp.getNextPageAnchor());
-            response.getShops().addAll(resp.getShopDTOs().stream().map(r -> {
+            result.addAll(resp.getShopDTOs().stream().map(r -> {
                 CommunityMapShopDTO shop = ConvertHelper.convert(r, CommunityMapShopDTO.class);
                 Long buildingId = null;
                 Long apartmentId = null;
@@ -158,20 +162,31 @@ public class CommunityMapServiceImpl implements CommunityMapService {
             }).collect(Collectors.toList()));
         }
 
-        SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-        Integer namespaceId = sceneTokenDto.getNamespaceId();
+        Long userId = UserContext.currentUserId();
 
-        List<CommunityMapShopDetail> shops = communityMapProvider.searchCommunityMapShops(namespaceId, null,
-                null, cmd.getBuildingId(), cmd.getKeyword(), cmd.getPageAnchor(), 5);
-        response.getShops().addAll(shops.stream().map(r -> {
-            CommunityMapShopDTO shop = new CommunityMapShopDTO();
-            shop.setShopNo(String.valueOf(r.getId()));
+        if (result.size() < pageSize) {
+            SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+            Integer namespaceId = sceneTokenDto.getNamespaceId();
 
-            populateShopAddressInfo(shop, r.getBuildingId(), r.getAddressId());
-            shop.setShopFlag(CommunityMapShopFlag.NOT_OPEN_IN_BIZ.getCode());
-            return shop;
-        }).collect(Collectors.toList()));
+            List<CommunityMapShopDetail> shops = communityMapProvider.searchCommunityMapShops(namespaceId, null,
+                    null, cmd.getBuildingId(), cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
+            result.addAll(shops.stream().map(r -> {
+                CommunityMapShopDTO shop = new CommunityMapShopDTO();
+                shop.setShopNo(String.valueOf(r.getId()));
 
+                String url = contentServerService.parserUri(r.getShopAvatarUri(), EntityType.USER.getCode(), userId);
+                shop.setShopLogo(url);
+
+                populateShopAddressInfo(shop, r.getBuildingId(), r.getAddressId());
+                shop.setShopFlag(CommunityMapShopFlag.NOT_OPEN_IN_BIZ.getCode());
+                return shop;
+            }).collect(Collectors.toList()));
+        }
+        //TODO:超过pageSize时，做一个截取，因为是从电商 和core server同时查询店铺数据
+        if (result.size() > pageSize) {
+            result = result.subList(0, pageSize);
+        }
+        response.setShops(result);
         return response;
     }
 
