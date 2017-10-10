@@ -1170,19 +1170,20 @@ public class OrganizationServiceImpl implements OrganizationService {
             //organization.setCommunityId(cmd.getCommunityId());
             organization.setDescription(enterprise.getDescription());
 
-            organizationSearcher.feedDoc(organization);
+            List<AttachmentDescriptor> attachments = cmd.getAttachments();
+
+            if (null != attachments && 0 != attachments.size()) {
+                this.addAttachments(organization.getId(), attachments, user.getId());
+            }
+
+            List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
+            if (null != addressDTOs && 0 != addressDTOs.size()) {
+                this.addAddresses(organization.getId(), addressDTOs, user.getId());
+            }
             return null;
         });
-        List<AttachmentDescriptor> attachments = cmd.getAttachments();
 
-        if (null != attachments && 0 != attachments.size()) {
-            this.addAttachments(organization.getId(), attachments, user.getId());
-        }
-
-        List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
-        if (null != addressDTOs && 0 != addressDTOs.size()) {
-            this.addAddresses(organization.getId(), addressDTOs, user.getId());
-        }
+        organizationSearcher.feedDoc(organization);
 
         return ConvertHelper.convert(organization, OrganizationDTO.class);
     }
