@@ -12,6 +12,11 @@ import com.everhomes.util.StringHelper;
  *     <li>pageSize: 页面大小</li>
  *     <li>trackingUid: 跟进人uid</li>
  *     <li>type: 查询类型;1:全部客户  2:我的客户   3:公共客户</li>
+ *     
+ *     <li>lastTrackingTime: 最近跟进时间（天）</li>
+ *     <li>propertyType: 资产类型   String类型,如果多选用英文逗号分隔,eg: 1,2</li>
+ *     <li>propertyUnitPrice: 资产单价区间  String类型,eg: 0~10 </li>
+ *     <li>propertyArea: 资产面积区间  String类型,eg: 0~10 </li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -32,6 +37,14 @@ public class SearchEnterpriseCustomerCommand {
     private Long trackingUid;
     
     private Integer type;
+    
+    private Integer lastTrackingTime;
+    
+    private String propertyType;
+    
+    private String propertyUnitPrice;
+    
+    private String propertyArea;
 
     public Long getCommunityId() {
         return communityId;
@@ -96,6 +109,39 @@ public class SearchEnterpriseCustomerCommand {
 
 	public void setType(Integer type) {
 		this.type = type;
+	}
+	
+
+	public Integer getLastTrackingTime() {
+		return lastTrackingTime;
+	}
+
+	public void setLastTrackingTime(Integer lastTrackingTime) {
+		this.lastTrackingTime = lastTrackingTime;
+	}
+
+	public String getPropertyType() {
+		return propertyType;
+	}
+
+	public void setPropertyType(String propertyType) {
+		this.propertyType = propertyType;
+	}
+
+	public String getPropertyUnitPrice() {
+		return propertyUnitPrice;
+	}
+
+	public void setPropertyUnitPrice(String propertyUnitPrice) {
+		this.propertyUnitPrice = propertyUnitPrice;
+	}
+
+	public String getPropertyArea() {
+		return propertyArea;
+	}
+
+	public void setPropertyArea(String propertyArea) {
+		this.propertyArea = propertyArea;
 	}
 
 	@Override

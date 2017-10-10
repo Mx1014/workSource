@@ -149,7 +149,7 @@ public class EnterpriseCustomerDTO {
     private String  propertyTypeName;
     private Double longitude;
     private Double latitude;
-
+    
     public String getContactAvatarUrl() {
         return contactAvatarUrl;
     }

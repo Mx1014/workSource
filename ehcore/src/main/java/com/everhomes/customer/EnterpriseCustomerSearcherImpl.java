@@ -27,6 +27,7 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -105,7 +108,11 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("status", customer.getStatus());
             builder.field("trackingUid",customer.getTrackingUid());
             builder.field("trackingName",customer.getTrackingName() == null ? "" : customer.getTrackingName());
-
+            builder.field("lastTrackingTime" , customer.getLastTrackingTime());
+            builder.field("propertyType" , customer.getPropertyType());
+            builder.field("propertyUnitPrice" , customer.getPropertyUnitPrice());
+            builder.field("propertyArea" , customer.getPropertyArea());
+           
             builder.endObject();
             return builder;
         } catch (IOException e) {
@@ -177,6 +184,44 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         		fb = FilterBuilders.andFilter(fb ,FilterBuilders.termFilter("trackingUid", -1l));
         	}
         }
+        //跟进时间、资产类型、资产面积、资产单价增加筛选
+        if(null != cmd.getLastTrackingTime() && cmd.getLastTrackingTime() > 0){
+        	RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
+        	Long startTime = getTomorrowLastTimestamp(cmd.getLastTrackingTime());
+        	rf.gte(startTime);
+        	fb = FilterBuilders.andFilter(fb, rf); 
+        }
+        
+        if(null != cmd.getPropertyType()){
+        	fb = FilterBuilders.andFilter(fb ,FilterBuilders.inFilter("propertyType", cmd.getPropertyType().split(",")));
+        }
+        
+        if(null != cmd.getPropertyArea()){
+        	RangeFilterBuilder rf = new RangeFilterBuilder("propertyArea");
+        	if(cmd.getPropertyArea().indexOf("~") > -1){
+        		if(null != cmd.getPropertyArea().split("~")[0]){
+        			rf.gte(Double.parseDouble(cmd.getPropertyArea().split("~")[0]));
+        		}
+        		if(null != cmd.getPropertyArea().split("~")[1]){
+        			rf.lte(Double.parseDouble(cmd.getPropertyArea().split("~")[1]));
+        		}
+        		fb = FilterBuilders.andFilter(fb, rf); 
+        	}
+        	
+        }
+        if(null != cmd.getPropertyUnitPrice()){
+        	RangeFilterBuilder rf = new RangeFilterBuilder("propertyUnitPrice");
+        	if(cmd.getPropertyUnitPrice().indexOf("~") > -1){
+        		if(null != cmd.getPropertyUnitPrice().split("~")[0]){
+        			rf.gte(Double.parseDouble(cmd.getPropertyUnitPrice().split("~")[0]));
+        		}
+        		if(null != cmd.getPropertyUnitPrice().split("~")[1]){
+        			rf.lte(Double.parseDouble(cmd.getPropertyUnitPrice().split("~")[1]));
+        		}
+        		fb = FilterBuilders.andFilter(fb, rf); 
+        	}
+        }
+        
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -233,4 +278,15 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         response.setDtos(dtos);
         return response;
     }
+    
+    private Long getTomorrowLastTimestamp(Integer lastTrackingTime) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		calendar.add(Calendar.DAY_OF_MONTH, -(lastTrackingTime-1));
+	    calendar.set(Calendar.HOUR_OF_DAY, 0);
+	    calendar.set(Calendar.MINUTE, 0);
+	    calendar.set(Calendar.SECOND, 0);
+	    calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTime().getTime();
+	}
 }
