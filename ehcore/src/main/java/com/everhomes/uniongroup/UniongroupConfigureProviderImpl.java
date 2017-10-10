@@ -610,25 +610,21 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     public List listDetailNotInUniongroup(Integer namespaceId, Long organizationId, String contactName, Integer versionCode) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t1");
-        //TableLike t2 = Tables.EH_UNIONGROUP_MEMBER_DETAILS.as("t2");
-        SelectJoinStep step = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
-        SelectConditionStep<Record> step2 = context.select().from(Tables.EH_UNIONGROUP_MEMBER_DETAILS).
-                where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID));
-
+        TableLike t1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t1");
+        TableLike t2 = Tables.EH_UNIONGROUP_MEMBER_DETAILS.as("t2");
+        SelectJoinStep step = null;
         if(versionCode != null){
-            step2 = step2.and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(versionCode));
+            step = context.select(t1.fields()).from(t1).leftOuterJoin(t2).on(t2.field("detail_id").eq(t1.field("id"))).and(t2.field("version_code").eq(versionCode));
+        }else{
+            step = context.select(t1.fields()).from(t1).leftOuterJoin(t2).on(t2.field("detail_id").eq(t1.field("id")));
         }
-//                .leftOuterJoin(t2).on(t2.field("detail_id").eq(t1.field("id")));
-        Condition condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId)
-                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
-                .andNotExists(step2) ;
+        Condition condition = t1.field("organization_id").eq(organizationId).and(t1.field("namespace_id").eq(namespaceId)).and(t2.field("detail_id").isNull());
         if(StringUtils.isNotEmpty(contactName)){
-            condition = condition.and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME.like(contactName +"%"));
+            condition = condition.and(t1.field("contact_name").like(contactName +"%"));
         }
-        condition = condition.and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(context.selectDistinct(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))));
+        condition = condition.and(t1.field("id").in(context.selectDistinct(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))));
         List<OrganizationMemberDetails> details = step.where(condition).fetch().map(new OrganizationMemberDetailsMapper());
-        LOGGER.debug("listDetailNotInUniongroup 's sql is :" + step );
+        LOGGER.debug("listDetailNotInUniongroup 's sql is :" + step.where(condition).getSQL());
         step.close();
         return details;
     }
