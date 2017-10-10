@@ -8,7 +8,7 @@ ALTER TABLE `eh_questionnaires` ADD COLUMN `poster_uri` VARCHAR(1024) COMMENT '�
 
 ALTER TABLE `eh_questionnaire_answers` ADD COLUMN `target_from` TINYINT COMMENT '用户来源（1:app，2:wx）' AFTER `target_name`;
 ALTER TABLE `eh_questionnaire_answers` ADD COLUMN `target_phone` VARCHAR(128) COMMENT '用户电话' AFTER `target_name`;
-ALTER TABLE `eh_questionnaire_answers` ADD COLUMN `anonymous_flag` TINYINT COMMENT '是否匿名回答, 0:不是匿名回答,2:是匿名回答' AFTER `target_name`;
+ALTER TABLE `eh_questionnaire_answers` ADD COLUMN `anonymous_flag` TINYINT DEFAULT 0 COMMENT '是否匿名回答, 0:不是匿名回答,2:是匿名回答' AFTER `target_name`;
 
 -- 问卷调查范围表
 -- DROP TABLE IF EXISTS  `eh_questionnaire_ranges`;
