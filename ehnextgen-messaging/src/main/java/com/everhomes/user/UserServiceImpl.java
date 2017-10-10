@@ -5047,11 +5047,16 @@ public class UserServiceImpl implements UserService {
 			existUser.setNickName(user.getNickName());
 			existUser.setAvatar(user.getAvatar());
 			existUser.setGender(user.getGender());
+			existUser.setNamespaceUserToken(user.getNamespaceUserToken());
+			existUser.setNamespaceUserType(user.getNamespaceUserType());
 
 			userProvider.updateUser(existUser);
+			//注销当前用户，
 			//防止自己将自己绑定，被设置成无效
 			if(user.getId() != existUser.getId()){
 				user.setStatus(UserStatus.INACTIVE.getCode());
+				user.setNamespaceUserToken("");
+				user.setNamespaceUserType(null);
 				userProvider.updateUser(user);
 			}
 //
