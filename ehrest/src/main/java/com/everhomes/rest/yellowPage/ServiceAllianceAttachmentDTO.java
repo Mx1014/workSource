@@ -26,6 +26,12 @@ public class ServiceAllianceAttachmentDTO {
 	
 	private Integer fileSize;
 
+	private String summaryDescription;
+
+	private String commentToken;
+
+	private Integer commentCount;
+
 	public Long getId() {
 		return id;
 	}
@@ -80,6 +86,30 @@ public class ServiceAllianceAttachmentDTO {
 
 	public void setFileSize(Integer fileSize) {
 		this.fileSize = fileSize;
+	}
+
+	public String getSummaryDescription() {
+		return summaryDescription;
+	}
+
+	public void setSummaryDescription(String summaryDescription) {
+		this.summaryDescription = summaryDescription;
+	}
+
+	public String getCommentToken() {
+		return commentToken;
+	}
+
+	public void setCommentToken(String commentToken) {
+		this.commentToken = commentToken;
+	}
+
+	public Integer getCommentCount() {
+		return commentCount;
+	}
+
+	public void setCommentCount(Integer commentCount) {
+		this.commentCount = commentCount;
 	}
 
 	@Override

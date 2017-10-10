@@ -389,7 +389,7 @@ public class UserUiController extends ControllerBase {
 	@RestReturn(value=SceneDTO.class, collection=true)
 	@RequireAuthentication(false)
 	public RestResponse listAllCommunityScenes() {
-		List<SceneDTO> sceneDtoList = userService.listTouristRelatedScenes();
+		List<SceneDTO> sceneDtoList = userService.listAllCommunityScenes();
 		RestResponse response = new RestResponse(sceneDtoList);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

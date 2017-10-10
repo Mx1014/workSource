@@ -56,12 +56,13 @@ public class RosterOrderSettingProviderImpl implements RosterOrderSettingProvide
 	}
 
 	@Override
-	public RosterOrderSetting findRosterOrderSettingByNamespace(Integer namespaceId) {
+	public RosterOrderSetting findRosterOrderSettingByNamespace(Integer namespaceId, Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		RosterOrderSetting rosterOrderSetting = context.select()
 				.from(Tables.EH_ROSTER_ORDER_SETTINGS)
 				.where(Tables.EH_ROSTER_ORDER_SETTINGS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_ROSTER_ORDER_SETTINGS.CATEGORY_ID.eq(categoryId))
 				.fetchOneInto(RosterOrderSetting.class);
 		return rosterOrderSetting;
 	}

@@ -19,26 +19,26 @@ SET @appUrl_id = (SELECT MAX(id) FROM `eh_app_urls`);
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@appUrl_id := @appUrl_id + 1), '999966', '深圳湾', '2', '', '', '移动平台聚合服务，助力园区效能提升');
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@appUrl_id := @appUrl_id + 1), '999966', '深圳湾', '1', '', '', '移动平台聚合服务，助力园区效能提升');
 
-	
+
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(@namespace_id, '深圳湾');
 
 SET @namespace_detail_id = (SELECT MAX(id) FROM `eh_namespace_details`);
-INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`)
 	VALUES((@namespace_detail_id := @namespace_detail_id + 1), @namespace_id, 'community_commercial', UTC_TIMESTAMP());
 
 SET @organization_id = 1024528;
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
 	VALUES(1041981, UUID(), '深圳湾科技发展有限公司', '深圳湾科技发展有限公司', 1, 1, @organization_id, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 190617, 1, @namespace_id);
-INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
 	VALUES(190617, UUID(), @namespace_id, 2, 'EhGroups', 1041981,'深圳湾科技发展有限公司论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 
 
-INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`) 
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`)
 	VALUES(@organization_id, 0, 'PM', '深圳湾科技发展有限公司', '', CONCAT('/', @organization_id), 1, 2, 'ENTERPRISE', @namespace_id, 1041981);
 
 SET @org_cmnty_request_id = (SELECT MAX(id) FROM `eh_organization_community_requests`);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time)
-	VALUES((@org_cmnty_request_id := @org_cmnty_request_id + 1), 240111044331050369, 'organization', @organization_id, 3, 0, UTC_TIMESTAMP()); 
+	VALUES((@org_cmnty_request_id := @org_cmnty_request_id + 1), 240111044331050369, 'organization', @organization_id, 3, 0, UTC_TIMESTAMP());
 
 SET @user_id = 316755;
 SET @account_name= 19132843868;
@@ -69,7 +69,7 @@ INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, tar
 	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
 
 SET @user_id = @user_id + 1;
-SET @account_name = @account_name + 1;    
+SET @account_name = @account_name + 1;
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
 	VALUES (@user_id, UUID(), @account_name, '吴振华', '', 1, 45, '1', '1',  'zh_CN',  'ded3543367cb95a8afe79d976ea50d9e', 'd5f7b54b1619769476ec3a8fd372d3d478111b137eb7f987ae094658dd0042af', UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
@@ -77,11 +77,11 @@ INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `ide
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
 	VALUES((@org_member_id := @org_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '吴振华', 0, '13302292332', 3, @namespace_id);
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());    
-    
-INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
+
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
 	VALUES(190682, UUID(), @namespace_id, 2, 'EhGroups', 0,'生态园论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
-INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
 	VALUES(190683, UUID(), @namespace_id, 2, 'EhGroups', 0,'生态园意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`)
@@ -99,12 +99,12 @@ SET @namespace_resource_id = (SELECT MAX(id) FROM `eh_namespace_resources`);
 
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES(240111044331050369, UUID(), 13905, '深圳市',  13908, '南山区', '生态园', '生态园', '白石路', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 98, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, 190682, 190683, UTC_TIMESTAMP(), @namespace_id);
-INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`)
 	VALUES((@community_geopoint_id := @community_geopoint_id + 1), 240111044331050369, '', 113.96029, 22.537713, 'ws101nz7enpn');
-INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+INSERT INTO `eh_organization_communities`(organization_id, community_id)
 	VALUES(@organization_id, 240111044331050369);
-INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
-	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', 240111044331050369, UTC_TIMESTAMP());	
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`)
+	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', 240111044331050369, UTC_TIMESTAMP());
 
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES(240111044331050370, UUID(), 13905, '深圳市',  13908, '南山区', '软件产业基地', '软基', '学府路', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 98, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, 190684, 190685, UTC_TIMESTAMP(), @namespace_id);
@@ -333,12 +333,12 @@ INSERT INTO `eh_item_service_categries` (`id`, `name`, `icon_uri`, `order`, `ali
 SET @layout_id = (SELECT MAX(id) FROM `eh_launch_pad_layouts`);
 SET @banner_id = (SELECT MAX(id) FROM `eh_banners`);
 
-	
--- 园区管理员  
-INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`) 
+
+-- 园区管理员
+INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`)
     VALUES ((@banner_id := @banner_id + 1), @namespace_id, 0, '/home', 'Default', '0', '0', '/home', 'Default', 'cs://1/image/aW1hZ2UvTVRwbU1UTTBNR1F3WW1VeVpqSTBZV0kyWkRNeE5EVmlNREZsWVdSaU1qQTJNQQ', '0', '', NULL, NULL, '2', '10', '0', UTC_TIMESTAMP(), NULL, 'pm_admin');
-  
-INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`) 
+
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`)
     VALUES ((@layout_id := @layout_id + 1), @namespace_id, 'ServiceMarketLayout', '{"versionCode":"2017081701","versionName":"4.8.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":16,"columnCount":5},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":16},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Gallery"},"style":"Gallery","defaultOrder":5,"separatorFlag":1,"separatorHeight":16,"columnCount":2}]}', '2017081701', '2017081701', '2', UTC_TIMESTAMP(), 'pm_admin');
 
 INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`)
@@ -888,8 +888,8 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
     VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'Bizs', 'ROUTE', '物业报修', 'cs://1/image/aW1hZ2UvTVRvM1lqZ3pNRGt4WWprelpHRmlNbVptWWpCaU56aGlZbUl5WVRrek5ESmxZdw', '1', '1', '60', '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修"}', 18, '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', 158);
 
 SET @module_id = IFNULL((SELECT MAX(id) FROM `eh_service_module_scopes`), 0);
-INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `default_order`, `apply_policy`) 
-SELECT (@module_id := @module_id + 1), owner_id, menu_id, '', NULL, '2' FROM eh_web_menu_scopes WHERE 
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `default_order`, `apply_policy`)
+SELECT (@module_id := @module_id + 1), owner_id, menu_id, '', NULL, '2' FROM eh_web_menu_scopes WHERE
 menu_id IN (SELECT id FROM eh_service_modules) AND `owner_id` = 999966;
 
 
@@ -1235,7 +1235,7 @@ INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `
 
 -- 补充缺失数据 add by xujuan 20170915
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('1478', 'biz.search.shops.api', '/zl-ec/rest/openapi/shop/listByKeyword', '搜索电商商家API', '0', NULL);
- 
+
 -- added by wh 【活动场地】【广告及其他】配置成标准企业联盟的样式，大图列表+详情
 
 SET @parent_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
@@ -1247,7 +1247,7 @@ INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alli
 SET @service_alliance_id = (SELECT MAX(id) FROM `eh_service_alliances`);
 INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`)
   VALUES ((@service_alliance_id := @service_alliance_id + 1), 0, 'community', 240111044331050369, '活动场地', '活动场地', @parent_id, '', '', '', 'cs://1/image/aW1hZ2UvTVRvMU56TXpOV0l3T1RKaFlqQTRNVFJpWmpSaVlUazFNall5WldRNVlUZ3dZUQ', 2, NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, NULL);
- 
+
 UPDATE  eh_launch_pad_items SET `action_type`=33,`action_data`= CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}')
 WHERE namespace_id = 999966 AND `item_label` ='活动场地';
 
@@ -1262,9 +1262,9 @@ INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`,
 
 UPDATE  eh_launch_pad_items SET `action_type`=33,`action_data`= CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}')
 WHERE namespace_id = 999966 AND `item_label` ='广告及其他';
- 
- 
- 
+
+
+
 SET @parent_id = @parent_id + 1;
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES (@parent_id, 'community', 240111044331050369, '0', '体育场地', '体育场地', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, 999966, '');
@@ -1277,20 +1277,20 @@ INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`,
 UPDATE  eh_launch_pad_items SET `action_type`=33,`action_data`= CONCAT('{"type":',@parent_id,',"parentId":',@parent_id,',"displayType": "list"}')
 WHERE namespace_id = 999966 AND `item_label` ='体育场地';
 
-DELETE FROM eh_rentalv2_resource_types WHERE namespace_id = 999966 AND `name` ='体育场地'; 
- 
-DELETE FROM eh_rentalv2_resource_types WHERE namespace_id = 999966 AND `name` ='广告及其他'; 
- 
-DELETE FROM eh_rentalv2_resource_types WHERE namespace_id = 999966 AND `name` ='活动场地'; 
- 
- 
- 
+DELETE FROM eh_rentalv2_resource_types WHERE namespace_id = 999966 AND `name` ='体育场地';
+
+DELETE FROM eh_rentalv2_resource_types WHERE namespace_id = 999966 AND `name` ='广告及其他';
+
+DELETE FROM eh_rentalv2_resource_types WHERE namespace_id = 999966 AND `name` ='活动场地';
+
+
+
  --  added by wh 隐藏【拓展空间】
- 
-DELETE FROM `eh_service_alliance_categories` WHERE  `name`  = '拓展空间' AND `namespace_id` = 999966 ; 
+
+DELETE FROM `eh_service_alliance_categories` WHERE  `name`  = '拓展空间' AND `namespace_id` = 999966 ;
 DELETE FROM  `eh_service_alliances` WHERE   `owner_type`= 'community' AND  `owner_id` = 240111044331050369 AND  `name` = '拓展空间';
 DELETE FROM eh_launch_pad_items WHERE namespace_id = 999966 AND `item_label` ='拓展空间';
- 
+
 -- add by xq.tian 2017/09/22
 SET @eh_launch_pad_items_id = IFNULL((SELECT MAX(id) FROM `eh_launch_pad_items`), 1);
 SET @ser_all_cate_id = IFNULL((SELECT MAX(id) FROM `eh_service_alliance_categories`), 1);
@@ -1329,4 +1329,64 @@ UPDATE eh_item_service_categries SET label = '政务服务' WHERE label = '政�
 
 -- 投诉建议icon
 UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveE56Y3lOREk1TURSalpEazNOVEl5T0dVNFptTmlPRFJrTkdaa09XVTFOZw' WHERE namespace_id = 999966 AND item_label = '投诉建议' AND item_group = 'Bizs';
- 
+
+-- added by janson, add zuolin_v2
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999966, 'aclink.qr_driver_zuolin_inner', 'zuolin_v2', 'use version2 of zuolin driver');
+
+-- 后台新增投诉建议菜单by st.zheng
+set @id=(select max(id) from `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id:=@id+1, '42000', '投诉建议', 'EhNamespaces', '999966', '1');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id:=@id+1, '42010', '', 'EhNamespaces', '999966', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id:=@id+1, '42020', '', 'EhNamespaces', '999966', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id:=@id+1, '42030', '', 'EhNamespaces', '999966', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id:=@id+1, '42040', '', 'EhNamespaces', '999966', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id:=@id+1, '42050', '', 'EhNamespaces', '999966', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id:=@id+1, '42060', '', 'EhNamespaces', '999966', '2');
+
+-- 修改menu名称 by st.zheng
+update `eh_web_menu_scopes` set menu_name = '创业入驻' where menu_id = 43400;
+update `eh_web_menu_scopes` set menu_name = '企业商务服务' where menu_id = 43200;
+update `eh_web_menu_scopes` set menu_name = '融资申请' where menu_id = 43300;
+
+-- 修改、删除服务广场内容图标等 by st.zheng
+update `eh_launch_pad_items` set action_data = '{"type":37,"parentId":37,"displayType": "grid"}' where namespace_id = 999966 and item_name like '%孵化器%' ;
+
+
+delete from `eh_launch_pad_items` where namespace_id = 999966 and item_label = '创客交流' ;
+update `eh_launch_pad_items` set item_name='创业入驻' ,item_label='创业入驻',icon_uri='cs://1/image/aW1hZ2UvTVRvNVlXWTRaR1UyWVdNd1ptVTBaakl5T0RFelpESTNNV05qWmpZeU1HVXdOdw' where namespace_id = 999966 and item_name = '创业服务' and item_group!='Gallery' ;
+update `eh_launch_pad_items`  set item_name='融资申请',item_label='融资申请' where namespace_id = 999966 and item_label = '众创机构';
+update `eh_launch_pad_items`  set item_name='企业商务服务',item_label='企业商务服务' where namespace_id = 999966 and item_label = '银行超市';
+update `eh_launch_pad_items` set icon_uri='cs://1/image/aW1hZ2UvTVRveE56Y3lOREk1TURSalpEazNOVEl5T0dVNFptTmlPRFJrTkdaa09XVTFOZw' where namespace_id = 999966 and item_label = '投诉建议' ;
+
+
+
+
+
+
+
+-- 新支付 copy from 4.9.4 by lqs 20170930
+-- 支付服务器链接
+SET @eh_configurations_id = (SELECT MAX(id) from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.callback.url', '/pay/payNotify', '新支付回调接口url', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'default.bind.phone', '12100001111', '绑手机号默认值', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.orderPaymentStatusQueryUri', '/order/queryOrderPaymentStatus', '查询支付单信息', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations_id := @eh_configurations_id+ 1), 'pay.v2.home.url', 'https://payv2.zuolin.com/pay', '新支付homeUrl', '0', NULL);
+
+
+INSERT INTO `eh_payment_accounts` (`id`, `name`, `account_id`, `system_id`, `app_key`, `secret_key`, `create_time`)
+	VALUES(1, 'MyBayAccount', '10001', '1', 'cffd7a0a-cf59-41d3-9140-773161fc7047', 'y6Yc0xJ3ZgMVUuHWkWyXkn5FVB0pryqUMKVWJSwIXizHnP+TQzm0jPuU8z69imooQzAU3iWHZKtqJOr5IGZpCg==', UTC_TIMESTAMP());
+
+
+-- 支付方式、收款方、付款方
+INSERT INTO `eh_payment_users`(`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
+	VALUES (30001, 'EhOrganizations', 1035830, '2', 1020, UTC_TIMESTAMP());
+
+INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
+	VALUES (10001, 'parking', 999966, 'EhOrganizations', 1035830, null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), null);
+INSERT INTO `eh_payment_service_configs`(`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
+	VALUES (20001, '停车充值', 'parking', 999966, 'EhOrganizations', 1035830, null, null, NULL, 1, 1020, UTC_TIMESTAMP(), null);
+
+INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
+	VALUES (10002, 'rentalOrder', 999966, 'EhOrganizations', 1035830, null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), null);
+INSERT INTO `eh_payment_service_configs`(`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
+	VALUES (20002, '资源预约', 'rentalOrder', 999966, 'EhOrganizations', 1035830, null, null, NULL, 1, 1020, UTC_TIMESTAMP(), null);

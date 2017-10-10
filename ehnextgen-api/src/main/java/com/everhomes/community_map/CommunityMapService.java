@@ -13,4 +13,14 @@ public interface CommunityMapService {
     CommunityMapBuildingDetailDTO getCommunityMapBuildingDetailById(GetCommunityMapBuildingDetailByIdCommand cmd);
 
     CommunityMapInitDataDTO getCommunityMapInitData(GetCommunityMapInitDataCommand cmd);
+
+    CommunityMapShopDetailDTO createCommunityMapShop(CreateCommunityMapShopCommand cmd);
+
+    void deleteCommunityMapShop(DeleteCommunityMapShopCommand cmd);
+
+    CommunityMapShopDetailDTO updateCommunityMapShop(UpdateCommunityMapShopCommand cmd);
+
+    CommunityMapShopDetailDTO getCommunityMapShopDetailById(GetCommunityMapShopDetailByIdCommand cmd);
+
+    SearchCommunityMapShopsResponse searchCommunityMapShops(SearchCommunityMapShopsCommand cmd);
 }

@@ -425,4 +425,20 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /community/listCommunitiesByOrgId</b>
+     * <p>查询企业管理的小区</p>
+     */
+    @RequestMapping("listCommunitiesByOrgId")
+    @RestReturn(value=ListCommunitiesByOrgIdResponse.class)
+    public RestResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd) {
+
+        ListCommunitiesByOrgIdResponse cmdResponse = this.communityService.listCommunitiesByOrgId(cmd);
+        RestResponse response =  new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
 }

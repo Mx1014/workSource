@@ -31,7 +31,9 @@ public interface ActivityService {
 
     CommonOrderDTO createSignupOrder(CreateSignupOrderCommand cmd);
 
-	CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd);
+    PreOrderDTO createSignupOrderV2(CreateSignupOrderV2Command cmd);
+
+    CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd);
 
     ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd);
 
@@ -155,7 +157,7 @@ public interface ActivityService {
 
 	SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd);
 
-	void importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files);
+	ImportSignupInfoResponse importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files);
 
 	ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd);
 
@@ -197,5 +199,7 @@ public interface ActivityService {
 	 * 同步报名人数
 	 */
 	void syncActivitySignupAttendeeCount();
+
+//	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
 }
 

@@ -97,6 +97,19 @@ public class ActivityController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /activity/createSignupOrderV2</b>
+     * <p>支付2.0</p>
+     */
+    @RequestMapping("createSignupOrderV2")
+    @RestReturn(value=PreOrderDTO.class)
+    public RestResponse createSignupOrderV2(@Valid CreateSignupOrderV2Command cmd) {
+        PreOrderDTO dto = activityService.createSignupOrderV2(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      *
@@ -136,10 +149,10 @@ public class ActivityController extends ControllerBase {
      * <b>URL: /activity/importSignupInfo</b>
      */
     @RequestMapping("importSignupInfo")
-    @RestReturn(value=String.class)
+    @RestReturn(value=ImportSignupInfoResponse.class)
     public RestResponse importSignupInfo(@Valid ImportSignupInfoCommand cmd, @RequestParam("attachment") MultipartFile[] files) {
-    	activityService.importSignupInfo(cmd, files);
-    	RestResponse response = new RestResponse();
+        ImportSignupInfoResponse importSignupInfoResponse = activityService.importSignupInfo(cmd, files);
+    	RestResponse response = new RestResponse(importSignupInfoResponse);
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
     	return response;
@@ -175,6 +188,21 @@ public class ActivityController extends ControllerBase {
     	restResponse.setErrorDescription("OK");
     	return restResponse;
     }
+
+//    /**
+//     *
+//     * <p>导出活动错误信息</p>
+//     * <b>URL: /activity/exportErrorInfo</b>
+//     */
+//    @RequestMapping("exportErrorInfo")
+//    @RestReturn(value=String.class)
+//    public RestResponse exportErrorInfo(@Valid ExportErrorInfoCommand cmd, HttpServletResponse response) {
+//        activityService.exportErrorInfo(cmd, response);
+//        RestResponse restResponse = new RestResponse();
+//        restResponse.setErrorCode(ErrorCodes.SUCCESS);
+//        restResponse.setErrorDescription("OK");
+//        return restResponse;
+//    }
     
     /**
      * 
