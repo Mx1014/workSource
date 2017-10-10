@@ -96,7 +96,8 @@ ADD COLUMN `property_unit_price`  DOUBLE NULL COMMENT '资产单价' AFTER `property
 ADD COLUMN `property_type`  BIGINT NULL COMMENT '资产类型' AFTER `property_unit_price`,
 ADD COLUMN `longitude`  DOUBLE NULL COMMENT '经度' AFTER `property_type`,
 ADD COLUMN `latitude`  DOUBLE NULL COMMENT '纬度' AFTER `longitude`,
-ADD COLUMN `geohash`  VARCHAR(32) NULL DEFAULT NULL AFTER `latitude`;
+ADD COLUMN `geohash`  VARCHAR(32) NULL DEFAULT NULL AFTER `latitude` ,
+ADD COLUMN `last_tracking_time`  DATETIME   COMMENT '最后一次跟进时间' AFTER `geohash`;
 
 
 

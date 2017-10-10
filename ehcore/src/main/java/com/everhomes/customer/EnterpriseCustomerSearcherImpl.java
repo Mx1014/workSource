@@ -104,7 +104,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("levelItemId", customer.getLevelItemId());
             builder.field("status", customer.getStatus());
             builder.field("trackingUid",customer.getTrackingUid());
-            builder.field("trackingName",customer.getTrackingName());
+            builder.field("trackingName",customer.getTrackingName() == null ? "" : customer.getTrackingName());
 
             builder.endObject();
             return builder;
