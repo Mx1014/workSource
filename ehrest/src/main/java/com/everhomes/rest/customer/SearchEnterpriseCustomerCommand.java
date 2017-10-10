@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>keyword: 关键字：手机号或地址或客户名称</li>
  *     <li>customerCategoryId: 客户类型id</li>
- *     <li>levelId: 客户级别id</li>
+ *     <li>levelId: 客户级别id,如果多选用英文逗号分隔,eg: 1,2</li>
  *     <li>communityId: 园区id</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 页面大小</li>
@@ -26,7 +26,7 @@ public class SearchEnterpriseCustomerCommand {
 
     private Long customerCategoryId;
 
-    private Long levelId;
+    private String levelId;
 
     private Long communityId;
 
@@ -70,11 +70,11 @@ public class SearchEnterpriseCustomerCommand {
         this.keyword = keyword;
     }
 
-    public Long getLevelId() {
+    public String getLevelId() {
         return levelId;
     }
 
-    public void setLevelId(Long levelId) {
+    public void setLevelId(String levelId) {
         this.levelId = levelId;
     }
 
