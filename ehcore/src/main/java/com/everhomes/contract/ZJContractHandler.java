@@ -158,7 +158,7 @@ public class ZJContractHandler implements ContractService{
     }
 
     @Override
-    public ContractDTO updateContract(UpdateContractCommand cmd) {
+    public ContractDetailDTO updateContract(UpdateContractCommand cmd) {
         LOGGER.error("Insufficient privilege, zjgkhandler createContract");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
