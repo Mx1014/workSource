@@ -192,8 +192,8 @@ public class NewsServiceImpl implements NewsService {
 		news.setDeleterUid(0L);
 		news.setPhone(cmd.getPhone());
 		if (StringUtils.isEmpty(news.getContentAbstract())) {
-			news.setContentAbstract(news.getContent().substring(0,
-					news.getContent().length() > 100 ? 100 : news.getContent().length()));
+			news.setContentAbstract(news.getContent().replaceAll("<p>.*</p>","").substring(0,
+					news.getContent().length() > 100 ? 100 : news.getContent().length())); //删除图片
 		}
 		if (cmd.getPublishTime() != null) {
 			news.setPublishTime(new Timestamp(cmd.getPublishTime()));
