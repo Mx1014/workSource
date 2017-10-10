@@ -9,18 +9,29 @@ import java.util.List;
 
 public class ExportArchivesEmployeesDTO {
 
-    @ItemType(GeneralFormFieldDTO.class)
-    private List<GeneralFormFieldDTO> fields;
+    @ItemType(String.class)
+    private List<String> titles;
+
+    @ItemType(String.class)
+    private List<String> vals;
 
     public ExportArchivesEmployeesDTO() {
     }
 
-    public List<GeneralFormFieldDTO> getFields() {
-        return fields;
+    public List<String> getTitles() {
+        return titles;
     }
 
-    public void setFields(List<GeneralFormFieldDTO> fields) {
-        this.fields = fields;
+    public void setTitles(List<String> titles) {
+        this.titles = titles;
+    }
+
+    public List<String> getVals() {
+        return vals;
+    }
+
+    public void setVals(List<String> vals) {
+        this.vals = vals;
     }
 
     @Override

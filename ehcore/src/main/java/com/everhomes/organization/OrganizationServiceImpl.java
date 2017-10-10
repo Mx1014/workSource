@@ -9830,6 +9830,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             organizationMember.setEmploymentTime(checkInTime);
         }*/
+        organizationMember.setEmployeeType(cmd.getEmployeeType() !=null ? cmd.getEmployeeType() : EmployeeType.FULLTIME.getCode());
         organizationMember.setEmployeeStatus(cmd.getEmployeeStatus() != null ? cmd.getEmployeeStatus() : EmployeeStatus.ON_THE_JOB.getCode());
         organizationMember.setCheckInTime(checkInTime);
         organizationMember.setEmploymentTime(checkInTime);
@@ -9839,7 +9840,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
             organizationMember.setTargetId(userIdentifier.getOwnerUid());
         } else {
-            organizationMember.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
+            organizationMember.setTargetType(OrganizationMemberTargetType.UNTRACK .getCode());
             organizationMember.setTargetId(0L);
         }
 

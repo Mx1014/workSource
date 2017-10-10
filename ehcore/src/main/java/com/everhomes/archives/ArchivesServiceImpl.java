@@ -8,6 +8,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
+import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.*;
@@ -23,6 +24,13 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +41,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.io.*;
+import java.net.URLEncoder;
 import java.sql.Date;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -838,7 +847,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  5.获取档案记录
         List<ArchivesLogs> logs = archivesProvider.listArchivesLogs(cmd.getOrganizationId(), cmd.getDetailId());
         if (logs != null && logs.size() > 0)
-            response.setLos(logs.stream().map(r -> {
+            response.setLogs(logs.stream().map(r -> {
                 ArchivesLogDTO dto = ConvertHelper.convert(r, ArchivesLogDTO.class);
                 return dto;
             }).collect(Collectors.toList()));
@@ -1294,11 +1303,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
 
         if (type.equals(ArchivesParameter.CONTRACT_PARTY_ID)) {
-            Long id = (Long) obj;
-            Organization org = organizationProvider.findOrganizationById(id);
-            if (org != null) {
-                return org.getName();
-
+            if (obj != null) {
+                Long id = (Long) obj;
+                Organization org = organizationProvider.findOrganizationById(id);
+                if (org != null) {
+                    return org.getName();
+                }
             }
         }
 
@@ -1901,6 +1911,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void exportArchivesEmployees(ExportArchivesEmployeesCommand cmd, HttpServletResponse httpResponse) {
+
+        //  此处的数据类型不好调用晓强哥的 ExcelUtil, 所以使用原始的导出方法
+        /*
         GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
         formCommand.setFormOriginId(getRealFormOriginId(cmd.getFormOriginId()));
         GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
@@ -1926,7 +1939,86 @@ public class ArchivesServiceImpl implements ArchivesService {
         dto.setFields(response.getForm().getFormFields());
         employeeLists.add(dto);
         excelUtils.writeExcel(propertyNames, titleNames, cellSizes, employeeLists);
+*/
+        GeneralFormIdCommand formCommand = new GeneralFormIdCommand();
+        formCommand.setFormOriginId(getRealFormOriginId(cmd.getFormOriginId()));
+        GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
 
+        //  1.设置导出标题
+        List<String> titleNames = form.getFormFields().stream().map(r -> {
+            return r.getFieldDisplayName();
+        }).collect(Collectors.toList());
+
+        //  2.设置导出变量值
+        Long detailId = 13157L;
+        GetArchivesEmployeeCommand getCommand = new GetArchivesEmployeeCommand(cmd.getFormOriginId(), cmd.getOrganizationId(), detailId);
+        GetArchivesEmployeeResponse response = getArchivesEmployee(getCommand);
+        List<String> employeeValues = response.getForm().getFormFields().stream().map(r -> {
+            return r.getFieldValue();
+        }).collect(Collectors.toList());
+        ByteArrayOutputStream out = null;
+        ExportArchivesEmployeesDTO dto = new ExportArchivesEmployeesDTO();
+        dto.setTitles(titleNames);
+        dto.setVals(employeeValues);
+        XSSFWorkbook workbook = this.exportArchivesEmployeesFiles(dto);
+        writeExcel(workbook,httpResponse);
+    }
+
+    private XSSFWorkbook exportArchivesEmployeesFiles(ExportArchivesEmployeesDTO dto) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+
+        Sheet sheet = workbook.createSheet("人员档案列表");
+        //  导出标题
+        Row titleNameRow = sheet.createRow(0);
+        createArchivesEmployeesFilesTitle(workbook, titleNameRow, dto.getTitles());
+
+        return workbook;
+    }
+
+    private void createArchivesEmployeesFilesTitle(XSSFWorkbook workbook, Row titleNameRow, List<String> list) {
+        //  设置样式
+        XSSFCellStyle titleStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 12);
+        font.setFontName("Arial Unicode MS");
+        font.setBold(true);
+        titleStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        titleStyle.setFont(font);
+        for (int i = 0; i < list.size(); i++) {
+            Cell cell = titleNameRow.createCell(i);
+            cell.setCellStyle(titleStyle);
+            cell.setCellValue(list.get(i));
+        }
+    }
+
+/*    private void setTitleFont(XSSFWorkbook workbook, CellStyle style) {
+
+    }*/
+
+    private void writeExcel(XSSFWorkbook workbook, HttpServletResponse httpResponse) {
+        ByteArrayOutputStream out = null;
+        try {
+            out = new ByteArrayOutputStream();
+            workbook.write(out);
+            String fileName = "人员档案列表.xlsx";
+            httpResponse.setContentType("application/msexcel");
+            httpResponse.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+            //response.addHeader("Content-Length", "" + out.);
+            OutputStream excelStream = new BufferedOutputStream(httpResponse.getOutputStream());
+            httpResponse.setContentType("application/msexcel");
+            excelStream.write(out.toByteArray());
+            excelStream.flush();
+            excelStream.close();
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        } finally {
+            try {
+                workbook.close();
+                out.close();
+            } catch (IOException e) {
+                LOGGER.error("close error", e);
+            }
+        }
     }
 
     @Override
