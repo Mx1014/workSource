@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 所属id，communityId</li>
  * <li>startTime: 起始时间搓</li>
  * <li>endTime: 结束时间搓</li>
- * <li>respondent: 收集对象，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireRespondentType}</li>
+ * <li>targetType: 收集对象，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireTargetType}</li>
  * <li>status: 问卷状态（已发布，草稿），参考 {@link com.everhomes.rest.questionnaire.QuestionnaireStatus}</li>
  * <li>collectFlag: 问卷收集状态（收集中，收集完成），参考 {@link com.everhomes.rest.questionnaire.QuestionnaireCollectFlagType}</li>
  * <li>pageAnchor: 锚点</li>
@@ -30,7 +30,7 @@ public class ListQuestionnairesCommand {
 
 	private Long endTime;
 
-	private Byte respondent;
+	private String targetType;
 
 	private Byte status;
 
@@ -44,13 +44,13 @@ public class ListQuestionnairesCommand {
 
 	}
 
-	public ListQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, Long startTime, Long endTime, Byte respondent, Byte status, Byte collectFlag, Long pageAnchor, Integer pageSize) {
+	public ListQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, Long startTime, Long endTime, String targetType, Byte status, Byte collectFlag, Long pageAnchor, Integer pageSize) {
 		this.namespaceId = namespaceId;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.startTime = startTime;
 		this.endTime = endTime;
-		this.respondent = respondent;
+		this.targetType = targetType;
 		this.status = status;
 		this.collectFlag = collectFlag;
 		this.pageAnchor = pageAnchor;
@@ -113,12 +113,12 @@ public class ListQuestionnairesCommand {
 		this.endTime = endTime;
 	}
 
-	public Byte getRespondent() {
-		return respondent;
+	public String getTargetType() {
+		return targetType;
 	}
 
-	public void setRespondent(Byte respondent) {
-		this.respondent = respondent;
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
 	}
 
 	public Byte getStatus() {

@@ -20,13 +20,16 @@ import com.everhomes.util.StringHelper;
  * <li>collectFlag: 问卷收集状态（收集中，收集完成），参考 {@link com.everhomes.rest.questionnaire.QuestionnaireCollectFlagType}</li>
  * <li>targetUserNum: 目标用户数量</li>
  * <li>percentComplete: 完成收集量的百分比</li>
+ * <li>posterUri: 封面图uri地址</li>
  * <li>posterUrl: 封面图url地址</li>
- * <li>respondent: 面向对象，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireRespondentType}</li>
+ * <li>targetType: 面向对象，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireTargetType}</li>
  * <li>ranges: 对象范围，参考{@link com.everhomes.rest.questionnaire.QuestionnaireRangeDTO}</li>
  * <li>supportAnonymous: 是否支持匿名，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireCommonStatus}</li>
  * <li>supportShare: 是否支持分享，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireCommonStatus}</li>
+ * <li>shareUrl: 分享的URL地址</li>
  * <li>publishTime: 发布时间</li>
  * <li>cutOffTime: 截止时间</li>
+ * <li>answeredFlag: 是否已经回答，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireCommonStatus}</li>
  * <li>createTime: 创建时间</li>
  * <li>submitTime: 企业问卷提交时间</li>
  * <li>questions: 题目列表，参考{@link com.everhomes.rest.questionnaire.QuestionnaireQuestionDTO}</li>
@@ -44,14 +47,17 @@ public class QuestionnaireDTO {
 	private Byte collectFlag;
 	private Integer targetUserNum;
 	private String percentComplete;
+	private String posterUri;
 	private String posterUrl;
-	private Byte respondent;
+	private String targetType;
 	@ItemType(QuestionnaireRangeDTO.class)
 	private List<QuestionnaireRangeDTO> ranges;
 	private Byte supportAnonymous;
 	private Byte supportShare;
+	private String shareUrl;
 	private Long publishTime;
 	private Long cutOffTime;
+	private Byte answeredFlag;
 	private Long createTime;
 	private Long submitTime;
 	@ItemType(QuestionnaireQuestionDTO.class)
@@ -161,12 +167,12 @@ public class QuestionnaireDTO {
 		this.posterUrl = posterUrl;
 	}
 
-	public Byte getRespondent() {
-		return respondent;
+	public String getTargetType() {
+		return targetType;
 	}
 
-	public void setRespondent(Byte respondent) {
-		this.respondent = respondent;
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
 	}
 
 	public List<QuestionnaireRangeDTO> getRanges() {
@@ -209,6 +215,14 @@ public class QuestionnaireDTO {
 		this.publishTime = publishTime;
 	}
 
+	public Byte getAnsweredFlag() {
+		return answeredFlag;
+	}
+
+	public void setAnsweredFlag(Byte answeredFlag) {
+		this.answeredFlag = answeredFlag;
+	}
+
 	public Long getCreateTime() {
 		return createTime;
 	}
@@ -223,6 +237,22 @@ public class QuestionnaireDTO {
 
 	public void setSubmitTime(Long submitTime) {
 		this.submitTime = submitTime;
+	}
+
+	public String getPosterUri() {
+		return posterUri;
+	}
+
+	public void setPosterUri(String posterUri) {
+		this.posterUri = posterUri;
+	}
+
+	public String getShareUrl() {
+		return shareUrl;
+	}
+
+	public void setShareUrl(String shareUrl) {
+		this.shareUrl = shareUrl;
 	}
 
 	@Override

@@ -89,6 +89,16 @@ public class QuestionnaireController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /questionnaire/exportQuestionnaireResultDetail</b>
+	 * <p>5.1.问卷调查结果详情导出-园区</p>
+	 */
+	@RequestMapping("exportQuestionnaireResultDetail")
+	@RestReturn(String.class)
+	public RestResponse exportQuestionnaireResultDetail(GetQuestionnaireResultDetailCommand cmd){
+		return new RestResponse();
+	}
+
+	/**
      * <b>URL: /questionnaire/getQuestionnaireResultSummary</b>
 	 * <p>6.问卷调查结果统计-园区</p>
 	 */
@@ -120,7 +130,7 @@ public class QuestionnaireController extends ControllerBase {
 
 	/**
      * <b>URL: /questionnaire/listTargetQuestionnaires</b>
-	 * <p>9.问卷调查列表-企业</p>
+	 * <p>9.问卷调查列表-企业&个人</p>
 	 */
 	@RequestMapping("listTargetQuestionnaires")
 	@RestReturn(ListTargetQuestionnairesResponse.class)
@@ -130,7 +140,7 @@ public class QuestionnaireController extends ControllerBase {
 
 	/**
      * <b>URL: /questionnaire/getTargetQuestionnaireDetail</b>
-	 * <p>10.问卷调查详情-企业</p>
+	 * <p>10.问卷调查详情-企业&个人</p>
 	 */
 	@RequestMapping("getTargetQuestionnaireDetail")
 	@RestReturn(GetTargetQuestionnaireDetailResponse.class)
@@ -140,7 +150,7 @@ public class QuestionnaireController extends ControllerBase {
 
 	/**
      * <b>URL: /questionnaire/createTargetQuestionnaire</b>
-	 * <p>11.提交问卷调查-企业</p>
+	 * <p>11.提交问卷调查-企业&个人</p>
 	 */
 	@RequestMapping("createTargetQuestionnaire")
 	@RestReturn(CreateTargetQuestionnaireResponse.class)

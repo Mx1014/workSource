@@ -4,12 +4,12 @@ package com.everhomes.rest.questionnaire;
 /**
  * 
  * <ul>
- * <li>NOTSUPPORT: 0,不支持</li>
- * <li>SUPPORT: 2, 支持</li>
+ * <li>FALSE: 0, 否，否定的，不支持的,结束的</li>
+ * <li>TRUE: 2, 是，肯定的，支持的，进行中的</li>
  * </ul>
  */
 public enum QuestionnaireCommonStatus {
-	NOTSUPPORT((byte)0),SUPPORT((byte)2);
+	FALSE((byte)0),TRUE((byte)2);
 
 	private byte code;
 

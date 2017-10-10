@@ -6,9 +6,11 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
- * <li>targetType: 目标类型</li>
+ * <li>targetType: 目标类型, 参考{@link com.everhomes.rest.questionnaire.QuestionnaireTargetType}</li>
  * <li>targetId: 目标id</li>
  * <li>targetName: 目标名称</li>
+ * <li>targetFrom: 目标类型为user时候，用户来源，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireUserType}</li>
+ * <li>targetPhone: 目标类型为user时候,用户的电话</li>
  * <li>submitTime: 提交时间</li>
  * </ul>
  */
@@ -16,6 +18,8 @@ public class QuestionnaireResultTargetDTO {
 	private String targetType;
 	private Long targetId;
 	private String targetName;
+	private String targetFrom;
+	private String targetPhone;
 	private Long submitTime;
 
 	public String getTargetType() {
@@ -40,6 +44,22 @@ public class QuestionnaireResultTargetDTO {
 
 	public void setTargetName(String targetName) {
 		this.targetName = targetName;
+	}
+
+	public String getTargetFrom() {
+		return targetFrom;
+	}
+
+	public void setTargetFrom(String targetFrom) {
+		this.targetFrom = targetFrom;
+	}
+
+	public String getTargetPhone() {
+		return targetPhone;
+	}
+
+	public void setTargetPhone(String targetPhone) {
+		this.targetPhone = targetPhone;
 	}
 
 	public Long getSubmitTime() {

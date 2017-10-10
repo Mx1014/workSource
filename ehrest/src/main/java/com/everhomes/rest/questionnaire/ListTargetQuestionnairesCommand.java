@@ -9,8 +9,9 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 所属类型，community</li>
  * <li>ownerId: 所属id，communityId</li>
- * <li>targetType: 目标类型，organization</li>
- * <li>targetId: 目标id，organization</li>
+ * <li>targetType: 目标类型，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireTargetType}</li>
+ * <li>targetId: 目标id</li>
+ * <li>questionaireStatus: 问卷状态（进行中，已结束），参考{@link com.everhomes.rest.questionnaire.QuestionnaireCommonStatus}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
@@ -27,6 +28,8 @@ public class ListTargetQuestionnairesCommand {
 
 	private Long targetId;
 
+	private Byte questionaireStatus;
+
 	private Long pageAnchor;
 
 	private Integer pageSize;
@@ -42,6 +45,17 @@ public class ListTargetQuestionnairesCommand {
 		this.ownerId = ownerId;
 		this.targetType = targetType;
 		this.targetId = targetId;
+		this.pageAnchor = pageAnchor;
+		this.pageSize = pageSize;
+	}
+
+	public ListTargetQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte questionaireStatus, Long pageAnchor, Integer pageSize) {
+		this.namespaceId = namespaceId;
+		this.ownerType = ownerType;
+		this.ownerId = ownerId;
+		this.targetType = targetType;
+		this.targetId = targetId;
+		this.questionaireStatus = questionaireStatus;
 		this.pageAnchor = pageAnchor;
 		this.pageSize = pageSize;
 	}
@@ -92,6 +106,14 @@ public class ListTargetQuestionnairesCommand {
 
 	public void setPageAnchor(Long pageAnchor) {
 		this.pageAnchor = pageAnchor;
+	}
+
+	public Byte getQuestionaireStatus() {
+		return questionaireStatus;
+	}
+
+	public void setQuestionaireStatus(Byte questionaireStatus) {
+		this.questionaireStatus = questionaireStatus;
 	}
 
 	public Integer getPageSize() {
