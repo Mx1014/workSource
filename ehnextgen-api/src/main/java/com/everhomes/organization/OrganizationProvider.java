@@ -500,4 +500,6 @@ public interface OrganizationProvider {
 			Long orgId, String memberGroup, Long userId);
 
 	List<Organization> findNamespaceUnifiedSocialCreditCode(String unifiedSocialCreditCode, Integer namespaceId);
+
+	void deleteOrganizationPersonelByJobPositionIdsAndDetailIds(List<Long> jobPositionIds, List<Long> detailIds);
 }

@@ -122,7 +122,6 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.*;
 import org.jooq.Condition;
@@ -139,7 +138,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -148,7 +146,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -5341,93 +5338,58 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         Organization org = checkOrganization(cmd.getOrganizationId());
 
-        List<Long> enterpriseIds = new ArrayList<>();
-
         List<Long> departmentIds = cmd.getDepartmentIds();
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-
-        // 需要添加直属的企业ID集合
-        List<Long> direct_under_enterpriseIds = new ArrayList<>();
-
-        // 离开公司的人员集合
-        List<OrganizationMember> leaveMembers = new ArrayList<>();
+        List<Long> enterpriseIds = new ArrayList<>();
 
         List<Long> detailIds = cmd.getDetailIds();
 
-        //总公司和分公司的ID集合
-        enterpriseIds.add(org.getId());
+        /**调整组织架构**/
+        if(departmentIds != null && departmentIds.size() > 0){
 
-        if (null != departmentIds) {
-            for (Long departmentId : departmentIds) {
-                Organization o = checkOrganization(departmentId);
-                if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())) {
-                    if (!enterpriseIds.contains(o.getId())) {
-                        //企业级记录
-                        enterpriseIds.add(o.getId());
-                        if (!direct_under_enterpriseIds.contains(o.getId())) {
-                            //直属场景
-                            direct_under_enterpriseIds.add(o.getId());
-                        }
-                    }
-                } else {
-                    if (!enterpriseIds.contains(o.getDirectlyEnterpriseId())) {
-                        //添加企业级记录
-                        enterpriseIds.add(o.getDirectlyEnterpriseId());
-                    }
-                }
+            // 需要添加直属的企业ID集合
+            List<Long> direct_under_enterpriseIds = new ArrayList<>();
+
+            // 离开公司的人员集合
+            List<OrganizationMember> leaveMembers = new ArrayList<>();
+
+
+            //总公司和分公司的ID集合
+            organizationPersonelsDatasProcess(enterpriseIds, departmentIds, direct_under_enterpriseIds, org);
+
+            detailIds.forEach(detailId -> {
+                OrganizationMember enterprise_member = getEnableEnterprisePersonel(org, detailId);
+                String token = enterprise_member.getContactToken();
+
+                //删除记录
+                List<String> groupTypes_full = new ArrayList<>();
+                groupTypes_full.add(OrganizationGroupType.DEPARTMENT.getCode());
+                groupTypes_full.add(OrganizationGroupType.GROUP.getCode());
+                groupTypes_full.add(OrganizationGroupType.ENTERPRISE.getCode());
+                groupTypes_full.add(OrganizationGroupType.JOB_LEVEL.getCode());
+                groupTypes_full.add(OrganizationGroupType.JOB_POSITION.getCode());
+                groupTypes_full.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+                deleteOrganizaitonMemberUnderEnterprise(enterpriseIds, groupTypes_full, leaveMembers, token);
+                //重复添加纪录
+                repeatCreateOrganizationmembers(departmentIds, token, enterpriseIds, enterprise_member);
+            });
+
+        }else if(cmd.getCommonJobPositionId() != null && cmd.getJobPositionIds() != null){/**根据通用岗位ID和detailIds进行批量调岗**/
+            //1. 删除通用岗位+detailIds所确认的部门岗位条目
+            List<OrganizationJobPositionMap> jobPositionMaps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(cmd.getCommonJobPositionId());
+            if(jobPositionMaps!=null && jobPositionMaps.size() > 0){
+                List<Long> organizationJobPositionIds = jobPositionMaps.stream().map(r->{
+                    return r.getOrganizationId();
+                }).collect(Collectors.toList());
+                organizationProvider.deleteOrganizationPersonelByJobPositionIdsAndDetailIds(organizationJobPositionIds, cmd.getDetailIds());
             }
-        } else {//如果没有选择部门，则默认直属当前的organizationId
-            direct_under_enterpriseIds.add(org.getId());
+            //2. 统一新增岗位
+            detailIds.forEach(detailId -> {
+                OrganizationMember enterprise_member = getEnableEnterprisePersonel(org, detailId);
+                String token = enterprise_member.getContactToken();
+                repeatCreateOrganizationmembers(cmd.getJobPositionIds(), token, enterpriseIds, enterprise_member);
+            });
         }
-
-
-        //创建直属企业的直属部门
-        if (null != direct_under_enterpriseIds) {
-            //遍历需要添加直属的企业
-            for (Long enterPriseId : direct_under_enterpriseIds) {
-                //寻找企业下的直属隐藏部门的organizationId
-                Long hiddenDirectId = findDirectUnderOrganizationId(enterPriseId);
-                //把需要添加直属的公司隐藏部门点加到departmentIds
-                if (!departmentIds.contains(hiddenDirectId)) {
-                    departmentIds.add(hiddenDirectId);
-                }
-            }
-        }
-
-        detailIds.forEach(detailId -> {
-            //根据detailId获得contactToken
-            OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-            String token = detail.getContactToken();
-            if (StringUtils.isEmpty(token)) {
-                LOGGER.error("contactToken is null");
-                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
-            }
-            //寻找有效的Enterprise记录
-            List<String> groupTypes = new ArrayList<String>();
-            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-            List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(org.getPath(), groupTypes, token);
-            if (members == null || members.size() == 0) {
-                LOGGER.error("Enterprise_member is null");
-                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TYPE, "Enterprise_member is null");
-            }
-            members = members.stream().filter(r -> {
-                return r.getOrganizationId().equals(org.getId());
-            }).collect(Collectors.toList());
-            OrganizationMember enterprise_member = members.get(0);
-
-            //删除记录
-            List<String> groupTypes_full = new ArrayList<>();
-            groupTypes_full.add(OrganizationGroupType.DEPARTMENT.getCode());
-            groupTypes_full.add(OrganizationGroupType.GROUP.getCode());
-            groupTypes_full.add(OrganizationGroupType.ENTERPRISE.getCode());
-            groupTypes_full.add(OrganizationGroupType.JOB_LEVEL.getCode());
-            groupTypes_full.add(OrganizationGroupType.JOB_POSITION.getCode());
-            groupTypes_full.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-            deleteOrganizaitonMemberUnderEnterprise(enterpriseIds, groupTypes_full, leaveMembers, token);
-            //重复添加纪录
-            repeatCreateOrganizationmembers(departmentIds, token, enterpriseIds, enterprise_member);
-        });
     }
 
     @Override
@@ -9838,7 +9800,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             organizationMember.setEmploymentTime(checkInTime);
         }*/
-        if (cmd.getCheckInTime() != null){
+        if (cmd.getCheckInTime() != null) {
             organizationMember.setCheckInTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
             organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
         }
@@ -9889,88 +9851,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 List<Long> jobLevelIds = cmd.getJobLevelIds();
 
-//			if(null == childOrganizationIds || 0 == childOrganizationIds.size()){
-//				if(null == desOrgMember){
-//					LOGGER.error("phone number already exists. organizationId = {}", finalOrganizationId);
-//					throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-//							"phone number already exists.");
-//				}
-//				organizationMember.setOrganizationId(finalOrganizationId);
-//				organizationProvider.createOrganizationMember(organizationMember);
-//				return null;
-//			}
+                //部门的数据处理
+                organizationPersonelsDatasProcess(enterpriseIds, departmentIds, direct_under_enterpriseIds, org);
 
-                /**modify by lei.lv*/
-                //总公司和分公司的ID集合
-                enterpriseIds.add(org.getId());
 
-                if (null != departmentIds) {
-                    for (Long departmentId : departmentIds) {
-                        Organization o = checkOrganization(departmentId);
-                        if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())) {
-                        if (o.getId().longValue() == org.getId().longValue()) {
-                            //如果是总公司
-                            direct_under_enterpriseIds.add(o.getId());
-                        }
-                            if (!enterpriseIds.contains(o.getId())) {
-                                //直属场景
-                                direct_under_enterpriseIds.add(o.getId());
-                                //企业级记录
-                                enterpriseIds.add(o.getId());
-                            }
-                        } else {
-                            if (!enterpriseIds.contains(o.getDirectlyEnterpriseId())) {
-                                //添加企业级记录
-                                enterpriseIds.add(o.getDirectlyEnterpriseId());
-                            }
-                        }
-                    }
-                } else {//如果没有选择部门，则默认直属当前的organizationId
-                    direct_under_enterpriseIds.add(org.getId());
+                //加上部门唯一性校验
+                if (cmd.getDepartmentIds() != null && cmd.getDepartmentIds().size() > 1) {
+                    LOGGER.error("there are more than one department in this cmd, cmd = {}", cmd);
+                    throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "there are more than one department in this cmd");
                 }
 
-
-                //创建直属企业的直属部门
-                if (null != direct_under_enterpriseIds) {
-                    //遍历需要添加直属的企业
-                    for (Long enterPriseId : direct_under_enterpriseIds) {
-                        //寻找企业下的直属隐藏部门的organizationId
-                        Long hiddenDirectId = findDirectUnderOrganizationId(enterPriseId);
-                        //把需要添加直属的公司隐藏部门点加到departmentIds
-                        if (!departmentIds.contains(hiddenDirectId)) {
-                            departmentIds.add(hiddenDirectId);
-                        }
-                    }
-                }
-
-
-            //加上部门唯一性校验
-            if(cmd.getDepartmentIds() != null && cmd.getDepartmentIds().size() > 1){
-                LOGGER.error("there are more than one department in this cmd, cmd = {}", cmd);
-                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "there are more than one department in this cmd");
-            }
-
-                // 先把把成员从公司所有部门都删除掉
-//			for (Organization organization : childOrganizations) {
-//				OrganizationMember groupMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organization.getId());
-//				if(null != groupMember){
-//					organizationProvider.deleteOrganizationMemberById(groupMember.getId());
-//				}
-//			}
-
-                // 先把把成员从公司所有机构都删除掉
-//            List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(org.getPath(), groupTypes, cmd.getContactToken());
-//            for (OrganizationMember member : members) {
-//                if (!enterpriseIds.contains(member.getOrganizationId())) {
-//                    //记录 退出的公司
-//                    if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
-//                        leaveMembers.add(member);
-//                    }
-//                    organizationProvider.deleteOrganizationMemberById(member.getId());
-//                }
-//            }
                 /**删除公司级别以下及退出公司的记录**/
-            deleteOrganizaitonMemberUnderEnterprise(enterpriseIds, groupTypes, leaveMembers, cmd.getContactToken());
+                deleteOrganizaitonMemberUnderEnterprise(enterpriseIds, groupTypes, leaveMembers, cmd.getContactToken());
 
                 Long new_detail_id = 0L;
 
@@ -9998,7 +9890,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //                    }
                         //新增userOrganization表记录
                         //仅当target为user且grouptype为企业时添加
-                    if(organizationMember.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && organizationMember.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())){
+                        if (organizationMember.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && organizationMember.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())) {
                             createOrUpdateUserOrganization(organizationMember);
                         }
                     } else {
@@ -10010,7 +9902,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         desOrgMember.setGroupPath(organizationMember.getGroupPath());
                         desOrgMember.setContactName(organizationMember.getContactName());
                         desOrgMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-                    	desOrgMember.setVisibleFlag(organizationMember.getVisibleFlag());
+                        desOrgMember.setVisibleFlag(organizationMember.getVisibleFlag());
                         organizationProvider.updateOrganizationMember(desOrgMember);
                         //保存当前企业关联的detailId,用于多个返回值时进行比对
 //                    if (enterpriseId.equals(org.getId())) {
@@ -10026,10 +9918,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
                 //添加除公司之外的机构成员
-            departments.addAll(repeatCreateOrganizationmembers(departmentIds,cmd.getContactToken(),enterpriseIds,organizationMember));
-            groups.addAll(repeatCreateOrganizationmembers(groupIds,cmd.getContactToken(),enterpriseIds,organizationMember));
-            jobPositions.addAll(repeatCreateOrganizationmembers(jobPositionIds,cmd.getContactToken(),enterpriseIds,organizationMember));
-            jobLevels.addAll(repeatCreateOrganizationmembers(jobLevelIds,cmd.getContactToken(),enterpriseIds,organizationMember));
+                departments.addAll(repeatCreateOrganizationmembers(departmentIds, cmd.getContactToken(), enterpriseIds, organizationMember));
+                groups.addAll(repeatCreateOrganizationmembers(groupIds, cmd.getContactToken(), enterpriseIds, organizationMember));
+                jobPositions.addAll(repeatCreateOrganizationmembers(jobPositionIds, cmd.getContactToken(), enterpriseIds, organizationMember));
+                jobLevels.addAll(repeatCreateOrganizationmembers(jobLevelIds, cmd.getContactToken(), enterpriseIds, organizationMember));
 
                 dto.setGroups(groups);
 
@@ -13368,6 +13260,78 @@ public class OrganizationServiceImpl implements OrganizationService {
         }finally {
             return;
         }
+    }
+
+    //人事调动的处理方法
+    private void organizationPersonelsDatasProcess(List<Long> enterpriseIds, List<Long> departmentIds, List<Long> direct_under_enterpriseIds, Organization org){
+        /**modify by lei.lv*/
+        //总公司和分公司的ID集合
+        enterpriseIds.add(org.getId());
+
+        if (null != departmentIds) {
+            for (Long departmentId : departmentIds) {
+                Organization o = checkOrganization(departmentId);
+                if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())) {
+                    if (o.getId().longValue() == org.getId().longValue()) {
+                        //如果是总公司
+                        direct_under_enterpriseIds.add(o.getId());
+                    }
+                    if (!enterpriseIds.contains(o.getId())) {
+                        //直属场景
+                        direct_under_enterpriseIds.add(o.getId());
+                        //企业级记录
+                        enterpriseIds.add(o.getId());
+                    }
+                } else {
+                    if (!enterpriseIds.contains(o.getDirectlyEnterpriseId())) {
+                        //添加企业级记录
+                        enterpriseIds.add(o.getDirectlyEnterpriseId());
+                    }
+                }
+            }
+        } else {//如果没有选择部门，则默认直属当前的organizationId
+            direct_under_enterpriseIds.add(org.getId());
+        }
+
+
+        //创建直属企业的直属部门
+        if (null != direct_under_enterpriseIds) {
+            //遍历需要添加直属的企业
+            for (Long enterPriseId : direct_under_enterpriseIds) {
+                //寻找企业下的直属隐藏部门的organizationId
+                Long hiddenDirectId = findDirectUnderOrganizationId(enterPriseId);
+                //把需要添加直属的公司隐藏部门点加到departmentIds
+                if (!departmentIds.contains(hiddenDirectId)) {
+                    departmentIds.add(hiddenDirectId);
+                }
+            }
+        }
+    }
+
+
+    //获取可用的企业级记录
+    private OrganizationMember getEnableEnterprisePersonel(Organization org, Long detailId){
+        //根据detailId获得contactToken
+        OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        String token = detail.getContactToken();
+        if (StringUtils.isEmpty(token)) {
+            LOGGER.error("contactToken is null");
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
+        }
+        //寻找有效的Enterprise记录
+        List<String> groupTypes = new ArrayList<String>();
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(org.getPath(), groupTypes, token);
+        if (members == null || members.size() == 0) {
+            LOGGER.error("Enterprise_member is null");
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TYPE, "Enterprise_member is null");
+        }
+        members = members.stream().filter(r -> {
+            return r.getOrganizationId().equals(org.getId());
+        }).collect(Collectors.toList());
+        OrganizationMember enterprise_member = members.get(0);
+        enterprise_member.setContactToken(token);
+        return enterprise_member;
     }
 }
 

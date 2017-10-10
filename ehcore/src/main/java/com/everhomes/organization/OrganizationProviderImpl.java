@@ -5403,7 +5403,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return result;
 	}
 
-@Override
+	@Override
+	public void deleteOrganizationPersonelByJobPositionIdsAndDetailIds(List<Long> jobPositionIds, List<Long> detailIds) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteQuery<EhOrganizationMembersRecord> delete = context.deleteQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		delete.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(jobPositionIds));
+		delete.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.in(detailIds));
+		delete.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, null);
+	}
+
+
+	@Override
 	public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
