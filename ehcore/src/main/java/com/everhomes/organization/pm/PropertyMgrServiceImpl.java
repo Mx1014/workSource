@@ -6052,7 +6052,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         ArrayList resultList = processorExcel(file[0]);
         List<CommunityPmOwner> ownerList = dbProvider.execute(status -> processorOrganizationOwner(user.getId(),
                 cmd.getOrganizationId(), cmd.getCommunityId(), resultList));
-        pmOwnerSearcher.bulkUpdate(ownerList);
+		//用 bulkUpdate不会更新 by xiongying20171009
+//        pmOwnerSearcher.bulkUpdate(ownerList);
     }
 
 	private ArrayList processorExcel(MultipartFile file) {
@@ -6119,7 +6120,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
 
 				long ownerId = propertyMgrProvider.createPropOwner(owner);
-
+				pmOwnerSearcher.feedDoc(owner);
 				Byte livingStatus = parseLivingStatus(RowResult.trimString(result.getF()));
 				createOrganizationOwnerAddress(address.getId(), livingStatus, currentNamespaceId(), ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
 
