@@ -110,5 +110,7 @@ public interface EnterpriseCustomerProvider {
 	
 	List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd ,Timestamp timestamp);
 	List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd, Long todayFirst);
+	
+	void updateCustomerLastTrackingTime(EnterpriseCustomer customer);
 
 }

@@ -1354,5 +1354,18 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         });
         return result;
 	}
+
+
+	@Override
+	public void updateCustomerLastTrackingTime(EnterpriseCustomer customer) {
+		assert(customer.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
+        context.update(Tables.EH_ENTERPRISE_CUSTOMERS)
+        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.LAST_TRACKING_TIME, customer.getLastTrackingTime())
+        	   .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(customer.getId()))
+        	   .execute();
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
+	}
 	
 }

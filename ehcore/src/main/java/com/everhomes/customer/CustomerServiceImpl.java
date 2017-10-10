@@ -1550,6 +1550,11 @@ public class CustomerServiceImpl implements CustomerService {
 			tracking.setContentImgUri(cmd.getContentImgUri());
 		}
         enterpriseCustomerProvider.updateCustomerTracking(tracking);
+        EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
+        customer.setLastTrackingTime(tracking.getTrackingTime());
+        //更细客户表的最后跟进时间
+        enterpriseCustomerProvider.updateCustomerLastTrackingTime(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
         return ConvertHelper.convert(tracking, CustomerTrackingDTO.class);
 	}
 
@@ -1561,11 +1566,17 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public void createCustomerTracking(CreateCustomerTrackingCommand cmd) {
+		
+		EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
 		CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
 		if(cmd.getTrackingTime() != null){
 			tracking.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
 		}
         enterpriseCustomerProvider.createCustomerTracking(tracking);
+        customer.setLastTrackingTime(tracking.getTrackingTime());
+        //更细客户表的最后跟进时间
+        enterpriseCustomerProvider.updateCustomerLastTrackingTime(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
 	}
 	
 	 private CustomerTracking checkCustomerTracking(Long id, Long customerId) {
