@@ -319,9 +319,15 @@ INSERT INTO `eh_payment_types` VALUES (@eh_payment_types_id:=@eh_payment_types_i
 
 -- wentian's script done here
 
+-- 修改一碑接口 by st.zheng
+update `eh_configurations` set `value`='http://101.37.179.25:5802' where id=1331;
 
+-- 设置省略 by st.zheng
+set @id=(select max(id) from `eh_service_alliance_skip_rule`);
+insert into eh_service_alliance_skip_rule (id,namespace_id,service_alliance_category_id) values (@id:=@id+1,999966,190);
+insert into eh_service_alliance_skip_rule (id,namespace_id,service_alliance_category_id) values (@id:=@id+1,999966,179);
 
-
-
+-- 停车 add by sw 20171009
+UPDATE eh_parking_recharge_orders set paid_version = 1 where paid_version IS NULL;
 
 
