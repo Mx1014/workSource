@@ -1792,8 +1792,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
+        if(cmd.getForumId() == null){
+            Forum forum = forumService.findFourmByNamespaceId(cmd.getNamespaceId());
+            if(forum != null){
+                cmd.setForumId(forum.getId());
+            }
+
+        }
+
         if (cmd.getForumId() == null ||
-                cmd.getVisibleRegionId() == null ||
                 cmd.getVisibleRegionType() == null ||
                 cmd.getContentCategory() == null ||
                 cmd.getCreatorTag() == null || cmd.getCreatorTag().equals("") ||
@@ -1804,12 +1811,14 @@ public class OrganizationServiceImpl implements OrganizationService {
                     "ForumId or visibleRegionId or visibleRegionType or creatorTag or targetTag or subject is null or empty.");
         }
         this.convertNewTopicCommand(cmd);
-        Organization organization = getOrganization(cmd);
-        if (organization == null) {
-            LOGGER.error("Unable to find the organization.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
-                    "Unable to find the organization.");
-        }
+
+        //不检查org，新的发布方式可以发布到几个园区、公司和全部，不方便检查 edit by yanjun 20170823
+//        Organization organization = getOrganization(cmd);
+//        if (organization == null) {
+//            LOGGER.error("Unable to find the organization.");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
+//                    "Unable to find the organization.");
+//        }
         //Temporarily do not check, delete by sfyan, 20160511
 //		this.checkUserHaveRightToNewTopic(cmd,organization);
         /*if(cmd.getEmbeddedAppId() == null)
@@ -9564,6 +9573,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setGroupPath(org.getPath());
         organizationMember.setGroupType(org.getGroupType());
         organizationMember.setOperatorUid(user.getId());
+        organizationMember.setVisibleFlag(cmd.getVisibleFlag());
         organizationMember.setGroupId(0l);
         /**Modify by lei.lv**/
         java.util.Date nDate = DateHelper.currentGMTTime();
@@ -9650,6 +9660,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                     for (Long departmentId : departmentIds) {
                         Organization o = checkOrganization(departmentId);
                         if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())) {
+                        if(o.getId().longValue() == org.getId().longValue()){
+                            //如果是总公司
+                            direct_under_enterpriseIds.add(o.getId());
+                        }
                             if (!enterpriseIds.contains(o.getId())) {
                                 //直属场景
                                 direct_under_enterpriseIds.add(o.getId());
@@ -9752,6 +9766,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         desOrgMember.setGroupPath(organizationMember.getGroupPath());
                         desOrgMember.setContactName(organizationMember.getContactName());
                         desOrgMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+                    desOrgMember.setVisibleFlag(organizationMember.getVisibleFlag());
                         organizationProvider.updateOrganizationMember(desOrgMember);
                         //保存当前企业关联的detailId,用于多个返回值时进行比对
 //                    if (enterpriseId.equals(org.getId())) {
@@ -10052,6 +10067,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             dto.setJobPosition(position);
             if(!StringUtils.isEmpty(r.getDetailId()))
                 dto.setDetailId(r.getDetailId());
+            //  需要将隐藏性显示出来
+            dto.setVisibleFlag(r.getVisibleFlag());
+
 
             //获取用户头像 昵称
             if (OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(r.getTargetType())) {
@@ -10924,13 +10942,23 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public OrganizationMemberDTO addOrganizationPersonnelV2(AddOrganizationPersonnelV2Command cmd) {
         AddOrganizationPersonnelCommand addCommand = ConvertHelper.convert(cmd, AddOrganizationPersonnelCommand.class);
-        if(cmd.getDepartmentIds() == null || cmd.getDepartmentIds().size() == 0){
+/*        if(cmd.getDepartmentIds() != null && cmd.getDepartmentIds().size() > 0){
             List<Long> departmentIds = new ArrayList<>();
             departmentIds.add(cmd.getOrganizationId());
             addCommand.setDepartmentIds(departmentIds);
-        }
+        }*/
         OrganizationMemberDTO memberDTO = this.addOrganizationPersonnel(addCommand);
 
+        //  added by R at 20170824, 人事1.4
+        if(cmd.getRegionCode() !=null) {
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(memberDTO.getDetailId());
+            detail.setRegionCode(cmd.getRegionCode());
+            if (cmd.getEmail() != null)
+                detail.setEmail(cmd.getEmail());
+            if (cmd.getEnName() != null)
+                detail.setEnName(cmd.getEnName());
+            organizationProvider.updateOrganizationMemberDetails(detail,detail.getId());
+        }
         if(StringUtils.isEmpty(cmd.getDetailId())){
             this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.ENTRY.getCode(),
                     "eh_organization_member_details","",DateUtil.parseTimestamp(cmd.getCheckInTime()));

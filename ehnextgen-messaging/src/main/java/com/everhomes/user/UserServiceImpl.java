@@ -105,6 +105,7 @@ import com.everhomes.sms.*;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -3533,7 +3534,7 @@ public class UserServiceImpl implements UserService {
 					response.getShopDTOs().addAll(tempResp.getShopDTOs());
 				}
 			}
-			
+
 			break;
 
 		default:
@@ -3549,7 +3550,8 @@ public class UserServiceImpl implements UserService {
 		return response;
 	}
 
-	private SearchTypes getSearchTypes(Integer namespaceId, String searchContentType){
+	@Override
+	public SearchTypes getSearchTypes(Integer namespaceId, String searchContentType){
 		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, searchContentType);
 		//找不到就找0域空间的
 		if(searchType == null){
@@ -4466,6 +4468,7 @@ public class UserServiceImpl implements UserService {
 				return null;
 			else {
 				SceneContactV2DTO dto = new SceneContactV2DTO();
+				dto.setOrganizationId(detail.getOrganizationId());
 				dto.setUserId(detail.getTargetId());
 				dto.setTargetType(detail.getTargetType());
 				dto.setDetailId(detail.getId());
@@ -4478,7 +4481,8 @@ public class UserServiceImpl implements UserService {
 				dto.setContactToken(detail.getContactToken());
 				if (!StringUtils.isEmpty(detail.getEmail()))
 					dto.setEmail(detail.getEmail());
-				getRelevantContactEnterpriseWithAvatar(dto, detail.getOrganizationId());
+				dto.setRegionCode(detail.getRegionCode());
+				getRelevantContactMoreInfo(dto, detail.getOrganizationId());
 				return dto;
 			}
 		}
@@ -4503,7 +4507,7 @@ public class UserServiceImpl implements UserService {
 		}
 	} 
 
-    private void getRelevantContactEnterpriseWithAvatar(SceneContactV2DTO dto, Long organizationId) {
+    private void getRelevantContactMoreInfo(SceneContactV2DTO dto, Long organizationId) {
 
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
@@ -4541,6 +4545,10 @@ public class UserServiceImpl implements UserService {
                 dto.setContactAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
             }
         }
+
+        //	设置隐私保护值
+        OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(dto.getContactToken(),dto.getOrganizationId());
+        dto.setVisibleFlag(member.getVisibleFlag());
     }
 
     @Override
@@ -4927,6 +4935,7 @@ public class UserServiceImpl implements UserService {
 		default_communityScene.setStatus(SCENE_EXAMPLE);
 		return default_communityScene;
 	}
+
 	@Override
 	public UserIdentifier getUserIdentifier(Long userId) {
 		if(userId == null){
@@ -5191,4 +5200,19 @@ public class UserServiceImpl implements UserService {
 		}
 
 	}
+	
+	@Override
+	public CheckContactAdminResponse checkContactAdmin(CheckContactAdminCommand cmd) {
+
+		CheckContactAdminResponse response = new CheckContactAdminResponse();
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
+		if(resolver.checkSuperAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId())
+				|| resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId()))
+			response.setIsAdmin(ContactAdminFlag.YES.getCode());
+		else
+			response.setIsAdmin(ContactAdminFlag.NO.getCode());
+		return response;
+	}
+
 }

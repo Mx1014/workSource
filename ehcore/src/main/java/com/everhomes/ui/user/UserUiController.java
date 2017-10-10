@@ -15,6 +15,7 @@ import com.everhomes.rest.family.FamilyMemberDTO;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.UserCurrentEntityType;
@@ -98,6 +99,8 @@ public class UserUiController extends ControllerBase {
 			command.setOrganizationId(cmd.getOrganizationId());
 			command.setPageSize(100000);
 			command.setIsSignedup(cmd.getIsSignedup());
+			if(cmd.getIsAdmin().equals(ContactAdminFlag.YES.getCode()))
+			    command.setVisibleFlag(VisibleFlag.ALL.getCode());
 			ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
 			List<OrganizationContactDTO> members = res.getMembers();
 			if(null != members){
@@ -114,6 +117,7 @@ public class UserUiController extends ControllerBase {
 					//增加岗位显示与 detailId added by R 20120713
 					dto.setJobPosition(r.getJobPosition());
 					dto.setDetailId(r.getDetailId());
+					dto.setVisibleFlag(r.getVisibleFlag());
 					return dto;
 				}).collect(Collectors.toList());
 			}
@@ -319,6 +323,20 @@ public class UserUiController extends ControllerBase {
         return response;
     } 
 	
+	/**
+	 * <b>URL: /ui/user/checkContactAdmin </b>
+	 * <p>判断用户是否为管理员</p>
+	 */
+	@RequestMapping("checkContactAdmin")
+	@RestReturn(value=CheckContactAdminResponse.class)
+	public RestResponse checkContactAdmin(CheckContactAdminCommand cmd) {
+		CheckContactAdminResponse res = userService.checkContactAdmin(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /ui/user/listAuthForms</b>
 	 * <p>获取家庭认证和公司认证的sourceType,sourceId</p>

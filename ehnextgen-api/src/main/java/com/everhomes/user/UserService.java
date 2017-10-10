@@ -108,6 +108,9 @@ public interface UserService {
 
     
     SearchContentsBySceneReponse searchContentsByScene(SearchContentsBySceneCommand cmd);
+
+    SearchTypes getSearchTypes(Integer namespaceId, String searchContentType);
+
     ListSearchTypesBySceneReponse listSearchTypesByScene(ListSearchTypesBySceneCommand cmd);
 
 
@@ -222,6 +225,9 @@ public interface UserService {
 	//added by R 20170713, 通讯录2.4增加
  
     SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd);
+
+	//added by R 20170824, 人事1.4,  判断管理员
+    CheckContactAdminResponse checkContactAdmin(CheckContactAdminCommand cmd);
 
     //added by R 20170803, 消息2.1增加
     SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd);

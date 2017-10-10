@@ -1340,7 +1340,7 @@ public class NewsServiceImpl implements NewsService {
 		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
 		final Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = sceneTokenDto.getNamespaceId();;
-		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.NEWS.getCode());
+		SearchTypes searchType = userService.getSearchTypes(namespaceId, SearchContentType.NEWS.getCode());
 		if (StringUtils.isEmpty(cmd.getKeyword())) {
 			ListNewsBySceneCommand command = new ListNewsBySceneCommand();
 			

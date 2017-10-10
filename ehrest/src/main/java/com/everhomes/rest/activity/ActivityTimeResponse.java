@@ -4,20 +4,21 @@ package com.everhomes.rest.activity;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
  * <ul>
- * <li>namespaceId: 域空间id</li>
- * <li>warningDays: 提醒天数</li>
- * <li>warningHours: 提醒小时数</li>
- * <li>warningTime: 提醒时长</li>
- * <li>orderDays: 订单天数</li>
- * <li>orderHours: 订单小时数</li>
- * <li>orderTime: 订单时长</li>
- * <li>wechatSignup: 是否支持微信报名，0-不支持，1-支持 参考  参考{@link com.everhomes.rest.activity.WechatSignupFlag }</li>
+ *     <li>namespaceId: 域空间id</li>
+ *     <li>categoryId: categoryId</li>
+ *     <li>warningDays: 提醒天数</li>
+ *     <li>warningHours: 提醒小时数</li>
+ *     <li>warningTime: 提醒时长</li>
+ *     <li>orderDays: 订单天数</li>
+ *     <li>orderHours: 订单小时数</li>
+ *     <li>orderTime: 订单时长</li>
+ *     <li>wechatSignup: 是否支持微信报名，0-不支持，1-支持 参考  参考{@link com.everhomes.rest.activity.WechatSignupFlag }</li>
  * </ul>
  */
 public class ActivityTimeResponse {
 	private Integer namespaceId;
+	private Long categoryId;
 	private Integer warningDays;
 	private Integer warningHours;
 	private Long warningTime;
@@ -25,7 +26,7 @@ public class ActivityTimeResponse {
 	private Integer orderHours;
 	private Long orderTime;
 	private Byte wechatSignup;
-	
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -88,6 +89,14 @@ public class ActivityTimeResponse {
 
 	public void setWechatSignup(Byte wechatSignup) {
 		this.wechatSignup = wechatSignup;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 
 	@Override
