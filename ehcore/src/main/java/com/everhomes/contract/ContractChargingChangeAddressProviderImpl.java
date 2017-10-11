@@ -19,6 +19,7 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.List;
 /**
  * Created by ying.xiong on 2017/10/10.
  */
+@Component
 public class ContractChargingChangeAddressProviderImpl implements ContractChargingChangeAddressProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContractChargingChangeAddressProviderImpl.class);
     @Autowired
