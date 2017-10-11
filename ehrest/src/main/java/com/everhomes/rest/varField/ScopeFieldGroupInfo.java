@@ -1,6 +1,9 @@
 package com.everhomes.rest.varField;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -26,6 +29,9 @@ public class ScopeFieldGroupInfo {
     private String groupDisplayName;
 
     private Integer defaultOrder;
+
+    @ItemType(ScopeFieldGroupInfo.class)
+    private List<ScopeFieldGroupInfo> childrenGroup;
 
     public Integer getDefaultOrder() {
         return defaultOrder;
@@ -73,6 +79,14 @@ public class ScopeFieldGroupInfo {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public List<ScopeFieldGroupInfo> getChildrenGroup() {
+        return childrenGroup;
+    }
+
+    public void setChildrenGroup(List<ScopeFieldGroupInfo> childrenGroup) {
+        this.childrenGroup = childrenGroup;
     }
 
     @Override

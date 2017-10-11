@@ -962,27 +962,34 @@ public class FieldServiceImpl implements FieldService {
             //处理 没有id的增加，有的在数据库中查询找到则更新,且在列表中去掉对应的，没找到则增加
             //将map列表中剩下的置为inactive
             groups.forEach(group -> {
-                ScopeFieldGroup scopeFieldGroup = ConvertHelper.convert(group, ScopeFieldGroup.class);
-                scopeFieldGroup.setNamespaceId(cmd.getNamespaceId());
-                scopeFieldGroup.setCommunityId(cmd.getCommunityId());
-                if(scopeFieldGroup.getId() == null) {
-                    scopeFieldGroup.setCreatorUid(userId);
-                    fieldProvider.createScopeFieldGroup(scopeFieldGroup);
-                } else {
-                    ScopeFieldGroup exist = fieldProvider.findScopeFieldGroup(scopeFieldGroup.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
-                    if(exist != null) {
-                        scopeFieldGroup.setCreatorUid(exist.getCreatorUid());
-                        scopeFieldGroup.setCreateTime(exist.getCreateTime());
-                        scopeFieldGroup.setOperatorUid(userId);
-                        scopeFieldGroup.setStatus(VarFieldStatus.ACTIVE.getCode());
-                        fieldProvider.updateScopeFieldGroup(scopeFieldGroup);
-                        existGroups.remove(exist.getId());
-                    } else {
+                List<ScopeFieldGroup> scopeFieldGroups = new ArrayList<>();
+                scopeFieldGroups.add(ConvertHelper.convert(group, ScopeFieldGroup.class));
+                if(group.getChildrenGroup() != null && group.getChildrenGroup().size() > 0) {
+                    group.getChildrenGroup().forEach(child -> {
+                        scopeFieldGroups.add(ConvertHelper.convert(child, ScopeFieldGroup.class));
+                    });
+                }
+                scopeFieldGroups.forEach(scopeFieldGroup -> {
+                    scopeFieldGroup.setNamespaceId(cmd.getNamespaceId());
+                    scopeFieldGroup.setCommunityId(cmd.getCommunityId());
+                    if(scopeFieldGroup.getId() == null) {
                         scopeFieldGroup.setCreatorUid(userId);
                         fieldProvider.createScopeFieldGroup(scopeFieldGroup);
+                    } else {
+                        ScopeFieldGroup exist = fieldProvider.findScopeFieldGroup(scopeFieldGroup.getId(), cmd.getNamespaceId(), cmd.getCommunityId());
+                        if(exist != null) {
+                            scopeFieldGroup.setCreatorUid(exist.getCreatorUid());
+                            scopeFieldGroup.setCreateTime(exist.getCreateTime());
+                            scopeFieldGroup.setOperatorUid(userId);
+                            scopeFieldGroup.setStatus(VarFieldStatus.ACTIVE.getCode());
+                            fieldProvider.updateScopeFieldGroup(scopeFieldGroup);
+                            existGroups.remove(exist.getId());
+                        } else {
+                            scopeFieldGroup.setCreatorUid(userId);
+                            fieldProvider.createScopeFieldGroup(scopeFieldGroup);
+                        }
                     }
-                }
-
+                });
             });
 
             if(existGroups.size() > 0) {
