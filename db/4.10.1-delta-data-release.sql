@@ -106,9 +106,11 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 DROP PROCEDURE if exists create_menu_scope;
 delimiter //
 CREATE PROCEDURE `create_menu_scope` ()
-BEGIN
+BEGIN  
   DECLARE menuid LONG;
+  DECLARE done INT DEFAULT FALSE;
   DECLARE cur CURSOR FOR select id from eh_web_menus where type = 'organization'; 
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
   OPEN cur;
   read_loop: LOOP
     FETCH cur INTO menuid;
