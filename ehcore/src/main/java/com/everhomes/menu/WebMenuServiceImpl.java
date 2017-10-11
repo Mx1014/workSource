@@ -154,7 +154,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 		if(null != menu){
 			path = menu.getPath() + "/%";
 		}
-		if(resolver.checkOrganizationAdmin(userId, organizationId)){
+		Boolean isAdmin = resolver.checkOrganizationAdmin(userId, organizationId);
+		LOGGER.debug("listEnterpriseWebMenu: userId: {}, organizationId: {}, isAdmin: {}", userId, organizationId, isAdmin);
+		if(isAdmin){
 			menus = webMenuProvider.listWebMenuByType(WebMenuType.ORGANIZATION.getCode(), categories, path, null);
 		}
 		if(null == menus || menus.size() == 0){

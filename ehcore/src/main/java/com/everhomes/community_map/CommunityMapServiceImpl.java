@@ -137,39 +137,45 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
         SearchCommunityMapContentsResponse response = new SearchCommunityMapContentsResponse();
+        List<CommunityMapShopDTO> result = new ArrayList<>();
 
         SearchContentsBySceneCommand cmd2 = ConvertHelper.convert(cmd, SearchContentsBySceneCommand.class);
         cmd2.setPageSize(pageSize);
-        SearchContentsBySceneReponse resp = businessService.searchShops(cmd2);
 
-        List<CommunityMapShopDTO> result = new ArrayList<>();
+        Long pageAnchor = cmd.getPageAnchor();
+        if (null == pageAnchor || pageAnchor < Integer.MAX_VALUE) {
+                SearchContentsBySceneReponse resp = businessService.searchShops(cmd2);
 
-        if (null != resp) {
-            response.setNextPageAnchor(resp.getNextPageAnchor());
-            result.addAll(resp.getShopDTOs().stream().map(r -> {
-                CommunityMapShopDTO shop = ConvertHelper.convert(r, CommunityMapShopDTO.class);
-                Long buildingId = null;
-                Long apartmentId = null;
-                if (StringUtils.isNotBlank(r.getBuildingId())) {
-                    buildingId = Long.valueOf(r.getBuildingId());
+                if (null != resp) {
+                    response.setNextPageAnchor(resp.getNextPageAnchor());
+                    result.addAll(resp.getShopDTOs().stream().map(r -> {
+                        CommunityMapShopDTO shop = ConvertHelper.convert(r, CommunityMapShopDTO.class);
+                        Long buildingId = null;
+                        Long apartmentId = null;
+                        if (StringUtils.isNotBlank(r.getBuildingId())) {
+                            buildingId = Long.valueOf(r.getBuildingId());
+                        }
+                        if (StringUtils.isNotBlank(r.getApartmentId())) {
+                            apartmentId = Long.valueOf(r.getApartmentId());
+                        }
+                        populateShopAddressInfo(shop, buildingId, apartmentId);
+                        shop.setShopFlag(CommunityMapShopFlag.OPEN_IN_BIZ.getCode());
+                        return shop;
+                    }).collect(Collectors.toList()));
                 }
-                if (StringUtils.isNotBlank(r.getApartmentId())) {
-                    apartmentId = Long.valueOf(r.getApartmentId());
-                }
-                populateShopAddressInfo(shop, buildingId, apartmentId);
-                shop.setShopFlag(CommunityMapShopFlag.OPEN_IN_BIZ.getCode());
-                return shop;
-            }).collect(Collectors.toList()));
         }
 
         Long userId = UserContext.currentUserId();
 
         if (result.size() < pageSize) {
+            //TODO:超过pageSize时，做一个截取，因为是从电商 和core server同时查询店铺数据
+            Integer tempPageSize = pageSize - result.size();
+
             SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
             Integer namespaceId = sceneTokenDto.getNamespaceId();
 
             List<CommunityMapShopDetail> shops = communityMapProvider.searchCommunityMapShops(namespaceId, null,
-                    null, cmd.getBuildingId(), cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
+                    null, cmd.getBuildingId(), cmd.getKeyword(), cmd.getPageAnchor(), tempPageSize);
             result.addAll(shops.stream().map(r -> {
                 CommunityMapShopDTO shop = new CommunityMapShopDTO();
                 shop.setShopNo(String.valueOf(r.getId()));
@@ -182,11 +188,14 @@ public class CommunityMapServiceImpl implements CommunityMapService {
                 shop.setShopFlag(CommunityMapShopFlag.NOT_OPEN_IN_BIZ.getCode());
                 return shop;
             }).collect(Collectors.toList()));
+
+            if(result.size() != pageSize){
+                response.setNextPageAnchor(null);
+            }else{
+                response.setNextPageAnchor(shops.get(shops.size() - 1).getCreateTime().getTime());
+            }
         }
-        //TODO:超过pageSize时，做一个截取，因为是从电商 和core server同时查询店铺数据
-        if (result.size() > pageSize) {
-            result = result.subList(0, pageSize);
-        }
+
         response.setShops(result);
         return response;
     }
