@@ -38,7 +38,10 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	
 	@Autowired
 	private QuestionnaireProvider questionnaireProvider;
-	
+
+	@Autowired
+	private QuestionnaireRangeProvider questionnaireRangeProvider;
+
 	@Autowired
 	private QuestionnaireQuestionProvider questionnaireQuestionProvider;
 	
@@ -69,7 +72,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Override
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {
-		checkOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+//		checkOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		checkListQuestionnairesCommand(cmd);
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -310,7 +313,10 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		QuestionnaireDTO questionnaireDTO = ConvertHelper.convert(questionnaire, QuestionnaireDTO.class);
 		questionnaireDTO.setQuestions(questionDTOs);
 		questionnaireDTO.setCreateTime(questionnaire.getCreateTime()==null?null:questionnaire.getCreateTime().getTime());
+		questionnaireDTO.setCutOffTime(questionnaire.getCutOffTime()==null?null:questionnaire.getCutOffTime().getTime());
 		questionnaireDTO.setPublishTime(questionnaire.getPublishTime()==null?null:questionnaire.getPublishTime().getTime());
+		List<QuestionnaireRange> listRanges = questionnaireRangeProvider.listQuestionnaireRangeByQuestionnaireId(questionnaire.getId());
+		questionnaireDTO.setRanges(listRanges.stream().map(r->ConvertHelper.convert(r,QuestionnaireRangeDTO.class)).collect(Collectors.toList()));
 		return questionnaireDTO;
 	}
 	
@@ -390,29 +396,29 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		questionnaireProvider.updateQuestionnaire(questionnaire);
 	}
 
-	private void checkOwner(Integer namespaceId, String ownerType, Long ownerId){
-		QuestionnaireOwnerType questionnaireOwnerType;
-		if (namespaceId == null || (questionnaireOwnerType=QuestionnaireOwnerType.fromCode(ownerType)) == null
-				|| ownerId == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameters, namespaceId=" + namespaceId + ", ownerType=" + ownerType + ", ownerId=" + ownerId);
-		}
-		switch (questionnaireOwnerType) {
-		case COMMUNITY:
-			Community community = communityProvider.findCommunityById(ownerId);
-			if (community == null) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"there is no such community, ownerId="+ownerId);
-			}
-			break;
-
-		default:
-			break;
-		}
-	}
+//	private void checkOwner(Integer namespaceId, String ownerType, Long ownerId){
+//		QuestionnaireOwnerType questionnaireOwnerType;
+//		if (namespaceId == null || (questionnaireOwnerType=QuestionnaireOwnerType.fromCode(ownerType)) == null
+//				|| ownerId == null) {
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid parameters, namespaceId=" + namespaceId + ", ownerType=" + ownerType + ", ownerId=" + ownerId);
+//		}
+//		switch (questionnaireOwnerType) {
+//		case COMMUNITY:
+//			Community community = communityProvider.findCommunityById(ownerId);
+//			if (community == null) {
+//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//						"there is no such community, ownerId="+ownerId);
+//			}
+//			break;
+//
+//		default:
+//			break;
+//		}
+//	}
 	
 	private void checkQuestionnaireParameters(QuestionnaireDTO questionnaire) {
-		checkOwner(questionnaire.getNamespaceId(), questionnaire.getOwnerType(), questionnaire.getOwnerId());
+//		checkOwner(questionnaire.getNamespaceId(), questionnaire.getOwnerType(), questionnaire.getOwnerId());
 		if (StringUtils.isBlank(questionnaire.getQuestionnaireName())) {
 			throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.QUESTIONNAIRE_NAME_EMPTY,
 					"Invalid parameters, questionnaire name cannot be null");
@@ -519,7 +525,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Override
 	public ListTargetQuestionnairesResponse listTargetQuestionnaires(ListTargetQuestionnairesCommand cmd) {
-		checkOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+//		checkOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<Questionnaire> questionnaires = questionnaireProvider.listTargetQuestionnaireByOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getPageAnchor(), pageSize+1);

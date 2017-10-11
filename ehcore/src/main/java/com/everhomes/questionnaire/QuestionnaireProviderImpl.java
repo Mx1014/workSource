@@ -79,8 +79,9 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 														int pageSize) {
 		SelectConditionStep step = getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRES)
 				.where(Tables.EH_QUESTIONNAIRES.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(cmd.getOwnerType()))
-				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(cmd.getOwnerId()))
+				//屏蔽这个东西，使用范围表
+//				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(cmd.getOwnerType()))
+//				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(cmd.getOwnerId()))
 				.and(cmd.getPageAnchor()==null?DSL.trueCondition():Tables.EH_QUESTIONNAIRES.ID.lt(cmd.getPageAnchor()));
 
 		Condition condition = cmd.getStatus()==null?DSL.trueCondition():Tables.EH_QUESTIONNAIRES.STATUS.eq(cmd.getStatus());

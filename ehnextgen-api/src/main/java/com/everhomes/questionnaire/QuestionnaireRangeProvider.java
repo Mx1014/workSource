@@ -13,4 +13,6 @@ public interface QuestionnaireRangeProvider {
 
 	List<QuestionnaireRange> listQuestionnaireRange();
 
+	List<QuestionnaireRange> listQuestionnaireRangeByQuestionnaireId(Long questionnaireId);
+
 }

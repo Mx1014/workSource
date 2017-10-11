@@ -4,7 +4,9 @@ package com.everhomes.questionnaire;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.approval.CommonStatus;
 import org.jooq.DSLContext;
+import org.jooq.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -86,5 +88,14 @@ public class QuestionnaireRangeProviderImpl implements QuestionnaireRangeProvide
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public List<QuestionnaireRange> listQuestionnaireRangeByQuestionnaireId(Long questionnaireId) {
+		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_RANGES)
+				.where(Tables.EH_QUESTIONNAIRE_RANGES.QUESTIONNAIRE_ID.eq(questionnaireId))
+				.and(Tables.EH_QUESTIONNAIRE_RANGES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_QUESTIONNAIRE_RANGES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireRange.class));
 	}
 }
