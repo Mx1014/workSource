@@ -40,6 +40,16 @@ public class ListOrganizationContactCommand {
     @ItemType(String.class)
     private List<String> filterScopeTypes;
 
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
     public ListOrganizationContactCommand() {
     }
 
