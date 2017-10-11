@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class GetActualClearanceLogCommand {
+
     private Long id;
     private Long organizationId;
     private Long communityId;

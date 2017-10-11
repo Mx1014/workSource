@@ -11,10 +11,19 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListLeaseIssuersCommand {
+    private Integer namespaceId;
     private Long pageAnchor;
     private Integer pageSize;
     private Long communityId;
     private String keyword;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Integer getPageSize() {
         return pageSize;

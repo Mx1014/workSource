@@ -4180,7 +4180,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 		else{
 			org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, org, ContactSignUpStatus.SIGNEDUP.getCode(),
+			organizationMembers = this.organizationProvider.listOrganizationPersonnels(org.getNamespaceId(), userName, org, ContactSignUpStatus.SIGNEDUP.getCode(),
 					null,null, Integer.MAX_VALUE-1);
 			}
 		if(null == organizationMembers)
