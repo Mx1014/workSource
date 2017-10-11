@@ -4113,7 +4113,13 @@ public class ForumServiceImpl implements ForumService {
         post.setCreatorAvatar(creatorAvatar);
         /*解决web 帖子头像问题，当帖子创建者没有头像时，取默认头像   by sw */
         if(StringUtils.isEmpty(creatorAvatar)) {
-        	creatorAvatar = configProvider.getValue(creator.getNamespaceId(), "user.avatar.default.url", "");
+
+            //防止creator空指针  add by yanjun 20171011
+            Integer namespaceId = 0;
+            if(creator != null && creator.getNamespaceId() != null){
+                namespaceId = creator.getNamespaceId();
+            }
+        	creatorAvatar = configProvider.getValue(namespaceId, "user.avatar.default.url", "");
         }
         
         if(creatorAvatar != null && creatorAvatar.length() > 0) {
@@ -4211,13 +4217,8 @@ public class ForumServiceImpl implements ForumService {
         Long forumId = post.getForumId();
         Forum forum = forumProvider.findForumById(forumId);
 
-        //TODO todelete
-        LOGGER.info("populatePostForumNameInfo forumId={}, forum={}", forumId, StringHelper.toJsonString(forum));
-
         // 补充namespaceId，使得在分享的时候可以根据域空间ID来获取版本信息以便确定是否要下载APP  by lqs 20170418
         if(forum != null) {
-            //TODO todelete
-            LOGGER.info("populatePostForumNameInfo setNamespaceId={}", forum.getNamespaceId());
             post.setNamespaceId(forum.getNamespaceId());
         }
         
