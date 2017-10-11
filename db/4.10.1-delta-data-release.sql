@@ -100,3 +100,29 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
   VALUES((@menu_scope_id := @menu_scope_id + 1),40070,'', 'EhNamespaces', 999981,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
   VALUES((@menu_scope_id := @menu_scope_id + 1),40071,'', 'EhNamespaces', 999981,2);
+
+  
+-- 园区企业后台菜单 fix 16642  add by xiongying20171011
+DROP PROCEDURE if exists create_menu_scope;
+delimiter //
+CREATE PROCEDURE `create_menu_scope` ()
+BEGIN
+  DECLARE menuid LONG;
+  DECLARE cur CURSOR FOR select id from eh_web_menus where type = 'organization'; 
+  OPEN cur;
+  read_loop: LOOP
+    FETCH cur INTO menuid;
+		
+        -- 菜单范围添加
+		SET @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+		INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@scope_id:=@scope_id+1), menuid,'', 'EhNamespaces', 999969 , 2);
+		INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@scope_id:=@scope_id+1), menuid,'', 'EhNamespaces', 999972 , 2);
+		
+
+  END LOOP;
+  CLOSE cur;
+END
+//
+delimiter ;
+CALL create_menu_scope;
+DROP PROCEDURE if exists create_menu_scope;
