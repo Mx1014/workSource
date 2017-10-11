@@ -188,7 +188,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Override
 	public ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd) {
-		
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 		ListEnterpriseApplyEntryResponse response = new ListEnterpriseApplyEntryResponse();
 		
 		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
@@ -327,6 +331,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ApplyEntryResponse applyEntry(EnterpriseApplyEntryCommand cmd) {
 		ApplyEntryResponse resp = new ApplyEntryResponse();
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
 		request.setApplyUserId(UserContext.current().getUser().getId());
@@ -712,6 +720,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd) {
 
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 		ListBuildingForRentResponse res = new ListBuildingForRentResponse();
 		if (null==cmd.getRentType()) {
 			cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
@@ -846,6 +858,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Override
 	public BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd, Byte adminFlag){
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		if (null == cmd.getIssuerType()) {
 			cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
@@ -1098,12 +1114,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ListLeaseIssuersResponse listLeaseIssuers(ListLeaseIssuersCommand cmd) {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		ListLeaseIssuersResponse resp = new ListLeaseIssuersResponse();
 
-		List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, null, cmd.getKeyword(),
-				cmd.getPageAnchor(), pageSize);
+		List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(cmd.getNamespaceId(), null,
+				cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
 
 		int size = issuers.size();
 
@@ -1213,24 +1231,26 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid communityId param.");
         }
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
         dbProvider.execute((TransactionStatus status) -> {
 
             if (null != cmd.getEnterpriseIds()) {
                 for (Long id : cmd.getEnterpriseIds()) {
 
-                    LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, id);
+                    LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(cmd.getNamespaceId(), id);
                     //已存在，过滤掉
                     if (null == leaseIssuer) {
                         leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
-                        leaseIssuer.setNamespaceId(namespaceId);
+                        leaseIssuer.setNamespaceId(cmd.getNamespaceId());
                         leaseIssuer.setEnterpriseId(id);
                         enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
                     }
                 }
             } else {
-                LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, cmd.getIssuerContact());
+                LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(cmd.getNamespaceId(), cmd.getIssuerContact());
 
                 if (null != leaseIssuer) {
                     LOGGER.error("LeaseIssuer exist, cmd={}", cmd);
@@ -1273,8 +1293,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
     @Override
     public LeasePromotionConfigDTO getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd) {
-        if (null == cmd.getNamespaceId())
-            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
         LeasePromotionConfig config = enterpriseLeaseIssuerProvider.getLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
 
@@ -1327,19 +1348,23 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         CheckIsLeaseIssuerDTO dto = new CheckIsLeaseIssuerDTO();
 		Long organizationId = cmd.getOrganizationId();
 		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 
 		dto.setFlag(LeasePromotionFlag.DISABLED.getCode());
 
 		//先检查是不是招租发行人
-		if (null != enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken())) {
+		if (null != enterpriseLeaseIssuerProvider.findLeaseIssersByContact(cmd.getNamespaceId(), identifier.getIdentifierToken())) {
 			dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
 		}
 
 		if (null != organizationId) {
 			//先检查是不是招租发行公司
-			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, organizationId)) {
+			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(cmd.getNamespaceId(), organizationId)) {
 				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
 					dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
@@ -1353,16 +1378,20 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     @Override
     public ListLeaseIssuerBuildingsResponse listBuildings(ListLeaseIssuerBuildingsCommand cmd) {
 
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
         ListLeaseIssuerBuildingsResponse response = new ListLeaseIssuerBuildingsResponse();
 		Long organizationId = cmd.getOrganizationId();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
         User user = UserContext.current().getUser();
         UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 
 		List<BuildingDTO> buildingDTOs = new ArrayList<>();
 
 		//先查询业主
-		LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken());
+		LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(cmd.getNamespaceId(), identifier.getIdentifierToken());
 		if (null != leaseIssuer) {
 			List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserBuildings(leaseIssuer.getId());
 
@@ -1379,7 +1408,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		if (null != organizationId)  {
-			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, organizationId)) {
+			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(cmd.getNamespaceId(), organizationId)) {
 				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
 					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
@@ -1405,13 +1434,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public List<AddressDTO> listLeaseIssuerApartments(ListLeaseIssuerApartmentsCommand cmd) {
 		List<AddressDTO> dtos = new ArrayList<>();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 		User user = UserContext.current().getUser();
 		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		Long organizationId = cmd.getOrganizationId();
 
 		//先查询业主
-		LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken());
+		LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(cmd.getNamespaceId(), identifier.getIdentifierToken());
 		if (null != leaseIssuer) {
 			List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(leaseIssuer.getId(), cmd.getBuildingId());
 
@@ -1422,7 +1453,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		if (null != organizationId)  {
-			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, organizationId)) {
+			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(cmd.getNamespaceId(), organizationId)) {
 				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
 					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
@@ -1444,6 +1475,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Override
 	public void updateLeasePromotionRequestForm(UpdateLeasePromotionRequestFormCommand cmd) {
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
 				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType());
@@ -1468,6 +1503,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Override
 	public LeaseFormRequestDTO getLeasePromotionRequestForm(GetLeasePromotionRequestFormCommand cmd) {
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
 				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType());
