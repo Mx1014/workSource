@@ -3920,9 +3920,6 @@ public class ForumServiceImpl implements ForumService {
 
                 //添加ownerToken, 当前字段在评论时使用 add by yanjun 20170601
                 populateOwnerToken(post);
-
-                //添加namespaceId, add by yanjun 20171011
-                populateNamespaceId(post);
                 
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
                 String relativeUrl = configProvider.getValue(ConfigConstants.POST_SHARE_URL, "");
@@ -3960,20 +3957,6 @@ public class ForumServiceImpl implements ForumService {
         long endTime = System.currentTimeMillis();
         if(LOGGER.isInfoEnabled()) {
             LOGGER.info("Populate post, userId=" + userId + ", postId=" + post.getId() + ", elapse=" + (endTime - startTime));
-        }
-    }
-
-    /**
-     *添加namespaceId, add by yanjun 20171011
-     * @param post
-     */
-    private void populateNamespaceId(Post post){
-        if(post.getNamespaceId() == null && post.getForumId() != null){
-            Long forumId = post.getForumId();
-            Forum forum = forumProvider.findForumById(forumId);
-            if(forum != null){
-                post.setNamespaceId(forum.getNamespaceId());
-            }
         }
     }
 
@@ -4130,7 +4113,13 @@ public class ForumServiceImpl implements ForumService {
         post.setCreatorAvatar(creatorAvatar);
         /*解决web 帖子头像问题，当帖子创建者没有头像时，取默认头像   by sw */
         if(StringUtils.isEmpty(creatorAvatar)) {
-        	creatorAvatar = configProvider.getValue(creator.getNamespaceId(), "user.avatar.default.url", "");
+
+            //防止creator空指针  add by yanjun 20171011
+            Integer namespaceId = 0;
+            if(creator != null && creator.getNamespaceId() != null){
+                namespaceId = creator.getNamespaceId();
+            }
+        	creatorAvatar = configProvider.getValue(namespaceId, "user.avatar.default.url", "");
         }
         
         if(creatorAvatar != null && creatorAvatar.length() > 0) {
@@ -4227,6 +4216,7 @@ public class ForumServiceImpl implements ForumService {
     private void populatePostForumNameInfo(long userId, Post post) {
         Long forumId = post.getForumId();
         Forum forum = forumProvider.findForumById(forumId);
+
         // 补充namespaceId，使得在分享的时候可以根据域空间ID来获取版本信息以便确定是否要下载APP  by lqs 20170418
         if(forum != null) {
             post.setNamespaceId(forum.getNamespaceId());

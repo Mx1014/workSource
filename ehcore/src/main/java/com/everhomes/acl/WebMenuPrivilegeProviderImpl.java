@@ -76,6 +76,10 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		}
 		query.addConditions(cond);
 		query.addOrderBy(Tables.EH_WEB_MENUS.SORT_NUM);
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listWebMenuByType, sql=" + query.getSQL());
+			LOGGER.debug("listWebMenuByType, bindValues=" + query.getBindValues());
+		}
 		return query.fetch().map((r) -> {
 			return ConvertHelper.convert(r, WebMenu.class);
 		});
