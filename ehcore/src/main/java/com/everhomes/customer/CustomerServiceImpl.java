@@ -1697,7 +1697,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public void allotEnterpriseCustomer(AllotEnterpriseCustomerCommand cmd) {
-		checkPrivilege();
+		//checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         customer.setTrackingUid(cmd.getTrackingUid());
         enterpriseCustomerProvider.allotEnterpriseCustomer(customer);
