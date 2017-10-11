@@ -3921,6 +3921,8 @@ public class ForumServiceImpl implements ForumService {
                 //添加ownerToken, 当前字段在评论时使用 add by yanjun 20170601
                 populateOwnerToken(post);
 
+                //添加namespaceId, add by yanjun 20171011
+                populateNamespaceId(post);
                 
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
                 String relativeUrl = configProvider.getValue(ConfigConstants.POST_SHARE_URL, "");
@@ -3958,6 +3960,20 @@ public class ForumServiceImpl implements ForumService {
         long endTime = System.currentTimeMillis();
         if(LOGGER.isInfoEnabled()) {
             LOGGER.info("Populate post, userId=" + userId + ", postId=" + post.getId() + ", elapse=" + (endTime - startTime));
+        }
+    }
+
+    /**
+     *添加namespaceId, add by yanjun 20171011
+     * @param post
+     */
+    private void populateNamespaceId(Post post){
+        if(post.getNamespaceId() == null && post.getForumId() != null){
+            Long forumId = post.getForumId();
+            Forum forum = forumProvider.findForumById(forumId);
+            if(forum != null){
+                post.setNamespaceId(forum.getNamespaceId());
+            }
         }
     }
 
@@ -4057,9 +4073,6 @@ public class ForumServiceImpl implements ForumService {
     		Community community = communityProvider.findCommunityById(user.getCommunityId());
     		if(community != null){
     			post.setCreatorCommunityName(community.getName());
-    			if(post.getNamespaceId() == null){
-                    post.setNamespaceId(community.getNamespaceId());
-                }
     		}
     	}
     }

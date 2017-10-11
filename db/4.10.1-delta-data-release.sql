@@ -36,7 +36,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 
 
 -- 将以前的官方活动50，改成61  add by yanjun 20170912
-UPDATE eh_launch_pad_items SET action_type = 61, action_data = CONCAT('{"categoryId":1,"publishPrivilege":1,"livePrivilege":2,"listStyle":2,"scope":3,"style":4,"title": "',item_label, '"}') WHERE action_type = 50 and id in (802, 10303, 10617, 10635, 111404, 111419, 112301, 112321, 112822, 112830, 114239, 114240, 114308, 114309, 114311, 114322, 114380, 114392, 114421, 114422, 115454, 115473, 119040, 119041);
+UPDATE eh_launch_pad_items SET action_type = 61, action_data = CONCAT('{"categoryId":1,"publishPrivilege":1,"livePrivilege":0,"listStyle":2,"scope":3,"style":4,"title": "',item_label, '"}') WHERE action_type = 50 and id in (802, 10303, 10617, 10635, 111404, 111419, 112301, 112321, 112822, 112830, 114239, 114240, 114308, 114309, 114311, 114322, 114380, 114392, 114421, 114422, 115454, 115473, 119040, 119041);
 
 	-- 给入口增加一个默认的分类-“全部”，parent_id为入口的entry_id
 set @id = 1101051;
