@@ -414,6 +414,11 @@ public class CustomerServiceImpl implements CustomerService {
                     createOrganizationAdminCommand.setContactName(str.getContactName());
                     rolePrivilegeService.createOrganizationAdmin(createOrganizationAdminCommand, cmd.getNamespaceId());
                 }
+                if(orgAdminAccounts.get(organizationDTO.getId()) == null) {
+                    List<String> mobiles = new ArrayList<>();
+                    mobiles.add(str.getContactMobile());
+                    orgAdminAccounts.put(organizationDTO.getId(), mobiles);
+                }
                 orgAdminAccounts.get(organizationDTO.getId()).add(str.getContactMobile());
             }
         }
