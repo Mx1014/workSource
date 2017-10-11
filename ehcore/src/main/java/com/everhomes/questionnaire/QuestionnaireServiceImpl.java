@@ -215,6 +215,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 				questionnaireOptionProvider.deleteOptionsByQuestionnaireId(questionnaireDTO.getId());
 			} else {
 				questionnaire = ConvertHelper.convert(questionnaireDTO, Questionnaire.class);
+				questionnaire.setCutOffTime(questionnaireDTO.getCutOffTime()==null?null:new Timestamp(questionnaireDTO.getCutOffTime()));
+				questionnaire.setPublishTime(questionnaireDTO.getPublishTime()==null?null:new Timestamp(questionnaireDTO.getPublishTime()));
 				questionnaireProvider.createQuestionnaire(questionnaire);
 			}
 			
@@ -393,6 +395,13 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		questionnaire.setQuestionnaireName(questionnaireDTO.getQuestionnaireName());
 		questionnaire.setDescription(questionnaireDTO.getDescription());
 		questionnaire.setStatus(questionnaireDTO.getStatus());
+		//新增部分属性
+		questionnaire.setPosterUri(questionnaireDTO.getPosterUri());
+		questionnaire.setTargetType(questionnaireDTO.getTargetType());
+		questionnaire.setCutOffTime(questionnaireDTO.getCutOffTime()==null?null:new Timestamp(questionnaireDTO.getCutOffTime()));
+		questionnaire.setPublishTime(questionnaireDTO.getPublishTime()==null?null:new Timestamp(questionnaireDTO.getPublishTime()));
+		questionnaire.setSupportAnonymous(questionnaireDTO.getSupportAnonymous());
+		questionnaire.setSupportShare(questionnaireDTO.getSupportShare());
 		questionnaireProvider.updateQuestionnaire(questionnaire);
 	}
 
@@ -419,6 +428,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	
 	private void checkQuestionnaireParameters(QuestionnaireDTO questionnaire) {
 //		checkOwner(questionnaire.getNamespaceId(), questionnaire.getOwnerType(), questionnaire.getOwnerId());
+		if(questionnaire == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters,questionnaire is null");
+		}
+		//问卷名称非空检查
 		if (StringUtils.isBlank(questionnaire.getQuestionnaireName())) {
 			throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.QUESTIONNAIRE_NAME_EMPTY,
 					"Invalid parameters, questionnaire name cannot be null");
@@ -427,16 +441,30 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.QUESTIONNAIRE_NAME_LENGTH_BEYOND_50,
 					"Invalid parameters, questionnaire name length cannot be beyond 50");
 		}
-		if (questionnaire.getQuestions() == null || questionnaire.getQuestions().size() == 0) {
-			throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.NO_QUESTIONS,
-					"Invalid parameters, there are no questions");
-		}
+
 		QuestionnaireStatus status;
 		if ((status=QuestionnaireStatus.fromCode(questionnaire.getStatus())) == null || status == QuestionnaireStatus.INACTIVE) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters,status="+questionnaire.getStatus());
 		}
-		
+
+		//如保存为草稿，则只检查标题和状态的正确性
+		if(status == QuestionnaireStatus.DRAFT){
+			return ;
+		}
+
+		if(StringUtils.isBlank(questionnaire.getDescription())){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters,description is null");
+		}
+
+		//问卷题目数量非0检查
+		if (questionnaire.getQuestions() == null || questionnaire.getQuestions().size() == 0) {
+			throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.NO_QUESTIONS,
+					"Invalid parameters, there are no questions");
+		}
+
+		//问题里面的枚举，非空等检查
 		for (QuestionnaireQuestionDTO question: questionnaire.getQuestions()) {
 			if (StringUtils.isBlank(question.getQuestionName())) {
 				throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.QUESTION_NAME_EMPTY,
@@ -460,6 +488,50 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 				}
 			}
 		}
+
+		//检查枚举，收集的目标
+		QuestionnaireTargetType targetType = QuestionnaireTargetType.fromCode(questionnaire.getTargetType());
+		if(targetType == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters,TargetType="+questionnaire.getTargetType());
+		}
+
+		//收集的范围非空检查，范围类型枚举检查
+		if(questionnaire.getRanges() == null || questionnaire.getRanges().size() == 0 ){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters,ranges is null");
+		}else{
+			for (QuestionnaireRangeDTO dto : questionnaire.getRanges()) {
+				QuestionnaireRangeType rangeType = QuestionnaireRangeType.fromCode(dto.getRangeType());
+				if(rangeType==null){
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"Invalid parameters,rangeType = "+dto.getRangeType());
+				}
+			}
+		}
+
+		//截止日期非空检查
+		if(questionnaire.getCutOffTime() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters,cutOffTime is null");
+		}
+
+		//枚举支持匿名检查
+		QuestionnaireCommonStatus supportAnonymous = QuestionnaireCommonStatus.fromCode(questionnaire.getSupportAnonymous());
+		if(supportAnonymous == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters,supportAnonymous = " +questionnaire.getSupportAnonymous());
+		}
+
+		//枚举支持分享检查
+		if (targetType == QuestionnaireTargetType.USER) {
+			QuestionnaireCommonStatus supportShare = QuestionnaireCommonStatus.fromCode(questionnaire.getSupportShare());
+			if (supportShare == null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Invalid parameters,supportShare = " + questionnaire.getSupportShare());
+			}
+		}
+
 	}
 
 	private Questionnaire findQuestionnaireById(Integer namespaceId, Long questionnaireId) {
