@@ -3,6 +3,9 @@ package com.everhomes.rest.questionnaire;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+
 /**
  * 
  * <ul>参数:
@@ -27,6 +30,8 @@ public class ListQuestionnairesCommand {
 	private Long ownerId;
 
 	private Long startTime;
+
+	private Timestamp nowTime = new Timestamp(System.currentTimeMillis());//用于和截止日期比较,定一个状态而已。
 
 	private Long endTime;
 
@@ -135,6 +140,14 @@ public class ListQuestionnairesCommand {
 
 	public void setCollectFlag(Byte collectFlag) {
 		this.collectFlag = collectFlag;
+	}
+
+	public Timestamp getNowTime() {
+		return nowTime;
+	}
+
+	public void setNowTime(Timestamp nowTime) {
+		this.nowTime = nowTime;
 	}
 
 	@Override

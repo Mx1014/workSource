@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 所属id，communityId</li>
  * <li>targetType: 目标类型，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireTargetType}</li>
  * <li>targetId: 目标id</li>
- * <li>questionaireStatus: 问卷状态（进行中，已结束），参考{@link com.everhomes.rest.questionnaire.QuestionnaireCommonStatus}</li>
+ * <li>collectFlag: 问卷状态（进行中，已结束），参考{@link com.everhomes.rest.questionnaire.QuestionnaireCollectFlagType}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
@@ -28,7 +28,7 @@ public class ListTargetQuestionnairesCommand {
 
 	private Long targetId;
 
-	private Byte questionaireStatus;
+	private Byte collectFlag;
 
 	private Long pageAnchor;
 
@@ -49,13 +49,13 @@ public class ListTargetQuestionnairesCommand {
 		this.pageSize = pageSize;
 	}
 
-	public ListTargetQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte questionaireStatus, Long pageAnchor, Integer pageSize) {
+	public ListTargetQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte collectFlag, Long pageAnchor, Integer pageSize) {
 		this.namespaceId = namespaceId;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.targetType = targetType;
 		this.targetId = targetId;
-		this.questionaireStatus = questionaireStatus;
+		this.collectFlag = collectFlag;
 		this.pageAnchor = pageAnchor;
 		this.pageSize = pageSize;
 	}
@@ -108,12 +108,12 @@ public class ListTargetQuestionnairesCommand {
 		this.pageAnchor = pageAnchor;
 	}
 
-	public Byte getQuestionaireStatus() {
-		return questionaireStatus;
+	public Byte getCollectFlag() {
+		return collectFlag;
 	}
 
-	public void setQuestionaireStatus(Byte questionaireStatus) {
-		this.questionaireStatus = questionaireStatus;
+	public void setCollectFlag(Byte collectFlag) {
+		this.collectFlag = collectFlag;
 	}
 
 	public Integer getPageSize() {

@@ -4,9 +4,9 @@ package com.everhomes.questionnaire;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectOffsetStep;
+import com.everhomes.rest.questionnaire.ListQuestionnairesCommand;
+import com.everhomes.rest.questionnaire.QuestionnaireCollectFlagType;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -75,15 +75,38 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 	}
 	
 	@Override
-	public List<Questionnaire> listQuestionnaireByOwner(Integer namespaceId, String ownerType, Long ownerId,
-			Long pageAnchor, int pageSize) {
-		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRES)
+	public List<Questionnaire> listQuestionnaireByOwner(ListQuestionnairesCommand cmd, Integer namespaceId,
+														int pageSize) {
+		SelectConditionStep step = getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRES)
 				.where(Tables.EH_QUESTIONNAIRES.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(ownerType))
-				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_QUESTIONNAIRES.STATUS.ne(QuestionnaireStatus.INACTIVE.getCode()))
-				.and(pageAnchor==null?DSL.trueCondition():Tables.EH_QUESTIONNAIRES.ID.lt(pageAnchor))
-				.orderBy(Tables.EH_QUESTIONNAIRES.ID.desc())
+				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(cmd.getOwnerType()))
+				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(cmd.getOwnerId()))
+				.and(cmd.getPageAnchor()==null?DSL.trueCondition():Tables.EH_QUESTIONNAIRES.ID.lt(cmd.getPageAnchor()));
+
+		Condition condition = cmd.getStatus()==null?DSL.trueCondition():Tables.EH_QUESTIONNAIRES.STATUS.eq(cmd.getStatus());
+		if(cmd.getStartTime()!=null){
+			condition.and(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.ge(new Timestamp(cmd.getStartTime())));
+		}
+		if(cmd.getEndTime()!=null){
+			condition.and(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.le(new Timestamp(cmd.getEndTime())));
+		}
+
+		if(cmd.getTargetType()!=null){
+			condition.and(Tables.EH_QUESTIONNAIRES.TARGET_TYPE.eq(cmd.getTargetType()));
+		}
+
+		if(cmd.getCollectFlag()!=null){
+			QuestionnaireCollectFlagType collectFlagType = QuestionnaireCollectFlagType.fromCode(cmd.getCollectFlag());
+			if (collectFlagType == QuestionnaireCollectFlagType.COLLECTING){
+				condition.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.ge(cmd.getNowTime()));
+			}else if (collectFlagType == QuestionnaireCollectFlagType.FINISHED){
+				condition.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.le(cmd.getNowTime()));
+			}
+		}
+
+		step.and(condition);
+
+		return step.orderBy(Tables.EH_QUESTIONNAIRES.ID.desc())
 				.limit(pageSize)
 				.fetch().map(r -> ConvertHelper.convert(r, Questionnaire.class));
 	}

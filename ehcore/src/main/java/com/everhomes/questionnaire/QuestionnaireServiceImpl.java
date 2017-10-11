@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.questionnaire.*;
 import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.util.TimSorter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,36 +26,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.questionnaire.CreateQuestionnaireCommand;
-import com.everhomes.rest.questionnaire.CreateQuestionnaireResponse;
-import com.everhomes.rest.questionnaire.CreateTargetQuestionnaireCommand;
-import com.everhomes.rest.questionnaire.CreateTargetQuestionnaireResponse;
-import com.everhomes.rest.questionnaire.DeleteQuestionnaireCommand;
-import com.everhomes.rest.questionnaire.GetQuestionnaireDetailCommand;
-import com.everhomes.rest.questionnaire.GetQuestionnaireDetailResponse;
-import com.everhomes.rest.questionnaire.GetQuestionnaireResultDetailCommand;
-import com.everhomes.rest.questionnaire.GetQuestionnaireResultDetailResponse;
-import com.everhomes.rest.questionnaire.GetQuestionnaireResultSummaryCommand;
-import com.everhomes.rest.questionnaire.GetQuestionnaireResultSummaryResponse;
-import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailCommand;
-import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailResponse;
-import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersCommand;
-import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersResponse;
-import com.everhomes.rest.questionnaire.ListOptionTargetsCommand;
-import com.everhomes.rest.questionnaire.ListOptionTargetsResponse;
-import com.everhomes.rest.questionnaire.ListQuestionnairesCommand;
-import com.everhomes.rest.questionnaire.ListQuestionnairesResponse;
-import com.everhomes.rest.questionnaire.ListTargetQuestionnairesCommand;
-import com.everhomes.rest.questionnaire.ListTargetQuestionnairesResponse;
-import com.everhomes.rest.questionnaire.QuestionType;
-import com.everhomes.rest.questionnaire.QuestionnaireDTO;
-import com.everhomes.rest.questionnaire.QuestionnaireOptionDTO;
-import com.everhomes.rest.questionnaire.QuestionnaireOwnerType;
-import com.everhomes.rest.questionnaire.QuestionnaireQuestionDTO;
-import com.everhomes.rest.questionnaire.QuestionnaireResultTargetDTO;
-import com.everhomes.rest.questionnaire.QuestionnaireServiceErrorCode;
-import com.everhomes.rest.questionnaire.QuestionnaireStatus;
-import com.everhomes.rest.questionnaire.QuestionnaireTargetType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -98,15 +70,59 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Override
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {
 		checkOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		
+		checkListQuestionnairesCommand(cmd);
+
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<Questionnaire> questionnaires = questionnaireProvider.listQuestionnaireByOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getPageAnchor(), pageSize+1);
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId == null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		List<Questionnaire> questionnaires = questionnaireProvider.listQuestionnaireByOwner(cmd, namespaceId, pageSize+1);
 		Long nextPageAnchor = null;
 		if (questionnaires.size() > pageSize) {
 			questionnaires.remove(questionnaires.size()-1);
 			nextPageAnchor = questionnaires.get(questionnaires.size()-1).getId();
 		}
-		return new ListQuestionnairesResponse(nextPageAnchor, questionnaires.stream().map(q->convertToQuestionnaireDTO(q)).collect(Collectors.toList()));
+		return new ListQuestionnairesResponse(nextPageAnchor, questionnaires.stream().map(q->convertToQuestionnaireDTO(q,cmd.getNowTime())).collect(Collectors.toList()));
+	}
+
+	private void checkListQuestionnairesCommand(ListQuestionnairesCommand cmd) {
+		checkQuestionnaireStatus(cmd.getStatus());
+		checkQuestionnaireCollectFlag(cmd.getCollectFlag());
+		checkQuestionnaireTargetType(cmd.getTargetType());
+	}
+
+	private void checkQuestionnaireTargetType(String targetType) {
+		if(targetType == null){
+			return ;
+		}
+		QuestionnaireTargetType enumTargetType = QuestionnaireTargetType.fromCode(targetType);
+		if (enumTargetType == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters, Unknown targetType = " + targetType );
+		}
+	}
+
+	private void checkQuestionnaireCollectFlag(Byte collectFlag) {
+		if(collectFlag == null){
+			return ;
+		}
+		QuestionnaireCollectFlagType enumCollectFlag = QuestionnaireCollectFlagType.fromCode(collectFlag);
+		if (enumCollectFlag == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters, Unknown collectFlag = " + enumCollectFlag );
+		}
+	}
+
+	private void checkQuestionnaireStatus(Byte status) {
+		if(status == null){
+			return ;
+		}
+		QuestionnaireStatus enumStatus = QuestionnaireStatus.fromCode(status);
+		if (enumStatus == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters, Unknown status = " + status );
+		}
 	}
 
 	@Override
@@ -298,12 +314,36 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		return questionnaireDTO;
 	}
 	
-	private QuestionnaireDTO convertToQuestionnaireDTO(Questionnaire questionnaire){
-		return convertToQuestionnaireDTO(questionnaire, false, null, null);
+	private QuestionnaireDTO convertToQuestionnaireDTO(Questionnaire questionnaire, Timestamp nowTime){
+		QuestionnaireDTO dto = convertToQuestionnaireDTO(questionnaire, false, null, null);
+		//v1.1版本补充一些属性
+		if(questionnaire.getCutOffTime()!=null){
+			dto.setCutOffTime(questionnaire.getCutOffTime().getTime());
+			if(questionnaire.getCutOffTime().before(nowTime)){
+				dto.setCollectFlag(QuestionnaireCollectFlagType.FINISHED.getCode());
+			}else if(questionnaire.getCutOffTime().after(nowTime)){
+				dto.setCollectFlag(QuestionnaireCollectFlagType.COLLECTING.getCode());
+			}
+
+		}
+		if(questionnaire.getPosterUri()!=null){
+			String url = contentServerService.parserUri(questionnaire.getPosterUri());
+			dto.setPosterUrl(url);
+		}
+		if(questionnaire.getCollectionCount()!=null && questionnaire.getTargetUserNum()!=null
+				&& questionnaire.getTargetUserNum()!=0){
+			Float targetUserNumber = (float)questionnaire.getTargetUserNum();
+			Float collectionCount = (float)questionnaire.getCollectionCount();
+			String result = String.valueOf((collectionCount/targetUserNumber)*100);
+			result = result.replaceFirst("([\\d]*\\.\\d[1-9])\\d*","$1");
+			dto.setPercentComplete(result);
+		}
+
+		return dto;
 	}
 	
 	private QuestionnaireDTO convertToQuestionnaireDTO(Questionnaire questionnaire, boolean containTarget, String targetType, Long targetId){
-		QuestionnaireDTO questionnaireDTO = convertToQuestionnaireDTO(questionnaire, null);
+		QuestionnaireDTO questionnaireDTO = convertToQuestionnaireDTO(questionnaire, (List)null);
 		if (containTarget) {
 			QuestionnaireAnswer answer = questionnaireAnswerProvider.findAnyAnswerByTarget(questionnaire.getId(), targetType, targetId);
 			if (answer != null) {
