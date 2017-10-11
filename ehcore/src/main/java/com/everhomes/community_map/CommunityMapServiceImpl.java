@@ -173,6 +173,7 @@ public class CommunityMapServiceImpl implements CommunityMapService {
             result.addAll(shops.stream().map(r -> {
                 CommunityMapShopDTO shop = new CommunityMapShopDTO();
                 shop.setShopNo(String.valueOf(r.getId()));
+                shop.setShopName(r.getShopName());
 
                 String url = contentServerService.parserUri(r.getShopAvatarUri(), EntityType.USER.getCode(), userId);
                 shop.setShopLogo(url);
