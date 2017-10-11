@@ -6,6 +6,7 @@ import com.everhomes.community.ResourceCategory;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.db.QueryBuilder;
 import com.everhomes.entity.EntityType;
@@ -97,6 +98,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private ServiceModuleService serviceModuleService;
+
+	@Autowired
+	private ContentServerService contentServerService;
 
 
 	@Override
@@ -1523,6 +1527,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			User user = userProvider.findUserById(member.getTargetId());
 			if(null != user)
 				dto.setNickName(user.getNickName());
+		}
+
+		//	added by R. 添加头像
+		if (OrganizationMemberTargetType.USER.getCode().equals(member.getTargetType())) {
+			User user = userProvider.findUserById(member.getTargetId());
+			if (null != user) {
+				dto.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
+			}
 		}
 		dto.setContactName(member.getContactName());
 		dto.setGender(member.getGender());
