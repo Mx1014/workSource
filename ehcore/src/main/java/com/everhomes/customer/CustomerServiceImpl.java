@@ -405,7 +405,8 @@ public class CustomerServiceImpl implements CustomerService {
             enterpriseCustomerSearcher.feedDoc(customer);
             //给企业账号添加管理员 默认添加联系人作为管理员 by xiongying20170909
             Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
-            if (!orgAdminAccounts.get(organizationDTO.getId()).contains(str.getContactMobile())) {
+            if (orgAdminAccounts.get(organizationDTO.getId()) == null ||
+                    !orgAdminAccounts.get(organizationDTO.getId()).contains(str.getContactMobile())) {
                 if (!org.springframework.util.StringUtils.isEmpty(str.getContactMobile())) {
                     CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
                     createOrganizationAdminCommand.setOrganizationId(organizationDTO.getId());
