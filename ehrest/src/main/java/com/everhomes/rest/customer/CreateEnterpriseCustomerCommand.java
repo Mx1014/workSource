@@ -68,6 +68,7 @@ import java.math.BigDecimal;
  *     <li>propertyType: 资产类型</li>
  *     <li>longitude: 经度</li>
  *     <li>latitude: 纬度</li>
+ *     <li>contactDuty:联系人职务</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -137,6 +138,7 @@ public class CreateEnterpriseCustomerCommand {
     private Long propertyType;
     private Double longitude;
     private Double latitude;
+    private String contactDuty;
 
     public Long getCommunityId() {
         return communityId;
@@ -652,6 +654,15 @@ public class CreateEnterpriseCustomerCommand {
 	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
+
+	public String getContactDuty() {
+		return contactDuty;
+	}
+
+	public void setContactDuty(String contactDuty) {
+		this.contactDuty = contactDuty;
+	}
+	
     
     
 }
