@@ -78,3 +78,6 @@ ALTER TABLE `eh_hot_tags` ADD COLUMN `category_id`  bigint(22) NULL ;
 ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE;
 ALTER TABLE eh_organization_member_details ADD COLUMN region_code VARCHAR(64) COMMENT '手机区号';
 -- merge form archives-1.4 by R 20171010 end
+
+-- bydengs,20171011,添加一个属性，存跳转的路由
+ALTER TABLE `eh_service_alliances` ADD COLUMN `jump_service_alliance_routing` VARCHAR(2048) COMMENT 'jump to other service alliance routing';
