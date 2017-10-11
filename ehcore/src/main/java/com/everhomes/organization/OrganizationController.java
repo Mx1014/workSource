@@ -1812,7 +1812,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("findOrgPersonel")
     @RestReturn(value = String.class)
-    public RestResponse findOrgPersonel(SortOrganizationsAtSameLevelCommand cmd) {
+    public RestResponse findOrgPersonel(FindOrgPersonelCommand cmd) {
         this.organizationService.findOrgPersonel(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

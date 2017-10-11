@@ -5539,7 +5539,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public List<OrganizationMember> findOrgPersonel() {
+    public List<OrganizationMember> findOrgPersonel(FindOrgPersonelCommand cmd) {
         return null;
     }
 

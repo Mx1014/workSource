@@ -560,5 +560,5 @@ public interface OrganizationService {
 
 	void sortOrganizationsAtSameLevel(SortOrganizationsAtSameLevelCommand cmd);
 
-	List<OrganizationMember> findOrgPersonel();
+	List<OrganizationMember> findOrgPersonel(FindOrgPersonelCommand cmd);
 }
