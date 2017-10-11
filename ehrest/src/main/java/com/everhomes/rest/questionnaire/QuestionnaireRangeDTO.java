@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  */
 public class QuestionnaireRangeDTO {
     private Integer namespaceId;
-    private Integer communityId;
+    private Long communityId;
     private String rangeType;
     private String range;
     private String rangeDescription;
@@ -28,11 +28,11 @@ public class QuestionnaireRangeDTO {
         this.namespaceId = namespaceId;
     }
 
-    public Integer getCommunityId() {
+    public Long getCommunityId() {
         return communityId;
     }
 
-    public void setCommunityId(Integer communityId) {
+    public void setCommunityId(Long communityId) {
         this.communityId = communityId;
     }
 

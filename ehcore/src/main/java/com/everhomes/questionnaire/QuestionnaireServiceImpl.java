@@ -2,13 +2,14 @@
 package com.everhomes.questionnaire;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.organization.ListEnterprisesCommand;
+import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.questionnaire.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.util.TimSorter;
@@ -68,6 +69,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+
+	@Autowired
+	private OrganizationService organizationService;
 	
 
 	@Override
@@ -200,6 +204,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	public CreateQuestionnaireResponse createQuestionnaire(CreateQuestionnaireCommand cmd) {
 		QuestionnaireDTO questionnaireDTO = cmd.getQuestionnaire();
 		checkQuestionnaireParameters(questionnaireDTO);
+
+		if(QuestionnaireStatus.ACTIVE == QuestionnaireStatus.fromCode(questionnaireDTO.getStatus())){
+			//计算问卷推送的范围
+			List<QuestionnaireRangeDTO> ranges = calculateQuesionnaireRange(questionnaireDTO);
+		}
 		
 		QuestionnaireDTO result = (QuestionnaireDTO)dbProvider.execute(s->{
 			//如果是重新编辑问卷，则把之前的题目和选项删除
@@ -226,6 +235,54 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		});
 		
 		return new CreateQuestionnaireResponse(result);
+	}
+
+	private List<QuestionnaireRangeDTO> calculateQuesionnaireRange(QuestionnaireDTO questionnaireDTO) {
+		List<QuestionnaireRangeDTO> ranges = new ArrayList<QuestionnaireRangeDTO>();
+		for (QuestionnaireRangeDTO rangeDTO : questionnaireDTO.getRanges()) {
+			QuestionnaireRangeType enumRangeType = QuestionnaireRangeType.fromCode(rangeDTO.getRangeType());
+			QuestionnaireRange range = new QuestionnaireRange();
+			switch (enumRangeType){
+				case USER:
+					ranges.add(rangeDTO);
+					break;
+				case BUILDING:
+					ListEnterprisesCommand cmd = new ListEnterprisesCommand();
+					cmd.setCommunityId(rangeDTO.getCommunityId());
+					cmd.setNamespaceId(rangeDTO.getNamespaceId());
+					cmd.setBuildingName(cmd.getBuildingName());
+					cmd.setPageSize(1000000);
+					ListEnterprisesCommandResponse rs = organizationService.listNewEnterprises(cmd);
+					rs.getDtos().stream().forEach(r->{
+						ranges.addAll(getEnterpriseUsers(String.valueOf(r.getOrganizationId()));
+					});
+					break;
+				case ENTERPRISE:
+					ranges.addAll(getEnterpriseUsers(rangeDTO.getRange()));
+					break;
+				case COMMUNITY_ALL:
+					break;
+				case COMMUNITY_UNAUTHORIZED:
+					break;
+				case COMMUNITY_AUTHENTICATED:
+					break;
+			}
+		}
+		return ranges;
+	}
+
+	private List<QuestionnaireRangeDTO> getEnterpriseUsers(String range) {
+		ListOrganizationContactCommand cmd = new ListOrganizationContactCommand();
+		cmd.setOrganizationId( Long.valueOf(range));
+		cmd.setPageSize(10000000);//这里需要查询全部的人员
+		ListOrganizationMemberCommandResponse response = organizationService.listOrganizationPersonnels(cmd, false);
+		return response.getMembers().stream().map(r->{
+			QuestionnaireRangeDTO dto = new QuestionnaireRangeDTO();
+			dto.setRange(String.valueOf(r.getTargetId()));
+			dto.setRangeType(QuestionnaireRangeType.USER.getCode());
+			dto.setRangeDescription(dto.getRangeDescription());
+			return dto;
+		}).collect(Collectors.toList());
 	}
 
 	private List<QuestionnaireQuestionDTO> createQuestions(Long questionnaireId, List<QuestionnaireQuestionDTO> questions) {
@@ -506,6 +563,20 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 				if(rangeType==null){
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"Invalid parameters,rangeType = "+dto.getRangeType());
+				}
+
+				switch (rangeType){
+					case COMMUNITY_AUTHENTICATED:
+					case COMMUNITY_UNAUTHORIZED:
+					case COMMUNITY_ALL:
+					case ENTERPRISE:
+					case USER:
+						try {
+							Long.valueOf(dto.getRange())
+						}catch (Exception e){
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+									"Invalid parameters,rangeType = "+dto.getRangeType()+", range = "+dto.getRange());
+						}
 				}
 			}
 		}
