@@ -5533,6 +5533,16 @@ public class OrganizationServiceImpl implements OrganizationService {
             return detailId;
     }
 
+    @Override
+    public void sortOrganizationsAtSameLevel(SortOrganizationsAtSameLevelCommand cmd) {
+
+    }
+
+    @Override
+    public List<OrganizationMember> findOrgPersonel() {
+        return null;
+    }
+
     /**
      * 根据contactToken退出删除organization path路径下的所有机构
      *

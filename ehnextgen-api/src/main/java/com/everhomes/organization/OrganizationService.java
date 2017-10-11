@@ -558,4 +558,7 @@ public interface OrganizationService {
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
 	Long updateOrganizationMemberInfoByDetailId(Long detailId, String contactToken, String contactName, Byte gender);
 
+	void sortOrganizationsAtSameLevel(SortOrganizationsAtSameLevelCommand cmd);
+
+	List<OrganizationMember> findOrgPersonel();
 }
