@@ -1,0 +1,1 @@
+ALTER TABLE `eh_service_alliances` ADD COLUMN `jump_service_alliance_routing` VARCHAR(2048) COMMENT 'jump to other service alliance routing';
