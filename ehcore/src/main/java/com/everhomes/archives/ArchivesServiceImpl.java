@@ -1961,7 +1961,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         dto.setTitles(titleNames);
         dto.setVals(employeeValues);
         XSSFWorkbook workbook = this.exportArchivesEmployeesFiles(dto);
-        writeExcel(workbook,httpResponse);
+        writeExcel(workbook, httpResponse);
     }
 
     private XSSFWorkbook exportArchivesEmployeesFiles(ExportArchivesEmployeesDTO dto) {
@@ -1971,7 +1971,10 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  导出标题
         Row titleNameRow = sheet.createRow(0);
         createArchivesEmployeesFilesTitle(workbook, titleNameRow, dto.getTitles());
-
+        for (int rowIndex = 1; rowIndex <=1; rowIndex++) {
+            Row dataRow = sheet.createRow(rowIndex);
+            createArchivesEmployeesFilesContent(workbook, dataRow, dto.getVals());
+        }
         return workbook;
     }
 
@@ -1987,6 +1990,21 @@ public class ArchivesServiceImpl implements ArchivesService {
         for (int i = 0; i < list.size(); i++) {
             Cell cell = titleNameRow.createCell(i);
             cell.setCellStyle(titleStyle);
+            cell.setCellValue(list.get(i));
+        }
+    }
+
+    private void createArchivesEmployeesFilesContent(XSSFWorkbook workbook, Row dataRow, List<String> list) {
+        //  设置样式
+        XSSFCellStyle contentStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 12);
+        font.setFontName("Arial Unicode MS");
+        contentStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        contentStyle.setFont(font);
+        for (int i = 0; i < list.size(); i++) {
+            Cell cell = dataRow.createCell(i);
+            cell.setCellStyle(contentStyle);
             cell.setCellValue(list.get(i));
         }
     }
