@@ -1157,6 +1157,16 @@ public class AssetServiceImpl implements AssetService {
         return handler.placeAnAssetOrder(cmd);
     }
 
+    @Override
+    public void configChargingItems(ConfigChargingItemsCommand cmd) {
+        assetProvider.configChargingItems(cmd.getChargingItemsIds(),cmd.getCommunityId(),cmd.getNamespaceId());
+    }
+
+    @Override
+    public void createChargingStandard(CreateChargingStandardCommand cmd) {
+        assetProvider.createChargingStandard(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingStandardName(),cmd.getFormulaType(),cmd.getFormula(),cmd.getFormulaJson(),cmd.getInstruction());
+    }
+
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
         CacheAccessor accessor = cacheProvider.getCacheAccessor(null);
         String key = String.format("pmbill:kexing:latest-selected-organization: %s:%s", UserContext.getCurrentNamespaceId(), UserContext.current().getUser().getId());

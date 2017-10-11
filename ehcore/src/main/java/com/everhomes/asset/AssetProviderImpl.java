@@ -1950,4 +1950,30 @@ public class AssetProviderImpl implements AssetProvider {
 
     }
 
+    @Override
+    public void configChargingItems(List<Long> chargingItemsIds, Long communityId, Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
+        EhPaymentChargingItemScopesDao dao = new EhPaymentChargingItemScopesDao(context.configuration());
+        List<com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes> list = new ArrayList<>();
+        for(int i = 0; i < chargingItemsIds.size(); i ++) {
+            Long chargingItemId = chargingItemsIds.get(i);
+            PaymentChargingItemScope scope = new PaymentChargingItemScope();
+            scope.setChargingItemId(chargingItemId);
+            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(t.getClass()));
+            scope.setId(nextSequence);
+            scope.setNamespaceId(namespaceId);
+            scope.setOwnerId(communityId);
+            scope.setOwnerType(PaymentConstants.OWER_TYPE_COMMUNITY);
+            list.add(scope);
+        }
+        dao.insert(list);
+    }
+
+    @Override
+    public void createChargingStandard(Integer namespaceId, String ownerType, Long ownerId, String chargingStandardName, Byte formulaType, String formula, String formulaJson, String instruction) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        
+    }
+
 }

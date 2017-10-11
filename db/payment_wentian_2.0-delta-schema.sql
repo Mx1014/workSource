@@ -1,0 +1,1 @@
+ALTER TABLE `eh_payment_charging_standards` ADD COLUMN `instruction` DEFAULT NULL COMMENT '说明';

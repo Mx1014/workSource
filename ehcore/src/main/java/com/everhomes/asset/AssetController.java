@@ -303,7 +303,7 @@ public class AssetController extends ControllerBase {
 
     // wentian's controlls for payment module
 
-    // this is for 展示所有收费项目   1
+    // this is for 展示所有收费项目   4
     /**
      * <p>获取园区启用的收费项目列表</p>
      * <b>URL: /asset/listChargingItems</b>
@@ -317,8 +317,22 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+    //左邻管理员可以进入，点击收费项目，传递所在园区，点击保存，其园区可以看到此收费项目          ---   4
+    /**
+     * <p>园区收费项权限配置</p>
+     * <b>URL: /asset/configChargingItems</b>
+     */
+    @RequestMapping("configChargingItems")
+    @RestReturn(value = String.class)
+    public RestResponse configChargingItems(ConfigChargingItemsCommand cmd) {
+        assetService.configChargingItems(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
 
-    // this is for 展示一个收费项目的客户可见的所有标准列表         1
+    // this is for 展示一个收费项目的客户可见的所有标准列表         4
     /**
      * <p>展示一个收费项目的园区下的所有标准列表</p>
      * <b>URL: /asset/listChargingStandards</b>
@@ -341,6 +355,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("createChargingStandard")
     @RestReturn(value = String.class)
     public RestResponse createChargingStandard(CreateChargingStandardCommand cmd) {
+        assetService.createChargingStandard(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -398,6 +413,20 @@ public class AssetController extends ControllerBase {
     @RestReturn(value = ListAvailableVariablesDTO.class, collection = true)
     public RestResponse listAvailableVariables(ListAvailableVariablesCommand cmd) {
         RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    /**
+     * <p>解析并保存新增的公式</p>
+     * <b>URL: /asset/createFormula</b>
+     */
+    @RequestMapping("createFormula")
+    @RestReturn(value = CreateFormulaDTO.class)
+    public RestResponse createFormula(CreateFormulaCommand cmd) {
+        CreateFormulaDTO dto = assetService.createFormula(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;

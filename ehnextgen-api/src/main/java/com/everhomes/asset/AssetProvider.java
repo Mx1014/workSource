@@ -166,4 +166,7 @@ public interface AssetProvider {
 
     void changeBillStatusOnPaiedOff(List<Long> billIds);
 
+    void configChargingItems(List<Long> chargingItemsIds, Long communityId, Integer namespaceId);
+
+    void createChargingStandard(Integer namespaceId, String ownerType, Long ownerId, String chargingStandardName, Byte formulaType, String formula, String formulaJson, String instruction);
 }

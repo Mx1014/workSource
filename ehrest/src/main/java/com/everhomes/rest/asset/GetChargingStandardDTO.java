@@ -8,8 +8,10 @@ import com.everhomes.util.StringHelper;
  * <li>chargingStandardId:收费标准id</li>
  * <li>chargingStandardName:收费标准名称</li>
  * <li>formula:公式</li>
+ * <li>formulaType:公式类型,1:固定金额;2:普通公式;3:斜面公式;4:梯度公式</li>
  * <li>billingCycle:计费周期,1:按天;2:按月;3:按季度;4:按年;</li>
  * <li>priceUnitType:价格单位类型,1:日单价;2:月单价;</li>
+ * <li>balanceDateType:应收日期类型，1:计费开始周期所在月2:计费结束周期所在月;</li>
  * <li>balanceDateType:应收日期类型，1:计费开始周期所在月2:计费结束周期所在月;</li>
  *</ul>
  */
@@ -17,7 +19,9 @@ public class GetChargingStandardDTO {
     private Long chargingStandardId;
     private String chargingStandardName;
     private String formula;
+    private Byte formulaType;
     private Byte billingCycle;
+    private String instruction;
     private Byte priceUnitType;
     private Byte balanceDateType;
 
@@ -40,6 +44,22 @@ public class GetChargingStandardDTO {
 
     public void setChargingStandardName(String chargingStandardName) {
         this.chargingStandardName = chargingStandardName;
+    }
+
+    public Byte getFormulaType() {
+        return formulaType;
+    }
+
+    public void setFormulaType(Byte formulaType) {
+        this.formulaType = formulaType;
+    }
+
+    public String getInstruction() {
+        return instruction;
+    }
+
+    public void setInstruction(String instruction) {
+        this.instruction = instruction;
     }
 
     public String getFormula() {

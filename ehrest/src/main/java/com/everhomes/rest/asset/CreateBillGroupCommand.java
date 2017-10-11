@@ -8,14 +8,19 @@ import javax.validation.constraints.NotNull;
 
 /**
  *<ul>
+ * <li>namespaceId:域空间id</li>
  * <li>ownerId:所属者id</li>
  * <li>ownerType:所属者type</li>
  * <li>billGroupName:账单组名称</li>
  * <li>billingCycle:生成账单周期,2:按月;3:按季度;4:按年</li>
  * <li>billDay:出账单日</li>
+ * <li>dueDate:最晚还款日</li>
+ * <li>dueDateType:最晚还款日的单位类型，1:日; 2:月</li>
  *</ul>
  */
 public class CreateBillGroupCommand {
+    @NotNull
+    private Integer namespaceId;
     @NotNull
     private Long ownerId;
     @NotNull
@@ -26,6 +31,10 @@ public class CreateBillGroupCommand {
     private Byte billingCycle;
     @NotNull
     private Integer billDay;
+    @NotNull
+    private Integer dueDate;
+    @NotNull
+    private Byte dueDateType;
 
     @Override
     public String toString() {
@@ -64,12 +73,36 @@ public class CreateBillGroupCommand {
         this.billingCycle = billingCycle;
     }
 
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
     public Integer getBillDay() {
         return billDay;
     }
 
     public void setBillDay(Integer billDay) {
         this.billDay = billDay;
+    }
+
+    public Integer getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(Integer dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public Byte getDueDateType() {
+        return dueDateType;
+    }
+
+    public void setDueDateType(Byte dueDateType) {
+        this.dueDateType = dueDateType;
     }
 
     public CreateBillGroupCommand() {

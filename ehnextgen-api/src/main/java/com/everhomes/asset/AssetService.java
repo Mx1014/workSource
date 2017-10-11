@@ -103,4 +103,7 @@ public interface AssetService {
 
     PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
 
+    void configChargingItems(ConfigChargingItemsCommand cmd);
+
+    void createChargingStandard(CreateChargingStandardCommand cmd);
 }
