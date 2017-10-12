@@ -18,4 +18,4 @@ CREATE TABLE `eh_payment_formula` (
   `operator_uid` BIGINT,
   `update_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='收费标准表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='收费标准公式表';

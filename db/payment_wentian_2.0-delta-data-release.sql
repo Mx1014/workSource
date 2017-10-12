@@ -29,3 +29,27 @@ INSERT INTO `eh_payment_charging_items`
 (`id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`)
 VALUES
 ('6', '滞纳金', '0', UTC_TIMESTAMP(), NULL, NULL, '1');
+
+-- 物业缴费2.0的变量 by wentian
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES ('1', '1', null, '单价', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'dj');
+set @eh_payment_variables_id = (SELECT MAX(id) from `eh_payment_variables`);
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '2', null, '单价', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'dj');
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '3', null, '单价', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'dj');
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '4', null, '单价', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'dj');
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '5', null, '单价', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'dj');
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '6', null, '单价', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'dj');
+
+
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '1', null, '面积', 0, UTC_TIMESTAMP(), NULL,UTC_TIMESTAMP(), 'mj');
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '3', null, '面积', 0, UTC_TIMESTAMP(), NULL,UTC_TIMESTAMP(), 'mj');
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '6', null, '面积', 0, UTC_TIMESTAMP(), NULL,UTC_TIMESTAMP(), 'mj');
+
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '1', null, '固定金额', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'gdje');
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '2', null, '固定金额', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'gdje');
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '3', null, '固定金额', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'gdje');
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '4', null, '固定金额', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'gdje');
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '5', null, '固定金额', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'gdje');
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '6', null, '固定金额', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'gdje');
+
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '4', null, '用量', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'yl');
+INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (@eh_payment_variables_id:=@eh_payment_variables_id+1, '5', null, '用量', 0, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 'yl');

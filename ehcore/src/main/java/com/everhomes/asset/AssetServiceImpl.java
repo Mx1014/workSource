@@ -76,6 +76,7 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sun.org.apache.regexp.internal.RE;
+import org.apache.commons.collections.list.AbstractLinkedList;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -1221,8 +1222,60 @@ public class AssetServiceImpl implements AssetService {
         CreateFormulaDTO dto = new CreateFormulaDTO();
         Byte formulaType = cmd.getFormulaType();
         dto.setFormulaType(formulaType);
-        if(formulaType==1){
+        String str = cmd.getNormalFormulaStr();
+        if(formulaType == 1){
+            dto.setFormula(cmd.getNormalFormulaStr());
+            dto.setFormulaJson(getVariableIdenfitierByName(targetStr));
+        }
+        else if(formulaType==2){
             //普通公式时
+            String formula = str;
+            formula.replace("[[","");
+            formula.replace("]]","");
+            dto.setFormula(formula);
+            Set<String> replaces = new HashSet<>();
+            String formulaJson = formula;
+            char[] formularChars = formulaJson.toCharArray();
+            int index = 0;
+            int start = 0;
+            while(index < formularChars.length){
+                if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
+                    replaces.add(formulaJson.substring(start,index==formulaJson.length()-1?index+1:index));
+                    start = index+1;
+                }
+                index++;
+            }
+            Iterator<String> iterator = replaces.iterator();
+            while(iterator.hasNext()){
+                String targetStr = iterator.next();
+                String substitute = getVariableIdenfitierByName(targetStr);
+                if(!org.apache.commons.lang.StringUtils.isEmpty(substitute)){
+                    formulaJson = formulaJson.replace(targetStr,substitute);
+                }
+            }
+            dto.setFormulaJson(formulaJson);
+        }
+        else if(formulaType == 3 || formulaType== 4){
+            //存储条件
+            List<VariableConstraints> envelop = cmd.getStepValuePairs();
+            StringBuilder name = new StringBuilder();
+            for(int i = 0 ; i < envelop.size(); i ++){
+                List<eh_payment_formula> list = new ArrayList<>();
+                payment_formula payment_formula = new payment_formula();
+                payment_formula.formula
+                        .formulaJson
+                        .formulatype
+                        .id
+                        .constraintVariableIdentifier
+                        .constrantVariableRelation
+                        .constratVariableLimit
+                        .createUid
+                        .updateTime
+                        .createTime
+                    name += payment_formula+"+";
+                VariableConstraints variableConstraints = envelop.get(i);
+                String variableIdentifier = getVariableIdenfitierById(variableConstraints.getVariableId());
+            }
         }
 
     }
