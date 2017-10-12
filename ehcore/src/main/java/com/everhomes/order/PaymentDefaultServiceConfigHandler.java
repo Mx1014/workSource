@@ -40,7 +40,7 @@ public class PaymentDefaultServiceConfigHandler implements PaymentServiceConfigH
             query.addConditions(Tables.EH_PAYMENT_SERVICE_CONFIGS.RESOURCE_ID.eq(resourceId));
         }
 
-
+        LOGGER.debug("sql : " + query);
         return  query.fetchOneInto(PaymentServiceConfig.class);
 
     }

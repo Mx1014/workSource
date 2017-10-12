@@ -16,6 +16,7 @@ import java.util.List;
  * <li>effectiveTime: 生效时间</li>
  * <li>transferType: 调整类型: 0-晋升,1-调整,2-其他 参考{@link com.everhomes.rest.archives.ArchivesTransferType}</li>
  * <li>transferReason: 调整原因</li>
+ * <li>commonJobPositionId: 通用岗位id</>
  * </ul>
  */
 public class TransferArchivesEmployeesCommand {
@@ -111,4 +112,5 @@ public class TransferArchivesEmployeesCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

@@ -15,7 +15,6 @@ import com.everhomes.pay.user.BusinessUserType;
 import com.everhomes.pay.user.RegisterBusinessUserCommand;
 import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.order.*;
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
@@ -27,6 +26,7 @@ import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -34,7 +34,9 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -325,7 +327,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
         //校验参数不为空
 
-        if(cmd.getOrderId() == null||cmd.getPaymentStatus()==null||cmd.getPaymentType()==null || cmd.getBizOrderNum() == null || cmd.getOrderType() == null){
+        if(cmd.getOrderId() == null||cmd.getPaymentStatus()==null || cmd.getBizOrderNum() == null || cmd.getOrderType() == null){
 
             LOGGER.error("Invalid parameter,orderId,orderType or paymentStatus is null");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -334,7 +336,8 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
 
         //检查订单是否存在
-        PaymentOrderRecord orderRecord = payProvider.findOrderRecordById(Long.valueOf(cmd.getBizOrderNum()));
+        //TODO
+        PaymentOrderRecord orderRecord = payProvider.findOrderRecordByOrderNum(cmd.getBizOrderNum());
         if(orderRecord == null){
             LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -349,25 +352,36 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         PaymentCallBackHandler handler = this.getOrderHandler(String.valueOf(orderRecord.getOrderType()));
         LOGGER.debug("PaymentCallBackHandler="+handler.getClass().getName());
 
-        if(cmd.getOrderType().intValue() == com.everhomes.pay.order.OrderType.PURCHACE.getCode()){
-            if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
-                //支付成功
-                handler.paySuccess(cmd);
+        SrvOrderPaymentNotificationCommand srvCmd = ConvertHelper.convert(cmd, SrvOrderPaymentNotificationCommand.class);
+        srvCmd.setOrderType(orderRecord.getOrderType());
+        com.everhomes.pay.order.OrderType orderType = com.everhomes.pay.order.OrderType.fromCode(cmd.getOrderType());
+        if(orderType != null) {
+            switch (orderType) {
+                case PURCHACE:
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                        //支付成功
+                        handler.paySuccess(srvCmd);
+                    }
+                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                        //支付失败
+                        handler.payFail(srvCmd);
+                    }
+                    break;
+                case REFUND:
+                    if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
+                        //退款成功
+                        handler.refundSuccess(srvCmd);
+                    }
+                    if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
+                        //退款失败
+                        handler.refundFail(srvCmd);
+                    }
+                    break;
+                default:
+                    LOGGER.error("unsupport orderType, orderType={}, cmd={}", orderType.getCode(), StringHelper.toJsonString(cmd));
             }
-            if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
-                //支付失败
-                handler.payFail(cmd);
-            }
-        }else if(cmd.getOrderType().intValue() == com.everhomes.pay.order.OrderType.REFUND.getCode()){
-
-            if(cmd.getPaymentStatus()== OrderPaymentStatus.SUCCESS.getCode()){
-                //退款成功
-                handler.refundSuccess(cmd);
-            }
-            if(cmd.getPaymentStatus()==OrderPaymentStatus.FAILED.getCode()){
-                //退款失败
-                handler.refundFail(cmd);
-            }
+        }else {
+            LOGGER.error("orderType is null, cmd={}", StringHelper.toJsonString(cmd));
         }
 
     }
@@ -406,12 +420,12 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         }
         return paymentUser;
     }
-
-    private PaymentUser createPaymentUser(int businessUserType, String ownerType, Long ownerId){
+    @Override
+    public PaymentUser createPaymentUser(int businessUserType, String ownerType, Long ownerId){
 
         Long id = payProvider.getNewPaymentUserId();
 
-        RegisterBusinessUserRestResponse restResponse = registerPayV2User(businessUserType, id + "");
+        RegisterBusinessUserRestResponse restResponse = registerPayV2User(businessUserType,  ownerType+String.valueOf(ownerId));
 
         if(restResponse == null || restResponse.getErrorCode() == null || restResponse.getErrorCode() != 200 ){
             LOGGER.error("register user fail, businessUserType={}, ownerType={}, ownerId={}", businessUserType, ownerType, ownerId);
@@ -513,7 +527,15 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
     }
 
     private PaymentServiceConfigHandler getServiceConfigHandler(String orderType) {
-        PaymentServiceConfigHandler handler = PlatformContext.getComponent(PaymentServiceConfigHandler.PAYMENT_SERVICE_CONFIG_HANDLER_PREFIX +this.getOrderTypeCode(orderType));
+        PaymentServiceConfigHandler handler = null;
+        String handlerName = PaymentServiceConfigHandler.PAYMENT_SERVICE_CONFIG_HANDLER_PREFIX +this.getOrderTypeCode(orderType);
+        
+        // 收款方不一定实现handler，此时会找不到handler而抛异常，为了减少日志这些不必要的堆栈打印，故只打一行warning by lqs 20170930
+        try {
+            handler = PlatformContext.getComponent(handlerName);
+        } catch (NoSuchBeanDefinitionException e) {
+            LOGGER.warn("Failed to find handler, orderType={}, handlerName={}", orderType, handlerName);
+        }
 
         if(handler == null){
             handler = PlatformContext.getComponent(PaymentServiceConfigHandler.PAYMENT_SERVICE_CONFIG_HANDLER_PREFIX +"DEFAULT");
@@ -581,18 +603,33 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         createOrderCmd.setIndustryName(null);
         createOrderCmd.setSourceType(SourceType.MOBILE.getCode());
 
-        //BizOrderNum需要传PaymentOrderRecords表记录的id，此处先申请id，在返回值中使用BizOrderNum做为record的id
-        Long orderRecordId = payProvider.getNewPaymentOrderRecordId();
-        createOrderCmd.setBizOrderNum(String.valueOf(orderRecordId));
+//        //BizOrderNum需要传PaymentOrderRecords表记录的id，此处先申请id，在返回值中使用BizOrderNum做为record的id
+//        Long orderRecordId = payProvider.getNewPaymentOrderRecordId();
 
-        createOrderCmd.setOrderRemark1(String.valueOf(serviceConfig.getId()));
-        createOrderCmd.setOrderRemark2(null);
+
+        String BizOrderNum  = getOrderNum(cmd.getOrderId(),cmd.getOrderType());
+        LOGGER.info("BizOrderNum is = {} "+BizOrderNum);
+        createOrderCmd.setBizOrderNum(BizOrderNum);
+
+        createOrderCmd.setOrderRemark1(String.valueOf(cmd.getOrderType()));
+//        createOrderCmd.setOrderRemark1(String.valueOf(serviceConfig.getId()));
+        createOrderCmd.setOrderRemark2(String.valueOf(cmd.getOrderId()));
         createOrderCmd.setOrderRemark3(null);
         createOrderCmd.setOrderRemark4(null);
         createOrderCmd.setOrderRemark5(null);
         createOrderCmd.setCommitFlag(0);
 
         return createOrderCmd;
+    }
+
+    private String getOrderNum(Long orderId, String orderType) {
+        String v2code = OrderType.OrderTypeEnum.getV2codeByPyCode(orderType);
+        DecimalFormat df = new DecimalFormat("00000000000000000");
+        String orderIdStr = df.format(orderId);
+        if(orderIdStr!=null && orderIdStr.length()>17){
+            orderIdStr = orderIdStr.substring(2);
+        }
+        return v2code+orderIdStr;
     }
 
     private CreateOrderRestResponse createOrderPayV2(CreateOrderCommand cmd){
@@ -611,8 +648,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
 
         PaymentOrderRecord record = ConvertHelper.convert(orderCommandResponse, PaymentOrderRecord.class);
 
-        //下预付单时，BizOrderNum需要传PaymentOrderRecords表记录的id，此处先申请id，在返回值中使用BizOrderNum做为record的id
-        record.setId(Long.valueOf(orderCommandResponse.getBizOrderNum()));
+        record.setOrderNum(orderCommandResponse.getBizOrderNum());
 
         record.setOrderId(orderId);
         //PaymentOrderId为支付系统传来的orderId
@@ -644,6 +680,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         dto.setPayMethod(payMethods);
         Long expiredIntervalTime = getExpiredIntervalTime(cmd.getExpiration());
         dto.setExpiredIntervalTime(expiredIntervalTime);
+        dto.setOrderId(cmd.getOrderId());
         return dto;
     }
 
@@ -745,7 +782,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         if(amount == null){
             return new BigDecimal(0);
         }
-        return  new BigDecimal(amount).divide(new BigDecimal(100));
+        return  new BigDecimal(amount).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
     }
 
     @Override

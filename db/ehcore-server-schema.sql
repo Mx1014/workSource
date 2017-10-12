@@ -561,7 +561,8 @@ CREATE TABLE `eh_addresses` (
   KEY `i_eh_addr_address_alias` (`address_alias`),
   KEY `i_eh_addr_building_apt_name` (`building_name`,`apartment_name`),
   KEY `i_eh_addr_building_alias_apt_name` (`building_alias_name`,`apartment_name`),
-  KEY `i_eh_addr_address` (`address`)
+  KEY `i_eh_addr_address` (`address`),
+  KEY `namespace_address` (`namespace_address_type`,`namespace_address_token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -7022,11 +7023,11 @@ CREATE TABLE `eh_os_objects` (
   `download_count` INTEGER NOT NULL DEFAULT 0,
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
   `delete_uid` BIGINT,
-  `delete_time` DATETIME,
+  `delete_time` datetime(3),
   `update_uid` BIGINT,
-  `update_time` DATETIME,
+  `update_time` datetime(3),
   `creator_uid` BIGINT,
-  `create_time` DATETIME,
+  `create_time` datetime(3),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -7359,7 +7360,7 @@ CREATE TABLE `eh_parking_recharge_orders` (
   `original_price` DECIMAL(10,2),
   `card_request_id` BIGINT,
   `invoice_type` bigint(4),
-  
+  `paid_version` TINYINT,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -7798,7 +7799,7 @@ CREATE TABLE `eh_payment_order_records` (
   `order_commit_timestamp` BIGINT COMMENT '支付时间戳',
   `pay_info` TEXT COMMENT '微信公众号支付,扫码支付等支付信息',
   `create_time` DATETIME NOT NULL,
-	
+  `order_num` VARCHAR(255) COMMENT '订单编号',
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_payment_order_id` (`payment_order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -7817,7 +7818,7 @@ CREATE TABLE `eh_payment_service_configs` (
   `owner_id` BIGINT,
   `resource_type` VARCHAR(64),
   `resource_id` BIGINT,
-  `payment_split_rule_id` BIGINT NOT NULL,
+  `payment_split_rule_id` BIGINT,
   `payment_user_type` INTEGER NOT NULL COMMENT '1-普通会员,2-企业会员',
   `payment_user_id` BIGINT NOT NULL,
   `create_time` DATETIME NOT NULL,
@@ -7862,7 +7863,6 @@ CREATE TABLE `eh_payment_users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `i_owner` (`owner_type`,`owner_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 DROP TABLE IF EXISTS `eh_payment_variables`;
 CREATE TABLE `eh_payment_variables` (
@@ -9948,6 +9948,7 @@ CREATE TABLE `eh_rentalv2_orders` (
   `offline_payee_uid` BIGINT,
   `flow_case_id` BIGINT COMMENT 'id of the flow_case',
   `requestor_organization_id` BIGINT COMMENT 'id of the requestor organization',
+  `paid_version` TINYINT,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

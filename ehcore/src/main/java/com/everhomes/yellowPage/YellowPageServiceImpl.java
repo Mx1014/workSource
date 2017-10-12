@@ -879,7 +879,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	//查询服务联盟的机构评论的数量。
 	private void processCommentCount(ServiceAllianceSourceRequestType sourceRequestType,Long type,String ownerType,Long ownerId, List<ServiceAllianceDTO> dtos) {
 		boolean enableComment = true;
-		if(sourceRequestType == ServiceAllianceSourceRequestType.CLIENT || sourceRequestType == null){//客户端请求
+//		if(sourceRequestType == ServiceAllianceSourceRequestType.CLIENT || sourceRequestType == null){//客户端请求
 			//查询当前机构的服务联盟应用入口是否允许评论
 			String finalOwnerType = null;
 			Long finalOwnerId = null;
@@ -897,7 +897,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 					&& (sa2 == null || CommonStatus.ACTIVE != CommonStatus.fromCode(sa2.getEnableComment()))){
 				enableComment = false;
 			}
-		}
+//		}
 		List<Long> ownerIds = dtos.stream().map(r->r.getId()).collect(Collectors.toList());
 		Map<String,Integer> mapcounts = commentProvider.listServiceAllianceCommentCountByOwner(UserContext.getCurrentNamespaceId(), ServiceAllianceOwnerType.SERVICE_ALLIANCE.getCode(), ownerIds);
 		for (ServiceAllianceDTO dto : dtos) {

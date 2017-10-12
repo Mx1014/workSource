@@ -595,17 +595,23 @@ public class PunchServiceImpl implements PunchService {
 		newPunchDayLog.setExceptionStatus(pdl.getExceptionStatus());
 		newPunchDayLog.setDeviceChangeFlag(getDeviceChangeFlag(userId,java.sql.Date.valueOf(dateSF.get().format(logDay
 				.getTime())),companyId));
-		PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
-				companyId, dateSF.get().format(logDay.getTime()));
-		if (null == punchDayLog) {
-			// 数据库没有计算好的数据
-			punchProvider.createPunchDayLog(newPunchDayLog);
+		//每一个user建立dayLog的地方加锁
+		this.coordinationProvider
+				.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode()+userId)
+				.enter(() -> {
+					PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
+							companyId, dateSF.get().format(logDay.getTime()));
+					if (null == punchDayLog) {
+						// 数据库没有计算好的数据
+						punchProvider.createPunchDayLog(newPunchDayLog);
 
-		} else {
-			// 数据库有计算好的数据
-			newPunchDayLog.setId(punchDayLog.getId());
-			punchProvider.updatePunchDayLog(newPunchDayLog);
-		}
+					} else {
+						// 数据库有计算好的数据
+						newPunchDayLog.setId(punchDayLog.getId());
+						punchProvider.updatePunchDayLog(newPunchDayLog);
+					}
+					return null;
+				});
 		return newPunchDayLog;
 	}
 
@@ -1333,9 +1339,9 @@ public class PunchServiceImpl implements PunchService {
 					refreshPunchDayLog(userId, cmd.getEnterpriseId(), punCalendar);
 				} catch (ParseException e) {
 					LOGGER.error("refresh punch day log error",e);
-					throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-							PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
-							"Something wrong with refresh PunchDayLog");
+//					throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+//							PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
+//							"Something wrong with refresh PunchDayLog");
 
 				}
 //		        return null;

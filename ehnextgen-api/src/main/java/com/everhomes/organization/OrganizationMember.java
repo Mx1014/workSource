@@ -48,9 +48,9 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
     private Date contractEndTime;
     private String contactShortToken;
 
+
     public OrganizationMember() {
     }
-
     public java.lang.String getNickName() {
         return nickName;
     }

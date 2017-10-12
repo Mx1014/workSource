@@ -15,6 +15,7 @@ import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
 import com.everhomes.rest.community_map.SearchCommunityMapContentsResponse;
 import com.everhomes.rest.organization.*;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -66,7 +67,7 @@ public interface OrganizationService {
 	OrganizationDTO getUserCurrentOrganization();
 
 	OrganizationDTO createChildrenOrganization(CreateOrganizationCommand cmd);
-	void deleteOrganization(DeleteOrganizationIdCommand cmd);
+	Boolean deleteOrganization(DeleteOrganizationIdCommand cmd);
 	void createOrganizationMember(CreateOrganizationMemberCommand cmd);
 	void deleteOrganizationMember(DeleteOrganizationIdCommand cmd);
 	void createOrganizationCommunity(CreateOrganizationCommunityCommand cmd);
@@ -380,17 +381,18 @@ public interface OrganizationService {
 	
 	void updateChildrenOrganizationJobPosition(UpdateOrganizationsCommand cmd);
 	
-	void deleteChildrenOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
+	Boolean deleteChildrenOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
 	
 	void createChildrenOrganizationJobLevel(CreateOrganizationCommand cmd);
 	
 	void updateChildrenOrganizationJobLevel(UpdateOrganizationsCommand cmd);
 
-	void deleteChildrenOrganizationJobLevel(DeleteOrganizationIdCommand cmd);
+	Boolean deleteChildrenOrganizationJobLevel(DeleteOrganizationIdCommand cmd);
 	
 	ListChildrenOrganizationJobLevelResponse listChildrenOrganizationJobLevels(ListAllChildrenOrganizationsCommand cmd);
 	
 	ListChildrenOrganizationJobPositionResponse listChildrenOrganizationJobPositions(ListAllChildrenOrganizationsCommand cmd);
+
 	List<OrganizationMemberDTO> listOrganizationMemberDTOs(Long orgId,
 			List<Long> memberUids);
 
@@ -547,17 +549,20 @@ public interface OrganizationService {
 	OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd);
 
 	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken);
- 
-	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
- 
- 	/**组织架构批量调整**/
+
+	/**组织架构批量调整**/
 	void transferOrganizationPersonels(TransferArchivesEmployeesCommand cmd);
 
 	/**通讯录查询接口**/
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd);
-
+	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
+	
 	/**根据detailId更新通用信息**/
 	Long updateOrganizationMemberInfoByDetailId(Long detailId, String contactToken, String contactName, Byte gender);
+
+	void sortOrganizationsAtSameLevel(SortOrganizationsAtSameLevelCommand cmd);
+
+	List<OrganizationMember> findOrgPersonel(FindOrgPersonelCommand cmd);
 
 	/**根据总公司id快速拿到所有公司人员的档案id**/
 	List<Long> ListDetailsByEnterpriseId(Long enterpriseId);

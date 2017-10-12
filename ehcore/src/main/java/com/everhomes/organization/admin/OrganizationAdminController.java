@@ -564,10 +564,8 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("deleteOrganizationById")
     @RestReturn(value = String.class)
     public RestResponse deleteOrganizationById(@Valid DeleteOrganizationIdCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-
-        organizationService.deleteOrganization(cmd);
-        RestResponse response = new RestResponse();
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        RestResponse response = new RestResponse(organizationService.deleteOrganization(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1228,6 +1226,4 @@ public class OrganizationAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
-
 }

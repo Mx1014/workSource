@@ -136,6 +136,7 @@ public class ServiceAllianceDTO {
 	private Integer descriptionHeight;
 	
 	private Byte displayFlag;
+
 	
 	private Integer commentCount;
 	
@@ -143,6 +144,7 @@ public class ServiceAllianceDTO {
 	
 	private String summaryDescription;
 	
+
 	public String getCommentToken() {
 		return commentToken;
 	}
@@ -150,6 +152,7 @@ public class ServiceAllianceDTO {
 	public void setCommentToken(String commentToken) {
 		this.commentToken = commentToken;
 	}
+
 
 	public Byte getDisplayFlag() {
 		return displayFlag;

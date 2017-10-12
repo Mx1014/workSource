@@ -1749,7 +1749,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result.get(0);
     }
 
-
     @Override
     public int countDepartments(String superiorPath) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2121,8 +2120,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
         SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
         Condition condition = t1.field("id").gt(0L);
-        Condition cond = t1.field("organization_id").in(orgIds);
-        cond = cond.and(t1.field("status").eq(memberStatus));
+
+		Condition cond = t1.field("status").eq(memberStatus);
+
+        if(orgIds != null && orgIds.size() > 0){
+			cond = cond.and(t1.field("organization_id").in(orgIds));
+		}
+//        Condition cond = t1.field("organization_id").in(orgIds);
+//        cond = cond.and(t1.field("status").eq(memberStatus));
 
         if (!StringUtils.isEmpty(keywords)) {
             Condition cond1 = t2.field("contact_token").eq(keywords);
@@ -5368,7 +5373,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return list;
 	}
-
 	@Override
 	public void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent) {
 
@@ -5399,7 +5403,28 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return result;
 	}
 
-    @Override
+	@Override
+	public void deleteOrganizationPersonelByJobPositionIdsAndDetailIds(List<Long> jobPositionIds, List<Long> detailIds) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteQuery<EhOrganizationMembersRecord> delete = context.deleteQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		delete.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(jobPositionIds));
+		delete.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.in(detailIds));
+		delete.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, null);
+	}
+
+	@Override
+	public void deleteOrganizationMembersByGroupTypeWithDetailIds(Integer namespaceId, List<Long> detailIds, String groupType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteQuery<EhOrganizationMembersRecord> delete = context.deleteQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		delete.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType);
+		delete.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.in(detailIds));
+		delete.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, null);
+	}
+
+
+	@Override
     public List<Long> listDetailsByEnterpriseId(Integer namespaceId, Long enterpriseId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID)
@@ -5450,6 +5475,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			// 合同主体
 			if(listCommand.getContractPartyId() != null){
 				cond = cond.and(t2.field("contract_party_id").eq(listCommand.getContractPartyId()));
+			}
+
+			//工作地点
+			if(listCommand.getWorkPlaceId() != null){
+				cond = cond.and(t2.field("work_place").eq(listCommand.getWorkPlaceId()));
 			}
 
 			//入职日期

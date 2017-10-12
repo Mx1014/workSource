@@ -1081,8 +1081,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("deleteChildrenOrganizationJobPosition")
     @RestReturn(value = String.class)
     public RestResponse deleteChildrenOrganizationJobPosition(@Valid DeleteOrganizationIdCommand cmd) {
-        organizationService.deleteChildrenOrganizationJobPosition(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.deleteChildrenOrganizationJobPosition(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1194,8 +1193,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("deleteChildrenOrganizationJobLevel")
     @RestReturn(value = String.class)
     public RestResponse deleteChildrenOrganizationJobLevel(@Valid DeleteOrganizationIdCommand cmd) {
-        organizationService.deleteChildrenOrganizationJobLevel(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.deleteChildrenOrganizationJobLevel(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1794,4 +1792,31 @@ public class OrganizationController extends ControllerBase {
     }
 
 
+    /**
+     * <b>URL: /org/sortOrganizationsAtSameLevel</b>
+     * <p>同级节点排序</p>
+     */
+    @RequestMapping("sortOrganizationsAtSameLevel")
+    @RestReturn(value = String.class)
+    public RestResponse sortOrganizationsAtSameLevel(SortOrganizationsAtSameLevelCommand cmd) {
+        this.organizationService.sortOrganizationsAtSameLevel(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/findOrgPersonel</b>
+     * <p>超级查询接口</p>
+     */
+    @RequestMapping("findOrgPersonel")
+    @RestReturn(value = String.class)
+    public RestResponse findOrgPersonel(FindOrgPersonelCommand cmd) {
+        this.organizationService.findOrgPersonel(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

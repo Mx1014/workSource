@@ -255,11 +255,16 @@ import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
 import com.everhomes.server.schema.tables.pojos.EhParkingStatistics;
 import com.everhomes.server.schema.tables.pojos.EhParkingUserInvoices;
 import com.everhomes.server.schema.tables.pojos.EhParkingVendors;
+import com.everhomes.server.schema.tables.pojos.EhPaymentAccounts;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuerCommunities;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuers;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCards;
+import com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords;
+import com.everhomes.server.schema.tables.pojos.EhPaymentServiceConfigs;
+import com.everhomes.server.schema.tables.pojos.EhPaymentTypes;
+import com.everhomes.server.schema.tables.pojos.EhPaymentUsers;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyLogs;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyRecords;
@@ -2237,15 +2242,37 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_WEB_MENU_SCOPES.ID.max()).from(Tables.EH_WEB_MENU_SCOPES).fetchOne().value1();
         });
 
-        syncTableSequence(EhAssetPaymentOrderBills.class, EhAssetPaymentOrderBills.class, Tables.EH_ASSET_PAYMENT_ORDER_BILLS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhAssetPaymentOrderBills.class, Tables.EH_ASSET_PAYMENT_ORDER_BILLS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.ID.max())
                     .from(Tables.EH_ASSET_PAYMENT_ORDER_BILLS).fetchOne().value1();
         });
 
-        syncTableSequence(com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrder.class, com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrder.class, Tables.EH_ASSET_PAYMENT_ORDER.getName(), (dbContext) -> {
+        syncTableSequence(null, EhAssetPaymentOrder.class, Tables.EH_ASSET_PAYMENT_ORDER.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ASSET_PAYMENT_ORDER.ID.max())
                     .from(Tables.EH_ASSET_PAYMENT_ORDER).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhPaymentUsers.class, Tables.EH_PAYMENT_USERS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_USERS.ID.max())
+                    .from(Tables.EH_PAYMENT_USERS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentOrderRecords.class, Tables.EH_PAYMENT_ORDER_RECORDS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_ORDER_RECORDS.ID.max())
+                    .from(Tables.EH_PAYMENT_ORDER_RECORDS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentTypes.class, Tables.EH_PAYMENT_TYPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_TYPES.ID.max())
+                    .from(Tables.EH_PAYMENT_TYPES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentAccounts.class, Tables.EH_PAYMENT_ACCOUNTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_ACCOUNTS.ID.max())
+                    .from(Tables.EH_PAYMENT_ACCOUNTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentServiceConfigs.class, Tables.EH_PAYMENT_SERVICE_CONFIGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_SERVICE_CONFIGS.ID.max())
+                    .from(Tables.EH_PAYMENT_SERVICE_CONFIGS).fetchOne().value1();
+        });
+
 		syncTableSequence(null, EhArchivesStickyContacts.class, Tables.EH_ARCHIVES_STICKY_CONTACTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ARCHIVES_STICKY_CONTACTS.ID.max()).from(Tables.EH_ARCHIVES_STICKY_CONTACTS).fetchOne().value1();
         });
@@ -2269,6 +2296,7 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhArchivesLogs.class, Tables.EH_ARCHIVES_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ARCHIVES_LOGS.ID.max()).from(Tables.EH_ARCHIVES_LOGS).fetchOne().value1();
         });
+
     }
 
     @SuppressWarnings("rawtypes")
