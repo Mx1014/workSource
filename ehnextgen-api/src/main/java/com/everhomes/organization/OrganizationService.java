@@ -556,9 +556,14 @@ public interface OrganizationService {
 	/**通讯录查询接口**/
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsWithDownStream(ListOrganizationContactCommand cmd);
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
+	
+	/**根据detailId更新通用信息**/
 	Long updateOrganizationMemberInfoByDetailId(Long detailId, String contactToken, String contactName, Byte gender);
 
 	void sortOrganizationsAtSameLevel(SortOrganizationsAtSameLevelCommand cmd);
 
 	List<OrganizationMember> findOrgPersonel(FindOrgPersonelCommand cmd);
+
+	/**根据总公司id快速拿到所有公司人员的档案id**/
+	List<Long> ListDetailsByEnterpriseId(Long enterpriseId);
 }

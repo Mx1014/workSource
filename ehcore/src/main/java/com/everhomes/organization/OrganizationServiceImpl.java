@@ -5561,6 +5561,15 @@ public class OrganizationServiceImpl implements OrganizationService {
     public List<OrganizationMember> findOrgPersonel(FindOrgPersonelCommand cmd) {
         return null;
     }
+	
+	@Override
+    public List<Long> ListDetailsByEnterpriseId(Long enterpriseId) {
+            Organization org = this.organizationProvider.findOrganizationById(enterpriseId);
+            if(org != null){
+                return this.organizationProvider.listDetailsByEnterpriseId(org.getNamespaceId(), enterpriseId);
+            }
+        return null;
+    }
 
     /**
      * 根据contactToken退出删除organization path路径下的所有机构
@@ -9829,6 +9838,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             organizationMember.setEmploymentTime(checkInTime);
         }*/
+        organizationMember.setEmployeeType(cmd.getEmployeeType() !=null ? cmd.getEmployeeType() : EmployeeType.FULLTIME.getCode());
         if (cmd.getCheckInTime() != null) {
             organizationMember.setCheckInTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
             organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
@@ -9839,7 +9849,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
             organizationMember.setTargetId(userIdentifier.getOwnerUid());
         } else {
-            organizationMember.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
+            organizationMember.setTargetType(OrganizationMemberTargetType.UNTRACK .getCode());
             organizationMember.setTargetId(0L);
         }
 

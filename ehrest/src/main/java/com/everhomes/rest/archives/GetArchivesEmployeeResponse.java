@@ -20,7 +20,7 @@ public class GetArchivesEmployeeResponse {
     private GeneralFormDTO form;
 
     @ItemType(ArchivesLogDTO.class)
-    public List<ArchivesLogDTO> los;
+    public List<ArchivesLogDTO> logs;
 
     public GetArchivesEmployeeResponse() {
     }
@@ -41,12 +41,12 @@ public class GetArchivesEmployeeResponse {
         this.form = form;
     }
 
-    public List<ArchivesLogDTO> getLos() {
-        return los;
+    public List<ArchivesLogDTO> getLogs() {
+        return logs;
     }
 
-    public void setLos(List<ArchivesLogDTO> los) {
-        this.los = los;
+    public void setLogs(List<ArchivesLogDTO> logs) {
+        this.logs = logs;
     }
 
     @Override
