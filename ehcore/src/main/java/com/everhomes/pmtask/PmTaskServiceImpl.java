@@ -2602,7 +2602,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		dbProvider.execute((TransactionStatus status) -> {
 
-			task.setStatus(state > PmTaskStatus.PROCESSED.getCode() &&  state<PmTaskStatus.INACTIVE.getCode()
+			task.setStatus(state > PmTaskStatus.PROCESSED.getCode()
 					? PmTaskStatus.PROCESSED.getCode(): state );
 			pmTaskProvider.updateTask(task);
 			dto.setStatus(task.getStatus());
