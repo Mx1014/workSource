@@ -1084,6 +1084,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalSiteDTO rentalSiteDTO = ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
 		rentalSiteDTO.setUnauthVisible(resourceType.getUnauthVisible());
 
+		if (priceRules.size() > 0) {
+			Rentalv2PriceRule priceRule = priceRules.get(0);
+			rentalSiteDTO.setRentalType(priceRule.getRentalType());
+		}
+
 		rentalSiteDTO.setSitePriceRules(priceRules.stream().map(p->convertToSitePriceRuleDTO(rentalSite, p, resourceType, sceneTokenDTO))
 				.collect(Collectors.toList()));
 		return rentalSiteDTO;
@@ -2466,6 +2471,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		singleCmd.setRentalSiteId(rs.getId());
 		singleCmd.setSiteCounts(rs.getResourceCounts());
 		singleCmd.setOpenWeekday(resolveOpenWeekday(rs.getOpenWeekday()));
+		singleCmd.setRentalType(rentalType);
 
 		QueryDefaultRuleAdminResponse tempResponse = new QueryDefaultRuleAdminResponse();
 		populateRentalRule(tempResponse, EhRentalv2Resources.class.getSimpleName(), rs.getId());
@@ -4718,7 +4724,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				for(AddRentalSiteSingleSimpleRule signleCmd : addSingleRules){
 					//在这里统一处理 
 					signleCmd.setRentalSiteId(resource.getId()); 
-					addRentalSiteSingleSimpleRule(signleCmd );
+					addRentalSiteSingleSimpleRule(signleCmd);
 				}
 				Long cellBeginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), seqNum.get());
 				priceRuleDTO.setCellBeginId(cellBeginId);
