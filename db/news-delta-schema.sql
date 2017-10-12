@@ -2,8 +2,17 @@
 ALTER TABLE eh_rentalv2_resources DROP COLUMN `cell_begin_id`;
 ALTER TABLE eh_rentalv2_resources DROP COLUMN `cell_end_id`;
 
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `org_member_workday_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `org_member_weekend_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `approving_user_workday_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `approving_user_weekend_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `workday_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `weekend_price`;
 
-
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `discount_type`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `full_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `cut_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `discount_ratio`;
 
 -- 增加咨询电话 by st.zheng
 ALTER TABLE `eh_news` ADD COLUMN `phone` BIGINT(20) NULL DEFAULT '0' AFTER `source_url`;
