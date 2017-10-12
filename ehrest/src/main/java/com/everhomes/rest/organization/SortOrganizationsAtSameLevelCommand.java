@@ -1,5 +1,6 @@
 package com.everhomes.rest.organization;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
  */
 public class SortOrganizationsAtSameLevelCommand {
     private Long  parentId;
+    @ItemType(Long.class)
     private List<Long> childIds;
 
     public Long getParentId() {

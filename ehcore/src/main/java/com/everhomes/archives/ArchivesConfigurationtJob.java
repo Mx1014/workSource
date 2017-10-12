@@ -7,7 +7,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ArchivesEventJob extends QuartzJobBean {
+public class ArchivesConfigurationtJob extends QuartzJobBean {
 
     @Autowired
     ArchivesService archivesService;
@@ -16,6 +16,5 @@ public class ArchivesEventJob extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         archivesService.executeArchivesConfiguration();
     }
-
 
 }

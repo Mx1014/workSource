@@ -398,4 +398,18 @@ public class ArchivesController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /archives/executeArchivesConfiguration</b>
+     * <p>(转正,调整,离职 配置项手动调用定时器)</p>
+     */
+    @RequestMapping("executeArchivesConfiguration")
+    @RestReturn(value = String.class)
+    public RestResponse executeArchivesConfiguration(){
+        archivesService.executeArchivesConfiguration();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
