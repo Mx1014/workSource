@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *  <li>pageAnchor: 本页开始锚点</li>
  *  <li>pageSize: 每页的数量</li>
  *  <li>buildingName: 楼栋名称</li>
+ *  <li>simplifyFlag: 是否简化搜索信息，0-不需要，1-需要（默认）</li>
  * </ul>
  *
  */
@@ -28,6 +29,8 @@ public class SearchOrganizationCommand {
     private String buildingName;
 
     private Byte existAddressFlag;
+
+    private Byte simplifyFlag;
 
     public Byte getExistAddressFlag() {
         return existAddressFlag;
@@ -87,7 +90,16 @@ public class SearchOrganizationCommand {
 	public void setOrganizationType(String organizationType) {
 		this.organizationType = organizationType;
 	}
-	@Override
+
+    public Byte getSimplifyFlag() {
+        return simplifyFlag;
+    }
+
+    public void setSimplifyFlag(Byte simplifyFlag) {
+        this.simplifyFlag = simplifyFlag;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
