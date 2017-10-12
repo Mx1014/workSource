@@ -502,4 +502,6 @@ public interface OrganizationProvider {
 	List<Organization> findNamespaceUnifiedSocialCreditCode(String unifiedSocialCreditCode, Integer namespaceId);
 
 	void deleteOrganizationPersonelByJobPositionIdsAndDetailIds(List<Long> jobPositionIds, List<Long> detailIds);
+
+	void deleteOrganizationMembersByGroupTypeWithDetailIds(Integer namespaceId, List<Long> detailIds, String groupType) ;
 }

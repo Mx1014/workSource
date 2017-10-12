@@ -5338,13 +5338,15 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         Organization org = checkOrganization(cmd.getOrganizationId());
 
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
         List<Long> departmentIds = cmd.getDepartmentIds();
 
         List<Long> enterpriseIds = new ArrayList<>();
 
         List<Long> detailIds = cmd.getDetailIds();
 
-        /**调整组织架构**/
+        //:todo 调整组织架构
         if(departmentIds != null && departmentIds.size() > 0){
 
             // 需要添加直属的企业ID集合
@@ -5374,20 +5376,37 @@ public class OrganizationServiceImpl implements OrganizationService {
                 repeatCreateOrganizationmembers(departmentIds, token, enterpriseIds, enterprise_member);
             });
 
-        }else if(cmd.getCommonJobPositionId() != null && cmd.getJobPositionIds() != null){/**根据通用岗位ID和detailIds进行批量调岗**/
+        }
+
+        //:todo 根据通用岗位ID和detailIds进行批量调岗
+        if(cmd.getJobPositionIds() != null){
             //1. 删除通用岗位+detailIds所确认的部门岗位条目
-            List<OrganizationJobPositionMap> jobPositionMaps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(cmd.getCommonJobPositionId());
-            if(jobPositionMaps!=null && jobPositionMaps.size() > 0){
-                List<Long> organizationJobPositionIds = jobPositionMaps.stream().map(r->{
-                    return r.getOrganizationId();
-                }).collect(Collectors.toList());
-                organizationProvider.deleteOrganizationPersonelByJobPositionIdsAndDetailIds(organizationJobPositionIds, cmd.getDetailIds());
-            }
+//            List<OrganizationJobPositionMap> jobPositionMaps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(cmd.getCommonJobPositionId());
+//            if(jobPositionMaps!=null && jobPositionMaps.size() > 0){
+//                List<Long> organizationJobPositionIds = jobPositionMaps.stream().map(r->{
+//                    return r.getOrganizationId();
+//                }).collect(Collectors.toList());
+//                organizationProvider.deleteOrganizationPersonelByJobPositionIdsAndDetailIds(organizationJobPositionIds, cmd.getDetailIds());
+//            }
+            //1.统一删除所有的部门岗位条目
+            this.organizationProvider.deleteOrganizationMembersByGroupTypeWithDetailIds(namespaceId, cmd.getDetailIds(), OrganizationGroupType.JOB_POSITION.getCode());
             //2. 统一新增岗位
             detailIds.forEach(detailId -> {
                 OrganizationMember enterprise_member = getEnableEnterprisePersonel(org, detailId);
                 String token = enterprise_member.getContactToken();
                 repeatCreateOrganizationmembers(cmd.getJobPositionIds(), token, enterpriseIds, enterprise_member);
+            });
+        }
+
+        //:todo 调整职级
+        if(cmd.getJobLevelIds() != null){
+            //1.统一删除原有职级
+            this.organizationProvider.deleteOrganizationMembersByGroupTypeWithDetailIds(namespaceId, cmd.getDetailIds(), OrganizationGroupType.JOB_LEVEL.getCode());
+            //2.统一新增职级
+            detailIds.forEach(detailId -> {
+                OrganizationMember enterprise_member = getEnableEnterprisePersonel(org, detailId);
+                String token = enterprise_member.getContactToken();
+                repeatCreateOrganizationmembers(cmd.getJobLevelIds(), token, enterpriseIds, enterprise_member);
             });
         }
     }
@@ -11787,7 +11806,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationDTO> results = new ArrayList<>();
         if (null != organizationIds) {
             removeRepeat(organizationIds);
-            // 重新把成员添加到公司多个部门
+            // 重新把成员添加到公司多个机构
             for (Long oId : organizationIds) {
                 if (null == oId) {
                     continue;

@@ -41,8 +41,6 @@ public class TransferArchivesEmployeesCommand {
 
     private String transferReason;
 
-    private Long commonJobPositionId;
-
     public TransferArchivesEmployeesCommand() {
     }
 
@@ -115,11 +113,4 @@ public class TransferArchivesEmployeesCommand {
         return StringHelper.toJsonString(this);
     }
 
-    public Long getCommonJobPositionId() {
-        return commonJobPositionId;
-    }
-
-    public void setCommonJobPositionId(Long commonJobPositionId) {
-        this.commonJobPositionId = commonJobPositionId;
-    }
 }

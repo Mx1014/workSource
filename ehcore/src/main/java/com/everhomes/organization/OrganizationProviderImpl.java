@@ -5413,6 +5413,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, null);
 	}
 
+	@Override
+	public void deleteOrganizationMembersByGroupTypeWithDetailIds(Integer namespaceId, List<Long> detailIds, String groupType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteQuery<EhOrganizationMembersRecord> delete = context.deleteQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		delete.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType);
+		delete.addConditions(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.in(detailIds));
+		delete.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, null);
+	}
+
 
 	@Override
 	public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand) {
