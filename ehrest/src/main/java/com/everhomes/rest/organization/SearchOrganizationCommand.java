@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  *  <li>pageAnchor: 本页开始锚点</li>
  *  <li>pageSize: 每页的数量</li>
  *  <li>buildingName: 楼栋名称</li>
- *  <li>simplifyFlag: 是否简化搜索信息，0-不需要，1-需要（默认）</li>
+ *  <li>simplifyFlag: 是否简化搜索信息，0-不简化（默认），1-简化</li>
  * </ul>
  *
  */
