@@ -100,6 +100,7 @@ public class AuthoriztionController extends ControllerBase {
 		}
 		RestResponse response = new RestResponse();
 		response.setErrorScope("asset");
+		response.setErrorDescription("");
 
 		if(record!=null) {
 			setUserContext(mapping,record);
