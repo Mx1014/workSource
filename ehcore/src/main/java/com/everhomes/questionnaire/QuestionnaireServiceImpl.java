@@ -11,6 +11,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.CommunityService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
@@ -265,6 +266,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		ranges.forEach(r->{
 			QuestionnaireRange questionnaireRange = ConvertHelper.convert(r,QuestionnaireRange.class);
 			questionnaireRange.setQuestionnaireId(questionnaireId);
+			questionnaireRange.setStatus(CommonStatus.ACTIVE.getCode());
 			questionnaireRangeProvider.createQuestionnaireRange(questionnaireRange);
 		});
 	}
@@ -512,9 +514,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	
 	private Questionnaire findQuestionnaire(QuestionnaireDTO questionnaireDTO) {
 		Questionnaire questionnaire = findQuestionnaireById(questionnaireDTO.getId());
-		if (questionnaire.getNamespaceId().intValue() != questionnaireDTO.getNamespaceId().intValue() ||
-				!questionnaire.getOwnerType().equals(questionnaireDTO.getOwnerType()) ||
-				questionnaire.getOwnerId().longValue() != questionnaireDTO.getOwnerId().longValue()) {
+		if (questionnaire.getNamespaceId().intValue() != questionnaireDTO.getNamespaceId().intValue()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"there is no such questionnaire in this context, questionnaireId=" + questionnaireDTO.getId());
 		}

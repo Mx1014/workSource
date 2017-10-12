@@ -28,11 +28,11 @@ public class QuestionnaireAsynchronizedServiceImpl implements ApplicationListene
     @Autowired
     JesqueClientFactory jesqueClientFactory;
 	
-    private String questionnaireTasks = "QuestionnaireAsynchronizedSendMessages";
+    private String questionnaireTasks = "questionnaireAsynchronizedSendMessages";
     
 	void pushToQueque(Long questionnaireId) {
 		
-		final Job job = new Job(QuestionnaireAsynchronizedAction.class.getName(), new Object[]{questionnaireId});
+		final Job job = new Job(QuestionnaireAsynchronizedAction.class.getName(), new Object[]{String.valueOf(questionnaireId)});
 		
 		jesqueClientFactory.getClientPool().enqueue(questionnaireTasks, job);
 		

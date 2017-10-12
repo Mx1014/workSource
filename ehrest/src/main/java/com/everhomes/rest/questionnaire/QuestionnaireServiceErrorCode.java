@@ -8,4 +8,8 @@ public interface QuestionnaireServiceErrorCode {
 	int NO_QUESTIONS = 4; //至少需要有一个题目
 	int NO_OPTIONS = 5; //至少需要有一个选项
 	int OPTION_NAME_EMPTY = 6; //选项名称不能为空
+
+	String UNKNOWN = "unknown"; //
+	String UNKNOWN1 = "unknown1"; //
+	String UNKNOWN2 = "unknown2"; //
 }
