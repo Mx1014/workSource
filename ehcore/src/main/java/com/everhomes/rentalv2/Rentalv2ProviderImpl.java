@@ -2265,66 +2265,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				 null);
 	}
 
-	@Override
-	public String getPriceStringByResourceId(Long rentalSiteId) {
-		// TODO Auto-generated method stub
-		BigDecimal minPrice = new BigDecimal(0);
-		BigDecimal maxPrice = new BigDecimal(0);
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		Record4<BigDecimal, BigDecimal, Byte, Double> record = context.select(Tables.EH_RENTALV2_RESOURCES.WEEKEND_PRICE,
-				Tables.EH_RENTALV2_RESOURCES.WORKDAY_PRICE , Tables.EH_RENTALV2_RESOURCES.RENTAL_TYPE,
-				Tables.EH_RENTALV2_RESOURCES.TIME_STEP)
-				.from(Tables.EH_RENTALV2_RESOURCES).where(Tables.EH_RENTALV2_RESOURCES.ID.eq(rentalSiteId)).fetchOne();
-		BigDecimal weekendPrice = record.value1();
-		BigDecimal workdayPrice = record.value2();
-		Byte rentalType = record.value3();
-		Double timeStep = record.value4();
-		int compareValue = workdayPrice.compareTo(weekendPrice);
-		switch(compareValue){
-			case -1:
-				minPrice = workdayPrice;
-				maxPrice = weekendPrice;
-				break;
-			case 0:
-				minPrice = weekendPrice;
-				maxPrice = weekendPrice;
-				break;
-			case 1:
-				minPrice = weekendPrice;
-				maxPrice = workdayPrice;
-				break;
-		}
-		BigDecimal min2 = context.select(Tables.EH_RENTALV2_CELLS.PRICE.min())
-		.from(Tables.EH_RENTALV2_CELLS).where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId)).fetchOne().value1();
-		if(null!=min2 && minPrice.compareTo(min2) == 1)
-			minPrice = min2;
-		BigDecimal max2 = context.select(Tables.EH_RENTALV2_CELLS.PRICE.max())
-		.from(Tables.EH_RENTALV2_CELLS).where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(rentalSiteId)).fetchOne().value1();
-		if(null!=max2 &&  maxPrice.compareTo(max2) == -1)
-			maxPrice = max2;
-		
-		if(minPrice.compareTo(maxPrice) == 0){
-			return priceToString(minPrice,rentalType,timeStep);
-		}
-		return priceToString(minPrice,rentalType,timeStep)+"~" +priceToString(maxPrice,rentalType,timeStep);
-	}
- 
 	private boolean isInteger(double d){
 		double eps = 0.0001;
 		return Math.abs(d - (double)((int)d)) < eps;
-	}
-	private String priceToString(BigDecimal price, Byte rentalType, Double timeStep) {
-		if(price.compareTo(new BigDecimal(0)) == 0)
-			return "免费";
-		if(rentalType.equals(RentalType.DAY.getCode()))
-			return "￥"+price.toString()+"/天";
-		if(rentalType.equals(RentalType.HALFDAY.getCode()))
-			return "￥"+price.toString()+"/半天";
-		if(rentalType.equals(RentalType.THREETIMEADAY.getCode()))
-			return "￥"+price.toString()+"/半天";
-		if(rentalType.equals(RentalType.HOUR.getCode()))
-			return "￥"+price.toString()+"/"+(isInteger(timeStep.doubleValue())?timeStep.intValue():timeStep)+"小时";
-		return "";
 	}
  
 	@Override
