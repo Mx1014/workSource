@@ -6,7 +6,7 @@ public enum WeekDaysList {
     WEDNESDAY("wednesday"),
     THURSDAY("thursday"),
     FRIDAY("friday"),
-    STAURDAY("staurday"),
+    SATURDAY("saturday"),
     SUNDAY("sunday");
 
     private String code;
