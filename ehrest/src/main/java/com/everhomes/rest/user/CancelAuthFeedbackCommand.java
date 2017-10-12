@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -35,6 +36,7 @@ public class CancelAuthFeedbackCommand {
 	@NotNull
 	private String phone;
 	
+	@ItemType(UnrentAddressDTO.class)
 	private List<UnrentAddressDTO> addressList;
 	
 	public String getAppKey() {
