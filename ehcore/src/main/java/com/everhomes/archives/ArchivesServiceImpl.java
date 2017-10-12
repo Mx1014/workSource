@@ -35,6 +35,7 @@ import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -2121,7 +2122,13 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
     }
 
+    @Scheduled(cron = "0 0 * * * ?")
     public void executeArchivesNotification(){
+        Calendar c = Calendar.getInstance();
+        int weekDay = c.get(Calendar.DAY_OF_WEEK);
+        List<ArchivesNotifications> results = archivesProvider.listArchivesNotificationsByWeek(weekDay);
+        for(int i=0; i<results.size(); i++){
 
+        }
     }
 }

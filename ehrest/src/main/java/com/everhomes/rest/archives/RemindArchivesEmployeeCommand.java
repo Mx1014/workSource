@@ -17,7 +17,7 @@ public class RemindArchivesEmployeeCommand {
 
     private Long organizationId;
 
-    private Byte remindDay;
+    private Integer remindDay;
 
     private Integer remindTime;
 
@@ -35,11 +35,11 @@ public class RemindArchivesEmployeeCommand {
         this.organizationId = organizationId;
     }
 
-    public Byte getRemindDay() {
+    public Integer getRemindDay() {
         return remindDay;
     }
 
-    public void setRemindDay(Byte remindDay) {
+    public void setRemindDay(Integer remindDay) {
         this.remindDay = remindDay;
     }
 

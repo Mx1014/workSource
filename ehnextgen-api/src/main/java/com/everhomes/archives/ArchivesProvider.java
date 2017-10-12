@@ -44,4 +44,6 @@ public interface ArchivesProvider {
     ArchivesNotifications findArchivesNotificationsByOrganizationId(Integer namespaceId, Long organizationId);
 
     void updateArchivesNotifications(ArchivesNotifications archivesNotification);
+
+    List<ArchivesNotifications> listArchivesNotificationsByWeek(Integer weekDay);
 }

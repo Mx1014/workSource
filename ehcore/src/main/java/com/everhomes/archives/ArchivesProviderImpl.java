@@ -17,6 +17,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.sql.Date;
@@ -278,5 +279,21 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         dao.update(notification);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesNotifications.class, notification.getId());
+    }
+
+    @Override
+    public List<ArchivesNotifications> listArchivesNotificationsByWeek(Integer weekDay){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesNotificationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_NOTIFICATIONS);
+        query.addConditions(Tables.EH_ARCHIVES_NOTIFICATIONS.NOTIFY_DAY.eq(weekDay));
+        List<ArchivesNotifications> results = new ArrayList<>();
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, ArchivesNotifications.class));
+            return null;
+        });
+        if (null != results && 0 != results.size()) {
+            return results;
+        }
+        return null;
     }
 }
