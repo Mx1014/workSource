@@ -236,7 +236,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ImportFileTaskDTO importEnterpriseCustomer(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId) {
-
+        checkPrivilege();
         ImportFileTask task = new ImportFileTask();
         try {
             //解析excel
