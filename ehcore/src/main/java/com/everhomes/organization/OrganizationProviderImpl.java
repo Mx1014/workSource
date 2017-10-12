@@ -2006,7 +2006,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		Condition condition = t1.field("id").gt(0L).and(t1.field("namespace_id").eq(namespaceId));
 		Condition cond = t1.field("organization_id").eq(orgCommoand.getId()).and(t1.field("status").eq(orgCommoand.getStatus()));
 		if (contactSignedupStatus != null && contactSignedupStatus == ContactSignUpStatus.SIGNEDUP.getCode()) {
-			cond = cond.and(t1.field("target_id").ne(0L));s
+			cond = cond.and(t1.field("target_id").ne(0L));
 			cond = cond.and(t1.field("target_type").eq(OrganizationMemberTargetType.USER.getCode()));
 		}
 		if (null != visibleFlag) {
