@@ -244,19 +244,22 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         return null;
     }
 
-    public void createArchivesNotifications(ArchivesNotifications archivesNotification){
+    @Override
+    public void createArchivesNotifications(ArchivesNotifications notification){
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesNotifications.class));
-        archivesNotification.setId(id);
-        archivesNotification.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        archivesNotification.setOperatorUid(UserContext.currentUserId());
+        notification.setId(id);
+        notification.setOperatorUid(UserContext.currentUserId());
+        notification.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesNotificationsDao dao = new EhArchivesNotificationsDao(context.configuration());
-        dao.insert(archivesNotification);
+        dao.insert(notification);
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesNotifications.class, null);
     }
 
+    @Override
     public ArchivesNotifications findArchivesNotificationsByOrganizationId(Integer namespaceId, Long organizationId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhArchivesNotificationsRecord> query = context.selectQuery(Tables.EH_ARCHIVES_NOTIFICATIONS);
@@ -265,14 +268,15 @@ public class ArchivesProviderImpl implements ArchivesProvider {
         return query.fetchOneInto(ArchivesNotifications.class);
     }
 
-    public void updateArchivesNotifications(ArchivesNotifications archivesNotification){
-        archivesNotification.setOperatorUid(UserContext.currentUserId());
-        archivesNotification.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    @Override
+    public void updateArchivesNotifications(ArchivesNotifications notification){
+        notification.setOperatorUid(UserContext.currentUserId());
+        notification.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhArchivesNotificationsDao dao = new EhArchivesNotificationsDao(context.configuration());
-        dao.update(archivesNotification);
+        dao.update(notification);
 
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesNotifications.class, archivesNotification.getId());
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhArchivesNotifications.class, notification.getId());
     }
 }

@@ -38,4 +38,10 @@ public interface ArchivesProvider {
     void createArchivesLogs(ArchivesLogs log);
 
     List<ArchivesLogs> listArchivesLogs(Long organizationId, Long detailId);
+
+    void createArchivesNotifications(ArchivesNotifications archivesNotification);
+
+    ArchivesNotifications findArchivesNotificationsByOrganizationId(Integer namespaceId, Long organizationId);
+
+    void updateArchivesNotifications(ArchivesNotifications archivesNotification);
 }

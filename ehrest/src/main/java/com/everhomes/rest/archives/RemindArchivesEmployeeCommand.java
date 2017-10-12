@@ -7,12 +7,15 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>remindDay: 提醒日</li>
+ * <li>organizationId: 公司 id</li>
+ * <li>remindDay: 提醒日, 参考{@link com.everhomes.rest.archives.WeekDaysList}</li>
  * <li>remindTime: 提醒时间点</li>
  * <li>remindEmails: 邮箱(List)</li>
  * </ul>
  */
 public class RemindArchivesEmployeeCommand {
+
+    private Long organizationId;
 
     private String remindDay;
 
@@ -22,6 +25,14 @@ public class RemindArchivesEmployeeCommand {
     private List<String> remindEmails;
 
     public RemindArchivesEmployeeCommand() {
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public String getRemindTime() {

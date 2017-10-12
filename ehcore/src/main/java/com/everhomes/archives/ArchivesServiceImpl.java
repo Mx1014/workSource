@@ -1971,7 +1971,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  导出标题
         Row titleNameRow = sheet.createRow(0);
         createArchivesEmployeesFilesTitle(workbook, titleNameRow, dto.getTitles());
-        for (int rowIndex = 1; rowIndex <=1; rowIndex++) {
+        for (int rowIndex = 1; rowIndex <= 1; rowIndex++) {
             Row dataRow = sheet.createRow(rowIndex);
             createArchivesEmployeesFilesContent(workbook, dataRow, dto.getVals());
         }
@@ -2100,6 +2100,21 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void remindArchivesEmployee(RemindArchivesEmployeeCommand cmd) {
-
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        ArchivesNotifications originNotify = archivesProvider.findArchivesNotificationsByOrganizationId(namespaceId, cmd.getOrganizationId());
+        if (originNotify == null) {
+            ArchivesNotifications newNotify = new ArchivesNotifications();
+            newNotify.setNamespaceId(namespaceId);
+            newNotify.setOrganizationId(cmd.getOrganizationId());
+            newNotify.setNotifyDay(cmd.getRemindDay());
+            newNotify.setNotifyHour(cmd.getRemindTime());
+            newNotify.setNotifyEmails(JSON.toJSONString(cmd.getRemindEmails()));
+            archivesProvider.createArchivesNotifications(newNotify);
+        } else {
+            originNotify.setNotifyEmails(JSON.toJSONString(cmd.getRemindEmails()));
+            originNotify.setNotifyDay(cmd.getRemindDay());
+            originNotify.setNotifyHour(cmd.getRemindTime());
+            archivesProvider.updateArchivesNotifications(originNotify);
+        }
     }
 }
