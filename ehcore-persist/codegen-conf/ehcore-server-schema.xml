@@ -184,13 +184,14 @@
             eh_enterprise_customers | eh_contract_attachments | eh_contract_charging_items | eh_contract_charging_item_addresses | eh_contract_params |
             eh_customer_talents | eh_customer_trademarks | eh_customer_patents | eh_customer_apply_projects | eh_customer_commercials | eh_customer_economic_indicators | eh_customer_investments | eh_customer_certificates |
             eh_zj_syncdata_backup | eh_thirdpart_configurations |
-            eh_community_approve|
-            eh_community_approve_requests |
-            eh_salary_default_entities | eh_salary_entity_categories | eh_salary_group_entities | eh_salary_employee_origin_vals | eh_salary_groups | eh_salary_employees | eh_salary_employee_period_vals |        eh_uniongroup_configures | eh_uniongroup_member_details |
             eh_payment_bills | eh_payment_bill_groups | eh_payment_bill_groups_rules | eh_payment_bill_items | eh_payment_bill_notice_records | eh_payment_charging_items | eh_payment_charging_standards | eh_payment_exemption_items | eh_payment_variables | eh_payment_charging_standards_scopes | eh_payment_charging_item_scopes | eh_payment_contract_receiver |
             eh_siyin_print_settings | eh_siyin_print_printers | eh_siyin_print_orders | eh_siyin_print_records | eh_siyin_print_emails |
+            eh_community_approve|
             eh_pm_notify_configurations | eh_pm_notify_records | eh_pm_notify_logs |
-            eh_community_map_search_types | eh_community_map_infos|  eh_community_building_geos |
+            eh_community_approve_requests | eh_community_map_search_types | eh_community_map_infos|  eh_community_building_geos |
+
+            eh_community_map_shops |
+            eh_pm_notify_configurations | eh_pm_notify_records | eh_pm_notify_logs |
             eh_lease_buildings | eh_lease_promotion_communities |
             eh_express_company_businesses | eh_express_hotlines | eh_express_param_settings |
             eh_stat_event_device_logs | eh_stat_event_upload_strategies | eh_stat_events | eh_stat_event_params | eh_stat_event_content_logs |
@@ -201,7 +202,9 @@
             eh_service_alliance_comment_attachments | eh_service_alliance_comments |
             eh_incubator_applies | eh_incubator_project_types | eh_incubator_apply_attachments |
             eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types | eh_asset_payment_order | eh_asset_payment_order_bills |
+            eh_news_tag | eh_news_tag_vals
 	    eh_archives_sticky_contacts | eh_archives_dismiss_employees | eh_general_form_groups | eh_archives_forms | eh_archives_configurations | eh_archives_logs | eh_archives_notifications |
+        
         </includes>
 
             <!-- All elements that are excluded from your schema

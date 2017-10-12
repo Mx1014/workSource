@@ -65,6 +65,7 @@ import com.everhomes.server.schema.tables.pojos.EhCommunityBuildingGeos;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhCommunityMapInfos;
 import com.everhomes.server.schema.tables.pojos.EhCommunityMapSearchTypes;
+import com.everhomes.server.schema.tables.pojos.EhCommunityMapShops;
 import com.everhomes.server.schema.tables.pojos.EhConfAccountCategories;
 import com.everhomes.server.schema.tables.pojos.EhConfAccountHistories;
 import com.everhomes.server.schema.tables.pojos.EhConfAccounts;
@@ -198,6 +199,8 @@ import com.everhomes.server.schema.tables.pojos.EhNews;
 import com.everhomes.server.schema.tables.pojos.EhNewsComment;
 import com.everhomes.server.schema.tables.pojos.EhNewsCommentRule;
 import com.everhomes.server.schema.tables.pojos.EhNewsCommunities;
+import com.everhomes.server.schema.tables.pojos.EhNewsTag;
+import com.everhomes.server.schema.tables.pojos.EhNewsTagVals;
 import com.everhomes.server.schema.tables.pojos.EhOauth2ClientTokens;
 import com.everhomes.server.schema.tables.pojos.EhOauth2Codes;
 import com.everhomes.server.schema.tables.pojos.EhOauth2Servers;
@@ -2213,6 +2216,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhPmNotifyLogs.class, Tables.EH_PM_NOTIFY_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_NOTIFY_LOGS.ID.max()).from(Tables.EH_PM_NOTIFY_LOGS).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhCommunityMapShops.class, Tables.EH_COMMUNITY_MAP_SHOPS.getName(), (dbContext) -> {
+                    return dbContext.select(Tables.EH_COMMUNITY_MAP_SHOPS.ID.max()).from(Tables.EH_COMMUNITY_MAP_SHOPS).fetchOne().value1();
+        });
         syncTableSequence(null, EhParkingUserInvoices.class, Tables.EH_PARKING_USER_INVOICES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PARKING_USER_INVOICES.ID.max()).from(Tables.EH_PARKING_USER_INVOICES).fetchOne().value1();
         });
@@ -2228,7 +2235,7 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhServiceAllianceCommentAttachments.class, Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENT_ATTACHMENTS).fetchOne().value1();
         });
-        	
+
         syncTableSequence(null, EhServiceAllianceComments.class, Tables.EH_SERVICE_ALLIANCE_COMMENTS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENTS).fetchOne().value1();
         });
@@ -2297,6 +2304,14 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_ARCHIVES_LOGS.ID.max()).from(Tables.EH_ARCHIVES_LOGS).fetchOne().value1();
         });
 
+
+        syncTableSequence(null, EhNewsTag.class, Tables.EH_NEWS_TAG.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_NEWS_TAG.ID.max()).from(Tables.EH_NEWS_TAG).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhNewsTagVals.class, Tables.EH_NEWS_TAG_VALS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_NEWS_TAG_VALS.ID.max()).from(Tables.EH_NEWS_TAG_VALS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

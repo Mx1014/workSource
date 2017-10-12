@@ -143,17 +143,6 @@ public class Utils {
         return sdf.format(date);
     }
 
-    public static String md5(String pw) {
-        try {
-            MessageDigest messageDigest =MessageDigest.getInstance("MD5");
-            messageDigest.update(pw.getBytes());
-            return new BigInteger(1, messageDigest.digest()).toString(16);
-        } catch (NoSuchAlgorithmException e) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "Convert md5 failed");
-        }
-    }
-
     /**
      *
      * @param url

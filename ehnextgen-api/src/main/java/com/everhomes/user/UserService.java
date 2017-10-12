@@ -108,6 +108,9 @@ public interface UserService {
 
     
     SearchContentsBySceneReponse searchContentsByScene(SearchContentsBySceneCommand cmd);
+
+    SearchTypes getSearchTypes(Integer namespaceId, String searchContentType);
+
     ListSearchTypesBySceneReponse listSearchTypesByScene(ListSearchTypesBySceneCommand cmd);
 
 

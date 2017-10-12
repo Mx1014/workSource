@@ -134,10 +134,10 @@ public interface OrganizationProvider {
 
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyworks);
 
-	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
+	List<OrganizationMember> listOrganizationPersonnels(Integer namespaceId, String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
 
 
-	Integer countOrganizationPersonnels(Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag);
+	Integer countOrganizationPersonnels(Integer namespaceId, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag);
 
 	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand);
 

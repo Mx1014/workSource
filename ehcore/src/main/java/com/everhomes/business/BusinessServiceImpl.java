@@ -2470,14 +2470,8 @@ public class BusinessServiceImpl implements BusinessService {
 	@Override
 	public SearchContentsBySceneReponse searchShops(SearchContentsBySceneCommand cmd) {
 		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-		Integer namespaceId = sceneTokenDto.getNamespaceId();;
-		SearchTypes tempSearchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.SHOP.getCode());
-
-		if (null == tempSearchType) {
-			tempSearchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.SHOP.getCode());
-		}
-
-		final SearchTypes searchType = tempSearchType;
+		Integer namespaceId = sceneTokenDto.getNamespaceId();
+		SearchTypes searchType =  userService.getSearchTypes(namespaceId, SearchContentType.SHOP.getCode());
 
 		String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_SEARCH_SHOPS_API, "");
 

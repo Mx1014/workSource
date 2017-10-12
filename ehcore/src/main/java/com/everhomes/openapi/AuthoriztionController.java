@@ -1,5 +1,6 @@
 package com.everhomes.openapi;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.everhomes.rest.approval.CommonStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +24,18 @@ import com.everhomes.authorization.AuthorizationThirdPartyRecord;
 import com.everhomes.authorization.AuthorizationThirdPartyRecordProvider;
 import com.everhomes.authorization.zjgk.ZjgkJsonEntity;
 import com.everhomes.authorization.zjgk.ZjgkResponse;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.contract.ZJContractHandler;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.DisclaimAddressCommand;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDetailDTO;
+import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.user.CancelAuthFeedbackCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -49,10 +56,16 @@ public class AuthoriztionController extends ControllerBase {
 	private AuthorizationThirdPartyRecordProvider authorizationThirdPartyRecordProvider;
 
 	@Autowired
+	private CommunityProvider communityProvider;
+	
+	@Autowired
 	private AppProvider appProvider;
 
 	@Autowired
 	private AddressService addressService;
+	
+	@Autowired
+	private ZJContractHandler zJContractHandler;
 
 	/**
 	 * <b>URL: /openapi/user/cancelAuthFeedback</b>
@@ -82,15 +95,13 @@ public class AuthoriztionController extends ControllerBase {
 		response.setErrorScope("asset");
 
 		if(record!=null) {
-			UserContext.current().setUser(new User());
-			UserContext.current().getUser().setId(record.getCreatorUid());
-			UserContext.current().setNamespaceId(mapping.getNamespaceId());
+			setUserContext(mapping,record);
 			if (record != null && record.getResultJson() != null) {
-				ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(record.getResultJson(), new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>() {
-				});
+				ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(record.getResultJson(), new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
 				List<ZjgkResponse> list = entity.getResponse();
 				if (list != null) {
 					try {
+//						list = fiterListByContractNo(entity,cmd.getContractNo());
 						for (ZjgkResponse r : list) {
 							//依次退租
 							DisclaimAddressCommand disCmd = new DisclaimAddressCommand();
@@ -116,6 +127,64 @@ public class AuthoriztionController extends ControllerBase {
 		return response;
 	}
 
+	private void setUserContext(AppNamespaceMapping mapping, AuthorizationThirdPartyRecord record) {
+		UserContext.current().setUser(new User());
+		UserContext.current().getUser().setId(record.getCreatorUid());
+		UserContext.current().setNamespaceId(mapping.getNamespaceId());
+	}
+
+	private List<ZjgkResponse> fiterListByContractNo(ZjgkJsonEntity<List<ZjgkResponse>> entity, String contractNo) {
+		List<ZjgkResponse> list = entity.getResponse();
+		List<ZjgkResponse> finalList = new ArrayList<ZjgkResponse>();
+		Map<String,ContractDetailDTO> repeatCheckMap = new HashMap<String,ContractDetailDTO>();
+		for (ZjgkResponse zjgkResponse : list) {
+			ContractDetailDTO dto = repeatCheckMap.get(zjgkResponse.getCommunityName());
+			if(dto == null){
+				Community community = generateClaimAddressCommand(zjgkResponse.getCommunityName());
+				dto = zJContractHandler.findContract(generateFindContractCommand(community,contractNo));
+				if(dto == null){
+					continue;
+				}
+				repeatCheckMap.put(zjgkResponse.getCommunityName(), dto);
+				
+			}
+			List<BuildingApartmentDTO> buildingdtos = dto.getApartments();
+			if(isEquals(zjgkResponse,buildingdtos)){
+				finalList.add(zjgkResponse);
+			}
+		}
+		return finalList;
+	}
+	
+	private boolean isEquals(ZjgkResponse r, List<BuildingApartmentDTO> s) {
+		if(s == null){
+			return false;
+		}
+		for (BuildingApartmentDTO x : s) {
+			if(r.getBuildingName().equals(x.getBuildingName()) && r.getApartmentName().equals(x.getApartmentName())){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private FindContractCommand generateFindContractCommand(Community community, String contractNo) {
+		FindContractCommand cmd = new FindContractCommand();
+		cmd.setCommunityId(community.getId());
+		cmd.setNamespaceId(999971);
+		cmd.setContractNumber(contractNo);
+		return cmd;
+	}
+
+	private Community generateClaimAddressCommand(String communityName) {
+		List<Community> communities = communityProvider.listCommunityByNamespaceIdAndName(999971, communityName);
+		if(communities == null || communities.size() == 0){
+			throw RuntimeErrorException.errorWith("asset", 201,
+					"退出失败,园区 "+communityName+" 未知");
+		}
+		return communities.get(0);
+	}
+	
 	private void checkCmd(CancelAuthFeedbackCommand cmd) {
 		if(cmd.getAppKey() == null
 				|| cmd.getNonce() == null

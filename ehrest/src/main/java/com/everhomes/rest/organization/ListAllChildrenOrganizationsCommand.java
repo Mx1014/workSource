@@ -31,10 +31,20 @@ public class ListAllChildrenOrganizationsCommand {
 	
 	private Long pageAnchor;
 	
-	private Integer pageSize;
-
 	private Byte simpleFlag;
 	
+	private Integer pageSize;
+
+	private Integer namespaceId;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	public Long getId() {
 		return id;
 	}

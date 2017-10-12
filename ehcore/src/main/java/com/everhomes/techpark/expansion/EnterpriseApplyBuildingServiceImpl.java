@@ -61,11 +61,13 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		ListLeaseBuildingsResponse response = new ListLeaseBuildingsResponse();
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
-		List<LeaseBuilding> leaseBuildings = enterpriseApplyBuildingProvider.listLeaseBuildings(namespaceId,
+		List<LeaseBuilding> leaseBuildings = enterpriseApplyBuildingProvider.listLeaseBuildings(cmd.getNamespaceId(),
 				cmd.getCommunityId(), cmd.getPageAnchor(), pageSize);
 
 		int size = leaseBuildings.size();
@@ -89,10 +91,12 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 	@Override
 	public LeaseBuildingDTO createLeaseBuilding(CreateLeaseBuildingCommand cmd) {
 
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		//检查楼栋名
-		if (!enterpriseApplyBuildingProvider.verifyBuildingName(namespaceId, cmd.getCommunityId(), cmd.getName())) {
+		if (!enterpriseApplyBuildingProvider.verifyBuildingName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getName())) {
 			throw RuntimeErrorException.errorWith(ApplyEntryErrorCodes.SCOPE, ApplyEntryErrorCodes.ERROR_BUILDING_NAME_EXIST,
 					"Building name exist");
 		}

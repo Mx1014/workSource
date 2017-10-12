@@ -276,14 +276,14 @@ public class PmTaskCommonServiceImpl {
         pmTaskProvider.createTaskLog(pmTaskLog);
 
         //查询园区执行人，发消息
-        List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(),
-                PmTaskOperateType.EXECUTOR.getCode(), null, null);
-        int size = targets.size();
-        if(LOGGER.isDebugEnabled())
-            LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
-        if(size > 0){
-            sendMessageForCreateTask(targets, requestorName, requestorPhone, taskCategory.getName(), user);
-        }
+//        List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(),
+//                PmTaskOperateType.EXECUTOR.getCode(), null, null);
+//        int size = targets.size();
+//        if(LOGGER.isDebugEnabled())
+//            LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
+//        if(size > 0){
+//            sendMessageForCreateTask(targets, requestorName, requestorPhone, taskCategory.getName(), user);
+//        }
 
         return task;
     }

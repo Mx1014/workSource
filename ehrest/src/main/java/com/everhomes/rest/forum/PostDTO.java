@@ -27,6 +27,7 @@ import com.everhomes.util.StringHelper;
  * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
  * <li>visibleRegionType: 区域范围类型，{@link com.everhomes.rest.visibility.VisibleRegionType}</li>
  * <li>visibleRegionId: 区域范围类型对应的ID</li>
+ * <li>visibleRegionIds: 区域范围类型对应的IDs。新版的活动发布时出现了范围的概念，比如“园区A、园区C和小区A”。visibleRegionId和visibleRegionIds只传一个</li>
  * <li>communityId: 用户当前小区ID</li>
  * <li>longitude: 帖子或评论内容涉及到的经度如活动</li>
  * <li>latitude: 帖子或评论内容涉及到的纬度如活动</li>
@@ -62,6 +63,7 @@ import com.everhomes.util.StringHelper;
  * <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布  参考{@link com.everhomes.rest.forum.PostStatus}</li>
  * <li>ownerToken: 当前帖子的token，当前字段在评论时使用<li/>
  * <li>tag: tag</li>
+ * <li>cloneFlag: 克隆标识，参考{@link com.everhomes.rest.forum.PostCloneFlag}</li>
  * </ul>
  */
 public class PostDTO {
@@ -98,6 +100,9 @@ public class PostDTO {
     private Byte visibleRegionType;
 
     private Long visibleRegionId;
+
+    @ItemType(Long.class)
+    private List<Long> visibleRegionIds;
     
     private Long communityId;
     
@@ -172,6 +177,9 @@ public class PostDTO {
     private String ownerToken;
 
 	private String tag;
+
+    private Byte cloneFlag;
+
     public Long getGroupId() {
 		return groupId;
 	}
@@ -594,7 +602,23 @@ public class PostDTO {
     public void setTag(String tag) {
         this.tag = tag;
     }
-	
+
+    public List<Long> getVisibleRegionIds() {
+        return visibleRegionIds;
+    }
+
+    public void setVisibleRegionIds(List<Long> visibleRegionIds) {
+        this.visibleRegionIds = visibleRegionIds;
+    }
+
+    public Byte getCloneFlag() {
+        return cloneFlag;
+    }
+
+    public void setCloneFlag(Byte cloneFlag) {
+        this.cloneFlag = cloneFlag;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

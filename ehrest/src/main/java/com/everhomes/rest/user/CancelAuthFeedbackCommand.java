@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * 	<li>crypto : 参数value加密算法名，有值时表示对指定的参数进行加密；无值则表示参数value不加密；</li>
  * 	<li>type : 申请类型：1.用户认证，2.企业认证</li>
  * 	<li>phone : 电话号码</li>
+ * 	<li>contractNo : 合同编号</li>
  * <ul>
  * 
  */
@@ -31,6 +32,8 @@ public class CancelAuthFeedbackCommand {
 	private Byte type;
 	@NotNull
 	private String phone;
+	
+	private String contractNo;
 	public String getAppKey() {
 		return appKey;
 	}
@@ -72,6 +75,12 @@ public class CancelAuthFeedbackCommand {
 	}
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+	public String getContractNo() {
+		return contractNo;
+	}
+	public void setContractNo(String contractNo) {
+		this.contractNo = contractNo;
 	}
 	@Override
 	public String toString() {

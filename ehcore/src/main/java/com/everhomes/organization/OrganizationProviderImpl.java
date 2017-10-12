@@ -1946,8 +1946,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      * modify cause member_detail by lei lv
      **/
     @Override
-    public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+    public List<OrganizationMember> listOrganizationPersonnels(Integer namespaceId, String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
+
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         pageSize = pageSize + 1;
         List<OrganizationMember> result = new ArrayList<>();
@@ -2028,8 +2028,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 	@Override
-	public Integer countOrganizationPersonnels(Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+	public Integer countOrganizationPersonnels(Integer namespaceId, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<OrganizationMember> result = new ArrayList<>();
 		/**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/

@@ -157,7 +157,7 @@ public interface ActivityService {
 
 	SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd);
 
-	void importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files);
+	ImportSignupInfoResponse importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files);
 
 	ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd);
 
@@ -199,5 +199,7 @@ public interface ActivityService {
 	 * 同步报名人数
 	 */
 	void syncActivitySignupAttendeeCount();
+
+//	void exportErrorInfo(ExportErrorInfoCommand cmd, HttpServletResponse response);
 }
 

@@ -61,6 +61,16 @@ public class ListOrganizationContactCommand {
     @ItemType(Long.class)
     private List<Long> exceptIds;
 
+    private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
     public ListOrganizationContactCommand() {
     }
 

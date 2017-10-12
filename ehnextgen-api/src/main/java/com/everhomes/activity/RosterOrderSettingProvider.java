@@ -11,6 +11,6 @@ public interface RosterOrderSettingProvider {
 
 	//List<RosterOrderSetting> listRosterOrderSetting();
 
-	RosterOrderSetting findRosterOrderSettingByNamespace(Integer namespaceId);
+	RosterOrderSetting findRosterOrderSettingByNamespace(Integer namespaceId, Long categoryId);
 
 }

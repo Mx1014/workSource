@@ -252,7 +252,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		}
 
 		//新发布的没有则删除全部，如果有则一个个对比
-		if(config.getCategoryFlag() == 0 || config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
+		if(config.getCategoryFlag() == null || config.getCategoryFlag() == 0 || config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
 			for(int i=0; i<oldContentCategories.size(); i++){
 				activityProvider.deleteActivityCategories(oldContentCategories.get(i).getId());
 			}

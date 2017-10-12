@@ -1,0 +1,60 @@
+package com.everhomes.rest.hotTag;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ *     <li>name: 标签名</li>
+ *     <li>serviceType: 标签服务类型 参考{@link com.everhomes.rest.hotTag.HotTagServiceType}</li>
+ *     <li>namespaceId: 域空间Id，不传则取当前域空间的</li>
+ *     <li>categoryId: categoryId</li>
+ * </ul>
+ */
+public class DeleteHotTagByNameCommand {
+
+	private String name;
+
+	private String serviceType;
+
+	private Integer namespaceId;
+
+	private Long categoryId;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getServiceType() {
+		return serviceType;
+	}
+
+	public void setServiceType(String serviceType) {
+		this.serviceType = serviceType;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
+}

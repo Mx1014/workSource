@@ -3,7 +3,9 @@
 package com.everhomes.rest.news;
 
 import java.sql.Timestamp;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -20,10 +22,12 @@ import com.everhomes.util.StringHelper;
  * <li>likeCount: 赞数量</li>
  * <li>childCount: 评论数量</li>
  * <li>viewCount: 查看数量</li>
+ * <li>phone: 联系方式</li>
  * <li>likeFlag: 点赞状态，0未点赞，1不喜欢，2已点赞，参考{@link com.everhomes.rest.user.UserLikeType}</li>
  * <li>newsUrl: 新闻链接-供分享</li>
  * <li>newsWebShareUrl: 给web化提供的新闻链接-供分享</li>
  * <li>coverUri: 封面</li>
+ * <li>tags: 标签值</li>
  * </ul>
  */
 public class GetNewsDetailInfoResponse {
@@ -44,6 +48,9 @@ public class GetNewsDetailInfoResponse {
 	private String coverUri;
 	private Byte commentFlag;
 	private Integer namespaceId;
+	private Long phone;
+	@ItemType(NewsTagValsDTO.class)
+	private List<NewsTagValsDTO> tags;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -186,4 +193,19 @@ public class GetNewsDetailInfoResponse {
 		this.newsWebShareUrl = newsWebShareUrl;
 	}
 
+	public List<NewsTagValsDTO> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<NewsTagValsDTO> tags) {
+		this.tags = tags;
+	}
+
+	public Long getPhone() {
+		return phone;
+	}
+
+	public void setPhone(Long phone) {
+		this.phone = phone;
+	}
 }

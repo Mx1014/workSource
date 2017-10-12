@@ -11,8 +11,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectOffsetStep;
+import org.jooq.SelectQuery;
 import org.jooq.impl.DefaultRecordMapper;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
@@ -683,16 +689,21 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public List<Community> listCommunitiesByKeyWord(ListingLocator locator,
-			int count, String keyword) {
-		int namespaceId =UserContext.getCurrentNamespaceId(null);
+			int count, String keyword, Integer namespaceId, Byte communityType) {
+        if(namespaceId == null){
+            namespaceId =UserContext.getCurrentNamespaceId(null);
+        }
 		final List<Community> communities = new ArrayList<Community>();
 		Condition cond = Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId);
 		cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
 		if(null != locator.getAnchor()){
 			cond = cond.and(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
 		}
-
-		if(StringUtils.isEmpty(keyword)){
+		if(communityType != null){
+            cond = cond.and(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType));
+        }
+		
+		if(!StringUtils.isEmpty(keyword)){
 			cond = cond.and(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%')));
 		}
 		Condition condition = cond;
@@ -1569,8 +1580,44 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         return null;
     }
+	
+	@Override
+    public List<Community> listCommunitiesByOrgId(ListingLocator locator, int count, Long orgId, String keyword) {
 
-    @Override
+        int namespaceId =UserContext.getCurrentNamespaceId(null);
+        final List<Community> communities = new ArrayList<Community>();
+        Condition cond = Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId);
+        cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        if(null != locator.getAnchor()){
+            cond = cond.and(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
+        }
+
+        if(!StringUtils.isEmpty(keyword)){
+            cond = cond.and(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%')));
+        }
+
+        cond = cond.and(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(orgId));
+        Condition condition = cond;
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null,
+                (DSLContext context, Object reducingContext) -> {
+
+                    context.select(Tables.EH_COMMUNITIES.fields()).from(Tables.EH_COMMUNITIES)
+                            .join(Tables.EH_ORGANIZATION_COMMUNITIES)
+                            .on(Tables.EH_COMMUNITIES.ID.eq(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID))
+                            .where(condition)
+                            .limit(count)
+                            .fetch().map((r) -> {
+                        communities.add(RecordHelper.convert(r, Community.class));
+                        return null;
+                    });
+
+                    return true;
+                });
+
+        return communities;
+    }
+	
+	@Override
     public List<CommunityGeoPoint> listCommunityGeoPointByGeoHashInCommunities(double latitude, double longitude, int geoHashLength, List<Long> communityIds) {
         List<CommunityGeoPoint> l = new ArrayList<>();
         String geoHashStr = GeoHashUtils.encode(latitude, longitude).substring(0, geoHashLength);
@@ -1590,4 +1637,6 @@ public class CommunityProviderImpl implements CommunityProvider {
                 });
         return l;
     }
+
+
 }
