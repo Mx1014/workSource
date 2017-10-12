@@ -4256,6 +4256,13 @@ public class ActivityServiceImpl implements ActivityService {
         Long organizationId = cmd.getOrganizationId();
         Long communityId = cmd.getCommunityId();
         Integer namespaceId = cmd.getNamespaceId();
+
+        //先记录是否是查询整个域空间的帖子
+        boolean searchNamesapceFlag = false;
+		if(cmd.getCommunityId() == null && cmd.getOrganizationId()==null){
+			searchNamesapceFlag = true;
+		}
+
         if(namespaceId == null){
         	namespaceId = UserContext.getCurrentNamespaceId();
 		}
@@ -4308,31 +4315,33 @@ public class ActivityServiceImpl implements ActivityService {
             communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.in(communityIdList));
 
             //范围帖子会在各个目标发一个clone帖子，同时有一个发送到全部clone帖子，还有一个发送到全部的real真身帖子  add by yanjun 20170807
-			if(communityIdList.size() == 1){
-				//单个 -- 发送到单个目标的（clone、正常），或者发送到“全部”（正常）
-				communityCondition = communityCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode())
-						.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())));
-			}else{
+			if(searchNamesapceFlag){
 				//全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）
 				communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
 				communityCondition = communityCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
+
+			}else{
+				//单个 -- 发送到单个目标的（clone、正常），或者发送到“全部”（正常）
+				communityCondition = communityCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode())
+						.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())));
 			}
 
         }
         Condition orgCondition = null;
         if(organizationId != null) {
-            orgCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ORGANIZATION.getCode());
-            orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.eq(organizationId));
+            orgCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.in(VisibleRegionType.REGION.getCode(),VisibleRegionType.ORGANIZATION.getCode());
 
 			//范围帖子会在各个目标发一个clone帖子，同时有一个发送到全部clone帖子，还有一个发送到全部的real真身帖子  add by yanjun 20170807
-			if(communityIdList.size() == 1){
-				//单个 -- 发送到单个目标的（clone、正常），或者发送到“全部”（正常）
-				orgCondition = orgCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode())
-						.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())));
-			}else{
+			if(searchNamesapceFlag){
 				//全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）
 				orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode()));
 				orgCondition = orgCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
+
+			}else{
+				//单个 -- 发送到单个目标的（clone、正常），或者发送到“全部”（正常）
+				orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.eq(organizationId));
+				orgCondition = orgCondition.or(Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode())
+						.and(Tables.EH_ACTIVITIES.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())));
 			}
 
         }
@@ -4349,6 +4358,8 @@ public class ActivityServiceImpl implements ActivityService {
         Condition condition = activityCondition;
         if(visibleCondition != null) {
             condition = condition.and(visibleCondition);
+            //搜索的时候不要搜出真身帖 add by yanjun 2171011
+            condition = condition.and(Tables.EH_ACTIVITIES.CLONE_FLAG.ne(PostCloneFlag.REAL.getCode()));
         }
 
 		//删除官方标志  使用CATEGORY_ID， 不传默认使用CATEGORY_ID为1，详见前面condition条件 edit by yanjun 20170712

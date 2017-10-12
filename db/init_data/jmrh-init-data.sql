@@ -392,3 +392,15 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 -- added by wh 军民融合加审批管理菜单
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),52000,'', 'EhNamespaces', 999972,2);
+
+-- add by dengs 服务联盟、菜单修正 20171012
+select * from eh_web_menu_scopes WHERE owner_id = 999972 AND menu_id in (41700,41710,41720,41730,41740,41750,41760);
+DELETE FROM eh_web_menu_scopes WHERE owner_id = 999972 AND menu_id in (41700,41710,41720,41730,41740,41750,41760);
+
+select * from eh_service_alliance_categories WHERE id = 212529;
+SET @service_alliance_id = (SELECT MAX(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`)
+VALUES ((@service_alliance_id := @service_alliance_id + 1), 0, 'organaization', 1034291, '政策服务', '政策服务', 212529, '', '', '', '', 2, NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, NULL);
+
+SELECT * from eh_service_alliances WHERE parent_id = 212524;
+update eh_service_alliances SET parent_id = 212529 WHERE parent_id = 212524;

@@ -1883,6 +1883,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public List<AuthorizationServiceModuleMembersDTO> listAuthorizationServiceModuleMembers(ListAuthorizationServiceModuleCommand cmd){
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 		List<AuthorizationServiceModuleMembersDTO> dtos = new ArrayList<>();
 		List<ServiceModuleAssignment> resourceAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOwnerId(), null);
 
@@ -1894,7 +1899,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			Organization orgCommoand = new Organization();
 			orgCommoand.setId(cmd.getOrganizationId());
 			orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-			List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(null ,orgCommoand, null ,null , locator, pageSize);
+			List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getNamespaceId(),
+					null ,orgCommoand, null ,null , locator, pageSize);
 
 			for (OrganizationMember member: organizationMembers) {
 				if(OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(member.getTargetType())){
@@ -1930,6 +1936,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public void deleteAuthorizationServiceModule(DeleteAuthorizationServiceModuleCommand cmd) {
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 		EntityType entityType = EntityType.fromCode(cmd.getOwnerType());
 		if(null == entityType){
 			LOGGER.error("params ownerType error, cmd="+ cmd.getOwnerType());
@@ -1963,7 +1974,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			Organization orgCommoand = new Organization();
 			orgCommoand.setId(cmd.getOrganizationId());
 			orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-			List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(null ,orgCommoand, null ,null , locator, pageSize);
+			List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getNamespaceId(),
+					null ,orgCommoand, null ,null , locator, pageSize);
 
 			//删除部门下所有人员的授权
 			for (OrganizationMember member:organizationMembers) {
