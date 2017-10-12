@@ -347,7 +347,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 增加一个收费标准         1
+    // this is for 增加一个收费标准         4
     /**
      * <p>增加一个收费标准</p>
      * <b>URL: /asset/createChargingStandard</b>
@@ -362,7 +362,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 修改一个收费标准         1
+    // this is for 修改一个收费标准         4
     /**
      * <p>修改一个收费标准</p>
      * <b>URL: /asset/modifyChargingStandard</b>
@@ -377,7 +377,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 查看一个收费标准详情       1
+    // this is for 查看一个收费标准详情       4
     /**
      * <p>查看一个收费标准详情</p>
      * <b>URL: /asset/getChargingStandardDetail</b>
@@ -392,21 +392,22 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 删除一个收费标准         1
+    // this is for 删除一个收费标准         4
     /**
      * <p>删除一个收费标准</p>
      * <b>URL: /asset/deleteChargingStandard</b>
      */
     @RequestMapping("deleteChargingStandard")
-    @RestReturn(value = String.class)
+    @RestReturn(value = DeleteChargingStandardDTO.class)
     public RestResponse deleteChargingStandard(DeleteChargingStandardCommand cmd) {
-        RestResponse response = new RestResponse();
+        DeleteChargingStandardDTO dto = assetService.deleteChargingStandard(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
 
-    // this is for 展示所有可以插入的变量          1
+    // this is for 展示所有可以插入的变量          4
     /**
      * <p>展示所有可以插入的变量</p>
      * <b>URL: /asset/listAvailableVariables</b>
@@ -414,12 +415,14 @@ public class AssetController extends ControllerBase {
     @RequestMapping("listAvailableVariables")
     @RestReturn(value = ListAvailableVariablesDTO.class, collection = true)
     public RestResponse listAvailableVariables(ListAvailableVariablesCommand cmd) {
-        RestResponse response = new RestResponse();
+        List<ListAvailableVariablesDTO> dtos = assetService.listAvailableVariables(cmd);
+        RestResponse response = new RestResponse(dtos);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
 
+    // 解析并返回新增的公式
     /**
      * <p>解析并保存新增的公式</p>
      * <b>URL: /asset/createFormula</b>

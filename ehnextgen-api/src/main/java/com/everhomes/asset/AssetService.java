@@ -110,4 +110,10 @@ public interface AssetService {
     void modifyChargingStandard(ModifyChargingStandardCommand cmd);
 
     GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
+
+    DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd);
+
+    List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
+
+    CreateFormulaDTO createFormula(CreateFormulaCommand cmd);
 }

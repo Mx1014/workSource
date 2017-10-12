@@ -51,6 +51,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
 import freemarker.core.ArithmeticEngine;
+import freemarker.core.ReturnInstruction;
 import org.jooq.*;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
@@ -2019,9 +2020,52 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd) {
         DSLContext context = getReadOnlyContext();
-
+        GetChargingStandardDTO dto = new GetChargingStandardDTO();
+        EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
+        context.select(t.NAME,t.FORMULA,t.BILLING_CYCLE,t.INSTRUCTION)
+                .from(t)
+                .where(t.ID.eq(cmd.getChargingStandardId()))
+                .fetch()
+                .map(r -> {
+                    dto.setChargingStandardName(r.getValue(t.NAME));
+                    dto.setFormula(r.getValue(t.FORMULA));
+                    dto.setBillingCycle(r.getValue(t.BILLING_CYCLE));
+                    dto.setInstruction(r.getValue(t.INSTRUCTION));
+                    return null;
+                });
+        return dto;
     }
 
+    @Override
+    public void deleteChargingStandard(Long chargingStandardId, Long ownerId, String ownerType) {
+        DSLContext context = getReadWriteContext();
+        EhPaymentChargingStandardsScopes t = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
+        context.delete(t)
+                .where(t.ID.eq(chargingStandardId))
+                .and(t.OWNER_ID.eq(ownerId))
+                .and(t.OWNER_TYPE.eq(ownerType))
+                .execute();
+    }
+
+    @Override
+    public List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd) {
+        DSLContext context = getReadOnlyContext();
+        List<ListAvailableVariablesDTO> list = new ArrayList<>();
+        EhPaymentVariables t = Tables.EH_PAYMENT_VARIABLES.as("t");
+        context.select(t.ID,t.NAME,t.IDENTIFIER)
+                .from(t)
+                .where(t.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()))
+                .fetch()
+                .map(r ->{
+                    ListAvailableVariablesDTO dto = new ListAvailableVariablesDTO();
+                    dto.setVariableIdentifier(r.getValue(t.IDENTIFIER));
+                    dto.setVariableId(r.getValue(t.ID));
+                    dto.setVariableName(r.getValue(t.NAME));
+                    list.add(dto);
+                    return null;});
+        return list;
+
+    }
 
 
     private DSLContext getReadOnlyContext(){

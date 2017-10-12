@@ -1179,6 +1179,54 @@ public class AssetServiceImpl implements AssetService {
         return assetProvider.getChargingStandardDetail(cmd);
     }
 
+    /**
+     * 删除一个收费标准，删除之前，查询其是否已经被引用
+     * 1. 是否已经被处于有效期的合同引用
+     */
+    @Override
+    public DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd) {
+        DeleteChargingStandardDTO dto = new DeleteChargingStandardDTO();
+        Object obj = null;
+        //通过熊颖的接口获得收费标准是否已经被引用
+        if(obj == null){
+            assetProvider.deleteChargingStandard(cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType());
+            dto.setMessage("success");
+        }else{
+            dto.setMessage("failed");
+        }
+        return dto;
+    }
+
+    @Override
+    public List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd) {
+        return assetProvider.listAvailableVariables(cmd);
+    }
+
+    /**
+     * 解析公式，传来的公式可以是identifer构成的，也可以是汉字构成的，先按照后者解析
+     * 返回值
+     *  1. formula公式名称，将解析符号去掉即可
+     *  普通公式时：
+     *      2. formulaJson公式解析式，去掉解析符号将汉字替换为对应的标识
+     *      3. formulaType，将传来的返回
+     *  阶梯公式时：
+     *      2. 需要自己组装公式，从公式表中得到条件与公式并存储
+     *      3.
+     *  梯度公式时：
+     *      2. 需要自己组装公式，从公式表中得到条件与公式并存储
+     *      3. 返回id
+     */
+    @Override
+    public CreateFormulaDTO createFormula(CreateFormulaCommand cmd) {
+        CreateFormulaDTO dto = new CreateFormulaDTO();
+        Byte formulaType = cmd.getFormulaType();
+        dto.setFormulaType(formulaType);
+        if(formulaType==1){
+            //普通公式时
+        }
+
+    }
+
     private void checkNullProhibit(String name , Object object) {
         if(object == null) {
             LOGGER.error(name + " cannot be null");

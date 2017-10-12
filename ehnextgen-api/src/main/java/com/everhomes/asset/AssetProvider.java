@@ -173,4 +173,8 @@ public interface AssetProvider {
     void modifyChargingStandard(ModifyChargingStandardCommand cmd);
 
     GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
+
+    void deleteChargingStandard(Long chargingStandardId, Long ownerId, String ownerType);
+
+    List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
 }
