@@ -98,4 +98,10 @@ public class QuestionnaireRangeProviderImpl implements QuestionnaireRangeProvide
 				.orderBy(Tables.EH_QUESTIONNAIRE_RANGES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireRange.class));
 	}
+
+	@Override
+	public void deleteRangesByQuestionnaireId(Long questionnaireId) {
+		getReadWriteContext().delete(Tables.EH_QUESTIONNAIRE_RANGES).where(Tables.EH_QUESTIONNAIRE_RANGES.QUESTIONNAIRE_ID.eq(questionnaireId)).execute();
+
+	}
 }

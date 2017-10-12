@@ -5,12 +5,18 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.alibaba.fastjson.JSONArray;
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.community.CommunityService;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.organization.ListEnterprisesCommand;
-import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.common.ActivationFlag;
+import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
+import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.questionnaire.*;
+import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.util.TimSorter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +35,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
 
 @Component
 public class QuestionnaireServiceImpl implements QuestionnaireService {
@@ -72,6 +74,12 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Autowired
 	private OrganizationService organizationService;
+
+	@Autowired
+	private CommunityService communityService;
+
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 	
 
 	@Override
@@ -204,71 +212,145 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	public CreateQuestionnaireResponse createQuestionnaire(CreateQuestionnaireCommand cmd) {
 		QuestionnaireDTO questionnaireDTO = cmd.getQuestionnaire();
 		checkQuestionnaireParameters(questionnaireDTO);
-
+		List<QuestionnaireRangeDTO> r = null;
 		if(QuestionnaireStatus.ACTIVE == QuestionnaireStatus.fromCode(questionnaireDTO.getStatus())){
 			//计算问卷推送的范围
-			List<QuestionnaireRangeDTO> ranges = calculateQuesionnaireRange(questionnaireDTO);
+			r = calculateQuesionnaireRange(questionnaireDTO,QuestionnaireTargetType.fromCode(questionnaireDTO.getTargetType()));
 		}
-		
+		final List<QuestionnaireRangeDTO> userRanges = r;
 		QuestionnaireDTO result = (QuestionnaireDTO)dbProvider.execute(s->{
 			//如果是重新编辑问卷，则把之前的题目和选项删除
 			Questionnaire questionnaire;
 			if (questionnaireDTO.getId() != null) {
 				questionnaire = (Questionnaire)coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_QUESTIONNAIRE.getCode() + questionnaireDTO.getId()).enter(()->{
 					Questionnaire q = findQuestionnaireForUpdate(questionnaireDTO);
-					updateQuestionnaire(q, questionnaireDTO);
+					updateQuestionnaire(q, questionnaireDTO,userRanges);
 					return q;
 				}).first();
 				
 				questionnaireQuestionProvider.deleteQuestionsByQuestionnaireId(questionnaireDTO.getId());
 				questionnaireOptionProvider.deleteOptionsByQuestionnaireId(questionnaireDTO.getId());
+				questionnaireRangeProvider.deleteRangesByQuestionnaireId(questionnaireDTO.getId());
 			} else {
 				questionnaire = ConvertHelper.convert(questionnaireDTO, Questionnaire.class);
 				questionnaire.setCutOffTime(questionnaireDTO.getCutOffTime()==null?null:new Timestamp(questionnaireDTO.getCutOffTime()));
 				questionnaire.setPublishTime(questionnaireDTO.getPublishTime()==null?null:new Timestamp(questionnaireDTO.getPublishTime()));
+				if(QuestionnaireStatus.ACTIVE == QuestionnaireStatus.fromCode(questionnaireDTO.getStatus())){
+					questionnaire.setUserScope(StringHelper.toJsonString(userRanges));
+					questionnaire.setTargetUserNum(userRanges.size());
+				}
 				questionnaireProvider.createQuestionnaire(questionnaire);
 			}
 			
 			List<QuestionnaireQuestionDTO> questionDTOs = createQuestions(questionnaire.getId(), questionnaireDTO.getQuestions());
-			
+
+			createRanges(questionnaire.getId(), questionnaireDTO.getRanges());
+
 			return convertToQuestionnaireDTO(questionnaire, questionDTOs);
 		});
-		
+
+		//发送消息
+		if(userRanges != null){
+			asynchronousSendMessage(result.getId());
+		}
 		return new CreateQuestionnaireResponse(result);
 	}
 
-	private List<QuestionnaireRangeDTO> calculateQuesionnaireRange(QuestionnaireDTO questionnaireDTO) {
+	private void asynchronousSendMessage(Long questionnaireId) {
+		QuestionnaireAsynchronizedServiceImpl handler = PlatformContext.getComponent("questionnaireAsynchronizedServiceImpl");
+		handler.pushToQueque(questionnaireId);
+	}
+
+	private void createRanges(Long questionnaireId, List<QuestionnaireRangeDTO> ranges) {
+		ranges.forEach(r->{
+			QuestionnaireRange questionnaireRange = ConvertHelper.convert(r,QuestionnaireRange.class)
+			questionnaireRange.setQuestionnaireId(questionnaireId);
+			questionnaireRangeProvider.createQuestionnaireRange(questionnaireRange);
+		});
+	}
+
+	private List<QuestionnaireRangeDTO> calculateQuesionnaireRange(QuestionnaireDTO questionnaireDTO, QuestionnaireTargetType targetType) {
 		List<QuestionnaireRangeDTO> ranges = new ArrayList<QuestionnaireRangeDTO>();
 		for (QuestionnaireRangeDTO rangeDTO : questionnaireDTO.getRanges()) {
 			QuestionnaireRangeType enumRangeType = QuestionnaireRangeType.fromCode(rangeDTO.getRangeType());
 			QuestionnaireRange range = new QuestionnaireRange();
-			switch (enumRangeType){
-				case USER:
-					ranges.add(rangeDTO);
-					break;
-				case BUILDING:
-					ListEnterprisesCommand cmd = new ListEnterprisesCommand();
-					cmd.setCommunityId(rangeDTO.getCommunityId());
-					cmd.setNamespaceId(rangeDTO.getNamespaceId());
-					cmd.setBuildingName(cmd.getBuildingName());
-					cmd.setPageSize(1000000);
-					ListEnterprisesCommandResponse rs = organizationService.listNewEnterprises(cmd);
-					rs.getDtos().stream().forEach(r->{
-						ranges.addAll(getEnterpriseUsers(String.valueOf(r.getOrganizationId()));
-					});
-					break;
-				case ENTERPRISE:
-					ranges.addAll(getEnterpriseUsers(rangeDTO.getRange()));
-					break;
-				case COMMUNITY_ALL:
-					break;
-				case COMMUNITY_UNAUTHORIZED:
-					break;
-				case COMMUNITY_AUTHENTICATED:
-					break;
+			if(targetType == QuestionnaireTargetType.USER){
+				switch (enumRangeType){
+					case USER:
+						ranges.add(rangeDTO);
+						break;
+					case BUILDING:
+						ListEnterprisesCommand cmd = new ListEnterprisesCommand();
+						cmd.setCommunityId(rangeDTO.getCommunityId());
+						cmd.setNamespaceId(rangeDTO.getNamespaceId());
+						cmd.setBuildingName(cmd.getBuildingName());
+						cmd.setPageSize(1000000);
+						ListEnterprisesCommandResponse rs = organizationService.listNewEnterprises(cmd);
+						rs.getDtos().stream().forEach(r->{
+							ranges.addAll(getEnterpriseUsers(String.valueOf(r.getOrganizationId()));
+						});
+						break;
+					case ENTERPRISE:
+						ranges.addAll(getEnterpriseUsers(rangeDTO.getRange()));
+						break;
+					case COMMUNITY_ALL:
+						ranges.addAll(getCommunityUsers(rangeDTO.getRange(),(Integer)null));
+						break;
+					case COMMUNITY_UNAUTHORIZED:
+						ranges.addAll(getCommunityUsers(rangeDTO.getRange(),1));
+						break;
+					case COMMUNITY_AUTHENTICATED:
+						ranges.addAll(getCommunityUsers(rangeDTO.getRange(),2));
+						break;
+				}
+			}else if (targetType == QuestionnaireTargetType.ORGANIZATION){
+				switch (enumRangeType){
+					case ENTERPRISE:
+						ranges.addAll(getOrganizationAdministrators(rangeDTO.getRange()));
+						break;
+				}
 			}
 		}
+		//去重
+		Map<String,QuestionnaireRangeDTO> map = new HashMap<String,QuestionnaireRangeDTO>();
+		ranges.forEach(r->{
+			map.put(r.getRange(),r);
+		});
+		ranges.clear();
+		map.forEach((k,v)->{
+			ranges.add(v);
+		});
 		return ranges;
+	}
+
+	private List<QuestionnaireRangeDTO> getOrganizationAdministrators(String range) {
+		ListServiceModuleAdministratorsCommand cmd = new ListServiceModuleAdministratorsCommand();
+		cmd.setOrganizationId(Long.valueOf(range));
+		cmd.setActivationFlag(ActivationFlag.YES.getCode());
+		List<OrganizationContactDTO> dtos = rolePrivilegeService.listOrganizationAdministrators(cmd);
+		return dtos.stream().map(r->{
+			QuestionnaireRangeDTO dto = new QuestionnaireRangeDTO();
+			dto.setRange(String.valueOf(r.getTargetId()));
+			dto.setRangeType(QuestionnaireRangeType.USER.getCode());
+			dto.setRangeDescription(r.getContactName());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	private  List<QuestionnaireRangeDTO> getCommunityUsers(String range, Integer isAuthor) {
+		ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
+		cmd.setCommunityId(Long.valueOf(range));
+		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		cmd.setPageSize(10000000);
+		cmd.setIsAuth(isAuthor);
+		CommunityUserAddressResponse response = communityService.listUserBycommunityId(cmd);
+		return response.getDtos().stream().map(r->{
+			QuestionnaireRangeDTO dto = new QuestionnaireRangeDTO();
+			dto.setRange(String.valueOf(r.getUserId()));
+			dto.setRangeType(QuestionnaireRangeType.USER.getCode());
+			dto.setRangeDescription(r.getUserName());
+			return dto;
+		}).collect(Collectors.toList());
 	}
 
 	private List<QuestionnaireRangeDTO> getEnterpriseUsers(String range) {
@@ -448,7 +530,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		return questionnaire;
 	}
 
-	private void updateQuestionnaire(Questionnaire questionnaire, QuestionnaireDTO questionnaireDTO) {
+	private void updateQuestionnaire(Questionnaire questionnaire, QuestionnaireDTO questionnaireDTO, List<QuestionnaireRangeDTO> userRanges) {
 		questionnaire.setQuestionnaireName(questionnaireDTO.getQuestionnaireName());
 		questionnaire.setDescription(questionnaireDTO.getDescription());
 		questionnaire.setStatus(questionnaireDTO.getStatus());
@@ -459,6 +541,10 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		questionnaire.setPublishTime(questionnaireDTO.getPublishTime()==null?null:new Timestamp(questionnaireDTO.getPublishTime()));
 		questionnaire.setSupportAnonymous(questionnaireDTO.getSupportAnonymous());
 		questionnaire.setSupportShare(questionnaireDTO.getSupportShare());
+		if(QuestionnaireStatus.ACTIVE == QuestionnaireStatus.fromCode(questionnaireDTO.getStatus())){
+			questionnaire.setUserScope(StringHelper.toJsonString(userRanges));
+			questionnaire.setTargetUserNum(userRanges.size());
+		}
 		questionnaireProvider.updateQuestionnaire(questionnaire);
 	}
 

@@ -15,4 +15,5 @@ public interface QuestionnaireRangeProvider {
 
 	List<QuestionnaireRange> listQuestionnaireRangeByQuestionnaireId(Long questionnaireId);
 
+	void deleteRangesByQuestionnaireId(Long id);
 }
