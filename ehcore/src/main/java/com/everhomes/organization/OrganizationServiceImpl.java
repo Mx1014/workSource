@@ -5444,7 +5444,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
         }
 
-        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(keywords, cmd.getIsSignedup(), visibleFlag, locator, pageSize, cmd);
+        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(keywords, cmd.getIsSignedup(), visibleFlag, locator, pageSize, cmd, cmd.getFilterScopeTypes().get(0));
 
         Map<String, OrganizationMember> contact_member = new HashMap<>();
 

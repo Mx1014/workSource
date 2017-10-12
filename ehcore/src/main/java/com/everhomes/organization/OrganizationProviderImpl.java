@@ -5484,7 +5484,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-	public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand) {
+	public List<OrganizationMember> listOrganizationPersonnelsWithDownStream(String keywords, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand, String filterScopeType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
 		List<OrganizationMember> result = new ArrayList<>();
@@ -5496,12 +5496,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		Organization org = findOrganizationById(listCommand.getOrganizationId());
 
+		Condition cond = null;
+		if(filterScopeType.equals(FilterOrganizationContactScopeType.CURRENT.getCode())){
+			cond = t1.field("group_path").like(org.getPath()+"%");
+		}else{
+			cond = t1.field("organization_id").eq(listCommand.getOrganizationId());
+		}
 
-		Condition cond = t1.field("group_path").like(org.getPath()+"%").and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		cond = cond.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
 
 		if (!StringUtils.isEmpty(keywords)) {
 			Condition cond1 = t2.field("contact_token").eq(keywords);
-			cond1 = cond1.or(t2.field("contact_name").like("%" + keywords + "%"));
+			cond1 = cond1.or(t2.field("contact_name").like("%" + keywords + "%")).or(t2.field("employee_no"));
 			cond = cond.and(cond1);
 		}
 
