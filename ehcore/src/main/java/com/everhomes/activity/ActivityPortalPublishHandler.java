@@ -56,14 +56,17 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		//删除内容分类
 		deleteContentCategory(config, namespaceId);
 
-		//如果没有则增加默认分类
-		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() ==0){
+		//如果没有则增加默认分类、或者子分类关闭
+		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() ==0
+				|| config.getCategoryFlag() == null || config.getCategoryFlag().byteValue() == 0){
 				List<ActivityCategoryDTO> listDto = new ArrayList<>();
 				ActivityCategoryDTO newDto = new ActivityCategoryDTO();
 				newDto.setAllFlag(AllFlagType.YES.getCode());
 				newDto.setName("all");
 				listDto.add(newDto);
 				config.setCategoryDTOList(listDto);
+
+				config.setCategoryFlag((byte)1);
 
 		}
 

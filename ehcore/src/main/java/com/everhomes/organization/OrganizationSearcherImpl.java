@@ -15,10 +15,8 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.common.xcontent.ToXContent.Params;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -375,10 +373,18 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         if(StringUtils.isEmpty(cmd.getKeyword())) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-        	qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("name", 5.0f)
-                    .field("name.pinyin_prefix", 2.0f)
-                    .field("name.pinyin_gram", 1.0f);      
+
+            // simplifyFlag = 1 简化版的搜索 add by yanjun 20171012
+            if(cmd.getSimplifyFlag() != null && cmd.getSimplifyFlag().byteValue() == 1){
+                qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                        .field("name", 5.0f);
+            }else {
+                qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                        .field("name", 5.0f)
+                        .field("name.pinyin_prefix", 2.0f)
+                        .field("name.pinyin_gram", 1.0f);
+            }
+
         }
         
         FilterBuilder fb = null;
@@ -429,7 +435,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
         OrganizationQueryResult result = new OrganizationQueryResult();
         
-        List<OrganizationDTO> dtos = this.getDTOs(rsp);
+        List<OrganizationDTO> dtos = this.getDTOs(rsp, cmd.getSimplifyFlag());
         
         if(dtos.size() > pageSize){
 //        	result.setPageAnchor(dtos.get(pageSize - 1).getId());
@@ -439,12 +445,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         	dtos.remove(dtos.size() - 1);
         }
         
-        result.setDtos(this.getDTOs(rsp));
+        result.setDtos(this.getDTOs(rsp, cmd.getSimplifyFlag()));
         
         return result;
     }
     
-    private List<OrganizationDTO> getDTOs(SearchResponse rsp) {
+    private List<OrganizationDTO> getDTOs(SearchResponse rsp, Byte simplifyFlag) {
         List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
         SearchHit[] docs = rsp.getHits().getHits();
         for (SearchHit sd : docs) {
@@ -467,16 +473,19 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     				if(ns != null)
     					dto.setNamespaceName(ns.getName());
     			}
-    	    	
-    	    	ListOrganizationAdministratorCommand orgAdminCmd = new ListOrganizationAdministratorCommand();
-		    	orgAdminCmd.setOrganizationId(dto.getId());
-		    	ListOrganizationMemberCommandResponse res = rolePrivilegeService.listOrganizationAdministrators(orgAdminCmd);
-		    	if(res != null && res.getMembers() != null && res.getMembers().size() > 0) {
-		    		OrganizationMemberDTO member = res.getMembers().get(0);
-		    		dto.setEnterpriseContactor(member.getContactName());
-			    	dto.setMobile(member.getContactToken());
-		    	}
-    			
+
+    			// add if by yanjun for no search detail  20171012
+    			if(simplifyFlag == null || simplifyFlag.byteValue() == 0){
+                    ListOrganizationAdministratorCommand orgAdminCmd = new ListOrganizationAdministratorCommand();
+                    orgAdminCmd.setOrganizationId(dto.getId());
+                    ListOrganizationMemberCommandResponse res = rolePrivilegeService.listOrganizationAdministrators(orgAdminCmd);
+                    if(res != null && res.getMembers() != null && res.getMembers().size() > 0) {
+                        OrganizationMemberDTO member = res.getMembers().get(0);
+                        dto.setEnterpriseContactor(member.getContactName());
+                        dto.setMobile(member.getContactToken());
+                    }
+                }
+
             	dtos.add(dto);
             	
             }

@@ -81,3 +81,24 @@ ALTER TABLE eh_organization_member_details ADD COLUMN region_code VARCHAR(64) CO
 
 -- bydengs,20171011,添加一个属性，存跳转的路由
 ALTER TABLE `eh_service_alliances` ADD COLUMN `jump_service_alliance_routing` VARCHAR(2048) COMMENT 'jump to other service alliance routing';
+
+-- fix rental add by sw 20171012
+ALTER TABLE `eh_rentalv2_orders` ADD COLUMN `rental_type` tinyint(4) DEFAULT NULL;
+update eh_rentalv2_orders o join eh_rentalv2_resources r on o.rental_resource_id = r.id set o.rental_type = r.rental_type;
+
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `cell_begin_id`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `cell_end_id`;
+
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `org_member_workday_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `org_member_weekend_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `approving_user_workday_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `approving_user_weekend_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `workday_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `weekend_price`;
+
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `rental_type`;
+
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `discount_type`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `full_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `cut_price`;
+ALTER TABLE eh_rentalv2_resources DROP COLUMN `discount_ratio`;
