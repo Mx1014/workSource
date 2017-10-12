@@ -157,7 +157,7 @@ public class AuthoriztionController extends ControllerBase {
 			}else{
 				StringBuffer desc = new StringBuffer();
 				desc.append(response.getErrorDescription()).append("\n地址：")
-				.append(addressDTO.getBuildingName())
+				.append(addressDTO.getCommunityName())
 				.append("  ")
 				.append(addressDTO.getBuildingName())
 				.append("  ")
