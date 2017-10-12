@@ -101,7 +101,7 @@ public class AuthoriztionController extends ControllerBase {
 				List<ZjgkResponse> list = entity.getResponse();
 				if (list != null) {
 					try {
-						list = fiterListByContractNo(entity,cmd.getContractNo());
+//						list = fiterListByContractNo(entity,cmd.getContractNo());
 						for (ZjgkResponse r : list) {
 							//依次退租
 							DisclaimAddressCommand disCmd = new DisclaimAddressCommand();
@@ -136,9 +136,18 @@ public class AuthoriztionController extends ControllerBase {
 	private List<ZjgkResponse> fiterListByContractNo(ZjgkJsonEntity<List<ZjgkResponse>> entity, String contractNo) {
 		List<ZjgkResponse> list = entity.getResponse();
 		List<ZjgkResponse> finalList = new ArrayList<ZjgkResponse>();
+		Map<String,ContractDetailDTO> repeatCheckMap = new HashMap<String,ContractDetailDTO>();
 		for (ZjgkResponse zjgkResponse : list) {
-			Community community = generateClaimAddressCommand(zjgkResponse.getCommunityName());
-			ContractDetailDTO dto = zJContractHandler.findContract(generateFindContractCommand(community,contractNo));
+			ContractDetailDTO dto = repeatCheckMap.get(zjgkResponse.getCommunityName());
+			if(dto == null){
+				Community community = generateClaimAddressCommand(zjgkResponse.getCommunityName());
+				dto = zJContractHandler.findContract(generateFindContractCommand(community,contractNo));
+				if(dto == null){
+					continue;
+				}
+				repeatCheckMap.put(zjgkResponse.getCommunityName(), dto);
+				
+			}
 			List<BuildingApartmentDTO> buildingdtos = dto.getApartments();
 			if(isEquals(zjgkResponse,buildingdtos)){
 				finalList.add(zjgkResponse);
@@ -148,6 +157,9 @@ public class AuthoriztionController extends ControllerBase {
 	}
 	
 	private boolean isEquals(ZjgkResponse r, List<BuildingApartmentDTO> s) {
+		if(s == null){
+			return false;
+		}
 		for (BuildingApartmentDTO x : s) {
 			if(r.getBuildingName().equals(x.getBuildingName()) && r.getApartmentName().equals(x.getApartmentName())){
 				return true;
