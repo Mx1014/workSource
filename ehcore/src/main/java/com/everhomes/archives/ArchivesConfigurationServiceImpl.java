@@ -10,15 +10,15 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 
 @Component
-public class ArchivesConfigurationServiceImpl implements ApplicationListener<ContextRefreshedEvent> {
+public class ArchivesConfigurationServiceImpl implements ArchivesConfigurationService,ApplicationListener<ContextRefreshedEvent> {
 
     @Autowired
     ScheduleProvider scheduleProvider;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        String triggerName = "ArchivesEventJobTrigger-" + System.currentTimeMillis();
-        String jobName = "ArchiveEventJobName-" + System.currentTimeMillis();
+        String triggerName = "ArchivesConfigurationTrigger-" + System.currentTimeMillis();
+        String jobName = "ArchiveConfigurationName-" + System.currentTimeMillis();
         String cronExpression = "0 0 4 * * ?";
         scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, ArchivesConfigurationtJob.class, new HashMap());
     }

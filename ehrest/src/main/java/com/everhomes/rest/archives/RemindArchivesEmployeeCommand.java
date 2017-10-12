@@ -17,9 +17,9 @@ public class RemindArchivesEmployeeCommand {
 
     private Long organizationId;
 
-    private String remindDay;
+    private Byte remindDay;
 
-    private String remindTime;
+    private Integer remindTime;
 
     @ItemType(String.class)
     private List<String> remindEmails;
@@ -35,20 +35,20 @@ public class RemindArchivesEmployeeCommand {
         this.organizationId = organizationId;
     }
 
-    public String getRemindTime() {
-        return remindTime;
-    }
-
-    public void setRemindTime(String remindTime) {
-        this.remindTime = remindTime;
-    }
-
-    public String getRemindDay() {
+    public Byte getRemindDay() {
         return remindDay;
     }
 
-    public void setRemindDay(String remindDay) {
+    public void setRemindDay(Byte remindDay) {
         this.remindDay = remindDay;
+    }
+
+    public Integer getRemindTime() {
+        return remindTime;
+    }
+
+    public void setRemindTime(Integer remindTime) {
+        this.remindTime = remindTime;
     }
 
     public List<String> getRemindEmails() {

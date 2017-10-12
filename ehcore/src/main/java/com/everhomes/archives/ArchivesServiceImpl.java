@@ -87,6 +87,9 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Autowired
     private LocaleTemplateService localeTemplateService;
 
+    @Autowired
+    private ArchivesConfigurationService archivesConfigurationService;
+
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
 
@@ -2116,5 +2119,9 @@ public class ArchivesServiceImpl implements ArchivesService {
             originNotify.setNotifyHour(cmd.getRemindTime());
             archivesProvider.updateArchivesNotifications(originNotify);
         }
+    }
+
+    public void executeArchivesNotification(){
+
     }
 }

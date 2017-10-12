@@ -3,6 +3,7 @@ import org.junit.Test;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class ArchivesTest {
     String str = "1506859877968";
@@ -20,7 +21,6 @@ public class ArchivesTest {
 
     }
 
-    @Test
     public void testDrive(){/*
         String str = "2017-09-20";
         java.sql.Date date = ArchivesUtil.currentDate();
@@ -29,5 +29,14 @@ public class ArchivesTest {
         System.out.println(date);
         System.out.println(date.toString().equals(dateStr.toString()));*/
         System.out.println(ArchivesUtil.currentDate());
+    }
+
+    @Test
+    public void testWeek(){
+        Calendar c = Calendar.getInstance();
+        System.out.println(c.get(Calendar.DAY_OF_WEEK));
+        int i = 7;
+        byte j = 7;
+        System.out.println(j==i);
     }
 }
