@@ -1971,9 +1971,50 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void createChargingStandard(Integer namespaceId, String ownerType, Long ownerId, String chargingStandardName, Byte formulaType, String formula, String formulaJson, String instruction) {
+    public void createChargingStandard(CreateChargingStandardCommand cmd) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        
+        com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c = new PaymentChargingStandards();
+        com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s = new PaymentChargingStandardScope();
+
+        // create a chargingstandard
+        c.setBillingCycle(cmd.getBillingCycle());
+        c.setChargingItemsId(cmd.getChargingItemId());
+        c.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        c.setCreatorUid(0l);
+        c.setFormula(cmd.getFormula());
+        c.setFormulaJson(cmd.getFormulaJson());
+        c.setFormulaType(cmd.getFormulaType());
+        long nextStandardId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS.getClass()));
+        c.setId(nextStandardId);
+        c.setName(cmd.getChargingStandardName());
+        c.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        c.setInstruction(cmd.getInstruction());
+
+        // create a scope corresponding to the chargingstandard just created
+        s.setChargingStandardId(nextStandardId);
+        s.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        s.setCreatorUid(0l);
+        s.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.getClass())));
+        s.setOwnerType(cmd.getOwnerType());
+        s.setOwnerId(cmd.getOwnerId());
+        s.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        EhPaymentChargingStandardsDao ChargingStandardsDao = new EhPaymentChargingStandardsDao(context.configuration());
+        EhPaymentChargingStandardsScopesDao chargingStandardsScopesDao = new EhPaymentChargingStandardsScopesDao(context.configuration());
+        ChargingStandardsDao.insert(c);
+        chargingStandardsScopesDao.insert(s);
     }
+
+    @Override
+    public void modifyChargingStandard(ModifyChargingStandardCommand cmd) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
+        context.update(t)
+                .set(t.NAME,cmd.getChargingStandardName())
+                .set(t.INSTRUCTION,cmd.getInstruction())
+                .where(t.ID.eq(cmd.getChargingStandardId()))
+                .execute();
+    }
+
 
 }

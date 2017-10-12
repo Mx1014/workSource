@@ -370,6 +370,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("modifyChargingStandard")
     @RestReturn(value = String.class)
     public RestResponse modifyChargingStandard(ModifyChargingStandardCommand cmd) {
+        assetService.modifyChargingStandard(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

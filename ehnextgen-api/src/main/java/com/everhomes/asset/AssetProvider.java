@@ -168,5 +168,7 @@ public interface AssetProvider {
 
     void configChargingItems(List<Long> chargingItemsIds, Long communityId, Integer namespaceId);
 
-    void createChargingStandard(Integer namespaceId, String ownerType, Long ownerId, String chargingStandardName, Byte formulaType, String formula, String formulaJson, String instruction);
+    void createChargingStandard(CreateChargingStandardCommand cmd);
+
+    void modifyChargingStandard(ModifyChargingStandardCommand cmd);
 }

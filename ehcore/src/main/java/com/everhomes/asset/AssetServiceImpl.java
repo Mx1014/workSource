@@ -1164,7 +1164,22 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void createChargingStandard(CreateChargingStandardCommand cmd) {
-        assetProvider.createChargingStandard(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingStandardName(),cmd.getFormulaType(),cmd.getFormula(),cmd.getFormulaJson(),cmd.getInstruction());
+        assetProvider.createChargingStandard(cmd);
+    }
+
+    @Override
+    public void modifyChargingStandard(ModifyChargingStandardCommand cmd) {
+        checkNullProhibit("chargingStandardId",cmd.getChargingStandardId());
+        checkNullProhibit("new chargingStandardName",cmd.getChargingStandardName());
+        assetProvider.modifyChargingStandard(cmd);
+    }
+
+    private void checkNullProhibit(String name , Object object) {
+        if(object == null) {
+            LOGGER.error(name + " cannot be null");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    name+ " cannot be null");
+        }
     }
 
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {

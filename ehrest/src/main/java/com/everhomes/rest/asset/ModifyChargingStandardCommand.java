@@ -7,11 +7,13 @@ import com.everhomes.util.StringHelper;
  *<ul>
  * <li>chargingStandardId:收费标准id</li>
  * <li>chargingStandardName:收费标准名称</li>
+ * <li>instruction:说明</li>
  *</ul>
  */
 public class ModifyChargingStandardCommand {
     private Long chargingStandardId;
     private String chargingStandardName;
+    private String instruction;
 
     @Override
     public String toString() {
@@ -31,6 +33,14 @@ public class ModifyChargingStandardCommand {
 
     public String getChargingStandardName() {
         return chargingStandardName;
+    }
+
+    public String getInstruction() {
+        return instruction;
+    }
+
+    public void setInstruction(String instruction) {
+        this.instruction = instruction;
     }
 
     public void setChargingStandardName(String chargingStandardName) {

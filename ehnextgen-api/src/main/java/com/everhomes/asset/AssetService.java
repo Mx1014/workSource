@@ -106,4 +106,6 @@ public interface AssetService {
     void configChargingItems(ConfigChargingItemsCommand cmd);
 
     void createChargingStandard(CreateChargingStandardCommand cmd);
+
+    void modifyChargingStandard(ModifyChargingStandardCommand cmd);
 }
