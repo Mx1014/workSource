@@ -73,7 +73,7 @@ public class QuestionnaireAsynchronizedAction implements Runnable {
 			linkBody.setActionUrl(contentServerService.parserUri(questionnaire.getPosterUri()));
 			linkBody.setContent("hello,你大爷的");
 			linkBody.setTitle("hello,nidaye ");
-			linkBody.setCoverUrl(contentServerService.parserUri(questionnaire.getPosterUri());
+			linkBody.setCoverUrl(contentServerService.parserUri(questionnaire.getPosterUri()));
 			String bodyStr = StringHelper.toJsonString(linkBody);
 
 			messageDto.setBody(bodyStr);

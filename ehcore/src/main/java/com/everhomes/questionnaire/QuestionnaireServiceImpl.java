@@ -263,7 +263,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	private void createRanges(Long questionnaireId, List<QuestionnaireRangeDTO> ranges) {
 		ranges.forEach(r->{
-			QuestionnaireRange questionnaireRange = ConvertHelper.convert(r,QuestionnaireRange.class)
+			QuestionnaireRange questionnaireRange = ConvertHelper.convert(r,QuestionnaireRange.class);
 			questionnaireRange.setQuestionnaireId(questionnaireId);
 			questionnaireRangeProvider.createQuestionnaireRange(questionnaireRange);
 		});
@@ -287,7 +287,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 						cmd.setPageSize(1000000);
 						ListEnterprisesCommandResponse rs = organizationService.listNewEnterprises(cmd);
 						rs.getDtos().stream().forEach(r->{
-							ranges.addAll(getEnterpriseUsers(String.valueOf(r.getOrganizationId()));
+							ranges.addAll(getEnterpriseUsers(String.valueOf(r.getOrganizationId())));
 						});
 						break;
 					case ENTERPRISE:
@@ -658,7 +658,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 					case ENTERPRISE:
 					case USER:
 						try {
-							Long.valueOf(dto.getRange())
+							Long.valueOf(dto.getRange());
 						}catch (Exception e){
 							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 									"Invalid parameters,rangeType = "+dto.getRangeType()+", range = "+dto.getRange());
