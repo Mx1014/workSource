@@ -101,7 +101,7 @@ public class AuthoriztionController extends ControllerBase {
 				List<ZjgkResponse> list = entity.getResponse();
 				if (list != null) {
 					try {
-						list = fiterListByContractNo(entity,cmd.getContractNo());
+//						list = fiterListByContractNo(entity,cmd.getContractNo());
 						for (ZjgkResponse r : list) {
 							//依次退租
 							DisclaimAddressCommand disCmd = new DisclaimAddressCommand();
