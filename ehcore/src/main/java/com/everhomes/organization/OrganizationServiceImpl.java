@@ -5566,6 +5566,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             return detailId;
     }
 
+    @Override
+    public List<Long> ListDetailsByEnterpriseId(Long enterpriseId) {
+            Organization org = this.organizationProvider.findOrganizationById(enterpriseId);
+            if(org != null){
+                return this.organizationProvider.listDetailsByEnterpriseId(org.getNamespaceId(), enterpriseId);
+            }
+        return null;
+    }
+
     /**
      * 根据contactToken退出删除organization path路径下的所有机构
      *
