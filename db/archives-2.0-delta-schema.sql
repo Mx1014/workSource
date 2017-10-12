@@ -88,6 +88,19 @@ CREATE TABLE `eh_archives_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
 
+DROP TABLE IF EXISTS `eh_archives_notifications`;
+CREATE TABLE `eh_archives_notifications` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+	`organization_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the organization',
+	`notify_day` VARCHAR(64) COMMENT 'the day of sending emails',
+	`notify_hour` VARCHAR(64) COMMENT 'the hour of sending emails',
+	`notify_emails` TEXT COMMENT 'email targets',
+	`operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of the operator',
+	`create_time` DATETIME COMMENT 'create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4;
+
 -- eh_organization_member_details 表的字段添加
 ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE COMMENT '离职日期';
 ALTER TABLE eh_organization_member_details CHANGE political_status political_flag VARCHAR(128) COMMENT '政治面貌';
