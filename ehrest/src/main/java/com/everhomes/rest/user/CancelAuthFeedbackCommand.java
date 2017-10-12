@@ -1,5 +1,7 @@
 package com.everhomes.rest.user;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -13,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * 	<li>crypto : 参数value加密算法名，有值时表示对指定的参数进行加密；无值则表示参数value不加密；</li>
  * 	<li>type : 申请类型：1.用户认证，2.企业认证</li>
  * 	<li>phone : 电话号码</li>
- * 	<li>contractNo : 合同编号</li>
+ * 	<li>addressList : 退租地址列表,参考{@link com.everhomes.rest.user.UnrentAddressDTO}</li>
  * <ul>
  * 
  */
@@ -33,7 +35,8 @@ public class CancelAuthFeedbackCommand {
 	@NotNull
 	private String phone;
 	
-	private String contractNo;
+	private List<UnrentAddressDTO> addressList;
+	
 	public String getAppKey() {
 		return appKey;
 	}
@@ -76,11 +79,11 @@ public class CancelAuthFeedbackCommand {
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
-	public String getContractNo() {
-		return contractNo;
+	public List<UnrentAddressDTO> getAddressList() {
+		return addressList;
 	}
-	public void setContractNo(String contractNo) {
-		this.contractNo = contractNo;
+	public void setAddressList(List<UnrentAddressDTO> addressList) {
+		this.addressList = addressList;
 	}
 	@Override
 	public String toString() {
