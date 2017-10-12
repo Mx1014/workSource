@@ -100,3 +100,5 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
   VALUES((@menu_scope_id := @menu_scope_id + 1),40070,'', 'EhNamespaces', 999981,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
   VALUES((@menu_scope_id := @menu_scope_id + 1),40071,'', 'EhNamespaces', 999981,2);
+
+  

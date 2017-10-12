@@ -141,6 +141,11 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		Condition cond = Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq(ownerType);
 		cond = cond.and(Tables.EH_WEB_MENU_SCOPES.OWNER_ID.eq(ownerId));
 		query.addConditions(cond);
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("getWebMenuScopeMapByOwnerId, sql=" + query.getSQL());
+			LOGGER.debug("getWebMenuScopeMapByOwnerId, bindValues=" + query.getBindValues());
+		}
 		query.fetch().map((r) -> {
 			map.put(r.getMenuId(), ConvertHelper.convert(r, WebMenuScope.class));
 			return null;
