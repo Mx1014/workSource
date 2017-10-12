@@ -1,5 +1,5 @@
 
-ALTER TABLE `eh_rentalv2_orders` ADD COLUMN `resource_type2` tinyint(4) DEFAULT NULL;
+ALTER TABLE `eh_rentalv2_orders` ADD COLUMN `rental_type` tinyint(4) DEFAULT NULL;
 
 ALTER TABLE eh_rentalv2_resources DROP COLUMN `cell_begin_id`;
 ALTER TABLE eh_rentalv2_resources DROP COLUMN `cell_end_id`;
