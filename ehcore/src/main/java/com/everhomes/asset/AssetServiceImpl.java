@@ -1174,6 +1174,11 @@ public class AssetServiceImpl implements AssetService {
         assetProvider.modifyChargingStandard(cmd);
     }
 
+    @Override
+    public GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd) {
+        return assetProvider.getChargingStandardDetail(cmd);
+    }
+
     private void checkNullProhibit(String name , Object object) {
         if(object == null) {
             LOGGER.error(name + " cannot be null");

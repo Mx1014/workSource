@@ -171,4 +171,6 @@ public interface AssetProvider {
     void createChargingStandard(CreateChargingStandardCommand cmd);
 
     void modifyChargingStandard(ModifyChargingStandardCommand cmd);
+
+    GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
 }

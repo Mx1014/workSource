@@ -385,7 +385,8 @@ public class AssetController extends ControllerBase {
     @RequestMapping("getChargingStandardDetail")
     @RestReturn(value = GetChargingStandardDTO.class)
     public RestResponse getChargingStandardDetail(GetChargingStandardCommand cmd) {
-        RestResponse response = new RestResponse();
+        GetChargingStandardDTO dto = assetService.getChargingStandardDetail(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;

@@ -1,1 +1,1 @@
-ALTER TABLE `eh_payment_charging_standards` ADD COLUMN `instruction` DEFAULT NULL COMMENT '说明';
+ALTER TABLE `eh_payment_charging_standards` ADD COLUMN `instruction` VARCHAR(1024) DEFAULT NULL COMMENT '说明';

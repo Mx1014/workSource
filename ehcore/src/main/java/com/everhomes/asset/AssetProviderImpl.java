@@ -2016,5 +2016,20 @@ public class AssetProviderImpl implements AssetProvider {
                 .execute();
     }
 
+    @Override
+    public GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd) {
+        DSLContext context = getReadOnlyContext();
+
+    }
+
+
+
+    private DSLContext getReadOnlyContext(){
+       return this.dbProvider.getDslContext(AccessSpec.readOnly());
+    }
+    private DSLContext getReadWriteContext(){
+        return this.dbProvider.getDslContext(AccessSpec.readWrite());
+    }
+
 
 }
