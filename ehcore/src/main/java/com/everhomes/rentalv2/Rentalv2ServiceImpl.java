@@ -1084,6 +1084,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalSiteDTO rentalSiteDTO = ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
 		rentalSiteDTO.setUnauthVisible(resourceType.getUnauthVisible());
 
+		if (priceRules.size() > 0) {
+			Rentalv2PriceRule priceRule = priceRules.get(0);
+			rentalSiteDTO.setRentalType(priceRule.getRentalType());
+		}
+
 		rentalSiteDTO.setSitePriceRules(priceRules.stream().map(p->convertToSitePriceRuleDTO(rentalSite, p, resourceType, sceneTokenDTO))
 				.collect(Collectors.toList()));
 		return rentalSiteDTO;
