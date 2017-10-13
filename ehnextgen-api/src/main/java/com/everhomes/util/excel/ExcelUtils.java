@@ -19,6 +19,8 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -296,7 +298,7 @@ public class ExcelUtils {
     /**
      * @Title: exportExcel
      * @Description: 导出Excel的方法
-     * @author: evan @ 2014-01-09
+     * @Author from internet
      * @param workbook
      * @param sheetNum (sheet的位置，0表示第一个表格中的第一个sheet)
      * @param sheetTitle  （sheet的名称）
@@ -402,8 +404,6 @@ public class ExcelUtils {
                 index++;
             }
         }
-<<<<<<< HEAD
-=======
     }
     /**
      * 描述：根据文件后缀，自适应上传文件的版本
@@ -458,7 +458,6 @@ public class ExcelUtils {
                 break;
         }
         return value;
->>>>>>> refs/heads/master
     }
 
     public ExcelUtils() {
