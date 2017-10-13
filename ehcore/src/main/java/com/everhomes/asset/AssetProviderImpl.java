@@ -2099,6 +2099,20 @@ public class AssetProviderImpl implements AssetProvider {
         dao.insert(group);
     }
 
+    @Override
+    public void modifyBillGroup(ModifyBillGroupCommand cmd) {
+        DSLContext context = getReadWriteContext();
+        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        context.update(t)
+                .set(t.NAME,cmd.getBillGroupName())
+                .set(t.BILLS_DAY,cmd.getBillDay())
+                .set(t.BALANCE_DATE_TYPE,cmd.getBillingCycle())
+                .set(t.DUE_DAY_TYPE,cmd.getDueDateType())
+                .set(t.DUE_DAY_TYPE,cmd.getDueDateType())
+                .where(t.ID.eq(cmd.getBillGroupId()))
+                .execute();
+    }
+
 
     private DSLContext getReadOnlyContext(){
        return this.dbProvider.getDslContext(AccessSpec.readOnly());

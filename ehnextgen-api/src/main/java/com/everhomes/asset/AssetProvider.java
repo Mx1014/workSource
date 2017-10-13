@@ -181,4 +181,6 @@ public interface AssetProvider {
     String getVariableIdenfitierByName(String targetStr);
 
     void createBillGroup(CreateBillGroupCommand cmd);
+
+    void modifyBillGroup(ModifyBillGroupCommand cmd);
 }

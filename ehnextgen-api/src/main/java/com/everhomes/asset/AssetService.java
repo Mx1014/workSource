@@ -119,4 +119,6 @@ public interface AssetService {
     List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd);
 
     void createBillGroup(CreateBillGroupCommand cmd);
+
+    void modifyBillGroup(ModifyBillGroupCommand cmd);
 }

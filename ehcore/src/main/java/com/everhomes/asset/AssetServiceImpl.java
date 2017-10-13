@@ -1337,6 +1337,11 @@ public class AssetServiceImpl implements AssetService {
         assetProvider.createBillGroup(cmd);
     }
 
+    @Override
+    public void modifyBillGroup(ModifyBillGroupCommand cmd) {
+        assetProvider.modifyBillGroup(cmd);
+    }
+
 
     private List<String> setFormula( String str) {
         List<String> formulaAndJson = new ArrayList<>();

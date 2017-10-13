@@ -461,6 +461,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("modifyBillGroup")
     @RestReturn(value = String.class)
     public RestResponse modifyBillGroup(ModifyBillGroupCommand cmd) {
+        assetService.modifyBillGroup(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
