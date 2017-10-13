@@ -2258,22 +2258,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     public OrganizationMember findOrganizationMemberByOrgIdAndToken(
             String contactPhone, Long organizationId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-//        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-//        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-//        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-//        Condition condition = t1.field("id").gt(0L);
-//        condition = condition.and(t1.field("organization_id").eq(organizationId))
-//                .and(t2.field("contact_token").eq(contactPhone));
-//        condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
-//                .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-//        Record record = step.where(condition).fetchAny();
-//        if (record != null) {
-//            OrganizationMember r = record.map(new OrganizationMemberRecordMapper());
-//            return ConvertHelper.convert(r, OrganizationMember.class);
-//        }
-//        return null;
-
         Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactPhone));
         condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
         //added by wh 2016-10-13 把被拒绝的过滤掉
@@ -3457,6 +3441,27 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             return ConvertHelper.convert(r, Organization.class);
         return null;
     }
+
+	@Override
+	public List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId) {
+		List<Organization> result  = new ArrayList<Organization>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAME.eq(name));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+		if(parentId != null){
+			query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId));
+		}
+		if(groupType != null){
+			query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
+		}
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Organization.class));
+			return null;
+		});
+		return result;
+	}
 
     @Override
     public Organization findOrganizationByNameAndNamespaceIdForJindie(String name, Integer namespaceId,

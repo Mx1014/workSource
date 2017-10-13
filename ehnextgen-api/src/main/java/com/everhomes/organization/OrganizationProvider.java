@@ -334,6 +334,8 @@ public interface OrganizationProvider {
 
 	Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
 
+	List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
+
 	void createImportFileTask(ImportFileTask importFileTask);
 
 	void updateImportFileTask(ImportFileTask importFileTask);

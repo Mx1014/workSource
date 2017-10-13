@@ -6,6 +6,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.community.CreateResourceCategoryCommand;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
@@ -1814,6 +1815,20 @@ public class OrganizationController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse findOrgPersonel(FindOrgPersonelCommand cmd) {
         this.organizationService.findOrgPersonel(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/findOrgByName</b>
+     * <p>超级查询接口</p>
+     */
+    @RequestMapping("findOrgByName")
+    @RestReturn(value = String.class)
+    public RestResponse findOrgByName(CreateResourceCategoryCommand cmd) {
+        this.organizationService.getOrganizationNameByNameAndType(cmd.getName(), "aaaaa");
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
