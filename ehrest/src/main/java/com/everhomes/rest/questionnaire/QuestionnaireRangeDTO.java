@@ -60,6 +60,20 @@ public class QuestionnaireRangeDTO {
         this.rangeDescription = rangeDescription;
     }
 
+//    @Override
+//    public boolean equals(Object obj) {
+//        if(obj instanceof QuestionnaireRangeDTO){
+//            if(obj == null){
+//                return false;
+//            }
+//            QuestionnaireRangeDTO dto = (QuestionnaireRangeDTO)obj;
+//            if(dto.getRange() == this.range || this.range.equals(dto.getRange())){
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

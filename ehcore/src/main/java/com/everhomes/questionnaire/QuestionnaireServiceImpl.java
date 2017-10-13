@@ -73,15 +73,6 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Autowired
 	private OrganizationProvider organizationProvider;
 
-	@Autowired
-	private OrganizationService organizationService;
-
-	@Autowired
-	private CommunityService communityService;
-
-	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
-	
 
 	@Override
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {
@@ -213,19 +204,13 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	public CreateQuestionnaireResponse createQuestionnaire(CreateQuestionnaireCommand cmd) {
 		QuestionnaireDTO questionnaireDTO = cmd.getQuestionnaire();
 		checkQuestionnaireParameters(questionnaireDTO);
-		List<QuestionnaireRangeDTO> r = null;
-		if(QuestionnaireStatus.ACTIVE == QuestionnaireStatus.fromCode(questionnaireDTO.getStatus())){
-			//计算问卷推送的范围
-			r = calculateQuesionnaireRange(questionnaireDTO,QuestionnaireTargetType.fromCode(questionnaireDTO.getTargetType()));
-		}
-		final List<QuestionnaireRangeDTO> userRanges = r;
 		QuestionnaireDTO result = (QuestionnaireDTO)dbProvider.execute(s->{
 			//如果是重新编辑问卷，则把之前的题目和选项删除
 			Questionnaire questionnaire;
 			if (questionnaireDTO.getId() != null) {
 				questionnaire = (Questionnaire)coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_QUESTIONNAIRE.getCode() + questionnaireDTO.getId()).enter(()->{
 					Questionnaire q = findQuestionnaireForUpdate(questionnaireDTO);
-					updateQuestionnaire(q, questionnaireDTO,userRanges);
+					updateQuestionnaire(q, questionnaireDTO);
 					return q;
 				}).first();
 				
@@ -236,10 +221,6 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 				questionnaire = ConvertHelper.convert(questionnaireDTO, Questionnaire.class);
 				questionnaire.setCutOffTime(questionnaireDTO.getCutOffTime()==null?null:new Timestamp(questionnaireDTO.getCutOffTime()));
 				questionnaire.setPublishTime(questionnaireDTO.getPublishTime()==null?null:new Timestamp(questionnaireDTO.getPublishTime()));
-				if(QuestionnaireStatus.ACTIVE == QuestionnaireStatus.fromCode(questionnaireDTO.getStatus())){
-					questionnaire.setUserScope(StringHelper.toJsonString(userRanges));
-					questionnaire.setTargetUserNum(userRanges.size());
-				}
 				questionnaireProvider.createQuestionnaire(questionnaire);
 			}
 			
@@ -250,8 +231,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			return convertToQuestionnaireDTO(questionnaire, questionDTOs);
 		});
 
-		//发送消息
-		if(userRanges != null){
+		//异步计算用户范围并且发送消息
+		if(QuestionnaireStatus.ACTIVE == QuestionnaireStatus.fromCode(questionnaireDTO.getStatus())){
 			asynchronousSendMessage(result.getId());
 		}
 		return new CreateQuestionnaireResponse(result);
@@ -269,104 +250,6 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			questionnaireRange.setStatus(CommonStatus.ACTIVE.getCode());
 			questionnaireRangeProvider.createQuestionnaireRange(questionnaireRange);
 		});
-	}
-
-	private List<QuestionnaireRangeDTO> calculateQuesionnaireRange(QuestionnaireDTO questionnaireDTO, QuestionnaireTargetType targetType) {
-		List<QuestionnaireRangeDTO> ranges = new ArrayList<QuestionnaireRangeDTO>();
-		for (QuestionnaireRangeDTO rangeDTO : questionnaireDTO.getRanges()) {
-			QuestionnaireRangeType enumRangeType = QuestionnaireRangeType.fromCode(rangeDTO.getRangeType());
-			QuestionnaireRange range = new QuestionnaireRange();
-			if(targetType == QuestionnaireTargetType.USER){
-				switch (enumRangeType){
-					case USER:
-						ranges.add(rangeDTO);
-						break;
-					case BUILDING:
-						ListEnterprisesCommand cmd = new ListEnterprisesCommand();
-						cmd.setCommunityId(rangeDTO.getCommunityId());
-						cmd.setNamespaceId(rangeDTO.getNamespaceId());
-						cmd.setBuildingName(cmd.getBuildingName());
-						cmd.setPageSize(1000000);
-						ListEnterprisesCommandResponse rs = organizationService.listNewEnterprises(cmd);
-						rs.getDtos().stream().forEach(r->{
-							ranges.addAll(getEnterpriseUsers(String.valueOf(r.getOrganizationId())));
-						});
-						break;
-					case ENTERPRISE:
-						ranges.addAll(getEnterpriseUsers(rangeDTO.getRange()));
-						break;
-					case COMMUNITY_ALL:
-						ranges.addAll(getCommunityUsers(rangeDTO.getRange(),(Integer)null));
-						break;
-					case COMMUNITY_UNAUTHORIZED:
-						ranges.addAll(getCommunityUsers(rangeDTO.getRange(),1));
-						break;
-					case COMMUNITY_AUTHENTICATED:
-						ranges.addAll(getCommunityUsers(rangeDTO.getRange(),2));
-						break;
-				}
-			}else if (targetType == QuestionnaireTargetType.ORGANIZATION){
-				switch (enumRangeType){
-					case ENTERPRISE:
-						ranges.addAll(getOrganizationAdministrators(rangeDTO.getRange()));
-						break;
-				}
-			}
-		}
-		//去重
-		Map<String,QuestionnaireRangeDTO> map = new HashMap<String,QuestionnaireRangeDTO>();
-		ranges.forEach(r->{
-			map.put(r.getRange(),r);
-		});
-		ranges.clear();
-		map.forEach((k,v)->{
-			ranges.add(v);
-		});
-		return ranges;
-	}
-
-	private List<QuestionnaireRangeDTO> getOrganizationAdministrators(String range) {
-		ListServiceModuleAdministratorsCommand cmd = new ListServiceModuleAdministratorsCommand();
-		cmd.setOrganizationId(Long.valueOf(range));
-		cmd.setActivationFlag(ActivationFlag.YES.getCode());
-		List<OrganizationContactDTO> dtos = rolePrivilegeService.listOrganizationAdministrators(cmd);
-		return dtos.stream().map(r->{
-			QuestionnaireRangeDTO dto = new QuestionnaireRangeDTO();
-			dto.setRange(String.valueOf(r.getTargetId()));
-			dto.setRangeType(QuestionnaireRangeType.USER.getCode());
-			dto.setRangeDescription(r.getContactName());
-			return dto;
-		}).collect(Collectors.toList());
-	}
-
-	private  List<QuestionnaireRangeDTO> getCommunityUsers(String range, Integer isAuthor) {
-		ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
-		cmd.setCommunityId(Long.valueOf(range));
-		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-		cmd.setPageSize(10000000);
-		cmd.setIsAuth(isAuthor);
-		CommunityUserAddressResponse response = communityService.listUserBycommunityId(cmd);
-		return response.getDtos().stream().map(r->{
-			QuestionnaireRangeDTO dto = new QuestionnaireRangeDTO();
-			dto.setRange(String.valueOf(r.getUserId()));
-			dto.setRangeType(QuestionnaireRangeType.USER.getCode());
-			dto.setRangeDescription(r.getUserName());
-			return dto;
-		}).collect(Collectors.toList());
-	}
-
-	private List<QuestionnaireRangeDTO> getEnterpriseUsers(String range) {
-		ListOrganizationContactCommand cmd = new ListOrganizationContactCommand();
-		cmd.setOrganizationId( Long.valueOf(range));
-		cmd.setPageSize(10000000);//这里需要查询全部的人员
-		ListOrganizationMemberCommandResponse response = organizationService.listOrganizationPersonnels(cmd, false);
-		return response.getMembers().stream().map(r->{
-			QuestionnaireRangeDTO dto = new QuestionnaireRangeDTO();
-			dto.setRange(String.valueOf(r.getTargetId()));
-			dto.setRangeType(QuestionnaireRangeType.USER.getCode());
-			dto.setRangeDescription(dto.getRangeDescription());
-			return dto;
-		}).collect(Collectors.toList());
 	}
 
 	private List<QuestionnaireQuestionDTO> createQuestions(Long questionnaireId, List<QuestionnaireQuestionDTO> questions) {
@@ -530,7 +413,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		return questionnaire;
 	}
 
-	private void updateQuestionnaire(Questionnaire questionnaire, QuestionnaireDTO questionnaireDTO, List<QuestionnaireRangeDTO> userRanges) {
+	private void updateQuestionnaire(Questionnaire questionnaire, QuestionnaireDTO questionnaireDTO) {
 		questionnaire.setQuestionnaireName(questionnaireDTO.getQuestionnaireName());
 		questionnaire.setDescription(questionnaireDTO.getDescription());
 		questionnaire.setStatus(questionnaireDTO.getStatus());
@@ -541,10 +424,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		questionnaire.setPublishTime(questionnaireDTO.getPublishTime()==null?null:new Timestamp(questionnaireDTO.getPublishTime()));
 		questionnaire.setSupportAnonymous(questionnaireDTO.getSupportAnonymous());
 		questionnaire.setSupportShare(questionnaireDTO.getSupportShare());
-		if(QuestionnaireStatus.ACTIVE == QuestionnaireStatus.fromCode(questionnaireDTO.getStatus())){
-			questionnaire.setUserScope(StringHelper.toJsonString(userRanges));
-			questionnaire.setTargetUserNum(userRanges.size());
-		}
+
 		questionnaireProvider.updateQuestionnaire(questionnaire);
 	}
 

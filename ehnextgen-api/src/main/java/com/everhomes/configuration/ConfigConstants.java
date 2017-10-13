@@ -120,4 +120,6 @@ public interface ConfigConstants {
     public static final String PORTAL_ITEM_MORE_TITLE = "portal.item.more.title";
     public static final String PAY_V2_HOME_URL = "pay.v2.home.url";
 
+    public static final String QUESTIONNAIRE_DETAIL_URL = "questionnaire.detail.url";
+
 }
