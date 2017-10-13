@@ -347,6 +347,21 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
+    // this is for 展示一个收费项目的客户可见的所有标准列表         1
+    /**
+     * <p>展示一个收费项目的园区下的的所有标准列表</p>
+     * <b>URL: /asset/listOnlyChargingStandards</b>
+     */
+    @RequestMapping("listOnlyChargingStandards")
+    @RestReturn(value = ListChargingStandardsDTO.class, collection = true)
+    public RestResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
+        List<ListChargingStandardsDTO> list = assetService.listOnlyChargingStandards(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
     // this is for 增加一个收费标准         4
     /**
      * <p>增加一个收费标准</p>

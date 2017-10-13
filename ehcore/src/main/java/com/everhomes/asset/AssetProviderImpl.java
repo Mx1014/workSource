@@ -2113,6 +2113,42 @@ public class AssetProviderImpl implements AssetProvider {
                 .execute();
     }
 
+    @Override
+    public List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
+        List<ListChargingStandardsDTO> list = new ArrayList<>();
+        DSLContext context = getReadOnlyContext();
+        EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
+        EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
+        EhPaymentVariables t3 = Tables.EH_PAYMENT_VARIABLES.as("t3");
+//        com.everhomes.server.schema.tables.EhPaymentFormula t3 = Tables.EH_PAYMENT_FORMULA.as("t3");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t.FORMULA_TYPE);
+        query.addFrom(t,t1);
+        query.addConditions(t.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()));
+        query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
+        query.addConditions(t1.OWNER_ID.eq(cmd.getOwnerId()));
+        query.addConditions(t1.OWNER_TYPE.eq(cmd.getOwnerType()));
+        query.fetch().map(r -> {
+            ListChargingStandardsDTO dto = new ListChargingStandardsDTO();
+            dto.setBillingCycle(r.getValue(t.BILLING_CYCLE));
+            dto.setChargingStandardId(r.getValue(t.ID));
+            dto.setChargingStandardName(r.getValue(t.NAME));
+            dto.setFormula(r.getValue(t.FORMULA));
+            dto.setFormulaType(r.getValue(t.FORMULA_TYPE));
+            list.add(dto);
+            return null;
+        });
+        List<String> fetch = context.select(t3.NAME)
+                .from(t3)
+                .where(t3.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()))
+                .fetch(t3.NAME);
+        for(int i = 0; i < list.size(); i ++){
+            ListChargingStandardsDTO dto = list.get(i);
+            dto.setVariableNames(fetch);
+        }
+        return list;
+    }
+
 
     private DSLContext getReadOnlyContext(){
        return this.dbProvider.getDslContext(AccessSpec.readOnly());

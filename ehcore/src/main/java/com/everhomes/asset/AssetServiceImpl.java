@@ -1166,6 +1166,10 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void createChargingStandard(CreateChargingStandardCommand cmd) {
+        String formula_no_quote = cmd.getFormula();
+        formula_no_quote.replace("[[","");
+        formula_no_quote.replace("]]","");
+        cmd.setFormula(formula_no_quote);
         com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c = new PaymentChargingStandards();
         com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s = new PaymentChargingStandardScope();
         // create a chargingstandard
@@ -1265,15 +1269,15 @@ public class AssetServiceImpl implements AssetService {
             paymentFormula.setCreatorUid(0l);
             paymentFormula.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             paymentFormula.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            paymentFormula.setName(cmd.getNormalFormulaStr());
+            paymentFormula.setName(cmd.getFormula());
             paymentFormula.setFormulaType(formulaType);
-            paymentFormula.setFormula(cmd.getNormalFormulaStr());
+            paymentFormula.setFormula(cmd.getFormula());
             paymentFormula.setFormulaJson("gdje");
             list.add(paymentFormula);
 //            formulaIds.add(nextPaymentFormulaId);
         } else if (formulaType == 2) {
             //普通公式时
-            String str = cmd.getNormalFormulaStr();
+            String str = cmd.getFormula();
             List<String> formulaAndJson = setFormula(str);
 
             EhPaymentFormula paymentFormula = new PaymentFormula();
@@ -1340,6 +1344,11 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void modifyBillGroup(ModifyBillGroupCommand cmd) {
         assetProvider.modifyBillGroup(cmd);
+    }
+
+    @Override
+    public List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
+        return assetProvider.listOnlyChargingStandards(cmd);
     }
 
 

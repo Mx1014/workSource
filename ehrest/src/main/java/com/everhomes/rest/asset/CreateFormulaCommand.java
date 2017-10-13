@@ -21,9 +21,18 @@ public class CreateFormulaCommand {
     @ItemType(VariableConstraints.class)
     private List<VariableConstraints> stepValuePairs;
     private Long chargingStandardId;
+    private String formula;
 
     public Byte getFormulaType() {
         return formulaType;
+    }
+
+    public String getFormula() {
+        return formula;
+    }
+
+    public void setFormula(String formula) {
+        this.formula = formula;
     }
 
     public void setFormulaType(Byte formulaType) {

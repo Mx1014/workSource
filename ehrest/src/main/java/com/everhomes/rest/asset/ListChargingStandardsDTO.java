@@ -15,6 +15,7 @@ import java.util.List;
  * <li>formulaType:公式类型,1:固定金额;2:普通公式;3:斜面公式;4:梯度公式</li>
  * <li>BillingCycle:计费周期,1:按天;2:按月;3:按季度;4:按年</li>
  * <li>variables:变量列表，参考{@link com.everhomes.rest.asset.PaymentVariable}</li>
+ * <li>variableNames:变量名称列表</li>
  *</ul>
  */
 public class ListChargingStandardsDTO {
@@ -25,6 +26,7 @@ public class ListChargingStandardsDTO {
     private Byte BillingCycle;
     @ItemType(PaymentVariable.class)
     private List<PaymentVariable> variables;
+    private List<String> variableNames;
 
     @Override
     public String toString() {
@@ -41,6 +43,14 @@ public class ListChargingStandardsDTO {
 
     public void setFormulaType(Byte formulaType) {
         this.formulaType = formulaType;
+    }
+
+    public List<String> getVariableNames() {
+        return variableNames;
+    }
+
+    public void setVariableNames(List<String> variableNames) {
+        this.variableNames = variableNames;
     }
 
     public void setChargingStandardId(Long chargingStandardId) {
