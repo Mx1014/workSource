@@ -177,6 +177,13 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             builder.addSort("id", SortOrder.DESC);
         }
+        if(cmd.getSortField() != null && cmd.getSortType() != null) {
+            if(cmd.getSortType() == 0) {
+                builder.addSort(cmd.getSortField(), SortOrder.ASC);
+            } else if(cmd.getSortType() == 1) {
+                builder.addSort(cmd.getSortField(), SortOrder.DESC);
+            }
+        }
         SearchResponse rsp = builder.execute().actionGet();
 
         if(LOGGER.isDebugEnabled())

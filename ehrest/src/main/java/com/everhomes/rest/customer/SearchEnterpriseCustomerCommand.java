@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
  *     <li>communityId: 园区id</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 页面大小</li>
+ *     <li>sortType: 排序类型：0 升序， 1 降序</li>
+ *     <li>sortField: 排序字段名</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -26,6 +28,26 @@ public class SearchEnterpriseCustomerCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    private Integer sortType;
+
+    private String sortField;
+
+    public String getSortField() {
+        return sortField;
+    }
+
+    public void setSortField(String sortField) {
+        this.sortField = sortField;
+    }
+
+    public Integer getSortType() {
+        return sortType;
+    }
+
+    public void setSortType(Integer sortType) {
+        this.sortType = sortType;
+    }
 
     public Long getCommunityId() {
         return communityId;
