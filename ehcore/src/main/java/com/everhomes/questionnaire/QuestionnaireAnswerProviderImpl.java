@@ -3,8 +3,11 @@ package com.everhomes.questionnaire;
 
 import java.util.List;
 
+import javafx.scene.control.Tab;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,13 +64,20 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 	}
 	
 	@Override
-	public List<QuestionnaireAnswer> listQuestionnaireTarget(Long questionnaireId, String keywords, int pageAnchor,
+	public List<QuestionnaireAnswer> listQuestionnaireTarget(Long questionnaireId, String keywords,Byte targetFrom, int pageAnchor,
 			int pageSize) {
 		keywords = keywords == null ? "" : keywords;
-		return getReadOnlyContext().selectDistinct(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID, Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE, 
-				Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_NAME, Tables.EH_QUESTIONNAIRE_ANSWERS.CREATE_TIME)
+		Condition cond = DSL.trueCondition();
+		if(targetFrom != null){
+			cond.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_FROM.eq(targetFrom));
+		}
+		return getReadOnlyContext().selectDistinct(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID, Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE,
+				Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_NAME, Tables.EH_QUESTIONNAIRE_ANSWERS.CREATE_TIME,
+				Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_FROM,Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_PHONE,
+				Tables.EH_QUESTIONNAIRE_ANSWERS.ANONYMOUS_FLAG)
 		.from(Tables.EH_QUESTIONNAIRE_ANSWERS)
 		.where(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID.eq(questionnaireId))
+		.and(cond)
 		.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_NAME.like("%"+keywords+"%"))
 		.orderBy(Tables.EH_QUESTIONNAIRE_ANSWERS.CREATE_TIME.asc())
 		.limit((pageAnchor-1)*pageSize, pageSize)

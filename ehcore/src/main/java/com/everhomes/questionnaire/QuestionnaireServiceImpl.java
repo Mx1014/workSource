@@ -371,16 +371,20 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		}
 		if(questionnaire.getCollectionCount()!=null && questionnaire.getTargetUserNum()!=null
 				&& questionnaire.getTargetUserNum()!=0){
-			Float targetUserNumber = (float)questionnaire.getTargetUserNum();
-			Float collectionCount = (float)questionnaire.getCollectionCount();
-			String result = String.valueOf((collectionCount/targetUserNumber)*100);
-			result = result.replaceFirst("([\\d]*\\.\\d[1-9])\\d*","$1");
-			dto.setPercentComplete(result);
+			dto.setPercentComplete(generatePercentComplete(questionnaire.getTargetUserNum(),questionnaire.getCollectionCount()));
 		}
 
 		return dto;
 	}
-	
+
+	private String generatePercentComplete(Integer targetUserNum, Integer collectionCount) {
+		Float ftargetUserNumber = (float)targetUserNum;
+		Float fcollectionCount = (float)collectionCount;
+		String result = String.valueOf((fcollectionCount/ftargetUserNumber)*100);
+		return result.replaceFirst("([0-9]*\\.\\d[0-9])\\d*","$1");
+	}
+
+
 	private QuestionnaireDTO convertToQuestionnaireDTO(Questionnaire questionnaire, boolean containTarget, String targetType, Long targetId){
 		QuestionnaireDTO questionnaireDTO = convertToQuestionnaireDTO(questionnaire, (List)null);
 		if (containTarget) {
@@ -604,22 +608,34 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Override
 	public GetQuestionnaireResultDetailResponse getQuestionnaireResultDetail(GetQuestionnaireResultDetailCommand cmd) {
 		// 主要用于检查问卷是否存在
-		findQuestionnaireById(cmd.getNamespaceId(), cmd.getQuestionnaireId());
+		Questionnaire questionnaire = findQuestionnaireById(cmd.getNamespaceId(), cmd.getQuestionnaireId());
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		int pageAnchor = cmd.getPageAnchor()==null?1:cmd.getPageAnchor().intValue();
-		List<QuestionnaireAnswer> questionnaireAnswers = questionnaireAnswerProvider.listQuestionnaireTarget(cmd.getQuestionnaireId(), cmd.getKeywords(), pageAnchor, pageSize+1);
+		List<QuestionnaireAnswer> questionnaireAnswers = questionnaireAnswerProvider.listQuestionnaireTarget(cmd.getQuestionnaireId(), cmd.getKeywords(),cmd.getTargetFrom(), pageAnchor, pageSize+1);
 		Long nextPageAnchor = null;
 		if (questionnaireAnswers.size() > pageSize) {
 			questionnaireAnswers.remove(questionnaireAnswers.size()-1);
 			nextPageAnchor = Long.valueOf(++pageAnchor);
 		}
-		return new GetQuestionnaireResultDetailResponse(nextPageAnchor, questionnaireAnswers.stream().map(q->convertToTargetDTO(q)).collect(Collectors.toList()));
+		GetQuestionnaireResultDetailResponse response = new GetQuestionnaireResultDetailResponse(nextPageAnchor, questionnaireAnswers.stream().map(q->convertToTargetDTO(q)).collect(Collectors.toList()));
+
+		response.setCollectionCount(questionnaire.getCollectionCount());
+		response.setTargetUserNum(questionnaire.getTargetUserNum());
+		response.setPercentComplete(generatePercentComplete(questionnaire.getTargetUserNum(),questionnaire.getCollectionCount()));
+		return response;
 	}
 
 	private QuestionnaireResultTargetDTO convertToTargetDTO(QuestionnaireAnswer answer) {
 		QuestionnaireResultTargetDTO dto = ConvertHelper.convert(answer, QuestionnaireResultTargetDTO.class);
 		dto.setSubmitTime(answer.getCreateTime().getTime());
+		if(QuestionnaireCommonStatus.fromCode(answer.getAnonymousFlag()) == QuestionnaireCommonStatus.TRUE){
+			if(QuestionnaireTargetType.fromCode(answer.getTargetType()) == QuestionnaireTargetType.ORGANIZATION) {
+				dto.setTargetName("匿名企业");
+			}else{
+				dto.setTargetName("匿名用户");
+			}
+		}
 		return dto;
 	}
 	
