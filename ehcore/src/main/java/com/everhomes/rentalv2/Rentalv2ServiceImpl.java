@@ -13,11 +13,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors; 
@@ -58,22 +55,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.web.client.AsyncRestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import com.alibaba.fastjson.JSON;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.app.App;
@@ -134,7 +119,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 
 @Component
@@ -281,80 +265,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	
 	private Object restCall(String api, Object command, Class<?> responseType) {
 		String host = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.host", "https://pay.zuolin.com");
-		return restCall(api, command, responseType, host);
+		return RentalUtils.restCall(api, command, responseType, host);
 	}
-	private Object restCall(String api, Object o, Class<?> responseType,String host) {
-		AsyncRestTemplate template = new AsyncRestTemplate();
-		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-		messageConverters.add(new StringHttpMessageConverter(Charset
-				.forName("UTF-8")));
-		template.setMessageConverters(messageConverters);
-		String[] apis = api.split(" ");
-		String method = apis[0];
 
-		String url = host
-				+ api.substring(method.length() + 1, api.length()).trim();
-
-		MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
-		HttpEntity<String> requestEntity = null;
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Host", host); 
-		headers.add("charset", "UTF-8");
-
-		ListenableFuture<ResponseEntity<String>> future = null;
-
-		if (method.equalsIgnoreCase("POST")) {
-			requestEntity = new HttpEntity<>(StringHelper.toJsonString(o),
-					headers);
-			LOGGER.debug("DEBUG: restCall headers: "+requestEntity.toString());
-			future = template.exchange(url, HttpMethod.POST, requestEntity,
-					String.class);
-		} else {
-			Map<String, String> params = new HashMap<String, String>();
-			StringHelper.toStringMap("", o, params);
-			LOGGER.debug("params is :" + params.toString());
-
-			for (Map.Entry<String, String> entry : params.entrySet()) {
-				paramMap.add(entry.getKey().substring(1),
-						URLEncoder.encode(entry.getValue()));
-			}
-
-			url = UriComponentsBuilder.fromHttpUrl(url).queryParams(paramMap)
-					.build().toUriString();
-			requestEntity = new HttpEntity<>(null, headers);
-			LOGGER.debug("DEBUG: restCall headers: "+requestEntity.toString());
-			future = template.exchange(url, HttpMethod.GET, requestEntity,
-					String.class);
-		}
-
-		ResponseEntity<String> responseEntity = null;
-		try {
-			responseEntity = future.get();
-		} catch (InterruptedException | ExecutionException e) {
-			LOGGER.info("restCall error " + e.getMessage());
-			return null;
-		}
-
-		if (responseEntity != null
-				&& responseEntity.getStatusCode() == HttpStatus.OK) {
-
-			// String bodyString = new
-			// String(responseEntity.getBody().getBytes("ISO-8859-1"), "UTF-8")
-			// ;
-			String bodyString = responseEntity.getBody();
-			LOGGER.debug(bodyString);
-			LOGGER.debug("HEADER" + responseEntity.getHeaders());
-//			return bodyString;
-			return StringHelper.fromJsonString(bodyString, responseType);
-
-		}
-
-//		LOGGER.info("restCall error " + responseEntity.getStatusCode());
-		return null;
-
-	}
 	
 	@Override
 	public void addDefaultRule(AddDefaultRuleAdminCommand cmd){
@@ -674,22 +587,29 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 */
 	@Override
 	public void updateDefaultRule(UpdateDefaultRuleAdminCommand cmd) { 
-		if(null == cmd.getRefundFlag())
+		if(null == cmd.getRefundFlag()) {
 			cmd.setRefundFlag(NormalFlag.NONEED.getCode());
-		RentalDefaultRule defaultRule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getResourceTypeId());
-		if(null==defaultRule){
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "didnt have default rule!");
 		}
-		if(null==cmd.getSiteCounts()) 
+		if(null==cmd.getSiteCounts()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts can not be null");
+					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter siteCounts");
+		}
+
 		if (null == cmd.getRentalEndTimeFlag()) {
 			cmd.setRentalEndTimeFlag(NormalFlag.NONEED.getCode());
 		}
 		if (null == cmd.getRentalStartTimeFlag()) {
 			cmd.setRentalStartTimeFlag(NormalFlag.NONEED.getCode());
 		}
+
+		RentalDefaultRule defaultRule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getResourceTypeId());
+
+		if(null == defaultRule){
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "RentalDefaultRule not found");
+		}
+
 		this.dbProvider.execute((TransactionStatus status) -> {
 			RentalDefaultRule newDefaultRule = ConvertHelper.convert(cmd, RentalDefaultRule.class); 
 			if(null==newDefaultRule.getCancelFlag()) {
@@ -2743,16 +2663,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public void cancelRentalBill(CancelRentalBillCommand cmd) {
 		java.util.Date cancelTime = new java.util.Date();
-		if(null == cmd.getRentalBillId())
+		if(null == cmd.getRentalBillId()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of BillId error");
+					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter BillId");
+		}
+
 		RentalOrder order = this.rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
-		if(null == order)
+		if(null == order) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of BillId error");
-		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());		
-		if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())&&cancelTime.after(new java.util.Date(order.getStartTime().getTime()
-				- rs.getCancelTime()))) {
+					ErrorCodes.ERROR_INVALID_PARAMETER, "RentalOrder not found");
+		}
+
+		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
+
+		if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode()) &&
+				cancelTime.after(new java.util.Date(order.getStartTime().getTime() - rs.getCancelTime()))) {
 			//当成功预约之后要判断是否过了取消时间
 			LOGGER.error("cancel over time");
 			throw RuntimeErrorException
