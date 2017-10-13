@@ -1764,5 +1764,11 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchOne(0,String.class);
     }
 
+    @Override
+    public List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
+        List<ListChargingStandardsDTO> list = new ArrayList<>();
+        return list;
+    }
+
 
 }

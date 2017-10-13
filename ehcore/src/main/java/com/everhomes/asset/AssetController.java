@@ -318,13 +318,28 @@ public class AssetController extends ControllerBase {
 
     // this is for 展示一个收费项目的客户可见的所有标准列表         1
     /**
-     * <p>展示一个收费项目的园区下的所有标准列表</p>
+     * <p>展示一个收费项目的园区下的账单组下的所有标准列表</p>
      * <b>URL: /asset/listChargingStandards</b>
      */
     @RequestMapping("listChargingStandards")
     @RestReturn(value = ListChargingStandardsDTO.class, collection = true)
     public RestResponse listChargingStandards(ListChargingStandardsCommand cmd) {
         List<ListChargingStandardsDTO> list = assetService.listChargingStandards(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 展示一个收费项目的客户可见的所有标准列表         1
+    /**
+     * <p>展示一个收费项目的园区下的的所有标准列表</p>
+     * <b>URL: /asset/listOnlyChargingStandards</b>
+     */
+    @RequestMapping("listOnlyChargingStandards")
+    @RestReturn(value = ListChargingStandardsDTO.class, collection = true)
+    public RestResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
+        List<ListChargingStandardsDTO> list = assetService.listOnlyChargingStandards(cmd);
         RestResponse response = new RestResponse(list);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

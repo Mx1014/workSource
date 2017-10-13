@@ -1149,6 +1149,11 @@ public class AssetServiceImpl implements AssetService {
         }
     }
 
+    @Override
+    public List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
+        return assetProvider.listOnlyChargingStandards(cmd);
+    }
+
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
         CacheAccessor accessor = cacheProvider.getCacheAccessor(null);
         String key = String.format("pmbill:kexing:latest-selected-organization: %s:%s", UserContext.getCurrentNamespaceId(), UserContext.current().getUser().getId());

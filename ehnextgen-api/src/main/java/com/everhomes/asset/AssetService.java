@@ -101,4 +101,5 @@ public interface AssetService {
 
     void updateBillSwitchOnTime();
 
+    List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 }

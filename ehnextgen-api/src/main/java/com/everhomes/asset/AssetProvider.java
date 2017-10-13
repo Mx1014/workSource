@@ -141,4 +141,5 @@ public interface AssetProvider {
 
     String findIdentifierByUid(Long aLong);
 
+    List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 }
