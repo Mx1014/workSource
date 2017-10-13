@@ -5,12 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +19,7 @@ import com.everhomes.app.AppProvider;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.order.PayService;
-import com.everhomes.pay.order.PaymentType;
+import com.everhomes.rentalv2.RentalUtils;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.order.*;
@@ -49,8 +46,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.*;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
@@ -90,12 +85,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class ParkingServiceImpl implements ParkingService {
@@ -1753,80 +1743,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 	private Object restCall(String api, Object command, Class<?> responseType) {
 		String host = this.configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.host", "https://pay.zuolin.com");
-		return restCall(api, command, responseType, host);
-	}
-
-	private Object restCall(String api, Object o, Class<?> responseType,String host) {
-		AsyncRestTemplate template = new AsyncRestTemplate();
-		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-		messageConverters.add(new StringHttpMessageConverter(Charset
-				.forName("UTF-8")));
-		template.setMessageConverters(messageConverters);
-		String[] apis = api.split(" ");
-		String method = apis[0];
-
-		String url = host
-				+ api.substring(method.length() + 1, api.length()).trim();
-
-		MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
-		HttpEntity<String> requestEntity = null;
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Host", host);
-		headers.add("charset", "UTF-8");
-
-		ListenableFuture<ResponseEntity<String>> future = null;
-
-		if (method.equalsIgnoreCase("POST")) {
-			requestEntity = new HttpEntity<>(StringHelper.toJsonString(o),
-					headers);
-			LOGGER.debug("DEBUG: restCall headers: "+requestEntity.toString());
-			future = template.exchange(url, HttpMethod.POST, requestEntity,
-					String.class);
-		} else {
-			Map<String, String> params = new HashMap<String, String>();
-			StringHelper.toStringMap("", o, params);
-			LOGGER.debug("params is :" + params.toString());
-
-			for (Map.Entry<String, String> entry : params.entrySet()) {
-				paramMap.add(entry.getKey().substring(1),
-						URLEncoder.encode(entry.getValue()));
-			}
-
-			url = UriComponentsBuilder.fromHttpUrl(url).queryParams(paramMap)
-					.build().toUriString();
-			requestEntity = new HttpEntity<>(null, headers);
-			LOGGER.debug("DEBUG: restCall headers: "+requestEntity.toString());
-			future = template.exchange(url, HttpMethod.GET, requestEntity,
-					String.class);
-		}
-
-		ResponseEntity<String> responseEntity = null;
-		try {
-			responseEntity = future.get();
-		} catch (InterruptedException | ExecutionException e) {
-			LOGGER.info("restCall error " + e.getMessage());
-			return null;
-		}
-
-		if (responseEntity != null
-				&& responseEntity.getStatusCode() == HttpStatus.OK) {
-
-			// String bodyString = new
-			// String(responseEntity.getBody().getBytes("ISO-8859-1"), "UTF-8")
-			// ;
-			String bodyString = responseEntity.getBody();
-			LOGGER.debug(bodyString);
-			LOGGER.debug("HEADER" + responseEntity.getHeaders());
-//			return bodyString;
-			return StringHelper.fromJsonString(bodyString, responseType);
-
-		}
-
-//		LOGGER.info("restCall error " + responseEntity.getStatusCode());
-		return null;
-
+		return RentalUtils.restCall(api, command, responseType, host);
 	}
 
 	@Override
