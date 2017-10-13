@@ -1256,8 +1256,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			else
 				rentalBill.setCancelTime(new Timestamp(rs.getCancelTime()));
 			rentalBill.setResourceName(rs.getResourceName());
-			rentalBill.setNamespaceId(UserContext.getCurrentNamespaceId()==null?0:
-			UserContext.getCurrentNamespaceId());
+			rentalBill.setNamespaceId(UserContext.getCurrentNamespaceId());
 			rentalBill.setRentalResourceId(cmd.getRentalSiteId());
 			rentalBill.setRentalUid(userId);
 			rentalBill.setInvoiceFlag(InvoiceFlag.NONEED.getCode());
@@ -2951,7 +2950,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalResource rs =this.rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
 //		correctRetalResource(rs, cmd.getRentalType());
-		proccessCells(rs, cmd.getRentalType());
+		proccessCells(rs, bill.getRentalType());
 		// 循环存物品订单
 		AddRentalBillItemCommandResponse response = new AddRentalBillItemCommandResponse();
 		this.dbProvider.execute((TransactionStatus status) -> {
