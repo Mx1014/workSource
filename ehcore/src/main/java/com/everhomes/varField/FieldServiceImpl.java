@@ -55,6 +55,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -559,6 +560,11 @@ public class FieldServiceImpl implements FieldService {
         Method readMethod = pd.getReadMethod();
         System.out.println(readMethod.getName());
         Object invoke = readMethod.invoke(dto);
+        if(invoke.getClass().getSimpleName().equals("Timestamp")){
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Timestamp var = (Timestamp)invoke;
+            invoke = sdf.format(var.toString());
+        }
         return String.valueOf(invoke);
     }
     private String setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
