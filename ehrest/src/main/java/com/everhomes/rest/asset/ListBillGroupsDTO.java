@@ -10,8 +10,9 @@ import com.everhomes.util.StringHelper;
  * <li>BillGroupName:账单组名称</li>
  * <li>defaultOrder:账单组排序，数值小着优先度高</li>
  * <li>billingCycle:计费周期,1:按天;2:按月;3:按季度;4:按年;</li>
- * <li>billingDay:出账单日</li>
+ * <li>billingDay:出账单日的描述，直接显示即可</li>
  * <li>dueDay:最晚还款日</li>
+ * <li>dueDayType:最晚还款日的单位，1：日；2：月</li>
  *</ul>
  */
 public class ListBillGroupsDTO {
@@ -21,6 +22,7 @@ public class ListBillGroupsDTO {
     private Byte billingCycle;
     private String billingDay;
     private String dueDay;
+    private Byte dueDayType;
 
     @Override
     public String toString() {
@@ -45,6 +47,14 @@ public class ListBillGroupsDTO {
 
     public String getBillGroupName() {
         return BillGroupName;
+    }
+
+    public Byte getDueDayType() {
+        return dueDayType;
+    }
+
+    public void setDueDayType(Byte dueDayType) {
+        this.dueDayType = dueDayType;
     }
 
     public void setBillGroupName(String billGroupName) {

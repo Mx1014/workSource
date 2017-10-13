@@ -117,4 +117,6 @@ public interface AssetService {
     List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
 
     List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd);
+
+    void createBillGroup(CreateBillGroupCommand cmd);
 }

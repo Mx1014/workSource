@@ -691,7 +691,8 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setDefaultOrder(r.getValue(t.DEFAULT_ORDER));
                     dto.setBillingCycle(r.getValue(t.BALANCE_DATE_TYPE));
                     dto.setBillingDay("每周期首月"+r.getValue(t.BILLS_DAY)+"日");
-                    dto.setDueDay("出账单"+"1"+"月"+"后");
+                    dto.setDueDay(String.valueOf(r.getValue(t.DUE_DAY)));
+                    dto.setDueDayType(r.getValue(t.DUE_DAY_TYPE));
                     list.add(dto);
                     return null;
                 });
@@ -2069,12 +2070,44 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchOne(0,String.class);
     }
 
+    @Override
+    public void createBillGroup(CreateBillGroupCommand cmd) {
+        DSLContext context = getReadWriteContext();
+        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = new PaymentBillGroup();
+        Long nextGroupId = getNextSequence(Tables.EH_PAYMENT_BILL_GROUPS.getClass());
+        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        group.setId(nextGroupId);
+        group.setBalanceDateType(cmd.getBillingCycle());
+        group.setBillsDay(cmd.getBillDay());
+        group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        group.setCreatorUid(UserContext.currentUserId());
+        Integer nextOrder = context.select(DSL.max(t.DEFAULT_ORDER))
+                .from(t)
+                .where(t.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .fetchOne(0,Integer.class);
+        group.setDefaultOrder(nextOrder);
+        group.setDueDay(cmd.getDueDay());
+        group.setDueDayType(cmd.getDueDayType());
+        group.setName(cmd.getBillGroupName());
+        group.setNamespaceId(cmd.getNamespaceId());
+        group.setOwnerId(cmd.getOwnerId());
+        group.setOwnerType(cmd.getOwnerType());
+        group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhPaymentBillGroupsDao dao = new EhPaymentBillGroupsDao(context.configuration());
+        dao.insert(group);
+    }
+
 
     private DSLContext getReadOnlyContext(){
        return this.dbProvider.getDslContext(AccessSpec.readOnly());
     }
     private DSLContext getReadWriteContext(){
         return this.dbProvider.getDslContext(AccessSpec.readWrite());
+    }
+    private Long getNextSequence(Class clz){
+        return this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(clz));
     }
 
 

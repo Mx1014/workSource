@@ -179,4 +179,6 @@ public interface AssetProvider {
     String getVariableIdenfitierById(Long variableId);
 
     String getVariableIdenfitierByName(String targetStr);
+
+    void createBillGroup(CreateBillGroupCommand cmd);
 }
