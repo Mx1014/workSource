@@ -2590,6 +2590,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		Map<Byte, Long> scopeMap = new HashMap<Byte, Long>();		
 		scopeMap.put(ScopeType.USER.getCode(), userId);
 		scopeMap.put(ScopeType.ALL.getCode(), 0L);
+		scopeMap.put(ScopeType.COMMUNITY.getCode(), 0L);
+		scopeMap.put(ScopeType.RESIDENTIAL.getCode(), 0L);
 		if(SceneType.fromCode(sceneType) != null){
 			switch(SceneType.fromCode(sceneType)) {
 			case DEFAULT:
