@@ -5581,6 +5581,26 @@ public class OrganizationServiceImpl implements OrganizationService {
         return null;
     }
 
+    @Override
+    public Long getOrganizationNameByNameAndType(String name, String groupType) {
+        if (StringUtils.isEmpty(name) || StringUtils.isEmpty(groupType)) {
+            LOGGER.error("groupTypes or name is null");
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+                    "groupTypes or name is null");
+        }
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        String[] list = name.split("/");
+        if(list.length > 0) {
+            Organization org = listUnderOrganizations(0, null, namespaceId, list);
+            if(org != null){
+                System.out.println(org.getName());
+            }
+        }
+        return null;
+    }
+
     /**
      * 根据contactToken退出删除organization path路径下的所有机构
      *
@@ -13399,6 +13419,39 @@ public class OrganizationServiceImpl implements OrganizationService {
         OrganizationMember enterprise_member = members.get(0);
         enterprise_member.setContactToken(token);
         return enterprise_member;
+    }
+
+    //递归
+    private Organization listUnderOrganizations(int i, List<Organization> orgs, Integer namespaceId, String[] list) {
+        if (orgs == null) {
+            //:todo 第一次进入
+            List<Organization> orgs_0 = this.organizationProvider.listOrganizationByName(list[0], null, null, namespaceId);
+            if (orgs_0 != null) {
+                return listUnderOrganizations(i + 1, orgs_0, namespaceId, list);
+            }
+        }
+        if (orgs.size() == 1 && i == list.length) {
+            //:todo 获得1个结果 结束递归
+            return orgs.get(0);
+        }
+        if (orgs.size() > 1 && i == list.length) {
+            //todo 获得多个结果 到达极限 报错
+            LOGGER.error("cannot find the exact :organization. path = {}", list.toString());
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "cannot find the exact organization. path = {}", list.toString());
+        } else {
+            //todo 递归
+            List<Organization> result = orgs.stream().map(r -> {
+                List<Organization> orgs_1 = this.organizationProvider.listOrganizationByName(list[i], null, r.getId(), namespaceId);
+                if (orgs_1 != null && orgs_1.size() > 0) {
+                    return listUnderOrganizations(i + 1, orgs_1, namespaceId, list);
+                }
+                return null;
+            }).filter(r -> {
+                return r != null;
+            }).collect(Collectors.toList());
+
+            return result.get(0);
+        }
     }
 }
 
