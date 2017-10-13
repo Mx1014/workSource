@@ -2128,7 +2128,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         int weekDay = c.get(Calendar.DAY_OF_WEEK);
         List<ArchivesNotifications> results = archivesProvider.listArchivesNotificationsByWeek(weekDay);
         for(int i=0; i<results.size(); i++){
-
+            //TODO:每半个小时来执行
         }
     }
 }
