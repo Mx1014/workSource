@@ -1149,11 +1149,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 					String  newData = objNew == null ? "null" : objNew.toString();
 					String  oldData = objOld == null ? "null" : objOld.toString();
 					if(field.getFieldName().lastIndexOf("ItemId") > -1){
-						ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), (objNew == null ? -1l : Long.parseLong(objNew.toString())));
+						ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
 				        if(levelItemNew != null) {
 				        	newData = levelItemNew.getItemDisplayName();
 				        }
-				        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+				        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
 				        if(levelItemOld != null) {
 				        	oldData = levelItemOld.getItemDisplayName();
 				        }

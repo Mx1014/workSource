@@ -302,13 +302,13 @@ public class CustomerServiceImpl implements CustomerService {
             dto.setLevelItemName(levelItem.getItemDisplayName());
         }
         if(null != dto.getCorpIndustryItemId()){
-        	ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), dto.getCorpIndustryItemId());
+        	ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getCorpIndustryItemId());
         	if(null != corpIndustryItem){
         		dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
         	}
         }
         if(null != dto.getContactGenderItemId()){
-        	ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), dto.getContactGenderItemId());
+        	ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getContactGenderItemId());
         	if(null != contactGenderItem){
         		dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
         	}
@@ -317,7 +317,7 @@ public class CustomerServiceImpl implements CustomerService {
         	dto.setTrackingName(dto.getTrackingName());
         }
         if(null != dto.getPropertyType()){
-        	ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), dto.getPropertyType());
+        	ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getPropertyType());
         	if(null != propertyTypeItem){
         		dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
         	}

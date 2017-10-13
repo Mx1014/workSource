@@ -485,19 +485,38 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType) {
+	public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType){
+		return listOrganizationMembersByOrganizationIdAndMemberGroup(organizationId, memberGroup, targetType, null);
+	}
+
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId){
+		return listOrganizationMembersByOrganizationIdAndMemberGroup(null, memberGroup, targetType, targetId);
+	}
+
+
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
+		if(null != organizationId){
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
+
+		}
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq(memberGroup));
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
 
 		if(null != OrganizationMemberTargetType.fromCode(targetType)){
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(targetType));
 		}
+
+		if(null != targetId){
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(targetId));
+		}
+
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
 		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
 		query.fetch().map((r) -> {
@@ -3004,17 +3023,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return null;
 	}
 
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByOrgIdAndMemberGroup(Long orgId, String memberGroup){
+		return listOrganizationMembersByOrgIdAndMemberGroup(orgId, memberGroup, null);
+	}
 
 
 	@Override
 	public List<OrganizationMember> listOrganizationMembersByOrgIdAndMemberGroup(
-			Long orgId, String memberGroup) {
+			Long orgId, String memberGroup, Long userId) {
 		List<OrganizationMember> list = new ArrayList<OrganizationMember>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode());
+		cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq(memberGroup));
+		if(null != orgId){
+			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId));
+		}
+		if(null != userId){
+			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
+			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
+		}
+
 		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
-				.where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId))
-				.and(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq(memberGroup))
-				.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode())).fetch();
+				.where(cond).fetch();
 
 		if(records != null && !records.isEmpty()){
 			for(Record r : records)
@@ -4921,7 +4953,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		dbProvider.mapReduce(AccessSpec.readOnly(), null,
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<Record> query = context.selectQuery();
-					query.addSelect(Tables.EH_USERS.ID,Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID,Tables.EH_USER_ORGANIZATIONS.STATUS,
+					query.addSelect(Tables.EH_USERS.ID,Tables.EH_USERS.NAMESPACE_USER_TYPE,Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID,Tables.EH_USER_ORGANIZATIONS.STATUS,
 							Tables.EH_USERS.NICK_NAME,Tables.EH_USERS.GENDER,Tables.EH_USERS.CREATE_TIME,Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID,
 							Tables.EH_USERS.EXECUTIVE_TAG,Tables.EH_USERS.POSITION_TAG,Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
 					query.addFrom(Tables.EH_USERS);
@@ -4951,6 +4983,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						userOrganizations.setExecutiveTag(r.getValue(Tables.EH_USERS.EXECUTIVE_TAG));
 						userOrganizations.setPosition(r.getValue(Tables.EH_USERS.POSITION_TAG));
 						userOrganizations.setPhoneNumber(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
+						userOrganizations.setNamespaceUserType(r.getValue(Tables.EH_USERS.NAMESPACE_USER_TYPE));
 						result.add(userOrganizations);
 						return null;
 					});
@@ -4967,7 +5000,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
+	public Integer countUserOrganization(Integer namespaceId, Long communityId){
+		return countUserOrganization(namespaceId, communityId, null, null);
+	}
+
+	@Override
 	public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus){
+		return countUserOrganization(namespaceId, communityId, userOrganizationStatus, null);
+	}
+
+	@Override
+	public Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType){
 		List<Long> result = new ArrayList<>();
 		dbProvider.mapReduce(AccessSpec.readOnly(), null,
 				(DSLContext context, Object reducingContext) -> {
@@ -4984,6 +5027,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 					query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
 					if(null != communityId){
 						query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
+					}
+					if(!StringUtils.isEmpty(namespaceUserType)){
+						query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(namespaceUserType));
 					}
 					query.addGroupBy(Tables.EH_USERS.ID);
 					LOGGER.debug("query sql:{}", query.getSQL());
