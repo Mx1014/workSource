@@ -97,6 +97,25 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 	}
 
 	@Override
+	public Integer countQuestionnaireAnswerByOptionId(Long optionId) {
+		List<String> counts = getReadOnlyContext().select(Tables.EH_QUESTIONNAIRE_ANSWERS.OPTION_ID.count().as("count")).from(Tables.EH_QUESTIONNAIRE_ANSWERS)
+				.where(Tables.EH_QUESTIONNAIRE_ANSWERS.OPTION_ID.eq(optionId)).fetch().map(r->r.getValue("count").toString());
+		if(counts!=null && counts.size()>0){
+			return Integer.valueOf(counts.get(0));
+		}
+		return 0;
+	}
+
+	@Override
+	public Integer countQuestionnaireAnswerByQuestionnaireId(Long qustionnaireId) {
+		return getReadOnlyContext().select(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTION_ID).
+				from(Tables.EH_QUESTIONNAIRE_ANSWERS)
+				.where(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID.eq(qustionnaireId))
+				.groupBy(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID,Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE)
+				.fetch().size();
+	}
+
+	@Override
 	public QuestionnaireAnswer findAnyAnswerByTarget(Long questionnaireId, String targetType, Long targetId) {
 		Record record = getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_ANSWERS)
 				.where(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID.eq(questionnaireId))

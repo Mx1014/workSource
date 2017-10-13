@@ -30,6 +30,7 @@ import com.everhomes.util.StringHelper;
  * <li>publishTime: 发布时间</li>
  * <li>cutOffTime: 截止时间</li>
  * <li>answeredFlag: 是否已经回答，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireCommonStatus}</li>
+ * <li>anonymousFlag: 是否匿名回答，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireCommonStatus}</li>
  * <li>createTime: 创建时间</li>
  * <li>submitTime: 企业问卷提交时间</li>
  * <li>questions: 题目列表，参考{@link com.everhomes.rest.questionnaire.QuestionnaireQuestionDTO}</li>
@@ -58,6 +59,7 @@ public class QuestionnaireDTO {
 	private Long publishTime;
 	private Long cutOffTime;
 	private Byte answeredFlag;
+	private Byte anonymousFlag;
 	private Long createTime;
 	private Long submitTime;
 	@ItemType(QuestionnaireQuestionDTO.class)
@@ -253,6 +255,14 @@ public class QuestionnaireDTO {
 
 	public void setShareUrl(String shareUrl) {
 		this.shareUrl = shareUrl;
+	}
+
+	public Byte getAnonymousFlag() {
+		return anonymousFlag;
+	}
+
+	public void setAnonymousFlag(Byte anonymousFlag) {
+		this.anonymousFlag = anonymousFlag;
 	}
 
 	@Override

@@ -17,6 +17,10 @@ import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.questionnaire.*;
+import com.everhomes.rest.user.NamespaceUserType;
+import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.util.TimSorter;
@@ -72,6 +76,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+
+	@Autowired
+	private UserProvider userProvider;
 
 
 	@Override
@@ -487,6 +494,10 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 					"Invalid parameters, there are no questions");
 		}
 
+		if(QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(questionnaire.getTargetType())){
+			questionnaire.setSupportShare(null);
+		}
+
 		//问题里面的枚举，非空等检查
 		for (QuestionnaireQuestionDTO question: questionnaire.getQuestions()) {
 			if (StringUtils.isBlank(question.getQuestionName())) {
@@ -710,6 +721,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	private void updateQuestionnaireCollectionCount(Long questionnaireId) {
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_QUESTIONNAIRE.getCode() + questionnaireId).enter(()->{
 			Questionnaire questionnaire = questionnaireProvider.findQuestionnaireById(questionnaireId);
+			Integer count = questionnaireAnswerProvider.countQuestionnaireAnswerByQuestionnaireId(questionnaireId);
+			questionnaire.setCollectionCount(count);
 			questionnaire.setCollectionCount((questionnaire.getCollectionCount()==null?0:questionnaire.getCollectionCount())+1);
 			questionnaireProvider.updateQuestionnaire(questionnaire);
 			return null;
@@ -719,6 +732,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	private void updateOptionCheckedCount(Long optionId) {
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_QUESTIONNAIRE_OPTION.getCode() + optionId).enter(()->{
 			QuestionnaireOption option = questionnaireOptionProvider.findQuestionnaireOptionById(optionId);
+			Integer count = questionnaireAnswerProvider.countQuestionnaireAnswerByOptionId(optionId);
+			option.setCheckedCount(count);
 			option.setCheckedCount((option.getCheckedCount()==null?0:option.getCheckedCount())+1);
 			questionnaireOptionProvider.updateQuestionnaireOption(option);
 			return null;
@@ -733,23 +748,44 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		answer.setOptionId(optionDTO.getId());
 		answer.setTargetType(targetType);
 		answer.setTargetId(targetId);
-		answer.setTargetName(getTargetName(targetType, targetId));
 		answer.setOptionContent(optionDTO.getOptionContent());
 		answer.setCreateTime(currentTime);
+		answer.setAnonymousFlag(questionnaireDTO.getAnonymousFlag()==null?QuestionnaireCommonStatus.FALSE.getCode():questionnaireDTO.getAnonymousFlag());
+		generateTarget(answer,targetType,targetId);
 		questionnaireAnswerProvider.createQuestionnaireAnswer(answer);
 	}
 
-	private String getTargetName(String targetType, Long targetId) {
+	private void generateTarget(QuestionnaireAnswer answer, String targetType, Long targetId) {
 		QuestionnaireTargetType questionnaireTargetType = QuestionnaireTargetType.fromCode(targetType);
 		switch (questionnaireTargetType) {
-		case ORGANIZATION:
-			Organization organization = organizationProvider.findOrganizationById(targetId);
-			return organization.getName();
-		default:
-			break;
+			case ORGANIZATION:
+				Organization organization = organizationProvider.findOrganizationById(targetId);
+				if(organization == null){
+					answer.setTargetName("");
+				}else {
+					answer.setTargetName(organization.getName());
+				}
+				break;
+			case USER:
+				User user = userProvider.findUserById(targetId);
+				if(user == null){
+					answer.setTargetName("");
+					answer.setTargetFrom(QuestionnaireUserType.APP.getCode());
+				}else {
+					answer.setTargetName(user.getNickName());
+					NamespaceUserType userType = NamespaceUserType.fromCode(user.getNamespaceUserType());
+					answer.setTargetFrom(userType == NamespaceUserType.WX?QuestionnaireUserType.WX.getCode():QuestionnaireUserType.APP.getCode());
+				}
+				UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(targetId,UserContext.getCurrentNamespaceId());
+				if(userIdentifier != null) {
+					answer.setTargetPhone(userIdentifier.getIdentifierToken());
+				}else{
+					answer.setTargetPhone("");
+				}
+				break;
+			default:
+				break;
 		}
-		
-		return null;
 	}
 
 	private void checkCreateTargetQuestionnaireParameters(CreateTargetQuestionnaireCommand cmd) {
@@ -763,20 +799,37 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		Questionnaire questionnaire = findQuestionnaireById(questionnaireDTO.getId());
 		if (QuestionnaireStatus.fromCode(questionnaire.getStatus()) != QuestionnaireStatus.ACTIVE) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"status error, status=" + questionnaire.getStatus());
+					"提交失败，问卷未发布！" + questionnaire.getStatus());
 		}
-		
+
+		if(!targetType.getCode().equals(questionnaire.getTargetType())){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"questionnaire type = " + questionnaire.getTargetType() + " summit type = "+cmd.getTargetType());
+		}
+
+		//支持匿名
+		if(QuestionnaireCommonStatus.FALSE == QuestionnaireCommonStatus.fromCode(questionnaire.getSupportAnonymous())
+				&& QuestionnaireCommonStatus.TRUE == QuestionnaireCommonStatus.fromCode(questionnaireDTO.getSupportAnonymous())){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"提交失败，问卷不支持匿名回答!");
+		}
+
 		QuestionnaireAnswer answer = questionnaireAnswerProvider.findAnyAnswerByTarget(questionnaireDTO.getId(), cmd.getTargetType(), cmd.getTargetId());
 		if (answer != null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Don't submit repeatedly!");
+			if(QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(cmd.getTargetType())) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"提交失败，其他管理员已填写问卷！");
+			}else{
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"提交失败，已填写问卷！");
+			}
 		}
 		
 		List<QuestionnaireQuestionDTO> questionDTOs = questionnaireDTO.getQuestions();
 		List<QuestionnaireQuestion> questions = questionnaireQuestionProvider.listQuestionsByQuestionnaireId(questionnaireDTO.getId());
 		if (questionDTOs == null || questionDTOs.size() != questions.size()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"some question may not be checked");
+					"提交失败，请完成答卷！");
 		}
 		
 		for (QuestionnaireQuestionDTO questionDTO : questionDTOs) {

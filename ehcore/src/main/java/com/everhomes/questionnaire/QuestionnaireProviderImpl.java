@@ -117,8 +117,8 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 			Long pageAnchor, int pageSize) {
 		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRES)
 				.where(Tables.EH_QUESTIONNAIRES.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(ownerType))
-				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(ownerId))
+//				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(ownerType))
+//				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_QUESTIONNAIRES.STATUS.eq(QuestionnaireStatus.ACTIVE.getCode()))
 				.and(pageAnchor==null?DSL.trueCondition():Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.lt(new Timestamp(pageAnchor)))
 				.orderBy(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc())

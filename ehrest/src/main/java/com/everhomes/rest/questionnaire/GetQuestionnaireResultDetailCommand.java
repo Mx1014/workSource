@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>namespaceId: 域空间id</li>
  * <li>questionnaireId: 问卷id</li>
+ * <li>targetFrom: 用户来源，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireUserType}</li>
  * <li>keywords: 查询关键字</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
@@ -18,6 +19,8 @@ public class GetQuestionnaireResultDetailCommand {
 	private Integer namespaceId;
 
 	private Long questionnaireId;
+
+	private Byte targetFrom;
 
 	private String keywords;
 
@@ -76,6 +79,14 @@ public class GetQuestionnaireResultDetailCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Byte getTargetFrom() {
+		return targetFrom;
+	}
+
+	public void setTargetFrom(Byte targetFrom) {
+		this.targetFrom = targetFrom;
 	}
 
 	@Override

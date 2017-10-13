@@ -18,7 +18,7 @@ public class QuestionnaireResultTargetDTO {
 	private String targetType;
 	private Long targetId;
 	private String targetName;
-	private String targetFrom;
+	private Byte targetFrom;
 	private String targetPhone;
 	private Long submitTime;
 
@@ -46,11 +46,11 @@ public class QuestionnaireResultTargetDTO {
 		this.targetName = targetName;
 	}
 
-	public String getTargetFrom() {
+	public Byte getTargetFrom() {
 		return targetFrom;
 	}
 
-	public void setTargetFrom(String targetFrom) {
+	public void setTargetFrom(Byte targetFrom) {
 		this.targetFrom = targetFrom;
 	}
 
