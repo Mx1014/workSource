@@ -446,6 +446,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("createBillGroup")
     @RestReturn(value = String.class)
     public RestResponse createBillGroup(CreateBillGroupCommand cmd) {
+
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
