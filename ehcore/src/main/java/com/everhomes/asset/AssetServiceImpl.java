@@ -64,6 +64,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
 import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
+import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
@@ -1165,7 +1166,39 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void createChargingStandard(CreateChargingStandardCommand cmd) {
-        assetProvider.createChargingStandard(cmd);
+        com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c = new PaymentChargingStandards();
+        com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s = new PaymentChargingStandardScope();
+        // create a chargingstandard
+        c.setBillingCycle(cmd.getBillingCycle());
+        c.setChargingItemsId(cmd.getChargingItemId());
+        c.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        c.setCreatorUid(0l);
+        c.setFormula(cmd.getFormula());
+        c.setFormulaJson(cmd.getFormulaJson());
+        c.setFormulaType(cmd.getFormulaType());
+        long nextStandardId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS.getClass()));
+        c.setId(nextStandardId);
+        c.setName(cmd.getChargingStandardName());
+        c.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        c.setInstruction(cmd.getInstruction());
+
+        // create formula that fits the standard
+        CreateFormulaCommand cmd1 = ConvertHelper.convert(cmd,CreateFormulaCommand.class);
+        cmd1.setChargingStandardId(nextStandardId);
+        List<EhPaymentFormula> f = createFormula(cmd1);
+
+
+        // create a scope corresponding to the chargingstandard just created
+        s.setChargingStandardId(nextStandardId);
+        s.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        s.setCreatorUid(0l);
+        s.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.getClass())));
+        s.setOwnerType(cmd.getOwnerType());
+        s.setOwnerId(cmd.getOwnerId());
+        s.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        assetProvider.createChargingStandard(c,s,f);
+
     }
 
     @Override
@@ -1218,66 +1251,118 @@ public class AssetServiceImpl implements AssetService {
      *      3. 返回id
      */
     @Override
-    public CreateFormulaDTO createFormula(CreateFormulaCommand cmd) {
-        CreateFormulaDTO dto = new CreateFormulaDTO();
+    public List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd) {
+//        CreateFormulaDTO dto = new CreateFormulaDTO();
+//        List<Long> formulaIds = new ArrayList<>();
+        List<EhPaymentFormula> list = new ArrayList<>();
         Byte formulaType = cmd.getFormulaType();
-        dto.setFormulaType(formulaType);
-        String str = cmd.getNormalFormulaStr();
-        if(formulaType == 1){
-            dto.setFormula(cmd.getNormalFormulaStr());
-            dto.setFormulaJson(getVariableIdenfitierByName(targetStr));
-        }
-        else if(formulaType==2){
+//        dto.setFormulaType(formulaType);
+        if (formulaType == 1) {
+            EhPaymentFormula paymentFormula = new PaymentFormula();
+            long nextPaymentFormulaId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_FORMULA.getClass()));
+            paymentFormula.setId(nextPaymentFormulaId);
+            paymentFormula.setChargingStandardId(cmd.getChargingStandardId());
+            paymentFormula.setCreatorUid(0l);
+            paymentFormula.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            paymentFormula.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            paymentFormula.setName(cmd.getNormalFormulaStr());
+            paymentFormula.setFormulaType(formulaType);
+            paymentFormula.setFormula(cmd.getNormalFormulaStr());
+            paymentFormula.setFormulaJson("gdje");
+            list.add(paymentFormula);
+//            formulaIds.add(nextPaymentFormulaId);
+        } else if (formulaType == 2) {
             //普通公式时
-            String formula = str;
-            formula.replace("[[","");
-            formula.replace("]]","");
-            dto.setFormula(formula);
-            Set<String> replaces = new HashSet<>();
-            String formulaJson = formula;
-            char[] formularChars = formulaJson.toCharArray();
-            int index = 0;
-            int start = 0;
-            while(index < formularChars.length){
-                if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
-                    replaces.add(formulaJson.substring(start,index==formulaJson.length()-1?index+1:index));
-                    start = index+1;
-                }
-                index++;
-            }
-            Iterator<String> iterator = replaces.iterator();
-            while(iterator.hasNext()){
-                String targetStr = iterator.next();
-                String substitute = getVariableIdenfitierByName(targetStr);
-                if(!org.apache.commons.lang.StringUtils.isEmpty(substitute)){
-                    formulaJson = formulaJson.replace(targetStr,substitute);
-                }
-            }
-            dto.setFormulaJson(formulaJson);
-        }
-        else if(formulaType == 3 || formulaType== 4){
+            String str = cmd.getNormalFormulaStr();
+            List<String> formulaAndJson = setFormula(str);
+
+            EhPaymentFormula paymentFormula = new PaymentFormula();
+            long nextPaymentFormulaId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_FORMULA.getClass()));
+            paymentFormula.setId(nextPaymentFormulaId);
+            paymentFormula.setChargingStandardId(cmd.getChargingStandardId());
+            paymentFormula.setCreatorUid(0l);
+            paymentFormula.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            paymentFormula.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            paymentFormula.setName(formulaAndJson.get(0));
+            paymentFormula.setFormulaType(formulaType);
+            paymentFormula.setFormula(formulaAndJson.get(0));
+            paymentFormula.setFormulaJson(formulaAndJson.get(1));
+            list.add(paymentFormula);
+//            formulaIds.add(nextPaymentFormulaId);
+        } else if (formulaType == 3 || formulaType == 4) {
             //存储条件
             List<VariableConstraints> envelop = cmd.getStepValuePairs();
             StringBuilder name = new StringBuilder();
-            for(int i = 0 ; i < envelop.size(); i ++){
-                List<eh_payment_formula> list = new ArrayList<>();
-                payment_formula payment_formula = new payment_formula();
-                payment_formula.formula
-                        .formulaJson
-                        .formulatype
-                        .id
-                        .constraintVariableIdentifier
-                        .constrantVariableRelation
-                        .constratVariableLimit
-                        .createUid
-                        .updateTime
-                        .createTime
-                    name += payment_formula+"+";
+            for (int i = 0; i < envelop.size(); i++) {
                 VariableConstraints variableConstraints = envelop.get(i);
-                String variableIdentifier = getVariableIdenfitierById(variableConstraints.getVariableId());
+                EhPaymentFormula paymentFormula = new PaymentFormula();
+
+                String eachFormula = variableConstraints.getFormula();
+                List<String> formularAndJson = setFormula(eachFormula);
+
+                paymentFormula.setFormulaType(cmd.getFormulaType());
+                paymentFormula.setFormula(formularAndJson.get(0));
+                paymentFormula.setFormulaJson(formularAndJson.get(1));
+                long nextPaymentFormulaId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_FORMULA.getClass()));
+                paymentFormula.setId(nextPaymentFormulaId);
+                paymentFormula.setChargingStandardId(cmd.getChargingStandardId());
+                //获得一个区间5个约束条件
+                paymentFormula.setConstraintVariableIdentifer(variableConstraints.getVariableIdentifier());
+                paymentFormula.setStartConstraint(variableConstraints.getStartConstraint());
+                paymentFormula.setStartNum(new BigDecimal(variableConstraints.getStartNum()));
+                paymentFormula.setEndConstraint(variableConstraints.getEndConstraint());
+                paymentFormula.setEndNum(new BigDecimal(variableConstraints.getEndNum()));
+
+
+                paymentFormula.setCreatorUid(0l);
+                paymentFormula.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                paymentFormula.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                list.add(paymentFormula);
+                name.append(formularAndJson.get(0) + "+");
+//                formulaIds.add(nextPaymentFormulaId);
+            }
+            if(name.lastIndexOf("+")==name.length()-1) name.deleteCharAt(name.length()-1);
+            for(int i = 0 ; i < list.size(); i ++){
+                list.get(i).setName(name.toString());
+            }
+        }
+        return list;
+//        assetProvider.savePaymentFormula(list);
+//        dto.setFormulaIds(formulaIds);
+//        return dto;
+    }
+
+
+    private List<String> setFormula( String str) {
+        List<String> formulaAndJson = new ArrayList<>();
+        String formula = str;
+        formula.replace("[[","");
+        formula.replace("]]","");
+
+        formulaAndJson.add(formula);
+        Set<String> replaces = new HashSet<>();
+        String formulaJson = formula;
+        char[] formularChars = formulaJson.toCharArray();
+        int index = 0;
+        int start = 0;
+        while(index < formularChars.length){
+            if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
+                replaces.add(formulaJson.substring(start,index==formulaJson.length()-1?index+1:index));
+                start = index+1;
+            }
+            index++;
+        }
+        Iterator<String> iterator = replaces.iterator();
+        while(iterator.hasNext()){
+            String targetStr = iterator.next();
+            String substitute = assetProvider.getVariableIdenfitierByName(targetStr);
+            if(!org.apache.commons.lang.StringUtils.isEmpty(substitute)){
+                formulaJson = formulaJson.replace(targetStr,substitute);
             }
         }
 
+        formulaAndJson.add(formulaJson);
+        return formulaAndJson;
     }
 
     private void checkNullProhibit(String name , Object object) {

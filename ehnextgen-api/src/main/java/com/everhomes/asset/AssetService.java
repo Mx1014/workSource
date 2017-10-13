@@ -5,6 +5,7 @@ import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -115,5 +116,5 @@ public interface AssetService {
 
     List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
 
-    CreateFormulaDTO createFormula(CreateFormulaCommand cmd);
+    List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd);
 }

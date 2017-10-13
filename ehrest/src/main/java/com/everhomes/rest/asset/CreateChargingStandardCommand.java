@@ -2,9 +2,11 @@
 package com.everhomes.rest.asset;
 
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  *<ul>
@@ -18,6 +20,9 @@ import javax.validation.constraints.NotNull;
  * <li>priceUnitType:价格单位类型,1:日单价;2:月单价;</li>
  * <li>formulaJson:公式的json</li>
  * <li>formula:公式</li>
+ * <li>instruction:说明</li>
+ * <li>normalFormulaStr:普通公式模式下新增的公式</li>
+ * <li>stepValuePairs:区间和阶梯公式模式下的传值，参考{@link com.everhomes.rest.asset.VariableConstraints}</li>
  *</ul>
  */
 public class CreateChargingStandardCommand {
@@ -41,6 +46,10 @@ public class CreateChargingStandardCommand {
     @NotNull
     private String formulaJson;
     private String instruction;
+
+    private String normalFormulaStr;
+    @ItemType(VariableConstraints.class)
+    private List<VariableConstraints> stepValuePairs;
 
     @Override
     public String toString() {

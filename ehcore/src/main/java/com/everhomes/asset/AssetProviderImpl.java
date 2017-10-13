@@ -40,6 +40,7 @@ import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 
 import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
 
+import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -688,6 +689,9 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillGroupId(r.getValue(t.ID));
                     dto.setBillGroupName(r.getValue(t.NAME));
                     dto.setDefaultOrder(r.getValue(t.DEFAULT_ORDER));
+                    dto.setBillingCycle(r.getValue(t.BALANCE_DATE_TYPE));
+                    dto.setBillingDay("每周期首月"+r.getValue(t.BILLS_DAY)+"日");
+                    dto.setDueDay("出账单"+"1"+"月"+"后");
                     list.add(dto);
                     return null;
                 });
@@ -1972,38 +1976,14 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void createChargingStandard(CreateChargingStandardCommand cmd) {
+    public void createChargingStandard(com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c, com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c = new PaymentChargingStandards();
-        com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s = new PaymentChargingStandardScope();
-
-        // create a chargingstandard
-        c.setBillingCycle(cmd.getBillingCycle());
-        c.setChargingItemsId(cmd.getChargingItemId());
-        c.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        c.setCreatorUid(0l);
-        c.setFormula(cmd.getFormula());
-        c.setFormulaJson(cmd.getFormulaJson());
-        c.setFormulaType(cmd.getFormulaType());
-        long nextStandardId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS.getClass()));
-        c.setId(nextStandardId);
-        c.setName(cmd.getChargingStandardName());
-        c.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        c.setInstruction(cmd.getInstruction());
-
-        // create a scope corresponding to the chargingstandard just created
-        s.setChargingStandardId(nextStandardId);
-        s.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        s.setCreatorUid(0l);
-        s.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.getClass())));
-        s.setOwnerType(cmd.getOwnerType());
-        s.setOwnerId(cmd.getOwnerId());
-        s.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
         EhPaymentChargingStandardsDao ChargingStandardsDao = new EhPaymentChargingStandardsDao(context.configuration());
         EhPaymentChargingStandardsScopesDao chargingStandardsScopesDao = new EhPaymentChargingStandardsScopesDao(context.configuration());
+        EhPaymentFormulaDao paymentFormulaDao = new EhPaymentFormulaDao(context.configuration());
         ChargingStandardsDao.insert(c);
         chargingStandardsScopesDao.insert(s);
+        paymentFormulaDao.insert(f);
     }
 
     @Override
@@ -2065,6 +2045,28 @@ public class AssetProviderImpl implements AssetProvider {
                     return null;});
         return list;
 
+    }
+
+    @Override
+    public String getVariableIdenfitierById(Long variableId) {
+        DSLContext context = getReadOnlyContext();
+        EhPaymentVariables t = Tables.EH_PAYMENT_VARIABLES.as("t");
+        return context.select(t.IDENTIFIER)
+                .from(t)
+                .where(t.ID.eq(variableId))
+                .fetchOne(0,String.class);
+    }
+
+
+
+    @Override
+    public String getVariableIdenfitierByName(String targetStr) {
+        DSLContext context = getReadOnlyContext();
+        EhPaymentVariables t = Tables.EH_PAYMENT_VARIABLES.as("t");
+        return context.select(t.IDENTIFIER)
+                .from(t)
+                .where(t.NAME.eq(targetStr))
+                .fetchOne(0,String.class);
     }
 
 

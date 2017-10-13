@@ -335,8 +335,8 @@ public class AssetController extends ControllerBase {
     // this is for 展示一个收费项目的客户可见的所有标准列表         4
     /**
      * <p>展示一个收费项目的园区下的所有标准列表</p>
-     * <b>URL: /asset/listChargingStandards</b>
-     */
+            * <b>URL: /asset/listChargingStandards</b>
+            */
     @RequestMapping("listChargingStandards")
     @RestReturn(value = ListChargingStandardsDTO.class, collection = true)
     public RestResponse listChargingStandards(ListChargingStandardsCommand cmd) {
@@ -361,6 +361,7 @@ public class AssetController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
+
 
     // this is for 修改一个收费标准         4
     /**
@@ -422,22 +423,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // 解析并返回新增的公式
-    /**
-     * <p>解析并保存新增的公式</p>
-     * <b>URL: /asset/createFormula</b>
-     */
-    @RequestMapping("createFormula")
-    @RestReturn(value = CreateFormulaDTO.class)
-    public RestResponse createFormula(CreateFormulaCommand cmd) {
-        CreateFormulaDTO dto = assetService.createFormula(cmd);
-        RestResponse response = new RestResponse(dto);
-        response.setErrorDescription("OK");
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        return response;
-    }
-
-    // this is for 展示账单组列表          1
+    // this is for 展示账单组列表          4
     /**
      * <p>展示账单组列表</p>
      * <b>URL: /asset/listBillGroups</b>

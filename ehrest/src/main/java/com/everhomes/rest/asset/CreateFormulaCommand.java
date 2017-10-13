@@ -20,6 +20,7 @@ public class CreateFormulaCommand {
     private String normalFormulaStr;
     @ItemType(VariableConstraints.class)
     private List<VariableConstraints> stepValuePairs;
+    private Long chargingStandardId;
 
     public Byte getFormulaType() {
         return formulaType;
@@ -43,5 +44,13 @@ public class CreateFormulaCommand {
 
     public void setStepValuePairs(List<VariableConstraints> stepValuePairs) {
         this.stepValuePairs = stepValuePairs;
+    }
+
+    public Long getChargingStandardId() {
+        return chargingStandardId;
+    }
+
+    public void setChargingStandardId(Long chargingStandardId) {
+        this.chargingStandardId = chargingStandardId;
     }
 }

@@ -4,9 +4,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.asset.*;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
-import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
+import com.everhomes.server.schema.tables.pojos.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -168,7 +166,7 @@ public interface AssetProvider {
 
     void configChargingItems(List<Long> chargingItemsIds, Long communityId, Integer namespaceId);
 
-    void createChargingStandard(CreateChargingStandardCommand cmd);
+    void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
     void modifyChargingStandard(ModifyChargingStandardCommand cmd);
 
@@ -177,4 +175,8 @@ public interface AssetProvider {
     void deleteChargingStandard(Long chargingStandardId, Long ownerId, String ownerType);
 
     List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
+
+    String getVariableIdenfitierById(Long variableId);
+
+    String getVariableIdenfitierByName(String targetStr);
 }
