@@ -790,19 +790,19 @@ public class AssetProviderImpl implements AssetProvider {
             BigDecimal amountOwed = new BigDecimal("0");
             BigDecimal zero = new BigDecimal("0");
 
-            long nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
+            long nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
             if(nextBillId == 0){
-                nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
+                nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
             }
 
             if(list2!=null) {
                 //bill exemption
                 List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
-                long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_EXEMPTION_ITEMS.getClass()), list2.size());
+                long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class), list2.size());
                 long currentExemItemSeq = nextExemItemBlock - list2.size() + 1;
                 if(currentExemItemSeq == 0){
                     currentExemItemSeq = currentExemItemSeq+1;
-                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_EXEMPTION_ITEMS.getClass()));
+                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
                 }
                 for(int i = 0; i < list2.size(); i++){
                     ExemptionItemDTO exemptionItemDTO = list2.get(i);
@@ -849,11 +849,11 @@ public class AssetProviderImpl implements AssetProvider {
             if(list1!=null){
                 //billItems assemble
                 List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
-                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), list1.size());
+                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class), list1.size());
                 long currentBillItemSeq = nextBillItemBlock - list1.size() + 1;
                 if(currentBillItemSeq == 0){
                     currentBillItemSeq = currentBillItemSeq+1;
-                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()));
+                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
                 }
 
                 for(int i = 0; i < list1.size() ; i++) {
@@ -1300,7 +1300,7 @@ public class AssetProviderImpl implements AssetProvider {
                                 .and(t2.ID.eq(exemptionItemDTO.getExemptionId()))
                                 .execute();
                     }else{
-                        long nextId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_EXEMPTION_ITEMS.getClass()));
+                        long nextId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
                         PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
                         BigDecimal amount = exemptionItemDTO.getAmount();
                         exemptionItem.setAmount(amount);
@@ -1782,7 +1782,7 @@ public class AssetProviderImpl implements AssetProvider {
     public Long saveAnOrderCopy(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         //TO SAVE A PRE ORDER COPY IN THE ORDER TABLE WITH STATUS BEING NOT BEING PAID YET
-        long nextOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_ASSET_PAYMENT_ORDER.getClass()));
+        long nextOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrder.class));
         AssetPaymentOrder order = new AssetPaymentOrder();
         order.setClientAppName(clientAppName);
         order.setCommunityId(String.valueOf(communityId));
@@ -1839,7 +1839,7 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public void saveOrderBills(List<BillIdAndAmount> bills, Long orderId) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.getClass()),bills.size());
+        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhAssetPaymentOrderBills.class),bills.size());
         long nextSequence = nextBlockSequence - bills.size()+1;
         List<EhAssetPaymentOrderBills> orderBills = new ArrayList<>();
         for(int i = 0; i < bills.size(); i ++){
@@ -1966,7 +1966,7 @@ public class AssetProviderImpl implements AssetProvider {
             Long chargingItemId = chargingItemsIds.get(i);
             PaymentChargingItemScope scope = new PaymentChargingItemScope();
             scope.setChargingItemId(chargingItemId);
-            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(t.getClass()));
+            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes.class));
             scope.setId(nextSequence);
             scope.setNamespaceId(namespaceId);
             scope.setOwnerId(communityId);
@@ -2074,7 +2074,7 @@ public class AssetProviderImpl implements AssetProvider {
     public void createBillGroup(CreateBillGroupCommand cmd) {
         DSLContext context = getReadWriteContext();
         com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = new PaymentBillGroup();
-        Long nextGroupId = getNextSequence(Tables.EH_PAYMENT_BILL_GROUPS.getClass());
+        Long nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
         group.setId(nextGroupId);
         group.setBalanceDateType(cmd.getBillingCycle());
