@@ -4,11 +4,14 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -24,13 +27,59 @@ public class FieldController extends ControllerBase {
     private FieldService fieldService;
 
     /**
+     * <b>URL: /varField/listSystemFields</b>
+     * <p>获取系统模块字段</p>
+     * @return {@link SystemFieldDTO}
+     */
+    @RequestMapping("listSystemFields")
+    @RestReturn(value=SystemFieldDTO.class, collection = true)
+    public RestResponse listSystemFields(@Valid ListSystemFieldCommand cmd) {
+        List<SystemFieldDTO> fields = fieldService.listSystemFields(cmd);
+        RestResponse res = new RestResponse(fields);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /varField/listSystemFieldGroups</b>
+     * <p>获取域空间模块字段组</p>
+     * @return {@link SystemFieldGroupDTO}
+     */
+    @RequestMapping("listSystemFieldGroups")
+    @RestReturn(value=SystemFieldGroupDTO.class, collection = true)
+    public RestResponse listSystemFieldGroups(@Valid ListSystemFieldGroupCommand cmd) {
+        List<SystemFieldGroupDTO> groups = fieldService.listSystemFieldGroups(cmd);
+        RestResponse res = new RestResponse(groups);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /varField/listSystemFieldItems</b>
+     * <p>获取域空间模块字段选择项</p>
+     * @return {@link SystemFieldItemDTO}
+     */
+    @RequestMapping("listSystemFieldItems")
+    @RestReturn(value=SystemFieldItemDTO.class, collection = true)
+    public RestResponse listSystemFieldItems(@Valid ListSystemFieldItemCommand cmd) {
+        List<SystemFieldItemDTO> items = fieldService.listSystemFieldItems(cmd);
+        RestResponse res = new RestResponse(items);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
      * <b>URL: /varField/updateFields</b>
-     * <p>更新域空间模块字段</p>
+     * <p>更新域空间or项目模块字段</p>
      * @return {@link String}
      */
     @RequestMapping("updateFields")
     @RestReturn(value=String.class)
     public RestResponse updateFields(@Valid UpdateFieldsCommand cmd) {
+        fieldService.updateFields(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
@@ -60,6 +109,7 @@ public class FieldController extends ControllerBase {
     @RequestMapping("updateFieldGroups")
     @RestReturn(value=String.class)
     public RestResponse updateFieldGroups(@Valid UpdateFieldGroupsCommand cmd) {
+        fieldService.updateFieldGroups(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
@@ -89,6 +139,7 @@ public class FieldController extends ControllerBase {
     @RequestMapping("updateFieldItems")
     @RestReturn(value=String.class)
     public RestResponse updateFieldItems(@Valid UpdateFieldItemsCommand cmd) {
+        fieldService.updateFieldItems(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
@@ -123,6 +174,8 @@ public class FieldController extends ControllerBase {
         return response;
     }
 
+
+    // 你认为这是段毫无意义的注释，但事实上，由于很多往往想不到的机制，实体之间相互的差异，这段注释保护了下面三个方法，代价极小的基于最小知识原理的trick
 //    /**
 //     * <p>模板导出</p>
 //     * <b>URL: /varField/exportExcelTemplate</b>
@@ -130,9 +183,7 @@ public class FieldController extends ControllerBase {
 //    @RequestMapping("exportExcelTemplate")
 //    public void exportExcelTemplate(@Valid ListFieldGroupCommand cmd,HttpServletResponse response){
 //        fieldService.exportExcelTemplate(cmd,response);
-//        RestResponse restResponse = new RestResponse();
-//        restResponse.setErrorDescription("OK");
-//        restResponse.setErrorCode(200);
+//
 //    }
 //
 //    /**
@@ -142,8 +193,24 @@ public class FieldController extends ControllerBase {
 //    @RequestMapping("exportFieldsExcel")
 //    public void exportFieldsExcel(@Valid ExportFieldsExcelCommand cmd, HttpServletResponse response){
 //        fieldService.exportFieldsExcel(cmd,response);
-//        RestResponse restResponse = new RestResponse();
-//        restResponse.setErrorDescription("OK");
-//        restResponse.setErrorCode(200);
 //    }
+//
+//    /**
+//     * <p>excel数据导入</p>
+//     * <b>URL: /varField/importFieldsExcel</b>
+//     */
+//    @RequestMapping("importFieldsExcel")
+//    @RestReturn(String.class)
+//    public RestResponse importFieldsExcel(@Valid ImportFieldExcelCommand cmd, MultipartFile file){
+//
+//        fieldService.importFieldsExcel(cmd,file);
+//
+//        RestResponse restResponse = new RestResponse();
+//        restResponse.setErrorCode(200);
+//        restResponse.setErrorDescription("OK");
+//        return restResponse;
+//    }
+
+
+
 }

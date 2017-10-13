@@ -217,10 +217,12 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                 dto.setAddresses(addresses.stream().map(r2 -> {
                 	OrganizationOwnerAddressDTO d = ConvertHelper.convert(r2, OrganizationOwnerAddressDTO.class);
                 	Address address = addressProvider.findAddressById(r2.getAddressId());
-                	d.setAddressId(address.getId());
-                	d.setAddress(address.getAddress());
-                	d.setApartment(address.getApartmentName());
-                	d.setBuilding(address.getBuildingName());
+                    if(address != null) {
+                        d.setAddressId(address.getId());
+                        d.setAddress(address.getAddress());
+                        d.setApartment(address.getApartmentName());
+                        d.setBuilding(address.getBuildingName());
+                    }
                 	return d;
                 }).collect(Collectors.toList()));
                 

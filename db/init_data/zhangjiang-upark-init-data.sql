@@ -1989,6 +1989,7 @@ INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`,
 UPDATE eh_launch_pad_items SET action_data = CONCAT('{"displayType":"grid","type":',@category_id,'"parentId":',@category_id,'}') WHERE item_label = '招商信息' AND namespace_id = '999971';
 
 
+
 -- 张江高科的app入口配置 by wentian
 UPDATE `eh_launch_pad_items` SET action_data='{"url":"http://zhangjiang-beta.zuolin.com/property-management/build/index.html?hideNavigationBar=1&name=1#/verify_account#sign_suffix"}'
 WHERE item_label = '费用查缴' AND scene_type != 'pm_admin' AND namespace_id='999971';
@@ -2107,6 +2108,7 @@ INSERT INTO `eh_payment_bill_groups` VALUES ('10', '999971', '240111044332059779
 INSERT INTO `eh_payment_bill_groups` VALUES ('11', '999971', '240111044332059780', 'community', '水电费', '2', '5', '0', UTC_TIMESTAMP(), NULL, NULL, '3');
 INSERT INTO `eh_payment_bill_groups` VALUES ('12', '999971', '240111044332059781', 'community', '水电费', '2', '5', '0', UTC_TIMESTAMP(), NULL, NULL, '3');
 
+
 -- 4.8.3 张江高科重新配置的数据 by lei.lv 9月13日
 -- By lei.lv
 -- layout数据
@@ -2206,6 +2208,7 @@ INSERT INTO `eh_namespace_masks` VALUES ('2', '999971', '园区服务', '3', '�
 -- 删除原有的门牌
 DELETE FROM eh_addresses WHERE namespace_id = 999971 AND community_id = 240111044331050388;
 -- 删除原有的楼栋
+<<<<<<< HEAD
 DELETE FROM eh_buildings WHERE namespace_id = 999971 AND community_id = 240111044331050388;
 
 -- added by wh add 搜索 快讯
@@ -2219,3 +2222,9 @@ INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999971','', '0', '快讯', 'news', '1',NULL,NULL,'6');
 
   
+-- aded by wh  张江高科--企业管理员后台内部管理->审批管理去掉
+DELETE FROM  eh_web_menu_scopes WHERE menu_id = 520000 AND owner_type = 'EhNamespaces' AND  owner_id = 999971;
+=======
+DELETE from eh_buildings WHERE namespace_id = 999971 AND community_id = 240111044331050388;
+
+>>>>>>> origin/contract-august-payment-2.0

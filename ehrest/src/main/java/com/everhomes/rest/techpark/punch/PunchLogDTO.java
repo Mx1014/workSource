@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
  * <li>punchType：上班还是下班 0-上班 1-下班 2-不打卡 参考 {@link PunchType}</li> 
  * <li>ruleTime： 规则时间(设置上下班打卡时间)</li> 
  * <li>punchTime： 实际打卡时间</li> 
+ * <li>latitude： 维度</li>
+ * <li>longitude： 经度</li>
  * <li>clockStatus：打卡状态 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
  * </ul>
  */
@@ -22,12 +24,40 @@ public class PunchLogDTO {
 	private long ruleTime;
     private long punchTime; 
     private Byte clockStatus;
+	private Double longitude;
+	private Double latitude;
+	private String identification;
+
       
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getIdentification() {
+		return identification;
+	}
+
+	public void setIdentification(String identification) {
+		this.identification = identification;
+	}
+
+	public Double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
 
 	public Long getExpiryTime() {
 		return expiryTime;

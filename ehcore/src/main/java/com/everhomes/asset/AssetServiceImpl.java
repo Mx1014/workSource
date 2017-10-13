@@ -691,7 +691,7 @@ public class AssetServiceImpl implements AssetService {
                 else if(billingCycle == AssetPaymentStrings.NATRUAL_MONTH){
                     NaturalMonthHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
                 }else{
-                    throw new RuntimeException("创建账单失败，暂不支持自然月自费周期以外的方式");
+                    LOGGER.info("failed to run natural mode, dtos2 length = {}",dtos2.size());
                 }
                 long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), dtos2.size());
                 long currentBillItemSeq = nextBillItemBlock - dtos2.size() + 1;
@@ -728,7 +728,8 @@ public class AssetServiceImpl implements AssetService {
                     item.setBillGroupId(billGroupId);
                     item.setBillId(nextBillId);
                     item.setChargingItemName(groupRule.getChargingItemName());
-                    item.setChargingItemsId(rule.getChargingItemId());
+//                    item.setChargingItemsId(rule.getChargingItemId());
+                    item.setChargingItemsId(groupRule.getChargingItemId());
                     item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setCreatorUid(UserContext.currentUserId());
                     item.setDateStr(dateStr);
@@ -789,7 +790,7 @@ public class AssetServiceImpl implements AssetService {
                         }
                         //if the billing cycle is on quarter or year, just change the way how the billIdentity defines that muliti bills should be merged as one or be independently
                     }else{
-                        throw new RuntimeException("暂只支持按月计费，请联系左邻在账单组设置");
+                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Only natural mode is supported now");
                     }
                 }
 
@@ -1142,6 +1143,14 @@ public class AssetServiceImpl implements AssetService {
                 }
             });
         }
+
+    }
+
+    @Override
+    public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
+        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId());
+        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
+        return handler.placeAnAssetOrder(cmd);
     }
 
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {

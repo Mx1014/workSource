@@ -31,16 +31,21 @@ import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.oauth2.Clients;
+import com.everhomes.order.PayService;
+import com.everhomes.order.PaymentUser;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pay.user.BusinessUserType;
 import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.asset.CheckPaymentUserCommand;
+import com.everhomes.rest.asset.CheckPaymentUserResponse;
 import com.everhomes.rest.business.*;
 import com.everhomes.rest.business.admin.*;
 import com.everhomes.rest.category.CategoryDTO;
@@ -142,7 +147,8 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
-
+	@Autowired
+	private PayService payService;
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
 		if(cmd.getUserId() == null){
@@ -1763,6 +1769,22 @@ public class BusinessServiceImpl implements BusinessService {
 			}
 		}
 		return dtos;
+	}
+
+	@Override
+	public CheckPaymentUserResponse checkPaymentUser(CheckPaymentUserCommand cmd) {
+		CheckPaymentUserResponse res = businessProvider.checkoutPaymentUser(cmd.getUserId());
+		if(res==null){
+			res = new CheckPaymentUserResponse();
+			PaymentUser paymentUser = payService.createPaymentUser(BusinessUserType.PERSONAL.getCode(), cmd.getOwnerType(), cmd.getUserId());
+			res.setCreateTime(paymentUser.getCreateTime());
+			res.setId(paymentUser.getId());
+			res.setOwnerId(paymentUser.getOwnerId());
+			res.setOwnerType(paymentUser.getOwnerType());
+			res.setPayment_user_id(paymentUser.getPaymentUserId());
+			res.setPaymentUserType(paymentUser.getPaymentUserType());
+		}
+		return res;
 	}
 
 	@Override

@@ -4,10 +4,24 @@ package com.everhomes.asset;
 import com.everhomes.asset.zjgkVOs.*;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.http.HttpUtils;
+import com.everhomes.order.PayService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.BillDetailDTO;
+
+import com.everhomes.pay.order.PaymentType;
+import com.everhomes.recommend.RecommendationService;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.BillDetailDTO;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.order.PreOrderCommand;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.user.User;
+
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
@@ -49,7 +63,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
 
     @Autowired
     private UserProvider userProvider;
-
+    @Autowired
+    private PayService payService;
 
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum) {
@@ -149,6 +164,8 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     dto.setAmountReceviable(sourceDto.getAmountReceivable()==null?null:new BigDecimal(sourceDto.getAmountReceivable()));
                     dto.setBillId(sourceDto.getBillID());
                     dto.setDateStr(sourceDto.getBillDate());
+                    dto.setDateStrBegin(sourceDto.getDateStrBegin());
+                    dto.setDateStrEnd(sourceDto.getDateStrEnd());
                     Byte billStatus = sourceDto.getPayFlag();
                     try{
                         String billDate = sourceDto.getBillDate();
@@ -179,7 +196,7 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     }
                     dto.setStatus(billStatus);
                     String szsm_status = sourceDto.getStatus();
-                    if(szsm_status.equals(PaymentStatus.SUSPEND)){
+                    if(szsm_status.equals(PaymentStatus.SUSPEND.getCode())){
                         dto.setPayStatus(PaymentStatus.IN_PROCESS.getCode());
                     }
                     dtos.add(dto);
@@ -241,6 +258,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     }
                     dto.setAddressName(buildingName+apartmentName);
                     dto.setPayStatus(sourceDto.getStatus()!=null?sourceDto.getStatus().equals(PaymentStatus.SUSPEND.getCode())?PaymentStatus.IN_PROCESS.getCode():null:null);
+                    dto.setDateStr(sourceDto.getBillDate());
+                    dto.setDateStrBegin(sourceDto.getDateStrBegin());
+                    dto.setDateStrEnd(sourceDto.getDateStrEnd());
                     result.setDatestr(sourceDto.getBillDate());
                     list.add(dto);
                 }
@@ -349,6 +369,9 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
                     }
                     dto.setAddressName(buildingName+apartmentName);
                     dto.setBillItemName(sourceDto.getFeeName());
+                    dto.setDateStr(sourceDto.getBillDate());
+                    dto.setDateStrBegin(sourceDto.getDateStrBegin());
+                    dto.setDateStrEnd(sourceDto.getDateStrEnd());
                     list.add(dto);
                 }
             }else{
@@ -588,6 +611,72 @@ public class ZhangjianggaokeAssetVendor implements AssetVendorHandler{
         LOGGER.error("Insufficient privilege, zjgkhandler updateBillsToSettled");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
+    }
+
+    @Override
+    public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
+        //先进行检查是否重复下单,查询此传来bills是否有对应的order，如果有，那么检查订单的状态，如果订单已经完毕，则返回
+        List<BillIdAndAmount> bills = cmd.getBills();
+        List<String> billIds = new ArrayList<>();
+        Long amountsInCents = 0l;
+        for(BillIdAndAmount billIdAndAmount : bills){
+            billIds.add(billIdAndAmount.getBillId());
+            String amountOwed = billIdAndAmount.getAmountOwed();
+            Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
+            amountsInCents += amountOwedInCents.longValue();
+        }
+        //这种检查的逻辑是不对的
+//        Long checkedOrderId = assetProvider.findAssetOrderByBillIds(billIds);
+//        if(checkedOrderId !=null){
+//            //重复下单的返回
+//            return null;
+//        }
+        //如果账单为新的，则进行存储
+        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId());
+        assetProvider.saveOrderBills(bills,orderId);
+        Long payerId = Long.parseLong(cmd.getPayerId());
+        //检查下单人的类型和id，不能为空
+        if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
+            if(Long.parseLong(cmd.getPayerId())==UserContext.currentUserId()){
+                payerId = Long.parseLong(cmd.getPayerId());
+            }else{
+                LOGGER.error("individual make asset order failed, the given uid = {}, but the online uid is = {}",cmd.getPayerId(),UserContext.currentUserId());
+                throw new RuntimeErrorException("individual make asset order failed");
+            }
+        }
+
+        //组装command ， 请求支付模块的下预付单
+        PreOrderCommand cmd2pay = new PreOrderCommand();
+        cmd2pay.setAmount(amountsInCents);
+//        cmd2pay.setAmount(1l);
+        cmd2pay.setClientAppName(cmd.getClientAppName());
+        cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
+        cmd2pay.setNamespaceId(cmd.getNamespaceId());
+        cmd2pay.setOpenid(cmd.getOpenid());
+        cmd2pay.setOrderId(orderId);
+        cmd2pay.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
+        cmd2pay.setPayerId(payerId);
+
+        //不填写paymentType，支持所有除了微信公众号的支付手段
+//        cmd2pay.setPaymentType(PaymentType.WECHAT_APPPAY.getCode());
+
+        //这个参数组装有什么用？
+//        PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+//        paymentParamsDTO.setPayType("no_credit");
+//        User user = UserContext.current().getUser();
+//        paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+//        cmd2pay.setPaymentParams(paymentParamsDTO);
+
+        PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
+//        response.setAmount(String.valueOf(preOrder.getAmount()));
+//        response.setExpiredIntervalTime(15l*60l);
+//        response.setOrderCommitNonce(preOrder.getOrderCommitNonce());
+//        response.setOrderCommitTimestamp(preOrder.getOrderCommitTimestamp());
+//        response.setOrderCommitToken(preOrder.getOrderCommitToken());
+//        response.setOrderCommitUrl(preOrder.getOrderCommitUrl());
+//        response.setPayMethod(preOrder.getPayMethod());
+
+        return preOrder;
     }
 
     @Override

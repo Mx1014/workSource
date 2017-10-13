@@ -58,6 +58,7 @@ import java.util.List;
  *     <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  *     <li>remark: 备注</li>
  *     <li>layout: 房型</li>
+ *     <li>settled: 入住方</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -113,6 +114,15 @@ public class ContractDetailDTO {
     private String creatorName;
     private String layout;
     private Byte status;
+    private String settled;
+
+    public String getSettled() {
+        return settled;
+    }
+
+    public void setSettled(String settled) {
+        this.settled = settled;
+    }
 
     public Byte getStatus() {
         return status;

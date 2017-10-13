@@ -1,0 +1,253 @@
+package com.everhomes.incubator;
+
+
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.activity.ActivityServiceImpl;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityGeoPoint;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
+import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.incubator.*;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.Assert;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+@Component
+public class IncubatorServiceImpl implements IncubatorService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ActivityServiceImpl.class);
+	@Autowired
+	IncubatorProvider incubatorProvider;
+	@Autowired
+	UserProvider userProvider;
+	@Autowired
+	OrganizationService organizationService;
+
+	@Autowired
+	private DbProvider dbProvider;
+
+	@Autowired
+	private ConfigurationProvider configProvider;
+
+	@Autowired
+	private CommunityProvider communityProvider;
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
+
+	@Autowired
+	private ContentServerService contentServerService;
+
+	@Override
+	public ListIncubatorApplyResponse listIncubatorApply(ListIncubatorApplyCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId();
+		Long applyUserId = cmd.getApplyUserId();
+		String keyWord = cmd.getKeyWord();
+		Byte approveStatus = cmd.getApproveStatus();
+		Byte needReject = cmd.getNeedReject();
+		Byte orderBy = cmd.getOrderBy();
+
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		Integer pageOffset = 1;
+		if (cmd.getPageOffset() != null){
+			pageOffset = cmd.getPageOffset();
+		}
+
+		List<IncubatorApply>  list = incubatorProvider.listIncubatorApplies(namespaceId, applyUserId, keyWord, approveStatus, needReject, pageOffset, pageSize + 1, orderBy);
+
+		ListIncubatorApplyResponse response = new ListIncubatorApplyResponse();
+		if (list != null && list.size() > pageSize) {
+			list.remove(list.size()-1);
+			response.setNextPageOffset(pageOffset + 1);
+		}
+
+
+		if(list != null && list.size() > 0){
+			List<IncubatorApplyDTO> dtos = new ArrayList<>();
+			list.forEach(r ->{
+				IncubatorApplyDTO dto = ConvertHelper.convert(r, IncubatorApplyDTO.class);
+				populateApproveUserName(dto);
+				populateAttachments(dto);
+				dtos.add(dto);
+			});
+			response.setDtos(dtos);
+		}
+
+		return response;
+	}
+
+	@Override
+	public ListIncubatorProjectTypeResponse listIncubatorProjectType() {
+		List<IncubatorProjectType> list = incubatorProvider.listIncubatorProjectType();
+		List<IncubatorProjectTypeDTO> dtos = new ArrayList<>();
+		if(list != null){
+			list.forEach(r ->
+				dtos.add(ConvertHelper.convert(r, IncubatorProjectTypeDTO.class))
+			);
+		}
+
+		ListIncubatorProjectTypeResponse response = new ListIncubatorProjectTypeResponse();
+		response.setDtos(dtos);
+		return response;
+	}
+
+	@Override
+	public IncubatorApplyDTO addIncubatorApply(AddIncubatorApplyCommand cmd) {
+
+		if(cmd.getNamespaceId() == null || cmd.getCommunityId() == null){
+			LOGGER.error("ERROR_INVALID_PARAMS, namespaceId or communityId is null, namespaceid={}, communityId={}", cmd.getNamespaceId(), cmd.getCommunityId());
+			throw RuntimeErrorException.errorWith(IncubatorServiceErrorCode.SCOPE, IncubatorServiceErrorCode.ERROR_INVALID_PARAMS,
+					"ERROR_INVALID_PARAMS");
+		}
+
+		IncubatorApply incubatorApply = ConvertHelper.convert(cmd, IncubatorApply.class);
+		User user = UserContext.current().getUser();
+		incubatorApply.setApplyUserId(user.getId());
+		incubatorApply.setApproveStatus(ApproveStatus.WAIT.getCode());
+		incubatorApply.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		dbProvider.execute((status)->{
+			incubatorProvider.createIncubatorApply(incubatorApply);
+			//如果是重新申请，更新父记录。此处的关系放在父记录维护是为了查询方便，不用每条记录都遍历查询子记录
+			if(cmd.getParentId() != null){
+				IncubatorApply parentIncubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
+				if(parentIncubatorApply != null){
+					parentIncubatorApply.setReApplyId(incubatorApply.getId());
+					incubatorProvider.updateIncubatorApply(parentIncubatorApply);
+				}
+
+			}
+
+			//保存附件
+			saveAttachment(cmd.getBusinessLicenceAttachments(), incubatorApply.getId(), user.getId(), IncubatorApplyAttachmentType.BUSINESS_LICENCE.getCode());
+			saveAttachment(cmd.getPlanBookAttachments(), incubatorApply.getId(), user.getId(), IncubatorApplyAttachmentType.PLAN_BOOK.getCode());
+
+			return null;
+		});
+
+		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApply, IncubatorApplyDTO.class);
+		populateApproveUserName(dto);
+		populateAttachments(dto);
+		return dto;
+	}
+
+	private void saveAttachment(List<IncubatorApplyAttachmentDTO> list, Long incubatorApplyId, Long uid, Byte type){
+		if(list != null){
+			for (int i = 0; i<list.size(); i++){
+				IncubatorApplyAttachment attachment = ConvertHelper.convert(list.get(i), IncubatorApplyAttachment.class);
+				attachment.setType(type);
+				attachment.setCreatorUid(uid);
+				attachment.setIncubatorApplyId(incubatorApplyId);
+				incubatorProvider.createAttachment(attachment);
+			}
+		}
+	}
+
+	@Override
+	public void approveIncubatorApply(ApproveIncubatorApplyCommand cmd) {
+		IncubatorApply incubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getApplyId());
+		User applyUser = userProvider.findUserById(incubatorApply.getApplyUserId());
+		UserIdentifier applyIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(applyUser.getId(), IdentifierType.MOBILE.getCode());
+		Community community = communityProvider.findCommunityById(incubatorApply.getCommunityId());
+		CommunityGeoPoint communityGeoPoint = communityProvider.findCommunityGeoPointByCommunityId(incubatorApply.getCommunityId());
+		incubatorApply.setApproveStatus(cmd.getApproveStatus());
+		incubatorApply.setApproveOpinion(cmd.getApproveOpinion());
+		incubatorApply.setApproveTime(new Timestamp(System.currentTimeMillis()));
+		incubatorApply.setApproveUserId(UserContext.currentUserId());
+
+		if(cmd.getApproveStatus().byteValue() == ApproveStatus.AGREE.getCode()){
+			dbProvider.execute((TransactionStatus status) -> {
+				//1、更新申请记录为成功
+				incubatorProvider.updateIncubatorApply(incubatorApply);
+
+				//2、创建公司
+				CreateEnterpriseCommand enterpriseCmd = new CreateEnterpriseCommand();
+				enterpriseCmd.setName(incubatorApply.getTeamName());
+				enterpriseCmd.setNamespaceId(incubatorApply.getNamespaceId());
+				enterpriseCmd.setCommunityId(community.getId());
+				enterpriseCmd.setAddress(community.getAddress());
+				enterpriseCmd.setLatitude(String.valueOf(communityGeoPoint.getLatitude()));
+				enterpriseCmd.setLongitude(String.valueOf(communityGeoPoint.getLongitude()));
+				OrganizationDTO  organizationDTO = organizationService.createEnterprise(enterpriseCmd);
+
+				//3、添加当前用户为管理员
+				CreateOrganizationAdminCommand adminCommand = new CreateOrganizationAdminCommand();
+				adminCommand.setOrganizationId(organizationDTO.getId());
+				adminCommand.setContactToken(applyIdentifier.getIdentifierToken());
+				adminCommand.setContactName(applyUser.getNickName());
+				rolePrivilegeService.createOrganizationAdmin(adminCommand);
+
+				return null;
+			});
+		}else {
+			incubatorProvider.updateIncubatorApply(incubatorApply);
+		}
+	}
+
+	@Override
+	public IncubatorApplyDTO findIncubatorApply(FindIncubatorApplyCommand cmd) {
+		Assert.notNull(cmd.getId());
+		IncubatorApply incubatorApply = incubatorProvider.findIncubatorApplyById(cmd.getId());
+		IncubatorApplyDTO dto = ConvertHelper.convert(incubatorApply, IncubatorApplyDTO.class);
+		populateApproveUserName(dto);
+		populateAttachments(dto);
+		return dto;
+	}
+
+	private void populateApproveUserName(IncubatorApplyDTO dto){
+		if(dto.getApproveUserId() != null){
+			User approveUser = userProvider.findUserById(dto.getApproveUserId());
+			if(approveUser != null){
+				dto.setApproveUserName(approveUser.getNickName());
+			}
+		}
+	}
+
+	private void populateAttachments(IncubatorApplyDTO dto){
+		List<IncubatorApplyAttachment> businessLicence= incubatorProvider.listAttachmentsByApplyId(dto.getId(), IncubatorApplyAttachmentType.BUSINESS_LICENCE.getCode());
+		List<IncubatorApplyAttachmentDTO> businessLicenceDto = new ArrayList<>();
+		if(businessLicence != null){
+			businessLicence.forEach(r -> {
+				businessLicenceDto.add(convertIncubatorApplyAttachment(r));
+			});
+		}
+		dto.setBusinessLicenceAttachments(businessLicenceDto);
+
+		List<IncubatorApplyAttachment> planBook= incubatorProvider.listAttachmentsByApplyId(dto.getId(), IncubatorApplyAttachmentType.PLAN_BOOK.getCode());
+		List<IncubatorApplyAttachmentDTO> planBookDto = new ArrayList<>();
+		if(planBook != null){
+			planBook.forEach(r -> {
+				planBookDto.add(convertIncubatorApplyAttachment(r));
+			});
+		}
+		dto.setPlanBookAttachments(planBookDto);
+	}
+
+	private IncubatorApplyAttachmentDTO convertIncubatorApplyAttachment(IncubatorApplyAttachment r){
+		IncubatorApplyAttachmentDTO temp = ConvertHelper.convert(r, IncubatorApplyAttachmentDTO.class);
+		String contentUrl = contentServerService.parserUri(temp.getContentUri(), IncubatorApplyAttachment.class.getSimpleName(), 1L);
+		temp.setContentUrl(contentUrl);
+		return temp;
+	}
+}

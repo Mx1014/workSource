@@ -25,6 +25,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -83,6 +84,9 @@ public class ZJContractHandler implements ContractService{
     @Autowired
     private UserProvider userProvider;
 
+    @Autowired
+    private FieldService fieldService;
+
     @Override
     public ListContractsResponse listContracts(ListContractsCommand cmd) {
         if(LOGGER.isDebugEnabled()) {
@@ -95,7 +99,7 @@ public class ZJContractHandler implements ContractService{
         String pageOffset = cmd.getPageAnchor() == null ? "" : cmd.getPageAnchor().toString();
         String pageSize = cmd.getPageSize() == null ? "" : cmd.getPageSize().toString();
 
-        ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCategoryItemId());
+        ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
         String categoryName = item == null ? "" : item.getItemDisplayName();
         Map<String, String> params = generateParams(communityIdentifier, contractStatus, contractAttribute, categoryName, cmd.getKeywords(), pageOffset, pageSize);
         StringBuilder sb = new StringBuilder();
@@ -246,6 +250,7 @@ public class ZJContractHandler implements ContractService{
         dto.setPartyAId(0L);
         dto.setContractNumber(zjContract.getContractNum());
         dto.setLayout(zjContract.getLayout());
+        dto.setSettled(zjContract.getSettled());
         //张江高科合同名和合同编号一样
         dto.setName(zjContract.getContractNum());
         dto.setCustomerName(zjContract.getLessee());
@@ -262,6 +267,14 @@ public class ZJContractHandler implements ContractService{
         pv.setVariableValue(zjContract.getPropertyFeeUnit());
         item.setChargingVariables(pv.toString());
         items.add(item);
+
+        ContractChargingItemDTO itemRent = new ContractChargingItemDTO();
+        itemRent.setChargingItemName("租金");
+        PaymentVariable pvRent = new PaymentVariable();
+        pvRent.setVariableName("租金");
+        pvRent.setVariableValue(zjContract.getRent());
+        itemRent.setChargingVariables(pvRent.toString());
+        items.add(itemRent);
         dto.setChargingItems(items);
         if(zjContract.getApartments() != null && zjContract.getApartments().size() > 0) {
             List<BuildingApartmentDTO> apartments = new ArrayList<>();

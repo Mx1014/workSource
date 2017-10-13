@@ -41,7 +41,35 @@ public class RequestParkingCardCommand {
 
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
-    
+
+    private String cardTypeId;
+    private Long addressId;
+    private Long invoiceType;
+
+    public String getCardTypeId() {
+        return cardTypeId;
+    }
+
+    public void setCardTypeId(String cardTypeId) {
+        this.cardTypeId = cardTypeId;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public Long getInvoiceType() {
+        return invoiceType;
+    }
+
+    public void setInvoiceType(Long invoiceType) {
+        this.invoiceType = invoiceType;
+    }
+
     public RequestParkingCardCommand() {
     }
 

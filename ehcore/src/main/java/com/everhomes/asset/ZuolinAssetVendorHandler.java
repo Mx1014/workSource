@@ -2,6 +2,7 @@ package com.everhomes.asset;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.zjgkVOs.ZjgkPaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -9,12 +10,15 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contract.ContractService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.order.PayService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.group.GroupDiscriminator;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
@@ -77,6 +81,9 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PayService payService;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -317,7 +324,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         for(int i = 0; i < billDetailDTOList.size(); i++) {
             BillDetailDTO dto = billDetailDTOList.get(i);
             dateStrFilter.add(dto.getDateStr());
-            amountOwed.add(dto.getAmountOwed());
+            amountOwed = amountOwed.add(dto.getAmountOwed());
         }
         response.setAmountOwed(amountOwed);
         response.setBillPeriodMonths(dateStrFilter.size());
@@ -562,6 +569,71 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     @Override
     public void updateBillsToSettled(UpdateBillsToSettled cmd) {
         assetProvider.updateBillsToSettled(cmd.getContractId(),cmd.getOwnerType(),cmd.getOwnerId());
+    }
+
+    @Override
+    public PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd) {
+        //先进行检查是否重复下单,查询此传来bills是否有对应的order，如果有，那么检查订单的状态，如果订单已经完毕，则返回
+        List<BillIdAndAmount> bills = cmd.getBills();
+        List<String> billIds = new ArrayList<>();
+        Long amountsInCents = 0l;
+        for(BillIdAndAmount billIdAndAmount : bills){
+            billIds.add(billIdAndAmount.getBillId());
+            String amountOwed = billIdAndAmount.getAmountOwed();
+            Float amountOwedInCents = Float.parseFloat(amountOwed)*100f;
+            amountsInCents += amountOwedInCents.longValue();
+        }
+        //这种检查的逻辑是不对的
+//        Long checkedOrderId = assetProvider.findAssetOrderByBillIds(billIds);
+//        if(checkedOrderId !=null){
+//            //重复下单的返回
+//            return null;
+//        }
+        //如果账单为新的，则进行存储
+        Long orderId  = assetProvider.saveAnOrderCopy(cmd.getPayerType(),cmd.getPayerId(),String.valueOf(amountsInCents/100l),cmd.getClientAppName(),cmd.getCommunityId(),cmd.getContactNum(),cmd.getOpenid(),cmd.getPayerName(),ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC, cmd.getNamespaceId());
+        assetProvider.saveOrderBills(bills,orderId);
+        Long payerId = Long.parseLong(cmd.getPayerId());
+        //检查下单人的类型和id，不能为空
+        if(cmd.getPayerType().equals(AssetTargetType.USER.getCode())){
+            if(Long.parseLong(cmd.getPayerId())==UserContext.currentUserId()){
+                payerId = Long.parseLong(cmd.getPayerId());
+            }else{
+                LOGGER.error("individual make asset order failed, the given uid = {}, but the online uid is = {}",cmd.getPayerId(),UserContext.currentUserId());
+                throw new RuntimeErrorException("individual make asset order failed");
+            }
+        }
+
+        //组装command ， 请求支付模块的下预付单
+        PreOrderCommand cmd2pay = new PreOrderCommand();
+        cmd2pay.setAmount(amountsInCents);
+        cmd2pay.setClientAppName(cmd.getClientAppName());
+        cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
+        cmd2pay.setNamespaceId(cmd.getNamespaceId());
+        cmd2pay.setOpenid(cmd.getOpenid());
+        cmd2pay.setOrderId(orderId);
+        cmd2pay.setOrderType(OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
+        cmd2pay.setPayerId(payerId);
+
+        //不填写paymentType，支持所有除了微信公众号的支付手段
+//        cmd2pay.setPaymentType(PaymentType.WECHAT_APPPAY.getCode());
+
+        //这个参数组装有什么用？
+//        PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+//        paymentParamsDTO.setPayType("no_credit");
+//        User user = UserContext.current().getUser();
+//        paymentParamsDTO.setAcct(user.getNamespaceUserToken());
+//        cmd2pay.setPaymentParams(paymentParamsDTO);
+
+        PreOrderDTO preOrder = payService.createPreOrder(cmd2pay);
+//        response.setAmount(String.valueOf(preOrder.getAmount()));
+//        response.setExpiredIntervalTime(15l*60l);
+//        response.setOrderCommitNonce(preOrder.getOrderCommitNonce());
+//        response.setOrderCommitTimestamp(preOrder.getOrderCommitTimestamp());
+//        response.setOrderCommitToken(preOrder.getOrderCommitToken());
+//        response.setOrderCommitUrl(preOrder.getOrderCommitUrl());
+//        response.setPayMethod(preOrder.getPayMethod());
+
+        return preOrder;
     }
 
 

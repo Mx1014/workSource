@@ -7,26 +7,26 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *     <li>clientAppName: clientAppName</li>
- *     <li>orderType: orderType</li>
- *     <li>orderId: orderId</li>
- *     <li>payerId: payerId</li>
- *     <li>amount: amount</li>
- *     <li>namespaceId: namespaceId</li>
- *     <li>ownerType: ownerType</li>
- *     <li>ownerId: ownerId</li>
- *     <li>resourceType: resourceType</li>
- *     <li>resourceId: resourceId</li>
- *     <li>openid: openid</li>
+ *     <li>namespaceId: 域空间</li>
+ *     <li>clientAppName: 客户端realm值</li>
+ *     <li>orderType: orderType {@link com.everhomes.rest.order.OrderType}</li>
+ *     <li>orderId: 订单Id</li>
+ *     <li>payerId: 卖家用户ID</li>
+ *     <li>amount: 支付金额，BigDecimal转换本类提供了方法changePayAmount</li>
+ *     <li>resourceType: 订单资源类型</li>
+ *     <li>resourceId: 订单资源类型ID</li>
+ *     <li>openid: 微信用户的openId</li>
  *     <li>summary: summary</li>
- *     <li>expiration: expiration</li>
- *     <li>extendInfo: extendInfo</li>
- *     <li>paymentType: paymentType</li>
- *     <li>paymentParams: paymentParams {@link com.everhomes.rest.order.PaymentParamsDTO}</li>
+ *     <li>expiration:  过期时间</li>
+ *     <li>extendInfo: 额外信息，将原样返回</li>
+ *     <li>paymentType: 支付类型，不传则获取除微信公众号以外的所有方式，微信公众号必传 参考{@link com.everhomes.pay.order.PaymentType}</li>
+ *     <li>paymentParams: 支付参数 微信公众号必传 {@link com.everhomes.rest.order.PaymentParamsDTO}</li>
  * </ul>
  */
 public class PreOrderCommand {
 
+    @NotNull
+    private Integer namespaceId;
     @NotNull
     private String clientAppName;
     @NotNull
@@ -37,15 +37,13 @@ public class PreOrderCommand {
     private Long payerId;
     @NotNull
     private Long amount;
-    @NotNull
-    private Integer namespaceId;
 
-//    private String ownerType;
+    //    private String ownerType;
 //    private Long ownerId;
     private String resourceType;
     private Long resourceId;
     private String openid;
-    private String summary;
+    //private String summary;
     private Long expiration;
     private String extendInfo;
     private Integer paymentType;
@@ -140,13 +138,13 @@ public class PreOrderCommand {
         this.openid = openid;
     }
 
-    public String getSummary() {
-        return summary;
-    }
-
-    public void setSummary(String summary) {
-        this.summary = summary;
-    }
+//    public String getSummary() {
+//        return summary;
+//    }
+//
+//    public void setSummary(String summary) {
+//        this.summary = summary;
+//    }
 
     public Long getExpiration() {
         return expiration;

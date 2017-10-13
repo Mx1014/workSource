@@ -71,7 +71,8 @@ public class OrganizationDTO {
 	
 	//expand 
 	private Long communityId;
-	private String communityName;    
+	private String communityName;
+	private String communityAliasName;
     private Byte communityType;
     private Long defaultForumId;
     private Long feedbackForumId;
@@ -375,5 +376,13 @@ public class OrganizationDTO {
 
 	public void setEmailDomain(String emailDomain) {
 		this.emailDomain = emailDomain;
+	}
+
+	public String getCommunityAliasName() {
+		return communityAliasName;
+	}
+
+	public void setCommunityAliasName(String communityAliasName) {
+		this.communityAliasName = communityAliasName;
 	}
 }
