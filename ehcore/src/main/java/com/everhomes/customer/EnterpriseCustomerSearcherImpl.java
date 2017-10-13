@@ -272,6 +272,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 		dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
                 	}
                 }
+                if(null != dto.getContactGenderItemId()){
+                	ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), dto.getContactGenderItemId());
+                	if(null != contactGenderItem){
+                		dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
+                	}
+                }
                 if(dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
                 	dto.setTrackingName(dto.getTrackingName());
                 }
