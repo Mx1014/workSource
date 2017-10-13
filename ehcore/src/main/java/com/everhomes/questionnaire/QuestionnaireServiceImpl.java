@@ -175,7 +175,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			sortQuestions(questionDTOs);
 			questionnaireDTOs.add(convertToQuestionnaireDTO(questionnaire, questionDTOs));
 		});
-		QuestionnaireDTO dto = questionnaireDTOs.get(0);、
+		QuestionnaireDTO dto = questionnaireDTOs.get(0);
 		dto.setPercentComplete(generatePercentComplete(dto.getTargetUserNum(),dto.getCollectionCount()));
 		return dto;
 	}
