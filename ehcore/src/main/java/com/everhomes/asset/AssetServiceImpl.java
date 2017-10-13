@@ -1167,8 +1167,8 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void createChargingStandard(CreateChargingStandardCommand cmd) {
         String formula_no_quote = cmd.getFormula();
-        formula_no_quote.replace("[[","");
-        formula_no_quote.replace("]]","");
+        formula_no_quote = formula_no_quote.replace("[[","");
+        formula_no_quote = formula_no_quote.replace("]]","");
         cmd.setFormula(formula_no_quote);
         com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c = new PaymentChargingStandards();
         com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s = new PaymentChargingStandardScope();
@@ -1355,8 +1355,8 @@ public class AssetServiceImpl implements AssetService {
     private List<String> setFormula( String str) {
         List<String> formulaAndJson = new ArrayList<>();
         String formula = str;
-        formula.replace("[[","");
-        formula.replace("]]","");
+        formula = formula.replace("[[","");
+        formula = formula.replace("]]","");
 
         formulaAndJson.add(formula);
         Set<String> replaces = new HashSet<>();
