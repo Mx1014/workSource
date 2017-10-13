@@ -250,15 +250,28 @@ import com.everhomes.server.schema.tables.pojos.EhParkingStatistics;
 import com.everhomes.server.schema.tables.pojos.EhParkingUserInvoices;
 import com.everhomes.server.schema.tables.pojos.EhParkingVendors;
 import com.everhomes.server.schema.tables.pojos.EhPaymentAccounts;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillNoticeRecords;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuerCommunities;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuers;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCards;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingItems;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes;
+import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
+import com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems;
+import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords;
 import com.everhomes.server.schema.tables.pojos.EhPaymentServiceConfigs;
 import com.everhomes.server.schema.tables.pojos.EhPaymentTypes;
 import com.everhomes.server.schema.tables.pojos.EhPaymentUsers;
+import com.everhomes.server.schema.tables.pojos.EhPaymentVariables;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyConfigurations;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyLogs;
 import com.everhomes.server.schema.tables.pojos.EhPmNotifyRecords;
@@ -2266,6 +2279,58 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhPaymentServiceConfigs.class, Tables.EH_PAYMENT_SERVICE_CONFIGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PAYMENT_SERVICE_CONFIGS.ID.max())
                     .from(Tables.EH_PAYMENT_SERVICE_CONFIGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentChargingStandards.class, Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.max())
+                    .from(Tables.EH_PAYMENT_CHARGING_STANDARDS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentChargingStandardsScopes.class, Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.ID.max())
+                    .from(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentChargingItems.class, Tables.EH_PAYMENT_CHARGING_ITEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.max())
+                    .from(Tables.EH_PAYMENT_CHARGING_ITEMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentChargingItemScopes.class, Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.ID.max())
+                    .from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentBillGroups.class, Tables.EH_PAYMENT_BILL_GROUPS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_BILL_GROUPS.ID.max())
+                    .from(Tables.EH_PAYMENT_BILL_GROUPS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentBillGroupsRules.class, Tables.EH_PAYMENT_BILL_GROUPS_RULES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID.max())
+                    .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentBills.class, Tables.EH_PAYMENT_BILLS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_BILLS.ID.max())
+                    .from(Tables.EH_PAYMENT_BILLS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentBillItems.class, Tables.EH_PAYMENT_BILL_ITEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_BILL_ITEMS.ID.max())
+                    .from(Tables.EH_PAYMENT_BILL_ITEMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentContractReceiver.class, Tables.EH_PAYMENT_CONTRACT_RECEIVER.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_CONTRACT_RECEIVER.ID.max())
+                    .from(Tables.EH_PAYMENT_CONTRACT_RECEIVER).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentBillNoticeRecords.class, Tables.EH_PAYMENT_BILL_NOTICE_RECORDS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_BILL_NOTICE_RECORDS.ID.max())
+                    .from(Tables.EH_PAYMENT_BILL_NOTICE_RECORDS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentExemptionItems.class, Tables.EH_PAYMENT_EXEMPTION_ITEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_EXEMPTION_ITEMS.ID.max())
+                    .from(Tables.EH_PAYMENT_EXEMPTION_ITEMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentVariables.class, Tables.EH_PAYMENT_VARIABLES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_VARIABLES.ID.max())
+                    .from(Tables.EH_PAYMENT_VARIABLES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPaymentFormula.class, Tables.EH_PAYMENT_FORMULA.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PAYMENT_FORMULA.ID.max())
+                    .from(Tables.EH_PAYMENT_FORMULA).fetchOne().value1();
         });
 
     }
