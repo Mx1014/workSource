@@ -174,9 +174,6 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
-        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
-            builder.addSort("id", SortOrder.DESC);
-        }
         if(cmd.getSortField() != null && cmd.getSortType() != null) {
             if(cmd.getSortType() == 0) {
                 builder.addSort(cmd.getSortField(), SortOrder.ASC);
