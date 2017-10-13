@@ -904,6 +904,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             orgCommand.setPageSize(cmd.getPageSize());
         else
             orgCommand.setPageSize(20);
+        orgCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode()));
         ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
 
         if (members.getMembers() != null && members.getMembers().size() > 0) {
@@ -2123,11 +2124,11 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     @Scheduled(cron = "0 0 * * * ?")
-    public void executeArchivesNotification(){
+    public void executeArchivesNotification() {
         Calendar c = Calendar.getInstance();
         int weekDay = c.get(Calendar.DAY_OF_WEEK);
         List<ArchivesNotifications> results = archivesProvider.listArchivesNotificationsByWeek(weekDay);
-        for(int i=0; i<results.size(); i++){
+        for (int i = 0; i < results.size(); i++) {
             //TODO:每半个小时来执行
         }
     }
