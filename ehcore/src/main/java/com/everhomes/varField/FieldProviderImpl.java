@@ -257,6 +257,13 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
+    public FieldGroup findFieldGroup(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhVarFieldGroupsDao dao = new EhVarFieldGroupsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), FieldGroup.class);
+    }
+
+    @Override
     public List<FieldGroup> listFieldGroups(String moduleName) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 

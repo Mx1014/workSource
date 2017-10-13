@@ -9,6 +9,7 @@ import java.util.Map;
 public interface FieldProvider {
     Map<Long, ScopeFieldGroup> listScopeFieldGroups(Integer namespaceId, Long communityId, String moduleName);
     List<FieldGroup> listFieldGroups(List<Long> ids);
+    FieldGroup findFieldGroup(Long id);
     List<FieldGroup> listFieldGroups(String moduleName);
     Map<Long, ScopeField> listScopeFields(Integer namespaceId, Long communityId, String moduleName, String groupPath);
     List<Field> listFields(List<Long> ids);

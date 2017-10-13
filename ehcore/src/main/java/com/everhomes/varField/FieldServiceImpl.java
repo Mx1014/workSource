@@ -969,6 +969,7 @@ public class FieldServiceImpl implements FieldService {
             //将map列表中剩下的置为inactive
             groups.forEach(group -> {
                 ScopeFieldGroup scopeFieldGroup = ConvertHelper.convert(group, ScopeFieldGroup.class);
+
                 scopeFieldGroup.setNamespaceId(cmd.getNamespaceId());
                 scopeFieldGroup.setCommunityId(cmd.getCommunityId());
                 if(scopeFieldGroup.getId() == null) {
@@ -988,7 +989,6 @@ public class FieldServiceImpl implements FieldService {
                         fieldProvider.createScopeFieldGroup(scopeFieldGroup);
                     }
                 }
-
             });
 
             if(existGroups.size() > 0) {
@@ -996,8 +996,9 @@ public class FieldServiceImpl implements FieldService {
                     group.setStatus(VarFieldStatus.INACTIVE.getCode());
                     fieldProvider.updateScopeFieldGroup(group);
 
+                    FieldGroup systemGroup = fieldProvider.findFieldGroup(group.getGroupId());
                     //删除组下的字段和选项
-                    Map<Long, ScopeField> scopeFieldMap = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), "/%"+group.getGroupId());
+                    Map<Long, ScopeField> scopeFieldMap = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), systemGroup.getPath());
                     inactiveScopeField(scopeFieldMap);
                 });
             }

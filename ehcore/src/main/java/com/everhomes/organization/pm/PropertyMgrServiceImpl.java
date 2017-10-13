@@ -2267,6 +2267,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				address.setDecorateStatus(cmd.getDecorateStatus());
 			}else if (cmd.getOrientation() != null) {
 				address.setOrientation(cmd.getOrientation());
+			}else if (cmd.getApartmentFloor() != null) {
+				address.setApartmentFloor(cmd.getApartmentFloor());
 			}
 	    	addressProvider.updateAddress(address);
 
