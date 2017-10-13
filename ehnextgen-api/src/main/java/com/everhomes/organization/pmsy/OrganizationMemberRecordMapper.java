@@ -24,8 +24,8 @@ public class OrganizationMemberRecordMapper implements RecordMapper<Record, Orga
         //以下信息来自于members表
         member.setId(r.getValue(t1.ID));
         member.setOrganizationId(r.getValue(t1.ORGANIZATION_ID));
-        member.setTargetId(r.getValue(t1.TARGET_ID));
-        member.setTargetType(r.getValue(t1.TARGET_TYPE));
+//        member.setTargetId(r.getValue(t1.TARGET_ID));
+//        member.setTargetType(r.getValue(t1.TARGET_TYPE));
         member.setMemberGroup(r.getValue(t1.MEMBER_GROUP));
         member.setStatus(r.getValue(t1.STATUS));
         member.setGroupId(r.getValue(t1.GROUP_ID));
@@ -49,6 +49,8 @@ public class OrganizationMemberRecordMapper implements RecordMapper<Record, Orga
         member.setOperatorUid(r.getValue(t1.OPERATOR_UID));
         member.setDetailId(r.getValue(t1.DETAIL_ID));
         //以下信息来自于detail表
+        member.setTargetId(r.getValue(t2.TARGET_ID));
+        member.setTargetType(r.getValue(t2.TARGET_TYPE));
         member.setContactName(r.getValue(t2.CONTACT_NAME));
         member.setContactType(r.getValue(t2.CONTACT_TYPE));
         member.setContactToken(r.getValue(t2.CONTACT_TOKEN));

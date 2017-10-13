@@ -99,7 +99,7 @@ public class UserUiController extends ControllerBase {
 			command.setOrganizationId(cmd.getOrganizationId());
 			command.setPageSize(100000);
 			command.setIsSignedup(cmd.getIsSignedup());
-			if(cmd.getIsAdmin().equals(ContactAdminFlag.YES.getCode()))
+			if(cmd.getIsAdmin() != null && cmd.getIsAdmin().equals(ContactAdminFlag.YES.getCode()))
 			    command.setVisibleFlag(VisibleFlag.ALL.getCode());
 			ListOrganizationContactCommandResponse res = organizationService.listOrganizationContacts(command);
 			List<OrganizationContactDTO> members = res.getMembers();

@@ -15,10 +15,8 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.common.xcontent.ToXContent.Params;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,14 +98,17 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
             List<OrganizationAddress> organizationAddresses = organizationProvider.listOrganizationAddressByOrganizationId(organization.getId());
             List<String> addresses = new ArrayList<>();
             if (organizationAddresses != null && !organizationAddresses.isEmpty()) {
+                List<String> buildings = new ArrayList<>();
             	for (OrganizationAddress organizationAddress : organizationAddresses) {
             		Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
             		if (address != null) {
             			addresses.add(getAddress(address));
+                        buildings.add(address.getBuildingName());
 					}
             	}
             	if (!addresses.isEmpty()) {
             		b.field("addresses", String.join(",", addresses));
+            		b.array("buildings", buildings);
 				}
 			}
             b.endObject();
@@ -203,31 +204,31 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         List<QueryBuilder> qbs = new ArrayList<>();
         BoolQueryBuilder bqb = null;
         //长度大于8的时候 截取掉一段查询
-        if(null != cmd.getBuildingName() && cmd.getBuildingName().length() > 8){
-            QueryBuilder qb1 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(0, 8)+"*").field("addresses");
-            qbs.add(qb1);
-            if(cmd.getBuildingName().length() > 16){
-                QueryBuilder qb2 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(8, 16)+"*").field("addresses");
-                qbs.add(qb2);
-                if(cmd.getBuildingName().length() > 24){
-                    QueryBuilder qb3 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(16, 24)+"*").field("addresses");
-                    qbs.add(qb3);
-                }else{
-                    qbs.add(QueryBuilders.queryString("*"+cmd.getBuildingName().substring(16)+"*").field("addresses"));
-                }
-            }else{
-                qbs.add(QueryBuilders.queryString("*"+cmd.getBuildingName().substring(8)+"*").field("addresses"));
-            }
-
-            if(qbs.size() > 1){
-                bqb = QueryBuilders.boolQuery();
-                for (QueryBuilder queryBuilder: qbs){
-                    bqb.must(queryBuilder);
-                }
-            }
-        }else if(null != cmd.getBuildingName()){
-            qbs.add(QueryBuilders.queryString("*"+cmd.getBuildingName()+"*").field("addresses"));
-        }
+//        if(null != cmd.getBuildingName() && cmd.getBuildingName().length() > 8){
+//            QueryBuilder qb1 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(0, 8)+"*").field("addresses");
+//            qbs.add(qb1);
+//            if(cmd.getBuildingName().length() > 16){
+//                QueryBuilder qb2 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(8, 16)+"*").field("addresses");
+//                qbs.add(qb2);
+//                if(cmd.getBuildingName().length() > 24){
+//                    QueryBuilder qb3 = QueryBuilders.queryString("*"+cmd.getBuildingName().substring(16, 24)+"*").field("addresses");
+//                    qbs.add(qb3);
+//                }else{
+//                    qbs.add(QueryBuilders.queryString("*"+cmd.getBuildingName().substring(16)+"*").field("addresses"));
+//                }
+//            }else{
+//                qbs.add(QueryBuilders.queryString("*"+cmd.getBuildingName().substring(8)+"*").field("addresses"));
+//            }
+//
+//            if(qbs.size() > 1){
+//                bqb = QueryBuilders.boolQuery();
+//                for (QueryBuilder queryBuilder: qbs){
+//                    bqb.must(queryBuilder);
+//                }
+//            }
+//        }else if(null != cmd.getBuildingName()){
+//            qbs.add(QueryBuilders.queryString("*"+cmd.getBuildingName()+"*").field("addresses"));
+//        }
 
         if(StringUtils.isEmpty(cmd.getKeyword())) {
         	if (StringUtils.isEmpty(cmd.getBuildingName())) {
@@ -290,7 +291,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         List<FilterBuilder> fbList = new ArrayList<>();
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
         fbList.add(fb);
-        
+
+        //楼栋名称完全匹配 fix 16826 by xiongying20171013
+        if(cmd.getBuildingName() != null) {
+            fbList.add(FilterBuilders.termFilter("buildings", cmd.getBuildingName()));
+        }
+
         // 每个企业（含物业管理公司）都有可能在某个园区内，当客户端提供园区作为过滤条件时，则在园区范围内挑选园区 by lqs 20160512
         if(cmd.getCommunityId() != null) {
             FilterBuilder cmntyFilter = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
@@ -375,10 +381,18 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         if(StringUtils.isEmpty(cmd.getKeyword())) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-        	qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("name", 5.0f)
-                    .field("name.pinyin_prefix", 2.0f)
-                    .field("name.pinyin_gram", 1.0f);      
+
+            // simplifyFlag = 1 简化版的搜索 add by yanjun 20171012
+            if(cmd.getSimplifyFlag() != null && cmd.getSimplifyFlag().byteValue() == 1){
+                qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                        .field("name", 5.0f);
+            }else {
+                qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                        .field("name", 5.0f)
+                        .field("name.pinyin_prefix", 2.0f)
+                        .field("name.pinyin_gram", 1.0f);
+            }
+
         }
         
         FilterBuilder fb = null;
@@ -429,7 +443,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
         OrganizationQueryResult result = new OrganizationQueryResult();
         
-        List<OrganizationDTO> dtos = this.getDTOs(rsp);
+        List<OrganizationDTO> dtos = this.getDTOs(rsp, cmd.getSimplifyFlag());
         
         if(dtos.size() > pageSize){
 //        	result.setPageAnchor(dtos.get(pageSize - 1).getId());
@@ -439,12 +453,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         	dtos.remove(dtos.size() - 1);
         }
         
-        result.setDtos(this.getDTOs(rsp));
+        result.setDtos(this.getDTOs(rsp, cmd.getSimplifyFlag()));
         
         return result;
     }
     
-    private List<OrganizationDTO> getDTOs(SearchResponse rsp) {
+    private List<OrganizationDTO> getDTOs(SearchResponse rsp, Byte simplifyFlag) {
         List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
         SearchHit[] docs = rsp.getHits().getHits();
         for (SearchHit sd : docs) {
@@ -467,16 +481,19 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     				if(ns != null)
     					dto.setNamespaceName(ns.getName());
     			}
-    	    	
-    	    	ListOrganizationAdministratorCommand orgAdminCmd = new ListOrganizationAdministratorCommand();
-		    	orgAdminCmd.setOrganizationId(dto.getId());
-		    	ListOrganizationMemberCommandResponse res = rolePrivilegeService.listOrganizationAdministrators(orgAdminCmd);
-		    	if(res != null && res.getMembers() != null && res.getMembers().size() > 0) {
-		    		OrganizationMemberDTO member = res.getMembers().get(0);
-		    		dto.setEnterpriseContactor(member.getContactName());
-			    	dto.setMobile(member.getContactToken());
-		    	}
-    			
+
+    			// add if by yanjun for no search detail  20171012
+    			if(simplifyFlag == null || simplifyFlag.byteValue() == 0){
+                    ListOrganizationAdministratorCommand orgAdminCmd = new ListOrganizationAdministratorCommand();
+                    orgAdminCmd.setOrganizationId(dto.getId());
+                    ListOrganizationMemberCommandResponse res = rolePrivilegeService.listOrganizationAdministrators(orgAdminCmd);
+                    if(res != null && res.getMembers() != null && res.getMembers().size() > 0) {
+                        OrganizationMemberDTO member = res.getMembers().get(0);
+                        dto.setEnterpriseContactor(member.getContactName());
+                        dto.setMobile(member.getContactToken());
+                    }
+                }
+
             	dtos.add(dto);
             	
             }

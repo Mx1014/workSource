@@ -26,6 +26,7 @@ import com.everhomes.authorization.zjgk.ZjgkJsonEntity;
 import com.everhomes.authorization.zjgk.ZjgkResponse;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contract.ZJContractHandler;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -37,11 +38,14 @@ import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.FindContractCommand;
 import com.everhomes.rest.user.CancelAuthFeedbackCommand;
+import com.everhomes.rest.user.UnrentAddressDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
+import com.sun.xml.ws.message.StringHeader;
 
 @RestDoc(value="authorization open Controller", site="core")
 @RestController
@@ -66,6 +70,9 @@ public class AuthoriztionController extends ControllerBase {
 	
 	@Autowired
 	private ZJContractHandler zJContractHandler;
+	
+    @Autowired
+    private ConfigurationProvider configProvider;
 
 	/**
 	 * <b>URL: /openapi/user/cancelAuthFeedback</b>
@@ -93,15 +100,19 @@ public class AuthoriztionController extends ControllerBase {
 		}
 		RestResponse response = new RestResponse();
 		response.setErrorScope("asset");
+		response.setErrorDescription("");
 
 		if(record!=null) {
 			setUserContext(mapping,record);
+			List<ZjgkResponse> list = null;
+			ZjgkJsonEntity<List<ZjgkResponse>> entity = null;
 			if (record != null && record.getResultJson() != null) {
-				ZjgkJsonEntity<List<ZjgkResponse>> entity = JSONObject.parseObject(record.getResultJson(), new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
-				List<ZjgkResponse> list = entity.getResponse();
+				entity = JSONObject.parseObject(record.getResultJson(), new TypeReference<ZjgkJsonEntity<List<ZjgkResponse>>>(){});
+				list = entity.getResponse();
 				if (list != null) {
 					try {
 //						list = fiterListByContractNo(entity,cmd.getContractNo());
+						list = fiterListByAddressList(entity,cmd.getAddressList(),response);
 						for (ZjgkResponse r : list) {
 							//依次退租
 							DisclaimAddressCommand disCmd = new DisclaimAddressCommand();
@@ -115,16 +126,64 @@ public class AuthoriztionController extends ControllerBase {
 					}
 				}
 			}
-			//退租了，然后就把这个认证记录的状态置为inactive
-			record.setStatus(CommonStatus.INACTIVE.getCode());
+//			//退租了，然后就把这个认证记录的状态置为inactive
+			//部分退租，记录就搞成部分
+			if(list != null && entity!=null && list.size() != entity.getResponse().size()){
+				entity.getResponse().removeAll(list);
+				record.setResultJson(StringHelper.toJsonString(entity));
+			}else{
+				//全部退租，就直接失效
+				record.setStatus(CommonStatus.INACTIVE.getCode());
+			}
 			authorizationThirdPartyRecordProvider.updateAuthorizationThirdPartyRecord(record);
+			//从新产生一条认证记录
 			response.setErrorDetails("OK");
-			response.setErrorDescription("退租成功");
+			response.setErrorDescription("退租成功\n"+response.getErrorDescription());
 		}else{
 			response.setErrorDetails("OK");
 			response.setErrorDescription("没有租赁记录");
 		}
 		return response;
+	}
+
+	private List<ZjgkResponse> fiterListByAddressList(ZjgkJsonEntity<List<ZjgkResponse>> entity,
+			List<UnrentAddressDTO> addressList, RestResponse response) {
+		List<ZjgkResponse> finalList = new ArrayList<ZjgkResponse>();
+		
+		for (UnrentAddressDTO addressDTO : addressList) {
+			ZjgkResponse zjresp = containAddressList(addressDTO,entity.getResponse());
+			if(zjresp!=null){
+				finalList.add(zjresp);
+			}else{
+				StringBuffer desc = new StringBuffer();
+				desc.append(response.getErrorDescription()).append("\n地址：")
+				.append(addressDTO.getCommunityName())
+				.append("  ")
+				.append(addressDTO.getBuildingName())
+				.append("  ")
+				.append(addressDTO.getApartmentName())
+				.append(" 未被此用户承租过。");
+				response.setErrorDescription(desc.toString());
+			}
+		}
+		return finalList;
+	}
+
+	private ZjgkResponse containAddressList(UnrentAddressDTO addressDTO, List<ZjgkResponse> list) {
+		for (ZjgkResponse x : list) {
+			String mappingjson = configProvider.getValue("zj_community_name_mapping","{\"天之骄子北块\":\"天之骄子专家楼\"}");
+			Map<String,String> communityMap = JSONObject.parseObject(mappingjson,new TypeReference<Map<String, String>>(){});
+			String communityName = communityMap.get(addressDTO.getCommunityName());
+			if(communityName == null){
+				communityName = addressDTO.getCommunityName();
+			}
+			if(communityName.equals(x.getCommunityName())
+					&& addressDTO.getBuildingName().equals(x.getBuildingName()) 
+					&& addressDTO.getApartmentName().equals(x.getApartmentName())){
+				return x;
+			}
+		}
+		return null;
 	}
 
 	private void setUserContext(AppNamespaceMapping mapping, AuthorizationThirdPartyRecord record) {
