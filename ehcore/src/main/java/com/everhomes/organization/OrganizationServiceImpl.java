@@ -8467,7 +8467,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgChildrens.add(organizationDTO);
             }
         }
-//        orgChildrens.sort(Comparator.comparingInt(Organization::getorde));
+//        orgChildrens.sort(Comparator.comparingInt(Organization::getOrganizationType));
         dto.setChildrens(orgChildrens);
 
         return dto;

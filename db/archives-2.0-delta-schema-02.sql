@@ -1,3 +1,6 @@
+-- lei.lv 机构表加排序
+ALTER TABLE `eh_organizations` ADD COLUMN `order` int(11) NULL DEFAULT '0' COMMENT 'order';
+
 -- 增加咨询电话 by st.zheng
 ALTER TABLE `eh_news` ADD COLUMN `phone` BIGINT(20) NULL DEFAULT '0' AFTER `source_url`;
 
