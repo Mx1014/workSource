@@ -21,6 +21,7 @@ import com.everhomes.discover.ItemType;
  * <li>formOriginId: 原始 formId，如果修改了版本，则原始的数据保留</li>
  * <li>approvalName : 审批名称</li>
  * <li>status: 查询approval的状态 默认是包括禁用和启用的 1-禁用 2-启用{@link com.everhomes.rest.general_approval.GeneralApprovalStatus}</li>
+ * <li>approvalType: 审批类型 DEFAULT-系统默认 CUSTOMIZE-自定义</li>
  * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
  * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
  * <li>iconUri: 图标的uri</li>
@@ -53,6 +54,7 @@ public class GeneralApprovalDTO {
     //	added by R.
 	private Byte modifyFlag;
 	private Byte deleteFlag;
+    private String approvalType;
 	private String iconUri;
 	private String iconUrl;
 
@@ -219,6 +221,14 @@ public class GeneralApprovalDTO {
 
     public void setDeleteFlag(Byte deleteFlag) {
         this.deleteFlag = deleteFlag;
+    }
+
+    public String getApprovalType() {
+        return approvalType;
+    }
+
+    public void setApprovalType(String approvalType) {
+        this.approvalType = approvalType;
     }
 
     public String getIconUri() {
