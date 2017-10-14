@@ -1942,6 +1942,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return listOrganizationPersonnels(keywords, orgCommoand, contactSignedupStatus, visibleFlag, locator, pageSize, null);
 	}
 
+    @Override
+    public void updateOrganizationDefaultOrder(Integer namespaceId, Long orgId, Integer order) {
+
+    }
+
     /**
      * modify cause member_detail by lei lv
      **/

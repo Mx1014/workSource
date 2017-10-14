@@ -97,6 +97,8 @@ public class OrganizationDTO {
 	private String pathName;
 
     private String emailDomain;
+
+    private Integer order;
 	
 	public String getEnterpriseContactor() {
 		return enterpriseContactor;
@@ -384,5 +386,13 @@ public class OrganizationDTO {
 
 	public void setCommunityAliasName(String communityAliasName) {
 		this.communityAliasName = communityAliasName;
+	}
+
+	public Integer getOrder() {
+		return order;
+	}
+
+	public void setOrder(Integer order) {
+		this.order = order;
 	}
 }

@@ -5565,7 +5565,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void sortOrganizationsAtSameLevel(SortOrganizationsAtSameLevelCommand cmd) {
-
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        this.coordinationProvider.getNamedLock(CoordinationLocks.ORGANIZATION_ORDER_LOCK.getCode()).enter(() -> {
+            if(cmd.getChildIds() != null && cmd.getChildIds().size() > 0){
+                List<Long> childIds = cmd.getChildIds();
+                for (Long orgId : childIds) {
+                    this.organizationProvider.updateOrganizationDefaultOrder(namespaceId, orgId, childIds.indexOf(orgId));
+                }
+            }
+            return null;
+        });
     }
 
     @Override
@@ -8467,7 +8476,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgChildrens.add(organizationDTO);
             }
         }
-        orgChildrens.sort(Comparator.comparingInt(Organization::getOrder));
+        orgChildrens.sort(Comparator.comparingInt(OrganizationDTO::getOrder));
         dto.setChildrens(orgChildrens);
 
         return dto;
