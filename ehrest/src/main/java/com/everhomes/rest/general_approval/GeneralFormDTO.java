@@ -18,6 +18,8 @@ import java.util.List;
  * <li>templateType: 模板数据类型。未来表单可能同样的控件有不同的表达方式，则可以用这个类型区分 {@link GeneralFormTemplateType}</li>
  * <li>formName: 表单名字</li>
  * <li>formFields: 表单控件数据 {@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
+ * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
+ * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
  * </ul>
  * @author janson
  *
@@ -37,6 +39,10 @@ public class GeneralFormDTO {
     private String     templateType;
     private String     templateText;
     private Timestamp     createTime;
+
+    //added by R
+	private Byte modifyFlag;
+	private Byte deleteFlag;
 
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
@@ -159,6 +165,22 @@ public class GeneralFormDTO {
 
 	public void setFormFields(List<GeneralFormFieldDTO> formFields) {
 		this.formFields = formFields;
+	}
+
+	public Byte getModifyFlag() {
+		return modifyFlag;
+	}
+
+	public void setModifyFlag(Byte modifyFlag) {
+		this.modifyFlag = modifyFlag;
+	}
+
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
 	}
 
 	@Override

@@ -23,6 +23,8 @@ import com.everhomes.discover.ItemType;
  * <li>status: 查询approval的状态 默认是包括禁用和启用的 1-禁用 2-启用{@link com.everhomes.rest.general_approval.GeneralApprovalStatus}</li>
  * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
  * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
+ * <li>iconUri: 图标的uri</li>
+ * <li>iconUrl: 图标的url</li>
  * </ul>
  * @author janson
  *
@@ -51,7 +53,8 @@ public class GeneralApprovalDTO {
     //	added by R.
 	private Byte modifyFlag;
 	private Byte deleteFlag;
-
+	private String iconUri;
+	private String iconUrl;
 
     public Byte getStatus() {
 		return status;
@@ -198,24 +201,40 @@ public class GeneralApprovalDTO {
 		return flowName;
 	}
 
-	public Byte getModifyFlag() {
-		return modifyFlag;
-	}
-
-	public void setModifyFlag(Byte modifyFlag) {
-		this.modifyFlag = modifyFlag;
-	}
-
-	public Byte getDeleteFlag() {
-		return deleteFlag;
-	}
-
-	public void setDeleteFlag(Byte deleteFlag) {
-		this.deleteFlag = deleteFlag;
-	}
-
 	public void setFlowName(String flowName) {
 		this.flowName = flowName;
 	}
+
+    public Byte getModifyFlag() {
+        return modifyFlag;
+    }
+
+    public void setModifyFlag(Byte modifyFlag) {
+        this.modifyFlag = modifyFlag;
+    }
+
+    public Byte getDeleteFlag() {
+        return deleteFlag;
+    }
+
+    public void setDeleteFlag(Byte deleteFlag) {
+        this.deleteFlag = deleteFlag;
+    }
+
+    public String getIconUri() {
+        return iconUri;
+    }
+
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
 }
 

@@ -24,6 +24,8 @@ import com.everhomes.util.StringHelper;
  * <li>dataSourceType: 数据源类型 {@link GeneralFormDataSourceType}</li>
  * <li>renderType: 渲染类型，{@link GeneralFormRenderType}</li>
  * <li>fieldValue: 字段值（查询详情时才会有值）</li>
+ * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
+ * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
  * </ul>
  * @author janson
  *
@@ -43,6 +45,11 @@ public class GeneralFormFieldDTO {
 	private String fieldExtra;
 
 	private String fieldValue;
+
+	//added by R
+	private Byte modifyFlag;
+	private Byte deleteFlag;
+
 
 	public String getFieldName() {
 		return fieldName;
@@ -146,6 +153,22 @@ public class GeneralFormFieldDTO {
 
 	public void setFieldValue(String fieldValue) {
 		this.fieldValue = fieldValue;
+	}
+
+	public Byte getModifyFlag() {
+		return modifyFlag;
+	}
+
+	public void setModifyFlag(Byte modifyFlag) {
+		this.modifyFlag = modifyFlag;
+	}
+
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
 	}
 
 	@Override

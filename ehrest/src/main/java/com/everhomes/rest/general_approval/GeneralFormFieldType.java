@@ -15,24 +15,31 @@ import org.apache.commons.lang.StringUtils;
  * <li>DROP_BOX:下拉框</li>
  * <li>SUBFORM:子表单</li>
  * <li>CONTACT:企业联系人组件</li>
+ * <li>LEAVE_APPLICATION:请假组件</li>
+ * <li>CANCEL_FOR_LEAVE:销假组件</li>
+ * <li>BUSINESS_TRIP:出差组件</li>
+ * <li>OVERTIME:加班组件</li>
+ * <li>GO_OUT:外出组件</li>
+ * <li>MEND_PUNCH:补卡组件</li>
  * </ul>
  * @author janson
  *
  */
 public enum GeneralFormFieldType {
 	SINGLE_LINE_TEXT("SINGLE_LINE_TEXT"), MULTI_LINE_TEXT("MULTI_LINE_TEXT"), IMAGE("IMAGE"), FILE("FILE"), INTEGER_TEXT("INTEGER_TEXT"),NUMBER_TEXT("NUMBER_TEXT"),DATE("DATE"),
-	DROP_BOX("DROP_BOX"),SUBFORM("SUBFORM"),CONTACT("CONTACT");
-	
+	DROP_BOX("DROP_BOX"), SUBFORM("SUBFORM"), CONTACT("CONTACT"), ASK_FOR_LEAVE("ASK_FOR_LEAVE"), CANCEL_FOR_LEAVE("CANCEL_FOR_LEAVE"), BUSINESS_TRIP("BUSINESS_TRIP"),
+	OVERTIME("OVERTIME"), GO_OUT("GO_OUT"), MEND_PUNCH("MEND_PUNCH");
+
 	private String code;
-	
+
 	private GeneralFormFieldType(String code){
 		this.code = code;
 	}
-	
+
 	public String getCode() {
 		return code;
 	}
-	
+
 	public static GeneralFormFieldType fromCode(String code) {
 		for(GeneralFormFieldType v : GeneralFormFieldType.values()) {
 			if(StringUtils.equals(v.getCode(), code))
@@ -40,7 +47,7 @@ public enum GeneralFormFieldType {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
