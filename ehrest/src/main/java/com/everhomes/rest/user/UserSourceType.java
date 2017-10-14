@@ -3,8 +3,8 @@ package com.everhomes.rest.user;
 
 /**
  * <ul>
- *  <li>APP: 来源app用户</li>
- *  <li>WEIXIN: 来源微信</li>
+ *  <li>APP: 1-来源app用户</li>
+ *  <li>WEIXIN: 2-来源微信</li>
  * </ul>
  */
 public enum UserSourceType {
