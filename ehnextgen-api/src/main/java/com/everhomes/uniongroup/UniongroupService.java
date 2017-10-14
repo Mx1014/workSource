@@ -84,5 +84,14 @@ public interface UniongroupService {
      **/
     UniongroupMemberDetailsDTO findUniongroupMemberDetailByDetailId(Integer namespaceId, Long detailId, String groupType, Integer versionCode);
 
-    public Object distributionUniongroupToDetail(DistributionUniongroupToDetailCommand cmd);
+    /**
+     * 将人员添加进入某薪酬组/考勤组
+     **/
+    Object distributionUniongroupToDetail(DistributionUniongroupToDetailCommand cmd);
+
+    /**
+     * 将version为N1的策略组记录转为0,并将version为0的策略组记录转换成N2
+     **/
+    UnionPolicyObject switchUnionGroupVersion(String groupType, Long groupId, Integer n1);
+
 }

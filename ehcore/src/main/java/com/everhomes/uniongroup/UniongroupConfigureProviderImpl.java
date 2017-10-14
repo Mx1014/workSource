@@ -22,6 +22,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
+import jdk.nashorn.internal.runtime.Version;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -546,6 +547,24 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                 .fetch().map(r -> {
                     return RecordHelper.convert(r, UniongroupMemberDetail.class);
                 });
+    }
+
+    @Override
+    public void updateUniongroupConfiguresVersion(String groupType, Long groupId, Integer v1, Integer v2) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        UpdateQuery<EhUniongroupConfiguresRecord> query = context.updateQuery(Tables.EH_UNIONGROUP_CONFIGURES);
+        query.addValue(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE, v2);
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(v1));
+        query.execute();
+    }
+
+    @Override
+    public void updateUniongroupMemberDetailsVersion(String groupType, Long groupId, Integer v1, Integer v2) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        UpdateQuery<EhUniongroupMemberDetailsRecord> query = context.updateQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
+        query.addValue(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE, v2);
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(v1));
+        query.execute();
     }
 
     @Override

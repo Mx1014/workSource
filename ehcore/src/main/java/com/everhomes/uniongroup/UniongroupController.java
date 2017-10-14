@@ -122,6 +122,18 @@ public class UniongroupController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <p>版本号切换 </p>
+     * <b>URL: /uniongroup/distributionUniongroupToDetail</b>
+     */
+    @RequestMapping("distributionUniongroupToDetail")
+    @RestReturn(value =String.class)
+    public RestResponse switchUnionGroupVersion(){
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 
 
