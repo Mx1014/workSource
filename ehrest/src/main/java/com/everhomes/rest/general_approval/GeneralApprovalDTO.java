@@ -14,13 +14,15 @@ import com.everhomes.discover.ItemType;
  * <li>ownerType: 对象类型，默认为 EhOrganizations {@link com.everhomes.entity.EntityType}</li>
  * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
  * <li>moduleType: 模块类型 默认"any-module" {@link com.everhomes.rest.flow.FlowModuleType}</li>
- * <li>organizationId: 属于的公司 ID</li> 
+ * <li>organizationId: 属于的公司 ID</li>
  * <li>supportType: APP可用，WEB 可用，APP 与 WEB 都可用 {@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
  * <li>projectType : </li>
  * <li>projectId : </li>
  * <li>formOriginId: 原始 formId，如果修改了版本，则原始的数据保留</li>
- * <li>approvalName : 审批名称</li> 
+ * <li>approvalName : 审批名称</li>
  * <li>status: 查询approval的状态 默认是包括禁用和启用的 1-禁用 2-启用{@link com.everhomes.rest.general_approval.GeneralApprovalStatus}</li>
+ * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
+ * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
  * </ul>
  * @author janson
  *
@@ -42,10 +44,14 @@ public class GeneralApprovalDTO {
     private String approvalName;
     private String formName;
     private String flowName;
-    
+
     private Timestamp     createTime;
     private Timestamp     updateTime;
-    
+
+    //	added by R.
+	private Byte modifyFlag;
+	private Byte deleteFlag;
+
 
     public Byte getStatus() {
 		return status;
@@ -190,6 +196,22 @@ public class GeneralApprovalDTO {
 
 	public String getFlowName() {
 		return flowName;
+	}
+
+	public Byte getModifyFlag() {
+		return modifyFlag;
+	}
+
+	public void setModifyFlag(Byte modifyFlag) {
+		this.modifyFlag = modifyFlag;
+	}
+
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
 	}
 
 	public void setFlowName(String flowName) {
