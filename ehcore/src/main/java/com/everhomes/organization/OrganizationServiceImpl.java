@@ -5444,6 +5444,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
         }
 
+        //:todo
         List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(keywords, cmd.getIsSignedup(), visibleFlag, locator, pageSize, cmd, cmd.getFilterScopeTypes().get(0));
 
         Map<String, OrganizationMember> contact_member = new HashMap<>();
@@ -7846,6 +7847,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         Long startTime1 = System.currentTimeMillis();
+        //:todo 递归
         dto = this.getOrganizationMenu(rganizationDTOs, dto);
         dto = processOrganizationCommunity(dto);
         res.setOrganizationMenu(dto);
@@ -7889,8 +7891,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public ListOrganizationsCommandResponse listAllChildrenOrganizations(Long id,
-                                                                         List<String> groupTypes) {
+    public ListOrganizationsCommandResponse listAllChildrenOrganizations(Long id, List<String> groupTypes) {
         ListOrganizationsCommandResponse res = new ListOrganizationsCommandResponse();
         Organization org = this.checkOrganization(id);
         List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
@@ -8466,6 +8467,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgChildrens.add(organizationDTO);
             }
         }
+//        orgChildrens.sort(Comparator.comparingInt(Organization::getOrder));
         dto.setChildrens(orgChildrens);
 
         return dto;

@@ -2307,8 +2307,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
     @Override
-    public List<Organization> listOrganizationByGroupTypes(String superiorPath,
-                                                           List<String> groupTypes) {
+    public List<Organization> listOrganizationByGroupTypes(String superiorPath, List<String> groupTypes) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<Organization> result = new ArrayList<Organization>();
