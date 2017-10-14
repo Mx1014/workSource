@@ -102,3 +102,5 @@ ALTER TABLE eh_rentalv2_resources DROP COLUMN `discount_type`;
 ALTER TABLE eh_rentalv2_resources DROP COLUMN `full_price`;
 ALTER TABLE eh_rentalv2_resources DROP COLUMN `cut_price`;
 ALTER TABLE eh_rentalv2_resources DROP COLUMN `discount_ratio`;
+
+
