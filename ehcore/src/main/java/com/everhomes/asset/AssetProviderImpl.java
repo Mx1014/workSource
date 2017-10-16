@@ -2020,7 +2020,7 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public void deleteChargingStandard(Long chargingStandardId, Long ownerId, String ownerType) {
         DSLContext context = getReadWriteContext();
-        EhPaymentChargingStandardsScopes t = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
+        EhPaymentChargingStandardsScopes t = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t");
         context.delete(t)
                 .where(t.ID.eq(chargingStandardId))
                 .and(t.OWNER_ID.eq(ownerId))
@@ -2176,13 +2176,28 @@ public class AssetProviderImpl implements AssetProvider {
         List<ListChargingItemsForBillGroupDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
+        EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
+        Tables
 
-        ListChargingItemsForBillGroupDTO dto = new ListChargingItemsForBillGroupDTO();
         SelectQuery<Record> query = context.selectQuery();
-        List<PaymentBillGroupRule> paymentBillGroupRules = context.selectFrom(t)
+        List<PaymentBillGroupRule> rules = context.selectFrom(t)
                 .where(t.BILL_GROUP_ID.eq(billGroupId))
                 .fetchInto(PaymentBillGroupRule.class);
-        
+        for(int i = 0 ; i < rules.size(); i ++){
+            PaymentBillGroupRule rule = rules.get(i);
+            ListChargingItemsForBillGroupDTO dto = new ListChargingItemsForBillGroupDTO();
+            dto.setBillGroupRuleId(rule.getId());
+            PaymentBillGroup group = context.selectFrom(t1)
+                    .where(t1.ID.eq(rule.getBillGroupId()))
+                    .fetchOneInto(PaymentBillGroup.class);
+
+            dto.setBillingCycle(group.getBalanceDateType());
+            dto.setChargingStandardName(rule.getChargingItemName());
+            context.selectFrom()
+            dto.setFormula();
+        }
+
+
         return null;
     }
 
