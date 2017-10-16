@@ -15,7 +15,9 @@ import java.util.List;
  * <li>chargingStandardName:收费标准名称</li>
  * <li>formula:公式</li>
  * <li>variables:变量名称和值的集合，参考{@link com.everhomes.rest.asset.ChargingItemVariable}</li>
- * <li>billingCycle:</li>
+ * <li>billingCycle:计费周期，2：按月；3：按季度；4：按年</li>
+ * <li>billItemGenerationMonth: 费项产生的月数</li>
+ * <li>billItemGenerationDay: 费项产生的日数</li>
  *</ul>
  */
 public class ListChargingItemsForBillGroupDTO {
@@ -27,6 +29,8 @@ public class ListChargingItemsForBillGroupDTO {
     @ItemType(ChargingItemVariable.class)
     private List<ChargingItemVariable> variables;
     private Byte billingCycle;
+    private Integer billItemGenerationMonth;
+    private Integer billItemGenerationDay;
 
     @Override
     public String toString() {
@@ -35,6 +39,22 @@ public class ListChargingItemsForBillGroupDTO {
 
     public Long getBillGroupRuleId() {
         return billGroupRuleId;
+    }
+
+    public Integer getBillItemGenerationMonth() {
+        return billItemGenerationMonth;
+    }
+
+    public void setBillItemGenerationMonth(Integer billItemGenerationMonth) {
+        this.billItemGenerationMonth = billItemGenerationMonth;
+    }
+
+    public Integer getBillItemGenerationDay() {
+        return billItemGenerationDay;
+    }
+
+    public void setBillItemGenerationDay(Integer billItemGenerationDay) {
+        this.billItemGenerationDay = billItemGenerationDay;
     }
 
     public void setBillGroupRuleId(Long billGroupRuleId) {

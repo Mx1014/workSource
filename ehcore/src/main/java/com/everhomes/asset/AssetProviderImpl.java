@@ -2178,7 +2178,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = getReadOnlyContext();
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
-//        Tables
+        EhPaymentChargingStandards t3 = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t3");
 
         SelectQuery<Record> query = context.selectQuery();
         List<PaymentBillGroupRule> rules = context.selectFrom(t)
@@ -2193,9 +2193,19 @@ public class AssetProviderImpl implements AssetProvider {
                     .fetchOneInto(PaymentBillGroup.class);
 
             dto.setBillingCycle(group.getBalanceDateType());
-            dto.setChargingStandardName(rule.getChargingItemName());
-//            context.selectFrom()
-//            dto.setFormula();
+
+            PaymentChargingStandards standard = context.selectFrom(t3)
+                    .where(t3.ID.eq(rule.getChargingStandardsId()))
+                    .fetchOneInto(PaymentChargingStandards.class);
+            dto.setFormula(standard.getFormula());
+            dto.setGroupChargingItemName(rule.getChargingItemName());
+            dto.setChargingStandardName(standard.getName());
+
+
+
+
+
+
         }
 
 

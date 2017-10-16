@@ -23,3 +23,7 @@ CREATE TABLE `eh_payment_formula` (
   `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='收费标准公式表';
+
+ALTER TABLE `eh_payment_charging_standards` ADD COLUMN `suggest_unit_price` DECIMAL(10,2) DEFAULT NULL COMMENT '建议单价';
+ALTER TABLE `eh_payment_charging_standards` ADD COLUMN `bill_item_month_offset` DECIMAL(10,2) DEFAULT NULL COMMENT '收费项产生时间偏离当前月的月数';
+ALTER TABLE `eh_payment_charging_standards` ADD COLUMN `bill_item_day_offset` DECIMAL(10,2) DEFAULT NULL COMMENT '收费项产生时间偏离当前月的日数';
