@@ -2012,6 +2012,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setFormula(r.getValue(t.FORMULA));
                     dto.setBillingCycle(r.getValue(t.BILLING_CYCLE));
                     dto.setInstruction(r.getValue(t.INSTRUCTION));
+                    dto.setFormulaType(r.getValue(t.FORMULA_TYPE));
                     return null;
                 });
         return dto;
@@ -2177,7 +2178,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = getReadOnlyContext();
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
-        Tables
+//        Tables
 
         SelectQuery<Record> query = context.selectQuery();
         List<PaymentBillGroupRule> rules = context.selectFrom(t)
@@ -2193,8 +2194,8 @@ public class AssetProviderImpl implements AssetProvider {
 
             dto.setBillingCycle(group.getBalanceDateType());
             dto.setChargingStandardName(rule.getChargingItemName());
-            context.selectFrom()
-            dto.setFormula();
+//            context.selectFrom()
+//            dto.setFormula();
         }
 
 
