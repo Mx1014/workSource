@@ -289,7 +289,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
 //            }
 //        }
         if(cmd.getPayTime() != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
             Date time = sdf.parse(cmd.getPayTime());
             Calendar todayStart = Calendar.getInstance();
             todayStart.setTime(time);

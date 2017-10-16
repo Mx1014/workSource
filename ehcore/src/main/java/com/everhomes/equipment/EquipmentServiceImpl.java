@@ -4318,6 +4318,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 									ReceiverName receiverName = new ReceiverName();
 									receiverName.setId(member.getId());
 									receiverName.setName(member.getContactName());
+									receiverName.setContactToken(member.getContactToken());
 									dtoReceivers.add(receiverName);
 								});
 								dto.setReceivers(dtoReceivers);
