@@ -560,6 +560,9 @@ public class FieldServiceImpl implements FieldService {
         Method readMethod = pd.getReadMethod();
         System.out.println(readMethod.getName());
         Object invoke = readMethod.invoke(dto);
+        if(invoke==null){
+            return "";
+        }
         if(invoke.getClass().getSimpleName().equals("Timestamp")){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Timestamp var = (Timestamp)invoke;
