@@ -626,20 +626,25 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
-    public List listDetailNotInUniongroup(Integer namespaceId, Long organizationId, String contactName, Integer versionCode) {
+    public List listDetailNotInUniongroup(Integer namespaceId, Long organizationId, String contactName, Integer versionCode, Long departmentId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
         TableLike t1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t1");
         TableLike t2 = Tables.EH_UNIONGROUP_MEMBER_DETAILS.as("t2");
+        TableLike t3 = Tables.EH_ORGANIZATION_MEMBERS.as("t3");
         SelectJoinStep step = null;
         if(versionCode != null){
-            step = context.select(t1.fields()).from(t1).leftOuterJoin(t2).on(t2.field("detail_id").eq(t1.field("id"))).and(t2.field("version_code").eq(versionCode));
+            step = context.select(t1.fields()).from(t1).leftOuterJoin(t2).on(t2.field("detail_id").eq(t1.field("id"))).and(t2.field("version_code").eq(versionCode)).leftOuterJoin(t3).on(t1.field("id")).and(t3.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
         }else{
             step = context.select(t1.fields()).from(t1).leftOuterJoin(t2).on(t2.field("detail_id").eq(t1.field("id")));
         }
+
         Condition condition = t1.field("organization_id").eq(organizationId).and(t1.field("namespace_id").eq(namespaceId)).and(t2.field("detail_id").isNull());
         if(StringUtils.isNotEmpty(contactName)){
             condition = condition.and(t1.field("contact_name").like(contactName +"%"));
+        }
+        if(departmentId != null){
+            condition = condition.and(t3.field("organizaiton_id").eq(departmentId));
         }
         condition = condition.and(t1.field("id").in(context.selectDistinct(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))));
         List<OrganizationMemberDetails> details = step.where(condition).fetch().map(new OrganizationMemberDetailsMapper());

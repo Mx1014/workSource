@@ -82,7 +82,7 @@ public interface UniongroupConfigureProvider {
 
     List<Object[]> listUniongroupMemberGroupIds(Integer namespaceId, Long ownerId);
 
-    List listDetailNotInUniongroup(Integer namespaceId, Long organizationId, String contactName, Integer versionCode);
+    List listDetailNotInUniongroup(Integer namespaceId, Long organizationId, String contactName, Integer versionCode, Long departmentId);
 
     Integer countUnionGroupMemberDetailsByGroupId(Integer namespaceId, Long groupId);
 
