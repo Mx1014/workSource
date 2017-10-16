@@ -166,4 +166,6 @@ public interface AssetProvider {
 
     void changeBillStatusOnPaiedOff(List<Long> billIds);
 
+    List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
+
 }

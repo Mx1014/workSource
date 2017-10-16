@@ -101,6 +101,7 @@ public interface AssetService {
 
     void updateBillSwitchOnTime();
 
-    PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
+    List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 
+    PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
 }
