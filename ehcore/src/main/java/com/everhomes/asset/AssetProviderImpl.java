@@ -2200,6 +2200,7 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setFormula(standard.getFormula());
             dto.setGroupChargingItemName(rule.getChargingItemName());
             dto.setChargingStandardName(standard.getName());
+            dto.setBillItemGenerationDay(standard.getBillItemMonthOffset());
 
 
 
