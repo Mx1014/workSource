@@ -22,6 +22,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.pmNotify.*;
 import com.everhomes.rest.quality.QualityGroupType;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -158,6 +159,7 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
             String taskName = "";
             Timestamp time = null;
             int code = 0;
+            int smsCode = 0;
             String scope = "";
             String locale = "zh_CN";
             PmNotifyType notify = PmNotifyType.fromCode(record.getNotifyType());
@@ -168,12 +170,15 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                 if(PmNotifyType.BEFORE_START.equals(notify)) {
                     time = task.getExecutiveStartTime();
                     code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_BEFORE_BEGIN;
+                    smsCode = SmsTemplateCode.PM_NOTIFY_BEFORE_TASK;
                 } else if(PmNotifyType.BEFORE_DELAY.equals(notify)){
                     time = task.getExecutiveExpireTime();
                     code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_BEFORE_DELAY;
+                    smsCode = SmsTemplateCode.PM_NOTIFY_BEFORE_TASK_DELAY;
                 } else if(PmNotifyType.AFTER_DELAY.equals(notify)){
                     time = task.getExecutiveExpireTime();
                     code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_AFTER_DELAY;
+                    smsCode = SmsTemplateCode.PM_NOTIFY_AFTER_TASK_DELAY;
                     //过期提醒的notifytime即为任务的截止时间，所以先关掉任务
                     equipmentProvider.closeTask(task);
                 }
@@ -198,7 +203,7 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                         List<Tuple<String, Object>> variables = new ArrayList<>();
                         variables.add(new Tuple<String, Object>("taskName", taskName));
                         variables.add(new Tuple<String, Object>("time", timeToStr(time)));
-                        smsProvider.sendSms(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken(), scope, code, locale, variables);
+                        smsProvider.sendSms(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken(), SmsTemplateCode.SCOPE, smsCode, locale, variables);
                         log.setNotifyText(notifyTextForApplicant);
                         break;
                     default:

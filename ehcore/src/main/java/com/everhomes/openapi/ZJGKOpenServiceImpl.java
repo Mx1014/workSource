@@ -458,7 +458,7 @@ public class ZJGKOpenServiceImpl {
     }
 
     private void syncDataToDb(Byte dataType, Byte allFlag) {
-        queueThreadPool.execute(()->{
+//        queueThreadPool.execute(()->{
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("dataType {} enter into thread=================", dataType);
             }
@@ -479,7 +479,7 @@ public class ZJGKOpenServiceImpl {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("dataType {} get out thread=================", dataType);
             }
-        });
+//        });
     }
 
     private String postToShenzhou(Map<String, String> params, String method, Map<String, String> headers) {
@@ -1371,7 +1371,10 @@ public class ZJGKOpenServiceImpl {
         if (apartmentIdentifier == null) {
             return;
         }
+        Long before = System.currentTimeMillis();
         Address address = addressProvider.findAddressByNamespaceTypeAndName(NamespaceAddressType.SHENZHOU.getCode(), apartmentIdentifier.getApartmentIdentifier());
+        Long after = System.currentTimeMillis();
+        LOGGER.info("address time before index:{}", after-before);
         if (address == null) {
             return;
         }

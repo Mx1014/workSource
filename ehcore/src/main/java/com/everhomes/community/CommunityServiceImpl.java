@@ -246,8 +246,6 @@ public class CommunityServiceImpl implements CommunityService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid areaId parameter,area is not found.");
 		}
-		community.setName(cmd.getName());
-		community.setAliasName(cmd.getAliasName());
 		community.setAreaId(cmd.getAreaId());
 		community.setCityId(cmd.getCityId());
 		community.setOperatorUid(userId);
@@ -605,15 +603,6 @@ public class CommunityServiceImpl implements CommunityService {
 
         	return dto;
         }).collect(Collectors.toList());
-        //增加公共区域
-        if (UserContext.getCurrentNamespaceId()==999983){
-            //if (cmd.getNamespaceId()==999983) {
-            BuildingDTO buildingDTO = new BuildingDTO();
-            buildingDTO.setName(EbeiBuildingType.publicArea);
-            buildingDTO.setBuildingName(EbeiBuildingType.publicArea);
-            buildingDTO.setId(0l);
-            dtoList.add(buildingDTO);
-        }
 
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
 	}
@@ -1888,13 +1877,6 @@ public class CommunityServiceImpl implements CommunityService {
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
 				}
 
-
-				if(UserSourceType.WEIXIN == UserSourceType.fromCode(cmd.getUserSourceType())){
-					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
-				}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
-					query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.isNotNull());
-				}
-
 				if(null != cmd.getCommunityId()){
 					query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 				}
@@ -1970,14 +1952,6 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setOrganizations(organizations);
 			} else {
 				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
-			}
-
-			if(NamespaceUserType.fromCode(r.getNamespaceUserType()) == NamespaceUserType.WX){
-				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
-			}
-
-			if(null != dto.getPhone()){
-				dto.setUserSourceType(UserSourceType.APP.getCode());
 			}
 			userCommunities.add(dto);
 		}
@@ -2111,8 +2085,6 @@ public class CommunityServiceImpl implements CommunityService {
 				CountCommunityUserResponse resp = new CountCommunityUserResponse();
 				resp.setCommunityUsers(allCount);
 				resp.setAuthUsers(authCount);
-				resp.setWxUserCount(authCount);
-				resp.setAppUserCount(allCount - authCount);
 				resp.setNotAuthUsers(allCount - authCount);
 				
 				return resp;
@@ -2120,8 +2092,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 			}
 		}
-
-
 		int authUserCount = 0;
 		if(namespaceId == Namespace.DEFAULT_NAMESPACE){
 			if(null == cmd.getOrganizationId() && null == cmd.getCommunityId()){
@@ -2136,17 +2106,9 @@ public class CommunityServiceImpl implements CommunityService {
 			if(null == cmd.getCommunityId())
 				communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
 			else
-				communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId());
+				communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
 
-			if(CommunityUserStatisticsType.fromCode(cmd.getStatisticsType()) == CommunityUserStatisticsType.AUTHENTICATION){
-				authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
-			}else{
-				if(null == cmd.getCommunityId())
-					authUserCount = userProvider.countUserByNamespaceIdAndNamespaceUserType(namespaceId, NamespaceUserType.WX.getCode());
-				else
-					authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null, NamespaceUserType.WX.getCode());
-
-			}
+			authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
 
 		}
 
@@ -2155,8 +2117,6 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
 		resp.setCommunityUsers(communityUserCount);
-		resp.setWxUserCount(authUserCount);
-		resp.setAppUserCount(notAuthUsers);
 		resp.setAuthUsers(authUserCount);
 		resp.setNotAuthUsers(notAuthUsers);
 

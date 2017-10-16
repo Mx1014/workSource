@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 
 public interface PunchSchedulingProvider {
 
@@ -41,4 +42,8 @@ public interface PunchSchedulingProvider {
 	void deletePunchSchedulingByPunchRuleIdAndNotInTarget(Long id, List<Long> detailIds);
 
 	void deletePunchSchedulingByOwnerIdAndTarget(Long ownerId, Long detailId);
+
+	void batchCreatePunchSchedulings(List<EhPunchSchedulings> schedulings);
+
+	void deleteAfterTodayPunchSchedulingByPunchRuleId(Long id, Date monthBeginDate, Date monthEndDate);
 }

@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -67,7 +68,9 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 			//计算有效期从当天235959秒计算
 			long expireTime = Utils.strToLong(expireDate + "235959", Utils.DateStyle.DATE_TIME_STR);
 			if (checkExpireTime(parkingLot, expireTime)) {
-				return resultList;
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 			}
 			
 			String userName = cardInfo.getUserName();
@@ -121,14 +124,9 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
     }
 
 	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
-		if(null == rate) {
-			LOGGER.error("Rate not found, cmd={}", order);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Rate not found.");
-		}
-		order.setRateName(rate.getRateName());
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
+		updateParkingRechargeOrderRateInfo(parkingLot, order);
+
 	}
 
     private Bosigao2ResultEntity getCard(String plateNumber){
@@ -168,6 +166,7 @@ public class Bosigao2ParkingVendorHandler extends DefaultParkingVendorHandler {
 		List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
 
 			ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+			dto.setCardTypeId(r.getCardType());
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.BOSIGAO2.getCode());
 			return dto;

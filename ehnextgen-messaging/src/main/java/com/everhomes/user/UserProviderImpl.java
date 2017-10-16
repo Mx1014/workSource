@@ -482,6 +482,17 @@ public class UserProviderImpl implements UserProvider {
             .fetchAny();
         return ConvertHelper.convert(record, UserIdentifier.class);
     }
+
+    @Override
+    public UserIdentifier findIdentifierByOwnerAndTypeAndClaimStatus(long ownerUid, byte identifierType, byte claimStatus) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, ownerUid));
+        Record record = context.select().from(EH_USER_IDENTIFIERS)
+                .where(EH_USER_IDENTIFIERS.OWNER_UID.eq(ownerUid))
+                .and(EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(identifierType))
+                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(claimStatus))
+                .fetchAny();
+        return ConvertHelper.convert(record, UserIdentifier.class);
+    }
     
 	@Caching(evict = { @CacheEvict(value = "UserGroup-Listing", key = "{#userGroup.ownerUid, #userGroup.groupDiscriminator}"),
 			@CacheEvict(value = "UserGroupByOwnerAndGroup", key = "{#userGroup.ownerUid, #userGroup.groupId}") })
@@ -1248,22 +1259,6 @@ public class UserProviderImpl implements UserProvider {
         });
 		return list;
 	}
-
-    @Override
-    public int countUserByNamespaceIdAndNamespaceUserType(Integer namespaceId, String namespaceUserType){
-        final Integer[] count = new Integer[1];
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
-                (DSLContext context, Object reducingContext)-> {
-                    count[0] = context.selectCount().from(Tables.EH_USERS)
-                            .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
-                            .and(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(namespaceUserType))
-                            .fetchOneInto(Integer.class);
-                    return true;
-        });
-
-        return count[0];
-    }
-
 
 	@Override
 	public int countUserByNamespaceId(Integer namespaceId, Boolean isAuth) {

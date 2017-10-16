@@ -44,8 +44,11 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 			//格式yyyyMMddHHmmss
 			String validEnd = card.getLimitEnd();
 			Long endTime = strToLong(validEnd);
+
 			if (checkExpireTime(parkingLot, endTime)) {
-				return resultList;
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 			}
 			
 			String plateOwnerName = card.getUserName();
@@ -62,8 +65,9 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 			parkingCardDTO.setEndTime(endTime);
 			parkingCardDTO.setCardType(cardType);
 			parkingCardDTO.setCardNumber(cardNumber);
+			//历史遗留下来，已废弃
 			parkingCardDTO.setIsValid(true);
-			
+
 			resultList.add(parkingCardDTO);
 		}
         return resultList;
@@ -99,14 +103,9 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
     }
 
 	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
-		if(null == rate) {
-			LOGGER.error("Rate not found, cmd={}", order);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Rate not found.");
-		}
-		order.setRateName(rate.getRateName());
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
+		updateParkingRechargeOrderRateInfo(parkingLot, order);
+
 	}
 
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
@@ -186,7 +185,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
 		String parkingId = configProvider.getValue("parking.techpark.parkingId", "");
 		if (verifyParkingCar(order.getPlateNumber(), parkingId)) {
 			String url = configProvider.getValue("parking.techpark.url", "");
-			String cost = String.valueOf((order.getPrice().multiply(new BigDecimal(100))).intValue());
+			String cost = String.valueOf((order.getOriginalPrice().multiply(new BigDecimal(100))).intValue());
 
 			JSONObject jsonParam = new JSONObject();
 			jsonParam.put("OrderID", order.getOrderToken());
@@ -262,6 +261,7 @@ public class Bosigao3ParkingVendorHandler extends DefaultParkingVendorHandler {
     	
     	List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
 			ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+			dto.setCardTypeId(r.getCardType());
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
 			return dto;

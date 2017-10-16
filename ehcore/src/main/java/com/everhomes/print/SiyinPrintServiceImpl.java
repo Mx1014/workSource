@@ -21,6 +21,9 @@ import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bus.*;
+import com.everhomes.order.PayService;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.print.*;
 import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,47 +55,6 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.print.GetPrintLogonUrlCommand;
-import com.everhomes.rest.print.GetPrintLogonUrlResponse;
-import com.everhomes.rest.print.GetPrintSettingCommand;
-import com.everhomes.rest.print.GetPrintSettingResponse;
-import com.everhomes.rest.print.GetPrintStatCommand;
-import com.everhomes.rest.print.GetPrintStatResponse;
-import com.everhomes.rest.print.GetPrintUnpaidOrderCommand;
-import com.everhomes.rest.print.GetPrintUnpaidOrderResponse;
-import com.everhomes.rest.print.GetPrintUserEmailCommand;
-import com.everhomes.rest.print.GetPrintUserEmailResponse;
-import com.everhomes.rest.print.InformPrintCommand;
-import com.everhomes.rest.print.InformPrintResponse;
-import com.everhomes.rest.print.ListPrintJobTypesCommand;
-import com.everhomes.rest.print.ListPrintJobTypesResponse;
-import com.everhomes.rest.print.ListPrintOrderStatusCommand;
-import com.everhomes.rest.print.ListPrintOrderStatusResponse;
-import com.everhomes.rest.print.ListPrintOrdersCommand;
-import com.everhomes.rest.print.ListPrintOrdersResponse;
-import com.everhomes.rest.print.ListPrintRecordsCommand;
-import com.everhomes.rest.print.ListPrintRecordsResponse;
-import com.everhomes.rest.print.ListPrintUserOrganizationsCommand;
-import com.everhomes.rest.print.ListPrintUserOrganizationsResponse;
-import com.everhomes.rest.print.ListPrintingJobsCommand;
-import com.everhomes.rest.print.ListPrintingJobsResponse;
-import com.everhomes.rest.print.PayPrintOrderCommand;
-import com.everhomes.rest.print.PrintErrorCode;
-import com.everhomes.rest.print.PrintJobTypeType;
-import com.everhomes.rest.print.PrintLogonStatusType;
-import com.everhomes.rest.print.PrintOrderDTO;
-import com.everhomes.rest.print.PrintOrderLockType;
-import com.everhomes.rest.print.PrintOrderStatusType;
-import com.everhomes.rest.print.PrintOwnerType;
-import com.everhomes.rest.print.PrintPaperSizeType;
-import com.everhomes.rest.print.PrintRecordDTO;
-import com.everhomes.rest.print.PrintSettingColorTypeDTO;
-import com.everhomes.rest.print.PrintSettingPaperSizePriceDTO;
-import com.everhomes.rest.print.PrintSettingType;
-import com.everhomes.rest.print.PrintStatDTO;
-import com.everhomes.rest.print.UnlockPrinterCommand;
-import com.everhomes.rest.print.UpdatePrintSettingCommand;
-import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -161,6 +123,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Autowired
 	private SiyinJobValidateServiceImpl siyinJobValidateServiceImpl;
+
+	@Autowired
+	private PayService payService;
 
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
@@ -495,6 +460,24 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		
 		return dto;
 		
+	}
+
+	@Override
+	public PreOrderDTO payPrintOrderV2(PayPrintOrderCommandV2 cmd) {
+		//检查订单id是否存在，是否已经是  已支付状态
+		SiyinPrintOrder order = checkPrintOrder(cmd.getOrderId());
+
+		//检查订单是否被锁定
+		//没有被锁定的订单，锁定他
+		PrintOrderLockType lockType = PrintOrderLockType.fromCode(order.getLockFlag());
+		if(lockType == PrintOrderLockType.UNLOCKED){
+			order = lockOrder(cmd.getOrderId());
+		}
+
+		Long paysummay = payService.changePayAmount(order.getOrderTotalFee());
+		PreOrderDTO dto = payService.createAppPreOrder(UserContext.getCurrentNamespaceId(),cmd.getClientAppName(),
+				OrderType.OrderTypeEnum.PRINT_ORDER.getPycode(),order.getOrderNo(),UserContext.current().getUser().getId(),paysummay);
+		return dto;
 	}
 
 	@Override

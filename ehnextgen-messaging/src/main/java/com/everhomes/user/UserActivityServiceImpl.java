@@ -1180,7 +1180,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<ActivityRoster> result = activityProivider.findRostersByUid(uid, locator, pageSize + 1);
+        List<ActivityRoster> result = activityProivider.findRostersByUid(uid, locator, pageSize + 1, ActivityRosterStatus.NORMAL.getCode());
         
         if (CollectionUtils.isEmpty(result)) {
             return new ListActivitiesReponse(null, new ArrayList<ActivityDTO>());

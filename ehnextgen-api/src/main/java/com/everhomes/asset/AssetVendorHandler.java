@@ -60,4 +60,6 @@ public interface AssetVendorHandler {
 
     void updateBillsToSettled(UpdateBillsToSettled cmd);
 
+    PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
+
 }

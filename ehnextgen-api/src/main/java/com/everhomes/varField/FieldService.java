@@ -2,7 +2,6 @@ package com.everhomes.varField;
 
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -28,13 +27,14 @@ public interface FieldService {
     void updateFieldItems(UpdateFieldItemsCommand cmd);
 
 
-    void importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file);
 
-    void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
+//    void importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file);
+//
+//    void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
+//
+//    void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response);
 
-    void exportExcelTemplate(ListFieldGroupCommand cmd,HttpServletResponse response);
 
-    
 
 
     ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
@@ -43,5 +43,6 @@ public interface FieldService {
     List<SystemFieldGroupDTO> listSystemFieldGroups(ListSystemFieldGroupCommand cmd);
     List<SystemFieldDTO> listSystemFields(ListSystemFieldCommand cmd);
     List<SystemFieldItemDTO> listSystemFieldItems(ListSystemFieldItemCommand cmd);
+
 
 }

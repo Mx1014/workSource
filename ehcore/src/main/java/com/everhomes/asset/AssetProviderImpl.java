@@ -6,15 +6,19 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
+import com.everhomes.server.schema.tables.EhPaymentAccounts;
 import com.everhomes.server.schema.tables.EhPaymentBillGroups;
 import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
@@ -25,6 +29,7 @@ import com.everhomes.server.schema.tables.EhPaymentChargingStandards;
 import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
 import com.everhomes.server.schema.tables.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.EhPaymentExemptionItems;
+import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
@@ -32,6 +37,8 @@ import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+
+import com.everhomes.server.schema.tables.pojos.EhAssetPaymentOrderBills;
 
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
@@ -532,17 +539,17 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillDTO> dtos = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-//        EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
+        EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
         EhAddresses t2 = Tables.EH_ADDRESSES.as("t2");
         context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME)
                 .from(t)
-//                .leftOuterJoin(t1)
-//                .on(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                .leftOuterJoin(t1)
+                .on(t.CHARGING_ITEMS_ID.eq(t1.ID))
                 .leftOuterJoin(t2)
                 .on(t.ADDRESS_ID.eq(t2.ID))
                 .where(t.BILL_ID.eq(billId))
-//                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
-//                .orderBy(t1.DEFAULT_ORDER)
+                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+                .orderBy(t1.DEFAULT_ORDER)
                 .limit(pageOffSet,pageSize+1)
                 .fetch()
                 .map(r ->{
@@ -641,7 +648,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.AMOUNT_OWED,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE)
+        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.AMOUNT_OWED,t.APARTMENT_NAME,t.BUILDING_NAME)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
@@ -650,7 +657,6 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
                     dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
-                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dtos.add(dto);
                     dateStr[0] = r.getValue(t.DATE_STR);
                     amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
@@ -742,7 +748,6 @@ public class AssetProviderImpl implements AssetProvider {
                         ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                         dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                         dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
-                        dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                         dtos.add(dto);
                         amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
                         amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
@@ -1421,15 +1426,13 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId,Long ownerId,String ownerType) {
+    public List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<VariableIdAndValue> list = new ArrayList<>();
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         String variableJson = context.select(t.VARIABLES_JSON_STRING)
                 .from(t)
                 .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
-                .and(t.OWNERID.eq(ownerId))
-                .and(t.OWNERTYPE.eq(ownerType))
                 .fetchOne(0, String.class);
         Gson gson = new Gson();
         Map<String,String> map = gson.fromJson(variableJson, Map.class);
@@ -1502,8 +1505,6 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(t)
                 .where(t.CHARGING_ITEM_ID.eq(chargingItemId))
                 .and(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
-                .and(t.OWNERTYPE.eq(ownerType))
-                .and(t.OWNERID.eq(ownerId))
                 .fetch()
                 .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
         return rules.get(0);
@@ -1764,5 +1765,183 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchOne(0,String.class);
     }
 
+
+    @Override
+    public Long saveAnOrderCopy(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //TO SAVE A PRE ORDER COPY IN THE ORDER TABLE WITH STATUS BEING NOT BEING PAID YET
+        long nextOrderId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_ASSET_PAYMENT_ORDER.getClass()));
+        AssetPaymentOrder order = new AssetPaymentOrder();
+        order.setClientAppName(clientAppName);
+        order.setCommunityId(String.valueOf(communityId));
+        order.setContractId(contactNum);
+        order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        order.setId(nextOrderId);
+        order.setNamespaceId(namespaceId);
+        // GET THE START TIME AND EXPIRTIME
+        Timestamp startTime = new Timestamp(DateHelper.currentGMTTime().getTime());
+        Calendar c = Calendar.getInstance();
+        //expiretime为妙，所以乘以1000得到milliseconds
+        long l = startTime.getTime() + expireTimePeriod*1000l;
+
+        Timestamp endTime = new Timestamp(l);
+        order.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        order.setOrderExpireTime(endTime);
+        order.setOrderType(OrderType.OrderTypeEnum.ZJGK_RENTAL_CODE.getPycode());
+
+        Random r = new Random();
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < 17; i++){
+               sb.append(r.nextInt(10));
+        }
+        order.setOrderNo(Long.parseLong(sb.toString()));
+        order.setUid(UserContext.currentUserId());
+        order.setPayAmount(new BigDecimal(amountOwed));
+        order.setPayerType(payerType);
+        order.setStatus((byte)0);
+        EhAssetPaymentOrderDao dao = new EhAssetPaymentOrderDao(context.configuration());
+        dao.insert(order);
+        return nextOrderId;
+    }
+
+
+    @Override
+    public Long findAssetOrderByBillIds(List<String> billIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        HashSet<Long> idSet = new HashSet<>();
+        Long id = null;
+        context.select(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.ORDER_ID)
+                .from(Tables.EH_ASSET_PAYMENT_ORDER_BILLS)
+                .where(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.BILL_ID.in(billIds))
+                .fetch()
+                .map(r -> {
+                    idSet.add(r.getValue(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.ORDER_ID));
+                    return null;});
+        if(idSet.size()==1){
+            id = idSet.iterator().next();
+        }
+        return id;
+    }
+
+    @Override
+    public void saveOrderBills(List<BillIdAndAmount> bills, Long orderId) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        long nextBlockSequence = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_ASSET_PAYMENT_ORDER_BILLS.getClass()),bills.size());
+        long nextSequence = nextBlockSequence - bills.size()+1;
+        List<EhAssetPaymentOrderBills> orderBills = new ArrayList<>();
+        for(int i = 0; i < bills.size(); i ++){
+            EhAssetPaymentOrderBills orderBill  = new EhAssetPaymentOrderBills();
+            BillIdAndAmount billIdAndAmount = bills.get(i);
+            orderBill.setId(nextSequence++);
+            orderBill.setAmount(new BigDecimal(billIdAndAmount.getAmountOwed()));
+            orderBill.setBillId(billIdAndAmount.getBillId());
+            orderBill.setOrderId(orderId);
+            orderBill.setStatus(0);
+            orderBills.add(orderBill);
+        }
+        EhAssetPaymentOrderBillsDao dao = new EhAssetPaymentOrderBillsDao(dslContext.configuration());
+        dao.insert(orderBills);
+    }
+
+    @Override
+    public AssetPaymentOrder findAssetPaymentById(Long orderId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhAssetPaymentOrder t = Tables.EH_ASSET_PAYMENT_ORDER.as("t");
+        return context.select()
+                .from(t)
+                .where(t.ID.eq(orderId))
+                .fetchOneInto(AssetPaymentOrder.class);
+    }
+
+    @Override
+    public List<AssetPaymentOrderBills> findBillsById(Long orderId) {
+        List<AssetPaymentOrderBills> list = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t");
+        context.select()
+                .from(t)
+                .where(t.ORDER_ID.eq(orderId))
+                .fetch()
+                .map(r -> {
+                    list.add(ConvertHelper.convert(r,AssetPaymentOrderBills.class));
+                    return null;
+                });
+
+        return list;
+    }
+
+    @Override
+    public void changeOrderStaus(Long orderId, Byte finalOrderStatus) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhAssetPaymentOrder t = Tables.EH_ASSET_PAYMENT_ORDER.as("t");
+        context.update(t)
+                .set(t.STATUS,finalOrderStatus)
+                .where(t.ID.eq(orderId))
+                .execute();
+    }
+
+    @Override
+    public void changeBillStatusOnOrder(Map<String, Integer> billStatuses,Long orderId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t");
+        for(Map.Entry<String,Integer> entry : billStatuses.entrySet()){
+            context.update(t)
+                    .set(t.STATUS,entry.getValue())
+                    .where(t.BILL_ID.eq(entry.getKey()))
+                    .and(t.ORDER_ID.eq(orderId))
+                    .execute();
+        }
+    }
+
+    @Override
+    public PaymentUser findByOwner(String userType, Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentUsers t = Tables.EH_PAYMENT_USERS.as("t");
+        List<PaymentUser> list = new ArrayList<>();
+        context.select()
+                .from(t)
+                .where(t.OWNER_ID.eq(id))
+                .and(t.OWNER_TYPE.eq(userType))
+                .fetch()
+                .map(r -> {
+                    PaymentUser convert = ConvertHelper.convert(r, PaymentUser.class);
+                    list.add(convert);
+                    return null;
+                });
+        return list.size()>0?list.get(0):null;
+    }
+
+    @Override
+    public PaymentAccount findPaymentAccount() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<PaymentAccount> list = new ArrayList<>();
+        EhPaymentAccounts t = Tables.EH_PAYMENT_ACCOUNTS.as("t");
+        context.select()
+                .from(t)
+                .fetch()
+                .map(r -> {
+                    PaymentAccount convert = ConvertHelper.convert(r, PaymentAccount.class);
+                    list.add(convert);
+                    return null;
+                });
+        return list.size() > 0 ? list.get(0) : null;
+    }
+
+    @Override
+    public void changeBillStatusOnPaiedOff(List<Long> billIds) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        EhPaymentBillItems t1 = Tables.EH_PAYMENT_BILL_ITEMS.as("t1");
+        context.update(t)
+                .set(t.STATUS,(byte)1)
+                .where(t.ID.in(billIds))
+                .execute();
+        context.update(t1)
+                .set(t1.STATUS,(byte)1)
+                .where(t1.BILL_ID.in(billIds))
+                .execute();
+
+    }
 
 }

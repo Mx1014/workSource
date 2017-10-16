@@ -22,6 +22,8 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.family.FamilyUtils;
 import com.everhomes.group.Group;
+import com.everhomes.group.GroupAdminStatus;
+import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -148,6 +150,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
     @Autowired
     private PropertyMgrService propertyMgrService;
+
+    @Autowired
+    private UserService userService;
 
     @PostConstruct
     public void setup() {
@@ -1776,7 +1781,34 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         }
 
         List<CommunityDTO> dtos = communities.stream().map(r -> {
-            Integer communityUserCount = organizationProvider.countUserOrganization(namespaceId, r.getId(), null);
+            Integer communityUserCount = 0;
+            if (r.getCommunityType() == CommunityType.RESIDENTIAL.getCode()) {
+                List<Group> groups = groupProvider.listGroupByCommunityId(r.getId(), (loc, query) -> {
+                    Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
+                    query.addConditions(c);
+                    return query;
+                });
+
+                List<Long> groupIds = new ArrayList<Long>();
+                for (Group group : groups) {
+                    groupIds.add(group.getId());
+                }
+
+                CrossShardListingLocator locator_g = new CrossShardListingLocator();
+                List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds, locator_g, null, (loc, query) -> {
+                    Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+                    c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
+                    query.addConditions(c);
+                    query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
+                    return query;
+                });
+
+                communityUserCount = groupMembers.size();
+
+            } else {
+                communityUserCount = organizationProvider.countUserOrganization(namespaceId, r.getId(), null);
+            }
+
             CommunityDTO dto = ConvertHelper.convert(r, CommunityDTO.class);
             dto.setCommunityUserCount(communityUserCount);
             return dto;
@@ -1791,7 +1823,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             });
 
             if (pageSize < dtos.size()) {
-                dtos = dtos.subList(0, pageSize - 1);
+                dtos = dtos.subList(0, pageSize);
             }
             response.setDtos(dtos);
             return response;
@@ -2254,5 +2286,28 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 cmd.getBuildingName(), cmd.getApartmentName());
         return ConvertHelper.convert(address, AddressDTO.class);
 
+    }
+
+
+    @Override
+    public List<Community> listMixCommunitiesByDistanceWithNamespaceId(ListNearbyMixCommunitiesCommand cmd, ListingLocator locator, int pageSize){
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Long userId = UserContext.current().getUser().getId();
+        List<Community> communities = this.communityProvider.listCommunitiesByNamespaceId(namespaceId);
+        if(communities != null){
+            List<Long> communityIds = communities.stream().map(r->{
+                return r.getId();
+            }).collect(Collectors.toList());
+            List<CommunityGeoPoint> pointList = this.communityProvider.listCommunityGeoPointByGeoHashInCommunities(cmd.getLatigtue(), cmd.getLongitude(), 5, communityIds);
+            if(pointList != null && pointList.size() > 0){
+                List<Community> communities_after = pointList.stream().map(r->{
+                    return this.communityProvider.findCommunityById(r.getCommunityId());
+                }).collect(Collectors.toList());
+                return communities_after;
+            }else {
+                return communities;
+            }
+        }
+        return null;
     }
 }

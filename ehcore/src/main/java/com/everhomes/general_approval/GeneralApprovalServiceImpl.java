@@ -151,8 +151,14 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 				form.setStatus(GeneralFormStatus.RUNNING.getCode());
 				this.generalFormProvider.updateGeneralForm(form);
 			}
-			Flow flow = flowService.getEnabledFlow(ga.getNamespaceId(), ga.getModuleId(),
-					ga.getModuleType(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
+			Flow flow = null;
+			if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(ga.getModuleType())){
+				flow = flowService.getEnabledFlow(ga.getNamespaceId(), 40500L,
+						FlowModuleType.NO_MODULE.getCode(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
+			}else{
+				flow = flowService.getEnabledFlow(ga.getNamespaceId(), ga.getModuleId(),
+						ga.getModuleType(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
+			}
 
 			CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
 			cmd21.setApplyUserId(userId);
@@ -463,7 +469,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 						List<OrganizationCommunity> communityList = null;
 						
 						//modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
-						if(EntityType.ORGANIZATIONS.getCode().equals(cmd.getOwnerType())){
+						if(EntityType.ORGANIZATIONS.getCode().equals(cmd.getOwnerType()) 
+								&& FlowModuleType.SERVICE_ALLIANCE.getCode().equals(cmd.getModuleType())){
 							 communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
 							 Condition conditionOR = null;
 							 for (OrganizationCommunity organizationCommunity : communityList) {
@@ -517,6 +524,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
 		ListGeneralApprovalResponse resp = new ListGeneralApprovalResponse();
 		resp.setDtos(gas.stream().map((r) -> {
+			if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(r.getModuleType())){
+				long oid = r.getModuleId();
+				r.setModuleId(40500L);
+				r.setModuleType(FlowModuleType.NO_MODULE.getCode());
+				GeneralApprovalDTO dto = processApproval(r);
+				dto.setModuleId(oid);
+				dto.setModuleType(FlowModuleType.SERVICE_ALLIANCE.getCode());
+				return dto;
+			}
 			return processApproval(r);
 		}).collect(Collectors.toList()));
 		return resp;
@@ -554,7 +570,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	}
 
 	@Override
-	public GeneralFormDTO  getApprovalForm(ApprovalFormIdCommand cmd) {
+	public GeneralFormDTO getApprovalForm(ApprovalFormIdCommand cmd) {
 		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
 				.getFormOriginId());
 		return processGeneralFormDTO(form);

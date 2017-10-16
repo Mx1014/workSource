@@ -1,8 +1,13 @@
 package com.everhomes.customer;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -78,4 +83,35 @@ public interface EnterpriseCustomerProvider {
     List<CustomerEconomicIndicator> listCustomerEconomicIndicatorsByCustomerIds(List<Long> customerIds);
 
     List<EnterpriseCustomer> listEnterpriseCustomerByCommunity(Long communityId);
+    
+	void createCustomerTracking(CustomerTracking tracking);
+	CustomerTracking findCustomerTrackingById(Long id);
+	void deleteCustomerTracking(CustomerTracking tracking);
+	void updateCustomerTracking(CustomerTracking tracking);
+	List<CustomerTracking> listCustomerTrackingsByCustomerId(Long customerId);
+	
+	void createCustomerTrackingPlan(CustomerTrackingPlan plan);
+	CustomerTrackingPlan findCustomerTrackingPlanById(Long id);
+	void deleteCustomerTrackingPlan(CustomerTrackingPlan plan);
+	void updateCustomerTrackingPlan(CustomerTrackingPlan plan);
+	List<CustomerTrackingPlan> listCustomerTrackingPlans(Long customerId);
+	
+	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist);
+	List<CustomerEvent> listCustomerEvents(Long customerId);
+	
+	void allotEnterpriseCustomer(EnterpriseCustomer customer);
+	void giveUpEnterpriseCustomer(EnterpriseCustomer customer);
+	
+	List<EnterpriseCustomerDTO> findEnterpriseCustomersByDistance(ListNearbyEnterpriseCustomersCommand cmd , ListingLocator locator , int pageSize);
+	boolean updateTrackingPlanNotify(Long recordId);
+	List<CustomerTrackingPlan> listWaitNotifyTrackingPlans(Timestamp queryStartTime, Timestamp queryEndTime);
+	void createTrackingNotifyLog(TrackingNotifyLog log);
+	
+	void updateTrackingPlanReadStatus(Long id);
+	
+	List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd ,Timestamp timestamp);
+	List<CustomerTrackingPlan> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd, Long todayFirst);
+	
+	void updateCustomerLastTrackingTime(EnterpriseCustomer customer);
+
 }

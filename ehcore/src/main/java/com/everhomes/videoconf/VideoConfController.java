@@ -16,6 +16,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
@@ -26,6 +27,7 @@ import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineCommand;
+import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineV2Command;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
 import com.everhomes.rest.videoconf.DeleteConfEnterpriseCommand;
@@ -87,6 +89,7 @@ import com.everhomes.rest.videoconf.UnassignAccountResponse;
 import com.everhomes.rest.videoconf.UpdateAccountOrderCommand;
 import com.everhomes.rest.videoconf.UpdateConfAccountCategoriesCommand;
 import com.everhomes.rest.videoconf.UpdateConfAccountPeriodCommand;
+import com.everhomes.rest.videoconf.UpdateConfAccountPeriodV2Command;
 import com.everhomes.rest.videoconf.UpdateContactorCommand;
 import com.everhomes.rest.videoconf.UpdateInvoiceCommand;
 import com.everhomes.rest.videoconf.UpdateVideoConfAccountCommand;
@@ -1349,6 +1352,22 @@ public class VideoConfController  extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /conf/updateConfAccountPeriodV2</b>
+	 * 账号延期v2
+	 * @return
+	 */
+	@RequestMapping("updateConfAccountPeriodV2")
+	@RestReturn(value = PreOrderDTO.class)
+	public RestResponse updateConfAccountPeriodV2(UpdateConfAccountPeriodV2Command cmd) {
+
+		PreOrderDTO dto = videoConfService.updateConfAccountPeriodV2(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 	/**
 	 * <b>URL: /conf/listConfCategory</b>
@@ -1365,7 +1384,22 @@ public class VideoConfController  extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <b>URL: /conf/createConfAccountOrderOnlineV2</b>
+	 * 客户端增加订单v2
+	 * @return
+	 */
+	@RequestMapping("createConfAccountOrderOnlineV2")
+	@RestReturn(value = PreOrderDTO.class)
+	public RestResponse createConfAccountOrderOnlineV2(CreateConfAccountOrderOnlineV2Command cmd) {
+
+		PreOrderDTO dto = videoConfService.createConfAccountOrderOnlineV2(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	/**
 	 * <b>URL: /conf/createConfAccountOrderOnline</b>
 	 * 客户端增加订单

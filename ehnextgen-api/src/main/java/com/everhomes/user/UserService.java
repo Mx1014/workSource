@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.user;
 
+import com.everhomes.community.Community;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
@@ -243,10 +244,24 @@ public interface UserService {
     Long getCommunityIdBySceneToken(SceneTokenDTO sceneTokenDTO);
 
     List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd);
+	
+    UserIdentifier getUserIdentifier(Long userId);
+
+    VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
+
+    UserLogin bindPhone(BindPhoneCommand cmd);
+
+    void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd);
+
+    UserTemporaryTokenDTO checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd);
 
     SceneDTO getProfileScene();
 
     List<SceneDTO> listUserRelateScenesByCommunityId(ListUserRelateScenesByCommunityId cmd);
 
     List<SceneDTO> listAllCommunityScenesIfGeoExist(ListAllCommunityScenesIfGeoExistCommand cmd);
+
+    SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community);
+
+    List<SceneDTO> listAllCommunityScenes();
 }

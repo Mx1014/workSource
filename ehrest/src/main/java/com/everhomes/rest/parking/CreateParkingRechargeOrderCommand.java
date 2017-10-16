@@ -46,7 +46,27 @@ public class CreateParkingRechargeOrderCommand {
 
     private Byte orderType;
 
+    private Long invoiceType;
+
+    private String clientAppName;
+
 	public CreateParkingRechargeOrderCommand() {
+    }
+
+    public String getClientAppName() {
+        return clientAppName;
+    }
+
+    public void setClientAppName(String clientAppName) {
+        this.clientAppName = clientAppName;
+    }
+
+    public Long getInvoiceType() {
+        return invoiceType;
+    }
+
+    public void setInvoiceType(Long invoiceType) {
+        this.invoiceType = invoiceType;
     }
 
     public Byte getOrderType() {
