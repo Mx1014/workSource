@@ -1145,43 +1145,45 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 		List<FieldDTO> fields = fieldService.listFields(command);
 		String  getPrefix = "get";
 		StringBuffer buffer = new StringBuffer();
-		for(FieldDTO field : fields){
-			String getter = getPrefix + StringUtils.capitalize(field.getFieldName());
-			Method methodNew = ReflectionUtils.findMethod(customer.getClass(), getter);
-			Method methodOld = ReflectionUtils.findMethod(exist.getClass(), getter);
-			Object objNew = null;
-			Object objOld = null;
-			try {
-				if(null != methodNew && null != exist){
-					objNew = methodNew.invoke(customer, new Object[] {});
-					objOld = methodOld.invoke(exist, new Object[] {});
-				}
-			} catch (Exception e) {
-				throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRACKING_NOT_EXIST,
-	                    "reflect exception");
-			}
-			if(null != objNew || null != objOld){
-				if(!(objNew == null ? "" : objNew).equals((objOld == null ? "" : objOld))){
-					String  content = "";
-					String  newData = objNew == null ? "null" : objNew.toString();
-					String  oldData = objOld == null ? "null" : objOld.toString();
-					if(field.getFieldName().lastIndexOf("ItemId") > -1){
-						ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
-				        if(levelItemNew != null) {
-				        	newData = levelItemNew.getItemDisplayName();
-				        }
-				        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
-				        if(levelItemOld != null) {
-				        	oldData = levelItemOld.getItemDisplayName();
-				        }
+		if(null != null && fields.size() > 0){
+			for(FieldDTO field : fields){
+				String getter = getPrefix + StringUtils.capitalize(field.getFieldName());
+				Method methodNew = ReflectionUtils.findMethod(customer.getClass(), getter);
+				Method methodOld = ReflectionUtils.findMethod(exist.getClass(), getter);
+				Object objNew = null;
+				Object objOld = null;
+				try {
+					if(null != methodNew && null != exist){
+						objNew = methodNew.invoke(customer, new Object[] {});
+						objOld = methodOld.invoke(exist, new Object[] {});
 					}
-					Map<String,Object> map = new HashMap<String,Object>();
-					map.put("display", field.getFieldDisplayName());
-					map.put("oldData", oldData);
-					map.put("newData", newData);
-					content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.UPDATE , UserContext.current().getUser().getLocale(), map, "");
-					buffer.append(content);
-					buffer.append(";");
+				} catch (Exception e) {
+					throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRACKING_NOT_EXIST,
+		                    "reflect exception");
+				}
+				if(null != objNew || null != objOld){
+					if(!(objNew == null ? "" : objNew).equals((objOld == null ? "" : objOld))){
+						String  content = "";
+						String  newData = objNew == null ? "null" : objNew.toString();
+						String  oldData = objOld == null ? "null" : objOld.toString();
+						if(field.getFieldName().lastIndexOf("ItemId") > -1){
+							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+					        if(levelItemNew != null) {
+					        	newData = levelItemNew.getItemDisplayName();
+					        }
+					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+					        if(levelItemOld != null) {
+					        	oldData = levelItemOld.getItemDisplayName();
+					        }
+						}
+						Map<String,Object> map = new HashMap<String,Object>();
+						map.put("display", field.getFieldDisplayName());
+						map.put("oldData", oldData);
+						map.put("newData", newData);
+						content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.UPDATE , UserContext.current().getUser().getLocale(), map, "");
+						buffer.append(content);
+						buffer.append(";");
+					}
 				}
 			}
 		}
