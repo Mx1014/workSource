@@ -6,6 +6,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -30,6 +31,8 @@ public class AddOrModifyRuleForBillGroupCommand {
     @ItemType(ChargingItemVariable.class)
     private List<ChargingItemVariable> variables;
 
+    private BigDecimal suggestUnitPrice;
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -41,6 +44,14 @@ public class AddOrModifyRuleForBillGroupCommand {
 
     public void setBillGroupId(Long billGroupId) {
         this.billGroupId = billGroupId;
+    }
+
+    public BigDecimal getSuggestUnitPrice() {
+        return suggestUnitPrice;
+    }
+
+    public void setSuggestUnitPrice(BigDecimal suggestUnitPrice) {
+        this.suggestUnitPrice = suggestUnitPrice;
     }
 
     public Long getBillGroupRuleId() {

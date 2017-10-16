@@ -1361,6 +1361,11 @@ public class AssetServiceImpl implements AssetService {
         return assetProvider.listChargingItemsForBillGroup(cmd.getBillGroupId());
     }
 
+    @Override
+    public void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
+        assetProvider.addOrModifyRuleForBillGroup
+    }
+
 
     private List<String> setFormula( String str) {
         List<String> formulaAndJson = new ArrayList<>();
