@@ -10,20 +10,9 @@ import java.util.List;
 public class ExportArchivesEmployeesDTO {
 
     @ItemType(String.class)
-    private List<String> titles;
-
-    @ItemType(String.class)
     private List<String> vals;
 
     public ExportArchivesEmployeesDTO() {
-    }
-
-    public List<String> getTitles() {
-        return titles;
-    }
-
-    public void setTitles(List<String> titles) {
-        this.titles = titles;
     }
 
     public List<String> getVals() {

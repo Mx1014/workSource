@@ -1955,35 +1955,38 @@ public class ArchivesServiceImpl implements ArchivesService {
         GeneralFormDTO form = generalFormService.getGeneralForm(formCommand);
 
         //  1.设置导出标题
-        List<String> titleNames = form.getFormFields().stream().map(r -> {
+        List<String> titles = form.getFormFields().stream().map(r -> {
             return r.getFieldDisplayName();
         }).collect(Collectors.toList());
 
         //  2.设置导出变量值
-        Long detailId = 13157L;
-        GetArchivesEmployeeCommand getCommand = new GetArchivesEmployeeCommand(cmd.getFormOriginId(), cmd.getOrganizationId(), detailId);
-        GetArchivesEmployeeResponse response = getArchivesEmployee(getCommand);
-        List<String> employeeValues = response.getForm().getFormFields().stream().map(r -> {
-            return r.getFieldValue();
-        }).collect(Collectors.toList());
-        ByteArrayOutputStream out = null;
-        ExportArchivesEmployeesDTO dto = new ExportArchivesEmployeesDTO();
-        dto.setTitles(titleNames);
-        dto.setVals(employeeValues);
-        XSSFWorkbook workbook = this.exportArchivesEmployeesFiles(dto);
+        List<Long> detailIds = organizationService.ListDetailsByEnterpriseId(cmd.getOrganizationId());
+
+        List<ExportArchivesEmployeesDTO> values = new ArrayList<>();
+        for(Long detailId : detailIds) {
+            ExportArchivesEmployeesDTO dto = new ExportArchivesEmployeesDTO();
+            GetArchivesEmployeeCommand getCommand = new GetArchivesEmployeeCommand(cmd.getFormOriginId(), cmd.getOrganizationId(), detailId);
+            GetArchivesEmployeeResponse response = getArchivesEmployee(getCommand);
+            List<String> employeeValues = response.getForm().getFormFields().stream().map(r -> {
+                return r.getFieldValue();
+            }).collect(Collectors.toList());
+            dto.setVals(employeeValues);
+            values.add(dto);
+        }
+        XSSFWorkbook workbook = this.exportArchivesEmployeesFiles(titles,values);
         writeExcel(workbook, httpResponse);
     }
 
-    private XSSFWorkbook exportArchivesEmployeesFiles(ExportArchivesEmployeesDTO dto) {
+    private XSSFWorkbook exportArchivesEmployeesFiles(List<String> titles, List<ExportArchivesEmployeesDTO> values) {
         XSSFWorkbook workbook = new XSSFWorkbook();
 
         Sheet sheet = workbook.createSheet("人员档案列表");
         //  导出标题
         Row titleNameRow = sheet.createRow(0);
-        createArchivesEmployeesFilesTitle(workbook, titleNameRow, dto.getTitles());
-        for (int rowIndex = 1; rowIndex <= 1; rowIndex++) {
+        createArchivesEmployeesFilesTitle(workbook, titleNameRow, titles);
+        for (int rowIndex = 1; rowIndex < values.size(); rowIndex++) {
             Row dataRow = sheet.createRow(rowIndex);
-            createArchivesEmployeesFilesContent(workbook, dataRow, dto.getVals());
+            createArchivesEmployeesFilesContent(workbook, dataRow, values.get(rowIndex-1).getVals());
         }
         return workbook;
     }
