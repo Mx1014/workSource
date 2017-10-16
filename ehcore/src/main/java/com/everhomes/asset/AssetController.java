@@ -453,7 +453,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 创建一个账单组          1
+    // this is for 创建一个账单组          4
     /**
      * <p>创建一个账单组</p>
      * <b>URL: /asset/createBillGroup</b>
@@ -468,7 +468,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 修改一个账单组          1
+    // this is for 修改一个账单组          4
     /**
      * <p>修改一个账单组</p>
      * <b>URL: /asset/modifyBillGroup</b>
@@ -491,6 +491,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("adjustBillGroupOrder")
     @RestReturn(value = String.class)
     public RestResponse adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd) {
+        assetService.adjustBillGroupOrder(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

@@ -2149,6 +2149,16 @@ public class AssetProviderImpl implements AssetProvider {
         return list;
     }
 
+    @Override
+    public void adjustBillGroupOrder(Long subjectBillGroupId, Long targetBillGroupId) {
+        DSLContext context = getReadWriteContext();
+        EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+        Integer subjectDefaultOrder = context.select(t.DEFAULT_ORDER)
+                .from(t)
+                .where(t.ID.eq(subjectBillGroupId))
+                .fetchOne(t.DEFAULT_ORDER);
+    }
+
 
     private DSLContext getReadOnlyContext(){
        return this.dbProvider.getDslContext(AccessSpec.readOnly());

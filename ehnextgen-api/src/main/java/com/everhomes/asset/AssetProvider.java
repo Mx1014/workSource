@@ -185,4 +185,6 @@ public interface AssetProvider {
     void modifyBillGroup(ModifyBillGroupCommand cmd);
 
     List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
+
+    void adjustBillGroupOrder(Long subjectBillGroupId, Long targetBillGroupId);
 }

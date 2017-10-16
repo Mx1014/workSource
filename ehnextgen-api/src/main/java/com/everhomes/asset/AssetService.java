@@ -123,4 +123,6 @@ public interface AssetService {
     void modifyBillGroup(ModifyBillGroupCommand cmd);
 
     List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
+
+    void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd);
 }
