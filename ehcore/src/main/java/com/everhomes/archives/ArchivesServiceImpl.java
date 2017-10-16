@@ -118,7 +118,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                 memberDetail.setRegionCode(cmd.getRegionCode());
                 memberDetail.setContactShortToken(cmd.getContactShortToken());
                 memberDetail.setDepartment(convertToArchivesInfo(cmd.getDepartmentIds(), ArchivesParameter.DEPARTMENT_IDS));
-                //  TODO:职位有可能修改
                 memberDetail.setJobPosition(convertToArchivesInfo(cmd.getJobPositionIds(), ArchivesParameter.DEPARTMENT_IDS));
                 memberDetail.setJobLevel(convertToArchivesInfo(cmd.getJobLevelIds(), ArchivesParameter.DEPARTMENT_IDS));
                 memberDetail.setWorkEmail(cmd.getWorkEmail());
@@ -529,10 +528,19 @@ public class ArchivesServiceImpl implements ArchivesService {
         addCommand.setContactToken(getRealContactToken(data.getContactToken(), "contactToken"));
         addCommand.setWorkEmail(data.getWorkEmail());
         if (StringUtils.isEmpty(data.getDepartment())) {
-            addCommand.setDepartmentIds(Arrays.asList(departmentId));
-//            addArchivesContact()
+            List<Long> ids = new ArrayList<>();
+            ids.add(departmentId);
+            addCommand.setDepartmentIds(ids);
+        } else {
+            List<Long> ids = new ArrayList<>();
+            ids.add(organizationService.getOrganizationNameByNameAndType(data.getDepartment(), OrganizationGroupType.DEPARTMENT.getCode()));
+            addCommand.setDepartmentIds(ids);
         }
-        //  TODO:部门、岗位中文查询
+        if (!StringUtils.isEmpty(data.getJobPosition())) {
+            List<Long> ids = new ArrayList<>();
+            ids.add(organizationService.getOrganizationNameByNameAndType(data.getJobPosition(), OrganizationGroupType.JOB_POSITION.getCode()));
+            addCommand.setJobPositionIds(ids);
+        }
         addCommand.setVisibleFlag(VisibleFlag.SHOW.getCode());
         addArchivesContact(addCommand);
         return verifyPersonnelByPhone(organizationId, addCommand.getContactToken());
@@ -1768,7 +1776,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         for (ImportArchivesEmployeesDTO data : datas) {
             List<PostApprovalFormItem> itemValues = new ArrayList<>();
             String contactName = "", contactToken = "";
-            Long realDepartmentId = 0L, detailId = null;
+            Long realDepartmentId = 0L, realJobPositionId = 0L, realJobLevelId = 0L, detailId = null;
             Byte gender = null;
             boolean flag = false;
 
@@ -1778,7 +1786,8 @@ public class ArchivesServiceImpl implements ArchivesService {
                 PostApprovalFormItem itemValue = ConvertHelper.convert(formValues.get(i), PostApprovalFormItem.class);
                 itemValue.setFieldValue(data.getValues().get(i));
                 //  2.校验导入数据
-                log = checkArchivesEmployeesDatas(data, itemValue, departmentId, contactName, gender, contactToken, realDepartmentId);
+                log = checkArchivesEmployeesDatas(data, itemValue, departmentId, contactName, gender,
+                        contactToken, realDepartmentId, realJobPositionId, realJobLevelId);
                 if (log != null) {
                     errorDataLogs.add(log);
                     break;
@@ -1786,7 +1795,8 @@ public class ArchivesServiceImpl implements ArchivesService {
                 itemValues.add(itemValue);
             }
             //  3.导入基础数据
-            detailId = saveArchivesEmployeesMember(organizationId, contactName, gender, departmentId, contactToken, flag);
+            detailId = saveArchivesEmployeesMember(organizationId, contactName, gender, realDepartmentId,
+                    realJobPositionId, realJobLevelId, contactToken, flag);
             //  4.导入详细信息
             if (detailId == null)
                 continue;
@@ -1807,7 +1817,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     private ImportFileResultLog<Map> checkArchivesEmployeesDatas(
             ImportArchivesEmployeesDTO data, PostApprovalFormItem itemValue, Long departmentId, String contactName,
-            Byte gender, String contactToken, Long realDepartmentId) {
+            Byte gender, String contactToken, Long realDepartmentId, Long realJobPositionId, Long realJobLevelId) {
         ImportFileResultLog<Map> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
 
         if (ArchivesParameter.CONTACT_NAME.equals(itemValue.getFieldName())) {
@@ -1872,13 +1882,23 @@ public class ArchivesServiceImpl implements ArchivesService {
             }
         }
 
+        //  在 check 阶段就把部门、岗位和职级的 id 找到
         if (ArchivesParameter.DEPARTMENT.equals(itemValue.getFieldName())) {
             if (StringUtils.isEmpty(itemValue.getFieldValue())) {
                 realDepartmentId = departmentId;
             } else {
-                // TODO: 根据部门名称获取id
-
+                realDepartmentId = organizationService.getOrganizationNameByNameAndType(itemValue.getFieldValue(), OrganizationGroupType.DEPARTMENT.getCode());
             }
+        }
+
+        if (ArchivesParameter.JOB_POSITION.equals(itemValue.getFieldName())) {
+            if (!StringUtils.isEmpty(itemValue.getFieldValue()))
+                realJobPositionId = organizationService.getOrganizationNameByNameAndType(itemValue.getFieldValue(), OrganizationGroupType.JOB_POSITION.getCode());
+        }
+
+        if (ArchivesParameter.JOB_LEVEL.equals(itemValue.getFieldName())) {
+            if (!StringUtils.isEmpty(itemValue.getFieldValue()))
+                realJobLevelId = organizationService.getOrganizationNameByNameAndType(itemValue.getFieldValue(), OrganizationGroupType.JOB_LEVEL.getCode());
         }
         return null;
     }
@@ -1893,15 +1913,25 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     private Long saveArchivesEmployeesMember(
-            Long organizationId, String contactName, Byte gender, Long departmentId, String contactToken, boolean flag) {
+            Long organizationId, String contactName, Byte gender, Long departmentId, Long jobPositionId,
+            Long jobLevelId, String contactToken, boolean flag) {
         AddArchivesEmployeeCommand addCommand = new AddArchivesEmployeeCommand();
         addCommand.setOrganizationId(organizationId);
         addCommand.setContactName(contactName);
         addCommand.setGender(gender);
+
+        //  部门、岗位、职级在 check 阶段获取 id 值
         List<Long> departmentIds = new ArrayList<>();
         departmentIds.add(departmentId);
         addCommand.setDepartmentIds(departmentIds);
+        List<Long> jobPositionIds = new ArrayList<>();
+        jobPositionIds.add(jobPositionId);
+        addCommand.setJobPositionIds(jobPositionIds);
+        List<Long> jobLevelIds = new ArrayList<>();
+        jobLevelIds.add(jobLevelId);
+        addCommand.setJobLevelIds(jobLevelIds);
         addCommand.setContactToken(contactToken);
+
         ArchivesEmployeeDTO dto = addArchivesEmployee(addCommand);
         flag = verifyPersonnelByPhone(organizationId, addCommand.getContactToken());
         Long detailId = null;
@@ -1963,7 +1993,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         List<Long> detailIds = organizationService.ListDetailsByEnterpriseId(cmd.getOrganizationId());
 
         List<ExportArchivesEmployeesDTO> values = new ArrayList<>();
-        for(Long detailId : detailIds) {
+        for (Long detailId : detailIds) {
             ExportArchivesEmployeesDTO dto = new ExportArchivesEmployeesDTO();
             GetArchivesEmployeeCommand getCommand = new GetArchivesEmployeeCommand(cmd.getFormOriginId(), cmd.getOrganizationId(), detailId);
             GetArchivesEmployeeResponse response = getArchivesEmployee(getCommand);
@@ -1973,7 +2003,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             dto.setVals(employeeValues);
             values.add(dto);
         }
-        XSSFWorkbook workbook = this.exportArchivesEmployeesFiles(titles,values);
+        XSSFWorkbook workbook = this.exportArchivesEmployeesFiles(titles, values);
         writeExcel(workbook, httpResponse);
     }
 
@@ -1986,7 +2016,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         createArchivesEmployeesFilesTitle(workbook, titleNameRow, titles);
         for (int rowIndex = 1; rowIndex < values.size(); rowIndex++) {
             Row dataRow = sheet.createRow(rowIndex);
-            createArchivesEmployeesFilesContent(workbook, dataRow, values.get(rowIndex-1).getVals());
+            createArchivesEmployeesFilesContent(workbook, dataRow, values.get(rowIndex - 1).getVals());
         }
         return workbook;
     }
