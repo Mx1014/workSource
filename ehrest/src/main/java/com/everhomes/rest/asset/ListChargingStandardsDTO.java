@@ -26,6 +26,7 @@ public class ListChargingStandardsDTO {
     private Byte BillingCycle;
     @ItemType(PaymentVariable.class)
     private List<PaymentVariable> variables;
+    @ItemType(String.class)
     private List<String> variableNames;
 
     @Override
