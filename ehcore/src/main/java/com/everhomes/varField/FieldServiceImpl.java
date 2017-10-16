@@ -563,10 +563,14 @@ public class FieldServiceImpl implements FieldService {
         if(invoke==null){
             return "";
         }
-        if(invoke.getClass().getSimpleName().equals("Timestamp")){
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Timestamp var = (Timestamp)invoke;
-            invoke = sdf.format(var.toString());
+        try {
+            if(invoke.getClass().getSimpleName().equals("Timestamp")){
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                Timestamp var = (Timestamp)invoke;
+                invoke = sdf.format(var.toString());
+            }
+        } catch (Exception e) {
+            return invoke.toString();
         }
         return String.valueOf(invoke);
     }
