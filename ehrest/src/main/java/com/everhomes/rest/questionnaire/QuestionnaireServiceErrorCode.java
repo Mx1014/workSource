@@ -12,4 +12,6 @@ public interface QuestionnaireServiceErrorCode {
 	String UNKNOWN = "unknown"; //
 	String UNKNOWN1 = "unknown1"; //
 	String UNKNOWN2 = "unknown2"; //
+	String UNKNOWN3 = "unknown3"; //
+	String UNKNOWN4 = "unknown4"; //
 }

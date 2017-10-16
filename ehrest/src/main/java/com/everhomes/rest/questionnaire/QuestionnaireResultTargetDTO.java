@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>targetFrom: 目标类型为user时候，用户来源，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireUserType}</li>
  * <li>targetPhone: 目标类型为user时候,用户的电话</li>
  * <li>submitTime: 提交时间</li>
+ * <li>anonymousFlag: 是否匿名回答，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireCommonStatus}</li>
  * </ul>
  */
 public class QuestionnaireResultTargetDTO {
@@ -21,6 +22,7 @@ public class QuestionnaireResultTargetDTO {
 	private Byte targetFrom;
 	private String targetPhone;
 	private Long submitTime;
+	private Byte anonymousFlag;
 
 	public String getTargetType() {
 		return targetType;
@@ -68,6 +70,14 @@ public class QuestionnaireResultTargetDTO {
 
 	public void setSubmitTime(Long submitTime) {
 		this.submitTime = submitTime;
+	}
+
+	public Byte getAnonymousFlag() {
+		return anonymousFlag;
+	}
+
+	public void setAnonymousFlag(Byte anonymousFlag) {
+		this.anonymousFlag = anonymousFlag;
 	}
 
 	@Override

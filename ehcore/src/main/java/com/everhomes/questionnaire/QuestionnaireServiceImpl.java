@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.CommunityService;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.approval.CommonStatus;
@@ -80,6 +81,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Autowired
 	private UserProvider userProvider;
 
+	@Autowired
+	private LocaleStringService stringService;
+
 
 	@Override
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {
@@ -104,6 +108,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		checkQuestionnaireStatus(cmd.getStatus());
 		checkQuestionnaireCollectFlag(cmd.getCollectFlag());
 		checkQuestionnaireTargetType(cmd.getTargetType());
+		cmd.setNowTime(new Timestamp(System.currentTimeMillis()));
 	}
 
 	private void checkQuestionnaireTargetType(String targetType) {
@@ -633,9 +638,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		dto.setSubmitTime(answer.getCreateTime().getTime());
 		if(QuestionnaireCommonStatus.fromCode(answer.getAnonymousFlag()) == QuestionnaireCommonStatus.TRUE){
 			if(QuestionnaireTargetType.fromCode(answer.getTargetType()) == QuestionnaireTargetType.ORGANIZATION) {
-				dto.setTargetName("匿名企业");
+				dto.setTargetName(stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN3,"zh_CN","匿名企业"));
 			}else{
-				dto.setTargetName("匿名用户");
+				dto.setTargetName(stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN4,"zh_CN","匿名用户"));
 			}
 		}
 		return dto;
@@ -664,15 +669,26 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Override
 	public ListTargetQuestionnairesResponse listTargetQuestionnaires(ListTargetQuestionnairesCommand cmd) {
 //		checkOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+
+		checkListTargetQuestionnairesCommand(cmd);
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<Questionnaire> questionnaires = questionnaireProvider.listTargetQuestionnaireByOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getPageAnchor(), pageSize+1);
-		Long nextPageAnchor = null;
+		List<QuestionnaireDTO> questionnaires = questionnaireProvider.listTargetQuestionnaireByOwner(cmd.getNamespaceId(),cmd.getNowTime(),
+				cmd.getCollectFlag(),UserContext.current().getUser().getId(),cmd.getAnswerTimeAnchor(),cmd.getPublishTimeAnchor(),pageSize+1);
+		Long answerFlagAnchor = null;
+		Long publishTimeAnchor = null;
 		if (questionnaires.size() > pageSize) {
 			questionnaires.remove(questionnaires.size()-1);
-			nextPageAnchor = questionnaires.get(questionnaires.size()-1).getPublishTime().getTime();
+			answerFlagAnchor = questionnaires.get(questionnaires.size()-1).getCreateTime();
+			publishTimeAnchor = questionnaires.get(questionnaires.size()-1).getPublishTime();
 		}
-		return new ListTargetQuestionnairesResponse(nextPageAnchor, questionnaires.stream().map(q->convertToQuestionnaireDTO(q, true, cmd.getTargetType(), cmd.getTargetId())).collect(Collectors.toList()));
+		return new ListTargetQuestionnairesResponse(answerFlagAnchor, publishTimeAnchor, questionnaires);
+	}
+
+	private void checkListTargetQuestionnairesCommand(ListTargetQuestionnairesCommand cmd) {
+		checkQuestionnaireTargetType(cmd.getTargetType());
+		checkQuestionnaireCollectFlag(cmd.getCollectFlag());
+		cmd.setNowTime(new Timestamp(System.currentTimeMillis()));
 	}
 
 	@Override

@@ -9,13 +9,16 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>nextPageAnchor: 下页锚点</li>
+ * <li>answerTimeAnchor: 回答时间的锚点</li>
+ * <li>publishTimeAnchor: 发布时间的锚点</li>
  * <li>questionnaires: 问卷调查列表，参考{@link com.everhomes.rest.questionnaire.QuestionnaireDTO}</li>
  * </ul>
  */
 public class ListTargetQuestionnairesResponse {
 
-	private Long nextPageAnchor;
+	private Long answerTimeAnchor;
+
+	private Long publishTimeAnchor;
 
 	@ItemType(QuestionnaireDTO.class)
 	private List<QuestionnaireDTO> questionnaires;
@@ -24,18 +27,26 @@ public class ListTargetQuestionnairesResponse {
 
 	}
 
-	public ListTargetQuestionnairesResponse(Long nextPageAnchor, List<QuestionnaireDTO> questionnaires) {
-		super();
-		this.nextPageAnchor = nextPageAnchor;
+	public ListTargetQuestionnairesResponse(Long answerTimeAnchor, Long publishTimeAnchor, List<QuestionnaireDTO> questionnaires) {
+		this.answerTimeAnchor = answerTimeAnchor;
+		this.publishTimeAnchor = publishTimeAnchor;
 		this.questionnaires = questionnaires;
 	}
 
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	public Long getAnswerTimeAnchor() {
+		return answerTimeAnchor;
 	}
 
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setAnswerTimeAnchor(Long answerTimeAnchor) {
+		this.answerTimeAnchor = answerTimeAnchor;
+	}
+
+	public Long getPublishTimeAnchor() {
+		return publishTimeAnchor;
+	}
+
+	public void setPublishTimeAnchor(Long publishTimeAnchor) {
+		this.publishTimeAnchor = publishTimeAnchor;
 	}
 
 	public List<QuestionnaireDTO> getQuestionnaires() {
