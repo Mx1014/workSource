@@ -580,9 +580,9 @@ public class FieldServiceImpl implements FieldService {
                 fieldName.equals("technical_title_item_id")||
                 fieldName.equals("individual_evaluation_item_id")||
                 fieldName.equals("patent_status_item_id")||
-                (fieldName.indexOf("id")!=-1 && fieldName.indexOf("id")!=0)
+                (fieldName.indexOf("id") == (fieldName.length()-2) && fieldName.indexOf("id")!=0)
                 ){
-            LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName);
+            LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName+" class is "+clz.toString());
 
             ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId,Long.parseLong(invoke.toString()));
             if(item!=null&&item.getItemId()!=null){
