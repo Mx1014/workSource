@@ -1550,18 +1550,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//按天预订结束时间:第二天
 				//按半天预定 结束时间根据产品需求,早上 12 下午  18 晚上 21 
 				//计算的时间用于定时任务 提醒时间:消息提醒  结束时间:订单过期
+
+				//计算结束提醒时间 按小时半天预约 提前15分钟提醒 按天、月预约结束日期下午8点提醒
 				Timestamp startTime = null;
 				Timestamp reminderTime = null;
+				Timestamp reminderEndTime = null;
 				Timestamp endTime = null;
 				
 				if(rentalSiteRule.getRentalType() == RentalType.HOUR.getCode()){
 					startTime =  new Timestamp(rentalSiteRule.getBeginTime().getTime() );
 					reminderTime =  new Timestamp(rentalSiteRule.getBeginTime().getTime() - 30*60*1000L);
 					endTime = rentalSiteRule.getEndTime();
+					reminderEndTime = new Timestamp(endTime.getTime()-15*60*1000L);
 				}else if(rentalSiteRule.getRentalType().equals(RentalType.DAY.getCode())){
 					startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() );
 					reminderTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000L);
 					endTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 24*60*60*1000L);
+					reminderEndTime = new Timestamp(endTime.getTime()-6*60*60*1000L);
 				}else if(rentalSiteRule.getRentalType().equals(RentalType.MONTH.getCode())){
 					// 按月的在前一天下午四点提醒，月底第二天结束
 					startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() );
@@ -1571,19 +1576,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					calendar.setTime(rentalSiteRule.getResourceRentalDate());
 					calendar.add(Calendar.MONTH, 1);
 					endTime = new Timestamp(calendar.getTimeInMillis());
+					reminderEndTime = new Timestamp(endTime.getTime()-6*60*60*1000L);
 				}else  {
 					if(rentalSiteRule.getAmorpm().equals(AmorpmFlag.AM.getCode())){
 						reminderTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000L);
 						startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 10*60*60*1000L);
 						endTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 12*60*60*1000L);
+						reminderEndTime = new Timestamp(endTime.getTime()-15*60*1000L);
 					}else if(rentalSiteRule.getAmorpm().equals(AmorpmFlag.PM.getCode())){
 						reminderTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000L);
 						startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 15*60*60*1000L);
 						endTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 18*60*60*1000L);
+						reminderEndTime = new Timestamp(endTime.getTime()-15*60*1000L);
 					}else   {
 						reminderTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000L);
 						startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 20*60*60*1000L);
 						endTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 21*60*60*1000L);
+						reminderEndTime = new Timestamp(endTime.getTime()-15*60*1000L);
 					}
 				}
 				 //如果订单的提醒时间在本单元格 提醒时间之后 或者 订单提醒时间为空
@@ -1595,7 +1604,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//如果订单的结束时间在本单元格 结束时间之前 或者 订单时间为空
 				if (null == rentalBill.getEndTime()|| rentalBill.getEndTime().before(endTime))
 					rentalBill.setEndTime(endTime);
-				 
+
+				rentalBill.setReminderEndTime(reminderEndTime);
+
 				if(rs.getNeedPay().equals(NormalFlag.NEED.getCode())){
 
 					BigDecimal amount = null == rentalSiteRule.getPrice() ? new java.math.BigDecimal(0) : rentalSiteRule.getPrice();
@@ -2083,6 +2094,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			for(RentalOrder order : orders ){
 				Long orderReminderTimeLong = order.getReminderTime().getTime();
 				Long orderEndTimeLong = order.getEndTime().getTime();
+				Long orderReminderEndTimeLong = order.getReminderEndTime().getTime();
 				//时间快到发推送
 				if(currTime<orderReminderTimeLong && currTime + 30*60*1000l >= orderReminderTimeLong){
 					Map<String, String> map = new HashMap<String, String>();  
@@ -2096,7 +2108,31 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
 							orderReminderTimeLong);
 				}
-				
+
+				//结束时间快到发推送
+				if(currTime<orderReminderEndTimeLong && currTime + 30*60*1000l >= orderReminderEndTimeLong){
+					Map<String, String> map = new HashMap<String, String>();
+					map.put("resourceName", order.getResourceName());
+					Long uid = order.getCreatorUid();
+					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid,order.getRequestorOrganizationId());
+					map.put("requestorName",member.getContactName());
+					map.put("requestorPhone",member.getContactToken());
+
+					Long chargeUid = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()).getChargeUid();
+					String notifyTextForOther = null;
+					if (orderReminderEndTimeLong % 3600 != 0)//检测是否在15分或45分结束
+						notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
+								RentalNotificationTemplateCode.RENTAL_END_NOTIFY_HOUR, RentalNotificationTemplateCode.locale, map, "");
+					else
+						notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
+								RentalNotificationTemplateCode.RENTAL_END_NOTIFY_DAY, RentalNotificationTemplateCode.locale, map, "");
+
+					final Job job3 = new Job(
+							SendMessageAction.class.getName(),
+							new Object[] {chargeUid,notifyTextForOther});
+					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
+							orderReminderEndTimeLong);
+				}
 				//订单过期,置状态
 				if(orderEndTimeLong <= currTime){
 					order.setStatus(SiteBillStatus.OVERTIME.getCode());
