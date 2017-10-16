@@ -806,7 +806,12 @@ public class FieldServiceImpl implements FieldService {
                         //cell不为null时特殊处理status和projectSource
                         if(cell!=null){
                             cellValue = ExcelUtils.getCellValue(cell);
-                            if(fieldName.equals("status")){
+                            if(fieldName.equals("status") || fieldName.equals("gender") ||fieldName.equals("nationality_item_id")||fieldName.equals("degree_item_id")||
+                                    fieldName.equals("technical_title_item_id")||
+                                    fieldName.equals("individual_evaluation_item_id")||
+                                    fieldName.equals("patent_status_item_id")||
+                                    fieldName.indexOf("id")!=-1
+                                    ){
                                 cellValue = "";
                                 //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
                                 ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), fieldName);
