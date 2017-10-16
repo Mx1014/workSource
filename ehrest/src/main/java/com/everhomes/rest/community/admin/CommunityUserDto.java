@@ -9,47 +9,63 @@ import java.util.List;
 
 /**
  * <ul>
-
- * <li>executiveFlag：是否高管 0-否 1-是</li>
- * <li>position：职位</li>
- * <li>identityNumber：身份证号</li> 
- * <li>gender：性别</li> 
+ *     <li>id: id</li>
+ *     <li>userId: userId</li>
+ *     <li>userName: userName</li>
+ *     <li>nikeName: nikeName</li>
+ *     <li>organizationMemberName: organizationMemberName</li>
+ *     <li>communityId: communityId</li>
+ *     <li>isAuth: isAuth</li>
+ *     <li>enterpriseName: enterpriseName</li>
+ *     <li>buildingId: buildingId</li>
+ *     <li>buildingName: buildingName</li>
+ *     <li>addressId: addressId</li>
+ *     <li>addressName: addressName</li>
+ *     <li>applyTime: applyTime</li>
+ *     <li>phone: phone</li>
+ *     <li>executiveFlag: 是否高管 0-否 1-是</li>
+ *     <li>position: 职位</li>
+ *     <li>identityNumber: 身份证号</li>
+ *     <li>gender: 性别</li>
+ *     <li>recentlyActiveTime: recentlyActiveTime</li>
+ *     <li>userSourceType: userSourceType</li>
+ *     <li>organizations: organizations {@link com.everhomes.rest.organization.OrganizationDetailDTO}</li>
  * </ul>
  */
 public class CommunityUserDto {
 
-	private Long     id;
-	
-	private Long     userId;
-	
-	private String     userName;
-	
-	private String     nikeName;
+	private Long id;
+
+	private Long userId;
+
+	private String userName;
+
+	private String nikeName;
 
 	private String organizationMemberName;
-	
-	private Long     communityId;
-	
+
+	private Long communityId;
+
 	private Integer isAuth;
-	
+
 	private String enterpriseName;
-	
+
 	private String buildingId;
-	
+
 	private String buildingName;
-	
+
 	private Long addressId;
-	
+
 	private String addressName;
-	
+
 	private Timestamp applyTime;
-	
+
 	private String phone;
 
-    private Byte executiveFlag;
-    private String position;
-    private String identityNumber;
-    private Byte gender;
+	private Byte executiveFlag;
+	private String position;
+	private String identityNumber;
+	private Byte gender;
 
 	private Long recentlyActiveTime;
 

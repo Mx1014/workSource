@@ -1757,6 +1757,12 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 			detailDto.setAddresses(addressDtos);
 
+			OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
+			if(memberDetail != null){
+				detailDto.setExecutiveTag(memberDetail.getExecutiveTag());
+				detailDto.setPositionTag(memberDetail.getPositionTag());
+			}
+
 			if (null != organization && organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())
 					&& OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE) {
 
@@ -1901,7 +1907,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 
 				if(null != cmd.getExecutiveFlag()){
-					query.addConditions(Tables.EH_USERS.EXECUTIVE_TAG.eq(cmd.getExecutiveFlag()));
+					query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EXECUTIVE_TAG.eq(cmd.getExecutiveFlag()));
 				}
 
 				if(AuthFlag.AUTHENTICATED == AuthFlag.fromCode(cmd.getIsAuth())){
@@ -2870,10 +2876,25 @@ public class CommunityServiceImpl implements CommunityService {
 		if(null == user)
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid userid parameter: no this user");
-		user.setExecutiveTag(cmd.getExecutiveFlag());
 		user.setIdentityNumberTag(cmd.getIdentityNumber());
-		user.setPositionTag(cmd.getPosition());
-		userProvider.updateUser(user); 
+
+		//更新用户信息和公司信息   edit by yanjun 20171016
+		dbProvider.execute((status) -> {
+			userProvider.updateUser(user);
+			if(cmd.getOrganizations() != null){
+				for (OrganizationDetailDTO dto: cmd.getOrganizations()){
+					OrganizationMemberDetails organizationMemberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getOrganizationMemberDetailId());
+
+					if(organizationMemberDetail != null){
+						organizationMemberDetail.setExecutiveTag(dto.getExecutiveTag());
+						organizationMemberDetail.setPositionTag(dto.getPositionTag());
+						organizationProvider.updateOrganizationMemberDetails(organizationMemberDetail, organizationMemberDetail.getId());
+					}
+				}
+			}
+
+			return null;
+		});
 		
 	}
 	
