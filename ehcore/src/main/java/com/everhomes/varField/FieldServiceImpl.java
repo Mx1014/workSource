@@ -738,6 +738,10 @@ public class FieldServiceImpl implements FieldService {
                 continue sheet;
             }
             //获得根据cell顺序的fieldname
+            if(sheet == null){
+                LOGGER.error("import error, sheet is null!");
+                continue;
+            }
             Row headRow = sheet.getRow(1);
 
 
@@ -810,13 +814,19 @@ public class FieldServiceImpl implements FieldService {
                                     fieldName.equals("technical_title_item_id")||
                                     fieldName.equals("individual_evaluation_item_id")||
                                     fieldName.equals("patent_status_item_id")||
-                                    fieldName.indexOf("id")!=-1
+                                    (fieldName.indexOf("id")!=-1 && fieldName.indexOf("id")!=0)
                                     ){
                                 cellValue = "";
                                 //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
+                                if(fieldName.equals("gender")||fieldName.equals("nationality_item_id")){
+                                    LOGGER.info("begin to handle field "+fieldName);
+                                }
                                 ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), fieldName);
                                 if(item!=null&&item.getItemId()!=null){
                                     cellValue = String.valueOf(item.getItemId());
+                                    LOGGER.info("field transferred to item id is "+cellValue);
+                                }else{
+                                    LOGGER.error("field "+ fieldName+" transferred to item using findScopeFieldItemByDisplayName failed ,item is "+ item);
                                 }
                             }
                             //处理特例projectSource的导入
