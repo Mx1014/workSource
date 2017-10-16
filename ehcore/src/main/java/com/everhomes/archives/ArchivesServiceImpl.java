@@ -141,12 +141,16 @@ public class ArchivesServiceImpl implements ArchivesService {
                 transferCommand.setOrganizationId(cmd.getOrganizationId());
                 transferCommand.setDetailIds(cmd.getDetailIds());
                 transferCommand.setDepartmentIds(cmd.getDepartmentIds());
+                transferCommand.setJobPositionIds(cmd.getJobPositionIds());
+                transferCommand.setJobLevelIds(cmd.getJobLevelIds());
                 organizationService.transferOrganizationPersonels(transferCommand);
 
-                //  同步部门名称
+                //  同步部门、岗位、职级名称
                 for (Long detailId : cmd.getDetailIds()) {
                     OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
                     detail.setDepartment(convertToArchivesInfo(cmd.getDepartmentIds(), ArchivesParameter.DEPARTMENT_IDS));
+                    detail.setJobLevel(convertToArchivesInfo(cmd.getJobLevelIds(), ArchivesParameter.DEPARTMENT_IDS));
+                    detail.setJobPosition(convertToArchivesInfo(cmd.getJobPositionIds(), ArchivesParameter.DEPARTMENT_IDS));
                     organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
                 }
 
@@ -1488,6 +1492,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         });
     }
 
+
     /**
      * 员工部门调整
      */
@@ -1497,12 +1502,12 @@ public class ArchivesServiceImpl implements ArchivesService {
             organizationService.transferOrganizationPersonels(cmd);
             //  2.同步部门、岗位、职级名称
             for (Long detailId : cmd.getDetailIds()) {
-                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                detail.setDepartment(convertToArchivesInfo(cmd.getDepartmentIds(), ArchivesParameter.DEPARTMENT_IDS));
-                organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+                OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                employee.setDepartment(convertToArchivesInfo(cmd.getDepartmentIds(), ArchivesParameter.DEPARTMENT_IDS));
+                employee.setJobPosition(convertToArchivesInfo(cmd.getJobPositionIds(), ArchivesParameter.DEPARTMENT_IDS));
+                employee.setJobLevel(convertToArchivesInfo(cmd.getJobLevelIds(), ArchivesParameter.DEPARTMENT_IDS));
+                organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
             }
-            //  TODO:3.调整员工岗位、职级
-            //  TODO:4.同步岗位名称、职级名称
             return null;
         });
     }
