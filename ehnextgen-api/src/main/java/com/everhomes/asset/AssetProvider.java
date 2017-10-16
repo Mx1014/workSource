@@ -189,4 +189,6 @@ public interface AssetProvider {
     void adjustBillGroupOrder(Long subjectBillGroupId, Long targetBillGroupId);
 
     List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId);
+
+    void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
 }

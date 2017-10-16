@@ -2207,6 +2207,16 @@ public class AssetProviderImpl implements AssetProvider {
         return list;
     }
 
+    @Override
+    public void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
+        Long ruleId = cmd.getBillGroupRuleId();
+        if(ruleId == null){
+            //新增
+        }else{
+            //修改
+        }
+    }
+
 
     private DSLContext getReadOnlyContext(){
        return this.dbProvider.getDslContext(AccessSpec.readOnly());

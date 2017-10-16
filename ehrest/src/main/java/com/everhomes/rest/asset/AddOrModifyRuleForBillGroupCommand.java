@@ -17,6 +17,8 @@ import java.util.List;
  * <li>chargingItemId:收费项目id</li>
  * <li>chargingStandardId:收费项目id</li>
  * <li>variables:变量集合，参考{@link com.everhomes.rest.asset.ChargingItemVariable}</li>
+ * <li>suggestUnitPrice:建议单价</li>
+ * <li>area_size_type:计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积</li>
  *</ul>
  */
 public class AddOrModifyRuleForBillGroupCommand {
@@ -32,6 +34,7 @@ public class AddOrModifyRuleForBillGroupCommand {
     private List<ChargingItemVariable> variables;
 
     private BigDecimal suggestUnitPrice;
+    private Byte area_size_type;
 
     @Override
     public String toString() {
@@ -40,6 +43,14 @@ public class AddOrModifyRuleForBillGroupCommand {
 
     public Long getBillGroupId() {
         return billGroupId;
+    }
+
+    public Byte getArea_size_type() {
+        return area_size_type;
+    }
+
+    public void setArea_size_type(Byte area_size_type) {
+        this.area_size_type = area_size_type;
     }
 
     public void setBillGroupId(Long billGroupId) {

@@ -1363,7 +1363,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-        assetProvider.addOrModifyRuleForBillGroup
+        assetProvider.addOrModifyRuleForBillGroup(cmd);
     }
 
 
