@@ -5653,7 +5653,7 @@ CREATE TABLE `eh_hot_tags` (
   `create_uid` BIGINT,
   `delete_time` DATETIME,
   `delete_uid` BIGINT,
-
+  `category_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -7114,12 +7114,12 @@ CREATE TABLE `eh_organization_member_details` (
   `employee_type` TINYINT COMMENT '0: full-time, 1: part-time, 2: internship, 3: labor dispatch',
   `employee_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: probation, 1: on the job, 2: leave the job',
   `employment_time` DATE COMMENT '转正日期',
-  `dimission_time` DATE COMMENT '离职日期',
+  `dismiss_time` DATE,
   `salary_card_number` VARCHAR(128) COMMENT '工资卡号',
   `social_security_number` VARCHAR(128) COMMENT '社保号',
   `provident_fund_number` VARCHAR(128) COMMENT '公积金号',
   `profile_integrity` INTEGER DEFAULT 0 COMMENT '档案完整度，0-100%',
-  `check_in_time` DATE NOT NULL COMMENT '入职日期',
+  `check_in_time` date NOT NULL COMMENT '入职日期',
   `region_code` VARCHAR(64) COMMENT '手机区号',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -10767,9 +10767,9 @@ DROP TABLE IF EXISTS `eh_rentalv2_orders`;
 
 
 CREATE TABLE `eh_rentalv2_orders` (
-  `id` BIGINT NOT NULL  COMMENT 'id',
+  `id` BIGINT NOT NULL COMMENT 'id',
   `order_no` VARCHAR(20) NOT NULL COMMENT '订单编号',
-  `rental_resource_id` BIGINT NOT NULL  COMMENT 'id',
+  `rental_resource_id` BIGINT NOT NULL COMMENT 'id',
   `rental_uid` BIGINT COMMENT 'rental user id',
   `rental_date` DATE COMMENT '使用日期',
   `start_time` DATETIME COMMENT '使用开始时间',
@@ -10798,8 +10798,8 @@ CREATE TABLE `eh_rentalv2_orders` (
   `organization_id` BIGINT COMMENT '所属公司的ID',
   `spec` VARCHAR(255) COMMENT '规格',
   `address` VARCHAR(192) COMMENT '地址',
-  `longitude` DOUBLE  COMMENT '地址经度',
-  `latitude` DOUBLE  COMMENT '地址纬度',
+  `longitude` DOUBLE COMMENT '地址经度',
+  `latitude` DOUBLE COMMENT '地址纬度',
   `contact_phonenum` VARCHAR(20) COMMENT '咨询电话',
   `introduction` TEXT COMMENT '详情',
   `notice` TEXT,
@@ -10818,6 +10818,7 @@ CREATE TABLE `eh_rentalv2_orders` (
   `rental_type` TINYINT,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 DROP TABLE IF EXISTS `eh_rentalv2_price_rules`;
 
@@ -11003,11 +11004,6 @@ CREATE TABLE `eh_rentalv2_resources` (
   `notice` TEXT,
   `charge_uid` BIGINT COMMENT '负责人id',
   `cover_uri` VARCHAR(1024) COMMENT '封面图uri',
-  `discount_type` TINYINT COMMENT '折扣信息：0不打折 1满减优惠2比例折扣',
-  `full_price` DECIMAL(10,2) COMMENT '满XX元',
-  `cut_price` DECIMAL(10,2) COMMENT '减XX元',
-  `discount_ratio` DOUBLE COMMENT '折扣比例',
-  `rental_type` TINYINT COMMENT '0: as hour:min 1-as half day 2-as day 3-支持晚上的半天',
   `time_step` DOUBLE COMMENT '按小时预约：最小单元格是多少小时，浮点型',
   `exclusive_flag` TINYINT COMMENT '是否为独占资源0否 1 是',
   `auto_assign` TINYINT COMMENT '是否动态分配 1是 0否',
@@ -11028,26 +11024,17 @@ CREATE TABLE `eh_rentalv2_resources` (
   `day_end_time` TIME COMMENT '对于按小时预定的每天结束时间',
   `community_id` BIGINT COMMENT '所属的社区ID（和可见范围的不一样）',
   `resource_counts` DOUBLE COMMENT '可预约个数',
-  `cell_begin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'cells begin id',
-  `cell_end_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'cells end id',
   `unit` DOUBLE DEFAULT 1 COMMENT '1-整租, 0.5-可半个租',
   `begin_date` DATE COMMENT '开始日期',
   `end_date` DATE COMMENT '结束日期',
   `open_weekday` VARCHAR(7) COMMENT '7位二进制，0000000每一位表示星期7123456',
-  `workday_price` DECIMAL(10,2) COMMENT '工作日价格',
-  `weekend_price` DECIMAL(10,2) COMMENT '周末价格',
   `avg_price_str` VARCHAR(1024) COMMENT '平均价格计算好的字符串',
   `confirmation_prompt` VARCHAR(200),
   `offline_cashier_address` VARCHAR(200),
   `offline_payee_uid` BIGINT,
   `rental_start_time_flag` TINYINT DEFAULT 0 COMMENT '至少提前预约时间标志: 1-限制, 0-不限制',
   `rental_end_time_flag` TINYINT DEFAULT 0 COMMENT '最多提前预约时间标志: 1-限制, 0-不限制',
-  `org_member_workday_price` DECIMAL(10,2) COMMENT '企业内部工作日价格',
-  `org_member_weekend_price` DECIMAL(10,2) COMMENT '企业内部节假日价格',
-  `approving_user_workday_price` DECIMAL(10,2) COMMENT '外部客户工作日价格',
-  `approving_user_weekend_price` DECIMAL(10,2) COMMENT '外部客户节假日价格',
   `default_order` BIGINT NOT NULL DEFAULT 0 COMMENT 'order',
-  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -11982,7 +11969,7 @@ CREATE TABLE `eh_service_alliances` (
   `display_flag` TINYINT NOT NULL DEFAULT 1 COMMENT '0:hide,1:display',
   `summary_description` VARCHAR(1024),
   `enable_comment` TINYINT DEFAULT 0 COMMENT '1,enable;0,disable',
-  
+  `jump_service_alliance_routing` VARCHAR(2048) COMMENT 'jump to other service alliance routing',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -14329,15 +14316,15 @@ DROP TABLE IF EXISTS `eh_warning_settings`;
 
 
 CREATE TABLE `eh_warning_settings` (
-  `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL COMMENT 'namespace id',
-  `type` VARCHAR(64) COMMENT 'type',
-  `time` BIGINT COMMENT 'millisecond',
-  `create_time` DATETIME,
-  `creator_uid` BIGINT,
-  `update_time` DATETIME,
-  `operator_uid` BIGINT,
-
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL COMMENT 'namespace id',
+  `type` varchar(64) DEFAULT NULL COMMENT 'type',
+  `time` bigint(20) DEFAULT NULL COMMENT 'millisecond',
+  `create_time` datetime DEFAULT NULL,
+  `creator_uid` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) DEFAULT NULL,
+  `category_id` bigint(22) DEFAULT NULL COMMENT '入口id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -14588,60 +14575,3 @@ CREATE TABLE `eh_community_map_shops` (
   `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- merge from activity-3.4.0 by yanjun 20171009 start
--- 在帖子表中增加一个字段，标识这个帖子是否是克隆帖子   add by yanjun 20170805
-ALTER TABLE `eh_forum_posts` ADD COLUMN `clone_flag`  tinyint(4) NULL COMMENT 'clone_flag post 0-real post, 1-clone post';
-ALTER TABLE `eh_forum_posts` ADD COLUMN `real_post_id`  bigint(20) NULL COMMENT 'if this is clone post, then it should have a real post id';
-
-ALTER TABLE `eh_activities` ADD COLUMN `clone_flag`  tinyint(4) NULL COMMENT 'clone_flag post 0-real post, 1-clone post';
-
--- -- 活动报名导入错误信息  add by yanjun 20170828
--- CREATE TABLE `eh_activity_roster_error` (
---   `id` bigint(20) NOT NULL COMMENT 'id',
---   `uuid` varchar(36) DEFAULT NULL COMMENT 'uuid',
---   `job_id` bigint(20) DEFAULT NULL COMMENT 'jobId, one job may has several error',
---   `row_num` int(11) DEFAULT NULL COMMENT 'row_num',
---   `description` varchar(255) DEFAULT NULL COMMENT 'description',
---   `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
---   `create_uid` bigint(20) DEFAULT NULL,
---   PRIMARY KEY (`id`),
---   KEY `eh_activity_roster_error_jobId` (`job_id`)
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-ALTER TABLE `eh_warning_settings` ADD COLUMN `category_id`  bigint(22) NULL COMMENT '入口id';
-
-ALTER TABLE `eh_roster_order_settings` ADD COLUMN `category_id`  bigint(22) NULL COMMENT 'category_id';
-
-ALTER TABLE `eh_hot_tags` ADD COLUMN `category_id`  bigint(22) NULL ;
-
--- merge from activity-3.4.0 by yanjun 20171009 end
-
--- merge form archives-1.4 by R 20171010 start
-ALTER TABLE eh_organization_member_details CHANGE dimission_time dismiss_time DATE;
-ALTER TABLE eh_organization_member_details ADD COLUMN region_code VARCHAR(64) COMMENT '手机区号';
--- merge form archives-1.4 by R 20171010 end
-
--- bydengs,20171011,添加一个属性，存跳转的路由
-ALTER TABLE `eh_service_alliances` ADD COLUMN `jump_service_alliance_routing` VARCHAR(2048) COMMENT 'jump to other service alliance routing';
-
--- fix rental add by sw 20171012
-ALTER TABLE `eh_rentalv2_orders` ADD COLUMN `rental_type` tinyint(4) DEFAULT NULL;
-update eh_rentalv2_orders o join eh_rentalv2_resources r on o.rental_resource_id = r.id set o.rental_type = r.rental_type;
-
-ALTER TABLE eh_rentalv2_resources DROP COLUMN `cell_begin_id`;
-ALTER TABLE eh_rentalv2_resources DROP COLUMN `cell_end_id`;
-
-ALTER TABLE eh_rentalv2_resources DROP COLUMN `org_member_workday_price`;
-ALTER TABLE eh_rentalv2_resources DROP COLUMN `org_member_weekend_price`;
-ALTER TABLE eh_rentalv2_resources DROP COLUMN `approving_user_workday_price`;
-ALTER TABLE eh_rentalv2_resources DROP COLUMN `approving_user_weekend_price`;
-ALTER TABLE eh_rentalv2_resources DROP COLUMN `workday_price`;
-ALTER TABLE eh_rentalv2_resources DROP COLUMN `weekend_price`;
-
-ALTER TABLE eh_rentalv2_resources DROP COLUMN `rental_type`;
-
-ALTER TABLE eh_rentalv2_resources DROP COLUMN `discount_type`;
-ALTER TABLE eh_rentalv2_resources DROP COLUMN `full_price`;
-ALTER TABLE eh_rentalv2_resources DROP COLUMN `cut_price`;
-ALTER TABLE eh_rentalv2_resources DROP COLUMN `discount_ratio`;
