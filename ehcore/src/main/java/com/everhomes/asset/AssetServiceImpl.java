@@ -1356,6 +1356,11 @@ public class AssetServiceImpl implements AssetService {
         assetProvider.adjustBillGroupOrder(cmd.getSubjectBillGroupId(),cmd.getTargetBillGroupId());
     }
 
+    @Override
+    public List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(BillGroupIdCommand cmd) {
+        return assetProvider.listChargingItemsForBillGroup(cmd.getBillGroupId());
+    }
+
 
     private List<String> setFormula( String str) {
         List<String> formulaAndJson = new ArrayList<>();

@@ -483,7 +483,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 调整账单组的顺序     1
+    // this is for 调整账单组的顺序     4
     /**
      * <p>调整账单组的顺序</p>
      * <b>URL: /asset/adjustBillGroupOrder</b>
@@ -506,7 +506,8 @@ public class AssetController extends ControllerBase {
     @RequestMapping("listChargingStandardForBillGroup")
     @RestReturn(value = ListChargingItemsForBillGroupDTO.class, collection = true)
     public RestResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd) {
-        RestResponse response = new RestResponse();
+        List<ListChargingItemsForBillGroupDTO> list = assetService.listChargingItemsForBillGroup(cmd);
+        RestResponse response = new RestResponse(list);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;

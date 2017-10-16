@@ -2157,6 +2157,27 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(t)
                 .where(t.ID.eq(subjectBillGroupId))
                 .fetchOne(t.DEFAULT_ORDER);
+        Integer targetDefaultOrder = context.select(t.DEFAULT_ORDER)
+                .from(t)
+                .where(t.ID.eq(targetBillGroupId))
+                .fetchOne(t.DEFAULT_ORDER);
+        context.update(t)
+                .set(t.DEFAULT_ORDER,targetDefaultOrder)
+                .where(t.ID.eq(subjectBillGroupId))
+                .execute();
+        context.update(t)
+                .set(t.DEFAULT_ORDER,subjectDefaultOrder)
+                .where(t.ID.eq(targetBillGroupId))
+                .execute();
+    }
+
+    @Override
+    public List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId) {
+        List<ListChargingItemsForBillGroupDTO> list = new ArrayList<>();
+        DSLContext context = getReadOnlyContext();
+        ListChargingItemsForBillGroupDTO dto = new ListChargingItemsForBillGroupDTO();
+        context
+        return null;
     }
 
 
