@@ -32,6 +32,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
 import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.spi.ErrorCode;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -343,7 +344,7 @@ public class FieldServiceImpl implements FieldService {
         }
         return;
     }
-    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Long customerId,Byte customerType,Integer namespaceId,Long communityId) {
+    private void sheetGenerate(List<FieldGroupDTO> groups, HSSFWorkbook workbook, ExcelUtils excel,Long customerId,Byte customerType,Integer namespaceId,Long communityId,String moduleName) {
         //遍历筛选过的sheet
         for( int i = 0; i < groups.size(); i++){
             //是否为叶节点的标识
@@ -351,7 +352,7 @@ public class FieldServiceImpl implements FieldService {
             FieldGroupDTO group = groups.get(i);
             //如果有叶节点，则送去轮回
             if(group.getChildrenGroup()!=null && group.getChildrenGroup().size()>0){
-                sheetGenerate(group.getChildrenGroup(),workbook,excel,customerId,customerType,namespaceId,communityId);
+                sheetGenerate(group.getChildrenGroup(),workbook,excel,customerId,customerType,namespaceId,communityId,moduleName);
                 //母节点的标识改为false，命运从出生就断定，唯有世世代代的延续才能成为永恒的现象
                 isRealSheet = false;
             }
@@ -378,7 +379,7 @@ public class FieldServiceImpl implements FieldService {
                     headers[j] = field.getFieldDisplayName();
                 }
                 //获取一个sheet的数据,这里只有叶节点，将header传回作为顺序.传递field来确保顺序
-                List<List<String>> data = getDataOnFields(group,customerId,customerType,fields, communityId);
+                List<List<String>> data = getDataOnFields(group,customerId,customerType,fields, communityId,namespaceId,moduleName);
                 try {
                     //写入workbook
                     System.out.println(sheetNum.get());
@@ -397,7 +398,7 @@ public class FieldServiceImpl implements FieldService {
      * 获取一个sheet的数据，通过sheet的中文名称进行匹配,同一个excel中sheet名称不会重复
      *
      */
-    private List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId) {
+    private List<List<String>> getDataOnFields(FieldGroupDTO group, Long customerId, Byte customerType,List<FieldDTO> fields,Long communityId,Integer namespaceId,String moduleName) {
         List<List<String>> data = new ArrayList<>();
         //使用groupName来对应不同的接口
         String sheetName = group.getGroupDisplayName();
@@ -414,7 +415,7 @@ public class FieldServiceImpl implements FieldService {
                 //使用双重循环获得具备顺序的rowdata，将其置入data中；污泥放入圣杯，供圣人们世世代代追寻---宝石翁
                 for(int j = 0; j < customerTalentDTOS.size(); j ++){
                     CustomerTalentDTO dto = customerTalentDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
                 break;
             //母节点已经不在，全部使用叶节点
@@ -429,7 +430,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerTrademarkDTOS.size(); j ++){
                     CustomerTrademarkDTO dto = customerTrademarkDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
             case "专利信息":
                 ListCustomerPatentsCommand cmd3 = new ListCustomerPatentsCommand();
@@ -442,7 +443,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerPatentDTOS.size(); j ++){
                     CustomerPatentDTO dto = customerPatentDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
             case "证书":
                 ListCustomerCertificatesCommand cmd4 = new ListCustomerCertificatesCommand();
@@ -454,7 +455,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerCertificateDTOS.size(); j ++){
                     CustomerCertificateDTO dto = customerCertificateDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
                 break;
             case "申报项目":
@@ -468,7 +469,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerApplyProjectDTOS.size(); j ++){
                     CustomerApplyProjectDTO dto = customerApplyProjectDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
                 break;
             case "工商信息":
@@ -482,7 +483,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerCommercialDTOS.size(); j ++){
                     CustomerCommercialDTO dto = customerCommercialDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
                 break;
             case "投融情况":
@@ -495,7 +496,7 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerInvestmentDTOS.size(); j ++){
                     CustomerInvestmentDTO dto = customerInvestmentDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
                 break;
             case "经济指标":
@@ -508,24 +509,24 @@ public class FieldServiceImpl implements FieldService {
                 }
                 for(int j = 0; j < customerEconomicIndicatorDTOS.size(); j ++){
                     CustomerEconomicIndicatorDTO dto = customerEconomicIndicatorDTOS.get(j);
-                    setMutilRowDatas(fields, data, dto);
+                    setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
                 break;
         }
         return data;
     }
 
-    private void setMutilRowDatas(List<FieldDTO> fields, List<List<String>> data, Object dto) {
+    private void setMutilRowDatas(List<FieldDTO> fields, List<List<String>> data, Object dto,Long communityId,Integer namespaceId,String moduleName) {
         List<String> rowDatas = new ArrayList<>();
         for(int i = 0; i <  fields.size(); i++) {
             FieldDTO field = fields.get(i);
-            setRowData(dto, rowDatas, field);
+            setRowData(dto, rowDatas, field,communityId,namespaceId,moduleName);
         }
         //一个dto，获得一行数据后置入data中
         data.add(rowDatas);
     }
 
-    private void setRowData(Object dto, List<String> rowDatas, FieldDTO field) {
+    private void setRowData(Object dto, List<String> rowDatas, FieldDTO field,Long communityId,Integer namespaceId,String moduleName) {
         String fieldName = field.getFieldName();
         String fieldParam = field.getFieldParam();
         FieldParams params = (FieldParams) StringHelper.fromJsonString(fieldParam, FieldParams.class);
@@ -536,9 +537,10 @@ public class FieldServiceImpl implements FieldService {
                 fieldName += "Name";
             }
         }
+
         try {
             //获得get方法并使用获得field的值
-            String cellData = getFromObj(fieldName, dto);
+            String cellData = getFromObj(fieldName, dto,communityId,namespaceId,moduleName);
             if(cellData==null|| cellData.equalsIgnoreCase("null")){
                 cellData = "";
             }
@@ -554,12 +556,13 @@ public class FieldServiceImpl implements FieldService {
         }
     }
 
-    private String getFromObj(String fieldName, Object dto) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
+    private String getFromObj(String fieldName, Object dto,Long communityId,Integer namespaceId,String moduleName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
         Class<?> clz = dto.getClass();
         PropertyDescriptor pd = new PropertyDescriptor(fieldName,clz);
         Method readMethod = pd.getReadMethod();
         System.out.println(readMethod.getName());
         Object invoke = readMethod.invoke(dto);
+
         if(invoke==null){
             return "";
         }
@@ -572,6 +575,28 @@ public class FieldServiceImpl implements FieldService {
         } catch (Exception e) {
             return invoke.toString();
         }
+
+        if(fieldName.equals("status") || fieldName.equals("gender") ||fieldName.equals("nationality_item_id")||fieldName.equals("degree_item_id")||
+                fieldName.equals("technical_title_item_id")||
+                fieldName.equals("individual_evaluation_item_id")||
+                fieldName.equals("patent_status_item_id")||
+                (fieldName.indexOf("id")!=-1 && fieldName.indexOf("id")!=0)
+                ){
+
+            //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
+            if(fieldName.equals("gender")||fieldName.equals("nationality_item_id")){
+                LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName);
+            }
+            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId,Long.parseLong(invoke.toString()));
+            if(item!=null&&item.getItemId()!=null){
+                invoke = String.valueOf(item.getItemId());
+                LOGGER.info("field transferred to item id is "+invoke);
+            }else{
+                LOGGER.error("field "+ fieldName+" transferred to item using findScopeFieldItemByDisplayName failed ,item is "+ item);
+            }
+        }
+
+
         return String.valueOf(invoke);
     }
     private String setToObj(String fieldName, Object dto,Object value) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
@@ -663,7 +688,7 @@ public class FieldServiceImpl implements FieldService {
         //工具excel
         ExcelUtils excel = new ExcelUtils();
         //注入sheet的内容到workbook中
-        sheetGenerate(groups,workbook,excel,cmd.getCustomerId(),cmd.getCustomerType(),cmd.getNamespaceId(),cmd.getCommunityId());
+        sheetGenerate(groups,workbook,excel,cmd.getCustomerId(),cmd.getCustomerType(),cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getModuleName());
         sheetNum.remove();
         //写入流
         ServletOutputStream out;
@@ -755,6 +780,7 @@ public class FieldServiceImpl implements FieldService {
             String[] headers = new String[headRow.getLastCellNum()-headRow.getFirstCellNum()+1];
             HashMap<Integer,String> orderedFieldNames = new HashMap<>();
             HashMap<Integer,FieldParams> orderedFieldParams = new HashMap<>();
+            HashMap<Integer,FieldDTO> orderedFieldDtos = new HashMap<>();
             HashMap<Integer,String> orderedFieldDisplayNames = new HashMap<>();
             for(int j =headRow.getFirstCellNum(); j < headRow.getLastCellNum();j++) {
                 for(int j1 = 0; j1 < fields.size();j1++){
@@ -774,6 +800,7 @@ public class FieldServiceImpl implements FieldService {
 //                        }
                         orderedFieldNames.put(j,fieldName);
                         orderedFieldParams.put(j,params);
+                        orderedFieldDtos.put(j,fieldDTO);
                         orderedFieldDisplayNames.put(j,fieldDTO.getFieldDisplayName());
                     }
                 }
@@ -810,6 +837,7 @@ public class FieldServiceImpl implements FieldService {
                 for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
                     String fieldName = orderedFieldNames.get(k);
                     FieldParams param = orderedFieldParams.get(k);
+                    FieldDTO fieldDTO = orderedFieldDtos.get(k);
                     String displayName = orderedFieldDisplayNames.get(k);
                     try {
                         Cell cell = row.getCell(k);
@@ -860,13 +888,15 @@ public class FieldServiceImpl implements FieldService {
                                     cellValue=String.valueOf(item.getItemId());
                                 }
 
-
                             }
                         } else {//不填默认状态为2
                             setToObj("status",object,"2");
                         }
-
-
+                        Byte mandatoryFlag = fieldDTO.getMandatoryFlag();
+                        if(mandatoryFlag == 1 && (cellValue == null || cellValue.equals(""))){
+                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                                    "必填项"+fieldDTO.getFieldDisplayName()+"没有填写");
+                        }
                         setToObj(fieldName,object,cellValue);
                     } catch (Exception e) {
                         LOGGER.error("set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName());
