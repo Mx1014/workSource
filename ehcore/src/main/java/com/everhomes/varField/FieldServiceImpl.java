@@ -582,11 +582,8 @@ public class FieldServiceImpl implements FieldService {
                 fieldName.equals("patent_status_item_id")||
                 (fieldName.indexOf("id")!=-1 && fieldName.indexOf("id")!=0)
                 ){
+            LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName);
 
-            //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
-            if(fieldName.equals("gender")||fieldName.equals("nationality_item_id")){
-                LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName);
-            }
             ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId,Long.parseLong(invoke.toString()));
             if(item!=null&&item.getItemId()!=null){
                 invoke = String.valueOf(item.getItemId());
