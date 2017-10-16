@@ -5444,6 +5444,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
         }
 
+        //:todo
         List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(keywords, cmd.getIsSignedup(), visibleFlag, locator, pageSize, cmd, cmd.getFilterScopeTypes().get(0));
 
         Map<String, OrganizationMember> contact_member = new HashMap<>();
@@ -5564,7 +5565,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void sortOrganizationsAtSameLevel(SortOrganizationsAtSameLevelCommand cmd) {
-
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        this.coordinationProvider.getNamedLock(CoordinationLocks.ORGANIZATION_ORDER_LOCK.getCode()).enter(() -> {
+            if(cmd.getChildIds() != null && cmd.getChildIds().size() > 0){
+                List<Long> childIds = cmd.getChildIds();
+                for (Long orgId : childIds) {
+                    this.organizationProvider.updateOrganizationDefaultOrder(namespaceId, orgId, childIds.indexOf(orgId));
+                }
+            }
+            return null;
+        });
     }
 
     @Override
@@ -7846,6 +7856,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         Long startTime1 = System.currentTimeMillis();
+        //:todo 递归
         dto = this.getOrganizationMenu(rganizationDTOs, dto);
         dto = processOrganizationCommunity(dto);
         res.setOrganizationMenu(dto);
@@ -7889,8 +7900,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public ListOrganizationsCommandResponse listAllChildrenOrganizations(Long id,
-                                                                         List<String> groupTypes) {
+    public ListOrganizationsCommandResponse listAllChildrenOrganizations(Long id, List<String> groupTypes) {
         ListOrganizationsCommandResponse res = new ListOrganizationsCommandResponse();
         Organization org = this.checkOrganization(id);
         List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
@@ -8466,6 +8476,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgChildrens.add(organizationDTO);
             }
         }
+        orgChildrens.sort(Comparator.comparingInt(OrganizationDTO::getOrder));
         dto.setChildrens(orgChildrens);
 
         return dto;

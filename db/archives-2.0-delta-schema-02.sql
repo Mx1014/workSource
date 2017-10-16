@@ -1,3 +1,4 @@
+
 -- 增加咨询电话 by st.zheng
 ALTER TABLE `eh_news` ADD COLUMN `phone` BIGINT(20) NULL DEFAULT '0' AFTER `source_url`;
 
