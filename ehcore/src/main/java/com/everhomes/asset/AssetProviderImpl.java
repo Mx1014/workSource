@@ -2175,8 +2175,14 @@ public class AssetProviderImpl implements AssetProvider {
     public List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId) {
         List<ListChargingItemsForBillGroupDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
+        EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
+
         ListChargingItemsForBillGroupDTO dto = new ListChargingItemsForBillGroupDTO();
-        context
+        SelectQuery<Record> query = context.selectQuery();
+        List<PaymentBillGroupRule> paymentBillGroupRules = context.selectFrom(t)
+                .where(t.BILL_GROUP_ID.eq(billGroupId))
+                .fetchInto(PaymentBillGroupRule.class);
+        
         return null;
     }
 
