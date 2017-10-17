@@ -124,9 +124,9 @@ public class UniongroupController extends ControllerBase {
 
     /**
      * <p>版本号切换 </p>
-     * <b>URL: /uniongroup/distributionUniongroupToDetail</b>
+     * <b>URL: /uniongroup/switchUnionGroupVersion</b>
      */
-    @RequestMapping("distributionUniongroupToDetail")
+    @RequestMapping("switchUnionGroupVersion")
     @RestReturn(value =String.class)
     public RestResponse switchUnionGroupVersion(){
         RestResponse response = new RestResponse();
