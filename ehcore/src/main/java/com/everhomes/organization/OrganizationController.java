@@ -1137,8 +1137,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("deleteOrganizationJobPosition")
     @RestReturn(value = String.class)
     public RestResponse deleteOrganizationJobPosition(@Valid DeleteOrganizationIdCommand cmd) {
-        organizationService.deleteOrganizationJobPosition(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.deleteOrganizationJobPosition(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

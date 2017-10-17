@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id：主键id</li>
  * <li>scopeType：删除人员范围{@link com.everhomes.rest.organization.DeleteOrganizationContactScopeType}</li>
+ * <li>enterpriseId: 当前总公司的名称</li>
  * </ul>
  */
 public class DeleteOrganizationIdCommand {
@@ -16,6 +17,8 @@ public class DeleteOrganizationIdCommand {
 	private Long  id;
 
 	private String scopeType;
+
+	private Long enterpriseId;
 	
 	public DeleteOrganizationIdCommand() {
     }
@@ -40,4 +43,12 @@ public class DeleteOrganizationIdCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
 }

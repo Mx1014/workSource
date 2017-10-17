@@ -375,7 +375,7 @@ public interface OrganizationService {
 	
 	void updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd);
 	
-	void deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
+	Boolean deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
 	
 	ListOrganizationJobPositionResponse listOrganizationJobPositions(ListOrganizationJobPositionCommand cmd);
 	

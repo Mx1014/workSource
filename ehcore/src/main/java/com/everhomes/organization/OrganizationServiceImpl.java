@@ -10460,13 +10460,24 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public void deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
+    public Boolean deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
 
         checkId(cmd.getId());
 
         OrganizationJobPosition organizationJobPosition = checkOrganizationJobPositionIsNull(cmd.getId());
+
+        if(cmd.getEnterpriseId() != null){
+            //:todo 删除时置空判断
+            List<OrganizationMember> emptyMember = this.listOrganizationContactByJobPositionId(cmd.getEnterpriseId(), cmd.getId());
+            if(emptyMember != null && emptyMember.size() > 0){
+                return false;
+            }
+        }
+
         organizationJobPosition.setStatus(OrganizationJobPositionStatus.INACTIVE.getCode());
         organizationProvider.updateOrganizationJobPosition(organizationJobPosition);
+
+        return true;
     }
 
     public List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd) {
