@@ -842,9 +842,9 @@ public class FieldServiceImpl implements FieldService {
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"sheet class new instance failed",e);
                 }
                 LOGGER.info("row "+row.getRowNum()+" has the firstcellnum is "+ row.getFirstCellNum()+",and the last cell num is "+ row.getLastCellNum());
-                for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
+            cellNumTooMany:for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
                     if(k == orderedFieldDtos.size()){
-                        continue;
+                        break cellNumTooMany;
                     }
                     String fieldName = orderedFieldNames.get(k);
                     FieldParams param = orderedFieldParams.get(k);
