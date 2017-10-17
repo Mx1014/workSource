@@ -46,6 +46,7 @@ import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
 import com.everhomes.parking.innospring.InnoSpringCardInfo;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
@@ -114,13 +115,6 @@ import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowReferType;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -3712,11 +3706,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
     	Flow flow = flowService.getEnabledFlow(order.getNamespaceId(), Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
     	LOGGER.debug("parames : " +order.getNamespaceId()+"*"+ Rentalv2Controller.moduleId+"*"+ moduleType+"*"+ ownerId+"*"+ ownerType );
     	LOGGER.debug("\n flow is "+flow);
-    	if(null!=flow){
+
 	    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
 	    	cmd.setApplyUserId(order.getRentalUid());
-	    	cmd.setFlowMainId(flow.getFlowMainId());
-	    	cmd.setFlowVersion(flow.getFlowVersion());
+
 	    	cmd.setReferId(order.getId());
 	    	cmd.setReferType(REFER_TYPE);
 	    	cmd.setProjectId(order.getCommunityId());
@@ -3737,10 +3730,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setTitle(resourceType.getName());
 	    	cmd.setContent(contentString);
 //	    	LOGGER.debug("cmd = \n"+cmd);
+		if (null!=flow) {
+			cmd.setFlowMainId(flow.getFlowMainId());
+			cmd.setFlowVersion(flow.getFlowVersion());
+			return flowService.createFlowCase(cmd);
+		}else{ //创建哑工作流
+			GeneralModuleInfo gm = new GeneralModuleInfo();
+			gm.setModuleId(Rentalv2Controller.moduleId);
+			gm.setModuleType(moduleType);
+			gm.setNamespaceId(order.getNamespaceId());
+			gm.setOwnerId(ownerId);
+			gm.setOwnerType(ownerType);
+			gm.setProjectId(order.getCommunityId());
+			gm.setProjectType(EntityType.COMMUNITY.getCode());
+			gm.setOrganizationId(cmd.getCurrentOrganizationId());
+			return flowService.createDumpFlowCase(gm,cmd);
+		}
 
-	    	return flowService.createFlowCase(cmd);
-    	}
-    	return null;
 	}
 	private boolean valiItem(RentalItemsOrder rib) {
 
