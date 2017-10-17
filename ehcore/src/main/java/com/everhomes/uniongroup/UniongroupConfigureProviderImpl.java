@@ -593,6 +593,13 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
+    public void cloneGroupTypeDataToVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer n1, Integer n2) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        InsertQuery<EhUniongroupConfiguresRecord> query = context.insertQuery(Tables.EH_UNIONGROUP_CONFIGURES);
+//        query.
+    }
+
+    @Override
     public void deleteUniongroupConfigresByGroupId(Long groupId, Long organizationId) {
         this.deleteUniongroupConfigresByGroupId(groupId, organizationId, null);
     }
