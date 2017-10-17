@@ -2233,13 +2233,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 
-        //1 判断该机构（子公司/部门/岗位/职级）是否有活动状态的人员
-        //查询需要失效的所有人
-        List<OrganizationMember> if_empty_members = organizationProvider.listOrganizationMemberByPath(organization.getPath(), null, "");
-        //2.如果仍有活动的人员,直接返回false
-        if(if_empty_members.size() != 0){
-            return false;
+        //：todo 判断该机构（子公司/部门/职级）是否有活动状态的人员
+        if(organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) || (organization.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || (organization.getGroupType().equals(OrganizationGroupType.JOB_LEVEL.getCode()){
+            //查询需要失效的所有人
+            List<OrganizationMember> if_empty_members = organizationProvider.listOrganizationMemberByPath(organization.getPath(), null, "");
+            //2.如果仍有活动的人员,直接返回false
+            if(if_empty_members.size() != 0){
+                return false;
+            }
         }
+        //:todo 2部门岗位不需要作判断
+
 
         //3.如果没有活动的
         List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "%", null);
