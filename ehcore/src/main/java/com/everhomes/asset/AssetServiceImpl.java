@@ -1185,6 +1185,8 @@ public class AssetServiceImpl implements AssetService {
         c.setName(cmd.getChargingStandardName());
         c.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         c.setInstruction(cmd.getInstruction());
+        c.setSuggestUnitPrice(cmd.getSuggest_unit_price());
+        c.setAreaSizeType(cmd.getArea_size_type());
 
         // create formula that fits the standard
         CreateFormulaCommand cmd1 = ConvertHelper.convert(cmd,CreateFormulaCommand.class);

@@ -498,7 +498,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 展示一个账单组的收费项目列表         1
+    // this is for 展示一个账单组的收费项目列表         4
     /**
      * <p>展示一个账单组的收费项目列表</p>
      * <b>URL: /asset/listChargingStandardForBillGroup</b>
@@ -521,6 +521,8 @@ public class AssetController extends ControllerBase {
     @RequestMapping("listChargingItemDetailForBillGroup")
     @RestReturn(value = ListChargingItemDetailForBillGroupDTO.class)
     public RestResponse listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd) {
+        //此接口已无需求
+//        ListChargingItemDetailForBillGroupDTO dto = assetService.listChargingItemDetailForBillGroup(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

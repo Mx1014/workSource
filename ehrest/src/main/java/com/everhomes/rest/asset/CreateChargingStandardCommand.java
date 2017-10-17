@@ -6,6 +6,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -21,8 +22,8 @@ import java.util.List;
  * <li>formulaJson:公式的json</li>
  * <li>formula:公式</li>
  * <li>instruction:说明</li>
- * <li>normalFormulaStr:普通公式模式下新增的公式</li>
- * <li>stepValuePairs:区间和阶梯公式模式下的传值，参考{@link com.everhomes.rest.asset.VariableConstraints}</li>
+ * <li>suggest_unit_price:建议单价</li>
+ * <li>area_size_type:计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积</li>
  *</ul>
  */
 public class CreateChargingStandardCommand {
@@ -47,9 +48,24 @@ public class CreateChargingStandardCommand {
     private String formulaJson;
     private String instruction;
 
-    private String normalFormulaStr;
-    @ItemType(VariableConstraints.class)
-    private List<VariableConstraints> stepValuePairs;
+    private BigDecimal suggest_unit_price;
+    private Integer area_size_type;
+
+    public BigDecimal getSuggest_unit_price() {
+        return suggest_unit_price;
+    }
+
+    public void setSuggest_unit_price(BigDecimal suggest_unit_price) {
+        this.suggest_unit_price = suggest_unit_price;
+    }
+
+    public Integer getArea_size_type() {
+        return area_size_type;
+    }
+
+    public void setArea_size_type(Integer area_size_type) {
+        this.area_size_type = area_size_type;
+    }
 
     @Override
     public String toString() {

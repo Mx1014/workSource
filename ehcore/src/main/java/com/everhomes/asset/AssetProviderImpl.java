@@ -2210,10 +2210,29 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
         Long ruleId = cmd.getBillGroupRuleId();
+        EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
+        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = new PaymentBillGroupRule();
+        DSLContext readOnlyContext = getReadOnlyContext();
+        com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = readOnlyContext.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(cmd.getBillGroupId())).fetchOneInto(PaymentBillGroup.class);
         if(ruleId == null){
-            //新增
+            //新增 一条billGroupRule
+            long nextRuleId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules.class));
+            rule.setId(nextRuleId);
+            rule.setBillGroupId(cmd.getBillGroupId());
+            rule.setChargingItemId(cmd.getChargingItemId());
+            rule.setChargingItemName(cmd.getGroupChargingItemName());
+            rule.setChargingStandardsId(cmd.getChargingStandardId());
+            rule.setNamespaceId(group.getNamespaceId());
+            rule.setOwnerid(group.getOwnerId());
+            rule.setOwnertype(group.getOwnerType());
         }else{
+            rule = readOnlyContext.selectFrom(t)
+                    .where(t.ID.eq(ruleId))
+                    .fetchOneInto(PaymentBillGroupRule.class);
             //修改
+            rule.setChargingItemName(cmd.getGroupChargingItemName());
+            
         }
     }
 

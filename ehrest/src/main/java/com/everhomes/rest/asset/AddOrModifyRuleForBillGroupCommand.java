@@ -36,6 +36,8 @@ public class AddOrModifyRuleForBillGroupCommand {
     private BigDecimal suggestUnitPrice;
     private Byte area_size_type;
 
+
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

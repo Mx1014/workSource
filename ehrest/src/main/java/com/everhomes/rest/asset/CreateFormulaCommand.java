@@ -11,13 +11,12 @@ import java.util.List;
 /**
  *<ul>
  * <li>formulaType:公式类型,1:固定金额;2:普通公式;3:斜面公式;4:梯度公式</li>
- * <li>normalFormulaStr:普通公式模式下新增的公式</li>
+ * <li>formula:普通公式模式下新增的公式</li>
  * <li>stepValuePairs:区间和阶梯公式模式下的传值，参考{@link com.everhomes.rest.asset.VariableConstraints}</li>
  *</ul>
  */
 public class CreateFormulaCommand {
     private Byte formulaType;
-    private String normalFormulaStr;
     @ItemType(VariableConstraints.class)
     private List<VariableConstraints> stepValuePairs;
     private Long chargingStandardId;
@@ -39,13 +38,6 @@ public class CreateFormulaCommand {
         this.formulaType = formulaType;
     }
 
-    public String getNormalFormulaStr() {
-        return normalFormulaStr;
-    }
-
-    public void setNormalFormulaStr(String normalFormulaStr) {
-        this.normalFormulaStr = normalFormulaStr;
-    }
 
     public List<VariableConstraints> getStepValuePairs() {
         return stepValuePairs;
