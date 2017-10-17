@@ -1327,8 +1327,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				switch (name) {
 					case "rentAmountFlag": dto.setRentAmountFlag(Byte.valueOf(c.getConfigValue())); break;
 					case "issuingLeaseFlag": dto.setIssuingLeaseFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "issuerManageFlag": dto.setIssuerManageFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "parkIntroduceFlag": dto.setParkIndroduceFlag(Byte.valueOf(c.getConfigValue())); break;
 					case "renewFlag": dto.setRenewFlag(Byte.valueOf(c.getConfigValue())); break;
 					case "areaSearchFlag": dto.setAreaSearchFlag(Byte.valueOf(c.getConfigValue())); break;
 					case "consultFlag": dto.setConsultFlag(Byte.valueOf(c.getConfigValue())); break;
