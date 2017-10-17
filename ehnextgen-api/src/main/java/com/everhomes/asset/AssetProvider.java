@@ -191,4 +191,10 @@ public interface AssetProvider {
     List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId);
 
     void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
+
+    EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId);
+
+    boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule, boolean b);
+
+    void deleteBillGroupRuleById(Long billGroupRuleId);
 }

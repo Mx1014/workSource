@@ -1,5 +1,6 @@
 package com.everhomes.asset;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -47,12 +48,14 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
 import freemarker.core.ArithmeticEngine;
 import freemarker.core.ReturnInstruction;
+import org.apache.log4j.spi.ErrorCode;
 import org.jooq.*;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
@@ -2200,8 +2203,8 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setFormula(standard.getFormula());
             dto.setGroupChargingItemName(rule.getChargingItemName());
             dto.setChargingStandardName(standard.getName());
-            dto.setBillItemGenerationMonth(standard.getBillItemMonthOffset());
-            dto.setBillItemGenerationDay(standard.getBillItemDayOffset());
+            dto.setBillItemGenerationMonth(rule.getBillItemMonthOffset());
+            dto.setBillItemGenerationDay(rule.getBillItemDayOffset());
             list.add(dto);
         }
         return list;
@@ -2213,6 +2216,8 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = new PaymentBillGroupRule();
         DSLContext readOnlyContext = getReadOnlyContext();
+        DSLContext writeContext = getReadWriteContext();
+        EhPaymentBillGroupsRulesDao dao = new EhPaymentBillGroupsRulesDao(writeContext.configuration());
         com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = readOnlyContext.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(cmd.getBillGroupId())).fetchOneInto(PaymentBillGroup.class);
         if(ruleId == null){
@@ -2226,14 +2231,70 @@ public class AssetProviderImpl implements AssetProvider {
             rule.setNamespaceId(group.getNamespaceId());
             rule.setOwnerid(group.getOwnerId());
             rule.setOwnertype(group.getOwnerType());
+            rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
+            rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
+            dao.insert(rule);
         }else{
             rule = readOnlyContext.selectFrom(t)
                     .where(t.ID.eq(ruleId))
                     .fetchOneInto(PaymentBillGroupRule.class);
-            //修改
+            boolean workFlag = isInWorkGroupRule(rule,false);
+            if(workFlag){
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_ACCESS_DENIED,"已关联合同，不能修改");
+            }
+            //如果没有关联则不修改
+            rule.setBillGroupId(cmd.getBillGroupId());
+            rule.setChargingItemId(cmd.getChargingItemId());
             rule.setChargingItemName(cmd.getGroupChargingItemName());
-            
+            rule.setChargingStandardsId(cmd.getChargingStandardId());
+            rule.setNamespaceId(group.getNamespaceId());
+            rule.setOwnerid(group.getOwnerId());
+            rule.setOwnertype(group.getOwnerType());
+            rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
+            rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
+            dao.insert(rule);
+
+            writeContext.delete(t)
+                    .where(t.ID.eq(rule.getId()))
+                    .execute();
+            dao.insert(rule);
         }
+    }
+
+    @Override
+    public com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID.eq(billGroupRuleId))
+                .fetchOneInto(PaymentBillGroupRule.class);
+    }
+    @Override
+    public boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule, boolean b) {
+        DSLContext context = getReadOnlyContext();
+        EhPaymentContractReceiver t = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t");
+        if(!b){
+            List<PaymentContractReceiver> list = context.selectFrom(t)
+                    .where(t.OWNER_ID.eq(rule.getOwnerid()))
+                    .and(t.OWNER_TYPE.eq(rule.getOwnertype()))
+                    .and(t.NAMESPACE_ID.eq(rule.getNamespaceId()))
+                    .and(t.EH_PAYMENT_CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
+                    .and(t.EH_PAYMENT_CHARGING_STANDARD_ID.eq(rule.getChargingStandardsId()))
+                    .fetchInto(PaymentContractReceiver.class);
+            if(list!=null && list.size()>0){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void deleteBillGroupRuleById(Long billGroupRuleId) {
+        DSLContext context = getReadWriteContext();
+        context.delete(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID.eq(billGroupRuleId))
+                .execute();
     }
 
 

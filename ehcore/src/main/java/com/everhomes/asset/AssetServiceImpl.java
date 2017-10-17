@@ -62,6 +62,7 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
 import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
@@ -1366,6 +1367,20 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
         assetProvider.addOrModifyRuleForBillGroup(cmd);
+    }
+
+    @Override
+    public void deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd) {
+        EhPaymentBillGroupsRules rule = assetProvider.findBillGroupRuleById(cmd.getBillGroupRuleId());
+        boolean workFlag = isInWorkGroupRule(rule,false);
+        if(workFlag){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_ACCESS_DENIED,"已关联合同，不能删除");
+        }
+        assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId());
+    }
+
+    private boolean isInWorkGroupRule(EhPaymentBillGroupsRules rule, boolean b) {
+        return assetProvider.isInWorkGroupRule(rule,b);
     }
 
 

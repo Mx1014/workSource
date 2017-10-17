@@ -19,6 +19,8 @@ import java.util.List;
  * <li>variables:变量集合，参考{@link com.everhomes.rest.asset.ChargingItemVariable}</li>
  * <li>suggestUnitPrice:建议单价</li>
  * <li>area_size_type:计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积</li>
+ * <li>billItemMonthOffset:收费项产生时间偏离当前月的月数</li>
+ * <li>billItemDayOffset:收费项产生时间偏离当前月的日数</li>
  *</ul>
  */
 public class AddOrModifyRuleForBillGroupCommand {
@@ -35,8 +37,24 @@ public class AddOrModifyRuleForBillGroupCommand {
 
     private BigDecimal suggestUnitPrice;
     private Byte area_size_type;
+    private Integer billItemMonthOffset;
+    private Integer billItemDayOffset;
 
+    public Integer getBillItemMonthOffset() {
+        return billItemMonthOffset;
+    }
 
+    public void setBillItemMonthOffset(Integer billItemMonthOffset) {
+        this.billItemMonthOffset = billItemMonthOffset;
+    }
+
+    public Integer getBillItemDayOffset() {
+        return billItemDayOffset;
+    }
+
+    public void setBillItemDayOffset(Integer billItemDayOffset) {
+        this.billItemDayOffset = billItemDayOffset;
+    }
 
     @Override
     public String toString() {

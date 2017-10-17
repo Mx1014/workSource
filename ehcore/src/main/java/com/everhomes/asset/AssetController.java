@@ -529,7 +529,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改       1
+    // this is for 为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改       4
     /**
      * <p>为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改</p>
      * <b>URL: /asset/addOrModifyRuleForBillGroup</b>
@@ -544,7 +544,7 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 删除一个账单组的收费项目         1
+    // this is for 删除一个账单组的收费项目         4
     /**
      * <p>删除一个账单组的收费项目</p>
      * <b>URL: /asset/deleteChargingItemForBillGroup</b>
@@ -552,6 +552,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("deleteChargingItemForBillGroup")
     @RestReturn(value = String.class)
     public RestResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd) {
+        assetService.deleteChargingItemForBillGroup(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
