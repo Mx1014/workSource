@@ -821,6 +821,16 @@ public class FieldServiceImpl implements FieldService {
             }
 
             LOGGER.info("sheet total row num = {}, first row num = {}, last row num = {}",sheet.getPhysicalNumberOfRows(),sheet.getFirstRowNum(),sheet.getLastRowNum());
+            if(2 > sheet.getLastRowNum()){
+                if(orderedFieldDtos!=null && orderedFieldDtos.size()>0){
+                    for(int k = 0; k < orderedFieldDtos.size(); k ++ ){
+                        if(orderedFieldDtos.get(k).getMandatoryFlag()==1){
+                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                                    "必填项"+orderedFieldDtos.get(k).getFieldDisplayName()+"没有填写");
+                        }
+                    }
+                }
+            }
             for(int j = 2; j <= sheet.getLastRowNum(); j ++){
                 Row row = sheet.getRow(j);
                 Object object = null;
