@@ -31,7 +31,62 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 
 	@Autowired
 	private EnterpriseApplyBuildingService enterpriseApplyBuildingService;
-	
+
+	/**
+	 * <b>URL: /techpark/entry/listLeaseProjects
+	 * <p>项目介绍列表
+	 */
+	@RequestMapping("listLeaseProjects")
+	@RestReturn(value=listLeaseProjectsResponse.class)
+	public RestResponse listLeaseProjects(ListLeaseProjectsCommand cmd){
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/updateLeaseProject
+	 * <p>修改项目介绍
+	 */
+	@RequestMapping("updateLeaseProject")
+	@RestReturn(value=LeaseProjectDTO.class)
+	public RestResponse updateLeaseProject(UpdateLeaseProjectCommand cmd){
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/getLeaseProjectById
+	 * <p>根据id查询项目介绍
+	 */
+	@RequestMapping("getLeaseProjectById")
+	@RestReturn(value=LeaseProjectDTO.class)
+	@RequireAuthentication(false)
+	public RestResponse getLeaseProjectById(GetLeaseProjectByIdCommand cmd){
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/updateLeaseProjectOrder
+	 * <p>修改项目介绍排序
+	 */
+	@RequestMapping("updateLeaseProjectOrder")
+	@RestReturn(value=String.class)
+	public RestResponse updateLeaseProjectOrder(UpdateLeaseProjectOrderCommand cmd){
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /techpark/entry/listLeaseBuildings
 	 * <p>项目介绍列表
