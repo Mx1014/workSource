@@ -99,4 +99,9 @@ public interface UniongroupService {
      **/
     void deleteUniongroupVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer versionCode);
 
+    /**
+     * 对某一Enterprise下的版本号为n1的grouptype进行数据复制，并将版本号指定为n2
+     */
+    void cloneGroupTypeDataToVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer n1, Integer n2);
+
 }

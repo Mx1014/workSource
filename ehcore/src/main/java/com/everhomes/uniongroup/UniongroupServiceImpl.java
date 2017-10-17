@@ -520,6 +520,13 @@ public class UniongroupServiceImpl implements UniongroupService {
         });
     }
 
+    @Override
+    public void cloneGroupTypeDataToVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer n1, Integer n2) {
+        dbProvider.execute((TransactionStatus status) -> {
+            this.uniongroupConfigureProvider.
+        });
+    }
+
     //策略算法一：源初算法
 	private UnionPolicyObject originPolicyAlgorithm(SaveUniongroupConfiguresCommand cmd){
         Integer namespaceId = UserContext.getCurrentNamespaceId();
