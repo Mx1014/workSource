@@ -165,7 +165,7 @@ public class CommunityController extends ControllerBase {
 	@RequestMapping("listCommunityUsers")
     @RestReturn(value=CommunityUserResponse.class)
 	public RestResponse listCommunityUsers(ListCommunityUsersCommand cmd) {
-		CommunityUserResponse res = communityService.listUserCommunities(cmd);
+		CommunityUserResponse res = communityService.listUserCommunitiesV2(cmd);
 		RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -43,6 +43,8 @@ public interface UserActivityProvider {
 
     List<UserProfile> findProfileByUid(Long uid);
 
+    List<User> listUnAuthUsersByProfileCommunityId(Integer namespaceId, Long communityId, Long anchor, int pagesize);
+
     void updateUserProfile(UserProfile userProfile);
 
     void deleteProfile(UserProfile userProfile);

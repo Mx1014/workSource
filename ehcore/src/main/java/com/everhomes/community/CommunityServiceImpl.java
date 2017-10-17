@@ -1868,7 +1868,17 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		return organizationIds;
 	}
-	
+
+	@Override
+	public CommunityUserResponse listUserCommunitiesV2(
+			ListCommunityUsersCommand cmd) {
+		if(AuthFlag.UNAUTHORIZED == AuthFlag.fromCode(cmd.getIsAuth())){
+			return  listUnAuthUsers(cmd);
+		}else{
+			return listUserCommunities(cmd);
+		}
+	}
+
 	@Override
 	public CommunityUserResponse listUserCommunities(
 			ListCommunityUsersCommand cmd) {
@@ -1986,6 +1996,50 @@ public class CommunityServiceImpl implements CommunityService {
 		res.setNextPageAnchor(locator.getAnchor());
 		res.setUserCommunities(userCommunities);
 		return res;
+	}
+
+	private CommunityUserResponse listUnAuthUsers(ListCommunityUsersCommand cmd){
+		CommunityUserResponse response = new CommunityUserResponse();
+		List<CommunityUserDto> dtos = new ArrayList<>();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1);
+		if(users != null){
+			if(users.size() > pageSize){
+				users.remove(pageSize);
+				response.setNextPageAnchor(users.get(pageSize -1).getId());
+			}
+			for(User u: users){
+				CommunityUserDto dto = new CommunityUserDto();
+				dto.setUserName(u.getNickName());
+				// dto.setPhone(r.getPhoneNumber());
+				dto.setApplyTime(u.getCreateTime());
+				dto.setIdentityNumber(u.getIdentityNumberTag());
+				dto.setGender(u.getGender());
+				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
+					dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+				}
+
+				//最新活跃时间 add by sfyan 20170620
+				List<UserActivity> userActivities = userActivityProvider.listUserActivetys(u.getId(), 1);
+				if(userActivities.size() > 0){
+					dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+				}
+
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(u.getId(), IdentifierType.MOBILE.getCode());
+				if(userIdentifier != null){
+					dto.setPhone(userIdentifier.getIdentifierToken());
+				}
+
+				dtos.add(dto);
+			}
+
+
+			response.setUserCommunities(dtos);
+		}
+
+
+		return response;
 	}
 
 	@Override
