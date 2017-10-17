@@ -33,6 +33,20 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	private EnterpriseApplyBuildingService enterpriseApplyBuildingService;
 
 	/**
+	 * <b>URL: /techpark/entry/listAllLeaseProjects
+	 * <p>项目介绍列表
+	 */
+	@RequestMapping("listAllLeaseProjects")
+	@RestReturn(value=BriefLeaseProjectDTO.class, collection = true)
+	public RestResponse listAllLeaseProjects(){
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /techpark/entry/listLeaseProjects
 	 * <p>项目介绍列表
 	 */
