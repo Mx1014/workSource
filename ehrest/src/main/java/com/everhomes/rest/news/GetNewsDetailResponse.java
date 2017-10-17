@@ -22,7 +22,7 @@ import java.util.List;
  * </ul>
  */
 public class GetNewsDetailResponse {
-    private String id;
+    private Long id;
     private String ownerType;
     private Long ownerId;
     private Long categoryId;
@@ -161,11 +161,11 @@ public class GetNewsDetailResponse {
         this.visibleType = visibleType;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 }
