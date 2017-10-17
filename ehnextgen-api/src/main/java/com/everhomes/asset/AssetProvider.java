@@ -201,4 +201,8 @@ public interface AssetProvider {
     EhPaymentChargingStandards findChargingStandardById(Long chargingStandardId);
 
     PaymentBillGroup getBillGroupById(Long billGroupId);
+
+    boolean checkBillsByBillGroupId(Long billGroupId);
+
+    void deleteBillGroupAndRules(Long billGroupId);
 }

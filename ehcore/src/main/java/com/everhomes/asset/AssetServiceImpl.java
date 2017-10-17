@@ -1638,6 +1638,22 @@ public class AssetServiceImpl implements AssetService {
         assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId());
     }
 
+    /**
+     * 如果已经关联合同（不论状态）或者新增账单被使用，则不能修改或删除
+     */
+    @Override
+    public void deleteBillGroup(DeleteBillGroupCommand cmd) {
+        boolean workFlag = isInWorkGroup(cmd.getBillGroupId(),false);
+        if(workFlag){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_ACCESS_DENIED,"账单组已经在工作，不能删除");
+        }
+        assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId());
+    }
+
+    private boolean isInWorkGroup(Long billGroupId, boolean b) {
+        return assetProvider.checkBillsByBillGroupId(billGroupId);
+    }
+
     private boolean isInWorkGroupRule(EhPaymentBillGroupsRules rule, boolean b) {
         return assetProvider.isInWorkGroupRule(rule,b);
     }

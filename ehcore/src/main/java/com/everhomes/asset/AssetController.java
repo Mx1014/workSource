@@ -498,6 +498,20 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <p>删除一个账单组</p>
+     * <b>URL: /asset/deleteBillGroup</b>
+     */
+    @RequestMapping("deleteBillGroup")
+    @RestReturn(value = String.class)
+    public RestResponse deleteBillGroup(DeleteBillGroupCommand cmd) {
+        assetService.deleteBillGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
     // this is for 展示一个账单组的收费项目列表         4
     /**
      * <p>展示一个账单组的收费项目列表</p>

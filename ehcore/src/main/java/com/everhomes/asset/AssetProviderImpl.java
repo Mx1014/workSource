@@ -694,8 +694,8 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillGroupName(r.getValue(t.NAME));
                     dto.setDefaultOrder(r.getValue(t.DEFAULT_ORDER));
                     dto.setBillingCycle(r.getValue(t.BALANCE_DATE_TYPE));
-                    dto.setBillingDay("每周期首月"+r.getValue(t.BILLS_DAY)+"日");
-                    dto.setDueDay(String.valueOf(r.getValue(t.DUE_DAY)));
+                    dto.setBillingDay(r.getValue(t.BILLS_DAY));
+                    dto.setDueDay(r.getValue(t.DUE_DAY));
                     dto.setDueDayType(r.getValue(t.DUE_DAY_TYPE));
                     list.add(dto);
                     return null;
@@ -2353,6 +2353,35 @@ public class AssetProviderImpl implements AssetProvider {
         return context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
                 .fetchOneInto(PaymentBillGroup.class);
+    }
+
+    @Override
+    public boolean checkBillsByBillGroupId(Long billGroupId) {
+        DSLContext context = getReadOnlyContext();
+        List<Long> fetch = context.select(Tables.EH_PAYMENT_BILLS.ID).from(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.BILL_GROUP_ID.eq(billGroupId)).fetch(Tables.EH_PAYMENT_BILLS.ID);
+        if(fetch.size()>0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    @Override
+    public void deleteBillGroupAndRules(Long billGroupId) {
+        DSLContext context = getReadWriteContext();
+        EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
+        EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
+        this.dbProvider.execute((TransactionStatus status) -> {
+            context.delete(t)
+                    .where(t.BILL_GROUP_ID.eq(billGroupId))
+                    .execute();
+            context.delete(t1)
+                    .where(t1.ID.eq(billGroupId))
+                    .execute();
+            return null;
+        });
+
     }
 
 
