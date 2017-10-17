@@ -8,7 +8,7 @@ package com.everhomes.rest.community.admin;
  *     <li>organizations: 公司信息，organizationMemberDetailId必传，会对是否高管、职位进行更新</li>
  * </ul>
  */
-public class CommunityOrgMemberDetailDTO {
+public class CommunityUserOrgDetailDTO {
 
 	private Byte executiveFlag;
 

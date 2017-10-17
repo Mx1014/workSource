@@ -6,7 +6,7 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.community.admin.CommunityOrgMemberDetailDTO;
+import com.everhomes.rest.community.admin.CommunityUserOrgDetailDTO;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
@@ -48,7 +48,7 @@ import com.everhomes.util.StringHelper;
  *     <li>adminMembers: 管理员列表，参考{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
  *     <li>website: 企业官网</li>
  *     <li>unifiedSocialCreditCode: 统一社会信用代码</li>
- *     <li>communityOrgMemberDetailDTO: 用户企业信息 {@link com.everhomes.rest.community.admin.CommunityOrgMemberDetailDTO}</li>
+ *     <li>communityUserOrgDetailDTO: 用户企业信息 {@link CommunityUserOrgDetailDTO}</li>
  * </ul>
  */
 public class OrganizationDetailDTO {
@@ -113,7 +113,7 @@ public class OrganizationDetailDTO {
 
 	private String unifiedSocialCreditCode;
 
-	private CommunityOrgMemberDetailDTO communityOrgMemberDetailDTO;
+	private CommunityUserOrgDetailDTO communityUserOrgDetailDTO;
 
 	public String getUnifiedSocialCreditCode() {
 		return unifiedSocialCreditCode;
@@ -450,12 +450,12 @@ public class OrganizationDetailDTO {
 		this.latitude = latitude;
 	}
 
-	public CommunityOrgMemberDetailDTO getCommunityOrgMemberDetailDTO() {
-		return communityOrgMemberDetailDTO;
+	public CommunityUserOrgDetailDTO getCommunityUserOrgDetailDTO() {
+		return communityUserOrgDetailDTO;
 	}
 
-	public void setCommunityOrgMemberDetailDTO(CommunityOrgMemberDetailDTO communityOrgMemberDetailDTO) {
-		this.communityOrgMemberDetailDTO = communityOrgMemberDetailDTO;
+	public void setCommunityUserOrgDetailDTO(CommunityUserOrgDetailDTO communityUserOrgDetailDTO) {
+		this.communityUserOrgDetailDTO = communityUserOrgDetailDTO;
 	}
 
 	@Override

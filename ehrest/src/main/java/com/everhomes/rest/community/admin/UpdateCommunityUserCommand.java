@@ -8,7 +8,7 @@ import com.everhomes.discover.ItemType;
  * <ul>
  *     <li>userId: 用户id</li>
  *     <li>identityNumber: 身份证号</li>
- *     <li>organizations: 公司信息，organizationMemberDetailId必传，会对是否高管、职位进行更新 参考{@link CommunityOrgMemberDetailDTO}</li>
+ *     <li>organizations: 公司信息，organizationMemberDetailId必传，会对是否高管、职位进行更新 参考{@link CommunityUserOrgDetailDTO}</li>
  * </ul>
  */
 public class UpdateCommunityUserCommand {
@@ -17,8 +17,8 @@ public class UpdateCommunityUserCommand {
 
 	private String identityNumber;
 
-	@ItemType(CommunityOrgMemberDetailDTO.class)
-	private List<CommunityOrgMemberDetailDTO> organizations;
+	@ItemType(CommunityUserOrgDetailDTO.class)
+	private List<CommunityUserOrgDetailDTO> organizations;
 
 	public Long getUserId() {
 		return userId;
@@ -36,11 +36,11 @@ public class UpdateCommunityUserCommand {
 		this.identityNumber = identityNumber;
 	}
 
-	public List<CommunityOrgMemberDetailDTO> getOrganizations() {
+	public List<CommunityUserOrgDetailDTO> getOrganizations() {
 		return organizations;
 	}
 
-	public void setOrganizations(List<CommunityOrgMemberDetailDTO> organizations) {
+	public void setOrganizations(List<CommunityUserOrgDetailDTO> organizations) {
 		this.organizations = organizations;
 	}
 }

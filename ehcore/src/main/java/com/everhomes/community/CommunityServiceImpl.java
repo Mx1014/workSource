@@ -1756,18 +1756,19 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 			detailDto.setAddresses(addressDtos);
 
-			//增加返回用户在企业中是否是高管、职位的信息  add by yanjun 20171017
-			OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
-			if(memberDetail != null){
-				CommunityOrgMemberDetailDTO communityOrgMemberDetailDTO = new CommunityOrgMemberDetailDTO();
-				communityOrgMemberDetailDTO.setDetailId(memberDetail.getId());
-				communityOrgMemberDetailDTO.setExecutiveFlag(memberDetail.getExecutiveTag());
-				communityOrgMemberDetailDTO.setPositionTag(memberDetail.getPositionTag());
-				detailDto.setCommunityOrgMemberDetailDTO(communityOrgMemberDetailDTO);
-			}
-
 			if (null != organization && organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())
 					&& OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE) {
+
+
+				//增加返回用户在企业中是否是高管、职位的信息  add by yanjun 20171017
+				UserOrganizations userOrg = organizationProvider.findUserOrganizationByUserIdAndOrgId(member.getTargetId(), detailDto.getOrganizationId());
+				if(userOrg != null){
+					CommunityUserOrgDetailDTO communityUserOrgDetailDTO = new CommunityUserOrgDetailDTO();
+					communityUserOrgDetailDTO.setDetailId(userOrg.getId());
+					communityUserOrgDetailDTO.setExecutiveFlag(userOrg.getExecutiveTag());
+					communityUserOrgDetailDTO.setPositionTag(userOrg.getPositionTag());
+					detailDto.setCommunityUserOrgDetailDTO(communityUserOrgDetailDTO);
+				}
 
 				set.add(detailDto);
 			}
@@ -1910,7 +1911,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 
 				if(null != cmd.getExecutiveFlag()){
-					query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EXECUTIVE_TAG.eq(cmd.getExecutiveFlag()));
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.EXECUTIVE_TAG.eq(cmd.getExecutiveFlag()));
 				}
 
 				if(AuthFlag.AUTHENTICATED == AuthFlag.fromCode(cmd.getIsAuth())){
@@ -2885,17 +2886,16 @@ public class CommunityServiceImpl implements CommunityService {
 		dbProvider.execute((status) -> {
 			userProvider.updateUser(user);
 			if(cmd.getOrganizations() != null){
-				for (CommunityOrgMemberDetailDTO dto: cmd.getOrganizations()){
-					OrganizationMemberDetails organizationMemberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getDetailId());
+				for (CommunityUserOrgDetailDTO dto: cmd.getOrganizations()){
+					UserOrganizations userOrganization = organizationProvider.findUserOrganizationById(dto.getDetailId());
 
-					if(organizationMemberDetail != null){
-						organizationMemberDetail.setExecutiveTag(dto.getExecutiveFlag());
-						organizationMemberDetail.setPositionTag(dto.getPositionTag());
-						organizationProvider.updateOrganizationMemberDetails(organizationMemberDetail, organizationMemberDetail.getId());
+					if(userOrganization != null){
+						userOrganization.setExecutiveTag(dto.getExecutiveFlag());
+						userOrganization.setPositionTag(dto.getPositionTag());
+						organizationProvider.updateUserOrganization(userOrganization);
 					}
 				}
 			}
-
 			return null;
 		});
 		
