@@ -1833,4 +1833,18 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /org/deleteChildrenOrganizationAsList</b>
+     * <p>批量删除子机构(职级或部门岗位)</p>
+     */
+    @RequestMapping("deleteChildrenOrganizationJobLevel")
+    @RestReturn(value = String.class)
+    public RestResponse deleteChildrenOrganizationAsList(@Valid DeleteChildrenOrganizationAsListCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.deleteChildrenOrganizationAsList(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }
