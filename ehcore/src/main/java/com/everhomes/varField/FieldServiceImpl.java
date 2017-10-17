@@ -841,7 +841,11 @@ public class FieldServiceImpl implements FieldService {
                     LOGGER.error("sheet class new instance failed,exception= {}",e);
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"sheet class new instance failed",e);
                 }
+                LOGGER.info("row "+row.getRowNum()+" has the firstcellnum is "+ row.getFirstCellNum()+",and the last cell num is "+ row.getLastCellNum());
                 for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
+                    if(k == orderedFieldDtos.size()){
+                        continue;
+                    }
                     String fieldName = orderedFieldNames.get(k);
                     FieldParams param = orderedFieldParams.get(k);
                     FieldDTO fieldDTO = orderedFieldDtos.get(k);
