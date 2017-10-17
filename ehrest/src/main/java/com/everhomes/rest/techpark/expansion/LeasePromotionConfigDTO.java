@@ -28,32 +28,9 @@ public class LeasePromotionConfigDTO {
     private String rentAmountUnit;
 
     @ItemType(String.class)
-    @Deprecated
     private List<String> displayNames;
     @ItemType(Integer.class)
-    @Deprecated
     private List<Integer> displayOrders;
-
-    @ItemType(String.class)
-    private List<String> displayNamesV2;
-    @ItemType(Integer.class)
-    private List<Integer> displayOrdersV2;
-
-    public List<String> getDisplayNamesV2() {
-        return displayNamesV2;
-    }
-
-    public void setDisplayNamesV2(List<String> displayNamesV2) {
-        this.displayNamesV2 = displayNamesV2;
-    }
-
-    public List<Integer> getDisplayOrdersV2() {
-        return displayOrdersV2;
-    }
-
-    public void setDisplayOrdersV2(List<Integer> displayOrdersV2) {
-        this.displayOrdersV2 = displayOrdersV2;
-    }
 
     public String getRentAmountUnit() {
         return rentAmountUnit;

@@ -2,14 +2,13 @@ package com.everhomes.rest.techpark.expansion;
 
 /**
  * <ul>
- * <li>PARK_INTRODUCE(1):园区介绍</li>
- * <li>LEASE_PROMOTION(2):虚位以待</li>
- * <li>LEASE_PROJECT(3):项目介绍</li>
+ * <li>PARK_INTRODUCE(1):项目介绍</li>
+ * <li>LEASE_PROMOTION(2):房源招租</li>
  * </ul>
  * */
 public enum LeasePromotionOrder {
 
-	PARK_INTRODUCE((byte)1), LEASE_PROMOTION((byte)2), LEASE_PROJECT((byte)3) ;
+	PARK_INTRODUCE((byte)1), LEASE_PROMOTION((byte)2);
 
 	private byte code;
 
