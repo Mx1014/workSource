@@ -92,6 +92,11 @@ public interface UniongroupService {
     /**
      * 将version为N1的策略组记录转为0,并将version为0的策略组记录转换成N2
      **/
-    UnionPolicyObject switchUnionGroupVersion(String groupType, Long groupId, Integer n1);
+    UnionPolicyObject switchUnionGroupVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer n1);
+
+    /**
+     * 统一删除某个版本的薪酬组
+     **/
+    void deleteUniongroupVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer versionCode);
 
 }

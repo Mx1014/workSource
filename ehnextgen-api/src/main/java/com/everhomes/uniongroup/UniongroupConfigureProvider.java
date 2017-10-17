@@ -86,12 +86,17 @@ public interface UniongroupConfigureProvider {
 
     Integer countUnionGroupMemberDetailsByGroupId(Integer namespaceId, Long groupId);
 
-    public void deleteUniongroupConfigresByCurrentIdAndGroupTypeAndVersion(Long detailId, String groupType, Integer versionCode);
+    void deleteUniongroupConfigresByCurrentIdAndGroupTypeAndVersion(Long detailId, String groupType, Integer versionCode);
 
     List<UniongroupMemberDetail> listUniongroupMemberDetailsByUserName(Long ownerId, String userName);
 
 
-    void updateUniongroupConfiguresVersion(String groupType, Long groupId, Integer v1, Integer v2);
+    void updateUniongroupConfiguresVersion(Integer namespaceId, String groupType, Long enterpriseId, Integer v1, Integer v2);
 
-    void updateUniongroupMemberDetailsVersion(String groupType, Long groupId, Integer v1, Integer v2);
+    void updateUniongroupMemberDetailsVersion(Integer namespaceId, String groupType, Long enterpriseId, Integer v1, Integer v2);
+
+    void deleteUniongroupConfigresByEnterpriseIdAndGroupType(Integer namespaceId, String groupType, Long enterpriseId);
+
+    void deleteUniongroupMemberDetailsByEnterpriseIdAndGroupType(Integer namespaceId, String groupType, Long enterpriseId);
+
 }

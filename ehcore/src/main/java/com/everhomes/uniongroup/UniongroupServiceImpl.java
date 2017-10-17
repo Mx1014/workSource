@@ -13,7 +13,6 @@ import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import org.jooq.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -489,25 +488,36 @@ public class UniongroupServiceImpl implements UniongroupService {
      * 将version为N1的策略组记录与current的互换,
      **/
     @Override
-    public UnionPolicyObject switchUnionGroupVersion(String groupType, Long groupId, Integer n1) {
+    public UnionPolicyObject switchUnionGroupVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer n1) {
         Integer finalN1 = n1;
         dbProvider.execute((TransactionStatus status) -> {
             //:todo 转存temp
-            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(groupType,groupId, finalN1, UniongroupVersion.TEMP.getCode());
-            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(groupType,groupId, finalN1,UniongroupVersion.TEMP.getCode());
+            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(namespaceId, groupType, enterpriseId, finalN1, UniongroupVersion.TEMP.getCode());
+            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(namespaceId, groupType, enterpriseId, finalN1, UniongroupVersion.TEMP.getCode());
 
             //:todo Current转n2
-            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(groupType,groupId,UniongroupVersion.CURRENT.getCode(), finalN1);
-            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(groupType,groupId,UniongroupVersion.CURRENT.getCode(), finalN1);
+            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(namespaceId, groupType, enterpriseId, UniongroupVersion.CURRENT.getCode(), finalN1);
+            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(namespaceId, groupType, enterpriseId, UniongroupVersion.CURRENT.getCode(), finalN1);
 
             //:todo n1转Current
-            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(groupType,groupId,UniongroupVersion.TEMP.getCode(), UniongroupVersion.CURRENT.getCode());
-            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(groupType,groupId,UniongroupVersion.TEMP.getCode(), UniongroupVersion.CURRENT.getCode());
+            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(namespaceId, groupType, enterpriseId, UniongroupVersion.TEMP.getCode(), UniongroupVersion.CURRENT.getCode());
+            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(namespaceId, groupType, enterpriseId, UniongroupVersion.TEMP.getCode(), UniongroupVersion.CURRENT.getCode())
+            ;
 
             return null;
         });
 
         return null;
+    }
+
+    @Override
+    public void deleteUniongroupVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer versionCode) {
+        dbProvider.execute((TransactionStatus status) -> {
+            //todo 指定条件删除
+            this.uniongroupConfigureProvider.deleteUniongroupConfigresByEnterpriseIdAndGroupType(namespaceId, groupType, enterpriseId);
+            this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByEnterpriseIdAndGroupType(namespaceId, groupType, enterpriseId);
+            return null;
+        });
     }
 
     //策略算法一：源初算法
