@@ -23,6 +23,8 @@ import com.everhomes.rest.questionnaire.ListQuestionnairesResponse;
 import com.everhomes.rest.questionnaire.ListTargetQuestionnairesCommand;
 import com.everhomes.rest.questionnaire.ListTargetQuestionnairesResponse;
 
+import javax.servlet.http.HttpServletResponse;
+
 public interface QuestionnaireService {
 
 
@@ -58,4 +60,5 @@ public interface QuestionnaireService {
 
 	public CreateTargetQuestionnaireResponse createTargetQuestionnaire(CreateTargetQuestionnaireCommand cmd);
 
+    public void exportQuestionnaireResultDetail(GetQuestionnaireResultDetailCommand cmd, HttpServletResponse response);
 }

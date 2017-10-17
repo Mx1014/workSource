@@ -30,6 +30,8 @@ import com.everhomes.rest.questionnaire.ListQuestionnairesResponse;
 import com.everhomes.rest.questionnaire.ListTargetQuestionnairesCommand;
 import com.everhomes.rest.questionnaire.ListTargetQuestionnairesResponse;
 
+import javax.servlet.http.HttpServletResponse;
+
 @RestController
 @RequestMapping("/questionnaire")
 public class QuestionnaireController extends ControllerBase {
@@ -94,7 +96,8 @@ public class QuestionnaireController extends ControllerBase {
 	 */
 	@RequestMapping("exportQuestionnaireResultDetail")
 	@RestReturn(String.class)
-	public RestResponse exportQuestionnaireResultDetail(GetQuestionnaireResultDetailCommand cmd){
+	public RestResponse exportQuestionnaireResultDetail(GetQuestionnaireResultDetailCommand cmd, HttpServletResponse response){
+		questionnaireService.exportQuestionnaireResultDetail(cmd,response);
 		return new RestResponse();
 	}
 

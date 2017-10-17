@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.CommunityService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ActivationFlag;
@@ -19,12 +21,20 @@ import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.questionnaire.*;
 import com.everhomes.rest.user.NamespaceUserType;
+import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.util.TimSorter;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +52,8 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import scala.util.control.Exception;
+
+import javax.servlet.http.HttpServletResponse;
 
 @Component
 public class QuestionnaireServiceImpl implements QuestionnaireService {
@@ -84,6 +96,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Autowired
 	private LocaleStringService stringService;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(QuestionnaireServiceImpl.class);
 
 
 	@Override
@@ -612,6 +626,133 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			return null;
 		});
 	}
+
+	@Override
+	public void exportQuestionnaireResultDetail(GetQuestionnaireResultDetailCommand cmd, HttpServletResponse httpResponse) {
+		//生成excel并，输出到httpResponse
+		try(
+			XSSFWorkbook wb = new XSSFWorkbook();
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+		){
+			createXSSFWorkbook(wb,cmd);
+			wb.write(out);
+			DownloadUtil.download(out, httpResponse);
+		} catch (java.lang.Exception e) {
+			LOGGER.error("export error, e = {}", e);
+		}
+	}
+
+
+//	private XSSFRow createRow(XSSFSheet sheet,XSSFCellStyle style,List<QuestionnaireDTO> dtos, int rowNum) {
+//
+//	}
+
+	private XSSFRow createRow(XSSFSheet sheet,XSSFCellStyle style,QuestionnaireDTO dto, int rowNum) {
+		List<String> contents = new ArrayList<String >();
+
+		contents.add(stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN,"zh_CN","用户名"));
+		if(QuestionnaireTargetType.fromCode(dto.getTargetType()) == QuestionnaireTargetType.USER) {
+			contents.add(stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN, "zh_CN", "手机号"));
+		}
+		dto.getQuestions().forEach(r->{
+			QuestionType type = QuestionType.fromCode(r.getQuestionType());
+			if(type!=null){
+				contents.add(type.getDesc1()+r.getQuestionName());
+			}
+		});
+		return createRow(sheet,style,contents,rowNum);
+	}
+
+	private XSSFRow createRow(XSSFSheet sheet,XSSFCellStyle style,List<String> contents, int rowNum) {
+		XSSFRow row1 = sheet.createRow(rowNum);
+		row1.setRowStyle(style);
+		int nextColumnNum = 0;
+		for (String content : contents) {
+			row1.createCell(nextColumnNum++).setCellValue(content);
+		}
+		return row1;
+	}
+
+	/**
+	 *
+	 * by dengs 20170427
+	 */
+	private void createXSSFWorkbook(XSSFWorkbook wb, GetQuestionnaireResultDetailCommand cmd){
+		//创建style
+		XSSFCellStyle style = createStyle(wb);
+		//创建sheet
+		XSSFSheet sheet = createSheet(wb,style);
+
+		cmd.setPageAnchor(null);
+		cmd.setPageSize(100000);
+
+		GetTargetQuestionnaireDetailResponse targetQuestionnaireDetail = getTargetQuestionnaireDetail(ConvertHelper.convert(cmd, GetTargetQuestionnaireDetailCommand.class));
+		GetQuestionnaireResultDetailResponse detail = getQuestionnaireResultDetail(cmd);
+
+		//头
+		int startrow = 1;
+		createRow(sheet,style,targetQuestionnaireDetail.getQuestionnaire(),startrow++);
+		String stringAnswer = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN,"zh_CN","答案:");
+
+		//内容
+		for (QuestionnaireResultTargetDTO resultTargetDTO : detail.getQuestionnaireResultTargets()) {
+			List<String> contents = new ArrayList<String>();
+			contents.add(resultTargetDTO.getTargetName());
+			if(QuestionnaireTargetType.fromCode(targetQuestionnaireDetail.getQuestionnaire().getTargetType()) == QuestionnaireTargetType.USER) {
+				contents.add(resultTargetDTO.getTargetPhone());
+			}
+			List<QuestionnaireAnswer> answers = questionnaireAnswerProvider.listQuestionnaireAnswerByQuestionnaireId(cmd.getQuestionnaireId(),resultTargetDTO.getTargetType(),resultTargetDTO.getTargetId());
+			long questionId = Long.MAX_VALUE;
+			String content = "";
+			for (QuestionnaireAnswer answer : answers) {
+				QuestionType type = QuestionType.fromCode(answer.getQuestionType());
+				switch (type) {
+					case BLANK:
+						content += stringAnswer + answer.getOptionContent()+"\n";
+						break;
+					case RADIO:
+					case IMAGE_RADIO:
+					case CHECKBOX:
+					case IMAGE_CHECKBOX:
+						content += stringAnswer + answer.getOptionName()+"\n";
+						break;
+					default:
+						break;
+				}
+				if(questionId != answer.getQuestionId()){
+					contents.add(content);
+					content = "";
+					questionId = answer.getQuestionId();
+				}
+			}
+
+			createRow(sheet,style,contents,startrow++);
+		}
+
+	}
+
+	/**
+	 * by dengs,创建cell style,20170502
+	 */
+	private XSSFCellStyle createStyle(XSSFWorkbook wb){
+		XSSFCellStyle style = wb.createCellStyle();// 样式对象
+		Font font = wb.createFont();
+		font.setFontHeightInPoints((short)20);
+		font.setFontName("Courier New");
+
+		style.setFont(font);
+
+		return style;
+	}
+
+	/**
+	 * by dengs,创建sheet，20170502
+	 */
+	private XSSFSheet createSheet(XSSFWorkbook wb,XSSFCellStyle style) {
+		XSSFSheet sheet = wb.createSheet("sheet1");
+		return sheet;
+	}
+
 
 	@Override
 	public GetQuestionnaireResultDetailResponse getQuestionnaireResultDetail(GetQuestionnaireResultDetailCommand cmd) {

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javafx.scene.control.Tab;
@@ -146,6 +147,40 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(targetType))
 				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(targetId))
 				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireAnswer.class));
+	}
+
+	@Override
+	public List<QuestionnaireAnswer> listQuestionnaireAnswerByQuestionnaireId(Long qustionnaireId, String targetType,Long targetId) {
+		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_ANSWERS)
+				.leftOuterJoin(Tables.EH_QUESTIONNAIRE_QUESTIONS)
+				.on(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTION_ID.eq(Tables.EH_QUESTIONNAIRE_QUESTIONS.ID))
+
+				.leftOuterJoin(Tables.EH_QUESTIONNAIRE_OPTIONS)
+				.on(Tables.EH_QUESTIONNAIRE_ANSWERS.OPTION_ID.eq(Tables.EH_QUESTIONNAIRE_OPTIONS.ID))
+
+				.where(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID.eq(qustionnaireId))
+				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(targetType))
+				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(targetId))
+				.orderBy(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTION_ID.asc())
+				.fetch().map(r -> convert(r));
+	}
+
+	private QuestionnaireAnswer convert(Record r) {
+		QuestionnaireAnswer answer = new QuestionnaireAnswer();
+		answer.setTargetPhone(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_PHONE));
+		answer.setTargetFrom(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_FROM));
+		answer.setAnonymousFlag(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.ANONYMOUS_FLAG));
+		answer.setOptionName(r.getValue(Tables.EH_QUESTIONNAIRE_OPTIONS.OPTION_NAME));
+		answer.setOptionUri(r.getValue(Tables.EH_QUESTIONNAIRE_OPTIONS.OPTION_URI));
+		answer.setQuestionType(r.getValue(Tables.EH_QUESTIONNAIRE_QUESTIONS.QUESTION_TYPE));
+		answer.setCreateTime(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.CREATE_TIME));
+		answer.setCreatorUid(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.CREATOR_UID));
+		answer.setId(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.ID));
+		answer.setOptionContent(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.OPTION_CONTENT));
+		answer.setOptionId(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.OPTION_ID));
+		answer.setQuestionId(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTION_ID));
+		answer.setQuestionnaireId(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID));
+		return answer;
 	}
 
 	private EhQuestionnaireAnswersDao getReadWriteDao() {
