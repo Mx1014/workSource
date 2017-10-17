@@ -14,12 +14,13 @@ import java.sql.Timestamp;
  * <li>targetType: 目标类型，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireTargetType}</li>
  * <li>targetId: 目标id</li>
  * <li>collectFlag: 问卷状态（进行中，已结束），参考{@link com.everhomes.rest.questionnaire.QuestionnaireCollectFlagType}</li>
- * <li>answerTimeAnchor: 回答时间的锚点</li>
- * <li>publishTimeAnchor: 发布时间的锚点</li>
+ * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
 public class ListTargetQuestionnairesCommand {
+//	 * <li>answerTimeAnchor: 回答时间的锚点</li>
+// * <li>publishTimeAnchor: 发布时间的锚点</li>
 
 	private Integer namespaceId;
 
@@ -35,9 +36,10 @@ public class ListTargetQuestionnairesCommand {
 
 	private Timestamp nowTime = new Timestamp(System.currentTimeMillis());//用于和截止日期比较,定一个状态而已。
 
-	private Long answerTimeAnchor;
+//	private Long answerTimeAnchor;
 
-	private Long publishTimeAnchor;
+//	private Long publishTimeAnchor;
+	private String pageAnchor;
 
 	private Integer pageSize;
 
@@ -45,7 +47,7 @@ public class ListTargetQuestionnairesCommand {
 
 	}
 
-	public ListTargetQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte collectFlag, Timestamp nowTime, Long answerTimeAnchor, Long publishTimeAnchor, Integer pageSize) {
+	public ListTargetQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Byte collectFlag, Timestamp nowTime, String pageAnchor, Integer pageSize) {
 		this.namespaceId = namespaceId;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
@@ -53,25 +55,16 @@ public class ListTargetQuestionnairesCommand {
 		this.targetId = targetId;
 		this.collectFlag = collectFlag;
 		this.nowTime = nowTime;
-		this.answerTimeAnchor = answerTimeAnchor;
-		this.publishTimeAnchor = publishTimeAnchor;
+		this.pageAnchor = pageAnchor;
 		this.pageSize = pageSize;
 	}
 
-	public Long getAnswerTimeAnchor() {
-		return answerTimeAnchor;
+	public String getPageAnchor() {
+		return pageAnchor;
 	}
 
-	public void setAnswerTimeAnchor(Long answerTimeAnchor) {
-		this.answerTimeAnchor = answerTimeAnchor;
-	}
-
-	public Long getPublishTimeAnchor() {
-		return publishTimeAnchor;
-	}
-
-	public void setPublishTimeAnchor(Long publishTimeAnchor) {
-		this.publishTimeAnchor = publishTimeAnchor;
+	public void setPageAnchor(String pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 
 	public Integer getNamespaceId() {

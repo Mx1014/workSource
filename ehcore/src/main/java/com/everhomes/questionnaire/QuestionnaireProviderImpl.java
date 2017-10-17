@@ -71,14 +71,14 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), Questionnaire.class);
 	}
-	
+
 	@Override
 	public List<Questionnaire> listQuestionnaire() {
 		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRES)
 				.orderBy(Tables.EH_QUESTIONNAIRES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, Questionnaire.class));
 	}
-	
+
 	@Override
 	public List<Questionnaire> listQuestionnaireByOwner(ListQuestionnairesCommand cmd, Integer namespaceId,
 														int pageSize) {
@@ -116,16 +116,19 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 				.limit(pageSize)
 				.fetch().map(r -> ConvertHelper.convert(r, Questionnaire.class));
 	}
-	
+
 	@Override
 	public List<QuestionnaireDTO> listTargetQuestionnaireByOwner(Integer namespaceId, Timestamp nowTime, Byte collectFlag, Long UserId,
-															  Long answerFlagAnchor, Long publishTimeAnchor, int pageSize) {
+																 Byte answerFlagAnchor, Long publishTimeAnchor, int pageSize) {
 		Condition condition = DSL.trueCondition();
 		QuestionnaireCollectFlagType collectFlagType = QuestionnaireCollectFlagType.fromCode(collectFlag);
+		SortField<?>[] orderby = null;
 		if(collectFlagType == QuestionnaireCollectFlagType.COLLECTING){
-			condition = condition.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.lt(nowTime));
-		}else{
 			condition = condition.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.ge(nowTime));
+			orderby = new SortField<?>[]{getSortAnswerTimeField().desc(), Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc()};
+		}else{
+			condition = condition.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.lt(nowTime));
+			orderby = new SortField<?>[]{getSortAnswerTimeField().asc(), Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc()};
 		}
 		condition = condition.and(Tables.EH_QUESTIONNAIRES.USER_SCOPE.like("%"+UserId+"%"));
 		SelectOffsetStep<Record> limit = getReadOnlyContext().selectDistinct(getFieldLists())
@@ -133,15 +136,10 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 				//连接条件
 				.on(Tables.EH_QUESTIONNAIRES.ID.eq(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID))
 				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.CREATOR_UID.eq(UserId))
-
 				.where(Tables.EH_QUESTIONNAIRES.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_QUESTIONNAIRES.STATUS.eq(QuestionnaireStatus.ACTIVE.getCode()))
 				.and(condition)
-				//锚点处理，目前已为准
-				.and(answerFlagAnchor == null ? (
-						publishTimeAnchor == null ? DSL.trueCondition() : Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.lt(new Timestamp(publishTimeAnchor))
-				) : Tables.EH_QUESTIONNAIRE_ANSWERS.CREATE_TIME.lt(new Timestamp(answerFlagAnchor)))
-				.orderBy(getSortAnswerTime().desc(), Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc())
+				.orderBy(orderby)
 				.limit(pageSize);
 		LOGGER.debug("search sql = {}, bind value = {}",limit.getSQL(),limit.getBindValues());
 		return  limit.fetch().map(r -> {
@@ -153,16 +151,12 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 			dto.setQuestionnaireName(r.getValue(Tables.EH_QUESTIONNAIRES.QUESTIONNAIRE_NAME));
 			dto.setStatus(r.getValue(Tables.EH_QUESTIONNAIRES.STATUS));
 			dto.setDescription(r.getValue(Tables.EH_QUESTIONNAIRES.DESCRIPTION));
-			dto.setAnsweredFlag(Byte.valueOf(r.getValue(DSL.field("CASE ISNULL(eh_questionnaire_answers.create_time) WHEN 1 THEN 0 ELSE 2 END AS answeredFlag")).toString()));
+			dto.setAnsweredFlag(Byte.valueOf(r.getValue(getAnsweredFlagField()).toString()));
 			if(QuestionnaireCommonStatus.TRUE == QuestionnaireCommonStatus.fromCode(dto.getAnsweredFlag())){
-				dto.setCreateTime(((Timestamp)r.getValue(DSL.field("CASE ISNULL(eh_questionnaire_answers.create_time) WHEN 1 THEN NOW() ELSE eh_questionnaire_answers.create_time END AS answerTime"))).getTime());
+				dto.setCreateTime(((Timestamp)r.getValue(getAnsweredTimeField())).getTime());
 			}
 			return dto;
 		});
-	}
-
-	private Field<?> getSortAnswerTime() {
-		return DSL.field("answerTime");
 	}
 
 	private List<Field<?>> getFieldLists() {
@@ -170,11 +164,22 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 		for (Field<?> field : Tables.EH_QUESTIONNAIRES.fields()) {
 			lists.add(field);
 		}
-		lists.add(DSL.field("CASE ISNULL(eh_questionnaire_answers.create_time) WHEN 1 THEN 0 ELSE 2 END AS answeredFlag"));
-		lists.add(DSL.field("CASE ISNULL(eh_questionnaire_answers.create_time) WHEN 1 THEN NOW() ELSE eh_questionnaire_answers.create_time END AS answerTime"));
+		lists.add(getAnsweredFlagField());
+		lists.add(getAnsweredTimeField());
 		return lists;
 	}
 
+	public Field<?> getAnsweredFlagField(){
+		return  DSL.field("CASE ISNULL(eh_questionnaire_answers.create_time) WHEN 1 THEN 0 ELSE 2 END AS answeredFlag");
+	}
+
+	public Field<?> getAnsweredTimeField(){
+		return DSL.field("CASE ISNULL(eh_questionnaire_answers.create_time) WHEN 1 THEN NOW() ELSE eh_questionnaire_answers.create_time END AS answerTime");
+	}
+
+	private Field<?> getSortAnswerTimeField() {
+		return DSL.field("answerTime");
+	}
 
 	private EhQuestionnairesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());

@@ -21,6 +21,6 @@ public interface QuestionnaireProvider {
 												 int pageSize);
 
 	List<QuestionnaireDTO> listTargetQuestionnaireByOwner(Integer namespaceId, Timestamp nowTime, Byte collectFlag, Long UserId,
-														  Long answerFlagAnchor, Long publishTimeAnchor, int pageSize);
+														  Byte answerFlagAnchor, Long publishTimeAnchor, int pageSize);
 
 }

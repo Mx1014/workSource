@@ -41,6 +41,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import scala.util.control.Exception;
 
 @Component
 public class QuestionnaireServiceImpl implements QuestionnaireService {
@@ -342,7 +343,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		if (uri != null && uri.length() > 0) {
 			try {
 				return contentServerService.parserUri(uri, "", UserContext.current().getUser().getId());
-			} catch (Exception e) {
+			} catch (Throwable e) {
 
 			}
 		}
@@ -561,7 +562,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 					case USER:
 						try {
 							Long.valueOf(dto.getRange());
-						}catch (Exception e){
+						}catch (Throwable e){
 							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 									"Invalid parameters,rangeType = "+dto.getRangeType()+", range = "+dto.getRange());
 						}
@@ -668,26 +669,79 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Override
 	public ListTargetQuestionnairesResponse listTargetQuestionnaires(ListTargetQuestionnairesCommand cmd) {
-//		checkOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-
 		checkListTargetQuestionnairesCommand(cmd);
-		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<QuestionnaireDTO> questionnaires = questionnaireProvider.listTargetQuestionnaireByOwner(cmd.getNamespaceId(),cmd.getNowTime(),
-				cmd.getCollectFlag(),UserContext.current().getUser().getId(),cmd.getAnswerTimeAnchor(),cmd.getPublishTimeAnchor(),pageSize+1);
-		Long answerFlagAnchor = null;
-		Long publishTimeAnchor = null;
-		if (questionnaires.size() > pageSize) {
-			questionnaires.remove(questionnaires.size()-1);
-			answerFlagAnchor = questionnaires.get(questionnaires.size()-1).getCreateTime();
-			publishTimeAnchor = questionnaires.get(questionnaires.size()-1).getPublishTime();
+		Byte answeredFlagAnchor  = null;
+		Long publishTimeAnchor  = null;
+		if(cmd.getPageAnchor()!=null){
+			answeredFlagAnchor = Byte.valueOf(String.valueOf(cmd.getPageAnchor()).substring(0,1));
+			publishTimeAnchor = Long.valueOf(String.valueOf(cmd.getPageAnchor()).substring(1));
 		}
-		return new ListTargetQuestionnairesResponse(answerFlagAnchor, publishTimeAnchor, questionnaires);
+		int questionnariePageSize = configurationProvider.getIntValue("questionnariePageSize",500);
+		List<QuestionnaireDTO> questionnaires = questionnaireProvider.listTargetQuestionnaireByOwner(cmd.getNamespaceId(),cmd.getNowTime(),
+				cmd.getCollectFlag(),UserContext.current().getUser().getId(),answeredFlagAnchor,publishTimeAnchor,questionnariePageSize);
+		return new ListTargetQuestionnairesResponse(generateNextPageAnchor(cmd,questionnaires,pageSize,answeredFlagAnchor,publishTimeAnchor), questionnaires);
+	}
+
+	//业务层分页
+	private String generateNextPageAnchor(ListTargetQuestionnairesCommand cmd,List<QuestionnaireDTO> questionnaires, Integer pageSize, Byte answeredFlagAnchor, Long publishTimeAnchor) {
+		List<QuestionnaireDTO> qds = new ArrayList<QuestionnaireDTO>();
+		if(questionnaires.size()<pageSize){
+			return null;
+		}
+		QuestionnaireDTO dto = null;
+		if(answeredFlagAnchor == null && publishTimeAnchor == null){
+			if(pageSize>=questionnaires.size()){
+				pageSize = questionnaires.size();
+			}else {
+				dto = questionnaires.get(pageSize);
+			}
+			qds.addAll(questionnaires.subList(0,pageSize));
+			questionnaires.clear();
+			questionnaires.addAll(qds);
+			if(dto == null) {
+				return null;
+			}
+			String nextPageAnchor = String.valueOf(dto.getAnsweredFlag()) + String.valueOf(dto.getPublishTime());
+			return nextPageAnchor;
+		}
+
+		for (int i = 0; i < questionnaires.size(); i++) {
+			if(questionnaires.get(i).getAnsweredFlag().byteValue() == answeredFlagAnchor
+					&& questionnaires.get(i).getPublishTime().longValue() == publishTimeAnchor){
+				int anchor = pageSize+i;
+				if(anchor>=questionnaires.size()){
+					anchor = questionnaires.size();
+				}else {
+					dto = questionnaires.get(anchor);
+				}
+				qds.addAll(questionnaires.subList(i,anchor));
+				questionnaires.clear();
+				questionnaires.addAll(qds);
+				if(dto == null) {
+					return null;
+				}
+				String nextPageAnchor = String.valueOf(dto.getAnsweredFlag()) + String.valueOf(dto.getPublishTime());
+				return nextPageAnchor;
+			}
+		}
+		return null;
 	}
 
 	private void checkListTargetQuestionnairesCommand(ListTargetQuestionnairesCommand cmd) {
 		checkQuestionnaireTargetType(cmd.getTargetType());
 		checkQuestionnaireCollectFlag(cmd.getCollectFlag());
+		if(cmd.getPageAnchor()!=null){
+			String value = String.valueOf(cmd.getPageAnchor());
+			if(value.length() != 14 || !(value.startsWith("0")|| value.startsWith("2"))){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Invalid parameters, invaild pageAnchor = " + cmd.getPageAnchor() +", pageAnchor should length = 14, start with 0 or 2");
+			}
+		}
+		int questionnariePageSize = configurationProvider.getIntValue("questionnariePageSize",500);
+		if(cmd.getPageSize()!=null && cmd.getPageSize()>questionnariePageSize){
+			cmd.setPageSize(questionnariePageSize);
+		}
 		cmd.setNowTime(new Timestamp(System.currentTimeMillis()));
 	}
 
