@@ -112,7 +112,6 @@ import com.everhomes.rest.organization.OperationType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
@@ -132,7 +131,6 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import scala.Int;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -2324,7 +2322,7 @@ public class PunchServiceImpl implements PunchService {
 				return null;
 			}
 			//看是循环timerule找当天的timeRule
-			List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId());
+			List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId(), pr.getStatus());
 			if(null != timeRules)
 				for(PunchTimeRule timeRule :  timeRules){
 					Integer openWeek = Integer.parseInt(timeRule.getOpenWeekday(), 2);
@@ -4969,7 +4967,53 @@ public class PunchServiceImpl implements PunchService {
 			return false;
 		return true;
 	}
-    private static int refreshGap = 15;
+	/**
+	 * 每天早上5点50,在前一天数据刷完了的时候,进行考勤修改次日生效的处理
+	 * */
+	@Scheduled(cron = "1 50 5 * * ?")
+	@Override
+	public void dayRefreshPunchGroupScheduled() {
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			// TODO: 2017/10/17 把状态为新增和更新的找出来,然后置状态为使用中,更新的把之前的正常废弃.然后用组织架构的接口改version为0
+			Set<Organization> orgs = new HashSet<>();
+			List<Byte> statusList = new ArrayList<>();
+			statusList.add(PunchRuleStatus.MODIFYED.getCode());
+			statusList.add(PunchRuleStatus.NEW.getCode());
+			List<PunchRule> punchRules = punchProvider.listPunchRulesByStatus(statusList);
+			for (PunchRule pr : punchRules) {
+				Organization org = organizationProvider.findOrganizationById(pr.getOwnerId());
+				orgs.add(org);
+				//对ptr表,psd表的处理
+				processTimeRule2Active(pr);
+
+				pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
+				punchProvider.updatePunchRule(pr);
+			}
+			//把uniongroup相关表version改为0
+			for (Organization org : orgs) {
+				//把1版本和0版本互换
+				uniongroupService.switchUnionGroupVersion(org.getNamespaceId(), org.getId(), UniongroupType.PUNCHGROUP.getCode(), 1);
+				//删除1版本(就是之前的0版本)
+				uniongroupService.deleteUniongroupVersion(org.getNamespaceId(), org.getId(), UniongroupType.PUNCHGROUP.getCode(), 1);
+			}
+		}
+	}
+
+	private void processTimeRule2Active(PunchRule pr) {
+		//正常的删除
+		deletePunchTimeRules(pr.getPunchOrganizationId(), PunchRuleStatus.ACTIVE.getCode());
+		//别的置为正常
+		List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId(), pr.getStatus());
+		if (null != timeRules) {
+			for (PunchTimeRule timeRule : timeRules) {
+				timeRule.setStatus(PunchRuleStatus.ACTIVE.getCode());
+				punchProvider.updatePunchTimeRule(timeRule);
+			}
+		}
+	}
+
+
+	private static int refreshGap = 15;
 	/**
 	 * 每15分轮询刷打卡记录
 	 * 1.刷punchdate为前一天的
@@ -4980,12 +5024,11 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void dayRefreshLogScheduled() {
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
-			coordinationProvider.getNamedLock(CoordinationLocks.PUNCH_DAY_SCHEDULE.getCode()).tryEnter(() -> {
-		        Date runDate = DateHelper.currentGMTTime();
-		        dayRefreshLogScheduled(runDate);
-			});
+			Date runDate = DateHelper.currentGMTTime();
+			dayRefreshLogScheduled(runDate);
 		}
     }
+
     @Override
     public void testDayRefreshLogs(Long runDate){
         dayRefreshLogScheduled(new Date(runDate));
@@ -6269,9 +6312,10 @@ public class PunchServiceImpl implements PunchService {
 	private void savePunchTimeRule(PunchGroupDTO punchGroupDTO, PunchRule pr) {
 		Long punchOrgId = pr.getPunchOrganizationId();
 		//timeRules 不删除,等第二天早上刷新到删除状态
-//		punchProvider.deletePunchTimeRuleByPunchOrgId(punchOrgId);
-		deletePunchTimeRules(punchOrgId);
-		punchProvider.deletePunchSpecialDaysByPunchOrgId(punchOrgId);
+//		deletePunchTimeRuleNotAbleByPunchOrgId(punchOrgId);
+		//删除眸状态的 timeRules -- 更新的时候删除次日生效状态的timeRules
+		deletePunchTimeRules(punchOrgId,pr.getStatus());
+//
 //		punchProvider.deletePunchTimeIntervalByPunchRuleId(pr.getId());
         List<PunchTimeRule> ptrs = new ArrayList<>();
         if(null != punchGroupDTO.getTimeRules()){
@@ -6316,9 +6360,11 @@ public class PunchServiceImpl implements PunchService {
         }
 
         //特殊日期
+		punchProvider.deletePunchSpecialDaysByPunchOrgId(punchOrgId);
         if(null != punchGroupDTO.getSpecialDays()){
         	for(PunchSpecialDayDTO specialDayDTO : punchGroupDTO.getSpecialDays()){
 				PunchSpecialDay psd = ConvertHelper.convert(specialDayDTO, PunchSpecialDay.class);
+				psd.setStatus(pr.getStatus());
 				psd.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
         		psd.setOwnerId(punchGroupDTO.getOwnerId());
         		psd.setPunchRuleId(pr.getId());
@@ -6332,30 +6378,6 @@ public class PunchServiceImpl implements PunchService {
 					//固定班次 默认第二天4点
 					ptr2.setDaySplitTimeLong(28*3600*1000L);
 					saveTimerRuleIntervals(timeRule,ptr2);
-//	        		if(timeRule.getPunchTimeIntervals().size()==1){
-//	        			ptr2.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
-//	        			ptr2.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
-//	        			ptr2.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
-//	        			punchProvider.createPunchTimeRule(ptr2);
-//	        		}else if(timeRule.getPunchTimeIntervals().size()==2){
-//	        			ptr2.setStartEarlyTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime());
-//	        			ptr2.setStartLateTimeLong(timeRule.getPunchTimeIntervals().get(0).getArriveTime()+(timeRule.getFlexTime()==null?0:timeRule.getFlexTime()));
-//	        			ptr2.setNoonLeaveTimeLong(timeRule.getPunchTimeIntervals().get(0).getLeaveTime());
-//	        			ptr2.setAfternoonArriveTimeLong(timeRule.getPunchTimeIntervals().get(1).getArriveTime());
-//	        			ptr2.setWorkTimeLong(timeRule.getPunchTimeIntervals().get(1).getLeaveTime() - timeRule.getPunchTimeIntervals().get(0).getArriveTime());
-//	        			punchProvider.createPunchTimeRule(ptr2);
-//	        		}else{
-//	        			punchProvider.createPunchTimeRule(ptr2);
-//	        			for(PunchTimeIntervalDTO interval:timeRule.getPunchTimeIntervals()){
-//	        				PunchTimeInterval ptInterval = ConvertHelper.convert(ptr2, PunchTimeInterval.class);
-//	        				ptInterval.setArriveTimeLong(interval.getArriveTime());
-//	        				ptInterval.setLeaveTimeLong(interval.getLeaveTime());
-//	        				ptInterval.setPunchRuleId(pr.getId());
-//	        				ptInterval.setTimeRuleId(ptr2.getId());
-//	        				punchProvider.createPunchTimeInterval(ptInterval);
-//
-//	        			}
-//	        		}
 	        		psd.setTimeRuleId(ptr2.getId());
 				}
 				punchProvider.createPunchSpecialDay(psd);
@@ -6424,10 +6446,11 @@ public class PunchServiceImpl implements PunchService {
 		return schedulings;
 	}
 
-	private void deletePunchTimeRules(Long punchOrgId) {
-		List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(), punchOrgId);
+	private void deletePunchTimeRules(Long punchOrgId, Byte status) {
+		List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(), punchOrgId,status);
 		if (null != timeRules) {
 			for (PunchTimeRule timeRule : timeRules) {
+
 				timeRule.setStatus(PunchRuleStatus.DELETED.getCode());
 				punchProvider.updatePunchTimeRule(timeRule);
 			}
@@ -6629,7 +6652,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 		}
 		//打卡时间
-		List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),r.getId());
+		List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),r.getId(), pr.getStatus());
 		if(null != timeRules && timeRules.size() > 0)
 			dto.setTimeRules(timeRules.stream().map(r1 -> {
 				PunchTimeRuleDTO dto1 = convertPunchTimeRule2DTO(r1) ;
@@ -6819,21 +6842,21 @@ public class PunchServiceImpl implements PunchService {
 						ErrorCodes.ERROR_INVALID_PARAMETER,
 						"Invalid rule type parameter in the command");
 			//获取考勤组
-			Long t0 = System.currentTimeMillis();
-			LOGGER.debug("saveUnion Time t0 "+  System.currentTimeMillis());
+//			Long t0 = System.currentTimeMillis();
+//			LOGGER.debug("saveUnion Time t0 "+  System.currentTimeMillis());
 			Organization punchOrg = this.organizationProvider.findOrganizationById(cmd.getId());
 			punchOrg.setName(cmd.getGroupName());
 			organizationProvider.updateOrganization(punchOrg);
-			Long t1 = System.currentTimeMillis();
-			LOGGER.debug("saveUnion Time1 "+  t1 + "cost: "+ (t1-t0));
+//			Long t1 = System.currentTimeMillis();
+//			LOGGER.debug("saveUnion Time1 "+  t1 + "cost: "+ (t1-t0));
 			PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
 			Integer versionCode = 0;
 			if (pr.getStatus().equals(PunchRuleStatus.NEW.getCode()) || pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
 				versionCode = 1;
 			}
 			List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),versionCode);
-			Long t2 = System.currentTimeMillis();
-			LOGGER.debug("saveUnion Time2 "+  t2 + "cost: "+ (t2-t1) + "save start");
+//			Long t2 = System.currentTimeMillis();
+//			LOGGER.debug("saveUnion Time2 "+  t2 + "cost: "+ (t2-t1) + "save start");
 
 
 			//添加关联

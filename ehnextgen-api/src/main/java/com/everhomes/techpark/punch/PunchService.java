@@ -13,6 +13,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.techpark.punch.*;
 
 import com.everhomes.rest.techpark.punch.admin.*;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -114,6 +115,9 @@ public interface PunchService {
 	public ListPunchDetailsResponse listPunchDetails(ListPunchDetailsCommand cmd);
 
 	public HttpServletResponse exportPunchStatistics(ListPunchCountCommand cmd, HttpServletResponse response);
+
+	@Scheduled(cron = "1 50 5 * * ?")
+	void dayRefreshPunchGroupScheduled();
 
 	void dayRefreshLogScheduled();
 
