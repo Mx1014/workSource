@@ -367,6 +367,9 @@ public class CustomerServiceImpl implements CustomerService {
 	    		updateCustomer.setTrackingName(detail.getContactName());
 	    	}
         }
+        if(updateCustomer.getTrackingUid() == -1){
+        	updateCustomer.setTrackingName(null);
+        }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         enterpriseCustomerSearcher.feedDoc(updateCustomer);
         
@@ -1738,6 +1741,12 @@ public class CustomerServiceImpl implements CustomerService {
 		//checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
         customer.setTrackingUid(cmd.getTrackingUid());
+        if(cmd.getTrackingUid() != -1){
+	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getTrackingUid());
+	    	if(null != detail && null != detail.getContactName()){
+	    		customer.setTrackingName(detail.getContactName());
+	    	}
+        }
         enterpriseCustomerProvider.allotEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
 	}
@@ -1752,6 +1761,7 @@ public class CustomerServiceImpl implements CustomerService {
                         "enterprise customer do not contains trackingUid or not the same uid");
 		}
 		customer.setTrackingUid(-1l);
+		customer.setTrackingName(null);
         enterpriseCustomerProvider.giveUpEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
 	}
