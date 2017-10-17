@@ -1142,10 +1142,11 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 		command.setNamespaceId(CustomerTrackingTemplateCode.NAMESPACE);
 		command.setModuleName(CustomerTrackingTemplateCode.MODULE_NAME);
 		command.setGroupPath(CustomerTrackingTemplateCode.GROUP_PATH);
+		command.setCommunityId(customer.getCommunityId());
 		List<FieldDTO> fields = fieldService.listFields(command);
 		String  getPrefix = "get";
 		StringBuffer buffer = new StringBuffer();
-		if(null != null && fields.size() > 0){
+		if(null != fields && fields.size() > 0){
 			for(FieldDTO field : fields){
 				String getter = getPrefix + StringUtils.capitalize(field.getFieldName());
 				Method methodNew = ReflectionUtils.findMethod(customer.getClass(), getter);
@@ -1167,6 +1168,16 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 						String  newData = objNew == null ? "null" : objNew.toString();
 						String  oldData = objOld == null ? "null" : objOld.toString();
 						if(field.getFieldName().lastIndexOf("ItemId") > -1){
+							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+					        if(levelItemNew != null) {
+					        	newData = levelItemNew.getItemDisplayName();
+					        }
+					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),customer.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+					        if(levelItemOld != null) {
+					        	oldData = levelItemOld.getItemDisplayName();
+					        }
+						}
+						if("propertyType".equals(field.getFieldName())){
 							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
 					        if(levelItemNew != null) {
 					        	newData = levelItemNew.getItemDisplayName();
