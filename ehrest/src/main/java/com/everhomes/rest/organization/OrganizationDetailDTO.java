@@ -6,6 +6,7 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.community.admin.CommunityOrgMemberDetailDTO;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
@@ -47,9 +48,7 @@ import com.everhomes.util.StringHelper;
  *     <li>adminMembers: 管理员列表，参考{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
  *     <li>website: 企业官网</li>
  *     <li>unifiedSocialCreditCode: 统一社会信用代码</li>
- *     <li>executiveTag: 否高管</li>
- *     <li>positionTag: 职位</li>
- *     <li>organizationMemberDetailId: 公司用户detailId</li>
+ *     <li>communityOrgMemberDetailDTO: 用户企业信息 {@link com.everhomes.rest.community.admin.CommunityOrgMemberDetailDTO}</li>
  * </ul>
  */
 public class OrganizationDetailDTO {
@@ -114,11 +113,7 @@ public class OrganizationDetailDTO {
 
 	private String unifiedSocialCreditCode;
 
-	private Byte executiveTag;
-
-	private String positionTag;
-
-	private Long organizationMemberDetailId;
+	private CommunityOrgMemberDetailDTO communityOrgMemberDetailDTO;
 
 	public String getUnifiedSocialCreditCode() {
 		return unifiedSocialCreditCode;
@@ -455,6 +450,13 @@ public class OrganizationDetailDTO {
 		this.latitude = latitude;
 	}
 
+	public CommunityOrgMemberDetailDTO getCommunityOrgMemberDetailDTO() {
+		return communityOrgMemberDetailDTO;
+	}
+
+	public void setCommunityOrgMemberDetailDTO(CommunityOrgMemberDetailDTO communityOrgMemberDetailDTO) {
+		this.communityOrgMemberDetailDTO = communityOrgMemberDetailDTO;
+	}
 
 	@Override
 	public String toString() {
@@ -479,29 +481,6 @@ public class OrganizationDetailDTO {
 		this.communityName = communityName;
 	}
 
-	public Byte getExecutiveTag() {
-		return executiveTag;
-	}
-
-	public void setExecutiveTag(Byte executiveTag) {
-		this.executiveTag = executiveTag;
-	}
-
-	public String getPositionTag() {
-		return positionTag;
-	}
-
-	public void setPositionTag(String positionTag) {
-		this.positionTag = positionTag;
-	}
-
-	public Long getOrganizationMemberDetailId() {
-		return organizationMemberDetailId;
-	}
-
-	public void setOrganizationMemberDetailId(Long organizationMemberDetailId) {
-		this.organizationMemberDetailId = organizationMemberDetailId;
-	}
 
 	@Override
 	public boolean equals(Object o) {

@@ -28,7 +28,6 @@ import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.*;
 import com.everhomes.organization.*;
-import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.point.UserLevel;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -1757,10 +1756,14 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 			detailDto.setAddresses(addressDtos);
 
+			//增加返回用户在企业中是否是高管、职位的信息  add by yanjun 20171017
 			OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
 			if(memberDetail != null){
-				detailDto.setExecutiveTag(memberDetail.getExecutiveTag());
-				detailDto.setPositionTag(memberDetail.getPositionTag());
+				CommunityOrgMemberDetailDTO communityOrgMemberDetailDTO = new CommunityOrgMemberDetailDTO();
+				communityOrgMemberDetailDTO.setDetailId(memberDetail.getId());
+				communityOrgMemberDetailDTO.setExecutiveFlag(memberDetail.getExecutiveTag());
+				communityOrgMemberDetailDTO.setPositionTag(memberDetail.getPositionTag());
+				detailDto.setCommunityOrgMemberDetailDTO(communityOrgMemberDetailDTO);
 			}
 
 			if (null != organization && organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())
@@ -2882,11 +2885,11 @@ public class CommunityServiceImpl implements CommunityService {
 		dbProvider.execute((status) -> {
 			userProvider.updateUser(user);
 			if(cmd.getOrganizations() != null){
-				for (OrganizationDetailDTO dto: cmd.getOrganizations()){
-					OrganizationMemberDetails organizationMemberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getOrganizationMemberDetailId());
+				for (CommunityOrgMemberDetailDTO dto: cmd.getOrganizations()){
+					OrganizationMemberDetails organizationMemberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(dto.getDetailId());
 
 					if(organizationMemberDetail != null){
-						organizationMemberDetail.setExecutiveTag(dto.getExecutiveTag());
+						organizationMemberDetail.setExecutiveTag(dto.getExecutiveFlag());
 						organizationMemberDetail.setPositionTag(dto.getPositionTag());
 						organizationProvider.updateOrganizationMemberDetails(organizationMemberDetail, organizationMemberDetail.getId());
 					}
