@@ -25,7 +25,7 @@ public class LeaseProjectDTO {
     private String trafficDescription;
     private String posterUri;
     private String posterUrl;
-
+    @ItemType(Long.class)
     private List<Long> communityIds;
     @ItemType(BuildingForRentAttachmentDTO.class)
     private List<BuildingForRentAttachmentDTO> attachments;
