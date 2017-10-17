@@ -702,9 +702,10 @@ public class NewsServiceImpl implements NewsService {
 			if (newsTag.getDeleteFlag()!=(byte)1) //没被删除
 				t.setNewsTagId(newsTag.getId()); //子标签id
 			newsTag = newsProvider.findNewsTagById(newsTag.getParentId());
-			t.setId(newsTag.getId()); //父标签id
+			if (newsTag.getDeleteFlag()!=(byte)1) //没被删除
+				t.setId(newsTag.getId()); //父标签id
 			return t;
-		}).collect(Collectors.toMap(NewsTagVals::getId,NewsTagVals::getNewsTagId));
+		}).filter(r-> r.getId()!=null).collect(Collectors.toMap(NewsTagVals::getId,NewsTagVals::getNewsTagId));
 
 		newsTags.stream().forEach(r->{
 			List<NewsTag> tags = newsProvider.listNewsTag(r.getOwnerType(),r.getOwnerId(),null,r.getId(),
