@@ -560,7 +560,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<Community> list = this.communityProvider.listCommunitiesByKeyWord(locator, pageSize+1,cmd.getKeyword());
+		List<Community> list = this.communityProvider.listCommunitiesByKeyWord(locator, pageSize+1,cmd.getKeyword(), cmd.getNamespaceId(), cmd.getCommunityType());
 
 		ListCommunitiesByKeywordCommandResponse response = new ListCommunitiesByKeywordCommandResponse();
 		if(list != null && list.size() > pageSize){
@@ -3442,4 +3442,32 @@ public class CommunityServiceImpl implements CommunityService {
         }
         return new CommunityAuthPopupConfigDTO(Byte.valueOf(conf.getValue()));
     }
+	
+		@Override
+	public ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd) {
+		if(cmd.getPageAnchor()==null)
+			cmd.setPageAnchor(0L);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
+		ListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<Community> list = this.communityProvider.listCommunitiesByOrgId(locator, pageSize+1,cmd.getOrgId(), cmd.getKeyword());
+
+		ListCommunitiesByOrgIdResponse response = new ListCommunitiesByOrgIdResponse();
+		if(list != null && list.size() > pageSize){
+			list.remove(list.size()-1);
+			response.setNextPageAnchor(list.get(list.size()-1).getId());
+		}
+		if(list != null){
+			List<CommunityDTO> resultList = list.stream().map((c) -> {
+				return ConvertHelper.convert(c, CommunityDTO.class);
+			}).collect(Collectors.toList());
+
+			response.setList(resultList);
+		}
+
+		return response;
+
+	}
 }
+

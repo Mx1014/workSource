@@ -21,11 +21,15 @@ import java.util.Map;
  * <li>gender: 联系人性别：0-保密, 1-男性, 2-女性</li>
  * <li>jobPosition: 联系人岗位 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>departments: 联系人部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * <li>regionCode: 区号</li>
  * <li>contactToken: 联系人号码</li>
  * <li>email: 联系人邮箱</li>
+ * <li>visibleFlag: 隐私保护: 0-显示(不受保护) 1-隐藏(保护) 参考{@link com.everhomes.rest.organization.VisibleFlag} </li>
  * </ul>
  */
 public class SceneContactV2DTO {
+
+    private Long organizationId;
 
     private Long userId;
 
@@ -49,12 +53,23 @@ public class SceneContactV2DTO {
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> departments;
 
+    private String regionCode;
+
     private String contactToken;
 
     private String email;
 
+    private Byte visibleFlag;
 
     public SceneContactV2DTO() {
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     public Long getUserId() {
@@ -137,6 +152,14 @@ public class SceneContactV2DTO {
         this.departments = departments;
     }
 
+    public String getRegionCode() {
+        return regionCode;
+    }
+
+    public void setRegionCode(String regionCode) {
+        this.regionCode = regionCode;
+    }
+
     public String getContactToken() {
         return contactToken;
     }
@@ -153,6 +176,13 @@ public class SceneContactV2DTO {
         this.email = email;
     }
 
+    public Byte getVisibleFlag() {
+        return visibleFlag;
+    }
+
+    public void setVisibleFlag(Byte visibleFlag) {
+        this.visibleFlag = visibleFlag;
+    }
 
     @Override
     public String toString() {

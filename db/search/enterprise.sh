@@ -31,6 +31,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterprise" -d '
             "createTime":{"type":"date"},
 	    "communityId":{"type":"long"},
 	    "addresses":{"type":"string", "analyzer": "standard_edge"},
+	    "buildings":{"type":"string", "index": "not_analyzed"},
 	    "setAdminFlag":{"type":"integer"},
 	    "organizationType":{"type":"string", "index":"not_analyzed"}
         }

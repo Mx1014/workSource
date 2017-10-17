@@ -1851,14 +1851,12 @@ public class ApprovalServiceImpl implements ApprovalService {
 			orgCommoand.setId(cmd.getDepartmentId());
 		}
 		orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-//<<<<<<< HEAD
 //
 //		List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(cmd.getKeyword(), orgCommoand,
 //				ContactSignUpStatus.SIGNEDUP.getCode(), locator, 10000);
-//=======
-		
-		List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(cmd.getKeyword(),orgCommoand, ContactSignUpStatus.SIGNEDUP.getCode(),null, locator, 10000);
-//>>>>>>> 3.11.0
+
+		List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(cmd.getNamespaceId(),
+				cmd.getKeyword(),orgCommoand, ContactSignUpStatus.SIGNEDUP.getCode(),null, locator, 10000);
 		processPinyin(organizationMembers);
 		organizationMembers.sort((o1, o2) -> {
 			return o1.getFullInitial().compareTo(o2.getFullInitial());
@@ -1946,18 +1944,17 @@ public class ApprovalServiceImpl implements ApprovalService {
 		Organization orgCommoand = new Organization();
 		orgCommoand.setId(ownerId);
 		orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-//<<<<<<< HEAD
 //
 //		List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(nickName, orgCommoand,
 //				ContactSignUpStatus.SIGNEDUP.getCode(), locator, 10000);
 //
 //		return organizationMembers.stream().map(o -> o.getTargetId()).collect(Collectors.toList());
-//=======
-		
-		List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(nickName, orgCommoand, ContactSignUpStatus.SIGNEDUP.getCode(),null, locator, 10000);
+
+		List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(UserContext.getCurrentNamespaceId(),
+				nickName, orgCommoand, ContactSignUpStatus.SIGNEDUP.getCode(),null, locator, 10000);
 		
 		return organizationMembers.stream().map(o->o.getTargetId()).collect(Collectors.toList());
-//>>>>>>> 3.11.0
+
 	}
 
 	public ApprovalRequestHandler getApprovalRequestHandler(Byte approvalType) {
