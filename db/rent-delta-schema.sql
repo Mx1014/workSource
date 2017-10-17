@@ -1,3 +1,30 @@
+
+
+CREATE TABLE `eh_lease_projects` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `project_id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `city_id` bigint(20) NOT NULL COMMENT 'city id in region table',
+  `city_name` varchar(64) DEFAULT NULL COMMENT 'redundant for query optimization',
+  `area_id` bigint(20) NOT NULL COMMENT 'area id in region table',
+  `area_name` varchar(64) DEFAULT NULL COMMENT 'redundant for query optimization',
+  `address` varchar(512) DEFAULT NULL,
+  `longitude` double DEFAULT NULL,
+  `latitude` double DEFAULT NULL,
+  `contact_name` varchar(128) DEFAULT NULL,
+  `contact_phone` varchar(128) DEFAULT NULL COMMENT 'the phone number',
+  `description` text,
+  `traffic_description` text,
+  `poster_uri` varchar(256) DEFAULT NULL,
+  `extra_info_json` text,
+
+  `creator_uid` bigint(20) DEFAULT NULL COMMENT 'user who suggested the creation',
+  `create_time` datetime DEFAULT NULL,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- 增加咨询电话 by st.zheng
 ALTER TABLE `eh_news` ADD COLUMN `phone` BIGINT(20) NULL DEFAULT '0' AFTER `source_url`;
 
