@@ -1198,6 +1198,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
         context.update(Tables.EH_ENTERPRISE_CUSTOMERS)
         	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_UID, customer.getTrackingUid())
+        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_NAME,customer.getTrackingName())
         	   .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(customer.getId()))
         	   .execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
@@ -1211,6 +1212,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, customer.getId()));
         context.update(Tables.EH_ENTERPRISE_CUSTOMERS)
         	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_UID, -1l)
+        	   .set(Tables.EH_ENTERPRISE_CUSTOMERS.TRACKING_NAME, "")
         	   .where(Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(customer.getId()))
         	   .execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
