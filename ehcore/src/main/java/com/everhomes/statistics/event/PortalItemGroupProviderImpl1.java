@@ -59,7 +59,9 @@ public class PortalItemGroupProviderImpl1 implements PortalItemGroupProvider {
     }
 
     private String getGroupName(LayoutItemGroup group) {
-        if (group.groupName == null || group.groupName.isEmpty()) {
+        if (group.title != null && group.title.length() > 0) {
+            return group.title;
+        } else if (group.groupName == null || group.groupName.isEmpty()) {
             int code = 0;
             Widget widget = Widget.fromCode(group.widget);
             if (widget != null) {
@@ -111,6 +113,7 @@ public class PortalItemGroupProviderImpl1 implements PortalItemGroupProvider {
     }
 
     public static class LayoutItemGroup {
+        String title;
         String groupName;
         String widget;
         Integer defaultOrder;

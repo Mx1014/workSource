@@ -19,6 +19,8 @@ import java.util.List;
  */
 public class CreateClearanceOperatorCommand {
 
+    private Integer namespaceId;
+
     @NotNull private Long organizationId;
     @NotNull private Long communityId;
     @NotNull private Long parkingLotId;
@@ -26,6 +28,14 @@ public class CreateClearanceOperatorCommand {
     private String operatorType;
     @ItemType(Long.class)
     private List<Long> userIds;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getParkingLotId() {
         return parkingLotId;

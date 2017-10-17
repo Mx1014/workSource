@@ -18,6 +18,7 @@ import javax.validation.constraints.Size;
  */
 public class CreateClearanceLogCommand {
 
+    private Integer namespaceId;
     @NotNull private Long organizationId;
     @NotNull private Long communityId;
     @NotNull private Long parkingLotId;
@@ -25,6 +26,14 @@ public class CreateClearanceLogCommand {
     private String plateNumber;
     @NotNull private Long clearanceTime;
     private String remarks;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getParkingLotId() {
         return parkingLotId;

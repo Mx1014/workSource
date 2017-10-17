@@ -40,7 +40,8 @@ public class CreateLeasePromotionCommand {
 	private Long communityId;
 	@ItemType(Long.class)
 	private List<Long> communityIds;
-	
+	private Integer namespaceId;
+
 	@NotNull
 	private Long buildingId;
 	private String buildingName;
@@ -71,6 +72,14 @@ public class CreateLeasePromotionCommand {
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 	public String getBuildingName() {
 		return buildingName;

@@ -133,14 +133,14 @@ public class RentalSiteDTO {
     @ItemType(SitePriceRuleDTO.class)
     private List<SitePriceRuleDTO> sitePriceRules;
     
-    @Deprecated
-	private java.lang.Byte       discountType;
-    @Deprecated
-	private java.math.BigDecimal fullPrice;
-    @Deprecated
-	private java.math.BigDecimal cutPrice;
-    @Deprecated
-	private java.lang.Double     discountRatio;
+//    @Deprecated
+//	private java.lang.Byte       discountType;
+//    @Deprecated
+//	private java.math.BigDecimal fullPrice;
+//    @Deprecated
+//	private java.math.BigDecimal cutPrice;
+//    @Deprecated
+//	private java.lang.Double     discountRatio;
     @Deprecated
 	private java.lang.Byte       rentalType;
     
@@ -391,44 +391,44 @@ public class RentalSiteDTO {
 	}
 
 
-	public java.lang.Byte getDiscountType() {
-		return discountType;
-	}
-
-
-	public void setDiscountType(java.lang.Byte discountType) {
-		this.discountType = discountType;
-	}
-
-
-	public java.math.BigDecimal getFullPrice() {
-		return fullPrice;
-	}
-
-
-	public void setFullPrice(java.math.BigDecimal fullPrice) {
-		this.fullPrice = fullPrice;
-	}
-
-
-	public java.math.BigDecimal getCutPrice() {
-		return cutPrice;
-	}
-
-
-	public void setCutPrice(java.math.BigDecimal cutPrice) {
-		this.cutPrice = cutPrice;
-	}
-
-
-	public java.lang.Double getDiscountRatio() {
-		return discountRatio;
-	}
-
-
-	public void setDiscountRatio(java.lang.Double discountRatio) {
-		this.discountRatio = discountRatio;
-	}
+//	public java.lang.Byte getDiscountType() {
+//		return discountType;
+//	}
+//
+//
+//	public void setDiscountType(java.lang.Byte discountType) {
+//		this.discountType = discountType;
+//	}
+//
+//
+//	public java.math.BigDecimal getFullPrice() {
+//		return fullPrice;
+//	}
+//
+//
+//	public void setFullPrice(java.math.BigDecimal fullPrice) {
+//		this.fullPrice = fullPrice;
+//	}
+//
+//
+//	public java.math.BigDecimal getCutPrice() {
+//		return cutPrice;
+//	}
+//
+//
+//	public void setCutPrice(java.math.BigDecimal cutPrice) {
+//		this.cutPrice = cutPrice;
+//	}
+//
+//
+//	public java.lang.Double getDiscountRatio() {
+//		return discountRatio;
+//	}
+//
+//
+//	public void setDiscountRatio(java.lang.Double discountRatio) {
+//		this.discountRatio = discountRatio;
+//	}
 
 
 	public java.lang.Byte getRentalType() {

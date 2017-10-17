@@ -3,18 +3,13 @@ package com.everhomes.activity;
 
 
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectQuery;
+import com.everhomes.rest.forum.NeedTemporaryType;
+import com.everhomes.server.schema.tables.daos.*;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,11 +42,6 @@ import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.user.UserGender;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
-import com.everhomes.server.schema.tables.daos.EhActivityAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhActivityCategoriesDao;
-import com.everhomes.server.schema.tables.daos.EhActivityGoodsDao;
-import com.everhomes.server.schema.tables.daos.EhActivityRosterDao;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityAttachments;
 import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
@@ -174,7 +164,24 @@ public class ActivityProviderImpl implements ActivityProivider {
 	 	                activity.setSignupFamilyCount(activity.getSignupFamilyCount() - 1);
 	            }
 	            ActivityProivider self = PlatformContext.getComponent(ActivityProivider.class);
-	            self.updateActivity(activity);
+
+            Activity temp = findActivityById(activity.getId());
+
+            LOGGER.warn("***************************************************** tempcount: " + temp.getSignupAttendeeCount() + "activitycount: " + activity.getSignupAttendeeCount());
+
+
+            self.updateActivity(activity);
+
+            Activity temp2 = findActivityById(activity.getId());
+
+            LOGGER.warn("***************************************************** tempcount: " + temp2.getSignupAttendeeCount());
+
+            if(temp2.getSignupAttendeeCount() != activity.getSignupAttendeeCount()){
+                for(int i=0; i<5; i++){
+                    LOGGER.warn("***************************************************** signupAttendeeCount: " + activity.getSignupAttendeeCount());
+                }
+            }
+
 	            // update dao and push event
 	            DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivities.class, activity.getId());
 	            
@@ -525,10 +532,14 @@ public class ActivityProviderImpl implements ActivityProivider {
         Integer offset =  (int) ((pageOffset - 1 ) * (count-1));
         
         //新增暂存活动，后台管理员在web端要看到暂存的活动 add by yanjun 20170513
-        if(needTemporary != null && needTemporary.byteValue() == 1){
-        	query.addConditions(Tables.EH_ACTIVITIES.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
-        }else{
-        	query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
+        if(needTemporary == null || needTemporary.byteValue() == NeedTemporaryType.PUBLISH.getCode()){
+            query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
+        }else if(needTemporary.byteValue() == NeedTemporaryType.ALL.getCode()){
+            query.addConditions(Tables.EH_ACTIVITIES.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+        }else if(needTemporary.byteValue() == NeedTemporaryType.TEMPORARY.getCode()){
+            query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+        }else {
+            return null;
         }
         
 
@@ -623,17 +634,19 @@ public class ActivityProviderImpl implements ActivityProivider {
 	}
 
 	@Override
-	public List<Activity> listActivitiesForWarning(Integer namespaceId, Timestamp queryStartTime, Timestamp queryEndTime) {
+	public List<Activity> listActivitiesForWarning(Integer namespaceId, Long categoryId, Timestamp queryStartTime, Timestamp queryEndTime) {
 		// 1 2 3 4 5
-		return dbProvider.getDslContext(AccessSpec.readOnly())
-			.select()
-			.from(Tables.EH_ACTIVITIES)
-			.where(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
-			.and(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2))
-			.and(Tables.EH_ACTIVITIES.START_TIME.gt(queryStartTime))
-			.and(Tables.EH_ACTIVITIES.START_TIME.le(queryEndTime))
-			.fetch()
-			.map(r->ConvertHelper.convert(r, Activity.class));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhActivitiesRecord> query = context.selectQuery(Tables.EH_ACTIVITIES);
+        query.addConditions(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
+        if(categoryId != null){
+            query.addConditions(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(categoryId));
+        }
+        query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2));
+        query.addConditions(Tables.EH_ACTIVITIES.START_TIME.gt(queryStartTime));
+        query.addConditions(Tables.EH_ACTIVITIES.START_TIME.le(queryEndTime));
+
+        return query.fetch().map(r->ConvertHelper.convert(r, Activity.class));
 	}
 
 	@Override
@@ -900,7 +913,7 @@ public class ActivityProviderImpl implements ActivityProivider {
             SelectQuery<EhActivityGoodsRecord> query = context.selectQuery(Tables.EH_ACTIVITY_GOODS);
 
             if (locator.getAnchor() != null)
-                query.addConditions(Tables.EH_ACTIVITY_GOODS.ID.ge(locator.getAnchor()));
+                query.addConditions(Tables.EH_ACTIVITY_GOODS.ID.gt(locator.getAnchor()));
 
             query.addConditions(Tables.EH_ACTIVITY_GOODS.ACTIVITY_ID.eq(activityId));
 
@@ -1411,4 +1424,36 @@ public class ActivityProviderImpl implements ActivityProivider {
 		return result;
 	}
 
+//    @Override
+//    public void createActivityRosterError(ActivityRosterError rosterError) {
+//        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhActivityRosterError.class));
+//        rosterError.setId(id);
+//        if(rosterError.getCreateTime() == null){
+//            rosterError.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//        }
+//
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//        EhActivityRosterErrorDao dao = new EhActivityRosterErrorDao(context.configuration());
+//        dao.insert(rosterError);
+//
+//        DaoHelper.publishDaoAction(DaoAction.CREATE, EhActivityRosterError.class, null);
+//    }
+
+//    @Override
+//    public List<ActivityRosterError> listActivityRosterErrorByJobId(Long jobId) {
+//        List<ActivityRosterError> result = new ArrayList<>();
+//
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//
+//        Condition condition = Tables.EH_ACTIVITY_ROSTER_ERROR.JOB_ID.eq(jobId);
+//
+//        SelectJoinStep<Record> query = context.select().from(Tables.EH_ACTIVITY_ROSTER_ERROR);
+//        query.where(condition);
+//        query.orderBy(Tables.EH_ACTIVITY_ROSTER_ERROR.ROW_NUM.asc());
+//        query.fetch().map((r) -> {
+//            result.add(ConvertHelper.convert(r, ActivityRosterError.class));
+//            return null;
+//        });
+//        return result;
+//    }
 }

@@ -51,7 +51,9 @@ public class SmsProviderImpl implements SmsProvider {
             SmsHandler handler = getHandler(namespaceId, phoneNumber);
             List<String> inMapPhones = handlerToPhonesMap.get(handler);
             if (inMapPhones == null) {
-                handlerToPhonesMap.put(handler, Collections.singletonList(phoneNumber));
+                List<String> tempList = new ArrayList<>();
+                tempList.add(phoneNumber);
+                handlerToPhonesMap.put(handler, tempList);
             } else {
                 inMapPhones.add(phoneNumber);
             }
