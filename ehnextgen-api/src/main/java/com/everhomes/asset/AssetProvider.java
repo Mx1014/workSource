@@ -102,7 +102,7 @@ public interface AssetProvider {
 
     List<Object> getBillDayAndCycleByChargingItemId(Long chargingStandardId, Long chargingItemId,String ownerType, Long ownerId);
 
-    PaymentBillGroupRule getBillGroupRule(Long chargingStandardId, Long chargingStandardId1, String ownerType, Long ownerId);
+    PaymentBillGroupRule getBillGroupRule(Long chargingItemId, Long chargingStandardId, String ownerType, Long ownerId);
 
     void saveBillItems(List<EhPaymentBillItems> billItemsList);
 
@@ -197,4 +197,8 @@ public interface AssetProvider {
     boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule, boolean b);
 
     void deleteBillGroupRuleById(Long billGroupRuleId);
+
+    EhPaymentChargingStandards findChargingStandardById(Long chargingStandardId);
+
+    PaymentBillGroup getBillGroupById(Long billGroupId);
 }

@@ -65,6 +65,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jca.cci.CciOperationNotSupportedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import scala.Char;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -1199,6 +1200,12 @@ public class AssetProviderImpl implements AssetProvider {
     public List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId) {
         List<ListChargingStandardsDTO> list = new ArrayList<>();
         List<String> variableInjectionJson = new ArrayList<>();
+
+        List<Set<String>> variableIdentifiersOfMultiStandard = new ArrayList<>();
+
+
+        List<String> formulas = new ArrayList<>();
+
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
         EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
@@ -1220,42 +1227,57 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setChargingStandardName(r.getValue(t.NAME));
             dto.setFormula(r.getValue(t.FORMULA));
             dto.setFormulaType(r.getValue(t.FORMULA_TYPE));
+            //现在不存变量注入的json串，改为从公式json中获得
+            formulas.add(r.getValue(t.FORMULA_JSON));
             variableInjectionJson.add(r.getValue(t3.VARIABLES_JSON_STRING));
             list.add(dto);
             return null;
         });
+        //获得不重复的字母的变量标识的集合
+        for(int j = 0; j < formulas.size(); j ++){
+            String formulaCopy = formulas.get(j);
+            Set<String> variableIdentifiers = new HashSet<>();
+            int index = 0;
+            getVaraibleIdenInHashset(formulaCopy, variableIdentifiers, index);
+            variableIdentifiersOfMultiStandard.add(variableIdentifiers);
+        }
         for(int i = 0; i < list.size(); i++) {
-            String json = variableInjectionJson.get(i);
             ListChargingStandardsDTO dto = list.get(i);
-            Gson gson = new Gson();
-            List<VariableIdAndValue> idAndValues = new ArrayList<>();
-            Map<String,String> map = gson.fromJson(json, Map.class);
-            for(Map.Entry<?,?> entry : map.entrySet()){
-                VariableIdAndValue var = new VariableIdAndValue();
-                var.setVariableId(entry.getKey());
-                var.setVariableValue(entry.getValue());
-                idAndValues.add(var);
+            com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards standard = findChargingStandardById(dto.getChargingStandardId());
+            Set<String> idens = variableIdentifiersOfMultiStandard.get(i);
+            List<PaymentVariable> variableList = new ArrayList<>();
+            Iterator<String> iterator = idens.iterator();
+            while(iterator.hasNext()){
+                PaymentVariable viv = new PaymentVariable();
+                String iden = iterator.next();
+                com.everhomes.server.schema.tables.pojos.EhPaymentVariables varia = findVariableByIden(iden);
+                viv.setVariableIdentifier(iden);
+                if(iden.equals("dj")){
+                    viv.setVariableValue(standard.getSuggestUnitPrice());
+                }
+                viv.setVariableName(varia.getName());
+                variableList.add(viv);
             }
-            List<PaymentVariable> variables = new ArrayList<>();
-            for(int j = 0; j < idAndValues.size(); j++) {
-                PaymentVariable variable = new PaymentVariable();
-                VariableIdAndValue idAndValue = idAndValues.get(j);
-                String variableIdentifier = ((String)idAndValue.getVariableId());
-                double variableValueDouble = Double.parseDouble((String)idAndValue.getVariableValue());
-                BigDecimal variableValue = new BigDecimal(variableValueDouble);
-                variableValue = variableValue.setScale(2);
-                String variableName = context.select(t2.NAME)
-                        .from(t2)
-                        .where(t2.IDENTIFIER.eq(variableIdentifier))
-                        .fetchOne(0, String.class);
-                variable.setVariableIdentifier(variableIdentifier);
-                variable.setVariableName(variableName);
-                variable.setVariableValue(variableValue);
-                variables.add(variable);
-            }
-            list.get(i).setVariables(variables);
+            dto.setVariables(variableList);
         }
         return list;
+    }
+
+    private com.everhomes.server.schema.tables.pojos.EhPaymentVariables findVariableByIden(String iden) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_VARIABLES)
+                .where(Tables.EH_PAYMENT_VARIABLES.IDENTIFIER.eq(iden))
+                .fetchOneInto(com.everhomes.server.schema.tables.pojos.EhPaymentVariables.class);
+    }
+
+    private boolean hasDigit(String iden) {
+        char[] chars = iden.toCharArray();
+        for(char c : chars){
+            if(Character.isDigit(c)){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -1440,22 +1462,42 @@ public class AssetProviderImpl implements AssetProvider {
     public List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId,Long ownerId,String ownerType) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<VariableIdAndValue> list = new ArrayList<>();
-        EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
-        String variableJson = context.select(t.VARIABLES_JSON_STRING)
-                .from(t)
-                .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
-                .and(t.OWNERID.eq(ownerId))
-                .and(t.OWNERTYPE.eq(ownerType))
-                .fetchOne(0, String.class);
-        Gson gson = new Gson();
-        Map<String,String> map = gson.fromJson(variableJson, Map.class);
-        for(Map.Entry entry : map.entrySet()){
-            VariableIdAndValue vid = new VariableIdAndValue();
-            vid.setVariableValue(entry.getValue());
-            vid.setVariableId(entry.getKey());
-            list.add(vid);
+
+        com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards standard = findChargingStandardById(chargingStandardId);
+        String formulaJson = standard.getFormulaJson();
+
+        //获得不重复的字母的变量标识的集合
+
+        String formulaCopy = formulaJson;
+        Set<String> variableIdentifiers = new HashSet<>();
+        int index = 0;
+        getVaraibleIdenInHashset(formulaCopy, variableIdentifiers, index);
+        Iterator<String> iterator = variableIdentifiers.iterator();
+        while(iterator.hasNext()){
+            String iden = iterator.next();
+            com.everhomes.server.schema.tables.pojos.EhPaymentVariables varia = findVariableByIden(iden);
+            VariableIdAndValue viv = new VariableIdAndValue();
+            viv.setVaribleIdentifier(iden);
+            viv.setVariableId(varia.getId());
+            if(viv.equals("dj")){
+                viv.setVariableValue(standard.getSuggestUnitPrice());
+            }
+            list.add(viv);
         }
         return list;
+    }
+
+    private void getVaraibleIdenInHashset(String formulaCopy, Set<String> variableIdentifiers, int index) {
+        for(int i = 0; i < formulaCopy.length(); i ++){
+            char c = formulaCopy.charAt(i);
+            if(c == '*' || c == '/' || c == '+' || c == '-' || i == formulaCopy.length()-1){
+                String iden = formulaCopy.substring(index, i == formulaCopy.length() - 1 ? i + 1 : i);
+                if(hasDigit(iden)){
+                    variableIdentifiers.add(iden);
+                }
+                index = i + 1;
+            }
+        }
     }
 
     @Override
@@ -2295,6 +2337,22 @@ public class AssetProviderImpl implements AssetProvider {
         context.delete(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID.eq(billGroupRuleId))
                 .execute();
+    }
+
+    @Override
+    public com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards findChargingStandardById(Long chargingStandardId) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_CHARGING_STANDARDS)
+                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.eq(chargingStandardId))
+                .fetchOneInto(PaymentChargingStandards.class);
+    }
+
+    @Override
+    public PaymentBillGroup getBillGroupById(Long billGroupId) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(billGroupId))
+                .fetchOneInto(PaymentBillGroup.class);
     }
 
 

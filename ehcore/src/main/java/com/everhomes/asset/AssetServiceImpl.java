@@ -62,10 +62,7 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
-import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
-import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
@@ -860,6 +857,268 @@ public class AssetServiceImpl implements AssetService {
         });
         response.setList(dtos);
         return response;
+    }
+
+    /**
+     * 重构费用计算方法
+     * 数据来源 1：公式和日期期限的数字来自于调用者； 2：日期的设置来自于rule，公式设置来自于standard
+     */
+    public void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd) {
+        //获得所有计价条款包裹（内有标准，数据，和住址）
+        List<FeeRules> feesRules = cmd.getFeesRules();
+        //定义了一个账单组不重复的哈希map，用来叠加收费项产生的账单
+        HashMap<BillIdentity,PaymentBills> map = new HashMap<>();
+        String json = "";
+        //收费项明细列表
+        List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
+        //账单的列表，现在的定义，如果有明细则必然有账单，无论时间
+        List<EhPaymentBills> billList = new ArrayList<>();
+        List<EhPaymentContractReceiver> contractDateList = new ArrayList<>();
+
+        //遍历计价条款包裹
+        for(int i = 0; i < feesRules.size(); i++) {
+            //获取单一包裹
+            FeeRules rule = feesRules.get(i);
+            //获得包裹中的地址包裹
+            List<ContractProperty> var1 = rule.getProperties();
+            //获得标准
+            EhPaymentChargingStandards standard = assetProvider.findChargingStandardById(rule.getChargingStandardId());
+            //获得包裹中的数据包
+            List<VariableIdAndValue> var2 = rule.getVariableIdAndValueList();
+
+            //获得standard公式
+            String formula = standard.getFormulaJson();
+            //获得standard时间设置
+            Byte billingCycle = standard.getBillingCycle();
+            //获得groupRule的时间设置
+            PaymentBillGroupRule groupRule = assetProvider.getBillGroupRule(rule.getChargingItemId(),rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
+            Integer monthOffset = groupRule.getBillItemMonthOffset();
+            Integer dayOffset = groupRule.getBillItemDayOffset();
+
+            //获得group
+            PaymentBillGroup group = assetProvider.getBillGroupById(groupRule.getBillGroupId());
+
+            //开始循环地址包裹
+            for(int j = 0; j < var1.size(); j ++){
+                //从地址包裹中获得一个地址
+                ContractProperty property = var1.get(j);
+            //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
+                //获得明细列表用来存储和传递数据
+                List<BillItemsExpectancy> billItemsExpectancies = new ArrayList<>();
+                if(dayOffset==null){
+                    //自然时间情况
+                    switch (billingCycle){
+                        case '2':
+                            billItemsExpectancies = NaturalMonthHandler(var2,formula,groupRule,group,rule);
+                            break;
+                        case '3':
+                            break;
+                        case '4':
+                            break;
+                        default:
+                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+                    }
+                }else{
+                    //固定时间情况
+
+                }
+
+
+                //如果收费项目的计费周期是按照固定日期，以合同开始日为计费周期
+                if(billingCycle==AssetPaymentStrings.CONTRACT_BEGIN_DATE_AS_FIXED_DAY_OF_MONTH){
+                    FixedAtContractStartHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
+                }
+                //自然月的计费方式
+                else if(billingCycle == AssetPaymentStrings.NATRUAL_MONTH){
+                    NaturalMonthHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
+                }else{
+                    LOGGER.info("failed to run natural mode, dtos2 length = {}",dtos2.size());
+                }
+                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), dtos2.size());
+                long currentBillItemSeq = nextBillItemBlock - dtos2.size() + 1;
+                if(currentBillItemSeq == 0){
+                    currentBillItemSeq = currentBillItemSeq+1;
+                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()));
+                }
+                for(int g = 0; g< dtos2.size(); g++) {
+                    PaymentExpectancyDTO dto = dtos2.get(g);
+                    BillIdentity identity = new BillIdentity();
+                    identity.setBillGroupId(groupRule.getBillGroupId());
+                    identity.setContract(cmd.getContractNum());
+                    String dateStr = dto.getDateStrBegin().substring(0,dto.getDateStrBegin().lastIndexOf("-"));
+                    identity.setDateStr(dateStr);
+                    // define a billId for billItem and bill to set
+                    long nextBillId = 0l;
+                    if(map.containsKey(identity)){
+                        nextBillId = map.get(identity).getId();
+                    }else{
+                        nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
+                        if(nextBillId == 0){
+                            nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
+                        }
+                    }
+                    // build a billItem
+                    PaymentBillItems item = new PaymentBillItems();
+                    item.setAddressId(property.getAddressId());
+                    item.setBuildingName(property.getBuldingName());
+                    item.setApartmentName(property.getApartmentName());
+                    item.setPropertyIdentifer(property.getPropertyName());
+                    item.setAmountOwed(dto.getAmountReceivable());
+                    item.setAmountReceivable(dto.getAmountReceivable());
+                    item.setAmountReceived(new BigDecimal("0"));
+                    item.setBillGroupId(billGroupId);
+                    item.setBillId(nextBillId);
+                    item.setChargingItemName(groupRule.getChargingItemName());
+//                    item.setChargingItemsId(rule.getChargingItemId());
+                    item.setChargingItemsId(groupRule.getChargingItemId());
+                    item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    item.setCreatorUid(UserContext.currentUserId());
+                    item.setDateStr(dateStr);
+                    item.setDateStrBegin(dto.getDateStrBegin());
+                    item.setDateStrEnd(dto.getDateStrEnd());
+                    item.setDateStrDue(dto.getDueDateStr());
+                    item.setId(currentBillItemSeq);
+                    currentBillItemSeq += 1;
+                    item.setNamespaceId(cmd.getNamesapceId());
+                    item.setOwnerType(cmd.getOwnerType());
+                    item.setOwnerId(cmd.getOwnerId());
+                    item.setTargetType(cmd.getTargetType());
+                    item.setTargetId(cmd.getTargetId());
+                    item.setContractId(cmd.getContractId());
+                    item.setContractNum(cmd.getContractNum());
+                    item.setTargetName(cmd.getTargetName());
+                    item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    billItemsList.add(item);
+                    if(balanceType == AssetPaymentStrings.BALANCE_ON_MONTH) {
+                        // create a new bill or update a bean according to whether the corresponding contract bill exists
+                        if(map.containsKey(identity)){
+                            PaymentBills bill = map.get(identity);
+                            bill.setAmountReceivable(bill.getAmountReceivable().add(item.getAmountReceivable()));
+                            bill.setAmountOwed(bill.getAmountOwed().add(item.getAmountOwed()));
+                            bill.setAmountReceived(bill.getAmountReceived().add(item.getAmountReceived()));
+                        }else{
+                            PaymentBills newBill = new PaymentBills();
+                            //账单只存第一个资产信息，收费项目中对应多个资产,根据地址查询账单
+                            //一是直接查账单表，二是确定用户信息，拿到targetId
+                            newBill.setAddressId(property.getAddressId());
+                            newBill.setBuildingName(property.getBuldingName());
+                            newBill.setApartmentName(property.getApartmentName());
+                            newBill.setAmountOwed(item.getAmountOwed());
+                            newBill.setAmountReceivable(item.getAmountReceivable());
+                            newBill.setAmountReceived(item.getAmountReceived());
+                            newBill.setAmountSupplement(new BigDecimal("0"));
+                            newBill.setAmountExemption(new BigDecimal("0"));
+                            newBill.setBillGroupId(billGroupId);
+                            // identity中最小的那个设置为datestr
+                            newBill.setDateStr(item.getDateStr());
+                            newBill.setId(nextBillId);
+                            newBill.setNamespaceId(cmd.getNamesapceId());
+                            newBill.setNoticetel(cmd.getNoticeTel());
+                            newBill.setOwnerId(cmd.getOwnerId());
+                            newBill.setContractId(cmd.getContractId());
+                            newBill.setContractNum(cmd.getContractNum());
+                            newBill.setTargetName(cmd.getTargetName());
+                            newBill.setOwnerType(cmd.getOwnerType());
+                            newBill.setTargetType(cmd.getTargetType());
+                            newBill.setTargetId(cmd.getTargetId());
+                            newBill.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            newBill.setCreatorId(UserContext.currentUserId());
+                            newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            newBill.setNoticeTimes(0);
+                            newBill.setStatus((byte)0);
+                            newBill.setSwitch((byte)3);
+                            map.put(identity,newBill);
+                        }
+                        //if the billing cycle is on quarter or year, just change the way how the billIdentity defines that muliti bills should be merged as one or be independently
+                    }else{
+                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Only natural mode is supported now");
+                    }
+                }
+
+            }
+            dtos.addAll(dtos1);
+            // contract receiver added with status being set as 0 i.e. inactive
+            Gson gson = new Gson();
+            Map<String,String> variableMap = new HashMap<>();
+            for(int k = 0; k< variableIdAndValueList.size(); k++){
+                VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
+                variableMap.put((String)variableIdAndValue.getVariableId(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
+            }
+            json = gson.toJson(variableMap, Map.class);
+            PaymentContractReceiver entity = new PaymentContractReceiver();
+            StringBuilder addressIds = new StringBuilder();
+            for(int l =0 ; l < var1.size(); l++) {
+                Long addressId = var1.get(l).getAddressId();
+                if(addressId!=null){
+                    if(l == var1.size()-1){
+                        addressIds.append(var1.get(l).getPropertyName());
+                        break;
+                    }
+                    addressIds.append(var1.get(l).getPropertyName()+",");
+                }
+            }
+//            entity.setApartmentName(property.getApartmentName());
+//            entity.setBuildingName(property.getBuldingName());
+            entity.setAddressIdsJson(addressIds.toString());
+            entity.setContractId(cmd.getContractId());
+            entity.setContractNum(cmd.getContractNum());
+            entity.setEhPaymentChargingItemId(rule.getChargingItemId());
+            entity.setEhPaymentChargingStandardId(rule.getChargingStandardId());
+            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
+            if(nextSequence==0l){
+                nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
+            }
+            entity.setId(nextSequence);
+            entity.setNamespaceId(cmd.getNamesapceId());
+            entity.setNoticeTel(cmd.getNoticeTel());
+            entity.setOwnerId(cmd.getOwnerId());
+            entity.setOwnerType(cmd.getOwnerType());
+            entity.setStatus((byte)0);
+            entity.setTargetId(cmd.getTargetId());
+            entity.setTargetType(cmd.getTargetType());
+            entity.setTargetName(cmd.getTargetName());
+            entity.setVariablesJsonString(json);
+            contractDateList.add(entity);
+        }
+        for(Map.Entry entry : map.entrySet()){
+            billList.add((PaymentBills)entry.getValue());
+        }
+        LOGGER.info("调用开始！ bill list length={}，item length = {}，contractreceiver = {}",billList.size(),billItemsList.size(),contractDateList.size());
+        this.dbProvider.execute((TransactionStatus status) -> {
+            if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
+                return null;
+            }
+            assetProvider.saveBillItems(billItemsList);
+            assetProvider.saveBills(billList);
+            assetProvider.saveContractVariables(contractDateList);
+            return null;
+        });
+        response.setList(dtos);
+        return response;
+    }
+
+    private List<BillItemsExpectancy> NaturalMonthHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule) {
+        //返回的列表
+        List<BillItemsExpectancy> list = new ArrayList<>();
+        //计算的时间区间
+        Calendar dateStrBegin = Calendar.getInstance();
+        dateStrBegin.setTime(rule.getDateStrBegin());
+        Calendar dateStrEnd = Calendar.getInstance();
+        dateStrEnd.setTime(rule.getDateStrEnd());
+        int DAY_OF_WHAT = 5;
+        if("自然".equals("yes")){
+            //先算第一个周期
+            BillItemsExpectancy exp = new BillItemsExpectancy();
+            Calendar firstCEnd = Calendar.getInstance();
+            firstCEnd.setTime(dateStrBegin.getTime());
+            firstCEnd.set(DAY_OF_WHAT,firstCEnd.getActualMaximum(DAY_OF_WHAT));
+            Calendar.QU
+            exp = calculateFee(var2,formula,duration);
+        };
+
+
+
+        return list;
     }
 
     private void NaturalMonthHandler(List<PaymentExpectancyDTO> dtos1, FeeRules rule, List<VariableIdAndValue> variableIdAndValueList, String formula, String chargingItemName, Integer billDay, List<PaymentExpectancyDTO> dtos2, ContractProperty property) {
