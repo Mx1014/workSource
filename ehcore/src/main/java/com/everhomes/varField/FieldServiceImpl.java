@@ -576,17 +576,16 @@ public class FieldServiceImpl implements FieldService {
             return invoke.toString();
         }
 
-        if(fieldName.equals("status") || fieldName.equals("gender") ||fieldName.equals("nationality_item_id")||fieldName.equals("degree_item_id")||
-                fieldName.equals("technical_title_item_id")||
-                fieldName.equals("individual_evaluation_item_id")||
-                fieldName.equals("patent_status_item_id")||
-                (fieldName.indexOf("id") == (fieldName.length()-2) && fieldName.indexOf("id")!=0)
-                ){
+        if(fieldName.equals("status") || fieldName.equals("gender") ||
+                (fieldName.indexOf("id")!=-1 && fieldName.indexOf("id")!=0) ||
+                (fieldName.indexOf("Id")!=-1 && fieldName.indexOf("Id")!=0) ||
+                 fieldName.indexOf("Status")!=-1)
+        {
             LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName+" class is "+clz.toString());
 
             ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId,Long.parseLong(invoke.toString()));
             if(item!=null&&item.getItemId()!=null){
-                invoke = String.valueOf(item.getItemId());
+                invoke = String.valueOf(item.getItemDisplayName());
                 LOGGER.info("field transferred to item id is "+invoke);
             }else{
                 LOGGER.error("field "+ fieldName+" transferred to item using findScopeFieldItemByDisplayName failed ,item is "+ item);
@@ -859,7 +858,8 @@ public class FieldServiceImpl implements FieldService {
                             cellCopy = cellValue;
                             if(fieldName.equals("status") || fieldName.equals("gender") ||
                                     (fieldName.indexOf("id")!=-1 && fieldName.indexOf("id")!=0) ||
-                                    (fieldName.indexOf("Id")!=-1 && fieldName.indexOf("Id")!=0)
+                                    (fieldName.indexOf("Id")!=-1 && fieldName.indexOf("Id")!=0) ||
+                                    fieldName.indexOf("Status")!=-1
                                     ){
                                 cellValue = "";
                                 //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
