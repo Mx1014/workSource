@@ -26,6 +26,7 @@ import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.news.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -707,14 +708,14 @@ public class NewsServiceImpl implements NewsService {
 			return t;
 		}).filter(r-> r.getId()!=null).collect(Collectors.toMap(NewsTagVals::getId,NewsTagVals::getNewsTagId));
 
-		newsTags.stream().forEach(r->{
+		newsTags.forEach(r->{
 			List<NewsTag> tags = newsProvider.listNewsTag(r.getOwnerType(),r.getOwnerId(),null,r.getId(),
 					null,null);
 			List<NewsTagDTO> list = tags.stream().map(t->ConvertHelper.convert(t,NewsTagDTO.class)).
 					map(t->{
 						if (map.get(r.getId())!=null)
 							t.setIsDefault((byte)0);
-						if (t.getId()==map.get(r.getId()))
+						if (t.getId()==map.get(r.getId())+0)
 							t.setIsDefault((byte)1);
 						return t;
 					}).collect(Collectors.toList());
@@ -1600,7 +1601,6 @@ public class NewsServiceImpl implements NewsService {
 		Long userId = UserContext.current().getUser().getId();
 		setNewsLikeFlag(userId, cmd.getNewsToken());
 	}
-
 
 
 }
