@@ -375,7 +375,7 @@ public interface OrganizationService {
 	
 	void updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd);
 	
-	void deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
+	Boolean deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
 	
 	ListOrganizationJobPositionResponse listOrganizationJobPositions(ListOrganizationJobPositionCommand cmd);
 	
@@ -569,4 +569,7 @@ public interface OrganizationService {
 
 	/**通过机构类型和名称获取机构id**/
 	Long getOrganizationNameByNameAndType(String name, String groupType);
+
+	/**批量删除子机构(职级或部门岗位)**/
+	Boolean deleteChildrenOrganizationAsList(DeleteChildrenOrganizationAsListCommand cmd);
 }

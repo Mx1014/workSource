@@ -138,6 +138,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.text.html.HTML;
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -2233,13 +2234,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 
-        //1 判断该机构（子公司/部门/岗位/职级）是否有活动状态的人员
-        //查询需要失效的所有人
-        List<OrganizationMember> if_empty_members = organizationProvider.listOrganizationMemberByPath(organization.getPath(), null, "");
-        //2.如果仍有活动的人员,直接返回false
-        if(if_empty_members.size() != 0){
-            return false;
+        //：todo 判断该机构（子公司/部门/职级）是否有活动状态的人员
+        if(organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) || organization.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || organization.getGroupType().equals(OrganizationGroupType.JOB_LEVEL.getCode())){
+            //查询需要失效的所有人
+            List<OrganizationMember> if_empty_members = organizationProvider.listOrganizationMemberByPath(organization.getPath(), null, "");
+            //2.如果仍有活动的人员,直接返回false
+            if(if_empty_members.size() != 0){
+                return false;
+            }
         }
+        //:todo 2部门岗位不需要作判断
+
 
         //3.如果没有活动的
         List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "%", null);
@@ -2267,24 +2272,26 @@ public class OrganizationServiceImpl implements OrganizationService {
             //把user_organization表中的相应记录更新为失效
             inactiveUserOrganizationWithMembers(members);
 
-            ExecutorUtil.submit(new Runnable() {
-                @Override
-                public void run() {
-                    Timestamp authStart = new Timestamp(DateHelper.currentGMTTime().getTime());
-                    LOGGER.debug("authStart: " + sdf.format(authStart));
-                    try {
-                        members.forEach(member -> {
-                            //解除门禁权限
-                            doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
-                        });
-                    } catch (Exception e) {
-                        LOGGER.error("deleteAuth task failure.", e);
-                    } finally {
-                        Timestamp authEnd = new Timestamp(DateHelper.currentGMTTime().getTime());
-                        LOGGER.debug("authEnd : " + sdf.format(authEnd));
+            if(members.size() > 0){
+                ExecutorUtil.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        Timestamp authStart = new Timestamp(DateHelper.currentGMTTime().getTime());
+                        LOGGER.debug("authStart: " + sdf.format(authStart));
+                        try {
+                            members.forEach(member -> {
+                                //解除门禁权限
+                                doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
+                            });
+                        } catch (Exception e) {
+                            LOGGER.error("deleteAuth task failure.", e);
+                        } finally {
+                            Timestamp authEnd = new Timestamp(DateHelper.currentGMTTime().getTime());
+                            LOGGER.debug("authEnd : " + sdf.format(authEnd));
+                        }
                     }
-                }
-            });
+                });
+            }
 
             return null;
         });
@@ -5609,6 +5616,93 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
         return null;
+    }
+
+    @Override
+    public Boolean deleteChildrenOrganizationAsList(DeleteChildrenOrganizationAsListCommand cmd) {
+        if(cmd.getIds() != null && cmd.getTag() != null && (cmd.getTag().equals(OrganizationGroupType.JOB_LEVEL.getCode()) || cmd.getTag().equals(OrganizationGroupType.JOB_POSITION.getCode()))){
+
+        }else {
+            LOGGER.error("deleteChildrenOrganizationAsList is not allowed.");
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+                    "deleteChildrenOrganizationAsList is not allowed. ");
+        }
+
+        //：todo 判断该机构（子公司/部门/职级）是否有活动状态的人员
+        if(cmd.getTag().equals(OrganizationGroupType.JOB_LEVEL.getCode())){
+            //查询需要失效的所有人
+            for(Long id : cmd.getIds()) {
+                Organization organization = this.checkOrganization(id);
+                List<OrganizationMember> if_empty_members = organizationProvider.listOrganizationMemberByPath(organization.getPath(), null, "");
+                //2.如果仍有活动的人员,直接返回false
+                if (if_empty_members.size() != 0) {
+                    return false;
+                }
+            }
+        }
+        //:todo 2部门岗位不需要作判断
+
+        User user = UserContext.current().getUser();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
+        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+
+
+        //:todo 如果没有活动的 循环撤销
+        for(Long id : cmd.getIds()) {
+            Organization organization = this.checkOrganization(id);
+            List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "%", null);
+
+            List<Long> organizationIds = organizations.stream().map(r -> r.getId()).collect(Collectors.toList());
+
+            dbProvider.execute((TransactionStatus status) -> {
+
+                //更新organization
+                organizationProvider.updateOrganization(organizationIds, OrganizationStatus.DELETED.getCode(), user.getId(), now);
+
+                //删除organizaitonCommunity
+                organizationProvider.deleteOrganizationCommunityByOrgIds(organizationIds);
+
+                //把机构入驻的园区关系修改成无效
+                organizationProvider.updateOrganizationCommunityRequestByOrgIds(organizationIds, OrganizationCommunityRequestStatus.INACTIVE.getCode(), user.getId(), now);
+
+                //把机构下的所有人员修改成无效
+                organizationProvider.updateOrganizationMemberByOrgPaths(organization.getPath() + "%", OrganizationMemberStatus.INACTIVE.getCode(), user.getId(), now);
+
+
+                //查询需要失效的所有人
+                List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(organization.getPath(), null, "");
+
+                //把user_organization表中的相应记录更新为失效
+                inactiveUserOrganizationWithMembers(members);
+
+                if(members.size() > 0){
+                    ExecutorUtil.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            Timestamp authStart = new Timestamp(DateHelper.currentGMTTime().getTime());
+                            LOGGER.debug("authStart: " + sdf.format(authStart));
+                            try {
+                                members.forEach(member -> {
+                                    //解除门禁权限
+                                    doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
+                                });
+                            } catch (Exception e) {
+                                LOGGER.error("deleteAuth task failure.", e);
+                            } finally {
+                                Timestamp authEnd = new Timestamp(DateHelper.currentGMTTime().getTime());
+                                LOGGER.debug("authEnd : " + sdf.format(authEnd));
+                            }
+                        }
+                    });
+                }
+
+                return null;
+            });
+        }
+
+        return true;
     }
 
     /**
@@ -10456,13 +10550,24 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public void deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
+    public Boolean deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
 
         checkId(cmd.getId());
 
         OrganizationJobPosition organizationJobPosition = checkOrganizationJobPositionIsNull(cmd.getId());
+
+        if(cmd.getEnterpriseId() != null){
+            //:todo 删除时置空判断
+            List<OrganizationMember> emptyMember = this.listOrganizationContactByJobPositionId(cmd.getEnterpriseId(), cmd.getId());
+            if(emptyMember != null && emptyMember.size() > 0){
+                return false;
+            }
+        }
+
         organizationJobPosition.setStatus(OrganizationJobPositionStatus.INACTIVE.getCode());
         organizationProvider.updateOrganizationJobPosition(organizationJobPosition);
+
+        return true;
     }
 
     public List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd) {
