@@ -466,3 +466,9 @@ INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999974','','0','应用','launchpaditem','1',NULL,NULL,'5');
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999974','','0','商家','shop','1',NULL,NULL,'6');
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999974','', '0', '快讯', 'news', '1',NULL,NULL,'6');
+
+-- added by dengs, 20171018 添加资源预约类型
+SET @resource_type_id = (SELECT MAX(id) FROM `eh_rentalv2_resource_types`);
+SET @resource_type_id = @resource_type_id + 1;
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES (@resource_type_id, '健身房', 0, NULL, 0, 999974); 
+update eh_rentalv2_resource_types SET `status` = 2,`pay_mode` = 1  WHERE `name` = '健身房' AND namespace_id = 999974;
