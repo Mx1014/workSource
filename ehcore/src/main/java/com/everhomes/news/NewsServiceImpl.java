@@ -715,7 +715,7 @@ public class NewsServiceImpl implements NewsService {
 					map(t->{
 						if (map.get(r.getId())!=null)
 							t.setIsDefault((byte)0);
-						if (t.getId()==map.get(r.getId())+0)
+						if (t.getId().equals(map.get(r.getId())))
 							t.setIsDefault((byte)1);
 						return t;
 					}).collect(Collectors.toList());
