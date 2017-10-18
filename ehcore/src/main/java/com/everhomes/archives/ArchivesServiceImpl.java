@@ -1407,15 +1407,16 @@ public class ArchivesServiceImpl implements ArchivesService {
         List<ArchivesDismissEmployees> results = archivesProvider.listArchivesDismissEmployees(cmd.getPageAnchor(), cmd.getPageSize() + 1, namespaceId, condition);
 
         if (results != null) {
+            Integer nextPageOffset = null;
+            if (results.size() > cmd.getPageSize()) {
+                results.remove(results.size()-1);
+                nextPageOffset = cmd.getPageAnchor() + 1;
+            }
+            response.setNextPageAnchor(nextPageOffset);
             response.setDismissEmployees(results.stream().map(r -> {
                 ArchivesDismissEmployeeDTO dto = ConvertHelper.convert(r, ArchivesDismissEmployeeDTO.class);
                 return dto;
             }).collect(Collectors.toList()));
-            Integer nextPageOffset = null;
-            if (results.size() > cmd.getPageSize()) {
-                nextPageOffset = cmd.getPageAnchor() + 1;
-            }
-            response.setNextPageAnchor(nextPageOffset);
             return response;
         }
 
