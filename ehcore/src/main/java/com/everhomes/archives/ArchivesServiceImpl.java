@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -90,6 +91,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     private ArchivesConfigurationService archivesConfigurationService;
+
+    @Autowired
+    private ContentServerService contentServerService;
 
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
@@ -1166,13 +1170,13 @@ public class ArchivesServiceImpl implements ArchivesService {
         valueMap.put(ArchivesParameter.PROVIDENT_FUND_NUMBER, employee.getProvidentFundNumber());
         valueMap.put(ArchivesParameter.REG_RESIDENCE_TYPE, employee.getRegResidenceType());
         valueMap.put(ArchivesParameter.REG_RESIDENCE, employee.getRegResidence());
-        valueMap.put(ArchivesParameter.ID_PHOTO, employee.getIdPhoto());
-        valueMap.put(ArchivesParameter.VISA_PHOTO, employee.getVisaPhoto());
-        valueMap.put(ArchivesParameter.LIFE_PHOTO, employee.getLifePhoto());
-        valueMap.put(ArchivesParameter.ENTRY_FORM, employee.getEntryForm());
-        valueMap.put(ArchivesParameter.GRADUATION_CERTIFICATE, employee.getGraduationCertificate());
-        valueMap.put(ArchivesParameter.DEGREE_CERTIFICATE, employee.getDegreeCertificate());
-        valueMap.put(ArchivesParameter.CONTRACT_CERTIFICATE, employee.getContractCertificate());
+        valueMap.put(ArchivesParameter.ID_PHOTO, contentServerService.parserUri(employee.getIdPhoto()));
+        valueMap.put(ArchivesParameter.VISA_PHOTO, contentServerService.parserUri(employee.getVisaPhoto()));
+        valueMap.put(ArchivesParameter.LIFE_PHOTO, contentServerService.parserUri(employee.getLifePhoto()));
+        valueMap.put(ArchivesParameter.ENTRY_FORM, contentServerService.parserUri(employee.getEntryForm()));
+        valueMap.put(ArchivesParameter.GRADUATION_CERTIFICATE, contentServerService.parserUri(employee.getGraduationCertificate()));
+        valueMap.put(ArchivesParameter.DEGREE_CERTIFICATE, contentServerService.parserUri(employee.getDegreeCertificate()));
+        valueMap.put(ArchivesParameter.CONTRACT_CERTIFICATE, contentServerService.parserUri(employee.getContractCertificate()));
         return valueMap;
     }
 
