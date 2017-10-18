@@ -121,5 +121,6 @@ public interface ConfigConstants {
     public static final String PAY_V2_HOME_URL = "pay.v2.home.url";
 
     public static final String QUESTIONNAIRE_DETAIL_URL = "questionnaire.detail.url";
+    public static final String QUESTIONNAIRE_SEND_MESSAGE_EXPRESS = "questionnaire.send.message.express";
 
 }

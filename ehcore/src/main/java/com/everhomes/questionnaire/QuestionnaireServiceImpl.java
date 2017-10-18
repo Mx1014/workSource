@@ -7,16 +7,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.questionnaire.*;
 import com.everhomes.rest.user.NamespaceUserType;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -42,11 +45,13 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 @Component
 public class QuestionnaireServiceImpl implements QuestionnaireService {
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(QuestionnaireServiceImpl.class);
+
 	@Autowired
 	private QuestionnaireProvider questionnaireProvider;
 
@@ -86,9 +91,18 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Autowired
 	private LocaleStringService stringService;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(QuestionnaireServiceImpl.class);
+	@Autowired
+	private ScheduleProvider scheduleProvider;
 
-
+	@PostConstruct
+	public void setup(){
+		//启动定时任务
+		String triggerName = "questionnarieSendMessage";
+		String jobName= "questionnarieSendMessage_"+System.currentTimeMillis();
+		//每天一点查询即将到期的问卷，发消息给没有填的用户。
+		String cronExpression = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_SEND_MESSAGE_EXPRESS,"0 0 1 * * ?");
+		scheduleProvider.scheduleCronJob(triggerName,jobName,cronExpression,QuestionnaireSendMessageJob.class , null);
+	}
 	@Override
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {
 //		checkOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -636,7 +650,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 //
 //	}
 
-	private XSSFRow createRow(XSSFSheet sheet,XSSFCellStyle style,QuestionnaireDTO dto, int rowNum) {
+	private XSSFRow createRow(XSSFSheet sheet,XSSFWorkbook wb,QuestionnaireDTO dto, int rowNum) {
 		List<String> contents = new ArrayList<String >();
 
 		contents.add(stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN,"zh_CN","用户名"));
@@ -649,7 +663,19 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 				contents.add(type.getDesc1()+r.getQuestionName());
 			}
 		});
-		return createRow(sheet,style,contents,rowNum);
+		for (int i = 0; i < contents.size(); i++) {
+			sheet.setColumnWidth(i,contents.get(i).length()*1000);
+		}
+		XSSFCellStyle style = wb.createCellStyle();
+		XSSFCellStyle cellStyle = wb.createCellStyle();
+		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);//水平居中
+		cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);//垂直居中
+
+		XSSFFont font = wb.createFont();
+		font.setBold(true);
+		font.setFontHeightInPoints((short)16);
+		cellStyle.setFont(font);
+		return createRow(sheet,cellStyle,contents,rowNum);
 	}
 
 	private XSSFRow createRow(XSSFSheet sheet,XSSFCellStyle style,List<String> contents, int rowNum) {
@@ -674,7 +700,6 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		XSSFCellStyle style = createStyle(wb);
 		//创建sheet
 		XSSFSheet sheet = createSheet(wb,style);
-		sheet.setColumnWidth(0,3766);
 
 		cmd.setPageAnchor(null);
 		cmd.setPageSize(100000);
@@ -684,8 +709,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 		//头
 		int startrow = 1;
-		createHead(sheet,style,targetQuestionnaireDetail.getQuestionnaire(),0);
-		createRow(sheet,style,targetQuestionnaireDetail.getQuestionnaire(),startrow++);
+		createHead(wb,sheet,targetQuestionnaireDetail.getQuestionnaire(),0);
+		createRow(sheet,wb,targetQuestionnaireDetail.getQuestionnaire(),startrow++);
 		String stringAnswer = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN,"zh_CN","答案:");
 
 		//内容
@@ -725,14 +750,29 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	}
 
-	private void createHead(XSSFSheet sheet, XSSFCellStyle style, QuestionnaireDTO questionnaire, int i) {
+	private void createHead(XSSFWorkbook wb, XSSFSheet sheet, QuestionnaireDTO questionnaire, int i) {
 		CellRangeAddress cra = new CellRangeAddress(i,i,0,questionnaire.getQuestions().size()+1);
 		sheet.addMergedRegion(cra);
 		Row row = sheet.createRow(i);
 		Cell cell = row.createCell(0);
-		cell.setCellStyle(style);
+		XSSFCellStyle cellStyle = wb.createCellStyle();
+		cellStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+		cellStyle.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+		cellStyle.setBorderRight(HSSFCellStyle.BORDER_THIN);
+		cellStyle.setBorderTop(HSSFCellStyle.BORDER_THIN);
+		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);//水平居中
+		cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);//垂直居中
+
+		XSSFFont font = wb.createFont();
+		font.setBold(true);
+		font.setFontHeightInPoints((short)20);
+		cellStyle.setFont(font);
+		cell.setCellStyle(cellStyle);
+
 		cell.setCellValue(questionnaire.getQuestionnaireName()+stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN,"zh_CN","问卷调查结果"));
+
 	}
+
 
 	/**
 	 * by dengs,创建cell style,20170502
@@ -741,14 +781,12 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		XSSFCellStyle style = wb.createCellStyle();// 样式对象
 		XSSFFont font2 = wb.createFont();
 		font2.setFontName("仿宋_GB2312");
-		font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);//粗体显示
-		font2.setFontHeightInPoints((short) 20);
 
 		style.setFont(font2);//选择需要用到的字体格式
 
-		style.setAlignment(CellStyle.ALIGN_CENTER);//水平居中
+//		style.setAlignment(CellStyle.ALIGN_CENTER);//水平居中
 		style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);//垂直居中
-		style.setWrapText(true);
+//		style.setWrapText(true);
 
 		return style;
 	}
