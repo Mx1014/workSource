@@ -1105,20 +1105,83 @@ public class AssetServiceImpl implements AssetService {
         dateStrBegin.setTime(rule.getDateStrBegin());
         Calendar dateStrEnd = Calendar.getInstance();
         dateStrEnd.setTime(rule.getDateStrEnd());
+
         int DAY_OF_WHAT = 5;
-        if("自然".equals("yes")){
-            //先算第一个周期
-            BillItemsExpectancy exp = new BillItemsExpectancy();
-            Calendar firstCEnd = Calendar.getInstance();
-            firstCEnd.setTime(dateStrBegin.getTime());
-            firstCEnd.set(DAY_OF_WHAT,firstCEnd.getActualMaximum(DAY_OF_WHAT));
-            Calendar.QU
-            exp = calculateFee(var2,formula,duration);
-        };
+        byte cycle = 1;
+        int time = 0;
+
+        //先算开始a
+        Calendar a = Calendar.getInstance();
+        a.setTime(dateStrBegin.getTime());
+        while(a.compareTo(dateStrEnd)<=0){
+            //如果是自然即dayOffset没有设置，则起始时算一把刀a的月末
+
+            //再算费用产生月d
+            Calendar d = Calendar.getInstance();
+            d.setTime(a.getTime());
+            d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
+            //计算费用产生的日期
+            Calendar d1 = Calendar.getInstance();
+            d1.setTime(d.getTime());
+            //如果是自然即dayOffset没有设置，则起始时算一把刀a的月末
+            if(groupRule.getBillItemDayOffset()!=null && time != 0){
+                d1.set(Calendar.MONTH,d1.get(Calendar.MONTH)+groupRule.getBillItemMonthOffset());
+            }
+            if(groupRule.getBillItemDayOffset()==null){
+                d1.set(Calendar.DAY_OF_MONTH,d1.getActualMaximum(Calendar.DAY_OF_MONTH));
+            }else{
+                d1.set(Calendar.DAY_OF_MONTH,groupRule.getBillItemDayOffset());
+            }
+            //比较d和d1
+            Calendar d2 = Calendar.getInstance();
+            if(d.compareTo(d1)<0){
+                d2.setTime(d.getTime());
+            }else if(d.compareTo(d1)>=0){
+                d2.setTime(d1.getTime());
+            }
+            if(d2.compareTo(dateStrEnd)>0){
+                d2.setTime(dateStrBegin.getTime());
+            }
+            //计算
+            //计算系数r，系数r = （d2-a）天数/d2所在月往未来一周期的天数；如果满足一个周期，那么r非常接近1
+            float divider = daysBetween(d2, a);
+            Calendar d_assist = Calendar.getInstance();
+            d_assist.setTime(d2.getTime());
+            d_assist.set(Calendar.MONTH,d_assist.get(Calendar.MONTH)+cycle);
+            float divided = daysBetween(d2,d_assist);
+            float r = divider/divided;
+            BigDecimal amount = calculateFee(var2, formula, r);
+            //组装对象
+            BillItemsExpectancy obj = new BillItemsExpectancy();
+            obj.setAmountReceivable(amount);
+            obj.setAmountOwed(amount);
+            obj.setDateStrBegin(a.getTime());
+            obj.setDateStrEnd(d2.getTime());
+            //根据时间这里计算滞纳金并规定状态为已出账单
+            /**
+             *
+             */
+            //更改a的值
+            d2.set(Calendar.DAY_OF_MONTH,d2.get(Calendar.DAY_OF_MONTH)+1);
+            a.setTime(d2.getTime());
+            //继续循环
+            time++;
+
+        }
+        LOGGER.info("账单产生了"+time+"项目,真实为"+list.size());
+
 
 
 
         return list;
+    }
+
+    private int daysBetween(Calendar c1,Calendar c2)
+    {
+        long time1 = c1.getTimeInMillis();
+        long time2 = c2.getTimeInMillis();
+        long between_days=Math.abs(time2-time1)/(1000*3600*24);
+        return Integer.parseInt(String.valueOf(between_days));
     }
 
     private void NaturalMonthHandler(List<PaymentExpectancyDTO> dtos1, FeeRules rule, List<VariableIdAndValue> variableIdAndValueList, String formula, String chargingItemName, Integer billDay, List<PaymentExpectancyDTO> dtos2, ContractProperty property) {

@@ -9,26 +9,24 @@ import java.util.Date;
  */
 
 public class BillItemsExpectancy {
-    private Long amountReceivable;
-    private Long amountOwed;
+    private BigDecimal amountReceivable;
+    private BigDecimal amountOwed;
     private Date dateStrBegin;
     private Date dateStrEnd;
 
-
-    public Long getAmountReceivable() {
+    public BigDecimal getAmountReceivable() {
         return amountReceivable;
     }
 
-
-    public void setAmountReceivable(Long amountReceivable) {
+    public void setAmountReceivable(BigDecimal amountReceivable) {
         this.amountReceivable = amountReceivable;
     }
 
-    public Long getAmountOwed() {
+    public BigDecimal getAmountOwed() {
         return amountOwed;
     }
 
-    public void setAmountOwed(Long amountOwed) {
+    public void setAmountOwed(BigDecimal amountOwed) {
         this.amountOwed = amountOwed;
     }
 
