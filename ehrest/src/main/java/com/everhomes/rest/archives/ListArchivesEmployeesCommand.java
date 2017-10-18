@@ -19,7 +19,6 @@ import java.text.SimpleDateFormat;
  * <li>contractPartyId: 合同主体 id</li>
  * <li>keywords: 搜索关键词</li>
  * <li>departmentId: 部门 id</li>
- * <li>workingPlaceId: 工作地点 id</li>
  * <li>pageAnchor: 锚点值</li>
  * <li>pageSize: 页大小</li>
  * </ul>
@@ -47,8 +46,6 @@ public class ListArchivesEmployeesCommand {
     private String keywords;
 
     private Long departmentId;
-
-    private Long workingPlaceId;
 
     private Long pageAnchor;
 
@@ -145,14 +142,6 @@ public class ListArchivesEmployeesCommand {
 
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
-    }
-
-    public Long getWorkingPlaceId() {
-        return workingPlaceId;
-    }
-
-    public void setWorkingPlaceId(Long workingPlaceId) {
-        this.workingPlaceId = workingPlaceId;
     }
 
     public Long getPageAnchor() {

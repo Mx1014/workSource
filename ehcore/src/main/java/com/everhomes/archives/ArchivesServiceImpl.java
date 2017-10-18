@@ -913,8 +913,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         orgCommand.setKeywords(cmd.getKeywords());
         if (cmd.getDepartmentId() != null)
             orgCommand.setOrganizationId(cmd.getDepartmentId());
-        orgCommand.setWorkPlaceId(cmd.getWorkingPlaceId());
-
         orgCommand.setPageAnchor(cmd.getPageAnchor());
         if (cmd.getPageSize() != null)
             orgCommand.setPageSize(cmd.getPageSize());
