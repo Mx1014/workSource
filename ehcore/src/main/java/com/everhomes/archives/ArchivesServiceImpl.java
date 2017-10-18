@@ -1553,6 +1553,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 //  1.将员工添加到离职人员表
                 OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
                 ArchivesDismissEmployees dismissEmployee = new ArchivesDismissEmployees();
+                dismissEmployee.setDetailId(employee.getId());
                 dismissEmployee.setNamespaceId(employee.getNamespaceId());
                 dismissEmployee.setOrganizationId(employee.getOrganizationId());
                 dismissEmployee.setContactName(employee.getContactName());
