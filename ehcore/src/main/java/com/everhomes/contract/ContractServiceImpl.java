@@ -574,7 +574,7 @@ public class ContractServiceImpl implements ContractService {
 			if(pvs != null && pvs.size() > 0) {
 				pvs.forEach(pv -> {
 					VariableIdAndValue variableIdAndValue = new VariableIdAndValue();
-					variableIdAndValue.setVariableId(pv.getVariableIdentifier());
+					variableIdAndValue.setVaribleIdentifier(pv.getVariableIdentifier());
 					variableIdAndValue.setVariableValue(pv.getVariableValue());
 					vv.add(variableIdAndValue);
 				});

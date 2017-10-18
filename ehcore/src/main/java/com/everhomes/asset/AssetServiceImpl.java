@@ -658,206 +658,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd) {
-        LOGGER.info("调用开始，cmd = {}",cmd);
-        //calculate the details of payment expectancies
-        PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
-        List<PaymentExpectancyDTO> dtos = new ArrayList<>();
-        List<FeeRules> feesRules = cmd.getFeesRules();
-        HashMap<BillIdentity,PaymentBills> map = new HashMap<>();
-        String json = "";
-        List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
-        List<EhPaymentBills> billList = new ArrayList<>();
-        List<EhPaymentContractReceiver> contractDateList = new ArrayList<>();
-        for(int i = 0; i < feesRules.size(); i++) {
-            List<PaymentExpectancyDTO> dtos1 = new ArrayList<>();
-            FeeRules rule = feesRules.get(i);
-            List<ContractProperty> var1 = rule.getProperties();
-            List<VariableIdAndValue> variableIdAndValueList = assetProvider.findPreInjectedVariablesForCal(rule.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType());
-            List<VariableIdAndValue> var2 = rule.getVariableIdAndValueList();
-            coverVariables(var2,variableIdAndValueList);
-            String formula = assetProvider.findFormulaByChargingStandardId(rule.getChargingStandardId());
-            String chargingItemName = assetProvider.findChargingItemNameById(rule.getChargingItemId());
-            Byte billingCycle = assetProvider.findBillyCycleById(rule.getChargingStandardId());
-            List<Object> billConf = assetProvider.getBillDayAndCycleByChargingItemId(rule.getChargingStandardId(),rule.getChargingItemId(),cmd.getOwnerType(),cmd.getOwnerId());
-            Integer billDay = (Integer)billConf.get(0);
-            Byte balanceType = (Byte)billConf.get(1);
-            PaymentBillGroupRule groupRule = assetProvider.getBillGroupRule(rule.getChargingItemId(),rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
-            Long billGroupId = groupRule.getBillGroupId();
-            for(int j = 0; j < var1.size(); j ++){
-                List<PaymentExpectancyDTO> dtos2 = new ArrayList<>();
-                ContractProperty property = var1.get(j);
-                //如果收费项目的计费周期是按照固定日期，以合同开始日为计费周期
-                if(billingCycle==AssetPaymentStrings.CONTRACT_BEGIN_DATE_AS_FIXED_DAY_OF_MONTH){
-                    FixedAtContractStartHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
-                }
-                //自然月的计费方式
-                else if(billingCycle == AssetPaymentStrings.NATRUAL_MONTH){
-                    NaturalMonthHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
-                }else{
-                    LOGGER.info("failed to run natural mode, dtos2 length = {}",dtos2.size());
-                }
-                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), dtos2.size());
-                long currentBillItemSeq = nextBillItemBlock - dtos2.size() + 1;
-                if(currentBillItemSeq == 0){
-                    currentBillItemSeq = currentBillItemSeq+1;
-                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()));
-                }
-                for(int g = 0; g< dtos2.size(); g++) {
-                    PaymentExpectancyDTO dto = dtos2.get(g);
-                    BillIdentity identity = new BillIdentity();
-                    identity.setBillGroupId(groupRule.getBillGroupId());
-                    identity.setContract(cmd.getContractNum());
-                    String dateStr = dto.getDateStrBegin().substring(0,dto.getDateStrBegin().lastIndexOf("-"));
-                    identity.setDateStr(dateStr);
-                    // define a billId for billItem and bill to set
-                    long nextBillId = 0l;
-                    if(map.containsKey(identity)){
-                        nextBillId = map.get(identity).getId();
-                    }else{
-                        nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-                        if(nextBillId == 0){
-                            nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-                        }
-                    }
-                    // build a billItem
-                    PaymentBillItems item = new PaymentBillItems();
-                    item.setAddressId(property.getAddressId());
-                    item.setBuildingName(property.getBuldingName());
-                    item.setApartmentName(property.getApartmentName());
-                    item.setPropertyIdentifer(property.getPropertyName());
-                    item.setAmountOwed(dto.getAmountReceivable());
-                    item.setAmountReceivable(dto.getAmountReceivable());
-                    item.setAmountReceived(new BigDecimal("0"));
-                    item.setBillGroupId(billGroupId);
-                    item.setBillId(nextBillId);
-                    item.setChargingItemName(groupRule.getChargingItemName());
-//                    item.setChargingItemsId(rule.getChargingItemId());
-                    item.setChargingItemsId(groupRule.getChargingItemId());
-                    item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    item.setCreatorUid(UserContext.currentUserId());
-                    item.setDateStr(dateStr);
-                    item.setDateStrBegin(dto.getDateStrBegin());
-                    item.setDateStrEnd(dto.getDateStrEnd());
-                    item.setDateStrDue(dto.getDueDateStr());
-                    item.setId(currentBillItemSeq);
-                    currentBillItemSeq += 1;
-                    item.setNamespaceId(cmd.getNamesapceId());
-                    item.setOwnerType(cmd.getOwnerType());
-                    item.setOwnerId(cmd.getOwnerId());
-                    item.setTargetType(cmd.getTargetType());
-                    item.setTargetId(cmd.getTargetId());
-                    item.setContractId(cmd.getContractId());
-                    item.setContractNum(cmd.getContractNum());
-                    item.setTargetName(cmd.getTargetName());
-                    item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    billItemsList.add(item);
-                    if(balanceType == AssetPaymentStrings.BALANCE_ON_MONTH) {
-                        // create a new bill or update a bean according to whether the corresponding contract bill exists
-                        if(map.containsKey(identity)){
-                            PaymentBills bill = map.get(identity);
-                            bill.setAmountReceivable(bill.getAmountReceivable().add(item.getAmountReceivable()));
-                            bill.setAmountOwed(bill.getAmountOwed().add(item.getAmountOwed()));
-                            bill.setAmountReceived(bill.getAmountReceived().add(item.getAmountReceived()));
-                        }else{
-                            PaymentBills newBill = new PaymentBills();
-                            //账单只存第一个资产信息，收费项目中对应多个资产,根据地址查询账单
-                            //一是直接查账单表，二是确定用户信息，拿到targetId
-                            newBill.setAddressId(property.getAddressId());
-                            newBill.setBuildingName(property.getBuldingName());
-                            newBill.setApartmentName(property.getApartmentName());
-                            newBill.setAmountOwed(item.getAmountOwed());
-                            newBill.setAmountReceivable(item.getAmountReceivable());
-                            newBill.setAmountReceived(item.getAmountReceived());
-                            newBill.setAmountSupplement(new BigDecimal("0"));
-                            newBill.setAmountExemption(new BigDecimal("0"));
-                            newBill.setBillGroupId(billGroupId);
-                            // identity中最小的那个设置为datestr
-                            newBill.setDateStr(item.getDateStr());
-                            newBill.setId(nextBillId);
-                            newBill.setNamespaceId(cmd.getNamesapceId());
-                            newBill.setNoticetel(cmd.getNoticeTel());
-                            newBill.setOwnerId(cmd.getOwnerId());
-                            newBill.setContractId(cmd.getContractId());
-                            newBill.setContractNum(cmd.getContractNum());
-                            newBill.setTargetName(cmd.getTargetName());
-                            newBill.setOwnerType(cmd.getOwnerType());
-                            newBill.setTargetType(cmd.getTargetType());
-                            newBill.setTargetId(cmd.getTargetId());
-                            newBill.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                            newBill.setCreatorId(UserContext.currentUserId());
-                            newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                            newBill.setNoticeTimes(0);
-                            newBill.setStatus((byte)0);
-                            newBill.setSwitch((byte)3);
-                            map.put(identity,newBill);
-                        }
-                        //if the billing cycle is on quarter or year, just change the way how the billIdentity defines that muliti bills should be merged as one or be independently
-                    }else{
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Only natural mode is supported now");
-                    }
-                }
-
-            }
-            dtos.addAll(dtos1);
-            // contract receiver added with status being set as 0 i.e. inactive
-            Gson gson = new Gson();
-            Map<String,String> variableMap = new HashMap<>();
-            for(int k = 0; k< variableIdAndValueList.size(); k++){
-                VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
-                variableMap.put((String)variableIdAndValue.getVariableId(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
-            }
-            json = gson.toJson(variableMap, Map.class);
-            PaymentContractReceiver entity = new PaymentContractReceiver();
-            StringBuilder addressIds = new StringBuilder();
-            for(int l =0 ; l < var1.size(); l++) {
-                Long addressId = var1.get(l).getAddressId();
-                if(addressId!=null){
-                    if(l == var1.size()-1){
-                        addressIds.append(var1.get(l).getPropertyName());
-                        break;
-                    }
-                    addressIds.append(var1.get(l).getPropertyName()+",");
-                }
-            }
-//            entity.setApartmentName(property.getApartmentName());
-//            entity.setBuildingName(property.getBuldingName());
-            entity.setAddressIdsJson(addressIds.toString());
-            entity.setContractId(cmd.getContractId());
-            entity.setContractNum(cmd.getContractNum());
-            entity.setEhPaymentChargingItemId(rule.getChargingItemId());
-            entity.setEhPaymentChargingStandardId(rule.getChargingStandardId());
-            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
-            if(nextSequence==0l){
-                nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CONTRACT_RECEIVER.getClass()));
-            }
-            entity.setId(nextSequence);
-            entity.setNamespaceId(cmd.getNamesapceId());
-            entity.setNoticeTel(cmd.getNoticeTel());
-            entity.setOwnerId(cmd.getOwnerId());
-            entity.setOwnerType(cmd.getOwnerType());
-            entity.setStatus((byte)0);
-            entity.setTargetId(cmd.getTargetId());
-            entity.setTargetType(cmd.getTargetType());
-            entity.setTargetName(cmd.getTargetName());
-            entity.setVariablesJsonString(json);
-            contractDateList.add(entity);
-        }
-        for(Map.Entry entry : map.entrySet()){
-            billList.add((PaymentBills)entry.getValue());
-        }
-        LOGGER.info("调用开始！ bill list length={}，item length = {}，contractreceiver = {}",billList.size(),billItemsList.size(),contractDateList.size());
-        this.dbProvider.execute((TransactionStatus status) -> {
-            if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
-                return null;
-            }
-            assetProvider.saveBillItems(billItemsList);
-            assetProvider.saveBills(billList);
-            assetProvider.saveContractVariables(contractDateList);
-            return null;
-        });
-        response.setList(dtos);
-        return response;
+        return null;
     }
+
 
     /**
      * 重构费用计算方法
@@ -903,147 +706,133 @@ public class AssetServiceImpl implements AssetService {
                 //从地址包裹中获得一个地址
                 ContractProperty property = var1.get(j);
             //按照收费标准的计费周期分为按月，按季，按年，均有固定和自然两种情况
-                //获得明细列表用来存储和传递数据
-                List<BillItemsExpectancy> billItemsExpectancies = new ArrayList<>();
-                if(dayOffset==null){
-                    //自然时间情况
-                    switch (billingCycle){
-                        case '2':
-                            billItemsExpectancies = NaturalMonthHandler(var2,formula,groupRule,group,rule);
-                            break;
-                        case '3':
-                            break;
-                        case '4':
-                            break;
-                        default:
-                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
-                    }
-                }else{
-                    //固定时间情况
-
+                Integer cycle = 0;
+                switch (billingCycle){
+                    case '2':
+                        cycle = 0;
+                        break;
+                    case '3':
+                        cycle = 2;
+                        break;
+                    case '4':
+                        cycle = 11;
+                        break;
+                    default:
+                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                 }
+                List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle);
 
 
-                //如果收费项目的计费周期是按照固定日期，以合同开始日为计费周期
-                if(billingCycle==AssetPaymentStrings.CONTRACT_BEGIN_DATE_AS_FIXED_DAY_OF_MONTH){
-                    FixedAtContractStartHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
-                }
-                //自然月的计费方式
-                else if(billingCycle == AssetPaymentStrings.NATRUAL_MONTH){
-                    NaturalMonthHandler(dtos1, rule, variableIdAndValueList, formula, chargingItemName, billDay, dtos2, property);
-                }else{
-                    LOGGER.info("failed to run natural mode, dtos2 length = {}",dtos2.size());
-                }
-                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), dtos2.size());
-                long currentBillItemSeq = nextBillItemBlock - dtos2.size() + 1;
+                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), billItemsExpectancies.size());
+                long currentBillItemSeq = nextBillItemBlock - billItemsExpectancies.size() + 1;
                 if(currentBillItemSeq == 0){
                     currentBillItemSeq = currentBillItemSeq+1;
                     this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()));
                 }
-                for(int g = 0; g< dtos2.size(); g++) {
-                    PaymentExpectancyDTO dto = dtos2.get(g);
-                    BillIdentity identity = new BillIdentity();
-                    identity.setBillGroupId(groupRule.getBillGroupId());
-                    identity.setContract(cmd.getContractNum());
-                    String dateStr = dto.getDateStrBegin().substring(0,dto.getDateStrBegin().lastIndexOf("-"));
-                    identity.setDateStr(dateStr);
-                    // define a billId for billItem and bill to set
-                    long nextBillId = 0l;
-                    if(map.containsKey(identity)){
-                        nextBillId = map.get(identity).getId();
-                    }else{
-                        nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-                        if(nextBillId == 0){
-                            nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
-                        }
-                    }
-                    // build a billItem
-                    PaymentBillItems item = new PaymentBillItems();
-                    item.setAddressId(property.getAddressId());
-                    item.setBuildingName(property.getBuldingName());
-                    item.setApartmentName(property.getApartmentName());
-                    item.setPropertyIdentifer(property.getPropertyName());
-                    item.setAmountOwed(dto.getAmountReceivable());
-                    item.setAmountReceivable(dto.getAmountReceivable());
-                    item.setAmountReceived(new BigDecimal("0"));
-                    item.setBillGroupId(billGroupId);
-                    item.setBillId(nextBillId);
-                    item.setChargingItemName(groupRule.getChargingItemName());
-//                    item.setChargingItemsId(rule.getChargingItemId());
-                    item.setChargingItemsId(groupRule.getChargingItemId());
-                    item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    item.setCreatorUid(UserContext.currentUserId());
-                    item.setDateStr(dateStr);
-                    item.setDateStrBegin(dto.getDateStrBegin());
-                    item.setDateStrEnd(dto.getDateStrEnd());
-                    item.setDateStrDue(dto.getDueDateStr());
-                    item.setId(currentBillItemSeq);
-                    currentBillItemSeq += 1;
-                    item.setNamespaceId(cmd.getNamesapceId());
-                    item.setOwnerType(cmd.getOwnerType());
-                    item.setOwnerId(cmd.getOwnerId());
-                    item.setTargetType(cmd.getTargetType());
-                    item.setTargetId(cmd.getTargetId());
-                    item.setContractId(cmd.getContractId());
-                    item.setContractNum(cmd.getContractNum());
-                    item.setTargetName(cmd.getTargetName());
-                    item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    billItemsList.add(item);
-                    if(balanceType == AssetPaymentStrings.BALANCE_ON_MONTH) {
-                        // create a new bill or update a bean according to whether the corresponding contract bill exists
-                        if(map.containsKey(identity)){
-                            PaymentBills bill = map.get(identity);
-                            bill.setAmountReceivable(bill.getAmountReceivable().add(item.getAmountReceivable()));
-                            bill.setAmountOwed(bill.getAmountOwed().add(item.getAmountOwed()));
-                            bill.setAmountReceived(bill.getAmountReceived().add(item.getAmountReceived()));
-                        }else{
-                            PaymentBills newBill = new PaymentBills();
-                            //账单只存第一个资产信息，收费项目中对应多个资产,根据地址查询账单
-                            //一是直接查账单表，二是确定用户信息，拿到targetId
-                            newBill.setAddressId(property.getAddressId());
-                            newBill.setBuildingName(property.getBuldingName());
-                            newBill.setApartmentName(property.getApartmentName());
-                            newBill.setAmountOwed(item.getAmountOwed());
-                            newBill.setAmountReceivable(item.getAmountReceivable());
-                            newBill.setAmountReceived(item.getAmountReceived());
-                            newBill.setAmountSupplement(new BigDecimal("0"));
-                            newBill.setAmountExemption(new BigDecimal("0"));
-                            newBill.setBillGroupId(billGroupId);
-                            // identity中最小的那个设置为datestr
-                            newBill.setDateStr(item.getDateStr());
-                            newBill.setId(nextBillId);
-                            newBill.setNamespaceId(cmd.getNamesapceId());
-                            newBill.setNoticetel(cmd.getNoticeTel());
-                            newBill.setOwnerId(cmd.getOwnerId());
-                            newBill.setContractId(cmd.getContractId());
-                            newBill.setContractNum(cmd.getContractNum());
-                            newBill.setTargetName(cmd.getTargetName());
-                            newBill.setOwnerType(cmd.getOwnerType());
-                            newBill.setTargetType(cmd.getTargetType());
-                            newBill.setTargetId(cmd.getTargetId());
-                            newBill.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                            newBill.setCreatorId(UserContext.currentUserId());
-                            newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                            newBill.setNoticeTimes(0);
-                            newBill.setStatus((byte)0);
-                            newBill.setSwitch((byte)3);
-                            map.put(identity,newBill);
-                        }
-                        //if the billing cycle is on quarter or year, just change the way how the billIdentity defines that muliti bills should be merged as one or be independently
-                    }else{
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Only natural mode is supported now");
-                    }
-                }
+//                for(int g = 0; g< billItemsExpectancies.size(); g++) {
+//                    PaymentExpectancyDTO dto = billItemsExpectancies.get(g);
+//                    BillIdentity identity = new BillIdentity();
+//                    identity.setBillGroupId(groupRule.getBillGroupId());
+//                    identity.setContract(cmd.getContractNum());
+//                    String dateStr = dto.getDateStrBegin().substring(0,dto.getDateStrBegin().lastIndexOf("-"));
+//                    identity.setDateStr(dateStr);
+//                    // define a billId for billItem and bill to set
+//                    long nextBillId = 0l;
+//                    if(map.containsKey(identity)){
+//                        nextBillId = map.get(identity).getId();
+//                    }else{
+//                        nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
+//                        if(nextBillId == 0){
+//                            nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
+//                        }
+//                    }
+//                    // build a billItem
+//                    PaymentBillItems item = new PaymentBillItems();
+//                    item.setAddressId(property.getAddressId());
+//                    item.setBuildingName(property.getBuldingName());
+//                    item.setApartmentName(property.getApartmentName());
+//                    item.setPropertyIdentifer(property.getPropertyName());
+//                    item.setAmountOwed(dto.getAmountReceivable());
+//                    item.setAmountReceivable(dto.getAmountReceivable());
+//                    item.setAmountReceived(new BigDecimal("0"));
+//                    item.setBillGroupId(billGroupId);
+//                    item.setBillId(nextBillId);
+//                    item.setChargingItemName(groupRule.getChargingItemName());
+////                    item.setChargingItemsId(rule.getChargingItemId());
+//                    item.setChargingItemsId(groupRule.getChargingItemId());
+//                    item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                    item.setCreatorUid(UserContext.currentUserId());
+//                    item.setDateStr(dateStr);
+//                    item.setDateStrBegin(dto.getDateStrBegin());
+//                    item.setDateStrEnd(dto.getDateStrEnd());
+//                    item.setDateStrDue(dto.getDueDateStr());
+//                    item.setId(currentBillItemSeq);
+//                    currentBillItemSeq += 1;
+//                    item.setNamespaceId(cmd.getNamesapceId());
+//                    item.setOwnerType(cmd.getOwnerType());
+//                    item.setOwnerId(cmd.getOwnerId());
+//                    item.setTargetType(cmd.getTargetType());
+//                    item.setTargetId(cmd.getTargetId());
+//                    item.setContractId(cmd.getContractId());
+//                    item.setContractNum(cmd.getContractNum());
+//                    item.setTargetName(cmd.getTargetName());
+//                    item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                    billItemsList.add(item);
+//                    if(balanceType == AssetPaymentStrings.BALANCE_ON_MONTH) {
+//                        // create a new bill or update a bean according to whether the corresponding contract bill exists
+//                        if(map.containsKey(identity)){
+//                            PaymentBills bill = map.get(identity);
+//                            bill.setAmountReceivable(bill.getAmountReceivable().add(item.getAmountReceivable()));
+//                            bill.setAmountOwed(bill.getAmountOwed().add(item.getAmountOwed()));
+//                            bill.setAmountReceived(bill.getAmountReceived().add(item.getAmountReceived()));
+//                        }else{
+//                            PaymentBills newBill = new PaymentBills();
+//                            //账单只存第一个资产信息，收费项目中对应多个资产,根据地址查询账单
+//                            //一是直接查账单表，二是确定用户信息，拿到targetId
+//                            newBill.setAddressId(property.getAddressId());
+//                            newBill.setBuildingName(property.getBuldingName());
+//                            newBill.setApartmentName(property.getApartmentName());
+//                            newBill.setAmountOwed(item.getAmountOwed());
+//                            newBill.setAmountReceivable(item.getAmountReceivable());
+//                            newBill.setAmountReceived(item.getAmountReceived());
+//                            newBill.setAmountSupplement(new BigDecimal("0"));
+//                            newBill.setAmountExemption(new BigDecimal("0"));
+//                            newBill.setBillGroupId(billGroupId);
+//                            // identity中最小的那个设置为datestr
+//                            newBill.setDateStr(item.getDateStr());
+//                            newBill.setId(nextBillId);
+//                            newBill.setNamespaceId(cmd.getNamesapceId());
+//                            newBill.setNoticetel(cmd.getNoticeTel());
+//                            newBill.setOwnerId(cmd.getOwnerId());
+//                            newBill.setContractId(cmd.getContractId());
+//                            newBill.setContractNum(cmd.getContractNum());
+//                            newBill.setTargetName(cmd.getTargetName());
+//                            newBill.setOwnerType(cmd.getOwnerType());
+//                            newBill.setTargetType(cmd.getTargetType());
+//                            newBill.setTargetId(cmd.getTargetId());
+//                            newBill.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                            newBill.setCreatorId(UserContext.currentUserId());
+//                            newBill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                            newBill.setNoticeTimes(0);
+//                            newBill.setStatus((byte)0);
+//                            newBill.setSwitch((byte)3);
+//                            map.put(identity,newBill);
+//                        }
+//                        //if the billing cycle is on quarter or year, just change the way how the billIdentity defines that muliti bills should be merged as one or be independently
+//                    }else{
+//                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Only natural mode is supported now");
+//                    }
+//                }
 
             }
-            dtos.addAll(dtos1);
+//            dtos.addAll(dtos1);
             // contract receiver added with status being set as 0 i.e. inactive
             Gson gson = new Gson();
             Map<String,String> variableMap = new HashMap<>();
-            for(int k = 0; k< variableIdAndValueList.size(); k++){
-                VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
-                variableMap.put((String)variableIdAndValue.getVariableId(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
-            }
+//            for(int k = 0; k< variableIdAndValueList.size(); k++){
+//                VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(k);
+//                variableMap.put((String)variableIdAndValue.getVariableId(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
+//            }
             json = gson.toJson(variableMap, Map.class);
             PaymentContractReceiver entity = new PaymentContractReceiver();
             StringBuilder addressIds = new StringBuilder();
@@ -1093,11 +882,11 @@ public class AssetServiceImpl implements AssetService {
             assetProvider.saveContractVariables(contractDateList);
             return null;
         });
-        response.setList(dtos);
-        return response;
+//        response.setList(dtos);
+//        return response;
     }
 
-    private List<BillItemsExpectancy> NaturalMonthHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule) {
+    private List<BillItemsExpectancy> assetFeeHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle) {
         //返回的列表
         List<BillItemsExpectancy> list = new ArrayList<>();
         //计算的时间区间
@@ -1106,29 +895,31 @@ public class AssetServiceImpl implements AssetService {
         Calendar dateStrEnd = Calendar.getInstance();
         dateStrEnd.setTime(rule.getDateStrEnd());
 
-        int DAY_OF_WHAT = 5;
-        byte cycle = 1;
+        SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+
         int time = 0;
 
         //先算开始a
         Calendar a = Calendar.getInstance();
         a.setTime(dateStrBegin.getTime());
-        while(a.compareTo(dateStrEnd)<=0){
-            //计算费用产生月d
+        while(a.compareTo(dateStrEnd)<0){
+            //计算费用产生月d d = a+cycle
             Calendar d = Calendar.getInstance();
             d.setTime(a.getTime());
+            d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
+            d.set(Calendar.MONTH,d.get(Calendar.MONTH)+cycle);
             d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
             //计算费用产生的日期
             Calendar d1 = Calendar.getInstance();
             d1.setTime(d.getTime());
-            //如果是自然即dayOffset没有设置，则起始时算一把刀a的月末
+
             if(groupRule.getBillItemDayOffset()!=null && time != 0){
                 d1.set(Calendar.MONTH,d1.get(Calendar.MONTH)+groupRule.getBillItemMonthOffset());
             }
             if(groupRule.getBillItemDayOffset()==null){
                 d1.set(Calendar.DAY_OF_MONTH,d1.getActualMaximum(Calendar.DAY_OF_MONTH));
             }else{
-                d1.set(Calendar.DAY_OF_MONTH,groupRule.getBillItemDayOffset());
+                d1.set(Calendar.DAY_OF_MONTH,groupRule.getBillItemMonthOffset());
             }
             //比较d和d1
             Calendar d2 = Calendar.getInstance();
@@ -1138,16 +929,20 @@ public class AssetServiceImpl implements AssetService {
                 d2.setTime(d1.getTime());
             }
             if(d2.compareTo(dateStrEnd)>0){
-                d2.setTime(dateStrBegin.getTime());
+                d2.setTime(dateStrEnd.getTime());
             }
             //计算
-            //计算系数r，系数r = （d2-a）天数/d2所在月往未来一周期的天数；如果满足一个周期，那么r非常接近1
-            float divider = daysBetween(d2, a);
-            Calendar d_assist = Calendar.getInstance();
-            d_assist.setTime(d2.getTime());
-            d_assist.set(Calendar.MONTH,d_assist.get(Calendar.MONTH)+cycle);
-            float divided = daysBetween(d2,d_assist);
-            float r = divider/divided;
+            //计算系数r，系数r = （d2-a）天数/d2所在月往未来一周期的天数,  如果符合一个周期，那么 r = 1；
+            boolean b = checkCycle(d2, a, cycle+1);
+            float r = 1;
+            if(!b){
+                float divider = daysBetween(d2, a);
+                Calendar d_assist = Calendar.getInstance();
+                d_assist.setTime(d2.getTime());
+                d_assist.set(Calendar.MONTH,d_assist.get(Calendar.MONTH)+cycle+1);
+                float divided = daysBetween(d2,d_assist);
+                r = divider/divided;
+            }
             BigDecimal amount = calculateFee(var2, formula, r);
             //组装对象
             BillItemsExpectancy obj = new BillItemsExpectancy();
@@ -1155,10 +950,16 @@ public class AssetServiceImpl implements AssetService {
             obj.setAmountOwed(amount);
             obj.setDateStrBegin(a.getTime());
             obj.setDateStrEnd(d2.getTime());
-            //根据时间这里计算滞纳金并规定状态为已出账单
+            //根据时间这里计算滞纳金并规定状态为已出账单,并校验调组，免租
             /**
              *
              */
+//            Byte billStatus = checkBillStatus(group,d1); //not payemntStatus
+//            obj.setStatus(billStatus);
+            obj.setBillGroupId(group.getId());
+            obj.setBillDateStr(yyyyMM.format(a.getTime()));
+
+            list.add(obj);
             //更改a的值
             d2.set(Calendar.DAY_OF_MONTH,d2.get(Calendar.DAY_OF_MONTH)+1);
             a.setTime(d2.getTime());
@@ -1166,11 +967,24 @@ public class AssetServiceImpl implements AssetService {
             time++;
         }
         LOGGER.info("账单产生了"+time+"项目,真实为"+list.size());
-
-
-
-
         return list;
+    }
+
+    private boolean checkCycle(Calendar d2, Calendar a, Integer cycle) {
+        Calendar a_assist = Calendar.getInstance();
+        a_assist.setTime(a.getTime());
+        a_assist.set(Calendar.MONTH,a_assist.get(Calendar.MONTH)+cycle);
+        a_assist.set(Calendar.DAY_OF_MONTH,a_assist.get(Calendar.DAY_OF_MONTH)-1);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        sdf.format(a_assist.getTime());
+        sdf.format(a.getTime());
+        sdf.format(d2.getTime());
+        int i = daysBetween(a_assist, a);
+        int i1 = daysBetween(d2, a);
+        if(i == i1){
+            return true;
+        }
+        return false;
     }
 
     private int daysBetween(Calendar c1,Calendar c2)
@@ -1406,10 +1220,10 @@ public class AssetServiceImpl implements AssetService {
     private void coverVariables(List<VariableIdAndValue> var1, List<VariableIdAndValue> var2) {
         for(int i = 0 ; i < var1.size(); i++){
             VariableIdAndValue v1 = var1.get(i);
-            String id1 = (String)v1.getVariableId();
+            String id1 = (String)v1.getVaribleIdentifier();
             for(int j = 0; j< var2.size(); j++){
                 VariableIdAndValue v2 = var2.get(j);
-                String id2 = (String)v2.getVariableId();
+                String id2 = (String)v2.getVaribleIdentifier();
                 if(id1.equals(id2)){
                     v2.setVariableValue(v1.getVariableValue());
                 }

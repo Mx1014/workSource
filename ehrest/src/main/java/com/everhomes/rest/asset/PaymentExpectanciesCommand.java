@@ -26,6 +26,11 @@ public class PaymentExpectanciesCommand {
     private Integer pageOffset;
     private Integer pageSize;
 
+    @ItemType(RentAdjust.class)
+    private List<RentAdjust> rentAdjusts;
+    @ItemType(RentFree.class)
+    private List<RentFree> rentFrees;
+
 
     @Override
     public String toString() {

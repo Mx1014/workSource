@@ -13,9 +13,28 @@ public class BillItemsExpectancy {
     private BigDecimal amountOwed;
     private Date dateStrBegin;
     private Date dateStrEnd;
+    private Byte status;
+    private Long billGroupId;
+    private String billDateStr;
 
     public BigDecimal getAmountReceivable() {
         return amountReceivable;
+    }
+
+    public Long getBillGroupId() {
+        return billGroupId;
+    }
+
+    public void setBillGroupId(Long billGroupId) {
+        this.billGroupId = billGroupId;
+    }
+
+    public String getBillDateStr() {
+        return billDateStr;
+    }
+
+    public void setBillDateStr(String billDateStr) {
+        this.billDateStr = billDateStr;
     }
 
     public void setAmountReceivable(BigDecimal amountReceivable) {
@@ -24,6 +43,14 @@ public class BillItemsExpectancy {
 
     public BigDecimal getAmountOwed() {
         return amountOwed;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     public void setAmountOwed(BigDecimal amountOwed) {
