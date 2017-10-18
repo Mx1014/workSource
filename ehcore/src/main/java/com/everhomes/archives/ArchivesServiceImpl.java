@@ -1629,6 +1629,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             updateCommand.setOrganizationId(cmd.getOrganizationId());
             updateCommand.setFormFields(cmd.getFormFields());
             updateCommand.setFormGroups(cmd.getFormGroups());
+            updateCommand.setFormName(ARCHIVES_FORM);
             GeneralFormDTO form = dbProvider.execute((TransactionStatus status) -> {
                 GeneralFormDTO dto = generalFormService.updateGeneralForm(updateCommand);
                 //  在业务表单同步记录
