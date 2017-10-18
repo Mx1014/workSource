@@ -903,7 +903,7 @@ public class FieldServiceImpl implements FieldService {
                             setToObj("status",object,"2");
                         }
                         Byte mandatoryFlag = fieldDTO.getMandatoryFlag();
-                        if(mandatoryFlag == 1 && (cellValue == null || (cellValue.equals("")&&!cellCopy.equals("")))){
+                        if(mandatoryFlag == 1 && (cellValue == null || (cellValue.equals("")&&cellCopy.equals("")))){
                             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                                     "必填项"+fieldDTO.getFieldDisplayName()+"没有填写");
                         }

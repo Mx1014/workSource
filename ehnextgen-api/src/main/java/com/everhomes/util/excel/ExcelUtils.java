@@ -355,7 +355,7 @@ public class ExcelUtils {
         //产生说明
         HSSFFont font3 = workbook.createFont();
         font3.setColor(HSSFColor.BLACK.index);
-        font3.setFontHeightInPoints((short) 18);
+        font3.setFontHeightInPoints((short) 12);
         font3.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 
         HSSFCellStyle introStyle = workbook.createCellStyle();
@@ -369,6 +369,7 @@ public class ExcelUtils {
         introRow.setHeightInPoints(130);
         HSSFCell introCell = introRow.createCell(0);
         introCell.setCellStyle(introStyle);
+        //这里可以根据sheet决定怎么显示枚举，晚上搞这个
         introCell.setCellValue("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
                 "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
                 "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
