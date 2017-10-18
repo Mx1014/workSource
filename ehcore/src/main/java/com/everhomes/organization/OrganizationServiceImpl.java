@@ -5586,6 +5586,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public List<OrganizationMember> findOrgPersonel(FindOrgPersonelCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        //:todo 人员/部门/岗位/部门岗位
+        ListOrganizationContactCommand  cmd_1 = new ListOrganizationContactCommand();
+        cmd_1.setOrganizationId(cmd.getOrganizationId());
+        cmd_1.setKeywords(cmd.getKeywords());
+        listOrganizationPersonnelsWithDownStream(cmd_1);
+
+        ListOrganizationsByNameCommand cmd_2 = new ListOrganizationsByNameCommand();
+        cmd_2.setName(cmd.getKeywords());
+        cmd_2.setNamespaceId(namespaceId);
+        this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.DEPARTMENT.getCode(), null, namespaceId, cmd.getOrganizationId());
+        listOrganizationByName(cmd_2);
+
         return null;
     }
 	

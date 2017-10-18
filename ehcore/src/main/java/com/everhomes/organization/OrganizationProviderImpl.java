@@ -42,7 +42,6 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
-
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
@@ -3450,18 +3449,27 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId) {
-		List<Organization> result  = new ArrayList<Organization>();
+		return listOrganizationByName(name, groupType, parentId, namespaceId, null);
+	}
+
+	@Override
+	public List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId, Long enterpriseId) {
+		List<Organization> result = new ArrayList<Organization>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 		query.addConditions(Tables.EH_ORGANIZATIONS.NAME.eq(name));
 		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
-		if(parentId != null){
+		if (parentId != null) {
 			query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId));
 		}
-		if(groupType != null){
+		if (groupType != null) {
 			query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
 		}
+		if (enterpriseId != null) {
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/" + enterpriseId + "%"));
+		}
+
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, Organization.class));
 			return null;
@@ -3469,7 +3477,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return result;
 	}
 
-    @Override
+	@Override
     public Organization findOrganizationByNameAndNamespaceIdForJindie(String name, Integer namespaceId,
                                                                       String namespaceToken, String namespaceType) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
