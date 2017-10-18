@@ -972,6 +972,23 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: punch/refreshPunchGroupScheduled</b>
+	 * <p>
+	 * 刷新次日更新
+	 * </p>
+	 */
+	@RequestMapping("refreshPunchGroupScheduled")
+	@RestReturn(value = String.class)
+	public RestResponse refreshPunchGroupScheduled() {
+		punchService.dayRefreshPunchGroupScheduled();
+		RestResponse response = new RestResponse( );
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: punch/transforSceneToken</b>
 	 * <p>

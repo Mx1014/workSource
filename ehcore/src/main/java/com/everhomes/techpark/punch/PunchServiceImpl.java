@@ -4980,15 +4980,16 @@ public class PunchServiceImpl implements PunchService {
 			statusList.add(PunchRuleStatus.MODIFYED.getCode());
 			statusList.add(PunchRuleStatus.NEW.getCode());
 			List<PunchRule> punchRules = punchProvider.listPunchRulesByStatus(statusList);
-			for (PunchRule pr : punchRules) {
-				Organization org = organizationProvider.findOrganizationById(pr.getOwnerId());
-				orgs.add(org);
-				//对ptr表,psd表的处理
-				processTimeRule2Active(pr);
+			if(null != punchRules)
+				for (PunchRule pr : punchRules) {
+					Organization org = organizationProvider.findOrganizationById(pr.getOwnerId());
+					orgs.add(org);
+					//对ptr表,psd表的处理
+					processTimeRule2Active(pr);
 
-				pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
-				punchProvider.updatePunchRule(pr);
-			}
+					pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
+					punchProvider.updatePunchRule(pr);
+				}
 			//把uniongroup相关表version改为0
 			for (Organization org : orgs) {
 				//把1版本和0版本互换
