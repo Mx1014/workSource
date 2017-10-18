@@ -6,39 +6,29 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.alibaba.fastjson.JSONArray;
-import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.community.CommunityService;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.payment.util.DownloadUtil;
-import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.common.ActivationFlag;
-import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
-import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
-import com.everhomes.rest.organization.*;
 import com.everhomes.rest.questionnaire.*;
 import com.everhomes.rest.user.NamespaceUserType;
-import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.util.TimSorter;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -51,7 +41,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
-import scala.util.control.Exception;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -667,8 +656,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		XSSFRow row1 = sheet.createRow(rowNum);
 		row1.setRowStyle(style);
 		int nextColumnNum = 0;
+		style.setWrapText(true);
 		for (String content : contents) {
-			row1.createCell(nextColumnNum++).setCellValue(content);
+			Cell cell = row1.createCell(nextColumnNum++);
+			cell.setCellValue(content);
+			cell.setCellStyle(style);
 		}
 		return row1;
 	}
@@ -682,6 +674,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		XSSFCellStyle style = createStyle(wb);
 		//创建sheet
 		XSSFSheet sheet = createSheet(wb,style);
+		sheet.setColumnWidth(0,3766);
 
 		cmd.setPageAnchor(null);
 		cmd.setPageSize(100000);
@@ -691,6 +684,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 		//头
 		int startrow = 1;
+		createHead(sheet,style,targetQuestionnaireDetail.getQuestionnaire(),0);
 		createRow(sheet,style,targetQuestionnaireDetail.getQuestionnaire(),startrow++);
 		String stringAnswer = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN,"zh_CN","答案:");
 
@@ -731,16 +725,30 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	}
 
+	private void createHead(XSSFSheet sheet, XSSFCellStyle style, QuestionnaireDTO questionnaire, int i) {
+		CellRangeAddress cra = new CellRangeAddress(i,i,0,questionnaire.getQuestions().size()+1);
+		sheet.addMergedRegion(cra);
+		Row row = sheet.createRow(i);
+		Cell cell = row.createCell(0);
+		cell.setCellStyle(style);
+		cell.setCellValue(questionnaire.getQuestionnaireName()+stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN,"zh_CN","问卷调查结果"));
+	}
+
 	/**
 	 * by dengs,创建cell style,20170502
 	 */
 	private XSSFCellStyle createStyle(XSSFWorkbook wb){
 		XSSFCellStyle style = wb.createCellStyle();// 样式对象
-		Font font = wb.createFont();
-		font.setFontHeightInPoints((short)20);
-		font.setFontName("Courier New");
+		XSSFFont font2 = wb.createFont();
+		font2.setFontName("仿宋_GB2312");
+		font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);//粗体显示
+		font2.setFontHeightInPoints((short) 20);
 
-		style.setFont(font);
+		style.setFont(font2);//选择需要用到的字体格式
+
+		style.setAlignment(CellStyle.ALIGN_CENTER);//水平居中
+		style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);//垂直居中
+		style.setWrapText(true);
 
 		return style;
 	}
