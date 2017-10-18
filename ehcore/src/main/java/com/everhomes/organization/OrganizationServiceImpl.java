@@ -5585,21 +5585,42 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public List<OrganizationMember> findOrgPersonel(FindOrgPersonelCommand cmd) {
+    public FindOrgPersonelCommandResponse findOrgPersonel(FindOrgPersonelCommand cmd) {
+        FindOrgPersonelCommandResponse res = new FindOrgPersonelCommandResponse();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        //:todo 人员/部门/岗位/部门岗位
+        //:todo 人员
         ListOrganizationContactCommand  cmd_1 = new ListOrganizationContactCommand();
         cmd_1.setOrganizationId(cmd.getOrganizationId());
         cmd_1.setKeywords(cmd.getKeywords());
-        listOrganizationPersonnelsWithDownStream(cmd_1);
+        ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
+        res.setMembers(res_1.getMembers());
 
+        //:todo 部门/岗位/部门岗位
         ListOrganizationsByNameCommand cmd_2 = new ListOrganizationsByNameCommand();
         cmd_2.setName(cmd.getKeywords());
         cmd_2.setNamespaceId(namespaceId);
-        this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.DEPARTMENT.getCode(), null, namespaceId, cmd.getOrganizationId());
-        listOrganizationByName(cmd_2);
+        res.setDepartments(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.DEPARTMENT.getCode(), null, namespaceId, cmd.getOrganizationId()));
 
-        return null;
+        //:todo 部门岗位
+        ListOrganizationsByNameCommand cmd_3 = new ListOrganizationsByNameCommand();
+        cmd_3.setName(cmd.getKeywords());
+        cmd_3.setNamespaceId(namespaceId);
+        res.setDepartJobPoisitions(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.JOB_POSITION.getCode(), null, namespaceId, cmd.getOrganizationId()));
+
+        //:todo 岗位
+        ListOrganizationsByNameCommand cmd_4 = new ListOrganizationsByNameCommand();
+        cmd_4.setName(cmd.getKeywords());
+        cmd_4.setNamespaceId(namespaceId);
+        String owner_type = "EhOrganizations";
+        List<OrganizationJobPosition> jps = this.organizationProvider.listOrganizationJobPositions(owner_type,cmd.getOrganizationId(),cmd.getKeywords(),null,null);
+        if(jps != null && jps.size() > 0){
+            List<OrganizationJobPositionDTO> jobPositionDTOs = jps.stream().map(r->{
+               return ConvertHelper.convert(r,OrganizationJobPositionDTO.class);
+            }).collect(Collectors.toList());
+            res.setJobPositions(jobPositionDTOs);
+        }
+
+        return res;
     }
 	
 	@Override

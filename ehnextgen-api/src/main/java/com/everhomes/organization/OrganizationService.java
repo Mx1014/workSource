@@ -562,7 +562,7 @@ public interface OrganizationService {
 
 	void sortOrganizationsAtSameLevel(SortOrganizationsAtSameLevelCommand cmd);
 
-	List<OrganizationMember> findOrgPersonel(FindOrgPersonelCommand cmd);
+	FindOrgPersonelCommandResponse findOrgPersonel(FindOrgPersonelCommand cmd);
 
 	/**根据总公司id快速拿到所有公司人员的档案id**/
 	List<Long> ListDetailsByEnterpriseId(Long enterpriseId);
