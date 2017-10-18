@@ -913,8 +913,6 @@ public class ArchivesServiceImpl implements ArchivesService {
         orgCommand.setKeywords(cmd.getKeywords());
         if (cmd.getDepartmentId() != null)
             orgCommand.setOrganizationId(cmd.getDepartmentId());
-        orgCommand.setWorkPlaceId(cmd.getWorkingPlaceId());
-
         orgCommand.setPageAnchor(cmd.getPageAnchor());
         if (cmd.getPageSize() != null)
             orgCommand.setPageSize(cmd.getPageSize());
@@ -1555,6 +1553,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 //  1.将员工添加到离职人员表
                 OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
                 ArchivesDismissEmployees dismissEmployee = new ArchivesDismissEmployees();
+                dismissEmployee.setDetailId(employee.getId());
                 dismissEmployee.setNamespaceId(employee.getNamespaceId());
                 dismissEmployee.setOrganizationId(employee.getOrganizationId());
                 dismissEmployee.setContactName(employee.getContactName());
