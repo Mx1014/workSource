@@ -25,4 +25,5 @@ public interface GeneralFormProvider {
 
 	GeneralForm getActiveGeneralFormByOriginIdAndVersion(Long formOriginId, Long formVersion);
 
+	List<GeneralFormTemplate> listGeneralFormTemplate(Long moduleId);
 }

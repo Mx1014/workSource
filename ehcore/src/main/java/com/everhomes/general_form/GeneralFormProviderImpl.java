@@ -10,6 +10,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
+import com.everhomes.server.schema.tables.records.EhGeneralFormTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralFormsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -161,5 +162,19 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 			// fetchAny() maybe return null
 			return null;
 		}
+	}
+
+	@Override
+	public List<GeneralFormTemplate> listGeneralFormTemplate(Long moduleId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhGeneralFormTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_TEMPLATES);
+		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.MODULE_ID.eq(moduleId));
+		List<GeneralFormTemplate> results = query.fetch().map(r -> {
+			return ConvertHelper.convert(r, GeneralFormTemplate.class);
+		});
+		if (results != null && results.size() > 0)
+			return results;
+		return null;
 	}
 }

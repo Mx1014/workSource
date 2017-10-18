@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.server.schema.tables.records.EhGeneralApprovalTemplatesRecord;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,17 +68,17 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
     @Override
     public GeneralApproval getGeneralApprovalById(Long id) {
         try {
-        GeneralApproval[] result = new GeneralApproval[1];
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
+            GeneralApproval[] result = new GeneralApproval[1];
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
 
-        result[0] = context.select().from(Tables.EH_GENERAL_APPROVALS)
-            .where(Tables.EH_GENERAL_APPROVALS.ID.eq(id))
-            .fetchAny().map((r) -> {
+            result[0] = context.select().from(Tables.EH_GENERAL_APPROVALS)
+                    .where(Tables.EH_GENERAL_APPROVALS.ID.eq(id))
+                    .fetchAny().map((r) -> {
 
-                return ConvertHelper.convert(r, GeneralApproval.class);
-            });
+                        return ConvertHelper.convert(r, GeneralApproval.class);
+                    });
 
-        return result[0];
+            return result[0];
         } catch (Exception ex) {
             //fetchAny() maybe return null
             return null;
@@ -89,19 +90,19 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovals.class));
 
         SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
-        if(queryBuilderCallback != null)
+        if (queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
-        if(locator.getAnchor() != null) {
+        if (locator.getAnchor() != null) {
             query.addConditions(Tables.EH_GENERAL_APPROVALS.ID.gt(locator.getAnchor()));
-            }
+        }
 
         query.addLimit(count);
         List<GeneralApproval> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, GeneralApproval.class);
         });
 
-        if(objs.size() >= count) {
+        if (objs.size() >= count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
         } else {
             locator.setAnchor(null);
@@ -116,5 +117,17 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         obj.setUpdateTime(new Timestamp(l2));
     }
 
-//    public List<> list
+    @Override
+    public List<GeneralApprovalTemplate> listGeneralApprovalTemplateByModuleId(Long moduleId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhGeneralApprovalTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVAL_TEMPLATES);
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_TEMPLATES.MODULE_ID.eq(moduleId));
+        List<GeneralApprovalTemplate> results = query.fetch().map(r -> {
+            return ConvertHelper.convert(r, GeneralApprovalTemplate.class);
+        });
+        if (results != null && results.size() > 0)
+            return results;
+        return null;
+    }
 }

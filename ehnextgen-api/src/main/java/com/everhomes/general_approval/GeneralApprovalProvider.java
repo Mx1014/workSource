@@ -18,4 +18,6 @@ public interface GeneralApprovalProvider {
 	List<GeneralApproval> queryGeneralApprovals(ListingLocator locator,
 			int count, ListingQueryBuilderCallback queryBuilderCallback);
 
+	List<GeneralApprovalTemplate> listGeneralApprovalTemplateByModuleId(Long moduleId);
+
 }
