@@ -36,7 +36,7 @@ public class GetNewsDetailResponse {
     private String sourceUrl;
     private Long phone;
     @ItemType(Long.class)
-    private List<Long> communityIds;
+    private List<String> communityIds;
     @ItemType(NewsTagDTO.class)
     private List<NewsTagDTO> newsTags;
     private String visibleType;
@@ -137,11 +137,11 @@ public class GetNewsDetailResponse {
         this.phone = phone;
     }
 
-    public List<Long> getCommunityIds() {
+    public List<String> getCommunityIds() {
         return communityIds;
     }
 
-    public void setCommunityIds(List<Long> communityIds) {
+    public void setCommunityIds(List<String> communityIds) {
         this.communityIds = communityIds;
     }
 

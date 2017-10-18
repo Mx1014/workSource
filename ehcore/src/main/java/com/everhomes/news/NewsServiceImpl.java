@@ -690,7 +690,7 @@ public class NewsServiceImpl implements NewsService {
 		News news = findNewsById(userId, newsId);
 		GetNewsDetailResponse response = ConvertHelper.convert(news,GetNewsDetailResponse.class);
 		List<Long> communityIds = newsProvider.listNewsCommunities(newsId);
-		response.setCommunityIds(communityIds);
+		response.setCommunityIds(communityIds.stream().map(r->r.toString()).collect(Collectors.toList()));
 		response.setPublishTime(news.getPublishTime().getTime());
 		List<NewsTag> parentTags = newsProvider.listNewsTag(news.getOwnerType(),news.getOwnerId(),null,0l,
 				null,null);
