@@ -21,7 +21,6 @@ CREATE TABLE `eh_general_approval_templates` (
   `form_template_id` bigint(20) NOT NULL DEFAULT 0 COMMENT 'The id of the template form',
   `support_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'APP:0, WEB:1, APP_WEB: 2',
   `approval_name` VARCHAR(128) NOT NULL,
-  `status` TINYINT NOT NULL COMMENT 'invalid, config, running',
   `update_time` DATETIME DEFAULT NULL COMMENT 'last update time',
   `create_time` DATETIME COMMENT 'record create time',
 	PRIMARY KEY (`id`)

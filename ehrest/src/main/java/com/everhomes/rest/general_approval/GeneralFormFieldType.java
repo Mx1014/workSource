@@ -20,7 +20,7 @@ import org.apache.commons.lang.StringUtils;
  * <li>BUSINESS_TRIP:出差组件</li>
  * <li>OVERTIME:加班组件</li>
  * <li>GO_OUT:外出组件</li>
- * <li>ABNORMAL_PUNCH:补卡组件</li>
+ * <li>ABNORMAL_PUNCH:打卡异常组件</li>
  * </ul>
  * @author janson
  *
