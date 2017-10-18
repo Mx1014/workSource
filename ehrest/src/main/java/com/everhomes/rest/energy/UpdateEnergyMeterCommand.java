@@ -1,10 +1,12 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
@@ -20,6 +22,7 @@ import java.math.BigDecimal;
  *     <li>endTime: 修改属性时选择的结束时间 </li>
  *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType} </li>
  *     <li>configId: 价格方案id </li>
+ *     <li>addresses: 表记所属楼栋门牌</li>
  * </ul>
  */
 public class UpdateEnergyMeterCommand {
@@ -38,6 +41,16 @@ public class UpdateEnergyMeterCommand {
 
     private Byte calculationType;
     private Long configId;
+    @ItemType(EnergyMeterAddressDTO.class)
+    private List<EnergyMeterAddressDTO> addresses;
+
+    public List<EnergyMeterAddressDTO> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<EnergyMeterAddressDTO> addresses) {
+        this.addresses = addresses;
+    }
 
     public Long getMeterId() {
         return meterId;

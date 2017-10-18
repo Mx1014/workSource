@@ -12,8 +12,17 @@ import javax.validation.constraints.NotNull;
  */
 public class DeleteEnergyMeterFormulaCommand {
 
+    private Long communityId;
     @NotNull private Long organizationId;
     @NotNull private Long formulaId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getOrganizationId() {
         return organizationId;

@@ -29,6 +29,7 @@ import java.util.List;
  */
 public class BatchUpdateEnergyMeterSettingsCommand {
 
+    private Long communityId;
     @NotNull
     private Long organizationId;
     @ItemType(Long.class)
@@ -53,6 +54,14 @@ public class BatchUpdateEnergyMeterSettingsCommand {
 
     private Byte calculationType;
     private Long configId;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Long getOrganizationId() {
         return organizationId;

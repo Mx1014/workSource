@@ -1,10 +1,12 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <ul>
@@ -24,6 +26,7 @@ import java.math.BigDecimal;
  *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType}</li>
  *     <li>configId: 价格方案id </li>
  *     <li>ownerType: 所属组织类型</li>
+ *     <li>addresses: 表记所属楼栋门牌</li>
  * </ul>
  */
 public class CreateEnergyMeterCommand {
@@ -44,6 +47,16 @@ public class CreateEnergyMeterCommand {
     private Byte calculationType;
     private Long configId;
     private String ownerType;
+    @ItemType(EnergyMeterAddressDTO.class)
+    private List<EnergyMeterAddressDTO> addresses;
+
+    public List<EnergyMeterAddressDTO> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<EnergyMeterAddressDTO> addresses) {
+        this.addresses = addresses;
+    }
 
     public Long getCommunityId() {
         return communityId;
