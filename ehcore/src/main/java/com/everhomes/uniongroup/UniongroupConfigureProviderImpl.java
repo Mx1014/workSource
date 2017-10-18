@@ -784,7 +784,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         TableLike t3 = Tables.EH_ORGANIZATION_MEMBERS.as("t3");
         SelectJoinStep step = null;
         if(versionCode != null){
-            step = context.select(t1.fields()).from(t1).leftOuterJoin(t2).on(t2.field("detail_id").eq(t1.field("id"))).and(t2.field("version_code").eq(versionCode)).leftOuterJoin(t3).on(t1.field("id")).and(t3.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+            step = context.select(t1.fields()).from(t1).leftOuterJoin(t2).on(t2.field("detail_id").eq(t1.field("id"))).and(t2.field("version_code").eq(versionCode)).leftOuterJoin(t3).on(t1.field("id").eq(t3.field("detail_id"))).and(t3.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
         }else{
             step = context.select(t1.fields()).from(t1).leftOuterJoin(t2).on(t2.field("detail_id").eq(t1.field("id")));
         }
