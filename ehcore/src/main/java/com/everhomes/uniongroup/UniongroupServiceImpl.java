@@ -515,8 +515,8 @@ public class UniongroupServiceImpl implements UniongroupService {
     public void deleteUniongroupVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer versionCode) {
         dbProvider.execute((TransactionStatus status) -> {
             //todo 指定条件删除
-            this.uniongroupConfigureProvider.deleteUniongroupConfigresByEnterpriseIdAndGroupType(namespaceId, groupType, enterpriseId);
-            this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByEnterpriseIdAndGroupType(namespaceId, groupType, enterpriseId);
+            this.uniongroupConfigureProvider.deleteUniongroupConfigresByEnterpriseIdAndGroupType(namespaceId, groupType, enterpriseId,versionCode);
+            this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByEnterpriseIdAndGroupType(namespaceId, groupType, enterpriseId,versionCode);
             return null;
         });
     }

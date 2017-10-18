@@ -22,7 +22,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
-import jdk.nashorn.internal.runtime.Version;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -589,23 +588,25 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
-    public void deleteUniongroupConfigresByEnterpriseIdAndGroupType(Integer namespaceId, String groupType, Long enterpriseId) {
+    public void deleteUniongroupConfigresByEnterpriseIdAndGroupType(Integer namespaceId, String groupType, Long enterpriseId, Integer versionCode) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhUniongroupConfiguresRecord> query = context.deleteQuery(Tables.EH_UNIONGROUP_CONFIGURES);
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUP_TYPE.eq(groupType));
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.ENTERPRISE_ID.eq(enterpriseId));
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(versionCode));
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUniongroupConfiguresDao.class, null);
     }
 
     @Override
-    public void deleteUniongroupMemberDetailsByEnterpriseIdAndGroupType(Integer namespaceId, String groupType, Long enterpriseId) {
+    public void deleteUniongroupMemberDetailsByEnterpriseIdAndGroupType(Integer namespaceId, String groupType, Long enterpriseId, Integer versionCode) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhUniongroupMemberDetailsRecord> query = context.deleteQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType));
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(enterpriseId));
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(versionCode));
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUniongroupMemberDetailsDao.class, null);
     }
