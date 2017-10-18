@@ -248,7 +248,6 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         //子查询和外层查询都加上communityId
         if(communityId != null){
             query.addConditions(Tables.EH_USER_PROFILES.ITEM_VALUE.eq(String.valueOf(communityId)));
-            subQueryCondition = subQueryCondition.and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
         }
 
         //排除已认证的
