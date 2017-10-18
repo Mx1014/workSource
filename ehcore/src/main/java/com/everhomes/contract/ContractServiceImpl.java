@@ -922,9 +922,8 @@ public class ContractServiceImpl implements ContractService {
 			contract.setDownpaymentTime(new Timestamp(cmd.getDownpaymentTime()));
 		}
 		contract.setCreateTime(exist.getCreateTime());
-
+		Double rentSize = dealContractApartments(contract, cmd.getApartments());
 		if(cmd.getRentSize() == null) {
-			Double rentSize = dealContractApartments(contract, cmd.getApartments());
 			contract.setRentSize(rentSize);
 		}
 
