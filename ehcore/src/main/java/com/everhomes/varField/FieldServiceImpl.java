@@ -580,13 +580,10 @@ public class FieldServiceImpl implements FieldService {
                 fieldName.equals("technical_title_item_id")||
                 fieldName.equals("individual_evaluation_item_id")||
                 fieldName.equals("patent_status_item_id")||
-                (fieldName.indexOf("id")!=-1 && fieldName.indexOf("id")!=0)
+                (fieldName.indexOf("id") == (fieldName.length()-2) && fieldName.indexOf("id")!=0)
                 ){
+            LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName+" class is "+clz.toString());
 
-            //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
-            if(fieldName.equals("gender")||fieldName.equals("nationality_item_id")){
-                LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName);
-            }
             ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId,Long.parseLong(invoke.toString()));
             if(item!=null&&item.getItemId()!=null){
                 invoke = String.valueOf(item.getItemId());
@@ -810,8 +807,7 @@ public class FieldServiceImpl implements FieldService {
             }
 
 
-            //通过row的个数，除去header，获得对象的个数
-            int objectsNum = sheet.getLastRowNum() - 3;
+
             List<Object> objects = new ArrayList<>();
             //获得对象的名称，通过表查到对象名，mapping为object隐藏起来。隐藏自身，消灭暴露者---安静的诀窍就是这个
             String className = fieldProvider.findClassNameByGroupDisplayName(group.getGroupDisplayName());
@@ -824,6 +820,16 @@ public class FieldServiceImpl implements FieldService {
             }
 
             LOGGER.info("sheet total row num = {}, first row num = {}, last row num = {}",sheet.getPhysicalNumberOfRows(),sheet.getFirstRowNum(),sheet.getLastRowNum());
+            if(2 > sheet.getLastRowNum()){
+                if(orderedFieldDtos!=null && orderedFieldDtos.size()>0){
+                    for(int k = 0; k < orderedFieldDtos.size(); k ++ ){
+                        if(orderedFieldDtos.get(k).getMandatoryFlag()==1){
+                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                                    "必填项"+orderedFieldDtos.get(k).getFieldDisplayName()+"没有填写");
+                        }
+                    }
+                }
+            }
             for(int j = 2; j <= sheet.getLastRowNum(); j ++){
                 Row row = sheet.getRow(j);
                 Object object = null;
@@ -834,7 +840,11 @@ public class FieldServiceImpl implements FieldService {
                     LOGGER.error("sheet class new instance failed,exception= {}",e);
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"sheet class new instance failed",e);
                 }
-                for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
+                LOGGER.info("row "+row.getRowNum()+" has the firstcellnum is "+ row.getFirstCellNum()+",and the last cell num is "+ row.getLastCellNum());
+            cellNumTooMany:for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
+                    if(k == orderedFieldDtos.size()){
+                        break cellNumTooMany;
+                    }
                     String fieldName = orderedFieldNames.get(k);
                     FieldParams param = orderedFieldParams.get(k);
                     FieldDTO fieldDTO = orderedFieldDtos.get(k);
@@ -842,14 +852,14 @@ public class FieldServiceImpl implements FieldService {
                     try {
                         Cell cell = row.getCell(k);
                         String cellValue = "";
+                        String cellCopy = "";
                         //cell不为null时特殊处理status和projectSource
                         if(cell!=null){
                             cellValue = ExcelUtils.getCellValue(cell);
-                            if(fieldName.equals("status") || fieldName.equals("gender") ||fieldName.equals("nationality_item_id")||fieldName.equals("degree_item_id")||
-                                    fieldName.equals("technical_title_item_id")||
-                                    fieldName.equals("individual_evaluation_item_id")||
-                                    fieldName.equals("patent_status_item_id")||
-                                    (fieldName.indexOf("id")!=-1 && fieldName.indexOf("id")!=0)
+                            cellCopy = cellValue;
+                            if(fieldName.equals("status") || fieldName.equals("gender") ||
+                                    (fieldName.indexOf("id")!=-1 && fieldName.indexOf("id")!=0) ||
+                                    (fieldName.indexOf("Id")!=-1 && fieldName.indexOf("Id")!=0)
                                     ){
                                 cellValue = "";
                                 //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
@@ -893,13 +903,13 @@ public class FieldServiceImpl implements FieldService {
                             setToObj("status",object,"2");
                         }
                         Byte mandatoryFlag = fieldDTO.getMandatoryFlag();
-                        if(mandatoryFlag == 1 && (cellValue == null || cellValue.equals(""))){
+                        if(mandatoryFlag == 1 && (cellValue == null || (cellValue.equals("")&&!cellCopy.equals("")))){
                             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                                     "必填项"+fieldDTO.getFieldDisplayName()+"没有填写");
                         }
                         setToObj(fieldName,object,cellValue);
                     } catch (Exception e) {
-                        LOGGER.error("set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName());
+                        LOGGER.error("set method invoke failed, the fieldName = "+fieldName+",object class = "+clazz.getName()+"");
                         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName(),e);
                     }
                 }
@@ -936,7 +946,7 @@ public class FieldServiceImpl implements FieldService {
                         }
                     }
                 }catch(Exception e){
-                    LOGGER.warn("one row invoke set method for obj failed,the clzz is = {}",clazz.getSimpleName());
+                    LOGGER.warn("one row invoke set method for obj failed,the clzz is = "+clazz.getSimpleName()+"");
                     continue;
                 }
                 objects.add(object);
