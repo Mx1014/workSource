@@ -19,6 +19,7 @@ import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
 
+import javax.validation.constraints.Null;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -335,6 +336,8 @@ public interface OrganizationProvider {
 	Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
 
 	List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
+
+	List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId, Long enterpriseId);
 
 	void createImportFileTask(ImportFileTask importFileTask);
 
