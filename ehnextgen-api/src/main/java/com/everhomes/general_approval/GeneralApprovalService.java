@@ -46,6 +46,8 @@ public interface GeneralApprovalService {
 
 	Boolean checkNumberDefaultValue(String defaultValue, Map<String, Integer> map);
 
+	void createApprovalTemplates(CreateApprovalTemplatesCommand cmd);
+
 	ListGeneralApprovalResponse listActiveGeneralApproval(ListActiveGeneralApprovalCommand cmd);
 
 //	/**

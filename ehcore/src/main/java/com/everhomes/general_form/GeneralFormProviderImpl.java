@@ -177,4 +177,13 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 			return results;
 		return null;
 	}
+
+	@Override
+	public GeneralFormTemplate findGeneralFormTemplateByIdAndModuleId(Long id, Long moduleId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhGeneralFormTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_TEMPLATES);
+		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.MODULE_ID.eq(moduleId));
+		query.addConditions(Tables.EH_GENERAL_FORM_TEMPLATES.ID.eq(id));
+		return query.fetchOneInto(GeneralFormTemplate.class);
+	}
 }

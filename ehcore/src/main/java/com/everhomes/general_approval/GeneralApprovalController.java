@@ -19,6 +19,7 @@ import com.everhomes.rest.general_approval.ListActiveGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
 import com.everhomes.rest.general_approval.PostApprovalFormCommand;
+import com.everhomes.rest.general_approval.CreateApprovalTemplatesCommand;
 //import com.everhomes.rest.general_approval.PostFormCommand;
 //import com.everhomes.rest.general_approval.PostFormResponse;
 
@@ -106,5 +107,20 @@ public class GeneralApprovalController extends ControllerBase {
 //    	response.setErrorDescription("OK");
 //    	
 //    	return response;
-//    } 
+//    }
+
+	/**
+	 * <b>URL: /general_approval/createApprovalTemplates</b>
+	 * <p> 创建审批模板 </p>
+	 */
+	@RequestMapping("createApprovalTemplates")
+	@RestReturn(value=String.class)
+	public RestResponse createApprovalTemplates(@Valid CreateApprovalTemplatesCommand cmd) {
+		generalApprovalService.createApprovalTemplates(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
 }

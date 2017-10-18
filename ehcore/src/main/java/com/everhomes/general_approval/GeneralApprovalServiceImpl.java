@@ -12,7 +12,9 @@ import java.util.stream.Collectors;
 import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormTemplate;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -74,442 +76,441 @@ import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class GeneralApprovalServiceImpl implements GeneralApprovalService {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalServiceImpl.class);
-	@Autowired
-	private GeneralApprovalValProvider generalApprovalValProvider;
-	@Autowired
-	private GeneralFormProvider generalFormProvider;
-	@Autowired
-	private GeneralApprovalProvider generalApprovalProvider;
-	@Autowired
-	private OrganizationProvider organizationProvider;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalServiceImpl.class);
+    @Autowired
+    private GeneralApprovalValProvider generalApprovalValProvider;
+    @Autowired
+    private GeneralFormProvider generalFormProvider;
+    @Autowired
+    private GeneralApprovalProvider generalApprovalProvider;
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     private StringTemplateLoader templateLoader;
-    
+
     private Configuration templateConfig;
-	@Autowired
-	private FlowService flowService;
+    @Autowired
+    private FlowService flowService;
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private DbProvider dbProvider;
 
-	@Override
-	public GetTemplateByApprovalIdResponse getTemplateByApprovalId(
-			GetTemplateByApprovalIdCommand cmd) {
-		//
-		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-				.getApprovalId());
-		GetTemplateByApprovalIdResponse response = ConvertHelper.convert(ga,
-				GetTemplateByApprovalIdResponse.class);
-		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(ga
-				.getFormOriginId());
-		if (form == null)
-			throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
-					GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "form not found");
-		form.setFormVersion(form.getFormVersion());
-		List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
-		fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-		// 增加一个隐藏的field 用于存放sourceId
-		GeneralFormFieldDTO sourceIdField = new GeneralFormFieldDTO();
-		sourceIdField.setDataSourceType(GeneralFormDataSourceType.SOURCE_ID.getCode());
-		sourceIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-		sourceIdField.setFieldName(GeneralFormDataSourceType.SOURCE_ID.getCode());
-		sourceIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-		sourceIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-		sourceIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-		sourceIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-		fieldDTOs.add(sourceIdField);
+    @Override
+    public GetTemplateByApprovalIdResponse getTemplateByApprovalId(
+            GetTemplateByApprovalIdCommand cmd) {
+        //
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
+                .getApprovalId());
+        GetTemplateByApprovalIdResponse response = ConvertHelper.convert(ga,
+                GetTemplateByApprovalIdResponse.class);
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(ga
+                .getFormOriginId());
+        if (form == null)
+            throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
+                    GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "form not found");
+        form.setFormVersion(form.getFormVersion());
+        List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
+        fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+        // 增加一个隐藏的field 用于存放sourceId
+        GeneralFormFieldDTO sourceIdField = new GeneralFormFieldDTO();
+        sourceIdField.setDataSourceType(GeneralFormDataSourceType.SOURCE_ID.getCode());
+        sourceIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        sourceIdField.setFieldName(GeneralFormDataSourceType.SOURCE_ID.getCode());
+        sourceIdField.setRequiredFlag(NormalFlag.NEED.getCode());
+        sourceIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+        sourceIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+        sourceIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+        fieldDTOs.add(sourceIdField);
 
-		GeneralFormFieldDTO organizationIdField = new GeneralFormFieldDTO();
-		organizationIdField.setDataSourceType(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
-		organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-		organizationIdField.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
-		organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-		organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-		organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-		organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-		fieldDTOs.add(organizationIdField);
+        GeneralFormFieldDTO organizationIdField = new GeneralFormFieldDTO();
+        organizationIdField.setDataSourceType(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        organizationIdField.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+        organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
+        organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+        organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+        fieldDTOs.add(organizationIdField);
 
-		response.setFormFields(fieldDTOs);
-		return response;
-	}
+        response.setFormFields(fieldDTOs);
+        return response;
+    }
 
-	@Override
-	public GetTemplateByApprovalIdResponse postApprovalForm(PostApprovalFormCommand cmd) {
+    @Override
+    public GetTemplateByApprovalIdResponse postApprovalForm(PostApprovalFormCommand cmd) {
 
-		// TODO Auto-generated method stub
-		return this.dbProvider.execute((TransactionStatus status) -> {
-			Long userId = UserContext.current().getUser().getId();
-			GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-					.getApprovalId());
-			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(ga
-					.getFormOriginId());
+        // TODO Auto-generated method stub
+        return this.dbProvider.execute((TransactionStatus status) -> {
+            Long userId = UserContext.current().getUser().getId();
+            GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
+                    .getApprovalId());
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(ga
+                    .getFormOriginId());
 
-			if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
-				// 使用表单/审批 注意状态 config
-				form.setStatus(GeneralFormStatus.RUNNING.getCode());
-				this.generalFormProvider.updateGeneralForm(form);
-			}
-			Flow flow = null;
-			if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(ga.getModuleType())){
-				flow = flowService.getEnabledFlow(ga.getNamespaceId(), 40500L,
-						FlowModuleType.NO_MODULE.getCode(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
-			}else{
-				flow = flowService.getEnabledFlow(ga.getNamespaceId(), ga.getModuleId(),
-						ga.getModuleType(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
-			}
+            if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
+                // 使用表单/审批 注意状态 config
+                form.setStatus(GeneralFormStatus.RUNNING.getCode());
+                this.generalFormProvider.updateGeneralForm(form);
+            }
+            Flow flow = null;
+            if (FlowModuleType.SERVICE_ALLIANCE.getCode().equals(ga.getModuleType())) {
+                flow = flowService.getEnabledFlow(ga.getNamespaceId(), 40500L,
+                        FlowModuleType.NO_MODULE.getCode(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
+            } else {
+                flow = flowService.getEnabledFlow(ga.getNamespaceId(), ga.getModuleId(),
+                        ga.getModuleType(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
+            }
 
-			CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
-			cmd21.setApplyUserId(userId);
-			// cmd21.setReferId(null);
-			cmd21.setReferType(FlowReferType.APPROVAL.getCode());
+            CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
+            cmd21.setApplyUserId(userId);
+            // cmd21.setReferId(null);
+            cmd21.setReferType(FlowReferType.APPROVAL.getCode());
 
-			cmd21.setProjectType(ga.getOwnerType());
-			cmd21.setProjectId(ga.getOwnerId());
+            cmd21.setProjectType(ga.getOwnerType());
+            cmd21.setProjectId(ga.getOwnerId());
 
-			// 把command作为json传到content里，给flowcase的listener进行处理
-			cmd21.setContent(JSON.toJSONString(cmd));
-			// 修改正中会工作流显示名称，暂时写死 add by sw 20170331
+            // 把command作为json传到content里，给flowcase的listener进行处理
+            cmd21.setContent(JSON.toJSONString(cmd));
+            // 修改正中会工作流显示名称，暂时写死 add by sw 20170331
 //			if (UserContext.getCurrentNamespaceId().equals(999983)) {
 //				cmd21.setTitle("办事指南");
 //				// cmd21.setTitle(ga.getApprovalName());
 //			}
-			cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
-			cmd21.setTitle(ga.getApprovalName());
-			FlowCase flowCase = null;
-			if (null == flow) {
-				// 给他一个默认哑的flow
-				GeneralModuleInfo gm = ConvertHelper.convert(ga, GeneralModuleInfo.class);
-				gm.setOwnerId(ga.getId());
-				gm.setOwnerType(FlowOwnerType.GENERAL_APPROVAL.getCode());
-				flowCase = flowService.createDumpFlowCase(gm, cmd21);
-			} else {
-				cmd21.setFlowMainId(flow.getFlowMainId());
-				cmd21.setFlowVersion(flow.getFlowVersion());
-				flowCase = flowService.createFlowCase(cmd21);
-			}
+            cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
+            cmd21.setTitle(ga.getApprovalName());
+            FlowCase flowCase = null;
+            if (null == flow) {
+                // 给他一个默认哑的flow
+                GeneralModuleInfo gm = ConvertHelper.convert(ga, GeneralModuleInfo.class);
+                gm.setOwnerId(ga.getId());
+                gm.setOwnerType(FlowOwnerType.GENERAL_APPROVAL.getCode());
+                flowCase = flowService.createDumpFlowCase(gm, cmd21);
+            } else {
+                cmd21.setFlowMainId(flow.getFlowMainId());
+                cmd21.setFlowVersion(flow.getFlowVersion());
+                flowCase = flowService.createFlowCase(cmd21);
+            }
 
-			// 把values 存起来
-			for (PostApprovalFormItem val : cmd.getValues()) {
-				GeneralApprovalVal obj = ConvertHelper.convert(ga, GeneralApprovalVal.class);
-				obj.setApprovalId(ga.getId());
-				obj.setFormVersion(form.getFormVersion());
-				obj.setFlowCaseId(flowCase.getId());
-				obj.setFieldName(val.getFieldName());
-				obj.setFieldType(val.getFieldType());
-				obj.setFieldStr3(val.getFieldValue());
-				this.generalApprovalValProvider.createGeneralApprovalVal(obj);
-			}
+            // 把values 存起来
+            for (PostApprovalFormItem val : cmd.getValues()) {
+                GeneralApprovalVal obj = ConvertHelper.convert(ga, GeneralApprovalVal.class);
+                obj.setApprovalId(ga.getId());
+                obj.setFormVersion(form.getFormVersion());
+                obj.setFlowCaseId(flowCase.getId());
+                obj.setFieldName(val.getFieldName());
+                obj.setFieldType(val.getFieldType());
+                obj.setFieldStr3(val.getFieldValue());
+                this.generalApprovalValProvider.createGeneralApprovalVal(obj);
+            }
 
-			GetTemplateByApprovalIdResponse response = ConvertHelper.convert(ga,
-					GetTemplateByApprovalIdResponse.class);
-			response.setFlowCaseId(flowCase.getId());
-			List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
-			fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-			response.setFormFields(fieldDTOs);
-			response.setValues(cmd.getValues());
-			return response;
-		});
-	}
+            GetTemplateByApprovalIdResponse response = ConvertHelper.convert(ga,
+                    GetTemplateByApprovalIdResponse.class);
+            response.setFlowCaseId(flowCase.getId());
+            List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
+            fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+            response.setFormFields(fieldDTOs);
+            response.setValues(cmd.getValues());
+            return response;
+        });
+    }
 
-	@Override
-	public GeneralFormDTO createApprovalForm(CreateApprovalFormCommand cmd) {
+    @Override
+    public GeneralFormDTO createApprovalForm(CreateApprovalFormCommand cmd) {
 
-		GeneralForm form = ConvertHelper.convert(cmd, GeneralForm.class);
-		form.setTemplateType(GeneralFormTemplateType.DEFAULT_JSON.getCode());
-		form.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		form.setStatus(GeneralFormStatus.CONFIG.getCode());
-		form.setNamespaceId(UserContext.getCurrentNamespaceId());
-		form.setFormVersion(0L);
-		form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
-		this.generalFormProvider.createGeneralForm(form);
-		return processGeneralFormDTO(form);
-	}
+        GeneralForm form = ConvertHelper.convert(cmd, GeneralForm.class);
+        form.setTemplateType(GeneralFormTemplateType.DEFAULT_JSON.getCode());
+        form.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        form.setStatus(GeneralFormStatus.CONFIG.getCode());
+        form.setNamespaceId(UserContext.getCurrentNamespaceId());
+        form.setFormVersion(0L);
+        form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
+        this.generalFormProvider.createGeneralForm(form);
+        return processGeneralFormDTO(form);
+    }
 
-	private ThreadLocal<Map<String,Integer>> topNumFieldNames = new ThreadLocal<Map<String,Integer>>() {
-		protected  Map<String,Integer> initialValue() {
-			return new HashMap<>();
-		}
-	};
+    private ThreadLocal<Map<String, Integer>> topNumFieldNames = new ThreadLocal<Map<String, Integer>>() {
+        protected Map<String, Integer> initialValue() {
+            return new HashMap<>();
+        }
+    };
 
-	private ThreadLocal<Map<String,Integer>> allNumFieldNames = new ThreadLocal<Map<String,Integer>>() {
-		protected Map<String,Integer> initialValue() {
-			return new HashMap<>();
-		}
-	};
+    private ThreadLocal<Map<String, Integer>> allNumFieldNames = new ThreadLocal<Map<String, Integer>>() {
+        protected Map<String, Integer> initialValue() {
+            return new HashMap<>();
+        }
+    };
 
-	public GeneralFormDTO processGeneralFormDTO(GeneralForm form) {
-		GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
-		List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
-		fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-		checkFieldDTOs(fieldDTOs);
-		dto.setFormFields(fieldDTOs);
-		return dto;
-	}
+    public GeneralFormDTO processGeneralFormDTO(GeneralForm form) {
+        GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+        List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
+        fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+        checkFieldDTOs(fieldDTOs);
+        dto.setFormFields(fieldDTOs);
+        return dto;
+    }
 
-	private void checkFieldDTOs(List<GeneralFormFieldDTO> fieldDTOs) {
-		topNumFieldNames.set(findTopNumFieldNames(fieldDTOs, null));
-		allNumFieldNames.set(findAllNumFieldNames(fieldDTOs));
-		for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
-			checkFieldDTO(fieldDTO, allNumFieldNames.get());
-		}
-	}
+    private void checkFieldDTOs(List<GeneralFormFieldDTO> fieldDTOs) {
+        topNumFieldNames.set(findTopNumFieldNames(fieldDTOs, null));
+        allNumFieldNames.set(findAllNumFieldNames(fieldDTOs));
+        for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
+            checkFieldDTO(fieldDTO, allNumFieldNames.get());
+        }
+    }
 
-	/** 找到filedDTOS里面的数字类型的字段名称 */
-	private Map<String,Integer> findTopNumFieldNames(List<GeneralFormFieldDTO> fieldDTOs,
-			String superFieldName) {
-		Map<String,Integer> fieldNames = new HashMap<>();
-		if(null == fieldDTOs)
-			return fieldNames;
-		for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
-			if (fieldDTO.getFieldType().equals(GeneralFormFieldType.NUMBER_TEXT.getCode())){
-				fieldNames.put(superFieldName == null ? fieldDTO.getFieldDisplayName()
-						: (superFieldName + "." + fieldDTO.getFieldDisplayName()),1);
-				}
-		}
-		return fieldNames;
-	}
+    /**
+     * 找到filedDTOS里面的数字类型的字段名称
+     */
+    private Map<String, Integer> findTopNumFieldNames(List<GeneralFormFieldDTO> fieldDTOs,
+                                                      String superFieldName) {
+        Map<String, Integer> fieldNames = new HashMap<>();
+        if (null == fieldDTOs)
+            return fieldNames;
+        for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
+            if (fieldDTO.getFieldType().equals(GeneralFormFieldType.NUMBER_TEXT.getCode())) {
+                fieldNames.put(superFieldName == null ? fieldDTO.getFieldDisplayName()
+                        : (superFieldName + "." + fieldDTO.getFieldDisplayName()), 1);
+            }
+        }
+        return fieldNames;
+    }
 
-	/**
-	 * 找到filedDTOS里面的数字类型的字段名称+子表单类型的内部数字类型名称 现在只支持一层的子表单
-	 * */
-	private Map<String,Integer> findAllNumFieldNames(List<GeneralFormFieldDTO> fieldDTOs) {
-		Map<String,Integer> fieldNames = new HashMap<>();
-		fieldNames.putAll(findTopNumFieldNames(fieldDTOs, null));
-		if(null == fieldDTOs)
-			return fieldNames;
-		for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
-			if (fieldDTO.getFieldType().equals(GeneralFormFieldType.SUBFORM.getCode())) {
-				GeneralFormSubformDTO subFromExtra = ConvertHelper.convert(
-						fieldDTO.getFieldExtra(), GeneralFormSubformDTO.class);
-				fieldNames.putAll(findTopNumFieldNames(subFromExtra.getFormFields(),
-						fieldDTO.getFieldDisplayName()));
-			}else if (fieldDTO.getFieldType().equals(GeneralFormFieldType.NUMBER_TEXT.getCode())){
-			}
-		}
-		return fieldNames;
-	}
+    /**
+     * 找到filedDTOS里面的数字类型的字段名称+子表单类型的内部数字类型名称 现在只支持一层的子表单
+     */
+    private Map<String, Integer> findAllNumFieldNames(List<GeneralFormFieldDTO> fieldDTOs) {
+        Map<String, Integer> fieldNames = new HashMap<>();
+        fieldNames.putAll(findTopNumFieldNames(fieldDTOs, null));
+        if (null == fieldDTOs)
+            return fieldNames;
+        for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
+            if (fieldDTO.getFieldType().equals(GeneralFormFieldType.SUBFORM.getCode())) {
+                GeneralFormSubformDTO subFromExtra = ConvertHelper.convert(
+                        fieldDTO.getFieldExtra(), GeneralFormSubformDTO.class);
+                fieldNames.putAll(findTopNumFieldNames(subFromExtra.getFormFields(),
+                        fieldDTO.getFieldDisplayName()));
+            } else if (fieldDTO.getFieldType().equals(GeneralFormFieldType.NUMBER_TEXT.getCode())) {
+            }
+        }
+        return fieldNames;
+    }
 
-	/** 检查客户端传的fieldDTO是否合法 */
-	private void checkFieldDTO(GeneralFormFieldDTO fieldDTO, Map<String,Integer> map) {
-		switch (GeneralFormFieldType.fromCode(fieldDTO.getFieldType())) {
-		case SUBFORM:
-			// 对于子表单要检查所有的字段
+    /**
+     * 检查客户端传的fieldDTO是否合法
+     */
+    private void checkFieldDTO(GeneralFormFieldDTO fieldDTO, Map<String, Integer> map) {
+        switch (GeneralFormFieldType.fromCode(fieldDTO.getFieldType())) {
+            case SUBFORM:
+                // 对于子表单要检查所有的字段
 
-			GeneralFormSubformDTO subFromExtra = JSONObject.parseObject(fieldDTO.getFieldExtra(),
-					GeneralFormSubformDTO.class);
-			LOGGER.debug("FIELD EXTRA"+fieldDTO.getFieldExtra());
-			LOGGER.debug("field extra dto "+subFromExtra);
-			Map<String,Integer> subNameMap = findTopNumFieldNames(subFromExtra.getFormFields(),
-					fieldDTO.getFieldDisplayName());
-			subNameMap.putAll(topNumFieldNames.get());
-			for (GeneralFormFieldDTO subFormFieldDTO : subFromExtra.getFormFields()) {
+                GeneralFormSubformDTO subFromExtra = JSONObject.parseObject(fieldDTO.getFieldExtra(),
+                        GeneralFormSubformDTO.class);
+                LOGGER.debug("FIELD EXTRA" + fieldDTO.getFieldExtra());
+                LOGGER.debug("field extra dto " + subFromExtra);
+                Map<String, Integer> subNameMap = findTopNumFieldNames(subFromExtra.getFormFields(),
+                        fieldDTO.getFieldDisplayName());
+                subNameMap.putAll(topNumFieldNames.get());
+                for (GeneralFormFieldDTO subFormFieldDTO : subFromExtra.getFormFields()) {
 
-				checkFieldDTO(subFormFieldDTO, subNameMap);
-			}
-			break;
-		case NUMBER_TEXT:
-			// 对于数字要检查默认公式
-			GeneralFormNumDTO numberExtra = ConvertHelper.convert(fieldDTO.getFieldExtra(),
-					GeneralFormNumDTO.class);
-			if (null == numberExtra.getDefaultValue())
-				break;
-			if(!checkNumberDefaultValue(numberExtra.getDefaultValue(), allNumFieldNames.get())){ 
-				throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
-						GeneralApprovalServiceErrorCode.ERROR_FORMULA_CHECK, "ERROR_FORMULA_CHECK");	
-			}
-			break;
-		default:
-			break;
-		}
-	}
+                    checkFieldDTO(subFormFieldDTO, subNameMap);
+                }
+                break;
+            case NUMBER_TEXT:
+                // 对于数字要检查默认公式
+                GeneralFormNumDTO numberExtra = ConvertHelper.convert(fieldDTO.getFieldExtra(),
+                        GeneralFormNumDTO.class);
+                if (null == numberExtra.getDefaultValue())
+                    break;
+                if (!checkNumberDefaultValue(numberExtra.getDefaultValue(), allNumFieldNames.get())) {
+                    throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
+                            GeneralApprovalServiceErrorCode.ERROR_FORMULA_CHECK, "ERROR_FORMULA_CHECK");
+                }
+                break;
+            default:
+                break;
+        }
+    }
 
-	/**
-	* @param defaultValue
-	* 公式
-	* @param map
-	* 允许的参数和参数被replace的值--一般是1
-	* @return 如果校验通过,返回true, 否则返回 false;
-	 * 检验数字文本框的默认公式 
-	 * 1. SUM（）里面必须是子表单变量，SUM（变量）算一个变量 
-	 * 2. 两个变量之间必须有+、-、*、/中的一个符号
-	 * 3. 变量与纯数字之间必须有+、-、*、/中的一个符号 
-	 * 4. 括号必须成对出现
-	 * 
-	 * @param defaultValue 公式-默认值
-	 * @param map 合法的变量名map
-	 */
-	@Override
-	public Boolean checkNumberDefaultValue(String defaultValue, Map<String,Integer> map) {
-		// TODO Auto-generated method stub
-		//1.去空格
-		defaultValue = defaultValue.trim();
-		//2验证变量-把变量都置为0
+    /**
+     * @param defaultValue 公式
+     * @param map          允许的参数和参数被replace的值--一般是1
+     * @param defaultValue 公式-默认值
+     * @param map          合法的变量名map
+     * @return 如果校验通过, 返回true, 否则返回 false;
+     * 检验数字文本框的默认公式
+     * 1. SUM（）里面必须是子表单变量，SUM（变量）算一个变量
+     * 2. 两个变量之间必须有+、-、*、/中的一个符号
+     * 3. 变量与纯数字之间必须有+、-、*、/中的一个符号
+     * 4. 括号必须成对出现
+     */
+    @Override
+    public Boolean checkNumberDefaultValue(String defaultValue, Map<String, Integer> map) {
+        // TODO Auto-generated method stub
+        //1.去空格
+        defaultValue = defaultValue.trim();
+        //2验证变量-把变量都置为0
         try {
             Template freeMarkerTemplate = null;
             String templateKey = "templateKey";
             try {
                 templateConfig.getTemplate(templateKey, "UTF8");
-            }catch(Exception e) {  
-            } 
+            } catch (Exception e) {
+            }
             String templateText = defaultValue;
             templateLoader.putTemplate(templateKey, templateText);
             freeMarkerTemplate = templateConfig.getTemplate(templateKey, "UTF8");
-            if(freeMarkerTemplate != null) {
-            	defaultValue =  FreeMarkerTemplateUtils.processTemplateIntoString(freeMarkerTemplate, map);
+            if (freeMarkerTemplate != null) {
+                defaultValue = FreeMarkerTemplateUtils.processTemplateIntoString(freeMarkerTemplate, map);
             }
-        } catch(Exception e) {
-            if(LOGGER.isErrorEnabled()) {
+        } catch (Exception e) {
+            if (LOGGER.isErrorEnabled()) {
                 LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map, e);
-    			return false;
+                return false;
             }
         }
-		//3replace sum
+        //3replace sum
         defaultValue.replace("sum", "");
-		//4验证()是成对出现并后接数字
+        //4验证()是成对出现并后接数字
         char[] valueArray = defaultValue.toCharArray();
         int anchor = 0;
-        
-        for(int i = 0 ;i<=defaultValue.length();i++){
-        	if(valueArray[i] == '('){
-        		anchor++;
-        		if(valueArray[i+1] == '+'||valueArray[i+1] == '-'||valueArray[i+1] == '*'||valueArray[i+1] == '\\'){
-                    LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map );
+
+        for (int i = 0; i <= defaultValue.length(); i++) {
+            if (valueArray[i] == '(') {
+                anchor++;
+                if (valueArray[i + 1] == '+' || valueArray[i + 1] == '-' || valueArray[i + 1] == '*' || valueArray[i + 1] == '\\') {
+                    LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map);
                     return false;
-        		}
-        	}
-        	else if(valueArray[i] == ')'){
-            	anchor--;
-        		if(valueArray[i-1] == '+'||valueArray[i-1] == '-'||valueArray[i-1] == '*'||valueArray[i-1] == '\\'){
-                    LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map );
+                }
+            } else if (valueArray[i] == ')') {
+                anchor--;
+                if (valueArray[i - 1] == '+' || valueArray[i - 1] == '-' || valueArray[i - 1] == '*' || valueArray[i - 1] == '\\') {
+                    LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map);
                     return false;
-        		}
-        	}
-        	if(anchor <0){ 
-                LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map );
+                }
+            }
+            if (anchor < 0) {
+                LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map);
                 return false;
-        	}  
+            }
         }
-    	if(anchor != 0){ 
-            LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map );
+        if (anchor != 0) {
+            LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map);
             return false;
-    	}  
-		//5 正则表达式验证
-    	String regex = "^\\d+([\\+\\-\\*\\/]{1}\\d+)*$"; 
-    	if(!match(regex, defaultValue)){ 
-            LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map );
+        }
+        //5 正则表达式验证
+        String regex = "^\\d+([\\+\\-\\*\\/]{1}\\d+)*$";
+        if (!match(regex, defaultValue)) {
+            LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map);
             return false;
-    	}
-    	return true;
-	}
+        }
+        return true;
+    }
 
-	/**
-	* @param regex
-	* 正则表达式字符串
-	* @param str
-	* 要匹配的字符串
-	* @return 如果str 符合 regex的正则表达式格式,返回true, 否则返回 false;
-	*/
-	private static boolean match(String regex, String str) {
-		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(str);
-		return matcher.matches();
-	}
-	@Override
-	public void deleteApprovalFormById(ApprovalFormIdCommand cmd) {
-		// 删除是状态置为invalid
-		this.generalFormProvider.invalidForms(cmd.getFormOriginId());
-	}
+    /**
+     * @param regex 正则表达式字符串
+     * @param str   要匹配的字符串
+     * @return 如果str 符合 regex的正则表达式格式,返回true, 否则返回 false;
+     */
+    private static boolean match(String regex, String str) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(str);
+        return matcher.matches();
+    }
 
-	@Override
-	public GeneralApprovalDTO createGeneralApproval(CreateGeneralApprovalCommand cmd) {
-		//
-		GeneralApproval ga = ConvertHelper.convert(cmd, GeneralApproval.class);
-		ga.setNamespaceId(UserContext.getCurrentNamespaceId());
-		ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
+    @Override
+    public void deleteApprovalFormById(ApprovalFormIdCommand cmd) {
+        // 删除是状态置为invalid
+        this.generalFormProvider.invalidForms(cmd.getFormOriginId());
+    }
 
-		// 新增加审批的时候可能并为设置 formId
-		// GeneralForm form =
-		// this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
-		// .getFormOriginId());
-		// ga.setFormVersion(form.getFormVersion());// 目前这个值并没用到
+    @Override
+    public GeneralApprovalDTO createGeneralApproval(CreateGeneralApprovalCommand cmd) {
+        //
+        GeneralApproval ga = ConvertHelper.convert(cmd, GeneralApproval.class);
+        ga.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
 
-		this.generalApprovalProvider.createGeneralApproval(ga);
+        // 新增加审批的时候可能并为设置 formId
+        // GeneralForm form =
+        // this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
+        // .getFormOriginId());
+        // ga.setFormVersion(form.getFormVersion());// 目前这个值并没用到
 
-		return processApproval(ga);
-	}
+        this.generalApprovalProvider.createGeneralApproval(ga);
 
-	@Override
-	public GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd) {
-		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-				.getApprovalId());
+        return processApproval(ga);
+    }
 
-		if (null != cmd.getSupportType())
-			ga.setSupportType(cmd.getSupportType());
-		if (null != cmd.getFormOriginId())
-			ga.setFormOriginId(cmd.getFormOriginId());
-		if (null != cmd.getApprovalName())
-			ga.setApprovalName(cmd.getApprovalName());
-		this.generalApprovalProvider.updateGeneralApproval(ga);
-		return processApproval(ga);
-	}
+    @Override
+    public GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd) {
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
+                .getApprovalId());
 
-	@Override
-	public ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd) {
+        if (null != cmd.getSupportType())
+            ga.setSupportType(cmd.getSupportType());
+        if (null != cmd.getFormOriginId())
+            ga.setFormOriginId(cmd.getFormOriginId());
+        if (null != cmd.getApprovalName())
+            ga.setApprovalName(cmd.getApprovalName());
+        this.generalApprovalProvider.updateGeneralApproval(ga);
+        return processApproval(ga);
+    }
 
-		//modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
+    @Override
+    public ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd) {
 
-		List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
-				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
+        //modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
 
-					@Override
-					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-							SelectQuery<? extends Record> query) {
-						List<OrganizationCommunity> communityList = null;
-						
-						//modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
-						if(EntityType.ORGANIZATIONS.getCode().equals(cmd.getOwnerType()) 
-								&& FlowModuleType.SERVICE_ALLIANCE.getCode().equals(cmd.getModuleType())){
-							 communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
-							 Condition conditionOR = null;
-							 for (OrganizationCommunity organizationCommunity : communityList) {
-								Condition condition = Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(organizationCommunity.getCommunityId())
-										.and(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
-								if(conditionOR==null){
-									conditionOR = condition;
-								}else{
-									conditionOR = conditionOR.or(condition);
-								}
-							 }
-							 if(conditionOR!=null){
-								 Condition condition = Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()).and(
-										 Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd.getOwnerType())
-								 );
-								 conditionOR = conditionOR.or(condition);
-								 query.addConditions(conditionOR);
-							 }
-						}else{
-							query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd
-									.getOwnerId()));
-							query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd
-									.getOwnerType()));
-						}
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS
-								.ne(GeneralApprovalStatus.DELETED.getCode()));
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd
-								.getModuleId()));
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(cmd
-								.getModuleType()));
+        List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
+                Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
 
-						if(null != cmd.getProjectId())
-							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd.getProjectId()));
-						if(null != cmd.getProjectType())
-							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd.getProjectType()));
-						if (null != cmd.getStatus())
-							query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(cmd
-									.getStatus()));
-						//注释掉, 2017年6月16日 不想过滤的条件就不要传好了,不用在这里假先知
+                    @Override
+                    public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                                                                        SelectQuery<? extends Record> query) {
+                        List<OrganizationCommunity> communityList = null;
+
+                        //modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
+                        if (EntityType.ORGANIZATIONS.getCode().equals(cmd.getOwnerType())
+                                && FlowModuleType.SERVICE_ALLIANCE.getCode().equals(cmd.getModuleType())) {
+                            communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+                            Condition conditionOR = null;
+                            for (OrganizationCommunity organizationCommunity : communityList) {
+                                Condition condition = Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(organizationCommunity.getCommunityId())
+                                        .and(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
+                                if (conditionOR == null) {
+                                    conditionOR = condition;
+                                } else {
+                                    conditionOR = conditionOR.or(condition);
+                                }
+                            }
+                            if (conditionOR != null) {
+                                Condition condition = Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()).and(
+                                        Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd.getOwnerType())
+                                );
+                                conditionOR = conditionOR.or(condition);
+                                query.addConditions(conditionOR);
+                            }
+                        } else {
+                            query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd
+                                    .getOwnerId()));
+                            query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd
+                                    .getOwnerType()));
+                        }
+                        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS
+                                .ne(GeneralApprovalStatus.DELETED.getCode()));
+                        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd
+                                .getModuleId()));
+                        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(cmd
+                                .getModuleType()));
+
+                        if (null != cmd.getProjectId())
+                            query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd.getProjectId()));
+                        if (null != cmd.getProjectType())
+                            query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd.getProjectType()));
+                        if (null != cmd.getStatus())
+                            query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(cmd
+                                    .getStatus()));
+                        //注释掉, 2017年6月16日 不想过滤的条件就不要传好了,不用在这里假先知
 //						EntityType entityType = EntityType.fromCode(cmd.getProjectType());
 //						//by dengs, 20170509 如果是园区才匹配查询园区相关信息，如果是公司，则不匹配。
 //						if(entityType == EntityType.COMMUNITY){
@@ -518,127 +519,185 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 //							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd
 //									.getProjectType()));
 //						}
-						return query;
-					}
-				});
+                        return query;
+                    }
+                });
 
-		ListGeneralApprovalResponse resp = new ListGeneralApprovalResponse();
-		resp.setDtos(gas.stream().map((r) -> {
-			if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(r.getModuleType())){
-				long oid = r.getModuleId();
-				r.setModuleId(40500L);
-				r.setModuleType(FlowModuleType.NO_MODULE.getCode());
-				GeneralApprovalDTO dto = processApproval(r);
-				dto.setModuleId(oid);
-				dto.setModuleType(FlowModuleType.SERVICE_ALLIANCE.getCode());
-				return dto;
-			}
-			return processApproval(r);
-		}).collect(Collectors.toList()));
-		return resp;
-	}
+        ListGeneralApprovalResponse resp = new ListGeneralApprovalResponse();
+        resp.setDtos(gas.stream().map((r) -> {
+            if (FlowModuleType.SERVICE_ALLIANCE.getCode().equals(r.getModuleType())) {
+                long oid = r.getModuleId();
+                r.setModuleId(40500L);
+                r.setModuleType(FlowModuleType.NO_MODULE.getCode());
+                GeneralApprovalDTO dto = processApproval(r);
+                dto.setModuleId(oid);
+                dto.setModuleType(FlowModuleType.SERVICE_ALLIANCE.getCode());
+                return dto;
+            }
+            return processApproval(r);
+        }).collect(Collectors.toList()));
+        return resp;
+    }
 
-	private GeneralApprovalDTO processApproval(GeneralApproval r) {
-		GeneralApprovalDTO result = ConvertHelper.convert(r, GeneralApprovalDTO.class);
-		// form name
-		if (r.getFormOriginId() != null && !r.getFormOriginId().equals(0l)) {
-			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(r
-					.getFormOriginId());
-			if (form != null) {
-				result.setFormName(form.getFormName());
-			}
-		}
+    private GeneralApprovalDTO processApproval(GeneralApproval r) {
+        GeneralApprovalDTO result = ConvertHelper.convert(r, GeneralApprovalDTO.class);
+        // form name
+        if (r.getFormOriginId() != null && !r.getFormOriginId().equals(0l)) {
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(r
+                    .getFormOriginId());
+            if (form != null) {
+                result.setFormName(form.getFormName());
+            }
+        }
 
-		// flow
-		Flow flow = flowService.getEnabledFlow(r.getNamespaceId(), r.getModuleId(),
-				r.getModuleType(), r.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
+        // flow
+        Flow flow = flowService.getEnabledFlow(r.getNamespaceId(), r.getModuleId(),
+                r.getModuleType(), r.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
 
-		if (null != flow) {
-			result.setFlowName(flow.getFlowName());
-		}
-		return result;
-	}
+        if (null != flow) {
+            result.setFlowName(flow.getFlowName());
+        }
+        return result;
+    }
 
-	@Override
-	public void deleteGeneralApproval(GeneralApprovalIdCommand cmd) {
+    @Override
+    public void deleteGeneralApproval(GeneralApprovalIdCommand cmd) {
 
-		// 删除是状态置为deleted
-		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-				.getApprovalId());
-		ga.setStatus(GeneralApprovalStatus.DELETED.getCode());
-		this.generalApprovalProvider.updateGeneralApproval(ga);
-	}
+        // 删除是状态置为deleted
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
+                .getApprovalId());
+        ga.setStatus(GeneralApprovalStatus.DELETED.getCode());
+        this.generalApprovalProvider.updateGeneralApproval(ga);
+    }
 
-	@Override
-	public GeneralFormDTO  getApprovalForm(ApprovalFormIdCommand cmd) {
-		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
-				.getFormOriginId());
-		return processGeneralFormDTO(form);
-	}
+    @Override
+    public GeneralFormDTO getApprovalForm(ApprovalFormIdCommand cmd) {
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
+                .getFormOriginId());
+        return processGeneralFormDTO(form);
+    }
 
- 
-	@Override
-	public void enableGeneralApproval(GeneralApprovalIdCommand cmd) { 
-		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-				.getApprovalId());
-		ga.setStatus(GeneralApprovalStatus.RUNNING.getCode());
-		this.generalApprovalProvider.updateGeneralApproval(ga);
-	}
 
-	@Override
-	public void disableGeneralApproval(GeneralApprovalIdCommand cmd) { 
-		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-				.getApprovalId());
-		ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
-		this.generalApprovalProvider.updateGeneralApproval(ga);
-	}
+    @Override
+    public void enableGeneralApproval(GeneralApprovalIdCommand cmd) {
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
+                .getApprovalId());
+        ga.setStatus(GeneralApprovalStatus.RUNNING.getCode());
+        this.generalApprovalProvider.updateGeneralApproval(ga);
+    }
 
-	/**
-	 * 取状态不为失效的form
-	 * */
-	@Override
-	public ListGeneralFormResponse listApprovalForms(ListApprovalFormsCommand cmd) {
+    @Override
+    public void disableGeneralApproval(GeneralApprovalIdCommand cmd) {
+        GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
+                .getApprovalId());
+        ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
+        this.generalApprovalProvider.updateGeneralApproval(ga);
+    }
 
-		List<GeneralForm> forms = this.generalFormProvider.queryGeneralForms(new ListingLocator(),
-				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
-					@Override
-					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-																		SelectQuery<? extends Record> query) {
-						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(cmd.getOwnerId()));
-						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(cmd
-								.getOwnerType()));
-						query.addConditions(Tables.EH_GENERAL_FORMS.STATUS
-								.ne(GeneralFormStatus.INVALID.getCode()));
-						return query;
-					}
-				});
-		ListGeneralFormResponse resp = new ListGeneralFormResponse();
-		resp.setForms(forms.stream().map((r) -> {
-			return processGeneralFormDTO(r);
-		}).collect(Collectors.toList()));
-		return resp;
-	}
+    /**
+     * 取状态不为失效的form
+     */
+    @Override
+    public ListGeneralFormResponse listApprovalForms(ListApprovalFormsCommand cmd) {
 
-	@Override
-	public GeneralFormDTO updateApprovalForm(UpdateApprovalFormCommand cmd) {
-		return null;
-	}
+        List<GeneralForm> forms = this.generalFormProvider.queryGeneralForms(new ListingLocator(),
+                Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
+                    @Override
+                    public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                                                                        SelectQuery<? extends Record> query) {
+                        query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(cmd.getOwnerId()));
+                        query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(cmd
+                                .getOwnerType()));
+                        query.addConditions(Tables.EH_GENERAL_FORMS.STATUS
+                                .ne(GeneralFormStatus.INVALID.getCode()));
+                        return query;
+                    }
+                });
+        ListGeneralFormResponse resp = new ListGeneralFormResponse();
+        resp.setForms(forms.stream().map((r) -> {
+            return processGeneralFormDTO(r);
+        }).collect(Collectors.toList()));
+        return resp;
+    }
 
-	@Override
-	public ListGeneralApprovalResponse listActiveGeneralApproval(
-			ListActiveGeneralApprovalCommand cmd) {
-		ListGeneralApprovalCommand cmd2 = ConvertHelper.convert(cmd, ListGeneralApprovalCommand.class);
-		cmd2.setStatus(GeneralApprovalStatus.RUNNING.getCode());
-		if(null == cmd2.getModuleType())
-			cmd2.setModuleType(FlowModuleType.NO_MODULE.getCode());
-		if(null == cmd2.getModuleId())
-			cmd2.setModuleId(GeneralApprovalController.MODULE_ID);
-		if(null == cmd2.getOwnerType())
-			cmd2.setOwnerType("EhOrganizations"); 
-		
-		
-		return listGeneralApproval(cmd2);
-	} 
+    @Override
+    public GeneralFormDTO updateApprovalForm(UpdateApprovalFormCommand cmd) {
+        return null;
+    }
+
+
+    //  创建审批模板的接口
+    @Override
+    public void createApprovalTemplates(CreateApprovalTemplatesCommand cmd) {
+        List<GeneralApprovalTemplate> templates = generalApprovalProvider.listGeneralApprovalTemplateByModuleId(cmd.getModuleId());
+        //  1.判断审批模板中是否有对directly应的表单模板
+        //  2.没有则直接创建审批
+        //  3.有则先创建表单拿去表单 id,在创建审批与生成的 id 关联
+        if (templates != null || templates.size() > 0) {
+            dbProvider.execute((TransactionStatus status) -> {
+                for (GeneralApprovalTemplate approval : templates) {
+                    if (approval.getFormTemplateId().longValue() == 0) {
+                        //  Create Approvals directly.
+                        GeneralApproval ga = convertApprovalFromTemplate(approval, null, cmd);
+                        generalApprovalProvider.createGeneralApproval(ga);
+                    } else {
+                        //  Create Forms before creating approvals.
+                        GeneralFormTemplate form = generalFormProvider.findGeneralFormTemplateByIdAndModuleId(
+                                approval.getFormTemplateId(), cmd.getModuleId());
+                        GeneralForm gf = convertFormFromTemplate(form, cmd);
+                        Long formOriginId = generalFormProvider.createGeneralForm(gf);
+                        //  Then, start to create approvals.
+                        GeneralApproval ga = convertApprovalFromTemplate(approval, formOriginId, cmd);
+                        generalApprovalProvider.createGeneralApproval(ga);
+                    }
+                }
+                return null;
+            });
+        }
+    }
+
+    private GeneralApproval convertApprovalFromTemplate(GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
+        GeneralApproval ga = ConvertHelper.convert(approval, GeneralApproval.class);
+        ga.setNamespaceId(UserContext.getCurrentNamespaceId());
+        ga.setStatus(GeneralApprovalStatus.RUNNING.getCode());
+        ga.setOwnerId(cmd.getOwnerId());
+        ga.setOwnerType(cmd.getOwnerType());
+        ga.setOrganizationId(cmd.getOrganizationId());
+        ga.setProjectId(cmd.getProjectId());
+        ga.setProjectType(cmd.getProjectType());
+        if (formOriginId != null)
+            ga.setFormOriginId(formOriginId);
+        ga.setSupportType(cmd.getSupportType());
+        return ga;
+    }
+
+    private GeneralForm convertFormFromTemplate(GeneralFormTemplate form, CreateApprovalTemplatesCommand cmd) {
+        GeneralForm gf = ConvertHelper.convert(form, GeneralForm.class);
+        gf.setStatus(GeneralFormStatus.CONFIG.getCode());
+        gf.setNamespaceId(UserContext.getCurrentNamespaceId());
+        gf.setFormVersion(0L);
+        gf.setOwnerId(cmd.getOwnerId());
+        gf.setOwnerId(cmd.getOwnerId());
+        gf.setOwnerType(cmd.getOwnerType());
+        gf.setOrganizationId(cmd.getOrganizationId());
+        return gf;
+    }
+
+    @Override
+    public ListGeneralApprovalResponse listActiveGeneralApproval(
+            ListActiveGeneralApprovalCommand cmd) {
+        ListGeneralApprovalCommand cmd2 = ConvertHelper.convert(cmd, ListGeneralApprovalCommand.class);
+        cmd2.setStatus(GeneralApprovalStatus.RUNNING.getCode());
+        if (null == cmd2.getModuleType())
+            cmd2.setModuleType(FlowModuleType.NO_MODULE.getCode());
+        if (null == cmd2.getModuleId())
+            cmd2.setModuleId(GeneralApprovalController.MODULE_ID);
+        if (null == cmd2.getOwnerType())
+            cmd2.setOwnerType("EhOrganizations");
+
+
+        return listGeneralApproval(cmd2);
+    }
 //	@Override
 //	public GetTemplateByApprovalIdResponse getActiveGeneralFormByOriginId(GetActiveGeneralFormByOriginIdCommand cmd) {
 //		// TODO Auto-generated method stub
