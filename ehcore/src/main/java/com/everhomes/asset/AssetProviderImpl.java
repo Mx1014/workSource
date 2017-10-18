@@ -2168,7 +2168,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentVariables t3 = Tables.EH_PAYMENT_VARIABLES.as("t3");
 //        com.everhomes.server.schema.tables.EhPaymentFormula t3 = Tables.EH_PAYMENT_FORMULA.as("t3");
         SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t.FORMULA_TYPE);
+        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t.FORMULA_TYPE,t.SUGGEST_UNIT_PRICE,t.AREA_SIZE_TYPE);
         query.addFrom(t,t1);
         query.addConditions(t.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()));
         query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
@@ -2181,6 +2181,8 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setChargingStandardName(r.getValue(t.NAME));
             dto.setFormula(r.getValue(t.FORMULA));
             dto.setFormulaType(r.getValue(t.FORMULA_TYPE));
+            dto.setSuggest_unit_price(r.getValue(t.SUGGEST_UNIT_PRICE));
+            dto.setArea_size_type(r.getValue(t.AREA_SIZE_TYPE));
             list.add(dto);
             return null;
         });

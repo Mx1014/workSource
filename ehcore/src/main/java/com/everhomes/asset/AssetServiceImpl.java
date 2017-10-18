@@ -1114,9 +1114,7 @@ public class AssetServiceImpl implements AssetService {
         Calendar a = Calendar.getInstance();
         a.setTime(dateStrBegin.getTime());
         while(a.compareTo(dateStrEnd)<=0){
-            //如果是自然即dayOffset没有设置，则起始时算一把刀a的月末
-
-            //再算费用产生月d
+            //计算费用产生月d
             Calendar d = Calendar.getInstance();
             d.setTime(a.getTime());
             d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
@@ -1166,7 +1164,6 @@ public class AssetServiceImpl implements AssetService {
             a.setTime(d2.getTime());
             //继续循环
             time++;
-
         }
         LOGGER.info("账单产生了"+time+"项目,真实为"+list.size());
 
@@ -1444,7 +1441,7 @@ public class AssetServiceImpl implements AssetService {
         HashMap<String,String> map = new HashMap();
         for(int i = 0; i < variableIdAndValueList.size(); i++){
             VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
-            map.put((String)variableIdAndValue.getVariableId(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
+            map.put((String)variableIdAndValue.getVaribleIdentifier(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
         }
         for(Map.Entry<String,String> entry : map.entrySet()){
             formula = formula.replace(entry.getKey(),entry.getValue());
