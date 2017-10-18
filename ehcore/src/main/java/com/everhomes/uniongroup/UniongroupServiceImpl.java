@@ -9,12 +9,11 @@ import com.everhomes.organization.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.search.UniongroupSearcher;
-import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhUniongroupConfigures;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -525,7 +524,13 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Override
     public void cloneGroupTypeDataToVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer n1, Integer n2) {
         dbProvider.execute((TransactionStatus status) -> {
-            this.uniongroupConfigureProvider.cloneGroupTypeDataToVersion(namespaceId,enterpriseId,groupType,n1,n2);
+            this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_CLONE_LOCK.getCode()).enter(() -> {
+                List<EhUniongroupConfigures> configures_n1 = this.uniongroupConfigureProvider.listUniongroupConfigures(namespaceId, groupType, enterpriseId, null, n1);
+                List<EhUniongroupMemberDetails> details_n1 = this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId, groupType, enterpriseId, null, n1);
+                this.uniongroupConfigureProvider.batchCreateUniongroupConfigres(configures_n1);
+                this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(details_n1);
+                return null;
+            });
             return null;
         });
     }

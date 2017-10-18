@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.uniongroup;
 
+import com.everhomes.server.schema.tables.EhUniongroupConfigures;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
 import jdk.nashorn.internal.runtime.Version;
 import org.jooq.Update;
@@ -35,8 +36,9 @@ public interface UniongroupConfigureProvider {
 
     void deleteUniongroupConfigresByCurrentIds(Integer namespaceId, List<Long> currentIds, String currentType, Integer versionCode);
 
-
     void createUniongroupMemberDetail(UniongroupMemberDetail uniongroupMemberDetail);
+
+    void batchCreateUniongroupConfigres(List<com.everhomes.server.schema.tables.pojos.EhUniongroupConfigures> unionConfiguresist);
 
     void batchCreateUniongroupMemberDetail(List<EhUniongroupMemberDetails> unionDetailList);
 
@@ -99,6 +101,10 @@ public interface UniongroupConfigureProvider {
 
     void deleteUniongroupMemberDetailsByEnterpriseIdAndGroupType(Integer namespaceId, String groupType, Long enterpriseId);
 
-    void cloneGroupTypeDataToVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer n1, Integer n2);
+//    void cloneGroupTypeDataToVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer n1, Integer n2);
+
+    List<com.everhomes.server.schema.tables.pojos.EhUniongroupConfigures> listUniongroupConfigures(Integer namespaceId, String groupType, Long enterpriseId, Long groupId, Integer versionCode);
+
+    List<EhUniongroupMemberDetails> listUniongroupMemberDetail(Integer namespaceId, String groupType, Long enterpriseId, Long groupId, Integer versionCode);
 
 }

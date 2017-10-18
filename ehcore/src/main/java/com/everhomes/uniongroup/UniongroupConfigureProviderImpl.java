@@ -249,6 +249,24 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
+    public void batchCreateUniongroupConfigres(List<EhUniongroupConfigures> unionConfiguresist) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        List<EhUniongroupConfigures> list = new ArrayList<>();
+        unionConfiguresist.stream().map(r -> {
+            Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUniongroupConfigures.class));
+            r.setId(id);
+            r.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            r.setOperatorUid(UserContext.current().getUser().getId());
+            list.add(r);
+            return null;
+        }).collect(Collectors.toList());
+        EhUniongroupConfiguresDao dao = new EhUniongroupConfiguresDao(context.configuration());
+        LOGGER.debug("batchCreateUniongroupConfiguresDao data.size()" + list.size());
+        dao.insert(list);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUniongroupMemberDetails.class, null);
+    }
+
+    @Override
     public void batchCreateUniongroupMemberDetail(List<EhUniongroupMemberDetails> unionDetailList) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         List<EhUniongroupMemberDetails> list = new ArrayList<>();
@@ -592,40 +610,110 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUniongroupMemberDetailsDao.class, null);
     }
 
+//    @Override
+//    public void cloneGroupTypeDataToVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer n1, Integer n2) {
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+////        InsertQuery<EhUniongroupConfiguresRecord> query = context.insertQuery(Tables.EH_UNIONGROUP_CONFIGURES);
+////        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUniongroupConfigures.class));
+////        context.execute("SET @id = " + id);
+////        Field<Long> f1 = DSL.field("@id:=@id+1", Long.class);
+////
+////        Insert<EhUniongroupConfiguresRecord> qq =  context.insertInto(Tables.EH_UNIONGROUP_CONFIGURES).select(context.select(f1,
+////                Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID,
+////                Tables.EH_UNIONGROUP_CONFIGURES.ENTERPRISE_ID,
+////                Tables.EH_UNIONGROUP_CONFIGURES.GROUP_TYPE,
+////                Tables.EH_UNIONGROUP_CONFIGURES.GROUP_ID,
+////                Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_ID,
+////                Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_TYPE,
+////                Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_NAME,
+////                Tables.EH_UNIONGROUP_CONFIGURES.OPERATOR_UID,
+////                Tables.EH_UNIONGROUP_CONFIGURES.UPDATE_TIME,
+////                Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE
+////                ).from(Tables.EH_UNIONGROUP_CONFIGURES));
+////
+////        String q = qq.getSQL();
+////
+//////        context.execute("SET @id = " + id + ";\r\n" + q + ";");
+//////                Tables.EH_UNIONGROUP_CONFIGURES.field(1),
+//////                Tables.EH_UNIONGROUP_CONFIGURES.field(2),
+//////                Tables.EH_UNIONGROUP_CONFIGURES.field(3),
+//////                Tables.EH_UNIONGROUP_CONFIGURES.field(4),
+//////                Tables.EH_UNIONGROUP_CONFIGURES.field(5),
+//////                Tables.EH_UNIONGROUP_CONFIGURES.field(6),
+//////                Tables.EH_UNIONGROUP_CONFIGURES.field(7),
+//////                Tables.EH_UNIONGROUP_CONFIGURES.field(8),
+//////                Tables.EH_UNIONGROUP_CONFIGURES.field(9)
+//////                ).from(Tables.EH_UNIONGROUP_CONFIGURES).execute();
+//    }
+
     @Override
-    public void cloneGroupTypeDataToVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer n1, Integer n2) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        InsertQuery<EhUniongroupConfiguresRecord> query = context.insertQuery(Tables.EH_UNIONGROUP_CONFIGURES);
-        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUniongroupConfigures.class));
-        context.execute("SET @id = " + id);
-        Field<Long> f1 = DSL.field("@id:=@id+1", Long.class);
+    public List<EhUniongroupConfigures> listUniongroupConfigures(Integer namespaceId, String groupType, Long enterpriseId, Long groupId, Integer versionCode) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhUniongroupConfiguresRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_CONFIGURES);
+        List<EhUniongroupConfigures> result = new ArrayList<>();
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
+        if(groupType != null){
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUP_TYPE.eq(groupType));
+        }
+        if(enterpriseId != null){
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.ENTERPRISE_ID.eq(enterpriseId));
+        }
+        if(groupId != null){
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUP_ID.eq(groupId));
 
-        Insert<EhUniongroupConfiguresRecord> qq =  context.insertInto(Tables.EH_UNIONGROUP_CONFIGURES).select(context.select(f1,
-                Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID,
-                Tables.EH_UNIONGROUP_CONFIGURES.ENTERPRISE_ID,
-                Tables.EH_UNIONGROUP_CONFIGURES.GROUP_TYPE,
-                Tables.EH_UNIONGROUP_CONFIGURES.GROUP_ID,
-                Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_ID,
-                Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_TYPE,
-                Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_NAME,
-                Tables.EH_UNIONGROUP_CONFIGURES.OPERATOR_UID,
-                Tables.EH_UNIONGROUP_CONFIGURES.UPDATE_TIME,
-                Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE
-                ).from(Tables.EH_UNIONGROUP_CONFIGURES));
+        }
+        if(versionCode != null){
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(versionCode));
+        }else{
+            query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(DEFAULT_VERSION_CODE));
 
-        String q = qq.getSQL();
+        }
+        List<EhUniongroupConfiguresRecord> records = query.fetch();
+        if (records != null) {
+            records.stream().map(r -> {
+                result.add(ConvertHelper.convert(r, EhUniongroupConfigures.class));
+                return null;
+            }).collect(Collectors.toList());
+        }
+        if (result != null && result.size() != 0) {
+            return result;
+        }
+        return null;
+    }
 
-//        context.execute("SET @id = " + id + ";\r\n" + q + ";");
-//                Tables.EH_UNIONGROUP_CONFIGURES.field(1),
-//                Tables.EH_UNIONGROUP_CONFIGURES.field(2),
-//                Tables.EH_UNIONGROUP_CONFIGURES.field(3),
-//                Tables.EH_UNIONGROUP_CONFIGURES.field(4),
-//                Tables.EH_UNIONGROUP_CONFIGURES.field(5),
-//                Tables.EH_UNIONGROUP_CONFIGURES.field(6),
-//                Tables.EH_UNIONGROUP_CONFIGURES.field(7),
-//                Tables.EH_UNIONGROUP_CONFIGURES.field(8),
-//                Tables.EH_UNIONGROUP_CONFIGURES.field(9)
-//                ).from(Tables.EH_UNIONGROUP_CONFIGURES).execute();
+    @Override
+    public List<EhUniongroupMemberDetails> listUniongroupMemberDetail(Integer namespaceId, String groupType, Long enterpriseId, Long groupId, Integer versionCode) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
+        List<EhUniongroupMemberDetails> result = new ArrayList<>();
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
+        if(groupType != null){
+            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType));
+        }
+        if(enterpriseId != null){
+            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(enterpriseId));
+        }
+        if(groupId != null){
+            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
+
+        }
+        if(versionCode != null){
+            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(versionCode));
+        }else{
+            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(DEFAULT_VERSION_CODE));
+
+        }
+        List<EhUniongroupMemberDetailsRecord> records = query.fetch();
+        if (records != null) {
+            records.stream().map(r -> {
+                result.add(ConvertHelper.convert(r, EhUniongroupMemberDetails.class));
+                return null;
+            }).collect(Collectors.toList());
+        }
+        if (result != null && result.size() != 0) {
+            return result;
+        }
+        return null;
     }
 
     @Override
