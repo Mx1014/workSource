@@ -1,4 +1,13 @@
 
+CREATE TABLE `eh_lease_project_communities` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `lease_project_id` bigint(20) NOT NULL COMMENT 'lease project id',
+  `community_id` bigint(20) NOT NULL COMMENT 'community id',
+  `creator_uid` bigint(20) NOT NULL,
+  `create_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 CREATE TABLE `eh_lease_projects` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
