@@ -116,5 +116,5 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         obj.setUpdateTime(new Timestamp(l2));
     }
 
-    public List<> list
+//    public List<> list
 }
