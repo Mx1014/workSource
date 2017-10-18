@@ -554,8 +554,8 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         UpdateQuery<EhUniongroupConfiguresRecord> query = context.updateQuery(Tables.EH_UNIONGROUP_CONFIGURES);
         query.addValue(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE, v2);
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(v1));
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(enterpriseId));
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.ENTERPRISE_ID.eq(enterpriseId));
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
         query.execute();
     }
 
@@ -710,7 +710,6 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         condition = condition.and(t1.field("id").in(context.selectDistinct(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))));
         List<OrganizationMemberDetails> details = step.where(condition).fetch().map(new OrganizationMemberDetailsMapper());
         LOGGER.debug("listDetailNotInUniongroup 's sql is :" + step.where(condition).getSQL());
-        step.close();
         return details;
     }
 
