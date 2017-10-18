@@ -596,7 +596,36 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     public void cloneGroupTypeDataToVersion(Integer namespaceId, Long enterpriseId, String groupType, Integer n1, Integer n2) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         InsertQuery<EhUniongroupConfiguresRecord> query = context.insertQuery(Tables.EH_UNIONGROUP_CONFIGURES);
-//        query.
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUniongroupConfigures.class));
+        context.execute("SET @id = " + id);
+        Field<Long> f1 = DSL.field("@id:=@id+1", Long.class);
+
+        Insert<EhUniongroupConfiguresRecord> qq =  context.insertInto(Tables.EH_UNIONGROUP_CONFIGURES).select(context.select(f1,
+                Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID,
+                Tables.EH_UNIONGROUP_CONFIGURES.ENTERPRISE_ID,
+                Tables.EH_UNIONGROUP_CONFIGURES.GROUP_TYPE,
+                Tables.EH_UNIONGROUP_CONFIGURES.GROUP_ID,
+                Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_ID,
+                Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_TYPE,
+                Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_NAME,
+                Tables.EH_UNIONGROUP_CONFIGURES.OPERATOR_UID,
+                Tables.EH_UNIONGROUP_CONFIGURES.UPDATE_TIME,
+                Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE
+                ).from(Tables.EH_UNIONGROUP_CONFIGURES));
+
+        String q = qq.getSQL();
+
+//        context.execute("SET @id = " + id + ";\r\n" + q + ";");
+//                Tables.EH_UNIONGROUP_CONFIGURES.field(1),
+//                Tables.EH_UNIONGROUP_CONFIGURES.field(2),
+//                Tables.EH_UNIONGROUP_CONFIGURES.field(3),
+//                Tables.EH_UNIONGROUP_CONFIGURES.field(4),
+//                Tables.EH_UNIONGROUP_CONFIGURES.field(5),
+//                Tables.EH_UNIONGROUP_CONFIGURES.field(6),
+//                Tables.EH_UNIONGROUP_CONFIGURES.field(7),
+//                Tables.EH_UNIONGROUP_CONFIGURES.field(8),
+//                Tables.EH_UNIONGROUP_CONFIGURES.field(9)
+//                ).from(Tables.EH_UNIONGROUP_CONFIGURES).execute();
     }
 
     @Override
