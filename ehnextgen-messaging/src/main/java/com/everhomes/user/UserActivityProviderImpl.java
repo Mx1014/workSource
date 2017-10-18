@@ -4,9 +4,13 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.organization.OrganizationCommunityRequestType;
 import com.everhomes.rest.organization.UserOrganizationStatus;
 import com.everhomes.rest.user.*;
@@ -228,35 +232,22 @@ public class UserActivityProviderImpl implements UserActivityProvider {
     }
 
     @Override
-    public List<User> listUnAuthUsersByProfileCommunityId(Integer namespaceId, Long communityId, Long anchor, int pagesize) {
+    public List<User> listUnAuthUsersByProfileCommunityId(Integer namespaceId, Long communityId, Long anchor, int pagesize, Byte communityType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
-
 
         SelectQuery<Record> query = context.select(Tables.EH_USERS.fields()).from(Tables.EH_USERS).getQuery();
         query.addJoin(Tables.EH_USER_PROFILES, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_PROFILES.OWNER_ID));
         query.addConditions(Tables.EH_USER_PROFILES.ITEM_NAME.in(UserCurrentEntityType.COMMUNITY_COMMERCIAL.getUserProfileKey(), UserCurrentEntityType.COMMUNITY_RESIDENTIAL.getUserProfileKey()));
 
-        //子查询的条件
-        Condition subQueryCondition =Tables.EH_USER_ORGANIZATIONS.STATUS.in(UserOrganizationStatus.ACTIVE.getCode(), UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode())
-                .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
-
-        //子查询和外层查询都加上namespaceId
-        if(namespaceId != null){
-            query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
-            subQueryCondition = subQueryCondition.and(Tables.EH_USER_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
-        }
-        //子查询和外层查询都加上communityId
         if(communityId != null){
             query.addConditions(Tables.EH_USER_PROFILES.ITEM_VALUE.eq(String.valueOf(communityId)));
         }
+        if(namespaceId != null){
+            query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+        }
 
-        //排除已认证的
-        query.addConditions(Tables.EH_USERS.ID.notIn(
-                context.select(Tables.EH_USER_ORGANIZATIONS.USER_ID).from(Tables.EH_USER_ORGANIZATIONS)
-                        .join(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
-                        .on(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID))
-                        .where(subQueryCondition))
-        );
+        excludeAuthUser(context, query, namespaceId, communityType);
+
         if (anchor != null){
             query.addConditions(Tables.EH_USERS.ID.lt(anchor));
         }
@@ -265,6 +256,44 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         query.addLimit(pagesize);
 
         return query.fetch().map((Record record) -> record.into(User.class));
+    }
+
+    private void excludeAuthUser(DSLContext context, SelectQuery<Record> query, Integer namespaceId, Byte communityType){
+        if(CommunityType.fromCode(communityType) == CommunityType.COMMERCIAL){
+            //子查询的条件
+            Condition subQueryCondition =Tables.EH_USER_ORGANIZATIONS.STATUS.in(UserOrganizationStatus.ACTIVE.getCode(), UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode())
+                    .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
+            if(namespaceId != null){
+                subQueryCondition = subQueryCondition.and(Tables.EH_USER_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+            }
+            //子查询排除已认证的
+            query.addConditions(Tables.EH_USERS.ID.notIn(
+                    context.select(Tables.EH_USER_ORGANIZATIONS.USER_ID).from(Tables.EH_USER_ORGANIZATIONS)
+                            .join(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
+                            .on(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID))
+                            .where(subQueryCondition))
+            );
+        }else {
+
+            //子查询的条件
+            Condition subQueryCondition = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode())
+                    .and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.notIn(GroupMemberStatus.INACTIVE.getCode(), GroupMemberStatus.REJECT.getCode()))
+                    .and(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode()));
+
+            if(namespaceId != null){
+                subQueryCondition = subQueryCondition.and(Tables.EH_GROUPS.NAMESPACE_ID.eq(namespaceId));
+            }
+
+            //子查询排除已认证、认证中的
+            query.addConditions(Tables.EH_USERS.ID.notIn(
+                    context.select(Tables.EH_GROUP_MEMBERS.MEMBER_ID).from(Tables.EH_GROUP_MEMBERS)
+                            .join(Tables.EH_GROUPS)
+                            .on(Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID))
+                            .where(subQueryCondition))
+            );
+
+        }
+
     }
 
     @Override

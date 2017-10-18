@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *     <li>communityUsers: 园区用户数</li>
  *     <li>authUsers: 园区认证用户数</li>
  *     <li>notAuthUsers: 园区非认证用户数</li>
+ *     <li>authingUsers: authingUsers</li>
  *     <li>wxUserCount: wxUserCount</li>
  *     <li>appUserCount: appUserCount</li>
  * </ul>
@@ -18,6 +19,8 @@ public class CountCommunityUserResponse {
 	private Integer authUsers;
 
 	private Integer notAuthUsers;
+
+	private Integer authingUsers;
 
 	private Integer wxUserCount;
 
@@ -61,6 +64,14 @@ public class CountCommunityUserResponse {
 
 	public void setAppUserCount(Integer appUserCount) {
 		this.appUserCount = appUserCount;
+	}
+
+	public Integer getAuthingUsers() {
+		return authingUsers;
+	}
+
+	public void setAuthingUsers(Integer authingUsers) {
+		this.authingUsers = authingUsers;
 	}
 
 	@Override

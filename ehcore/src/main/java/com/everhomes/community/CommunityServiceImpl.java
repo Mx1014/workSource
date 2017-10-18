@@ -1874,7 +1874,7 @@ public class CommunityServiceImpl implements CommunityService {
 	public CommunityUserResponse listUserCommunitiesV2(
 			ListCommunityUsersCommand cmd) {
 		if(AuthFlag.UNAUTHORIZED == AuthFlag.fromCode(cmd.getIsAuth())){
-			return  listUnAuthUsers(cmd);
+			return  listUnAuthUsers(cmd, CommunityType.COMMERCIAL.getCode());
 		}else{
 			return listUserCommunities(cmd);
 		}
@@ -2000,11 +2000,11 @@ public class CommunityServiceImpl implements CommunityService {
 		return res;
 	}
 
-	private CommunityUserResponse listUnAuthUsers(ListCommunityUsersCommand cmd){
+	private CommunityUserResponse listUnAuthUsers(ListCommunityUsersCommand cmd, Byte communityType){
 		CommunityUserResponse response = new CommunityUserResponse();
 		List<CommunityUserDto> dtos = new ArrayList<>();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1);
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, communityType);
 		if(users != null){
 			if(users.size() > pageSize){
 				users.remove(pageSize);
@@ -2124,7 +2124,6 @@ public class CommunityServiceImpl implements CommunityService {
 		 */
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		int communityUserCount  = 0;
-		List<Long> orgIds  = new ArrayList<Long>();
 
 		if(cmd.getCommunityId() != null) {
 			Community community = communityProvider.findCommunityById(cmd.getCommunityId());
@@ -2147,34 +2146,50 @@ public class CommunityServiceImpl implements CommunityService {
 				CrossShardListingLocator locator = new CrossShardListingLocator();
 				List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,null,(loc, query) -> {
 					Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
-					c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
+					c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.notIn(GroupMemberStatus.INACTIVE.getCode(), GroupMemberStatus.REJECT.getCode()));
 		            query.addConditions(c);
 		            query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
 		            return query;
 		        });
-				
-				int allCount = groupMembers.size();
-				
-				List<GroupMember> authMembers = new ArrayList<GroupMember>();
-				for (GroupMember groupMember : groupMembers) {
-					
-					if(GroupMemberStatus.fromCode(groupMember.getMemberStatus()) == GroupMemberStatus.ACTIVE){
-						authMembers.add(groupMember);
+
+				//全部用户、已认证用户(只要有一个已认证) add by yanjun 20171018
+				Set<Long> memberIds = new HashSet<>();
+				Set<Long> authMemberIds = new HashSet<>();
+				for(GroupMember m: groupMembers){
+					memberIds.add(m.getMemberId());
+					if(GroupMemberStatus.fromCode(m.getMemberStatus()) == GroupMemberStatus.ACTIVE){
+						authMemberIds.add(m.getMemberId());
 					}
 				}
-				
-				int authCount = authMembers.size();
-				
+				//int allCount = memberIds.size();
+				int authCount = authMemberIds.size();
+				int authingCount = memberIds.size() - authMemberIds.size();
+
+				//未认证用户 userprofile表中的用户-已认证或者认证中的用户
+				List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode());
+
+				int notAuthCount = authMemberIds.size();
+				int allCount = notAuthCount + authCount + authingCount;
+
+				Set<Long> wxMemberIds = new HashSet<>();
+				for(User u: users){
+					if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
+						wxMemberIds.add(u.getId());
+					}
+				}
+
+				int wxCount = wxMemberIds.size();
+
+
 				CountCommunityUserResponse resp = new CountCommunityUserResponse();
 				resp.setCommunityUsers(allCount);
 				resp.setAuthUsers(authCount);
-				resp.setWxUserCount(authCount);
-				resp.setAppUserCount(allCount - authCount);
-				resp.setNotAuthUsers(allCount - authCount);
+				resp.setAuthingUsers(authingCount);
+				resp.setNotAuthUsers(notAuthCount);
+				resp.setWxUserCount(wxCount);
+				resp.setAppUserCount(allCount - wxCount);
 				
 				return resp;
-			}else{
-
 			}
 		}
 
