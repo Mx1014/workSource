@@ -1636,6 +1636,7 @@ public class CommunityServiceImpl implements CommunityService {
 				if(null != address)
 					addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
 			}
+			dto.setAddressDtos(addressDtos);
 			return dto;
 		}
 		User user = userProvider.findUserById(userIdentifier.getOwnerUid());
@@ -1913,6 +1914,7 @@ public class CommunityServiceImpl implements CommunityService {
 				if(!StringUtils.isEmpty(cmd.getKeywords())){
 					Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(cmd.getKeywords());
 					cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
+					cond = cond.or(Tables.EH_ORGANIZATIONS.NAME.like("%" + cmd.getKeywords() + "%"));
 					query.addConditions(cond);
 				}
 

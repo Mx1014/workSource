@@ -4,17 +4,19 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>communityUsers: 园区用户数</li>
- *  <li>authUsers: 园区认证用户数</li>
- *  <li>notAuthUsers: 园区非认证用户数</li>
+ *     <li>communityUsers: 园区用户数</li>
+ *     <li>authUsers: 园区认证用户数</li>
+ *     <li>notAuthUsers: 园区非认证用户数</li>
+ *     <li>wxUserCount: wxUserCount</li>
+ *     <li>appUserCount: appUserCount</li>
  * </ul>
  */
 public class CountCommunityUserResponse {
-	
+
 	private Integer communityUsers;
-	
+
 	private Integer authUsers;
-	
+
 	private Integer notAuthUsers;
 
 	private Integer wxUserCount;
@@ -62,8 +64,8 @@ public class CountCommunityUserResponse {
 	}
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 }

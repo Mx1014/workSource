@@ -432,7 +432,7 @@ public class CommunityAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/community/qryCommunityUserEnterpriseByUserId</b>
+     * <b>URL: /admin/community/qryCommunityUserAddressByUserId</b>
      * <p>查询用户所在的地址</p>
      */
     @RequestMapping("qryCommunityUserAddressByUserId")

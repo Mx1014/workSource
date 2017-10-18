@@ -3,16 +3,19 @@ package com.everhomes.rest.community.admin;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * namespaceId: 命名空间
- *
+ * <ul>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>communityId: communityId</li>
+ *     <li>organizationId: organizationId</li>
+ *     <li>statisticsType: statisticsType</li>
+ * </ul>
  */
 public class CountCommunityUsersCommand {
-	
+
 	private Integer namespaceId;
-	
+
 	private Long communityId;
-	
+
 	private Long organizationId;
 
 	private Byte statisticsType;
@@ -24,9 +27,8 @@ public class CountCommunityUsersCommand {
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
 	}
-	
-	
-	
+
+
 	public Long getCommunityId() {
 		return communityId;
 	}
@@ -35,7 +37,7 @@ public class CountCommunityUsersCommand {
 		this.communityId = communityId;
 	}
 
-	
+
 	public Long getOrganizationId() {
 		return organizationId;
 	}
@@ -53,8 +55,8 @@ public class CountCommunityUsersCommand {
 	}
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 }
