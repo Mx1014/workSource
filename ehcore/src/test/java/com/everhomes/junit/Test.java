@@ -10,6 +10,6 @@ public class Test extends CoreServerTestCase {
 
     @org.junit.Test
     public void test() {
-        uniongroupConfigureProvider.cloneGroupTypeDataToVersion(null,null,null,null, null);
+//        uniongroupConfigureProvider.cloneGroupTypeDataToVersion(null,null,null,null, null);
     }
 }
