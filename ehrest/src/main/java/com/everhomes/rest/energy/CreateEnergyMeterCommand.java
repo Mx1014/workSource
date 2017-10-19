@@ -22,6 +22,7 @@ import java.util.List;
  *     <li>rate: 倍率</li>
  *     <li>price: 价格</li>
  *     <li>costFormulaId: 费用计算公式</li>
+ *     <li>costFormulaSource: 费用计算公式来源 0: 能耗设置, 1: 缴费模块</li>
  *     <li>amountFormulaId: 用量计算公式</li>
  *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType}</li>
  *     <li>configId: 价格方案id </li>
@@ -43,12 +44,21 @@ public class CreateEnergyMeterCommand {
     @NotNull private BigDecimal rate;
     @NotNull private BigDecimal price;
     @NotNull private Long costFormulaId;
+    private Byte costFormulaSource;
     @NotNull private Long amountFormulaId;
     private Byte calculationType;
     private Long configId;
     private String ownerType;
     @ItemType(EnergyMeterAddressDTO.class)
     private List<EnergyMeterAddressDTO> addresses;
+
+    public Byte getCostFormulaSource() {
+        return costFormulaSource;
+    }
+
+    public void setCostFormulaSource(Byte costFormulaSource) {
+        this.costFormulaSource = costFormulaSource;
+    }
 
     public List<EnergyMeterAddressDTO> getAddresses() {
         return addresses;

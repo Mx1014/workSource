@@ -273,11 +273,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             LOGGER.error("The energy meter formula is not exist, id = {}", cmd.getAmountFormulaId());
             throw errorWith(SCOPE, ERR_METER_FORMULA_NOT_EXIST, "The energy meter formula is not exist, id = %s", cmd.getAmountFormulaId());
         }
-        formula = meterFormulaProvider.findById(currNamespaceId(), cmd.getCostFormulaId());
-        if (formula == null) {
-            LOGGER.error("The energy meter formula is not exist, id = {}", cmd.getCostFormulaId());
-            throw errorWith(SCOPE, ERR_METER_FORMULA_NOT_EXIST, "The energy meter formula is not exist, id = %s", cmd.getCostFormulaId());
+        if(cmd.getCostFormulaSource() == null || cmd.getCostFormulaSource() == 0) {
+            formula = meterFormulaProvider.findById(currNamespaceId(), cmd.getCostFormulaId());
+            if (formula == null) {
+                LOGGER.error("The energy meter formula is not exist, id = {}", cmd.getCostFormulaId());
+                throw errorWith(SCOPE, ERR_METER_FORMULA_NOT_EXIST, "The energy meter formula is not exist, id = %s", cmd.getCostFormulaId());
+            }
         }
+
         if (cmd.getStartReading().doubleValue() > cmd.getMaxReading().doubleValue()) {
             LOGGER.error("The energy meter start reading is greater then max reading");
             throw errorWith(SCOPE, ERR_METER_START_GREATER_THEN_MAX, "The energy meter start reading is greater then max reading");
@@ -295,6 +298,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             updateCmd.setPrice(cmd.getPrice());
             updateCmd.setRate(cmd.getRate());
             updateCmd.setCostFormulaId(cmd.getCostFormulaId());
+            updateCmd.setCostFormulaSource(cmd.getCostFormulaSource());
             updateCmd.setAmountFormulaId(cmd.getAmountFormulaId());
             updateCmd.setStartTime(Date.valueOf(LocalDate.now()).getTime());
             updateCmd.setMeterId(meter.getId());
@@ -597,6 +601,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 break;
             case COST_FORMULA:
                 log.setFormulaId(cmd.getCostFormulaId());
+                log.setFormulaSource(cmd.getCostFormulaSource());
                 break;
         }
         meterSettingLogProvider.createSettingLog(log);
@@ -771,6 +776,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     // 费用
                     if (cmd.getCostFormulaId() != null) {
                         updateCmd.setCostFormulaId(cmd.getCostFormulaId());
+                        updateCmd.setCostFormulaSource(cmd.getCostFormulaSource());
                         updateCmd.setStartTime(cmd.getCostFormulaStart());
                         updateCmd.setEndTime(cmd.getCostFormulaEnd());
                         this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);

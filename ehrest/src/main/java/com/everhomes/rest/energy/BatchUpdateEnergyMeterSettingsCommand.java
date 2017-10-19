@@ -38,6 +38,7 @@ public class BatchUpdateEnergyMeterSettingsCommand {
     private BigDecimal price;
     private BigDecimal rate;
     private Long costFormulaId;
+    private Byte costFormulaSource;
     private Long amountFormulaId;
 
     private Long priceStart;
@@ -54,6 +55,14 @@ public class BatchUpdateEnergyMeterSettingsCommand {
 
     private Byte calculationType;
     private Long configId;
+
+    public Byte getCostFormulaSource() {
+        return costFormulaSource;
+    }
+
+    public void setCostFormulaSource(Byte costFormulaSource) {
+        this.costFormulaSource = costFormulaSource;
+    }
 
     public Long getCommunityId() {
         return communityId;

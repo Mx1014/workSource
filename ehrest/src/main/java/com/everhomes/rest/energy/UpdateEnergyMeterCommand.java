@@ -34,6 +34,7 @@ public class UpdateEnergyMeterCommand {
     private BigDecimal rate;
     private BigDecimal price;
     private Long costFormulaId;
+    private Byte costFormulaSource;
     private Long amountFormulaId;
 
     private Long startTime;
@@ -43,6 +44,14 @@ public class UpdateEnergyMeterCommand {
     private Long configId;
     @ItemType(EnergyMeterAddressDTO.class)
     private List<EnergyMeterAddressDTO> addresses;
+
+    public Byte getCostFormulaSource() {
+        return costFormulaSource;
+    }
+
+    public void setCostFormulaSource(Byte costFormulaSource) {
+        this.costFormulaSource = costFormulaSource;
+    }
 
     public List<EnergyMeterAddressDTO> getAddresses() {
         return addresses;

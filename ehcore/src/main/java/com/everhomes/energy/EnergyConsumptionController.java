@@ -519,4 +519,10 @@ public class EnergyConsumptionController extends ControllerBase {
         return resp;
     }
 
+    //新建、修改计划
+
+    //列出抄表任务
+
+    //执行抄表任务
+
 }
