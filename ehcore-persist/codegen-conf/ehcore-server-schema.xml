@@ -204,6 +204,7 @@
         eh_stat_event_logs | eh_stat_event_param_logs | eh_stat_event_app_attachment_logs | eh_stat_event_portal_configs | eh_stat_event_portal_statistics |
         eh_stat_event_statistics | eh_stat_event_task_logs | eh_community_default | eh_namespace_masks | eh_door_auth_level |
         eh_punch_special_days | eh_punch_time_intervals |
+        eh_energy_meter_addresses | eh_energy_plans | eh_energy_plan_group_map | eh_energy_plan_meter_map | eh_energy_meter_tasks |
         </includes>
 
             <!-- All elements that are excluded from your schema
