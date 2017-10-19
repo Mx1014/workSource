@@ -1446,11 +1446,17 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void employArchivesEmployeesConfig(EmployArchivesEmployeesCommand cmd) {
         dbProvider.execute((TransactionStatus status) -> {
-            //  1.若为当前日期则立即执行
+            //  1.更新员工转正时间
+            for (Long detailId : cmd.getDetailIds()) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                detail.setEmploymentTime(cmd.getEmploymentTime());
+                organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+            }
+            //  2.若为当前日期则立即执行
             if (cmd.getEmploymentTime().toString().equals(ArchivesUtil.currentDate().toString()))
                 employArchivesEmployees(cmd);
             else {
-                //  2.若为其它时间则增加转正配置
+                //  3.若为其它时间则增加转正配置
                 ArchivesConfigurations configuration = new ArchivesConfigurations();
                 configuration.setOrganizationId(cmd.getOrganizationId());
                 configuration.setOperationType(ArchivesOperationType.EMPLOY.getCode());
@@ -1459,7 +1465,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 archivesProvider.createArchivesConfigurations(configuration);
 
             }
-            //  3.更新人员变动记录
+            //  4.更新人员变动记录
             employArchivesEmployeesLogs(cmd);
             return null;
         });
