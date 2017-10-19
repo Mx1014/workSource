@@ -79,7 +79,7 @@ import java.sql.Timestamp;
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
-public class EnterpriseCustomerDTO {
+public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>{
     private Long id;
     private Long organizationId;
     private String customerNumber;
@@ -711,6 +711,11 @@ public class EnterpriseCustomerDTO {
 
 	public void setContactDuty(String contactDuty) {
 		this.contactDuty = contactDuty;
+	}
+
+	@Override
+	public int compareTo(EnterpriseCustomerDTO o) {
+		return this.getId() - o.getId() >= 0L ? 1 : -1;
 	}
     
 }
