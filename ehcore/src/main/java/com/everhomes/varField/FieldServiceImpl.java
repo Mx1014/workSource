@@ -577,7 +577,9 @@ public class FieldServiceImpl implements FieldService {
         }
 
         if(fieldName.equals("status") ||
+                fieldName.equals("Status") ||
                 fieldName.equals("gender") ||
+                fieldName.equals("Gender") ||
                 (fieldName.indexOf("id")!=fieldName.length()-1-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("Id")!=-1) ||
                 (fieldName.indexOf("Id")!=fieldName.length()-1-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
                 (fieldName.indexOf("Status")==fieldName.length()-1-5 && fieldName.indexOf("Status")!=-1) &&
@@ -597,9 +599,12 @@ public class FieldServiceImpl implements FieldService {
         }
         //处理特例projectSource的导入
         StringBuilder sb = new StringBuilder();
-        if(fieldName.equals("projectSource")){
+        if(fieldName.equals("projectSource")||
+                fieldName.equals("ProjectSource")
+                ){
             String cellValue =(String)invoke;
             String[] split = cellValue.split(",");
+
             for(String projectSource : split){
                 ScopeFieldItem projectSourceItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, projectSource);
                 if(projectSourceItem!=null){
@@ -876,7 +881,9 @@ public class FieldServiceImpl implements FieldService {
                             cellValue = ExcelUtils.getCellValue(cell);
                             cellCopy = cellValue;
                             if(fieldName.equals("status") ||
+                                    fieldName.equals("Status") ||
                                     fieldName.equals("gender") ||
+                                    fieldName.equals("Gender") ||
                                     (fieldName.indexOf("id")!=fieldName.length()-1-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("Id")!=-1) ||
                                     (fieldName.indexOf("Id")!=fieldName.length()-1-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
                                     (fieldName.indexOf("Status")==fieldName.length()-1-5 && fieldName.indexOf("Status")!=-1) &&
@@ -893,9 +900,16 @@ public class FieldServiceImpl implements FieldService {
                             }
                             //处理特例projectSource的导入
                             StringBuilder sb = new StringBuilder();
-                            if(fieldName.equals("projectSource")){
+                            if(fieldName.equals("projectSource")||
+                                    fieldName.equals("ProjectSource")){
                                 cellValue = "";
                                 String[] split = cell.getStringCellValue().split(",");
+                                if(split.length == 1){
+                                    String[] split1 = cellValue.split("，");
+                                    if(split1.length>1){
+                                        split = split1;
+                                    }
+                                }
                                 for(String projectSource : split){
                                     ScopeFieldItem projectSourceItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), projectSource);
                                     if(projectSourceItem!=null){
