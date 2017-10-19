@@ -582,7 +582,7 @@ public class FieldServiceImpl implements FieldService {
                  fieldName.indexOf("Status")!=-1)
         {
             LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName+" class is "+clz.toString());
-            if(invoke.getClass().getSimpleName().equals("String")){
+            if(!invoke.getClass().getSimpleName().equals("String")){
                 ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId,Long.parseLong(invoke.toString()));
                 if(item!=null&&item.getItemId()!=null){
                     invoke = String.valueOf(item.getItemDisplayName());
