@@ -570,7 +570,7 @@ public class FieldServiceImpl implements FieldService {
             if(invoke.getClass().getSimpleName().equals("Timestamp")){
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 Timestamp var = (Timestamp)invoke;
-                invoke = sdf.format(var.toString());
+                invoke = sdf.format(var.getTime());
             }
         } catch (Exception e) {
             return invoke.toString();
@@ -588,11 +588,20 @@ public class FieldServiceImpl implements FieldService {
         {
             LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName+" class is "+clz.toString());
             if(!invoke.getClass().getSimpleName().equals("String")){
-                ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId,Long.parseLong(invoke.toString()));
+                long l = Long.parseLong(invoke.toString());
+                ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId,l);
                 if(item!=null&&item.getItemId()!=null){
                     invoke = String.valueOf(item.getItemDisplayName());
                     LOGGER.info("field transferred to item id is "+invoke);
                 }else{
+                    if(fieldName.equals("status") ||
+                            fieldName.equals("Status") ){
+                        if(l == 1){
+                            invoke = "进行中";
+                        }else if(l == 2){
+                            invoke = "已完结";
+                        }
+                    }
                     LOGGER.error("field "+ fieldName+" transferred to item using findScopeFieldItemByDisplayName failed ,item is "+ item);
                 }
             }
@@ -895,6 +904,14 @@ public class FieldServiceImpl implements FieldService {
                                     cellValue = String.valueOf(item.getItemId());
                                     LOGGER.info("field transferred to item id is "+cellValue);
                                 }else{
+                                    if(fieldName.equals("status") ||
+                                            fieldName.equals("Status")){
+                                        if(cellValue.equals("进行中")){
+                                            cellValue = "1";
+                                        }else if(cellValue.equals("已完结")){
+                                            cellValue = "2";
+                                        }
+                                    }
                                     LOGGER.error("field "+ fieldName+" transferred to item using findScopeFieldItemByDisplayName failed ,item is "+ item);
                                 }
                             }
@@ -902,10 +919,9 @@ public class FieldServiceImpl implements FieldService {
                             StringBuilder sb = new StringBuilder();
                             if(fieldName.equals("projectSource")||
                                     fieldName.equals("ProjectSource")){
-                                cellValue = "";
                                 String[] split = cell.getStringCellValue().split(",");
                                 if(split.length == 1){
-                                    String[] split1 = cellValue.split("，");
+                                    String[] split1 = cell.getStringCellValue().split("，");
                                     if(split1.length>1){
                                         split = split1;
                                     }
@@ -928,10 +944,7 @@ public class FieldServiceImpl implements FieldService {
                                 if(item!=null&&item.getItemId()!=null){
                                     cellValue=String.valueOf(item.getItemId());
                                 }
-
                             }
-                        } else {//不填默认状态为2
-                            setToObj("status",object,"2");
                         }
                         Byte mandatoryFlag = fieldDTO.getMandatoryFlag();
                         if(mandatoryFlag == 1 && (cellValue == null || (cellValue.equals("")&&cellCopy.equals("")))){
