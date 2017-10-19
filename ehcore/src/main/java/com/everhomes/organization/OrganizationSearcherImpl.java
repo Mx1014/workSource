@@ -230,9 +230,6 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 //            qbs.add(QueryBuilders.queryString("*"+cmd.getBuildingName()+"*").field("addresses"));
 //        }
 
-        if(cmd.getBuildingName() != null) {
-            qbs.add(QueryBuilders.queryString(cmd.getBuildingName()).field("buildings"));
-        }
         if(StringUtils.isEmpty(cmd.getKeyword())) {
         	if (StringUtils.isEmpty(cmd.getBuildingName())) {
         		qb = QueryBuilders.matchAllQuery();
@@ -294,6 +291,13 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         List<FilterBuilder> fbList = new ArrayList<>();
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
         fbList.add(fb);
+        
+        if(cmd.getBuildingName() != null) {
+            //fix bug for #15397
+            //qbs.add(QueryBuilders.queryString(cmd.getBuildingName()).field("buildings"));
+            FilterBuilder buildFilter = FilterBuilders.termFilter("buildings", cmd.getBuildingName());
+            fbList.add(buildFilter);
+        }
 
         // 每个企业（含物业管理公司）都有可能在某个园区内，当客户端提供园区作为过滤条件时，则在园区范围内挑选园区 by lqs 20160512
         if(cmd.getCommunityId() != null) {
