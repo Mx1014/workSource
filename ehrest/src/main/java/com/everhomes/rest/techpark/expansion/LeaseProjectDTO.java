@@ -51,6 +51,16 @@ public class LeaseProjectDTO {
     private String parkingTempFee;
     private String enteredEnterprises;
 
+    private String detailUrl;
+
+    public String getDetailUrl() {
+        return detailUrl;
+    }
+
+    public void setDetailUrl(String detailUrl) {
+        this.detailUrl = detailUrl;
+    }
+
     public String getFloorHeight() {
         return floorHeight;
     }

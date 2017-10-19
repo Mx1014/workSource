@@ -1,33 +1,11 @@
-package com.everhomes.rest.techpark.expansion;
+package com.everhomes.techpark.expansion;
 
-import com.everhomes.discover.ItemType;
-
-import java.util.List;
+import com.everhomes.util.StringHelper;
 
 /**
- * @author sw on 2017/10/17.
+ * @author sw on 2017/10/18.
  */
-public class UpdateLeaseProjectCommand {
-
-    private Integer namespaceId;
-    private Long projectId;
-    private Long cityId;
-    private String cityName;
-    private Long areaId;
-    private String areaName;
-    private String address;
-    private Double longitude;
-    private Double latitude;
-    private String contactName;
-    private String contactPhone;
-    private String description;
-    private String trafficDescription;
-    private String posterUri;
-    private String posterUrl;
-    @ItemType(Long.class)
-    private List<Long> communityIds;
-    @ItemType(BuildingForRentAttachmentDTO.class)
-    private List<BuildingForRentAttachmentDTO> attachments;
+public class LeaseProjectExtraInfo {
 
     private String projectNo;
     private String completeTime;
@@ -49,140 +27,9 @@ public class UpdateLeaseProjectCommand {
     private String parkingTempFee;
     private String enteredEnterprises;
 
-    public Integer getNamespaceId() {
-        return namespaceId;
-    }
-
-    public void setNamespaceId(Integer namespaceId) {
-        this.namespaceId = namespaceId;
-    }
-
-    public Long getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(Long projectId) {
-        this.projectId = projectId;
-    }
-
-    public Long getCityId() {
-        return cityId;
-    }
-
-    public void setCityId(Long cityId) {
-        this.cityId = cityId;
-    }
-
-    public String getCityName() {
-        return cityName;
-    }
-
-    public void setCityName(String cityName) {
-        this.cityName = cityName;
-    }
-
-    public Long getAreaId() {
-        return areaId;
-    }
-
-    public void setAreaId(Long areaId) {
-        this.areaId = areaId;
-    }
-
-    public String getAreaName() {
-        return areaName;
-    }
-
-    public void setAreaName(String areaName) {
-        this.areaName = areaName;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public String getContactName() {
-        return contactName;
-    }
-
-    public void setContactName(String contactName) {
-        this.contactName = contactName;
-    }
-
-    public String getContactPhone() {
-        return contactPhone;
-    }
-
-    public void setContactPhone(String contactPhone) {
-        this.contactPhone = contactPhone;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getTrafficDescription() {
-        return trafficDescription;
-    }
-
-    public void setTrafficDescription(String trafficDescription) {
-        this.trafficDescription = trafficDescription;
-    }
-
-    public String getPosterUri() {
-        return posterUri;
-    }
-
-    public void setPosterUri(String posterUri) {
-        this.posterUri = posterUri;
-    }
-
-    public String getPosterUrl() {
-        return posterUrl;
-    }
-
-    public void setPosterUrl(String posterUrl) {
-        this.posterUrl = posterUrl;
-    }
-
-    public List<Long> getCommunityIds() {
-        return communityIds;
-    }
-
-    public void setCommunityIds(List<Long> communityIds) {
-        this.communityIds = communityIds;
-    }
-
-    public List<BuildingForRentAttachmentDTO> getAttachments() {
-        return attachments;
-    }
-
-    public void setAttachments(List<BuildingForRentAttachmentDTO> attachments) {
-        this.attachments = attachments;
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 
     public String getProjectNo() {

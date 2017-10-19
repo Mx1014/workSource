@@ -1,6 +1,8 @@
 package com.everhomes.techpark.expansion;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.community.Building;
+import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -298,5 +300,192 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		}).collect(Collectors.toList());
 
 		enterpriseApplyBuildingProvider.createLeaseBuildings(leaseBuildings);
+	}
+
+	@Override
+	public List<BriefLeaseProjectDTO> listAllLeaseProjects(ListAllLeaseProjectsCommand cmd) {
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		List<Community> communities = communityProvider.listCommunitiesByNamespaceId(cmd.getNamespaceId());
+
+		List<BriefLeaseProjectDTO> result = communities.stream().map(r -> {
+			BriefLeaseProjectDTO dto = new BriefLeaseProjectDTO();
+			dto.setProjectId(r.getId());
+			dto.setProjectName(r.getName());
+			return dto;
+		}).collect(Collectors.toList());
+
+		return result;
+	}
+
+	@Override
+	public listLeaseProjectsResponse listLeaseProjects(ListLeaseProjectsCommand cmd) {
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		List<Community> communities = communityProvider.listCommunitiesByCityIdAndAreaId(cmd.getNamespaceId(), cmd.getCityId(),
+				cmd.getAreaId(), cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
+
+		listLeaseProjectsResponse response = new listLeaseProjectsResponse();
+
+		int size = communities.size();
+
+		response.setProjects(communities.stream().map(r -> {
+			LeaseProjectDTO dto = new LeaseProjectDTO();
+			populateProjectBasicInfo(dto, r);
+			return dto;
+		}).collect(Collectors.toList()));
+
+		if(size != pageSize){
+			response.setNextPageAnchor(null);
+		}else{
+			response.setNextPageAnchor(communities.get(size - 1).getId());
+		}
+
+		return response;
+	}
+
+	private void populateProjectBasicInfo (LeaseProjectDTO dto, Community r) {
+		dto.setProjectId(r.getId());
+		dto.setNamespaceId(r.getNamespaceId());
+		dto.setName(r.getName());
+		dto.setCityId(r.getCityId());
+		dto.setCityName(r.getCityName());
+		dto.setAreaId(r.getAreaId());
+		dto.setAreaName(r.getAreaName());
+		dto.setAddress(r.getAddress());
+//			dto.setContactPhone(r.get);
+	}
+
+	private void populateProjectDetailInfo (LeaseProjectDTO dto, Community r, LeaseProject leaseProject) {
+		populateProjectBasicInfo(dto, r);
+
+		String json = leaseProject.getExtraInfoJson();
+		LeaseProjectExtraInfo extraInfo = JSONObject.parseObject(json, LeaseProjectExtraInfo.class);
+		BeanUtils.copyProperties(extraInfo, dto);
+
+		List<Long> communityIds = enterpriseApplyBuildingProvider.listLeaseProjectCommunities(leaseProject.getProjectId());
+		dto.setCommunityIds(communityIds);
+
+		Long userId = UserContext.currentUserId();
+		//设置封面图url 和banner图
+		if (null != dto.getPosterUri()) {
+			dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
+		}
+
+		List<LeasePromotionAttachment> attachments = enterpriseApplyEntryProvider.findAttachmentsByOwnerTypeAndOwnerId(
+				EntityType.LEASE_PROJECT.getCode(), leaseProject.getId());
+		dto.setAttachments(attachments.stream().map(a -> {
+			BuildingForRentAttachmentDTO ad = ConvertHelper.convert(a, BuildingForRentAttachmentDTO.class);
+			ad.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.USER.getCode(), userId));
+			return ad;
+		}).collect(Collectors.toList()));
+
+	}
+
+	@Override
+	public LeaseProjectDTO updateLeaseProject(UpdateLeaseProjectCommand cmd) {
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		LeaseProject leaseProject = enterpriseApplyBuildingProvider.findLeaseProjectByProjectId(cmd.getProjectId());
+		LeaseProject[] leaseProjects = new LeaseProject[1];
+
+		if (null == leaseProject) {
+			leaseProject = ConvertHelper.convert(cmd, LeaseProject.class);
+
+			leaseProject.setNamespaceId(cmd.getNamespaceId());
+			LeaseProjectExtraInfo extraInfo = ConvertHelper.convert(cmd, LeaseProjectExtraInfo.class);
+			leaseProject.setExtraInfoJson(JSONObject.toJSONString(extraInfo));
+
+			leaseProjects[0] = leaseProject;
+
+			dbProvider.execute((TransactionStatus status) -> {
+				enterpriseApplyBuildingProvider.createLeaseProject(leaseProjects[0]);
+
+				addAttachments(cmd.getAttachments(), leaseProjects[0]);
+				addLeaseProjectCommunities(cmd.getCommunityIds(), leaseProjects[0]);
+				return null;
+			});
+		}else {
+
+			BeanUtils.copyProperties(cmd, leaseProject);
+			LeaseProjectExtraInfo extraInfo = ConvertHelper.convert(cmd, LeaseProjectExtraInfo.class);
+
+			leaseProject.setExtraInfoJson(JSONObject.toJSONString(extraInfo));
+
+			leaseProjects[0] = leaseProject;
+			dbProvider.execute((TransactionStatus status) -> {
+				enterpriseApplyBuildingProvider.updateLeaseProject(leaseProjects[0]);
+
+				enterpriseApplyEntryProvider.deleteLeasePromotionAttachment(EntityType.LEASE_PROJECT.getCode(), leaseProjects[0].getId());
+				addAttachments(cmd.getAttachments(), leaseProjects[0]);
+
+				enterpriseApplyBuildingProvider.deleteLeasePromotionCommunity(leaseProjects[0].getId());
+				addLeaseProjectCommunities(cmd.getCommunityIds(), leaseProjects[0]);
+
+				return null;
+			});
+		}
+
+		return null;
+	}
+
+	@Override
+	public LeaseProjectDTO getLeaseProjectById(GetLeaseProjectByIdCommand cmd) {
+
+		LeaseProjectDTO dto;
+
+		Community community = communityProvider.findCommunityById(cmd.getProjectId());
+
+		if (null == community) {
+			throw RuntimeErrorException.errorWith(ApplyEntryErrorCodes.SCOPE, ApplyEntryErrorCodes.ERROR_BUILDING_NAME_EXIST,
+					"Community not found");
+		}
+
+		LeaseProject leaseProject = enterpriseApplyBuildingProvider.findLeaseProjectByProjectId(cmd.getProjectId());
+
+		if (null == leaseProject) {
+			dto = new LeaseProjectDTO();
+			populateProjectBasicInfo(dto, community);
+		}else {
+			dto = ConvertHelper.convert(leaseProject, LeaseProjectDTO.class);
+
+			populateProjectDetailInfo(dto, community, leaseProject);
+		}
+
+		return dto;
+	}
+
+	private void addLeaseProjectCommunities(List<Long> communityIds, LeaseProject leaseProject) {
+		if (null != communityIds) {
+			communityIds.forEach(m -> {
+				LeaseProjectCommunity leaseProjectCommunity = new LeaseProjectCommunity();
+				leaseProjectCommunity.setLeaseProjectId(leaseProject.getId());
+				leaseProjectCommunity.setCommunityId(m);
+				enterpriseApplyBuildingProvider.createLeaseProjectCommunity(leaseProjectCommunity);
+			});
+		}
+	}
+
+	private void addAttachments(List<BuildingForRentAttachmentDTO> attachmentDTOs, LeaseProject leaseProject) {
+		if (null != attachmentDTOs) {
+			for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
+				LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
+				attachment.setOwnerId(leaseProject.getId());
+				attachment.setOwnerType(EntityType.LEASE_PROJECT.getCode());
+				attachment.setCreatorUid(leaseProject.getCreatorUid());
+				enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+			}
+		}
 	}
 }

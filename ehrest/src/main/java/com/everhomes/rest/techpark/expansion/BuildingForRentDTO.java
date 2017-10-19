@@ -47,6 +47,7 @@ public class BuildingForRentDTO {
 	private Long id;
 	private Integer  namespaceId;
 	private Long     communityId;
+	private String communityName;
 	private Long     buildingId;
 	private String buildingName;
 	private String   rentPosition;
@@ -90,6 +91,14 @@ public class BuildingForRentDTO {
 
 //	private Long requestFormId;
 
+
+	public String getCommunityName() {
+		return communityName;
+	}
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
 
 	public String getPosterUri() {
 		return posterUri;

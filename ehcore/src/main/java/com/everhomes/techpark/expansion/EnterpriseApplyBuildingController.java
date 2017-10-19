@@ -38,9 +38,9 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	 */
 	@RequestMapping("listAllLeaseProjects")
 	@RestReturn(value=BriefLeaseProjectDTO.class, collection = true)
-	public RestResponse listAllLeaseProjects(){
+	public RestResponse listAllLeaseProjects(ListAllLeaseProjectsCommand cmd){
 
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(enterpriseApplyBuildingService.listAllLeaseProjects(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -54,7 +54,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	@RestReturn(value=listLeaseProjectsResponse.class)
 	public RestResponse listLeaseProjects(ListLeaseProjectsCommand cmd){
 
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(enterpriseApplyBuildingService.listLeaseProjects(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -67,7 +67,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	@RequestMapping("updateLeaseProject")
 	@RestReturn(value=LeaseProjectDTO.class)
 	public RestResponse updateLeaseProject(UpdateLeaseProjectCommand cmd){
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(enterpriseApplyBuildingService.updateLeaseProject(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
