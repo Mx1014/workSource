@@ -493,16 +493,16 @@ public class UniongroupServiceImpl implements UniongroupService {
         Integer finalN1 = n1;
         dbProvider.execute((TransactionStatus status) -> {
             //:todo 转存temp
-            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(namespaceId, groupType, enterpriseId, finalN1, UniongroupVersion.TEMP.getCode());
-            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(namespaceId, groupType, enterpriseId, finalN1, UniongroupVersion.TEMP.getCode());
+            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(namespaceId, groupType, enterpriseId, finalN1, UniongroupVersionEnum.TEMP.getCode());
+            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(namespaceId, groupType, enterpriseId, finalN1, UniongroupVersionEnum.TEMP.getCode());
 
             //:todo Current转n2
-            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(namespaceId, groupType, enterpriseId, UniongroupVersion.CURRENT.getCode(), finalN1);
-            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(namespaceId, groupType, enterpriseId, UniongroupVersion.CURRENT.getCode(), finalN1);
+            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(namespaceId, groupType, enterpriseId, UniongroupVersionEnum.CURRENT.getCode(), finalN1);
+            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(namespaceId, groupType, enterpriseId, UniongroupVersionEnum.CURRENT.getCode(), finalN1);
 
             //:todo n1转Current
-            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(namespaceId, groupType, enterpriseId, UniongroupVersion.TEMP.getCode(), UniongroupVersion.CURRENT.getCode());
-            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(namespaceId, groupType, enterpriseId, UniongroupVersion.TEMP.getCode(), UniongroupVersion.CURRENT.getCode())
+            this.uniongroupConfigureProvider.updateUniongroupConfiguresVersion(namespaceId, groupType, enterpriseId, UniongroupVersionEnum.TEMP.getCode(), UniongroupVersionEnum.CURRENT.getCode());
+            this.uniongroupConfigureProvider.updateUniongroupMemberDetailsVersion(namespaceId, groupType, enterpriseId, UniongroupVersionEnum.TEMP.getCode(), UniongroupVersionEnum.CURRENT.getCode())
             ;
 
             return null;

@@ -161,7 +161,7 @@ public class PunchServiceImpl implements PunchService {
         }
     };
     private static ThreadLocal<List<PunchTimeRule>> targetTimeRules = new ThreadLocal<List<PunchTimeRule>>() ;
-
+	public static final Integer CONFIG_VERSION_CODE = 0;
 	@Autowired
 	private SequenceProvider sequenceProvider;
 
@@ -5123,7 +5123,7 @@ public class PunchServiceImpl implements PunchService {
     }
     /**刷固定排班*/
     private void refreshGroupDayLogAndMonthStat(PunchRule pr, Calendar yesterday) {
-        List<UniongroupMemberDetail> members = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),0);
+        List<UniongroupMemberDetail> members = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),pr.getVersionCode());
 		if (null != members && members.size()>0) {
 
 			for(UniongroupMemberDetail member : members) {
