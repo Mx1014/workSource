@@ -341,6 +341,10 @@ public class ExcelUtils {
         // 设置这些样式
 //        style.setFillForegroundColor(HSSFColor.GREEN.index);
 //        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        style_m.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        style_m.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        style_m.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        style_m.setBorderTop(HSSFCellStyle.BORDER_THIN);
         style_m.setAlignment(HSSFCellStyle.ALIGN_CENTER);
 
         HSSFFont font4 = workbook.createFont();
