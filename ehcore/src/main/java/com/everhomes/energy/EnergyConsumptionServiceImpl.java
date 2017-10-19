@@ -18,6 +18,7 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.energy.*;
@@ -189,6 +190,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
+    @Autowired
+    private EnergyMeterAddressProvider energyMeterAddressProvider;
+
+    @Autowired
+    private EnergyPlanProvider energyPlanProvider;
+
 //    @Override
 //    public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
 //
@@ -282,7 +289,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         dbProvider.execute(r -> {
             meterProvider.createEnergyMeter(meter);
 
-            processEnergyMeterAddresses(cmd.getAddresses());
+            processEnergyMeterAddresses(meter.getId(), cmd.getAddresses());
             // 创建setting log 记录
             UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
             updateCmd.setPrice(cmd.getPrice());
@@ -312,13 +319,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return toEnergyMeterDTO(meter);
     }
 
-    private void processEnergyMeterAddresses(List<EnergyMeterAddressDTO> addresses) {
+    private void processEnergyMeterAddresses(Long meterId, List<EnergyMeterAddressDTO> addresses) {
         //取出表记关联的所有门牌；传入的参数有id的从exist中去掉，没有id的增加，最后将exist中剩下的门牌关联关系置为inactive
-        Map<Long, > existAddress = ;
+        Map<Long, EnergyMeterAddress> existAddress = energyMeterAddressProvider.findByMeterId(meterId);
         if(addresses != null && addresses.size() > 0) {
             addresses.forEach(meterAddress -> {
                 if (meterAddress.getId() == null) {
-                    create();
+                    meterAddress.setMeterId(meterId);
+                    EnergyMeterAddress address = ConvertHelper.convert(meterAddress, EnergyMeterAddress.class);
+                    energyMeterAddressProvider.createEnergyMeterAddress(address);
                 } else {
                     existAddress.remove(meterAddress.getId());
                 }
@@ -327,18 +336,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         if(existAddress != null && existAddress.size() > 0) {
             existAddress.forEach((id, meterAddress) -> {
-                meterAddress.setStatus(inactive);
-                update();
+                meterAddress.setStatus(CommonStatus.INACTIVE.getCode());
+                energyMeterAddressProvider.updateEnergyMeterAddress(meterAddress);
             });
         }
     }
 
     private List<EnergyMeterAddressDTO> populateEnergyMeterAddresses(Long meterId) {
-        Map<Long, > existAddress = ;
+        Map<Long, EnergyMeterAddress> existAddress = energyMeterAddressProvider.findByMeterId(meterId);
         List<EnergyMeterAddressDTO> dtos = new ArrayList<>();
         if(existAddress != null && existAddress.size() > 0) {
             existAddress.forEach((id, meterAddress) -> {
-                dtos.add(ConvertHelper(meterAddress, EnergyMeterAddressDTO.class));
+                dtos.add(ConvertHelper.convert(meterAddress, EnergyMeterAddressDTO.class));
             });
         }
         return dtos;
