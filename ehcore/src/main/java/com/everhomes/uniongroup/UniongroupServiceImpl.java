@@ -222,7 +222,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public List listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd) {
-        return this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizaitonId(), cmd.getContactName(), cmd.getVersionCode(), cmd.getDepartmentId());
+        return this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getContactName(), cmd.getVersionCode(), cmd.getDepartmentId());
     }
 
     private Organization checkOrganization(Long orgId) {
