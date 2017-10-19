@@ -30,15 +30,12 @@ import com.everhomes.rest.questionnaire.QuestionnaireTargetType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -108,6 +105,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 
 	@Override
 	public void sendUnAnsweredTargetMessage() {
+		LOGGER.info("start sendUnAnsweredTargetMessage at ", System.currentTimeMillis());
 		int intervalTime = configurationProvider.getIntValue(ConfigConstants.QUESTIONNAIRE_REMIND_TIME_INTERVAL,24);
 		Timestamp remindTime = new Timestamp(System.currentTimeMillis()+intervalTime*3600*1000);
 		List<Questionnaire> questionnaires = questionnaireProvider.listApproachCutoffTimeQuestionnaire(remindTime);
@@ -138,7 +136,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 				}
 			}
 			if (!answered){
-				userLevelRanges.addAll(getEnterpriseUsers(originalRange.getRange()));
+				userLevelRanges.addAll(getOrganizationAdministrators(originalRange.getRange()));
 			}
 		}
 		return userLevelRanges;
@@ -163,13 +161,14 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 
 
 	private void sendMessage(Questionnaire questionnaire){
+		LOGGER.info("send message to:"+questionnaire.getUserScope());
 		List<String> ranges = JSONObject.parseObject(questionnaire.getUserScope(),new TypeReference<List<String>>(){});
 
 		//部分不用循环创建的对象
 		Namespace namespace = namespaceProvider.findNamespaceById(questionnaire.getNamespaceId());
 		String string1 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN1, "zh_CN", "邀请您参与《");
 		String string2 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN2, "zh_CN", "》问卷调查。");
-		String  url = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL,"https://www.zuolin.com/mobile/static/coming_soon/index.html");
+		String  url = String.format(configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL,"https://www.zuolin.com/mobile/static/coming_soon/index.html"),questionnaire.getId());
 
 		MessageChannel channel2 = new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId()));
 

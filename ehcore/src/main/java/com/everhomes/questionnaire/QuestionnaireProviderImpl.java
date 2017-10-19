@@ -76,6 +76,7 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRES)
 				.where(Tables.EH_QUESTIONNAIRES.STATUS.eq(QuestionnaireStatus.ACTIVE.getCode()))
 				.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.le(approachTime))
+				.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.ge(new Timestamp(System.currentTimeMillis())))
 				.orderBy(Tables.EH_QUESTIONNAIRES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, Questionnaire.class));
 	}
