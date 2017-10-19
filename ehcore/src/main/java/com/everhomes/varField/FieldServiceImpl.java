@@ -910,9 +910,13 @@ public class FieldServiceImpl implements FieldService {
                                             cellValue = "1";
                                         }else if(cellValue.equals("已完结")){
                                             cellValue = "2";
+                                        }else{
+                                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"枚举值不正确");
                                         }
+                                    }else{
+                                        LOGGER.error("field "+ fieldName+" transferred to item using findScopeFieldItemByDisplayName failed ,item is "+ item);
+                                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"枚举值不正确");
                                     }
-                                    LOGGER.error("field "+ fieldName+" transferred to item using findScopeFieldItemByDisplayName failed ,item is "+ item);
                                 }
                             }
                             //处理特例projectSource的导入
@@ -930,6 +934,8 @@ public class FieldServiceImpl implements FieldService {
                                     ScopeFieldItem projectSourceItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), projectSource);
                                     if(projectSourceItem!=null){
                                         sb.append((projectSourceItem.getItemId()==null?"":projectSourceItem.getItemId())+",");
+                                    }else{
+                                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"枚举值不正确");
                                     }
                                 }
                                 if(sb.toString().trim().length()>0){
@@ -954,7 +960,7 @@ public class FieldServiceImpl implements FieldService {
                         setToObj(fieldName,object,cellValue);
                     } catch (Exception e) {
                         LOGGER.error("set method invoke failed, the fieldName = "+fieldName+",object class = "+clazz.getName()+"");
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"set method invoke failed, the fieldName = {},object class = {}",fieldName,clazz.getName(),e);
+                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,e.getMessage());
                     }
                 }
                 //然后进行通用字段的set
