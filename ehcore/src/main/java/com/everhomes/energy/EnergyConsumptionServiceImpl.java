@@ -224,13 +224,28 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //        }
 //        return response;
 //    }
+    private void checkEnergyMeterUnique(Long id, Long communityId, String meterNumber, String meterName) {
+        EnergyMeter meter = meterProvider.findByName(communityId, meterName);
+        if(meter != null && !meter.getId().equals(id)) {
+            LOGGER.error("meterName: {} in community: {} already exist!", meterName, communityId);
+            throw RuntimeErrorException.errorWith(SCOPE, ERROR_METER_NAME_EXIST,
+                    "meterName is already exist");
+        }
 
+        meter = meterProvider.findByNumber(communityId, meterNumber);
+        if(meter != null && !meter.getId().equals(id)) {
+            LOGGER.error("meterNumber: {} in community: {} already exist!", meterNumber, communityId);
+            throw RuntimeErrorException.errorWith(SCOPE, ERROR_METER_NUMBER_EXIST,
+                    "meterNumber is already exist");
+        }
+    }
     @Override
     public EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd) {
         validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
         userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.METER_CREATE);
 
+        checkEnergyMeterUnique(null, cmd.getCommunityId(), cmd.getName(), cmd.getMeterNumber());
 
         EnergyMeterType meterType = EnergyMeterType.fromCode(cmd.getMeterType());
         if (meterType == null) {
@@ -510,6 +525,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
         Tuple<EnergyMeter, Boolean> result = coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER.getCode() + cmd.getMeterId()).enter(() -> {
             EnergyMeter meter = this.findMeterById(cmd.getMeterId());
+            userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), meter.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.METER_CREATE);
+            checkEnergyMeterUnique(meter.getId(), meter.getCommunityId(), cmd.getName(), cmd.getMeterNumber());
             if (cmd.getName() != null) {
                 meter.setName(cmd.getName());
             }
