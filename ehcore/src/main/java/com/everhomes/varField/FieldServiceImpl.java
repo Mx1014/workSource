@@ -615,7 +615,7 @@ public class FieldServiceImpl implements FieldService {
             String[] split = cellValue.split(",");
 
             for(String projectSource : split){
-                ScopeFieldItem projectSourceItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, projectSource);
+                ScopeFieldItem projectSourceItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, Long.parseLong(projectSource));
                 if(projectSourceItem!=null){
                     sb.append((projectSourceItem.getItemId()==null?"":projectSourceItem.getItemId())+",");
                 }
