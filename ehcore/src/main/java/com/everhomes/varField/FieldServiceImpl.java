@@ -617,7 +617,7 @@ public class FieldServiceImpl implements FieldService {
             for(String projectSource : split){
                 ScopeFieldItem projectSourceItem = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId, Long.parseLong(projectSource));
                 if(projectSourceItem!=null){
-                    sb.append((projectSourceItem.getItemId()==null?"":projectSourceItem.getItemId())+",");
+                    sb.append((projectSourceItem.getItemDisplayName()==null?"":projectSourceItem.getItemDisplayName())+",");
                 }
             }
             if(sb.toString().trim().length()>0){
