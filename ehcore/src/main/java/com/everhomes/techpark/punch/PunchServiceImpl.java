@@ -37,7 +37,7 @@ import com.everhomes.rest.uniongroup.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
-import com.everhomes.uniongroup.UniongroupConfigures;
+import com.everhomes.uniongroup.*;
 import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
@@ -121,9 +121,6 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.uniongroup.UniongroupConfigureProvider;
-import com.everhomes.uniongroup.UniongroupMemberDetail;
-import com.everhomes.uniongroup.UniongroupService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -188,7 +185,8 @@ public class PunchServiceImpl implements PunchService {
 	private UniongroupConfigureProvider uniongroupConfigureProvider;
 	@Autowired
     private UniongroupService uniongroupService;
-
+	@Autowired
+	private UniongroupVersionProvider uniongroupVersionProvider;
 	@Autowired
 	private ConfigurationProvider configurationProvider;
 
@@ -306,6 +304,31 @@ public class PunchServiceImpl implements PunchService {
 
 	}
 
+	/**获取公司当前的version,如果没有,则新建一个从1开始*/
+	public Integer getPunchGroupCurrentVersion(Long enterpriseId){
+		return getPunchGroupVersion(enterpriseId).getCurrentVersionCode();
+	}
+	/**获取公司当前的version,如果没有,则新建一个从1开始*/
+	public UniongroupVersion getPunchGroupVersion(Long enterpriseId){
+		UniongroupVersion uv = uniongroupVersionProvider.findUniongroupVersion(enterpriseId, UniongroupType.PUNCHGROUP.getCode());
+		if(null == uv){
+			Organization org = organizationProvider.findOrganizationById(enterpriseId);
+			if (null == org) {
+
+				throw RuntimeErrorException.errorWith(
+						PunchServiceErrorCode.SCOPE,
+						PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_FOUND,
+						"didnt find enterprise");
+			}
+			uv = new UniongroupVersion();
+			uv.setNamespaceId(org.getNamespaceId());
+			uv.setGroupType(UniongroupType.PUNCHGROUP.getCode());
+			uv.setCurrentVersionCode(1);
+			uv.setEnterpriseId(enterpriseId);
+			uniongroupVersionProvider.createUniongroupVersion(uv);
+		}
+		return uv;
+	}
 	@Override
 	public ListYearPunchLogsCommandResponse getlistPunchLogs(
 			ListYearPunchLogsCommand cmd) {
@@ -3895,8 +3918,9 @@ public class PunchServiceImpl implements PunchService {
 		List<OrganizationMember> orgMembers = organizationProvider.findOrganizationMembersByOrgIdAndUId(userId, organizationId);
 		if(null == orgMembers || orgMembers.size() == 0 )
 			return null;
+		Integer currentVersion = getPunchGroupCurrentVersion(organizationId);
 		UniongroupMemberDetail detail = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailId(orgMembers.get(0).getNamespaceId(),
-				orgMembers.get(0).getDetailId(), UniongroupType.PUNCHGROUP.getCode());
+				orgMembers.get(0).getDetailId(), UniongroupType.PUNCHGROUP.getCode(),currentVersion);
 		return detail;
 	}
 	/**找到用户的打卡总规则*/
@@ -4986,14 +5010,23 @@ public class PunchServiceImpl implements PunchService {
 					orgs.add(org);
 					//对ptr表,psd表的处理
 					processTimeRule2Active(pr);
+					if (pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
+						//copy from addpunchgroup
+					} else if (pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
 
+
+
+
+					}
 					pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
 					punchProvider.updatePunchRule(pr);
+
 				}
 			//把uniongroup相关表version改为0
 			for (Organization org : orgs) {
 				//把1版本和0版本互换
 				uniongroupService.switchUnionGroupVersion(org.getNamespaceId(), org.getId(), UniongroupType.PUNCHGROUP.getCode(), 1);
+
 				//删除1版本(就是之前的0版本)
 				uniongroupService.deleteUniongroupVersion(org.getNamespaceId(), org.getId(), UniongroupType.PUNCHGROUP.getCode(), 1);
 			}
@@ -5123,7 +5156,8 @@ public class PunchServiceImpl implements PunchService {
     }
     /**刷固定排班*/
     private void refreshGroupDayLogAndMonthStat(PunchRule pr, Calendar yesterday) {
-        List<UniongroupMemberDetail> members = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),pr.getVersionCode());
+		Integer currentVersion = getPunchGroupCurrentVersion(pr.getOwnerId());
+		List<UniongroupMemberDetail> members = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),currentVersion);
 		if (null != members && members.size()>0) {
 
 			for(UniongroupMemberDetail member : members) {
@@ -6234,7 +6268,9 @@ public class PunchServiceImpl implements PunchService {
                         ErrorCodes.ERROR_INVALID_PARAMETER,
                         "Invalid rule type parameter in the command");
             cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
-            //建立考勤组
+			Integer currentVersion = getPunchGroupCurrentVersion(cmd.getOwnerId());
+
+			//建立考勤组
 			Organization punchOrg = this.organizationService.createUniongroupOrganization(cmd.getOwnerId(),cmd.getGroupName(),UniongroupType.PUNCHGROUP.getCode());
 			//添加关联
 			SaveUniongroupConfiguresCommand command = new SaveUniongroupConfiguresCommand();
@@ -6242,8 +6278,8 @@ public class PunchServiceImpl implements PunchService {
 	        command.setGroupType(UniongroupType.PUNCHGROUP.getCode());
 	        command.setEnterpriseId(cmd.getOwnerId());
 	        command.setTargets(cmd.getTargets());
-			//次日生效的versioncode为1
-			command.setVersionCode(1);
+			//修改都修改config版本的数据
+			command.setVersionCode(CONFIG_VERSION_CODE);
             try {
                 this.uniongroupService.saveUniongroupConfigures(command);
             }catch(NoNodeAvailableException e){
@@ -6251,11 +6287,11 @@ public class PunchServiceImpl implements PunchService {
             }
 
 			//删除新增人员之前的考勤排班
-			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(punchOrg.getId(),1);
+			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(punchOrg.getId(), CONFIG_VERSION_CODE);
 			if (null != newEmployees)
 				for (UniongroupMemberDetail employee : newEmployees) {
 					//删除新增人员之前的排班
-					punchSchedulingProvider.deletePunchSchedulingByOwnerIdAndTarget(cmd.getOwnerId(),employee.getDetailId());
+					punchSchedulingProvider.deletePunchSchedulingByOwnerIdAndTarget(cmd.getOwnerId(), employee.getDetailId());
 				}
 	        //打卡地点和wifi
 	        saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
@@ -6557,6 +6593,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd) {
 		ListPunchGroupsResponse response = new ListPunchGroupsResponse();
 
+		Integer currentVersion = getPunchGroupCurrentVersion(cmd.getOwnerId());
 
         //  获取所有批次
 		if (cmd.getPageAnchor() == null)
@@ -6569,7 +6606,7 @@ public class PunchServiceImpl implements PunchService {
 		if(null!=cmd.getDeptId()){
 			orgIds = new ArrayList<>();
 			UniongroupConfigures unc = uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(
-					UserContext.getCurrentNamespaceId(), cmd.getDeptId(), UniongroupType.PUNCHGROUP.getCode(),null,UniongroupTargetType.ORGANIZATION.getCode());
+					UserContext.getCurrentNamespaceId(), cmd.getDeptId(), UniongroupType.PUNCHGROUP.getCode(),CONFIG_VERSION_CODE,UniongroupTargetType.ORGANIZATION.getCode());
 			if(null != unc)
 				orgIds.add(unc.getGroupId());
 
@@ -6622,11 +6659,11 @@ public class PunchServiceImpl implements PunchService {
 			dto.setOperatorUid(pr.getOperatorUid());
 		}
 		dto.setId(pr.getPunchOrganizationId());
-		Integer versionCode = 0;
-		if (pr.getStatus().equals(PunchRuleStatus.NEW.getCode()) || pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
-			versionCode = 1;
-		}
-		List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(r.getId(),versionCode);
+
+//		if (pr.getStatus().equals(PunchRuleStatus.NEW.getCode()) || pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
+//			versionCode = 1;
+//		}
+		List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(r.getId(),CONFIG_VERSION_CODE);
 		dto.setEmployeeCount(employees == null ? 0: employees.size());
 		if (null != employees) {
 			dto.setEmployees(new ArrayList<>());
@@ -6851,11 +6888,11 @@ public class PunchServiceImpl implements PunchService {
 //			Long t1 = System.currentTimeMillis();
 //			LOGGER.debug("saveUnion Time1 "+  t1 + "cost: "+ (t1-t0));
 			PunchRule pr = punchProvider.getPunchruleByPunchOrgId(cmd.getId());
-			Integer versionCode = 0;
-			if (pr.getStatus().equals(PunchRuleStatus.NEW.getCode()) || pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
-				versionCode = 1;
-			}
-			List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),versionCode);
+			Integer currentVersion = getPunchGroupCurrentVersion(pr.getOwnerId());
+//			Integer versionCode = 0;
+//			if (pr.getStatus().equals(PunchRuleStatus.NEW.getCode()) || pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
+//				versionCode = 1;
+//			}
 //			Long t2 = System.currentTimeMillis();
 //			LOGGER.debug("saveUnion Time2 "+  t2 + "cost: "+ (t2-t1) + "save start");
 
@@ -6867,15 +6904,20 @@ public class PunchServiceImpl implements PunchService {
 			command.setEnterpriseId(cmd.getOwnerId());
 			command.setTargets(cmd.getTargets());
 			//次日生效的versioncode为1
-			command.setVersionCode(1);
+			command.setVersionCode(CONFIG_VERSION_CODE);
 			try {
 				this.uniongroupService.saveUniongroupConfigures(command);
 			} catch (NoNodeAvailableException e) {
 				LOGGER.error("NoNodeAvailableException", e);
 			}
-			Long t7 = System.currentTimeMillis();
-			LOGGER.debug("saveUnion Time7 "+  t7 + "save end");
-			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),1);
+			Long t8 = System.currentTimeMillis();
+			//打卡地点和wifi
+			saveGeopointsAndWifis(punchOrg.getId(), cmd.getPunchGeoPoints(), cmd.getWifis());
+
+			// updatePunchGroup
+			List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(), currentVersion);
+
+			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(), CONFIG_VERSION_CODE);
 			List<Long> detailIds = new ArrayList<>();
 			if (null == newEmployees)
 				newEmployees = new ArrayList<>();
@@ -6883,15 +6925,11 @@ public class PunchServiceImpl implements PunchService {
 				detailIds.add(employee.getDetailId());
 				//删除被踢出考勤组的人的设置 -- 排班
 				//删除新增人员之前的排班
-				if(!isEmployeeInList(employee,oldEmployees)){
+				if (!isEmployeeInList(employee, oldEmployees)) {
 					punchSchedulingProvider.deletePunchSchedulingByOwnerIdAndTarget(pr.getOwnerId(), employee.getDetailId());
 				}
 			}
 
-			Long t8 = System.currentTimeMillis();
-			LOGGER.debug("saveUnion Time8 "+  t8 + "cost: " +(t8-t7));
-			//打卡地点和wifi
-			saveGeopointsAndWifis(punchOrg.getId(), cmd.getPunchGeoPoints(), cmd.getWifis());
 
 			//打卡时间,特殊日期,排班等
 			pr.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
@@ -6935,6 +6973,7 @@ public class PunchServiceImpl implements PunchService {
 	/**给组下面所有人发消息通知*/
 	private void sendMessageToGroupUser(PunchRule pr, List<PunchTimeRuleDTO> timeRules, Integer versionCode) {
 		//捞人
+
 		List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),versionCode);
 		StringBuilder timeRuleSB = new StringBuilder();
 		//拼班次信息
@@ -7828,7 +7867,7 @@ public class PunchServiceImpl implements PunchService {
 		Integer allOrganizationInteger = organizationProvider.countOrganizationMemberDetailsByOrgId(org.getNamespaceId(), cmd.getOwnerId());
 		response.setAllEmployeeCount(allOrganizationInteger);
 		// 未关联人数
-		List<OrganizationMemberDetails> details = uniongroupConfigureProvider.listDetailNotInUniongroup(org.getNamespaceId(), org.getId(), null, 0, null);
+		List<OrganizationMemberDetails> details = uniongroupConfigureProvider.listDetailNotInUniongroup(org.getNamespaceId(), org.getId(), null, CONFIG_VERSION_CODE, null);
 //		if (null != details && details.size()>0)
 //			response.setUnjoinPunchGroupEmployees(details.stream().map(r ->{
 //				OrganizationMemberDetailDTO dto = ConvertHelper.convert(r, OrganizationMemberDetailDTO.class);
