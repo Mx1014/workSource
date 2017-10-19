@@ -26,6 +26,15 @@ public class LeaseProjectExtraInfo {
     private String parkingSpaceAmount;
     private String parkingTempFee;
     private String enteredEnterprises;
+    private String floorHeight;
+
+    public String getFloorHeight() {
+        return floorHeight;
+    }
+
+    public void setFloorHeight(String floorHeight) {
+        this.floorHeight = floorHeight;
+    }
 
     @Override
     public String toString() {

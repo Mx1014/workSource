@@ -34,6 +34,7 @@ public class UpdateLeaseProjectCommand {
     private String roomType;
     private String buildingNum;
     private String floorNum;
+    private String floorHeight;
     private String areaSize;
     private String investmentArea;
     private String floorBearing;
@@ -48,6 +49,14 @@ public class UpdateLeaseProjectCommand {
     private String parkingSpaceAmount;
     private String parkingTempFee;
     private String enteredEnterprises;
+
+    public String getFloorHeight() {
+        return floorHeight;
+    }
+
+    public void setFloorHeight(String floorHeight) {
+        this.floorHeight = floorHeight;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;
