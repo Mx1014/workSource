@@ -294,8 +294,8 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
         if(cmd.getBuildingName() != null) {
             //fix bug for #15397
-            //qbs.add(QueryBuilders.queryString(cmd.getBuildingName()).field("buildings"));
-            FilterBuilder buildFilter = FilterBuilders.termFilter("buildings", cmd.getBuildingName());
+            qbs.add(QueryBuilders.queryString(cmd.getBuildingName()).field("buildings"));
+//            FilterBuilder buildFilter = FilterBuilders.termFilter("buildings", cmd.getBuildingName());
             fbList.add(buildFilter);
         }
 
