@@ -768,16 +768,17 @@ public class AssetServiceImpl implements AssetService {
                     item.setBillId(nextBillId);
                     item.setChargingItemName(groupRule.getChargingItemName());
                     item.setChargingItemsId(groupRule.getChargingItemId());
-                    //归档字段
-                    item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    item.setCreatorUid(UserContext.currentUserId());
                     //日期
                     item.setDateStr(exp.getBillDateStr());
                     item.setDateStrBegin(sdf_dateStrD.format(exp.getDateStrBegin()));
                     item.setDateStrEnd(sdf_dateStrD.format(exp.getDateStrEnd()));
-//                    item.setDateStrDue();ssss
+                    item.setDateStrDue(exp.getBillDateDue());
+                    item.setDueDayDeadline(exp.getBillDateDeadline());
+                    //归档字段
                     item.setId(currentBillItemSeq);
                     currentBillItemSeq += 1;
+                    item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    item.setCreatorUid(UserContext.currentUserId());
                     item.setNamespaceId(cmd.getNamesapceId());
                     item.setOwnerType(cmd.getOwnerType());
                     item.setOwnerId(cmd.getOwnerId());
@@ -787,9 +788,9 @@ public class AssetServiceImpl implements AssetService {
                     item.setContractNum(cmd.getContractNum());
                     item.setTargetName(cmd.getTargetName());
                     item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    //放到数组中去
                     billItemsList.add(item);
-//                    if(balanceType == AssetPaymentStrings.BALANCE_ON_MONTH) {
-                    if(1 == AssetPaymentStrings.BALANCE_ON_MONTH) {
+                    //bill的组装，bill和item的时间不同，需要再在exp中放一个bill的周期，然后检测是否包含费用产生日
                         // create a new bill or update a bean according to whether the corresponding contract bill exists
                         if(map.containsKey(identity)){
                             PaymentBills bill = map.get(identity);
@@ -830,9 +831,7 @@ public class AssetServiceImpl implements AssetService {
                             map.put(identity,newBill);
                         }
                         //if the billing cycle is on quarter or year, just change the way how the billIdentity defines that muliti bills should be merged as one or be independently
-                    }else{
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Only natural mode is supported now");
-                    }
+
                 }
 
             }
@@ -970,7 +969,7 @@ public class AssetServiceImpl implements AssetService {
             obj.setBillGroupId(group.getId());
             obj.setBillDateStr(yyyyMM.format(a.getTime()));
             Calendar due = Calendar.getInstance();
-            due.setTime(d2.getTime());
+            due.setTime(d.getTime());
             due.set(Calendar.MONTH,due.get(Calendar.MONTH)+1);
             due.set(Calendar.DAY_OF_MONTH,group.getBillsDay());
             obj.setBillDateDue(yyyyMMdd.format(due.getTime()));
@@ -1324,7 +1323,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void configChargingItems(ConfigChargingItemsCommand cmd) {
-        assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getCommunityId(),cmd.getNamespaceId());
+        assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId());
     }
 
     @Override

@@ -1185,7 +1185,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t1.OWNER_ID.eq(ownerId))
                 .and(t1.OWNER_TYPE.eq(ownerType))
                 .fetchInto(PaymentChargingItemScope.class);
-        
+
         Byte isSelected = 0;
         for(int i = 0; i < items.size(); i ++){
             PaymentChargingItem item = items.get(i);
@@ -1197,7 +1197,6 @@ public class AssetProviderImpl implements AssetProvider {
                 if(item.getId() == scope.getChargingItemId()){
                     isSelected = 1;
                     dto.setProjectChargingItemName(scope.getProjectLevelName());
-                    dto.setChargingScopeId(scope.getId());
                 }
                 dto.setIsSelected(isSelected);
                 isSelected = 0;
@@ -2013,33 +2012,36 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, Integer namespaceId) {
+    public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType,Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
         EhPaymentChargingItemScopesDao dao = new EhPaymentChargingItemScopesDao(context.configuration());
         List<com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes> list = new ArrayList<>();
         for(int i = 0; i < configChargingItems.size(); i ++) {
             ConfigChargingItems vo = configChargingItems.get(i);
-            Long scopeId = vo.getChargingItemScopeId();
-            if(scopeId != null){
-                context.update(t)
-                        .set(t.PROJECT_LEVEL_NAME,vo.getProjectChargingItemName())
-                        .where(t.ID.eq(scopeId))
-                        .execute();
-            }else{
-                PaymentChargingItemScope scope = new PaymentChargingItemScope();
-                scope.setChargingItemId(vo.getChargingItemId());
-                long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes.class));
-                scope.setId(nextSequence);
-                scope.setNamespaceId(namespaceId);
-                scope.setOwnerId(communityId);
-                scope.setOwnerType(PaymentConstants.OWER_TYPE_COMMUNITY);
-                list.add(scope);
+            PaymentChargingItemScope scope = new PaymentChargingItemScope();
+            scope.setChargingItemId(vo.getChargingItemId());
+            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes.class));
+            scope.setId(nextSequence);
+            scope.setNamespaceId(namespaceId);
+            scope.setOwnerId(communityId);
+            scope.setOwnerType(PaymentConstants.OWER_TYPE_COMMUNITY);
+            scope.setProjectLevelName(vo.getProjectChargingItemName());
+            list.add(scope);
+        }
+        this.dbProvider.execute((TransactionStatus status) -> {
+            context.delete(t)
+                    .where(t.OWNER_TYPE.eq(ownerType))
+                    .and(t.OWNER_ID.eq(communityId))
+                    .execute();
+            if(list.size()>0){
+                dao.insert(list);
             }
-        }
-        if(list.size()>0){
-            dao.insert(list);
-        }
+            return null;
+        });
+
+
+
     }
 
     @Override

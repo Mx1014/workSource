@@ -10,7 +10,6 @@ import com.everhomes.util.StringHelper;
  * <li>chargingItemName: 收费项目名称</li>
  * <li>projectChargingItemName: 园区收费项目名称</li>
  * <li>isSelected: 是否被选中，1:是;0:否;</li>
- * <li>chargingScopeId: 园区项目id</li>
  *</ul>
  */
 public class ListChargingItemsDTO {
@@ -18,7 +17,6 @@ public class ListChargingItemsDTO {
     private String chargingItemName;
     private String projectChargingItemName;
     private Byte isSelected;
-    private Long chargingScopeId;
 
     public ListChargingItemsDTO() {
     }
@@ -60,11 +58,4 @@ public class ListChargingItemsDTO {
         this.isSelected = isSelected;
     }
 
-    public Long getChargingScopeId() {
-        return chargingScopeId;
-    }
-
-    public void setChargingScopeId(Long chargingScopeId) {
-        this.chargingScopeId = chargingScopeId;
-    }
 }
