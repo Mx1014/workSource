@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>ids：机构id集合</li>
- * <li>enterpriseId: 当前总公司的名称</li>
+ * <li>enterpriseId: 当前总公司的ID</li>
  * <li>tag: 标识{@link com.everhomes.rest.organization.OrganizationGroupType}</li>
  * </ul>
  */

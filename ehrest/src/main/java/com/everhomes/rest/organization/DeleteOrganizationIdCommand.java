@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id：主键id</li>
  * <li>scopeType：删除人员范围{@link com.everhomes.rest.organization.DeleteOrganizationContactScopeType}</li>
- * <li>enterpriseId: 当前总公司的名称</li>
+ * <li>enterpriseId: 当前总公司的Id</li>
  * </ul>
  */
 public class DeleteOrganizationIdCommand {
