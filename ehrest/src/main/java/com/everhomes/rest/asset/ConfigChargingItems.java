@@ -6,6 +6,7 @@ package com.everhomes.rest.asset;
  */
 /**
  *<ul>
+ * <li>chargingItemScopeId:园区收费项目id</li>
  * <li>chargingItemId:收费项目id</li>
  * <li>projectChargingItemName:园区自定义的收费项目名字</li>
  *</ul>
@@ -13,6 +14,15 @@ package com.everhomes.rest.asset;
 public class ConfigChargingItems {
     private Long chargingItemId;
     private String projectChargingItemName;
+    private Long chargingItemScopeId;
+
+    public Long getChargingItemScopeId() {
+        return chargingItemScopeId;
+    }
+
+    public void setChargingItemScopeId(Long chargingItemScopeId) {
+        this.chargingItemScopeId = chargingItemScopeId;
+    }
 
     public Long getChargingItemId() {
         return chargingItemId;
