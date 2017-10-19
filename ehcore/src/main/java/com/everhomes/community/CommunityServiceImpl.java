@@ -257,7 +257,7 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setAreaSize(cmd.getAreaSize());
 		this.dbProvider.execute((TransactionStatus status) ->  {
 			this.communityProvider.updateCommunity(community);
-
+			communitySearcher.feedDoc(community);
 			List<CommunityGeoPointDTO> geoList = cmd.getGeoPointList();
 			
 			if(geoList != null && geoList.size() > 0){
