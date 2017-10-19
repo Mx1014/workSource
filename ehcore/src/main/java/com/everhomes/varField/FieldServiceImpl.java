@@ -582,13 +582,14 @@ public class FieldServiceImpl implements FieldService {
                  fieldName.indexOf("Status")!=-1)
         {
             LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName+" class is "+clz.toString());
-
-            ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId,Long.parseLong(invoke.toString()));
-            if(item!=null&&item.getItemId()!=null){
-                invoke = String.valueOf(item.getItemDisplayName());
-                LOGGER.info("field transferred to item id is "+invoke);
-            }else{
-                LOGGER.error("field "+ fieldName+" transferred to item using findScopeFieldItemByDisplayName failed ,item is "+ item);
+            if(invoke.getClass().getSimpleName().equals("String")){
+                ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId,Long.parseLong(invoke.toString()));
+                if(item!=null&&item.getItemId()!=null){
+                    invoke = String.valueOf(item.getItemDisplayName());
+                    LOGGER.info("field transferred to item id is "+invoke);
+                }else{
+                    LOGGER.error("field "+ fieldName+" transferred to item using findScopeFieldItemByDisplayName failed ,item is "+ item);
+                }
             }
         }
 
@@ -866,7 +867,7 @@ public class FieldServiceImpl implements FieldService {
                                 if(fieldName.equals("gender")||fieldName.equals("nationality_item_id")){
                                     LOGGER.info("begin to handle field "+fieldName);
                                 }
-                                ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), fieldName);
+                                ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cellCopy);
                                 if(item!=null&&item.getItemId()!=null){
                                     cellValue = String.valueOf(item.getItemId());
                                     LOGGER.info("field transferred to item id is "+cellValue);
