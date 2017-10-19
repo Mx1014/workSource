@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import com.everhomes.rest.questionnaire.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,27 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.questionnaire.CreateQuestionnaireCommand;
-import com.everhomes.rest.questionnaire.CreateQuestionnaireResponse;
-import com.everhomes.rest.questionnaire.CreateTargetQuestionnaireCommand;
-import com.everhomes.rest.questionnaire.CreateTargetQuestionnaireResponse;
-import com.everhomes.rest.questionnaire.DeleteQuestionnaireCommand;
-import com.everhomes.rest.questionnaire.GetQuestionnaireDetailCommand;
-import com.everhomes.rest.questionnaire.GetQuestionnaireDetailResponse;
-import com.everhomes.rest.questionnaire.GetQuestionnaireResultDetailCommand;
-import com.everhomes.rest.questionnaire.GetQuestionnaireResultDetailResponse;
-import com.everhomes.rest.questionnaire.GetQuestionnaireResultSummaryCommand;
-import com.everhomes.rest.questionnaire.GetQuestionnaireResultSummaryResponse;
-import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailCommand;
-import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailResponse;
-import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersCommand;
-import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersResponse;
-import com.everhomes.rest.questionnaire.ListOptionTargetsCommand;
-import com.everhomes.rest.questionnaire.ListOptionTargetsResponse;
-import com.everhomes.rest.questionnaire.ListQuestionnairesCommand;
-import com.everhomes.rest.questionnaire.ListQuestionnairesResponse;
-import com.everhomes.rest.questionnaire.ListTargetQuestionnairesCommand;
-import com.everhomes.rest.questionnaire.ListTargetQuestionnairesResponse;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -159,6 +139,16 @@ public class QuestionnaireController extends ControllerBase {
 	@RestReturn(CreateTargetQuestionnaireResponse.class)
 	public RestResponse createTargetQuestionnaire(CreateTargetQuestionnaireCommand cmd){
 		return new RestResponse(questionnaireService.createTargetQuestionnaire(cmd));
+	}
+
+	/**
+	 * <b>URL: /questionnaire/listUsersbyIdentifiers</b>
+	 * <p>12.通过手机号查询用户信息</p>
+	 */
+	@RequestMapping("listUsersbyIdentifiers")
+	@RestReturn(ListUsersbyIdentifiersResponse.class)
+	public RestResponse listUsersbyIdentifiers(ListUsersbyIdentifiersCommand cmd){
+		return new RestResponse(questionnaireService.listUsersbyIdentifiers(cmd));
 	}
 
 }

@@ -4,6 +4,8 @@ package com.everhomes.questionnaire;
 import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.everhomes.bootstrap.PlatformContext;
@@ -18,6 +20,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
@@ -1128,4 +1131,59 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		}
 	}
 
+	@Override
+	public ListUsersbyIdentifiersResponse listUsersbyIdentifiers(ListUsersbyIdentifiersCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId ==null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		if(cmd.getIdentifiers()==null){
+			return new ListUsersbyIdentifiersResponse();
+		}
+		List<UserIdentifier> userIdentifiers = userProvider.listClaimedIdentifiersByTokens(namespaceId, cmd.getIdentifiers());
+		List<User> users = userProvider.listUserByIds(namespaceId, userIdentifiers.stream().map(r -> Long.valueOf(r.getOwnerUid())).collect(Collectors.toList()));
+		Map<String,User> userMaps = generateUserMaps(userIdentifiers,users);
+
+		return new ListUsersbyIdentifiersResponse(cmd.getIdentifiers().stream().map(r->convertToQuestionnaireUserDTOs(r,userMaps)).collect(Collectors.toList()));
+	}
+
+	private Map<String,User> generateUserMaps(List<UserIdentifier> userIdentifiers, List<User> users) {
+		Map<String,User> maps = new HashMap<>();
+		for (UserIdentifier userIdentifier : userIdentifiers) {
+			for (User user : users) {
+				if(userIdentifier.getOwnerUid().longValue() == user.getId()){
+					maps.put(userIdentifier.getIdentifierToken(),user);
+				}
+			}
+		}
+		return maps;
+	}
+
+	private QuestionnaireUserDTO convertToQuestionnaireUserDTOs(String sidentifier, Map<String,User> userMaps) {
+		QuestionnaireUserDTO dtos = new QuestionnaireUserDTO();
+		dtos.setIdentifierToken(sidentifier);
+		User user = userMaps.get(sidentifier);
+		if(user!=null) {
+			dtos.setId(user.getId());
+			dtos.setAccountName(user.getNickName());
+			dtos.setVerifyStatus(QuestionnaireCommonStatus.TRUE.getCode());
+			return dtos;
+		}
+		if(isRightFormatSidentifier(sidentifier)){
+			dtos.setAccountName("手机号未注册");
+			dtos.setVerifyStatus(QuestionnaireCommonStatus.FALSE.getCode());
+		}else{
+			dtos.setAccountName("手机号有误");
+			dtos.setVerifyStatus(QuestionnaireCommonStatus.FALSE.getCode());
+		}
+		return dtos;
+	}
+	private static Pattern formatSidentifier = Pattern.compile("^\\d{11}$");
+	private boolean isRightFormatSidentifier(String sidentifier) {
+		Matcher matcher = formatSidentifier.matcher(sidentifier);
+		if(matcher.find()){
+			return true;
+		}
+		return false;
+	}
 }
