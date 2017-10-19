@@ -15,7 +15,7 @@ public interface QuestionnaireProvider {
 
 	Questionnaire findQuestionnaireById(Long id);
 
-	List<Questionnaire> listQuestionnaire();
+	List<Questionnaire> listApproachCutoffTimeQuestionnaire(Timestamp timestamp);
 
 	List<Questionnaire> listQuestionnaireByOwner(ListQuestionnairesCommand cmd,Integer namespaceId,
 												 int pageSize);

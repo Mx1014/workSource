@@ -122,5 +122,6 @@ public interface ConfigConstants {
 
     public static final String QUESTIONNAIRE_DETAIL_URL = "questionnaire.detail.url";
     public static final String QUESTIONNAIRE_SEND_MESSAGE_EXPRESS = "questionnaire.send.message.express";
+    public static final String QUESTIONNAIRE_REMIND_TIME_INTERVAL = "questionnaire.remind.time.interval";
 
 }

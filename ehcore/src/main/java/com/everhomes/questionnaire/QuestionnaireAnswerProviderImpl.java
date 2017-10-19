@@ -165,6 +165,25 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 				.fetch().map(r -> convert(r));
 	}
 
+	@Override
+	public List<QuestionnaireAnswer> listQuestionnaireAnswerByQuestionnaireId(Long qustionnaireId, String targetType) {
+		return getReadOnlyContext().selectDistinct(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTION_ID,
+				Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE,
+				Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID
+				).from(Tables.EH_QUESTIONNAIRE_ANSWERS)
+				.where(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID.eq(qustionnaireId))
+				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(targetType))
+				.fetch().map(r -> convert2(r));
+	}
+
+	private QuestionnaireAnswer convert2(Record r) {
+		QuestionnaireAnswer answer = new QuestionnaireAnswer();
+		answer.setQuestionId(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTION_ID));
+		answer.setTargetFrom(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_FROM));
+		answer.setTargetId(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID));
+		return answer;
+	}
+
 	private QuestionnaireAnswer convert(Record r) {
 		QuestionnaireAnswer answer = new QuestionnaireAnswer();
 		answer.setTargetPhone(r.getValue(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_PHONE));

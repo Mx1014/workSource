@@ -23,6 +23,8 @@ public interface QuestionnaireAnswerProvider {
 
 	List<QuestionnaireAnswer> listQuestionnaireAnswerByQuestionnaireId(Long qustionnaireId, String targetType,Long targetId);
 
+	List<QuestionnaireAnswer> listQuestionnaireAnswerByQuestionnaireId(Long qustionnaireId, String targetType);
+
 	List<QuestionnaireAnswer> listQuestionnaireAnswerByQuestionId(Long questionId, Long pageAnchor, int pageSize);
 
 	QuestionnaireAnswer findAnyAnswerByTarget(Long questionnaireId, String targetType, Long targetId);

@@ -26,7 +26,6 @@ import com.everhomes.server.schema.tables.pojos.EhQuestionnaires;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import scala.util.control.Exception;
 
 @Component
 public class QuestionnaireProviderImpl implements QuestionnaireProvider {
@@ -73,8 +72,10 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 	}
 
 	@Override
-	public List<Questionnaire> listQuestionnaire() {
+	public List<Questionnaire> listApproachCutoffTimeQuestionnaire(Timestamp approachTime) {
 		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRES)
+				.where(Tables.EH_QUESTIONNAIRES.STATUS.eq(QuestionnaireStatus.ACTIVE.getCode()))
+				.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.le(approachTime))
 				.orderBy(Tables.EH_QUESTIONNAIRES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, Questionnaire.class));
 	}
