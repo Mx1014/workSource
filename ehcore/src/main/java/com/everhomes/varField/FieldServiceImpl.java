@@ -576,10 +576,12 @@ public class FieldServiceImpl implements FieldService {
             return invoke.toString();
         }
 
-        if((fieldName.equals("status") || fieldName.equals("gender") ||
+        if(fieldName.equals("status") ||
+                fieldName.equals("gender") ||
                 (fieldName.indexOf("id")!=fieldName.length()-1-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("Id")!=-1) ||
                 (fieldName.indexOf("Id")!=fieldName.length()-1-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
-                (fieldName.indexOf("Status")==fieldName.length()-1-5 && fieldName.indexOf("Status")!=-1) && fieldName.indexOf("individual")==-1)
+                (fieldName.indexOf("Status")==fieldName.length()-1-5 && fieldName.indexOf("Status")!=-1) &&
+                        fieldName.indexOf("individual")==-1
                 )
         {
             LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName+" class is "+clz.toString());
@@ -593,7 +595,22 @@ public class FieldServiceImpl implements FieldService {
                 }
             }
         }
-
+        //处理特例projectSource的导入
+        StringBuilder sb = new StringBuilder();
+        if(fieldName.equals("projectSource")){
+            String cellValue =(String)invoke;
+            String[] split = cellValue.split(",");
+            for(String projectSource : split){
+                ScopeFieldItem projectSourceItem = fieldProvider.findScopeFieldItemByDisplayName(namespaceId, communityId, moduleName, projectSource);
+                if(projectSourceItem!=null){
+                    sb.append((projectSourceItem.getItemId()==null?"":projectSourceItem.getItemId())+",");
+                }
+            }
+            if(sb.toString().trim().length()>0){
+                sb.deleteCharAt(sb.length()-1);
+                invoke = sb.toString();
+            }
+        }
 
         return String.valueOf(invoke);
     }
@@ -858,17 +875,15 @@ public class FieldServiceImpl implements FieldService {
                         if(cell!=null){
                             cellValue = ExcelUtils.getCellValue(cell);
                             cellCopy = cellValue;
-                            if((fieldName.equals("status") || fieldName.equals("gender") ||
+                            if(fieldName.equals("status") ||
+                                    fieldName.equals("gender") ||
                                     (fieldName.indexOf("id")!=fieldName.length()-1-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("Id")!=-1) ||
                                     (fieldName.indexOf("Id")!=fieldName.length()-1-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
-                                    (fieldName.indexOf("Status")==fieldName.length()-1-5 && fieldName.indexOf("Status")!=-1) && fieldName.indexOf("individual")==-1)
+                                    (fieldName.indexOf("Status")==fieldName.length()-1-5 && fieldName.indexOf("Status")!=-1) &&
+                                            fieldName.indexOf("individual")==-1
                                     ){
-                                cellValue = "";
                                 //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
-                                if(fieldName.equals("gender")||fieldName.equals("nationality_item_id")){
-                                    LOGGER.info("begin to handle field "+fieldName);
-                                }
-                                ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cellCopy);
+                                ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cellValue);
                                 if(item!=null&&item.getItemId()!=null){
                                     cellValue = String.valueOf(item.getItemId());
                                     LOGGER.info("field transferred to item id is "+cellValue);
