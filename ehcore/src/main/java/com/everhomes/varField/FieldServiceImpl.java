@@ -576,10 +576,11 @@ public class FieldServiceImpl implements FieldService {
             return invoke.toString();
         }
 
-        if(fieldName.equals("status") || fieldName.equals("gender") ||
-                (fieldName.indexOf("id")!=-1 && fieldName.indexOf("id")!=0) ||
-                (fieldName.indexOf("Id")!=-1 && fieldName.indexOf("Id")!=0) ||
-                 fieldName.indexOf("Status")!=-1)
+        if((fieldName.equals("status") || fieldName.equals("gender") ||
+                (fieldName.indexOf("id")!=fieldName.length()-1-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("Id")!=-1) ||
+                (fieldName.indexOf("Id")!=fieldName.length()-1-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
+                (fieldName.indexOf("Status")==fieldName.length()-1-5 && fieldName.indexOf("Status")!=-1) && fieldName.indexOf("individual")==-1)
+                )
         {
             LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName+" class is "+clz.toString());
             if(!invoke.getClass().getSimpleName().equals("String")){
@@ -857,10 +858,10 @@ public class FieldServiceImpl implements FieldService {
                         if(cell!=null){
                             cellValue = ExcelUtils.getCellValue(cell);
                             cellCopy = cellValue;
-                            if(fieldName.equals("status") || fieldName.equals("gender") ||
-                                    (fieldName.indexOf("id")!=-1 && fieldName.indexOf("id")!=0) ||
-                                    (fieldName.indexOf("Id")!=-1 && fieldName.indexOf("Id")!=0) ||
-                                    fieldName.indexOf("Status")!=-1
+                            if((fieldName.equals("status") || fieldName.equals("gender") ||
+                                    (fieldName.indexOf("id")!=fieldName.length()-1-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("Id")!=-1) ||
+                                    (fieldName.indexOf("Id")!=fieldName.length()-1-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
+                                    (fieldName.indexOf("Status")==fieldName.length()-1-5 && fieldName.indexOf("Status")!=-1) && fieldName.indexOf("individual")==-1)
                                     ){
                                 cellValue = "";
                                 //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
