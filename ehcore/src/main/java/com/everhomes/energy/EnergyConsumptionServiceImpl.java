@@ -557,7 +557,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, cmd);
                 }
                 meterProvider.updateEnergyMeter(meter);
-                processEnergyMeterAddresses(cmd.getAddresses());
+                processEnergyMeterAddresses(meter.getId(), cmd.getAddresses());
                 return true;
             });
             meterSearcher.feedDoc(meter);
