@@ -2968,6 +2968,13 @@ public class UserServiceImpl implements UserService {
 		}else{
 			communityName = organizationDto.getCommunityName();
 		}
+
+		String organizaitonName = "";
+		if(organizationDto.getDisplayName() != null && !organizationDto.getDisplayName().equals("")){
+			organizaitonName = organizationDto.getDisplayName();
+		}else {
+			organizaitonName = organizationDto.getName();
+		}
 		// 处理名称
 		GetNamespaceDetailCommand cmd = new GetNamespaceDetailCommand();
 		cmd.setNamespaceId(namespaceId);
@@ -2975,13 +2982,13 @@ public class UserServiceImpl implements UserService {
 		NamespaceNameType namespaceNameType = NamespaceNameType.fromCode(namespaceDetail.getNameType());
 		switch (namespaceNameType){
 			case ONLY_COMPANY_NAME:
-				titlieName.append(organizationDto.getName());
+				titlieName.append(organizaitonName);
 				break;
 			case ONLY_COMMUNITY_NAME:
 				titlieName.append(communityName);
 				break;
 			case COMMUNITY_COMPANY_NAME:
-				titlieName.append(communityName).append(organizationDto.getName());
+				titlieName.append(communityName).append(organizaitonName);
 				break;
 		}
 //		sceneDto.setName(organizationDto.getName().trim());
