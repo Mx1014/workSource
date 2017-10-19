@@ -207,6 +207,7 @@ public class GuoMaoEmsHandler implements ExpressHandler{
 		params.put("sender", getSendAddress(expressOrder));
 		params.put("receiver", getReceiveAddress(expressOrder));
 		params.put("orderType", "1");//一般情况下为1，寄件人付费
+		params.put("remark", "国贸圈app");//一般情况下为1，寄件人付费
 		if(expressOrder.getInsuredPrice() != null){
 			params.put("insuredAmount", (long)(expressOrder.getInsuredPrice().floatValue()*100));//
 		}
