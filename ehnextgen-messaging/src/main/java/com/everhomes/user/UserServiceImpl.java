@@ -5233,10 +5233,12 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String checkServerStatus() {
 	    Map<String, String> result = new HashMap<String, String>();
+	    int flag = 0x00;
 	    
 	    // 检查是否可以申请内存创建对象
 	    Object obj = new Object();
 	    result.put("objectCreated", "OK");
+        flag = flag | 0x01;
 
 	    // 检查redis storage 连接是否正常（可读可写）
 	    try {
@@ -5248,6 +5250,7 @@ public class UserServiceImpl implements UserService {
             op.set(heartbeat, String.valueOf(System.currentTimeMillis()));
 
             result.put("redisStorageStatus", "OK");
+            flag = flag | 0x02;
 	    } catch (Exception e) {
 	        LOGGER.error("Redis storage invalid state", e);
 	        result.put("redisStorageStatus", e.getMessage());
@@ -5257,20 +5260,28 @@ public class UserServiceImpl implements UserService {
 	    try {
             userProvider.updateCacheStatus();
             userProvider.checkCacheStatus();
-            result.put("redisStorageStatus", "OK");
+            result.put("redisCacheStatus", "OK");
+            flag = flag | 0x04;
 	    } catch (Exception e) {
 	        LOGGER.error("Redis cache invalid state", e);
-	        result.put("redisStorageStatus", e.getMessage());
+	        result.put("redisCacheStatus", e.getMessage());
         }
 	    
 	    // 检查数据库查询是否正常
 	    try {
 	        namespaceResourceProvider.checkDbStatus();
             result.put("dbStatus", "OK");
+            flag = flag | 0x08;
 	    }  catch (Exception e) {
             LOGGER.error("Db invalid state", e);
             result.put("dbStatus", e.getMessage());
         }
+	    
+	    if(flag == 0x0f) {
+	        result.put("coreStatus", "OK");
+	    } else {
+	        result.put("coreStatus", String.valueOf(flag));
+	    }
 	    
 	    return StringHelper.toJsonString(result);
 	}
