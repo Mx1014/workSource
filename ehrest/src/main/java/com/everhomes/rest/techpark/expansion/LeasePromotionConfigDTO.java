@@ -26,11 +26,20 @@ public class LeasePromotionConfigDTO {
     private Byte areaSearchFlag;
     private Byte consultFlag;
     private String rentAmountUnit;
+    private Byte buildingIntroduceFlag;
 
     @ItemType(String.class)
     private List<String> displayNames;
     @ItemType(Integer.class)
     private List<Integer> displayOrders;
+
+    public Byte getBuildingIntroduceFlag() {
+        return buildingIntroduceFlag;
+    }
+
+    public void setBuildingIntroduceFlag(Byte buildingIntroduceFlag) {
+        this.buildingIntroduceFlag = buildingIntroduceFlag;
+    }
 
     public String getRentAmountUnit() {
         return rentAmountUnit;

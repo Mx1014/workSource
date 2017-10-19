@@ -10,6 +10,7 @@ import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
 import com.everhomes.rest.techpark.expansion.LeaseIssuerStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhLeaseConfigsDao;
 import com.everhomes.server.schema.tables.daos.EhLeaseIssuerAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhLeaseIssuersDao;
 import com.everhomes.server.schema.tables.pojos.EhLeaseConfigs;
@@ -146,6 +147,15 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 
 		return 	ConvertHelper.convert(query.fetchAny(), LeaseIssuer.class);
 
+	}
+
+	@Override
+	public void updateLeasePromotionConfig(LeasePromotionConfig config) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseConfigs.class));
+
+		EhLeaseConfigsDao dao = new EhLeaseConfigsDao(context.configuration());
+
+		dao.update(config);
 	}
 
 	@Override

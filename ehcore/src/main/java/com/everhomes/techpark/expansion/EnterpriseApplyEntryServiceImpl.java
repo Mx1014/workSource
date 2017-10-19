@@ -1340,6 +1340,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			dto.setDisplayOrders(Arrays.stream(orders).map(Integer::valueOf).collect(Collectors.toList()));
 
 			dto.setConsultFlag((byte)1);
+			dto.setBuildingIntroduceFlag(config.getParkIndroduceFlag());
 			return dto;
 		}
 
@@ -1364,6 +1365,18 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         return dto;
 
     }
+
+	@Override
+	public void setLeasePromotionConfig(SetLeasePromotionConfigCommand cmd) {
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		LeasePromotionConfig config = enterpriseLeaseIssuerProvider.getLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
+		config.setParkIndroduceFlag(cmd.getBuildingIntroduceFlag());
+
+		enterpriseLeaseIssuerProvider.updateLeasePromotionConfig(config);
+	}
 
     @Override
     public CheckIsLeaseIssuerDTO checkIsLeaseIssuer(CheckIsLeaseIssuerCommand cmd) {
