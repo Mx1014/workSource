@@ -2118,123 +2118,162 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public CountCommunityUserResponse countCommunityUsers(
 			CountCommunityUsersCommand cmd) {
-		
-		/**
-		 * 园区用户统计
-		 */
+
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		int communityUserCount  = 0;
 
-		if(cmd.getCommunityId() != null) {
-			Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-			
-			/**
-			 * 小区用户统计
-			 */
-			if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL){
-				List<Group> groups = groupProvider.listGroupByCommunityId(community.getId(), (loc, query) -> {
-		            Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
-		            query.addConditions(c);
-		            return query;
-		        });
-				
-				List<Long> groupIds = new ArrayList<Long>(); 
-				for (Group group : groups) {
-					groupIds.add(group.getId());
-				}
-				
-				CrossShardListingLocator locator = new CrossShardListingLocator();
-				List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,null,(loc, query) -> {
-					Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
-					c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.notIn(GroupMemberStatus.INACTIVE.getCode(), GroupMemberStatus.REJECT.getCode()));
-		            query.addConditions(c);
-		            query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
-		            return query;
-		        });
-
-				//全部用户、已认证用户(只要有一个已认证) add by yanjun 20171018
-				Set<Long> memberIds = new HashSet<>();
-				Set<Long> authMemberIds = new HashSet<>();
-				for(GroupMember m: groupMembers){
-					memberIds.add(m.getMemberId());
-					if(GroupMemberStatus.fromCode(m.getMemberStatus()) == GroupMemberStatus.ACTIVE){
-						authMemberIds.add(m.getMemberId());
-					}
-				}
-				//int allCount = memberIds.size();
-				int authCount = authMemberIds.size();
-				int authingCount = memberIds.size() - authMemberIds.size();
-
-				//未认证用户 userprofile表中的用户-已认证或者认证中的用户
-				List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode());
-
-				int notAuthCount = authMemberIds.size();
-				int allCount = notAuthCount + authCount + authingCount;
-
-				Set<Long> wxMemberIds = new HashSet<>();
-				for(User u: users){
-					if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
-						wxMemberIds.add(u.getId());
-					}
-				}
-
-				int wxCount = wxMemberIds.size();
-
-
-				CountCommunityUserResponse resp = new CountCommunityUserResponse();
-				resp.setCommunityUsers(allCount);
-				resp.setAuthUsers(authCount);
-				resp.setAuthingUsers(authingCount);
-				resp.setNotAuthUsers(notAuthCount);
-				resp.setWxUserCount(wxCount);
-				resp.setAppUserCount(allCount - wxCount);
-				
-				return resp;
-			}
-		}
-
-
-		int authUserCount = 0;
-		if(namespaceId == Namespace.DEFAULT_NAMESPACE){
+		if(namespaceId == Namespace.DEFAULT_NAMESPACE || cmd.getCommunityId() == null){
 			if(null == cmd.getOrganizationId() && null == cmd.getCommunityId()){
 				LOGGER.error("organizationId and communityId All are empty");
 				throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"organizationId and communityId All are empty");
 			}
 			communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
-
-		}else{
-			// 如果是其他域的情况，则获取域下面所有的公司
-			if(null == cmd.getCommunityId())
-				communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
-			else
-				communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId());
-
-			if(CommunityUserStatisticsType.fromCode(cmd.getStatisticsType()) == CommunityUserStatisticsType.AUTHENTICATION){
-				authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
-			}else{
-				if(null == cmd.getCommunityId())
-					authUserCount = userProvider.countUserByNamespaceIdAndNamespaceUserType(namespaceId, NamespaceUserType.WX.getCode());
-				else
-					authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null, NamespaceUserType.WX.getCode());
-
-			}
-
+			CountCommunityUserResponse resp = new CountCommunityUserResponse();
+			resp.setCommunityUsers(communityUserCount);
+			return resp;
 		}
 
-		//总注册用户-认证用户 = 非认证用户
-		int notAuthUsers = communityUserCount - authUserCount;
-		
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+		/**
+		 * 小区用户统计
+		 */
+		if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL){
+			return countCommunityUsersForResidential(cmd);
+		}else {
+			return  countCommunityUsersForCommercial(cmd);
+		}
+	}
+
+	private CountCommunityUserResponse countCommunityUsersForResidential(
+			CountCommunityUsersCommand cmd) {
+		List<Group> groups = groupProvider.listGroupByCommunityId(cmd.getCommunityId(), (loc, query) -> {
+			Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
+			query.addConditions(c);
+			return query;
+		});
+
+		List<Long> groupIds = new ArrayList<Long>();
+		for (Group group : groups) {
+			groupIds.add(group.getId());
+		}
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,null,(loc, query) -> {
+			Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+			c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.notIn(GroupMemberStatus.INACTIVE.getCode(), GroupMemberStatus.REJECT.getCode()));
+			query.addConditions(c);
+			query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
+			return query;
+		});
+
+		//全部用户、已认证用户(只要有一个已认证) add by yanjun 20171018
+		Set<Long> memberIds = new HashSet<>();
+		Set<Long> authMemberIds = new HashSet<>();
+		for(GroupMember m: groupMembers){
+			memberIds.add(m.getMemberId());
+			if(GroupMemberStatus.fromCode(m.getMemberStatus()) == GroupMemberStatus.ACTIVE){
+				authMemberIds.add(m.getMemberId());
+			}
+		}
+
+		//已认证
+		int authCount = authMemberIds.size();
+		//认证中 = 已认证、认证中 - 已认证
+		int authingCount = memberIds.size() - authCount;
+
+		//未认证用户 userprofile表中的用户-已认证或者认证中的用户
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode());
+		//未认证
+		int notAuthCount = authMemberIds.size();
+
+		//全部 = 认证 + 认证中 + 未认证
+		int allCount = authCount + authingCount + notAuthCount;
+
+		//未认证中绑定微信的
+		Set<Long> wxMemberIds = new HashSet<>();
+		if(users != null){
+			for(User u: users){
+				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
+					wxMemberIds.add(u.getId());
+				}
+			}
+		}
+
+		//已认证或认证中绑定微信的
+		List<Long> userIds = new ArrayList<>(memberIds);
+		List<User> memberUsers = userProvider.listUserByIds(cmd.getNamespaceId(), userIds);
+		if(memberUsers != null){
+			for(User u: memberUsers){
+				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
+					wxMemberIds.add(u.getId());
+				}
+			}
+		}
+
+		//绑定微信
+		int wxCount = wxMemberIds.size();
+
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
-		resp.setCommunityUsers(communityUserCount);
-		resp.setWxUserCount(authUserCount);
-		resp.setAppUserCount(notAuthUsers);
-		resp.setAuthUsers(authUserCount);
-		resp.setNotAuthUsers(notAuthUsers);
+		resp.setCommunityUsers(allCount);
+		resp.setAuthUsers(authCount);
+		resp.setAuthingUsers(authingCount);
+		resp.setNotAuthUsers(notAuthCount);
+		resp.setWxUserCount(wxCount);
+		resp.setAppUserCount(allCount - wxCount);
 
 		return resp;
 	}
-	
+
+	private CountCommunityUserResponse countCommunityUsersForCommercial(
+			CountCommunityUsersCommand cmd) {
+
+		//已认证、认证中
+		int communityUserCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId());
+
+		//已认证
+		int authCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
+
+		//已认证、认证中的微信微信用户
+		int wxAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.WX.getCode());
+
+		//未认证用户 userprofile表中的用户-已认证或者认证中的用户
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode());
+		if(users == null){
+			users = new ArrayList<>();
+		}
+		int notAuthCount = users.size();
+
+		//认证中 = 已认证、认证中 - 已认证
+		int authingCount = communityUserCount - authCount;
+
+		//总用户 =  已认证 + 认证中 + 未认证
+		int allCount = authCount + authingCount + notAuthCount;
+
+		//未认证中绑定微信的
+		Set<Long> wxMemberIds = new HashSet<>();
+		if(users != null){
+			for(User u: users){
+				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
+					wxMemberIds.add(u.getId());
+				}
+			}
+		}
+
+		//微信用户 = 已认证、认证中的微信微信用户 + 未认证中绑定微信的
+		int wxCount =  wxAuthCount + wxMemberIds.size();
+
+		CountCommunityUserResponse resp = new CountCommunityUserResponse();
+		resp.setCommunityUsers(allCount);
+		resp.setAuthUsers(authCount);
+		resp.setAuthingUsers(authingCount);
+		resp.setNotAuthUsers(notAuthCount);
+		resp.setWxUserCount(wxCount);
+		resp.setAppUserCount(allCount - wxCount);
+
+		return resp;
+	}
+
 	@Override
 	public CommunityUserAddressResponse listUserByNotJoinedCommunity(
 			ListCommunityUsersCommand cmd) {

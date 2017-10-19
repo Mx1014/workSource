@@ -7,7 +7,6 @@ import com.everhomes.util.StringHelper;
  *     <li>namespaceId: namespaceId</li>
  *     <li>communityId: communityId</li>
  *     <li>organizationId: organizationId</li>
- *     <li>statisticsType: statisticsType</li>
  * </ul>
  */
 public class CountCommunityUsersCommand {
@@ -17,8 +16,6 @@ public class CountCommunityUsersCommand {
 	private Long communityId;
 
 	private Long organizationId;
-
-	private Byte statisticsType;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -46,13 +43,6 @@ public class CountCommunityUsersCommand {
 		this.organizationId = organizationId;
 	}
 
-	public Byte getStatisticsType() {
-		return statisticsType;
-	}
-
-	public void setStatisticsType(Byte statisticsType) {
-		this.statisticsType = statisticsType;
-	}
 
 	@Override
 	public String toString() {
