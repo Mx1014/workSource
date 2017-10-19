@@ -164,7 +164,7 @@ public interface AssetProvider {
 
     void changeBillStatusOnPaiedOff(List<Long> billIds);
 
-    void configChargingItems(List<Long> chargingItemsIds, Long communityId, Integer namespaceId);
+    void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, Integer namespaceId);
 
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 

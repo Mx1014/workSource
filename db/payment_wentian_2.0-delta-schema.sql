@@ -28,3 +28,12 @@ ALTER TABLE `eh_payment_charging_standards` ADD COLUMN `suggest_unit_price` DECI
 ALTER TABLE `eh_payment_bill_groups_rules` ADD COLUMN `bill_item_month_offset` INTEGER DEFAULT NULL COMMENT '收费项产生时间偏离当前月的月数';
 ALTER TABLE `eh_payment_bill_groups_rules` ADD COLUMN `bill_item_day_offset` INTEGER DEFAULT NULL COMMENT '收费项产生时间偏离当前月的日数';
 ALTER TABLE `eh_payment_charging_standards` ADD COLUMN `area_size_type` INTEGER DEFAULT 1 COMMENT '计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积';
+ALTER TABLE `eh_payment_bill_groups` MODIFY COLUMN `name` VARCHAR(50) DEFAULT NULL COMMENT '账单组名称';
+
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `due_day_deadline` varchar(30) DEFAULT NULL COMMENT '最后付款日期';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `date_str_begin` varchar(30) DEFAULT NULL COMMENT '计费开始日期';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `date_str_end` varchar(30) DEFAULT NULL COMMENT '计费结束日期';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `date_str_due` varchar(30) DEFAULT NULL COMMENT '出账单日期';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `due_day_deadline` varchar(30) DEFAULT NULL COMMENT '最后付款日期';
+
+ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `projectLevelName` VARCHAR(30) DEFAULT NULL COMMENT '园区自定义的收费项目名字';

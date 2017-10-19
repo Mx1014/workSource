@@ -12,14 +12,14 @@ import java.util.List;
  *<ul>
  * <li>namespaceId:域空间id</li>
  * <li>communityId:项目/园区id</li>
- * <li>chargingItemsIds:收费项目id集合</li>
+ * <li>chargingItemConfigs:收费id和新名字的集合</li>
  *</ul>
  */
 public class ConfigChargingItemsCommand {
     private Integer namespaceId;
     private Long communityId;
-    @ItemType(Long.class)
-    private List<Long> chargingItemsIds;
+    @ItemType(ConfigChargingItems.class)
+    private List<ConfigChargingItems> chargingItemConfigs;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -37,11 +37,11 @@ public class ConfigChargingItemsCommand {
         this.communityId = communityId;
     }
 
-    public List<Long> getChargingItemsIds() {
-        return chargingItemsIds;
+    public List<ConfigChargingItems> getChargingItemConfigs() {
+        return chargingItemConfigs;
     }
 
-    public void setChargingItemsIds(List<Long> chargingItemsIds) {
-        this.chargingItemsIds = chargingItemsIds;
+    public void setChargingItemConfigs(List<ConfigChargingItems> chargingItemConfigs) {
+        this.chargingItemConfigs = chargingItemConfigs;
     }
 }

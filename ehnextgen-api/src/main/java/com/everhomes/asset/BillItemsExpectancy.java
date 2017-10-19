@@ -16,6 +16,8 @@ public class BillItemsExpectancy {
     private Byte status;
     private Long billGroupId;
     private String billDateStr;
+    private String billDateDue;
+    private String billDateDeadline;
 
     public BigDecimal getAmountReceivable() {
         return amountReceivable;
@@ -71,5 +73,21 @@ public class BillItemsExpectancy {
 
     public void setDateStrEnd(Date dateStrEnd) {
         this.dateStrEnd = dateStrEnd;
+    }
+
+    public String getBillDateDue() {
+        return billDateDue;
+    }
+
+    public void setBillDateDue(String billDateDue) {
+        this.billDateDue = billDateDue;
+    }
+
+    public String getBillDateDeadline() {
+        return billDateDeadline;
+    }
+
+    public void setBillDateDeadline(String billDateDeadline) {
+        this.billDateDeadline = billDateDeadline;
     }
 }

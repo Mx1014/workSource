@@ -2002,13 +2002,14 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void configChargingItems(List<Long> chargingItemsIds, Long communityId, Integer namespaceId) {
+    public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, Integer namespaceId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
         EhPaymentChargingItemScopesDao dao = new EhPaymentChargingItemScopesDao(context.configuration());
         List<com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes> list = new ArrayList<>();
-        for(int i = 0; i < chargingItemsIds.size(); i ++) {
-            Long chargingItemId = chargingItemsIds.get(i);
+        for(int i = 0; i < configChargingItems.size(); i ++) {
+            ConfigChargingItems vo = configChargingItems.get(i);
+            Long chargingItemId = vo.getChargingItemId();
             PaymentChargingItemScope scope = new PaymentChargingItemScope();
             scope.setChargingItemId(chargingItemId);
             long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes.class));
