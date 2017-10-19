@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * <ul>
- * <li>DEFAULT("DEFAULT"): 默认字段组(不可删除与修改名称) {@link com.everhomes.rest.general_approval.GeneralFormFieldAttributeType}</li>
+ * <li>DEFAULT("DEFAULT"): 默认字段组 </li>
  * <li>CUSTOMIZE("CUSTOMIZE"): 自定义</li>
  * </ul>
  */
