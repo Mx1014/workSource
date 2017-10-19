@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
  *     <li>authingUsers: authingUsers</li>
  *     <li>wxUserCount: wxUserCount</li>
  *     <li>appUserCount: appUserCount</li>
+ *     <li>maleCount: maleCount</li>
+ *     <li>femaleCount: femaleCount</li>
  * </ul>
  */
 public class CountCommunityUserResponse {
@@ -25,6 +27,10 @@ public class CountCommunityUserResponse {
 	private Integer wxUserCount;
 
 	private Integer appUserCount;
+
+	private Integer maleCount;
+
+	private Integer femaleCount;
 
 	public Integer getCommunityUsers() {
 		return communityUsers;
@@ -72,6 +78,22 @@ public class CountCommunityUserResponse {
 
 	public void setAuthingUsers(Integer authingUsers) {
 		this.authingUsers = authingUsers;
+	}
+
+	public Integer getMaleCount() {
+		return maleCount;
+	}
+
+	public void setMaleCount(Integer maleCount) {
+		this.maleCount = maleCount;
+	}
+
+	public Integer getFemaleCount() {
+		return femaleCount;
+	}
+
+	public void setFemaleCount(Integer femaleCount) {
+		this.femaleCount = femaleCount;
 	}
 
 	@Override

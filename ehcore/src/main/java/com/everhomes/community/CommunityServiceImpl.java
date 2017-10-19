@@ -2120,27 +2120,37 @@ public class CommunityServiceImpl implements CommunityService {
 			CountCommunityUsersCommand cmd) {
 
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		int communityUserCount  = 0;
+		if(namespaceId == Namespace.DEFAULT_NAMESPACE){
+            LOGGER.error("Invalid parameter namespaceId={}", namespaceId);
+            throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter namespaceId=" + namespaceId );
+        }
 
-		if(namespaceId == Namespace.DEFAULT_NAMESPACE || cmd.getCommunityId() == null){
-			if(null == cmd.getOrganizationId() && null == cmd.getCommunityId()){
-				LOGGER.error("organizationId and communityId All are empty");
-				throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"organizationId and communityId All are empty");
-			}
-			communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
-			CountCommunityUserResponse resp = new CountCommunityUserResponse();
-			resp.setCommunityUsers(communityUserCount);
-			return resp;
-		}
+        if(cmd.getCommunityId() == null){
+            int allCount = userProvider.countUserByNamespaceId(namespaceId, null);
+            int wxCount = userProvider.countUserByNamespaceIdAndNamespaceUserType(namespaceId, NamespaceUserType.WX.getCode());
+            int maleCount = userProvider.countUserByNamespaceIdAndGender(namespaceId, UserGender.MALE.getCode());
+            int femaleCount = userProvider.countUserByNamespaceIdAndGender(namespaceId, UserGender.FEMALE.getCode());
+
+            CountCommunityUserResponse resp = new CountCommunityUserResponse();
+            resp.setCommunityUsers(allCount);
+            resp.setAuthUsers(0);
+            resp.setAuthingUsers(0);
+            resp.setNotAuthUsers(0);
+            resp.setWxUserCount(wxCount);
+            resp.setAppUserCount(allCount - wxCount);
+            resp.setMaleCount(maleCount);
+            resp.setFemaleCount(femaleCount);
+
+            return resp;
+        }
 
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		/**
-		 * 小区用户统计
-		 */
 		if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL){
+		    //小区用户统计
 			return countCommunityUsersForResidential(cmd);
 		}else {
+            //园区用户统计
 			return  countCommunityUsersForCommercial(cmd);
 		}
 	}
@@ -2190,29 +2200,39 @@ public class CommunityServiceImpl implements CommunityService {
 		//全部 = 认证 + 认证中 + 未认证
 		int allCount = authCount + authingCount + notAuthCount;
 
-		//未认证中绑定微信的
-		Set<Long> wxMemberIds = new HashSet<>();
-		if(users != null){
-			for(User u: users){
-				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
-					wxMemberIds.add(u.getId());
-				}
-			}
-		}
+        //绑定微信的、男性、女性
+        Set<Long> wxMemberIds = new HashSet<>();
+        Set<Long> maleMemberIds = new HashSet<>();
+        Set<Long> femaleMemberIds = new HashSet<>();
 
-		//已认证或认证中绑定微信的
-		List<Long> userIds = new ArrayList<>(memberIds);
-		List<User> memberUsers = userProvider.listUserByIds(cmd.getNamespaceId(), userIds);
-		if(memberUsers != null){
-			for(User u: memberUsers){
-				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
-					wxMemberIds.add(u.getId());
-				}
-			}
-		}
+        List<User> allUsers = new ArrayList<>();
+		allUsers.addAll(users);
+
+        //已认证或认证中
+        List<Long> userIds = new ArrayList<>(memberIds);
+        List<User> memberUsers = userProvider.listUserByIds(cmd.getNamespaceId(), userIds);
+		allUsers.addAll(memberUsers);
+
+        for(User u: allUsers){
+            if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
+                wxMemberIds.add(u.getId());
+            }
+
+            if(UserGender.fromCode(u.getGender()) == UserGender.MALE){
+                maleMemberIds.add(u.getId());
+            }
+
+            if(UserGender.fromCode(u.getGender()) == UserGender.FEMALE){
+                femaleMemberIds.add(u.getId());
+            }
+        }
 
 		//绑定微信
 		int wxCount = wxMemberIds.size();
+        //男性用户
+        int maleCount = maleMemberIds.size();
+        //女性用户
+        int femaleCount = femaleMemberIds.size();
 
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
 		resp.setCommunityUsers(allCount);
@@ -2221,6 +2241,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setNotAuthUsers(notAuthCount);
 		resp.setWxUserCount(wxCount);
 		resp.setAppUserCount(allCount - wxCount);
+		resp.setMaleCount(maleCount);
+		resp.setFemaleCount(femaleCount);
 
 		return resp;
 	}
@@ -2235,7 +2257,7 @@ public class CommunityServiceImpl implements CommunityService {
 		int authCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
 
 		//已认证、认证中的微信微信用户
-		int wxAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.WX.getCode());
+		int wxAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.WX.getCode(), null);
 
 		//未认证用户 userprofile表中的用户-已认证或者认证中的用户
 		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode());
@@ -2250,18 +2272,35 @@ public class CommunityServiceImpl implements CommunityService {
 		//总用户 =  已认证 + 认证中 + 未认证
 		int allCount = authCount + authingCount + notAuthCount;
 
-		//未认证中绑定微信的
-		Set<Long> wxMemberIds = new HashSet<>();
-		if(users != null){
+        //未认证中绑定微信的、男性、女性
+        Set<Long> wxMemberIds = new HashSet<>();
+        Set<Long> maleMemberIds = new HashSet<>();
+        Set<Long> femaleMemberIds = new HashSet<>();
+
+        if(users != null){
 			for(User u: users){
 				if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
 					wxMemberIds.add(u.getId());
 				}
+                if(UserGender.fromCode(u.getGender()) == UserGender.FEMALE){
+                    femaleMemberIds.add(u.getId());
+                }
+                if(UserGender.fromCode(u.getGender()) == UserGender.MALE){
+                    maleMemberIds.add(u.getId());
+                }
 			}
 		}
 
 		//微信用户 = 已认证、认证中的微信微信用户 + 未认证中绑定微信的
 		int wxCount =  wxAuthCount + wxMemberIds.size();
+
+        //男性用户
+        //已认证、认证中
+        int maleAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, null, UserGender.MALE.getCode());
+        int maleCount = maleMemberIds.size() + maleAuthCount;
+        //女性用户
+        int femaleAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, null, UserGender.FEMALE.getCode());
+        int femaleCount = femaleMemberIds.size() + femaleAuthCount;
 
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
 		resp.setCommunityUsers(allCount);
@@ -2270,6 +2309,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setNotAuthUsers(notAuthCount);
 		resp.setWxUserCount(wxCount);
 		resp.setAppUserCount(allCount - wxCount);
+		resp.setMaleCount(maleCount);
+		resp.setFemaleCount(femaleCount);
 
 		return resp;
 	}

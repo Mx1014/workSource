@@ -444,7 +444,7 @@ public interface OrganizationProvider {
 	Map<Long, String> listOrganizationsOfDetail(Integer namespaceId, Long detailId, String organizationGroupType);
 	List<OrganizationMember> listOrganizationMembersByDetailId(Long detailId,List<String> groupTypes);
 	
-	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType);
+	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus, String namespaceUserType, Byte gender);
 	Integer countUserOrganization(Integer namespaceId, Long communityId, Byte userOrganizationStatus);
 	Integer countUserOrganization(Integer namespaceId, Long communityId);
 

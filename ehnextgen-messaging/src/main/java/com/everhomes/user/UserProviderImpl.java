@@ -1275,8 +1275,23 @@ public class UserProviderImpl implements UserProvider {
         return count[0];
     }
 
+    @Override
+    public int countUserByNamespaceIdAndGender(Integer namespaceId, Byte gender){
+        final Integer[] count = new Integer[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_USERS)
+                            .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+                            .and(Tables.EH_USERS.GENDER.eq(gender))
+                            .fetchOneInto(Integer.class);
+                    return true;
+                });
 
-	@Override
+        return count[0];
+    }
+
+
+    @Override
 	public int countUserByNamespaceId(Integer namespaceId, Boolean isAuth) {
 		
 		final Integer[] count = new Integer[1];
