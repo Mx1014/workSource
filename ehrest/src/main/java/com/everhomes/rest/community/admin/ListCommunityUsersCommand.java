@@ -13,6 +13,8 @@ package com.everhomes.rest.community.admin;
  *     <li>communityId: 小区id</li>
  *     <li>organizationId: organizationId</li>
  *     <li>userSourceType: 用户来源 1：来源app 2：来源微信</li>
+ *     <li>startTime: 注册时间-开始</li>
+ *     <li>endTime: 注册时间-结束</li>
  * </ul>
  */
 public class ListCommunityUsersCommand {
@@ -36,6 +38,10 @@ public class ListCommunityUsersCommand {
 	private Long organizationId;
 
 	private Byte userSourceType;
+
+	private Long startTime;
+
+	private Long endTime;
 
 	public Byte getGender() {
 		return gender;
@@ -119,5 +125,21 @@ public class ListCommunityUsersCommand {
 
 	public void setUserSourceType(Byte userSourceType) {
 		this.userSourceType = userSourceType;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
 	}
 }

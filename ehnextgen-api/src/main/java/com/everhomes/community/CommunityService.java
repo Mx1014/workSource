@@ -67,8 +67,10 @@ public interface CommunityService {
 	CountCommunityUserResponse countCommunityUsers(CountCommunityUsersCommand cmd);
 	
 	CommunityUserAddressDTO qryCommunityUserAddressByUserId(QryCommunityUserAddressByUserIdCommand cmd);
-	
-	CommunityUserAddressResponse listUserBycommunityId(ListCommunityUsersCommand cmd);
+
+    CommunityUserAddressResponse listUserBycommunityIdV2(ListCommunityUsersCommand cmd);
+
+    CommunityUserAddressResponse listUserBycommunityId(ListCommunityUsersCommand cmd);
 	
 	CommunityUserAddressDTO qryCommunityUserEnterpriseByUserId(QryCommunityUserAddressByUserIdCommand cmd);
 	

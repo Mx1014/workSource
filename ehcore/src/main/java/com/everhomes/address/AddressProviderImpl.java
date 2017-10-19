@@ -15,12 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import com.everhomes.asset.AddressIdAndName;
 
 import com.everhomes.rest.address.*;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record2;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -140,6 +135,31 @@ public class AddressProviderImpl implements AddressProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddresses.class, id));
         EhAddressesDao dao = new EhAddressesDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), Address.class);
+    }
+
+
+    @Override
+    public Address findGroupAddress(Long groupId) {
+        final Address[] result = new Address[1];
+
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null,
+                (DSLContext context, Object reducingContext) -> {
+
+                    List<Address> list = context.select().from(Tables.EH_ADDRESSES)
+                            .join(Tables.EH_GROUPS).on(Tables.EH_ADDRESSES.ID.eq(Tables.EH_GROUPS.INTEGRAL_TAG1))
+                            .where(Tables.EH_GROUPS.ID.eq(groupId))
+                            .fetch().map((r) -> {
+                                return ConvertHelper.convert(r, Address.class);
+                            });
+                    if(list != null && !list.isEmpty()){
+                        result[0] = list.get(0);
+                        return false;
+                    }
+
+                    return true;
+                });
+
+        return result[0];
     }
     
     @Cacheable(value="Apartment", key="{#communityId, #buildingName, #apartmentName}" ,unless="#result==null")
