@@ -261,7 +261,7 @@ public class CustomerServiceImpl implements CustomerService {
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
         checkPrivilege();
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
-        customer.setNamespaceId(UserContext.getCurrentNamespaceId());
+        customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
         if(cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }

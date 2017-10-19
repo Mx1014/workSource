@@ -69,6 +69,7 @@ import java.math.BigDecimal;
  *     <li>longitude: 经度</li>
  *     <li>latitude: 纬度</li>
  *     <li>contactDuty:联系人职务</li>
+ *     <li>namespaceId:域空间ID</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -139,6 +140,8 @@ public class CreateEnterpriseCustomerCommand {
     private Double longitude;
     private Double latitude;
     private String contactDuty;
+    
+    private Integer namespaceId;
 
     public Long getCommunityId() {
         return communityId;
@@ -661,6 +664,14 @@ public class CreateEnterpriseCustomerCommand {
 
 	public void setContactDuty(String contactDuty) {
 		this.contactDuty = contactDuty;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 	
     
