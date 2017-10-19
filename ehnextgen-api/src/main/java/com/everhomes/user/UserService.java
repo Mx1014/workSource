@@ -270,4 +270,9 @@ public interface UserService {
     SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community);
 
     List<SceneDTO> listAllCommunityScenes();
+    
+    /**
+     * 用于测试服务器状态，不要用于业务使用 by lqs 20171019
+     */
+    String checkServerStatus();
 }

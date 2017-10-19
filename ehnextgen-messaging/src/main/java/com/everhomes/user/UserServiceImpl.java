@@ -5226,5 +5226,53 @@ public class UserServiceImpl implements UserService {
 			response.setIsAdmin(ContactAdminFlag.NO.getCode());
 		return response;
 	}
+	
+	/**
+	 * 用于测试服务器状态，不要用于业务使用 by lqs 20171019
+	 */
+	@Override
+	public String checkServerStatus() {
+	    Map<String, String> result = new HashMap<String, String>();
+	    
+	    // 检查是否可以申请内存创建对象
+	    Object obj = new Object();
+	    result.put("objectCreated", "OK");
+
+	    // 检查redis storage 连接是否正常（可读可写）
+	    try {
+            String key = "check.server.status";
+            String heartbeat = "server.heartbeat.check";
+    	    RedisTemplate template = bigCollectionProvider.getMapAccessor(key, "").getTemplate(new StringRedisSerializer());
+            ValueOperations op = template.opsForValue();
+            Object times = op.get(heartbeat);
+            op.set(heartbeat, String.valueOf(System.currentTimeMillis()));
+
+            result.put("redisStorageStatus", "OK");
+	    } catch (Exception e) {
+	        LOGGER.error("Redis storage invalid state", e);
+	        result.put("redisStorageStatus", e.getMessage());
+        }
+        
+	    // 检查redis cache是否可以正常evict缓存和缓存内容
+	    try {
+            userProvider.updateCacheStatus();
+            userProvider.checkCacheStatus();
+            result.put("redisStorageStatus", "OK");
+	    } catch (Exception e) {
+	        LOGGER.error("Redis cache invalid state", e);
+	        result.put("redisStorageStatus", e.getMessage());
+        }
+	    
+	    // 检查数据库查询是否正常
+	    try {
+	        namespaceResourceProvider.checkDbStatus();
+            result.put("dbStatus", "OK");
+	    }  catch (Exception e) {
+            LOGGER.error("Db invalid state", e);
+            result.put("dbStatus", e.getMessage());
+        }
+	    
+	    return StringHelper.toJsonString(result);
+	}
 
 }
