@@ -207,6 +207,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		//表单信息
 		populateFormInfo(dto);
 
+		Community community = communityProvider.findCommunityById(leaseBuilding.getCommunityId());
+		dto.setCommunityName(community.getName());
 		if (null != leaseBuilding.getBuildingId()) {
 			Building building = communityProvider.findBuildingById(leaseBuilding.getBuildingId());
 			if (null != building) {
@@ -371,7 +373,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		LeaseProjectExtraInfo extraInfo = JSONObject.parseObject(json, LeaseProjectExtraInfo.class);
 		BeanUtils.copyProperties(extraInfo, dto);
 
-		List<Long> communityIds = enterpriseApplyBuildingProvider.listLeaseProjectCommunities(leaseProject.getProjectId());
+		List<Long> communityIds = enterpriseApplyBuildingProvider.listLeaseProjectCommunities(leaseProject.getId());
 		dto.setCommunityIds(communityIds);
 
 		Long userId = UserContext.currentUserId();
@@ -430,7 +432,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 				enterpriseApplyEntryProvider.deleteLeasePromotionAttachment(EntityType.LEASE_PROJECT.getCode(), leaseProjects[0].getId());
 				addAttachments(cmd.getAttachments(), leaseProjects[0]);
 
-				enterpriseApplyBuildingProvider.deleteLeasePromotionCommunity(leaseProjects[0].getId());
+				enterpriseApplyBuildingProvider.deleteLeaseProjectCommunity(leaseProjects[0].getId());
 				addLeaseProjectCommunities(cmd.getCommunityIds(), leaseProjects[0]);
 
 				return null;

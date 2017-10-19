@@ -6,6 +6,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
+import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
@@ -86,6 +87,8 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     private EnterpriseApplyBuildingProvider enterpriseApplyBuildingProvider;
     @Autowired
     private EnterpriseOpRequestBuildingProvider enterpriseOpRequestBuildingProvider;
+    @Autowired
+    private CommunityProvider communityProvider;
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
 
@@ -201,7 +204,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
         return new ArrayList<>();
     }
 
-    private Object defaultIfNull(Object obj, Object defaultValue) {
+    private String defaultIfNull(String obj, String defaultValue) {
         return obj != null ? obj : defaultValue;
     }
 
@@ -235,12 +238,16 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             }
 
 		}else if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
+
+            Community community = communityProvider.findCommunityById(applyEntry.getCommunityId());
 			//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
             LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(applyEntry.getSourceId());
 			if(null != leaseBuilding){
-                buildingName = leaseBuilding.getName();
+                buildingName = community.getName() + leaseBuilding.getName();
             }
 		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType())){
+
+            Community community = communityProvider.findCommunityById(applyEntry.getCommunityId());
 
             LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
 
@@ -255,10 +262,13 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             }
 
             Address address = addressProvider.findAddressById(applyEntry.getAddressId());
-
+            String apartmentName = defaultIfNull(leasePromotion.getApartmentName(), "");
             if (null != address) {
-                buildingName = address.getBuildingName() + " " + address.getApartmentName();
+                apartmentName = address.getApartmentName();
             }
+
+            buildingName = community.getName() + buildingName + apartmentName;
+
 		}else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(applyEntry.getSourceType())){
 			//创客入驻处的申请，申请来源=“创客申请” 创客入驻处的申请，楼栋=创客空间所在的楼栋
 			YellowPage yellowPage = yellowPageProvider.getYellowPageById(applyEntry.getSourceId());

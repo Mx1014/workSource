@@ -61,6 +61,7 @@ public class ProjectApplyEntryFormHandler implements GeneralFormModuleHandler {
         String contactPhone = null;
         String enterpriseName = null;
         String description = null;
+        String communityId = null;
 
         for (PostApprovalFormItem item: values) {
             GeneralFormDataSourceType dataSourceType = GeneralFormDataSourceType.fromCode(item.getFieldName());
@@ -92,6 +93,9 @@ public class ProjectApplyEntryFormHandler implements GeneralFormModuleHandler {
                         break;
                     case LEASE_PROMOTION_DESCRIPTION:
                         description = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
+                        break;
+                    case LEASE_PROJECT_NAME:
+                        communityId = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
                         break;
                 }
             }

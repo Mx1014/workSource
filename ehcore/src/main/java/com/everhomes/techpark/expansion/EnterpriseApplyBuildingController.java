@@ -81,7 +81,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	@RestReturn(value=LeaseProjectDTO.class)
 	@RequireAuthentication(false)
 	public RestResponse getLeaseProjectById(GetLeaseProjectByIdCommand cmd){
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(enterpriseApplyBuildingService.getLeaseProjectById(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -103,7 +103,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 
 	/**
 	 * <b>URL: /techpark/entry/listLeaseBuildings
-	 * <p>项目介绍列表
+	 * <p>楼栋介绍列表
 	 */
 	@RequestMapping("listLeaseBuildings")
 	@RestReturn(value=ListLeaseBuildingsResponse.class)
@@ -117,7 +117,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/createLeaseBuilding
-	 * <p>创建项目介绍
+	 * <p>创建楼栋介绍
 	 */
 	@RequestMapping("createLeaseBuilding")
 	@RestReturn(value=LeaseBuildingDTO.class)
@@ -131,7 +131,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/updateLeaseBuilding
-	 * <p>修改项目介绍
+	 * <p>修改楼栋介绍
 	 */
 	@RequestMapping("updateLeaseBuilding")
 	@RestReturn(value=LeaseBuildingDTO.class)
@@ -144,7 +144,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/getLeaseBuildingById
-	 * <p>根据id查询项目介绍
+	 * <p>根据id查询楼栋介绍
 	 */
 	@RequestMapping("getLeaseBuildingById")
 	@RestReturn(value=LeaseBuildingDTO.class)
@@ -158,7 +158,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 
 	/**
 	 * <b>URL: /techpark/entry/deleteLeaseBuilding
-	 * <p>删除项目介绍
+	 * <p>删除楼栋介绍
 	 */
 	@RequestMapping("deleteLeaseBuilding")
 	@RestReturn(value=String.class)
@@ -173,7 +173,7 @@ public class EnterpriseApplyBuildingController extends ControllerBase{
 
 	/**
 	 * <b>URL: /techpark/entry/updateLeaseBuildingOrder
-	 * <p>修改项目介绍排序
+	 * <p>修改楼栋介绍排序
 	 */
 	@RequestMapping("updateLeaseBuildingOrder")
 	@RestReturn(value=String.class)
