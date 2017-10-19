@@ -1181,12 +1181,11 @@ public class AssetProviderImpl implements AssetProvider {
         List<PaymentChargingItem> items = context.selectFrom(t)
                 .fetchInto(PaymentChargingItem.class);
 
-        SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t1.CHARGING_ITEM_ID,t1.PROJECT_LEVEL_NAME);
-        query.addFrom(t1);
-        query.addConditions(t1.OWNER_ID.eq(ownerId));
-        query.addConditions(t1.OWNER_TYPE.eq(ownerType));
-        List<PaymentChargingItemScope> scopes = query.fetchInto(PaymentChargingItemScope.class);
+        List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
+                .where(t1.OWNER_ID.eq(ownerId))
+                .and(t1.OWNER_TYPE.eq(ownerType))
+                .fetchInto(PaymentChargingItemScope.class);
+        
         Byte isSelected = 0;
         for(int i = 0; i < items.size(); i ++){
             PaymentChargingItem item = items.get(i);
