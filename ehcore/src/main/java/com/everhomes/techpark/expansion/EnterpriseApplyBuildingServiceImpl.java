@@ -13,6 +13,8 @@ import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.region.Region;
+import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
@@ -57,6 +59,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 	private CommunityProvider communityProvider;
 	@Autowired
 	private SequenceProvider sequenceProvider;
+	@Autowired
+	private RegionProvider regionProvider;
 
 	@Override
 	public ListLeaseBuildingsResponse listLeaseBuildings(ListLeaseBuildingsCommand cmd) {
@@ -369,7 +373,15 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			dto.setAddress(r.getAddress());
 //			dto.setContactPhone(r.get);
 		}else {
-			BeanUtils.copyProperties(leaseProject, dto);
+			dto.setProjectId(leaseProject.getProjectId());
+			dto.setNamespaceId(leaseProject.getNamespaceId());
+			dto.setName(r.getName());
+			dto.setCityId(leaseProject.getCityId());
+			dto.setCityName(leaseProject.getCityName());
+			dto.setAreaId(leaseProject.getAreaId());
+			dto.setAreaName(leaseProject.getAreaName());
+			dto.setAddress(leaseProject.getAddress());
+			dto.setContactPhone(leaseProject.getContactPhone());
 		}
 	}
 
@@ -404,6 +416,16 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		if (null != cmd.getCityId()) {
+			Region region = regionProvider.findRegionById(cmd.getCityId());
+			cmd.setCityName(region.getName());
+		}
+
+		if (null != cmd.getAreaId()) {
+			Region region = regionProvider.findRegionById(cmd.getAreaId());
+			cmd.setAreaName(region.getName());
 		}
 
 		LeaseProject leaseProject = enterpriseApplyBuildingProvider.findLeaseProjectByProjectId(cmd.getProjectId());
