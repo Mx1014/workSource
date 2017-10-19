@@ -1175,11 +1175,13 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId) {
         List<ListChargingItemsDTO> list = new ArrayList<>();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        DSLContext context = getReadOnlyContext();
         EhPaymentChargingItems t = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t");
         EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
+        List<PaymentChargingItem> items = context.selectFrom(t)
+                .fetchInto(PaymentChargingItem.class);
         SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t.ID,t.NAME);
+        query.addSelect(t1.CHARGING_ITEM_ID,t1.PROJEC);
         query.addSelect(t.NAME);
         query.addFrom(t);
         query.addFrom(t1);
