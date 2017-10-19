@@ -1462,3 +1462,8 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 update eh_service_alliances SET jump_service_alliance_routing = CONCAT('zl://service-alliance/main?actionData=%7b%22title%22%3a%22%e5%85%9a%e7%be%a4%e6%96%b0%e9%97%bb%e4%b8%ad%e5%bf%83%22%2c%22parentId%22%3a',@category_id,'%2c%22type%22%3a',@category_id,'%2c%22displayType%22%3a%22list%22%7d') WHERE parent_id = 0 AND `name` = '党群服务';
 
 UPDATE eh_launch_pad_items SET action_data = REPLACE(action_data,'"list"','"grid"') WHERE namespace_id = '999966' AND item_label = '党群服务';
+
+-- dengs,处理菜单，by dengs.
+DELETE from eh_web_menu_scopes WHERE menu_id in (10700,50600) AND owner_id = 999966;
+SET @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50700', '', 'EhNamespaces', '999966', '2');
