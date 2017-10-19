@@ -103,7 +103,7 @@ public class AclinkLinglingServiceImpl implements AclinkLinglingService {
             ListenableFuture<ResponseEntity<String>> future = this.restCall(cmd, params, null);
             return future.get().getBody();
         } catch (UnsupportedEncodingException | InterruptedException | ExecutionException e) {
-            LOGGER.error("request error", e);
+            LOGGER.error("lingling request error", e);
             return "";
         }
         

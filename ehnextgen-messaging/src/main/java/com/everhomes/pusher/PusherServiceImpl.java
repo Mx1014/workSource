@@ -524,4 +524,5 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             pushMessage(senderLogin, destLogin, msgId, msg);
         }
     }
+
 }

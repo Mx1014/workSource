@@ -141,5 +141,8 @@ public interface DoorAccessService {
     ListDoorAuthLevelResponse listDoorAuthLevel(ListDoorAuthLevelCommand cmd);
     
     void deleteDoorAuthLevel(Long id);
+
+    void sendXiaomiMessage();
     
+    String faceTest();
 }

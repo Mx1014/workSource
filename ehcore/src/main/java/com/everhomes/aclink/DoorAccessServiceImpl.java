@@ -18,6 +18,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
@@ -60,8 +61,13 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
+import com.xiaomi.xmpush.server.Constants;
+import com.xiaomi.xmpush.server.Message;
+import com.xiaomi.xmpush.server.Result;
+import com.xiaomi.xmpush.server.Sender;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.usermodel.Font;
@@ -73,6 +79,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2715,7 +2722,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public DoorAuthDTO createDoorVisitorAuth(CreateDoorVisitorCommand cmd) {
         
         //first check is the phone is in black list
-        this.userService.checkSmsBlackList("doorVisitor", cmd.getPhone());
+//        this.userService.checkSmsBlackList("doorVisitor", cmd.getPhone());
+        
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_NEWS);
         
         DoorAccessDriverType qrDriver = getQrDriverType(cmd.getNamespaceId());
         DoorAccessDriverType qrDriverExt = getQrDriverExt(cmd.getNamespaceId());
@@ -3856,6 +3866,27 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             e.printStackTrace();
         }
     }
+    
+    @Override
+    public String faceTest() {
+        String doorMAC = "DA:28:B1:38:44:57";
+        String phone = "15889660710";
+        User user = userService.findUserByIndentifier(1000000, phone);
+        
+        DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(doorMAC.toUpperCase());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+        }
+        
+        DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthByDoorIdAndUserId(doorAccess.getId(), user.getId(), (byte)1);
+        if(doorAuth == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "DoorAuth error");
+        }
+        
+        remoteOpenDoor(doorAuth.getId());
+        
+        return "door " + doorMAC + " open"; 
+    }
 
     @Override
     public DoorAuthLevelDTO createDoorAuthLevel(CreateDoorAuthLevelCommand cmd) {
@@ -3929,6 +3960,35 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             lvl.setStatus(DoorAuthStatus.INVALID.getCode());
             doorAuthLevelProvider.updateDoorAuthLevel(lvl);
         }
+    }
+    
+    //xiaomi test
+    @Override
+    public void sendXiaomiMessage() {
+        //Constants.useOfficial();
+        Sender sender = new Sender("3ijRnJlb08iLMfh6hyMvqw==");
+        String messagePayload = "This is a message by zuolin";
+        String title = "notification title zuolin";
+        String description = "notification description zuolin";
+        Message message = new Message.Builder()
+            .title(title)
+            .description(description).payload(messagePayload)
+            .restrictedPackageName("com.everhomes.android.oa.debug")
+            .passThrough(0)
+            .notifyType(1)     // 使用默认提示音提示
+            .build();
+        String regId = "mCSNgs9e5UWI6En0EAI9guxt4Qje6UcqLo295M3DORs=";
+        Result result;
+        try {
+            result = sender.send(message, regId, 3);
+            LOGGER.info("Server response: ", "MessageId: " + result.getMessageId()
+                    + " ErrorCode: " + result.getErrorCode().toString()
+                    + " Reason: " + result.getReason());
+        } catch (IOException | ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
     
 }
