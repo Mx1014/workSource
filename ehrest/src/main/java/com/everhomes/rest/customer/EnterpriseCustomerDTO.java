@@ -715,7 +715,7 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
 	@Override
 	public int compareTo(EnterpriseCustomerDTO o) {
-		return this.getId() - o.getId() >= 0L ? 1 : -1;
+		return o.getId() - this.getId() >= 0 ? 1 : -1;
 	}
     
 }
