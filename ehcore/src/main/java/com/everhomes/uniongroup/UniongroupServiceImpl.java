@@ -5,8 +5,11 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.*;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.search.UniongroupSearcher;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupConfigures;
@@ -221,8 +224,18 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
-    public List listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd) {
-        return this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getContactName(), cmd.getVersionCode(), cmd.getDepartmentId());
+    public ListOrganizationMemberCommandResponse listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd) {
+        ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
+        CrossShardListingLocator locator = new CrossShardListingLocator(cmd.getPageAnchor());
+        List<OrganizationMemberDetails>  details = this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getContactName(), cmd.getVersionCode(), cmd.getDepartmentId(), cmd.getPageSize(), locator);
+        if(details != null && details.size() > 0){
+            List<OrganizationMemberDTO> dtos = details.stream().map(r->{
+                return ConvertHelper.convert(r, OrganizationMemberDTO.class);
+            }).collect(Collectors.toList());
+            response.setMembers(dtos);
+            response.setNextPageAnchor(locator.getAnchor());
+        }
+        return response;
     }
 
     private Organization checkOrganization(Long orgId) {

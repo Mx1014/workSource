@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.uniongroup;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
 
 import java.util.List;
@@ -82,6 +83,8 @@ public interface UniongroupConfigureProvider {
     List<Object[]> listUniongroupMemberGroupIds(Integer namespaceId, Long ownerId);
 
     List listDetailNotInUniongroup(Integer namespaceId, Long organizationId, String contactName, Integer versionCode, Long departmentId);
+
+    List listDetailNotInUniongroup(Integer namespaceId, Long organizationId, String contactName, Integer versionCode, Long departmentId, Integer pageSize, CrossShardListingLocator pageAnchor);
 
     Integer countUnionGroupMemberDetailsByGroupId(Integer namespaceId, Long groupId);
 

@@ -10,9 +10,6 @@ import java.text.SimpleDateFormat;
 
 public class  OrganizationMemberDetails extends EhOrganizationMemberDetails {
 
-    @Autowired
-    private OrganizationProvider organizationProvider;
-
     private String targetType;
     private Long targetId;
     private String memberGroup;

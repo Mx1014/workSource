@@ -16,6 +16,8 @@ public class ListDetailsNotInUniongroupsCommand {
     private String contactName;
     private Integer versionCode;
     private Long departmentId;
+    private Integer pageSize;
+    private Long pageAnchor;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -60,5 +62,21 @@ public class ListDetailsNotInUniongroupsCommand {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
 }
