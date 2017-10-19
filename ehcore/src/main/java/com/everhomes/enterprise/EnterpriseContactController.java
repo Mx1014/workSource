@@ -413,7 +413,19 @@ public class EnterpriseContactController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
- 
 
+
+    /**
+     * <b>URL: /contact/listOrganizationPersonelsByOrgId</b>
+     * <p>查部门下的人</p>
+     */
+    @RequestMapping("listOrganizationPersonelsByOrgId")
+    @RestReturn(value=String.class)
+    public RestResponse listOrganizationPersonelsByOrgId(@Valid ListOrganizationContactCommand cmd) {
+        ListOrganizationMemberCommandResponse res = enterpriseContactService.listOrganizationPersonnels(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
