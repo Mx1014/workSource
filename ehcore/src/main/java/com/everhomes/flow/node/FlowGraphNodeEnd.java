@@ -1,10 +1,7 @@
-package com.everhomes.flow;
+package com.everhomes.flow.node;
 
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowLogType;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.user.UserInfo;
+import com.everhomes.flow.*;
 
 public class FlowGraphNodeEnd extends FlowGraphNode {
 	private FlowStateProcessor flowStateProcessor;

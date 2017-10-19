@@ -8,11 +8,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 节点的详细信息，包括名字，包括消息提醒，包括任务跟踪，其它信息
- * @author janson
- *
+ * <ul>
+ *     <li>id: id</li>
+ *     <li>status: status</li>
+ *     <li>description: description</li>
+ *     <li>flowMainId: flowMainId</li>
+ *     <li>createTime: createTime</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>flowVersion: flowVersion</li>
+ *     <li>nodeLevel: nodeLevel</li>
+ *     <li>nodeName: nodeName</li>
+ *     <li>params: params</li>
+ *     <li>autoStepType: autoStepType</li>
+ *     <li>allowApplierUpdate: allowApplierUpdate</li>
+ *     <li>autoStepMinute: autoStepMinute</li>
+ *     <li>allowTimeoutAction: allowTimeoutAction</li>
+ *     <li>reminder: reminder {@link com.everhomes.rest.flow.FlowNodeReminderDTO}</li>
+ *     <li>tracker: tracker {@link com.everhomes.rest.flow.FlowNodeTrackerDTO}</li>
+ *     <li>flowLaneId: flowLaneId</li>
+ *     <li>nodeType: nodeType</li>
+ *     <li>gotoProcessButtonName: gotoProcessButtonName</li>
+ *     <li>needAllProcessorComplete: needAllProcessorComplete</li>
+ *     <li>branch: branch {@link com.everhomes.rest.flow.FlowBranchDTO}</li>
+ *     <li>processors: processors {@link com.everhomes.rest.flow.FlowUserSelectionDTO}</li>
+ *     <li>processButtons: processButtons {@link com.everhomes.rest.flow.FlowButtonDetailDTO}</li>
+ *     <li>conditions: conditions {@link com.everhomes.rest.flow.FlowConditionDTO}</li>
+ * </ul>
  */
 public class FlowNodeDetailDTO {
+
     private Long id;
     private Byte status;
     private String description;
@@ -28,17 +52,24 @@ public class FlowNodeDetailDTO {
     private Integer autoStepMinute;
     private Byte allowTimeoutAction;
 
-    @ItemType(FlowUserSelectionDTO.class)
-    private
-    List<FlowUserSelectionDTO> processors = new ArrayList<>();
-
     private FlowNodeReminderDTO reminder;
-
     private FlowNodeTrackerDTO tracker;
 
+    private Long flowLaneId;
+    private String nodeType;
+    private String gotoProcessButtonName;
+    private Byte needAllProcessorComplete;
+
+    private FlowBranchDTO branch;
+
+    @ItemType(FlowUserSelectionDTO.class)
+    private List<FlowUserSelectionDTO> processors = new ArrayList<>();
+
     @ItemType(FlowButtonDetailDTO.class)
-    private
-    List<FlowButtonDetailDTO> processButtons = new ArrayList<>();
+    private List<FlowButtonDetailDTO> processButtons = new ArrayList<>();
+
+    @ItemType(FlowConditionDTO.class)
+    private List<FlowConditionDTO> conditions = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -120,6 +151,14 @@ public class FlowNodeDetailDTO {
         this.flowVersion = flowVersion;
     }
 
+    public String getGotoProcessButtonName() {
+        return gotoProcessButtonName;
+    }
+
+    public void setGotoProcessButtonName(String gotoProcessButtonName) {
+        this.gotoProcessButtonName = gotoProcessButtonName;
+    }
+
     public Integer getNodeLevel() {
         return nodeLevel;
     }
@@ -182,6 +221,46 @@ public class FlowNodeDetailDTO {
 
     public void setAllowTimeoutAction(Byte allowTimeoutAction) {
         this.allowTimeoutAction = allowTimeoutAction;
+    }
+
+    public String getNodeType() {
+        return nodeType;
+    }
+
+    public void setNodeType(String nodeType) {
+        this.nodeType = nodeType;
+    }
+
+    public FlowBranchDTO getBranch() {
+        return branch;
+    }
+
+    public void setBranch(FlowBranchDTO branch) {
+        this.branch = branch;
+    }
+
+    public Long getFlowLaneId() {
+        return flowLaneId;
+    }
+
+    public void setFlowLaneId(Long flowLaneId) {
+        this.flowLaneId = flowLaneId;
+    }
+
+    public Byte getNeedAllProcessorComplete() {
+        return needAllProcessorComplete;
+    }
+
+    public void setNeedAllProcessorComplete(Byte needAllProcessorComplete) {
+        this.needAllProcessorComplete = needAllProcessorComplete;
+    }
+
+    public List<FlowConditionDTO> getConditions() {
+        return conditions;
+    }
+
+    public void setConditions(List<FlowConditionDTO> conditions) {
+        this.conditions = conditions;
     }
 
     @Override

@@ -1,11 +1,13 @@
 package com.everhomes.flow;
 
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowServiceTypeDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.Tuple;
 
 import java.util.List;
+import java.util.Map;
 
 public interface FlowListenerManager {
 
@@ -55,14 +57,6 @@ public interface FlowListenerManager {
 	 * @return
 	 */
 	List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType);
-	
-	/**
-	 * FlowCase 的变量渲染
-	 * @param ctx
-	 * @param variable
-	 * @return
-	 */
-	String onFlowVariableRender(FlowCaseState ctx, String variable);
 
 	/**
 	 * 当时间触发的时候
@@ -70,7 +64,7 @@ public interface FlowListenerManager {
 	 */
 	void onFlowButtonFired(FlowCaseState ctx);
 
-	FlowModuleInfo getModule(String module);
+	FlowModuleInfo getModule(Long module);
 	
 	List<FlowModuleInfo> getModules();
 
@@ -83,4 +77,8 @@ public interface FlowListenerManager {
 	void onFlowSMSVariableRender(FlowCaseState ctx, int templateId, List<Tuple<String, Object>> variables);
 
     void onFlowMessageSend(FlowCaseState ctx, MessageDTO messageDto);
+
+    Map<String,String> onFlowVariableRender(FlowCaseState ctx, List<String> vars);
+
+    List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId);
 }

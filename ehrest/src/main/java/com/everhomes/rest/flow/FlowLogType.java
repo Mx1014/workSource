@@ -7,6 +7,7 @@ package com.everhomes.rest.flow;
  * <li>NODE_ENTER: 确认是否有处理 Case 的权限，确定节点处理人</li>
  * <li>BUTTON_FIRED: 是否已经处理过 Case，确定节点执行人 </li>
  * <li>FLOW_SUPERVISOR: 确定节点的督办人员 </li>
+ * <li>NODE_SUPERVISE: 督办次数 </li>
  * </ul>
  * @author janson
  *
@@ -19,6 +20,7 @@ public enum FlowLogType {
     FLOW_SUPERVISOR("flow_supervisor"),
     AUTO_STEP("auto_step"),
     NODE_REMIND("flow_remind"),
+    NODE_SUPERVISE("node_supervise"),
     ;
 	
 	private String code;

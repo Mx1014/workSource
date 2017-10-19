@@ -1,7 +1,7 @@
 package com.everhomes.flow.event;
 
 import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowGraphEvent;
+import com.everhomes.flow.FlowGraphLink;
 import com.everhomes.flow.FlowGraphNode;
 import com.everhomes.flow.FlowSubject;
 import com.everhomes.rest.flow.*;
@@ -9,7 +9,7 @@ import com.everhomes.rest.flow.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FlowGraphStartEvent implements FlowGraphEvent {
+public class FlowGraphStartEvent extends AbstractFlowGraphEvent {
 	private Long firedUserId;
 	
 	@Override
@@ -33,11 +33,29 @@ public class FlowGraphStartEvent implements FlowGraphEvent {
 
 	@Override
 	public void fire(FlowCaseState ctx) {
-		FlowGraphNode next = ctx.getFlowGraph().getNodes().get(1);
-		ctx.setNextNode(next);
-		ctx.setStepType(FlowStepType.APPROVE_STEP);
-		ctx.getFlowCase().setStatus(FlowCaseStatus.PROCESS.getCode());
-		ctx.getFlowCase().setStepCount(ctx.getFlowCase().getStepCount() + 1L);
+        FlowGraphNode startNode = ctx.getFlowGraph().getStartNode();
+        List<FlowGraphLink> linksOut = startNode.getLinksOut();
+
+        FlowGraphNode next;
+        if (linksOut.size() > 0) {
+            next = linksOut.get(0).getToNode(ctx, this);
+        } else {
+            startNode = ctx.getFlowGraph().getNodes().get(0);
+            next = ctx.getFlowGraph().getNodes().get(1);
+        }
+
+        ctx.setCurrentNode(startNode);
+        ctx.setNextNode(next);
+        ctx.setStepType(FlowStepType.APPROVE_STEP);
+        ctx.getFlowCase().setStatus(FlowCaseStatus.PROCESS.getCode());
+        ctx.getFlowCase().setStepCount(ctx.getFlowCase().getStepCount() + 1L);
+        ctx.getFlowCase().setCurrentNodeId(startNode.getFlowNode().getId());
+        ctx.getFlowCase().setCurrentLaneId(startNode.getFlowNode().getFlowLaneId());
+
+        if (FlowNodeType.fromCode(next.getFlowNode().getNodeType()) == FlowNodeType.CONDITION_FRONT) {
+            next.stepEnter(ctx, startNode);
+            ctx.setNextNode(null);
+        }
 	}
 
 	@Override
@@ -52,8 +70,6 @@ public class FlowGraphStartEvent implements FlowGraphEvent {
 
 	@Override
 	public FlowSubject getSubject() {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

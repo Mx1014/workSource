@@ -3,7 +3,7 @@ package com.everhomes.flow;
 import java.util.List;
 import java.util.Map;
 
-import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
 
@@ -194,7 +194,13 @@ public interface FlowService {
 	 */
 	FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd);
 
-	/**
+    FlowCase getFlowCaseById(Long flowCaseId);
+
+    List<UserInfo> getCurrentProcessors(Long flowCaseId);
+
+    List<UserInfo> getSupervisor(FlowCase flowCase);
+
+    /**
 	 * 搜索 FlowCase 的信息
 	 * @param cmd
 	 * @return
@@ -303,7 +309,9 @@ public interface FlowService {
 
 	FlowModuleDTO getModuleById(Long moduleId);
 
-	/**
+    SearchFlowCaseResponse searchFlowCases(SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback);
+
+    /**
 	 * 获取 FlowCase 的详细日志信息
 	 * @param flowCaseId
 	 * @return
@@ -394,8 +402,9 @@ public interface FlowService {
  
 	void processSMSTimeout(FlowTimeout ft);
 
-	String getStepMessageTemplate(FlowStepType fromStep,
-			FlowCaseStatus nextStatus, FlowUserType flowUserType, Map<String, Object> map);
+    String getButtonFireEventContentTemplate(FlowStepType step, Map<String, Object> map);
+
+    String getStepMessageTemplate(FlowStepType fromStep, FlowCaseStatus nextStatus, FlowGraphEvent event, Map<String, Object> map);
 
 	ListSelectUsersResponse listUserSelections(ListSelectUsersCommand cmd);
 
@@ -415,4 +424,40 @@ public interface FlowService {
      * 删除flowCase
      */
     void deleteFlowCase(DeleteFlowCaseCommand cmd);
+
+    ListFlowPredefinedParamResponse listPredefinedParam(ListPredefinedParamCommand cmd);
+
+    void updateFlowButtonOrder(UpdateFlowButtonOrderCommand cmd);
+
+    FlowLaneDTO updateFlowLane(UpdateFlowLaneCommand cmd);
+
+    FlowButtonDTO createFlowButton(CreateFlowButtonCommand cmd);
+
+    FlowGraphDTO getFlowGraphNew(FlowIdCommand cmd);
+
+    FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphCommand cmd);
+
+    FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphJsonCommand cmd);
+
+    FlowCaseDetailDTOV2 getFlowCaseDetailByIdV2(Long flowCaseId, Long userId, FlowUserType flowUserType, boolean checkProcessor, boolean needButton);
+
+    FlowCaseTrackDTO getFlowCaseTrack(GetFlowCaseTrackCommand cmd);
+
+    FlowCaseBriefDTO getFlowCaseBrief(GetFlowCaseBriefCommand cmd);
+
+    void deleteFlowButton(DeleteFlowButtonCommand cmd);
+
+    ListFlowServiceTypeResponse listFlowServiceTypes(ListFlowServiceTypesCommand cmd);
+
+    ListNextBranchesResponse listNextBranches(ListNextBranchesCommand cmd);
+
+    SearchFlowOperateLogResponse searchFlowOperateLogs(SearchFlowOperateLogsCommand cmd);
+
+    FlowEvaluateItemDTO createFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
+
+    void deleteFlowEvaluateItem(DeleteFlowEvaluateItemCommand cmd);
+
+    FlowEvaluateItemDTO updateFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
+
+    List<FlowCase> getAllFlowCase(Long flowCaseId);
 }

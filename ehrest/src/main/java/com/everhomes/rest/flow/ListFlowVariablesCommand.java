@@ -11,44 +11,45 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class ListFlowVariablesCommand {
-    private Integer     namespaceId;
+
+    private Integer namespaceId;
     private String flowVariableType;
     private String entityType;
     private Long entityId;
 
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
 
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
-	public String getFlowVariableType() {
-		return flowVariableType;
-	}
+    public String getFlowVariableType() {
+        return flowVariableType;
+    }
 
-	public void setFlowVariableType(String flowVariableType) {
-		this.flowVariableType = flowVariableType;
-	}
+    public void setFlowVariableType(String flowVariableType) {
+        this.flowVariableType = flowVariableType;
+    }
 
-	public String getEntityType() {
-		return entityType;
-	}
+    public String getEntityType() {
+        return entityType;
+    }
 
-	public void setEntityType(String entityType) {
-		this.entityType = entityType;
-	}
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
+    }
 
-	public Long getEntityId() {
-		return entityId;
-	}
+    public Long getEntityId() {
+        return entityId;
+    }
 
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
+    public void setEntityId(Long entityId) {
+        this.entityId = entityId;
+    }
 
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
