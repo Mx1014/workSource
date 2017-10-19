@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -300,6 +301,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 dtos.add(dto);
             });
         }
+        Collections.sort(dtos);
         response.setDtos(dtos);
         return response;
     }
