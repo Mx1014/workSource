@@ -1811,10 +1811,10 @@ public class OrganizationController extends ControllerBase {
      * <p>超级查询接口</p>
      */
     @RequestMapping("findOrgPersonel")
-    @RestReturn(value = String.class)
+    @RestReturn(value = FindOrgPersonelCommandResponse.class)
     public RestResponse findOrgPersonel(FindOrgPersonelCommand cmd) {
-        this.organizationService.findOrgPersonel(cmd);
-        RestResponse response = new RestResponse();
+        FindOrgPersonelCommandResponse res = this.organizationService.findOrgPersonel(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
