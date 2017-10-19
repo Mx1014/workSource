@@ -720,12 +720,12 @@ public class AclinkController extends ControllerBase {
      * <p>列出所有二维码门禁列表 </p>
      * @return
      */
-    @RequestMapping("doorTest3")
+    /*@RequestMapping("doorTest3")
     @RequireAuthentication(false)
     public Object doorTest3(HttpServletRequest request) {
         doorAccessService.sendXiaomiMessage();
         Map<String,Long> m = new HashMap<String,Long>();
         m.put("result", 0l);
         return m;
-    }
+    }*/
 }

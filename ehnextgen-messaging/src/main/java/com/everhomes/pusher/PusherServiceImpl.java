@@ -37,6 +37,11 @@ import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.notnoop.apns.*;
 import com.notnoop.exceptions.NetworkIOException;
+import com.xiaomi.xmpush.server.Constants;
+import com.xiaomi.xmpush.server.Result;
+import com.xiaomi.xmpush.server.Sender;
+
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +51,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -523,6 +530,35 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             //iOS only
             pushMessage(senderLogin, destLogin, msgId, msg);
         }
+    }
+    
+    //xiaomi test
+    @Override
+    public void sendXiaomiMessage() {
+        //Constants.useOfficial();
+        Sender sender = new Sender("3ijRnJlb08iLMfh6hyMvqw==");
+        String messagePayload = "This is a message by zuolin";
+        String title = "notification title zuolin";
+        String description = "notification description zuolin";
+        com.xiaomi.xmpush.server.Message message = new com.xiaomi.xmpush.server.Message.Builder()
+            .title(title)
+            .description(description).payload(messagePayload)
+            .restrictedPackageName("com.everhomes.android.oa.debug")
+            .passThrough(0)
+            .notifyType(1)     // 使用默认提示音提示
+            .build();
+        String regId = "mCSNgs9e5UWI6En0EAI9guxt4Qje6UcqLo295M3DORs=";
+        Result result;
+        try {
+            result = sender.send(message, regId, 3);
+            LOGGER.info("Server response: ", "MessageId: " + result.getMessageId()
+                    + " ErrorCode: " + result.getErrorCode().toString()
+                    + " Reason: " + result.getReason());
+        } catch (IOException | ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 
 }
