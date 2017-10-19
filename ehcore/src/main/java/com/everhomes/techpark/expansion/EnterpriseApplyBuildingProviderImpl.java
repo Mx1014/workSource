@@ -244,6 +244,8 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
 
         DeleteQuery<EhLeaseProjectCommunitiesRecord> query =  context.deleteQuery(Tables.EH_LEASE_PROJECT_COMMUNITIES);
         query.addConditions(Tables.EH_LEASE_PROJECT_COMMUNITIES.LEASE_PROJECT_ID.eq(leaseProjectId));
+
+        query.execute();
     }
 
     @Override

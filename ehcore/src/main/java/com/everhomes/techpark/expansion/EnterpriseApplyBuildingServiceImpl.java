@@ -355,19 +355,26 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 	}
 
 	private void populateProjectBasicInfo (LeaseProjectDTO dto, Community r) {
-		dto.setProjectId(r.getId());
-		dto.setNamespaceId(r.getNamespaceId());
-		dto.setName(r.getName());
-		dto.setCityId(r.getCityId());
-		dto.setCityName(r.getCityName());
-		dto.setAreaId(r.getAreaId());
-		dto.setAreaName(r.getAreaName());
-		dto.setAddress(r.getAddress());
+
+		LeaseProject leaseProject = enterpriseApplyBuildingProvider.findLeaseProjectByProjectId(r.getId());
+
+		if (null == leaseProject) {
+			dto.setProjectId(r.getId());
+			dto.setNamespaceId(r.getNamespaceId());
+			dto.setName(r.getName());
+			dto.setCityId(r.getCityId());
+			dto.setCityName(r.getCityName());
+			dto.setAreaId(r.getAreaId());
+			dto.setAreaName(r.getAreaName());
+			dto.setAddress(r.getAddress());
 //			dto.setContactPhone(r.get);
+		}else {
+			BeanUtils.copyProperties(leaseProject, dto);
+		}
 	}
 
 	private void populateProjectDetailInfo (LeaseProjectDTO dto, Community r, LeaseProject leaseProject) {
-		populateProjectBasicInfo(dto, r);
+//		populateProjectBasicInfo(dto, r);
 
 		String json = leaseProject.getExtraInfoJson();
 		LeaseProjectExtraInfo extraInfo = JSONObject.parseObject(json, LeaseProjectExtraInfo.class);
@@ -439,7 +446,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			});
 		}
 
-		return null;
+		return ConvertHelper.convert(leaseProject, LeaseProjectDTO.class);
 	}
 
 	@Override
