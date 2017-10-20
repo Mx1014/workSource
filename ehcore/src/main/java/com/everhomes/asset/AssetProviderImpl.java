@@ -2072,7 +2072,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = getReadOnlyContext();
         GetChargingStandardDTO dto = new GetChargingStandardDTO();
         EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
-        context.select(t.NAME,t.FORMULA,t.BILLING_CYCLE,t.INSTRUCTION,t.FORMULA_TYPE)
+        context.select(t.NAME,t.FORMULA,t.BILLING_CYCLE,t.INSTRUCTION,t.FORMULA_TYPE,t.SUGGEST_UNIT_PRICE,t.AREA_SIZE_TYPE)
                 .from(t)
                 .where(t.ID.eq(cmd.getChargingStandardId()))
                 .fetch()
@@ -2082,6 +2082,8 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillingCycle(r.getValue(t.BILLING_CYCLE));
                     dto.setInstruction(r.getValue(t.INSTRUCTION));
                     dto.setFormulaType(r.getValue(t.FORMULA_TYPE));
+                    dto.setSuggest_unit_price(r.getValue(t.SUGGEST_UNIT_PRICE));
+                    dto.setArea_size_type(r.getValue(t.AREA_SIZE_TYPE));
                     return null;
                 });
         return dto;

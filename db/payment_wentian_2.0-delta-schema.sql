@@ -40,3 +40,5 @@ ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `project_level_name` VA
 
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `date_str_generation` VARCHAR(40) DEFAULT NULL COMMENT '费用产生日期';
 
+ALTER TABLE `eh_payment_bills` ADD COLUMN `charge_status` TINYINT DEFAULT 0 COMMENT '缴费状态，0：正常；1：欠费';
+

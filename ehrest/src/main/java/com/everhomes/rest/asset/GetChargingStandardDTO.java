@@ -3,6 +3,8 @@ package com.everhomes.rest.asset;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
+
 /**
  *<ul>
  * <li>chargingStandardId:收费标准id</li>
@@ -24,6 +26,8 @@ public class GetChargingStandardDTO {
     private String instruction;
     private Byte priceUnitType;
     private Byte balanceDateType;
+    private BigDecimal suggest_unit_price;
+    private Integer area_size_type;
 
     @Override
     public String toString() {
@@ -44,6 +48,22 @@ public class GetChargingStandardDTO {
 
     public void setChargingStandardName(String chargingStandardName) {
         this.chargingStandardName = chargingStandardName;
+    }
+
+    public BigDecimal getSuggest_unit_price() {
+        return suggest_unit_price;
+    }
+
+    public void setSuggest_unit_price(BigDecimal suggest_unit_price) {
+        this.suggest_unit_price = suggest_unit_price;
+    }
+
+    public Integer getArea_size_type() {
+        return area_size_type;
+    }
+
+    public void setArea_size_type(Integer area_size_type) {
+        this.area_size_type = area_size_type;
     }
 
     public Byte getFormulaType() {
