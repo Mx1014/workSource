@@ -207,7 +207,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		populatePostUrl(dto, leaseBuilding.getPosterUri());
 		populateLeaseBuildingAttachments(dto, attachments);
-		processDetailUrl(dto);
+		processBuilingDetailUrl(dto);
 		//表单信息
 		populateFormInfo(dto);
 
@@ -233,11 +233,21 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		}
 	}
 
-	private void processDetailUrl(LeaseBuildingDTO dto) {
+	private void processBuilingDetailUrl(LeaseBuildingDTO dto) {
 		String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
 		String detailUrl = configProvider.getValue(ConfigConstants.APPLY_ENTRY_LEASE_BUILDING_DETAIL_URL, "");
 
 		detailUrl = String.format(detailUrl, dto.getId());
+
+		dto.setDetailUrl(homeUrl + detailUrl);
+
+	}
+
+	private void processProjectDetailUrl(LeaseProjectDTO dto) {
+		String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
+		String detailUrl = configProvider.getValue(ConfigConstants.APPLY_ENTRY_LEASE_PROJECT_DETAIL_URL, "");
+
+		detailUrl = String.format(detailUrl, dto.getProjectId());
 
 		dto.setDetailUrl(homeUrl + detailUrl);
 
@@ -346,6 +356,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		response.setProjects(communities.stream().map(r -> {
 			LeaseProjectDTO dto = new LeaseProjectDTO();
 			populateProjectBasicInfo(dto, r);
+
+			processProjectDetailUrl(dto);
 			return dto;
 		}).collect(Collectors.toList()));
 
@@ -501,7 +513,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		dto.setBuildings(leaseBuildings.stream().map(r -> {
 			LeaseBuildingDTO d = ConvertHelper.convert(r, LeaseBuildingDTO.class);
 			populatePostUrl(d, r.getPosterUri());
-
+			processBuilingDetailUrl(d);
 			return d;
 		}).collect(Collectors.toList()));
 		return dto;
