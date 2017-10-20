@@ -29,6 +29,7 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.*;
+import com.everhomes.organization.*;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
 import com.everhomes.pmtask.ebei.EbeiPmtaskLogDTO;
@@ -88,11 +89,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationAddress;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -1933,6 +1929,31 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}else{
 			response.setCommunities(dtos);
 		}
+		return response;
+	}
+
+	@Override
+	public ListAuthorizationCommunityByUserResponse listOrganizationCommunityByUser(ListOrganizationCommunityByUserCommand cmd) {
+
+		ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
+
+		long userId = UserContext.currentUserId();
+		List<OrganizationMember> orgMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId(
+				"/" + cmd.getOrganizationId(), userId);
+
+		List<CommunityDTO> result = new ArrayList<>();
+		if (null != orgMembers) {
+			for (OrganizationMember m: orgMembers) {
+				OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(m.getOrganizationId());
+				if (null != request) {
+					Community community = communityProvider.findCommunityById(request.getCommunityId());
+					if (null != community) {
+						result.add(ConvertHelper.convert(community, CommunityDTO.class));
+					}
+				}
+			}
+		}
+
 		return response;
 	}
 
