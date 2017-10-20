@@ -1,8 +1,10 @@
 
-
 -- 薪酬组加上版本 By lei.lv 
 ALTER TABLE eh_uniongroup_configures ADD COLUMN `version_code` INT DEFAULT 0 COMMENT '版本号';
 ALTER TABLE eh_uniongroup_member_details ADD COLUMN `version_code` INT DEFAULT 0 COMMENT '版本号';
+ -- 更改索引
+ALTER TABLE `eh_uniongroup_member_details`  DROP INDEX `uniongroup_member_uniqueIndex`;
+ALTER TABLE eh_uniongroup_member_details ADD UNIQUE INDEX `uniongroup_member_uniqueIndex` (`group_type`, `group_id`, `detail_id`, `contact_token`,`version_code`) ;
 
 -- 打卡加入当前生效版本号
 -- ALTER TABLE eh_punch_rules ADD COLUMN `version_code` INT DEFAULT 0 COMMENT '当前生效版本号';
