@@ -724,7 +724,7 @@ public class AssetServiceImpl implements AssetService {
                     default:
                         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                 }
-                List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle);
+                List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle,cmd);
 
                 long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), billItemsExpectancies.size());
                 long currentBillItemSeq = nextBillItemBlock - billItemsExpectancies.size() + 1;
@@ -916,7 +916,7 @@ public class AssetServiceImpl implements AssetService {
         });
     }
 
-    private List<BillItemsExpectancy> assetFeeHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle) {
+    private List<BillItemsExpectancy> assetFeeHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd) {
         //返回的列表
         List<BillItemsExpectancy> list = new ArrayList<>();
         //计算的时间区间
@@ -1026,6 +1026,8 @@ public class AssetServiceImpl implements AssetService {
             time++;
         }
         LOGGER.info("账单产生了"+time+"项目,真实为"+list.size());
+        //拆卸免租的包裹
+        cmd.get
         return list;
     }
 
