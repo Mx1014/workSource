@@ -943,14 +943,6 @@ public class FieldServiceImpl implements FieldService {
                                     cellValue = sb.toString();
                                 }
                             }
-                            //处理其他select的
-                            if(param.getFieldParamType().equals("select")&&!fieldName.equals("projectSource")&&!fieldName.equals("status")){
-                                cellValue = "";
-                                ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), displayName);
-                                if(item!=null&&item.getItemId()!=null){
-                                    cellValue=String.valueOf(item.getItemId());
-                                }
-                            }
                         }
                         Byte mandatoryFlag = fieldDTO.getMandatoryFlag();
                         if(mandatoryFlag == 1 && (cellValue == null || (cellValue.equals("")))){
