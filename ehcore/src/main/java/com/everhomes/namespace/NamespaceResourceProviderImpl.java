@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,5 +149,17 @@ public class NamespaceResourceProviderImpl implements NamespaceResourceProvider 
         dao.deleteById(resource.getId());
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhNamespaceResources.class, resource.getId());
+    }
+
+    /**
+     * 用于测试数据库连接是否正常，不能用于业务使用，也不能加缓存信息 by lqs 20171019
+     */
+    @Override
+    public void checkDbStatus() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        Record r = context.select().from(Tables.EH_NAMESPACE_DETAILS).fetchAny();
+        if(r == null) {
+            throw new IllegalStateException("No record found in namespace resources");
+        }
     }
 }

@@ -1792,5 +1792,19 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /org/testAdmins</b>
+     * <p>人事档案离职</p>
+     */
+    /*@RequestMapping("testAdmins")
+    @RestReturn(value = String.class)
+    public RestResponse testAdmins() {
+        List<Long> users = this.organizationService.getOrganizationAdminIncludeList2(1000001L, 195506L, 195506L);
+        RestResponse response = new RestResponse(users);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }*/
 
 }

@@ -3838,7 +3838,7 @@ public class PunchServiceImpl implements PunchService {
 		if(null== members || members.size() == 0)
 			return null;
 		for(OrganizationMember member : members){
-			if(member.getTargetId().equals(targetId))
+			if(member!=null && member.getTargetId()!=null && member.getTargetId().equals(targetId))
 				return member;
 		}
 		return null;
