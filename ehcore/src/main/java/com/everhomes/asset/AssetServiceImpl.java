@@ -838,9 +838,9 @@ public class AssetServiceImpl implements AssetService {
                             newBill.setChargeStatus((byte)0);
                         }
                     }
-                    for(){
-                        //减免项目，用有序列表和时间控制循环次数
-                    }
+//                    for(){
+//                        //减免项目，用有序列表和时间控制循环次数
+//                    }
                     for(int k = 0 ; k < billItemsList.size(); k ++){
                         EhPaymentBillItems item = billItemsList.get(k);
                         String dateGeneration = item.getDateStrGeneration();

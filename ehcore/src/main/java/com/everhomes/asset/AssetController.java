@@ -535,8 +535,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("listChargingItemDetailForBillGroup")
     @RestReturn(value = ListChargingItemDetailForBillGroupDTO.class)
     public RestResponse listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd) {
-        //此接口已无需求
-//        ListChargingItemDetailForBillGroupDTO dto = assetService.listChargingItemDetailForBillGroup(cmd);
+        ListChargingItemDetailForBillGroupDTO dto = assetService.listChargingItemDetailForBillGroup(cmd);
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
