@@ -12,8 +12,10 @@ import com.everhomes.server.schema.tables.pojos.EhUniongroupVersion;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.List;
 /**
  * Created by wuhan on 2017/10/19.
  */
+@Component
 public class UniongroupVersionProviderImpl implements  UniongroupVersionProvider {
 
     @Autowired
