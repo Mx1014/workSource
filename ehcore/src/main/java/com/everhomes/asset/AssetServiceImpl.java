@@ -732,7 +732,60 @@ public class AssetServiceImpl implements AssetService {
                     this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()));
                 }
 
+                //先算出所有的item
+                for(int g = 0; g < billItemsExpectancies.size(); g++){
+                    BillItemsExpectancy exp = billItemsExpectancies.get(g);
+                    // build a billItem
+                    PaymentBillItems item = new PaymentBillItems();
+                    //资产
+                    item.setAddressId(property.getAddressId());
+                    item.setBuildingName(property.getBuldingName());
+                    item.setApartmentName(property.getApartmentName());
+                    item.setPropertyIdentifer(property.getPropertyName());
+                    //金额
+                    item.setAmountOwed(exp.getAmountReceivable());
+                    item.setAmountReceivable(exp.getAmountReceivable());
+                    item.setAmountReceived(new BigDecimal("0"));
+                    //关联和显示
+                    item.setBillGroupId(groupRule.getBillGroupId());
+                    item.setChargingItemName(groupRule.getChargingItemName());
+                    item.setChargingItemsId(groupRule.getChargingItemId());
+                    //日期
+                    item.setDateStr(exp.getBillDateStr());
+                    item.setDateStrBegin(sdf_dateStrD.format(exp.getDateStrBegin()));
+                    item.setDateStrEnd(sdf_dateStrD.format(exp.getDateStrEnd()));
+                    item.setDateStrDue(exp.getBillDateDue());
+                    item.setDueDayDeadline(exp.getBillDateDeadline());
+                    item.setDateStrGeneration(exp.getBillDateGeneration());
+                    //归档字段
+                    item.setId(currentBillItemSeq);
+                    currentBillItemSeq += 1;
+                    item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    item.setCreatorUid(UserContext.currentUserId());
+                    item.setNamespaceId(cmd.getNamesapceId());
+                    item.setOwnerType(cmd.getOwnerType());
+                    item.setOwnerId(cmd.getOwnerId());
+                    item.setTargetType(cmd.getTargetType());
+                    item.setTargetId(cmd.getTargetId());
+                    item.setContractId(cmd.getContractId());
+                    item.setContractNum(cmd.getContractNum());
+                    item.setTargetName(cmd.getTargetName());
+                    item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    //放到数组中去
+                    billItemsList.add(item);
+                }
+                //再算bill
                 for(int g = 0; g< billItemsExpectancies.size(); g++){
+                    BillItemsExpectancy exp = billItemsExpectancies.get(g);
+                    String billCycleStart = exp.getBillCycleStart();
+                    String billCycleEnd = exp.getBillCycleEnd();
+
+                    for(int k = 0 ; k < billItemsList.size(); k ++){
+                        EhPaymentBillItems item = billItemsList.get(k);
+                        item.getBill
+                    }
+
+
                     BillItemsExpectancy exp = billItemsExpectancies.get(g);
                     //exp使用groupid，contractnum和datestr（yyyy-MM-dd）来分类
                     //想要合并的是哪些呢？楼栋门牌
