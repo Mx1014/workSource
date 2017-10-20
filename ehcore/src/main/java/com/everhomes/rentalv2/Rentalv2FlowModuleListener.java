@@ -1,9 +1,7 @@
 package com.everhomes.rentalv2;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import com.everhomes.flow.*;
 import com.everhomes.organization.Organization;
@@ -238,6 +236,23 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				"useDetail", RentalNotificationTemplateCode.locale, ""));
 		e.setValue(order.getUseDetail());
 		entities.add(e);
+
+		if (order.getDoorAuthId()!=null){
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"authKey", RentalNotificationTemplateCode.locale, ""));
+			e.setValue(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"authValue", RentalNotificationTemplateCode.locale, ""));
+			entities.add(e);
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"authTime", RentalNotificationTemplateCode.locale, ""));
+			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd hh:mm");
+			e.setValue(dateFormat.format(new Date(order.getAuthStartTime().getTime()))+"到"+
+			dateFormat.format(new Date(order.getAuthEndTime().getTime())));
+		}
 
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
 		if (rs != null && NormalFlag.NONEED.getCode() == rs.getExclusiveFlag()

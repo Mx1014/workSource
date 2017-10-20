@@ -2435,7 +2435,14 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		return null;
 	}
-	
+
+	@Override
+	public void setAuthDoorId(Long rentalId, Long AuthDoorId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_RENTALV2_ORDERS).set(Tables.EH_RENTALV2_ORDERS.DOOR_AUTH_ID,AuthDoorId).where(
+				Tables.EH_RENTALV2_ORDERS.ID.eq(rentalId)
+		).execute();
+	}
 	private BigDecimal max(BigDecimal ... b) {
 		BigDecimal max = new BigDecimal(Integer.MIN_VALUE);
 		for (BigDecimal bigDecimal : b) {
@@ -2465,5 +2472,6 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		return b1;
 	}
-	
+
+
 }

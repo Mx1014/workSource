@@ -124,7 +124,7 @@ public interface Rentalv2Provider {
 
 	RentalItem getRentalSiteItemById(Long id);
 
- 
+    void setAuthDoorId(Long rentalId,Long AuthDoorId);
 
 	void createRentalDefaultRule(RentalDefaultRule defaultRule);
 

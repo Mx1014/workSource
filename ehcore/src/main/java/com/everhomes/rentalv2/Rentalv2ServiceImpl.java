@@ -37,14 +37,16 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors; 
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;  
+import javax.servlet.http.HttpServletResponse;
 
 
- 
+import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.order.PayService;
 import com.everhomes.parking.innospring.InnoSpringCardInfo;
+import com.everhomes.rest.aclink.CreateDoorAuthCommand;
+import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.order.*;
@@ -225,7 +227,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private Rentalv2PriceRuleProvider rentalv2PriceRuleProvider;
 	@Autowired
 	private PayService payService;
-
+	@Autowired
+	private DoorAccessService doorAccessService;
 
 	/**cellList : 当前线程用到的单元格 */
 	private static ThreadLocal<List<RentalCell>> cellList = new ThreadLocal<List<RentalCell>>() {
@@ -1546,21 +1549,29 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//计算的时间用于定时任务 提醒时间:消息提醒  结束时间:订单过期
 
 				//计算结束提醒时间 按小时半天预约 提前15分钟提醒 按天、月预约结束日期下午8点提醒
+				//计算门禁时间 按小时半天预约 按预定时间延伸1小时(未来可变) 按天预约 6点到20点 按月预约 前一天6点到后一天20点
 				Timestamp startTime = null;
 				Timestamp reminderTime = null;
 				Timestamp reminderEndTime = null;
 				Timestamp endTime = null;
-				
+				Timestamp authStartTime = null;
+				Timestamp authEndTime = null;
+
+
 				if(rentalSiteRule.getRentalType() == RentalType.HOUR.getCode()){
 					startTime =  new Timestamp(rentalSiteRule.getBeginTime().getTime() );
 					reminderTime =  new Timestamp(rentalSiteRule.getBeginTime().getTime() - 30*60*1000L);
 					endTime = rentalSiteRule.getEndTime();
 					reminderEndTime = new Timestamp(endTime.getTime()-15*60*1000L);
+					authStartTime = new Timestamp(startTime.getTime()-60*60*1000L);
+					authEndTime = new Timestamp(endTime.getTime()+60*60*1000L);
 				}else if(rentalSiteRule.getRentalType().equals(RentalType.DAY.getCode())){
 					startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() );
 					reminderTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000L);
 					endTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 24*60*60*1000L);
 					reminderEndTime = new Timestamp(endTime.getTime()-6*60*60*1000L);
+					authStartTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime()+6*60*60*1000L);
+					authEndTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime()+20*60*60*1000L);
 				}else if(rentalSiteRule.getRentalType().equals(RentalType.MONTH.getCode())){
 					// 按月的在前一天下午四点提醒，月底第二天结束
 					startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() );
@@ -1571,23 +1582,26 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					calendar.add(Calendar.MONTH, 1);
 					endTime = new Timestamp(calendar.getTimeInMillis());
 					reminderEndTime = new Timestamp(endTime.getTime()-6*60*60*1000L);
+					authStartTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime()-18*60*60*1000L);
+					authEndTime = new Timestamp(endTime.getTime()+20*60*60*1000L);
 				}else  {
 					if(rentalSiteRule.getAmorpm().equals(AmorpmFlag.AM.getCode())){
 						reminderTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000L);
 						startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 10*60*60*1000L);
 						endTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 12*60*60*1000L);
-						reminderEndTime = new Timestamp(endTime.getTime()-15*60*1000L);
 					}else if(rentalSiteRule.getAmorpm().equals(AmorpmFlag.PM.getCode())){
 						reminderTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000L);
 						startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 15*60*60*1000L);
 						endTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 18*60*60*1000L);
-						reminderEndTime = new Timestamp(endTime.getTime()-15*60*1000L);
 					}else   {
 						reminderTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000L);
 						startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 20*60*60*1000L);
 						endTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 21*60*60*1000L);
-						reminderEndTime = new Timestamp(endTime.getTime()-15*60*1000L);
+
 					}
+					reminderEndTime = new Timestamp(endTime.getTime()-15*60*1000L);
+					authStartTime = new Timestamp(startTime.getTime()-60*60*1000L);
+					authEndTime = new Timestamp(endTime.getTime()+60*60*1000L);
 				}
 				 //如果订单的提醒时间在本单元格 提醒时间之后 或者 订单提醒时间为空
 				if (null == rentalBill.getReminderTime()|| rentalBill.getReminderTime().after(reminderTime))
@@ -1598,8 +1612,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//如果订单的结束时间在本单元格 结束时间之前 或者 订单时间为空
 				if (null == rentalBill.getEndTime()|| rentalBill.getEndTime().before(endTime))
 					rentalBill.setEndTime(endTime);
-
-				rentalBill.setReminderEndTime(reminderEndTime);
+				if (null == rentalBill.getReminderEndTime()|| rentalBill.getReminderEndTime().before(reminderEndTime))
+					rentalBill.setReminderEndTime(reminderEndTime);
+				//设置门禁时间
+				if (rs.getAclinkId()!=null && (null == rentalBill.getAuthStartTime() || rentalBill.getAuthStartTime().after(authStartTime)))
+					rentalBill.setAuthStartTime(authStartTime);
+				if (rs.getAclinkId()!=null && (null == rentalBill.getAuthEndTime() || rentalBill.getAuthEndTime().before(authEndTime)))
+					rentalBill.setAuthEndTime(authEndTime);
 
 				if(rs.getNeedPay().equals(NormalFlag.NEED.getCode())){
 
@@ -1960,7 +1979,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				rules.add(dto);
 			}
 		}
-		
+
 		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()+order.getRentalResourceId())
 		.enter(() -> {
 
@@ -1973,6 +1992,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalv2Provider.updateRentalBill(order);
 			return null;
 		});
+
+		//状态为已完成时 创建门禁授权
+		if (SiteBillStatus.COMPLETE.getCode() == status){
+			RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
+			Long doorAuthId = createDoorAuth(order.getRentalUid(),order.getAuthStartTime().getTime(),order.getAuthEndTime().getTime(),
+					rs.getAclinkId(),rs.getCreatorUid());
+			rentalv2Provider.setAuthDoorId(order.getId(),doorAuthId);
+		}
+
 		//TODO: 改成工作流的短信
 		//发短信给预订人
 //		String templateScope = SmsTemplateCode.SCOPE;
@@ -3264,6 +3292,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				
 				rentalv2Provider.updateRentalBill(order); 
 				onOrderCancel(order);
+				if (order.getDoorAuthId()!=null) //解除门禁授权
+					doorAccessService.deleteDoorAuth(order.getDoorAuthId());
+					rentalv2Provider.setAuthDoorId(order.getId(),null);
 				return null;
 			});
 		}
@@ -3734,7 +3765,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setFlowMainId(flow.getFlowMainId());
 			cmd.setFlowVersion(flow.getFlowVersion());
 			return flowService.createFlowCase(cmd);
-		}else{ //创建哑工作流
+		}else{
+			//预约成功 授权门禁
+			RentalResource rentalResource = rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
+			if (rentalResource.getAclinkId()!=null) {
+				Long doorAuthId = createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
+						rentalResource.getAclinkId(), rentalResource.getCreatorUid());
+				rentalv2Provider.setAuthDoorId(order.getId(),doorAuthId);
+			}
+
+			//创建哑工作流
 			GeneralModuleInfo gm = new GeneralModuleInfo();
 			gm.setModuleId(Rentalv2Controller.moduleId);
 			gm.setModuleType(moduleType);
@@ -3748,6 +3788,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 
 	}
+
+	private Long createDoorAuth(Long userId,Long timeBegin,Long timeEnd,Long doorId,Long authUserId){
+		CreateDoorAuthCommand cmd = new CreateDoorAuthCommand();
+		cmd.setAuthType((byte)1);//临时授权
+		cmd.setApproveUserId(authUserId);
+		cmd.setDoorId(doorId);
+		cmd.setUserId(userId);
+		cmd.setValidFromMs(timeBegin);
+		cmd.setValidEndMs(timeEnd);
+
+		DoorAuthDTO dto =doorAccessService.createDoorAuth(cmd);
+		return  dto.getId();
+	}
+
 	private boolean valiItem(RentalItemsOrder rib) {
 
 		RentalItem rSiteItem = this.rentalv2Provider.getRentalSiteItemById(rib.getRentalResourceItemId()); 
