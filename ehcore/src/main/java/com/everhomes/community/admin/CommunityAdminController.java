@@ -467,7 +467,7 @@ public class CommunityAdminController extends ControllerBase {
     @RestReturn(value=CommunityUserAddressResponse.class)
     public RestResponse listUserBycommunityId(@Valid ListCommunityUsersCommand cmd) {
         
-        RestResponse response =  new RestResponse(communityService.listUserBycommunityId(cmd));
+        RestResponse response =  new RestResponse(communityService.listUserBycommunityIdV2(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

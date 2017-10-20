@@ -3,9 +3,9 @@ package com.everhomes.rest.community.admin;
 
 /**
  * <ul>
- *     <li>userId: 用户id</li>
- *     <li>identityNumber: 身份证号</li>
- *     <li>organizations: 公司信息，organizationMemberDetailId必传，会对是否高管、职位进行更新</li>
+ *     <li>executiveFlag: 是否高管</li>
+ *     <li>positionTag: 职位</li>
+ *     <li>detailId: detailId</li>
  * </ul>
  */
 public class CommunityUserOrgDetailDTO {
