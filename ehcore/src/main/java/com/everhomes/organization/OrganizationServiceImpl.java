@@ -138,7 +138,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.html.HTML;
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -5737,6 +5736,18 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         return true;
+    }
+
+    @Override
+    public void deleteOrganizationJobPositionsByPositionIdAndDetails(DeleteOrganizationJobPositionsByPositionIdAndDetailsCommand cmd) {
+//        1. 删除通用岗位+detailIds所确认的部门岗位条目
+        List<OrganizationJobPositionMap> jobPositionMaps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(cmd.getJobPositionId());
+        if (jobPositionMaps != null && jobPositionMaps.size() > 0) {
+            List<Long> organizationJobPositionIds = jobPositionMaps.stream().map(r -> {
+                return r.getOrganizationId();
+            }).collect(Collectors.toList());
+            organizationProvider.deleteOrganizationPersonelByJobPositionIdsAndDetailIds(organizationJobPositionIds, cmd.getDetailIds());
+        }
     }
 
     /**

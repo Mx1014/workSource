@@ -1847,4 +1847,18 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL: /org/deleteOrganizationJobPositionsByPositionIdAndDetails</b>
+     * <p>批量撤销通用岗位下的人员</p>
+     */
+    @RequestMapping("deleteOrganizationJobPositionsByPositionIdAndDetails")
+    @RestReturn(value = String.class)
+    public RestResponse deleteOrganizationJobPositionsByPositionIdAndDetails(@Valid DeleteOrganizationJobPositionsByPositionIdAndDetailsCommand cmd) {
+        organizationService.deleteOrganizationJobPositionsByPositionIdAndDetails(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
