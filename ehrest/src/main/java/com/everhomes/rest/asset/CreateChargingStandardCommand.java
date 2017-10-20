@@ -51,6 +51,11 @@ public class CreateChargingStandardCommand {
     private BigDecimal suggest_unit_price;
     private Integer area_size_type;
 
+    @ItemType(VariableConstraints.class)
+    private List<VariableConstraints> stepValuePairs;
+    private Long chargingStandardId;
+
+
     public BigDecimal getSuggest_unit_price() {
         return suggest_unit_price;
     }
@@ -61,6 +66,22 @@ public class CreateChargingStandardCommand {
 
     public Integer getArea_size_type() {
         return area_size_type;
+    }
+
+    public List<VariableConstraints> getStepValuePairs() {
+        return stepValuePairs;
+    }
+
+    public void setStepValuePairs(List<VariableConstraints> stepValuePairs) {
+        this.stepValuePairs = stepValuePairs;
+    }
+
+    public Long getChargingStandardId() {
+        return chargingStandardId;
+    }
+
+    public void setChargingStandardId(Long chargingStandardId) {
+        this.chargingStandardId = chargingStandardId;
     }
 
     public void setArea_size_type(Integer area_size_type) {
