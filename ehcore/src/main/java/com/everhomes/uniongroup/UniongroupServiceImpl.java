@@ -10,6 +10,7 @@ import com.everhomes.organization.*;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.search.UniongroupSearcher;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupConfigures;
@@ -235,11 +236,18 @@ public class UniongroupServiceImpl implements UniongroupService {
         if(details != null && details.size() > 0){
             List<OrganizationMemberDTO> dtos = details.stream().map(r->{
                 OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
-
+                //:todo 寻找部门名
                 List<OrganizationMember> departments = this.organizationProvider.listOrganizationMembersByDetailId(r.getId(),groupTypes);
                 if(departments != null && departments.size() > 0){
-//                    departments
+                    for(OrganizationMember d: departments){
+                        Organization departOrg = organizationProvider.findOrganizationById(d.getOrganizationId());
+                        if(departOrg != null && departOrg.getStatus().equals(OrganizationStatus.ACTIVE.getCode())){
+                            dto.setDepartmentName(departOrg.getName());
+                        }
+                    }
+
                 }
+                return dto;
             }).collect(Collectors.toList());
             response.setMembers(dtos);
             response.setNextPageAnchor(locator.getAnchor());
