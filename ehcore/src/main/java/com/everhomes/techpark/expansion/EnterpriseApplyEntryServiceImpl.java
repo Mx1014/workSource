@@ -1397,6 +1397,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				enterpriseLeaseIssuerProvider.createLeasePromotionConfig(config);
 			}
 
+		}else {
+			enterpriseLeaseIssuerProvider.deleteLeasePromotionConfig(cmd.getNamespaceId(),
+					"buildingIntroduceFlag");
 		}
 
 	}
