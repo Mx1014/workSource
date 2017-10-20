@@ -577,13 +577,14 @@ public class FieldServiceImpl implements FieldService {
         }
 
         if(fieldName.equals("status") ||
-                fieldName.equals("Status") ||
                 fieldName.equals("gender") ||
-                fieldName.equals("Gender") ||
-                (fieldName.indexOf("id")!=fieldName.length()-1-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("Id")!=-1) ||
+                (fieldName.indexOf("id")!=fieldName.length()-1-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("id")!=-1) ||
                 (fieldName.indexOf("Id")!=fieldName.length()-1-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
                 (fieldName.indexOf("Status")==fieldName.length()-1-5 && fieldName.indexOf("Status")!=-1) &&
-                        fieldName.indexOf("individual")==-1
+                        fieldName.indexOf("individual")==-1 ||
+                fieldName.indexOf("Type") != fieldName.length()-1-4 ||
+                fieldName.equals("type")   ||
+               !fieldName.equals("projectSource")
                 )
         {
             LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName+" class is "+clz.toString());
@@ -890,13 +891,14 @@ public class FieldServiceImpl implements FieldService {
                             cellValue = ExcelUtils.getCellValue(cell);
                             cellCopy = cellValue;
                             if(fieldName.equals("status") ||
-                                    fieldName.equals("Status") ||
                                     fieldName.equals("gender") ||
-                                    fieldName.equals("Gender") ||
-                                    (fieldName.indexOf("id")!=fieldName.length()-1-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("Id")!=-1) ||
+                                    (fieldName.indexOf("id")!=fieldName.length()-1-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("id")!=-1) ||
                                     (fieldName.indexOf("Id")!=fieldName.length()-1-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
                                     (fieldName.indexOf("Status")==fieldName.length()-1-5 && fieldName.indexOf("Status")!=-1) &&
-                                            fieldName.indexOf("individual")==-1
+                                            fieldName.indexOf("individual")==-1 ||
+                                    fieldName.indexOf("Type") != fieldName.length()-1-4 ||
+                                    fieldName.equals("type")   ||
+                                    !fieldName.equals("projectSource")
                                     ){
                                 //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
                                 ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cellValue);
