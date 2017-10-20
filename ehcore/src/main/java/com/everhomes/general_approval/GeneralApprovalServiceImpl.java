@@ -698,6 +698,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
         return listGeneralApproval(cmd2);
     }
+
+    @Override
+    public ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd) {
+        return null;
+    }
 //	@Override
 //	public GetTemplateByApprovalIdResponse getActiveGeneralFormByOriginId(GetActiveGeneralFormByOriginIdCommand cmd) {
 //		// TODO Auto-generated method stub

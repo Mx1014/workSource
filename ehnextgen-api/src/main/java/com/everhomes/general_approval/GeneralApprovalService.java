@@ -50,6 +50,9 @@ public interface GeneralApprovalService {
 
 	ListGeneralApprovalResponse listActiveGeneralApproval(ListActiveGeneralApprovalCommand cmd);
 
+	ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd);
+
+
 //	/**
 //	 * 直接通过表单id获取表单
 //	 */
