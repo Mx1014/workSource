@@ -1192,14 +1192,15 @@ public class AssetProviderImpl implements AssetProvider {
             ListChargingItemsDTO dto = new ListChargingItemsDTO();
             dto.setChargingItemName(item.getName());
             dto.setChargingItemId(item.getId());
+            dto.setIsSelected(isSelected);
             for(int j = 0; j < scopes.size(); j ++){
                 PaymentChargingItemScope scope = scopes.get(j);
                 if(item.getId() == scope.getChargingItemId()){
                     isSelected = 1;
                     dto.setProjectChargingItemName(scope.getProjectLevelName());
+                    dto.setIsSelected(isSelected);
+                    isSelected = 0;
                 }
-                dto.setIsSelected(isSelected);
-                isSelected = 0;
             }
             list.add(dto);
         }
@@ -2025,7 +2026,7 @@ public class AssetProviderImpl implements AssetProvider {
             scope.setId(nextSequence);
             scope.setNamespaceId(namespaceId);
             scope.setOwnerId(communityId);
-            scope.setOwnerType(PaymentConstants.OWER_TYPE_COMMUNITY);
+            scope.setOwnerType(PaymentConstants.OWNER_TYPE_ADMIN);
             scope.setProjectLevelName(vo.getProjectChargingItemName());
             list.add(scope);
         }

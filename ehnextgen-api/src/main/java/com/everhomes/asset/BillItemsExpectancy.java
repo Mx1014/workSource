@@ -18,9 +18,36 @@ public class BillItemsExpectancy {
     private String billDateStr;
     private String billDateDue;
     private String billDateDeadline;
+    private String billDateGeneration;
+    private String billCycleStart;
+    private String billCycleEnd;
 
     public BigDecimal getAmountReceivable() {
         return amountReceivable;
+    }
+
+    public String getBillDateGeneration() {
+        return billDateGeneration;
+    }
+
+    public void setBillDateGeneration(String billDateGeneration) {
+        this.billDateGeneration = billDateGeneration;
+    }
+
+    public String getBillCycleStart() {
+        return billCycleStart;
+    }
+
+    public void setBillCycleStart(String billCycleStart) {
+        this.billCycleStart = billCycleStart;
+    }
+
+    public String getBillCycleEnd() {
+        return billCycleEnd;
+    }
+
+    public void setBillCycleEnd(String billCycleEnd) {
+        this.billCycleEnd = billCycleEnd;
     }
 
     public Long getBillGroupId() {

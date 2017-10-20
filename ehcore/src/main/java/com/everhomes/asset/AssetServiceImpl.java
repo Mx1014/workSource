@@ -732,6 +732,31 @@ public class AssetServiceImpl implements AssetService {
                     this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()));
                 }
 
+                for(int g = 0; g< billItemsExpectancies.size(); g++){
+                    BillItemsExpectancy exp = billItemsExpectancies.get(g);
+                    //exp使用groupid，contractnum和datestr（yyyy-MM-dd）来分类
+                    //想要合并的是哪些呢？楼栋门牌
+                    BillIdentity identity = new BillIdentity();
+                    identity.setBillGroupId(groupRule.getBillGroupId());
+                    identity.setContract(cmd.getContractNum());
+                    String dateStr = exp.getBillDateStr();
+                    identity.setDateStr(dateStr);
+                    //每一个周期的bill
+                    // 确认一个bill的id
+                    Long nextBillId = 0l;
+                    if(map.containsKey(identity)){
+                        nextBillId = map.get(identity).getId();
+                    }else{
+                        nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
+                        if(nextBillId == 0){
+                            nextBillId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILLS.getClass()));
+                        }
+                    }
+                    //扫描循环
+
+
+                }
+
                 for(int g = 0; g< billItemsExpectancies.size(); g++) {
                     BillItemsExpectancy exp = billItemsExpectancies.get(g);
                     //exp使用groupid，contractnum和datestr（yyyy-MM-dd）来分类
@@ -960,6 +985,11 @@ public class AssetServiceImpl implements AssetService {
             obj.setAmountOwed(amount);
             obj.setDateStrBegin(a.getTime());
             obj.setDateStrEnd(d2.getTime());
+            if(d1.compareTo(dateStrEnd) ==-1){
+                obj.setBillDateGeneration(yyyyMMdd.format(d1));
+            }else{
+                obj.setBillDateGeneration(yyyyMMdd.format(dateStrEnd));
+            }
             //根据时间这里计算滞纳金并规定状态为已出账单,并校验调组，免租
             /**
              *
@@ -986,6 +1016,12 @@ public class AssetServiceImpl implements AssetService {
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"账单组最迟付款设置只能是日或月，数据库被篡改，请联系管理员");
             }
             obj.setBillDateDeadline(yyyyMMdd.format(deadline));
+            obj.setBillCycleStart(yyyyMMdd.format(a));
+            if(d.compareTo(dateStrEnd) ==-1){
+                obj.setBillCycleEnd(yyyyMMdd.format(d));
+            }else{
+                obj.setBillCycleEnd(yyyyMMdd.format(dateStrEnd));
+            }
 
             list.add(obj);
             //更改a的值

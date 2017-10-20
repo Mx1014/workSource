@@ -6,4 +6,5 @@ package com.everhomes.asset;
  */
 public interface PaymentConstants {
     public final String OWER_TYPE_COMMUNITY = "community";
+    public final String OWNER_TYPE_ADMIN = "PM";
 }
