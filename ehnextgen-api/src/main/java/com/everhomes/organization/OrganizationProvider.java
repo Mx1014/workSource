@@ -488,6 +488,8 @@ public interface OrganizationProvider {
 
 	UserOrganizations findUserOrganizationByUserIdAndOrgId(Long userId, Long orgId);
 
+	UserOrganizations findActiveAndWaitUserOrganizationByUserIdAndOrgId(Long userId, Long orgId);
+
 	UserOrganizations findUserOrganizationById(Long id);
 
 	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);

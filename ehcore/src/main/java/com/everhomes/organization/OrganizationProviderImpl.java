@@ -5426,6 +5426,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
+	public UserOrganizations findActiveAndWaitUserOrganizationByUserIdAndOrgId(Long userId, Long orgId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_USER_ORGANIZATIONS)
+				.where(Tables.EH_USER_ORGANIZATIONS.USER_ID.eq(userId)
+						.and(Tables.EH_USER_ORGANIZATIONS.STATUS.in(UserOrganizationStatus.ACTIVE.getCode(), UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode()))
+						.and(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(orgId)))
+				.fetchOne();
+		if (record != null)
+			return ConvertHelper.convert(record, UserOrganizations.class);
+		return null;
+	}
+
+	@Override
 	public UserOrganizations findUserOrganizationById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Record record = context.select().from(Tables.EH_USER_ORGANIZATIONS)

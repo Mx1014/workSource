@@ -1534,6 +1534,13 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setIsAuth(0);
 			//添加地址信息
 			addGroupAddressDto(dto, userGroups);
+
+			//最新活跃时间 add by sfyan 20170620
+			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(user.getId(), 1);
+			if(userActivities.size() > 0){
+				dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+			}
+
 			dtos.add(dto);
 			res.setDtos(dtos);
 			return res;
@@ -1548,7 +1555,7 @@ public class CommunityServiceImpl implements CommunityService {
 			Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
 			if(cmd.getIsAuth() == 1){
 				c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()));
-			}else if(cmd.getIsAuth() == 2){
+			}else if(cmd.getIsAuth() == 3){
 				Condition cond = Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
 				cond = cond.or(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()));
 				c = c.and(cond);
@@ -1585,6 +1592,13 @@ public class CommunityServiceImpl implements CommunityService {
 				List<UserGroup> userGroups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
 				//添加地址信息
 				addGroupAddressDto(dto, userGroups);
+
+				//最新活跃时间 add by sfyan 20170620
+				List<UserActivity> userActivities = userActivityProvider.listUserActivetys(user.getId(), 1);
+				if(userActivities.size() > 0){
+					dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+				}
+
 				userIdList.add(user.getId());
 				dtos.add(dto);
 			}
@@ -1692,8 +1706,13 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
 			dto.setAddressDtos(addressDtos);
+
+			//最新活跃时间 add by sfyan 20170620
+			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(user.getId(), 1);
+			if(userActivities.size() > 0){
+				dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+			}
 		}
-		
 		return dto;
 	}
 	
@@ -1739,6 +1758,12 @@ public class CommunityServiceImpl implements CommunityService {
 					logDTO.setOperatorNickName(operator.getNickName());
 				dto.getMemberLogDTOs().add(logDTO);
 			}
+		}
+
+		//最新活跃时间 add by sfyan 20170620
+		List<UserActivity> userActivities = userActivityProvider.listUserActivetys(cmd.getUserId(), 1);
+		if(userActivities.size() > 0){
+			dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
 		}
 		return dto;
 	}
@@ -1791,9 +1816,8 @@ public class CommunityServiceImpl implements CommunityService {
 			if (null != organization && organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())
 					&& OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE) {
 
-
 				//增加返回用户在企业中是否是高管、职位的信息  add by yanjun 20171017
-				UserOrganizations userOrg = organizationProvider.findUserOrganizationByUserIdAndOrgId(member.getTargetId(), detailDto.getOrganizationId());
+				UserOrganizations userOrg = organizationProvider.findActiveAndWaitUserOrganizationByUserIdAndOrgId(member.getTargetId(), detailDto.getOrganizationId());
 				if(userOrg != null){
 					CommunityUserOrgDetailDTO communityUserOrgDetailDTO = new CommunityUserOrgDetailDTO();
 					communityUserOrgDetailDTO.setDetailId(userOrg.getId());
