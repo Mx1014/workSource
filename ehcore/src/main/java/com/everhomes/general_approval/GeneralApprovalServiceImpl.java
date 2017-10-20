@@ -1,5 +1,6 @@
 package com.everhomes.general_approval;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.Timestamp;
@@ -9,11 +10,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormTemplate;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
 import freemarker.cache.StringTemplateLoader;
@@ -32,18 +37,10 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.db.DbProvider;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowReferType;
-import com.everhomes.rest.flow.GeneralModuleInfo;
-import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.GeneralApprovalDTO;
 import com.everhomes.rest.general_approval.GeneralApprovalIdCommand;
@@ -80,21 +77,37 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalServiceImpl.class);
     @Autowired
     private GeneralApprovalValProvider generalApprovalValProvider;
+
     @Autowired
     private GeneralFormProvider generalFormProvider;
+
     @Autowired
     private GeneralApprovalProvider generalApprovalProvider;
+
     @Autowired
     private OrganizationProvider organizationProvider;
 
-    private StringTemplateLoader templateLoader;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
 
-    private Configuration templateConfig;
+    @Autowired
+    private ConfigurationProvider configProvider;
+
+    @Autowired
+    private GeneralApprovalFlowCase generalApprovalFlowCase;
+
     @Autowired
     private FlowService flowService;
 
     @Autowired
     private DbProvider dbProvider;
+
+    private StringTemplateLoader templateLoader;
+
+    private Configuration templateConfig;
+
+    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
 
     @Override
     public GetTemplateByApprovalIdResponse getTemplateByApprovalId(
@@ -701,7 +714,62 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd) {
-        return null;
+        ListGeneralApprovalRecordsResponse response = new ListGeneralApprovalRecordsResponse();
+        ListingLocator locator = new ListingLocator();
+        SearchFlowCaseCommand command = new SearchFlowCaseCommand();
+
+        command.setStartTime(cmd.getStartTime());
+        command.setEndTime(cmd.getEndTime());
+        command.setOrganizationId(cmd.getOrganizationId());
+        command.setModuleId(cmd.getModuleId());
+        //  审批状态
+        if (cmd.getApprovalStatus() != null)
+            command.setFlowCaseStatus(cmd.getApprovalStatus());
+        if (cmd.getPageAnchor() != null)
+            command.setPageAnchor(cmd.getPageAnchor());
+
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        command.setPageSize(count);
+
+        List<FlowCaseDetail> details = flowCaseProvider.findAdminFlowCases(locator, count, command, (locator1, query) -> {
+            //  审批类型
+            if (cmd.getApprovalType() != null)
+                query.addConditions(Tables.EH_FLOW_CASES.TITLE.eq(cmd.getApprovalType()));
+            //  申请人姓名
+            if (cmd.getCreatorName() != null)
+                query.addConditions(Tables.EH_FLOW_CASES.APPLIER_NAME.eq(cmd.getCreatorName()));
+            //  审批编号
+            if (cmd.getApprovalNo() != null)
+                query.addConditions(GeneralApprovalFlowCaseCustomField.APPROVAL_NO.getField().eq(cmd.getApprovalNo()));
+            //  申请人部门
+            if (cmd.getCreatorDepartmentId() != null)
+                query.addConditions(GeneralApprovalFlowCaseCustomField.CREATOR_DEPARTMENT_ID.getField().eq(cmd.getCreatorDepartmentId()));
+            return query;
+        });
+        if (details != null && details.size() > 0){
+            List<GeneralApprovalRecordDTO> results = details.stream().map(r ->{
+                GeneralApprovalFlowCase flowCase = ConvertHelper.convert(r, GeneralApprovalFlowCase.class);
+                GeneralApprovalRecordDTO dto = new GeneralApprovalRecordDTO();
+                dto.setId(r.getId());
+                dto.setNamespaceId(r.getNamespaceId());
+                dto.setModuleId(r.getModuleId());
+                dto.setCreatorName(r.getApplierName());
+                dto.setCreatorDepartment(flowCase.getCreatorDepartment());
+                dto.setCreatorDepartmentId(flowCase.getCreatorDepartmentId());
+                dto.setCreatorMobile(r.getApplierPhone());
+                String time = format.format(r.getCreateTime());
+                dto.setCreateTime(time);
+                dto.setApprovalType(r.getTitle());
+                dto.setApprovalNo(flowCase.getApprovalNo());
+                dto.setApprovalStatus(r.getStatus());
+                dto.setFlowCaseId(flowCase.getId());
+                return dto;
+            }).collect(Collectors.toList());
+            response.setRecords(results);
+            response.setNextPageAnchor(locator.getAnchor());
+            return response;
+        }
+            return null;
     }
 //	@Override
 //	public GetTemplateByApprovalIdResponse getActiveGeneralFormByOriginId(GetActiveGeneralFormByOriginIdCommand cmd) {

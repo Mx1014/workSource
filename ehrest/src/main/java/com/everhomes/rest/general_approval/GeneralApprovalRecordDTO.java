@@ -4,13 +4,15 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+
  * <li>creatorName: 申请人</li>
  * <li>creatorDepartment: 申请人部门</li>
+ * <li>creatorDepartmentId: 申请人部门id</li>
  * <li>creatorMobile: 申请人手机号</li>
  * <li>createTime: 申请时间</li>
  * <li>approvalType: 审批类型</li>
  * <li>approvalNo: 审批编号</li>
- * <li>approvalStatus: 审批状态</li>
+ * <li>approvalStatus: 审批状态 参考{@link com.everhomes.rest.flow.FlowCaseStatus}</li>
  * <li>flowCaseId: 工作流id</li>
  * </ul>
  */
@@ -27,15 +29,17 @@ public class GeneralApprovalRecordDTO {
 
     private String creatorDepartment;
 
+    private Long creatorDepartmentId;
+
     private String creatorMobile;
 
     private String createTime;
 
     private String approvalType;
 
-    private String approvalNo;
+    private Long approvalNo;
 
-    private String approvalStatus;
+    private Byte approvalStatus;
 
     private Long flowCaseId;
 
@@ -90,6 +94,14 @@ public class GeneralApprovalRecordDTO {
         this.creatorDepartment = creatorDepartment;
     }
 
+    public Long getCreatorDepartmentId() {
+        return creatorDepartmentId;
+    }
+
+    public void setCreatorDepartmentId(Long creatorDepartmentId) {
+        this.creatorDepartmentId = creatorDepartmentId;
+    }
+
     public String getCreatorMobile() {
         return creatorMobile;
     }
@@ -114,19 +126,19 @@ public class GeneralApprovalRecordDTO {
         this.approvalType = approvalType;
     }
 
-    public String getApprovalNo() {
+    public Long getApprovalNo() {
         return approvalNo;
     }
 
-    public void setApprovalNo(String approvalNo) {
+    public void setApprovalNo(Long approvalNo) {
         this.approvalNo = approvalNo;
     }
 
-    public String getApprovalStatus() {
+    public Byte getApprovalStatus() {
         return approvalStatus;
     }
 
-    public void setApprovalStatus(String approvalStatus) {
+    public void setApprovalStatus(Byte approvalStatus) {
         this.approvalStatus = approvalStatus;
     }
 
