@@ -387,7 +387,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 	private void populateProjectDetailInfo (LeaseProjectDTO dto, Community r, LeaseProject leaseProject) {
 //		populateProjectBasicInfo(dto, r);
-
+		dto.setName(r.getName());
 		String json = leaseProject.getExtraInfoJson();
 		LeaseProjectExtraInfo extraInfo = JSONObject.parseObject(json, LeaseProjectExtraInfo.class);
 		BeanUtils.copyProperties(extraInfo, dto);
@@ -487,6 +487,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		if (null == leaseProject) {
 			dto = new LeaseProjectDTO();
+
 			populateProjectBasicInfo(dto, community);
 		}else {
 			dto = ConvertHelper.convert(leaseProject, LeaseProjectDTO.class);
