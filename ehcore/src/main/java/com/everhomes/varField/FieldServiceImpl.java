@@ -150,8 +150,14 @@ public class FieldServiceImpl implements FieldService {
             //一把取出scope field对应的所有系统的field 然后把对应信息塞进fielddto中
             //一把取出所有的scope field对应的scope items信息
             List<Field> fields = fieldProvider.listFields(fieldIds);
-            List<ScopeFieldItem> fieldItems = fieldProvider.listScopeFieldItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId());
+            List<ScopeFieldItem> scopeItems = new ArrayList<>();
+            if(namespaceFlag) {
+                scopeItems = fieldProvider.listScopeFieldItems(fieldIds, cmd.getNamespaceId(), null);
+            } else {
+                scopeItems = fieldProvider.listScopeFieldItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId());
+            }
 
+            List<ScopeFieldItem> fieldItems = scopeItems;
             if(fields != null && fields.size() > 0) {
                 List<FieldDTO> dtos = new ArrayList<>();
                 fields.forEach(field -> {
