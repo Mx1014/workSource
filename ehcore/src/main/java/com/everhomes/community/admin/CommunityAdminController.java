@@ -461,7 +461,7 @@ public class CommunityAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/community/listUserBycommunityId</b>
-     * <p>查询已注册的用户</p>
+     * <p>查询用户</p>
      */
     @RequestMapping("listUserBycommunityId")
     @RestReturn(value=CommunityUserAddressResponse.class)
