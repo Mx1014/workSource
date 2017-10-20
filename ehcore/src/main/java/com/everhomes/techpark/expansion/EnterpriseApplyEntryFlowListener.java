@@ -129,6 +129,10 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         EnterpriseOpRequest applyEntry = enterpriseApplyEntryProvider.getApplyEntryById(flowCase.getReferId());
         if (applyEntry != null) {
+            String locale = UserContext.current().getUser().getLocale();
+
+            String defaultValue = localeStringService.getLocalizedString(ApplyEntryErrorCodes.SCOPE, String.valueOf(ApplyEntryErrorCodes.WU), locale, "");
+
             EnterpriseApplyEntryDTO dto = ConvertHelper.convert(applyEntry, EnterpriseApplyEntryDTO.class);
 
             if (null != applyEntry.getAddressId()){
@@ -140,7 +144,6 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             }
             flowCase.setCustomObject(JSONObject.toJSONString(dto));
 
-            String locale = UserContext.current().getUser().getLocale();
             Map<String, Object> map = new HashMap<>();
 
             String buildingName = processBuildingName(applyEntry);
@@ -176,7 +179,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
             map.put("sourceType", defaultIfNull(sourceType, ""));
 
-            map.put("description", defaultIfNull(applyEntry.getDescription(), ""));
+            map.put("description", StringUtils.isBlank(applyEntry.getDescription()) ? defaultValue : applyEntry.getDescription());
             
             String jsonStr;
 
@@ -187,7 +190,6 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             cmd2.setSourceId(dto.getId());
             List<FlowCaseEntity> formEntities = generalFormService.getGeneralFormFlowEntities(cmd2);
 
-            String defaultValue = localeStringService.getLocalizedString(ApplyEntryErrorCodes.SCOPE, String.valueOf(ApplyEntryErrorCodes.WU), locale, "");
 
             formEntities.forEach(r -> {
                 if (StringUtils.isBlank(r.getValue())) {
