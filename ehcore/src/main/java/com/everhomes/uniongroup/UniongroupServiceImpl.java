@@ -228,11 +228,18 @@ public class UniongroupServiceImpl implements UniongroupService {
         ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
         Long pageAnchor = cmd.getPageAnchor() != null ? cmd.getPageAnchor() : 0L;
         Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize() : 9999;
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         CrossShardListingLocator locator = new CrossShardListingLocator(pageAnchor);
         List<OrganizationMemberDetails>  details = this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getContactName(), cmd.getVersionCode(), cmd.getDepartmentId(), pageSize, locator);
         if(details != null && details.size() > 0){
             List<OrganizationMemberDTO> dtos = details.stream().map(r->{
-                return ConvertHelper.convert(r, OrganizationMemberDTO.class);
+                OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
+
+                List<OrganizationMember> departments = this.organizationProvider.listOrganizationMembersByDetailId(r.getId(),groupTypes);
+                if(departments != null && departments.size() > 0){
+//                    departments
+                }
             }).collect(Collectors.toList());
             response.setMembers(dtos);
             response.setNextPageAnchor(locator.getAnchor());
