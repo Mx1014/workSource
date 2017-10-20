@@ -81,7 +81,7 @@ public class UniongroupVersionProviderImpl implements  UniongroupVersionProvider
         List<UniongroupVersion> result = getReadOnlyContext().select().from(Tables.EH_UNIONGROUP_VERSION)
                 .where(Tables.EH_UNIONGROUP_VERSION.ENTERPRISE_ID.eq(enterpriseId))
                 .and(Tables.EH_UNIONGROUP_VERSION.GROUP_TYPE.eq(groupType))
-                .orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+                .orderBy(Tables.EH_UNIONGROUP_VERSION.ID.asc())
                 .fetch().map(r -> ConvertHelper.convert(r, UniongroupVersion.class));
         if (null == result || result.size() == 0) {
             return null;
