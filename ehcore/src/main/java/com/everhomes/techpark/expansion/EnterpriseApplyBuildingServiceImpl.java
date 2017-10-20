@@ -497,8 +497,12 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		List<LeaseBuilding> leaseBuildings = enterpriseApplyBuildingProvider.listLeaseBuildings(UserContext.getCurrentNamespaceId(),
 				cmd.getProjectId(), null, 5);
 
-		dto.setBuildings(leaseBuildings.stream().map(r -> ConvertHelper.convert(r, LeaseBuildingDTO.class))
-				.collect(Collectors.toList()));
+		dto.setBuildings(leaseBuildings.stream().map(r -> {
+			LeaseBuildingDTO d = ConvertHelper.convert(r, LeaseBuildingDTO.class);
+			populatePostUrl(d, r.getPosterUri());
+
+			return d;
+		}).collect(Collectors.toList()));
 		return dto;
 	}
 
