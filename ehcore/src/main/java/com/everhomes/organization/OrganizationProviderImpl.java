@@ -1786,7 +1786,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 context.select(Tables.EH_ORGANIZATIONS.ID).from(Tables.EH_ORGANIZATIONS)
                         .where(cond)));
         if (null != locator.getAnchor())
-            condition = condition.and(t1.field("id").lt(locator.getAnchor()));
+            condition = condition.and(t1.field("id").gt(locator.getAnchor()));
 
         List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).limit(pageSize).fetch().map(new OrganizationMemberRecordMapper());
         records.stream().map(r -> {
@@ -5513,6 +5513,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
 		Condition condition = t1.field("id").gt(0L);
 
+		if (null != locator && null != locator.getAnchor())
+			condition = condition.and(t1.field("id").gt(locator.getAnchor()));
+
 		Organization org = findOrganizationById(listCommand.getOrganizationId());
 
 		Condition cond = null;
@@ -5577,8 +5580,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		condition = condition.and(cond);
-		if (null != locator && null != locator.getAnchor())
-			condition.and(t1.field("id").lt(locator.getAnchor()));
 
 		List<OrganizationMember> records = step.where(condition).groupBy(t1.field("contact_token")).orderBy(t1.field("detail_id").desc()).limit(pageSize).fetch().map(new OrganizationMemberRecordMapper());
 		if (records != null) {
@@ -5591,8 +5592,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			locator.setAnchor(null);
 
 		if (result.size() >= pageSize) {
-			result.remove(result.size() - 1);
 			locator.setAnchor(result.get(result.size() - 1).getId());
+			result.remove(result.size() - 1);
+//			locator.setAnchor(result.get(result.size() - 1).getId());
 		}
 		return result;
 	}
