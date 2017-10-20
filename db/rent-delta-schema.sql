@@ -1,3 +1,17 @@
+DROP TABLE IF EXISTS `eh_lease_configs`;
+DROP TABLE IF EXISTS `eh_lease_configs2`;
+
+CREATE TABLE `eh_lease_configs` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) DEFAULT NULL COMMENT 'owner type, e.g EhCommunities',
+  `owner_id` bigint(20) DEFAULT NULL COMMENT 'owner id, e.g eh_communities id',
+  `config_name` varchar(128) DEFAULT NULL,
+  `config_value` varchar(128) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `creator_uid` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_lease_project_communities` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
