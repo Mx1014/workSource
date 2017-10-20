@@ -5,8 +5,12 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.*;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.search.UniongroupSearcher;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupConfigures;
@@ -221,8 +225,34 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
-    public List listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd) {
-        return this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizaitonId(), cmd.getContactName(), cmd.getVersionCode(), cmd.getDepartmentId());
+    public ListOrganizationMemberCommandResponse listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd) {
+        ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
+        Long pageAnchor = cmd.getPageAnchor() != null ? cmd.getPageAnchor() : 0L;
+        Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize() : 9999;
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        CrossShardListingLocator locator = new CrossShardListingLocator(pageAnchor);
+        List<OrganizationMemberDetails>  details = this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getContactName(), cmd.getVersionCode(), cmd.getDepartmentId(), pageSize, locator);
+        if(details != null && details.size() > 0){
+            List<OrganizationMemberDTO> dtos = details.stream().map(r->{
+                OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
+                //:todo 寻找部门名
+                List<OrganizationMember> departments = this.organizationProvider.listOrganizationMembersByDetailId(r.getId(),groupTypes);
+                if(departments != null && departments.size() > 0){
+                    for(OrganizationMember d: departments){
+                        Organization departOrg = organizationProvider.findOrganizationById(d.getOrganizationId());
+                        if(departOrg != null && departOrg.getStatus().equals(OrganizationStatus.ACTIVE.getCode())){
+                            dto.setDepartmentName(departOrg.getName());
+                        }
+                    }
+
+                }
+                return dto;
+            }).collect(Collectors.toList());
+            response.setMembers(dtos);
+            response.setNextPageAnchor(locator.getAnchor());
+        }
+        return response;
     }
 
     private Organization checkOrganization(Long orgId) {

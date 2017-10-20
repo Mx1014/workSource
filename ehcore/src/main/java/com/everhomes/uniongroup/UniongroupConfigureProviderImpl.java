@@ -5,6 +5,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationMemberDetailsMapper;
@@ -777,7 +778,13 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
     @Override
     public List listDetailNotInUniongroup(Integer namespaceId, Long organizationId, String contactName, Integer versionCode, Long departmentId) {
+        return listDetailNotInUniongroup(namespaceId, organizationId, contactName, versionCode, departmentId, 99999,null);
+    }
+
+    @Override
+    public List listDetailNotInUniongroup(Integer namespaceId, Long organizationId, String contactName, Integer versionCode, Long departmentId, Integer pageSize, CrossShardListingLocator locator) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        pageSize = pageSize + 1;
         /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
         TableLike t1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t1");
         TableLike t2 = Tables.EH_UNIONGROUP_MEMBER_DETAILS.as("t2");
@@ -790,15 +797,27 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         }
 
         Condition condition = t1.field("organization_id").eq(organizationId).and(t1.field("namespace_id").eq(namespaceId)).and(t2.field("detail_id").isNull());
+        if (null != locator.getAnchor())
+            condition = condition.and(t1.field("id").gt(locator.getAnchor()));
+
         if(StringUtils.isNotEmpty(contactName)){
             condition = condition.and(t1.field("contact_name").like(contactName +"%"));
         }
         if(departmentId != null){
-            condition = condition.and(t3.field("organizaiton_id").eq(departmentId));
+            condition = condition.and(t3.field("organization_id").eq(departmentId));
         }
         condition = condition.and(t1.field("id").in(context.selectDistinct(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))));
-        List<OrganizationMemberDetails> details = step.where(condition).fetch().map(new OrganizationMemberDetailsMapper());
+
+
+        List<OrganizationMemberDetails> details = step.where(condition).groupBy(t1.field("target_id")).limit(pageSize).fetch().map(new OrganizationMemberDetailsMapper());
         LOGGER.debug("listDetailNotInUniongroup 's sql is :" + step.where(condition).getSQL());
+
+        locator.setAnchor(null);
+        if (details.size() >= pageSize) {
+            details.remove(details.size() - 1);
+            locator.setAnchor(details.get(details.size() - 1).getId());
+        }
+
         return details;
     }
 

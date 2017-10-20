@@ -2,6 +2,7 @@
 package com.everhomes.uniongroup;
 
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.uniongroup.*;
 
 import java.util.List;
@@ -45,7 +46,7 @@ public interface UniongroupService {
     /**
      * 查询一个公司下没有分配薪酬组的人
      **/
-    List listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd);
+    ListOrganizationMemberCommandResponse listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd);
 
     public Integer countUnionGroupMemberDetailsByOrgId(Integer namespaceId, Long ownerId);
 
