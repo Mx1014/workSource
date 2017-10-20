@@ -103,4 +103,5 @@ public class  OrganizationMemberDetails extends EhOrganizationMemberDetails {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

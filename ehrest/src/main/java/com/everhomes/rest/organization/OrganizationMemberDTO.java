@@ -119,6 +119,8 @@ public class OrganizationMemberDTO {
     private String operatorName;
     private String operatorPhone;
 
+    private String departmentName;
+
     public OrganizationMemberDTO() {
     }
 
@@ -483,5 +485,13 @@ public class OrganizationMemberDTO {
 
     public void setSalaryGroupId(Long salaryGroupId) {
         this.salaryGroupId = salaryGroupId;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 }
