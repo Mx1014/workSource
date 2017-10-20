@@ -5591,6 +5591,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListOrganizationContactCommand  cmd_1 = new ListOrganizationContactCommand();
         cmd_1.setOrganizationId(cmd.getOrganizationId());
         cmd_1.setKeywords(cmd.getKeywords());
+        cmd_1.setFilterScopeTypes(Collections.singletonList("current"));
         ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
         res.setMembers(res_1.getMembers());
 

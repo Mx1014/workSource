@@ -3467,7 +3467,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
 		}
 		if (enterpriseId != null) {
-			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/" + enterpriseId + "%"));
+			query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like("/" + enterpriseId + "%"));
 		}
 
 		query.fetch().map((r) -> {

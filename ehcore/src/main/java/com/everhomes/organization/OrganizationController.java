@@ -1822,12 +1822,12 @@ public class OrganizationController extends ControllerBase {
 
     /**
      * <b>URL: /org/findOrgByName</b>
-     * <p>超级查询接口</p>
+     * <p>根据名字查部门</p>
      */
     @RequestMapping("findOrgByName")
     @RestReturn(value = String.class)
     public RestResponse findOrgByName(CreateResourceCategoryCommand cmd) {
-        this.organizationService.getOrganizationNameByNameAndType(cmd.getName(), "aaaaa");
+        this.organizationService.getOrganizationNameByNameAndType(cmd.getName(), "DEPARTMENT");
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
