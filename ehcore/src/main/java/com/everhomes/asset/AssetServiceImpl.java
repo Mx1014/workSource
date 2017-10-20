@@ -1027,7 +1027,9 @@ public class AssetServiceImpl implements AssetService {
         }
         LOGGER.info("账单产生了"+time+"项目,真实为"+list.size());
         //拆卸免租的包裹
-        cmd.get
+        List<RentFree> rentFrees = cmd.getRentFrees();
+
+        
         return list;
     }
 
