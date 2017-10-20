@@ -85,3 +85,17 @@ CREATE TABLE `eh_energy_meter_tasks` (
   KEY `target_id` (`target_id`),		
   KEY `executive_expire_time` (`executive_expire_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 操作记录表 目前只有计划操作记录
+CREATE TABLE `eh_energy_meter_logs` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the log, enterprise, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'plan, etc',
+  `target_id` BIGINT NOT NULL DEFAULT 0,
+  `process_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: insert, 2: update, 3: delete',
+  `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record operator user id',
+  `create_time` DATETIME,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

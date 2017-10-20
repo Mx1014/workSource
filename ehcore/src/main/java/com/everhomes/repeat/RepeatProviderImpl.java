@@ -51,6 +51,18 @@ private static final Logger LOGGER = LoggerFactory.getLogger(RepeatProviderImpl.
 	}
 
 	@Override
+	public void updateRepeatSettings(RepeatSettings repeat) {
+		assert(repeat.getId() != null);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhRepeatSettings.class, repeat.getId()));
+		EhRepeatSettingsDao dao = new EhRepeatSettingsDao(context.configuration());
+		dao.update(repeat);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRepeatSettings.class, repeat.getId());
+
+	}
+
+	@Override
 	public void deleteRepeatSettingsById(Long id) {
 		// TODO Auto-generated method stub
 		

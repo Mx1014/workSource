@@ -95,6 +95,14 @@ public class RepeatServiceImpl implements RepeatService {
 	}
 
 	@Override
+	public void updateRepeatSettings(RepeatSettings repeat) {
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("update repeat setting, repeat=" + repeat);
+		}
+		repeatProvider.updateRepeatSettings(repeat);
+	}
+
+	@Override
 	public void deleteRepeatSettingsById(Long id) {
 		// TODO Auto-generated method stub
 		

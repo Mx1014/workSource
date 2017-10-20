@@ -13,6 +13,7 @@ public interface RepeatService {
 	Timestamp getEndTimeByAnalyzeDuration(Timestamp startTime, String duration);
 	
 	void createRepeatSettings(RepeatSettings repeat);
+	void updateRepeatSettings(RepeatSettings repeat);
 	void deleteRepeatSettingsById(Long id);
 	RepeatSettings findRepeatSettingById(Long id);
 

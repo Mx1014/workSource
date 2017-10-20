@@ -16,6 +16,8 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.repeat.RepeatService;
+import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.CommonStatus;
@@ -27,6 +29,8 @@ import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.repeat.RepeatServiceErrorCode;
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
@@ -66,6 +70,7 @@ import javax.validation.Validator;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ConvolveOp;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -195,6 +200,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private EnergyPlanProvider energyPlanProvider;
+
+    @Autowired
+    private RepeatService repeatService;
 
 //    @Override
 //    public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
@@ -2687,6 +2695,136 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 readEnergyMeter(read);
             });
         }
+    }
+
+    @Override
+    public void deleteEnergyPlan(DeleteEnergyPlanCommand cmd) {
+
+    }
+
+    @Override
+    public EnergyPlanDTO findEnergyPlanDetails(FindEnergyPlanDetailsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public ListEnergyPlanMetersResponse listEnergyPlanMeters(ListEnergyPlanMetersCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public ListEnergyPlanMetersResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd) {
+        return null;
+    }
+
+    private RepeatSettings dealEnergyPlanRepeat(RepeatSettingsDTO dto) {
+        if(dto == null) {
+            throw RuntimeErrorException.errorWith(RepeatServiceErrorCode.SCOPE,
+                    RepeatServiceErrorCode.ERROR_REPEAT_SETTING_NOT_EXIST,
+                    "执行周期为空");
+        }
+
+        RepeatSettings repeat = ConvertHelper.convert(dto, RepeatSettings.class);
+        if(dto.getStartDate() != null)
+            repeat.setStartDate(new Date(dto.getStartDate()));
+        if(dto.getEndDate() != null)
+            repeat.setEndDate(new Date(dto.getEndDate()));
+
+        if(repeat.getId() == null) {
+            repeat.setCreatorUid(UserContext.currentUserId());
+            repeatService.createRepeatSettings(repeat);
+        } else {
+            repeatService.updateRepeatSettings(repeat);
+        }
+        return repeat;
+    }
+
+    private void dealEnergyPlanGroups(EnergyPlan plan, List<EnergyPlanGroupDTO> groups) {
+        //groups有的从maps去掉，groups没有的删除，maps没有的新增
+        Map<Long, EnergyPlanGroupMap> maps = energyPlanProvider.listGroupMapsByEnergyPlan(plan.getId());
+        if(groups != null && groups.size() > 0) {
+            groups.forEach(group -> {
+                if(group.getId() != null) {
+                    maps.remove(group.getId());
+                } else {
+                    EnergyPlanGroupMap groupMap = ConvertHelper.convert(group, EnergyPlanGroupMap.class);
+                    energyPlanProvider.createEnergyPlanGroupMap(groupMap);
+                }
+            });
+        }
+        if(maps != null && maps.size() > 0) {
+            maps.forEach((id, groupMap) -> {
+                energyPlanProvider.deleteEnergyPlanGroupMap(groupMap);
+            });
+        }
+
+
+    }
+
+    private void dealEnergyPlanMeters(EnergyPlan plan, List<EnergyPlanMeterDTO> meters) {
+        //meters有的从maps去掉，meters没有的删除，maps没有的新增
+        Map<Long, EnergyPlanMeterMap> maps = energyPlanProvider.listMeterMapsByEnergyPlan(plan.getId());
+        if(meters != null && meters.size() > 0) {
+            meters.forEach(meter -> {
+                if(meter.getId() != null) {
+                    maps.remove(meter.getId());
+                } else {
+                    EnergyPlanMeterMap meterMap = ConvertHelper.convert(meter, EnergyPlanMeterMap.class);
+                    energyPlanProvider.createEnergyPlanMeterMap(meterMap);
+                }
+            });
+        }
+
+        if(maps != null && maps.size() > 0) {
+            maps.forEach((id, meterMap) -> {
+                energyPlanProvider.deleteEnergyPlanMeterMap(meterMap);
+            });
+        }
+
+    }
+
+    private EnergyPlanDTO toEnergyPlanDTO(EnergyPlan plan) {
+        EnergyPlanDTO dto = ConvertHelper.convert(plan, EnergyPlanDTO.class);
+        if(null != plan.getRepeatSettingId() && plan.getRepeatSettingId() != 0) {
+            RepeatSettings repeat = repeatService.findRepeatSettingById(plan.getRepeatSettingId());
+            RepeatSettingsDTO repeatDTO = ConvertHelper.convert(repeat, RepeatSettingsDTO.class);
+            dto.setRepeat(repeatDTO);
+        }
+        List<EnergyPlanMeterMap> meterMaps = energyPlanProvider.listMetersByEnergyPlan(plan.getId());
+        if(meterMaps != null && meterMaps.size() > 0) {
+            List<EnergyPlanMeterDTO> meters = new ArrayList<>();
+            meterMaps.forEach(meter -> {
+                EnergyPlanMeterDTO meterDTO = ConvertHelper.convert(meter, EnergyPlanMeterDTO.class);
+                meters.add(meterDTO);
+            });
+            dto.setMeters(meters);
+        }
+        List<EnergyPlanGroupMap> groupMaps = energyPlanProvider.listGroupsByEnergyPlan(plan.getId());
+        if(groupMaps != null && groupMaps.size() > 0) {
+            List<EnergyPlanGroupDTO> groups = new ArrayList<>();
+            groupMaps.forEach(group -> {
+                EnergyPlanGroupDTO groupDTO = ConvertHelper.convert(group, EnergyPlanGroupDTO.class);
+                groups.add(groupDTO);
+            });
+            dto.setGroups(groups);
+        }
+        return dto;
+    }
+
+    @Override
+    public EnergyPlanDTO updateEnergyPlan(UpdateEnergyPlanCommand cmd) {
+        EnergyPlan plan = ConvertHelper.convert(cmd, EnergyPlan.class);
+        RepeatSettings repeat = dealEnergyPlanRepeat(cmd.getRepeat());
+        plan.setRepeatSettingId(repeat.getId());
+        if(cmd.getId() == null) {
+            energyPlanProvider.createEnergyPlan(plan);
+        } else {
+            energyPlanProvider.updateEnergyPlan(plan);
+        }
+
+        dealEnergyPlanGroups(plan, cmd.getGroups());
+        dealEnergyPlanMeters(plan, cmd.getMeters());
+        return toEnergyPlanDTO(plan);
     }
 
     @Override

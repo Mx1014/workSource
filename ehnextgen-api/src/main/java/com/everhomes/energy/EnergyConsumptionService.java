@@ -247,4 +247,10 @@ public interface EnergyConsumptionService {
     String getEnergyMeterQRCode(GetEnergyMeterQRCodeCommand cmd);
     void exportEnergyMeterQRCode(ExportEnergyMeterQRCodeCommand cmd, HttpServletResponse response);
     void exportSearchEnergyMeterQRCode(SearchEnergyMeterCommand cmd, HttpServletResponse response);
+
+    EnergyPlanDTO updateEnergyPlan(UpdateEnergyPlanCommand cmd);
+    EnergyPlanDTO findEnergyPlanDetails(FindEnergyPlanDetailsCommand cmd);
+    void deleteEnergyPlan(DeleteEnergyPlanCommand cmd);
+    ListEnergyPlanMetersResponse listEnergyPlanMeters(ListEnergyPlanMetersCommand cmd);
+    ListEnergyPlanMetersResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd);
 }

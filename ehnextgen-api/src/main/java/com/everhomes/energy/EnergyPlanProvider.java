@@ -1,7 +1,22 @@
 package com.everhomes.energy;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by ying.xiong on 2017/10/19.
  */
 public interface EnergyPlanProvider {
+    void createEnergyPlan(EnergyPlan plan);
+    void updateEnergyPlan(EnergyPlan plan);
+
+    void createEnergyPlanGroupMap(EnergyPlanGroupMap groupMap);
+    void deleteEnergyPlanGroupMap(EnergyPlanGroupMap groupMap);
+    List<EnergyPlanGroupMap> listGroupsByEnergyPlan(Long planId);
+    Map<Long, EnergyPlanGroupMap> listGroupMapsByEnergyPlan(Long planId);
+
+    void createEnergyPlanMeterMap(EnergyPlanMeterMap meterMap);
+    void deleteEnergyPlanMeterMap(EnergyPlanMeterMap meterMap);
+    List<EnergyPlanMeterMap> listMetersByEnergyPlan(Long planId);
+    Map<Long, EnergyPlanMeterMap> listMeterMapsByEnergyPlan(Long planId);
 }
