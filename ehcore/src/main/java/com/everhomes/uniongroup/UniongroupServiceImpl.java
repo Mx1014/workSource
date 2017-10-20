@@ -226,8 +226,10 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Override
     public ListOrganizationMemberCommandResponse listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd) {
         ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
-        CrossShardListingLocator locator = new CrossShardListingLocator(cmd.getPageAnchor());
-        List<OrganizationMemberDetails>  details = this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getContactName(), cmd.getVersionCode(), cmd.getDepartmentId(), cmd.getPageSize(), locator);
+        Long pageAnchor = cmd.getPageAnchor() != null ? cmd.getPageAnchor() : 0L;
+        Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize() : 9999;
+        CrossShardListingLocator locator = new CrossShardListingLocator(pageAnchor);
+        List<OrganizationMemberDetails>  details = this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getContactName(), cmd.getVersionCode(), cmd.getDepartmentId(), pageSize, locator);
         if(details != null && details.size() > 0){
             List<OrganizationMemberDTO> dtos = details.stream().map(r->{
                 return ConvertHelper.convert(r, OrganizationMemberDTO.class);

@@ -798,12 +798,13 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
         Condition condition = t1.field("organization_id").eq(organizationId).and(t1.field("namespace_id").eq(namespaceId)).and(t2.field("detail_id").isNull());
         if (null != locator.getAnchor())
-            condition = condition.and(t1.field("id").lt(locator.getAnchor()));
+            condition = condition.and(t1.field("id").gt(locator.getAnchor()));
+
         if(StringUtils.isNotEmpty(contactName)){
             condition = condition.and(t1.field("contact_name").like(contactName +"%"));
         }
         if(departmentId != null){
-            condition = condition.and(t3.field("organizaiton_id").eq(departmentId));
+            condition = condition.and(t3.field("organization_id").eq(departmentId));
         }
         condition = condition.and(t1.field("id").in(context.selectDistinct(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID).from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))));
 
