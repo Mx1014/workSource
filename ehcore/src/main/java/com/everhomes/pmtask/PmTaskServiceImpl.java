@@ -1939,7 +1939,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		long userId = UserContext.currentUserId();
 		List<OrganizationMember> orgMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId(
-				"/" + cmd.getOrganizationId(), userId);
+				"/" + cmd.getOrganizationId() + "/", userId);
 
 		List<CommunityDTO> result = new ArrayList<>();
 		if (null != orgMembers) {
@@ -1953,7 +1953,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				}
 			}
 		}
-
+		response.setCommunities(result);
 		return response;
 	}
 
