@@ -53,6 +53,17 @@ public class LeaseProjectDTO {
 
     private String detailUrl;
 
+    @ItemType(LeaseBuildingDTO.class)
+    private List<LeaseBuildingDTO> buildings;
+
+    public List<LeaseBuildingDTO> getBuildings() {
+        return buildings;
+    }
+
+    public void setBuildings(List<LeaseBuildingDTO> buildings) {
+        this.buildings = buildings;
+    }
+
     public String getDetailUrl() {
         return detailUrl;
     }

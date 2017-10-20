@@ -840,7 +840,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			return ad;
 		}).collect(Collectors.toList()));
 		//暂时用枚举，如果拓展单位类型，则须在表中添加字段
-		dto.setUnit(LeasePromotionUnit.MONTH_UNIT.getDescription());
+
+		LeasePromotionConfig unitConfig = enterpriseLeaseIssuerProvider.findLeasePromotionConfig(leasePromotion.getNamespaceId(),
+				"rentAmountUnit");
+		if (null != unitConfig) {
+			dto.setUnit(LeasePromotionUnit.fromType(unitConfig.getConfigValue()).getDescription());
+		}
 
 		//	启用表单，则查询表单值
 		if (LeasePromotionFlag.ENABLED.getCode() == leasePromotion.getCustomFormFlag()) {
@@ -1321,42 +1326,45 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
-        LeasePromotionConfig config = enterpriseLeaseIssuerProvider.getLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
-
-
-		if (null == config) {
-			LOGGER.error("LeaseIssuerConfig not found, namespaceId={}", cmd.getNamespaceId());
-			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"LeaseIssuerConfig not found.");
-		}
-
-        String displayNameStr = config.getDisplayNameStr();
-        String displayOrderStr = config.getDisplayOrderStr();
-        if (null != displayNameStr) {
-        	String[] names = displayNameStr.split(",");
-        	String[] orders = displayOrderStr.split(",");
-			LeasePromotionConfigDTO dto = ConvertHelper.convert(config, LeasePromotionConfigDTO.class);
-			dto.setDisplayNames(Arrays.stream(names).collect(Collectors.toList()));
-			dto.setDisplayOrders(Arrays.stream(orders).map(Integer::valueOf).collect(Collectors.toList()));
-
-			dto.setConsultFlag((byte)1);
-			dto.setBuildingIntroduceFlag(config.getParkIndroduceFlag());
-			return dto;
-		}
-
 		LeasePromotionConfigDTO dto = new LeasePromotionConfigDTO();
-		List<LeasePromotionConfig2> configs = enterpriseLeaseIssuerProvider.listLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
+
+		dto.setNamespaceId(cmd.getNamespaceId());
+		dto.setRentAmountFlag(LeasePromotionFlag.DISABLED.getCode());
+//		dto.setRentAmountUnit();
+		dto.setIssuingLeaseFlag(LeasePromotionFlag.DISABLED.getCode());
+		dto.setRenewFlag(LeasePromotionFlag.DISABLED.getCode());
+		dto.setAreaSearchFlag(LeasePromotionFlag.DISABLED.getCode());
+		dto.setConsultFlag(LeasePromotionFlag.DISABLED.getCode());
+		dto.setBuildingIntroduceFlag(LeasePromotionFlag.DISABLED.getCode());
+		String[] defaultNames = {"项目介绍","房源招租"};
+		String[] defaultOrders = {"1","2"};
+		dto.setDisplayNames(Arrays.stream(defaultNames).collect(Collectors.toList()));
+		dto.setDisplayOrders(Arrays.stream(defaultOrders).map(Integer::valueOf).collect(Collectors.toList()));
+
+		List<LeasePromotionConfig> configs = enterpriseLeaseIssuerProvider.listLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
         if (null != configs) {
 			configs.forEach(c -> {
 				String name = c.getConfigName();
 				switch (name) {
 					case "rentAmountFlag": dto.setRentAmountFlag(Byte.valueOf(c.getConfigValue())); break;
+					case "rentAmountUnit": dto.setRentAmountUnit(LeasePromotionUnit.fromType(c.getConfigValue()).getDescription()); break;
 					case "issuingLeaseFlag": dto.setIssuingLeaseFlag(Byte.valueOf(c.getConfigValue())); break;
 					case "renewFlag": dto.setRenewFlag(Byte.valueOf(c.getConfigValue())); break;
 					case "areaSearchFlag": dto.setAreaSearchFlag(Byte.valueOf(c.getConfigValue())); break;
 					case "consultFlag": dto.setConsultFlag(Byte.valueOf(c.getConfigValue())); break;
-//					case "displayNameStr": dto.setDisplayNameStr(c.getConfigValue()); break;
-//					case "displayOrderStr": dto.setDisplayOrderStr(c.getConfigValue()); break;
+					case "buildingIntroduceFlag": dto.setBuildingIntroduceFlag(Byte.valueOf(c.getConfigValue())); break;
+					case "displayNameStr":
+						String displayNameStr = c.getConfigValue();
+						String[] names = displayNameStr.split(",");
+						dto.setDisplayNames(Arrays.stream(names).collect(Collectors.toList()));
+
+						break;
+					case "displayOrderStr":
+						String displayOrderStr = c.getConfigValue();
+						String[] orders = displayOrderStr.split(",");
+						dto.setDisplayOrders(Arrays.stream(orders).map(Integer::valueOf).collect(Collectors.toList()));
+
+						break;
 					default: break;
 				}
 			});
@@ -1372,10 +1380,25 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
-		LeasePromotionConfig config = enterpriseLeaseIssuerProvider.getLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
-		config.setParkIndroduceFlag(cmd.getBuildingIntroduceFlag());
+		//如果开启就添加到数据库中，否则默认关闭
+		if (LeasePromotionFlag.ENABLED.getCode() == cmd.getBuildingIntroduceFlag()) {
 
-		enterpriseLeaseIssuerProvider.updateLeasePromotionConfig(config);
+			LeasePromotionConfig config = enterpriseLeaseIssuerProvider.findLeasePromotionConfig(cmd.getNamespaceId(),
+					"buildingIntroduceFlag");
+
+			if (null != config) {
+				config.setConfigValue(String.valueOf(cmd.getBuildingIntroduceFlag()));
+				enterpriseLeaseIssuerProvider.updateLeasePromotionConfig(config);
+			}else {
+				config = new LeasePromotionConfig();
+				config.setNamespaceId(cmd.getNamespaceId());
+				config.setConfigName("buildingIntroduceFlag");
+				config.setConfigValue(String.valueOf(cmd.getBuildingIntroduceFlag()));
+				enterpriseLeaseIssuerProvider.createLeasePromotionConfig(config);
+			}
+
+		}
+
 	}
 
     @Override

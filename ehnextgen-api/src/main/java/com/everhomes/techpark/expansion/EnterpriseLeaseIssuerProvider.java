@@ -31,7 +31,13 @@ public interface EnterpriseLeaseIssuerProvider {
 
     LeaseIssuer findLeaseIssersByContact(Integer namespaceId, String contact);
 
-    List<LeasePromotionConfig2> listLeasePromotionConfigByNamespaceId(Integer namespaceId);
+    List<LeasePromotionConfig> listLeasePromotionConfigByNamespaceId(Integer namespaceId);
+
+    void createLeasePromotionConfig(LeasePromotionConfig config);
+
+    LeasePromotionConfig findLeasePromotionConfig(Integer namespaceId, String configName);
+
+    void deleteLeasePromotionConfig(Integer namespaceId, String configName);
 
     void updateLeasePromotionConfig(LeasePromotionConfig config);
 }

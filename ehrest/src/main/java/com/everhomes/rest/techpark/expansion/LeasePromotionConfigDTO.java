@@ -18,7 +18,6 @@ import java.util.List;
  * </ul>
  */
 public class LeasePromotionConfigDTO {
-    private Long id;
     private Integer namespaceId;
     private Byte rentAmountFlag;
     private Byte issuingLeaseFlag;
@@ -79,14 +78,6 @@ public class LeasePromotionConfigDTO {
 
     public void setAreaSearchFlag(Byte areaSearchFlag) {
         this.areaSearchFlag = areaSearchFlag;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Integer getNamespaceId() {
