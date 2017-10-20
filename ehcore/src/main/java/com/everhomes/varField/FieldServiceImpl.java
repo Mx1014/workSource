@@ -578,11 +578,10 @@ public class FieldServiceImpl implements FieldService {
 
         if(fieldName.equals("status") ||
                 fieldName.equals("gender") ||
-                (fieldName.indexOf("id")!=fieldName.length()-1-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("id")!=-1) ||
-                (fieldName.indexOf("Id")!=fieldName.length()-1-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
-                (fieldName.indexOf("Status")==fieldName.length()-1-5 && fieldName.indexOf("Status")!=-1) &&
-                        fieldName.indexOf("individual")==-1 ||
-                fieldName.indexOf("Type") != fieldName.length()-1-4 ||
+                (fieldName.indexOf("id")==fieldName.length()-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("id")!=-1) ||
+                (fieldName.indexOf("Id")==fieldName.length()-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
+                (fieldName.indexOf("Status")==fieldName.length()-6 && fieldName.indexOf("Status")!=-1) ||
+                fieldName.indexOf("Type") == fieldName.length()-4 ||
                 fieldName.equals("type")
                 )
         {
@@ -891,11 +890,10 @@ public class FieldServiceImpl implements FieldService {
                             cellCopy = cellValue;
                             if(fieldName.equals("status") ||
                                     fieldName.equals("gender") ||
-                                    (fieldName.indexOf("id")!=fieldName.length()-1-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("id")!=-1) ||
-                                    (fieldName.indexOf("Id")!=fieldName.length()-1-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
-                                    (fieldName.indexOf("Status")==fieldName.length()-1-5 && fieldName.indexOf("Status")!=-1) &&
-                                            fieldName.indexOf("individual")==-1 ||
-                                    fieldName.indexOf("Type") != fieldName.length()-1-4 ||
+                                    (fieldName.indexOf("id")==fieldName.length()-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("id")!=-1) ||
+                                    (fieldName.indexOf("Id")==fieldName.length()-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
+                                    (fieldName.indexOf("Status")==fieldName.length()-6 && fieldName.indexOf("Status")!=-1) ||
+                                    fieldName.indexOf("Type") == fieldName.length()-4 ||
                                     fieldName.equals("type")
                                     ){
                                 //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
