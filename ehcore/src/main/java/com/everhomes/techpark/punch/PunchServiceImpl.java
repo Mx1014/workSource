@@ -4983,7 +4983,6 @@ public class PunchServiceImpl implements PunchService {
 		}
 	}
 	private boolean checkUserPunch(java.sql.Date ruleDate, Long userId,Long companyId) {
-		// TODO Auto-generated method stub
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
 				companyId, dateSF.get().format(ruleDate),
 				ClockCode.SUCESS.getCode());
@@ -5006,29 +5005,38 @@ public class PunchServiceImpl implements PunchService {
 			List<PunchRule> punchRules = punchProvider.listPunchRulesByStatus(statusList);
 			if(null != punchRules)
 				for (PunchRule pr : punchRules) {
-					Organization org = organizationProvider.findOrganizationById(pr.getOwnerId());
-					orgs.add(org);
-					//对ptr表,psd表的处理
-					processTimeRule2Active(pr);
-					if (pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
-						//copy from addpunchgroup
-					} else if (pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
-
-
-
-
+					try {
+						Organization org = organizationProvider.findOrganizationById(pr.getOwnerId());
+						//对ptr表,psd表的处理
+						processTimeRule2Active(pr);
+//					if (pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
+//						//copy from addpunchgroup
+//					} else if (pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
+//
+//					}
+						pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
+						punchProvider.updatePunchRule(pr);
+						orgs.add(org);
+					} catch (Exception e) {
+						LOGGER.error("dayRefreshPunchGroupScheduled error!!!");
+						LOGGER.error("update pr from modify to active error!!",e);
 					}
-					pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
-					punchProvider.updatePunchRule(pr);
-
 				}
 			//把uniongroup相关表version改为0
 			for (Organization org : orgs) {
-				//把1版本和0版本互换
-				uniongroupService.switchUnionGroupVersion(org.getNamespaceId(), org.getId(), UniongroupType.PUNCHGROUP.getCode(), 1);
+				try {
+					UniongroupVersion unionGroupVersion = getPunchGroupVersion(org.getId());
+					unionGroupVersion.setCurrentVersionCode(unionGroupVersion.getCurrentVersionCode() + 1);
+					//把config版本复制一份新的,
+					uniongroupService.cloneGroupTypeDataToVersion(org.getNamespaceId(), org.getId(), UniongroupType.PUNCHGROUP.getCode(),
+							CONFIG_VERSION_CODE, unionGroupVersion.getCurrentVersionCode());
 
-				//删除1版本(就是之前的0版本)
-				uniongroupService.deleteUniongroupVersion(org.getNamespaceId(), org.getId(), UniongroupType.PUNCHGROUP.getCode(), 1);
+					//更新当前版本到新的
+					uniongroupVersionProvider.updateUniongroupVersion(unionGroupVersion);
+				} catch (Exception e) {
+					LOGGER.error("dayRefreshPunchGroupScheduled error!!!");
+					LOGGER.error("switch union group version error!!!",e);
+				}
 			}
 		}
 	}
