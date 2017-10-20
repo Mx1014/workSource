@@ -1583,6 +1583,11 @@ public class AssetServiceImpl implements AssetService {
         assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId());
     }
 
+    @Override
+    public ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd) {
+        return assetProvider.listChargingItemDetailForBillGroup(cmd.getBillGroupRuleId());
+    }
+
     private boolean isInWorkGroup(Long billGroupId, boolean b) {
         return assetProvider.checkBillsByBillGroupId(billGroupId);
     }

@@ -133,4 +133,6 @@ public interface AssetService {
     void deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd);
 
     void deleteBillGroup(DeleteBillGroupCommand cmd);
+
+    ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd);
 }

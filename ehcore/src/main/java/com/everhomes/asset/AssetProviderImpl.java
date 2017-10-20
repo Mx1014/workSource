@@ -2412,6 +2412,29 @@ public class AssetProviderImpl implements AssetProvider {
 
     }
 
+    @Override
+    public ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(Long billGroupRuleId) {
+        DSLContext context = getReadOnlyContext();
+        ListChargingItemDetailForBillGroupDTO dto = new ListChargingItemDetailForBillGroupDTO();
+        EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
+        EhPaymentBillGroupsRules t1 = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t1");
+        PaymentBillGroupRule rule = context.selectFrom(t1)
+                .where(t1.ID.eq(billGroupRuleId))
+                .fetchOneInto(PaymentBillGroupRule.class);
+        PaymentChargingStandards standard = context.selectFrom(t)
+                .where(t.ID.eq(rule.getChargingStandardsId()))
+                .fetchOneInto(PaymentChargingStandards.class);
+        dto.setBillCycle(standard.getBillingCycle());
+        dto.setBillGroupRuleId(rule.getId());
+        dto.setChargingItemId(rule.getChargingItemId());
+        dto.setChargingStandardId(standard.getId());
+        dto.setDayOffset(rule.getBillItemDayOffset());
+        dto.setMonthOffset(rule.getBillItemMonthOffset());
+        dto.setFormula(standard.getFormula());
+        dto.setGroupChargingItemName(rule.getChargingItemName());
+        return dto;
+    }
+
 
     private DSLContext getReadOnlyContext(){
        return this.dbProvider.getDslContext(AccessSpec.readOnly());

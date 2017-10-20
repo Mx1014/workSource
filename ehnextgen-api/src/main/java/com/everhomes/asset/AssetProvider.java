@@ -205,4 +205,6 @@ public interface AssetProvider {
     boolean checkBillsByBillGroupId(Long billGroupId);
 
     void deleteBillGroupAndRules(Long billGroupId);
+
+    ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(Long billGroupRuleId);
 }
