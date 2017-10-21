@@ -1,5 +1,6 @@
 package com.everhomes.rest.techpark.punch.admin;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.util.StringHelper;
 
@@ -11,6 +12,9 @@ import java.util.List;
  * </ul>
  */
 public class ListApprovalCategoriesResponse {
+	@ItemType(ApprovalCategoryDTO.class)
+    List<ApprovalCategoryDTO> categoryList;
+    
     public ListApprovalCategoriesResponse() {
 
     }
@@ -18,7 +22,6 @@ public class ListApprovalCategoriesResponse {
     public ListApprovalCategoriesResponse(List<ApprovalCategoryDTO> categoryList) {
         this.categoryList = categoryList;
     }
-    List<ApprovalCategoryDTO> categoryList;
 
     @Override
     public String toString() {
