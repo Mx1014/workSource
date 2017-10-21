@@ -810,6 +810,7 @@ public class FieldServiceImpl implements FieldService {
             Row headRow = sheet.getRow(1);
             if(headRow == null){
                 response.setFailCause("excel sheet格式不正确（例如：没有标题行），导入失败，请下载模板然后进行导入");
+                return response;
             }
 
             String[] headers = new String[headRow.getLastCellNum()-headRow.getFirstCellNum()+1];
