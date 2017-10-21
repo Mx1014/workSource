@@ -877,7 +877,8 @@ public class FieldServiceImpl implements FieldService {
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"sheet class new instance failed",e);
                 }
                 LOGGER.info("row "+row.getRowNum()+" has the firstcellnum is "+ row.getFirstCellNum()+",and the last cell num is "+ row.getLastCellNum());
-            cellNumTooMany:for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
+//            cellNumTooMany:for(int k = row.getFirstCellNum(); k < row.getLastCellNum(); k ++){
+            cellNumTooMany:for(int k =headRow.getFirstCellNum(); k < headRow.getLastCellNum();k++){
                     if(k == orderedFieldDtos.size()){
                         break cellNumTooMany;
                     }
