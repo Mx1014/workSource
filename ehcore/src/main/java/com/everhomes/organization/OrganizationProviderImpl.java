@@ -3457,7 +3457,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		List<Organization> result = new ArrayList<Organization>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
-		query.addConditions(Tables.EH_ORGANIZATIONS.NAME.eq(name));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%"+name+"%"));
 		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		if (parentId != null) {
@@ -5529,7 +5529,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		if (!StringUtils.isEmpty(keywords)) {
 			Condition cond1 = t2.field("contact_token").eq(keywords);
-			cond1 = cond1.or(t2.field("contact_name").like("%" + keywords + "%")).or(t2.field("employee_no"));
+			cond1 = cond1.or(t2.field("contact_name").like("%" + keywords + "%"));
+			cond1 = cond1.or(t2.field("employee_no").like("%" + keywords + "%"));
 			cond = cond.and(cond1);
 		}
 

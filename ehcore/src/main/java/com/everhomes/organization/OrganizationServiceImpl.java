@@ -5595,7 +5595,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
         res.setMembers(res_1.getMembers());
 
-        //:todo 部门/岗位/部门岗位
+        //:todo 部门/部门岗位
         ListOrganizationsByNameCommand cmd_2 = new ListOrganizationsByNameCommand();
         cmd_2.setName(cmd.getKeywords());
         cmd_2.setNamespaceId(namespaceId);
