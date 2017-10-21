@@ -5377,19 +5377,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             detailIds.forEach(detailId -> {
                 OrganizationMember enterprise_member = getEnableEnterprisePersonel(org, detailId);
-                String token = enterprise_member.getContactToken();
-
-                //删除记录
-                List<String> groupTypes_full = new ArrayList<>();
-                groupTypes_full.add(OrganizationGroupType.DEPARTMENT.getCode());
-                groupTypes_full.add(OrganizationGroupType.GROUP.getCode());
-                groupTypes_full.add(OrganizationGroupType.ENTERPRISE.getCode());
-                groupTypes_full.add(OrganizationGroupType.JOB_LEVEL.getCode());
-                groupTypes_full.add(OrganizationGroupType.JOB_POSITION.getCode());
-                groupTypes_full.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-                deleteOrganizaitonMemberUnderEnterprise(enterpriseIds, groupTypes_full, leaveMembers, token);
-                //重复添加纪录
-                repeatCreateOrganizationmembers(departmentIds, token, enterpriseIds, enterprise_member);
+                if(enterprise_member != null){
+                    String token = enterprise_member.getContactToken();
+                    //删除记录
+                    List<String> groupTypes_full = new ArrayList<>();
+                    groupTypes_full.add(OrganizationGroupType.DEPARTMENT.getCode());
+                    groupTypes_full.add(OrganizationGroupType.GROUP.getCode());
+                    groupTypes_full.add(OrganizationGroupType.ENTERPRISE.getCode());
+                    groupTypes_full.add(OrganizationGroupType.JOB_LEVEL.getCode());
+                    groupTypes_full.add(OrganizationGroupType.JOB_POSITION.getCode());
+                    groupTypes_full.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+                    deleteOrganizaitonMemberUnderEnterprise(enterpriseIds, groupTypes_full, leaveMembers, token);
+                    //重复添加纪录
+                    repeatCreateOrganizationmembers(departmentIds, token, enterpriseIds, enterprise_member);
+                }
             });
 
         }
@@ -13573,7 +13574,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(org.getPath(), groupTypes, token);
         if (members == null || members.size() == 0) {
             LOGGER.error("Enterprise_member is null");
-            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TYPE, "Enterprise_member is null");
+            return null;
+//            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TYPE, "Enterprise_member is null");
         }
         members = members.stream().filter(r -> {
             return r.getOrganizationId().equals(org.getId());
