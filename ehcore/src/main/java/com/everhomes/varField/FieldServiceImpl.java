@@ -3,6 +3,7 @@ package com.everhomes.varField;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.customer.*;
 
 import com.everhomes.rest.field.*;
@@ -756,7 +757,8 @@ public class FieldServiceImpl implements FieldService {
      * 4.存入目标客户的记录
      */
     @Override
-    public void importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
+    public ImportFieldsExcelResponse importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file) {
+        ImportFieldsExcelResponse response = new ImportFieldsExcelResponse();
         Workbook workbook;
         try {
             workbook = ExcelUtils.getWorkbook(file.getInputStream(), file.getOriginalFilename());
@@ -773,6 +775,8 @@ public class FieldServiceImpl implements FieldService {
             getAllGroups(partGroups.get(i),groups);
         }
         int numberOfSheets = workbook.getNumberOfSheets();
+        int sheets = 0;
+        int rows = 0;
         sheet:for(int i = 0; i < numberOfSheets; i ++){
             Sheet sheet = workbook.getSheetAt(i);
             //通过sheet名字进行匹配，获得此sheet对应的group
@@ -856,8 +860,8 @@ public class FieldServiceImpl implements FieldService {
                 if(orderedFieldDtos!=null && orderedFieldDtos.size()>0){
                     for(int k = 0; k < orderedFieldDtos.size(); k ++ ){
                         if(orderedFieldDtos.get(k).getMandatoryFlag()==1){
-                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                                    "必填项"+orderedFieldDtos.get(k).getFieldDisplayName()+"没有填写");
+                            response.setFailCause("导入失败！请在excel中填写有效数据");
+                            return response;
                         }
                     }
                 }
@@ -915,7 +919,9 @@ public class FieldServiceImpl implements FieldService {
                                         }
                                     }else{
                                         LOGGER.error("field "+ fieldName+" transferred to item using findScopeFieldItemByDisplayName failed ,item is "+ item);
-                                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"枚举值不正确");
+//                                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"枚举值不正确");
+                                        response.setFailCause("枚举值"+fieldDTO.getFieldDisplayName()+"不正确，请按照excel下载里“"+sheetName+"”模板说明里进行填写");
+                                        return response;
                                     }
                                 }
                             }
@@ -946,8 +952,11 @@ public class FieldServiceImpl implements FieldService {
                         }
                         Byte mandatoryFlag = fieldDTO.getMandatoryFlag();
                         if(mandatoryFlag == 1 && (cellValue == null || (cellValue.equals("")))){
-                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                                    "必填项"+fieldDTO.getFieldDisplayName()+"没有填写");
+                            LOGGER.error("必填项"+fieldDTO.getFieldDisplayName()+"没有填写");
+//                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//                                    "必填项"+fieldDTO.getFieldDisplayName()+"没有填写");
+                            response.setFailCause("必填项"+fieldDTO.getFieldDisplayName()+"没有填写");
+                            return response;
                         }
                         setToObj(fieldName,object,cellValue);
                     } catch (Exception e) {
@@ -995,8 +1004,11 @@ public class FieldServiceImpl implements FieldService {
             }
             //此时获得一个sheet的list对象，进行存储
             fieldProvider.saveFieldGroups(cmd.getCustomerType(),cmd.getCustomerId(),objects,clazz.getSimpleName());
+            sheets++;
+            rows++;
         }
-
+        response.setFailCause("导入数据成功，导入"+sheets+"sheet页,共"+rows+"行数据");
+        return response;
     }
 
     private void getAllGroups(FieldGroupDTO group,List<FieldGroupDTO> allGroups) {

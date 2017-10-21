@@ -4,6 +4,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.varField.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -202,9 +203,9 @@ public class FieldController extends ControllerBase {
     @RestReturn(String.class)
     public RestResponse importFieldsExcel(@Valid ImportFieldExcelCommand cmd, MultipartFile file){
 
-        fieldService.importFieldsExcel(cmd,file);
+        ImportFieldsExcelResponse response = fieldService.importFieldsExcel(cmd,file);
 
-        RestResponse restResponse = new RestResponse();
+        RestResponse restResponse = new RestResponse(response);
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
         return restResponse;
