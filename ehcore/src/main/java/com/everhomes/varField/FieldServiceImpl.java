@@ -582,7 +582,8 @@ public class FieldServiceImpl implements FieldService {
                 (fieldName.indexOf("Id")==fieldName.length()-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
                 (fieldName.indexOf("Status")==fieldName.length()-6 && fieldName.indexOf("Status")!=-1) ||
                 fieldName.indexOf("Type") == fieldName.length()-4 ||
-                fieldName.equals("type")
+                fieldName.equals("type")    ||
+                fieldName.indexOf("Flag") == fieldName.length() - 4
                 )
         {
             LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName+" class is "+clz.toString());
@@ -894,7 +895,8 @@ public class FieldServiceImpl implements FieldService {
                                     (fieldName.indexOf("Id")==fieldName.length()-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
                                     (fieldName.indexOf("Status")==fieldName.length()-6 && fieldName.indexOf("Status")!=-1) ||
                                     fieldName.indexOf("Type") == fieldName.length()-4 ||
-                                    fieldName.equals("type")
+                                    fieldName.equals("type")    ||
+                                    fieldName.indexOf("Flag") == fieldName.length() - 4
                                     ){
                                 //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
                                 ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cellValue);
