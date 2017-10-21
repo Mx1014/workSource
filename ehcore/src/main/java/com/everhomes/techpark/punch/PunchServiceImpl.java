@@ -37,6 +37,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.util.*;
+
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -98,6 +99,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -122,6 +124,7 @@ import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
 import com.everhomes.rest.techpark.punch.admin.GetPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
+import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchGroupsCommand;
@@ -7847,4 +7850,14 @@ public class PunchServiceImpl implements PunchService {
 		redisTemplate.delete(key);
 	}
 
+
+	@Override
+	public ListApprovalCategoriesResponse listApprovalCategories(){
+
+		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory();
+
+		return new ListApprovalCategoriesResponse(categoryList.stream()
+				.map(c -> ConvertHelper.convert(c, ApprovalCategoryDTO.class)).collect(Collectors.toList()));
+
+	}
 }

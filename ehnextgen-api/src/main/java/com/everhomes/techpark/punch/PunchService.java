@@ -222,4 +222,6 @@ public interface PunchService {
 	HttpServletResponse exportPunchSchedulingTemplate(ListPunchSchedulingMonthCommand cmd, HttpServletResponse response);
 
 	void invalidPunchQRCode(GetPunchQRCodeCommand cmd);
+
+	ListApprovalCategoriesResponse listApprovalCategories();
 }
