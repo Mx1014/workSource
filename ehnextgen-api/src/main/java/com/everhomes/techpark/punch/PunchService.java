@@ -196,6 +196,8 @@ public interface PunchService {
 
 	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd);
 
+	ListApprovalCategoriesResponse listApprovalCategories();
+
 	public PunchGroupDTO updatePunchGroup(PunchGroupDTO cmd);
 
 	public void deletePunchGroup(DeleteCommonCommand cmd);

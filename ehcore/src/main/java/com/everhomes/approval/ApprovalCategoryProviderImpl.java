@@ -60,6 +60,8 @@ public class ApprovalCategoryProviderImpl implements ApprovalCategoryProvider {
 	@Override
 	public List<ApprovalCategory> listApprovalCategory() {
 		return getReadOnlyContext().select().from(Tables.EH_APPROVAL_CATEGORIES)
+				.where(Tables.EH_APPROVAL_CATEGORIES.NAMESPACE_ID.eq(0))
+				.and(Tables.EH_APPROVAL_CATEGORIES.OWNER_ID.eq(0L))
 				.orderBy(Tables.EH_APPROVAL_CATEGORIES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, ApprovalCategory.class));
 	}

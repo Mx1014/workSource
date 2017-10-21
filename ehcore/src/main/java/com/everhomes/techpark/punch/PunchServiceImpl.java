@@ -30,6 +30,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
+import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.*;
@@ -6649,6 +6650,15 @@ public class PunchServiceImpl implements PunchService {
 		}
 		response.setPunchGroups(punchGroups);
 		return response;
+	}
+	@Override
+	public ListApprovalCategoriesResponse listApprovalCategories(){
+
+		List<ApprovalCategory> categoryList = approvalCategoryProvider.listApprovalCategory();
+
+		return new ListApprovalCategoriesResponse(categoryList.stream()
+				.map(c -> ConvertHelper.convert(c, ApprovalCategoryDTO.class)).collect(Collectors.toList()));
+
 	}
 	private PunchGroupDTO getPunchGroupDTOByOrg(Organization r) {
 		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(r.getId());
