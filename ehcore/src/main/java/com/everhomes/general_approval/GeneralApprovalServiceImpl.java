@@ -94,9 +94,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     private ConfigurationProvider configProvider;
 
     @Autowired
-    private GeneralApprovalFlowCase generalApprovalFlowCase;
-
-    @Autowired
     private FlowService flowService;
 
     @Autowired
@@ -722,6 +719,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         command.setEndTime(cmd.getEndTime());
         command.setOrganizationId(cmd.getOrganizationId());
         command.setModuleId(cmd.getModuleId());
+        command.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
+        command.setNamespaceId(UserContext.getCurrentNamespaceId());
         //  审批状态
         if (cmd.getApprovalStatus() != null)
             command.setFlowCaseStatus(cmd.getApprovalStatus());
