@@ -139,7 +139,7 @@ public class GeneralApprovalController extends ControllerBase {
 
 	/**
 	 * <b>URL: /general_approval/exportGeneralApprovalRecords</b>
-	 * <p> 根据模块 id 导出对应的审批记录 </p>
+	 * <p> 根据模块 id 与审判类型导出对应的审批记录 </p>
 	 */
 	@RequestMapping("exportGeneralApprovalRecords")
 	@RestReturn(value=String.class)
