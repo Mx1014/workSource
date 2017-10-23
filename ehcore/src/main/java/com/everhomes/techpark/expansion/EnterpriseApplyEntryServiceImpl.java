@@ -1345,21 +1345,22 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         if (null != configs) {
 			configs.forEach(c -> {
 				String name = c.getConfigName();
-				switch (name) {
-					case "rentAmountFlag": dto.setRentAmountFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "rentAmountUnit": dto.setRentAmountUnit(LeasePromotionUnit.fromType(c.getConfigValue()).getDescription()); break;
-					case "issuingLeaseFlag": dto.setIssuingLeaseFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "renewFlag": dto.setRenewFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "areaSearchFlag": dto.setAreaSearchFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "consultFlag": dto.setConsultFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "buildingIntroduceFlag": dto.setBuildingIntroduceFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "displayNameStr":
+				LeasePromotionConfigType type = LeasePromotionConfigType.fromCode(name);
+				switch (type) {
+					case RENT_AMOUNT_FLAG: dto.setRentAmountFlag(Byte.valueOf(c.getConfigValue())); break;
+					case RENT_AMOUNT_UNIT: dto.setRentAmountUnit(LeasePromotionUnit.fromType(c.getConfigValue()).getDescription()); break;
+					case ISSUING_LEASE_FLAG: dto.setIssuingLeaseFlag(Byte.valueOf(c.getConfigValue())); break;
+					case RENEW_FLAG: dto.setRenewFlag(Byte.valueOf(c.getConfigValue())); break;
+					case AREA_SEARCH_FLAG: dto.setAreaSearchFlag(Byte.valueOf(c.getConfigValue())); break;
+					case CONSULT_FLAG: dto.setConsultFlag(Byte.valueOf(c.getConfigValue())); break;
+					case BUILDING_INTRODUCE_FLAG: dto.setBuildingIntroduceFlag(Byte.valueOf(c.getConfigValue())); break;
+					case DISPLAY_NAME_STR:
 						String displayNameStr = c.getConfigValue();
 						String[] names = displayNameStr.split(",");
 						dto.setDisplayNames(Arrays.stream(names).collect(Collectors.toList()));
 
 						break;
-					case "displayOrderStr":
+					case DISPLAY_ORDER_STR:
 						String displayOrderStr = c.getConfigValue();
 						String[] orders = displayOrderStr.split(",");
 						dto.setDisplayOrders(Arrays.stream(orders).map(Integer::valueOf).collect(Collectors.toList()));
