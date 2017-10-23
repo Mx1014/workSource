@@ -1945,7 +1945,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public void updateOrganizationDefaultOrder(Integer namespaceId, Long orgId, Integer order) {
-
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		UpdateQuery<EhOrganizationsRecord> query = context.updateQuery(Tables.EH_ORGANIZATIONS);
+		query.addValue(Tables.EH_ORGANIZATIONS.ORDER, order);
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(orgId));
+		query.execute();
     }
 
     /**
