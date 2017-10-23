@@ -2346,7 +2346,7 @@ public class PunchServiceImpl implements PunchService {
 				return null;
 			}
 			//看是循环timerule找当天的timeRule
-			List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId(), pr.getStatus());
+			List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(),pr.getPunchOrganizationId(), PunchRuleStatus.ACTIVE.getCode());
 			if(null != timeRules)
 				for(PunchTimeRule timeRule :  timeRules){
 					Integer openWeek = Integer.parseInt(timeRule.getOpenWeekday(), 2);
