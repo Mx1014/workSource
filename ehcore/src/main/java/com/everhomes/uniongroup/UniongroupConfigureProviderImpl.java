@@ -250,6 +250,11 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
     @Override
     public void batchCreateUniongroupConfigres(List<EhUniongroupConfigures> unionConfiguresist) {
+        this.batchCreateUniongroupConfigresToVersion(unionConfiguresist, null);
+    }
+
+    @Override
+    public void batchCreateUniongroupConfigresToVersion(List<EhUniongroupConfigures> unionConfiguresist, Integer n2) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         List<EhUniongroupConfigures> list = new ArrayList<>();
         unionConfiguresist.stream().map(r -> {
@@ -257,6 +262,9 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
             r.setId(id);
             r.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             r.setOperatorUid(UserContext.current().getUser().getId());
+            if(n2 != null){
+                r.setVersionCode(n2);
+            }
             list.add(r);
             return null;
         }).collect(Collectors.toList());
@@ -268,6 +276,11 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
     @Override
     public void batchCreateUniongroupMemberDetail(List<EhUniongroupMemberDetails> unionDetailList) {
+        this.batchCreateUniongroupMemberDetailToVersion(unionDetailList, null);
+    }
+
+    @Override
+    public void batchCreateUniongroupMemberDetailToVersion(List<EhUniongroupMemberDetails> unionDetailList, Integer n2) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         List<EhUniongroupMemberDetails> list = new ArrayList<>();
         unionDetailList.stream().map(r -> {
@@ -275,6 +288,9 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
             r.setId(id);
             r.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             r.setOperatorUid(UserContext.current().getUser().getId());
+            if(n2 != null){
+                r.setVersionCode(n2);
+            }
             list.add(r);
             return null;
         }).collect(Collectors.toList());

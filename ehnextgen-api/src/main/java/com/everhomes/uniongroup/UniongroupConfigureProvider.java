@@ -38,7 +38,11 @@ public interface UniongroupConfigureProvider {
 
     void batchCreateUniongroupConfigres(List<com.everhomes.server.schema.tables.pojos.EhUniongroupConfigures> unionConfiguresist);
 
+    void batchCreateUniongroupConfigresToVersion(List<com.everhomes.server.schema.tables.pojos.EhUniongroupConfigures> unionConfiguresist, Integer n2);
+
     void batchCreateUniongroupMemberDetail(List<EhUniongroupMemberDetails> unionDetailList);
+
+    void batchCreateUniongroupMemberDetailToVersion(List<EhUniongroupMemberDetails> unionDetailList, Integer n2);
 
     void updateUniongroupMemberDetail(UniongroupMemberDetail uniongroupMemberDetail);
 
