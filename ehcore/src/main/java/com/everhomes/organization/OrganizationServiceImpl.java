@@ -293,7 +293,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         //同级重名校验
         Organization down_organization = organizationProvider.findOrganizationByParentAndName(parOrg.getId(),cmd.getName());
-        if(down_organization == null){
+        if(down_organization != null){
             return null;
         }
 
