@@ -68,3 +68,12 @@ INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`,
   VALUES ((@flow_variables_id := @flow_variables_id + 1), 0, 0, '', 0, '', 'all_current_node_processors', '所有任务的当前处理人', 'flow_var_hidden', 'bean_id', 'flow-variable-hidden-button-msg-all-current-processors', 1);
 INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
   VALUES ((@flow_variables_id := @flow_variables_id + 1), 0, 0, '', 0, '', 'text_tracker_curr_operator_name', '操作执行人姓名', 'text_tracker', 'bean_id', 'flow-variable-curr-processor-name', 1);
+
+-- 增加业务类型
+SET @ns_id = 0;
+SET @flow_service_types_id = IFNULL((SELECT MAX(id) FROM `eh_flow_service_types`), 1);
+INSERT INTO `eh_flow_service_types` (`id`, `namespace_id`, `service_name`)
+  VALUES ((@flow_service_types_id := @flow_service_types_id + 1), @ns_id, '物业报修');
+  INSERT INTO `eh_flow_service_types` (`id`, `namespace_id`, `service_name`)
+  VALUES ((@flow_service_types_id := @flow_service_types_id + 1), @ns_id, '投诉建议');
+
