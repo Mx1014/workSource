@@ -308,6 +308,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setStatus(OrganizationStatus.ACTIVE.getCode());
         organization.setNamespaceId(parOrg.getNamespaceId());
         organization.setCreatorUid(user.getId());
+        organization.setOrder(0);
 
         Organization org = dbProvider.execute((TransactionStatus status) -> {
 
