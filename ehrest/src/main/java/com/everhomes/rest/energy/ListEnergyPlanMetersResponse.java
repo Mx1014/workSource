@@ -12,7 +12,7 @@ import java.util.List;
  * Created by ying.xiong on 2017/10/20.
  */
 public class ListEnergyPlanMetersResponse {
-    private Long total;
+    private Integer total;
     @ItemType(EnergyPlanMeterDTO.class)
     private List<EnergyPlanMeterDTO> meters;
 
@@ -24,11 +24,11 @@ public class ListEnergyPlanMetersResponse {
         this.meters = meters;
     }
 
-    public Long getTotal() {
+    public Integer getTotal() {
         return total;
     }
 
-    public void setTotal(Long total) {
+    public void setTotal(Integer total) {
         this.total = total;
     }
 }

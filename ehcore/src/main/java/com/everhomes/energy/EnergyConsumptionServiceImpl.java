@@ -35,6 +35,8 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
+import com.everhomes.search.EnergyMeterTaskSearcher;
+import com.everhomes.search.EnergyPlanSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
@@ -204,7 +206,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private RepeatService repeatService;
 
-//    @Override
+    @Autowired
+    private EnergyPlanSearcher energyPlanSearcher;
+
+    @Autowired
+    private EnergyMeterTaskSearcher energyMeterTaskSearcher;
+
+
+    //    @Override
 //    public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
 //
 //        if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
@@ -2699,22 +2708,47 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public void deleteEnergyPlan(DeleteEnergyPlanCommand cmd) {
+        EnergyPlan plan = energyPlanProvider.findEnergyPlanById(cmd.getPlanId());
+        plan.setStatus(CommonStatus.INACTIVE.getCode());
+        plan.setDeleterUid(UserContext.currentUserId());
+        plan.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        energyPlanProvider.updateEnergyPlan(plan);
 
     }
 
     @Override
     public EnergyPlanDTO findEnergyPlanDetails(FindEnergyPlanDetailsCommand cmd) {
-        return null;
+        EnergyPlan plan = energyPlanProvider.findEnergyPlanById(cmd.getPlanId());
+        return toEnergyPlanDTO(plan);
     }
 
     @Override
     public ListEnergyPlanMetersResponse listEnergyPlanMeters(ListEnergyPlanMetersCommand cmd) {
-        return null;
+        ListEnergyPlanMetersResponse response = new ListEnergyPlanMetersResponse();
+        List<EnergyPlanMeterMap> meterMaps = energyPlanProvider.listMetersByEnergyPlan(cmd.getPlanId());
+        if(meterMaps != null && meterMaps.size() > 0) {
+            List<EnergyPlanMeterDTO> meters = new ArrayList<>();
+            meterMaps.forEach(meter -> {
+                EnergyPlanMeterDTO meterDTO = ConvertHelper.convert(meter, EnergyPlanMeterDTO.class);
+                meters.add(meterDTO);
+            });
+            response.setMeters(meters);
+            response.setTotal(meters.size());
+        }
+        return response;
     }
 
     @Override
     public ListEnergyPlanMetersResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd) {
-        return null;
+        ListEnergyPlanMetersResponse response = new ListEnergyPlanMetersResponse();
+        if(cmd.getMeters() != null && cmd.getMeters().size() > 0) {
+            cmd.getMeters().forEach(meter -> {
+                energyPlanProvider.updateEnergyPlanMeterMap(ConvertHelper.convert(meter, EnergyPlanMeterMap.class));
+            });
+            response.setMeters(cmd.getMeters());
+            response.setTotal(cmd.getMeters().size());
+        }
+        return response;
     }
 
     private RepeatSettings dealEnergyPlanRepeat(RepeatSettingsDTO dto) {
@@ -2816,6 +2850,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyPlan plan = ConvertHelper.convert(cmd, EnergyPlan.class);
         RepeatSettings repeat = dealEnergyPlanRepeat(cmd.getRepeat());
         plan.setRepeatSettingId(repeat.getId());
+        plan.setStatus(CommonStatus.ACTIVE.getCode());
         if(cmd.getId() == null) {
             energyPlanProvider.createEnergyPlan(plan);
         } else {

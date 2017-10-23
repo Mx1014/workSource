@@ -9,6 +9,8 @@ import com.everhomes.rest.energy.*;
 import com.everhomes.rest.equipment.ExportEquipmentsCardCommand;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
+import com.everhomes.search.EnergyMeterTaskSearcher;
+import com.everhomes.search.EnergyPlanSearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,6 +32,12 @@ public class EnergyConsumptionController extends ControllerBase {
 
     @Autowired
     private EnergyConsumptionService energyConsumptionService;
+
+    @Autowired
+    private EnergyPlanSearcher energyPlanSearcher;
+
+    @Autowired
+    private EnergyMeterTaskSearcher energyMeterTaskSearcher;
 
     /**
      * <b>URL: /energy/listAuthorizationCommunityByUser</b>
@@ -551,7 +559,7 @@ public class EnergyConsumptionController extends ControllerBase {
     @RestReturn(SearchEnergyPlansResponse.class)
     @RequestMapping("searchEnergyPlans")
     public RestResponse searchEnergyPlans(SearchEnergyPlansCommand cmd) {
-        return response(energyConsumptionService.searchEnergyPlans(cmd));
+        return response(energyPlanSearcher.query(cmd));
     }
 
     /**

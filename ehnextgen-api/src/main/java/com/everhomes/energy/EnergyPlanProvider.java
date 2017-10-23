@@ -9,6 +9,8 @@ import java.util.Map;
 public interface EnergyPlanProvider {
     void createEnergyPlan(EnergyPlan plan);
     void updateEnergyPlan(EnergyPlan plan);
+    EnergyPlan findEnergyPlanById(Long planId);
+    List<EnergyPlan> listEnergyPlans(long pageAnchor, int pageSize);
 
     void createEnergyPlanGroupMap(EnergyPlanGroupMap groupMap);
     void deleteEnergyPlanGroupMap(EnergyPlanGroupMap groupMap);
@@ -16,6 +18,7 @@ public interface EnergyPlanProvider {
     Map<Long, EnergyPlanGroupMap> listGroupMapsByEnergyPlan(Long planId);
 
     void createEnergyPlanMeterMap(EnergyPlanMeterMap meterMap);
+    void updateEnergyPlanMeterMap(EnergyPlanMeterMap meterMap);
     void deleteEnergyPlanMeterMap(EnergyPlanMeterMap meterMap);
     List<EnergyPlanMeterMap> listMetersByEnergyPlan(Long planId);
     Map<Long, EnergyPlanMeterMap> listMeterMapsByEnergyPlan(Long planId);
