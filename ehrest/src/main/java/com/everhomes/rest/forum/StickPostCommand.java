@@ -1,7 +1,6 @@
 // @formatter:off
-package com.everhomes.rest.forum.admin;
+package com.everhomes.rest.forum;
 
-import com.everhomes.rest.forum.StickFlag;
 import com.everhomes.util.StringHelper;
 
 
@@ -11,7 +10,7 @@ import com.everhomes.util.StringHelper;
  *     <li>stickFlag: 置顶标志，0-否，1-是，参考{@link StickFlag}</li>
  * </ul>
  */
-public class StickPostAdminCommand {
+public class StickPostCommand {
     private Long postId;
     private Byte stickFlag;
 

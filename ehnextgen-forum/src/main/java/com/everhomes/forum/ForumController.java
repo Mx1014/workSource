@@ -3,6 +3,9 @@ package com.everhomes.forum;
 
 import javax.validation.Valid;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.rest.forum.StickPostCommand;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -402,6 +405,24 @@ public class ForumController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse publisTopic(PublishTopicCommand cmd) {
         this.forumService.publisTopic(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/forum/stickPost</b>
+     * <p>管理员置顶帖子</p>
+     * @param cmd 参数命令
+     * @return
+     */
+    @RequestMapping("stickPost")
+    @RestReturn(value=String.class)
+    public RestResponse stickPost(StickPostCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        forumService.stickPost(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

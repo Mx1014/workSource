@@ -59,7 +59,7 @@ import com.everhomes.rest.forum.*;
 import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
-import com.everhomes.rest.forum.admin.StickPostAdminCommand;
+import com.everhomes.rest.forum.StickPostCommand;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.hotTag.HotFlag;
@@ -86,7 +86,6 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
-import javafx.geometry.Pos;
 import net.greghaines.jesque.Job;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.geo.GeoHashUtils;
@@ -1978,7 +1977,7 @@ public class ForumServiceImpl implements ForumService {
     }
 
     @Override
-    public void stickPost(StickPostAdminCommand cmd) {
+    public void stickPost(StickPostCommand cmd) {
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();
 

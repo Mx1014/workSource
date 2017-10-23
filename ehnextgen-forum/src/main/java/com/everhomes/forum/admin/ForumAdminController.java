@@ -177,22 +177,4 @@ public class ForumAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
-    /**
-     * <b>URL: /admin/forum/stickPost</b>
-     * <p>管理员置顶帖子</p>
-     * @param cmd 参数命令
-     * @return
-     */
-    @RequestMapping("stickPost")
-    @RestReturn(value=String.class)
-    public RestResponse stickPost(StickPostAdminCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
-        forumService.stickPost(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
 }

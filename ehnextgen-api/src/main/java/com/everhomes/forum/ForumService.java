@@ -7,7 +7,7 @@ import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
-import com.everhomes.rest.forum.admin.StickPostAdminCommand;
+import com.everhomes.rest.forum.StickPostCommand;
 import com.everhomes.rest.group.ListUserGroupPostResponse;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.ui.forum.*;
@@ -61,7 +61,7 @@ public interface ForumService {
     void likeTopic(LikeTopicCommand cmd);
     void cancelLikeTopic(CancelLikeTopicCommand cmd);
 
-    void stickPost(StickPostAdminCommand cmd);
+    void stickPost(StickPostCommand cmd);
 
     ListPostCommandResponse listTopicComments(ListTopicCommentCommand cmd);
     /**
