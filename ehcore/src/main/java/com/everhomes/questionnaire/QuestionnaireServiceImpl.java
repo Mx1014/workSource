@@ -400,6 +400,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		if(questionnaire.getCollectionCount()!=null && questionnaire.getTargetUserNum()!=null
 				&& questionnaire.getTargetUserNum()!=0){
 			dto.setPercentComplete(generatePercentComplete(questionnaire.getTargetUserNum(),questionnaire.getCollectionCount()));
+		}else{
+			dto.setPercentComplete(0+"");
 		}
 
 		return dto;

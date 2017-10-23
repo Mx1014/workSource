@@ -93,22 +93,22 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 
 		Condition condition = cmd.getStatus()==null?DSL.trueCondition():Tables.EH_QUESTIONNAIRES.STATUS.eq(cmd.getStatus());
 		if(cmd.getStartTime()!=null){
-			condition.and(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.ge(new Timestamp(cmd.getStartTime())));
+			condition = condition.and(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.ge(new Timestamp(cmd.getStartTime())));
 		}
 		if(cmd.getEndTime()!=null){
-			condition.and(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.le(new Timestamp(cmd.getEndTime())));
+			condition = condition.and(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.le(new Timestamp(cmd.getEndTime())));
 		}
 
 		if(cmd.getTargetType()!=null){
-			condition.and(Tables.EH_QUESTIONNAIRES.TARGET_TYPE.eq(cmd.getTargetType()));
+			condition = condition.and(Tables.EH_QUESTIONNAIRES.TARGET_TYPE.eq(cmd.getTargetType()));
 		}
 
 		if(cmd.getCollectFlag()!=null){
 			QuestionnaireCollectFlagType collectFlagType = QuestionnaireCollectFlagType.fromCode(cmd.getCollectFlag());
 			if (collectFlagType == QuestionnaireCollectFlagType.COLLECTING){
-				condition.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.ge(cmd.getNowTime()));
+				condition = condition.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.ge(cmd.getNowTime()));
 			}else if (collectFlagType == QuestionnaireCollectFlagType.FINISHED){
-				condition.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.le(cmd.getNowTime()));
+				condition = condition.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.le(cmd.getNowTime()));
 			}
 		}
 
