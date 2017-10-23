@@ -182,6 +182,8 @@ import com.everhomes.server.schema.tables.pojos.EhLeaseBuildings;
 import com.everhomes.server.schema.tables.pojos.EhLeaseConfigs;
 import com.everhomes.server.schema.tables.pojos.EhLeaseIssuerAddresses;
 import com.everhomes.server.schema.tables.pojos.EhLeaseIssuers;
+import com.everhomes.server.schema.tables.pojos.EhLeaseProjectCommunities;
+import com.everhomes.server.schema.tables.pojos.EhLeaseProjects;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotionAttachments;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotionCommunities;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
@@ -2281,6 +2283,14 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhNewsTagVals.class, Tables.EH_NEWS_TAG_VALS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_NEWS_TAG_VALS.ID.max()).from(Tables.EH_NEWS_TAG_VALS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhLeaseProjects.class, Tables.EH_LEASE_PROJECTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_LEASE_PROJECTS.ID.max()).from(Tables.EH_LEASE_PROJECTS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhLeaseProjectCommunities.class, Tables.EH_LEASE_PROJECT_COMMUNITIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_LEASE_PROJECT_COMMUNITIES.ID.max()).from(Tables.EH_LEASE_PROJECT_COMMUNITIES).fetchOne().value1();
         });
     }
 
