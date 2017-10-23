@@ -70,6 +70,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+import javax.servlet.http.HttpServletResponse;
+
 
 @Component
 public class GeneralApprovalServiceImpl implements GeneralApprovalService {
@@ -769,6 +771,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             return response;
         }
             return null;
+    }
+
+    @Override
+    public void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse) {
+
     }
 //	@Override
 //	public GetTemplateByApprovalIdResponse getActiveGeneralFormByOriginId(GetActiveGeneralFormByOriginIdCommand cmd) {

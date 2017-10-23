@@ -143,7 +143,7 @@ public class GeneralApprovalController extends ControllerBase {
 	 */
 	@RequestMapping("exportGeneralApprovalRecords")
 	@RestReturn(value=String.class)
-	public RestResponse exportGeneralApprovalRecords(@Valid ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse) {
+	public RestResponse exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse) {
 		generalApprovalService.exportGeneralApprovalRecords(cmd, httpResponse);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
