@@ -20,4 +20,6 @@ public interface CommunityApproveProvider {
 
     List<CommunityApprove> queryCommunityApproves(ListingLocator locator,
                                                   int count, ListingQueryBuilderCallback queryBuilderCallback);
+
+    List<CommunityApprove> queryCommunityApprovesByNamespaceId(Integer namespaceId);
 }

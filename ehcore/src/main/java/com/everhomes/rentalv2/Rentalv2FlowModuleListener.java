@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.everhomes.flow.*;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.organization.Organization;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +26,6 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.rentalv2.NormalFlag;
@@ -622,4 +620,16 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}
 	}
 
+	@Override
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+		List<RentalResourceType> resourceTypes =  this.rentalv2Provider.findRentalResourceTypes(namespaceId, ResourceTypeStatus.NORMAL.getCode(), null);
+		List<FlowServiceTypeDTO> dtos = resourceTypes.stream().map(r->{
+			FlowServiceTypeDTO dto =new FlowServiceTypeDTO();
+			dto.setId(r.getId());
+			dto.setNamespaceId(r.getNamespaceId());
+			dto.setServiceName(r.getName());
+			return dto;
+		}).collect(Collectors.toList());
+		return dtos;
+	}
 }
