@@ -38,6 +38,7 @@ import java.sql.Timestamp;
  *     <li>title: title</li>
  *     <li>currentLane: 当前泳道</li>
  *     <li>evaluateBtn: 评价按钮，替代原来的needEvaluate字段，统一使用fireButton接口提交评价 {@link com.everhomes.rest.flow.FlowButtonDTO}</li>
+ *     <li>concurrentFlag: 是否是并发执行标记</li>
  * </ul>
  */
 public class FlowCaseDTO {
@@ -75,6 +76,7 @@ public class FlowCaseDTO {
     private String currentLane;
 
     private FlowButtonDTO evaluateBtn;
+    private Byte concurrentFlag;
 
     public Long getId() {
         return id;
@@ -335,6 +337,14 @@ public class FlowCaseDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public void setConcurrentFlag(Byte concurrentFlag) {
+        this.concurrentFlag = concurrentFlag;
+    }
+
+    public Byte getConcurrentFlag() {
+        return concurrentFlag;
     }
 }
 

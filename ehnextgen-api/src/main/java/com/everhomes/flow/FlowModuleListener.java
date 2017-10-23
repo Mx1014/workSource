@@ -23,7 +23,7 @@ public interface FlowModuleListener {
 
 	default void onFlowCreating(Flow flow) { }
 
-    List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId);
+    default List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {return null;}
 
 	/**
 	 * 当 FlowCase 开始运行时

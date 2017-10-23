@@ -2673,7 +2673,8 @@ public class FlowServiceImpl implements FlowService {
         dto.setCurrNodeParams(flowNode.getParams());
         dto.setFlowNodeName(flowNode.getNodeName());
 
-        List<UserInfo> currentProcessors = getCurrentProcessors(flowCase.getId());
+        boolean allFlowCaseFlag = type != 3;
+        List<UserInfo> currentProcessors = getCurrentProcessors(flowCase.getId(), allFlowCaseFlag);
         int i = 0;
         String name = "";
         for (UserInfo userInfo : currentProcessors) {
@@ -2688,6 +2689,14 @@ public class FlowServiceImpl implements FlowService {
             name = name.substring(0, name.length() - 1);
         }
         dto.setProcessUserName(name);
+
+        // 判断当前flowCase有没有兄弟flowCase，暨是不是并发状态执行
+        if (flowCase.getParentId() != 0) {
+            List<FlowCase> subFlowCases = flowCaseProvider.listFlowCaseByParentId(flowCase.getParentId());
+            if (subFlowCases.size() > 1) {
+                dto.setConcurrentFlag(TrueOrFalseFlag.TRUE.getCode());
+            }
+        }
 
         // Long realCurrentNodeId = getRealCurrentNodeId(flowCase, flowNode.getId());
 
@@ -2759,10 +2768,16 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
-    public List<UserInfo> getCurrentProcessors(Long flowCaseId) {
-        List<FlowEventLog> enterLogs = new ArrayList<>();
-        List<FlowCase> allFlowCase = getAllFlowCase(flowCaseId);
+    public List<UserInfo> getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag) {
+        List<FlowCase> allFlowCase = new ArrayList<>();
+        if (allFlowCaseFlag) {
+            allFlowCase = getAllFlowCase(flowCaseId);
+        } else {
+            allFlowCase.add(flowCaseProvider.getFlowCaseById(flowCaseId));
+        }
+
         Long organizationId = null;
+        List<FlowEventLog> enterLogs = new ArrayList<>();
         for (FlowCase aCase : allFlowCase) {
             if (organizationId == null) {
                 organizationId = aCase.getOrganizationId();
@@ -2776,8 +2791,8 @@ public class FlowServiceImpl implements FlowService {
         List<Long> userIds = enterLogs.stream().map(FlowEventLog::getFlowUserId).distinct().collect(Collectors.toList());
 
         List<UserInfo> userInfoList = new ArrayList<>();
-        for (int i = 0; i < userIds.size(); i++) {
-            UserInfo userInfo = userService.getUserSnapshotInfo(userIds.get(i));
+        for (Long userId : userIds) {
+            UserInfo userInfo = userService.getUserSnapshotInfo(userId);
             fixupUserInfo(organizationId, userInfo);
             userInfoList.add(userInfo);
         }
@@ -4718,7 +4733,7 @@ public class FlowServiceImpl implements FlowService {
             flowLaneCmd.setLaneLevel(1);
             flowLaneCmd.setDisplayName(buttonDefName(flow.getNamespaceId(), FlowStepType.START_STEP));
             flowLaneCmd.setFlowNodeLevel(1);
-            laneDTO = createFlowLane(flow, flowLaneCmd, buttonDefName(flow.getNamespaceId(), FlowStepType.START_STEP));
+            laneDTO = createFlowLane(flow, flowLaneCmd, null);
             laneList.add(laneDTO);
 
             CreateFlowNodeCommand flowNodeCmd = new CreateFlowNodeCommand();
@@ -4736,7 +4751,7 @@ public class FlowServiceImpl implements FlowService {
             flowLaneCmd.setLaneLevel(laneLevel);
             flowLaneCmd.setDisplayName(buttonDefName(flow.getNamespaceId(), FlowStepType.END_STEP));
             flowLaneCmd.setFlowNodeLevel(2);
-            laneDTO = createFlowLane(flow, flowLaneCmd, buttonDefName(flow.getNamespaceId(), FlowStepType.END_STEP));
+            laneDTO = createFlowLane(flow, flowLaneCmd, buttonDefName(flow.getNamespaceId(), FlowStepType.ABSORT_STEP));
             laneList.add(laneDTO);
 
             flowNodeCmd = new CreateFlowNodeCommand();
@@ -4945,6 +4960,10 @@ public class FlowServiceImpl implements FlowService {
         FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
         if (flowCase == null) {
             return new FlowCaseDetailDTOV2();
+        }
+
+        if (FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB) {
+            return ConvertHelper.convert(getDumpFlowCaseBrief(flowCase), FlowCaseDetailDTOV2.class);
         }
 
         FlowCaseDetailDTOV2 dto = ConvertHelper.convert(flowCase, FlowCaseDetailDTOV2.class);

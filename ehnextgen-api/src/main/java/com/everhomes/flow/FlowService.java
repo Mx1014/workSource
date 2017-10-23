@@ -196,7 +196,7 @@ public interface FlowService {
 
     FlowCase getFlowCaseById(Long flowCaseId);
 
-    List<UserInfo> getCurrentProcessors(Long flowCaseId);
+    List<UserInfo> getCurrentProcessors(Long flowCaseId, boolean allFlowCaseFlag);
 
     List<UserInfo> getSupervisor(FlowCase flowCase);
 
