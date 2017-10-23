@@ -768,9 +768,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             }).collect(Collectors.toList());
             response.setRecords(results);
             response.setNextPageAnchor(locator.getAnchor());
-            return response;
+
         }
-            return null;
+        return response;
     }
 
     @Override
