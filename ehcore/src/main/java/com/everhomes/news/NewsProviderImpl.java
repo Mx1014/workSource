@@ -70,6 +70,13 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
+	public void deletNewsTagVals(Long newsId) {
+		DeleteQuery query = getContext(AccessSpec.readWrite()).deleteQuery(Tables.EH_NEWS_TAG_VALS);
+		query.addConditions(Tables.EH_NEWS_TAG_VALS.NEWS_ID.eq(newsId));
+		query.execute();
+	}
+
+	@Override
 	public List<NewsTagVals> listNewsTagVals(Long newsId) {
 		return dbProvider.getDslContext(AccessSpec.readOnlyWith(EhNewsTagVals.class)).select().from(Tables.EH_NEWS_TAG_VALS)
 				.where(Tables.EH_NEWS_TAG_VALS.NEWS_ID.eq(newsId)).fetch().map(r->ConvertHelper.convert(r, NewsTagVals.class));
