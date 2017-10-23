@@ -4831,8 +4831,14 @@ CREATE TABLE `eh_flow_event_logs` (
   `integral_tag3` BIGINT NOT NULL DEFAULT 0,
   `integral_tag4` BIGINT NOT NULL DEFAULT 0,
   `integral_tag5` BIGINT NOT NULL DEFAULT 0,
-
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_namespace_id` (`namespace_id`),
+  KEY `i_eh_flow_main_id` (`flow_main_id`),
+  KEY `i_eh_flow_version` (`flow_version`),
+  KEY `i_eh_flow_case_id` (`flow_case_id`),
+  KEY `i_eh_flow_user_id` (`flow_user_id`),
+  KEY `i_eh_step_count` (`step_count`),
+  KEY `i_eh_log_type` (`log_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -13932,6 +13938,7 @@ CREATE TABLE `eh_var_field_group_scopes` (
   `operator_uid` BIGINT,
   `update_time` DATETIME,
   `community_id` BIGINT COMMENT '园区id',
+  `group_parent_id` BIGINT COMMENT '父组系统id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -14000,7 +14007,6 @@ CREATE TABLE `eh_var_field_scopes` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `module_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the module which the field belong to',
   `group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to eh_var_field_groups',
-  `group_path` VARCHAR(128) COMMENT 'path from the root',
   `field_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to eh_var_fields',
   `field_param` VARCHAR(128),
   `field_display_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the field name, it will use the name in eh_var_fields if not defined',
@@ -14012,6 +14018,7 @@ CREATE TABLE `eh_var_field_scopes` (
   `operator_uid` BIGINT,
   `update_time` DATETIME,
   `community_id` BIGINT COMMENT '园区id',
+  `group_path` VARCHAR(128) COMMENT 'path from the root',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 
@@ -14033,6 +14040,7 @@ CREATE TABLE `eh_var_fields` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
+  `field_param` VARCHAR(128),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -14316,15 +14324,15 @@ DROP TABLE IF EXISTS `eh_warning_settings`;
 
 
 CREATE TABLE `eh_warning_settings` (
-  `id` bigint(20) NOT NULL,
-  `namespace_id` int(11) NOT NULL COMMENT 'namespace id',
-  `type` varchar(64) DEFAULT NULL COMMENT 'type',
-  `time` bigint(20) DEFAULT NULL COMMENT 'millisecond',
-  `create_time` datetime DEFAULT NULL,
-  `creator_uid` bigint(20) DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL,
-  `operator_uid` bigint(20) DEFAULT NULL,
-  `category_id` bigint(22) DEFAULT NULL COMMENT '入口id',
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL COMMENT 'namespace id',
+  `type` VARCHAR(64) COMMENT 'type',
+  `time` BIGINT COMMENT 'millisecond',
+  `create_time` DATETIME,
+  `creator_uid` BIGINT,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT,
+  `category_id` BIGINT COMMENT '入口id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -14525,53 +14533,5 @@ CREATE TABLE `eh_zj_syncdata_backup` (
   `create_time` DATETIME,
   `creator_uid` BIGINT,
   `update_time` DATETIME,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 增加咨询电话 by st.zheng
-ALTER TABLE `eh_news` ADD COLUMN `phone` BIGINT(20) NULL DEFAULT '0' AFTER `source_url`;
-
--- 新建标签表 by st.zheng
-CREATE TABLE `eh_news_tag` (
-  `id` bigint(20) NOT NULL,
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `owner_type` varchar(32) DEFAULT NULL,
-  `owner_id` bigint(20) DEFAULT '0',
-  `parent_id` bigint(20)  DEFAULT '0',
-  `value` varchar(32) DEFAULT NULL,
-  `is_search` tinyint(8)  DEFAULT '0' COMMENT '是否开启筛选',
-  `is_default` tinyint(8)  DEFAULT '0' COMMENT '是否是默认选项',
-  `delete_flag` tinyint(8) NOT NULL DEFAULT '0',
-  `default_order` bigint(20)  DEFAULT '0',
-  `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE `eh_news_tag_vals` (
-  `id` BIGINT(20) NOT NULL,
-  `news_id` BIGINT(20) NOT NULL DEFAULT '0',
-  `news_tag_id` BIGINT(20) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`));
-
--- 园区地图add by sw 20171009
-CREATE TABLE `eh_community_map_shops` (
-  `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `namespace_id` int(11) NOT NULL DEFAULT 0,
-  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the type, community, enterprise, etc',
-  `owner_id` bigint(20) NOT NULL DEFAULT 0,
-  `shop_name` varchar(128) DEFAULT NULL,
-  `shop_type` varchar(128) DEFAULT NULL,
-  `business_hours` varchar(512) DEFAULT NULL,
-  `contact_name` varchar(128) DEFAULT NULL,
-  `contact_phone` varchar(128) DEFAULT NULL,
-  `building_id` bigint(20) NOT NULL,
-  `address_id` bigint(20) NOT NULL,
-  `description` text,
-  `shop_Avatar_uri` varchar(1024) DEFAULT NULL,
-  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: active',
-  `creator_uid` bigint(20) NOT NULL DEFAULT 0,
-  `create_time` datetime DEFAULT NULL,
-  `update_uid` bigint(20) NOT NULL DEFAULT 0,
-  `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
