@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
  *     <li>content: 列表展示内容</li>
  *     <li>title: 标题</li>
  *     <li>currentOrganizationId: 用户当前场景下的公司id</li>
+ *     <li>serviceType: 业务类型</li>
  * </ul>
  */
 public class CreateFlowCaseCommand {
@@ -32,6 +33,7 @@ public class CreateFlowCaseCommand {
     private String title;
     @NotNull
     private Long currentOrganizationId;
+    private String serviceType;
 
     public Long getFlowMainId() {
         return flowMainId;
@@ -111,6 +113,14 @@ public class CreateFlowCaseCommand {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
     }
 
     @Override

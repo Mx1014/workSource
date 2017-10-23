@@ -12,4 +12,14 @@ public class FlowNode extends EhFlowNodes {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof FlowNode && this.getId().equals(((FlowNode) obj).getId());
+    }
 }

@@ -8,6 +8,7 @@ import java.sql.Timestamp;
  * <ul>
  *     <li>id: id</li>
  *     <li>flowName: flowName</li>
+ *     <li>description: description</li>
  *     <li>flowMainId: flowMainId</li>
  *     <li>ownerType: ownerType</li>
  *     <li>endNode: endNode</li>
@@ -31,6 +32,7 @@ import java.sql.Timestamp;
 public class FlowDTO {
     private Long id;
     private String flowName;
+    private String description;
     private Long flowMainId;
     private String ownerType;
     private Long endNode;
@@ -203,17 +205,25 @@ public class FlowDTO {
         this.updateTime = updateTime;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
     public String getStringTag1() {
         return stringTag1;
     }
 
     public void setStringTag1(String stringTag1) {
         this.stringTag1 = stringTag1;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
 

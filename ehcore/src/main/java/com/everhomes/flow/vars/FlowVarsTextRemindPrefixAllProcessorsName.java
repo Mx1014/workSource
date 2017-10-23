@@ -1,11 +1,6 @@
 package com.everhomes.flow.vars;
 
-import com.everhomes.flow.*;
-import com.everhomes.rest.user.UserInfo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * 节点提醒的 上个节点处理人
@@ -13,9 +8,9 @@ import java.util.List;
  *
  */
 @Component("flow-variable-text-remind-prefix-processors-name")
-public class FlowVarsTextRemindPrefixAllProcessorsName implements FlowVariableTextResolver {
+public class FlowVarsTextRemindPrefixAllProcessorsName extends FlowVarsTextTrackerPrefixAllProcessorsName {
 
-	@Autowired
+	/*@Autowired
 	FlowService flowService;
 	
 	@Autowired
@@ -75,5 +70,5 @@ public class FlowVarsTextRemindPrefixAllProcessorsName implements FlowVariableTe
 		
 		return null;
 	}
-
+*/
 }

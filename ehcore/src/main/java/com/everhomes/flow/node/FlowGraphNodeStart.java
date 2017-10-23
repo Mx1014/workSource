@@ -1,7 +1,7 @@
-package com.everhomes.flow;
+package com.everhomes.flow.node;
 
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.flow.*;
 
 public class FlowGraphNodeStart extends FlowGraphNode {
 	private FlowEventLogProvider flowEventLogProvider;
