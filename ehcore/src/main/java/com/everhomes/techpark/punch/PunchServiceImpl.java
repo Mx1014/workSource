@@ -5015,6 +5015,15 @@ public class PunchServiceImpl implements PunchService {
 //					} else if (pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
 //
 //					}
+						//排班处理
+						List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(pr.getId(),pr.getStatus()) ;
+						for(PunchScheduling ps : schedulings){
+							//删除现在active的,然后把自己变成active的
+							ps.setStatus( PunchRuleStatus.ACTIVE.getCode());
+							punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(ps.getOwnerType(), ps.getOwnerId(),
+									ps.getTargetType(), ps.getTargetId(), ps.getRuleDate(), ps.getStatus());
+							punchSchedulingProvider.updatePunchScheduling(ps);
+						}
 						pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
 						punchProvider.updatePunchRule(pr);
 						orgs.add(org);
@@ -6295,13 +6304,13 @@ public class PunchServiceImpl implements PunchService {
                 LOGGER.error("NoNodeAvailableException",e);
             }
 
-			//删除新增人员之前的考勤排班
-			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(punchOrg.getId(), CONFIG_VERSION_CODE);
-			if (null != newEmployees)
-				for (UniongroupMemberDetail employee : newEmployees) {
-					//删除新增人员之前的排班
-					punchSchedulingProvider.deletePunchSchedulingByOwnerIdAndTarget(cmd.getOwnerId(), employee.getDetailId());
-				}
+//			//删除新增人员之前的考勤排班
+//			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(punchOrg.getId(), CONFIG_VERSION_CODE);
+//			if (null != newEmployees)
+//				for (UniongroupMemberDetail employee : newEmployees) {
+//					//删除新增人员之前的排班
+//					punchSchedulingProvider.deletePunchSchedulingByOwnerIdAndTarget(cmd.getOwnerId(), employee.getDetailId());
+//				}
 	        //打卡地点和wifi
 	        saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
 
@@ -6472,8 +6481,9 @@ public class PunchServiceImpl implements PunchService {
 		Date monthBeginDate = calendar.getTime();
 		calendar.add(Calendar.MONTH, 1);
 		Date monthEndDate = calendar.getTime();
+		//只删除当前状态的--比如新增,比如修改
 		punchSchedulingProvider.deleteAfterTodayPunchSchedulingByPunchRuleId(pr.getId(),
-				monthBeginDate, monthEndDate);
+				monthBeginDate, monthEndDate,pr.getStatus());
 		calendar.add(Calendar.DAY_OF_MONTH, -1);
 		int monthDays = calendar.get(Calendar.DAY_OF_MONTH);
 
@@ -6561,7 +6571,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 			ps.setTargetType(PunchTargetType.USER.getCode());
 			ps.setTargetId(r.getUserId());
-
+			ps.setStatus(pr.getStatus());
 			schedulings.add(ps);
 			i++;
 		}
@@ -6777,19 +6787,8 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchSchedulingDTO> result = new ArrayList<PunchSchedulingDTO>();
 		PunchSchedulingDTO dto = new PunchSchedulingDTO();
 		dto.setMonth(startDate.getTime());
-		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
-			@Override
-			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-					SelectQuery<? extends Record> query) {
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(startDate));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(endDate));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.isNotNull());
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.eq(pr.getId()));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(PunchTargetType.USER.getCode()));
-				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.asc());
-				return null;
-			}
-		});
+		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(startDate,endDate,pr.getId(),pr.getStatus()) ;
+
 		if(null != schedulings){
 			Map<Long, List<PunchScheduling>> scheMap = new HashMap<>();
 			for(PunchScheduling sche : schedulings){
@@ -6933,20 +6932,20 @@ public class PunchServiceImpl implements PunchService {
 			saveGeopointsAndWifis(punchOrg.getId(), cmd.getPunchGeoPoints(), cmd.getWifis());
 
 			// updatePunchGroup
-			List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(), currentVersion);
-
-			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(), CONFIG_VERSION_CODE);
-			List<Long> detailIds = new ArrayList<>();
-			if (null == newEmployees)
-				newEmployees = new ArrayList<>();
-			for (UniongroupMemberDetail employee : newEmployees) {
-				detailIds.add(employee.getDetailId());
-				//删除被踢出考勤组的人的设置 -- 排班
-				//删除新增人员之前的排班
-				if (!isEmployeeInList(employee, oldEmployees)) {
-					punchSchedulingProvider.deletePunchSchedulingByOwnerIdAndTarget(pr.getOwnerId(), employee.getDetailId());
-				}
-			}
+//			List<UniongroupMemberDetail> oldEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(), currentVersion);
+//
+//			List<UniongroupMemberDetail> newEmployees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(), CONFIG_VERSION_CODE);
+//			List<Long> detailIds = new ArrayList<>();
+//			if (null == newEmployees)
+//				newEmployees = new ArrayList<>();
+//			for (UniongroupMemberDetail employee : newEmployees) {
+//				detailIds.add(employee.getDetailId());
+//				//删除被踢出考勤组的人的设置 -- 排班
+//				//删除新增人员之前的排班
+//				if (!isEmployeeInList(employee, oldEmployees)) {
+//					punchSchedulingProvider.deletePunchSchedulingByOwnerIdAndTarget(pr.getOwnerId(), employee.getDetailId());
+//				}
+//			}
 
 
 			//打卡时间,特殊日期,排班等
@@ -6956,17 +6955,17 @@ public class PunchServiceImpl implements PunchService {
 			pr.setName(cmd.getGroupName());
 			pr.setRuleType(cmd.getRuleType());
 			pr.setPunchOrganizationId(punchOrg.getId());
-			pr.setStatus(PunchRuleStatus.MODIFYED.getCode());
+			if(PunchRuleStatus.NEW.getCode() != pr.getStatus().byteValue())
+				pr.setStatus(PunchRuleStatus.MODIFYED.getCode());
 			pr.setOperatorUid(UserContext.current().getUser().getId());
 			pr.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			// 新增一条修改状态的规则
-			//TODO:删除
 			punchProvider.updatePunchRule(pr);
 //		punchProvider.deletePunchTimeRuleByRuleId(pr.getId());
 
 			savePunchTimeRule(cmd, pr);
 			//删除不在考勤组的排班
-			punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndNotInTarget(pr.getId(), detailIds);
+//			punchSchedulingProvider.deletePunchSchedulingByPunchRuleIdAndNotInTarget(pr.getId(), detailIds);
 			Long t9 = System.currentTimeMillis();
 			LOGGER.debug("saveUnion Time9 "+  t9 + "cost: " +(t9-t8));
 

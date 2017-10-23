@@ -3,6 +3,7 @@ package com.everhomes.techpark.punch;
 import java.util.Date;
 import java.util.List;
 
+import com.everhomes.rest.techpark.punch.PunchRuleStatus;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteWhereStep;
@@ -187,6 +188,7 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.equal(punchOrganizationId));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.equal(userId));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(punchruleId));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.STATUS.equal(PunchRuleStatus.ACTIVE.getCode()));
 //				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
 				return null;
 			}
@@ -254,14 +256,67 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 	}
 
 	@Override
-	public void deleteAfterTodayPunchSchedulingByPunchRuleId(Long id, Date monthBeginDate, Date monthEndDate) {
+	public void deleteAfterTodayPunchSchedulingByPunchRuleId(Long id, Date monthBeginDate, Date monthEndDate, Byte status) {
 
 		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
 		DeleteWhereStep<EhPunchSchedulingsRecord> step = context.delete(Tables.EH_PUNCH_SCHEDULINGS);
 		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(id)
 				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt(new java.sql.Date(new Date().getTime())))
 				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(new java.sql.Date(monthBeginDate.getTime())))
-				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(new java.sql.Date(monthEndDate.getTime())));
+				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(new java.sql.Date(monthEndDate.getTime())))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.STATUS.eq(status));
+		step.where(condition);
+		step.execute();
+	}
+
+	@Override
+	public List<PunchScheduling> queryPunchSchedulings(java.sql.Date startDate, java.sql.Date endDate, Long prId, Byte status) {
+		return queryPunchSchedulings(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+																SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(startDate));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(endDate));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.isNotNull());
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.eq(prId));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(PunchTargetType.USER.getCode()));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.STATUS.eq(status));
+				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.asc());
+				return null;
+			}
+		});
+	}
+
+
+	@Override
+	public List<PunchScheduling> queryPunchSchedulings(Long prId, Byte status) {
+		return queryPunchSchedulings(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+																SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.isNotNull());
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.eq(prId));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(PunchTargetType.USER.getCode()));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.STATUS.eq(status));
+				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.asc());
+				return null;
+			}
+		});
+	}
+
+	@Override
+	public void deletePunchSchedulingByOwnerAndTarget(String ownerType, Long ownerId, String targetType,
+													  Long targetId, java.sql.Date ruleDate, Byte status) {
+
+		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchSchedulingsRecord> step = context.delete(Tables.EH_PUNCH_SCHEDULINGS);
+		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.equal(targetId)
+				.and(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.equal(targetType))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.equal(ownerId))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.OWNER_TYPE.equal(ownerType))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.equal(ruleDate))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.STATUS.equal(status))
+				;
 		step.where(condition);
 		step.execute();
 	}

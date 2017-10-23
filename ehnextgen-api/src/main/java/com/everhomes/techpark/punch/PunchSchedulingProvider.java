@@ -45,5 +45,11 @@ public interface PunchSchedulingProvider {
 
 	void batchCreatePunchSchedulings(List<EhPunchSchedulings> schedulings);
 
-	void deleteAfterTodayPunchSchedulingByPunchRuleId(Long id, Date monthBeginDate, Date monthEndDate);
+	void deleteAfterTodayPunchSchedulingByPunchRuleId(Long id, Date monthBeginDate, Date monthEndDate, Byte status);
+
+	List<PunchScheduling> queryPunchSchedulings(java.sql.Date startDate, java.sql.Date endDate, Long prId, Byte status);
+
+	List<PunchScheduling> queryPunchSchedulings(Long id, Byte status);
+
+	void deletePunchSchedulingByOwnerAndTarget(String ownerType, Long ownerId, String targetType, Long targetId, java.sql.Date ruleDate, Byte status);
 }
