@@ -74,6 +74,8 @@ SET @ns_id = 0;
 SET @flow_service_types_id = IFNULL((SELECT MAX(id) FROM `eh_flow_service_types`), 1);
 INSERT INTO `eh_flow_service_types` (`id`, `namespace_id`, `service_name`)
   VALUES ((@flow_service_types_id := @flow_service_types_id + 1), @ns_id, '物业报修');
-  INSERT INTO `eh_flow_service_types` (`id`, `namespace_id`, `service_name`)
+INSERT INTO `eh_flow_service_types` (`id`, `namespace_id`, `service_name`)
   VALUES ((@flow_service_types_id := @flow_service_types_id + 1), @ns_id, '投诉建议');
+INSERT INTO `eh_flow_service_types` (`id`, `namespace_id`, `service_name`)
+  VALUES ((@flow_service_types_id := @flow_service_types_id + 1), @ns_id, '审批');
 
