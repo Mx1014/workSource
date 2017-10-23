@@ -49,5 +49,5 @@ CREATE TABLE `eh_lease_projects` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 帖子增加置顶功能  add by yanjun 201710231623
-ALTER TABLE `eh_forum_posts` ADD COLUMN `stick_flag`  tinyint(4) NULL COMMENT '是否置顶，0-否，1-是';
-ALTER TABLE `eh_activities` ADD COLUMN `stick_flag`  tinyint(4) NULL COMMENT '是否置顶，0-否，1-是';
+ALTER TABLE `eh_forum_posts` ADD COLUMN `stick_flag`  tinyint(4) NOT NULL DEFAULT 0 COMMENT '是否置顶，0-否，1-是';
+ALTER TABLE `eh_activities` ADD COLUMN `stick_flag`  tinyint(4) NOT NULL DEFAULT 0 COMMENT '是否置顶，0-否，1-是';
