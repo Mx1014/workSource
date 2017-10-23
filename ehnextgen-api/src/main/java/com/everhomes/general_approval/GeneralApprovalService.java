@@ -15,6 +15,8 @@ import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
 import com.everhomes.rest.general_approval.PostApprovalFormCommand;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
 
+import javax.servlet.http.HttpServletResponse;
+
 public interface GeneralApprovalService {
 
 	GetTemplateByApprovalIdResponse getTemplateByApprovalId(GetTemplateByApprovalIdCommand cmd);
@@ -52,6 +54,7 @@ public interface GeneralApprovalService {
 
 	ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd);
 
+	void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse);
 
 //	/**
 //	 * 直接通过表单id获取表单

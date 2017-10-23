@@ -1,5 +1,6 @@
 package com.everhomes.general_approval;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.general_approval.*;
@@ -126,10 +127,25 @@ public class GeneralApprovalController extends ControllerBase {
 	 * <p> 根据模块 id 获取对应的审批记录 </p>
 	 */
 	@RequestMapping("listGeneralApprovalRecords")
-	@RestReturn(value=ListGeneralApprovalRecordsResponse.class, collection = true)
+	@RestReturn(value=ListGeneralApprovalRecordsResponse.class)
 	public RestResponse listGeneralApprovalRecords(@Valid ListGeneralApprovalRecordsCommand cmd) {
 		ListGeneralApprovalRecordsResponse results =  generalApprovalService.listGeneralApprovalRecords(cmd);
 		RestResponse response = new RestResponse(results);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_approval/exportGeneralApprovalRecords</b>
+	 * <p> 根据模块 id 导出对应的审批记录 </p>
+	 */
+	@RequestMapping("exportGeneralApprovalRecords")
+	@RestReturn(value=String.class)
+	public RestResponse exportGeneralApprovalRecords(@Valid ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse) {
+		generalApprovalService.exportGeneralApprovalRecords(cmd, httpResponse);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 
