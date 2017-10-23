@@ -62,6 +62,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 	private SequenceProvider sequenceProvider;
 	@Autowired
 	private RegionProvider regionProvider;
+	@Autowired
+	private EnterpriseApplyEntryService enterpriseApplyEntryService;
 
 	@Override
 	public ListLeaseBuildingsResponse listLeaseBuildings(ListLeaseBuildingsCommand cmd) {
@@ -512,15 +514,23 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 			populateProjectDetailInfo(dto, community, leaseProject);
 		}
 
-		List<LeaseBuilding> leaseBuildings = enterpriseApplyBuildingProvider.listLeaseBuildings(community.getNamespaceId(),
-				cmd.getProjectId(), null, 5);
+		//当配置 APP端显示楼栋介绍信息时，才返回楼栋列表，园区入驻3.6
+		GetLeasePromotionConfigCommand configCmd = new GetLeasePromotionConfigCommand();
+		configCmd.setNamespaceId(community.getNamespaceId());
+		LeasePromotionConfigDTO config = enterpriseApplyEntryService.getLeasePromotionConfig(configCmd);
 
-		dto.setBuildings(leaseBuildings.stream().map(r -> {
-			LeaseBuildingDTO d = ConvertHelper.convert(r, LeaseBuildingDTO.class);
-			populatePostUrl(d, r.getPosterUri());
-			processBuilingDetailUrl(d);
-			return d;
-		}).collect(Collectors.toList()));
+		if (config.getBuildingIntroduceFlag() == LeasePromotionFlag.ENABLED.getCode()) {
+			List<LeaseBuilding> leaseBuildings = enterpriseApplyBuildingProvider.listLeaseBuildings(community.getNamespaceId(),
+					cmd.getProjectId(), null, 5);
+
+			dto.setBuildings(leaseBuildings.stream().map(r -> {
+				LeaseBuildingDTO d = ConvertHelper.convert(r, LeaseBuildingDTO.class);
+				populatePostUrl(d, r.getPosterUri());
+				processBuilingDetailUrl(d);
+				return d;
+			}).collect(Collectors.toList()));
+		}
+
 		return dto;
 	}
 
