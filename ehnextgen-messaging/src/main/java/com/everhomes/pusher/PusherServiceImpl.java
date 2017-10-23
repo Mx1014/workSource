@@ -302,6 +302,11 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             
     }
 
+    /**
+     * 
+     * @param destLogin
+     * @return iOS Xiaomi Huawei Android
+     */
     private String getPlatform(UserLogin destLogin) {
         if(destLogin.getStatus() == UserLoginStatus.LOGGED_OFF) {
             LOGGER.error("Pushing message, destLogin loggedoff, destLogin=" + destLogin);

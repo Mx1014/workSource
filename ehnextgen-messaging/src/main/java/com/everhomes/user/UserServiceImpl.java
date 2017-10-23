@@ -103,9 +103,12 @@ import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.*;
 import com.everhomes.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoHashUtils;
+
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -129,6 +132,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -5285,5 +5289,39 @@ public class UserServiceImpl implements UserService {
 	    
 	    return StringHelper.toJsonString(result);
 	}
+
+    @Override
+    public SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
+            HttpServletRequest request, HttpServletResponse response) {
+        User user = UserContext.current().getUser();
+        UserLogin login = UserContext.current().getLogin();
+        SystemInfoResponse resp = new SystemInfoResponse();
+        resp.setUploadUrlInBrowser("https://upload.zuolin.com");
+        
+        if(user != null && user.getId() >= User.MAX_SYSTEM_USER_ID && login != null) {
+            String userKey = NameMapper.getCacheKey("user", user.getId(), null);
+            Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, String.valueOf(login.getLoginId()));
+            UserLogin newLogin = accessor.getMapValueObject(String.valueOf(login.getLoginId()));
+            if(newLogin != null && newLogin.getLoginId() == login.getLoginId() && newLogin.getLoginInstanceNumber() == newLogin.getLoginInstanceNumber()) {
+                newLogin.setPusherIdentify(cmd.getPusherIdentify());
+                newLogin.setDeviceIdentifier(cmd.getDeviceIdentifier());
+
+                //update device info
+                login.setPusherIdentify(cmd.getPusherIdentify());
+                login.setDeviceIdentifier(cmd.getDeviceIdentifier());
+                accessor.putMapValueObject(String.valueOf(newLogin.getLoginId()), newLogin);
+            }
+            
+            List<Border> borders = this.borderProvider.listAllBorders();
+            List<String> borderStrs = borders.stream().map((Border border) -> {
+                return String.format("%s:%d", border.getPublicAddress(), border.getPublicPort());
+            }).collect(Collectors.toList());
+            
+            resp.setAccessPoints(borderStrs);
+            resp.setContentServer(contentServerService.getContentServer());
+        }
+        
+        return resp;
+    }
 
 }
