@@ -15,6 +15,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
@@ -405,7 +406,11 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		BeanUtils.copyProperties(extraInfo, dto);
 
 		List<Long> communityIds = enterpriseApplyBuildingProvider.listLeaseProjectCommunities(leaseProject.getId());
-		dto.setCommunityIds(communityIds);
+		dto.setProjectDTOS(communityIds.stream().map(c -> {
+			ProjectDTO d = new ProjectDTO();
+			d.setProjectId(c);
+			return d;
+		}).collect(Collectors.toList()));
 
 		Long userId = UserContext.currentUserId();
 		//设置封面图url 和banner图

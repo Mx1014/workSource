@@ -1,6 +1,7 @@
 package com.everhomes.rest.techpark.expansion;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.acl.ProjectDTO;
 
 import java.util.List;
 
@@ -25,8 +26,8 @@ public class LeaseProjectDTO {
     private String trafficDescription;
     private String posterUri;
     private String posterUrl;
-    @ItemType(Long.class)
-    private List<Long> communityIds;
+    @ItemType(ProjectDTO.class)
+    private List<ProjectDTO> projectDTOS;
     @ItemType(BuildingForRentAttachmentDTO.class)
     private List<BuildingForRentAttachmentDTO> attachments;
 
@@ -208,12 +209,12 @@ public class LeaseProjectDTO {
         this.posterUrl = posterUrl;
     }
 
-    public List<Long> getCommunityIds() {
-        return communityIds;
+    public List<ProjectDTO> getProjectDTOS() {
+        return projectDTOS;
     }
 
-    public void setCommunityIds(List<Long> communityIds) {
-        this.communityIds = communityIds;
+    public void setProjectDTOS(List<ProjectDTO> projectDTOS) {
+        this.projectDTOS = projectDTOS;
     }
 
     public List<BuildingForRentAttachmentDTO> getAttachments() {
