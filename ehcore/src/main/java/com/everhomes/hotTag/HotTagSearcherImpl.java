@@ -89,7 +89,7 @@ public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagS
         }
 
         //热门标签增加 categoryId    add by yanjun 20170920
-        if(cmd.getCategoryId() == null){
+        if(cmd.getCategoryId() != null){
             fb = FilterBuilders.termFilter("categoryId", cmd.getCategoryId());
         }
 

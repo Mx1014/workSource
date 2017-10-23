@@ -59,6 +59,7 @@ import com.everhomes.rest.forum.*;
 import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
+import com.everhomes.rest.forum.admin.StickPostAdminCommand;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.hotTag.HotFlag;
@@ -1975,7 +1976,43 @@ public class ForumServiceImpl implements ForumService {
             LOGGER.error("Failed to update the dislike count of post, userId=" + operatorId + ", topicId=" + topicId, e);
         }
     }
-    
+
+    @Override
+    public void stickPost(StickPostAdminCommand cmd) {
+        User operator = UserContext.current().getUser();
+        Long operatorId = operator.getId();
+
+        Post post = checkStickPostParameter(operatorId, cmd.getPostId(), cmd.getStickFlag());
+
+        dbProvider.execute((status) -> {
+            post.setStickFlag(cmd.getStickFlag());
+            forumProvider.updatePost(post);
+            if(post.getEmbeddedAppId() != null &&  post.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY){
+                Activity activity = activityProvider.findSnapshotByPostId(cmd.getPostId());
+                activity.setStickFlag(cmd.getStickFlag());
+                activityProivider.updateActivity(activity);
+            }
+            return null;
+        });
+    }
+
+    private Post checkStickPostParameter(Long operatorId, Long postId, Byte stickFlag) {
+        if(postId == null || StickFlag.fromCode(stickFlag) == null) {
+            LOGGER.error("invalid parameter, postId or stickFlag is invalid, operatorId={}, postId={}, stickFlag={}", operatorId, postId, stickFlag);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, postId or stickFlag is null");
+        }
+
+        Post post = this.forumProvider.findPostById(postId);
+        if(post == null) {
+            LOGGER.error("Forum post not found, operatorId={}, postId={}, stickFlag={}", operatorId, postId, stickFlag);
+            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
+                    ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
+        }
+
+        return post;
+    }
+
     @Override
     public ListPostCommandResponse listTopicComments(ListTopicCommentCommand cmd) {
     	// 非登录用户只能看第一页 add by xiongying20161009

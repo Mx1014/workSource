@@ -64,6 +64,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerToken: 当前帖子的token，当前字段在评论时使用<li/>
  * <li>tag: tag</li>
  * <li>cloneFlag: 克隆标识，参考{@link com.everhomes.rest.forum.PostCloneFlag}</li>
+ * <li>stickFlag: 置顶标志，0-否，1-是，参考{@link StickFlag}</li>
  * </ul>
  */
 public class PostDTO {
@@ -179,6 +180,8 @@ public class PostDTO {
 	private String tag;
 
     private Byte cloneFlag;
+
+    private Byte stickFlag;
 
     public Long getGroupId() {
 		return groupId;
@@ -617,6 +620,14 @@ public class PostDTO {
 
     public void setCloneFlag(Byte cloneFlag) {
         this.cloneFlag = cloneFlag;
+    }
+
+    public Byte getStickFlag() {
+        return stickFlag;
+    }
+
+    public void setStickFlag(Byte stickFlag) {
+        this.stickFlag = stickFlag;
     }
 
     @Override

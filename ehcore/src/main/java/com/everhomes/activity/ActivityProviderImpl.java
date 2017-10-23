@@ -541,7 +541,9 @@ public class ActivityProviderImpl implements ActivityProivider {
         }else {
             return null;
         }
-        
+
+        //置顶的优先排序  add by yanjun 20171023
+        query.addOrderBy(Tables.EH_ACTIVITIES.STICK_FLAG.desc());
 
         //排序：1、待确认， 2、正常。排序会影响性能，需要待确认状态的活动时才按这个排序  add by yanjun 20170516  
         if(needTemporary != null && needTemporary.byteValue() == 1){

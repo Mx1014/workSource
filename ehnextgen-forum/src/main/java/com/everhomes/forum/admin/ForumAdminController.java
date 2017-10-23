@@ -4,6 +4,7 @@ package com.everhomes.forum.admin;
 
 import java.util.List;
 
+import com.everhomes.rest.forum.admin.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +24,6 @@ import com.everhomes.rest.forum.AssignedScopeDTO;
 import com.everhomes.rest.forum.DeleteCommentCommand;
 import com.everhomes.rest.forum.DeleteTopicCommand;
 import com.everhomes.rest.forum.ListTopicAssignedScopeCommand;
-import com.everhomes.rest.forum.admin.DeleteCommentAdminCommand;
-import com.everhomes.rest.forum.admin.DeleteTopicAdminCommand;
-import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
-import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.search.SearchSyncManager;
 import com.everhomes.search.SearchSyncType;
 import com.everhomes.user.UserContext;
@@ -176,6 +173,24 @@ public class ForumAdminController extends ControllerBase {
         SearchTopicAdminCommandResponse cmdResponse = forumService.searchComment(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/forum/stickPost</b>
+     * <p>管理员置顶帖子</p>
+     * @param cmd 参数命令
+     * @return
+     */
+    @RequestMapping("stickPost")
+    @RestReturn(value=String.class)
+    public RestResponse stickPost(StickPostAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        forumService.stickPost(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
