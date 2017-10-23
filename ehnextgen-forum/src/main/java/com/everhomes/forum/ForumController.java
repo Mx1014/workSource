@@ -412,7 +412,7 @@ public class ForumController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/forum/stickPost</b>
+     * <b>URL: /forum/stickPost</b>
      * <p>管理员置顶帖子</p>
      * @param cmd 参数命令
      * @return
