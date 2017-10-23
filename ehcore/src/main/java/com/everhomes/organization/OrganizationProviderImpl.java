@@ -519,7 +519,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
 		//:todo 解决重复
-		query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+		// updated by Janson 20171018 错误的公司成员会覆盖正确的公司成员 #17284
+//		query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
 		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));

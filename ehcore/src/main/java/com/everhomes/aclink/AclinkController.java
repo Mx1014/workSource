@@ -214,7 +214,7 @@ public class AclinkController extends ControllerBase {
         RestResponse response = new RestResponse(resp);
         List<DoorAccessDTO> dtos = new ArrayList<DoorAccessDTO>();
         resp.setDoors(dtos);
-        Long role = 0l;
+        Long role = 1l;
         
         if(cmd.getOrganizationId() != null) {
             
@@ -703,16 +703,29 @@ public class AclinkController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /aclink/faceTest</b>
+     * <p>alitest 002</p>
+     * @return 
+     */
+    @SuppressDiscover
+    @RequireAuthentication(false)
+    @RequestMapping("faceTest")
+    public String faceTest(HttpServletRequest request) {
+        return doorAccessService.faceTest();
+    }
+    
+    /**
      * 
      * <b>URL: /aclink/v</b>
      * <p>列出所有二维码门禁列表 </p>
      * @return
      */
-    @RequestMapping("doorTest3")
+    /*@RequestMapping("doorTest3")
     @RequireAuthentication(false)
     public Object doorTest3(HttpServletRequest request) {
+        doorAccessService.sendXiaomiMessage();
         Map<String,Long> m = new HashMap<String,Long>();
         m.put("result", 0l);
         return m;
-    }
+    }*/
 }

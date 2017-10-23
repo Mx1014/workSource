@@ -1663,4 +1663,22 @@ public class UserProviderImpl implements UserProvider {
         }
         return null;
     }
+    
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    @Cacheable(value = "checkCacheStatus", key="'cache.heartbeat'", unless="#result == null")
+    @Override
+    public String checkCacheStatus() {
+        return String.valueOf(System.currentTimeMillis());
+    }
+    
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    @Caching(evict={@CacheEvict(value="checkCacheStatus", key="'cache.heartbeat'")})
+    @Override
+    public void updateCacheStatus() {
+        // 只需要去掉缓存，使可缓存可测
+    }
 }

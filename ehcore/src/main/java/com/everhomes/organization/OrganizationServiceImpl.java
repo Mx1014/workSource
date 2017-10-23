@@ -5012,6 +5012,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public OrganizationDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd) {
         User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         if (StringUtils.isEmpty(cmd.getTargetId())) {
             cmd.setTargetId(user.getId());
         }
@@ -5057,6 +5058,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     IdentifierType.MOBILE.getCode());
 
             OrganizationMember member = new OrganizationMember();
+            member.setNamespaceId(namespaceId);
             member.setContactToken(identifier.getIdentifierToken());
             member.setContactType(identifier.getIdentifierType());
             member.setContactName(StringUtils.isEmpty(cmd.getContactName()) ? user.getNickName() : cmd.getContactName());
@@ -9580,7 +9582,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setGroupPath(org.getPath());
         organizationMember.setGroupType(org.getGroupType());
         organizationMember.setOperatorUid(user.getId());
-        organizationMember.setVisibleFlag(cmd.getVisibleFlag());
+        Byte visibleFlag = cmd.getVisibleFlag() != null ? cmd.getVisibleFlag() : Byte.valueOf("0");
+        organizationMember.setVisibleFlag(visibleFlag);
         organizationMember.setGroupId(0l);
         /**Modify by lei.lv**/
         java.util.Date nDate = DateHelper.currentGMTTime();
@@ -9773,7 +9776,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         desOrgMember.setGroupPath(organizationMember.getGroupPath());
                         desOrgMember.setContactName(organizationMember.getContactName());
                         desOrgMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-                    desOrgMember.setVisibleFlag(organizationMember.getVisibleFlag());
+                        desOrgMember.setVisibleFlag(organizationMember.getVisibleFlag());
                         organizationProvider.updateOrganizationMember(desOrgMember);
                         //保存当前企业关联的detailId,用于多个返回值时进行比对
 //                    if (enterpriseId.equals(org.getId())) {

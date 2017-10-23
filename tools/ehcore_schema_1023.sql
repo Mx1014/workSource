@@ -1,3 +1,49 @@
+--
+-- Special notes about the schema design below (KY)
+--
+-- Custom fileds
+--   To balance performance and flexibility, some tables carry general purpose integer fields and string fields,
+--   interpretation of these fields will be determined by the applications on top of, at database level, we only
+--   provide general indexing support for these fields, it is the responsibility of the application to map queries that
+--   are against to these fields.
+--
+--   Initially, only two of integral-type and string-type fields are indexed, more indices can be added during operating
+--   time, tuning changes about the indexing will be sync-ed back into schema design afterwards
+--
+-- namespaces and application modules
+--  Reusable modules are abstracted under the concept of application. The platform provides built-in application modules
+--  such as messaging application module, forum application module, etc. These built-in application modules are running
+--  in the context of core server. When a application module has external counterpart at third-party servers or remote client endpoints,
+--  the API it provides requires to go through the authentication system via appkey/secret key pair mechanism
+--
+--   Namespace is used to put related resources into distinct domains
+--
+-- namespace and application design rules
+--  Shared resources (usually system defined) that are common to all namespaces do not need namespace_id field
+--  First level resources usually have namespace_id field
+--  Secondary level resources do not need namespace_id field
+--  objects that can carry information generated from multiple application modules usualy have app_id field
+--  all profile items have app_id field, so that it allows other application modules to attach application specific
+--  profile information into it
+--
+-- name convention
+--  index prefix: i_eh_
+--  unique index prefix: u_eh_
+--  foreign key constraint prefix: fk_eh_
+--   table prefix: eh_
+--
+-- record deletion
+--  There are two deletion policies in regards to deletion
+--  mark-deletion: mark it as deleted, wait for lazy cleanup or archive
+--  remove-deletion: completely remove it from database
+--
+--   for the mark-deletion policy, the convention is to have a delete_time field which not only marks up the deletion
+--  but also the deletion time
+--
+--
+
+SET FOREIGN_KEY_CHECKS = 0;
+
 DROP TABLE IF EXISTS `eh_acl_privileges`;
 
 
@@ -257,6 +303,7 @@ CREATE TABLE `eh_activities` (
   `charge_flag` TINYINT DEFAULT 0 COMMENT '0: no charge, 1: charge',
   `charge_price` DECIMAL(10,2) COMMENT 'charge_price',
   `wechat_signup` TINYINT DEFAULT 0 COMMENT 'is support wechat signup 0:no, 1:yes',
+  `clone_flag` TINYINT COMMENT 'clone_flag post 0-real post, 1-clone post',
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid` (`uuid`),
   KEY `i_eh_act_start_time_ms` (`start_time_ms`),
@@ -1660,6 +1707,31 @@ CREATE TABLE `eh_community_map_search_types` (
   `create_time` DATETIME,
   `delete_time` DATETIME,
   `order` TINYINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_community_map_shops`;
+
+
+CREATE TABLE `eh_community_map_shops` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the type, community, enterprise, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `shop_name` VARCHAR(128),
+  `shop_type` VARCHAR(128),
+  `business_hours` VARCHAR(512),
+  `contact_name` VARCHAR(128),
+  `contact_phone` VARCHAR(128),
+  `building_id` BIGINT NOT NULL,
+  `address_id` BIGINT NOT NULL,
+  `description` TEXT,
+  `shop_Avatar_uri` VARCHAR(1024),
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: active',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `update_uid` BIGINT NOT NULL DEFAULT 0,
+  `update_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -4176,7 +4248,14 @@ CREATE TABLE `eh_flow_event_logs` (
   `integral_tag3` BIGINT NOT NULL DEFAULT 0,
   `integral_tag4` BIGINT NOT NULL DEFAULT 0,
   `integral_tag5` BIGINT NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_namespace_id` (`namespace_id`),
+  KEY `i_eh_flow_main_id` (`flow_main_id`),
+  KEY `i_eh_flow_version` (`flow_version`),
+  KEY `i_eh_flow_case_id` (`flow_case_id`),
+  KEY `i_eh_flow_user_id` (`flow_user_id`),
+  KEY `i_eh_step_count` (`step_count`),
+  KEY `i_eh_log_type` (`log_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_flow_forms`;
@@ -4465,6 +4544,8 @@ CREATE TABLE `eh_forum_posts` (
   `activity_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'activity category id',
   `activity_content_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'activity content category id',
   `parent_comment_id` BIGINT COMMENT 'parent comment id',
+  `clone_flag` TINYINT COMMENT 'clone_flag post 0-real post, 1-clone post',
+  `real_post_id` BIGINT COMMENT 'if this is clone post, then it should have a real post id',
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid` (`uuid`),
   KEY `i_eh_post_seqs` (`modify_seq`),
@@ -4872,6 +4953,7 @@ CREATE TABLE `eh_hot_tags` (
   `create_uid` BIGINT,
   `delete_time` DATETIME,
   `delete_uid` BIGINT,
+  `category_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -5431,6 +5513,7 @@ CREATE TABLE `eh_news` (
   `content_abstract` TEXT COMMENT 'abstract of content data',
   `source_desc` VARCHAR(128) COMMENT 'where the news comes from',
   `source_url` VARCHAR(256) COMMENT 'the url of source',
+  `phone` BIGINT DEFAULT 0,
   `child_count` BIGINT NOT NULL DEFAULT 0 COMMENT 'comment count',
   `forward_count` BIGINT NOT NULL DEFAULT 0 COMMENT 'forward count',
   `like_count` BIGINT NOT NULL DEFAULT 0 COMMENT 'like count',
@@ -5519,6 +5602,34 @@ CREATE TABLE `eh_news_communities` (
   `community_id` BIGINT NOT NULL COMMENT 'community id',
   `creator_uid` BIGINT NOT NULL,
   `create_time` DATETIME NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_news_tag`;
+
+
+CREATE TABLE `eh_news_tag` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32),
+  `owner_id` BIGINT DEFAULT 0,
+  `parent_id` BIGINT DEFAULT 0,
+  `value` VARCHAR(32),
+  `is_search` tinyint(8) DEFAULT 0 COMMENT '是否开启筛选',
+  `is_default` tinyint(8) DEFAULT 0 COMMENT '是否是默认选项',
+  `delete_flag` tinyint(8) NOT NULL DEFAULT 0,
+  `default_order` BIGINT DEFAULT 0,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_news_tag_vals`;
+
+
+CREATE TABLE `eh_news_tag_vals` (
+  `id` BIGINT NOT NULL,
+  `news_id` BIGINT NOT NULL DEFAULT 0,
+  `news_tag_id` BIGINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -6116,12 +6227,13 @@ CREATE TABLE `eh_organization_member_details` (
   `employee_type` TINYINT COMMENT '0: full-time, 1: part-time, 2: internship, 3: labor dispatch',
   `employee_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: probation, 1: on the job, 2: leave the job',
   `employment_time` DATE COMMENT '转正日期',
-  `dimission_time` DATE COMMENT '离职日期',
+  `dismiss_time` DATE,
   `salary_card_number` VARCHAR(128) COMMENT '工资卡号',
   `social_security_number` VARCHAR(128) COMMENT '社保号',
   `provident_fund_number` VARCHAR(128) COMMENT '公积金号',
   `profile_integrity` INTEGER DEFAULT 0 COMMENT '档案完整度，0-100%',
   `check_in_time` date NOT NULL COMMENT '入职日期',
+  `region_code` VARCHAR(64) COMMENT '手机区号',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -9440,6 +9552,7 @@ CREATE TABLE `eh_rentalv2_orders` (
   `flow_case_id` BIGINT COMMENT 'id of the flow_case',
   `requestor_organization_id` BIGINT COMMENT 'id of the requestor organization',
   `paid_version` TINYINT,
+  `rental_type` TINYINT,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -9595,11 +9708,6 @@ CREATE TABLE `eh_rentalv2_resources` (
   `notice` TEXT,
   `charge_uid` BIGINT COMMENT '负责人id',
   `cover_uri` VARCHAR(1024) COMMENT '封面图uri',
-  `discount_type` TINYINT COMMENT '折扣信息：0不打折 1满减优惠2比例折扣',
-  `full_price` DECIMAL(10,2) COMMENT '满XX元',
-  `cut_price` DECIMAL(10,2) COMMENT '减XX元',
-  `discount_ratio` DOUBLE COMMENT '折扣比例',
-  `rental_type` TINYINT COMMENT '0: as hour:min 1-as half day 2-as day 3-支持晚上的半天',
   `time_step` DOUBLE COMMENT '按小时预约：最小单元格是多少小时，浮点型',
   `exclusive_flag` TINYINT COMMENT '是否为独占资源0否 1 是',
   `auto_assign` TINYINT COMMENT '是否动态分配 1是 0否',
@@ -9620,24 +9728,16 @@ CREATE TABLE `eh_rentalv2_resources` (
   `day_end_time` TIME COMMENT '对于按小时预定的每天结束时间',
   `community_id` BIGINT COMMENT '所属的社区ID（和可见范围的不一样）',
   `resource_counts` DOUBLE COMMENT '可预约个数',
-  `cell_begin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'cells begin id',
-  `cell_end_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'cells end id',
   `unit` DOUBLE DEFAULT 1 COMMENT '1-整租, 0.5-可半个租',
   `begin_date` DATE COMMENT '开始日期',
   `end_date` DATE COMMENT '结束日期',
   `open_weekday` VARCHAR(7) COMMENT '7位二进制，0000000每一位表示星期7123456',
-  `workday_price` DECIMAL(10,2) COMMENT '工作日价格',
-  `weekend_price` DECIMAL(10,2) COMMENT '周末价格',
   `avg_price_str` VARCHAR(1024) COMMENT '平均价格计算好的字符串',
   `confirmation_prompt` VARCHAR(200),
   `offline_cashier_address` VARCHAR(200),
   `offline_payee_uid` BIGINT,
   `rental_start_time_flag` TINYINT DEFAULT 0 COMMENT '至少提前预约时间标志: 1-限制, 0-不限制',
   `rental_end_time_flag` TINYINT DEFAULT 0 COMMENT '最多提前预约时间标志: 1-限制, 0-不限制',
-  `org_member_workday_price` DECIMAL(10,2) COMMENT '企业内部工作日价格',
-  `org_member_weekend_price` DECIMAL(10,2) COMMENT '企业内部节假日价格',
-  `approving_user_workday_price` DECIMAL(10,2) COMMENT '外部客户工作日价格',
-  `approving_user_weekend_price` DECIMAL(10,2) COMMENT '外部客户节假日价格',
   `default_order` BIGINT NOT NULL DEFAULT 0 COMMENT 'order',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -9791,6 +9891,7 @@ CREATE TABLE `eh_roster_order_settings` (
   `update_time` DATETIME,
   `operator_uid` BIGINT,
   `wechat_signup` TINYINT DEFAULT 0 COMMENT 'is support wechat signup 0:no, 1:yes',
+  `category_id` BIGINT COMMENT 'category_id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -10474,6 +10575,7 @@ CREATE TABLE `eh_service_alliances` (
   `display_flag` TINYINT NOT NULL DEFAULT 1 COMMENT '0:hide,1:display',
   `summary_description` VARCHAR(1024),
   `enable_comment` TINYINT DEFAULT 0 COMMENT '1,enable;0,disable',
+  `jump_service_alliance_routing` VARCHAR(2048) COMMENT 'jump to other service alliance routing',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -12175,6 +12277,7 @@ CREATE TABLE `eh_var_field_group_scopes` (
   `operator_uid` BIGINT,
   `update_time` DATETIME,
   `community_id` BIGINT COMMENT '园区id',
+  `group_parent_id` BIGINT COMMENT '父组系统id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -12255,6 +12358,7 @@ CREATE TABLE `eh_var_field_scopes` (
   `operator_uid` BIGINT,
   `update_time` DATETIME,
   `community_id` BIGINT COMMENT '园区id',
+  `group_path` VARCHAR(128) COMMENT 'path from the root',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -12276,6 +12380,7 @@ CREATE TABLE `eh_var_fields` (
   `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
+  `field_param` VARCHAR(128),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -12545,6 +12650,7 @@ CREATE TABLE `eh_warning_settings` (
   `creator_uid` BIGINT,
   `update_time` DATETIME,
   `operator_uid` BIGINT,
+  `category_id` BIGINT COMMENT '入口id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

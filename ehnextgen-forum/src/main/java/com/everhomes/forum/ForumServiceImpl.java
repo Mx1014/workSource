@@ -843,7 +843,7 @@ public class ForumServiceImpl implements ForumService {
                     	}
                     }
                     //如果是活动创建者删除活动，通知到已报名的人，add by tt, 20161012
-                    if (post.getCreatorUid().longValue() == userId.longValue() && embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
+                    if (post.getCreatorUid().longValue() == userId.longValue() &&  embededAppId != null && embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
 						sendMessageWhenCreatorDeleteActivity(post.getEmbeddedId(), userId);
 					}
                     

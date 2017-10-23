@@ -3838,7 +3838,7 @@ public class PunchServiceImpl implements PunchService {
 		if(null== members || members.size() == 0)
 			return null;
 		for(OrganizationMember member : members){
-			if(member.getTargetId().equals(targetId))
+			if(member!=null && member.getTargetId()!=null && member.getTargetId().equals(targetId))
 				return member;
 		}
 		return null;
@@ -6070,6 +6070,8 @@ public class PunchServiceImpl implements PunchService {
 				RowResult r = (RowResult)list.get(rowIndex);
 				PunchSchedulingEmployeeDTO dto = new PunchSchedulingEmployeeDTO();
 				// 名字去空格
+				if(r.getCells().get("A")==null || StringUtils.isEmpty(r.getCells().get("A")))
+					continue;
 				dto.setContactName(r.getCells().get("A").replace(" ",""));
 				dto.setDaySchedulings(new ArrayList<>());
 				for(int i = 1 ; i<=days;i++){
