@@ -4930,6 +4930,10 @@ public class FlowServiceImpl implements FlowService {
             return new FlowCaseDetailDTOV2();
         }
 
+        if (FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB) {
+            return ConvertHelper.convert(getDumpFlowCaseBrief(flowCase), FlowCaseDetailDTOV2.class);
+        }
+
         FlowCaseDetailDTOV2 dto = ConvertHelper.convert(flowCase, FlowCaseDetailDTOV2.class);
         if (dto.getStatus().equals(FlowCaseStatus.INVALID.getCode())) {
             return null;
