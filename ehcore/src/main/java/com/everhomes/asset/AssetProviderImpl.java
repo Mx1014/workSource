@@ -2063,6 +2063,8 @@ public class AssetProviderImpl implements AssetProvider {
         context.update(t)
                 .set(t.NAME,cmd.getChargingStandardName())
                 .set(t.INSTRUCTION,cmd.getInstruction())
+                .set(t.AREA_SIZE_TYPE,cmd.getAreaSizeType())
+                .set(t.SUGGEST_UNIT_PRICE,cmd.getSuggestUnitPrice())
                 .where(t.ID.eq(cmd.getChargingStandardId()))
                 .execute();
     }

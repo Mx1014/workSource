@@ -15,6 +15,8 @@ import java.math.BigDecimal;
  * <li>priceUnitType:价格单位类型,1:日单价;2:月单价;</li>
  * <li>balanceDateType:应收日期类型，1:计费开始周期所在月2:计费结束周期所在月;</li>
  * <li>balanceDateType:应收日期类型，1:计费开始周期所在月2:计费结束周期所在月;</li>
+ * <li>suggestUnitPrice:建议单价</li>
+ * <li>areaSizeType:计费面积类型</li>
  *</ul>
  */
 public class GetChargingStandardDTO {
