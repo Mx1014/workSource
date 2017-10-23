@@ -434,4 +434,9 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		}
 
 	}
+
+	@Override
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+		return null;
+	}
 }
