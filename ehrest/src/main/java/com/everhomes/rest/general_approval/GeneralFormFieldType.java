@@ -16,7 +16,6 @@ import org.apache.commons.lang.StringUtils;
  * <li>SUBFORM:子表单</li>
  * <li>CONTACT:企业联系人组件</li>
  * <li>ASK_FOR_LEAVE:请假组件</li>
- * <li>CANCEL_FOR_LEAVE:销假组件</li>
  * <li>BUSINESS_TRIP:出差组件</li>
  * <li>OVERTIME:加班组件</li>
  * <li>GO_OUT:外出组件</li>
