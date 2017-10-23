@@ -919,7 +919,8 @@ public class FieldServiceImpl implements FieldService {
                                         }else if(cellValue.equals("已完结")){
                                             cellValue = "2";
                                         }else{
-                                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"枚举值不正确");
+                                            response.setFailCause("枚举值"+fieldDTO.getFieldDisplayName()+"不正确，请按照excel下载里“"+sheetName+"”模板说明里进行填写");
+                                            return response;
                                         }
                                     }else{
                                         LOGGER.error("field "+ fieldName+" transferred to item using findScopeFieldItemByDisplayName failed ,item is "+ item);
@@ -945,7 +946,8 @@ public class FieldServiceImpl implements FieldService {
                                     if(projectSourceItem!=null){
                                         sb.append((projectSourceItem.getItemId()==null?"":projectSourceItem.getItemId())+",");
                                     }else{
-                                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"枚举值不正确");
+                                        response.setFailCause("枚举值"+fieldDTO.getFieldDisplayName()+"不正确，请按照excel下载里“"+sheetName+"”模板说明里进行填写");
+                                        return response;
                                     }
                                 }
                                 if(sb.toString().trim().length()>0){
