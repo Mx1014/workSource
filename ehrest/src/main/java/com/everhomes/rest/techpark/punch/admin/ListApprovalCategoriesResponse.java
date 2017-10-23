@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>categoryList：请假类型的List</li>
+ * <li>categoryList：请假类型的List{@link com.everhomes.rest.approval.ApprovalCategoryDTO}</li>
  * </ul>
  */
 public class ListApprovalCategoriesResponse {

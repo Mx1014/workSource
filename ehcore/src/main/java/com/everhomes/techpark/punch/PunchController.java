@@ -206,7 +206,7 @@ public class PunchController extends ControllerBase {
 	/**
 	 * <b>URL: /techpark/punch/listApprovalCategories</b>
 	 * <p>
-	 * 根据请求 companyid和日期 取一年的打卡记录
+	 * 获取默认设置好的请假类型
 	 * </p>
 	 */
 	@RequestMapping("listApprovalCategories")
