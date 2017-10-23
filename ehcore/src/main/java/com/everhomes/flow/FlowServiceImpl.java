@@ -4718,7 +4718,7 @@ public class FlowServiceImpl implements FlowService {
             flowLaneCmd.setLaneLevel(1);
             flowLaneCmd.setDisplayName(buttonDefName(flow.getNamespaceId(), FlowStepType.START_STEP));
             flowLaneCmd.setFlowNodeLevel(1);
-            laneDTO = createFlowLane(flow, flowLaneCmd, buttonDefName(flow.getNamespaceId(), FlowStepType.START_STEP));
+            laneDTO = createFlowLane(flow, flowLaneCmd, null);
             laneList.add(laneDTO);
 
             CreateFlowNodeCommand flowNodeCmd = new CreateFlowNodeCommand();
@@ -4736,7 +4736,7 @@ public class FlowServiceImpl implements FlowService {
             flowLaneCmd.setLaneLevel(laneLevel);
             flowLaneCmd.setDisplayName(buttonDefName(flow.getNamespaceId(), FlowStepType.END_STEP));
             flowLaneCmd.setFlowNodeLevel(2);
-            laneDTO = createFlowLane(flow, flowLaneCmd, buttonDefName(flow.getNamespaceId(), FlowStepType.END_STEP));
+            laneDTO = createFlowLane(flow, flowLaneCmd, buttonDefName(flow.getNamespaceId(), FlowStepType.ABSORT_STEP));
             laneList.add(laneDTO);
 
             flowNodeCmd = new CreateFlowNodeCommand();
@@ -4945,6 +4945,10 @@ public class FlowServiceImpl implements FlowService {
         FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
         if (flowCase == null) {
             return new FlowCaseDetailDTOV2();
+        }
+
+        if (FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB) {
+            return ConvertHelper.convert(getDumpFlowCaseBrief(flowCase), FlowCaseDetailDTOV2.class);
         }
 
         FlowCaseDetailDTOV2 dto = ConvertHelper.convert(flowCase, FlowCaseDetailDTOV2.class);
