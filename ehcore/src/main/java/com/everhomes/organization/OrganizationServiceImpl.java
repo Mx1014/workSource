@@ -12965,7 +12965,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private void deleteUserOrganizationWithMembers(List<OrganizationMember> members) {
         dbProvider.execute((TransactionStatus status) -> {
             for (OrganizationMember member : members) {
-                if(member.getGroupType() == OrganizationGroupType.ENTERPRISE.getCode()){
+                if(OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.ENTERPRISE){
                     UserOrganizations userOrganization = userOrganizationProvider.findUserOrganizations(member.getNamespaceId(), member.getOrganizationId(), member.getTargetId());
                     if (userOrganization != null) {
                         this.userOrganizationProvider.deleteUserOrganizations(userOrganization);
