@@ -19,3 +19,8 @@ update eh_web_menus set name = '楼栋介绍' where id = 40105;
 set @id = (select MAX(id) FROM eh_web_menu_scopes);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	select (@id := @id + 1), '40103', '', 'EhNamespaces', owner_id, '2' from eh_web_menu_scopes where menu_id = 40100;
+
+-- 招商测试入口 add by xiongying20171024
+set @item_id = (select MAX(id) FROM eh_launch_pad_items);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+    VALUES ((@item_id := @item_id + 1), 999992, 0, 0, 0, '/home', 'Bizs', '招商', '招商', 'cs://1/image/aW1hZ2UvTVRwaE5qVTJNbVZoTW1KaU1qRmlNbVV6TVdabE5UQXdaRGN5TmpkbE5qTmlaQQ', 1, 1, 13, '{\"url\":\"http://alpha.lab.everhomes.com/customer/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 10, 0, 1, 1, '1', 0, NULL, NULL, NULL, 1, 'pm_admin', 0, 221, NULL, 10, NULL);
