@@ -14,6 +14,8 @@ import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.util.DateHelper;
+import com.everhomes.yellowPage.ServiceAllianceCategories;
+import com.everhomes.yellowPage.YellowPageProvider;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -93,6 +95,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
 	@Autowired
 	private DbProvider dbProvider;
+
+	@Autowired
+	private YellowPageProvider yellowPageProvider;
 
 	@Override
 	public GetTemplateByApprovalIdResponse getTemplateByApprovalId(
@@ -177,6 +182,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 //			}
 			cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
 			cmd21.setTitle(ga.getApprovalName());
+
+			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(ga.getModuleId());
+			if(category != null){
+				cmd21.setServiceType(category.getName());
+			}
 			FlowCase flowCase = null;
 			if (null == flow) {
 				// 给他一个默认哑的flow
