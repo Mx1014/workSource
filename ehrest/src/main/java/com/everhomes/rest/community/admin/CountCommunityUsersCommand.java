@@ -15,8 +15,6 @@ public class CountCommunityUsersCommand {
 	
 	private Long organizationId;
 
-	private Byte statisticsType;
-
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -42,14 +40,6 @@ public class CountCommunityUsersCommand {
 
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
-	}
-
-	public Byte getStatisticsType() {
-		return statisticsType;
-	}
-
-	public void setStatisticsType(Byte statisticsType) {
-		this.statisticsType = statisticsType;
 	}
 
 	@Override

@@ -1,6 +1,9 @@
 package com.everhomes.rest.varField;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>

@@ -10,6 +10,7 @@ import javax.validation.constraints.Size;
  *     <li>organizationId: 组织id</li>
  *     <li>categoryId: 分类id</li>
  *     <li>name: 名称</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class UpdateEnergyMeterCategoryCommand {
@@ -17,6 +18,7 @@ public class UpdateEnergyMeterCategoryCommand {
     @NotNull private Long organizationId;
     @NotNull private Long categoryId;
     @NotNull @Size(max = 255) private String name;
+    private Integer namespaceId;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -41,6 +43,14 @@ public class UpdateEnergyMeterCategoryCommand {
     public void setName(String name) {
         this.name = name;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {

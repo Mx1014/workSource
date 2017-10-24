@@ -139,8 +139,7 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
     }
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent arg0) {
-        setup();
+    public void onApplicationEvent(ContextRefreshedEvent arg0) {setup();
     }
 
     @Override

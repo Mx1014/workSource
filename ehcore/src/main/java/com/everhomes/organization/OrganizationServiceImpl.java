@@ -718,13 +718,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         dto.setName(organization.getName());
         dto.setCommunityId(organizationDTO.getCommunityId());
         dto.setCommunityName(organizationDTO.getCommunityName());
-        if(!StringUtils.isEmpty(organization.getWebsite())){
-            dto.setWebsite(organization.getWebsite());
-        }
-        if(!StringUtils.isEmpty(organization.getUnifiedSocialCreditCode())){
-            dto.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
-        }
-
         dto.setAvatarUri(org.getAvatar());
         if(!StringUtils.isEmpty(org.getDisplayName())){
             dto.setDisplayName(org.getDisplayName());
@@ -1124,8 +1117,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setGroupId(group.getId());
             organization.setEmailDomain(cmd.getEmailDomain());
-            organization.setWebsite(cmd.getWebsite());
-            organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.createOrganization(organization);
 
             OrganizationDetail enterprise = new OrganizationDetail();
@@ -1273,8 +1264,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             organization.setName(cmd.getName());
             organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organization.setEmailDomain(cmd.getEmailDomain());
-            organization.setWebsite(cmd.getWebsite());
-            organization.setUnifiedSocialCreditCode(cmd.getUnifiedSocialCreditCode());
             organizationProvider.updateOrganization(organization);
 
             OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
@@ -2754,35 +2743,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     public List<OrganizationSimpleDTO> listUserRelateOrganizations(Long userId){
         List<OrganizationSimpleDTO> orgs = new ArrayList<>();
+
+        List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
         Set<Long> organizationIds = new HashSet<>();
-
-
-        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(OrganizationMemberGroupType.MANAGER.getCode(), OrganizationMemberTargetType.USER.getCode(), userId);
-        for (OrganizationMember member: members) {
-            if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
-                organizationIds.add(member.getOrganizationId());
+        for (RoleAssignment roleAssignment: roleAssignments) {
+            if(EntityType.ORGANIZATIONS == EntityType.fromCode(roleAssignment.getOwnerType()) && (roleAssignment.getRoleId() == RoleConstants.PM_SUPER_ADMIN || roleAssignment.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN)){
+                organizationIds.add(roleAssignment.getOwnerId());
             }
         }
 
-//        /* 人员在新的管理员数据里没有 则去查老的管理员是角色的时候数据（之前添加的管理员可以不在公司，所以在organizationMember里面查询不到）,如果打算去掉老的，需要迁移数据把创建管理员没有添加到公司的数据给补上 */
-//        if(organizationIds.size() == 0){
-//            List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
-//            for (RoleAssignment roleAssignment: roleAssignments) {
-//                if(EntityType.ORGANIZATIONS == EntityType.fromCode(roleAssignment.getOwnerType()) && (roleAssignment.getRoleId() == RoleConstants.PM_SUPER_ADMIN || roleAssignment.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN)){
-//                    organizationIds.add(roleAssignment.getOwnerId());
-//                }
-//            }
-//        }
-
-        /* 人员在新的管理员数据里没有 则去查老的管理员是角色的时候数据（之前添加的管理员可以不在公司，所以在organizationMember里面查询不到）,如果打算去掉老的，需要迁移数据把创建管理员没有添加到公司的数据给补上 */
-        if(organizationIds.size() == 0){
-            List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
-            for (RoleAssignment roleAssignment: roleAssignments) {
-                if(EntityType.ORGANIZATIONS == EntityType.fromCode(roleAssignment.getOwnerType()) && (roleAssignment.getRoleId() == RoleConstants.PM_SUPER_ADMIN || roleAssignment.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN)){
-                    organizationIds.add(roleAssignment.getOwnerId());
-                }
-            }
-        }
         Set<Long> orgIds = new HashSet<>();
         List<Target> targets = new ArrayList<>();
         targets.add(new Target(EntityType.USER.getCode(), userId));
@@ -6698,7 +6667,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getE()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getF()) ||
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getG()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getH()) ||
 					org.apache.commons.lang.StringUtils.isNotBlank(r.getI()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getJ()) ||
-                    org.apache.commons.lang.StringUtils.isNotBlank(r.getK()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getL())) {
+                    org.apache.commons.lang.StringUtils.isNotBlank(r.getK())) {
                 ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
                 if (null != r.getA())
                     data.setName(r.getA().trim());
@@ -6722,8 +6691,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                     data.setCheckinDate(r.getJ().trim());
                 if (null != r.getK())
                     data.setDescription(r.getK().trim());
-                if (null != r.getL())
-                    data.setUnifiedSocialCreditCode(r.getL().trim());
                 datas.add(data);
             }
         }
@@ -6833,7 +6800,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             enterpriseCommand.setNamespaceId(namespaceId);
             enterpriseCommand.setCommunityId(cmd.getCommunityId());
             enterpriseCommand.setEmailDomain(data.getEmail());
-            enterpriseCommand.setUnifiedSocialCreditCode(data.getUnifiedSocialCreditCode());
             enterpriseCommand.setCheckinDate(data.getCheckinDate());
             if (!StringUtils.isEmpty(data.getNumber())) {
                 enterpriseCommand.setMemberCount(Long.parseLong(data.getNumber().toString()));
@@ -13112,17 +13078,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
         deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
         //更新人事管理状态
-//        UpdateOrganizationEmployeeStatusCommand updateOrganizationEmployeeStatusCommand = new UpdateOrganizationEmployeeStatusCommand();
-//        updateOrganizationEmployeeStatusCommand.setDetailId(cmd.getDetailId());
-//        updateOrganizationEmployeeStatusCommand.setEmployeeStatus(EmployeeStatus.LEAVETHEJOB.getCode());
-//        updateOrganizationEmployeeStatusCommand.setRemarks(cmd.getRemarks());
-//        updateOrganizationEmployeeStatus(updateOrganizationEmployeeStatusCommand);
+        UpdateOrganizationEmployeeStatusCommand updateOrganizationEmployeeStatusCommand = new UpdateOrganizationEmployeeStatusCommand();
+        updateOrganizationEmployeeStatusCommand.setDetailId(cmd.getDetailId());
+        updateOrganizationEmployeeStatusCommand.setEmployeeStatus(EmployeeStatus.LEAVETHEJOB.getCode());
+        updateOrganizationEmployeeStatusCommand.setRemarks(cmd.getRemarks());
+        updateOrganizationEmployeeStatus(updateOrganizationEmployeeStatusCommand);
         //离职时薪酬组相关的改动
-        try{
-            this.uniongroupService.syncUniongroupAfterLeaveTheJob(cmd.getDetailId());
-        }finally {
-            return;
-        }
+        this.uniongroupService.syncUniongroupAfterLeaveTheJob(cmd.getDetailId());
+ 
     }
  
 

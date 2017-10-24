@@ -219,10 +219,10 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public List<ScopeFieldGroup> listScopeFieldGroups(Integer namespaceId, Long communityId, String moduleName) {
+    public Map<Long, ScopeFieldGroup> listScopeFieldGroups(Integer namespaceId, Long communityId, String moduleName) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-        List<ScopeFieldGroup> groups = new ArrayList<>();
+        Map<Long, ScopeFieldGroup> groups = new HashMap<>();
         SelectQuery<EhVarFieldGroupScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_GROUP_SCOPES);
         query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.MODULE_NAME.eq(moduleName));
@@ -236,7 +236,7 @@ public class FieldProviderImpl implements FieldProvider {
             query.addConditions(Tables.EH_VAR_FIELD_GROUP_SCOPES.COMMUNITY_ID.isNull());
         }
         query.fetch().map((r) -> {
-            groups.add(ConvertHelper.convert(r, ScopeFieldGroup.class));
+            groups.put(r.getId(), ConvertHelper.convert(r, ScopeFieldGroup.class));
             return null;
         });
 
@@ -257,6 +257,13 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
+    public FieldGroup findFieldGroup(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhVarFieldGroupsDao dao = new EhVarFieldGroupsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), FieldGroup.class);
+    }
+
+    @Override
     public List<FieldGroup> listFieldGroups(String moduleName) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
@@ -270,10 +277,10 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public List<ScopeField> listScopeFields(Integer namespaceId, Long communityId, String moduleName, String groupPath) {
+    public Map<Long, ScopeField> listScopeFields(Integer namespaceId, Long communityId, String moduleName, String groupPath) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-        List<ScopeField> fields = new ArrayList<>();
+        Map<Long, ScopeField> fields = new HashMap<>();
         SelectQuery<EhVarFieldScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_SCOPES);
         query.addConditions(Tables.EH_VAR_FIELD_SCOPES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_VAR_FIELD_SCOPES.MODULE_NAME.eq(moduleName));
@@ -286,8 +293,13 @@ public class FieldProviderImpl implements FieldProvider {
         if(communityId == null) {
             query.addConditions(Tables.EH_VAR_FIELD_SCOPES.COMMUNITY_ID.isNull());
         }
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listScopeFields, sql=" + query.getSQL());
+            LOGGER.debug("listScopeFields, bindValues=" + query.getBindValues());
+        }
         query.fetch().map((record)-> {
-            fields.add(ConvertHelper.convert(record, ScopeField.class));
+            fields.put(record.getId(), ConvertHelper.convert(record, ScopeField.class));
             return null;
         });
 
@@ -460,12 +472,12 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public List<ScopeFieldItem> listScopeFieldItems(List<Long> fieldIds, Integer namespaceId, Long communityId) {
+    public List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<ScopeFieldItem> items = new ArrayList<>();
         SelectQuery<EhVarFieldItemScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEM_SCOPES);
-        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.in(fieldIds));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.eq(fieldId));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
         if(communityId != null) {
@@ -485,13 +497,13 @@ public class FieldProviderImpl implements FieldProvider {
     }
 
     @Override
-    public List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId) {
+    public Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds, Integer namespaceId, Long communityId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-        List<ScopeFieldItem> items = new ArrayList<>();
+        Map<Long, ScopeFieldItem> items = new HashMap<>();
         SelectQuery<EhVarFieldItemScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEM_SCOPES);
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.eq(fieldId));
+        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.in(fieldIds));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
 
         if(communityId != null) {
@@ -503,7 +515,7 @@ public class FieldProviderImpl implements FieldProvider {
         }
 
         query.fetch().map((r) -> {
-            items.add(ConvertHelper.convert(r, ScopeFieldItem.class));
+            items.put(r.getId(), ConvertHelper.convert(r, ScopeFieldItem.class));
             return null;
         });
 

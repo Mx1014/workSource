@@ -21,7 +21,7 @@ public interface ContractService {
     List<Object> findCustomerByContractNum(String contractNum,Long ownerId,String ownerType);
 
 	ContractDetailDTO createContract(CreateContractCommand cmd);
-	ContractDTO updateContract(UpdateContractCommand cmd);
+	ContractDetailDTO updateContract(UpdateContractCommand cmd);
 
 	void denunciationContract(DenunciationContractCommand cmd);
 	ContractDetailDTO findContract(FindContractCommand cmd);

@@ -861,9 +861,3 @@ INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999981','','0','应用','launchpaditem','1',NULL,NULL,'5');
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999981','','0','商家','shop','1',NULL,NULL,'6');
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`, `order`) VALUES((@search_types_id := @search_types_id + 1),'999981','', '0', '快讯', 'news', '1',NULL,NULL,'6');
-
--- added by wh 电子屏预约 改审批后付款
-
-UPDATE `eh_rentalv2_resource_types` SET pay_mode = 2 WHERE NAME IN('电子屏预约' ) AND namespace_id = 999981;
-
-UPDATE `eh_launch_pad_items` SET action_data = REPLACE(action_data,'"payMode":1','"payMode":2') WHERE `item_label` IN('电子屏预约') AND namespace_id = 999981;

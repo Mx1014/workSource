@@ -986,7 +986,6 @@ public class PunchServiceImpl implements PunchService {
 			if(onDutyLog == null){
 				onDutyLog = new PunchLog();
 				onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
-				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			}
 			PunchLog offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), 1);
 			if(offDutyLog == null){
