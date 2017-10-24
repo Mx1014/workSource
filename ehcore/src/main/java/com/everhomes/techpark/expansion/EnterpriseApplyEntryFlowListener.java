@@ -17,6 +17,7 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
+import com.everhomes.rest.flow.FlowServiceTypeDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -379,5 +380,14 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
         }
 
+    }
+
+    @Override
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+        List<FlowServiceTypeDTO> result = new ArrayList<>();
+        FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+        dto.setNamespaceId(namespaceId);
+        dto.setServiceName("园区入驻");
+        return result;
     }
 }

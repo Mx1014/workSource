@@ -68,3 +68,44 @@ INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`,
   VALUES ((@flow_variables_id := @flow_variables_id + 1), 0, 0, '', 0, '', 'all_current_node_processors', '所有任务的当前处理人', 'flow_var_hidden', 'bean_id', 'flow-variable-hidden-button-msg-all-current-processors', 1);
 INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
   VALUES ((@flow_variables_id := @flow_variables_id + 1), 0, 0, '', 0, '', 'text_tracker_curr_operator_name', '操作执行人姓名', 'text_tracker', 'bean_id', 'flow-variable-curr-processor-name', 1);
+
+-- 增加业务类型
+SET @ns_id = 0;
+SET @flow_service_types_id = IFNULL((SELECT MAX(id) FROM `eh_flow_service_types`), 1);
+INSERT INTO `eh_flow_service_types` (`id`, `namespace_id`, `service_name`)
+  VALUES ((@flow_service_types_id := @flow_service_types_id + 1), @ns_id, '物业报修');
+INSERT INTO `eh_flow_service_types` (`id`, `namespace_id`, `service_name`)
+  VALUES ((@flow_service_types_id := @flow_service_types_id + 1), @ns_id, '投诉建议');
+INSERT INTO `eh_flow_service_types` (`id`, `namespace_id`, `service_name`)
+  VALUES ((@flow_service_types_id := @flow_service_types_id + 1), @ns_id, '审批');
+
+-- add by sw 物业报修 资源预订 停车 节点配置值 20171024
+SET @ns_id = 0;
+SET @flow_predefined_params_id = IFNULL((SELECT MAX(id) FROM `eh_flow_predefined_params`), 1);
+
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '待受理', '待受理', '{"nodeType":"ACCEPTING"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '待分配', '待分配', '{"nodeType":"ASSIGNING"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '待处理', '待处理', '{"nodeType":"PROCESSING"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 20100, 'any-module', 'flow_node', '已完成', '已完成', '{"nodeType":"COMPLETED"}', 2, NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 40400, 'any-module', 'flow_node', '待审批', '待审批', 'agree', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 40400, 'any-module', 'flow_node', '待分配', '待付款', 'unpaid', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 40400, 'any-module', 'flow_node', '已预约', '已预约', 'paid', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 40400, 'any-module', 'flow_node', '已完成', '已完成', 'complete', 2, NULL, NULL, NULL, NULL);
+
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 40800, 'any-module', 'flow_node', '待审核', '待审核', '{"nodeType":"AUDITING"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 40800, 'any-module', 'flow_node', '排队中', '排队中', '{"nodeType":"QUEUEING"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 40800, 'any-module', 'flow_node', '待处理', '待处理', '{"nodeType":"PROCESSING"}', 2, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+	VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1), @ns_id, 0, '', 40800, 'any-module', 'flow_node', '办理成功', '办理成功', '{"nodeType":"SUCCEED"}', 2, NULL, NULL, NULL, NULL);

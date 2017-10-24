@@ -10,14 +10,6 @@ import com.everhomes.rest.admin.GetSequenceDTO;
 import com.everhomes.schema.tables.pojos.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.pojos.EhCommunityMapShops;
-import com.everhomes.server.schema.tables.pojos.EhNewsTag;
-import com.everhomes.server.schema.tables.pojos.EhNewsTagVals;
-import com.everhomes.server.schema.tables.pojos.EhPaymentAccounts;
-import com.everhomes.server.schema.tables.pojos.EhPaymentOrderRecords;
-import com.everhomes.server.schema.tables.pojos.EhPaymentServiceConfigs;
-import com.everhomes.server.schema.tables.pojos.EhPaymentTypes;
-import com.everhomes.server.schema.tables.pojos.EhPaymentUsers;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import org.slf4j.Logger;
@@ -1811,35 +1803,6 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhAssetPaymentOrder.class, Tables.EH_ASSET_PAYMENT_ORDER.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ASSET_PAYMENT_ORDER.ID.max())
                     .from(Tables.EH_ASSET_PAYMENT_ORDER).fetchOne().value1();
-        });
-        syncTableSequence(null, EhPaymentUsers.class, Tables.EH_PAYMENT_USERS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_PAYMENT_USERS.ID.max())
-                    .from(Tables.EH_PAYMENT_USERS).fetchOne().value1();
-        });
-        syncTableSequence(null, EhPaymentOrderRecords.class, Tables.EH_PAYMENT_ORDER_RECORDS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_PAYMENT_ORDER_RECORDS.ID.max())
-                    .from(Tables.EH_PAYMENT_ORDER_RECORDS).fetchOne().value1();
-        });
-        syncTableSequence(null, EhPaymentTypes.class, Tables.EH_PAYMENT_TYPES.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_PAYMENT_TYPES.ID.max())
-                    .from(Tables.EH_PAYMENT_TYPES).fetchOne().value1();
-        });
-        syncTableSequence(null, EhPaymentAccounts.class, Tables.EH_PAYMENT_ACCOUNTS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_PAYMENT_ACCOUNTS.ID.max())
-                    .from(Tables.EH_PAYMENT_ACCOUNTS).fetchOne().value1();
-        });
-        syncTableSequence(null, EhPaymentServiceConfigs.class, Tables.EH_PAYMENT_SERVICE_CONFIGS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_PAYMENT_SERVICE_CONFIGS.ID.max())
-                    .from(Tables.EH_PAYMENT_SERVICE_CONFIGS).fetchOne().value1();
-        });
-
-
-        syncTableSequence(null, EhNewsTag.class, Tables.EH_NEWS_TAG.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_NEWS_TAG.ID.max()).from(Tables.EH_NEWS_TAG).fetchOne().value1();
-        });
-
-        syncTableSequence(null, EhNewsTagVals.class, Tables.EH_NEWS_TAG_VALS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_NEWS_TAG_VALS.ID.max()).from(Tables.EH_NEWS_TAG_VALS).fetchOne().value1();
         });
     }
 

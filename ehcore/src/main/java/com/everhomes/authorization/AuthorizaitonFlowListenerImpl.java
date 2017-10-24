@@ -4,6 +4,7 @@ package com.everhomes.authorization;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.flow.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,12 +23,6 @@ import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.Tuple;
 
@@ -299,4 +294,16 @@ public class AuthorizaitonFlowListenerImpl implements FlowModuleListener{
 		
 	}
 
+	@Override
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+		if(namespaceId == 999971) {
+			List<FlowServiceTypeDTO> dtos = new ArrayList<FlowServiceTypeDTO>();
+			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+			dto.setServiceName("认证");
+			dto.setNamespaceId(namespaceId);
+			dtos.add(dto);
+			return dtos;
+		}
+		return new ArrayList<>();
+	}
 }
