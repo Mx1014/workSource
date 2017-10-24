@@ -5302,14 +5302,24 @@ public class UserServiceImpl implements UserService {
             String userKey = NameMapper.getCacheKey("user", user.getId(), null);
             Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, String.valueOf(login.getLoginId()));
             UserLogin newLogin = accessor.getMapValueObject(String.valueOf(login.getLoginId()));
-            if(newLogin != null && newLogin.getLoginId() == login.getLoginId() && newLogin.getLoginInstanceNumber() == newLogin.getLoginInstanceNumber()) {
-                newLogin.setPusherIdentify(cmd.getPusherIdentify());
-                newLogin.setDeviceIdentifier(cmd.getDeviceIdentifier());
-
-                //update device info
+            if(newLogin != null 
+                    && newLogin.getLoginId() == login.getLoginId() 
+                    && newLogin.getLoginInstanceNumber() == newLogin.getLoginInstanceNumber()
+                    ) {
+              //update device info
                 login.setPusherIdentify(cmd.getPusherIdentify());
                 login.setDeviceIdentifier(cmd.getDeviceIdentifier());
-                accessor.putMapValueObject(String.valueOf(newLogin.getLoginId()), newLogin);
+                
+                if(!(newLogin.getPusherIdentify() != null 
+                        && newLogin.getPusherIdentify().equals(cmd.getPusherIdentify())
+                        && newLogin.getDeviceIdentifier() != null
+                        && newLogin.getDeviceIdentifier().equals(cmd.getPusherIdentify()))) {
+                    //not equal, set the newLogin
+                    newLogin.setPusherIdentify(cmd.getPusherIdentify());
+                    newLogin.setDeviceIdentifier(cmd.getDeviceIdentifier());
+                    accessor.putMapValueObject(String.valueOf(newLogin.getLoginId()), newLogin);    
+                }
+                
             }
             
             List<Border> borders = this.borderProvider.listAllBorders();
@@ -5320,6 +5330,9 @@ public class UserServiceImpl implements UserService {
             resp.setAccessPoints(borderStrs);
             resp.setContentServer(contentServerService.getContentServer());
         }
+
+        Long l = configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.PAY_PLATFORM, 0l);
+        resp.setPaymentPlatform(l);
         
         return resp;
     }

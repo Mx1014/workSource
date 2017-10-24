@@ -17,6 +17,9 @@ import com.everhomes.device.DeviceProvider;
 import com.everhomes.messaging.ApnsServiceFactory;
 import com.everhomes.messaging.PushMessageResolver;
 import com.everhomes.messaging.PusherService;
+import com.everhomes.messaging.PusherVenderType;
+import com.everhomes.messaging.PusherVendorData;
+import com.everhomes.messaging.PusherVendorService;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
@@ -82,11 +85,11 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     @Autowired
     ConfigurationProvider configProvider;
     
-    @Autowired
-    WorkerPoolFactory workerPoolFactory;
-    
-    @Autowired
-    JesqueClientFactory jesqueClientFactory;
+//    @Autowired
+//    WorkerPoolFactory workerPoolFactory;
+//    
+//    @Autowired
+//    JesqueClientFactory jesqueClientFactory;
     
     @Autowired
     private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
@@ -97,9 +100,12 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     @Autowired
     BigCollectionProvider bigCollectionProvider;
     
+    @Autowired
+    PusherVendorService pusherVendorService;
+    
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
-    private String queueName = "iOS-pusher2";
+//    private String queueName = "iOS-pusher2";
 
     ApnsService service = null;
 
@@ -114,7 +120,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 
     @PostConstruct
     public void setup() {
-        workerPoolFactory.getWorkerPool().addQueue(queueName);
+//        workerPoolFactory.getWorkerPool().addQueue(queueName);
     }
     
     @Override
@@ -170,6 +176,8 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         if(server != null) {
             server.stop();    
             }
+        
+        pusherVendorService.stopService(partner);
     }
     
     private void pushMessageAndroid(UserLogin senderLogin, UserLogin destLogin, long msgId, Message msg, String platform, DeviceMessage devMessage) {
@@ -200,7 +208,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         long requestId = LocalSequenceGenerator.getNextSequence();
         borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
         
-        LOGGER.info("pushing to uid=" + destLogin.getUserId() );
+        LOGGER.info("Pushing to uid=" + destLogin.getUserId() );
     }
     private void pushMessageApple(UserLogin senderLogin, UserLogin destLogin, long msgId, Message msg, String platform, DeviceMessage devMessage) {
         PayloadBuilder payloadBuilder = APNS.newPayload();
@@ -316,6 +324,14 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         if(destLogin.getDeviceIdentifier() == null || destLogin.getDeviceIdentifier().isEmpty()) {
             return null;
         }
+        
+        if(destLogin.getPusherIdentify() != null) {
+            if(destLogin.getPusherIdentify().startsWith("xiaomi:")) {
+                return "xiaomi";
+            } else if(destLogin.getPusherIdentify().startsWith("huawei:")) {
+                return "huawei";
+            }            
+        }
 
         Device d = this.deviceProvider.findDeviceByDeviceId(destLogin.getDeviceIdentifier());
         String platform = null;
@@ -371,6 +387,10 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         
         if(platform.equals("iOS")) {
             pushMessageApple(senderLogin, destLogin, msgId, msg, platform, devMessage);
+        } else if (platform.equals("xiaomi")) {
+            pusherVendorService.pushMessageAsync(PusherVenderType.XIAOMI, senderLogin, destLogin, msg, devMessage);
+        } else if (platform.equals("huawei")) {
+            pusherVendorService.pushMessageAsync(PusherVenderType.HUAWEI, senderLogin, destLogin, msg, devMessage);
         } else {
             //Android or other here
             pushMessageAndroid(senderLogin, destLogin, msgId, msg, platform, devMessage);
