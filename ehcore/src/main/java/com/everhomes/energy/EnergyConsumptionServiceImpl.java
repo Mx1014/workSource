@@ -2751,6 +2751,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return response;
     }
 
+    @Override
+    public ListUserEnergyPlanTasksResponse listUserEnergyPlanTasks(ListUserEnergyPlanTasksCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void readTaskMeter(ReadTaskMeterCommand cmd) {
+
+    }
+
     private RepeatSettings dealEnergyPlanRepeat(RepeatSettingsDTO dto) {
         if(dto == null) {
             throw RuntimeErrorException.errorWith(RepeatServiceErrorCode.SCOPE,
