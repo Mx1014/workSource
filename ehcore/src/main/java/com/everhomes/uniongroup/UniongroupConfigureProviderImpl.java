@@ -221,13 +221,13 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
 
     @Override
-    public void deleteUniongroupConfigresByCurrentIds(Integer namespaceId, List<Long> currentIds, String currentType, Integer versionCode) {
+    public void deleteUniongroupConfigresByCurrentIds(Integer namespaceId, List<Long> currentIds, String groupType, Integer versionCode) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhUniongroupConfiguresRecord> query = context.deleteQuery(Tables.EH_UNIONGROUP_CONFIGURES);
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_ID.in(currentIds));
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.VERSION_CODE.eq(versionCode));
-        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.CURRENT_TYPE.eq(currentType));
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUP_TYPE.eq(groupType));
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUniongroupConfiguresDao.class, null);
     }
