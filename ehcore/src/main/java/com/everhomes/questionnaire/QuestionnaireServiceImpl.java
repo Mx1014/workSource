@@ -203,6 +203,12 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		});
 		QuestionnaireDTO dto = questionnaireDTOs.get(0);
 		dto.setPercentComplete(generatePercentComplete(dto.getTargetUserNum(),dto.getCollectionCount()));
+		if(dto.getCollectionCount() == null){
+			dto.setCollectionCount(0);
+		}
+		if(dto.getTargetUserNum()==null){
+			dto.setTargetUserNum(0);
+		}
 		return dto;
 	}
 	
