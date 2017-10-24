@@ -37,12 +37,14 @@ import com.everhomes.util.StringHelper;
  *  <li>serviceUserId: 客服服务人员id</li>
  *  <li>serviceUserName: 客服服务人员名称</li>
  *  <li>serviceUserPhone: 客服服务人员电话</li>
+ *  <li>website: 企业官网</li>
+ *  <li>unifiedSocialCreditCode: 统一社会信用代码</li>
  *  <li>adminMembers: 管理员列表，参考{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
  * </ul>
  *
  */
 public class OrganizationDetailDTO {
-	
+
 	private Long     id;
 	private Long     organizationId;
 	private String   description;
@@ -54,51 +56,71 @@ public class OrganizationDetailDTO {
 	private Long     memberCount;
 	private Long checkinDate;
 	private String name;
-	
-    private String avatarUri;
-    private String avatarUrl;
-    
-    private Long updateTime;
-    private Long createTime;
-    
-    private String accountPhone; 
-    private String accountName;
-    private Long assignmentId;
-    
-    private String postUri;
-    private String postUrl;
-    
-    private String longitude;
-    
-    private String latitude;
-    
-    private OrganizationMemberDTO member;
-    
-    private CommunityDTO community;
 
-    private String emailDomain;
-    	//TODO address info ?
-    @ItemType(value = AddressDTO.class)
-    private List<AddressDTO> addresses;
-    
-    @ItemType(value = AttachmentDescriptor.class)
-    private List<AttachmentDescriptor> attachments = new ArrayList<AttachmentDescriptor>();
-    
-    private Long communityId;
+	private String avatarUri;
+	private String avatarUrl;
+
+	private Long updateTime;
+	private Long createTime;
+
+	private String accountPhone;
+	private String accountName;
+	private Long assignmentId;
+
+	private String postUri;
+	private String postUrl;
+
+	private String longitude;
+
+	private String latitude;
+
+	private OrganizationMemberDTO member;
+
+	private CommunityDTO community;
+
+	private String emailDomain;
+	//TODO address info ?
+	@ItemType(value = AddressDTO.class)
+	private List<AddressDTO> addresses;
+
+	@ItemType(value = AttachmentDescriptor.class)
+	private List<AttachmentDescriptor> attachments = new ArrayList<AttachmentDescriptor>();
+
+	private Long communityId;
 
 	private String communityName;
 
-    private Integer signupCount;
-    
-    private Long serviceUserId;
-    
-    private String serviceUserName;
-    
-    private String serviceUserPhone;
-    
-    @ItemType(OrganizationMemberDTO.class)
-    private List<OrganizationContactDTO> adminMembers;
-    
+	private Integer signupCount;
+
+	private Long serviceUserId;
+
+	private String serviceUserName;
+
+	private String serviceUserPhone;
+
+	@ItemType(OrganizationMemberDTO.class)
+	private List<OrganizationContactDTO> adminMembers;
+
+	private String website;
+
+	private String unifiedSocialCreditCode;
+
+	public String getUnifiedSocialCreditCode() {
+		return unifiedSocialCreditCode;
+	}
+
+	public void setUnifiedSocialCreditCode(String unifiedSocialCreditCode) {
+		this.unifiedSocialCreditCode = unifiedSocialCreditCode;
+	}
+
+	public String getWebsite() {
+		return website;
+	}
+
+	public void setWebsite(String website) {
+		this.website = website;
+	}
+
 	public Integer getSignupCount() {
 		return signupCount;
 	}
@@ -489,9 +511,9 @@ public class OrganizationDetailDTO {
 
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 
 
