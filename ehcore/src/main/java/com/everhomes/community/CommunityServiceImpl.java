@@ -1612,7 +1612,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	private void addGroupAddressDto(CommunityUserAddressDTO dto, List<UserGroup> userGroups){
 		List<AddressDTO> addressDtos = new ArrayList<>();
-		if(userGroups != null){
+		if(userGroups == null){
 			dto.setAddressDtos(addressDtos);
 			return;
 		}
