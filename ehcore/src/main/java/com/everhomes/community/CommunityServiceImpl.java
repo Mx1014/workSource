@@ -1531,7 +1531,7 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setNikeName(user.getNickName());
 			dto.setGender(user.getGender());
 			dto.setPhone(identifier.getIdentifierToken());
-			dto.setIsAuth(0);
+			dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 			//添加地址信息
 			addGroupAddressDto(dto, userGroups);
 
@@ -1587,7 +1587,7 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setGender(user.getGender());
 				if(null != userIdentifier)
 					dto.setPhone(userIdentifier.getIdentifierToken());
-				dto.setIsAuth(0);
+				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 
 				List<UserGroup> userGroups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
 				//添加地址信息
@@ -1622,10 +1622,12 @@ public class CommunityServiceImpl implements CommunityService {
 			AddressDTO addressDTO = ConvertHelper.convert(groupAddress, AddressDTO.class);
 
 			if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.ACTIVE){
-				addressDTO.setUserAuth((byte)1);
-				dto.setIsAuth(1);
-			}else{
-				addressDTO.setUserAuth((byte)0);
+				addressDTO.setUserAuth(AuthFlag.AUTHENTICATED.getCode().byteValue());
+				dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
+			}else if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_ACCEPTANCE || GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_APPROVAL){
+				addressDTO.setUserAuth(AuthFlag.PENDING_AUTHENTICATION.getCode().byteValue());
+			}else {
+				addressDTO.setUserAuth(AuthFlag.UNAUTHORIZED.getCode().byteValue());
 			}
 			addressDtos.add(addressDTO);
 		}
