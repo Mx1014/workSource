@@ -10,6 +10,7 @@ import java.util.UUID;
 
 
 import com.everhomes.rest.address.ApartmentAbstractDTO;
+import com.everhomes.util.RecordHelper;
 import org.apache.commons.lang.StringUtils;
 
 import com.everhomes.asset.AddressIdAndName;
@@ -145,12 +146,11 @@ public class AddressProviderImpl implements AddressProvider {
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null,
                 (DSLContext context, Object reducingContext) -> {
 
-                    List<Address> list = context.select().from(Tables.EH_ADDRESSES)
+                    List<Address> list = context.select(Tables.EH_ADDRESSES.fields()).from(Tables.EH_ADDRESSES)
                             .join(Tables.EH_GROUPS).on(Tables.EH_ADDRESSES.ID.eq(Tables.EH_GROUPS.INTEGRAL_TAG1))
                             .where(Tables.EH_GROUPS.ID.eq(groupId))
-                            .fetch().map((r) -> {
-                                return ConvertHelper.convert(r, Address.class);
-                            });
+                            .fetch().map((r) -> RecordHelper.convert(r, Address.class));
+
                     if(list != null && !list.isEmpty()){
                         result[0] = list.get(0);
                         return false;
