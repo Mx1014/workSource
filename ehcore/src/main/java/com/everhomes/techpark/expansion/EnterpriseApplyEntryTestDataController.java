@@ -211,11 +211,11 @@ public class EnterpriseApplyEntryTestDataController extends ControllerBase {
 
     private void updateFlowEvaluate(FlowDTO flowDTO) {
         UpdateFlowEvaluateCommand cmd = new UpdateFlowEvaluateCommand();
-        cmd.setNeedEvaluate((byte)1);
+        // cmd.setNeedEvaluate((byte)1);
         cmd.setFlowId(flowDTO.getId());
-        cmd.setEvaluateStart(4L);
-        cmd.setEvaluateEnd(4L);
-        cmd.setEvaluateStep(FlowStepType.NO_STEP.getCode());
+        // cmd.setEvaluateStart(4L);
+        // cmd.setEvaluateEnd(4L);
+        // cmd.setEvaluateStep(FlowStepType.NO_STEP.getCode());
         // cmd.setItems(Collections.singletonList("入驻评价"));
         flowService.updateFlowEvaluate(cmd);
     }

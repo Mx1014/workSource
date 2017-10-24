@@ -1,6 +1,7 @@
 package com.everhomes.flow;
 
 public abstract class FlowGraphAction {
+
 	private FlowAction flowAction;
 
 	public FlowAction getFlowAction() {
@@ -12,5 +13,4 @@ public abstract class FlowGraphAction {
 	}
 	
 	public abstract void fireAction(FlowCaseState ctx, FlowGraphEvent event) throws FlowStepErrorException;
-
 }

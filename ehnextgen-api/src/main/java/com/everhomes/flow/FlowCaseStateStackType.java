@@ -12,29 +12,31 @@ import com.everhomes.rest.flow.FlowCaseType;
  *
  */
 public enum FlowCaseStateStackType {
-	STEP_SYNC_PROCESS("STEP_SYNC_PROCESS"), NO_STEP_PROCESS("NO_STEP_PROCESS"), STEP_ASYNC_TIMEOUT("STEP_ASYNC_TIMEOUT")
-		, TRACKER_ACTION("TRACKER_ACTION");
-	
-	private String code;
-    private FlowCaseStateStackType(String code) {
+
+    STEP_SYNC_PROCESS("STEP_SYNC_PROCESS"),
+    NO_STEP_PROCESS("NO_STEP_PROCESS"),
+    STEP_ASYNC_TIMEOUT("STEP_ASYNC_TIMEOUT"),
+    TRACKER_ACTION("TRACKER_ACTION");
+
+    private String code;
+
+    FlowCaseStateStackType(String code) {
         this.code = code;
     }
-    
+
     public String getCode() {
         return this.code;
     }
-    
-    public static FlowCaseType fromCode(String code) {
-    	if(code == null) {
-    		return null;
-    	}
-    	
-    	for(FlowCaseType t : FlowCaseType.values()) {
-    		if(code.equalsIgnoreCase(t.getCode())) {
-    			return t;
-    		}
-    	}
 
+    public static FlowCaseType fromCode(String code) {
+        if (code == null) {
+            return null;
+        }
+        for (FlowCaseType t : FlowCaseType.values()) {
+            if (code.equalsIgnoreCase(t.getCode())) {
+                return t;
+            }
+        }
         return null;
     }
 }
