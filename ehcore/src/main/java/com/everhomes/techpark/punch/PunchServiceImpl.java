@@ -6288,6 +6288,7 @@ public class PunchServiceImpl implements PunchService {
             cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 			Integer currentVersion = getPunchGroupCurrentVersion(cmd.getOwnerId());
 
+			Long t7 = System.currentTimeMillis();
 			//建立考勤组
 			Organization punchOrg = this.organizationService.createUniongroupOrganization(cmd.getOwnerId(),cmd.getGroupName(),UniongroupType.PUNCHGROUP.getCode());
 			//添加关联
@@ -6312,6 +6313,9 @@ public class PunchServiceImpl implements PunchService {
 //					punchSchedulingProvider.deletePunchSchedulingByOwnerIdAndTarget(cmd.getOwnerId(), employee.getDetailId());
 //				}
 	        //打卡地点和wifi
+			Long t8 = System.currentTimeMillis();
+
+			LOGGER.debug("save union group  Time8 "+  t8 + "cost: " +(t8-t7));
 	        saveGeopointsAndWifis(punchOrg.getId(),cmd.getPunchGeoPoints(),cmd.getWifis());
 
 	        PunchRule pr = ConvertHelper.convert(cmd, PunchRule.class);
@@ -6331,6 +6335,8 @@ public class PunchServiceImpl implements PunchService {
 	        //打卡时间
 			savePunchTimeRule(ConvertHelper.convert(cmd, PunchGroupDTO.class),pr);
 
+			Long t9 = System.currentTimeMillis();
+			LOGGER.debug("save ptr Time9 "+  t9 + "cost: " +(t9-t8));
 			//发消息
 			//发消息 暂时屏蔽
 //			sendMessageToGroupUser(pr, cmd.getTimeRules());
