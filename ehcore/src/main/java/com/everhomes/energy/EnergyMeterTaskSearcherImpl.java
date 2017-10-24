@@ -8,6 +8,7 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EnergyMeterTaskSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ying.xiong on 2017/10/23.
@@ -39,6 +41,9 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
 
     @Autowired
     private EnergyMeterTaskProvider energyMeterTaskProvider;
+
+    @Autowired
+    private EnergyMeterAddressProvider energyMeterAddressProvider;
 
     @Override
     public String getIndexType() {
@@ -166,6 +171,25 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
         if(ids.size() > pageSize) {
             response.setNextPageAnchor(anchor + 1);
             ids.remove(ids.size() - 1);
+        }
+
+        Map<Long, EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasks(ids);
+        if(tasks != null && tasks.size() > 0) {
+            tasks.forEach((id, task) -> {
+                EnergyMeterTaskDTO dto = ConvertHelper.convert(task, EnergyMeterTaskDTO.class);
+                EnergyMeter meter = energyMeterProvider.findById(task.getNamespaceId(), task.getMeterId());
+                dto.setMeterName(meter.getName());
+                dto.setMeterNumber(meter.getMeterNumber());
+                dto.setMeterType(meter.getMeterType());
+
+                Map<Long, EnergyMeterAddress> addressMap = energyMeterAddressProvider.findByMeterId(task.getMeterId());
+                if(addressMap != null && addressMap.size() > 0) {
+                    dto.setApartmentFloor(addressMap.get(0).getApartmentFloor());
+                    dto.setAddress(addressMap.get(0).getApartmentName());
+                }
+                
+                taskDTOs.add(dto);
+            });
         }
         response.setTaskDTOs(taskDTOs);
         return response;

@@ -9,6 +9,7 @@ import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ying.xiong on 2017/10/23.
@@ -40,5 +41,10 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
         return context.selectFrom(Tables.EH_ENERGY_METER_TASKS)
                 .where(Tables.EH_ENERGY_METER_TASKS.ID.ge(pageAnchor))
                 .limit(pageSize).fetchInto(EnergyMeterTask.class);
+    }
+
+    @Override
+    public Map<Long, EnergyMeterTask> listEnergyMeterTasks(List<Long> ids) {
+        return null;
     }
 }
