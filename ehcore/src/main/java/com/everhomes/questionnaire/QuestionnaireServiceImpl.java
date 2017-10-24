@@ -2,6 +2,7 @@
 package com.everhomes.questionnaire;
 
 import java.io.ByteArrayOutputStream;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -269,13 +270,15 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 			createRanges(questionnaire.getId(), questionnaireDTO.getRanges());
 
-			return convertToQuestionnaireDTO(questionnaire, questionDTOs);
+
+			QuestionnaireDTO resultDto = convertToQuestionnaireDTO(questionnaire, questionDTOs);
+			//异步计算用户范围并且发送消息
+			if(QuestionnaireStatus.ACTIVE == QuestionnaireStatus.fromCode(questionnaireDTO.getStatus())){
+				asynchronousSendMessage(resultDto.getId());
+			}
+			return resultDto;
 		});
 
-		//异步计算用户范围并且发送消息
-		if(QuestionnaireStatus.ACTIVE == QuestionnaireStatus.fromCode(questionnaireDTO.getStatus())){
-			asynchronousSendMessage(result.getId());
-		}
 		return new CreateQuestionnaireResponse(result);
 	}
 
