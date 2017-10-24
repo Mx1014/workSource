@@ -7934,13 +7934,48 @@ public class PunchServiceImpl implements PunchService {
 
 		if(null == pr )
 			return;
+		//对于活动状态的要变成修改状态,并且复制班次和排班
+		if (PunchRuleStatus.ACTIVE.getCode() == pr.getStatus().byteValue()) {
 
-		if(PunchRuleStatus.NEW.getCode() != pr.getStatus().byteValue())
+			List<PunchTimeRule> timeRules = punchProvider.listActivePunchTimeRuleByOwner(PunchOwnerType.ORGANIZATION.getCode(), pr.getPunchOrganizationId(), pr.getStatus());
+			//这个考勤组改成修改状态
 			pr.setStatus(PunchRuleStatus.MODIFYED.getCode());
-		pr.setOperatorUid(UserContext.current().getUser().getId());
-		pr.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			//把班次复制一份修改状态的
+			if (null != timeRules) {
+				for (PunchTimeRule timeRule : timeRules) {
+					List<PunchTimeInterval> timeIntervals = punchProvider.listPunchTimeIntervalByTimeRuleId(timeRule.getId());
+					timeRule.setStatus(pr.getStatus());
+					punchProvider.createPunchTimeRule(timeRule);
+					if (null != timeIntervals) {
+						for (PunchTimeInterval interval : timeIntervals) {
+							interval.setTimeRuleId(timeRule.getId());
+							punchProvider.createPunchTimeInterval(interval);
+						}
+					}
+				}
+			}
 
-		punchProvider.updatePunchRule(pr);
-		// TODO: 2017/10/24  是否需要把排班表什么的复制一份出来
+			//排班表复制一份修改状态的
+			Calendar end = Calendar.getInstance();
+			end.set(Calendar.DAY_OF_MONTH, 1);
+			end.set(Calendar.HOUR_OF_DAY, 0);
+			end.set(Calendar.MINUTE, 0);
+			end.set(Calendar.SECOND, 0);
+			end.set(Calendar.MILLISECOND, 0);
+			end.add(Calendar.MONTH, 2);
+			List<PunchScheduling> psList = punchSchedulingProvider.queryPunchSchedulings(new java.sql.Date(new Date().getTime()),
+					new java.sql.Date(end.getTimeInMillis()), pr.getId(), PunchRuleStatus.ACTIVE.getCode());
+			if (null != psList) {
+				for (PunchScheduling ps : psList) {
+					ps.setStatus(pr.getStatus());
+					punchSchedulingProvider.createPunchScheduling(ps);
+				}
+			}
+
+			//组织架构调用的接口不一定有userContext
+//			pr.setOperatorUid(UserContext.current().getUser().getId());
+			pr.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			punchProvider.updatePunchRule(pr);
+		}
 	}
 }
