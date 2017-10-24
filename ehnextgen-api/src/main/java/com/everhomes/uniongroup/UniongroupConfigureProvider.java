@@ -32,7 +32,7 @@ public interface UniongroupConfigureProvider {
 
     void deleteUniongroupConfigres(UniongroupConfigures uniongroupConfigures);
 
-    void deleteUniongroupConfigresByCurrentIds(Integer namespaceId, List<Long> currentIds, String currentType, Integer versionCode);
+    void deleteUniongroupConfigresByCurrentIds(Integer namespaceId, List<Long> currentIds, String groupType, Integer versionCode);
 
     void createUniongroupMemberDetail(UniongroupMemberDetail uniongroupMemberDetail);
 
