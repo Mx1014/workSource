@@ -671,7 +671,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     private GeneralApproval convertApprovalFromTemplate(GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
         GeneralApproval ga = ConvertHelper.convert(approval, GeneralApproval.class);
         ga.setNamespaceId(UserContext.getCurrentNamespaceId());
-        ga.setStatus(GeneralApprovalStatus.RUNNING.getCode());
+        ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
         ga.setOwnerId(cmd.getOwnerId());
         ga.setOwnerType(cmd.getOwnerType());
         ga.setOrganizationId(cmd.getOrganizationId());
