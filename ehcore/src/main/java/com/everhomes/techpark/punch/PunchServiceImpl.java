@@ -6693,6 +6693,7 @@ public class PunchServiceImpl implements PunchService {
 //		}
 		List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(r.getId(),CONFIG_VERSION_CODE);
 		dto.setEmployeeCount(employees == null ? 0: employees.size());
+		List<Long> detailIds = new ArrayList<>();
 		if (null != employees) {
 			dto.setEmployees(new ArrayList<>());
 			for (UniongroupMemberDetail detail : employees) {
@@ -6701,6 +6702,7 @@ public class PunchServiceImpl implements PunchService {
 				target.setId(detail.getDetailId());
 				target.setType(UniongroupTargetType.MEMBERDETAIL.getCode());
 				dto.getEmployees().add(target);
+				detailIds.add(detail.getDetailId());
 			}
 		}
 		// 关联 人员和机构
@@ -6756,7 +6758,7 @@ public class PunchServiceImpl implements PunchService {
 			Calendar end = Calendar.getInstance();
 			end.setTime(start.getTime());
 			end.add(Calendar.MONTH, 1);
-			Integer linkedCount = punchSchedulingProvider.countSchedulingUser(pr.getId(),new java.sql.Date(start.getTimeInMillis()),new java.sql.Date(end.getTimeInMillis()));
+			Integer linkedCount = punchSchedulingProvider.countSchedulingUser(pr.getId(),new java.sql.Date(start.getTimeInMillis()),new java.sql.Date(end.getTimeInMillis()),detailIds);
 			dto.setUnSchedulingCount(dto.getEmployeeCount() - linkedCount);
 			//排班
 			List<PunchSchedulingDTO> schedulings = processschedulings(pr,new java.sql.Date(start.getTimeInMillis()),new java.sql.Date(end.getTimeInMillis()));

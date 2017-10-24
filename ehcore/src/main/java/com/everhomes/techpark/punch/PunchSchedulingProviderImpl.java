@@ -165,7 +165,7 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 	}
 
 	@Override
-	public Integer countSchedulingUser(Long ruleId, java.sql.Date start, java.sql.Date end) {
+	public Integer countSchedulingUser(Long ruleId, java.sql.Date start, java.sql.Date end, List<Long> detailIds) {
 		 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.selectDistinct(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID)
 				.from(Tables.EH_PUNCH_SCHEDULINGS)
@@ -173,6 +173,7 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 				.and(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.eq(ruleId))
 				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(start))
 				.and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(end))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.in(detailIds))
 				.fetchCount();
 	}
 
