@@ -596,20 +596,28 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters,cutOffTime is null");
 		}
+		//截止日期必须在当前日期之后
+
+		if(new Timestamp(System.currentTimeMillis()).after(new Timestamp(questionnaire.getCutOffTime()))){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters,cutOffTime = "+questionnaire.getCutOffTime()+" before now time");
+		}
 
 		//枚举支持匿名检查
-		QuestionnaireCommonStatus supportAnonymous = QuestionnaireCommonStatus.fromCode(questionnaire.getSupportAnonymous());
-		if(supportAnonymous == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameters,supportAnonymous = " +questionnaire.getSupportAnonymous());
+//		QuestionnaireCommonStatus supportAnonymous = QuestionnaireCommonStatus.fromCode(questionnaire.getSupportAnonymous());
+		if(questionnaire.getSupportAnonymous() == null){
+			questionnaire.setSupportAnonymous(QuestionnaireCommonStatus.FALSE.getCode());
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid parameters,supportAnonymous = " +questionnaire.getSupportAnonymous());
 		}
 
 		//枚举支持分享检查
 		if (targetType == QuestionnaireTargetType.USER) {
-			QuestionnaireCommonStatus supportShare = QuestionnaireCommonStatus.fromCode(questionnaire.getSupportShare());
-			if (supportShare == null) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"Invalid parameters,supportShare = " + questionnaire.getSupportShare());
+//			QuestionnaireCommonStatus supportShare = QuestionnaireCommonStatus.fromCode(questionnaire.getSupportShare());
+			if (questionnaire.getSupportShare() == null) {
+				questionnaire.setSupportShare(QuestionnaireCommonStatus.FALSE.getCode());
+//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//						"Invalid parameters,supportShare = " + questionnaire.getSupportShare());
 			}
 		}
 

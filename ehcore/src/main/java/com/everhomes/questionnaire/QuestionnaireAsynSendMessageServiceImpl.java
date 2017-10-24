@@ -231,7 +231,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 						userLevelRanges.addAll(getEnterpriseUsers(originalRange.getRange()));
 						break;
 					case COMMUNITY_ALL:
-						userLevelRanges.addAll(getCommunityUsers(originalRange.getRange(),(Integer)null));
+						userLevelRanges.addAll(getCommunityUsers(originalRange.getRange(),0));
 						break;
 					case COMMUNITY_UNAUTHORIZED:
 						userLevelRanges.addAll(getCommunityUsers(originalRange.getRange(),1));
