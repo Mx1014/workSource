@@ -4819,8 +4819,10 @@ public class FlowServiceImpl implements FlowService {
                     Long nodeId = nodeLevelToIdMap.get(Integer.parseInt(String.valueOf(flow.getEvaluateStart() + i)));
                     FlowButton evalButton = flowButtonProvider.findFlowButtonByStepType(nodeId,
                             FlowConstants.FLOW_CONFIG_VER, FlowStepType.EVALUATE_STEP.getCode(), FlowUserType.APPLIER.getCode());
-                    evalButton.setStatus(FlowButtonStatus.ENABLED.getCode());
-                    flowButtonProvider.updateFlowButton(evalButton);
+                    if (evalButton != null) {
+                        evalButton.setStatus(FlowButtonStatus.ENABLED.getCode());
+                        flowButtonProvider.updateFlowButton(evalButton);
+                    }
                 }
                 flow.setAllowFlowCaseEndEvaluate(TrueOrFalseFlag.TRUE.getCode());
             }
