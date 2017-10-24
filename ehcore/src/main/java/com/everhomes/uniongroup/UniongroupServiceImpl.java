@@ -328,7 +328,6 @@ public class UniongroupServiceImpl implements UniongroupService {
     public void reallocatedUnion(Long enterpriseId, List<Long> departmentIds, OrganizationMember organizationMember) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         //根据层级关系将departmentIds排序
-        Organization organization = checkOrganization(enterpriseId);
         List<Organization> departments = this.organizationProvider.listOrganizationsByIds(departmentIds);
         //按层级退化
 //        Collections.sort(departments, new Comparator<Organization>() {
