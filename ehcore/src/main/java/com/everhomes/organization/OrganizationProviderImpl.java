@@ -5184,7 +5184,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
 		if(null != organizationId)
 			step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(organizationId));
-		return step.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
+		return step.orderBy(Tables.EH_ORGANIZATIONS.ID.desc()).fetch().map(r -> ConvertHelper.convert(r, Organization.class));
 	}
 
 	@Override
