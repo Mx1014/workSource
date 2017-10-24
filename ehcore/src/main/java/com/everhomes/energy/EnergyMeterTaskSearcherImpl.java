@@ -187,7 +187,7 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
                     dto.setApartmentFloor(addressMap.get(0).getApartmentFloor());
                     dto.setAddress(addressMap.get(0).getApartmentName());
                 }
-                
+
                 taskDTOs.add(dto);
             });
         }
