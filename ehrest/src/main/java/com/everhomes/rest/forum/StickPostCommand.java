@@ -6,13 +6,23 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *     <li>organizationId: organizationId</li>
  *     <li>postId: postId</li>
  *     <li>stickFlag: 置顶标志，0-否，1-是，参考{@link StickFlag}</li>
  * </ul>
  */
 public class StickPostCommand {
+    private Long organizationId;
     private Long postId;
     private Byte stickFlag;
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public Long getPostId() {
         return postId;
