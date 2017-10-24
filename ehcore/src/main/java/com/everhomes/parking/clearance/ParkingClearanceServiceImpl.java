@@ -152,6 +152,11 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     @Override
     public void createClearanceOperator(CreateClearanceOperatorCommand cmd) {
+
+        if (null == cmd.getNamespaceId()) {
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+
         validate(cmd);
 
         if (cmd.getUserIds() != null && cmd.getUserIds().size() > 0) {
@@ -167,7 +172,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
                 ParkingClearanceOperator newOperator = new ParkingClearanceOperator();
                 newOperator.setOrganizationId(cmd.getOrganizationId());
                 newOperator.setCommunityId(cmd.getCommunityId());
-                newOperator.setNamespaceId(currNamespaceId());
+                newOperator.setNamespaceId(cmd.getNamespaceId());
                 newOperator.setParkingLotId(cmd.getParkingLotId());
                 newOperator.setOperatorType(cmd.getOperatorType());
                 newOperator.setOperatorId(user.getId());
@@ -320,11 +325,16 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     @Override
     public ListClearanceOperatorResponse listClearanceOperator(ListClearanceOperatorCommand cmd) {
+
+        if (null == cmd.getNamespaceId()) {
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+
         validate(cmd);
         ListClearanceOperatorResponse response = new ListClearanceOperatorResponse();
 
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        List<ParkingClearanceOperator> operators = clearanceOperatorProvider.listClearanceOperator(currNamespaceId(),
+        List<ParkingClearanceOperator> operators = clearanceOperatorProvider.listClearanceOperator(cmd.getNamespaceId(),
                 cmd.getCommunityId(), cmd.getParkingLotId(), cmd.getOperatorType(), pageSize+1, cmd.getPageAnchor());
         if (operators != null) {
             if (operators.size() > pageSize) {
@@ -337,11 +347,16 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     @Override
     public ParkingClearanceLogDTO createClearanceLog(CreateClearanceLogCommand cmd) {
+
+        if (null == cmd.getNamespaceId()) {
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+
         this.validate(cmd);
         this.checkApplicantAuthority(cmd.getOrganizationId(), cmd.getParkingLotId());
 
         ParkingClearanceLog log = new ParkingClearanceLog();
-        log.setNamespaceId(currNamespaceId());
+        log.setNamespaceId(cmd.getNamespaceId());
         log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
         log.setParkingLotId(cmd.getParkingLotId());
         log.setCommunityId(cmd.getCommunityId());
@@ -355,7 +370,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         boolean success = dbProvider.execute(status -> {
             long logId = clearanceLogProvider.createClearanceLog(log);
             log.setId(logId);
-            this.createFlowCase(log, cmd.getOrganizationId());
+            this.createFlowCase(log, cmd.getOrganizationId(), cmd.getNamespaceId());
 
             notifyParkingLot(log);
             return true;
@@ -383,8 +398,8 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         clearanceLogProvider.updateClearanceLog(log);
     }
 
-    private Long createFlowCase(ParkingClearanceLog log, Long organizationId) {
-        Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, log.getParkingLotId(), FlowOwnerType.PARKING.getCode());
+    private Long createFlowCase(ParkingClearanceLog log, Long organizationId, Integer namespaceId) {
+        Flow flow = flowService.getEnabledFlow(namespaceId, MODULE_ID, null, log.getParkingLotId(), FlowOwnerType.PARKING.getCode());
         if (flow != null) {
             CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
             flowCaseCmd.setApplyUserId(currUserId());
@@ -415,6 +430,11 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     @Override
     public SearchClearanceLogsResponse searchClearanceLog(SearchClearanceLogCommand cmd) {
+
+        if (null == cmd.getNamespaceId()) {
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        }
+
         validate(cmd);
         SearchClearanceLogsResponse response = new SearchClearanceLogsResponse();
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -514,10 +534,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     private String currLocale() {
         return UserContext.current().getUser().getLocale();
-    }
-
-    private Integer currNamespaceId() {
-        return UserContext.getCurrentNamespaceId();
     }
 
     private UserIdentifier findUserIdentifierByUserId(Long userId) {

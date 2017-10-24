@@ -188,7 +188,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Override
 	public ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd) {
-		
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 		ListEnterpriseApplyEntryResponse response = new ListEnterpriseApplyEntryResponse();
 		
 		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
@@ -314,6 +318,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		dto.setBuildings(buildings);
 
+		Community community = communityProvider.findCommunityById(enterpriseOpRequest.getCommunityId());
+		dto.setCommunityName(community.getName());
 		return dto;
 	}
 
@@ -328,11 +334,16 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	public ApplyEntryResponse applyEntry(EnterpriseApplyEntryCommand cmd) {
 		ApplyEntryResponse resp = new ApplyEntryResponse();
 
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
 		request.setApplyUserId(UserContext.current().getUser().getId());
-		if(null != cmd.getContactPhone())
+		if(null != cmd.getContactPhone()) {
 			request.setApplyContact(cmd.getContactPhone());
-		
+		}
+
 		request.setOperatorUid(request.getApplyUserId());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
 
@@ -381,7 +392,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	private String addEnterpriseOpRequestBuildings(EnterpriseOpRequest request, ResourceCategoryAssignment[] resourceCategories) {
 
 		String issuerType = LeaseIssuerType.ORGANIZATION.getCode();
-		String buildingName = null;
+		String requestAddress = null;
 		Set<Long> buildingIds = new HashSet<>();
 
 		EnterpriseOpRequestBuilding opRequestBuilding = new EnterpriseOpRequestBuilding();
@@ -452,7 +463,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		}else if (request.getSourceType().equals(ApplyEntrySourceType.BUILDING.getCode())){
 			//3. 园区介绍直接就是楼栋的地址
-
+			//暂时
 			LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(request.getSourceId());
 			if (null != leaseBuilding) {
 
@@ -489,6 +500,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				}
 			}
 
+			//如果是项目介绍的申请，产品定义buildingName 值显示项目名称
+			Community community = communityProvider.findCommunityById(request.getCommunityId());
+			requestAddress = community.getName() + leaseBuilding.getName();
 		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(request.getSourceType())){
 			//4. 虚位以待的楼栋地址
 			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(request.getSourceId());
@@ -501,15 +515,30 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			opRequestBuilding.setBuildingId(leasePromotion.getBuildingId());
 			enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
 
+			//招租信息的buildingId如果是0，则表示楼栋信息是手动输入，门牌也是手动输入
 			if (leasePromotion.getBuildingId() != OTHER_BUILDING_ID) {
 				LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(leasePromotion.getBuildingId());
+				//leaseBuilding的buildingId是对应项目管理楼栋id，如果是0，表示是园区入驻的楼栋介绍自定义新增的楼栋
 				if (leaseBuilding.getBuildingId() != 0L) {
 					resourceCategories[0] = communityProvider.findResourceCategoryAssignment(leaseBuilding.getBuildingId(),
 							EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				}
+
+				String apartmentName = defaultIfNull(leasePromotion.getApartmentName(), "");
+				Address address = addressProvider.findAddressById(leasePromotion.getAddressId());
+				if (null != address) {
+					apartmentName = address.getApartmentName();
+				}
+				requestAddress = leaseBuilding.getName() + apartmentName;
 			}else {
-				buildingName = leasePromotion.getBuildingName();
+				requestAddress = defaultIfNull(leasePromotion.getBuildingName(), "") +
+						defaultIfNull(leasePromotion.getApartmentName(), "");
 			}
+		}else if(ApplyEntrySourceType.LEASE_PROJECT.getCode().equals(request.getSourceType())){
+			//如果是项目介绍的申请，产品定义buildingName 值显示项目名称
+			Community community = communityProvider.findCommunityById(request.getCommunityId());
+			requestAddress = community.getName();
+
 		}
 
 		if (null != opRequestBuilding.getBuildingId()) {
@@ -518,12 +547,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		//从招租信息获取发布人信息，填充到申请信息中
 		request.setIssuerType(issuerType);
 
-		return parseBuildingName(buildingIds, buildingName);
+		return parseRequestAddress(buildingIds, requestAddress);
 	}
 
-	private String parseBuildingName(Set<Long> buildingIds, String buildingName) {
+	private String parseRequestAddress(Set<Long> buildingIds, String requestAddress) {
 
-		if (buildingName == null) {
+		if (requestAddress == null) {
 			StringBuilder sb = new StringBuilder();
 			int n = 1;
 			for (Long id: buildingIds) {
@@ -538,10 +567,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				}
 				n++;
 			}
-			buildingName = defaultIfNull(sb.toString(),"").toString();
+			requestAddress = defaultIfNull(sb.toString(),"");
 		}
 
-		return buildingName;
+		return requestAddress;
 	}
 
 	private String processFlowURL(Long flowCaseId, String string, Long moduleId) { 
@@ -639,7 +668,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
                 ApplyEntryErrorCodes.FLOW_BRIEF_CONTENT_CODE, locale, map, "");
     }
 
-    private Object defaultIfNull(Object obj, Object defaultValue) {
+    private String defaultIfNull(String obj, String defaultValue) {
         return obj != null ? obj : defaultValue;
     }
 
@@ -711,6 +740,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	
 	@Override
 	public ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd) {
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		ListBuildingForRentResponse res = new ListBuildingForRentResponse();
 		if (null==cmd.getRentType()) {
@@ -786,6 +819,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			if(null != building){
 				dto.setBuildingName(building.getName());
 				dto.setCommunityId(building.getCommunityId());
+				Community community = communityProvider.findCommunityById(building.getCommunityId());
+				dto.setCommunityName(community.getName());
+			}else {
+				dto.setCommunityName("其他");
 			}
 		}
 		//兼容历史app，rentPosition字段值返回的就是楼栋名称
@@ -807,7 +844,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			return ad;
 		}).collect(Collectors.toList()));
 		//暂时用枚举，如果拓展单位类型，则须在表中添加字段
-		dto.setUnit(LeasePromotionUnit.MONTH_UNIT.getDescription());
+
+		LeasePromotionConfig unitConfig = enterpriseLeaseIssuerProvider.findLeasePromotionConfig(leasePromotion.getNamespaceId(),
+				"rentAmountUnit");
+		if (null != unitConfig) {
+			dto.setUnit(LeasePromotionUnit.fromType(unitConfig.getConfigValue()).getDescription());
+		}
 
 		//	启用表单，则查询表单值
 		if (LeasePromotionFlag.ENABLED.getCode() == leasePromotion.getCustomFormFlag()) {
@@ -846,6 +888,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Override
 	public BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd, Byte adminFlag){
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		if (null == cmd.getIssuerType()) {
 			cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
@@ -1098,12 +1144,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ListLeaseIssuersResponse listLeaseIssuers(ListLeaseIssuersCommand cmd) {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		ListLeaseIssuersResponse resp = new ListLeaseIssuersResponse();
 
-		List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, null, cmd.getKeyword(),
-				cmd.getPageAnchor(), pageSize);
+		List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(cmd.getNamespaceId(), null,
+				cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
 
 		int size = issuers.size();
 
@@ -1213,24 +1261,26 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid communityId param.");
         }
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
         dbProvider.execute((TransactionStatus status) -> {
 
             if (null != cmd.getEnterpriseIds()) {
                 for (Long id : cmd.getEnterpriseIds()) {
 
-                    LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, id);
+                    LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(cmd.getNamespaceId(), id);
                     //已存在，过滤掉
                     if (null == leaseIssuer) {
                         leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
-                        leaseIssuer.setNamespaceId(namespaceId);
+                        leaseIssuer.setNamespaceId(cmd.getNamespaceId());
                         leaseIssuer.setEnterpriseId(id);
                         enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
                     }
                 }
             } else {
-                LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, cmd.getIssuerContact());
+                LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(cmd.getNamespaceId(), cmd.getIssuerContact());
 
                 if (null != leaseIssuer) {
                     LOGGER.error("LeaseIssuer exist, cmd={}", cmd);
@@ -1273,46 +1323,50 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
     @Override
     public LeasePromotionConfigDTO getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd) {
-        if (null == cmd.getNamespaceId())
-            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-
-        LeasePromotionConfig config = enterpriseLeaseIssuerProvider.getLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
-
-
-		if (null == config) {
-			LOGGER.error("LeaseIssuerConfig not found, namespaceId={}", cmd.getNamespaceId());
-			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"LeaseIssuerConfig not found.");
-		}
-
-        String displayNameStr = config.getDisplayNameStr();
-        String displayOrderStr = config.getDisplayOrderStr();
-        if (null != displayNameStr) {
-        	String[] names = displayNameStr.split(",");
-        	String[] orders = displayOrderStr.split(",");
-			LeasePromotionConfigDTO dto = ConvertHelper.convert(config, LeasePromotionConfigDTO.class);
-			dto.setDisplayNames(Arrays.stream(names).collect(Collectors.toList()));
-			dto.setDisplayOrders(Arrays.stream(orders).map(Integer::valueOf).collect(Collectors.toList()));
-
-			dto.setConsultFlag((byte)1);
-			return dto;
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 
 		LeasePromotionConfigDTO dto = new LeasePromotionConfigDTO();
-		List<LeasePromotionConfig2> configs = enterpriseLeaseIssuerProvider.listLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
+
+		dto.setNamespaceId(cmd.getNamespaceId());
+		dto.setRentAmountFlag(LeasePromotionFlag.DISABLED.getCode());
+//		dto.setRentAmountUnit();
+		dto.setIssuingLeaseFlag(LeasePromotionFlag.DISABLED.getCode());
+		dto.setRenewFlag(LeasePromotionFlag.DISABLED.getCode());
+		dto.setAreaSearchFlag(LeasePromotionFlag.DISABLED.getCode());
+		dto.setConsultFlag(LeasePromotionFlag.DISABLED.getCode());
+		dto.setBuildingIntroduceFlag(LeasePromotionFlag.DISABLED.getCode());
+		String[] defaultNames = {"项目介绍","房源招租"};
+		String[] defaultOrders = {"1","2"};
+		dto.setDisplayNames(Arrays.stream(defaultNames).collect(Collectors.toList()));
+		dto.setDisplayOrders(Arrays.stream(defaultOrders).map(Integer::valueOf).collect(Collectors.toList()));
+
+		List<LeasePromotionConfig> configs = enterpriseLeaseIssuerProvider.listLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
         if (null != configs) {
 			configs.forEach(c -> {
 				String name = c.getConfigName();
-				switch (name) {
-					case "rentAmountFlag": dto.setRentAmountFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "issuingLeaseFlag": dto.setIssuingLeaseFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "issuerManageFlag": dto.setIssuerManageFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "parkIntroduceFlag": dto.setParkIndroduceFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "renewFlag": dto.setRenewFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "areaSearchFlag": dto.setAreaSearchFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "consultFlag": dto.setConsultFlag(Byte.valueOf(c.getConfigValue())); break;
-//					case "displayNameStr": dto.setDisplayNameStr(c.getConfigValue()); break;
-//					case "displayOrderStr": dto.setDisplayOrderStr(c.getConfigValue()); break;
+				LeasePromotionConfigType type = LeasePromotionConfigType.fromCode(name);
+				switch (type) {
+					case RENT_AMOUNT_FLAG: dto.setRentAmountFlag(Byte.valueOf(c.getConfigValue())); break;
+					case RENT_AMOUNT_UNIT: dto.setRentAmountUnit(LeasePromotionUnit.fromType(c.getConfigValue()).getDescription()); break;
+					case ISSUING_LEASE_FLAG: dto.setIssuingLeaseFlag(Byte.valueOf(c.getConfigValue())); break;
+					case RENEW_FLAG: dto.setRenewFlag(Byte.valueOf(c.getConfigValue())); break;
+					case AREA_SEARCH_FLAG: dto.setAreaSearchFlag(Byte.valueOf(c.getConfigValue())); break;
+					case CONSULT_FLAG: dto.setConsultFlag(Byte.valueOf(c.getConfigValue())); break;
+					case BUILDING_INTRODUCE_FLAG: dto.setBuildingIntroduceFlag(Byte.valueOf(c.getConfigValue())); break;
+					case DISPLAY_NAME_STR:
+						String displayNameStr = c.getConfigValue();
+						String[] names = displayNameStr.split(",");
+						dto.setDisplayNames(Arrays.stream(names).collect(Collectors.toList()));
+
+						break;
+					case DISPLAY_ORDER_STR:
+						String displayOrderStr = c.getConfigValue();
+						String[] orders = displayOrderStr.split(",");
+						dto.setDisplayOrders(Arrays.stream(orders).map(Integer::valueOf).collect(Collectors.toList()));
+
+						break;
 					default: break;
 				}
 			});
@@ -1322,24 +1376,58 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
     }
 
+	@Override
+	public void setLeasePromotionConfig(SetLeasePromotionConfigCommand cmd) {
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		//如果开启就添加到数据库中，否则默认关闭
+		if (LeasePromotionFlag.ENABLED.getCode() == cmd.getBuildingIntroduceFlag()) {
+
+			LeasePromotionConfig config = enterpriseLeaseIssuerProvider.findLeasePromotionConfig(cmd.getNamespaceId(),
+					"buildingIntroduceFlag");
+
+			if (null != config) {
+				config.setConfigValue(String.valueOf(cmd.getBuildingIntroduceFlag()));
+				enterpriseLeaseIssuerProvider.updateLeasePromotionConfig(config);
+			}else {
+				config = new LeasePromotionConfig();
+				config.setNamespaceId(cmd.getNamespaceId());
+				config.setConfigName("buildingIntroduceFlag");
+				config.setConfigValue(String.valueOf(cmd.getBuildingIntroduceFlag()));
+				enterpriseLeaseIssuerProvider.createLeasePromotionConfig(config);
+			}
+
+		}else {
+			enterpriseLeaseIssuerProvider.deleteLeasePromotionConfig(cmd.getNamespaceId(),
+					"buildingIntroduceFlag");
+		}
+
+	}
+
     @Override
     public CheckIsLeaseIssuerDTO checkIsLeaseIssuer(CheckIsLeaseIssuerCommand cmd) {
         CheckIsLeaseIssuerDTO dto = new CheckIsLeaseIssuerDTO();
 		Long organizationId = cmd.getOrganizationId();
 		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
 		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 
 		dto.setFlag(LeasePromotionFlag.DISABLED.getCode());
 
 		//先检查是不是招租发行人
-		if (null != enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken())) {
+		if (null != enterpriseLeaseIssuerProvider.findLeaseIssersByContact(cmd.getNamespaceId(), identifier.getIdentifierToken())) {
 			dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
 		}
 
 		if (null != organizationId) {
 			//先检查是不是招租发行公司
-			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, organizationId)) {
+			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(cmd.getNamespaceId(), organizationId)) {
 				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
 					dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
@@ -1353,16 +1441,20 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     @Override
     public ListLeaseIssuerBuildingsResponse listBuildings(ListLeaseIssuerBuildingsCommand cmd) {
 
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
         ListLeaseIssuerBuildingsResponse response = new ListLeaseIssuerBuildingsResponse();
 		Long organizationId = cmd.getOrganizationId();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
         User user = UserContext.current().getUser();
         UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 
 		List<BuildingDTO> buildingDTOs = new ArrayList<>();
 
 		//先查询业主
-		LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken());
+		LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(cmd.getNamespaceId(), identifier.getIdentifierToken());
 		if (null != leaseIssuer) {
 			List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserBuildings(leaseIssuer.getId());
 
@@ -1379,7 +1471,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		if (null != organizationId)  {
-			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, organizationId)) {
+			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(cmd.getNamespaceId(), organizationId)) {
 				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
 					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
@@ -1405,13 +1497,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public List<AddressDTO> listLeaseIssuerApartments(ListLeaseIssuerApartmentsCommand cmd) {
 		List<AddressDTO> dtos = new ArrayList<>();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 		User user = UserContext.current().getUser();
 		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		Long organizationId = cmd.getOrganizationId();
 
 		//先查询业主
-		LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken());
+		LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(cmd.getNamespaceId(), identifier.getIdentifierToken());
 		if (null != leaseIssuer) {
 			List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(leaseIssuer.getId(), cmd.getBuildingId());
 
@@ -1422,7 +1516,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		if (null != organizationId)  {
-			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, organizationId)) {
+			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(cmd.getNamespaceId(), organizationId)) {
 				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
 					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
@@ -1444,6 +1538,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Override
 	public void updateLeasePromotionRequestForm(UpdateLeasePromotionRequestFormCommand cmd) {
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
 				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType());
@@ -1468,6 +1566,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Override
 	public LeaseFormRequestDTO getLeasePromotionRequestForm(GetLeasePromotionRequestFormCommand cmd) {
+
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
 				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType());

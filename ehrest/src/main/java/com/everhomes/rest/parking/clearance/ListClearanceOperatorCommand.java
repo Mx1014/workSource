@@ -18,6 +18,8 @@ import javax.validation.constraints.NotNull;
  */
 public class ListClearanceOperatorCommand {
 
+    private Integer namespaceId;
+
     @NotNull private Long organizationId;
     @NotNull private Long communityId;
     @NotNull private Long parkingLotId;
@@ -26,6 +28,14 @@ public class ListClearanceOperatorCommand {
 
     private Integer pageSize;
     private Long pageAnchor;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getCommunityId() {
         return communityId;

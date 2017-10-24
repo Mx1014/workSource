@@ -2,10 +2,8 @@
 package com.everhomes.rest.activity;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.List;
 
-import com.everhomes.discover.ItemType;
+import com.everhomes.rest.forum.StickFlag;
 import com.everhomes.util.StringHelper;
 /**
  *<ul>
@@ -51,6 +49,7 @@ import com.everhomes.util.StringHelper;
  * <li>createTime: 创建时间</li>
  * <li>systemTime: 系统时间</li>
  * <li>wechatSignup: 是否支持微信报名，0-不支持，1-支持 参考  参考{@link com.everhomes.rest.activity.WechatSignupFlag }</li>
+ * <li>stickFlag: 置顶标志，0-否，1-是，参考{@link StickFlag}</li>
  *</ul>
  */
 public class ActivityDTO {
@@ -128,6 +127,8 @@ public class ActivityDTO {
     private Long systemTime;
 
     private Byte wechatSignup;
+
+    private Byte stickFlag;
     
     public String getSignupEndTime() {
 		return signupEndTime;
@@ -613,6 +614,14 @@ public class ActivityDTO {
 
     public void setWechatSignup(Byte wechatSignup) {
         this.wechatSignup = wechatSignup;
+    }
+
+    public Byte getStickFlag() {
+        return stickFlag;
+    }
+
+    public void setStickFlag(Byte stickFlag) {
+        this.stickFlag = stickFlag;
     }
 
     public String toString() {

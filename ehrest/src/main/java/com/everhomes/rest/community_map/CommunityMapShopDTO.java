@@ -25,6 +25,16 @@ public class CommunityMapShopDTO {
     @ItemType(CommunityMapBuildingDTO.class)
     private List<CommunityMapBuildingDTO> buildings;
 
+    private Byte shopFlag;
+
+    public Byte getShopFlag() {
+        return shopFlag;
+    }
+
+    public void setShopFlag(Byte shopFlag) {
+        this.shopFlag = shopFlag;
+    }
+
     public List<CommunityMapBuildingDTO> getBuildings() {
         return buildings;
     }

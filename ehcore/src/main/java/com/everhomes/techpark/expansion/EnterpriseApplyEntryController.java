@@ -260,6 +260,21 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
+	 * <b>URL: /techpark/entry/setLeasePromotionConfig
+	 * <p>修改园区入驻设置
+	 */
+	@RequestMapping("setLeasePromotionConfig")
+	@RestReturn(value=String.class)
+	public RestResponse setLeasePromotionConfig(SetLeasePromotionConfigCommand cmd){
+
+		enterpriseApplyEntryService.setLeasePromotionConfig(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /techpark/entry/getLeasePromotionConfig
 	 * <p>获取园区入驻设置
 	 */

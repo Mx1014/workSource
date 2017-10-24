@@ -18,6 +18,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
@@ -60,6 +61,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 
@@ -73,6 +75,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2715,7 +2718,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public DoorAuthDTO createDoorVisitorAuth(CreateDoorVisitorCommand cmd) {
         
         //first check is the phone is in black list
-        this.userService.checkSmsBlackList("doorVisitor", cmd.getPhone());
+//        this.userService.checkSmsBlackList("doorVisitor", cmd.getPhone());
+        
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_NEWS);
         
         DoorAccessDriverType qrDriver = getQrDriverType(cmd.getNamespaceId());
         DoorAccessDriverType qrDriverExt = getQrDriverExt(cmd.getNamespaceId());
@@ -3855,6 +3861,27 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             //处理异常
             e.printStackTrace();
         }
+    }
+    
+    @Override
+    public String faceTest() {
+        String doorMAC = "DA:28:B1:38:44:57";
+        String phone = "15889660710";
+        User user = userService.findUserByIndentifier(1000000, phone);
+        
+        DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(doorMAC.toUpperCase());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+        }
+        
+        DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthByDoorIdAndUserId(doorAccess.getId(), user.getId(), (byte)1);
+        if(doorAuth == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "DoorAuth error");
+        }
+        
+        remoteOpenDoor(doorAuth.getId());
+        
+        return "door " + doorMAC + " open"; 
     }
 
     @Override

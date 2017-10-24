@@ -35,8 +35,8 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 	VALUES (1499, 'business.url', CONCAT('https://', 'biz.zuolin.com', '/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2F', 'biz.zuolin.com', '%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix'), 'biz access url for junminronghe', 999972, NULL);	   
 
 -- 我用125,126 yan军 127,128
-INSERT INTO `eh_version_realm` VALUES (125, 'Android_JunMinRongHe', NULL, UTC_TIMESTAMP(), 999972);
-INSERT INTO `eh_version_realm` VALUES (126, 'iOS_JunMinRongHe', NULL, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_version_realm` VALUES (125, 'Android_JunMinRongHe', null, UTC_TIMESTAMP(), 999972);
+INSERT INTO `eh_version_realm` VALUES (126, 'iOS_JunMinRongHe', null, UTC_TIMESTAMP(), 999972);
 
 -- eh_version_upgrade_rules ： 我加20 你加40
 -- eh_version_upgrade_rules 现在是 397
@@ -74,7 +74,7 @@ INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, 
 	VALUES (319545, UUID(), 19129838142, '关子忠', '', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
 	VALUES (283636 , 319545 ,  '0',  '13910753575',  '221616',  3, UTC_TIMESTAMP(), 999972);
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, STATUS, `namespace_id`)
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
 	VALUES(2145060, 1034291, 'USER', 319545  , 'manager', '关子忠', 0, '13910753575', 3, 999972);	
 -- todo
 SET @role_assignment_id = (SELECT MAX(id) FROM eh_acl_role_assignments);
@@ -343,7 +343,7 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issui
 SET @eh_rentalv2_resource_types_id = (SELECT MAX(id) FROM `eh_rentalv2_resource_types`);
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES ((@eh_rentalv2_resource_types_id := @eh_rentalv2_resource_types_id+1), '会议室预订', 0, NULL, 2, 999972);
 -- 20170719 add by dengs,增加俱乐部分类
-SET @eh_categories_id = (SELECT MAX(id) FROM eh_categories);
+set @eh_categories_id = (select max(id) FROM eh_categories);
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'亲子与教育','兴趣/亲子与教育', 0, 2, UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'运动与音乐','兴趣/运动与音乐', 0, 2, UTC_TIMESTAMP(), 999972);
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`) VALUES((@eh_categories_id := @eh_categories_id+1), 2, 0,'美食与厨艺','兴趣/美食与厨艺', 0, 2, UTC_TIMESTAMP(), 999972);
@@ -392,3 +392,15 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 -- added by wh 军民融合加审批管理菜单
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),52000,'', 'EhNamespaces', 999972,2);
+
+-- add by dengs 服务联盟、菜单修正 20171012
+select * from eh_web_menu_scopes WHERE owner_id = 999972 AND menu_id in (41700,41710,41720,41730,41740,41750,41760);
+DELETE FROM eh_web_menu_scopes WHERE owner_id = 999972 AND menu_id in (41700,41710,41720,41730,41740,41750,41760);
+
+select * from eh_service_alliance_categories WHERE id = 212529;
+SET @service_alliance_id = (SELECT MAX(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`)
+VALUES ((@service_alliance_id := @service_alliance_id + 1), 0, 'organaization', 1034291, '政策服务', '政策服务', 212529, '', '', '', '', 2, NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, NULL);
+
+SELECT * from eh_service_alliances WHERE parent_id = 212524;
+update eh_service_alliances SET parent_id = 212529 WHERE parent_id = 212524;

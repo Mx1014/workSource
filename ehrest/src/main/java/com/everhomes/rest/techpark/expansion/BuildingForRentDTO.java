@@ -12,6 +12,7 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
  * <ul>
  * <li>id：实体id</li>
  * <li>namespaceId：命名空间</li>
+ * <li>communityId：招租信息归属园区</li>
  * <li>buildingId：楼栋ID</li>
  * <li>buildingName：楼栋名</li>
  * <li>rentPosition：招租位置</li>
@@ -40,13 +41,14 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
  * <li>leasePromotionFormId：招租表单id</li>
  * <li>customFormFlag：是否启用表单 {@link com.everhomes.rest.techpark.expansion.LeasePromotionFlag  0 ：否  1 是}</li>
  * <li>formValues：招租表单字段列表 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
- * <li>requestFormId：申请表单id</li>
+ * <li>projectDTOS：招租信息可见范围列表</li>
  * </ul>
  */
 public class BuildingForRentDTO {
 	private Long id;
 	private Integer  namespaceId;
 	private Long     communityId;
+	private String communityName;
 	private Long     buildingId;
 	private String buildingName;
 	private String   rentPosition;
@@ -88,8 +90,13 @@ public class BuildingForRentDTO {
 	@ItemType(ProjectDTO.class)
 	private List<ProjectDTO> projectDTOS;
 
-//	private Long requestFormId;
+	public String getCommunityName() {
+		return communityName;
+	}
 
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
 
 	public String getPosterUri() {
 		return posterUri;

@@ -9,8 +9,8 @@ package com.everhomes.rest.techpark.expansion;
  */
 public enum ApplyEntrySourceType {
 	
-	BUILDING("building", "园区介绍"), MARKET_ZONE("market_zone", "创客入驻"), FOR_RENT("for_rent", "虚位以待"),
-    OFFICE_CUBICLE("office_cubicle", "工位预定"), RENEW("renew", "续租申请");
+	BUILDING("building", "园区介绍"), MARKET_ZONE("market_zone", "创客入驻"), FOR_RENT("for_rent", "房源招租"),
+    OFFICE_CUBICLE("office_cubicle", "工位预定"), RENEW("renew", "续租申请"), LEASE_PROJECT("lease_project", "项目介绍");
     
     private String code;
     private String description;

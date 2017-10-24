@@ -36,8 +36,7 @@ public interface CommunityProvider {
     List<Community> findCommunitiesByNameAndCityId(String name, long cityId, int namespaceId);
     List<Community> findCommunitiesByIds(List<Long> ids);
     Community findCommunityByUuid(String uuid);
-	List<Community> listCommunitiesByKeyWord(ListingLocator locator, int i,
-			String keyword);
+	List<Community> listCommunitiesByKeyWord(ListingLocator locator, int i, String keyword, Integer namespaceId, Byte communityType);
 	List<Community> findCommunitiesByNameCityIdAreaId(String name, Long cityId,Long areaId);
 	
 	List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId, String keyword);
@@ -125,7 +124,11 @@ public interface CommunityProvider {
 
     //获取对应的目标communityId
     Long findDefaultCommunityByCommunityId(Integer namespaceId, Long originId);
+	List<Community> listCommunitiesByOrgId(ListingLocator locator, int i, Long orgId, String keyword);
 
     //在给予的communityIds的范围内根据参数中的经纬度进行排序
     List<CommunityGeoPoint> listCommunityGeoPointByGeoHashInCommunities(double latitude, double longitude, int geoHashLength, List<Long> communityIds);
+
+    List<Community> listCommunitiesByCityIdAndAreaId(Integer namespaceId, Long cityId, Long areaId, String keyword, Long pageAnchor,
+                                                     Integer pageSize);
 }

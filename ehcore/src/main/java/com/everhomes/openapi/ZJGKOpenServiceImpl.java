@@ -1335,7 +1335,7 @@ public class ZJGKOpenServiceImpl {
 
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
-            insertOrUpdateOrganizationAddresses(zjEnterprise.getAddressList(), customer);
+            insertOrUpdateOrganizationAddresses(zjEnterprise.getApartmentIdentifierList(), customer);
             organizationSearcher.feedDoc(organization);
             return null;
         });
@@ -1581,7 +1581,7 @@ public class ZJGKOpenServiceImpl {
 
             insertOrUpdateOrganizationDetail(organization, customer);
             insertOrUpdateOrganizationCommunityRequest(zjEnterprise.getCommunityId(), organization);
-            insertOrUpdateOrganizationAddresses(zjEnterprise.getAddressList(), customer);
+            insertOrUpdateOrganizationAddresses(zjEnterprise.getApartmentIdentifierList(), customer);
             organizationSearcher.feedDoc(organization);
             return null;
         });

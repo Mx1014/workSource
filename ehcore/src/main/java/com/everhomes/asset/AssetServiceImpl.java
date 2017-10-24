@@ -183,9 +183,6 @@ public class AssetServiceImpl implements AssetService {
 //    @Autowired
 //    private ZhangjianggaokeAssetVendor handler;
 
-//    @Autowired
-//    private ZuolinAssetVendorHandler handler;
-
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
         List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
@@ -232,7 +229,8 @@ public class AssetServiceImpl implements AssetService {
         ListBillsResponse response = new ListBillsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
             if(UserContext.getCurrentNamespaceId()!=999971){
-                cmd.setPageAnchor(0l);
+//                cmd.setPageAnchor(0l);
+                cmd.setPageAnchor(1l);
             }else{
                 cmd.setPageAnchor(1l);
             }
@@ -254,14 +252,14 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillItemsResponse listBillItems(ListBillItemsCommand cmd) {
-        LOGGER.info("调用开始，cmd is={}"+cmd);
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId());
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         ListBillItemsResponse response = new ListBillItemsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
             if(UserContext.getCurrentNamespaceId()!=999971){
-                cmd.setPageAnchor(0l);
+//                cmd.setPageAnchor(0l);
+                cmd.setPageAnchor(1l);
             }else{
                 cmd.setPageAnchor(1l);
             }
@@ -270,7 +268,6 @@ public class AssetServiceImpl implements AssetService {
             cmd.setPageSize(20);
         }
         Integer pageOffSet = cmd.getPageAnchor().intValue();
-        LOGGER.info("调用开始，cmd.getTargetType()={},cmd.getBillId()={},cmd.getTargetName()={},pageOffSet={},cmd.getPageSize()={}",cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         List<BillDTO> billDTOS = handler.listBillItems(cmd.getTargetType(),cmd.getBillId(),cmd.getTargetName(),pageOffSet,cmd.getPageSize());
         if(billDTOS.size() <= cmd.getPageSize()) {
 //            response.setNextPageAnchor(null);
@@ -431,7 +428,8 @@ public class AssetServiceImpl implements AssetService {
     public void OneKeyNotice(OneKeyNoticeCommand cmd) {
         ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
         if(UserContext.getCurrentNamespaceId()!=999971){
-            convertedCmd.setPageAnchor(0l);
+//            convertedCmd.setPageAnchor(0l);
+            convertedCmd.setPageAnchor(1l);
         }else{
             convertedCmd.setPageAnchor(1l);
         }
@@ -672,6 +670,7 @@ public class AssetServiceImpl implements AssetService {
         SimpleDateFormat sdf_dateStr = new SimpleDateFormat("yyyy-MM");
         Gson gson = new Gson();
         //获得所有计价条款包裹（内有标准，数据，和住址）
+
         List<FeeRules> feesRules = cmd.getFeesRules();
         //定义了一个账单组不重复的哈希map，用来叠加收费项产生的账单
         HashMap<BillIdentity,EhPaymentBills> map = new HashMap<>();
@@ -688,9 +687,11 @@ public class AssetServiceImpl implements AssetService {
             FeeRules rule = feesRules.get(i);
             //获得包裹中的地址包裹
             List<ContractProperty> var1 = rule.getProperties();
+
             //获得标准
             EhPaymentChargingStandards standard = assetProvider.findChargingStandardById(rule.getChargingStandardId());
             //获得包裹中的数据包
+
             List<VariableIdAndValue> var2 = rule.getVariableIdAndValueList();
 
             //获得standard公式
@@ -904,7 +905,9 @@ public class AssetServiceImpl implements AssetService {
         for(Map.Entry<BillIdentity,EhPaymentBills> entry : map.entrySet()){
             billList.add(entry.getValue());
         }
+
         LOGGER.debug("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
+
         this.dbProvider.execute((TransactionStatus status) -> {
             if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Bills generation failed, "+billList.size()+" bill generated, "+billItemsList.size()+" billItem generated, "+contractDateList.size()+" contract receiver generated before store");
@@ -1551,6 +1554,7 @@ public class AssetServiceImpl implements AssetService {
         return assetProvider.listOnlyChargingStandards(cmd);
     }
 
+
     @Override
     public void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd) {
         assetProvider.adjustBillGroupOrder(cmd.getSubjectBillGroupId(),cmd.getTargetBillGroupId());
@@ -1641,6 +1645,7 @@ public class AssetServiceImpl implements AssetService {
                     name+ " cannot be null");
         }
     }
+
 
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
         CacheAccessor accessor = cacheProvider.getCacheAccessor(null);

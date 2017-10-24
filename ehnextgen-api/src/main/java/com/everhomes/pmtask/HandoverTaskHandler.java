@@ -7,7 +7,7 @@ import java.util.List;
  */
 public interface HandoverTaskHandler {
     String HANDOVER_VENDOR_PREFIX = "HandoverVendor-";
-    int ZJGK = 999971;
+    int ZJGK = 9999;
 //    Integer ZJGK = 9999;
 
     void handoverTaskToTrd(PmTask task, String content, List<String> attachments);

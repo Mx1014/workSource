@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
  */
 public class SearchClearanceLogCommand {
 
+    private Integer namespaceId;
     @NotNull private Long organizationId;
     @NotNull private Long communityId;
     @NotNull private Long parkingLotId;
@@ -36,6 +37,14 @@ public class SearchClearanceLogCommand {
 
     private Integer pageSize;
     private Long pageAnchor;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getParkingLotId() {
         return parkingLotId;

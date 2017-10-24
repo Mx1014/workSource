@@ -489,9 +489,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-
         //过滤出与scopes匹配的serviceModule
-        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getActionTypeFlag());
+        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
 
         return this.getServiceModuleAsLevelTree(tempList, 0L);
     }
@@ -742,13 +741,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     }
 
     @Override
-    public List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId){
-        return filterByScopes(namespaceId, ownerType, ownerId, null);
-    }
-
-    @Override
-    public List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId, Byte actionTypeFlag) {
-        List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode(), actionTypeFlag);
+    public List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId) {
+        List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode());
 
         if(namespaceId != Namespace.DEFAULT_NAMESPACE){
             List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, ownerType, ownerId, ServiceModuleScopeApplyPolicy.REVERT.getCode());

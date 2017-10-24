@@ -92,7 +92,7 @@ public interface AssetProvider {
 
     void saveContractVariables(List<EhPaymentContractReceiver> contractDateList);
 
-    List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId,Long ownerId,String ownerType);
+    List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId);
 
     void increaseNoticeTime(List<Long> billIds);
 
@@ -164,6 +164,7 @@ public interface AssetProvider {
 
     void changeBillStatusOnPaiedOff(List<Long> billIds);
 
+
     void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId,String ownerType, Integer namespaceId);
 
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
@@ -207,4 +208,5 @@ public interface AssetProvider {
     void deleteBillGroupAndRules(Long billGroupId);
 
     ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(Long billGroupRuleId);
+
 }

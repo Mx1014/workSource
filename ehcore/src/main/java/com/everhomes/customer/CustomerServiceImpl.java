@@ -1,38 +1,175 @@
 package com.everhomes.customer;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.tomcat.jni.Time;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.contract.ContractService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.openapi.ZJGKOpenServiceImpl;
 import com.everhomes.organization.ExecuteImportTaskCallback;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
-import com.everhomes.rest.customer.*;
+import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.CreateCustomerApplyProjectCommand;
+import com.everhomes.rest.customer.CreateCustomerCertificateCommand;
+import com.everhomes.rest.customer.CreateCustomerCommercialCommand;
+import com.everhomes.rest.customer.CreateCustomerEconomicIndicatorCommand;
+import com.everhomes.rest.customer.CreateCustomerInvestmentCommand;
+import com.everhomes.rest.customer.CreateCustomerPatentCommand;
+import com.everhomes.rest.customer.CreateCustomerTalentCommand;
+import com.everhomes.rest.customer.CreateCustomerTrackingCommand;
+import com.everhomes.rest.customer.CreateCustomerTrackingPlanCommand;
+import com.everhomes.rest.customer.CreateCustomerTrademarkCommand;
+import com.everhomes.rest.customer.CreateEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.CustomerApplyProjectDTO;
+import com.everhomes.rest.customer.CustomerCertificateDTO;
+import com.everhomes.rest.customer.CustomerCommercialDTO;
+import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
+import com.everhomes.rest.customer.CustomerErrorCode;
+import com.everhomes.rest.customer.CustomerEventDTO;
+import com.everhomes.rest.customer.CustomerIndustryStatisticsDTO;
+import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
+import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsDTO;
+import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
+import com.everhomes.rest.customer.CustomerInvestmentDTO;
+import com.everhomes.rest.customer.CustomerPatentDTO;
+import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
+import com.everhomes.rest.customer.CustomerProjectStatisticsResponse;
+import com.everhomes.rest.customer.CustomerSourceStatisticsDTO;
+import com.everhomes.rest.customer.CustomerSourceStatisticsResponse;
+import com.everhomes.rest.customer.CustomerTalentDTO;
+import com.everhomes.rest.customer.CustomerTalentStatisticsDTO;
+import com.everhomes.rest.customer.CustomerTalentStatisticsResponse;
+import com.everhomes.rest.customer.CustomerTrackingDTO;
+import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
+import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
+import com.everhomes.rest.customer.CustomerTrademarkDTO;
+import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.DeleteCustomerApplyProjectCommand;
+import com.everhomes.rest.customer.DeleteCustomerCertificateCommand;
+import com.everhomes.rest.customer.DeleteCustomerCommercialCommand;
+import com.everhomes.rest.customer.DeleteCustomerEconomicIndicatorCommand;
+import com.everhomes.rest.customer.DeleteCustomerInvestmentCommand;
+import com.everhomes.rest.customer.DeleteCustomerPatentCommand;
+import com.everhomes.rest.customer.DeleteCustomerTalentCommand;
+import com.everhomes.rest.customer.DeleteCustomerTrackingCommand;
+import com.everhomes.rest.customer.DeleteCustomerTrackingPlanCommand;
+import com.everhomes.rest.customer.DeleteCustomerTrademarkCommand;
+import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.customer.EnterpriseCustomerStatisticsDTO;
+import com.everhomes.rest.customer.GetCustomerApplyProjectCommand;
+import com.everhomes.rest.customer.GetCustomerCertificateCommand;
+import com.everhomes.rest.customer.GetCustomerCommercialCommand;
+import com.everhomes.rest.customer.GetCustomerEconomicIndicatorCommand;
+import com.everhomes.rest.customer.GetCustomerInvestmentCommand;
+import com.everhomes.rest.customer.GetCustomerPatentCommand;
+import com.everhomes.rest.customer.GetCustomerTalentCommand;
+import com.everhomes.rest.customer.GetCustomerTrackingCommand;
+import com.everhomes.rest.customer.GetCustomerTrackingPlanCommand;
+import com.everhomes.rest.customer.GetCustomerTrademarkCommand;
+import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.GiveUpEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
+import com.everhomes.rest.customer.ImportEnterpriseCustomerDataDTO;
+import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
+import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
+import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
+import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
+import com.everhomes.rest.customer.ListCustomerEventsCommand;
+import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
+import com.everhomes.rest.customer.ListCustomerPatentsCommand;
+import com.everhomes.rest.customer.ListCustomerTalentsCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
+import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
+import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
+import com.everhomes.rest.customer.ListEnterpriseCustomerStatisticsCommand;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
+import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.SyncCustomersCommand;
+import com.everhomes.rest.customer.TrackingNotifyTemplateCode;
+import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
+import com.everhomes.rest.customer.TrackingPlanReadStatus;
+import com.everhomes.rest.customer.UpdateCustomerApplyProjectCommand;
+import com.everhomes.rest.customer.UpdateCustomerCertificateCommand;
+import com.everhomes.rest.customer.UpdateCustomerCommercialCommand;
+import com.everhomes.rest.customer.UpdateCustomerEconomicIndicatorCommand;
+import com.everhomes.rest.customer.UpdateCustomerInvestmentCommand;
+import com.everhomes.rest.customer.UpdateCustomerPatentCommand;
+import com.everhomes.rest.customer.UpdateCustomerTalentCommand;
+import com.everhomes.rest.customer.UpdateCustomerTrackingCommand;
+import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
+import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
+import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
+import com.everhomes.rest.organization.ImportFileResultLog;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ImportFileTaskType;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.varField.ModuleName;
-import com.everhomes.rest.warehouse.ImportWarehouseMaterialDataDTO;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -41,21 +178,6 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/15.
@@ -101,6 +223,27 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+    
+    @Autowired
+    private UserService userService;
+    
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
+	
+	@Autowired
+	private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+	
+    private static final  String queueDelay = "trackingPlanTaskDelays";
+    private static final  String  queueNoDelay = "trackingPlanTaskNoDelays";
+    
+    @Autowired
+    private MessagingService messagingService;
 
     @Autowired
     private FieldService fieldService;
@@ -114,17 +257,65 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
+    private void checkEnterpriseCustomerNumberUnique(Long id, Integer namespaceId, String customerNumber, String customerName) {
+        if(StringUtils.isNotBlank(customerNumber)) {
+            List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndNumber(namespaceId, customerNumber);
+            if(customers != null && customers.size() > 0) {
+                if(id != null) {
+                    for(EnterpriseCustomer customer : customers) {
+                        if(id.equals(customer.getId())) {
+                            return;
+                        }
+                    }
+                }
+                LOGGER.error("customerNumber {} in namespace {} already exist!", customerNumber, namespaceId);
+                throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NUMBER_IS_EXIST,
+                        "contractNumber is already exist");
+            }
+        }
+        if(StringUtils.isNotBlank(customerName)) {
+            List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, customerName);
+            if(customers != null && customers.size() > 0) {
+                if(id != null) {
+                    for(EnterpriseCustomer customer : customers) {
+                        if(id.equals(customer.getId())) {
+                            return;
+                        }
+                    }
+                }
+                LOGGER.error("customerName {} in namespace {} already exist!", customerName, namespaceId);
+                throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NAME_IS_EXIST,
+                        "customerName is already exist");
+            }
+        }
+
+    }
+
     @Override
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
         checkPrivilege();
+        checkEnterpriseCustomerNumberUnique(null, cmd.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
-        customer.setNamespaceId(UserContext.getCurrentNamespaceId());
+        customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
         if(cmd.getCorpEntryDate() != null) {
             customer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
         customer.setCreatorUid(UserContext.currentUserId());
+        if(null != customer.getLongitude() && null != customer.getLatitude()){
+        	String geohash  = GeoHashUtils.encode(customer.getLatitude(), customer.getLongitude());
+        	customer.setGeohash(geohash);
+        }
+        if(null != customer && customer.getTrackingUid() != -1){
+	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(customer.getTrackingUid());
+	    	if(null != detail && null != detail.getContactName()){
+	    		customer.setTrackingName(detail.getContactName());
+	    	}
+        }
         enterpriseCustomerProvider.createEnterpriseCustomer(customer);
-
+        
+        //企业客户新增成功,保存客户事件
+        saveCustomerEvent( 1  ,customer ,null);
+        
         OrganizationDTO organizationDTO = createOrganization(customer);
         customer.setOrganizationId(organizationDTO.getId());
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
@@ -144,6 +335,27 @@ public class CustomerServiceImpl implements CustomerService {
         ScopeFieldItem levelItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), customer.getLevelItemId());
         if(levelItem != null) {
             dto.setLevelItemName(levelItem.getItemDisplayName());
+        }
+        if(null != dto.getCorpIndustryItemId()){
+        	ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getCorpIndustryItemId());
+        	if(null != corpIndustryItem){
+        		dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
+        	}
+        }
+        if(null != dto.getContactGenderItemId()){
+        	ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getContactGenderItemId());
+        	if(null != contactGenderItem){
+        		dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
+        	}
+        }
+        if(dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
+        	dto.setTrackingName(dto.getTrackingName());
+        }
+        if(null != dto.getPropertyType()){
+        	ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(),customer.getCommunityId(), dto.getPropertyType());
+        	if(null != propertyTypeItem){
+        		dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
+        	}
         }
 
         return dto;
@@ -169,6 +381,7 @@ public class CustomerServiceImpl implements CustomerService {
     public EnterpriseCustomerDTO updateEnterpriseCustomer(UpdateEnterpriseCustomerCommand cmd) {
         checkPrivilege();
         EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        checkEnterpriseCustomerNumberUnique(customer.getId(), customer.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         updateCustomer.setNamespaceId(customer.getNamespaceId());
         updateCustomer.setCommunityId(customer.getCommunityId());
@@ -179,8 +392,25 @@ public class CustomerServiceImpl implements CustomerService {
             updateCustomer.setCorpEntryDate(new Timestamp(cmd.getCorpEntryDate()));
         }
         updateCustomer.setStatus(CommonStatus.ACTIVE.getCode());
+        //保存经纬度
+        if(null != updateCustomer.getLongitude() && null != updateCustomer.getLatitude()){
+        	String geohash  = GeoHashUtils.encode(updateCustomer.getLatitude(), updateCustomer.getLongitude());
+        	updateCustomer.setGeohash(geohash);
+        }
+        if(null != updateCustomer && updateCustomer.getTrackingUid() != -1){
+	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(updateCustomer.getTrackingUid());
+	    	if(null != detail && null != detail.getContactName()){
+	    		updateCustomer.setTrackingName(detail.getContactName());
+	    	}
+        }
+        if(updateCustomer.getTrackingUid() == -1){
+        	updateCustomer.setTrackingName(null);
+        }
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
-        enterpriseCustomerSearcher.feedDoc(customer);
+        enterpriseCustomerSearcher.feedDoc(updateCustomer);
+        
+        //保存客户事件
+        saveCustomerEvent( 3  ,updateCustomer ,customer);
 
         if(customer.getOrganizationId() != null && customer.getOrganizationId() != 0L) {
             UpdateEnterpriseCommand command = new UpdateEnterpriseCommand();
@@ -220,6 +450,9 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setStatus(CommonStatus.INACTIVE.getCode());
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
+        
+        //企业客户新增成功,保存客户事件
+        saveCustomerEvent( 2  ,customer ,null);
 
         if(customer.getOrganizationId() != null) {
             DeleteOrganizationIdCommand command = new DeleteOrganizationIdCommand();
@@ -236,7 +469,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ImportFileTaskDTO importEnterpriseCustomer(ImportEnterpriseCustomerDataCommand cmd, MultipartFile mfile, Long userId) {
-
+        checkPrivilege();
         ImportFileTask task = new ImportFileTask();
         try {
             //解析excel
@@ -369,13 +602,19 @@ public class CustomerServiceImpl implements CustomerService {
             enterpriseCustomerSearcher.feedDoc(customer);
             //给企业账号添加管理员 默认添加联系人作为管理员 by xiongying20170909
             Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
-            if (!orgAdminAccounts.get(organizationDTO.getId()).contains(str.getContactMobile())) {
+            if (orgAdminAccounts.get(organizationDTO.getId()) == null ||
+                    !orgAdminAccounts.get(organizationDTO.getId()).contains(str.getContactMobile())) {
                 if (!org.springframework.util.StringUtils.isEmpty(str.getContactMobile())) {
                     CreateOrganizationAdminCommand createOrganizationAdminCommand = new CreateOrganizationAdminCommand();
                     createOrganizationAdminCommand.setOrganizationId(organizationDTO.getId());
                     createOrganizationAdminCommand.setContactToken(str.getContactMobile());
                     createOrganizationAdminCommand.setContactName(str.getContactName());
                     rolePrivilegeService.createOrganizationAdmin(createOrganizationAdminCommand, cmd.getNamespaceId());
+                }
+                if(orgAdminAccounts.get(organizationDTO.getId()) == null) {
+                    List<String> mobiles = new ArrayList<>();
+                    mobiles.add(str.getContactMobile());
+                    orgAdminAccounts.put(organizationDTO.getId(), mobiles);
                 }
                 orgAdminAccounts.get(organizationDTO.getId()).add(str.getContactMobile());
             }
@@ -1330,4 +1569,455 @@ public class CustomerServiceImpl implements CustomerService {
 
         }
     }
+
+    
+	@Override
+	public List<CustomerTrackingDTO> listCustomerTrackings(ListCustomerTrackingsCommand cmd) {
+		List<CustomerTracking> trackings = enterpriseCustomerProvider.listCustomerTrackingsByCustomerId(cmd.getCustomerId());
+        if(trackings != null && trackings.size() > 0) {
+            return trackings.stream().map(tracking -> {
+                return convertCustomerTrackingDTO(tracking);
+            }).collect(Collectors.toList());
+        }
+        return null;
+	}
+
+	@Override
+	public CustomerTrackingDTO getCustomerTracking(GetCustomerTrackingCommand cmd) {
+		CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
+        return convertCustomerTrackingDTO(tracking);
+	}
+
+	private CustomerTrackingDTO convertCustomerTrackingDTO(CustomerTracking talent) {
+		CustomerTrackingDTO dto = ConvertHelper.convert(talent, CustomerTrackingDTO.class);
+        if(dto.getTrackingType() != null) {
+        	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+        	dto.setTrackingTypeName(trackingTypeName);
+        }
+        if(dto.getTrackingUid() != null) {
+        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getTrackingUid());
+        	if(null != detail && null != detail.getContactName()){
+        		dto.setTrackingUidName(detail.getContactName());
+        	}else{
+        		UserInfo userInfo = userService.getUserInfo(dto.getTrackingUid());
+        		if(userInfo != null){
+            		dto.setTrackingUidName(userInfo.getNickName());
+            	}
+        	}
+        }
+        List<String> urlList = new ArrayList<>();
+        List<String> uriList = new ArrayList<>();
+        if(StringUtils.isNotEmpty(talent.getContentImgUri())){
+        	String[] uriArray = talent.getContentImgUri().split(",");
+        	for(String  uri : uriArray){
+        		uriList.add(uri);
+        		String contentUrl = contentServerService.parserUri(uri, EntityType.CUSTOMER_TRACKING.getCode(), dto.getId());
+        		urlList.add(contentUrl);
+        	}
+        }
+        dto.setContentImgUriList(uriList);
+        dto.setContentImgUrlList(urlList);
+        return dto;
+	}
+
+	@Override
+	public CustomerTrackingDTO updateCustomerTracking(UpdateCustomerTrackingCommand cmd) {
+		CustomerTracking exist = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
+		CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
+		if(cmd.getTrackingTime() != null){
+			tracking.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
+		}
+		tracking.setCreateTime(exist.getCreateTime());
+		tracking.setCreatorUid(exist.getCreatorUid());
+		if(null != cmd.getContentImgUri()){
+			tracking.setContentImgUri(cmd.getContentImgUri());
+		}
+        enterpriseCustomerProvider.updateCustomerTracking(tracking);
+        EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
+        customer.setLastTrackingTime(tracking.getTrackingTime());
+        //更细客户表的最后跟进时间
+        enterpriseCustomerProvider.updateCustomerLastTrackingTime(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
+        return ConvertHelper.convert(tracking, CustomerTrackingDTO.class);
+	}
+
+	@Override
+	public void deleteCustomerTracking(DeleteCustomerTrackingCommand cmd) {
+		CustomerTracking tracking = checkCustomerTracking(cmd.getId(), cmd.getCustomerId());
+	    enterpriseCustomerProvider.deleteCustomerTracking(tracking);
+	}
+
+	@Override
+	public void createCustomerTracking(CreateCustomerTrackingCommand cmd) {
+		
+		EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getCustomerId());
+		CustomerTracking tracking = ConvertHelper.convert(cmd, CustomerTracking.class);
+		if(cmd.getTrackingTime() != null){
+			tracking.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
+		}
+        enterpriseCustomerProvider.createCustomerTracking(tracking);
+        customer.setLastTrackingTime(tracking.getTrackingTime());
+        //更细客户表的最后跟进时间
+        enterpriseCustomerProvider.updateCustomerLastTrackingTime(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
+	}
+	
+	 private CustomerTracking checkCustomerTracking(Long id, Long customerId) {
+		CustomerTracking tracking = enterpriseCustomerProvider.findCustomerTrackingById(id);
+        if(tracking == null || !tracking.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(tracking.getStatus()))) {
+            LOGGER.error("enterprise customer tracking is not exist or inactive. id: {}, tracking: {}", id, tracking);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRACKING_NOT_EXIST,
+                    "customer tracking is not exist or inactive");
+        }
+        return tracking;
+	}
+
+	@Override
+	public List<CustomerTrackingPlanDTO> listCustomerTrackingPlans(ListCustomerTrackingPlansCommand cmd) {
+		List<CustomerTrackingPlan> plans = enterpriseCustomerProvider.listCustomerTrackingPlans(cmd.getCustomerId());
+        if(plans != null && plans.size() > 0) {
+            return plans.stream().map(plan -> {
+                return convertCustomerTrackingPlanDTO(plan);
+            }).collect(Collectors.toList());
+        }
+        return null;
+	}
+
+	@Override
+	public CustomerTrackingPlanDTO getCustomerTrackingPlan(GetCustomerTrackingPlanCommand cmd) {
+		CustomerTrackingPlan plan = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
+        CustomerTrackingPlanDTO  customerTrackingPlanDTO = convertCustomerTrackingPlanDTO(plan);
+        //更新状态为已读
+        enterpriseCustomerProvider.updateTrackingPlanReadStatus(cmd.getId());
+        return customerTrackingPlanDTO;
+	}
+
+	private CustomerTrackingPlanDTO convertCustomerTrackingPlanDTO(CustomerTrackingPlan plan) {
+		CustomerTrackingPlanDTO dto = ConvertHelper.convert(plan, CustomerTrackingPlanDTO.class);
+        if(dto.getTrackingType() != null) {
+        	String trackingTypeName = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, Integer.parseInt(dto.getTrackingType().toString()) , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+        	dto.setTrackingTypeName(trackingTypeName);
+        }
+        return dto;
+	}
+
+	@Override
+	public CustomerTrackingPlanDTO updateCustomerTrackingPlan(UpdateCustomerTrackingPlanCommand cmd) {
+		CustomerTrackingPlan exist = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
+		CustomerTrackingPlan plan = ConvertHelper.convert(cmd, CustomerTrackingPlan.class);
+		if(cmd.getTrackingTime() != null){
+			plan.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
+		}
+		plan.setNotifyStatus(TrackingPlanNotifyStatus.INVAILD.getCode());
+		if(cmd.getNotifyTime() != null){
+			plan.setNotifyTime(new Timestamp(cmd.getNotifyTime()));
+			plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
+		}
+		plan.setCreateTime(exist.getCreateTime());
+		plan.setCreatorUid(exist.getCreatorUid());
+        enterpriseCustomerProvider.updateCustomerTrackingPlan(plan);
+        return ConvertHelper.convert(plan, CustomerTrackingPlanDTO.class);
+	}
+
+	@Override
+	public void deleteCustomerTrackingPlan(DeleteCustomerTrackingPlanCommand cmd) {
+		CustomerTrackingPlan plan = checkCustomerTrackingPlan(cmd.getId(), cmd.getCustomerId());
+	    enterpriseCustomerProvider.deleteCustomerTrackingPlan(plan);
+	}
+	
+	 private CustomerTrackingPlan checkCustomerTrackingPlan(Long id, Long customerId) {
+		CustomerTrackingPlan plan = enterpriseCustomerProvider.findCustomerTrackingPlanById(id);
+        if(plan == null || !plan.getCustomerId().equals(customerId)
+                || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(plan.getStatus()))) {
+            LOGGER.error("enterprise customer tracking plan is not exist or inactive. id: {}, plan: {}", id, plan);
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_TRACKING_NOT_EXIST,
+                    "customer tracking plan is not exist or inactive");
+        }
+        return plan;
+	}
+
+	@Override
+	public void createCustomerTrackingPlan(CreateCustomerTrackingPlanCommand cmd) {
+		CustomerTrackingPlan plan = ConvertHelper.convert(cmd, CustomerTrackingPlan.class);
+		if(cmd.getTrackingTime() != null){
+			plan.setTrackingTime(new Timestamp(cmd.getTrackingTime()));
+		}
+		plan.setNotifyStatus(TrackingPlanNotifyStatus.INVAILD.getCode());
+		if(cmd.getNotifyTime() != null ){
+			plan.setNotifyTime(new Timestamp(cmd.getNotifyTime()));
+			plan.setNotifyStatus(TrackingPlanNotifyStatus.WAITING_FOR_SEND_OUT.getCode());
+		}
+		plan.setReadStatus(TrackingPlanReadStatus.UNREAD.getCode());
+        enterpriseCustomerProvider.createCustomerTrackingPlan(plan);
+	}
+
+	private void saveCustomerEvent(int i,  EnterpriseCustomer customer, EnterpriseCustomer exist) {
+		enterpriseCustomerProvider.saveCustomerEvent(i,customer,exist);
+	}
+	
+	@Override
+	public List<CustomerEventDTO> listCustomerEvents(ListCustomerEventsCommand cmd) {
+		List<CustomerEvent> events = enterpriseCustomerProvider.listCustomerEvents(cmd.getCustomerId());
+        if(events != null && events.size() > 0) {
+            return events.stream().map(event -> {
+                return convertCustomerEventDTO(event);
+            }).collect(Collectors.toList());
+        }
+        return null;
+	}
+
+	private CustomerEventDTO convertCustomerEventDTO(CustomerEvent event) {
+		CustomerEventDTO dto = ConvertHelper.convert(event, CustomerEventDTO.class);
+        if(dto.getCreatorUid() != null) {
+        	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(dto.getCreatorUid());
+        	if(null != detail && null != detail.getContactName()){
+        		dto.setCreatorName(detail.getContactName());
+        	}        	
+        }
+        return dto;
+	}
+
+	@Override
+	public void allotEnterpriseCustomer(AllotEnterpriseCustomerCommand cmd) {
+		//checkPrivilege();
+        EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+        customer.setTrackingUid(cmd.getTrackingUid());
+        if(cmd.getTrackingUid() != -1){
+	        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getTrackingUid());
+	    	if(null != detail && null != detail.getContactName()){
+	    		customer.setTrackingName(detail.getContactName());
+	    	}
+        }
+        enterpriseCustomerProvider.allotEnterpriseCustomer(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
+	}
+
+	@Override
+	public void giveUpEnterpriseCustomer(GiveUpEnterpriseCustomerCommand cmd) {
+		EnterpriseCustomer customer = checkEnterpriseCustomer(cmd.getId());
+		//查看当前用户是否和跟进人一致
+		if(null == customer.getTrackingUid() || !(customer.getTrackingUid().toString()).equals(UserContext.currentUserId()== null ? "" : UserContext.currentUserId().toString())){
+			LOGGER.error("enterprise customer do not contains trackingUid or not the same uid. id: {}, customer: {} ,current:{}", cmd.getId(), customer,UserContext.currentUserId());
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NOT_EXIST,
+                        "enterprise customer do not contains trackingUid or not the same uid");
+		}
+		customer.setTrackingUid(-1l);
+		customer.setTrackingName(null);
+        enterpriseCustomerProvider.giveUpEnterpriseCustomer(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
+	}
+
+	@Override
+	public ListNearbyEnterpriseCustomersCommandResponse listNearbyEnterpriseCustomers(ListNearbyEnterpriseCustomersCommand cmd) {
+		ListNearbyEnterpriseCustomersCommandResponse resp = new ListNearbyEnterpriseCustomersCommandResponse();
+        List<EnterpriseCustomerDTO> results = new ArrayList<EnterpriseCustomerDTO>();
+
+        if (cmd.getLatitude() == null || cmd.getLongitude() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter, latitude and longitude have to be both specified or neigher");
+
+
+        if (cmd.getPageAnchor() == null)
+            cmd.setPageAnchor(0L);
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+
+        List<EnterpriseCustomerDTO> customers = this.enterpriseCustomerProvider.findEnterpriseCustomersByDistance(cmd, locator, pageSize +1);
+        if (customers != null) {
+        	for(EnterpriseCustomerDTO customer : customers){
+        		results.add(customer);
+        	}
+        }
+        if (results != null && results.size() > pageSize) {
+        	resp.setNextPageAnchor(results.get(results.size() - 1).getId());
+        	results.remove(results.size() - 1);
+        }
+        if (results != null) {
+            resp.setDtos(results);
+        }
+        return resp;
+	}
+
+	
+	//每15分钟执行一次，找出待n~n+15分钟内提醒时间的跟进计划 
+	@Scheduled(cron="0 0/15 * * * ?")
+	@Override
+	public void trackingPlanWarningSchedule() {
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+			LOGGER.info("trackingPlanWarningSchedule is running...");
+			//使用tryEnter方法可以防止分布式部署时重复执行
+			coordinationProvider.getNamedLock(CoordinationLocks.TRACKING_PLAN_WARNING_SCHEDULE.getCode()).tryEnter(() -> {
+				Date now = DateHelper.currentGMTTime();
+				Timestamp queryStartTime = new Timestamp(now.getTime());
+				Timestamp queryEndTime = new Timestamp(now.getTime() + 900 * 1000);
+				List<CustomerTrackingPlan> plans = enterpriseCustomerProvider.listWaitNotifyTrackingPlans(queryStartTime,queryEndTime);
+				if(null != plans && plans.size() > 0){
+					plans.forEach(plan ->{
+						pushPlanIntoEnqueue(plan);
+					});
+				}
+			});
+		}
+	}
+
+	private void pushPlanIntoEnqueue(CustomerTrackingPlan plan) {
+		 Map<String, Object> map = new HashMap<>();
+         map.put("trackingPlanId", plan.getId());
+		if (plan.getNotifyTime().getTime() > (DateHelper.currentGMTTime().getTime() + 10L)) {
+            scheduleProvider.scheduleSimpleJob(
+                    queueDelay + plan.getId(),
+                    queueDelay + plan.getId(),
+                    new Date(plan.getNotifyTime().getTime()),
+                    TrackingPlanNotifytJob.class,
+                    map
+            );
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("pushTrackingPlanNotify delayedEnqueue trackingPlan = {}", plan);
+            }
+        } else {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("pushTrackingPlanNotify noDelayedenqueue trackingPlan = {}", plan);
+            }
+            scheduleProvider.scheduleSimpleJob(
+                    queueNoDelay + plan.getId(),
+                    queueNoDelay + plan.getId(),
+                    new Date(System.currentTimeMillis() + 1000),
+                    TrackingPlanNotifytJob.class,
+                    map
+            );
+        }
+	}
+
+	@Override
+	public void processTrackingPlanNotify(CustomerTrackingPlan plan) {
+		Long userId = plan.getCreatorUid();
+		LOGGER.info("processTrackingPlanNotify userId:{}", userId);
+        if(userId != null && null != plan.getTrackingTime()) {
+            String taskName = plan.getTitle() == null ? "" : plan.getTitle();
+            Timestamp time = plan.getTrackingTime();
+            String customerName = plan.getCustomerName();
+            int code = TrackingNotifyTemplateCode.TRACKING_NEARLY_REACH_NOTIFY;
+            String scope = TrackingNotifyTemplateCode.SCOPE;
+            String locale = "zh_CN";
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("processPmNotifyRecord, userId={}, recordId={}", userId, plan.getId());
+            }
+            TrackingNotifyLog log = new TrackingNotifyLog();
+            log.setCustomerType(plan.getCustomerType());
+            log.setCustomerId(plan.getCustomerId());
+            log.setReceiverId(userId);
+            String notifyTextForApplicant = getMessage(customerName,taskName, time, scope, locale, code);
+            sendMessageToUser(userId, notifyTextForApplicant);
+            log.setNotifyText(notifyTextForApplicant);
+            enterpriseCustomerProvider.createTrackingNotifyLog(log);
+        }
+	}
+
+	private String getMessage(String  customerName , String taskName, Timestamp time, String scope, String locale, int code) {
+		Map<String, Object> notifyMap = new HashMap<String, Object>();
+        notifyMap.put("taskName", taskName);
+        notifyMap.put("time", timeToStr(time));
+        notifyMap.put("customerName", customerName);
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+        return notifyTextForApplicant;
+	}
+	
+	 private String timeToStr(Timestamp time) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(time);
+	 }
+	 
+	 private void sendMessageToUser(Long userId, String content) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+	                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+	 }
+
+	@Override
+	public List<List<CustomerTrackingPlanDTO>> listCustomerTrackingPlansByDate(ListCustomerTrackingPlansByDateCommand cmd) {
+		List<List<CustomerTrackingPlanDTO>> planList = new ArrayList<>();
+		List<CustomerTrackingPlanDTO> todayPlan = new ArrayList<>();
+		List<CustomerTrackingPlanDTO> tomorrowPlan = new ArrayList<>();
+		List<CustomerTrackingPlanDTO> passOrFuturePlan = new ArrayList<>();
+		List<CustomerTrackingPlan> plans = null;
+		Long todayFirst = getTodayFirstTimestamp();
+		Long todayLast = getTodayLastTimestamp();
+		Long tomorrowLast = getTomorrowLastTimestamp();
+		//历史记录
+		if(StringUtils.isNotEmpty(cmd.getGetHistory()) && "1".equals(cmd.getGetHistory())){
+			plans = enterpriseCustomerProvider.listCustomerTrackingPlansByDate(cmd,todayFirst);
+			plans.forEach(plan -> {
+				passOrFuturePlan.add(convertCustomerTrackingPlanDTO(plan));
+			});
+			Collections.sort(passOrFuturePlan);
+			planList.add(passOrFuturePlan);
+			return planList;
+		}
+		//今天 & 明天  & 以后
+		plans = enterpriseCustomerProvider.listCustomerTrackingPlansByDate(cmd , new Timestamp(todayFirst));
+		plans.forEach(plan -> {
+			if(null != plan.getTrackingTime()){
+				Long trackingTime = plan.getTrackingTime().getTime();
+				if(trackingTime <= todayLast && trackingTime >= todayFirst){
+					todayPlan.add(convertCustomerTrackingPlanDTO(plan));
+				}else if(trackingTime > tomorrowLast){
+					passOrFuturePlan.add(convertCustomerTrackingPlanDTO(plan));
+				}else{
+					tomorrowPlan.add(convertCustomerTrackingPlanDTO(plan));
+				}
+			}
+		});
+		Collections.sort(todayPlan);
+		Collections.sort(tomorrowPlan);
+		Collections.sort(passOrFuturePlan);
+		planList.add(todayPlan);
+		planList.add(tomorrowPlan);
+		planList.add(passOrFuturePlan);
+		return planList;
+	}
+
+	private Long getTodayFirstTimestamp() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+	    calendar.set(Calendar.HOUR_OF_DAY, 0);
+	    calendar.set(Calendar.MINUTE, 0);
+	    calendar.set(Calendar.SECOND, 0);
+	    calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTime().getTime();
+	}
+
+	private Long getTodayLastTimestamp() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+	    calendar.set(Calendar.HOUR_OF_DAY, 23);
+	    calendar.set(Calendar.MINUTE, 59);
+	    calendar.set(Calendar.SECOND, 59);
+	    calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTime().getTime();
+	}
+	
+	private Long getTomorrowLastTimestamp() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		calendar.add(Calendar.DAY_OF_MONTH, +1);
+	    calendar.set(Calendar.HOUR_OF_DAY, 23);
+	    calendar.set(Calendar.MINUTE, 59);
+	    calendar.set(Calendar.SECOND, 59);
+	    calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTime().getTime();
+	}
+	
+	
 }

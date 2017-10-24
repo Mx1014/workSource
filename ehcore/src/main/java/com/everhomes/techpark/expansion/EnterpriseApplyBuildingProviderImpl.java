@@ -9,10 +9,15 @@ import com.everhomes.rest.techpark.expansion.LeaseBulidingStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhLeaseBuildingsDao;
+import com.everhomes.server.schema.tables.daos.EhLeaseProjectCommunitiesDao;
+import com.everhomes.server.schema.tables.daos.EhLeaseProjectsDao;
 import com.everhomes.server.schema.tables.daos.EhLeasePromotionCommunitiesDao;
 import com.everhomes.server.schema.tables.pojos.EhLeaseBuildings;
+import com.everhomes.server.schema.tables.pojos.EhLeaseProjectCommunities;
+import com.everhomes.server.schema.tables.pojos.EhLeaseProjects;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotionCommunities;
 import com.everhomes.server.schema.tables.records.EhLeaseBuildingsRecord;
+import com.everhomes.server.schema.tables.records.EhLeaseProjectCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhLeasePromotionCommunitiesRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -198,6 +203,83 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
         query.execute();
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLeasePromotionCommunities.class, null);
+
+    }
+
+    @Override
+    public void createLeaseProject(LeaseProject leaseProject) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhLeaseProjects.class));
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhLeaseProjectsDao dao = new EhLeaseProjectsDao(context.configuration());
+        leaseProject.setId(id);
+        leaseProject.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        leaseProject.setCreatorUid(UserContext.currentUserId());
+        dao.insert(leaseProject);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhLeaseProjects.class, null);
+
+    }
+
+    @Override
+    public void createLeaseProjectCommunity(LeaseProjectCommunity leaseProjectCommunity) {
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhLeaseProjectCommunities.class));
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhLeaseProjectCommunitiesDao dao = new EhLeaseProjectCommunitiesDao(context.configuration());
+        leaseProjectCommunity.setId(id);
+        leaseProjectCommunity.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        leaseProjectCommunity.setCreatorUid(UserContext.currentUserId());
+        dao.insert(leaseProjectCommunity);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhLeaseProjectCommunities.class, null);
+
+    }
+
+    @Override
+    public void deleteLeaseProjectCommunity(Long leaseProjectId) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+
+        DeleteQuery<EhLeaseProjectCommunitiesRecord> query =  context.deleteQuery(Tables.EH_LEASE_PROJECT_COMMUNITIES);
+        query.addConditions(Tables.EH_LEASE_PROJECT_COMMUNITIES.LEASE_PROJECT_ID.eq(leaseProjectId));
+
+        query.execute();
+    }
+
+    @Override
+    public List<Long> listLeaseProjectCommunities(Long leaseProjectId) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseProjectCommunities.class));
+
+        SelectQuery<EhLeaseProjectCommunitiesRecord> query = context.selectQuery(Tables.EH_LEASE_PROJECT_COMMUNITIES);
+
+        query.addConditions(Tables.EH_LEASE_PROJECT_COMMUNITIES.LEASE_PROJECT_ID.eq(leaseProjectId));
+
+        return query.fetch(Tables.EH_LEASE_PROJECT_COMMUNITIES.COMMUNITY_ID);
+    }
+
+    @Override
+    public void updateLeaseProject(LeaseProject leaseProject) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhLeaseProjectsDao dao = new EhLeaseProjectsDao(context.configuration());
+
+        dao.update(leaseProject);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLeaseProjects.class, null);
+
+    }
+
+    @Override
+    public LeaseProject findLeaseProjectByProjectId(Long projectId) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        EhLeaseProjectsDao dao = new EhLeaseProjectsDao(context.configuration());
+
+        return ConvertHelper.convert(dao.fetchOne(Tables.EH_LEASE_PROJECTS.PROJECT_ID, projectId), LeaseProject.class);
 
     }
 }

@@ -986,7 +986,6 @@ public class PunchServiceImpl implements PunchService {
 			if(onDutyLog == null){
 				onDutyLog = new PunchLog();
 				onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
-				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			}
 			PunchLog offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), 1);
 			if(offDutyLog == null){
@@ -3838,7 +3837,7 @@ public class PunchServiceImpl implements PunchService {
 		if(null== members || members.size() == 0)
 			return null;
 		for(OrganizationMember member : members){
-			if(member.getTargetId().equals(targetId))
+			if(member!=null && member.getTargetId()!=null && member.getTargetId().equals(targetId))
 				return member;
 		}
 		return null;
@@ -4180,7 +4179,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 		else{
 			org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, org, ContactSignUpStatus.SIGNEDUP.getCode(),
+			organizationMembers = this.organizationProvider.listOrganizationPersonnels(org.getNamespaceId(), userName, org, ContactSignUpStatus.SIGNEDUP.getCode(),
 					null,null, Integer.MAX_VALUE-1);
 			}
 		if(null == organizationMembers)
@@ -6069,7 +6068,10 @@ public class PunchServiceImpl implements PunchService {
 			for(int rowIndex=3;rowIndex<list.size();rowIndex++){
 				RowResult r = (RowResult)list.get(rowIndex);
 				PunchSchedulingEmployeeDTO dto = new PunchSchedulingEmployeeDTO();
-				dto.setContactName(r.getCells().get("A"));
+				// 名字去空格
+				if(r.getCells().get("A")==null || StringUtils.isEmpty(r.getCells().get("A")))
+					continue;
+				dto.setContactName(r.getCells().get("A").replace(" ",""));
 				dto.setDaySchedulings(new ArrayList<>());
 				for(int i = 1 ; i<=days;i++){
 					String val = r.getCells().get(GetExcelLetter(i + 1));
