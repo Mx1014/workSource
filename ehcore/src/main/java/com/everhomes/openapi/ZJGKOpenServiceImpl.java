@@ -436,6 +436,10 @@ public class ZJGKOpenServiceImpl {
     }
 
     private void syncData(ShenzhouJsonEntity entity, Byte dataType, String communityIdentifier) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("zj syncData: dataType: {}, communityIdentifier: {}", dataType, communityIdentifier);
+        }
+
         ZjSyncdataBackup backup = new ZjSyncdataBackup();
         backup.setNamespaceId(NAMESPACE_ID);
         backup.setDataType(dataType);
@@ -1728,6 +1732,7 @@ public class ZJGKOpenServiceImpl {
             if(ownerType != null) {
                 customer.setOrgOwnerTypeId(ownerType.getId());
             }
+            customer.setOrganizationId(1012516L);
             organizationProvider.createOrganizationOwner(customer);
             CommunityPmOwner communityPmOwner = ConvertHelper.convert(customer, CommunityPmOwner.class);
             pmOwnerSearcher.feedDoc(communityPmOwner);

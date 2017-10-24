@@ -3281,10 +3281,10 @@ public class FlowServiceImpl implements FlowService {
 
         flushState(ctx);
 
-        /*if (snapshotFlow.getEvaluateStep() != null
+        if (snapshotFlow.getEvaluateStep() != null
                 && snapshotFlow.getEvaluateStep().equals(FlowStepType.APPROVE_STEP.getCode())
                 && flowCase.getStatus().equals(FlowCaseStatus.PROCESS.getCode())) {
-            FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+            stepDTO = new FlowAutoStepDTO();
             stepDTO.setAutoStepType(snapshotFlow.getEvaluateStep());
             stepDTO.setFlowCaseId(flowCase.getId());
             stepDTO.setFlowMainId(flowCase.getFlowMainId());
@@ -3295,7 +3295,7 @@ public class FlowServiceImpl implements FlowService {
             }
             stepDTO.setStepCount(cmd.getStepCount());
             processAutoStep(stepDTO);//fire next step
-        }*/
+        }
         return null;
     }
 
@@ -4686,7 +4686,6 @@ public class FlowServiceImpl implements FlowService {
 
     private void processStartAndEndNode(FlowIdCommand cmd, Flow flow, FlowGraphDTO graphDTO) {
         dbProvider.execute(status -> {
-            flowMarkUpdated(flow);
             List<FlowNodeDTO> nodes = graphDTO.getNodes();
             nodes.sort(Comparator.comparingInt(FlowNodeDTO::getNodeLevel));
 
@@ -4708,11 +4707,15 @@ public class FlowServiceImpl implements FlowService {
             FlowLaneCommand flowLaneCmd = null;
             FlowLaneDTO laneDTO = null;
 
+            Map<Integer, Long> nodeLevelToIdMap = new HashMap<>();
+
             // order is important
             int laneLevel = 2;
             int nodeLevel = 3;
             for (FlowNodeDTO node : nodes) {
                 FlowNode flowNode = flowNodeProvider.getFlowNodeById(node.getId());
+                nodeLevelToIdMap.put(flowNode.getNodeLevel(), flowNode.getId());
+
                 if (node.getNodeType() == null || node.getNodeType().isEmpty()) {
                     node.setNodeType(FlowNodeType.NORMAL.getCode());
                     flowNode.setNodeType(FlowNodeType.NORMAL.getCode());
@@ -4808,6 +4811,22 @@ public class FlowServiceImpl implements FlowService {
 
             graphDTO.setLinks(linkList);
             graphDTO.setLanes(laneList);
+
+            // 评价按钮根据之前的设置启用
+            if (flow.getEvaluateStart() != null && flow.getEvaluateEnd() != null) {
+                long nodeCount = flow.getEvaluateEnd() - flow.getEvaluateStart();
+                for (long i = 0; i <= nodeCount; i++) {
+                    Long nodeId = nodeLevelToIdMap.get(Integer.parseInt(String.valueOf(flow.getEvaluateStart() + i)));
+                    FlowButton evalButton = flowButtonProvider.findFlowButtonByStepType(nodeId,
+                            FlowConstants.FLOW_CONFIG_VER, FlowStepType.EVALUATE_STEP.getCode(), FlowUserType.APPLIER.getCode());
+                    if (evalButton != null) {
+                        evalButton.setStatus(FlowButtonStatus.ENABLED.getCode());
+                        flowButtonProvider.updateFlowButton(evalButton);
+                    }
+                }
+                flow.setAllowFlowCaseEndEvaluate(TrueOrFalseFlag.TRUE.getCode());
+            }
+            flowMarkUpdated(flow);
             return true;
         });
     }

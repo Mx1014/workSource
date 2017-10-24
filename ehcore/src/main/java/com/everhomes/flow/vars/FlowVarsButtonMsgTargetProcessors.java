@@ -25,11 +25,22 @@ public class FlowVarsButtonMsgTargetProcessors implements FlowVariableUserResolv
                                           Long entityId, FlowUserSelection userSelection, int loopCnt) {
 
 	    List<Long> users = new ArrayList<>();
-		if(ctx.getNextNode() != null) {
+        FlowGraphNode currentNode = ctx.getCurrentNode();
+        List<FlowGraphLink> linksOut = currentNode.getLinksOut();
+
+        FlowNode nextNode = null;
+        if (linksOut.size() > 0) {
+            nextNode = linksOut.get(0).getToNode(ctx, null).getFlowNode();
+        }
+
+        if(nextNode != null) {
+            Long maxStepCount = flowEventLogProvider.findMaxStepCountByNodeEnterLog(
+                    nextNode.getId(), ctx.getFlowCase().getId());
+
             //stepCount 不加 1 的原因是，目标节点处理人是当前 stepCount 计算的 node_enter 的值
-            List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(ctx.getNextNode().getFlowNode().getId()
+            List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(nextNode.getId()
 					, ctx.getFlowCase().getId()
-					, ctx.getFlowCase().getStepCount());
+					, maxStepCount);
 			if(logs != null && logs.size() > 0) {
 				for(FlowEventLog log : logs) {
 					if(log.getFlowUserId() != null && log.getFlowUserId() > 0) {
