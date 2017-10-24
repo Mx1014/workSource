@@ -1467,3 +1467,16 @@ UPDATE eh_launch_pad_items SET action_data = REPLACE(action_data,'"list"','"grid
 DELETE from eh_web_menu_scopes WHERE menu_id in (10700,50600) AND owner_id = 999966;
 SET @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), '50700', '', 'EhNamespaces', '999966', '2');
+
+
+-- 添加微信支付方式 by lqs 20171024
+INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
+    VALUES(10003, 'parking', '999966', 'EhOrganizations', '1035830', null, null, '1', '微信', 'cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw', '{\"payType\":\"no_credit\"}', UTC_TIMESTAMP(), NULL);
+INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
+    VALUES(10004, 'rentalOrder', '999966', 'EhOrganizations', '1035830', null, null, '1', '微信', 'cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw', '{\"payType\":\"no_credit\"}', UTC_TIMESTAMP(), NULL);
+
+INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
+    VALUES(10005, 'activitySignupOrder', '999966', 'EhOrganizations', '1035830', null, null, '1', '微信', 'cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw', '{\"payType\":\"no_credit\"}', UTC_TIMESTAMP(), NULL);
+INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
+    VALUES(10006, 'activitySignupOrder', '999966', 'EhOrganizations', '1035830', null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
+
