@@ -827,8 +827,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		}
 		GetQuestionnaireResultDetailResponse response = new GetQuestionnaireResultDetailResponse(nextPageAnchor, questionnaireAnswers.stream().map(q->convertToTargetDTO(q)).collect(Collectors.toList()));
 
-		response.setCollectionCount(questionnaire.getCollectionCount());
-		response.setTargetUserNum(questionnaire.getTargetUserNum());
+		response.setCollectionCount(questionnaire.getCollectionCount()==null?0:questionnaire.getCollectionCount());
+		response.setTargetUserNum(questionnaire.getTargetUserNum()==null?0:questionnaire.getTargetUserNum());
 		response.setPercentComplete(generatePercentComplete(questionnaire.getTargetUserNum(),questionnaire.getCollectionCount()));
 		return response;
 	}
