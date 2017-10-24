@@ -11,6 +11,7 @@ import com.everhomes.schema.tables.pojos.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
+import com.everhomes.server.schema.tables.EhQuestionnaireRanges;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAclinkFirmware;
 import com.everhomes.server.schema.tables.pojos.EhAclinkLogs;
@@ -2266,6 +2267,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhPaymentServiceConfigs.class, Tables.EH_PAYMENT_SERVICE_CONFIGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PAYMENT_SERVICE_CONFIGS.ID.max())
                     .from(Tables.EH_PAYMENT_SERVICE_CONFIGS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhQuestionnaireRanges.class, Tables.EH_QUESTIONNAIRE_RANGES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUESTIONNAIRE_RANGES.ID.max()).from(Tables.EH_QUESTIONNAIRE_RANGES).fetchOne().value1();
         });
 
     }
