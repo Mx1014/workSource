@@ -1945,7 +1945,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public void updateOrganizationDefaultOrder(Integer namespaceId, Long orgId, Integer order) {
-
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		UpdateQuery<EhOrganizationsRecord> query = context.updateQuery(Tables.EH_ORGANIZATIONS);
+		query.addValue(Tables.EH_ORGANIZATIONS.ORDER, order);
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(orgId));
+		query.execute();
     }
 
     /**
@@ -3457,7 +3462,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		List<Organization> result = new ArrayList<Organization>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
-		query.addConditions(Tables.EH_ORGANIZATIONS.NAME.eq(name));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%"+name+"%"));
 		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		if (parentId != null) {
@@ -5514,7 +5519,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		Condition condition = t1.field("id").gt(0L);
 
 		if (null != locator && null != locator.getAnchor())
-			condition = condition.and(t1.field("id").gt(locator.getAnchor()));
+			condition = condition.and(t1.field("id").lt(locator.getAnchor()));
 
 		Organization org = findOrganizationById(listCommand.getOrganizationId());
 
@@ -5529,7 +5534,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		if (!StringUtils.isEmpty(keywords)) {
 			Condition cond1 = t2.field("contact_token").eq(keywords);
-			cond1 = cond1.or(t2.field("contact_name").like("%" + keywords + "%")).or(t2.field("employee_no"));
+			cond1 = cond1.or(t2.field("contact_name").like("%" + keywords + "%"));
+			cond1 = cond1.or(t2.field("employee_no").like("%" + keywords + "%"));
 			cond = cond.and(cond1);
 		}
 
@@ -5592,9 +5598,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			locator.setAnchor(null);
 
 		if (result.size() >= pageSize) {
-			locator.setAnchor(result.get(result.size() - 1).getId());
 			result.remove(result.size() - 1);
-//			locator.setAnchor(result.get(result.size() - 1).getId());
+			locator.setAnchor(result.get(result.size() - 1).getId());
 		}
 		return result;
 	}
