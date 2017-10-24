@@ -1732,6 +1732,7 @@ public class ZJGKOpenServiceImpl {
             if(ownerType != null) {
                 customer.setOrgOwnerTypeId(ownerType.getId());
             }
+            customer.setOrganizationId(1012516L);
             organizationProvider.createOrganizationOwner(customer);
             CommunityPmOwner communityPmOwner = ConvertHelper.convert(customer, CommunityPmOwner.class);
             pmOwnerSearcher.feedDoc(communityPmOwner);
