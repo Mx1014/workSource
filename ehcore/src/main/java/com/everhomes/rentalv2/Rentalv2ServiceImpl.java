@@ -3630,6 +3630,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalNotificationTemplateCode.RENTAL_FLOW_CONTENT, RentalNotificationTemplateCode.locale, map, "");
 			RentalResourceType resourceType = rentalv2Provider.getRentalResourceTypeById(order.getResourceTypeId());
 			cmd.setTitle(resourceType.getName());
+			cmd.setServiceType(resourceType.getName());
 	    	cmd.setContent(contentString);
 //	    	LOGGER.debug("cmd = \n"+cmd);
 
