@@ -4,7 +4,8 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2400000', '合同管理', '2000000', NULL, 'contract-management', '1', '2', '/2000000/2400000', 'zuolin', '2', '21200', '2', 'system', 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2410000', '合同管理', '2400000', NULL, 'contract-management', '1', '2', '/2000000/2400000/2410000', 'zuolin', '2', '21200', '3', 'system', 'page');
 
-
+SET @eh_var_fields_id = (SELECT MAX(id) FROM `eh_var_fields`);
+SET @eh_var_field_items_id = (SELECT MAX(id) FROM `eh_var_field_items`);
 update eh_var_fields set field_param = '{\"fieldParamType\": \"text\", \"length\": 32}' where id = 7;
 update eh_var_fields set field_param = '{\"fieldParamType\": \"select\", \"length\": 32}' where id = 188;
 update eh_var_fields set field_param = '{\"fieldParamType\": \"text\", \"length\": 32}' where id = 211;
