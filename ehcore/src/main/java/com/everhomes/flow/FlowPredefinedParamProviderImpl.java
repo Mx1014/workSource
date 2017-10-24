@@ -53,10 +53,12 @@ public class FlowPredefinedParamProviderImpl implements FlowPredefinedParamProvi
 	}
 
     @Override
-    public List<FlowPredefinedParam> listPredefinedParam(String moduleType, Long moduleId, String ownerType, Long ownerId, String entityType) {
+    public List<FlowPredefinedParam> listPredefinedParam(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId, String entityType) {
         com.everhomes.server.schema.tables.EhFlowPredefinedParams t = Tables.EH_FLOW_PREDEFINED_PARAMS;
 
         SelectQuery<EhFlowPredefinedParamsRecord> query = context().selectQuery(t);
+
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
         if (moduleType != null && moduleId != null) {
             query.addConditions(t.MODULE_TYPE.eq(moduleType));
             query.addConditions(t.MODULE_ID.eq(moduleId));

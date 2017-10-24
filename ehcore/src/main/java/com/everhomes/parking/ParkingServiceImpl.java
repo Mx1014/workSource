@@ -354,7 +354,7 @@ public class ParkingServiceImpl implements ParkingService {
 		if (UserContext.getCurrentNamespaceId().equals(999983)) {
 			createFlowCaseCommand.setTitle("停车月卡申请");
 		}
-
+		createFlowCaseCommand.setServiceType("停车月卡申请");
 		FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 
 		return flowCase;

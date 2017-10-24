@@ -93,9 +93,10 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_FLOW_EVENT_LOGS.ID.gt(locator.getAnchor()));
-            }
-        query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.ge(0l));
+        }
+        query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.ge(0L));
 
+        query.addOrderBy(Tables.EH_FLOW_EVENT_LOGS.ID);
         query.addLimit(count);
         List<FlowEventLog> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, FlowEventLog.class);
@@ -594,7 +595,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                 .from(Tables.EH_FLOW_EVENT_LOGS)
                 .where(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId))
                 .and(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId))
-                .and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()))
+                .and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()))
                 .fetchAnyInto(Long.class);
     }
 

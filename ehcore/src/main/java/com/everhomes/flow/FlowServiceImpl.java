@@ -761,21 +761,20 @@ public class FlowServiceImpl implements FlowService {
         FlowAction action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
                 , FlowActionType.TRACK.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.APPROVE_STEP.getCode());
         if (action != null) {
-            dto.setEnterTracker(ConvertHelper.convert(action, FlowActionDTO.class));
+            dto.setEnterTracker(actionToDTO(action));
         }
 
         action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
                 , FlowActionType.TRACK.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.REJECT_STEP.getCode());
         if (action != null) {
-            dto.setRejectTracker(ConvertHelper.convert(action, FlowActionDTO.class));
+            dto.setRejectTracker(actionToDTO(action));
         }
 
         action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
                 , FlowActionType.TRACK.getCode(), FlowActionStepType.STEP_LEAVE.getCode(), FlowStepType.TRANSFER_STEP.getCode());
         if (action != null) {
-            dto.setTransferTracker(ConvertHelper.convert(action, FlowActionDTO.class));
+            dto.setTransferTracker(actionToDTO(action));
         }
-
         return dto;
     }
 
@@ -2425,6 +2424,9 @@ public class FlowServiceImpl implements FlowService {
         if (flowCaseCmd.getTitle() == null || flowCaseCmd.getTitle().isEmpty()) {
             flowCase.setTitle(moduleDTO.getModuleName());
         }
+        if (flowCase.getServiceType() == null) {
+            flowCase.setServiceType(flowCase.getTitle());
+        }
         flowCase.setModuleType(snapshotFlow.getModuleType());
         flowCase.setOwnerId(snapshotFlow.getOwnerId());
         flowCase.setOwnerType(snapshotFlow.getOwnerType());
@@ -3721,7 +3723,9 @@ public class FlowServiceImpl implements FlowService {
                         }
                         break;
                     case MODULE_ID:
-                        Map<String, String> variableMap = flowListenerManager.onFlowVariableRender(ctx, Collections.singletonList(para));
+                        List<String> paramList = new ArrayList<>();
+                        paramList.add(para);
+                        Map<String, String> variableMap = flowListenerManager.onFlowVariableRender(ctx, paramList);
                         if (variableMap != null) {
                             String val = variableMap.get(para);
                             if (val != null) {
@@ -4552,8 +4556,15 @@ public class FlowServiceImpl implements FlowService {
     public ListFlowPredefinedParamResponse listPredefinedParam(ListPredefinedParamCommand cmd) {
         ValidatorUtil.validate(cmd);
 
-        List<FlowPredefinedParam> paramList = flowPredefinedParamProvider.listPredefinedParam(
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        List<FlowPredefinedParam> paramList = flowPredefinedParamProvider.listPredefinedParam(namespaceId,
                 cmd.getModuleType(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+
+        if (paramList.isEmpty()) {
+            paramList = flowPredefinedParamProvider.listPredefinedParam(Namespace.DEFAULT_NAMESPACE,
+                    cmd.getModuleType(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+        }
 
         List<FlowPredefinedParamDTO> dtoList = paramList.stream().map(this::toPredefinedParamDTO).collect(Collectors.toList());
 
@@ -4598,6 +4609,8 @@ public class FlowServiceImpl implements FlowService {
         Tuple<FlowLane, Boolean> tuple = coordinationProvider.getNamedLock(CoordinationLocks.FLOW_LANE.getCode() + cmd.getLaneId()).enter(() -> {
             FlowLane flowLane = flowLaneProvider.findById(cmd.getLaneId());
             if (flowLane != null) {
+                Flow flow = flowProvider.getFlowById(flowLane.getFlowMainId());
+                flowMarkUpdated(flow);
                 flowLane.setDisplayName(cmd.getDisplayName());
                 flowLane.setIdentifierNodeLevel(cmd.getIdentifierNodeLevel());
                 flowLane.setIdentifierNodeId(cmd.getIdentifierNodeId());
@@ -4692,7 +4705,7 @@ public class FlowServiceImpl implements FlowService {
                 flowLaneCmd.setLaneLevel(laneLevel++);
                 flowLaneCmd.setDisplayName(node.getNodeName());
                 flowLaneCmd.setFlowNodeLevel(node.getNodeLevel());
-                laneDTO = createFlowLane(flow, flowLaneCmd);
+                laneDTO = createFlowLane(flow, flowLaneCmd, node.getNodeName());
                 laneList.add(laneDTO);
 
                 flowNode.setFlowLaneId(laneDTO.getId());
@@ -4703,15 +4716,15 @@ public class FlowServiceImpl implements FlowService {
             // start node
             flowLaneCmd = new FlowLaneCommand();
             flowLaneCmd.setLaneLevel(1);
-            flowLaneCmd.setDisplayName("start");
+            flowLaneCmd.setDisplayName(buttonDefName(flow.getNamespaceId(), FlowStepType.START_STEP));
             flowLaneCmd.setFlowNodeLevel(1);
-            laneDTO = createFlowLane(flow, flowLaneCmd);
+            laneDTO = createFlowLane(flow, flowLaneCmd, buttonDefName(flow.getNamespaceId(), FlowStepType.START_STEP));
             laneList.add(laneDTO);
 
             CreateFlowNodeCommand flowNodeCmd = new CreateFlowNodeCommand();
             flowNodeCmd.setFlowMainId(cmd.getFlowId());
             flowNodeCmd.setNodeLevel(1);
-            flowNodeCmd.setNodeName("start");
+            flowNodeCmd.setNodeName(buttonDefName(flow.getNamespaceId(), FlowStepType.START_STEP));
             flowNodeCmd.setNodeType(FlowNodeType.START.getCode());
             flowNodeCmd.setFlowLaneId(laneDTO.getId());
             flowNodeCmd.setFlowLaneLevel(laneDTO.getLaneLevel());
@@ -4721,15 +4734,15 @@ public class FlowServiceImpl implements FlowService {
             // end node
             flowLaneCmd = new FlowLaneCommand();
             flowLaneCmd.setLaneLevel(laneLevel);
-            flowLaneCmd.setDisplayName("end");
+            flowLaneCmd.setDisplayName(buttonDefName(flow.getNamespaceId(), FlowStepType.END_STEP));
             flowLaneCmd.setFlowNodeLevel(2);
-            laneDTO = createFlowLane(flow, flowLaneCmd);
+            laneDTO = createFlowLane(flow, flowLaneCmd, buttonDefName(flow.getNamespaceId(), FlowStepType.END_STEP));
             laneList.add(laneDTO);
 
             flowNodeCmd = new CreateFlowNodeCommand();
             flowNodeCmd.setFlowMainId(cmd.getFlowId());
             flowNodeCmd.setNodeLevel(2);
-            flowNodeCmd.setNodeName("end");
+            flowNodeCmd.setNodeName(buttonDefName(flow.getNamespaceId(), FlowStepType.END_STEP));
             flowNodeCmd.setNodeType(FlowNodeType.END.getCode());
             flowNodeCmd.setFlowLaneId(laneDTO.getId());
             flowNodeCmd.setFlowLaneLevel(laneDTO.getLaneLevel());
@@ -4793,8 +4806,12 @@ public class FlowServiceImpl implements FlowService {
 
             // 创建lane
             Map<Integer, Long> laneLevelToLaneIdMap = new HashMap<>();
-            for (FlowLaneCommand flowLaneCmd : cmd.getLanes()) {
-                FlowLaneDTO flowLane = createFlowLane(flow, flowLaneCmd);
+            String absortDisplayName = null;
+            for (int i = 0; i < cmd.getLanes().size(); i++) {
+                if (i == cmd.getLanes().size() - 1) {
+                    absortDisplayName = buttonDefName(flow.getNamespaceId(), FlowStepType.ABSORT_STEP);
+                }
+                FlowLaneDTO flowLane = createFlowLane(flow, cmd.getLanes().get(i), absortDisplayName);
                 laneLevelToLaneIdMap.put(flowLane.getLaneLevel(), flowLane.getId());
             }
 
@@ -5734,7 +5751,7 @@ public class FlowServiceImpl implements FlowService {
         return toFlowLinkDTO(flowLink);
     }
 
-    private FlowLaneDTO createFlowLane(Flow flow, FlowLaneCommand flowLaneCmd) {
+    private FlowLaneDTO createFlowLane(Flow flow, FlowLaneCommand flowLaneCmd, String absortDisplayName) {
         FlowLane flowLane = new FlowLane();
         if (flowLaneCmd.getId() != null) {
             flowLane = flowLaneProvider.findById(flowLaneCmd.getId());
@@ -5746,7 +5763,7 @@ public class FlowServiceImpl implements FlowService {
             flowLane.setIdentifierNodeLevel(flowLaneCmd.getIdentifierNodeLevel());
             flowLaneProvider.updateFlowLane(flowLane);
         } else {
-            flowLane.setDisplayNameAbsort(flowLaneCmd.getDisplayName());
+            flowLane.setDisplayNameAbsort(absortDisplayName);
             flowLane.setDisplayName(flowLaneCmd.getDisplayName());
             flowLane.setFlowMainId(flow.getId());
             flowLane.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
