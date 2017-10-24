@@ -1518,9 +1518,13 @@ public class AssetServiceImpl implements AssetService {
                 //获得一个区间5个约束条件
                 paymentFormula.setConstraintVariableIdentifer(variableConstraints.getVariableIdentifier());
                 paymentFormula.setStartConstraint(variableConstraints.getStartConstraint());
-                paymentFormula.setStartNum(new BigDecimal(variableConstraints.getStartNum()));
+                if(variableConstraints.getStartNum()!=null){
+                    paymentFormula.setStartNum(new BigDecimal(variableConstraints.getStartNum()));
+                }
                 paymentFormula.setEndConstraint(variableConstraints.getEndConstraint());
-                paymentFormula.setEndNum(new BigDecimal(variableConstraints.getEndNum()));
+                if(variableConstraints.getEndNum()!=null){
+                    paymentFormula.setEndNum(new BigDecimal(variableConstraints.getEndNum()));
+                }
 
 
                 paymentFormula.setCreatorUid(0l);

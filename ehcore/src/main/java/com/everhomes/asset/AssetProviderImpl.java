@@ -2157,7 +2157,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
                 .and(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                 .fetchOne(0,Integer.class);
-        group.setDefaultOrder(nextOrder==null?nextOrder:nextOrder+1);
+        group.setDefaultOrder(nextOrder==null?1:nextOrder+1);
         group.setDueDay(cmd.getDueDay());
         group.setDueDayType(cmd.getDueDayType());
         group.setName(cmd.getBillGroupName());
