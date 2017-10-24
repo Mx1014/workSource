@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.flow.*;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.rest.flow.*;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class PmtaskFlowModuleListener implements FlowModuleListener {
@@ -52,7 +54,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
-	private FlowEventLogProvider flowEventLogProvider;
+	private ConfigurationProvider configProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 
@@ -437,6 +439,16 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
-		return null;
+		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, defaultId, null,
+				null, null);
+
+		return categories.stream().map(c -> {
+			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+			dto.setId(c.getId());
+			dto.setNamespaceId(namespaceId);
+			dto.setServiceName(c.getName());
+			return dto;
+		}).collect(Collectors.toList());
 	}
 }
