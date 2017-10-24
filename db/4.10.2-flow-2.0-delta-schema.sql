@@ -1,7 +1,7 @@
 --
 -- 条件
 --
-DROP TABLE IF EXISTS `eh_flow_conditions`;
+-- DROP TABLE IF EXISTS `eh_flow_conditions`;
 CREATE TABLE `eh_flow_conditions` (
   `id` BIGINT,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -25,7 +25,7 @@ CREATE TABLE `eh_flow_conditions` (
 --
 -- 条件表达式
 --
-DROP TABLE IF EXISTS `eh_flow_condition_expressions`;
+-- DROP TABLE IF EXISTS `eh_flow_condition_expressions`;
 CREATE TABLE `eh_flow_condition_expressions` (
   `id` BIGINT,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -49,7 +49,7 @@ CREATE TABLE `eh_flow_condition_expressions` (
 --
 -- 泳道
 --
-DROP TABLE IF EXISTS `eh_flow_lanes`;
+-- DROP TABLE IF EXISTS `eh_flow_lanes`;
 CREATE TABLE `eh_flow_lanes` (
   `id` BIGINT,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -72,7 +72,7 @@ CREATE TABLE `eh_flow_lanes` (
 --
 -- 流程图的连接
 --
-DROP TABLE IF EXISTS `eh_flow_links`;
+-- DROP TABLE IF EXISTS `eh_flow_links`;
 CREATE TABLE `eh_flow_links` (
   `id` BIGINT,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -95,7 +95,7 @@ CREATE TABLE `eh_flow_links` (
 --
 -- 分支
 --
-DROP TABLE IF EXISTS `eh_flow_branches`;
+-- DROP TABLE IF EXISTS `eh_flow_branches`;
 CREATE TABLE `eh_flow_branches` (
   `id` BIGINT,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -118,7 +118,7 @@ CREATE TABLE `eh_flow_branches` (
 --
 -- 节点和按钮的预定义参数
 --
-DROP TABLE IF EXISTS `eh_flow_predefined_params`;
+-- DROP TABLE IF EXISTS `eh_flow_predefined_params`;
 CREATE TABLE `eh_flow_predefined_params` (
   `id` BIGINT,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -141,7 +141,7 @@ CREATE TABLE `eh_flow_predefined_params` (
 --
 -- 业务类别
 --
-DROP TABLE IF EXISTS `eh_flow_service_types`;
+-- DROP TABLE IF EXISTS `eh_flow_service_types`;
 CREATE TABLE `eh_flow_service_types` (
   `id` BIGINT,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
