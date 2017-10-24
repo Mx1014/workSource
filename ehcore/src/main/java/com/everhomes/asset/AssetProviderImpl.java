@@ -2081,8 +2081,8 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setBillingCycle(r.getValue(t.BILLING_CYCLE));
                     dto.setInstruction(r.getValue(t.INSTRUCTION));
                     dto.setFormulaType(r.getValue(t.FORMULA_TYPE));
-                    dto.setSuggest_unit_price(r.getValue(t.SUGGEST_UNIT_PRICE));
-                    dto.setArea_size_type(r.getValue(t.AREA_SIZE_TYPE));
+                    dto.setSuggestUnitPrice(r.getValue(t.SUGGEST_UNIT_PRICE));
+                    dto.setAreaSizeType(r.getValue(t.AREA_SIZE_TYPE));
                     return null;
                 });
         return dto;
@@ -2093,7 +2093,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = getReadWriteContext();
         EhPaymentChargingStandardsScopes t = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t");
         context.delete(t)
-                .where(t.ID.eq(chargingStandardId))
+                .where(t.CHARGING_STANDARD_ID.eq(chargingStandardId))
                 .and(t.OWNER_ID.eq(ownerId))
                 .and(t.OWNER_TYPE.eq(ownerType))
                 .execute();
@@ -2106,7 +2106,6 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentVariables t = Tables.EH_PAYMENT_VARIABLES.as("t");
         context.select(t.ID,t.NAME,t.IDENTIFIER)
                 .from(t)
-                .where(t.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()))
                 .fetch()
                 .map(r ->{
                     ListAvailableVariablesDTO dto = new ListAvailableVariablesDTO();
@@ -2158,7 +2157,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
                 .and(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                 .fetchOne(0,Integer.class);
-        group.setDefaultOrder(nextOrder+1);
+        group.setDefaultOrder(nextOrder==null?nextOrder:nextOrder+1);
         group.setDueDay(cmd.getDueDay());
         group.setDueDayType(cmd.getDueDayType());
         group.setName(cmd.getBillGroupName());

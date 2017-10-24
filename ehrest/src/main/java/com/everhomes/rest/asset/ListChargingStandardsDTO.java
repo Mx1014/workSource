@@ -17,8 +17,8 @@ import java.util.List;
  * <li>BillingCycle:计费周期,1:按天;2:按月;3:按季度;4:按年</li>
  * <li>variables:变量列表，参考{@link com.everhomes.rest.asset.PaymentVariable}</li>
  * <li>variableNames:变量名称列表</li>
- * <li>suggest_unit_price:建议单价</li>
- * <li>area_size_type:计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积</li>
+ * <li>suggestUnitPrice:建议单价</li>
+ * <li>areaSizeType:计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积</li>
  *</ul>
  */
 public class ListChargingStandardsDTO {
@@ -31,8 +31,8 @@ public class ListChargingStandardsDTO {
     private List<PaymentVariable> variables;
     @ItemType(String.class)
     private List<String> variableNames;
-    private BigDecimal suggest_unit_price;
-    private Integer area_size_type;
+    private BigDecimal suggestUnitPrice;
+    private Integer areaSizeType;
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -22,8 +22,8 @@ import java.util.List;
  * <li>formulaJson:公式的json</li>
  * <li>formula:公式</li>
  * <li>instruction:说明</li>
- * <li>suggest_unit_price:建议单价</li>
- * <li>area_size_type:计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积</li>
+ * <li>suggestUnitPrice:建议单价</li>
+ * <li>areaSizeType:计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积</li>
  *</ul>
  */
 public class CreateChargingStandardCommand {
@@ -48,24 +48,28 @@ public class CreateChargingStandardCommand {
     private String formulaJson;
     private String instruction;
 
-    private BigDecimal suggest_unit_price;
-    private Integer area_size_type;
+    private BigDecimal suggestUnitPrice;
+    private Integer areaSizeType;
 
     @ItemType(VariableConstraints.class)
     private List<VariableConstraints> stepValuePairs;
     private Long chargingStandardId;
 
 
-    public BigDecimal getSuggest_unit_price() {
-        return suggest_unit_price;
+    public BigDecimal getSuggestUnitPrice() {
+        return suggestUnitPrice;
     }
 
-    public void setSuggest_unit_price(BigDecimal suggest_unit_price) {
-        this.suggest_unit_price = suggest_unit_price;
+    public void setSuggestUnitPrice(BigDecimal suggestUnitPrice) {
+        this.suggestUnitPrice = suggestUnitPrice;
     }
 
-    public Integer getArea_size_type() {
-        return area_size_type;
+    public Integer getAreaSizeType() {
+        return areaSizeType;
+    }
+
+    public void setAreaSizeType(Integer areaSizeType) {
+        this.areaSizeType = areaSizeType;
     }
 
     public List<VariableConstraints> getStepValuePairs() {
@@ -84,9 +88,6 @@ public class CreateChargingStandardCommand {
         this.chargingStandardId = chargingStandardId;
     }
 
-    public void setArea_size_type(Integer area_size_type) {
-        this.area_size_type = area_size_type;
-    }
 
     @Override
     public String toString() {

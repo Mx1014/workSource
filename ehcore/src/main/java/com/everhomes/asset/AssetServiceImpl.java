@@ -1366,10 +1366,12 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void createChargingStandard(CreateChargingStandardCommand cmd) {
-        String formula_no_quote = cmd.getFormula();
-        formula_no_quote = formula_no_quote.replace("[[","");
-        formula_no_quote = formula_no_quote.replace("]]","");
-        cmd.setFormula(formula_no_quote);
+        if(cmd.getFormulaType() == 1 || cmd.getFormulaType() == 2){
+            String formula_no_quote = cmd.getFormula();
+            formula_no_quote = formula_no_quote.replace("[[","");
+            formula_no_quote = formula_no_quote.replace("]]","");
+            cmd.setFormula(formula_no_quote);
+        }
         com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards c = new PaymentChargingStandards();
         com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes s = new PaymentChargingStandardScope();
         // create a chargingstandard
@@ -1385,8 +1387,8 @@ public class AssetServiceImpl implements AssetService {
         c.setName(cmd.getChargingStandardName());
         c.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         c.setInstruction(cmd.getInstruction());
-        c.setSuggestUnitPrice(cmd.getSuggest_unit_price());
-        c.setAreaSizeType(cmd.getArea_size_type());
+        c.setSuggestUnitPrice(cmd.getSuggestUnitPrice());
+        c.setAreaSizeType(cmd.getAreaSizeType());
 
         // create formula that fits the standard
         CreateFormulaCommand cmd1 = ConvertHelper.convert(cmd,CreateFormulaCommand.class);
@@ -1464,7 +1466,7 @@ public class AssetServiceImpl implements AssetService {
         List<EhPaymentFormula> list = new ArrayList<>();
         Byte formulaType = cmd.getFormulaType();
 //        dto.setFormulaType(formulaType);
-        if (formulaType == 1) {
+        if (formulaType == 1 ) {
             EhPaymentFormula paymentFormula = new PaymentFormula();
             long nextPaymentFormulaId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_FORMULA.getClass()));
             paymentFormula.setId(nextPaymentFormulaId);
