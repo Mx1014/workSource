@@ -2644,6 +2644,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationDTO dto = toOrganizationDTO(userId, org);
             dtos.add(dto);
         }
+
+        //：todo 去重
+        dtos = new ArrayList<>(new HashSet<>(dtos));
+
         Long endTime = System.currentTimeMillis();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:elapse:{}", endTime - startTime);

@@ -1981,9 +1981,11 @@ public class ForumServiceImpl implements ForumService {
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();
 
-        Post post = checkStickPostParameter(operatorId, cmd.getPostId(), cmd.getStickFlag());
+        checkStickPostPrivilege(operatorId, cmd.getOrganizationId());
+        checkStickPostParameter(operatorId, cmd.getPostId(), cmd.getStickFlag());
 
         dbProvider.execute((status) -> {
+            Post post = this.forumProvider.findPostById(cmd.getPostId());
             post.setStickFlag(cmd.getStickFlag());
             forumProvider.updatePost(post);
             if(post.getEmbeddedAppId() != null &&  post.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY){
@@ -1993,6 +1995,19 @@ public class ForumServiceImpl implements ForumService {
             }
             return null;
         });
+    }
+
+    private void checkStickPostPrivilege(Long operatorId, Long organizationId) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
+        //检查园区企业管理员
+        if(resolver.checkSuperAdmin(operatorId, organizationId)){
+            return;
+        }
+        //检查超级管理员，此处不成立会报错
+        resolver.checkUserPrivilege(operatorId, 0);
+
     }
 
     private Post checkStickPostParameter(Long operatorId, Long postId, Byte stickFlag) {
