@@ -63,6 +63,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd, SaveUniongroupCallBack callBack) {
+        LOGGER.debug("saveUniongroupConfigures t1:" +  System.currentTimeMillis());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         Integer versionCode = cmd.getVersionCode() != null ? cmd.getVersionCode() : DEFAULT_VERSION_CODE;
 
@@ -76,6 +77,8 @@ public class UniongroupServiceImpl implements UniongroupService {
 
             //4.保存
             UnionPolicyObject finalUnionPolicyObject = unionPolicyObject; //拷贝变量
+
+            LOGGER.debug("saveUniongroupConfigures t2:" +  System.currentTimeMillis());
 
             this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_LOCK.getCode()).enter(() -> {
 
@@ -94,16 +97,17 @@ public class UniongroupServiceImpl implements UniongroupService {
                     this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(finalUnionPolicyObject.getUnionDetailsList());
                 }
 
+                LOGGER.debug("saveUniongroupConfigures t3:" +  System.currentTimeMillis());
+                //5.同步搜索引擎
+                this.uniongroupSearcher.deleteAll();
+                this.uniongroupSearcher.syncUniongroupDetailsAtOrg(checkOrganization(cmd.getEnterpriseId()), cmd.getGroupType());
+                this.uniongroupSearcher.refresh();
+
                 return null;
             });
             return null;
         });
-
-
-        //5.同步搜索引擎
-        this.uniongroupSearcher.deleteAll();
-        this.uniongroupSearcher.syncUniongroupDetailsAtOrg(checkOrganization(cmd.getEnterpriseId()), cmd.getGroupType());
-        this.uniongroupSearcher.refresh();
+        LOGGER.debug("saveUniongroupConfigures t4:" +  System.currentTimeMillis());
     }
 
     @Override
