@@ -90,9 +90,6 @@ public class ArchivesServiceImpl implements ArchivesService {
     private LocaleTemplateService localeTemplateService;
 
     @Autowired
-    private ArchivesConfigurationService archivesConfigurationService;
-
-    @Autowired
     private ContentServerService contentServerService;
 
     @Override
