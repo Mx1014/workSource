@@ -2205,8 +2205,8 @@ public class AssetProviderImpl implements AssetProvider {
             dto.setChargingStandardName(r.getValue(t.NAME));
             dto.setFormula(r.getValue(t.FORMULA));
             dto.setFormulaType(r.getValue(t.FORMULA_TYPE));
-            dto.setSuggest_unit_price(r.getValue(t.SUGGEST_UNIT_PRICE));
-            dto.setArea_size_type(r.getValue(t.AREA_SIZE_TYPE));
+            dto.setSuggestUnitPrice(r.getValue(t.SUGGEST_UNIT_PRICE));
+            dto.setAreaSizeType(r.getValue(t.AREA_SIZE_TYPE));
             list.add(dto);
             return null;
         });

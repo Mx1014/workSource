@@ -42,20 +42,20 @@ public class ListChargingStandardsDTO {
         return chargingStandardId;
     }
 
-    public BigDecimal getSuggest_unit_price() {
-        return suggest_unit_price;
+    public BigDecimal getSuggestUnitPrice() {
+        return suggestUnitPrice;
     }
 
-    public void setSuggest_unit_price(BigDecimal suggest_unit_price) {
-        this.suggest_unit_price = suggest_unit_price;
+    public void setSuggestUnitPrice(BigDecimal suggestUnitPrice) {
+        this.suggestUnitPrice = suggestUnitPrice;
     }
 
-    public Integer getArea_size_type() {
-        return area_size_type;
+    public Integer getAreaSizeType() {
+        return areaSizeType;
     }
 
-    public void setArea_size_type(Integer area_size_type) {
-        this.area_size_type = area_size_type;
+    public void setAreaSizeType(Integer areaSizeType) {
+        this.areaSizeType = areaSizeType;
     }
 
     public Byte getFormulaType() {
