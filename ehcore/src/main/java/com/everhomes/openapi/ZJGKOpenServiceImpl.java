@@ -436,6 +436,10 @@ public class ZJGKOpenServiceImpl {
     }
 
     private void syncData(ShenzhouJsonEntity entity, Byte dataType, String communityIdentifier) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("zj syncData: dataType: {}, communityIdentifier: {}", dataType, communityIdentifier);
+        }
+
         ZjSyncdataBackup backup = new ZjSyncdataBackup();
         backup.setNamespaceId(NAMESPACE_ID);
         backup.setDataType(dataType);
