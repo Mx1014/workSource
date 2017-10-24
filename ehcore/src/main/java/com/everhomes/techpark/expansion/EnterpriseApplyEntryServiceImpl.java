@@ -819,6 +819,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			if(null != building){
 				dto.setBuildingName(building.getName());
 				dto.setCommunityId(building.getCommunityId());
+				Community community = communityProvider.findCommunityById(building.getCommunityId());
+				dto.setCommunityName(community.getName());
+			}else {
+				dto.setCommunityName("其他");
 			}
 		}
 		//兼容历史app，rentPosition字段值返回的就是楼栋名称
@@ -863,9 +867,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 //				dto.setRequestFormId(request.getSourceId());
 //			}
 		}
-
-//		Community community = communityProvider.findCommunityById(leaseBuilding.getCommunityId());
-//		dto.setCommunityName(community.getName());
 
 		dto.setProjectDTOS(getProjectDTOs(dto.getId()));
 
