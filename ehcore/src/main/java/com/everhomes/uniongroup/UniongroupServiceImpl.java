@@ -557,8 +557,8 @@ public class UniongroupServiceImpl implements UniongroupService {
             this.coordinationProvider.getNamedLock(CoordinationLocks.UNION_GROUP_CLONE_LOCK.getCode()).enter(() -> {
                 List<EhUniongroupConfigures> configures_n1 = this.uniongroupConfigureProvider.listUniongroupConfigures(namespaceId, groupType, enterpriseId, null, n1);
                 List<EhUniongroupMemberDetails> details_n1 = this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId, groupType, enterpriseId, null, n1);
-                this.uniongroupConfigureProvider.batchCreateUniongroupConfigres(configures_n1);
-                this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(details_n1);
+                this.uniongroupConfigureProvider.batchCreateUniongroupConfigresToVersion(configures_n1, n2);
+                this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetailToVersion(details_n1, n2);
                 return null;
             });
             return null;
