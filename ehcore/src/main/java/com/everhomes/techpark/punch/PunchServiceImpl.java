@@ -7927,5 +7927,20 @@ public class PunchServiceImpl implements PunchService {
 		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
 		redisTemplate.delete(key);
 	}
+	
+	@Override
+	public void punchGroupAddNewEmployee(Long groupId){
+		PunchRule pr = punchProvider.getPunchruleByPunchOrgId(groupId);
 
+		if(null == pr )
+			return;
+
+		if(PunchRuleStatus.NEW.getCode() != pr.getStatus().byteValue())
+			pr.setStatus(PunchRuleStatus.MODIFYED.getCode());
+		pr.setOperatorUid(UserContext.current().getUser().getId());
+		pr.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		punchProvider.updatePunchRule(pr);
+		// TODO: 2017/10/24  是否需要把排班表什么的复制一份出来
+	}
 }

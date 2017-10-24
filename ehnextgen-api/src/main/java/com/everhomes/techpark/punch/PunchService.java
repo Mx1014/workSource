@@ -230,4 +230,6 @@ public interface PunchService {
 	void invalidPunchQRCode(GetPunchQRCodeCommand cmd);
 
 	GetPunchGroupsCountResponse getPunchGroupsCount(GetPunchGroupsCountCommand cmd);
+
+	void punchGroupAddNewEmployee(Long groupId);
 }
