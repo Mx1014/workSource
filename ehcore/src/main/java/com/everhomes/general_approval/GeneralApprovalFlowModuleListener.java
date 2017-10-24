@@ -1,5 +1,6 @@
 package com.everhomes.general_approval;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.spi.LocaleServiceProvider;
@@ -54,6 +55,8 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     protected GeneralFormProvider generalFormProvider;
     @Autowired
     protected LocaleStringService localeStringService;
+
+    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     public GeneralApprovalFlowModuleListener() {
         for (GeneralFormDataSourceType value : GeneralFormDataSourceType.values()) {
@@ -171,6 +174,33 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                 entities.add(e);
             }
         }
+
+        //  approval-1.6 added by R
+        GeneralApprovalFlowCase gf = ConvertHelper.convert(flowCase, GeneralApprovalFlowCase.class);
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "审批编号"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(gf.getApprovalNo().toString());
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请时间"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(format.format(gf.getCreateTime()));
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请人"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(gf.getApplierName());
+        entities.add(e);
+
+        e = new FlowCaseEntity();
+        e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "所在部门"));
+        e.setEntityType(FlowCaseEntityType.LIST.getCode());
+        e.setValue(gf.getCreatorDepartment());
+        entities.add(e);
+
         entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
         return entities;
     }
