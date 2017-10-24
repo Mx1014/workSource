@@ -21,6 +21,7 @@ CREATE TABLE `eh_questionnaire_ranges` (
   `range_type` VARCHAR(64) COMMENT 'community_all(项目),community_authenticated(项目下已认证的用户),community_unauthorized(未认证),building(楼栋),enterprise(企业),user 范围类型',
   `range` VARCHAR(512) COMMENT '对应项目id,楼栋名称，企业ID，用户id',
 	`range_description` VARCHAR(1024) COMMENT '范围描述信息，用于显示在问卷详情页',
+	`rid` BIGINT COMMENT '范围为building的时候，存buildingid，给web做逻辑，后端没有必要存储',
   `status` TINYINT NOT NULL COMMENT '0. inactive, 1. draft, 2. active',
   `creator_uid` BIGINT,
   `create_time` DATETIME,

@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>rangeType: 范围类型，参考 {@link com.everhomes.rest.questionnaire.QuestionnaireRangeType}</li>
  * <li>range: 范围id,当rangeType=building时，为楼栋名称，其他情况为对应id </li>
  * <li>rangeDescription: 范围描述，如（园区1认证用户、林园、园区2楼栋1用户、永佳天成科技发展有限公司用户）</li>
+ * <li>rid: 创建问卷，范围为building，前端传building的id保存</li>
  * </ul>
  */
 public class QuestionnaireRangeDTO {
@@ -19,6 +20,7 @@ public class QuestionnaireRangeDTO {
     private String rangeType;
     private String range;
     private String rangeDescription;
+    private Long rid;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -60,6 +62,13 @@ public class QuestionnaireRangeDTO {
         this.rangeDescription = rangeDescription;
     }
 
+    public Long getRid() {
+        return rid;
+    }
+
+    public void setRid(Long rid) {
+        this.rid = rid;
+    }
 //    @Override
 //    public boolean equals(Object obj) {
 //        if(obj instanceof QuestionnaireRangeDTO){
