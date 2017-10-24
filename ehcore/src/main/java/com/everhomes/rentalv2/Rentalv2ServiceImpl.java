@@ -2252,8 +2252,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			this.rentalProvider.batchCreateRentalCells(cellList.get());
 //			rs.setCellBeginId(cellBeginId);
 //			rs.setCellEndId(cellBeginId+seqNum.get()-1);
-			rs.setCellBeginId(0L);
-			rs.setCellEndId(0L);
+//			rs.setCellBeginId(0L);
+//			rs.setCellEndId(0L);
 
 			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(PriceRuleType.RESOURCE.getCode(), rs.getId());
 			createPriceRules(PriceRuleType.RESOURCE, rs.getId(), cmd.getPriceRules());
