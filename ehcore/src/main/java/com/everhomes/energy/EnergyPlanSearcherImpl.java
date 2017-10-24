@@ -1,25 +1,40 @@
 package com.everhomes.energy;
 
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationJobPosition;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.repeat.RepeatProvider;
 import com.everhomes.repeat.RepeatSettings;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.energy.EnergyPlanDTO;
+import com.everhomes.rest.energy.EnergyPlanGroupDTO;
 import com.everhomes.rest.energy.SearchEnergyPlansCommand;
 import com.everhomes.rest.energy.SearchEnergyPlansResponse;
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EnergyPlanSearcher;
 import com.everhomes.search.SearchUtils;
+import com.everhomes.settings.PaginationConfigHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ying.xiong on 2017/10/23.
@@ -35,6 +50,9 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
 
     @Autowired
     private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private ConfigurationProvider configProvider;
 
     @Override
     public String getIndexType() {
@@ -79,6 +97,7 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
             if(rs != null) {
                 builder.field("startTime", rs.getStartDate());
                 builder.field("endTime", rs.getEndDate());
+                builder.field("repeatType", rs.getRepeatType());
             }
             List<EnergyPlanGroupMap> groupMaps = energyPlanProvider.listGroupsByEnergyPlan(plan.getId());
             if(groupMaps != null && groupMaps.size() > 0) {
@@ -124,6 +143,101 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
 
     @Override
     public SearchEnergyPlansResponse query(SearchEnergyPlansCommand cmd) {
-        return null;
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+        QueryBuilder qb = null;
+        if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
+            qb = QueryBuilders.matchAllQuery();
+        } else {
+            qb = QueryBuilders.multiMatchQuery(cmd.getKeywords())
+                    .field("planName", 1.5f)
+                    .field("groupName", 1.0f);
+
+            builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);
+            builder.addHighlightedField("planName").addHighlightedField("groupName");
+        }
+
+        FilterBuilder fb = null;
+        FilterBuilder nfb = FilterBuilders.termFilter("status", CommonStatus.INACTIVE.getCode());
+        fb = FilterBuilders.notFilter(nfb);
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+
+        if(cmd.getStartTime() != null) {
+            RangeFilterBuilder rf = new RangeFilterBuilder("startTime");
+            rf.gt(cmd.getStartTime());
+            fb = FilterBuilders.andFilter(fb, rf);
+        }
+
+        if(cmd.getEndTime() != null) {
+            RangeFilterBuilder rf = new RangeFilterBuilder("endTime");
+            rf.lt(cmd.getEndTime());
+            fb = FilterBuilders.andFilter(fb, rf);
+        }
+
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+
+        qb = QueryBuilders.filteredQuery(qb, fb);
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        builder.setQuery(qb);
+        if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
+            builder.addSort("id", SortOrder.DESC);
+        }
+        SearchResponse rsp = builder.execute().actionGet();
+
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("EnergyPlanSearcherImpl query builder: {}, rsp: {}", builder, rsp);
+
+        List<EnergyPlanDTO> planDTOs = getDTOs(rsp);
+        SearchEnergyPlansResponse response = new SearchEnergyPlansResponse();
+
+        if(planDTOs.size() > pageSize) {
+            response.setNextPageAnchor(anchor + 1);
+            planDTOs.remove(planDTOs.size() - 1);
+        }
+        response.setPlanDTOs(planDTOs);
+        return response;
+    }
+
+    private List<EnergyPlanDTO> getDTOs(SearchResponse rsp) {
+        List<EnergyPlanDTO> dtos = new ArrayList<>();
+        SearchHit[] docs = rsp.getHits().getHits();
+        for (SearchHit sd : docs) {
+            try {
+                EnergyPlanDTO dto = new EnergyPlanDTO();
+                dto.setId(Long.parseLong(sd.getId()));
+                Map<String, Object> source = sd.getSource();
+
+                dto.setName(String.valueOf(source.get("planName")));
+                dto.setNamespaceId(SearchUtils.getLongField(source.get("namespaceId")).intValue());
+                RepeatSettingsDTO repeat = new RepeatSettingsDTO();
+                repeat.setStartDate(SearchUtils.getLongField(source.get("startTime")));
+                repeat.setEndDate(SearchUtils.getLongField(source.get("endTime")));
+                repeat.setRepeatType(SearchUtils.getLongField(source.get("repeatType")).byteValue());
+                dto.setRepeat(repeat);
+
+                String[] groupNames = String.valueOf(source.get("groupName")).split(",");
+                if(groupNames != null && groupNames.length > 0) {
+                    List<EnergyPlanGroupDTO> groups = new ArrayList<>();
+                    for(String groupName : groupNames) {
+                        EnergyPlanGroupDTO groupDTO = new EnergyPlanGroupDTO();
+                        groupDTO.setGroupName(groupName);
+                        groups.add(groupDTO);
+                    }
+                    dto.setGroups(groups);
+                }
+                dtos.add(dto);
+            }
+            catch(Exception ex) {
+                LOGGER.info("getTopicIds error " + ex.getMessage());
+            }
+        }
+
+        return dtos;
     }
 }

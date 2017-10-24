@@ -1,5 +1,9 @@
 package com.everhomes.search;
 
+import com.everhomes.energy.EnergyMeterTask;
+import com.everhomes.rest.energy.SearchTasksByEnergyPlanCommand;
+import com.everhomes.rest.energy.SearchTasksByEnergyPlanResponse;
+
 import java.util.List;
 
 /**
@@ -7,8 +11,8 @@ import java.util.List;
  */
 public interface EnergyMeterTaskSearcher {
     void deleteById(Long id);
-    void bulkUpdate(List<EnergyPlan> tasks);
-    void feedDoc(EnergyPlan task);
+    void bulkUpdate(List<EnergyMeterTask> tasks);
+    void feedDoc(EnergyMeterTask task);
     void syncFromDb();
-    SearchEnergyPlansResponse query(SearchEnergyPlansCommand cmd);
+    SearchTasksByEnergyPlanResponse searchTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd);
 }

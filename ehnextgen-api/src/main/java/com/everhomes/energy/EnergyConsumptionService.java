@@ -253,4 +253,6 @@ public interface EnergyConsumptionService {
     void deleteEnergyPlan(DeleteEnergyPlanCommand cmd);
     ListEnergyPlanMetersResponse listEnergyPlanMeters(ListEnergyPlanMetersCommand cmd);
     ListEnergyPlanMetersResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd);
+    ListUserEnergyPlanTasksResponse listUserEnergyPlanTasks(ListUserEnergyPlanTasksCommand cmd);
+    void readTaskMeter(ReadTaskMeterCommand cmd);
 }

@@ -2,6 +2,8 @@ package com.everhomes.rest.energy;
 
 /**
  * <ul>
+ *     <li>namespaceId: 域空间id</li>
+ *     <li>communityId: 园区id</li>
  *     <li>keywords: 关键字：计划名称或执行人</li>
  *     <li>startTime: 开始时间</li>
  *     <li>endTime: 结束时间</li>
@@ -11,12 +13,30 @@ package com.everhomes.rest.energy;
  * Created by ying.xiong on 2017/10/20.
  */
 public class SearchEnergyPlansCommand {
+    private Integer namespaceId;
+    private Long communityId;
     private String keywords;
     private Long startTime;
     private Long endTime;
 
     private Long pageAnchor;
     private Integer pageSize;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public String getKeywords() {
         return keywords;

@@ -71,6 +71,7 @@ public class SearchUtils {
 
     public static final String UNIONGROUP_DETAILS= "uniongroupDetails";
     public static final String ENERGY_PLAN= "energyPlan";
+    public static final String ENERGY_TASK= "energyTask";
 
     public static Long getLongField(Object o) {
         Long v = -1l;

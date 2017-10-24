@@ -599,7 +599,7 @@ public class EnergyConsumptionController extends ControllerBase {
     @RestReturn(SearchTasksByEnergyPlanResponse.class)
     @RequestMapping("searchTasksByEnergyPlan")
     public RestResponse searchTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd) {
-        return response(energyConsumptionService.searchTasksByEnergyPlan(cmd));
+        return response(energyMeterTaskSearcher.searchTasksByEnergyPlan(cmd));
     }
 
     /**
@@ -620,7 +620,12 @@ public class EnergyConsumptionController extends ControllerBase {
     @RestReturn(String.class)
     @RequestMapping("readTaskMeter")
     public RestResponse readTaskMeter(ReadTaskMeterCommand cmd) {
-        return response(energyConsumptionService.readTaskMeter(cmd));
+        energyConsumptionService.readTaskMeter(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
     }
 
 }
