@@ -629,7 +629,7 @@ public class ContractServiceImpl implements ContractService {
 		createFlowCaseCommand.setReferId(contract.getId());
 		createFlowCaseCommand.setReferType(EntityType.CONTRACT.getCode());
 		createFlowCaseCommand.setContent(contract.getContractNumber());
-
+		createFlowCaseCommand.setServiceType(EntityType.CONTRACT.getCode());
 		createFlowCaseCommand.setProjectId(contract.getCommunityId());
 		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
 
