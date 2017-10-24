@@ -1729,6 +1729,8 @@ public class ZJGKOpenServiceImpl {
                 customer.setOrgOwnerTypeId(ownerType.getId());
             }
             organizationProvider.createOrganizationOwner(customer);
+            CommunityPmOwner communityPmOwner = ConvertHelper.convert(customer, CommunityPmOwner.class);
+            pmOwnerSearcher.feedDoc(communityPmOwner);
             //给个人客户添加地址
             insertOrganizationOwnerAddresses(customer, zjIndividual.getAddressList());
             return null;
@@ -1809,6 +1811,8 @@ public class ZJGKOpenServiceImpl {
         if (OrganizationOwnerStatus.fromCode(customer.getStatus()) != OrganizationOwnerStatus.DELETE) {
             customer.setStatus(OrganizationOwnerStatus.DELETE.getCode());
             organizationProvider.updateOrganizationOwner(customer);
+            CommunityPmOwner communityPmOwner = ConvertHelper.convert(customer, CommunityPmOwner.class);
+            pmOwnerSearcher.feedDoc(communityPmOwner);
         }
 
         List<OrganizationOwnerAddress> myOrganizationOwnerAddressList = individualCustomerProvider.listOrganizationOwnerAddressByOwnerId(customer.getId());
