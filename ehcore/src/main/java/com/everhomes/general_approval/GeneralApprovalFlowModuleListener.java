@@ -181,7 +181,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         e = new FlowCaseEntity();
         e.setKey(localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "审批编号"));
         e.setEntityType(FlowCaseEntityType.LIST.getCode());
-        e.setValue(gf.getApprovalNo().toString());
+        e.setValue(gf.getApprovalNo() != null ? gf.getApprovalNo().toString() : null);
         entities.add(e);
 
         e = new FlowCaseEntity();
