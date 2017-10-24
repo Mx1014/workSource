@@ -18,6 +18,7 @@ import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,14 +99,19 @@ public class UniongroupServiceImpl implements UniongroupService {
                 }
 
                 LOGGER.debug("saveUniongroupConfigures t3:" +  System.currentTimeMillis());
-                //5.同步搜索引擎
-                this.uniongroupSearcher.deleteAll();
-                this.uniongroupSearcher.syncUniongroupDetailsAtOrg(checkOrganization(cmd.getEnterpriseId()), cmd.getGroupType());
-                this.uniongroupSearcher.refresh();
-
                 return null;
             });
             return null;
+        });
+
+        //5.同步搜索引擎
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                uniongroupSearcher.deleteAll();
+                uniongroupSearcher.syncUniongroupDetailsAtOrg(checkOrganization(cmd.getEnterpriseId()), cmd.getGroupType());
+                uniongroupSearcher.refresh();
+            }
         });
         LOGGER.debug("saveUniongroupConfigures t4:" +  System.currentTimeMillis());
     }
