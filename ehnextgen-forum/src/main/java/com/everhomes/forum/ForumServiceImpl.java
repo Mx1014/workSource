@@ -2008,11 +2008,6 @@ public class ForumServiceImpl implements ForumService {
         //检查超级管理员，此处不成立会报错
         resolver.checkUserPrivilege(operatorId, 0);
 
-//        if(ContactAdminFlag.fromCode(adminResponse.getIsAdmin()) != ContactAdminFlag.YES){
-//            LOGGER.error("Insufficient privilege, operatorId={}, organizationId={}", operatorId, organizationId);
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-//                    "Insufficient privilege");
-//        }
     }
 
     private Post checkStickPostParameter(Long operatorId, Long postId, Byte stickFlag) {
