@@ -420,8 +420,6 @@ public class ForumController extends ControllerBase {
     @RequestMapping("stickPost")
     @RestReturn(value=String.class)
     public RestResponse stickPost(StickPostCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         forumService.stickPost(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
