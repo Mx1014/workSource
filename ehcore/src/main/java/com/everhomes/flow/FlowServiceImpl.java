@@ -60,6 +60,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -2404,6 +2405,10 @@ public class FlowServiceImpl implements FlowService {
         }
 
         FlowCase flowCase = ConvertHelper.convert(flowCaseCmd, FlowCase.class);
+        if (flowCaseCmd.getAdditionalFieldDTO() != null) {
+            BeanUtils.copyProperties(flowCaseCmd.getAdditionalFieldDTO(), flowCase);
+        }
+
         flowCase.setCurrentNodeId(0L);
         if (flowCase.getApplyUserId() == null) {
             flowCase.setApplyUserId(UserContext.current().getUser().getId());
@@ -4952,7 +4957,7 @@ public class FlowServiceImpl implements FlowService {
             return null;
         }
 
-        if (dto.getTitle() != null) {
+        if (dto.getTitle() != null && dto.getModuleName() == null) {
             dto.setModuleName(dto.getTitle());
         } else {
             dto.setTitle(dto.getModuleName());
@@ -5130,7 +5135,7 @@ public class FlowServiceImpl implements FlowService {
         FlowGraph flowGraph = ctx.getFlowGraph();
 
         FlowCaseBriefDTO dto = ConvertHelper.convert(flowCase, FlowCaseBriefDTO.class);
-        if (dto.getTitle() != null) {
+        if (dto.getTitle() != null && dto.getModuleName() == null) {
             dto.setModuleName(dto.getTitle());
         } else {
             dto.setTitle(dto.getModuleName());
