@@ -314,15 +314,15 @@ public class ExcelUtils {
         // 设置表格默认列宽度为20个字节
         sheet.setDefaultColumnWidth((short) 20);
         // 生成一个样式
-        HSSFCellStyle style = workbook.createCellStyle();
+        HSSFCellStyle style_non_m = workbook.createCellStyle();
         // 设置这些样式
 //        style.setFillForegroundColor(HSSFColor.GREEN.index);
 //        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-        style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-        style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-        style.setBorderRight(HSSFCellStyle.BORDER_THIN);
-        style.setBorderTop(HSSFCellStyle.BORDER_THIN);
-        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        style_non_m.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        style_non_m.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        style_non_m.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        style_non_m.setBorderTop(HSSFCellStyle.BORDER_THIN);
+        style_non_m.setAlignment(HSSFCellStyle.ALIGN_CENTER);
         // 生成一个内容字体
         HSSFCellStyle style_content = workbook.createCellStyle();
         HSSFFont font = workbook.createFont();
@@ -334,7 +334,7 @@ public class ExcelUtils {
         font2.setColor(HSSFColor.BLACK.index);
         font2.setFontHeightInPoints((short) 16);
         font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-        style.setFont(font2);
+        style_non_m.setFont(font2);
         //必填的字体和样式
 
         HSSFCellStyle style_m = workbook.createCellStyle();
@@ -350,7 +350,8 @@ public class ExcelUtils {
 
         style_m.setFont(font4);
         // 指定当单元格内容显示不下时自动换行
-        style.setWrapText(true);
+        style_non_m.setWrapText(true);
+        style_content.setWrapText(true);
         //产生说明
         HSSFFont font3 = workbook.createFont();
         font3.setColor(HSSFColor.BLACK.index);
@@ -383,12 +384,12 @@ public class ExcelUtils {
             if(mandatory[i].equals("1")){
                 cell.setCellStyle(style_m);
             }else{
-                cell.setCellStyle(style);
+                cell.setCellStyle(style_non_m);
             }
             HSSFRichTextString text = new HSSFRichTextString(headers[i]);
             cell.setCellValue(text.toString());
         }
-        style.setFont(font);
+
         // 遍历集合数据，产生数据行
         if (result != null) {
             int index = 1;

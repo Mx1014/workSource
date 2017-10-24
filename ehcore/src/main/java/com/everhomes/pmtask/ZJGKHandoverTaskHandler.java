@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 /**
  * Created by ying.xiong on 2017/7/17.
  */
-@Component(HandoverTaskHandler.HANDOVER_VENDOR_PREFIX + HandoverTaskHandler.ZJGK)
+@Component(ZJGKHandoverTaskHandler.HANDOVER_VENDOR_PREFIX + HandoverTaskHandler.ZJGK)
 public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZJGKHandoverTaskHandler.class);
 

@@ -60,7 +60,7 @@ public class ImportFileServiceImpl implements ImportFileService{
                     task.setStatus(ImportFileTaskStatus.FINISH.getCode());
                     task.setResult(StringHelper.toJsonString(response));
                 }catch (Exception e){
-                    LOGGER.error("executor task error.", e);
+                    LOGGER.error("executor task error. error: {}", e);
                     task.setStatus(ImportFileTaskStatus.EXCEPTION.getCode());
                     task.setResult(e.toString());
                 }finally {

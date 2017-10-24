@@ -20,15 +20,6 @@ public class ZJContract {
     private List<BuildingApartmentDTO> apartments;
     private BigDecimal amount;
     private String status;
-    private String customerName;
-
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
 
     public String getContracId() {
         return contracId;

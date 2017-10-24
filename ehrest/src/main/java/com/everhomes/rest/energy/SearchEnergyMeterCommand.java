@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
  *     <li>status: 表记状态 {@link com.everhomes.rest.energy.EnergyMeterStatus}</li>
  *     <li>pageAnchor: 下页锚点</li>
  *     <li>pageSize: 每页数量</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class SearchEnergyMeterCommand {
@@ -32,6 +33,7 @@ public class SearchEnergyMeterCommand {
     private Long status;
     private Long pageAnchor;
     private Integer pageSize;
+    private Integer namespaceId;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -112,6 +114,14 @@ public class SearchEnergyMeterCommand {
     public void setStatus(Long status) {
         this.status = status;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {

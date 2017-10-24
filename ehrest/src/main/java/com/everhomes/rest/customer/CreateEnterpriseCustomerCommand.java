@@ -62,10 +62,19 @@ import java.math.BigDecimal;
  *     <li>managerPhone: 总经理电话</li>
  *     <li>managerEmail: 总经理邮箱</li>
  *     <li>remark: 备注</li>
+ *     <li>trackingUid: 跟进人UID</li>
+ *     <li>propertyArea: 资产面积</li>
+ *     <li>propertyUnitPrice: 资产单价</li>
+ *     <li>propertyType: 资产类型</li>
+ *     <li>longitude: 经度</li>
+ *     <li>latitude: 纬度</li>
+ *     <li>contactDuty:联系人职务</li>
+ *     <li>namespaceId:域空间ID</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
 public class CreateEnterpriseCustomerCommand {
+    private Integer namespaceId;
     private String customerNumber;
     private String name;
     private String nickName;
@@ -124,6 +133,16 @@ public class CreateEnterpriseCustomerCommand {
     private String managerPhone;
     private String managerEmail;
     private String remark;
+    
+    private Long trackingUid;
+    private Double propertyArea;
+    private Double propertyUnitPrice;
+    private Long propertyType;
+    private Double longitude;
+    private Double latitude;
+    private String contactDuty;
+    
+
 
     public Long getCommunityId() {
         return communityId;
@@ -591,4 +610,71 @@ public class CreateEnterpriseCustomerCommand {
     public void setSourceItemName(String sourceItemName) {
         this.sourceItemName = sourceItemName;
     }
+
+	public Long getTrackingUid() {
+		return trackingUid;
+	}
+
+	public void setTrackingUid(Long trackingUid) {
+		this.trackingUid = trackingUid;
+	}
+
+	public Double getPropertyArea() {
+		return propertyArea;
+	}
+
+	public void setPropertyArea(Double propertyArea) {
+		this.propertyArea = propertyArea;
+	}
+
+	public Double getPropertyUnitPrice() {
+		return propertyUnitPrice;
+	}
+
+	public void setPropertyUnitPrice(Double propertyUnitPrice) {
+		this.propertyUnitPrice = propertyUnitPrice;
+	}
+
+	public Long getPropertyType() {
+		return propertyType;
+	}
+
+	public void setPropertyType(Long propertyType) {
+		this.propertyType = propertyType;
+	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public Double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getContactDuty() {
+		return contactDuty;
+	}
+
+	public void setContactDuty(String contactDuty) {
+		this.contactDuty = contactDuty;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+	
+    
+    
 }

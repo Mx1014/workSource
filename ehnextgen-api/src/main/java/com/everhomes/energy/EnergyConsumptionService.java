@@ -35,7 +35,7 @@ public interface EnergyConsumptionService {
     /**
      * meter转dto
      */
-    EnergyMeterDTO toEnergyMeterDTO(EnergyMeter meter);
+    EnergyMeterDTO toEnergyMeterDTO(EnergyMeter meter , Integer namespaceId);
 
     /**
      * 修改表记
