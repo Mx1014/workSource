@@ -69,44 +69,89 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		return config;
 	}
 
+//	@Override
+//	public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,
+//																String plateNumber, String cardNo) {
+//		List<KetuoCardRate> list = new ArrayList<>();
+//		List<KetuoCardType> types = getCardType();
+//
+//		if(StringUtils.isBlank(plateNumber)) {
+//			for(KetuoCardType k: types) {
+//				populateRateInfo(k.getCarType(), k, list);
+//			}
+//		}else{
+//			KetuoCard cardInfo = getCard(plateNumber);
+//			if(null != cardInfo) {
+//				long now = System.currentTimeMillis();
+//				long expireTime = strToLong(cardInfo.getValidTo());
+//
+//				String carType = cardInfo.getCarType();
+//				KetuoCardType type = null;
+//				for(KetuoCardType kt: types) {
+//					if(carType.equals(kt.getCarType())) {
+//						type = kt;
+//						break;
+//					}
+//				}
+//
+//				if(expireTime < now) {
+//					KetuoCardRate ketuoCardRate = getExpiredRate(cardInfo, parkingLot, now);
+//
+//					ketuoCardRate.setCarType(carType);
+//					ketuoCardRate.setTypeName(type.getTypeName());
+//
+//					if (null != ketuoCardRate) {
+//						list.add(ketuoCardRate);
+//					}
+//				}else {
+//					populateRateInfo(carType, type, list);
+//				}
+//			}
+//		}
+//
+//		return list.stream().map(r -> convertParkingRechargeRateDTO(parkingLot, r)).collect(Collectors.toList());
+//	}
+
+	/**
+	 * 查询 过期月卡充值信息
+	 * @param cmd
+	 * @return
+	 */
 	@Override
-	public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,
-																String plateNumber, String cardNo) {
-		List<KetuoCardRate> list = new ArrayList<>();
+	public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd) {
+
+		ParkingExpiredRechargeInfoDTO dto = null;
 		List<KetuoCardType> types = getCardType();
 
-		if(StringUtils.isBlank(plateNumber)) {
-			for(KetuoCardType k: types) {
-				populateRateInfo(k.getCarType(), k, list);
+		KetuoCard cardInfo = getCard(cmd.getPlateNumber());
+		if(null != cardInfo) {
+			long now = System.currentTimeMillis();
+			long expireTime = strToLong(cardInfo.getValidTo());
+
+			String carType = cardInfo.getCarType();
+			KetuoCardType type = null;
+			for(KetuoCardType kt: types) {
+				if(carType.equals(kt.getCarType())) {
+					type = kt;
+					break;
+				}
 			}
-		}else{
-			KetuoCard cardInfo = getCard(plateNumber);
-			if(null != cardInfo) {
-				long now = System.currentTimeMillis();
-				long expireTime = strToLong(cardInfo.getValidTo());
 
-				if(expireTime < now) {
-					KetuoCardRate ketuoCardRate = getExpiredRate(cardInfo, parkingLot, now);
+			if(expireTime < now) {
+				KetuoCardRate ketuoCardRate = getExpiredRate(cardInfo, parkingLot, now);
 
-					if (null != ketuoCardRate) {
-						list.add(ketuoCardRate);
-					}
-				}else {
-					String carType = cardInfo.getCarType();
-					KetuoCardType type = null;
-					for(KetuoCardType kt: types) {
-						if(carType.equals(kt.getCarType())) {
-							type = kt;
-							break;
-						}
-					}
-					populateRateInfo(carType, type, list);
+				if (null != ketuoCardRate) {
+					ketuoCardRate.setCarType(carType);
+					ketuoCardRate.setTypeName(type.getTypeName());
+					ParkingRechargeRateDTO rateDTO =  convertParkingRechargeRateDTO(parkingLot, ketuoCardRate);
+
+					dto = ConvertHelper.convert(rateDTO, ParkingExpiredRechargeInfoDTO.class);
 
 				}
 			}
 		}
 
-		return list.stream().map(r -> convertParkingRechargeRateDTO(parkingLot, r)).collect(Collectors.toList());
+		return dto;
 	}
 
 	@Override

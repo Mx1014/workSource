@@ -92,6 +92,20 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /parking/getExpiredRechargeInfo</b>
+     * <p>查询 过期月卡充值信息</p>
+     */
+    @RequestMapping("getExpiredRechargeInfo")
+    @RestReturn(value=ParkingExpiredRechargeInfoDTO.class)
+    public RestResponse getExpiredRechargeInfo(GetExpiredRechargeInfoCommand cmd) {
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /parking/getParkingTempFee</b>

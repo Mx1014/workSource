@@ -301,4 +301,14 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
     ParkingRechargeRateDTO getOpenCardRate(ParkingCardRequest parkingCardRequest) {
         return null;
     }
+
+    /**
+     * 查询 过期月卡充值信息
+     * @param cmd
+     * @return
+     */
+    @Override
+    public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd) {
+        return null;
+    }
 }
