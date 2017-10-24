@@ -1,24 +1,28 @@
 package com.everhomes.general_approval;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.*;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormTemplate;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
@@ -32,6 +36,9 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
@@ -103,14 +110,19 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Autowired
     private DbProvider dbProvider;
 
-	@Autowired
-	private YellowPageProvider yellowPageProvider;
-	
-	private StringTemplateLoader templateLoader;
+    @Autowired
+    private YellowPageProvider yellowPageProvider;
+
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
+
+    private StringTemplateLoader templateLoader;
 
     private Configuration templateConfig;
 
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+    private SimpleDateFormat numberFormat = new SimpleDateFormat("yyyyMMdd");
 
 
     @Override
@@ -156,10 +168,12 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public GetTemplateByApprovalIdResponse postApprovalForm(PostApprovalFormCommand cmd) {
+        RedisTemplate template = bigCollectionProvider.getMapAccessor("general_approval_no", "").getTemplate(new StringRedisSerializer());
+        ValueOperations op = template.opsForValue();
 
         // TODO Auto-generated method stub
         return this.dbProvider.execute((TransactionStatus status) -> {
-            Long userId = UserContext.current().getUser().getId();
+            User user = UserContext.current().getUser();
             GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
                     .getApprovalId());
             GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(ga
@@ -180,27 +194,50 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             }
 
             CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
-            cmd21.setApplyUserId(userId);
-            // cmd21.setReferId(null);
+            cmd21.setApplyUserId(user.getId());
             cmd21.setReferType(FlowReferType.APPROVAL.getCode());
-
             cmd21.setProjectType(ga.getOwnerType());
             cmd21.setProjectId(ga.getOwnerId());
-
             // 把command作为json传到content里，给flowcase的listener进行处理
             cmd21.setContent(JSON.toJSONString(cmd));
-            // 修改正中会工作流显示名称，暂时写死 add by sw 20170331
-//			if (UserContext.getCurrentNamespaceId().equals(999983)) {
-//				cmd21.setTitle("办事指南");
-//				// cmd21.setTitle(ga.getApprovalName());
-//			}
             cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
             cmd21.setTitle(ga.getApprovalName());
 
-			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(ga.getModuleId());
-			if(category != null){
-				cmd21.setServiceType(category.getName());
-			}
+            //  存储更多的信息
+            GeneralApprovalFlowCaseAdditionalFieldDTO fieldDTO = new GeneralApprovalFlowCaseAdditionalFieldDTO();
+            List<OrganizationMember> member = organizationProvider.listOrganizationMembersByUId(user.getId());
+            member.stream().filter(r -> {
+                return r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode());
+            });
+            if (member != null && member.size() > 0) {
+                Organization department = organizationProvider.findOrganizationById(member.get(0).getOrganizationId());
+                //  存储部门 id 及名称
+                fieldDTO.setDepartment(department.getName());
+                fieldDTO.setDepartmentId(department.getId());
+            }
+            //  设置审批编号
+            String countKey = "general_approval_no" + user.getNamespaceId() + cmd.getOrganizationId();
+            String count;
+            if (op.get(countKey) == null) {
+                LocalDate tomorrowStart = LocalDate.now().plusDays(1);
+                long seconds = (java.sql.Date.valueOf(tomorrowStart).getTime() - System.currentTimeMillis()) / 1000;
+                op.set(countKey, 1L, seconds, TimeUnit.SECONDS);
+                count = "1";
+            } else {
+                count = (String) op.get(countKey);
+            }
+            String approvalNo = numberFormat.format(new Date());
+            for (int i = 0; i < 4 - count.length(); i++)
+                approvalNo += "0";
+            approvalNo += count;
+            op.increment(countKey, 1L);
+            fieldDTO.setApprovalNo(Long.valueOf(approvalNo));
+            cmd21.setAdditionalFieldDTO(fieldDTO);
+
+            ServiceAllianceCategories category = yellowPageProvider.findCategoryById(ga.getModuleId());
+            if (category != null) {
+                cmd21.setServiceType(category.getName());
+            }
             FlowCase flowCase = null;
             if (null == flow) {
                 // 给他一个默认哑的flow
@@ -757,8 +794,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 query.addConditions(GeneralApprovalFlowCaseCustomField.CREATOR_DEPARTMENT_ID.getField().eq(cmd.getCreatorDepartmentId()));
             return query;
         });
-        if (details != null && details.size() > 0){
-            List<GeneralApprovalRecordDTO> results = details.stream().map(r ->{
+        if (details != null && details.size() > 0) {
+            List<GeneralApprovalRecordDTO> results = details.stream().map(r -> {
                 GeneralApprovalFlowCase flowCase = ConvertHelper.convert(r, GeneralApprovalFlowCase.class);
                 GeneralApprovalRecordDTO dto = new GeneralApprovalRecordDTO();
                 dto.setId(r.getId());
