@@ -221,7 +221,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             if (op.get(countKey) == null) {
                 LocalDate tomorrowStart = LocalDate.now().plusDays(1);
                 long seconds = (java.sql.Date.valueOf(tomorrowStart).getTime() - System.currentTimeMillis()) / 1000;
-                op.set(countKey, 1L, seconds, TimeUnit.SECONDS);
+                op.set(countKey, "1", seconds, TimeUnit.SECONDS);
                 count = "1";
             } else {
                 count = (String) op.get(countKey);
