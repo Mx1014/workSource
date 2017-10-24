@@ -2263,6 +2263,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return null;
 		});
 	}
+
+	private List<PriceRuleDTO> buildDefaultPriceRule(List<Byte> rentalTypes) {
+		List<PriceRuleDTO> priceRules = new ArrayList<>();
+		rentalTypes.forEach(r -> {
+			PriceRuleDTO rule = new PriceRuleDTO();
+			rule.setRentalType(r);
+			rule.setWorkdayPrice(new BigDecimal(0));
+			rule.setWeekendPrice(new BigDecimal(0));
+			rule.setApprovingUserWeekendPrice(new BigDecimal(0));
+			rule.setApprovingUserWorkdayPrice(new BigDecimal(0));
+			rule.setOrgMemberWeekendPrice(new BigDecimal(0));
+			rule.setOrgMemberWorkdayPrice(new BigDecimal(0));
+			priceRules.add(rule);
+		});
+
+		return priceRules;
+	}
+
 	/**
 	 * 取某个场所,某段时间的单元格
 	 * */
