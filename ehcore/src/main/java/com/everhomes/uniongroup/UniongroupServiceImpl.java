@@ -15,6 +15,7 @@ import com.everhomes.rest.uniongroup.*;
 import com.everhomes.search.UniongroupSearcher;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupConfigures;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
+import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -49,6 +50,9 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Autowired
     private UniongroupSearcher uniongroupSearcher;
+
+    @Autowired
+    private PunchService punchService;
 
     private Integer DEFAULT_VERSION_CODE = 0;
 
@@ -341,7 +345,9 @@ public class UniongroupServiceImpl implements UniongroupService {
         /**判断departmentIds是否已经被分配薪酬组**/
         for (int i = departmentIds.size() - 1; i >= 0; i--) {
             //存疑！
-            UniongroupConfigures uniongroupConfigures = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, departmentIds.get(i), null, DEFAULT_VERSION_CODE, null);
+            //:todo 目前只使用到薪酬组，因此只返回一个对象。如果需要支持多组织，这里需要重构
+            //:todo 查询的是0版本
+            UniongroupConfigures uniongroupConfigures = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, departmentIds.get(i), UniongroupType.PUNCHGROUP.getCode(), DEFAULT_VERSION_CODE, null);
             if (uniongroupConfigures != null) {
                 groupId = uniongroupConfigures.getGroupId();
                 groupType = uniongroupConfigures.getGroupType();
@@ -368,7 +374,7 @@ public class UniongroupServiceImpl implements UniongroupService {
                 Organization _org = departs_one.get(i);
                 while (unc == null) {
                     //判断是否在配置表中
-                    unc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, _org.getId(), null, DEFAULT_VERSION_CODE,null);
+                    unc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, _org.getId(), UniongroupType.PUNCHGROUP.getCode(), DEFAULT_VERSION_CODE,null);
                     _org = this.organizationProvider.findOrganizationById(_org.getParentId());
                     if (_org == null || unc != null) {
                         break;
@@ -402,6 +408,8 @@ public class UniongroupServiceImpl implements UniongroupService {
             dbProvider.execute((TransactionStatus status) -> {
                 //先删除
                 this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(organizationMember.getDetailId()), finalGroupType);
+                //通知
+                this.punchService.punchGroupAddNewEmployee(uniongroupMemberDetails.getGroupId());
                 //后保存
                 this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(Collections.singletonList(uniongroupMemberDetails));
                 return null;
