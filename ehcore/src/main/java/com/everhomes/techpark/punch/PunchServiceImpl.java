@@ -5163,7 +5163,8 @@ public class PunchServiceImpl implements PunchService {
 					if (null != punchSchedulings) {
 						for (PunchScheduling punchScheduling : punchSchedulings) {
 							OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(punchScheduling.getTargetId());
-							refreshDayLogAndMonthStat(memberDetail.getTargetId(), pr.getOwnerId(), schedulingCalendar);
+							if(null != memberDetail)
+								refreshDayLogAndMonthStat(memberDetail.getTargetId(), pr.getOwnerId(), schedulingCalendar);
 						}
 					}
 				}
