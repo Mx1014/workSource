@@ -49,6 +49,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	private static final String GET_PARKINGS = "/api/find/GetParkingLotList";
 	private static final String GET_FREE_SPACE_NUM = "/api/find/GetFreeSpaceNum";
 	private static final String GET_CAR_LOCATION = "/api/find/GetCarLocInfo";
+	private static final String GET_PARKING_CAR_INFO = "/api/wec/GetParkingCarInfo";
 	private static final String ADD_MONTH_CARD = "/api/card/AddMonthCarCardNo_KX";
 	//科兴的需求，充值过期的月卡时，需要计算费率，标记为自定义custom的费率，其他停车场不建议做这样的功能。
 	private static final String EXPIRE_CUSTOM_RATE_TOKEN = "custom_expired";
@@ -138,7 +139,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			}
 
 			if(expireTime < now) {
-				dto = getExpiredRate(cardInfo, parkingLot, now, type);
+				dto = getExpiredRate(cmd.getPlateNumber(), cardInfo, parkingLot, now, type);
 			}
 		}
 
@@ -157,7 +158,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		return false;
 	}
 
-	private ParkingExpiredRechargeInfoDTO getExpiredRate(KetuoCard cardInfo, ParkingLot parkingLot, long now, KetuoCardType type) {
+	private ParkingExpiredRechargeInfoDTO getExpiredRate(String plateNumber, KetuoCard cardInfo, ParkingLot parkingLot, long now, KetuoCardType type) {
 		ParkingExpiredRechargeInfoDTO dto = null;
 
 		if(parkingLot.getExpiredRechargeFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
@@ -193,25 +194,30 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 //						calendar.set(Calendar.HOUR_OF_DAY, 23);
 //						calendar.set(Calendar.MINUTE, 59);
 //						calendar.set(Calendar.SECOND, 59);
+					//查询车在场信息，来判断车是否在场
+					KetuoCarInfo carInfo = getKetuoCarInfo(plateNumber);
+					if (null != carInfo) {
+						long entryTime = strToLong(carInfo.getEntryTime());
 
-					if (true) {
+						if (entryTime <= expireTime) {
 
 
-						//当卡的有效期是月的最后一天，只考虑月卡有效期是每月的最后一天 23:59:59,如果月卡有效期不是这个格式的时间，
-						// 则是停车场返回的月卡有效期的问题
-						if(Utils.isLastDayOfMonth(cardCalendar)){
-							//计算要补充的月数，当前月减去月卡有效期月份 加上后台设置的要预交的月数
-							rechargeMonthCount = currentCalendar.get(Calendar.MONTH) - cardCalendar.get(Calendar.MONTH)
-													+ rechargeMonthCount - 1;
+							//当卡的有效期是月的最后一天，只考虑月卡有效期是每月的最后一天 23:59:59,如果月卡有效期不是这个格式的时间，
+							// 则是停车场返回的月卡有效期的问题
+							if(Utils.isLastDayOfMonth(cardCalendar)){
+								//计算要补充的月数，当前月减去月卡有效期月份 加上后台设置的要预交的月数
+								rechargeMonthCount = currentCalendar.get(Calendar.MONTH) - cardCalendar.get(Calendar.MONTH)
+										+ rechargeMonthCount - 1;
 
 //							cardCalendar.add(Calendar.MONTH, month);
 //							int d = cardCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 //							cardCalendar.set(Calendar.DAY_OF_MONTH, d);
-						}
+							}
 
-					}else if(true) {
-						rechargeMonthCount = currentCalendar.get(Calendar.MONTH) - entryCalendar.get(Calendar.MONTH)
-								+ rechargeMonthCount;
+						}else if(entryTime > expireTime) {
+							rechargeMonthCount = currentCalendar.get(Calendar.MONTH) - entryCalendar.get(Calendar.MONTH)
+									+ rechargeMonthCount;
+						}
 					}
 
 					if(parkingLot.getExpiredRechargeType() == ParkingCardExpiredRechargeType.ALL.getCode()) {
@@ -675,5 +681,28 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			}
 		}
 		return null;
+	}
+
+	private KetuoCarInfo getKetuoCarInfo(String plateNumber) {
+		KetuoCarInfo carInfo = null;
+		String parkingId = configProvider.getValue("parking.kexing.searchCar.parkId", "");
+		String url = configProvider.getValue("parking.kexing.searchCar.url", "");
+
+		LinkedHashMap<String, Object> param = new LinkedHashMap<>();
+		param.put("parkId", parkingId);
+		param.put("plateNo", plateNumber);
+
+		JSONObject params = createRequestParam(param);
+		String json = Utils.post(url + GET_PARKING_CAR_INFO, params);
+
+		KetuoJsonEntity<KetuoCarInfo> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoCarInfo>>(){});
+
+		if(entity.isSuccess()){
+			List<KetuoCarInfo> list = entity.getData();
+			if(null != list && !list.isEmpty()) {
+				 return list.get(0);
+			}
+		}
+		return carInfo;
 	}
 }
