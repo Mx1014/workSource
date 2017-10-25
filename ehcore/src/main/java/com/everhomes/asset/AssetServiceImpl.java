@@ -594,6 +594,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {
+        if(cmd.getOwnerId()==null){
+            cmd.setOwnerId(UserContext.);
+        }
         return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId());
     }
 
