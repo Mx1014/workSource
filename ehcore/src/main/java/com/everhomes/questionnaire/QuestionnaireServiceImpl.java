@@ -886,7 +886,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			publishTimeAnchor = Long.valueOf(String.valueOf(cmd.getPageAnchor()).substring(1));
 		}
 		int questionnariePageSize = configurationProvider.getIntValue("questionnariePageSize",500);
-		List<QuestionnaireDTO> questionnaires = questionnaireProvider.listTargetQuestionnaireByOwner(cmd.getNamespaceId(),cmd.getNowTime(),
+		Integer namespaceId = cmd.getNamespaceId();
+		if(namespaceId == null){
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		List<QuestionnaireDTO> questionnaires = questionnaireProvider.listTargetQuestionnaireByOwner(namespaceId,cmd.getNowTime(),
 				cmd.getCollectFlag(),UserContext.current().getUser().getId(),answeredFlagAnchor,publishTimeAnchor,questionnariePageSize);
 		return new ListTargetQuestionnairesResponse(generateNextPageAnchor(cmd,questionnaires,pageSize,answeredFlagAnchor,publishTimeAnchor), questionnaires);
 	}
