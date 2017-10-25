@@ -71,4 +71,7 @@ INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name
 
 -- 默认去处理按钮文本  add by xq.tian 2017/10/25
 update eh_flow_nodes set goto_process_button_name='去处理' where goto_process_button_name is null or goto_process_button_name='';
+-- by Sir Xiongying.V.Breg
+update eh_var_field_groups set name = 'com.everhomes.customer.CustomerTracking' where title = '跟进信息';
+update eh_var_field_groups set name = 'com.everhomes.customer.CustomerTrackingPlan' where title = '计划信息';
 
