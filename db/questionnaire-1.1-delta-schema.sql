@@ -20,7 +20,7 @@ CREATE TABLE `eh_questionnaire_ranges` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
 	`questionnaire_id` BIGINT NOT NULL COMMENT '关联问卷调查的id',
-  `community_id` BIGINT NOT NULL COMMENT '园区id，查询楼栋（range_type=building）下的企业的时候，使用的是楼栋的名称查询，这里必须保存community一起查询才正确。',
+  `community_id` BIGINT COMMENT '园区id，查询楼栋（range_type=building）下的企业的时候，使用的是楼栋的名称查询，这里必须保存community一起查询才正确。',
   `range_type` VARCHAR(64) COMMENT 'community_all(项目),community_authenticated(项目下已认证的用户),community_unauthorized(未认证),building(楼栋),enterprise(企业),user 范围类型',
   `range` VARCHAR(512) COMMENT '对应项目id,楼栋名称，企业ID，用户id',
 	`range_description` VARCHAR(1024) COMMENT '范围描述信息，用于显示在问卷详情页',
