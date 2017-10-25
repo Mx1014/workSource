@@ -6394,6 +6394,18 @@ public class OrganizationServiceImpl implements OrganizationService {
         return response;
     }
 
+    @Override
+    public ListOrganizationMemberCommandResponse cleanWrongStatusOrganizationMembers(Integer namespaceId) {
+        List<EhOrganizations> orgs = this.organizationProvider.listLapseOrganizations(namespaceId);
+        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+        if(orgs != null && orgs.size() > 0){
+            orgs.forEach(r->{
+                this.organizationProvider.updateOrganizationMembersToInactiveByPath(r.getPath(), now);
+            });
+        }
+        return null;
+    }
+
 
     private UserIdentifier createUserAndIdentifier(Integer namespaceId, String nickName, String identifierToken){
         User user = new User();

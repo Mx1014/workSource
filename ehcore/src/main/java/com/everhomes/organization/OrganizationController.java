@@ -1807,4 +1807,18 @@ public class OrganizationController extends ControllerBase {
         return response;
     }*/
 
+    /**
+     * <b>URL: /org/cleanWrongStatusOrganizationMembers</b>
+     * <p>同步失效的organizaitonMember记录</p>
+     */
+    @RequestMapping("cleanWrongStatusOrganizationMembers")
+    @RestReturn(value = String.class)
+    public RestResponse cleanWrongStatusOrganizationMembers() {
+        ListOrganizationMemberCommandResponse members = this.organizationService.cleanWrongStatusOrganizationMembers();
+        RestResponse response = new RestResponse(members);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }
