@@ -2178,7 +2178,6 @@ public class AssetProviderImpl implements AssetProvider {
                 .set(t.BILLS_DAY,cmd.getBillDay())
                 .set(t.BALANCE_DATE_TYPE,cmd.getBillingCycle())
                 .set(t.DUE_DAY_TYPE,cmd.getDueDateType())
-                .set(t.DUE_DAY_TYPE,cmd.getDueDateType())
                 .where(t.ID.eq(cmd.getBillGroupId()))
                 .execute();
     }
@@ -2250,6 +2249,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
         EhPaymentChargingStandards t3 = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t3");
+        EhPaymentChargingItemScopes t4 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t4");
 
         SelectQuery<Record> query = context.selectQuery();
         List<PaymentBillGroupRule> rules = context.selectFrom(t)
@@ -2262,6 +2262,12 @@ public class AssetProviderImpl implements AssetProvider {
             PaymentBillGroup group = context.selectFrom(t1)
                     .where(t1.ID.eq(rule.getBillGroupId()))
                     .fetchOneInto(PaymentBillGroup.class);
+            PaymentChargingItemScope itemScope = context.selectFrom(t4)
+                    .where(t4.ID.eq(rule.getChargingItemId()))
+                    .and(t4.OWNER_ID.eq(group.getOwnerId()))
+                    .and(t4.OWNER_TYPE.eq(group.getOwnerType()))
+                    .and(t4.NAMESPACE_ID.eq(group.getNamespaceId()))
+                    .fetchOneInto(PaymentChargingItemScope.class);
 
             dto.setBillingCycle(group.getBalanceDateType());
 
@@ -2269,7 +2275,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .where(t3.ID.eq(rule.getChargingStandardsId()))
                     .fetchOneInto(PaymentChargingStandards.class);
             dto.setFormula(standard.getFormula());
-            dto.setGroupChargingItemName(rule.getChargingItemName());
+            dto.setGroupChargingItemName(itemScope.getProjectLevelName());
             dto.setChargingStandardName(standard.getName());
             dto.setBillItemGenerationMonth(rule.getBillItemMonthOffset());
             dto.setBillItemGenerationDay(rule.getBillItemDayOffset());
