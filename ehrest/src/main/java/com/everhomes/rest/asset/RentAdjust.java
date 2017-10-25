@@ -22,5 +22,5 @@ public class RentAdjust {
 
     @ItemType(String.class)
     private List<ContractProperty> properties;
-    private
+
 }
