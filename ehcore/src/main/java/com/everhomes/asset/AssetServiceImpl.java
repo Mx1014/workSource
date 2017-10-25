@@ -725,6 +725,7 @@ public class AssetServiceImpl implements AssetService {
                     default:
                         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                 }
+                //计算
                 List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle,cmd);
 
                 long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), billItemsExpectancies.size());
@@ -850,6 +851,7 @@ public class AssetServiceImpl implements AssetService {
                                 && dateGeneration.compareTo(billCycleStart) != -1){
                             newBill.setAmountOwed(newBill.getAmountOwed().add(item.getAmountOwed()));
                             newBill.setAmountReceivable(newBill.getAmountReceivable().add(item.getAmountReceivable()));
+                            item.setBillId(newBill.getId());
                             break;
                         }
                     }
@@ -1029,6 +1031,14 @@ public class AssetServiceImpl implements AssetService {
             time++;
         }
         LOGGER.info("账单产生了"+time+"项目,真实为"+list.size());
+        //拆卸调组的包裹
+        List<RentAdjust> rentAdjusts = cmd.getRentAdjusts();
+        for(int i = 0; i < rentAdjusts.size(); i ++){
+            RentAdjust rent = rentAdjusts.get(i);
+
+
+        }
+
         //拆卸免租的包裹
         List<RentFree> rentFrees = cmd.getRentFrees();
 
