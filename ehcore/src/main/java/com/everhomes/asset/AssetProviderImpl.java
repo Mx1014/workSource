@@ -2023,7 +2023,7 @@ public class AssetProviderImpl implements AssetProvider {
             scope.setId(nextSequence);
             scope.setNamespaceId(namespaceId);
             scope.setOwnerId(communityId);
-            scope.setOwnerType(PaymentConstants.OWNER_TYPE_ADMIN);
+            scope.setOwnerType(ownerType);
             scope.setProjectLevelName(vo.getProjectChargingItemName());
             list.add(scope);
         }
