@@ -14,8 +14,8 @@ import org.jooq.RecordMapper;
  * </ul>
  */
 public class OrganizationMemberRecordMapper implements RecordMapper<Record, OrganizationMember> {
-    private static final EhOrganizationMembers t1 = Tables.EH_ORGANIZATION_MEMBERS;
-    private static final EhOrganizationMemberDetails t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS;
+    private static final EhOrganizationMembers t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+    private static final EhOrganizationMemberDetails t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
 
     @SuppressWarnings("unchecked")
     @Override

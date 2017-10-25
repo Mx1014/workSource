@@ -1822,12 +1822,12 @@ public class OrganizationController extends ControllerBase {
 
     /**
      * <b>URL: /org/findOrgByName</b>
-     * <p>超级查询接口</p>
+     * <p>根据名字查部门</p>
      */
     @RequestMapping("findOrgByName")
     @RestReturn(value = String.class)
     public RestResponse findOrgByName(CreateResourceCategoryCommand cmd) {
-        this.organizationService.getOrganizationNameByNameAndType(cmd.getName(), "aaaaa");
+        this.organizationService.getOrganizationNameByNameAndType(cmd.getName(), "DEPARTMENT");
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1847,4 +1847,18 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL: /org/deleteOrganizationJobPositionsByPositionIdAndDetails</b>
+     * <p>批量撤销通用岗位下的人员</p>
+     */
+    @RequestMapping("deleteOrganizationJobPositionsByPositionIdAndDetails")
+    @RestReturn(value = String.class)
+    public RestResponse deleteOrganizationJobPositionsByPositionIdAndDetails(@Valid DeleteOrganizationJobPositionsByPositionIdAndDetailsCommand cmd) {
+        organizationService.deleteOrganizationJobPositionsByPositionIdAndDetails(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

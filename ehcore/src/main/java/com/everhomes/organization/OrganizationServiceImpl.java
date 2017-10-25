@@ -138,7 +138,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.html.HTML;
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -294,7 +293,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         //同级重名校验
         Organization down_organization = organizationProvider.findOrganizationByParentAndName(parOrg.getId(),cmd.getName());
-        if(down_organization == null){
+        if(down_organization != null){
             return null;
         }
 
@@ -309,6 +308,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setStatus(OrganizationStatus.ACTIVE.getCode());
         organization.setNamespaceId(parOrg.getNamespaceId());
         organization.setCreatorUid(user.getId());
+        organization.setOrder(0);
 
         Organization org = dbProvider.execute((TransactionStatus status) -> {
 
@@ -5378,19 +5378,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             detailIds.forEach(detailId -> {
                 OrganizationMember enterprise_member = getEnableEnterprisePersonel(org, detailId);
-                String token = enterprise_member.getContactToken();
-
-                //删除记录
-                List<String> groupTypes_full = new ArrayList<>();
-                groupTypes_full.add(OrganizationGroupType.DEPARTMENT.getCode());
-                groupTypes_full.add(OrganizationGroupType.GROUP.getCode());
-                groupTypes_full.add(OrganizationGroupType.ENTERPRISE.getCode());
-                groupTypes_full.add(OrganizationGroupType.JOB_LEVEL.getCode());
-                groupTypes_full.add(OrganizationGroupType.JOB_POSITION.getCode());
-                groupTypes_full.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-                deleteOrganizaitonMemberUnderEnterprise(enterpriseIds, groupTypes_full, leaveMembers, token);
-                //重复添加纪录
-                repeatCreateOrganizationmembers(departmentIds, token, enterpriseIds, enterprise_member);
+                if(enterprise_member != null){
+                    String token = enterprise_member.getContactToken();
+                    //删除记录
+                    List<String> groupTypes_full = new ArrayList<>();
+                    groupTypes_full.add(OrganizationGroupType.DEPARTMENT.getCode());
+                    groupTypes_full.add(OrganizationGroupType.GROUP.getCode());
+                    groupTypes_full.add(OrganizationGroupType.ENTERPRISE.getCode());
+                    groupTypes_full.add(OrganizationGroupType.JOB_LEVEL.getCode());
+                    groupTypes_full.add(OrganizationGroupType.JOB_POSITION.getCode());
+                    groupTypes_full.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+                    deleteOrganizaitonMemberUnderEnterprise(enterpriseIds, groupTypes_full, leaveMembers, token);
+                    //重复添加纪录
+                    repeatCreateOrganizationmembers(departmentIds, token, enterpriseIds, enterprise_member);
+                }
             });
 
         }
@@ -5592,10 +5593,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListOrganizationContactCommand  cmd_1 = new ListOrganizationContactCommand();
         cmd_1.setOrganizationId(cmd.getOrganizationId());
         cmd_1.setKeywords(cmd.getKeywords());
+        cmd_1.setFilterScopeTypes(Collections.singletonList("current"));
         ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
         res.setMembers(res_1.getMembers());
 
-        //:todo 部门/岗位/部门岗位
+        //:todo 部门/部门岗位
         ListOrganizationsByNameCommand cmd_2 = new ListOrganizationsByNameCommand();
         cmd_2.setName(cmd.getKeywords());
         cmd_2.setNamespaceId(namespaceId);
@@ -5737,6 +5739,18 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         return true;
+    }
+
+    @Override
+    public void deleteOrganizationJobPositionsByPositionIdAndDetails(DeleteOrganizationJobPositionsByPositionIdAndDetailsCommand cmd) {
+//        1. 删除通用岗位+detailIds所确认的部门岗位条目
+        List<OrganizationJobPositionMap> jobPositionMaps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(cmd.getJobPositionId());
+        if (jobPositionMaps != null && jobPositionMaps.size() > 0) {
+            List<Long> organizationJobPositionIds = jobPositionMaps.stream().map(r -> {
+                return r.getOrganizationId();
+            }).collect(Collectors.toList());
+            organizationProvider.deleteOrganizationPersonelByJobPositionIdsAndDetailIds(organizationJobPositionIds, cmd.getDetailIds());
+        }
     }
 
     /**
@@ -13561,7 +13575,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(org.getPath(), groupTypes, token);
         if (members == null || members.size() == 0) {
             LOGGER.error("Enterprise_member is null");
-            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TYPE, "Enterprise_member is null");
+            return null;
+//            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TYPE, "Enterprise_member is null");
         }
         members = members.stream().filter(r -> {
             return r.getOrganizationId().equals(org.getId());

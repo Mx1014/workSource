@@ -572,4 +572,7 @@ public interface OrganizationService {
 
 	/**批量删除子机构(职级或部门岗位)**/
 	Boolean deleteChildrenOrganizationAsList(DeleteChildrenOrganizationAsListCommand cmd);
+
+	/**通过通用岗位和details删除岗位**/
+	void deleteOrganizationJobPositionsByPositionIdAndDetails(DeleteOrganizationJobPositionsByPositionIdAndDetailsCommand cmd);
 }

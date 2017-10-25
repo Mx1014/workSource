@@ -90,9 +90,6 @@ public class ArchivesServiceImpl implements ArchivesService {
     private LocaleTemplateService localeTemplateService;
 
     @Autowired
-    private ArchivesConfigurationService archivesConfigurationService;
-
-    @Autowired
     private ContentServerService contentServerService;
 
     @Override
@@ -320,25 +317,27 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (!StringUtils.isEmpty(cmd.getKeywords()))
             orgCommand.setKeywords(cmd.getKeywords());
         ListOrganizationMemberCommandResponse members = organizationService.listOrganizationPersonnelsWithDownStream(orgCommand);
-        members.getMembers().forEach(r -> {
-            ArchivesContactDTO dto = new ArchivesContactDTO();
-            dto.setDetailId(r.getDetailId());
-            dto.setOrganizationId(r.getOrganizationId());
-            dto.setTargetId(r.getTargetId());
-            dto.setTargetType(r.getTargetType());
-            dto.setContactName(r.getContactName());
-            dto.setDepartments(r.getDepartments());
-            dto.setJobPositions(r.getJobPositions());
-            dto.setGender(r.getGender());
-            dto.setRegionCode(r.getRegionCode());
-            dto.setContactToken(r.getContactToken());
-            dto.setContactShortToken(r.getContactShortToken());
-            dto.setWorkEmail(r.getWorkEmail());
-            dto.setVisibleFlag(r.getVisibleFlag());
-            dto.setStick("0");
-            contacts.add(dto);
-        });
-        response.setNextPageAnchor(members.getNextPageAnchor());
+        if(members != null && members.getMembers() != null){
+            members.getMembers().forEach(r -> {
+                ArchivesContactDTO dto = new ArchivesContactDTO();
+                dto.setDetailId(r.getDetailId());
+                dto.setOrganizationId(r.getOrganizationId());
+                dto.setTargetId(r.getTargetId());
+                dto.setTargetType(r.getTargetType());
+                dto.setContactName(r.getContactName());
+                dto.setDepartments(r.getDepartments());
+                dto.setJobPositions(r.getJobPositions());
+                dto.setGender(r.getGender());
+                dto.setRegionCode(r.getRegionCode());
+                dto.setContactToken(r.getContactToken());
+                dto.setContactShortToken(r.getContactShortToken());
+                dto.setWorkEmail(r.getWorkEmail());
+                dto.setVisibleFlag(r.getVisibleFlag());
+                dto.setStick("0");
+                contacts.add(dto);
+            });
+            response.setNextPageAnchor(members.getNextPageAnchor());
+        }
         return contacts;
     }
 

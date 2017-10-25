@@ -1786,7 +1786,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 context.select(Tables.EH_ORGANIZATIONS.ID).from(Tables.EH_ORGANIZATIONS)
                         .where(cond)));
         if (null != locator.getAnchor())
-            condition = condition.and(t1.field("id").lt(locator.getAnchor()));
+            condition = condition.and(t1.field("id").gt(locator.getAnchor()));
 
         List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).limit(pageSize).fetch().map(new OrganizationMemberRecordMapper());
         records.stream().map(r -> {
@@ -1945,7 +1945,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public void updateOrganizationDefaultOrder(Integer namespaceId, Long orgId, Integer order) {
-
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		UpdateQuery<EhOrganizationsRecord> query = context.updateQuery(Tables.EH_ORGANIZATIONS);
+		query.addValue(Tables.EH_ORGANIZATIONS.ORDER, order);
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(orgId));
+		query.execute();
     }
 
     /**
@@ -3457,7 +3462,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		List<Organization> result = new ArrayList<Organization>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
-		query.addConditions(Tables.EH_ORGANIZATIONS.NAME.eq(name));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%"+name+"%"));
 		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		if (parentId != null) {
@@ -3467,7 +3472,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
 		}
 		if (enterpriseId != null) {
-			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/" + enterpriseId + "%"));
+			query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like("/" + enterpriseId + "%"));
 		}
 
 		query.fetch().map((r) -> {
@@ -5513,20 +5518,24 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
 		Condition condition = t1.field("id").gt(0L);
 
+		if (null != locator && null != locator.getAnchor())
+			condition = condition.and(t1.field("id").lt(locator.getAnchor()));
+
 		Organization org = findOrganizationById(listCommand.getOrganizationId());
 
 		Condition cond = null;
 		if(filterScopeType.equals(FilterOrganizationContactScopeType.CURRENT.getCode())){
-			cond = t1.field("group_path").like(org.getPath()+"%");
-		}else{
 			cond = t1.field("organization_id").eq(listCommand.getOrganizationId());
+		}else{
+			cond = t1.field("group_path").like(org.getPath()+"%");
 		}
 
 		cond = cond.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
 
 		if (!StringUtils.isEmpty(keywords)) {
 			Condition cond1 = t2.field("contact_token").eq(keywords);
-			cond1 = cond1.or(t2.field("contact_name").like("%" + keywords + "%")).or(t2.field("employee_no"));
+			cond1 = cond1.or(t2.field("contact_name").like("%" + keywords + "%"));
+			cond1 = cond1.or(t2.field("employee_no").like("%" + keywords + "%"));
 			cond = cond.and(cond1);
 		}
 
@@ -5577,8 +5586,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		condition = condition.and(cond);
-		if (null != locator && null != locator.getAnchor())
-			condition.and(t1.field("id").lt(locator.getAnchor()));
 
 		List<OrganizationMember> records = step.where(condition).groupBy(t1.field("contact_token")).orderBy(t1.field("detail_id").desc()).limit(pageSize).fetch().map(new OrganizationMemberRecordMapper());
 		if (records != null) {
