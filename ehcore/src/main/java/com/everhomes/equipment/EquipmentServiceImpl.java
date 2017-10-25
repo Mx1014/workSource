@@ -3005,6 +3005,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			response.setNextPageAnchor((long) (offset + 1));
 		}
 
+
 		Timestamp current = new Timestamp(System.currentTimeMillis());
 		tasks = allTasks.stream().map(r -> {
 			if ((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
