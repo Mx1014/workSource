@@ -1082,7 +1082,7 @@ public class FieldServiceImpl implements FieldService {
             //此时获得一个sheet的list对象，进行存储
             fieldProvider.saveFieldGroups(cmd.getCustomerType(),cmd.getCustomerId(),objects,clazz.getSimpleName());
             sheets++;
-            rows++;
+            rows = rows + objects.size();
         }
         response.setFailCause("导入数据成功，导入"+sheets+"sheet页,共"+rows+"行数据");
         return response;
