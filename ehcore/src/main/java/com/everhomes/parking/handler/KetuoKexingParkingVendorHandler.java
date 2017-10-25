@@ -138,16 +138,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			}
 
 			if(expireTime < now) {
-				KetuoCardRate ketuoCardRate = getExpiredRate(cardInfo, parkingLot, now);
-
-				if (null != ketuoCardRate) {
-					ketuoCardRate.setCarType(carType);
-					ketuoCardRate.setTypeName(type.getTypeName());
-					ParkingRechargeRateDTO rateDTO =  convertParkingRechargeRateDTO(parkingLot, ketuoCardRate);
-
-					dto = ConvertHelper.convert(rateDTO, ParkingExpiredRechargeInfoDTO.class);
-
-				}
+				dto = getExpiredRate(cardInfo, parkingLot, now, type);
 			}
 		}
 
@@ -166,8 +157,8 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		return false;
 	}
 
-	private KetuoCardRate getExpiredRate(KetuoCard cardInfo, ParkingLot parkingLot, long now) {
-		KetuoCardRate ketuoCardRate = null;
+	private ParkingExpiredRechargeInfoDTO getExpiredRate(KetuoCard cardInfo, ParkingLot parkingLot, long now, KetuoCardType type) {
+		ParkingExpiredRechargeInfoDTO dto = null;
 
 		if(parkingLot.getExpiredRechargeFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
 
@@ -187,7 +178,35 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 				}
 				if (null != rate) {
 					//默认查询一个月的费率，如果不存在，就返回null。
-					ketuoCardRate = new KetuoCardRate();
+					KetuoCardRate ketuoCardRate = new KetuoCardRate();
+
+					if (true) {
+						long expireTime = strToLong(cardInfo.getValidTo());
+						//卡的有效期
+						Calendar cardCalendar = Calendar.getInstance();
+						cardCalendar.setTimeInMillis(expireTime);
+						//当前时间
+						Calendar currentCalendar = Calendar.getInstance();
+						currentCalendar.setTimeInMillis(now);
+//						calendar.set(Calendar.HOUR_OF_DAY, 23);
+//						calendar.set(Calendar.MINUTE, 59);
+//						calendar.set(Calendar.SECOND, 59);
+
+						//当卡的有效期是月的最后一天，只考虑月卡有效期是每月的最后一天 23:59:59,如果月卡有效期不是这个格式的时间，
+						// 则是停车场返回的月卡有效期的问题
+						if(cardCalendar.get(Calendar.DAY_OF_MONTH) == cardCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+							//计算要补充的月数，当前月减去月卡有效期月份 加上后台设置的要预交的月数
+							rechargeMonthCount = currentCalendar.get(Calendar.MONTH) - cardCalendar.get(Calendar.MONTH)
+													+ rechargeMonthCount - 1;
+
+//							cardCalendar.add(Calendar.MONTH, month);
+//							int d = cardCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+//							cardCalendar.set(Calendar.DAY_OF_MONTH, d);
+						}
+
+					}else if(true) {
+
+					}
 
 					if(parkingLot.getExpiredRechargeType() == ParkingCardExpiredRechargeType.ALL.getCode()) {
 						//实际价格减去优惠金额，因为是一个月的费率，直接减。
@@ -206,11 +225,16 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 					}
 
 					ketuoCardRate.setRuleId(EXPIRE_CUSTOM_RATE_TOKEN);
-					ketuoCardRate.setRuleAmount(String.valueOf(parkingLot.getExpiredRechargeMonthCount()));
+					ketuoCardRate.setRuleAmount(String.valueOf(rechargeMonthCount));
+
+					ketuoCardRate.setCarType(type.getCarType());
+					ketuoCardRate.setTypeName(type.getTypeName());
+					ParkingRechargeRateDTO rateDTO =  convertParkingRechargeRateDTO(parkingLot, ketuoCardRate);
+					dto = ConvertHelper.convert(rateDTO, ParkingExpiredRechargeInfoDTO.class);
 				}
 			}
 		}
-		return ketuoCardRate;
+		return dto;
 	}
 
 	@Override
