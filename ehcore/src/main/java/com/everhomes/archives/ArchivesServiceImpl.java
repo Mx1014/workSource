@@ -816,7 +816,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             addGeneralFormValuesCommand formCommand = new addGeneralFormValuesCommand();
             formCommand.setGeneralFormId(getRealFormOriginId(cmd.getFormOriginId()));
             formCommand.setSourceId(employee.getId());
-            formCommand.setSourceType(GeneralFormSourceType.ARCHIVES_ATUH.getCode());
+            formCommand.setSourceType(GeneralFormSourceType.ARCHIVES_AUTH.getCode());
             formCommand.setValues(dynamicItems);
             generalFormService.addGeneralFormValues(formCommand);
 
@@ -836,7 +836,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  2.获取表单对应的值
         GetGeneralFormValuesCommand valueCommand =
-                new GetGeneralFormValuesCommand(GeneralFormSourceType.ARCHIVES_ATUH.getCode(), cmd.getDetailId(), NormalFlag.NEED.getCode());
+                new GetGeneralFormValuesCommand(GeneralFormSourceType.ARCHIVES_AUTH.getCode(), cmd.getDetailId(), NormalFlag.NEED.getCode());
         List<PostApprovalFormItem> employeeDynamicVal = generalFormService.getGeneralFormValues(valueCommand);
         Map<String, String> employeeDynamicMaps = handleEmployeeDynamicVal(employeeDynamicVal);
 

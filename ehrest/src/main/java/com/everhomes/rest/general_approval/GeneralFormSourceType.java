@@ -8,7 +8,7 @@ import org.apache.commons.lang.StringUtils;
  * <li>LEASE_PROMOTION: 招租管理</li>
  * <li>PERSONAL_AUTH("personal_auth"): 个人认证表单</li>
  * <li>ORGANIZATION_AUTH("organization_auth"):  公司认证表单</li>
- * <li>ARCHIVES_ATUH: 员工档案表单</li>
+ * <li>ARCHIVES_AUTH: 员工档案表单</li>
  * </ul>
  * @author janson
  *
@@ -16,7 +16,7 @@ import org.apache.commons.lang.StringUtils;
 public enum GeneralFormSourceType {
 	LEASE_PROMOTION("EhLeasePromotions"), GENERAL_APPROVE("GENERAL_APPROVE"), BUILDING("EhBuildings"), TALENT("EhTalents"),
 	PERSONAL_AUTH("personal_auth"),ORGANIZATION_AUTH("organization_auth"),
-	ARCHIVES_ATUH("archives_auth");
+	ARCHIVES_AUTH("archives_auth");
 
 	private String code;
 
