@@ -105,8 +105,7 @@ public class Utils {
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
 
-        int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
-        if(currentDay == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+        if(isLastDayOfMonth(calendar)){
             calendar.add(Calendar.MONTH, month);
             int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
             calendar.set(Calendar.DAY_OF_MONTH, d);
@@ -117,6 +116,17 @@ public class Utils {
         }
 
         return calendar.getTimeInMillis();
+    }
+
+    static boolean isLastDayOfMonth(Calendar calendar) {
+        //获取当前天
+        int curDay = calendar.get(Calendar.DAY_OF_MONTH);
+        //获取当月的最后一天
+        int lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        if(curDay == lastDay){
+            return true;
+        }
+        return false;
     }
 
     static Timestamp getTimestampByAddNatureMonth(Long source, int month) {

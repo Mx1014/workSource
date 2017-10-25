@@ -51,7 +51,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	private static final String GET_CAR_LOCATION = "/api/find/GetCarLocInfo";
 	private static final String ADD_MONTH_CARD = "/api/card/AddMonthCarCardNo_KX";
 	//科兴的需求，充值过期的月卡时，需要计算费率，标记为自定义custom的费率，其他停车场不建议做这样的功能。
-	private static final String EXPIRE_CUSTOM_RATE_TOKEN = "custom";
+	private static final String EXPIRE_CUSTOM_RATE_TOKEN = "custom_expired";
 
 	public KetuoRequestConfig getKetuoRequestConfig() {
 
@@ -180,21 +180,26 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 					//默认查询一个月的费率，如果不存在，就返回null。
 					KetuoCardRate ketuoCardRate = new KetuoCardRate();
 
-					if (true) {
-						long expireTime = strToLong(cardInfo.getValidTo());
-						//卡的有效期
-						Calendar cardCalendar = Calendar.getInstance();
-						cardCalendar.setTimeInMillis(expireTime);
-						//当前时间
-						Calendar currentCalendar = Calendar.getInstance();
-						currentCalendar.setTimeInMillis(now);
+					long expireTime = strToLong(cardInfo.getValidTo());
+					//卡的有效期
+					Calendar cardCalendar = Calendar.getInstance();
+					cardCalendar.setTimeInMillis(expireTime);
+					//当前时间
+					Calendar currentCalendar = Calendar.getInstance();
+					currentCalendar.setTimeInMillis(now);
+					//车进场时间
+					Calendar entryCalendar = Calendar.getInstance();
+					currentCalendar.setTimeInMillis(now);
 //						calendar.set(Calendar.HOUR_OF_DAY, 23);
 //						calendar.set(Calendar.MINUTE, 59);
 //						calendar.set(Calendar.SECOND, 59);
 
+					if (true) {
+
+
 						//当卡的有效期是月的最后一天，只考虑月卡有效期是每月的最后一天 23:59:59,如果月卡有效期不是这个格式的时间，
 						// 则是停车场返回的月卡有效期的问题
-						if(cardCalendar.get(Calendar.DAY_OF_MONTH) == cardCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+						if(Utils.isLastDayOfMonth(cardCalendar)){
 							//计算要补充的月数，当前月减去月卡有效期月份 加上后台设置的要预交的月数
 							rechargeMonthCount = currentCalendar.get(Calendar.MONTH) - cardCalendar.get(Calendar.MONTH)
 													+ rechargeMonthCount - 1;
@@ -205,7 +210,8 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 						}
 
 					}else if(true) {
-
+						rechargeMonthCount = currentCalendar.get(Calendar.MONTH) - entryCalendar.get(Calendar.MONTH)
+								+ rechargeMonthCount;
 					}
 
 					if(parkingLot.getExpiredRechargeType() == ParkingCardExpiredRechargeType.ALL.getCode()) {
@@ -223,12 +229,12 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 								+ actualPrice * (maxDay - today + 1) / DAY_COUNT ));
 
 					}
-
+					//费率
 					ketuoCardRate.setRuleId(EXPIRE_CUSTOM_RATE_TOKEN);
 					ketuoCardRate.setRuleAmount(String.valueOf(rechargeMonthCount));
-
 					ketuoCardRate.setCarType(type.getCarType());
 					ketuoCardRate.setTypeName(type.getTypeName());
+
 					ParkingRechargeRateDTO rateDTO =  convertParkingRechargeRateDTO(parkingLot, ketuoCardRate);
 					dto = ConvertHelper.convert(rateDTO, ParkingExpiredRechargeInfoDTO.class);
 				}
@@ -242,6 +248,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		String plateNumber = order.getPlateNumber();
 		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(order.getRateToken())) {
 			//过期没有优惠
+			//TODO:
 			order.setRateName(EXPIRE_CUSTOM_RATE_TOKEN);
 			order.setOriginalPrice(order.getPrice());
 		}else {
@@ -336,35 +343,71 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder originalOrder, ParkingRechargeOrder tempOrder) {
 
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+
 		JSONObject param = new JSONObject();
 		String plateNumber = tempOrder.getPlateNumber();
 
 		KetuoCard card = getCard(plateNumber);
 		String oldValidEnd = card.getValidTo();
+		//获取月卡有效时间
 		Long expireTime = strToLong(oldValidEnd);
-		long now = System.currentTimeMillis();
-		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-		if(expireTime < now) {
-			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+		//计算免费金额
+		Integer freeMoney = card.getFreeMoney() * tempOrder.getMonthCount().intValue();
+		//充值月数
+		int ruleAmount = tempOrder.getMonthCount().intValue();
+		//计算充值  有效期的 月数，正常充值时取ruleAmount，
+		int addMonthCount = ruleAmount;
+//		if(expireTime < now) {
+//
+//		}
+
+		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(tempOrder.getRateToken())) {
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(tempOrder.getParkingLotId());
+
+			addMonthCount = parkingLot.getExpiredRechargeMonthCount();
+
+			Calendar calendar = Calendar.getInstance();
+			//获取当前时间
+			long now = calendar.getTimeInMillis();
+			//过期充值时，如果是当月的最后一天，则需要减1
+			if (Utils.isLastDayOfMonth(calendar)) {
+				addMonthCount -= 1;
+			}
+
+			//当卡过期时，后台设置支持充值时，充值时间从今天开始（不论当前车是否在停车场，只是计算费用不同而已，
+			// 参见 getExpiredRate方法计算过期费用，需求6.0 rp）
 			String date = sdf2.format(new Date(now)) + " 00:00:00";
 			try {
-				//减一秒，当卡过期时，还支持充值时，充值时间从今天开始
+				//下面的Utils.addSecond方法会统一加一秒，所以这里减一秒时间
 				expireTime = sdf1.parse(date).getTime() - 1000L;
 			} catch (ParseException e) {
 				LOGGER.info("date={}, time={}", date, expireTime, e);
 			}
+
+			if(parkingLot.getExpiredRechargeType() == ParkingCardExpiredRechargeType.ACTUAL.getCode()) {
+
+				int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+				int today = calendar.get(Calendar.DAY_OF_MONTH);
+				Integer actualPrice = card.getFreeMoney();
+				Integer monthCount = tempOrder.getMonthCount().intValue();
+				param.put("freeMoney", actualPrice * (monthCount - 1)
+						+ actualPrice * (maxDay - today + 1) / DAY_COUNT);
+			}
 		}
 
+		//计算月卡充值有效期
 		Timestamp tempStart = Utils.addSecond(expireTime, 1);
-		Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(expireTime, tempOrder.getMonthCount().intValue());
+		Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(expireTime, addMonthCount);
 		String validStart = sdf1.format(tempStart);
 		String validEnd = sdf1.format(tempEnd);
 
 		param.put("cardId", card.getCardId());
 		//修改科托ruleType 固定为1 表示月卡车
 		param.put("ruleType", RULE_TYPE);
-		param.put("ruleAmount", String.valueOf(tempOrder.getMonthCount().intValue()));
+		param.put("ruleAmount", String.valueOf(ruleAmount));
 		// 支付金额（分）
 		param.put("payMoney", (tempOrder.getPrice().multiply(new BigDecimal(100))).intValue());
 		//续费开始时间 yyyy-MM-dd HH:mm:ss 每月第一天的 0点0分0秒
@@ -379,22 +422,9 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		}else {
 			param.put("invType", "-1");
 		}
-		param.put("freeMoney", card.getFreeMoney() * tempOrder.getMonthCount().intValue());
+		param.put("freeMoney", freeMoney);
 		param.put("payType", VendorType.WEI_XIN.getCode().equals(originalOrder.getPaidType()) ? 4 : 5);
 
-		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(tempOrder.getRateToken())) {
-			ParkingLot parkingLot = parkingProvider.findParkingLotById(tempOrder.getParkingLotId());
-			if(parkingLot.getExpiredRechargeType() == ParkingCardExpiredRechargeType.ACTUAL.getCode()) {
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTimeInMillis(now);
-				int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-				int today = calendar.get(Calendar.DAY_OF_MONTH);
-				Integer actualPrice = card.getFreeMoney();
-				Integer monthCount = tempOrder.getMonthCount().intValue();
-				param.put("freeMoney", actualPrice * (monthCount - 1)
-						+ actualPrice * (maxDay - today + 1) / DAY_COUNT);
-			}
-		}
 		String json = post(param, RECHARGE);
 
 		//将充值信息存入订单
