@@ -1734,11 +1734,18 @@ public class CommunityServiceImpl implements CommunityService {
 		User user = userProvider.findUserById(cmd.getUserId());
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
-		
+
+		dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+
 		List<OrganizationDetailDTO> orgDtos = new ArrayList<OrganizationDetailDTO>();
 		if(null != members){
-
 			orgDtos.addAll(populateOrganizationDetails(members));
+
+			for (OrganizationMember member : members) {
+				if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
+					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
+				}
+			}
 		}
 
 
