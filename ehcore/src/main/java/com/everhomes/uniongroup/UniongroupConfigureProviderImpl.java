@@ -561,6 +561,12 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
 
     @Override
     public List<UniongroupMemberDetail> listUniongroupMemberDetailsByUserName(Long ownerId, String userName) {
+         
+        return  listUniongroupMemberDetailsByUserName(ownerId,userName,DEFAULT_VERSION_CODE);
+    }
+
+    @Override
+    public List<UniongroupMemberDetail> listUniongroupMemberDetailsByUserName(Long ownerId, String userName, Integer versionCode) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
                 Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE,
@@ -577,11 +583,11 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                 .on(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID))
                 .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.CONTACT_NAME.like("%"+userName+"%"))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(versionCode))
                 .fetch().map(r -> {
                     return RecordHelper.convert(r, UniongroupMemberDetail.class);
                 });
     }
-
     @Override
     public void updateUniongroupConfiguresVersion(Integer namespaceId, String groupType, Long enterpriseId, Integer v1, Integer v2) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

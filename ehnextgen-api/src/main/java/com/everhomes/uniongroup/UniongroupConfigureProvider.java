@@ -110,5 +110,8 @@ public interface UniongroupConfigureProvider {
     List<com.everhomes.server.schema.tables.pojos.EhUniongroupConfigures> listUniongroupConfigures(Integer namespaceId, String groupType, Long enterpriseId, Long groupId, Integer versionCode);
 
     List<EhUniongroupMemberDetails> listUniongroupMemberDetail(Integer namespaceId, String groupType, Long enterpriseId, Long groupId, Integer versionCode);
+ 
+	List<UniongroupMemberDetail> listUniongroupMemberDetailsByUserName(Long ownerId,
+			String userName, Integer versionCode);
 
 }
