@@ -1553,9 +1553,9 @@ public class CommunityServiceImpl implements CommunityService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,pageSize,(loc, query) -> {
 			Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
-			if(cmd.getIsAuth() == 1){
+			if(AuthFlag.fromCode(cmd.getIsAuth()) == AuthFlag.AUTHENTICATED){
 				c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()));
-			}else if(cmd.getIsAuth() == 3){
+			}else if(AuthFlag.fromCode(cmd.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION){
 				Condition cond = Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
 				cond = cond.or(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode()));
 				c = c.and(cond);
@@ -1620,15 +1620,17 @@ public class CommunityServiceImpl implements CommunityService {
 		for (UserGroup userGroup : userGroups) {
 			Address groupAddress = addressProvider.findGroupAddress(userGroup.getGroupId());
 			AddressDTO addressDTO = ConvertHelper.convert(groupAddress, AddressDTO.class);
-
-			if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.ACTIVE){
-				addressDTO.setUserAuth(AuthFlag.AUTHENTICATED.getCode().byteValue());
-				dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
-			}else if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_ACCEPTANCE || GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_APPROVAL){
-				addressDTO.setUserAuth(AuthFlag.PENDING_AUTHENTICATION.getCode().byteValue());
-			}else {
-				addressDTO.setUserAuth(AuthFlag.UNAUTHORIZED.getCode().byteValue());
+			if(addressDTO != null){
+				if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.ACTIVE){
+					addressDTO.setUserAuth(AuthFlag.AUTHENTICATED.getCode().byteValue());
+					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
+				}else if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_ACCEPTANCE || GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_APPROVAL){
+					addressDTO.setUserAuth(AuthFlag.PENDING_AUTHENTICATION.getCode().byteValue());
+				}else {
+					addressDTO.setUserAuth(AuthFlag.UNAUTHORIZED.getCode().byteValue());
+				}
 			}
+
 			addressDtos.add(addressDTO);
 		}
 		dto.setAddressDtos(addressDtos);
@@ -1689,18 +1691,23 @@ public class CommunityServiceImpl implements CommunityService {
 		User user = userProvider.findUserById(userIdentifier.getOwnerUid());
 		List<UserGroup> usreGroups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
 		List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
-		if(null != usreGroups){
-			for (UserGroup userGroup : usreGroups) {
-				Group group = groupProvider.findGroupById(userGroup.getGroupId());
-				if(null != group && group.getFamilyCommunityId().equals(cmd.getCommunityId())){
-					Address address = addressProvider.findAddressById(group.getFamilyAddressId());
-					if(null != address){
-						address.setMemberStatus(userGroup.getMemberStatus());
-						addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
-					}
-				}
-			}
-		}
+
+		dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+		//添加地址信息
+		addGroupAddressDto(dto, usreGroups);
+
+//		if(null != usreGroups){
+//			for (UserGroup userGroup : usreGroups) {
+//				Group group = groupProvider.findGroupById(userGroup.getGroupId());
+//				if(null != group && group.getFamilyCommunityId().equals(cmd.getCommunityId())){
+//					Address address = addressProvider.findAddressById(group.getFamilyAddressId());
+//					if(null != address){
+//						address.setMemberStatus(userGroup.getMemberStatus());
+//						addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
+//					}
+//				}
+//			}
+//		}
 		if(null != user){
 			dto.setUserId(user.getId());
 			dto.setUserName(user.getNickName());
