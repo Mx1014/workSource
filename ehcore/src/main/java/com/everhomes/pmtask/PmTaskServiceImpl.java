@@ -1951,6 +1951,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 				}
 			}
 		}
+		if (result.size() == 0) {
+			OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getOrganizationId());
+			if (null != request) {
+				Community community = communityProvider.findCommunityById(request.getCommunityId());
+				if (null != community) {
+					result.add(ConvertHelper.convert(community, CommunityDTO.class));
+				}
+			}
+		}
 		response.setCommunities(result);
 		return response;
 	}
