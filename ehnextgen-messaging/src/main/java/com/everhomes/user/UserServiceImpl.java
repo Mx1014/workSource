@@ -73,6 +73,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
@@ -4850,6 +4851,13 @@ public class UserServiceImpl implements UserService {
 	private List<SceneDTO> addOrganizationSceneToList(Long userId, Integer namespaceId, List<SceneDTO> sceneList){
 		// 处于某个公司对应的场景
 		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+
+		//:todo 校验
+ 		if(userId < User.MAX_SYSTEM_USER_ID){
+			LOGGER.error("userId is not legal! userId: {}", userId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "userId is not legal! userId: {}", userId);
+		}
+
 		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
 		for(OrganizationDTO orgDto : organizationList) {
 			String orgType = orgDto.getOrganizationType();

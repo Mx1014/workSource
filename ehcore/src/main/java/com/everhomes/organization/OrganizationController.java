@@ -10,6 +10,7 @@ import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
 import com.everhomes.rest.forum.*;
+import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -1813,9 +1814,9 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("cleanWrongStatusOrganizationMembers")
     @RestReturn(value = String.class)
-    public RestResponse cleanWrongStatusOrganizationMembers() {
-        ListOrganizationMemberCommandResponse members = this.organizationService.cleanWrongStatusOrganizationMembers();
-        RestResponse response = new RestResponse(members);
+    public RestResponse cleanWrongStatusOrganizationMembers(GetRemainBroadcastCountCommand cmd) {
+        Integer count = this.organizationService.cleanWrongStatusOrganizationMembers(cmd.getNamespaceId());
+        RestResponse response = new RestResponse(count);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

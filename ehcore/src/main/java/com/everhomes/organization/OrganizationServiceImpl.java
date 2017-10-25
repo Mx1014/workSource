@@ -70,8 +70,6 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.common.Router;
-import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
-import com.everhomes.rest.community_map.SearchCommunityMapContentsResponse;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
@@ -111,6 +109,7 @@ import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
+import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
@@ -126,7 +125,6 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.*;
-import org.apache.xmlbeans.impl.tool.Diff;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -150,7 +148,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -6395,15 +6392,17 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public ListOrganizationMemberCommandResponse cleanWrongStatusOrganizationMembers(Integer namespaceId) {
-        List<EhOrganizations> orgs = this.organizationProvider.listLapseOrganizations(namespaceId);
+    public Integer cleanWrongStatusOrganizationMembers(Integer namespaceId) {
+        List<EhOrganizationsRecord> orgs = this.organizationProvider.listLapseOrganizations(namespaceId);
         Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+        Integer count = 0;
         if(orgs != null && orgs.size() > 0){
-            orgs.forEach(r->{
-                this.organizationProvider.updateOrganizationMembersToInactiveByPath(r.getPath(), now);
-            });
+            for(EhOrganizationsRecord r: orgs){
+                int i = this.organizationProvider.updateOrganizationMembersToInactiveByPath(r.getPath(), now);
+                count += count + i;
+            };
         }
-        return null;
+        return count;
     }
 
 

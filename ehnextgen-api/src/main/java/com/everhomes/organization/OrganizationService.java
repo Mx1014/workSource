@@ -542,5 +542,5 @@ public interface OrganizationService {
  
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
 
-	ListOrganizationMemberCommandResponse cleanWrongStatusOrganizationMembers(Integer namespaceId);
+	Integer cleanWrongStatusOrganizationMembers(Integer namespaceId);
 }
