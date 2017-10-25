@@ -109,7 +109,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             @Override
             public void run() {
                 uniongroupSearcher.deleteAll();
-                uniongroupSearcher.syncUniongroupDetailsAtOrg(checkOrganization(cmd.getEnterpriseId()), cmd.getGroupType());
+                uniongroupSearcher.syncUniongroupDetailsAtOrg(checkOrganization(cmd.getEnterpriseId()), cmd.getGroupType(), DEFAULT_VERSION_CODE);
                 uniongroupSearcher.refresh();
             }
         });
