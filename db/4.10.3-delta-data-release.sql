@@ -76,6 +76,6 @@ update eh_var_field_groups set name = 'com.everhomes.customer.CustomerTracking' 
 update eh_var_field_groups set name = 'com.everhomes.customer.CustomerTrackingPlan' where title = '计划信息'
 
 -- 工作流的文本修改  add by xq.tian 2017/10/25
-UPDATE eh_locale_templates SET `text` = '${nodeName} 执行 ${buttonName}' WHERE scope='flow' AND code=20001;
+UPDATE eh_locale_templates SET `text` = '在 ${nodeName} 执行 ${buttonName}' WHERE scope='flow' AND code=20001;
 UPDATE eh_locale_templates SET `text` = '任务超时 已取消任务' WHERE scope='flow' AND code=20003;
 
