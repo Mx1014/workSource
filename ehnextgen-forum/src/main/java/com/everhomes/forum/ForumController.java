@@ -395,7 +395,7 @@ public class ForumController extends ControllerBase {
      * @return
      */
     @RequestMapping("listForumCategory")
-    @RestReturn(value=ForumCategoryDTO.class)
+    @RestReturn(value=ListForumCategoryResponse.class)
     public RestResponse listForumCategory(ListForumCategoryCommand cmd) {
         ListForumCategoryResponse  res  = this.forumService.listForumCategory(cmd);
         RestResponse response = new RestResponse(res);
