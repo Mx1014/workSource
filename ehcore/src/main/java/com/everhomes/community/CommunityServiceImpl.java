@@ -1529,6 +1529,7 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setUserId(user.getId());
 			dto.setUserName(user.getNickName());
 			dto.setNikeName(user.getNickName());
+			dto.setApplyTime(user.getCreateTime());
 			dto.setGender(user.getGender());
 			dto.setPhone(identifier.getIdentifierToken());
 			dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
@@ -1585,6 +1586,7 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setUserName(user.getNickName());
 				dto.setNikeName(user.getNickName());
 				dto.setGender(user.getGender());
+				dto.setApplyTime(user.getCreateTime());
 				if(null != userIdentifier)
 					dto.setPhone(userIdentifier.getIdentifierToken());
 				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());

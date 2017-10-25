@@ -15,7 +15,7 @@ import com.everhomes.rest.organization.OrganizationDetailDTO;
  *     <li>nikeName: 用户昵称</li>
  *     <li>communityId: 小区id</li>
  *     <li>isAuth: 认证状态  1认证 2未认证</li>
- *     <li>applyTime: 时间</li>
+ *     <li>applyTime: 注册时间</li>
  *     <li>phone: 电话号码</li>
  *     <li>gender: 性别</li>
  *     <li>createTime: 注册时间</li>
@@ -26,7 +26,7 @@ import com.everhomes.rest.organization.OrganizationDetailDTO;
  *     <li>addressDtos: 地址， 参考{@link com.everhomes.rest.address.AddressDTO}</li>
  *     <li>memberLogDTOs: 用户认证记录， 参考{@link com.everhomes.rest.community.admin.OrganizationMemberLogDTO}</li>
  *     <li>userSourceType: userSourceType</li>
- *     <li>recentlyActiveTime: recentlyActiveTime</li>
+ *     <li>recentlyActiveTime: 最近活跃时间</li>
  * </ul>
  */
 public class CommunityUserAddressDTO {

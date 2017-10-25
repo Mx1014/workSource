@@ -21,7 +21,7 @@ import java.util.List;
  *     <li>buildingName: buildingName</li>
  *     <li>addressId: addressId</li>
  *     <li>addressName: addressName</li>
- *     <li>applyTime: applyTime</li>
+ *     <li>applyTime: 注册时间</li>
  *     <li>phone: phone</li>
  *     <li>executiveFlag: 是否高管 0-否 1-是</li>
  *     <li>position: 职位</li>
