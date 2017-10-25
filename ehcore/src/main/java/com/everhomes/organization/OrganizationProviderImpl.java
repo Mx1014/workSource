@@ -5525,9 +5525,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		Condition cond = null;
 		if(filterScopeType.equals(FilterOrganizationContactScopeType.CURRENT.getCode())){
-			cond = t1.field("group_path").like(org.getPath()+"%");
-		}else{
 			cond = t1.field("organization_id").eq(listCommand.getOrganizationId());
+		}else{
+			cond = t1.field("group_path").like(org.getPath()+"%");
 		}
 
 		cond = cond.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
