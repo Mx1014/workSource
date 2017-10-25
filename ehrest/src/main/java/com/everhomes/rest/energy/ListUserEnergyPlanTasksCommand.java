@@ -9,6 +9,8 @@ package com.everhomes.rest.energy;
  *     <li>ownerId: 管理机构id</li>
  *     <li>targetType: 关联类型 如 community</li>
  *     <li>targetId: 关联id communityId</li>
+ *     <li>pageAnchor: 下页锚点</li>
+ *     <li>pageSize: 每页数量</li>
  * </ul>
  * Created by ying.xiong on 2017/10/20.
  */
@@ -20,6 +22,26 @@ public class ListUserEnergyPlanTasksCommand {
     private Long targetId;
     private Long ownerId;
     private String ownerType;
+
+    private Long pageAnchor;
+    private Integer pageSize;
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
 
     public Long getOwnerId() {
         return ownerId;
