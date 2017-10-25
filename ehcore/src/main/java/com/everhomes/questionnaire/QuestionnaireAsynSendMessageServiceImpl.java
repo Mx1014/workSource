@@ -10,10 +10,15 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.app.AppConstants;
@@ -21,18 +26,29 @@ import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.OfficialActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
+import com.everhomes.rest.community.admin.CommunityUserDto;
+import com.everhomes.rest.community.admin.CommunityUserResponse;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.questionnaire.QuestionnaireRangeType;
 import com.everhomes.rest.questionnaire.QuestionnaireServiceErrorCode;
 import com.everhomes.rest.questionnaire.QuestionnaireTargetType;
-import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.*;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivity;
 import com.everhomes.user.UserContext;
+import com.everhomes.userOrganization.UserOrganizations;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +97,8 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 
 	@Autowired
 	private QuestionnaireAnswerProvider questionnaireAnswerProvider;
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
 	@Override
 	public void sendAllTargetMessageAndSaveTargetScope(Long questionnaireId) {
@@ -276,8 +294,9 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		cmd.setPageSize(10000000);
 		cmd.setIsAuth(isAuthor);
-		CommunityUserAddressResponse response = communityService.listUserBycommunityId(cmd);
-		return response.getDtos().stream().map(r->String.valueOf(r.getUserId())).collect(Collectors.toList());
+		//这里只需要查询userID，其他的附加查询不需要，所以自己搞了个查询。
+		List<UserOrganizations> userOrganizations = listUserCommunities(cmd);
+		return userOrganizations.stream().map(r->String.valueOf(r.getUserId())).collect(Collectors.toList());
 	}
 
 	private List<String> getEnterpriseUsers(String range) {
@@ -289,5 +308,68 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			return new ArrayList<>();
 		}
 		return response.getMembers().stream().map(r->String.valueOf(r.getTargetId())).collect(Collectors.toList());
+	}
+
+	private List<UserOrganizations> listUserCommunities(
+			ListCommunityUsersCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		return organizationProvider.listUserOrganizations(locator, pageSize, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+				query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
+				if(null != cmd.getOrganizationId()){
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
+				}
+
+
+				if(UserSourceType.WEIXIN == UserSourceType.fromCode(cmd.getUserSourceType())){
+					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
+				}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
+					query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.isNotNull());
+				}
+
+				if(null != cmd.getCommunityId()){
+					query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
+				}
+
+				if(!StringUtils.isEmpty(cmd.getKeywords())){
+					Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(cmd.getKeywords());
+					cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
+					query.addConditions(cond);
+				}
+
+				if(null != UserGender.fromCode(cmd.getGender())){
+					query.addConditions(Tables.EH_USERS.GENDER.eq(cmd.getGender()));
+				}
+
+				if(null != cmd.getExecutiveFlag()){
+					query.addConditions(Tables.EH_USERS.EXECUTIVE_TAG.eq(cmd.getExecutiveFlag()));
+				}
+
+				if(AuthFlag.AUTHENTICATED == AuthFlag.fromCode(cmd.getIsAuth())){
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.ACTIVE.getCode()));
+				}else if(AuthFlag.PENDING_AUTHENTICATION == AuthFlag.fromCode(cmd.getIsAuth())){
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode()));
+				}else if(AuthFlag.UNAUTHORIZED == AuthFlag.fromCode(cmd.getIsAuth())){
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.isNull());
+				}
+
+				query.addGroupBy(Tables.EH_USERS.ID);
+
+				Condition cond = Tables.EH_USERS.ID.isNotNull();
+				if(AuthFlag.UNAUTHORIZED == AuthFlag.fromCode(cmd.getIsAuth())){
+					cond = cond.and(" `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + " or status = " + UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode() + ")");
+				}else if(AuthFlag.PENDING_AUTHENTICATION == AuthFlag.fromCode(cmd.getIsAuth())){
+					cond = cond.and(" `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + ")");
+				}
+				query.addHaving(cond);
+
+				return query;
+			}
+		});
 	}
 }
