@@ -8,6 +8,8 @@ import java.util.Calendar;
 public class ArchivesTest {
     String str = "1506859877968";
 
+    private SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+
     public void test() {
 /*        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         try{
@@ -31,12 +33,28 @@ public class ArchivesTest {
         System.out.println(ArchivesUtil.currentDate());
     }
 
-    @Test
     public void testWeek(){
-        Calendar c = Calendar.getInstance();
+/*        Calendar c = Calendar.getInstance();
         System.out.println(c.get(Calendar.DAY_OF_WEEK));
         int i = 7;
         byte j = 7;
-        System.out.println(j==i);
+        System.out.println(j==i);*/
+
+    }
+    @Test
+    public void testDate(){
+        java.util.Date now = new java.util.Date();
+        System.out.println(format.format(now));
+
+        String r = "123";
+        String c = "12";
+        for(int i=0; i<4-c.length(); i++){
+            r += "0";
+        }
+        r += c;
+        System.out.println(r);
+
+        Long a = null;
+        System.out.println(String.valueOf(a));
     }
 }
