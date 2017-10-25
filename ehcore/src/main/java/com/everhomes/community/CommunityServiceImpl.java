@@ -1692,7 +1692,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		User user = userProvider.findUserById(userIdentifier.getOwnerUid());
 		List<UserGroup> usreGroups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
-		List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
+		//List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
 
 		dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 		//添加地址信息
@@ -1716,7 +1716,7 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setGender(user.getGender());
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
-			dto.setAddressDtos(addressDtos);
+			//dto.setAddressDtos(addressDtos);
 
 			//最新活跃时间 add by sfyan 20170620
 			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(user.getId(), 1);
