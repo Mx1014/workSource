@@ -6628,7 +6628,7 @@ public class PunchServiceImpl implements PunchService {
 		locator.setAnchor(cmd.getPageAnchor());
 		List<Long> orgIds = null;
 		//员工姓名和部门
-		if(null!=cmd.getDeptId()){
+		if(null!=cmd.getDeptId() && !cmd.getOwnerId().equals(cmd.getDeptId())){
 			orgIds = new ArrayList<>();
 			UniongroupConfigures unc = uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(
 					UserContext.getCurrentNamespaceId(), cmd.getDeptId(), UniongroupType.PUNCHGROUP.getCode(),CONFIG_VERSION_CODE,UniongroupTargetType.ORGANIZATION.getCode());
