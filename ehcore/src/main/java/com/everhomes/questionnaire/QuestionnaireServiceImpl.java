@@ -977,7 +977,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			List<QuestionnaireQuestionDTO> questionDTOs = new ArrayList<>();
 			v1.forEach((k2, v2)->{
 				QuestionnaireQuestion question = questionnaireQuestionProvider.findQuestionnaireQuestionById(k2);
-				List<QuestionnaireAnswer> questionnaireAnswers = questionnaireAnswerProvider.listTargetQuestionnaireAnswerByQuestionId(question.getId(), targetType, targetId);
+				List<QuestionnaireAnswer> questionnaireAnswers = questionnaireAnswerProvider.listTargetQuestionnaireAnswerByQuestionId(question.getId(), targetType, UserContext.current().getUser().getId());
 				List<QuestionnaireOptionDTO> optionDTOs =  v2.stream().map(o->convertToOptionDTO(o, questionnaireAnswers)).collect(Collectors.toList());
 				questionDTOs.add(convertToQuestionDTO(question, optionDTOs));
 			});
