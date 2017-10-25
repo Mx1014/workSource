@@ -392,3 +392,5 @@ ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag10` BIGINT;
 ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag11` BIGINT;
 ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag12` BIGINT;
 ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag13` BIGINT;
+
+alter table eh_customer_talents modify COLUMN status TINYINT DEFAULT 2;
