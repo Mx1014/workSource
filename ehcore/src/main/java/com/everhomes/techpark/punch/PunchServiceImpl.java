@@ -40,6 +40,8 @@ import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.uniongroup.*;
 import com.everhomes.util.*;
+
+import org.apache.commons.codec.language.bm.RuleType;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -129,6 +131,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -5006,31 +5009,23 @@ public class PunchServiceImpl implements PunchService {
 			List<PunchRule> punchRules = punchProvider.listPunchRulesByStatus(statusList);
 			if(null != punchRules)
 				for (PunchRule pr : punchRules) {
-					try {
-						Organization org = organizationProvider.findOrganizationById(pr.getOwnerId());
-						//对ptr表,psd表的处理
-						processTimeRule2Active(pr);
-//					if (pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
-//						//copy from addpunchgroup
-//					} else if (pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
-//
-//					}
-						//排班处理
-						List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(pr.getId(),pr.getStatus()) ;
-						for(PunchScheduling ps : schedulings){
-							//删除现在active的,然后把自己变成active的
-							ps.setStatus( PunchRuleStatus.ACTIVE.getCode());
-							punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(ps.getOwnerType(), ps.getOwnerId(),
-									ps.getTargetType(), ps.getTargetId(), ps.getRuleDate(), ps.getStatus());
-							punchSchedulingProvider.updatePunchScheduling(ps);
+					this.coordinationProvider.getNamedLock(CoordinationLocks.REFRESH_PUNCH_RULE.getCode()+pr.getId()).enter(() -> {
+						try {
+							
+							if(pr.getStatus().equals(PunchRuleStatus.ACTIVE.getCode()))
+								continue;
+							Organization org = organizationProvider.findOrganizationById(pr.getOwnerId());
+							//对ptr表,psd表的处理
+							processTimeRule2Active(pr); 
+							pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
+							punchProvider.updatePunchRule(pr);
+							orgs.add(org);
+						} catch (Exception e) {
+							LOGGER.error("dayRefreshPunchGroupScheduled error!!!");
+							LOGGER.error("update pr from modify to active error!!",e);
 						}
-						pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
-						punchProvider.updatePunchRule(pr);
-						orgs.add(org);
-					} catch (Exception e) {
-						LOGGER.error("dayRefreshPunchGroupScheduled error!!!");
-						LOGGER.error("update pr from modify to active error!!",e);
-					}
+						return null;
+					});
 				}
 			//把uniongroup相关表version改为0
 			for (Organization org : orgs) {
@@ -5061,6 +5056,19 @@ public class PunchServiceImpl implements PunchService {
 				timeRule.setStatus(PunchRuleStatus.ACTIVE.getCode());
 				punchProvider.updatePunchTimeRule(timeRule);
 			}
+		}
+
+		if(pr.getRuleType().equals(PunchRuleType.PAIBAN.getCode())){
+		//排班处理
+			List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(pr.getId(),pr.getStatus()) ;
+			if(null != schedulings)
+				for(PunchScheduling ps : schedulings){
+					//删除现在active的,然后把自己变成active的
+					ps.setStatus( PunchRuleStatus.ACTIVE.getCode());
+					punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(ps.getOwnerType(), ps.getOwnerId(),
+							ps.getTargetType(), ps.getTargetId(), ps.getRuleDate(), ps.getStatus());
+					punchSchedulingProvider.updatePunchScheduling(ps);
+				}
 		}
 	}
 
