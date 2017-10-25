@@ -6,6 +6,8 @@ ALTER TABLE `eh_questionnaires` ADD COLUMN `support_anonymous` TINYINT COMMENT '
 ALTER TABLE `eh_questionnaires` ADD COLUMN `target_type` VARCHAR(32) DEFAULT 'organization' COMMENT '调查对象 organization:企业 user:个人' AFTER `cut_off_time`;
 ALTER TABLE `eh_questionnaires` ADD COLUMN `poster_uri` VARCHAR(1024) COMMENT '问卷调查的封面uri' AFTER `cut_off_time`;
 ALTER TABLE `eh_questionnaires` ADD COLUMN `target_user_num` INTEGER COMMENT '目标用户收集数量' AFTER `cut_off_time`;
+ALTER TABLE `eh_questionnaires` ADD COLUMN `scope_sent_message_users` TEXT COMMENT '已发送消息的用户列表（发布时发送的消息用户）' AFTER `target_user_num`;
+
 
 ALTER TABLE `eh_questionnaire_answers` ADD COLUMN `target_from` TINYINT COMMENT '用户来源（1:app，2:wx）' AFTER `target_name`;
 ALTER TABLE `eh_questionnaire_answers` ADD COLUMN `target_phone` VARCHAR(128) COMMENT '用户电话' AFTER `target_name`;
