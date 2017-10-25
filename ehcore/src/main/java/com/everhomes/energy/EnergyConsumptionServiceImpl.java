@@ -2756,8 +2756,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public ListUserEnergyPlanTasksResponse listUserEnergyPlanTasks(ListUserEnergyPlanTasksCommand cmd) {
+        ListUserEnergyPlanTasksResponse response = new ListUserEnergyPlanTasksResponse();
 
-        return null;
+        return response;
     }
 
     @Override

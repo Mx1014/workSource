@@ -2186,27 +2186,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		communityProvider.updateCommunity(community);
 	}
 
-    @Override
+	@Override
 	public void updateApartment(UpdateApartmentCommand cmd) {
-    	Address address = addressProvider.findAddressById(cmd.getId());
-    	if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
+		Address address = addressProvider.findAddressById(cmd.getId());
+		if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
 		}
 		Community community = checkCommunity(address.getCommunityId());
 		Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
-    	if (cmd.getStatus() != null) {
-    		Long organizationId = findOrganizationByCommunity(community);
-    		CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
-    		communityAddressMapping.setLivingStatus(cmd.getStatus());
-    		organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+		if (cmd.getStatus() != null) {
+			Long organizationId = findOrganizationByCommunity(community);
+			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+			communityAddressMapping.setLivingStatus(cmd.getStatus());
+			organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
 		}else {
 			if (!StringUtils.isEmpty(cmd.getApartmentName())) {
-	    		Address other = addressProvider.findAddressByBuildingApartmentName(address.getNamespaceId(), address.getCommunityId(), address.getBuildingName(), cmd.getApartmentName());
-	    		if (other != null && other.getId() != cmd.getId()) {
-	    			throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
-	    		}
-	    		address.setApartmentName(cmd.getApartmentName());
-	    		address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
+				Address other = addressProvider.findAddressByBuildingApartmentName(address.getNamespaceId(), address.getCommunityId(), address.getBuildingName(), cmd.getApartmentName());
+				if (other != null && other.getId() != cmd.getId()) {
+					throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
+				}
+				address.setApartmentName(cmd.getApartmentName());
+				address.setAddress(address.getBuildingName() + "-" + cmd.getApartmentName());
 			}else if (cmd.getAreaSize() != null) {
 				address.setAreaSize(cmd.getAreaSize());
 			}else if (cmd.getSharedArea() != null) {
@@ -2241,24 +2241,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				community.setChargeArea(communityChargeArea - oldAddressChargeArea + cmd.getChargeArea());
 
 				address.setChargeArea(cmd.getChargeArea());
-			}else if (cmd.getCategoryItemId() != null) {
-				address.setCategoryItemId(cmd.getCategoryItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
-				if(item != null) {
-					address.setCategoryItemName(item.getItemDisplayName());
-				}
-			}else if (cmd.getSourceItemId() != null) {
-				address.setSourceItemId(cmd.getSourceItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
-				if(item != null) {
-					address.setSourceItemName(item.getItemDisplayName());
-				}
 			}else if (cmd.getDecorateStatus() != null) {
 				address.setDecorateStatus(cmd.getDecorateStatus());
 			}else if (cmd.getOrientation() != null) {
 				address.setOrientation(cmd.getOrientation());
+			}else if (cmd.getApartmentFloor() != null) {
+				address.setApartmentFloor(cmd.getApartmentFloor());
 			}
-	    	addressProvider.updateAddress(address);
+			addressProvider.updateAddress(address);
 
 			communityProvider.updateBuilding(building);
 			communityProvider.updateCommunity(community);
@@ -2269,13 +2259,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	public GetApartmentDetailResponse getApartmentDetail(GetApartmentDetailCommand cmd) {
 		GetApartmentDetailResponse response = new GetApartmentDetailResponse();
 		Address address = addressProvider.findAddressById(cmd.getId());
-    	if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
+		if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
 		}
-    	Community community = checkCommunity(address.getCommunityId());
+		Community community = checkCommunity(address.getCommunityId());
 		Long organizationId = findOrganizationByCommunity(community);
 		CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
-		
+
 //		response.setBuildingName(address.getBuildingName());
 //		response.setApartmentName(address.getApartmentName());
 //		response.setAreaSize(address.getAreaSize());
@@ -2285,7 +2275,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}else {
 			response.setStatus(address.getLivingStatus());
 		}
-		
+
 		if (CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
 			OrganizationAddress organizationAddress = organizationProvider.findOrganizationAddressByAddressId(address.getId());
 			if (organizationAddress != null) {

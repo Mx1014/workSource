@@ -4,7 +4,7 @@ package com.everhomes.rest.address;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
+ *
  * <ul>
  * <li>id: 门牌id</li>
  * <li>apartmentName: 门牌名称</li>
@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>sourceItemId: 资产来源：自管、业主放盘、大业主交管、其他...</li>
  * <li>decorateStatus: 装修状态</li>
  * <li>orientation: 朝向</li>
+ * <li>apartmentFloor: 楼层名称</li>
  * </ul>
  */
 public class UpdateApartmentCommand {
@@ -33,6 +34,15 @@ public class UpdateApartmentCommand {
 	private Long sourceItemId;
 	private Byte decorateStatus;
 	private String orientation;
+	private String apartmentFloor;
+
+	public String getApartmentFloor() {
+		return apartmentFloor;
+	}
+
+	public void setApartmentFloor(String apartmentFloor) {
+		this.apartmentFloor = apartmentFloor;
+	}
 
 	public Double getBuildArea() {
 		return buildArea;
