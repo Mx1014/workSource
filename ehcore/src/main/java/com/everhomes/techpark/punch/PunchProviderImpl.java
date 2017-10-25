@@ -2755,6 +2755,27 @@ long id = sequenceProvider.getNextSequence(key);
 		return null;
 	}
 
+	@Override
+	public List<PunchRule> listPunchRulesByOwnerAndRuleType(String ownerType, Long ownerId, byte ruleType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhPunchRulesRecord> query = context
+				.selectQuery(Tables.EH_PUNCH_RULES);
+
+		Condition condition = Tables.EH_PUNCH_RULES.OWNER_ID.eq(ownerId)
+				.and(Tables.EH_PUNCH_RULES.RULE_TYPE.eq(ruleType));
+
+		query.addConditions(condition);
+		List<PunchRule> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, PunchRule.class));
+			return null;
+		});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
+
 
 }
 

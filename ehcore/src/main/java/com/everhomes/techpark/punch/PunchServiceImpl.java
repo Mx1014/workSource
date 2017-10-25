@@ -7893,21 +7893,36 @@ public class PunchServiceImpl implements PunchService {
 		response.setAllEmployeeCount(allOrganizationInteger);
 		// 未关联人数
 		List<OrganizationMemberDetails> details = uniongroupConfigureProvider.listDetailNotInUniongroup(org.getNamespaceId(), org.getId(), null, CONFIG_VERSION_CODE, null);
-//		if (null != details && details.size()>0)
-//			response.setUnjoinPunchGroupEmployees(details.stream().map(r ->{
-//				OrganizationMemberDetailDTO dto = ConvertHelper.convert(r, OrganizationMemberDetailDTO.class);
-//				Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(org.getNamespaceId(),r.getId(),OrganizationGroupType.DEPARTMENT.getCode());
-//				String department = "";
-//				if(!StringUtils.isEmpty(departMap)){
-//					for(Long k : departMap.keySet()){
-//						department += (departMap.get(k) + ",");
-//					}
-//					department = department.substring(0,department.length()-1);
-//				}
-//				dto.setDepartment(department);
-//				return dto;
-//			}).collect(Collectors.toList()));
 		response.setUnjoinPunchGroupCount(details == null ? 0 : details.size());
+		//未排班的人
+		response.setUnSchedulingCount(0);
+		List<PunchRule> prList = punchProvider.listPunchRulesByOwnerAndRuleType(cmd.getOwnerType(), cmd.getOwnerId(), PunchRuleType.PAIBAN.getCode());
+		if (null != prList) {
+			Calendar start = Calendar.getInstance();
+			start.set(Calendar.DAY_OF_MONTH, 1);
+			start.set(Calendar.HOUR_OF_DAY, 0);
+			start.set(Calendar.MINUTE, 0);
+			start.set(Calendar.SECOND, 0);
+			start.set(Calendar.MILLISECOND, 0);
+			Calendar end = Calendar.getInstance();
+			end.setTime(start.getTime());
+			end.add(Calendar.MONTH, 1);
+			for (PunchRule pr : prList) {
+
+				List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(pr.getPunchOrganizationId(),CONFIG_VERSION_CODE);
+
+				List<Long> detailIds = new ArrayList<>();
+				if (null != employees) {
+					for (UniongroupMemberDetail detail : employees) {
+						detailIds.add(detail.getDetailId());
+					}
+				}
+				Integer linkedCount = punchSchedulingProvider.countSchedulingUser(pr.getId(), new java.sql.Date(start.getTimeInMillis()), new java.sql.Date(end.getTimeInMillis()), detailIds);
+				int unlikedCount = detailIds.size() - linkedCount;
+				response.setUnSchedulingCount(response.getUnSchedulingCount()+unlikedCount);
+			}
+		}
+
 		return response;
 	}
 

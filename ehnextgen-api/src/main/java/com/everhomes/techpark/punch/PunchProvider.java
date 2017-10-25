@@ -332,4 +332,6 @@ public interface PunchProvider {
 	void deletePunchTimeRuleByRuleId(Long id);
 
 	List<PunchRule> listPunchRulesByStatus(List<Byte> statusList);
+
+	List<PunchRule> listPunchRulesByOwnerAndRuleType(String ownerType, Long ownerId, byte code);
 }
