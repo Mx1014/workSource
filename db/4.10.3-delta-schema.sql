@@ -393,4 +393,13 @@ ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag11` BIGINT;
 ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag12` BIGINT;
 ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag13` BIGINT;
 
-alter table eh_customer_talents modify COLUMN status TINYINT DEFAULT 2;
+ALTER TABLE eh_customer_talents modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_apply_projects modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_certificates modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_commercials modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_economic_indicators modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_investments modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_patents modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_tracking_plans modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_trackings modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_trademarks modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
