@@ -5021,7 +5021,7 @@ public class PunchServiceImpl implements PunchService {
 								orgs.add(org);
 							}
 						} catch (Exception e) {
-							LOGGER.error("dayRefreshPunchGroupScheduled error!!!");
+							LOGGER.error("dayRefreshPunchGroupScheduled error!!! pr id : "+pr.getId());
 							LOGGER.error("update pr from modify to active error!!",e);
 						}
 						return null;
