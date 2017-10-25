@@ -7,6 +7,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.Map;
 /**
  * Created by ying.xiong on 2017/10/23.
  */
+@Component
 public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
     @Autowired
     private DbProvider dbProvider;

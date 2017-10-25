@@ -30,6 +30,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import java.util.Map;
 /**
  * Created by ying.xiong on 2017/10/23.
  */
+@Component
 public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements EnergyPlanSearcher {
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
