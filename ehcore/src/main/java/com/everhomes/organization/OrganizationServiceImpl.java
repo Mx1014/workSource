@@ -2742,33 +2742,43 @@ public class OrganizationServiceImpl implements OrganizationService {
         return listUserRelateOrganizations(userId);
     }
 
-    public List<OrganizationSimpleDTO> listUserRelateOrganizations(Long userId){
+    public List<OrganizationSimpleDTO> listUserRelateOrganizations(Long userId) {
         List<OrganizationSimpleDTO> orgs = new ArrayList<>();
-
-        List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
         Set<Long> organizationIds = new HashSet<>();
-        for (RoleAssignment roleAssignment: roleAssignments) {
-            if(EntityType.ORGANIZATIONS == EntityType.fromCode(roleAssignment.getOwnerType()) && (roleAssignment.getRoleId() == RoleConstants.PM_SUPER_ADMIN || roleAssignment.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN)){
-                organizationIds.add(roleAssignment.getOwnerId());
+
+
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(OrganizationMemberGroupType.MANAGER.getCode(), OrganizationMemberTargetType.USER.getCode(), userId);
+        for (OrganizationMember member: members) {
+            if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
+                organizationIds.add(member.getOrganizationId());
             }
         }
 
+        /* 人员在新的管理员数据里没有 则去查老的管理员是角色的时候数据（之前添加的管理员可以不在公司，所以在organizationMember里面查询不到）,如果打算去掉老的，需要迁移数据把创建管理员没有添加到公司的数据给补上 */
+        if(organizationIds.size() == 0){
+            List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
+            for (RoleAssignment roleAssignment: roleAssignments) {
+                if(EntityType.ORGANIZATIONS == EntityType.fromCode(roleAssignment.getOwnerType()) && (roleAssignment.getRoleId() == RoleConstants.PM_SUPER_ADMIN || roleAssignment.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN)){
+                    organizationIds.add(roleAssignment.getOwnerId());
+                }
+            }
+        }
         Set<Long> orgIds = new HashSet<>();
         List<Target> targets = new ArrayList<>();
         targets.add(new Target(EntityType.USER.getCode(), userId));
 
         List<Project> projects = authorizationProvider.getManageAuthorizationProjectsByAuthAndTargets(EntityType.SERVICE_MODULE.getCode(), null, targets);
-        for (Project project: projects) {
-            if(EntityType.fromCode(project.getProjectType()) == EntityType.ORGANIZATIONS){
+        for (Project project : projects) {
+            if (EntityType.fromCode(project.getProjectType()) == EntityType.ORGANIZATIONS) {
                 organizationIds.add(project.getProjectId());
             }
         }
 
         List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
-        for (OrganizationMember member: orgMembers) {
-            if(OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus())){
+        for (OrganizationMember member : orgMembers) {
+            if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus())) {
                 Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
-                if(null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus())){
+                if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus())) {
                     addPathOrganizationId(org.getPath(), orgIds);
                 }
             }
@@ -2776,19 +2786,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         //把用户所有关联的部门放到targets里面查询
-        for (Long orgId: orgIds) {
+        for (Long orgId : orgIds) {
             targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
         }
 
         //获取人员和人员所有机构所赋予模块的所属项目范围
         List<String> scopes = authorizationProvider.getAuthorizationScopesByAuthAndTargets(EntityType.SERVICE_MODULE.getCode(), null, targets);
-        for (String scope: scopes) {
-            if(null != scope){
+        for (String scope : scopes) {
+            if (null != scope) {
                 String[] scopeStrs = scope.split("\\.");
-                if(scopeStrs.length == 2){
-                    if(EntityType.AUTHORIZATION_RELATION == EntityType.fromCode(scopeStrs[0])){
+                if (scopeStrs.length == 2) {
+                    if (EntityType.AUTHORIZATION_RELATION == EntityType.fromCode(scopeStrs[0])) {
                         AuthorizationRelation authorizationRelation = authorizationProvider.findAuthorizationRelationById(Long.valueOf(scopeStrs[1]));
-                        if(EntityType.fromCode(authorizationRelation.getOwnerType()) == EntityType.ORGANIZATIONS){
+                        if (EntityType.fromCode(authorizationRelation.getOwnerType()) == EntityType.ORGANIZATIONS) {
                             organizationIds.add(authorizationRelation.getOwnerId());
                         }
                     }
@@ -2796,9 +2806,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
 
-        for (Long organizationId: organizationIds) {
+        for (Long organizationId : organizationIds) {
             Organization org = organizationProvider.findOrganizationById(organizationId);
-            if(null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus()) && 0L == org.getParentId()){
+            if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus()) && 0L == org.getParentId()) {
                 OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                 //物业或业委增加小区Id和小区name信息
                 if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
