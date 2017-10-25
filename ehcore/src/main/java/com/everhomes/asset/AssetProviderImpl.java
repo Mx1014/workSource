@@ -2262,20 +2262,25 @@ public class AssetProviderImpl implements AssetProvider {
             PaymentBillGroup group = context.selectFrom(t1)
                     .where(t1.ID.eq(rule.getBillGroupId()))
                     .fetchOneInto(PaymentBillGroup.class);
-            PaymentChargingItemScope itemScope = context.selectFrom(t4)
-                    .where(t4.ID.eq(rule.getChargingItemId()))
+            String ItemName = context.select(t4.PROJECT_LEVEL_NAME)
+                    .where(t4.CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
                     .and(t4.OWNER_ID.eq(group.getOwnerId()))
                     .and(t4.OWNER_TYPE.eq(group.getOwnerType()))
                     .and(t4.NAMESPACE_ID.eq(group.getNamespaceId()))
-                    .fetchOneInto(PaymentChargingItemScope.class);
-
+                    .fetchOne(t4.PROJECT_LEVEL_NAME);
+            if(StringUtils.isNullOrEmpty(ItemName)){
+                ItemName = context.select(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME)
+                        .from(Tables.EH_PAYMENT_CHARGING_ITEMS)
+                        .where(Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(rule.getChargingItemId()))
+                        .fetchOne(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME);
+            }
             dto.setBillingCycle(group.getBalanceDateType());
 
             PaymentChargingStandards standard = context.selectFrom(t3)
                     .where(t3.ID.eq(rule.getChargingStandardsId()))
                     .fetchOneInto(PaymentChargingStandards.class);
             dto.setFormula(standard.getFormula());
-            dto.setGroupChargingItemName(itemScope.getProjectLevelName());
+            dto.setGroupChargingItemName(ItemName==null?"":ItemName);
             dto.setChargingStandardName(standard.getName());
             dto.setBillItemGenerationMonth(rule.getBillItemMonthOffset());
             dto.setBillItemGenerationDay(rule.getBillItemDayOffset());
