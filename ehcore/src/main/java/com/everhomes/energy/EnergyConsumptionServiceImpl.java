@@ -2763,8 +2763,42 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public ListUserEnergyPlanTasksResponse listUserEnergyPlanTasks(ListUserEnergyPlanTasksCommand cmd) {
         ListUserEnergyPlanTasksResponse response = new ListUserEnergyPlanTasksResponse();
         User user = UserContext.current().getUser();
+        int pageSize = cmd.getPageSize() == null ? Integer.MAX_VALUE - 1 : cmd.getPageSize();
+        if(null == cmd.getPageAnchor()) {
+            cmd.setPageAnchor(0L);
+        }
         List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
-        List<EnergyPlanGroupMap> maps = energyPlanProvider.lisEnergyPlanGroupMapByGroupAndPosition(groupDtos, null);
+        List<EnergyPlanGroupMap> maps = energyPlanProvider.lisEnergyPlanGroupMapByGroupAndPosition(groupDtos);
+        if (maps != null && maps.size() > 0) {
+            List<Long> planIds = maps.stream().map(map -> {
+                return map.getPlanId();
+            }).collect(Collectors.toList());
+            List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasksByPlan(planIds, cmd.getPageAnchor(), pageSize+1);
+
+            if(tasks != null && tasks.size() > 0) {
+                if (tasks.size() > pageSize) {
+                    tasks.remove(tasks.size() - 1);
+                    response.setNextPageAnchor(tasks.get(tasks.size()-1).getId());
+                }
+
+                List<EnergyMeterTaskDTO> taskDTOs = tasks.stream().map(task -> {
+                    EnergyMeterTaskDTO dto = ConvertHelper.convert(task, EnergyMeterTaskDTO.class);
+                    EnergyMeter meter = meterProvider.findById(task.getNamespaceId(), task.getMeterId());
+                    dto.setMeterName(meter.getName());
+                    dto.setMeterNumber(meter.getMeterNumber());
+                    dto.setMeterType(meter.getMeterType());
+
+                    Map<Long, EnergyMeterAddress> addressMap = energyMeterAddressProvider.findByMeterId(task.getMeterId());
+                    if(addressMap != null && addressMap.size() > 0) {
+                        dto.setApartmentFloor(addressMap.get(0).getApartmentFloor());
+                        dto.setAddress(addressMap.get(0).getApartmentName());
+                    }
+                    return dto;
+                }).collect(Collectors.toList());
+                response.setTaskDTOs(taskDTOs);
+            }
+
+        }
         return response;
     }
 

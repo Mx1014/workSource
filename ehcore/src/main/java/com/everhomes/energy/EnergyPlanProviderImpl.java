@@ -21,8 +21,11 @@ import com.everhomes.server.schema.tables.records.EhEnergyPlanMeterMapRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +40,7 @@ import java.util.Map;
  */
 @Component
 public class EnergyPlanProviderImpl implements EnergyPlanProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnergyPlanProviderImpl.class);
     @Autowired
     private DbProvider dbProvider;
 
@@ -144,7 +148,44 @@ public class EnergyPlanProviderImpl implements EnergyPlanProvider {
 
     @Override
     public List<EnergyPlanGroupMap> lisEnergyPlanGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> groups) {
-        return null;
+        long startTime = System.currentTimeMillis();
+        final List<EnergyPlanGroupMap> maps = new ArrayList<EnergyPlanGroupMap>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhEnergyPlanGroupMap.class));
+
+        SelectQuery<EhEnergyPlanGroupMapRecord> query = context.selectQuery(Tables.EH_ENERGY_PLAN_GROUP_MAP);
+
+        Condition con = null;
+        if(groups != null) {
+            Condition con5 = null;
+            for(ExecuteGroupAndPosition group : groups) {
+                Condition con4 = null;
+                con4 = Tables.EH_ENERGY_PLAN_GROUP_MAP.GROUP_ID.eq(group.getGroupId());
+                con4 = con4.and(Tables.EH_ENERGY_PLAN_GROUP_MAP.POSITION_ID.eq(group.getPositionId()));
+                if(con5 == null) {
+                    con5 = con4;
+                } else {
+                    con5 = con5.or(con4);
+                }
+            }
+            con = con5;
+        }
+
+        query.addConditions(con);
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("lisEnergyPlanGroupMapByGroupAndPosition, sql=" + query.getSQL());
+            LOGGER.debug("lisEnergyPlanGroupMapByGroupAndPosition, bindValues=" + query.getBindValues());
+        }
+        query.fetch().map((r) -> {
+            maps.add(ConvertHelper.convert(r, EnergyPlanGroupMap.class));
+            return null;
+        });
+
+        long endTime = System.currentTimeMillis();
+        LOGGER.debug("TrackUserRelatedCost: lisEnergyPlanGroupMapByGroupAndPosition resultSize = " + maps.size()
+                + ", elapse=" + (endTime - startTime));
+
+        return maps;
     }
 
     @Override

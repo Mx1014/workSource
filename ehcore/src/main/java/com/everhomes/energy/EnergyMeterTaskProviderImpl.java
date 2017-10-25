@@ -10,13 +10,17 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterTasks;
+import com.everhomes.server.schema.tables.records.EhEnergyMeterTasksRecord;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +63,9 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
 
     @Override
     public EnergyMeterTask findEnergyMeterTaskById(Long taskId) {
-        return null;
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnergyMeterTasks.class));
+        EhEnergyMeterTasksDao dao = new EhEnergyMeterTasksDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(taskId), EnergyMeterTask.class);
     }
 
     @Override
@@ -71,7 +77,28 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
     }
 
     @Override
+    public List<EnergyMeterTask> listEnergyMeterTasksByPlan(List<Long> planIds, long pageAnchor, int pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_METER_TASKS)
+                .where(Tables.EH_ENERGY_METER_TASKS.ID.ge(pageAnchor))
+                .and(Tables.EH_ENERGY_METER_TASKS.PLAN_ID.in(planIds))
+                .orderBy(Tables.EH_ENERGY_METER_TASKS.PLAN_ID, Tables.EH_ENERGY_METER_TASKS.DEFAULT_ORDER)
+                .limit(pageSize).fetchInto(EnergyMeterTask.class);
+    }
+
+    @Override
     public Map<Long, EnergyMeterTask> listEnergyMeterTasks(List<Long> ids) {
-        return null;
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnergyMeterTasksRecord> query = context.selectQuery(Tables.EH_ENERGY_METER_TASKS);
+        query.addConditions(Tables.EH_ENERGY_METER_TASKS.ID.in(ids));
+
+        Map<Long, EnergyMeterTask> result = new HashMap<>();
+        query.fetch().map((r) -> {
+            result.put(r.getId(), ConvertHelper.convert(r, EnergyMeterTask.class));
+            return null;
+        });
+
+        return result;
     }
 }
