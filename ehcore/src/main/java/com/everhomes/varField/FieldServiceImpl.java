@@ -500,6 +500,7 @@ public class FieldServiceImpl implements FieldService {
                     CustomerTrademarkDTO dto = customerTrademarkDTOS.get(j);
                     setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
+                break;
             case "专利信息":
                 ListCustomerPatentsCommand cmd3 = new ListCustomerPatentsCommand();
                 cmd3.setCustomerId(customerId);
@@ -513,6 +514,7 @@ public class FieldServiceImpl implements FieldService {
                     CustomerPatentDTO dto = customerPatentDTOS.get(j);
                     setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
+                break;
             case "证书":
                 ListCustomerCertificatesCommand cmd4 = new ListCustomerCertificatesCommand();
                 cmd4.setCustomerId(customerId);
