@@ -7,6 +7,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.energy.EnergyCommonStatus;
+import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnergyPlanGroupMapDao;
@@ -139,6 +140,11 @@ public class EnergyPlanProviderImpl implements EnergyPlanProvider {
             return null;
 
         return map;
+    }
+
+    @Override
+    public List<EnergyPlanGroupMap> lisEnergyPlanGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> groups) {
+        return null;
     }
 
     @Override

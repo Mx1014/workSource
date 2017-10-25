@@ -15,6 +15,9 @@ import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.module.ServiceModuleService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationJobPositionMap;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
@@ -24,7 +27,9 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.energy.*;
+import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
@@ -2757,10 +2762,74 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public ListUserEnergyPlanTasksResponse listUserEnergyPlanTasks(ListUserEnergyPlanTasksCommand cmd) {
         ListUserEnergyPlanTasksResponse response = new ListUserEnergyPlanTasksResponse();
-
+        User user = UserContext.current().getUser();
+        List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
+        List<EnergyPlanGroupMap> maps = energyPlanProvider.lisEnergyPlanGroupMapByGroupAndPosition(groupDtos, null);
         return response;
     }
 
+    private List<ExecuteGroupAndPosition> listUserRelateGroups() {
+        Long startTime = System.currentTimeMillis();
+        User user = UserContext.current().getUser();
+
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(user.getId());
+        if(members == null || members.size() == 0) {
+            return new ArrayList<ExecuteGroupAndPosition>();
+        }
+
+        List<ExecuteGroupAndPosition> groupDtos = new ArrayList<ExecuteGroupAndPosition>();
+        for(OrganizationMember member : members) {
+            Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
+
+            if(organization != null) {
+                if(LOGGER.isInfoEnabled()) {
+                    LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
+                }
+                if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
+
+                    List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
+                    if(LOGGER.isInfoEnabled()) {
+                        LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}" , organization.getId(), maps);
+                    }
+
+                    if(maps != null && maps.size() > 0) {
+                        for(OrganizationJobPositionMap map : maps) {
+                            ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
+                            group.setGroupId(organization.getParentId());//具体岗位所属的部门公司组等 by xiongying20170619
+                            group.setPositionId(map.getJobPositionId());
+                            groupDtos.add(group);
+
+//							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
+//							if(groupOrg != null) {
+//								//取path后的第一个路径 为顶层公司 by xiongying 20170323
+                            String[] path = organization.getPath().split("/");
+                            Long organizationId = Long.valueOf(path[1]);
+                            ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
+                            topGroup.setGroupId(organizationId);
+                            topGroup.setPositionId(map.getJobPositionId());
+                            groupDtos.add(topGroup);
+//							}
+
+                        }
+
+                    }
+                } else {
+                    ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
+                    group.setGroupId(organization.getId());
+                    group.setPositionId(0L);
+                    groupDtos.add(group);
+                }
+            }
+        }
+
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("listUserRelateGroups, groupDtos = {}" , groupDtos);
+        }
+
+        Long endTime = System.currentTimeMillis();
+        LOGGER.debug("TrackUserRelatedCost: listUserRelateGroups userId = " + user.getId() + ", elapse=" + (endTime - startTime));
+        return groupDtos;
+    }
     @Override
     public void readTaskMeter(ReadTaskMeterCommand cmd) {
         EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskById(cmd.getTaskId());

@@ -1,5 +1,7 @@
 package com.everhomes.energy;
 
+import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
+
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +18,7 @@ public interface EnergyPlanProvider {
     void deleteEnergyPlanGroupMap(EnergyPlanGroupMap groupMap);
     List<EnergyPlanGroupMap> listGroupsByEnergyPlan(Long planId);
     Map<Long, EnergyPlanGroupMap> listGroupMapsByEnergyPlan(Long planId);
+    List<EnergyPlanGroupMap> lisEnergyPlanGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> groups);
 
     void createEnergyPlanMeterMap(EnergyPlanMeterMap meterMap);
     void updateEnergyPlanMeterMap(EnergyPlanMeterMap meterMap);
