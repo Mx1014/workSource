@@ -5012,14 +5012,14 @@ public class PunchServiceImpl implements PunchService {
 					this.coordinationProvider.getNamedLock(CoordinationLocks.REFRESH_PUNCH_RULE.getCode()+pr.getId()).enter(() -> {
 						try {
 							
-							if(pr.getStatus().equals(PunchRuleStatus.ACTIVE.getCode()))
-								continue;
-							Organization org = organizationProvider.findOrganizationById(pr.getOwnerId());
-							//对ptr表,psd表的处理
-							processTimeRule2Active(pr); 
-							pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
-							punchProvider.updatePunchRule(pr);
-							orgs.add(org);
+							if(!pr.getStatus().equals(PunchRuleStatus.ACTIVE.getCode())){
+								Organization org = organizationProvider.findOrganizationById(pr.getOwnerId());
+								//对ptr表,psd表的处理
+								processTimeRule2Active(pr); 
+								pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
+								punchProvider.updatePunchRule(pr);
+								orgs.add(org);
+							}
 						} catch (Exception e) {
 							LOGGER.error("dayRefreshPunchGroupScheduled error!!!");
 							LOGGER.error("update pr from modify to active error!!",e);
