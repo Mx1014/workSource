@@ -5399,6 +5399,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.in(OrganizationStatus.INACTIVE.getCode(),OrganizationStatus.DELETED.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
 		List list = query.fetch();
 		return list;
 	}

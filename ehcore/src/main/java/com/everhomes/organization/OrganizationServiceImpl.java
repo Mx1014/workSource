@@ -6393,16 +6393,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Integer cleanWrongStatusOrganizationMembers(Integer namespaceId) {
-        List<EhOrganizationsRecord> orgs = this.organizationProvider.listLapseOrganizations(namespaceId);
-        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-        Integer count = 0;
-        if(orgs != null && orgs.size() > 0){
-            for(EhOrganizationsRecord r: orgs){
-                int i = this.organizationProvider.updateOrganizationMembersToInactiveByPath(r.getPath(), now);
-                count += count + i;
-            };
-        }
-        return count;
+        Tuple tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.CLEANWRONGSTATUS_ORGANIZATIONMEMBERS.getCode() + namespaceId).enter(() -> {
+            Integer count = 0;
+            List<EhOrganizationsRecord> orgs = this.organizationProvider.listLapseOrganizations(namespaceId);
+            Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+            if (orgs != null && orgs.size() > 0) {
+                for (EhOrganizationsRecord r : orgs) {
+                    int i = this.organizationProvider.updateOrganizationMembersToInactiveByPath(r.getPath(), now);
+                    LOGGER.debug("cleanWrongStatusOrganizationMembers queue organizaitonId:" + r.getId() + " count: " + i);
+                    count += i;
+                };
+            }
+            return count;
+        });
+        return (Integer) tuple.first();
     }
 
 
