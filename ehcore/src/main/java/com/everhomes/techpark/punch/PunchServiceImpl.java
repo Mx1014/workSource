@@ -5011,8 +5011,10 @@ public class PunchServiceImpl implements PunchService {
 				for (PunchRule pr : punchRules) {
 					this.coordinationProvider.getNamedLock(CoordinationLocks.REFRESH_PUNCH_RULE.getCode()+pr.getId()).enter(() -> {
 						try {
-							
+							LOGGER.debug("begin! prid = "+pr.getId()+" thread :" + Thread.currentThread().getName());
+							Thread.sleep(6000);
 							if(!pr.getStatus().equals(PunchRuleStatus.ACTIVE.getCode())){
+								
 								Organization org = organizationProvider.findOrganizationById(pr.getOwnerId());
 								//对ptr表,psd表的处理
 								processTimeRule2Active(pr); 
