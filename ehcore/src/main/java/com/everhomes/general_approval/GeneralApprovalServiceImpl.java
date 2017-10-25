@@ -1,5 +1,10 @@
 package com.everhomes.general_approval;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
@@ -16,13 +21,13 @@ import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormTemplate;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
@@ -30,6 +35,13 @@ import com.everhomes.yellowPage.YellowPageProvider;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -116,13 +128,16 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
 
+    @Autowired
+    private GeneralApprovalFlowModuleListener generalApprovalFlowModuleListener;
+
     private StringTemplateLoader templateLoader;
 
     private Configuration templateConfig;
 
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
-    private SimpleDateFormat numberFormat = new SimpleDateFormat("yyyyMMdd");
+    private SimpleDateFormat approvalNoFormat = new SimpleDateFormat("yyyyMMdd");
 
 
     @Override
@@ -226,7 +241,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             } else {
                 count = (String) op.get(countKey);
             }
-            String approvalNo = numberFormat.format(new Date());
+            String approvalNo = approvalNoFormat.format(new Date());
             for (int i = 0; i < 4 - count.length(); i++)
                 approvalNo += "0";
             approvalNo += count;
@@ -822,19 +837,105 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse) {
+        cmd.setPageAnchor(null);
+        cmd.setPageSize(1000000);
+        ListGeneralApprovalRecordsResponse response = listGeneralApprovalRecords(cmd);
+        if (response.getRecords() == null || response.getRecords().size() < 1 || cmd.getApprovalType() == null)
+            return;
+        //  1. Set the main title of the sheet
+        String mainTitle = "审批记录";
+        //  2. Set the subtitle of the sheet
+        String subTitle = "申请时间:" + approvalNoFormat.format(cmd.getStartTime()) + " ~ " + approvalNoFormat.format(cmd.getEndTime());
+        if (response.getRecords() == null || response.getRecords().size() < 1)
+            return;
+        //  3. Set the title of the approval lists
+        Long flowCaseId = response.getRecords().get(0).getFlowCaseId();
+        List<FlowCaseEntity> titles = getApprovalDetails(flowCaseId);
 
+
+        XSSFWorkbook workbook = exportGeneralApprovalRecordsFile(mainTitle, subTitle, titles);
+
+        List<Long> flowCaseIds = response.getRecords().stream().map(r -> {
+            return r.getFlowCaseId();
+        }).collect(Collectors.toList());
+        writeExcel(workbook, httpResponse);
     }
-//	@Override
-//	public GetTemplateByApprovalIdResponse getActiveGeneralFormByOriginId(GetActiveGeneralFormByOriginIdCommand cmd) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public GetTemplateByApprovalIdResponse postForm(PostFormCommand cmd) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	} 
 
+    public List<FlowCaseEntity> getApprovalDetails(Long flowCaseId) {
+        FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+        return generalApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
+    }
 
+    private XSSFWorkbook exportGeneralApprovalRecordsFile(String mainTitle, String subTitle, List<FlowCaseEntity> titles) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("审批记录");
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 12));
+        sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 12));
+        //  Export titles
+        createGeneralApprovalRecordsFileTitle(workbook, sheet, mainTitle, subTitle, titles);
+/*        for (int rowIndex = 1; rowIndex < values.size(); rowIndex++) {
+            Row dataRow = sheet.createRow(rowIndex);
+            createArchivesEmployeesFilesContent(workbook, dataRow, values.get(rowIndex - 1).getVals());
+        }*/
+        return workbook;
+    }
+
+    private void createGeneralApprovalRecordsFileTitle(XSSFWorkbook workbook, Sheet sheet, String mainTitle, String subTitle, List<FlowCaseEntity> list) {
+
+        //  1.Set the style(center)
+        Row mainTitleRow = sheet.createRow(0);
+        XSSFCellStyle mainTitleStyle = workbook.createCellStyle();
+        mainTitleStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        //  1.Set the value of the main title
+        Cell mainTitleCell = mainTitleRow.createCell(0);
+        mainTitleCell.setCellStyle(mainTitleStyle);
+        mainTitleCell.setCellValue(mainTitle);
+
+        //  2.Set the style(center)
+        Row subTitleRow = sheet.createRow(1);
+        XSSFCellStyle subTitleStyle = workbook.createCellStyle();
+        subTitleStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        //  2.Set the value of the subtitle
+        Cell subTitleCell = subTitleRow.createCell(0);
+        subTitleCell.setCellStyle(subTitleStyle);
+        subTitleCell.setCellValue(subTitle);
+
+        //  3.Set the value of the approval lists
+        Row titleRow = sheet.createRow(2);
+        int titleList = list.size();
+        for (int i = 0; i < titleList; i++) {
+            Cell cell = titleRow.createCell(i);
+            cell.setCellValue(list.get(i).getKey());
+        }
+        titleRow.createCell(titleList + 0).setCellValue("审批状态");
+        titleRow.createCell(titleList + 1).setCellValue("审批记录");
+        titleRow.createCell(titleList + 2).setCellValue("当前审批人");
+        titleRow.createCell(titleList + 3).setCellValue("督办人");
+    }
+
+    private void writeExcel(XSSFWorkbook workbook, HttpServletResponse httpResponse) {
+        ByteArrayOutputStream out = null;
+        try {
+            out = new ByteArrayOutputStream();
+            workbook.write(out);
+            String fileName = "审批记录.xlsx";
+            httpResponse.setContentType("application/msexcel");
+            httpResponse.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
+            //response.addHeader("Content-Length", "" + out.);
+            OutputStream excelStream = new BufferedOutputStream(httpResponse.getOutputStream());
+            httpResponse.setContentType("application/msexcel");
+            excelStream.write(out.toByteArray());
+            excelStream.flush();
+            excelStream.close();
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        } finally {
+            try {
+                workbook.close();
+                out.close();
+            } catch (IOException e) {
+                LOGGER.error("close error", e);
+            }
+        }
+    }
 }
