@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页的数量</li>
  * <li>needTemporary: 0-不需要， 1-需要， 是否需要查询暂存的活动，用于后台查询时把暂存的贴子也查出来。 不填默认0</li>
  * <li>tag: 标签</li>
+ * <li>entryId: 论坛应用入口Id</li>
  * </ul>
  */
 public class ListTopicCommand {
@@ -34,6 +35,8 @@ public class ListTopicCommand {
     private Byte needTemporary;
 
     private String tag;
+
+    private Long entryId;
     
     public ListTopicCommand() {
     }
@@ -109,6 +112,14 @@ public class ListTopicCommand {
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public Long getEntryId() {
+        return entryId;
+    }
+
+    public void setEntryId(Long entryId) {
+        this.entryId = entryId;
     }
 
     @Override

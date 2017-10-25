@@ -107,4 +107,8 @@ public interface ForumService {
 	void publisTopic(PublishTopicCommand cmd);
 
     Forum findFourmByNamespaceId(Integer namespaceId);
+
+    ListForumCategoryResponse listForumCategory(ListForumCategoryCommand cmd);
+
+    ForumCategoryDTO findForumCategory(FindForumCategoryCommand cmd);
 }

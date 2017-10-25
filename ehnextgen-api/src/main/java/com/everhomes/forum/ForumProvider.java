@@ -287,4 +287,12 @@ public interface ForumProvider {
     Forum findForumByNamespaceId(Integer namespaceId);
 
     List<Post> listPostsByRealPostId(Long realPostId);
+
+    List<ForumCategory> listForumCategoryByForumId(Long forumId);
+
+    ForumCategory findForumCategoryById(Long Id);
+
+    //ForumCategory findForumCategory(Long forumId, Long entryId);
+
+    ForumCategory findForumCategoryByForumIdAndEntryId(Long forumId, Long entryId);
 }

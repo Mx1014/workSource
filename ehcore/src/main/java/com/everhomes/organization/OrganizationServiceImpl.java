@@ -70,8 +70,6 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.common.Router;
-import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
-import com.everhomes.rest.community_map.SearchCommunityMapContentsResponse;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
@@ -126,7 +124,6 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.*;
-import org.apache.xmlbeans.impl.tool.Diff;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -150,7 +147,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -1980,6 +1976,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     	    forumCmd.setExcludeCategories(cmd.getExcludeCategories());
     	    forumCmd.setCategoryId(cmd.getCategoryId());
             forumCmd.setTag(cmd.getTag());
+            forumCmd.setForumEntryId(cmd.getForumEntryId());
     	    response = forumService.listTopicsByForums(forumCmd);
 	        break;
 	    case COMMUNITY_ALL:

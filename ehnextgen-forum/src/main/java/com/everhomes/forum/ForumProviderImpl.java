@@ -1063,5 +1063,35 @@ public class ForumProviderImpl implements ForumProvider {
         }
         return new ArrayList<Post>();
     }
+
+    @Override
+    public List<ForumCategory> listForumCategoryByForumId(Long forumId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Result<Record> result = context.select().from(Tables.EH_FORUM_CATEGORIES)
+                .where(Tables.EH_FORUM_CATEGORIES.FORUM_ID.eq(forumId))
+                .fetch();
+
+        if (result != null && result.isNotEmpty()) {
+            return result.map(r->RecordHelper.convert(r, ForumCategory.class));
+        }
+        return new ArrayList<ForumCategory>();
+    }
+
+    @Override
+    public ForumCategory findForumCategoryById(Long Id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_FORUM_CATEGORIES)
+                .where(Tables.EH_FORUM_CATEGORIES.ID.eq(Id))
+                .fetchOneInto(ForumCategory.class);
+    }
+
+    @Cacheable(value = "findForumCategoryByForumIdAndEntryId", key="{#forumId, #entryId}", unless="#result == null")
+    @Override
+    public ForumCategory findForumCategoryByForumIdAndEntryId(Long forumId, Long entryId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_FORUM_CATEGORIES)
+                .where(Tables.EH_FORUM_CATEGORIES.FORUM_ID.eq(forumId).and(Tables.EH_FORUM_CATEGORIES.ENTRY_ID.eq(entryId)))
+                .fetchOneInto(ForumCategory.class);
+    }
 	
  }

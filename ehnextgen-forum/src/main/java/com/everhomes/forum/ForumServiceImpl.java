@@ -85,7 +85,6 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
-import javafx.geometry.Pos;
 import net.greghaines.jesque.Job;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.geo.GeoHashUtils;
@@ -1528,7 +1527,14 @@ public class ForumServiceImpl implements ForumService {
              if(!StringUtils.isEmpty(cmd.getTag())){
                  condition = condition.and(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
              }
-	         
+
+             //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
+             if(StringUtils.isEmpty(cmd.getForumEntryId())){
+                 condition = condition.and(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(0L));
+             }else {
+                 condition = condition.and(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getForumEntryId()));
+             }
+
 	         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), cmd.getNeedTemporary());
 	    	 if(LOGGER.isInfoEnabled()) {
 	             long endTime = System.currentTimeMillis();
@@ -2867,6 +2873,13 @@ public class ForumServiceImpl implements ForumService {
             if(!StringUtils.isEmpty(cmd.getTag())){
                 query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
             }
+
+            //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
+            if(StringUtils.isEmpty(cmd.getEntryId())){
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(0L));
+            }else {
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getEntryId()));
+            }
             
             if(visibilityCondition != null) {
                 //单个 -- 查询单个目标的（正常、clone），或者发送到“全部”的（正常）   add by yanjun 20170809
@@ -3052,6 +3065,14 @@ public class ForumServiceImpl implements ForumService {
             if(!StringUtils.isEmpty(cmd.getTag())){
                 query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
             }
+
+            //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
+            if(StringUtils.isEmpty(cmd.getEntryId())){
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(0L));
+            }else {
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getEntryId()));
+            }
+
             if(null != condition){
             	query.addConditions(condition);
             }
@@ -3160,6 +3181,9 @@ public class ForumServiceImpl implements ForumService {
         //设置帖子的克隆状态和真身帖   add by yanjun 20170807
         post.setCloneFlag(cmd.getCloneFlag());
         post.setRealPostId(cmd.getRealPostId());
+
+        //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
+        post.setForumEntryId(cmd.getForumEntryId());
 
         
         return post;
@@ -3920,6 +3944,9 @@ public class ForumServiceImpl implements ForumService {
 
                 //添加ownerToken, 当前字段在评论时使用 add by yanjun 20170601
                 populateOwnerToken(post);
+
+                //添加是否支持评论字段 add by yanjun 20171025
+                populateCommemtFlag(post);
                 
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
                 String relativeUrl = configProvider.getValue(ConfigConstants.POST_SHARE_URL, "");
@@ -3960,6 +3987,26 @@ public class ForumServiceImpl implements ForumService {
         }
     }
 
+    /**
+     *添加是否支持评论字段 add by yanjun 20171025
+     * @param post
+     */
+    private void populateCommemtFlag(Post post){
+        //如果帖子时关闭评论的，直接是关闭
+        if(post.getInteractFlag() != null || post.getInteractFlag() == 0){
+            return;
+        }
+
+        //帖子时开放的，查看入口配置，没有配置或者配置成1的话是开放的，其他时候关闭
+        ForumCategory category = forumProvider.findForumCategoryByForumIdAndEntryId(post.getForumId(), post.getForumEntryId());
+        if(category == null || InteractFlag.fromCode(category.getInteractFlag()) == InteractFlag.SUPPORT){
+            post.setInteractFlag(InteractFlag.SUPPORT.getCode());
+            return;
+        }else {
+            post.setInteractFlag(InteractFlag.UNSUPPORT.getCode());
+        }
+
+    }
     /**
      *添加ownerToken, 当前字段在评论时使用 add by yanjun 20170601
      * @param post
@@ -5632,6 +5679,13 @@ public class ForumServiceImpl implements ForumService {
                     query.addConditions(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
                 }
 
+                //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
+                if(StringUtils.isEmpty(cmd.getForumEntryId())){
+                    query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(0L));
+                }else {
+                    query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getForumEntryId()));
+                }
+
                 //全部 -- 查询各个目标的（正常），或者发送到“全部”的（clone、正常）   add by yanjun 20170807
                 Condition cloneCondition = Tables.EH_FORUM_POSTS.CLONE_FLAG.eq(PostCloneFlag.NORMAL.getCode())
                         .or(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.ALL.getCode()));
@@ -5748,7 +5802,14 @@ public class ForumServiceImpl implements ForumService {
             if(condition != null){
                 query.addConditions(condition);
             }
-            
+
+            //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
+            if(StringUtils.isEmpty(cmd.getEntryId())){
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(0L));
+            }else {
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getEntryId()));
+            }
+
             return query;
         });
         this.forumProvider.populatePostAttachments(posts);
@@ -6112,6 +6173,22 @@ public class ForumServiceImpl implements ForumService {
     public Forum findFourmByNamespaceId(Integer namespaceId){
         Forum forum = forumProvider.findForumByNamespaceId(namespaceId);
         return forum;
+    }
+
+    @Override
+    public ListForumCategoryResponse listForumCategory(ListForumCategoryCommand cmd) {
+        List<ForumCategory> list = forumProvider.listForumCategoryByForumId(cmd.getForumId());
+        List<ForumCategoryDTO> dtos = list.stream().map(r -> ConvertHelper.convert(r, ForumCategoryDTO.class)).collect(Collectors.toList());
+
+        ListForumCategoryResponse response = new ListForumCategoryResponse();
+        response.setDtos(dtos);
+        return response;
+    }
+
+    @Override
+    public ForumCategoryDTO findForumCategory(FindForumCategoryCommand cmd) {
+         ForumCategory category = forumProvider.findForumCategoryById(cmd.getId());
+        return ConvertHelper.convert(category, ForumCategoryDTO.class);
     }
     
 }
