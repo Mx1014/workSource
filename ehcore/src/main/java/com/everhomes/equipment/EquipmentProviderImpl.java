@@ -1754,6 +1754,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);
 		EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
         dao.update(t);
+		LOGGER.debug("EquipmentInspectionTasks closeTask: {}", task);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionTasks.class, t.getId());
 		
 	}
