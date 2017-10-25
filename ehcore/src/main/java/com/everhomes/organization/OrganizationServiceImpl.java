@@ -10079,15 +10079,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 List<Long> jobLevelIds = cmd.getJobLevelIds();
 
-                //部门的数据处理
-                organizationPersonelsDatasProcess(enterpriseIds, departmentIds, direct_under_enterpriseIds, org);
-
-
                 //加上部门唯一性校验
                 if (cmd.getDepartmentIds() != null && cmd.getDepartmentIds().size() > 1) {
                     LOGGER.error("there are more than one department in this cmd, cmd = {}", cmd);
                     throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "there are more than one department in this cmd");
                 }
+
+                //部门的数据处理
+                organizationPersonelsDatasProcess(enterpriseIds, departmentIds, direct_under_enterpriseIds, org);
 
                 /**删除公司级别以下及退出公司的记录**/
                 deleteOrganizaitonMemberUnderEnterprise(enterpriseIds, groupTypes, leaveMembers, cmd.getContactToken());
