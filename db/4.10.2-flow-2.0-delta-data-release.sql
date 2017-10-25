@@ -34,7 +34,7 @@ VALUES ((@menu_scope_id := @menu_scope_id + 1), 70300, '', 'EhNamespaces', 99999
 
 SET @locale_templates_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 1);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-  VALUES ((@locale_templates_id := @locale_templates_id + 1), 'flow', 20001, 'zh_CN', '工作流通用按钮触发描述在', '${nodeName} 执行 ${buttonName}', 0);
+  VALUES ((@locale_templates_id := @locale_templates_id + 1), 'flow', 20001, 'zh_CN', '工作流通用按钮触发描述在', '在 ${nodeName} 执行 ${buttonName}', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
   VALUES ((@locale_templates_id := @locale_templates_id + 1), 'flow', 20003, 'zh_CN', '任务超时 已取消任务', '任务超时 已取消任务', 0);
 
