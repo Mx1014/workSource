@@ -27,4 +27,6 @@ public interface EnergyConsumptionServiceErrorCode {
 
     int ERROR_METER_NAME_EXIST = 10017;// 表计名称存在
     int ERROR_METER_NUMBER_EXIST = 10018;// 表计号码存在
+
+    int ERR_METER_TASK_NOT_EXIST = 10019;//任务不存在
 }

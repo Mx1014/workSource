@@ -8,8 +8,8 @@ import java.util.Map;
  */
 public interface EnergyMeterTaskProvider {
     void createEnergyMeterTask(EnergyMeterTask task);
-    void updateEnergyMeterTask(EnergyMeterTask plan);
-    EnergyMeterTask findEnergyMeterTaskById(Long planId);
+    void updateEnergyMeterTask(EnergyMeterTask task);
+    EnergyMeterTask findEnergyMeterTaskById(Long taskId);
     List<EnergyMeterTask> listEnergyMeterTasks(long pageAnchor, int pageSize);
 
     Map<Long, EnergyMeterTask> listEnergyMeterTasks(List<Long> ids);

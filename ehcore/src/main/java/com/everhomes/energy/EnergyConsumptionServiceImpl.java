@@ -212,6 +212,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private EnergyMeterTaskSearcher energyMeterTaskSearcher;
 
+    @Autowired
+    private EnergyMeterTaskProvider energyMeterTaskProvider;
+
 
     //    @Override
 //    public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
@@ -2758,7 +2761,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public void readTaskMeter(ReadTaskMeterCommand cmd) {
-
+        EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskById(cmd.getTaskId());
+        if (task == null) {
+            LOGGER.error("EnergyTask not exist, id = {}", cmd.getTaskId());
+            throw errorWith(SCOPE, ERR_METER_TASK_NOT_EXIST, "The meter task is not exist id = %s", cmd.getTaskId());
+        }
+        task.setReading(cmd.getCurrReading());
+        task.setOperatorUid(UserContext.currentUserId());
+        task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        energyMeterTaskProvider.updateEnergyMeterTask(task);
+        energyMeterTaskSearcher.feedDoc(task);
+        ReadEnergyMeterCommand command = ConvertHelper.convert(cmd, ReadEnergyMeterCommand.class);
+        command.setMeterId(task.getMeterId());
+        readEnergyMeter(command);
     }
 
     private RepeatSettings dealEnergyPlanRepeat(RepeatSettingsDTO dto) {

@@ -28,12 +28,12 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
     }
 
     @Override
-    public void updateEnergyMeterTask(EnergyMeterTask plan) {
+    public void updateEnergyMeterTask(EnergyMeterTask task) {
 
     }
 
     @Override
-    public EnergyMeterTask findEnergyMeterTaskById(Long planId) {
+    public EnergyMeterTask findEnergyMeterTaskById(Long taskId) {
         return null;
     }
 

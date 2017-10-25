@@ -17,6 +17,7 @@ import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import java.util.Map;
 /**
  * Created by ying.xiong on 2017/10/19.
  */
+@Component
 public class EnergyMeterAddressProviderImpl implements EnergyMeterAddressProvider {
 
     @Autowired
