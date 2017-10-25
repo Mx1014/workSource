@@ -1,8 +1,8 @@
 -- add by xiongying20171024
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2300000', 'øÕªßπ‹¿Ì', '2000000', NULL, 'customer-management', '1', '2', '/2000000/2300000', 'zuolin', '2', '21100', '2', 'system', 'module');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2310000', 'øÕªßπ‹¿Ì', '2300000', NULL, 'customer-management', '1', '2', '/2000000/2300000/2310000', 'zuolin', '2', '21100', '3', 'system', 'page');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2400000', '∫œÕ¨π‹¿Ì', '2000000', NULL, 'contract-management', '1', '2', '/2000000/2400000', 'zuolin', '2', '21200', '2', 'system', 'module');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2410000', '∫œÕ¨π‹¿Ì', '2400000', NULL, 'contract-management', '1', '2', '/2000000/2400000/2410000', 'zuolin', '2', '21200', '3', 'system', 'page');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2300000', 'ÂÆ¢Êà∑ÁÆ°ÁêÜ', '2000000', NULL, 'customer-management', '1', '2', '/2000000/2300000', 'zuolin', '2', '21100', '2', 'system', 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2310000', 'ÂÆ¢Êà∑ÁÆ°ÁêÜ', '2300000', NULL, 'customer-management', '1', '2', '/2000000/2300000/2310000', 'zuolin', '2', '21100', '3', 'system', 'page');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2400000', 'ÂêàÂêåÁÆ°ÁêÜ', '2000000', NULL, 'contract-management', '1', '2', '/2000000/2400000', 'zuolin', '2', '21200', '2', 'system', 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2410000', 'ÂêàÂêåÁÆ°ÁêÜ', '2400000', NULL, 'contract-management', '1', '2', '/2000000/2400000/2410000', 'zuolin', '2', '21200', '3', 'system', 'page');
 
 SET @eh_var_fields_id = (SELECT MAX(id) FROM `eh_var_fields`);
 SET @eh_var_field_items_id = (SELECT MAX(id) FROM `eh_var_field_items`);
@@ -14,57 +14,61 @@ update eh_var_fields set field_param = '{\"fieldParamType\": \"text\", \"length\
 update eh_var_fields set field_param = '{\"fieldParamType\": \"select\", \"length\": 32}' where id = 214;
 update eh_var_fields set field_param = '{\"fieldParamType\": \"text\", \"length\": 32}' where id = 215;
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'intentionGrade', '“‚œÚµ»º∂', 'Long', '19', '/19', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'intentionGrade', 'ÊÑèÂêëÁ≠âÁ∫ß', 'Long', '19', '/19', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 
-INSERT INTO ``eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'trackingTime', '∏˙Ω¯ ±º‰', 'Long', '19', '/19', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"datetimeWithM\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'trackingTime', 'Ë∑üËøõÊó∂Èó¥', 'Long', '19', '/19', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"datetimeWithM\", \"length\": 32}');
 
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'content', '∏˙Ω¯ƒ⁄»›', 'Long', '19', '/19', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"multiText\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'content', 'Ë∑üËøõÂÜÖÂÆπ', 'Long', '19', '/19', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"multiText\", \"length\": 32}');
 
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'trackingType', 'º∆ªÆ¿‡–Õ', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'trackingType', 'ËÆ°ÂàíÁ±ªÂûã', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'customerName', 'øÕªß√˚≥∆', 'String', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'customerName', 'ÂÆ¢Êà∑ÂêçÁß∞', 'String', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'trackingTime', '∏˙Ω¯ ±º‰', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"datetimeWithM\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'trackingTime', 'Ë∑üËøõÊó∂Èó¥', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"datetimeWithM\", \"length\": 32}');
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'notifyTime', 'Ã·«∞Ã·–— ±º‰', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"datetimeWithM\", \"length\": 32}');
-
-
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'title', '±ÍÃ‚', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'notifyTime', 'ÊèêÂâçÊèêÈÜíÊó∂Èó¥', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"datetimeWithM\", \"length\": 32}');
 
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'content', 'ƒ⁄»›', 'String', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"multiText\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'title', 'Ê†áÈ¢ò', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) 
-VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, '–¥◊÷¬•', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) 
-VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, '…Ã∆Ã', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) 
-VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, '≥ß∑ø', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) 
-VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, '≥µŒª', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) 
-VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, '∆‰À˚', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'content', 'ÂÜÖÂÆπ', 'String', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"multiText\", \"length\": 32}');
 
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '∏ˆ»À', '1', '2', '1', '2017-08-24 04:26:25', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '…Ã∆∑∑ø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '¥Ê¡ø∑ø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ºØ◊ ∑ø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '∆Ωº€∑ø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '¡Æ◊‚◊°∑ø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'æ≠º√  ”√◊°∑ø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'π´‘¢ Ω◊°’¨', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '∆‰À˚', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`)
+VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, 'ÂÜôÂ≠óÊ•º', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`)
+VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, 'ÂïÜÈì∫', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`)
+VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, 'ÂéÇÊàø', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`)
+VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, 'ËΩ¶‰Ωç', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`)
+VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, 'ÂÖ∂‰ªñ', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
+
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '‰∏™‰∫∫', '1', '2', '1', '2017-08-24 04:26:25', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ÂïÜÂìÅÊàø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'Â≠òÈáèÊàø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ÈõÜËµÑÊàø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'Âπ≥‰ª∑Êàø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ÂªâÁßü‰ΩèÊàø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ÁªèÊµéÈÄÇÁî®‰ΩèÊàø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ÂÖ¨ÂØìÂºè‰ΩèÂÆÖ', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ÂÖ∂‰ªñ', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+
+-- ÈªòËÆ§ÂéªÂ§ÑÁêÜÊåâÈíÆÊñáÊú¨  add by xq.tian 2017/10/25
+update eh_flow_nodes set goto_process_button_name='ÂéªÂ§ÑÁêÜ' where goto_process_button_name is null or goto_process_button_name='';
+
