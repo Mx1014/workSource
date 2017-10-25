@@ -98,9 +98,9 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		//保存文件的范围和用户数量
 		questionnaire.setTargetUserNum(userLevelRanges.size());
 		questionnaire.setUserScope(StringHelper.toJsonString(userLevelRanges));
-		questionnaireProvider.updateQuestionnaire(questionnaire);
 		//发送消息
-		sendMessage(questionnaire);
+		questionnaire.setScopeSentMessageUsers(StringHelper.toJsonString(sendMessage(questionnaire)));
+		questionnaireProvider.updateQuestionnaire(questionnaire);
 	}
 
 	@Override
@@ -111,6 +111,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		List<Questionnaire> questionnaires = questionnaireProvider.listApproachCutoffTimeQuestionnaire(remindTime);
 		Set<String> userLevelRanges = null;
 		for (Questionnaire questionnaire : questionnaires) {
+			String originalUseScope = questionnaire.getUserScope();
 			List<QuestionnaireAnswer> answers = questionnaireAnswerProvider.listQuestionnaireAnswerByQuestionnaireId(questionnaire.getId(), questionnaire.getTargetType());
 			if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.ORGANIZATION){
 				List<QuestionnaireRange> originalRanges = questionnaireRangeProvider.listQuestionnaireRangeByQuestionnaireId(questionnaire.getId());
@@ -119,7 +120,9 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 				userLevelRanges = calculateUnAnsweredQuesionnaireRange(questionnaire,answers);
 			}
 			questionnaire.setUserScope(StringHelper.toJsonString(userLevelRanges));
-			sendMessage(questionnaire);
+			questionnaire.setScopeResentMessageUsers(StringHelper.toJsonString(sendMessage(questionnaire)));
+			questionnaire.setUserScope(originalUseScope);
+			questionnaireProvider.updateQuestionnaire(questionnaire);
 		}
 
 	}
@@ -160,49 +163,56 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 	}
 
 
-	private void sendMessage(Questionnaire questionnaire){
-		LOGGER.info("send message to:"+questionnaire.getUserScope());
-		List<String> ranges = JSONObject.parseObject(questionnaire.getUserScope(),new TypeReference<List<String>>(){});
+	private List<String> sendMessage(Questionnaire questionnaire){
+		List<String> sendedranges = new ArrayList<>();
+		try {
+			LOGGER.info("send message to:" + questionnaire.getUserScope());
+			List<String> ranges = JSONObject.parseObject(questionnaire.getUserScope(), new TypeReference<List<String>>() {
+			});
 
-		//部分不用循环创建的对象
-		Namespace namespace = namespaceProvider.findNamespaceById(questionnaire.getNamespaceId());
-		String string1 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN1, "zh_CN", "邀请您参与《");
-		String string2 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN2, "zh_CN", "》问卷调查。");
-		String  url = String.format(configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL,"https://www.zuolin.com/mobile/static/coming_soon/index.html"),questionnaire.getId());
+			//部分不用循环创建的对象
+			Namespace namespace = namespaceProvider.findNamespaceById(questionnaire.getNamespaceId());
+			String string1 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN1, "zh_CN", "邀请您参与《");
+			String string2 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN2, "zh_CN", "》问卷调查。");
+			String url = String.format(configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "https://www.zuolin.com/mobile/static/coming_soon/index.html"), questionnaire.getId());
 
-		MessageChannel channel2 = new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId()));
+			MessageChannel channel2 = new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId()));
 
-		// 组装路由
-		OfficialActionData actionData = new OfficialActionData();
-		actionData.setUrl(url);
+			// 组装路由
+			OfficialActionData actionData = new OfficialActionData();
+			actionData.setUrl(url);
 
-		String uri = RouterBuilder.build(Router.BROWSER_I, actionData);
-		RouterMetaObject metaObject = new RouterMetaObject();
-		metaObject.setUrl(uri);
+			String uri = RouterBuilder.build(Router.BROWSER_I, actionData);
+			RouterMetaObject metaObject = new RouterMetaObject();
+			metaObject.setUrl(uri);
 
-		Map<String, String> meta = new HashMap<String, String>();
-		meta.put(MessageMetaConstant.MESSAGE_SUBJECT,stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN, "zh_CN","问卷调查邀请函"));
-		meta.put(MessageMetaConstant.META_OBJECT_TYPE,MetaObjectType.MESSAGE_ROUTER.getCode());
-		meta.put(MessageMetaConstant.META_OBJECT,StringHelper.toJsonString(metaObject));
+			Map<String, String> meta = new HashMap<String, String>();
+			meta.put(MessageMetaConstant.MESSAGE_SUBJECT, stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN, "zh_CN", "问卷调查邀请函"));
+			meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+			meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
 
-		String body = new StringBuffer().append(namespace.getName()).append(string1).append(questionnaire.getQuestionnaireName()).append(string2).append(questionnaire.getDescription()).toString();
-		MessageDTO messageDto = new MessageDTO();
-		ranges.forEach(range->{
-			messageDto.setAppId(AppConstants.APPID_MESSAGING);
-			messageDto.setSenderUid(User.SYSTEM_UID);
-			messageDto.setChannels(
-					new MessageChannel(MessageChannelType.USER.getCode(), range),
-					channel2
-			);
+			String body = new StringBuffer().append(namespace.getName()).append(string1).append(questionnaire.getQuestionnaireName()).append(string2).append(questionnaire.getDescription()).toString();
+			MessageDTO messageDto = new MessageDTO();
+			ranges.forEach(range -> {
+				messageDto.setAppId(AppConstants.APPID_MESSAGING);
+				messageDto.setSenderUid(User.SYSTEM_UID);
+				messageDto.setChannels(
+						new MessageChannel(MessageChannelType.USER.getCode(), range),
+						channel2
+				);
 
-			messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-			messageDto.setBody(body);
-			messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-			messageDto.setMeta(meta);
+				messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+				messageDto.setBody(body);
+				messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+				messageDto.setMeta(meta);
 
-			messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-					range, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-		});
+				messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+						range, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+				sendedranges.add(range);
+			});
+		}finally {
+			return sendedranges;
+		}
 	}
 
 	private Set<String> calculateQuesionnaireRange(Questionnaire questionnaireDTO) {
