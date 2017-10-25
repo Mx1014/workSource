@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.flow.*;
+import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class PmtaskFlowModuleListener implements FlowModuleListener {
@@ -51,7 +54,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
-	private FlowEventLogProvider flowEventLogProvider;
+	private ConfigurationProvider configProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 
@@ -331,7 +334,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
 				stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
 				flowService.processAutoStep(stepDTO);
-				ctx.setContinueStep(false);
+				// ctx.setContinueStep(false);
 
 			}else
 			if ("ASSIGNING".equals(nodeType)) {
@@ -344,7 +347,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
                     stepDTO.setSubjectId(subject.getId());
                 }
 				flowService.processAutoStep(stepDTO);
-				ctx.setContinueStep(false);
+				// ctx.setContinueStep(false);
 
 
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
@@ -432,5 +435,20 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			smsProvider.addToTupleList(variables, "categoryName", category.getName());
 		}
 
+	}
+
+	@Override
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, defaultId, null,
+				null, null);
+
+		return categories.stream().map(c -> {
+			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+			dto.setId(c.getId());
+			dto.setNamespaceId(namespaceId);
+			dto.setServiceName(c.getName());
+			return dto;
+		}).collect(Collectors.toList());
 	}
 }

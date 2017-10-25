@@ -2,33 +2,26 @@ package com.everhomes.flow;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.flow.FlowNodeStatus;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhFlowNodesDao;
+import com.everhomes.server.schema.tables.pojos.EhFlowNodes;
+import com.everhomes.server.schema.tables.records.EhFlowNodesRecord;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.rest.flow.FlowNodeStatus;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.daos.EhFlowNodesDao;
-import com.everhomes.server.schema.tables.pojos.EhFlowNodes;
-import com.everhomes.server.schema.tables.records.EhFlowNodesRecord;
-import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import java.sql.Timestamp;
+import java.util.List;
 
 @Component
 public class FlowNodeProviderImpl implements FlowNodeProvider {
@@ -69,16 +62,16 @@ public class FlowNodeProviderImpl implements FlowNodeProvider {
     @Override
     public FlowNode getFlowNodeById(Long id) {
         try {
-        FlowNode[] result = new FlowNode[1];
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowNodes.class));
+            FlowNode[] result = new FlowNode[1];
+            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowNodes.class));
 
-        result[0] = context.select().from(Tables.EH_FLOW_NODES)
-            .where(Tables.EH_FLOW_NODES.ID.eq(id))
-            .fetchAny().map((r) -> {
-                return ConvertHelper.convert(r, FlowNode.class);
-            });
+            result[0] = context.select().from(Tables.EH_FLOW_NODES)
+                    .where(Tables.EH_FLOW_NODES.ID.eq(id))
+                    .fetchAny().map((r) -> {
+                        return ConvertHelper.convert(r, FlowNode.class);
+                    });
 
-        return result[0];
+            return result[0];
         } catch (Exception ex) {
             //fetchAny() maybe return null
             return null;
@@ -90,19 +83,19 @@ public class FlowNodeProviderImpl implements FlowNodeProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowNodes.class));
 
         SelectQuery<EhFlowNodesRecord> query = context.selectQuery(Tables.EH_FLOW_NODES);
-        if(queryBuilderCallback != null)
+        if (queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
-        if(locator.getAnchor() != null) {
+        if (locator.getAnchor() != null) {
             query.addConditions(Tables.EH_FLOW_NODES.ID.gt(locator.getAnchor()));
-            }
+        }
 
         query.addLimit(count);
         List<FlowNode> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, FlowNode.class);
         });
 
-        if(objs.size() >= count) {
+        if (objs.size() >= count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
         } else {
             locator.setAnchor(null);
@@ -116,46 +109,58 @@ public class FlowNodeProviderImpl implements FlowNodeProvider {
         obj.setCreateTime(new Timestamp(l2));
     }
 
-	@Override
-	public FlowNode findFlowNodeByName(Long flowMainId, Integer flowVersion, String nodeName) {
-		ListingLocator locator = new ListingLocator();
-		List<FlowNode> flowNodes = this.queryFlowNodes(locator, 1, new ListingQueryBuilderCallback() {
+    @Override
+    public FlowNode findFlowNodeByName(Long flowMainId, Integer flowVersion, String nodeName) {
+        ListingLocator locator = new ListingLocator();
+        List<FlowNode> flowNodes = this.queryFlowNodes(locator, 1, new ListingQueryBuilderCallback() {
 
-			@Override
-			public SelectQuery<? extends Record> buildCondition(
-					ListingLocator locator, SelectQuery<? extends Record> query) {
-				query.addConditions(Tables.EH_FLOW_NODES.FLOW_MAIN_ID.eq(flowMainId));
-				query.addConditions(Tables.EH_FLOW_NODES.FLOW_VERSION.eq(flowVersion));
-				query.addConditions(Tables.EH_FLOW_NODES.NODE_NAME.eq(nodeName));
-				query.addConditions(Tables.EH_FLOW_NODES.STATUS.eq(FlowNodeStatus.VISIBLE.getCode()));
-				return query;
-			}
-			
-		});
-		
-		if(flowNodes == null || flowNodes.size() == 0) {
-			return null;
-		}
-		
-		return flowNodes.get(0);
-	}
-	
-	@Override
-	public List<FlowNode> findFlowNodesByFlowId(Long flowMainId, Integer flowVersion) {
-		ListingLocator locator = new ListingLocator();
-		List<FlowNode> flowNodes = this.queryFlowNodes(locator, 100, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(
+                    ListingLocator locator, SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_FLOW_NODES.FLOW_MAIN_ID.eq(flowMainId));
+                query.addConditions(Tables.EH_FLOW_NODES.FLOW_VERSION.eq(flowVersion));
+                query.addConditions(Tables.EH_FLOW_NODES.NODE_NAME.eq(nodeName));
+                query.addConditions(Tables.EH_FLOW_NODES.STATUS.eq(FlowNodeStatus.VISIBLE.getCode()));
+                return query;
+            }
 
-			@Override
-			public SelectQuery<? extends Record> buildCondition(
-					ListingLocator locator, SelectQuery<? extends Record> query) {
-				query.addConditions(Tables.EH_FLOW_NODES.FLOW_MAIN_ID.eq(flowMainId));
-				query.addConditions(Tables.EH_FLOW_NODES.FLOW_VERSION.eq(flowVersion));
-				query.addConditions(Tables.EH_FLOW_NODES.STATUS.ne(FlowNodeStatus.INVALID.getCode()));
-				return query;
-			}
-			
-		});
-		
-		return flowNodes;
-	}
+        });
+
+        if (flowNodes == null || flowNodes.size() == 0) {
+            return null;
+        }
+
+        return flowNodes.get(0);
+    }
+
+    @Override
+    public List<FlowNode> findFlowNodesByFlowId(Long flowMainId, Integer flowVersion) {
+        return queryFlowNodes(new ListingLocator(), 200, (locator, query) -> {
+            query.addConditions(Tables.EH_FLOW_NODES.FLOW_MAIN_ID.eq(flowMainId));
+            query.addConditions(Tables.EH_FLOW_NODES.FLOW_VERSION.eq(flowVersion));
+            query.addConditions(Tables.EH_FLOW_NODES.STATUS.ne(FlowNodeStatus.INVALID.getCode()));
+            return query;
+        });
+    }
+
+    @Override
+    public void deleteFlowNode(List<Long> nodeIdList) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhFlowNodes t = Tables.EH_FLOW_NODES;
+        context.update(t)
+                .set(t.STATUS, FlowNodeStatus.INVALID.getCode())
+                .where(t.ID.in(nodeIdList))
+                .execute();
+    }
+
+    @Override
+    public void deleteFlowNode(Long flowMainId, Integer flowVersion, List<Long> retainNodeIdList) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhFlowNodes t = Tables.EH_FLOW_NODES;
+        context.delete(t)
+                .where(t.FLOW_MAIN_ID.eq(flowMainId))
+                .and(t.FLOW_VERSION.eq(flowVersion))
+                .and(t.ID.notIn(retainNodeIdList))
+                .execute();
+    }
 }

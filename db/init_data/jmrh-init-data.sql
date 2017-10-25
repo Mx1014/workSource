@@ -404,3 +404,60 @@ VALUES ((@service_alliance_id := @service_alliance_id + 1), 0, 'organaization', 
 
 SELECT * from eh_service_alliances WHERE parent_id = 212524;
 update eh_service_alliances SET parent_id = 212529 WHERE parent_id = 212524;
+
+-- 新增“企业展厅”和两个服务联盟“企业服务”&“投融资”入口 by wentian
+-- 删除多余的
+
+delete from `eh_service_alliance_categories` where id = 212546 and name= '企业服务';
+
+-- 1. 配置企业展厅
+
+update eh_launch_pad_items set action_type = '34',action_data='{"type":3}' where namespace_id='999972' and item_label='企业展厅';
+
+ -- 企业服务：即服务联盟（icon在“更多”中，配置为形式2）
+
+SET @category_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
+set @category_id = @category_id + 1;
+SET @service_alliance_id = (SELECT MAX(id) FROM `eh_service_alliances`);
+set @service_alliance_id = @service_alliance_id + 1;
+set @entry_id = (select MAX(entry_id) from `eh_service_alliance_categories` where `namespace_id` = '999972');
+
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`, `display_mode`, `display_destination`, `selected_logo_url`, `entry_id`) VALUES
+(@category_id, 'community', '240111044331050371', '0', '企业服务', '企业服务', '0', '2', '1', now(), '0', NULL, '999972', '', '1', '0', '', @entry_id:=@entry_id+1);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `range`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`, `description_height`, `display_flag`, `summary_description`, `enable_comment`) VALUES
+(@service_alliance_id, '0', 'organaization', '1034291', 'all', '企业服务', '企业服务', @category_id, '', NULL, '', '','2', @service_alliance_id, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2', NULL, '2', '1', '', '0');
+
+SET @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100, '企业服务', 'EhNamespaces', '999972', '1');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100+10, '', 'EhNamespaces', '999972', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100+20, '', 'EhNamespaces', '999972', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100+30, '', 'EhNamespaces', '999972', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100+40, '', 'EhNamespaces', '999972', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100+50, '', 'EhNamespaces', '999972', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100+60, '', 'EhNamespaces', '999972', '2');
+
+update eh_launch_pad_items set action_type = '33' , action_data = CONCAT('{"type":',@category_id,',"parentId":',@category_id,',"displayType": "list"}') where namespace_id=999972 and item_label='企业服务';
+
+ -- 投融资：即服务联盟（icon在“更多”中，配置为形式5，大图列表展示）
+
+SET @category_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
+set @category_id = @category_id + 1;
+SET @service_alliance_id = (SELECT MAX(id) FROM `eh_service_alliances`);
+set @service_alliance_id = @service_alliance_id + 1;
+set @entry_id = (select MAX(entry_id) from `eh_service_alliance_categories` where `namespace_id` = '999972');
+
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`, `display_mode`, `display_destination`, `selected_logo_url`, `entry_id`) VALUES
+(@category_id, 'community', '240111044331050371', '0', '投融资', '投融资', '0', '2', '1', now(), '0', NULL, '999972', '', '1', '0', '', @entry_id:=@entry_id+1);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `range`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`, `description_height`, `display_flag`, `summary_description`, `enable_comment`) VALUES
+(@service_alliance_id, '0', 'organaization', '1034291', 'all', '投融资', '投融资', @category_id, '', NULL, '', '','2', @service_alliance_id, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2', NULL, '2', '1', '', '0');
+
+SET @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100, '投融资', 'EhNamespaces', '999972', '1');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100+10, '', 'EhNamespaces', '999972', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100+20, '', 'EhNamespaces', '999972', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100+30, '', 'EhNamespaces', '999972', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100+40, '', 'EhNamespaces', '999972', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100+50, '', 'EhNamespaces', '999972', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@scope_id:=@scope_id+1), 41600+@entry_id*100+60, '', 'EhNamespaces', '999972', '2');
+
+update eh_launch_pad_items set action_type = '33' , action_data = CONCAT('{"type":',@category_id,',"parentId":',@category_id,',"displayType": "list"}') where namespace_id=999972 and item_label='投融资';

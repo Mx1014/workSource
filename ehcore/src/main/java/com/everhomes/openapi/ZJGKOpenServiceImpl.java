@@ -436,6 +436,10 @@ public class ZJGKOpenServiceImpl {
     }
 
     private void syncData(ShenzhouJsonEntity entity, Byte dataType, String communityIdentifier) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("zj syncData: dataType: {}, communityIdentifier: {}", dataType, communityIdentifier);
+        }
+
         ZjSyncdataBackup backup = new ZjSyncdataBackup();
         backup.setNamespaceId(NAMESPACE_ID);
         backup.setDataType(dataType);
@@ -1728,7 +1732,10 @@ public class ZJGKOpenServiceImpl {
             if(ownerType != null) {
                 customer.setOrgOwnerTypeId(ownerType.getId());
             }
+            customer.setOrganizationId(1012516L);
             organizationProvider.createOrganizationOwner(customer);
+            CommunityPmOwner communityPmOwner = ConvertHelper.convert(customer, CommunityPmOwner.class);
+            pmOwnerSearcher.feedDoc(communityPmOwner);
             //给个人客户添加地址
             insertOrganizationOwnerAddresses(customer, zjIndividual.getAddressList());
             return null;
@@ -1809,6 +1816,8 @@ public class ZJGKOpenServiceImpl {
         if (OrganizationOwnerStatus.fromCode(customer.getStatus()) != OrganizationOwnerStatus.DELETE) {
             customer.setStatus(OrganizationOwnerStatus.DELETE.getCode());
             organizationProvider.updateOrganizationOwner(customer);
+            CommunityPmOwner communityPmOwner = ConvertHelper.convert(customer, CommunityPmOwner.class);
+            pmOwnerSearcher.feedDoc(communityPmOwner);
         }
 
         List<OrganizationOwnerAddress> myOrganizationOwnerAddressList = individualCustomerProvider.listOrganizationOwnerAddressByOwnerId(customer.getId());

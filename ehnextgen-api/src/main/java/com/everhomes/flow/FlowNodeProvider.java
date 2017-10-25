@@ -1,9 +1,9 @@
 package com.everhomes.flow;
 
-import java.util.List;
-
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+
+import java.util.List;
 
 public interface FlowNodeProvider {
 
@@ -22,4 +22,7 @@ public interface FlowNodeProvider {
 
 	List<FlowNode> findFlowNodesByFlowId(Long flowMainId, Integer flowVersion);
 
+    void deleteFlowNode(List<Long> nodeIdList);
+
+    void deleteFlowNode(Long flowMainId, Integer flowVersion, List<Long> retainNodeIdList);
 }

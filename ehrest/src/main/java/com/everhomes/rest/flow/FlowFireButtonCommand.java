@@ -1,120 +1,141 @@
 package com.everhomes.rest.flow;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * <ul> 按钮时间触发
- * <li>flowCaseId: 工作流任务 ID </li>
- * <li>buttonId: 工作流按钮 ID </li>
- * <li>stepCount: 当前节点的 stepCount，用来防止重复提交</li>
- * <li>title: 评论标题 </li>
- * <li>content: 评论内容</li>
- * <li>entityId: 用户 ID 或者 选择人员的 ID。新版本不能使用这个值了，用 entitySel 代替 </li>
- * <li>flowEntityType: 客户端对象选择下个节点的用户 ID 或者 用户选择类型 ID 。新版本不能使用这个值了，用 entitySel 代替</li>
- * <li>entitySel: 具体用户的选择列表</li>
- * <li>
+ * <ul>
+ *     <li>flowCaseId: 工作流任务 ID</li>
+ *     <li>buttonId: 工作流按钮 ID</li>
+ *     <li>stepCount: 当前节点的 stepCount，用来防止重复提交</li>
+ *     <li>nextNodeId: 用户选择的下一个节点id</li>
+ *     <li>images: images</li>
+ *     <li>title: 评论标题</li>
+ *     <li>content: 评论内容</li>
+ *     <li>entityId: 用户 ID 或者 选择人员的 ID。新版本不能使用这个值了，用 entitySel 代替</li>
+ *     <li>flowEntityType: 客户端对象选择下个节点的用户 ID 或者 用户选择类型 ID 。新版本不能使用这个值了，用 entitySel 代替</li>
+ *     <li>entitySel: 具体用户的选择列表 {@link com.everhomes.rest.flow.FlowEntitySel}</li>
+ *     <li>evaluate: 评价内容 {@link com.everhomes.rest.flow.FlowPostEvaluateCommand}</li>
  * </ul>
- * @author janson
- *
  */
 public class FlowFireButtonCommand {
-	private Long flowCaseId;
-	private Long buttonId;
-	private Long stepCount;
-	
-	@ItemType(String.class)
-	private List<String> images;
-	
-	private String title;
-	private String content;
-	
-	private Long entityId;
-	private String flowEntityType;
-	
-	@ItemType(FlowEntitySel.class)
-	private List<FlowEntitySel> entitySel;
-	
-	public FlowFireButtonCommand() {
-		images = new ArrayList<String>();
-	}
 
-	public Long getFlowCaseId() {
-		return flowCaseId;
-	}
+    private Long flowCaseId;
+    private Long buttonId;
+    private Long stepCount;
+    private Long nextNodeId;
 
-	public void setFlowCaseId(Long flowCaseId) {
-		this.flowCaseId = flowCaseId;
-	}
+    @ItemType(String.class)
+    private List<String> images;
 
-	public Long getButtonId() {
-		return buttonId;
-	}
+    private String title;
+    private String content;
 
-	public void setButtonId(Long buttonId) {
-		this.buttonId = buttonId;
-	}
+    private Long entityId;
+    private String flowEntityType;
 
-	public List<String> getImages() {
-		return images;
-	}
+    @ItemType(FlowEntitySel.class)
+    private List<FlowEntitySel> entitySel;
 
-	public void setImages(List<String> images) {
-		this.images = images;
-	}
+    private FlowPostEvaluateCommand evaluate;
 
-	public String getTitle() {
-		return title;
-	}
+    public FlowFireButtonCommand() {
+        images = new ArrayList<>();
+        entitySel = new ArrayList<>();
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public FlowPostEvaluateCommand getEvaluate() {
+        return evaluate;
+    }
 
-	public String getContent() {
-		return content;
-	}
+    public void setEvaluate(FlowPostEvaluateCommand evaluate) {
+        this.evaluate = evaluate;
+    }
 
-	public void setContent(String content) {
-		this.content = content;
-	}
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
 
-	public Long getEntityId() {
-		return entityId;
-	}
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
+    }
 
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
+    public Long getButtonId() {
+        return buttonId;
+    }
 
-	public String getFlowEntityType() {
-		return flowEntityType;
-	}
+    public void setButtonId(Long buttonId) {
+        this.buttonId = buttonId;
+    }
 
-	public void setFlowEntityType(String flowEntityType) {
-		this.flowEntityType = flowEntityType;
-	}
+    public List<String> getImages() {
+        return images;
+    }
 
-	public Long getStepCount() {
-		return stepCount;
-	}
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
 
-	public void setStepCount(Long stepCount) {
-		this.stepCount = stepCount;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public List<FlowEntitySel> getEntitySel() {
-		return entitySel;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	public void setEntitySel(List<FlowEntitySel> entitySel) {
-		this.entitySel = entitySel;
-	}
+    public String getContent() {
+        return content;
+    }
 
-	@Override
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public Long getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(Long entityId) {
+        this.entityId = entityId;
+    }
+
+    public String getFlowEntityType() {
+        return flowEntityType;
+    }
+
+    public void setFlowEntityType(String flowEntityType) {
+        this.flowEntityType = flowEntityType;
+    }
+
+    public Long getStepCount() {
+        return stepCount;
+    }
+
+    public void setStepCount(Long stepCount) {
+        this.stepCount = stepCount;
+    }
+
+    public List<FlowEntitySel> getEntitySel() {
+        return entitySel;
+    }
+
+    public void setEntitySel(List<FlowEntitySel> entitySel) {
+        this.entitySel = entitySel;
+    }
+
+    public Long getNextNodeId() {
+        return nextNodeId;
+    }
+
+    public void setNextNodeId(Long nextNodeId) {
+        this.nextNodeId = nextNodeId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -437,7 +437,7 @@ public class PayServiceImpl implements PayService, ApplicationListener<ContextRe
         String defaultPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"default.bind.phone", "");
         StringRestResponse bindResponse = bindPhonePayV2(paymentUserId, defaultPhone);
         String errorDescription = bindResponse.getErrorDescription();
-        if(errorDescription.indexOf("30024")==-1){
+        if(errorDescription!=null && errorDescription.indexOf("30024")==-1){
             if(bindResponse == null || bindResponse.getErrorCode() == null || bindResponse.getErrorCode() != 200 ){
                 LOGGER.error("bind phone fail, businessUserType={}, ownerType={}, ownerId={}, phone={}", businessUserType, ownerType, ownerId, defaultPhone);
                 throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_BIND_PHONE_FAIL,

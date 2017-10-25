@@ -1,6 +1,13 @@
 package com.everhomes.varField;
 
+
 import java.util.List;
+
+import com.everhomes.rest.asset.ImportFieldsExcelResponse;
+import com.everhomes.rest.field.ExportFieldsExcelCommand;
+import com.everhomes.rest.varField.*;
+import org.springframework.web.multipart.MultipartFile;
+
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -46,7 +53,8 @@ public interface FieldService {
 
 
 
-    void importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file);
+    ImportFieldsExcelResponse importFieldsExcel(ImportFieldExcelCommand cmd, MultipartFile file);
+
 
     void exportFieldsExcel(ExportFieldsExcelCommand cmd, HttpServletResponse response);
 

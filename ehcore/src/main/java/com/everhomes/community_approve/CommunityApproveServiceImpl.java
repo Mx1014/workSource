@@ -292,7 +292,7 @@ public class CommunityApproveServiceImpl implements CommunityApproveService {
         cmd21.setContent(content);
         cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
         cmd21.setTitle(ca.getApproveName());
-
+        cmd21.setServiceType(ca.getApproveName());
         FlowCase flowCase = null;
         if (null == flow) {
             // 给他一个默认哑的flow

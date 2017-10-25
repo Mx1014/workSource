@@ -1,10 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.flow;
 
-import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-
-import java.util.List;
 
 /**
  * <ul>
@@ -16,9 +13,13 @@ import java.util.List;
  *     <li>subjectRequiredFlag: 文字及图片必须填写 {@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  *     <li>needProcessor: 指定目标节点处理人 {@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  *     <li>remindCount: ??</li>
+ *     <li>remindMsgAction: 催办消息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
  *     <li>messageAction: 消息信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
  *     <li>smsAction: 短信信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
- *     <li>enterScriptIds: 前置脚本id列表</li>
+ *     <li>tracker: 跟踪 {@link com.everhomes.rest.flow.FlowActionInfo}</li>
+ *     <li>param: 按钮参数</li>
+ *     <li>enterScriptId: 前置脚本id</li>
+ *     <li>evaluateStep: 评价后是否跳转下一个节点, no_step:不跳转, approve_step: 跳转下一个节点</li>
  * </ul>
  */
 public class UpdateFlowButtonCommand {
@@ -29,14 +30,17 @@ public class UpdateFlowButtonCommand {
     private Long gotoNodeId;
     private Byte needSubject;
     private Byte subjectRequiredFlag;
+    private String evaluateStep;
     private Byte needProcessor;
     private Integer remindCount;
 
+    private FlowActionInfo remindMsgAction;
     private FlowActionInfo messageAction;
     private FlowActionInfo smsAction;
+    private FlowActionInfo tracker;
 
-    @ItemType(Long.class)
-    private List<Long> enterScriptIds;
+    private String param;
+    private Long enterScriptId;
 
     public Long getFlowButtonId() {
         return flowButtonId;
@@ -110,12 +114,12 @@ public class UpdateFlowButtonCommand {
         this.remindCount = remindCount;
     }
 
-    public List<Long> getEnterScriptIds() {
-        return enterScriptIds;
+    public Long getEnterScriptId() {
+        return enterScriptId;
     }
 
-    public void setEnterScriptIds(List<Long> enterScriptIds) {
-        this.enterScriptIds = enterScriptIds;
+    public void setEnterScriptId(Long enterScriptId) {
+        this.enterScriptId = enterScriptId;
     }
 
     public Byte getSubjectRequiredFlag() {
@@ -124,6 +128,38 @@ public class UpdateFlowButtonCommand {
 
     public void setSubjectRequiredFlag(Byte subjectRequiredFlag) {
         this.subjectRequiredFlag = subjectRequiredFlag;
+    }
+
+    public FlowActionInfo getTracker() {
+        return tracker;
+    }
+
+    public void setTracker(FlowActionInfo tracker) {
+        this.tracker = tracker;
+    }
+
+    public String getParam() {
+        return param;
+    }
+
+    public void setParam(String param) {
+        this.param = param;
+    }
+
+    public String getEvaluateStep() {
+        return evaluateStep;
+    }
+
+    public void setEvaluateStep(String evaluateStep) {
+        this.evaluateStep = evaluateStep;
+    }
+
+    public FlowActionInfo getRemindMsgAction() {
+        return remindMsgAction;
+    }
+
+    public void setRemindMsgAction(FlowActionInfo remindMsgAction) {
+        this.remindMsgAction = remindMsgAction;
     }
 
     @Override

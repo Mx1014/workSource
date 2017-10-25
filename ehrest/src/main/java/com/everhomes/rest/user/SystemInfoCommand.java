@@ -1,5 +1,7 @@
 package com.everhomes.rest.user;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,7 +15,9 @@ import com.everhomes.util.StringHelper;
  */
 public class SystemInfoCommand {
     private Integer namespaceId;
+    @NotNull
     private String deviceIdentifier;
+    @NotNull
     private String pusherIdentify;
 
     public Integer getNamespaceId() {

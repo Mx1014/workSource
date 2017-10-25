@@ -9,8 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.common.ImportFileResponse;
-import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
-import com.everhomes.rest.community_map.SearchCommunityMapContentsResponse;
 import com.everhomes.rest.organization.*;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -543,5 +541,6 @@ public interface OrganizationService {
 	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName, String contactToken);
  
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByOrgIds(ListOrganizationPersonnelsByOrgIdsCommand cmd);
- 
+
+	Integer cleanWrongStatusOrganizationMembers(Integer namespaceId);
 }

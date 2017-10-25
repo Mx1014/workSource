@@ -31,6 +31,7 @@ import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.flow.FlowReferType;
+import com.everhomes.rest.flow.FlowServiceTypeDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
@@ -369,6 +370,12 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 			List<Tuple<String, Object>> variables) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
