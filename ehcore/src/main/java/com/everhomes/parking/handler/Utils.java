@@ -145,6 +145,17 @@ public class Utils {
         return tempCalendar.getTimeInMillis();
     }
 
+    static Long getlastDayOfMonth(Long time) {
+        Calendar tempCalendar = Calendar.getInstance();
+        tempCalendar.setTimeInMillis(time);
+        tempCalendar.set(Calendar.DAY_OF_MONTH, tempCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        tempCalendar.set(Calendar.HOUR_OF_DAY, 23);
+        tempCalendar.set(Calendar.MINUTE, 59);
+        tempCalendar.set(Calendar.SECOND, 59);
+        tempCalendar.set(Calendar.MILLISECOND, 999);
+        return tempCalendar.getTimeInMillis();
+    }
+
     static Long getNewDay(Long time) {
         Calendar tempCalendar = Calendar.getInstance();
         tempCalendar.setTimeInMillis(time);

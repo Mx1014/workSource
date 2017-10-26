@@ -249,6 +249,8 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 					dto = ConvertHelper.convert(rateDTO, ParkingExpiredRechargeInfoDTO.class);
 
 					dto.setStartPeriod(startPeriod);
+
+					dto.setEndPeriod(Utils.getLongByAddNatureMonth(Utils.getlastDayOfMonth(now), parkingLot.getExpiredRechargeMonthCount() -1));
 				}
 			}
 		}

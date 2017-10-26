@@ -56,12 +56,7 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 
 			ParkingCardDTO parkingCardDTO = convertCardInfo(parkingLot);
 
-			if (checkExpireTime(parkingLot, expireTime)) {
-				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
-			}else {
-				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
-
-			}
+			setCardStatus(parkingLot, expireTime, parkingCardDTO);
 
 			if (null != card.getName()) {
 				String plateOwnerName = card.getName();
