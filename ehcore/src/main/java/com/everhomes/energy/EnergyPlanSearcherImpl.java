@@ -1,7 +1,6 @@
 package com.everhomes.energy;
 
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationJobPosition;
 import com.everhomes.organization.OrganizationProvider;
@@ -27,13 +26,15 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -207,6 +208,13 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
         return response;
     }
 
+    private Long convertStrToTimestamp(String date) throws ParseException {
+        date = date.replace("Z", " UTC");//注意是空格+UTC
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS Z");
+        Long d = format.parse(date).getTime();
+        return d;
+    }
+
     private List<EnergyPlanDTO> getDTOs(SearchResponse rsp) {
         List<EnergyPlanDTO> dtos = new ArrayList<>();
         SearchHit[] docs = rsp.getHits().getHits();
@@ -217,11 +225,12 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
                 Map<String, Object> source = sd.getSource();
 
                 dto.setName(String.valueOf(source.get("planName")));
-                dto.setNamespaceId(SearchUtils.getLongField(source.get("namespaceId")).intValue());
+                dto.setNamespaceId(Integer.valueOf(String.valueOf(source.get("namespaceId"))));
                 RepeatSettingsDTO repeat = new RepeatSettingsDTO();
-                repeat.setStartDate(SearchUtils.getLongField(source.get("startTime")));
-                repeat.setEndDate(SearchUtils.getLongField(source.get("endTime")));
-                repeat.setRepeatType(SearchUtils.getLongField(source.get("repeatType")).byteValue());
+
+                repeat.setStartDate(convertStrToTimestamp(String.valueOf(source.get("startTime"))));
+                repeat.setEndDate(convertStrToTimestamp(String.valueOf(source.get("endTime"))));
+                repeat.setRepeatType(Byte.valueOf(String.valueOf(source.get("repeatType"))));
                 dto.setRepeat(repeat);
 
                 String[] groupNames = String.valueOf(source.get("groupName")).split(",");
@@ -234,7 +243,6 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
                     }
                     dto.setGroups(groups);
                 }
-                LOGGER.debug("source: {}, plandto: {}", StringHelper.toJsonString(dto));
                 dtos.add(dto);
             }
             catch(Exception ex) {
