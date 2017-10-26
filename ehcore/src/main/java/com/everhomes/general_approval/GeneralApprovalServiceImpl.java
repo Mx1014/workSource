@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralForm;
@@ -130,6 +131,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Autowired
     private GeneralApprovalFlowModuleListener generalApprovalFlowModuleListener;
+
+    @Autowired
+    private ContentServerService contentServerService;
 
     private StringTemplateLoader templateLoader;
 
@@ -631,6 +635,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         if (null != flow) {
             result.setFlowName(flow.getFlowName());
         }
+
+        //  approval icon
+        result.setIconUrl(contentServerService.parserUri(result.getIconUri()));
         return result;
     }
 
@@ -915,16 +922,26 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     private void createGeneralApprovalRecordsFileData(XSSFWorkbook workbook, Row dataRow, GeneralApprovalRecordDTO data) {
         List<FlowCaseEntity> entities = getApprovalDetails(data.getFlowCaseId());
+
+        //  1. basic data from flowCase
         for (int i = 0; i < entities.size(); i++) {
             dataRow.createCell(i).setCellValue(entities.get(i).getValue());
         }
+        //  2. approval status
         if (FlowCaseStatus.PROCESS.getCode().equals(data.getApprovalStatus()))
             dataRow.createCell(entities.size() + 0).setCellValue("处理中");
         else if (FlowCaseStatus.FINISHED.getCode().equals(data.getApprovalStatus()))
             dataRow.createCell(entities.size() + 0).setCellValue("已完成");
         else
             dataRow.createCell(entities.size() + 0).setCellValue("已取消");
+        //  3. the operator logs of the approval
+        SearchFlowOperateLogsCommand logsCommand = new SearchFlowOperateLogsCommand();
+        logsCommand.setFlowCaseId(data.getFlowCaseId());
+        logsCommand.setPageSize(100000);
+        SearchFlowOperateLogResponse resLogs = flowService.searchFlowOperateLogs(logsCommand);
+
 //        dataRow.createCell(entities.size() + 1).set
+
     }
 
     private void writeExcel(XSSFWorkbook workbook, HttpServletResponse httpResponse) {
