@@ -57,7 +57,7 @@ public class FlowServiceTypeProviderImpl implements FlowServiceTypeProvider {
         SelectQuery<EhFlowServiceTypesRecord> query = context().selectFrom(t).getQuery();
         query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
         if (moduleId != null) {
-            // query.addConditions(t.MODULE_ID.eq(moduleId));
+            query.addConditions(t.MODULE_ID.eq(moduleId));
         }
         return query.fetchInto(clazz);
     }
