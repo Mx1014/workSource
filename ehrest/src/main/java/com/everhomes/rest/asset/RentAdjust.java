@@ -28,7 +28,16 @@ public class RentAdjust {
     private Byte adjustType;
     private Float separationTime;
     private Byte seperationType;
-    private Long adjustAmplitude;
+    private BigDecimal adjustAmplitude;
+    private Long chargingItemId;
+
+    public Long getChargingItemId() {
+        return chargingItemId;
+    }
+
+    public void setChargingItemId(Long chargingItemId) {
+        this.chargingItemId = chargingItemId;
+    }
 
     @ItemType(String.class)
     private List<ContractProperty> properties;
@@ -73,11 +82,11 @@ public class RentAdjust {
         this.seperationType = seperationType;
     }
 
-    public Long getAdjustAmplitude() {
+    public BigDecimal getAdjustAmplitude() {
         return adjustAmplitude;
     }
 
-    public void setAdjustAmplitude(Long adjustAmplitude) {
+    public void setAdjustAmplitude(BigDecimal adjustAmplitude) {
         this.adjustAmplitude = adjustAmplitude;
     }
 

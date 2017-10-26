@@ -24,4 +24,14 @@ public class IntegerUtil {
         return Integer.valueOf(value);
     }
 
+    /**
+     * 给定一个单精度的数字，获得整数部分(index : 0)和单精度的小数部分(index : 1)
+     */
+    public static Object[] getIntegerAndFloatPartFromFloat(Float separationTime) {
+        Object[] objs = new Object[2];
+        String s = separationTime.toString();
+        objs[0] = Integer.parseInt(s.substring(0, s.indexOf(".")));
+        objs[1] = Float.parseFloat("0" + s.substring(s.indexOf(".")));
+        return objs;
+    }
 }

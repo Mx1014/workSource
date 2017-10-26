@@ -729,7 +729,7 @@ public class AssetServiceImpl implements AssetService {
                         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                 }
                 //计算
-                List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle,cmd);
+                List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle,cmd,property);
 
                 long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), billItemsExpectancies.size());
                 long currentBillItemSeq = nextBillItemBlock - billItemsExpectancies.size() + 1;
@@ -924,7 +924,7 @@ public class AssetServiceImpl implements AssetService {
         });
     }
 
-    private List<BillItemsExpectancy> assetFeeHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd) {
+    private List<BillItemsExpectancy> assetFeeHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd,ContractProperty property) {
         //返回的列表
         List<BillItemsExpectancy> list = new ArrayList<>();
         //计算的时间区间
@@ -945,18 +945,19 @@ public class AssetServiceImpl implements AssetService {
             Calendar d = Calendar.getInstance();
             d.setTime(a.getTime());
             d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
-            d.set(Calendar.MONTH,d.get(Calendar.MONTH)+cycle);
+            d.add(Calendar.MONTH,cycle);
             d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
             //计算费用产生的日期
             Calendar d1 = Calendar.getInstance();
             d1.setTime(d.getTime());
 
             if(groupRule.getBillItemDayOffset()!=null && time != 0){
-                d1.set(Calendar.MONTH,d1.get(Calendar.MONTH)+groupRule.getBillItemMonthOffset());
+                d1.add(Calendar.MONTH,groupRule.getBillItemMonthOffset());
             }
             if(groupRule.getBillItemDayOffset()==null){
                 d1.set(Calendar.DAY_OF_MONTH,d1.getActualMaximum(Calendar.DAY_OF_MONTH));
             }else{
+                // ?
                 d1.set(Calendar.DAY_OF_MONTH,groupRule.getBillItemMonthOffset());
             }
             //比较d和d1
@@ -977,7 +978,8 @@ public class AssetServiceImpl implements AssetService {
                 float divider = daysBetween(d2, a);
                 Calendar d_assist = Calendar.getInstance();
                 d_assist.setTime(d2.getTime());
-                d_assist.set(Calendar.MONTH,d_assist.get(Calendar.MONTH)+cycle+1);
+//                d_assist.set(Calendar.MONTH,d_assist.get(Calendar.MONTH)+cycle+1);
+                d_assist.add(Calendar.MONTH,cycle+1);
                 float divided = daysBetween(d2,d_assist);
                 r = divider/divided;
             }
@@ -1003,17 +1005,19 @@ public class AssetServiceImpl implements AssetService {
             obj.setBillDateStr(yyyyMM.format(a.getTime()));
             Calendar due = Calendar.getInstance();
             due.setTime(d.getTime());
-            due.set(Calendar.MONTH,due.get(Calendar.MONTH)+1);
+//            due.set(Calendar.MONTH,due.get(Calendar.MONTH)+1);
+            due.add(Calendar.MONTH,1);
             due.set(Calendar.DAY_OF_MONTH,group.getBillsDay());
             obj.setBillDateDue(yyyyMMdd.format(due.getTime()));
             Calendar deadline = Calendar.getInstance();
             deadline.setTime(due.getTime());
             if(group.getBalanceDateType()==1){
                 //日
-                deadline.set(Calendar.DAY_OF_MONTH,deadline.get(Calendar.DAY_OF_MONTH)+group.getDueDay());
+//                deadline.set(Calendar.DAY_OF_MONTH,deadline.get(Calendar.DAY_OF_MONTH)+group.getDueDay());
+                deadline.add(Calendar.DAY_OF_MONTH,group.getDueDay());
             }else if(group.getBalanceDateType() == 2){
                 //月
-                deadline.set(Calendar.MONTH,deadline.get(Calendar.MONTH)+group.getDueDay());
+                deadline.add(Calendar.MONTH,group.getDueDay());
             }else{
                 LOGGER.info("Group due day type can only be 1 or 2, but now type = {}",group.getBalanceDateType());
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"账单组最迟付款设置只能是日或月，数据库被篡改，请联系管理员");
@@ -1028,7 +1032,8 @@ public class AssetServiceImpl implements AssetService {
 
             list.add(obj);
             //更改a的值
-            d2.set(Calendar.DAY_OF_MONTH,d2.get(Calendar.DAY_OF_MONTH)+1);
+//            d2.set(Calendar.DAY_OF_MONTH,d2.get(Calendar.DAY_OF_MONTH)+1);
+            d2.add(Calendar.DAY_OF_MONTH,1);
             a.setTime(d2.getTime());
             //继续循环
             time++;
@@ -1036,17 +1041,253 @@ public class AssetServiceImpl implements AssetService {
         LOGGER.info("账单产生了"+time+"项目,真实为"+list.size());
         //拆卸调组的包裹
         List<RentAdjust> rentAdjusts = cmd.getRentAdjusts();
-        for(int i = 0; i < rentAdjusts.size(); i ++){
+        outter:for(int i = 0; i < rentAdjusts.size(); i ++){
             RentAdjust rent = rentAdjusts.get(i);
 
+            //是否对应一个资源和收费项，不对应则不进行调组
+            List<ContractProperty> rentProperties = rent.getProperties();
+            Long rentChargingItemId = rent.getChargingItemId();
+            Long feeChargingItemId = rule.getChargingItemId();
+            if(feeChargingItemId != rentChargingItemId){
+                break outter;
+            }
+            inner:for(int j = 0; j < rentProperties.size(); j ++){
+                if(rentProperties.get(j).getAddressId() == property.getAddressId()){
+                    break inner;
+                }
+                break outter;
+            }
+            //进行调组
 
+            //调组的时间区间,收费项的计费时间区间为 a —— d2
+            Calendar start = Calendar.getInstance();
+            start.setTime(rent.getStart());
+            Calendar end = Calendar.getInstance();
+            end.setTime(rent.getStart());
+            if(end.compareTo(dateStrEnd)!=-1){
+                end.setTime(dateStrEnd.getTime());
+            }
+            //算出哪些时间区间是需要调的，（调整幅度放到计算里去)
+            Byte seperationType = rent.getSeperationType();
+            Float separationTime = rent.getSeparationTime();
+            List<Calendar> insertTimes = new ArrayList<>();
+            switch (seperationType){
+                case 1:
+                    Calendar start_copy = getCopyCalendar(start);
+                    if(separationTime<1) separationTime = 1f;
+                    start_copy.add(Calendar.DAY_OF_MONTH,separationTime.intValue());
+                    while(start_copy.compareTo(end)==-1){
+                        insertTimes.add(start_copy);
+                        start_copy.add(Calendar.DAY_OF_MONTH,separationTime.intValue());
+                    }
+                    break;
+                case 2:
+                    Calendar start_copy_1 = getCopyCalendar(start);
+                    Object[] interAndFloat = IntegerUtil.getIntegerAndFloatPartFromFloat(separationTime);
+
+                    start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
+                    start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
+                    while(start_copy_1.compareTo(end)==-1){
+                        insertTimes.add(start_copy_1);
+                        start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
+                        start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
+                    }
+                    break;
+                case 3:
+                    Calendar start_copy_2 = getCopyCalendar(start);
+
+                    Object[] interAndFloat_1 = IntegerUtil.getIntegerAndFloatPartFromFloat(separationTime);
+                    start_copy_2.add(Calendar.YEAR,(Integer) interAndFloat_1[0]);
+                    Object[] interAndFloat_2 = IntegerUtil.getIntegerAndFloatPartFromFloat(((float) interAndFloat_1[1]) * 12f);
+                    start_copy_2.add(Calendar.MONTH,(Integer) interAndFloat_2[0]);
+                    start_copy_2.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_2.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat_2[1]));
+
+                    while(start_copy_2.compareTo(end)==-1){
+                        insertTimes.add(start_copy_2);
+
+                        start_copy_2.add(Calendar.YEAR,(Integer) interAndFloat_1[0]);
+                        start_copy_2.add(Calendar.MONTH,(Integer) interAndFloat_2[0]);
+                        start_copy_2.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_2.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat_2[1]));
+                    }
+                    break;
+            }
+
+            //查找开始插入，没插一次，更新插入点后的所有数据，并且continue外层循环
+            longinusBase:for(int m = 0; m < insertTimes.size(); m ++){
+                Calendar longinus = insertTimes.get(m);
+                for(int k = 0; k < list.size(); k++){
+                    BillItemsExpectancy item = list.get(k);
+                    a.setTime(item.getDateStrBegin());
+                    Calendar d2 = Calendar.getInstance();
+                    d2.setTime(item.getDateStrEnd());
+
+                    if(d2.compareTo(longinus)!=-1){
+                        //插中了！获得 插入点 到 整个计价标准的结束
+                        reCalFee(longinus,d2,item,rent);
+                        reCalFee(list,m+1,rent);
+                        continue longinusBase;
+                    }
+                }
+            }
+            //调租完毕
         }
 
         //拆卸免租的包裹
         List<RentFree> rentFrees = cmd.getRentFrees();
+        //是否对应一个资源和收费项，不对应则不进行调组
+        outter:for(int i = 0; i < rentFrees.size(); i ++){
+            RentFree rent = rentFrees.get(i);
+            List<ContractProperty> rentProperties = rent.getProperties();
+            Long rentChargingItemId = rent.getChargingItemId();
+            Long feeChargingItemId = rule.getChargingItemId();
+            if(feeChargingItemId != rentChargingItemId){
+                break outter;
+            }
+            inner:for(int j = 0; j < rentProperties.size(); j ++){
+                if(rentProperties.get(j).getAddressId() == property.getAddressId()){
+                    break inner;
+                }
+                break outter;
+            }
+            //开始免租
+//            //此计价条款在此资产上的终止时间
+//            Date feeEnd = list.get(list.size() - 1).getDateStrEnd();
+//            Calendar start = Calendar.getInstance();
+//            start.setTime(rent.getStartDate());
+//            Calendar end = Calendar.getInstance();
+//            end.setTime(rent.getEndDate());
+            Date start = rent.getStartDate();
+            Date end = rent.getEndDate();
+            BigDecimal amount_free = rent.getAmount();
+            for(int j = 0; j < list.size(); j ++){
+                BillItemsExpectancy item = list.get(j);
+                Date item_start = item.getDateStrBegin();
+                Date item_end = item.getDateStrEnd();
+                //全包裹
+                if(start.compareTo(item_start)!=1 && end.compareTo(item_end)!= -1){
+                    item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free));
+                    item.setAmountOwed(item.getAmountOwed().subtract(amount_free));
+                }
+                //左包不全，右包全
+                else if(start.compareTo(item_start)==1 && end.compareTo(item_end)!=-1){
+                    //代码不能重用，提取没有意义,overfitting
+                    Calendar item_start_c = Calendar.getInstance();
+                    item_start_c.setTime(item_start);
+                    Float f = (float)daysBetween_date(start,item_end)/ (float)item_start_c.getActualMaximum(Calendar.DAY_OF_MONTH);
+                    BigDecimal f_c = new BigDecimal(f);
+                    BigDecimal amount_free_real = amount_free.multiply(f_c);
+                    item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free_real));
+                    item.setAmountOwed(item.getAmountOwed().subtract(amount_free_real));
+                }
+                //左包全，右包不全
+                else if(start.compareTo(item_start)!=1 && end.compareTo(item_end)==-1){
+                    Calendar item_start_c = Calendar.getInstance();
+                    item_start_c.setTime(item_start);
+                    Float f = (float)daysBetween_date(end,item_start)/ (float)item_start_c.getActualMaximum(Calendar.DAY_OF_MONTH);
+                    BigDecimal f_c = new BigDecimal(f);
+                    BigDecimal amount_free_real = amount_free.multiply(f_c);
+                    item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free_real));
+                    item.setAmountOwed(item.getAmountOwed().subtract(amount_free_real));
+                }
+                //左保不全，右也包步全
+                else if(start.compareTo(item_start)==1 && end.compareTo(item_end)==-1){
+                    Calendar item_start_c = Calendar.getInstance();
+                    item_start_c.setTime(item_start);
+                    Float f = (float)daysBetween_date(end,start)/ (float)item_start_c.getActualMaximum(Calendar.DAY_OF_MONTH);
+                    BigDecimal f_c = new BigDecimal(f);
+                    BigDecimal amount_free_real = amount_free.multiply(f_c);
+                    item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free_real));
+                    item.setAmountOwed(item.getAmountOwed().subtract(amount_free_real));
+                }
+            }
+            //免租结束
+
+            //需要记录免租和调租的话，需要定义或者修改减免项目
+        }
 
         
         return list;
+    }
+
+    private void reCalFee(List<BillItemsExpectancy> list, int m, RentAdjust rent) {
+        Byte adjustType = rent.getAdjustType();
+        BigDecimal adjustAmplitude = rent.getAdjustAmplitude();
+        for(int i = m; i < list.size(); i ++) {
+            BillItemsExpectancy item = list.get(m);
+            BigDecimal amount = item.getAmountOwed();
+            switch (adjustType){
+                case 1:
+                    //按金额递增
+                    item.setAmountOwed(amount.add(adjustAmplitude));
+                    item.setAmountReceivable(amount.add(adjustAmplitude));
+                    break;
+                case 2:
+                    //按金额递减
+                    item.setAmountOwed(amount.subtract(adjustAmplitude));
+                    item.setAmountReceivable(amount.subtract(adjustAmplitude));
+                    break;
+                case 3:
+                    //按比例递增
+                    BigDecimal one = new BigDecimal("1");
+                    BigDecimal amount_changed = amount.multiply(one.add(adjustAmplitude.multiply(new BigDecimal("0.01"))));
+                    item.setAmountOwed(amount.add(amount_changed));
+                    item.setAmountReceivable(amount.add(amount_changed));
+                    break;
+                case 4:
+                    //按比例递减去
+                    BigDecimal one_1 = new BigDecimal("1");
+                    BigDecimal amount_changed_1 = amount.multiply(one_1.add(adjustAmplitude.multiply(new BigDecimal("0.01"))));
+                    item.setAmountOwed(amount.add(amount_changed_1));
+                    item.setAmountReceivable(amount.add(amount_changed_1));
+                    break;
+            }
+        }
+    }
+
+    private void reCalFee(Calendar longinus, Calendar d2, BillItemsExpectancy item, RentAdjust rent) {
+        float i = (float)daysBetween(longinus, d2) / (float)longinus.getActualMaximum(Calendar.DAY_OF_MONTH);
+        BigDecimal d = new BigDecimal(String.valueOf(i));
+        Byte adjustType = rent.getAdjustType();
+        BigDecimal adjustAmplitude = rent.getAdjustAmplitude();
+
+        switch (adjustType){
+            case 1:
+                //按金额递增
+                BigDecimal changedAmount = adjustAmplitude.multiply(d);
+                item.setAmountReceivable(item.getAmountReceivable().add(changedAmount));
+                item.setAmountOwed(item.getAmountReceivable());
+                break;
+            case 2:
+                BigDecimal changedAmount_1 = adjustAmplitude.multiply(d);
+                item.setAmountReceivable(item.getAmountReceivable().subtract(changedAmount_1));
+                item.setAmountOwed(item.getAmountReceivable());
+                //按金额递减
+                break;
+            case 3:
+                //按比例递增
+                BigDecimal amount_before_adjust = item.getAmountOwed();
+                // a * ((b * 0.01)+1) * d
+                BigDecimal changedAmount_2 = amount_before_adjust.multiply((adjustAmplitude.multiply(new BigDecimal("0.01"))).add(new BigDecimal("1"))).multiply(d);
+                // amount_at_d - (amount_before * d)
+                item.setAmountReceivable(item.getAmountReceivable().add(changedAmount_2.subtract(amount_before_adjust.multiply(d))));
+                item.setAmountOwed(item.getAmountReceivable());
+                break;
+            case 4:
+                //按比例递减
+                BigDecimal amount_before_adjust_1 = item.getAmountOwed();
+                BigDecimal one = new BigDecimal("1");
+                // a * (1- (b * 0.01)) * d
+                BigDecimal changedAmount_3 = amount_before_adjust_1.multiply(one.subtract(adjustAmplitude.multiply(new BigDecimal("0.01")))).multiply(d);
+                item.setAmountReceivable(item.getAmountReceivable().subtract(amount_before_adjust_1.multiply(d).subtract(changedAmount_3)));
+                item.setAmountOwed(item.getAmountReceivable());
+                break;
+        }
+    }
+
+    private Calendar getCopyCalendar(Calendar raw) {
+        Calendar copy = Calendar.getInstance();
+        copy.setTime(raw.getTime());
+        return copy;
     }
 
     private boolean checkCycle(Calendar d2, Calendar a, Integer cycle) {
@@ -1070,6 +1311,13 @@ public class AssetServiceImpl implements AssetService {
     {
         long time1 = c1.getTimeInMillis();
         long time2 = c2.getTimeInMillis();
+        long between_days=Math.abs(time2-time1)/(1000*3600*24);
+        return Integer.parseInt(String.valueOf(between_days));
+    }
+    private int daysBetween_date(Date c1,Date c2)
+    {
+        long time1 = c1.getTime();
+        long time2 = c2.getTime();
         long between_days=Math.abs(time2-time1)/(1000*3600*24);
         return Integer.parseInt(String.valueOf(between_days));
     }
