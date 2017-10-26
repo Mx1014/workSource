@@ -1818,10 +1818,6 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("cleanWrongStatusOrganizationMembers")
     @RestReturn(value = String.class)
     public RestResponse cleanWrongStatusOrganizationMembers(GetRemainBroadcastCountCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), 1000750L)){
-            resolver.checkCurrentUserAuthority(1000750L, PrivilegeConstants.ORG_ADMIN_CREATE);
-        }
         Integer count = this.organizationService.cleanWrongStatusOrganizationMembers(cmd.getNamespaceId());
         RestResponse response = new RestResponse(count);
         response.setErrorCode(ErrorCodes.SUCCESS);

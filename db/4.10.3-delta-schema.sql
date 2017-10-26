@@ -406,3 +406,5 @@ ALTER TABLE eh_customer_trackings modify COLUMN status TINYINT DEFAULT 2 COMMENT
 ALTER TABLE eh_customer_trademarks modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
 
 ALTER TABLE `eh_flow_service_types` ADD COLUMN `module_id` BIGINT NOT NULL DEFAULT 0;
+-- 更改号码类型 --by st.zheng
+ALTER TABLE `eh_news` CHANGE COLUMN `phone` `phone` VARCHAR(32) NULL DEFAULT '0' ;
