@@ -821,9 +821,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				dto.setCommunityId(building.getCommunityId());
 				Community community = communityProvider.findCommunityById(building.getCommunityId());
 				dto.setCommunityName(community.getName());
-			}else {
-				dto.setCommunityName("其他");
 			}
+		}else {
+			dto.setCommunityName("其他");
 		}
 		//兼容历史app，rentPosition字段值返回的就是楼栋名称
 		dto.setRentPosition(dto.getBuildingName());

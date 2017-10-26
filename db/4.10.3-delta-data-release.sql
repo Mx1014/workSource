@@ -215,3 +215,7 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, 
 
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 	VALUES ((@id := @id + 1), '999985', NULL, NULL, 'issuingLeaseFlag', '1', NULL, NULL);
+
+-- janson 20171025
+SET @max_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@max_id := @max_id + 1), '50800', '0', '10041', '', '0', now());
