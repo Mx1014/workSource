@@ -1315,156 +1315,164 @@ public class FlowServiceImpl implements FlowService {
     public Boolean enableFlow(Long flowId) {
         Flow flow = flowProvider.getFlowById(flowId);
 
-        // 查询看是否有原来已经开启的工作流
-        Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
-        if (enabledFlow != null && !enabledFlow.getId().equals(flowId)) {
-            dbProvider.execute(status -> {
-                enabledFlow.setStatus(FlowStatusType.STOP.getCode());
-                Timestamp now = DateUtils.currentTimestamp();
-                enabledFlow.setStopTime(now);
-                flow.setUpdateTime(now);
-                flowProvider.updateFlow(enabledFlow);
+        // 避免同时启用工作流的问题
+        String lockKey = String.format("%s:%s:%s:%s:%s:%s:%s:%s",
+                CoordinationLocks.FLOW.getCode(), flow.getNamespaceId(), flow.getProjectType(), flow.getProjectId(),
+                flow.getModuleType(), flow.getModuleId(), flow.getOwnerType(), flow.getOwnerId());
 
-                Flow snapshotFlow = flowProvider.getSnapshotFlow(enabledFlow.getId(), FlowStatusType.RUNNING.getCode());
-                snapshotFlow.setStatus(FlowStatusType.STOP.getCode());
-                snapshotFlow.setUpdateTime(now);
-                snapshotFlow.setRunTime(now);
-                flowProvider.updateFlow(snapshotFlow);
+        Tuple<Boolean, Boolean> tuple = coordinationProvider.getNamedLock(lockKey).enter(() -> {
+            // 查询看是否有原来已经开启的工作流
+            Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
+            if (enabledFlow != null && !enabledFlow.getId().equals(flowId)) {
+                dbProvider.execute(status -> {
+                    enabledFlow.setStatus(FlowStatusType.STOP.getCode());
+                    Timestamp now = DateUtils.currentTimestamp();
+                    enabledFlow.setStopTime(now);
+                    flow.setUpdateTime(now);
+                    flowProvider.updateFlow(enabledFlow);
+
+                    Flow snapshotFlow = flowProvider.getSnapshotFlow(enabledFlow.getId(), FlowStatusType.RUNNING.getCode());
+                    snapshotFlow.setStatus(FlowStatusType.STOP.getCode());
+                    snapshotFlow.setUpdateTime(now);
+                    snapshotFlow.setRunTime(now);
+                    flowProvider.updateFlow(snapshotFlow);
+                    return true;
+                });
+            }
+
+            // 如果configFlow只是STOP状态
+            // 说明该工作流没有被改过，则不用创建snapshot版本，可以直接启用，并使用原来的snapshot版本
+            if (flow.getStatus().equals(FlowStatusType.STOP.getCode())) {
+                dbProvider.execute(status -> {
+                    //restart it
+                    flow.setStatus(FlowStatusType.RUNNING.getCode());
+                    Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+                    flow.setUpdateTime(now);
+                    flow.setRunTime(now);
+                    flowProvider.updateFlow(flow);
+
+                    Flow snapshotFlow = flowProvider.getSnapshotFlow(flowId, FlowStatusType.STOP.getCode());
+                    snapshotFlow.setStatus(FlowStatusType.RUNNING.getCode());
+                    snapshotFlow.setUpdateTime(now);
+                    snapshotFlow.setRunTime(now);
+                    flowProvider.updateFlow(snapshotFlow);
+                    return true;
+                });
                 return true;
-            });
-        }
-
-        // 如果configFlow只是STOP状态
-        // 说明该工作流没有被改过，则不用创建snapshot版本，可以直接启用，并使用原来的snapshot版本
-        if (flow.getStatus().equals(FlowStatusType.STOP.getCode())) {
-            dbProvider.execute(status -> {
-                //restart it
-                flow.setStatus(FlowStatusType.RUNNING.getCode());
+            } else if (flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
+                //already running
                 Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
                 flow.setUpdateTime(now);
                 flow.setRunTime(now);
                 flowProvider.updateFlow(flow);
-
-                Flow snapshotFlow = flowProvider.getSnapshotFlow(flowId, FlowStatusType.STOP.getCode());
-                snapshotFlow.setStatus(FlowStatusType.RUNNING.getCode());
-                snapshotFlow.setUpdateTime(now);
-                snapshotFlow.setRunTime(now);
-                flowProvider.updateFlow(snapshotFlow);
                 return true;
-            });
-            return true;
-        } else if (flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
-            //already running
-            Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-            flow.setUpdateTime(now);
-            flow.setRunTime(now);
-            flowProvider.updateFlow(flow);
-            return true;
-        }
+            }
 
-        updateFlowVersion(flow);
+            updateFlowVersion(flow);
 
-        List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
-        flowNodes.sort(Comparator.comparing(EhFlowNodes::getNodeLevel));
+            List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
+            flowNodes.sort(Comparator.comparing(EhFlowNodes::getNodeLevel));
 
-        // 老版本的工作流在数据库都没有开始和结束节点
-        boolean hasStartNode = false;
-        boolean hasEndNode = false;
+            // 老版本的工作流在数据库都没有开始和结束节点
+            boolean hasStartNode = false;
+            boolean hasEndNode = false;
 
-        // int i = 1;
-        for (FlowNode fn : flowNodes) {
+            // int i = 1;
+            for (FlowNode fn : flowNodes) {
             /*if (!fn.getNodeLevel().equals(i)) {
                 throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE,
                         FlowServiceErrorCode.ERROR_FLOW_NODE_LEVEL_ERR, "node_level error");
             }
             i++;*/
-            // 老版本的工作流在数据库都没有开始和结束节点
-            if (FlowNodeType.START.getCode().equals(fn.getNodeType())) hasStartNode = true;
-            if (FlowNodeType.END.getCode().equals(fn.getNodeType())) hasEndNode = true;
-        }
-
-        final FlowGraph flowGraph = new FlowGraph();
-        flowGraph.setFlow(flow);
-
-        FlowNode nodeObj;
-        if (!hasStartNode) {
-            // 开始节点snapshot
-            nodeObj = new FlowNode();
-            nodeObj.setNodeName("START");
-            nodeObj.setFlowMainId(flow.getId());
-            nodeObj.setFlowVersion(flow.getFlowVersion());//now not use config version, but real flow version
-            nodeObj.setNamespaceId(flow.getNamespaceId());
-            nodeObj.setStatus(FlowNodeStatus.HIDDEN.getCode());
-            nodeObj.setNodeLevel(0);
-            nodeObj.setDescription("");
-            FlowGraphNode start = new FlowGraphNodeStart();
-            start.setFlowNode(nodeObj);
-            flowGraph.getNodes().add(start);
-        }
-
-        // 节点snapshot
-        flowNodes.forEach((fn) -> {
-            if (fn.getNodeName().equals("START")) {
-                flowGraph.getNodes().add(new FlowGraphNodeStart(fn));
-            } else if (fn.getNodeName().equals("END")) {
-                flowGraph.getNodes().add(new FlowGraphNodeEnd(fn));
-            } else if (fn.getNodeType().equals(FlowNodeType.CONDITION_FRONT.getCode())) {
-                flowGraph.getNodes().add(getFlowGraphConditionNode(fn, FlowConstants.FLOW_CONFIG_VER));
-            } else {
-                flowGraph.getNodes().add(getFlowGraphNode(fn, FlowConstants.FLOW_CONFIG_VER));
+                // 老版本的工作流在数据库都没有开始和结束节点
+                if (FlowNodeType.START.getCode().equals(fn.getNodeType())) hasStartNode = true;
+                if (FlowNodeType.END.getCode().equals(fn.getNodeType())) hasEndNode = true;
             }
-        });
 
-        if (!hasEndNode) {
-            // 结束节点snapshot
-            nodeObj = new FlowNode();
-            nodeObj.setNodeName("END");
-            nodeObj.setFlowMainId(flow.getId());
-            nodeObj.setFlowVersion(flow.getFlowVersion());
-            nodeObj.setNamespaceId(flow.getNamespaceId());
-            nodeObj.setStatus(FlowNodeStatus.HIDDEN.getCode());
-            nodeObj.setNodeLevel(flowGraph.getNodes().size());
-            nodeObj.setDescription("");
-            FlowGraphNode end = new FlowGraphNodeEnd();
-            end.setFlowNode(nodeObj);
-            flowGraph.getNodes().add(end);
-        }
+            final FlowGraph flowGraph = new FlowGraph();
+            flowGraph.setFlow(flow);
 
-        // 泳道
-        List<FlowLane> laneList = flowLaneProvider.listFlowLane(flowId, FlowConstants.FLOW_CONFIG_VER);
-        laneList.forEach(r -> flowGraph.getLanes().add(getFlowGraphLane(r)));
-        // 分支
-        List<FlowBranch> branchList = flowBranchProvider.findByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
-        branchList.forEach(r -> flowGraph.getBranches().add(getFlowGraphBranch(r)));
+            FlowNode nodeObj;
+            if (!hasStartNode) {
+                // 开始节点snapshot
+                nodeObj = new FlowNode();
+                nodeObj.setNodeName("START");
+                nodeObj.setFlowMainId(flow.getId());
+                nodeObj.setFlowVersion(flow.getFlowVersion());//now not use config version, but real flow version
+                nodeObj.setNamespaceId(flow.getNamespaceId());
+                nodeObj.setStatus(FlowNodeStatus.HIDDEN.getCode());
+                nodeObj.setNodeLevel(0);
+                nodeObj.setDescription("");
+                FlowGraphNode start = new FlowGraphNodeStart();
+                start.setFlowNode(nodeObj);
+                flowGraph.getNodes().add(start);
+            }
 
-        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-        flow.setUpdateTime(now);
-
-        boolean isOk = true;
-        try {
-            dbProvider.execute((s) -> {
-                doSnapshot(flowGraph);
-                return true;
+            // 节点snapshot
+            flowNodes.forEach((fn) -> {
+                if (fn.getNodeName().equals("START")) {
+                    flowGraph.getNodes().add(new FlowGraphNodeStart(fn));
+                } else if (fn.getNodeName().equals("END")) {
+                    flowGraph.getNodes().add(new FlowGraphNodeEnd(fn));
+                } else if (fn.getNodeType().equals(FlowNodeType.CONDITION_FRONT.getCode())) {
+                    flowGraph.getNodes().add(getFlowGraphConditionNode(fn, FlowConstants.FLOW_CONFIG_VER));
+                } else {
+                    flowGraph.getNodes().add(getFlowGraphNode(fn, FlowConstants.FLOW_CONFIG_VER));
+                }
             });
-        } catch (Exception ex) {
-            isOk = false;
-            LOGGER.error("do snapshot error", ex);
-        }
 
-        if (flow.getFlowMainId().equals(0L)) {
-            isOk = false;
-        }
+            if (!hasEndNode) {
+                // 结束节点snapshot
+                nodeObj = new FlowNode();
+                nodeObj.setNodeName("END");
+                nodeObj.setFlowMainId(flow.getId());
+                nodeObj.setFlowVersion(flow.getFlowVersion());
+                nodeObj.setNamespaceId(flow.getNamespaceId());
+                nodeObj.setStatus(FlowNodeStatus.HIDDEN.getCode());
+                nodeObj.setNodeLevel(flowGraph.getNodes().size());
+                nodeObj.setDescription("");
+                FlowGraphNode end = new FlowGraphNodeEnd();
+                end.setFlowNode(nodeObj);
+                flowGraph.getNodes().add(end);
+            }
 
-        if (isOk) {
-            //running now
-            flow.setId(flow.getFlowMainId());
-            flow.setFlowMainId(0L);
-            flow.setRunTime(now);
-            flow.setStatus(FlowStatusType.RUNNING.getCode());
-            flowProvider.updateFlow(flow);
-        }
+            // 泳道
+            List<FlowLane> laneList = flowLaneProvider.listFlowLane(flowId, FlowConstants.FLOW_CONFIG_VER);
+            laneList.forEach(r -> flowGraph.getLanes().add(getFlowGraphLane(r)));
+            // 分支
+            List<FlowBranch> branchList = flowBranchProvider.findByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
+            branchList.forEach(r -> flowGraph.getBranches().add(getFlowGraphBranch(r)));
 
-        return isOk;
+            Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+            flow.setUpdateTime(now);
+
+            boolean isOk = true;
+            try {
+                dbProvider.execute((s) -> {
+                    doSnapshot(flowGraph);
+                    return true;
+                });
+            } catch (Exception ex) {
+                isOk = false;
+                LOGGER.error("do snapshot error", ex);
+            }
+
+            if (flow.getFlowMainId().equals(0L)) {
+                isOk = false;
+            }
+
+            if (isOk) {
+                //running now
+                flow.setId(flow.getFlowMainId());
+                flow.setFlowMainId(0L);
+                flow.setRunTime(now);
+                flow.setStatus(FlowStatusType.RUNNING.getCode());
+                flowProvider.updateFlow(flow);
+            }
+
+            return isOk;
+        });
+        return tuple.first();
     }
 
     private FlowGraphBranch getFlowGraphBranch(FlowBranch branch) {
@@ -2163,7 +2171,9 @@ public class FlowServiceImpl implements FlowService {
         FlowCaseState ctx = flowStateProcessor.prepareButtonFire(userInfo, cmd);
         fixupUserInfoInContext(ctx, userInfo);
 
-        flowStateProcessor.step(ctx, ctx.getCurrentEvent());
+        if (ctx.isContinueFlag()) {
+            flowStateProcessor.step(ctx, ctx.getCurrentEvent());
+        }
 
         FlowButton btn = flowButtonProvider.getFlowButtonById(cmd.getButtonId());
         return ConvertHelper.convert(btn, FlowButtonDTO.class);
@@ -4563,7 +4573,7 @@ public class FlowServiceImpl implements FlowService {
                 FlowCaseStatus status = FlowCaseStatus.fromCode(flowCase.getStatus());
                 if (status != FlowCaseStatus.INVALID &&
                         (status == FlowCaseStatus.ABSORTED || status == FlowCaseStatus.FINISHED)) {
-                    flowCase.setStatus(FlowCaseStatus.INVALID.getCode());
+                    flowCase.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
                     flowCaseProvider.updateFlowCase(flowCase);
                     return true;
                 }
@@ -4582,8 +4592,16 @@ public class FlowServiceImpl implements FlowService {
                 cmd.getModuleType(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
 
         if (paramList.isEmpty()) {
+            paramList = flowPredefinedParamProvider.listPredefinedParam(namespaceId,
+                    FlowModuleType.NO_MODULE.getCode(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+        }
+        if (paramList.isEmpty()) {
             paramList = flowPredefinedParamProvider.listPredefinedParam(Namespace.DEFAULT_NAMESPACE,
                     cmd.getModuleType(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+        }
+        if (paramList.isEmpty()) {
+            paramList = flowPredefinedParamProvider.listPredefinedParam(Namespace.DEFAULT_NAMESPACE,
+                    FlowModuleType.NO_MODULE.getCode(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
         }
 
         List<FlowPredefinedParamDTO> dtoList = paramList.stream().map(this::toPredefinedParamDTO).collect(Collectors.toList());

@@ -4,6 +4,7 @@ package com.everhomes.rest.flow;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * <ul>
@@ -18,6 +19,7 @@ public class UpdateFlowLaneCommand {
 
     @NotNull
     private Long laneId;
+    @Size(min = 1, max = 64)
     private String displayName;
     private String displayNameAbsort;
     private Integer identifierNodeLevel;
