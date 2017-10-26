@@ -47,6 +47,10 @@ import java.util.List;
  *  <li>descriptionHeight : 折叠服务联盟高度  0:全部展开 大于0:折叠相应高度</li>
  *  <li>displayFlag : 是否在app端显示服务联盟企业, 参考 {@link com.everhomes.rest.yellowPage.DisplayFlagType}</li>
  *  <li>defaultOrder : 排序序号</li>
+ *  <li>commentCount : 评论数量</li>
+ *  <li>commentToken : 评论token，评论当前机构需要使用此参数。</li>
+ *  <li>summaryDescription : 概要描述字段。</li>
+ *  <li>jumpServiceAllianceRouting : "grid" 样式下，点击服务联盟的banner图跳转到其他服务联盟的路由</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -133,7 +137,25 @@ public class ServiceAllianceDTO {
 	private Integer descriptionHeight;
 	
 	private Byte displayFlag;
+
 	
+	private Integer commentCount;
+	
+	private String commentToken;
+	
+	private String summaryDescription;
+	
+	private String jumpServiceAllianceRouting;
+	
+	public String getCommentToken() {
+		return commentToken;
+	}
+
+	public void setCommentToken(String commentToken) {
+		this.commentToken = commentToken;
+	}
+
+
 	public Byte getDisplayFlag() {
 		return displayFlag;
 	}
@@ -406,6 +428,30 @@ public class ServiceAllianceDTO {
 
 	public void setDescriptionHeight(Integer descriptionHeight) {
 		this.descriptionHeight = descriptionHeight;
+	}
+
+	public Integer getCommentCount() {
+		return commentCount;
+	}
+
+	public void setCommentCount(Integer commentCount) {
+		this.commentCount = commentCount;
+	}
+
+	public String getSummaryDescription() {
+		return summaryDescription;
+	}
+
+	public void setSummaryDescription(String summaryDescription) {
+		this.summaryDescription = summaryDescription;
+	}
+
+	public String getJumpServiceAllianceRouting() {
+		return jumpServiceAllianceRouting;
+	}
+
+	public void setJumpServiceAllianceRouting(String jumpServiceAllianceRouting) {
+		this.jumpServiceAllianceRouting = jumpServiceAllianceRouting;
 	}
 
 	@Override

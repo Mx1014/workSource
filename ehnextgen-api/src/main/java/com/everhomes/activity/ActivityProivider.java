@@ -55,11 +55,11 @@ public interface ActivityProivider {
     
     Activity findActivityByUuid(String uuid);
     
-    List<ActivityRoster> findRostersByUid(Long uid, CrossShardListingLocator locator, int count);
+    List<ActivityRoster> findRostersByUid(Long uid, CrossShardListingLocator locator, int count, Byte rosterStatus);
     
     List<Activity> listNewActivities(CrossShardListingLocator locator, int count, Timestamp lastViewedTime, Condition condition);
 
-	List<Activity> listActivitiesForWarning(Integer namespaceId, Timestamp queryStartTime, Timestamp queryEndTime);
+	List<Activity> listActivitiesForWarning(Integer namespaceId, Long categoryId, Timestamp queryStartTime, Timestamp queryEndTime);
 	
 	List<ActivityCategories> listActivityEntryCategories(Integer namespaceId, String ownerType, Long ownerId, Long parentId, CategoryAdminStatus status);
 
@@ -165,4 +165,9 @@ public interface ActivityProivider {
 	 * @param id
 	 */
 	void deleteActivityCategories(Long id);
+	
+//	void createActivityRosterError(ActivityRosterError rosterError);
+//
+//	List<ActivityRosterError> listActivityRosterErrorByJobId(Long jobId);
+
 }

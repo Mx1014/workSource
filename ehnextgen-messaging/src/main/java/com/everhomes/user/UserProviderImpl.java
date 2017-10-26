@@ -482,6 +482,17 @@ public class UserProviderImpl implements UserProvider {
             .fetchAny();
         return ConvertHelper.convert(record, UserIdentifier.class);
     }
+
+    @Override
+    public UserIdentifier findIdentifierByOwnerAndTypeAndClaimStatus(long ownerUid, byte identifierType, byte claimStatus) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, ownerUid));
+        Record record = context.select().from(EH_USER_IDENTIFIERS)
+                .where(EH_USER_IDENTIFIERS.OWNER_UID.eq(ownerUid))
+                .and(EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(identifierType))
+                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(claimStatus))
+                .fetchAny();
+        return ConvertHelper.convert(record, UserIdentifier.class);
+    }
     
 	@Caching(evict = { @CacheEvict(value = "UserGroup-Listing", key = "{#userGroup.ownerUid, #userGroup.groupDiscriminator}"),
 			@CacheEvict(value = "UserGroupByOwnerAndGroup", key = "{#userGroup.ownerUid, #userGroup.groupId}") })
@@ -1651,5 +1662,23 @@ public class UserProviderImpl implements UserProvider {
             }
         }
         return null;
+    }
+    
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    @Cacheable(value = "checkCacheStatus", key="'cache.heartbeat'", unless="#result == null")
+    @Override
+    public String checkCacheStatus() {
+        return String.valueOf(System.currentTimeMillis());
+    }
+    
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    @Caching(evict={@CacheEvict(value="checkCacheStatus", key="'cache.heartbeat'")})
+    @Override
+    public void updateCacheStatus() {
+        // 只需要去掉缓存，使可缓存可测
     }
 }

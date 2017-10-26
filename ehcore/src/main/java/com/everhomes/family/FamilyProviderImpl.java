@@ -278,6 +278,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 			if(community != null){
 				family.setCommunityId(communityId);
 				family.setCommunityName(community.getName());
+				family.setCommunityAliasName(community.getAliasName());
 				family.setCityId(community.getCityId());
 				family.setCityName(community.getCityName()+community.getAreaName());
 				family.setCommunityType(community.getCommunityType());
@@ -446,6 +447,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 						    f.setCityName(community.getCityName());
 	                        f.setAreaName(community.getAreaName());
 	                        f.setCommunityId(community.getId());
+	                        f.setCommunityAliasName(community.getAliasName());
 	                        f.setCommunityName(community.getName());
 	                        f.setCommunityType(community.getCommunityType());
 	                        f.setDefaultForumId(community.getDefaultForumId());
@@ -593,6 +595,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 			if(community != null){
 				family.setCommunityId(communityId);
 				family.setCommunityName(community.getName());
+				family.setCommunityAliasName(community.getAliasName());
 				family.setCityId(community.getCityId());
 				family.setCityName(community.getCityName());
 			}

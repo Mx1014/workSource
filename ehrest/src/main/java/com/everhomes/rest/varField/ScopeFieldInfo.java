@@ -6,10 +6,11 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>id: 域下的字段id，新加进去的没有</li>
  *     <li>namespaceId: 域空间id</li>
+ *     <li>communityId: 项目id</li>
  *     <li>moduleName: 字段所属的模块类型名</li>
  *     <li>fieldId: 在系统里的字段id</li>
  *     <li>fieldDisplayName: 字段名</li>
- *     <li>fieldParam: 字段描述，json 如：{fieldParamType: "file", length: 9}，字段类型枚举型，参考{@link FieldParamType}</li>
+ *     <li>fieldParam: 字段描述，json 如：{fieldParamType: "file", length: 9}，字段类型枚举型，参考{@link com.everhomes.rest.varField.FieldParamType}</li>
  *     <li>mandatoryFlag: 是否必填 0: 否; 1: 是</li>
  *     <li>defaultOrder: 顺序</li>
  * </ul>
@@ -20,6 +21,8 @@ public class ScopeFieldInfo {
     private Long id;
 
     private Integer namespaceId;
+
+    private Long communityId;
 
     private String moduleName;
 
@@ -32,6 +35,14 @@ public class ScopeFieldInfo {
     private Byte mandatoryFlag;
 
     private Integer defaultOrder;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
     public Integer getDefaultOrder() {
         return defaultOrder;

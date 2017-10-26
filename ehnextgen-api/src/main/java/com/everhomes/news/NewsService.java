@@ -1,30 +1,9 @@
 // @formatter:off
 package com.everhomes.news;
 
+import com.everhomes.rest.news.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.rest.news.AddNewsCommentCommand;
-import com.everhomes.rest.news.AddNewsCommentForWebCommand;
-import com.everhomes.rest.news.AddNewsCommentResponse;
-import com.everhomes.rest.news.CreateNewsCommand;
-import com.everhomes.rest.news.CreateNewsResponse;
-import com.everhomes.rest.news.DeleteNewsCommand;
-import com.everhomes.rest.news.DeleteNewsCommentCommand;
-import com.everhomes.rest.news.GetNewsContentCommand;
-import com.everhomes.rest.news.GetNewsContentResponse;
-import com.everhomes.rest.news.GetNewsDetailInfoCommand;
-import com.everhomes.rest.news.GetNewsDetailInfoResponse;
-import com.everhomes.rest.news.ImportNewsCommand;
-import com.everhomes.rest.news.ListNewsCommand;
-import com.everhomes.rest.news.ListNewsCommentCommand;
-import com.everhomes.rest.news.ListNewsCommentResponse;
-import com.everhomes.rest.news.ListNewsResponse;
-import com.everhomes.rest.news.SearchNewsCommand;
-import com.everhomes.rest.news.SearchNewsResponse;
-import com.everhomes.rest.news.SetNewsLikeFlagCommand;
-import com.everhomes.rest.news.SetNewsLikeFlagForWebCommand;
-import com.everhomes.rest.news.SetNewsTopFlagCommand;
-import com.everhomes.rest.news.SyncNewsCommand;
 import com.everhomes.rest.ui.news.AddNewsCommentBySceneCommand;
 import com.everhomes.rest.ui.news.AddNewsCommentBySceneResponse;
 import com.everhomes.rest.ui.news.DeleteNewsCommentBySceneCommand;
@@ -33,6 +12,8 @@ import com.everhomes.rest.ui.news.ListNewsBySceneResponse;
 import com.everhomes.rest.ui.news.SetNewsLikeFlagBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
+
+import java.util.List;
 
 public interface NewsService {
 
@@ -59,6 +40,10 @@ public interface NewsService {
 	ListNewsCommentResponse listNewsComment(ListNewsCommentCommand cmd);
 
 	void deleteNewsComment(DeleteNewsCommentCommand cmd);
+
+	void updateNewsTag(UpdateNewsTagCommand cmd);
+
+	GetNewsTagResponse getNewsTag(GetNewsTagCommand cmd);
 
 	ListNewsBySceneResponse listNewsByScene(ListNewsBySceneCommand cmd);
 

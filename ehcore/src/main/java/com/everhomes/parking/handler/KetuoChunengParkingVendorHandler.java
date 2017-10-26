@@ -2,8 +2,10 @@
 package com.everhomes.parking.handler;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.parking.ParkingCardRequest;
 import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.parking.ketuo.KetuoRequestConfig;
+import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,4 +33,6 @@ public class KetuoChunengParkingVendorHandler extends KetuoParkingVendorHandler 
 
 		return config;
 	}
+
+
 }

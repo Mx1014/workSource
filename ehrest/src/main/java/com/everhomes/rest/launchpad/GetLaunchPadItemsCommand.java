@@ -77,7 +77,7 @@ public class GetLaunchPadItemsCommand {
     public void setSceneType(String sceneType) {
         this.sceneType = sceneType;
     }
-    
+
     public String getCurrentSceneType() {
         return (sceneType == null) ? SceneType.DEFAULT.getCode() : sceneType;
     }

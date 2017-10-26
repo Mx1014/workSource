@@ -94,8 +94,10 @@ public enum CoordinationLocks {
     SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
 
     EVENT_STAT_SCHEDULE("event.stat.schedule"),
+
     CREATE_ENERGY_TASK("energy.task.create"),
-    SCHEDULE_ENERGY_TASK("energy.task.schedule")
+    SCHEDULE_ENERGY_TASK("energy.task.schedule"),
+    ADD_ORGANIZATION_PERSONEL("add.organization.personel")
     ; 
     private String code;
     private CoordinationLocks(String code) {

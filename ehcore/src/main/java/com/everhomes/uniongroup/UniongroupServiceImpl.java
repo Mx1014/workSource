@@ -231,6 +231,24 @@ public class UniongroupServiceImpl implements UniongroupService {
         return null;
     }
 
+    @Override
+    public List<UniongroupConfiguresDTO> getConfiguresInfosListByGroupId(GetUniongroupConfiguresCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<UniongroupConfigures> configures = this.uniongroupConfigureProvider.listUniongroupConfiguresByGroupId(namespaceId, cmd.getGroupId());
+        if (configures != null) {
+            return configures.stream().map(r -> {
+                if(r.getCurrentType().equals(UniongroupTargetType.MEMBERDETAIL.getCode())){
+                    OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(r.getCurrentId());
+                    if(detail != null){
+                        r.setCurrentName(detail.getContactName());
+                    }
+                }
+                return ConvertHelper.convert(r, UniongroupConfiguresDTO.class);
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
     //  将 pojo 转换为 DTO 对象
     private UniongroupMemberDetailsDTO convertUniongroupMemberToDTO(UniongroupMemberDetail detail){
         UniongroupMemberDetailsDTO dto = ConvertHelper.convert(detail,UniongroupMemberDetailsDTO.class);
@@ -322,7 +340,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public List listDetailNotInUniongroup(ListDetailsNotInUniongroupsCommand cmd) {
-        return this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizaitonId());
+        return this.uniongroupConfigureProvider.listDetailNotInUniongroup(cmd.getNamespaceId(), cmd.getOrganizaitonId(), cmd.getContactName());
     }
 
     private Organization checkOrganization(Long orgId) {

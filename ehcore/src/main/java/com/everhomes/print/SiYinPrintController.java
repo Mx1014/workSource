@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.print.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,37 +23,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.print.GetPrintLogonUrlCommand;
-import com.everhomes.rest.print.GetPrintLogonUrlResponse;
-import com.everhomes.rest.print.GetPrintSettingCommand;
-import com.everhomes.rest.print.GetPrintSettingResponse;
-import com.everhomes.rest.print.GetPrintStatCommand;
-import com.everhomes.rest.print.GetPrintStatResponse;
-import com.everhomes.rest.print.GetPrintUnpaidOrderCommand;
-import com.everhomes.rest.print.GetPrintUnpaidOrderResponse;
-import com.everhomes.rest.print.GetPrintUserEmailCommand;
-import com.everhomes.rest.print.GetPrintUserEmailResponse;
-import com.everhomes.rest.print.InformPrintCommand;
-import com.everhomes.rest.print.InformPrintResponse;
-import com.everhomes.rest.print.ListPrintJobTypesCommand;
-import com.everhomes.rest.print.ListPrintJobTypesResponse;
-import com.everhomes.rest.print.ListPrintOrderStatusCommand;
-import com.everhomes.rest.print.ListPrintOrderStatusResponse;
-import com.everhomes.rest.print.ListPrintOrdersCommand;
-import com.everhomes.rest.print.ListPrintOrdersResponse;
-import com.everhomes.rest.print.ListPrintRecordsCommand;
-import com.everhomes.rest.print.ListPrintRecordsResponse;
-import com.everhomes.rest.print.ListPrintUserOrganizationsCommand;
-import com.everhomes.rest.print.ListPrintUserOrganizationsResponse;
-import com.everhomes.rest.print.ListPrintingJobsCommand;
-import com.everhomes.rest.print.ListPrintingJobsResponse;
-import com.everhomes.rest.print.LogonPrintCommand;
-import com.everhomes.rest.print.PayPrintOrderCommand;
-import com.everhomes.rest.print.PrintImmediatelyCommand;
-import com.everhomes.rest.print.PrintSettingColorTypeDTO;
-import com.everhomes.rest.print.UnlockPrinterCommand;
-import com.everhomes.rest.print.UpdatePrintSettingCommand;
-import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.util.RequireAuthentication;
 
@@ -294,6 +265,20 @@ public class SiYinPrintController extends ControllerBase {
 	     response.setErrorDescription("OK");
 	     return response;
 	 }
+
+	/**
+	 * <b>URL: /siyinprint/payPrintOrderV2</b>
+	 * <p>支付订单</p>
+	 */
+	@RequestMapping("payPrintOrderV2")
+	@RestReturn(value=PreOrderDTO.class)
+	public RestResponse payPrintOrderV2(PayPrintOrderCommandV2 cmd) {
+
+		RestResponse response = new RestResponse(siyinPrintService.payPrintOrderV2(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	 
 	 /**
 	  * <b>URL: /siyinprint/listPrintingJobs</b>

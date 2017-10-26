@@ -54,7 +54,9 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 			long expireTime = Utils.strToLong(expireDate, Utils.DateStyle.DATE_TIME_STR);
 
 			if (checkExpireTime(parkingLot, expireTime)) {
-				return resultList;
+				parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
+			}else {
+				parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 			}
 
 			parkingCardDTO.setOwnerType(parkingLot.getOwnerType());
@@ -106,18 +108,19 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 		List<WankeCardType> types = getCardType();
 
 		List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
-			String type = null;
+			WankeCardType type = null;
 			for(WankeCardType t: types) {
 				if(t.getId().equals(r.getCardType())) {
-					type = t.getName();
+					type = t;
 				}
 			}
 
 			ParkingRechargeRateDTO dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.WANKE.getCode());
-			
-			dto.setCardType(type);
+
+			dto.setCardTypeId(type.getId());
+			dto.setCardType(type.getName());
 			return dto;
 		}).collect(Collectors.toList());
 		
@@ -132,14 +135,9 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
     }
 
 	@Override
-	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
-		if(null == rate) {
-			LOGGER.error("Rate not found, cmd={}", order);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Rate not found.");
-		}
-		order.setRateName(rate.getRateName());
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
+		updateParkingRechargeOrderRateInfo(parkingLot, order);
+
 	}
 
     private void checkExpireDateIsNull(String expireDate,String plateNo) {
@@ -236,7 +234,7 @@ public class WankeParkingVendorHandler extends DefaultParkingVendorHandler {
 		JSONObject param = new JSONObject();
 
 		param.put("orderNo", order.getOrderToken());
-		param.put("amount", (order.getPrice().multiply(new BigDecimal(100))).intValue());
+		param.put("amount", (order.getOriginalPrice().multiply(new BigDecimal(100))).intValue());
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?1:2);
 		String json = post(PAY_TEMP_FEE, param);
 

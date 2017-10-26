@@ -23,14 +23,19 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.*;
+import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
 import com.everhomes.pmtask.ebei.EbeiPmtaskLogDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
@@ -171,6 +176,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
+
+	@Autowired
+	private CommunityService communityService;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -629,7 +637,24 @@ public class PmTaskServiceImpl implements PmTaskService {
 			return handler.createTask(cmd, requestorUid, requestorName, requestorPhone);
 		}
 	}
-	
+
+	@Override
+	public ListBuildingCommandResponse listBuildings(ListBuildingCommand cmd) {
+		ListBuildingCommandResponse response = communityService.listBuildings(cmd);
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		//增加公共区域
+		if (response.getNextPageAnchor()==null && cmd.getNamespaceId()==999983) {
+			BuildingDTO buildingDTO = new BuildingDTO();
+			buildingDTO.setName(EbeiBuildingType.publicArea);
+			buildingDTO.setBuildingName(EbeiBuildingType.publicArea);
+			buildingDTO.setId(0l);
+			response.getBuildings().add(buildingDTO);
+		}
+		return response;
+	}
+
 	@Override
 	public PmTaskDTO createTaskByOrg(CreateTaskCommand cmd) {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
@@ -2577,7 +2602,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		dbProvider.execute((TransactionStatus status) -> {
 
-			task.setStatus(state > PmTaskStatus.PROCESSED.getCode() &&  state<PmTaskStatus.INACTIVE.getCode()
+			task.setStatus(state > PmTaskStatus.PROCESSED.getCode()
 					? PmTaskStatus.PROCESSED.getCode(): state );
 			pmTaskProvider.updateTask(task);
 			dto.setStatus(task.getStatus());

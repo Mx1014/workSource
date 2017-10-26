@@ -43,23 +43,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	@Autowired
 	private Rentalv2Service rentalService;
-	
-//	/**
-//	 * 
-//	 * <b>URL: /rental/admin/addDefaultRule<b>
-//	 * <p>
-//	 * 添加默认规则
-//	 * </p>
-//	 */
-//	@RequestMapping("addDefaultRule")
-//	@RestReturn(String.class)
-//	public RestResponse addDefaultRule(@Valid AddDefaultRuleAdminCommand cmd) {
-//		this.rentalService.addDefaultRule(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+
 	/**
 	 * 
 	 * <b>URL: /rental/admin/getResourceTypeList<b>
@@ -479,23 +463,6 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RestReturn(value = String.class)
 	public RestResponse updateRentalSiteSimpleRules(@Valid  UpdateRentalSiteRulesAdminCommand cmd) {
 		rentalService.updateRentalSiteSimpleRules(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /rental/admin/updateRentalSiteDiscount</b>
-	 * <p>
-	 * 更新优惠信息
-	 * </p>
-	 */
-
-	@RequestMapping("updateRentalSiteDiscount")
-	@RestReturn(value = String.class)
-	public RestResponse updateRentalSiteDiscount(@Valid  UpdateRentalSiteDiscountAdminCommand cmd) {
-		rentalService.updateRentalSiteDiscount(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

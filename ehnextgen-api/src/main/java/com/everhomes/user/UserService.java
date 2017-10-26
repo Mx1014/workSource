@@ -15,6 +15,7 @@ import com.everhomes.rest.user.admin.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.List;
 
 /**
@@ -108,6 +109,9 @@ public interface UserService {
 
     
     SearchContentsBySceneReponse searchContentsByScene(SearchContentsBySceneCommand cmd);
+
+    SearchTypes getSearchTypes(Integer namespaceId, String searchContentType);
+
     ListSearchTypesBySceneReponse listSearchTypesByScene(ListSearchTypesBySceneCommand cmd);
 
 
@@ -223,6 +227,9 @@ public interface UserService {
  
     SceneContactV2DTO getRelevantContactInfo(GetRelevantContactInfoCommand cmd);
 
+	//added by R 20170824, 人事1.4,  判断管理员
+    CheckContactAdminResponse checkContactAdmin(CheckContactAdminCommand cmd);
+
     //added by R 20170803, 消息2.1增加
     SceneContactV2DTO getContactInfoByUserId(GetContactInfoByUserIdCommand cmd);
 
@@ -244,6 +251,16 @@ public interface UserService {
     Long getCommunityIdBySceneToken(SceneTokenDTO sceneTokenDTO);
 
     List<SceneDTO> listUserRelatedScenesByCurrentType(ListUserRelatedScenesByCurrentTypeCommand cmd);
+	
+    UserIdentifier getUserIdentifier(Long userId);
+
+    VerificationCodeForBindPhoneResponse verificationCodeForBindPhone(VerificationCodeForBindPhoneCommand cmd);
+
+    UserLogin bindPhone(BindPhoneCommand cmd);
+
+    void checkVerifyCodeAndResetPassword(CheckVerifyCodeAndResetPasswordCommand cmd);
+
+    UserTemporaryTokenDTO checkUserTemporaryToken(CheckUserTemporaryTokenCommand cmd);
 
     SceneDTO getProfileScene();
 
@@ -252,4 +269,21 @@ public interface UserService {
     List<SceneDTO> listAllCommunityScenesIfGeoExist(ListAllCommunityScenesIfGeoExistCommand cmd);
 
     SceneDTO convertCommunityToScene(Integer namespaceId, Long userId, Community default_community);
+
+    List<SceneDTO> listAllCommunityScenes();
+    
+    /**
+     * 用于测试服务器状态，不要用于业务使用 by lqs 20171019
+     */
+    String checkServerStatus();
+    
+    /** 
+     * 客户端更新设备信息到服务器端
+     * @param cmd
+     * @param request
+     * @param response
+     * @return 返回服务器端的信息
+     */
+    SystemInfoResponse updateUserBySystemInfo(SystemInfoCommand cmd,
+            HttpServletRequest request, HttpServletResponse response);
 }

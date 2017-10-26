@@ -50,7 +50,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("spring.freemarker.check-template-location", false)
             .withProperty("db.driver", "com.mysql.jdbc.Driver")
             .withProperty("elastic.nodes.hosts", "elasticsearch")
-            .withProperty("elastic.nodes.ports", "9200")
+            .withProperty("elastic.nodes.ports", "9300")
             .withProperty("elastic.index", "everhomesv3")
             .withProperty("javadoc.root", "http://localhost:8080/apidocs")
             .withProperty("javadoc.location", "file:///Users/kelveny/archive/ehng/apidocs/")

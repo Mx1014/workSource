@@ -4,11 +4,14 @@ package com.everhomes.activity;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.portal.PortalPublishHandler;
-import com.everhomes.rest.activity.*;
-import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.activity.ActivityActionData;
+import com.everhomes.rest.activity.ActivityCategoryDTO;
+import com.everhomes.rest.activity.ActivityEntryConfigulation;
 import com.everhomes.rest.common.AllFlagType;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,14 +56,17 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		//删除内容分类
 		deleteContentCategory(config, namespaceId);
 
-		//如果没有则增加默认分类
-		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() ==0){
+		//如果没有则增加默认分类、或者子分类关闭
+		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() ==0
+				|| config.getCategoryFlag() == null || config.getCategoryFlag().byteValue() == 0){
 				List<ActivityCategoryDTO> listDto = new ArrayList<>();
 				ActivityCategoryDTO newDto = new ActivityCategoryDTO();
 				newDto.setAllFlag(AllFlagType.YES.getCode());
 				newDto.setName("all");
 				listDto.add(newDto);
 				config.setCategoryDTOList(listDto);
+
+				config.setCategoryFlag((byte)1);
 
 		}
 
@@ -249,7 +255,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		}
 
 		//新发布的没有则删除全部，如果有则一个个对比
-		if(config.getCategoryFlag() == 0 || config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
+		if(config.getCategoryFlag() == null || config.getCategoryFlag() == 0 || config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
 			for(int i=0; i<oldContentCategories.size(); i++){
 				activityProvider.deleteActivityCategories(oldContentCategories.get(i).getId());
 			}

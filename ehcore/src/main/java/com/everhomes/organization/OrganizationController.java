@@ -1366,6 +1366,19 @@ public class OrganizationController extends ControllerBase {
         return res;
     }
 
+    /**
+     * <b>URL: /org/listOrganizationAddresses</b>
+     * <p>获取机构地址</p>
+     */
+    @RequestMapping("listOrganizationAddresses")
+    @RestReturn(value = OrgAddressDTO.class, collection = true)
+    public RestResponse listOrganizationAddresses(ListOrganizationAddressesCommand cmd) {
+        RestResponse res = new RestResponse(organizationService.listOrganizationAddresses(cmd));
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
 /*New*/
 
     /**
@@ -1779,5 +1792,19 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /org/testAdmins</b>
+     * <p>人事档案离职</p>
+     */
+    /*@RequestMapping("testAdmins")
+    @RestReturn(value = String.class)
+    public RestResponse testAdmins() {
+        List<Long> users = this.organizationService.getOrganizationAdminIncludeList2(1000001L, 195506L, 195506L);
+        RestResponse response = new RestResponse(users);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }*/
 
 }

@@ -599,4 +599,35 @@ public class AclController extends ControllerBase {
 //        response.setErrorDescription("OK");
 //        return response;
 //    }
+    /**
+     * <b>URL: /acl/createOrganizationSuperAdmins</b>
+     * <p>批量创建超级管理员</p>
+     */
+    @RequestMapping("createOrganizationSuperAdmins")
+    @RestReturn(value=String.class)
+    public RestResponse createOrganizationSuperAdmins(@Valid CreateOrganizationAdminsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_CREATE);
+        rolePrivilegeService.createOrganizationSuperAdmins(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/transferOrganizationSuperAdmin</b>
+     * <p>移交管理员权限</p>
+     */
+    @RequestMapping("transferOrganizationSuperAdmin")
+    @RestReturn(value=String.class)
+    public RestResponse transferOrganizationSuperAdmin(@Valid TransferOrganizationSuperAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_CREATE);
+        rolePrivilegeService.transferOrganizationSuperAdmin(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

@@ -85,6 +85,7 @@ import com.everhomes.util.excel.handler.ProcessBillModel1;
 import com.everhomes.util.excel.handler.PropMgrBillHandler;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import net.greghaines.jesque.Job;
 import org.apache.poi.ss.usermodel.*;
@@ -238,6 +239,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Autowired
 	private FieldProvider fieldProvider;
+
+	@Autowired
+	private FieldService fieldService;
 
 	@Autowired
 	private ContractSearcher contractSearcher;
@@ -814,12 +818,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		this.checkCommunity(cmd.getCommunityId());
 		Tuple<Integer, List<BuildingDTO>> tuple = addressService.listBuildingsByKeyword(cmd);
-		//增加公共区域
-		List list = tuple.second();
-		BuildingDTO buildingDTO = new BuildingDTO();
-		buildingDTO.setBuildingName(EbeiBuildingType.publicArea);
-		buildingDTO.setCommunityId(cmd.getCommunityId());
-		list.add(buildingDTO);
+
 		return tuple;
 	}
 
@@ -2101,7 +2100,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			address.setSharedArea(cmd.getSharedArea());
 			if(cmd.getCategoryItemId() != null) {
 				address.setCategoryItemId(cmd.getCategoryItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
 				if(item != null) {
 					address.setCategoryItemName(item.getItemDisplayName());
 				}
@@ -2109,7 +2109,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 			if(cmd.getSourceItemId() != null) {
 				address.setSourceItemId(cmd.getSourceItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getSourceItemId());
 				if(item != null) {
 					address.setSourceItemName(item.getItemDisplayName());
 				}
@@ -2129,7 +2130,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			address.setSharedArea(cmd.getSharedArea());
 			if(cmd.getCategoryItemId() != null) {
 				address.setCategoryItemId(cmd.getCategoryItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
 				if(item != null) {
 					address.setCategoryItemName(item.getItemDisplayName());
 				}
@@ -2137,7 +2139,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 			if(cmd.getSourceItemId() != null) {
 				address.setSourceItemId(cmd.getSourceItemId());
-				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getSourceItemId());
 				if(item != null) {
 					address.setSourceItemName(item.getItemDisplayName());
 				}
@@ -2241,6 +2244,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				community.setChargeArea(communityChargeArea - oldAddressChargeArea + cmd.getChargeArea());
 
 				address.setChargeArea(cmd.getChargeArea());
+			}else if (cmd.getCategoryItemId() != null) {
+				address.setCategoryItemId(cmd.getCategoryItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
+				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), address.getCommunityId(), cmd.getCategoryItemId());
+				if(item != null) {
+					address.setCategoryItemName(item.getItemDisplayName());
+				}
+			}else if (cmd.getSourceItemId() != null) {
+				address.setSourceItemId(cmd.getSourceItemId());
+//				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
+				ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), address.getCommunityId(), cmd.getSourceItemId());
+				if(item != null) {
+					address.setSourceItemName(item.getItemDisplayName());
+				}
 			}else if (cmd.getDecorateStatus() != null) {
 				address.setDecorateStatus(cmd.getDecorateStatus());
 			}else if (cmd.getOrientation() != null) {
@@ -6037,7 +6054,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         ArrayList resultList = processorExcel(file[0]);
         List<CommunityPmOwner> ownerList = dbProvider.execute(status -> processorOrganizationOwner(user.getId(),
                 cmd.getOrganizationId(), cmd.getCommunityId(), resultList));
-        pmOwnerSearcher.bulkUpdate(ownerList);
+		//用 bulkUpdate不会更新 by xiongying20171009
+//        pmOwnerSearcher.bulkUpdate(ownerList);
     }
 
 	private ArrayList processorExcel(MultipartFile file) {
@@ -6104,7 +6122,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
 
 				long ownerId = propertyMgrProvider.createPropOwner(owner);
-
+				pmOwnerSearcher.feedDoc(owner);
 				Byte livingStatus = parseLivingStatus(RowResult.trimString(result.getF()));
 				createOrganizationOwnerAddress(address.getId(), livingStatus, currentNamespaceId(), ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
 

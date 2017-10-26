@@ -92,7 +92,7 @@ public class SiYinPrintOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		if(LOGGER.isDebugEnabled())
 			LOGGER.error("onlinePayBillSuccess");
 		this.checkOrderNoIsNull(cmd.getOrderNo());
-		this.checkVendorTypeIsNull(cmd.getVendorType());
+//		this.checkVendorTypeIsNull(cmd.getVendorType());
 		this.checkPayAmountIsNull(cmd.getPayAmount());
 		
 		Long orderId = Long.parseLong(cmd.getOrderNo());
@@ -113,13 +113,13 @@ public class SiYinPrintOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		Long payTime = System.currentTimeMillis();
 		Timestamp payTimeStamp = new Timestamp(payTime);
 		
-		this.checkVendorTypeFormat(cmd.getVendorType());
+//		this.checkVendorTypeFormat(cmd.getVendorType());
 		
 		if(order.getOrderStatus().byteValue() == PrintOrderStatusType.UNPAID.getCode()) {
 			order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
 			order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
 			order.setPaidTime(payTimeStamp);
-			order.setPaidType(cmd.getVendorType());
+//			order.setPaidType(cmd.getVendorType());
 			siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 		}
 		

@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *  <li> namespaceId: 域空间id</li>
  *  <li> parentId: 父id</li>
  *  <li> ownerType: 拥有者类型：现在是community</li>
  *  <li> ownerId: 拥有者ID</li>
@@ -11,6 +12,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListServiceAllianceCategoriesCommand {
+	
+	private Integer namespaceId;
 
 	private Long parentId;
 	
@@ -19,6 +22,14 @@ public class ListServiceAllianceCategoriesCommand {
 	private Long ownerId;
 
 	private Byte destination;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 	public Byte getDestination() {
 		return destination;
