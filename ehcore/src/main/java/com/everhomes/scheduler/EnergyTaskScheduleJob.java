@@ -5,9 +5,11 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.energy.*;
 import com.everhomes.repeat.RepeatService;
+import com.everhomes.rest.asset.FeeRules;
 import com.everhomes.rest.energy.CreateEnergyTaskCommand;
 import com.everhomes.rest.energy.EnergyMeterStatus;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.ExecutorUtil;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -29,9 +31,6 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 
     @Autowired
     private ScheduleProvider scheduleProvider;
-
-    @Autowired
-    private EnergyMeterTaskProvider energyMeterTaskProvider;
 
     @Autowired
     private EnergyPlanProvider energyPlanProvider;
@@ -56,14 +55,24 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 
         //双机判断
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
-            closeDelayTasks();
+            calculateCloseTaskFee();
             createTask();
         }
     }
 
-    private void closeDelayTasks() {
-        LOGGER.info("EnergyTaskScheduleJob: close delay tasks.");
+    private void calculateCloseTaskFee() {
+        LOGGER.info("EnergyTaskScheduleJob: calculateCloseTaskFee.");
         //suanqian
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                generatePaymentExpectancies();
+            }
+        });
+
+    }
+
+    private void generatePaymentExpectancies() {
 
     }
 

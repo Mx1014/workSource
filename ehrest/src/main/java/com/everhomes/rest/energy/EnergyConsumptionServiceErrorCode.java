@@ -30,4 +30,5 @@ public interface EnergyConsumptionServiceErrorCode {
 
     int ERR_METER_TASK_NOT_EXIST = 10019;//任务不存在
     int ERR_METER_PLAN_NOT_ACTIVE = 10020;//计划不存在
+    int ERR_METER_TASK_ALREADY_CLOSE = 10021;//任务已关闭
 }

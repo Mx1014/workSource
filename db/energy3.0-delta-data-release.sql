@@ -71,3 +71,11 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 SET @max_template_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 1);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES ((@max_template_id := @max_template_id + 1), 'energy.notification', 1, 'zh_CN', '任务过期前提醒', '你的抄表任务${taskName}将在${time}结束，请尽快处理。', 0);
+
+set @id = (select MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@id := @id + 1), 'energy', '10016', 'zh_CN', '文件导出错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@id := @id + 1), 'energy', '10017', 'zh_CN', '表计名称已存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@id := @id + 1), 'energy', '10018', 'zh_CN', '表计号码已存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@id := @id + 1), 'energy', '10019', 'zh_CN', '任务不存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@id := @id + 1), 'energy', '10020', 'zh_CN', '计划不存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES((@id := @id + 1), 'energy', '10021', 'zh_CN', '任务已关闭，无法抄表');

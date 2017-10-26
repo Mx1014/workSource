@@ -2932,6 +2932,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             LOGGER.error("EnergyTask not exist, id = {}", cmd.getTaskId());
             throw errorWith(SCOPE, ERR_METER_TASK_NOT_EXIST, "The meter task is not exist id = %s", cmd.getTaskId());
         }
+        if(task.getExecutiveExpireTime().before(new Timestamp(DateHelper.currentGMTTime().getTime()))) {
+            LOGGER.error("EnergyTask already close, id = {}, expire time: {}", cmd.getTaskId(), task.getExecutiveExpireTime());
+            throw errorWith(SCOPE, ERR_METER_TASK_ALREADY_CLOSE, "The meter task is already close id = %s", cmd.getTaskId());
+
+        }
         task.setReading(cmd.getCurrReading());
         task.setOperatorUid(UserContext.currentUserId());
         task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
