@@ -192,7 +192,9 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			Namespace namespace = namespaceProvider.findNamespaceById(questionnaire.getNamespaceId());
 			String string1 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN1, "zh_CN", "邀请您参与《");
 			String string2 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN2, "zh_CN", "》问卷调查。");
-			String url = String.format(configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "https://www.zuolin.com/mobile/static/coming_soon/index.html"), questionnaire.getId());
+			String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://www.zuolin.com");
+			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s/0");
+			String url = String.format(homeurl+contextUrl, questionnaire.getId());
 
 			MessageChannel channel2 = new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId()));
 
