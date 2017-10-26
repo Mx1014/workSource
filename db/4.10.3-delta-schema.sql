@@ -367,6 +367,7 @@ ALTER TABLE `eh_flow_cases` ADD COLUMN `end_node_id` BIGINT NOT NULL DEFAULT 0 C
 ALTER TABLE `eh_flow_cases` ADD COLUMN `start_link_id` BIGINT NOT NULL DEFAULT 0 COMMENT '开始linkId';
 ALTER TABLE `eh_flow_cases` ADD COLUMN `end_link_id` BIGINT NOT NULL DEFAULT 0 COMMENT '结束linkId';
 ALTER TABLE `eh_flow_cases` ADD COLUMN `evaluate_status` TINYINT NOT NULL DEFAULT 0 COMMENT '评价状态，一般指结束后还可以评价的情况';
+ALTER TABLE `eh_flow_cases` ADD COLUMN `delete_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '删除状态';
 ALTER TABLE `eh_flow_cases` ADD COLUMN `service_type` VARCHAR(64) COMMENT 'service type';
 
 ALTER TABLE `eh_flow_buttons` ADD COLUMN `param` VARCHAR(64) COMMENT 'the params from other module';
@@ -392,3 +393,25 @@ ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag10` BIGINT;
 ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag11` BIGINT;
 ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag12` BIGINT;
 ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag13` BIGINT;
+
+ALTER TABLE eh_customer_talents modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_apply_projects modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_certificates modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_commercials modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_economic_indicators modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_investments modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_patents modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_tracking_plans modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_trackings modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+ALTER TABLE eh_customer_trademarks modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+
+ALTER TABLE `eh_flow_service_types` ADD COLUMN `module_id` BIGINT NOT NULL DEFAULT 0;
+-- 更改号码类型 --by st.zheng
+ALTER TABLE `eh_news` CHANGE COLUMN `phone` `phone` VARCHAR(32) NULL DEFAULT '0' ;
+
+SET @launch_pad_layouts_id = IFNULL((SELECT MAX(id) FROM `eh_launch_pad_layouts`), 1);
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`)
+  VALUES ((@launch_pad_layouts_id := @launch_pad_layouts_id + 1), 999973, 'ResourceLayout', '{"versionCode":"2017110101","versionName":"3.0.0","layoutName":"ResourceLayout","displayName":"预订中心","groups":[{"groupName":"预订中心","widget":"Navigator","instanceConfig":{"itemGroup":"ResGroup"},"style":"Default","defaultOrder":10,"separatorFlag":0,"separatorHeight":0,"columnCount":4}]}', 2017110117, 2015061701, 2, NOW(), 'pm_admin', 0, 0, 0);
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`)
+  VALUES ((@launch_pad_layouts_id := @launch_pad_layouts_id + 1), 999973, 'ResourceLayout', '{"versionCode":"2017110101","versionName":"3.0.0","layoutName":"ResourceLayout","displayName":"预订中心","groups":[{"groupName":"预订中心","widget":"Navigator","instanceConfig":{"itemGroup":"ResGroup"},"style":"Default","defaultOrder":10,"separatorFlag":0,"separatorHeight":0,"columnCount":4}]}', 2017110117, 2015061701, 2, NOW(), 'park_tourist', 0, 0, 0);
+

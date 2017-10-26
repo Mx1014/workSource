@@ -99,6 +99,9 @@ public enum CoordinationLocks {
     ADD_ORGANIZATION_PERSONEL("add.organization.personel"),
 
     FLOW_LANE("flow.lane"),
+    FLOW("flow"),
+
+    CLEANWRONGSTATUS_ORGANIZATIONMEMBERS("cleanwrongstatus.organizationmembers"),
     ;
  
     private String code;

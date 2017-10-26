@@ -108,7 +108,12 @@ public class PusherHuawei implements PusherVender {
 //        deviceTokens.add("32345678901234561234567890123456");
           
         JSONObject body = new JSONObject();//仅通知栏消息需要设置标题和内容，透传消息key和value为用户自定义
-        body.put("title", devMessage.getTitle());//消息标题
+        if(devMessage.getTitle() == null) {
+            body.put("title", "zuolin");
+        } else {
+            body.put("title", devMessage.getTitle());//消息标题    
+        }
+        
         body.put("content", devMessage.getAlert());//消息内容体
         
         JSONObject param = new JSONObject();

@@ -1,8 +1,8 @@
 -- add by xiongying20171024
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2300000', 'øÕªßπ‹¿Ì', '2000000', NULL, 'customer-management', '1', '2', '/2000000/2300000', 'zuolin', '2', '21100', '2', 'system', 'module');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2310000', 'øÕªßπ‹¿Ì', '2300000', NULL, 'customer-management', '1', '2', '/2000000/2300000/2310000', 'zuolin', '2', '21100', '3', 'system', 'page');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2400000', '∫œÕ¨π‹¿Ì', '2000000', NULL, 'contract-management', '1', '2', '/2000000/2400000', 'zuolin', '2', '21200', '2', 'system', 'module');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2410000', '∫œÕ¨π‹¿Ì', '2400000', NULL, 'contract-management', '1', '2', '/2000000/2400000/2410000', 'zuolin', '2', '21200', '3', 'system', 'page');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2300000', 'ÂÆ¢Êà∑ÁÆ°ÁêÜ', '2000000', NULL, 'customer-management', '1', '2', '/2000000/2300000', 'zuolin', '2', '21100', '2', 'system', 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2310000', 'ÂÆ¢Êà∑ÁÆ°ÁêÜ', '2300000', NULL, 'customer-management', '1', '2', '/2000000/2300000/2310000', 'zuolin', '2', '21100', '3', 'system', 'page');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2400000', 'ÂêàÂêåÁÆ°ÁêÜ', '2000000', NULL, 'contract-management', '1', '2', '/2000000/2400000', 'zuolin', '2', '21200', '2', 'system', 'module');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('2410000', 'ÂêàÂêåÁÆ°ÁêÜ', '2400000', NULL, 'contract-management', '1', '2', '/2000000/2400000/2410000', 'zuolin', '2', '21200', '3', 'system', 'page');
 
 SET @eh_var_fields_id = (SELECT MAX(id) FROM `eh_var_fields`);
 SET @eh_var_field_items_id = (SELECT MAX(id) FROM `eh_var_field_items`);
@@ -14,84 +14,235 @@ update eh_var_fields set field_param = '{\"fieldParamType\": \"text\", \"length\
 update eh_var_fields set field_param = '{\"fieldParamType\": \"select\", \"length\": 32}' where id = 214;
 update eh_var_fields set field_param = '{\"fieldParamType\": \"text\", \"length\": 32}' where id = 215;
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'intentionGrade', '“‚œÚµ»º∂', 'Long', '19', '/19', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'intentionGrade', 'ÊÑèÂêëÁ≠âÁ∫ß', 'Long', '19', '/19', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 
-INSERT INTO ``eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'trackingTime', '∏˙Ω¯ ±º‰', 'Long', '19', '/19', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"datetimeWithM\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'trackingTime', 'Ë∑üËøõÊó∂Èó¥', 'Long', '19', '/19', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"datetimeWithM\", \"length\": 32}');
 
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'content', '∏˙Ω¯ƒ⁄»›', 'Long', '19', '/19', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"multiText\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'content', 'Ë∑üËøõÂÜÖÂÆπ', 'Long', '19', '/19', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"multiText\", \"length\": 32}');
 
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'trackingType', 'º∆ªÆ¿‡–Õ', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'trackingType', 'ËÆ°ÂàíÁ±ªÂûã', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'customerName', 'øÕªß√˚≥∆', 'String', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'customerName', 'ÂÆ¢Êà∑ÂêçÁß∞', 'String', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'trackingTime', '∏˙Ω¯ ±º‰', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"datetimeWithM\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'trackingTime', 'Ë∑üËøõÊó∂Èó¥', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"datetimeWithM\", \"length\": 32}');
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'notifyTime', 'Ã·«∞Ã·–— ±º‰', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"datetimeWithM\", \"length\": 32}');
-
-
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'title', '±ÍÃ‚', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'notifyTime', 'ÊèêÂâçÊèêÈÜíÊó∂Èó¥', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"datetimeWithM\", \"length\": 32}');
 
 
-INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`) 
-VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'content', 'ƒ⁄»›', 'String', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"multiText\", \"length\": 32}');
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'title', 'Ê†áÈ¢ò', 'Long', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"text\", \"length\": 32}');
 
 
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) 
-VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, '–¥◊÷¬•', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) 
-VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, '…Ã∆Ã', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) 
-VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, '≥ß∑ø', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) 
-VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, '≥µŒª', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) 
-VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, '∆‰À˚', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
+INSERT INTO `eh_var_fields` (`id`, `module_name`, `name`, `display_name`, `field_type`, `group_id`, `group_path`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `field_param`)
+VALUES ((@eh_var_fields_id := @eh_var_fields_id + 1 ), 'enterprise_customer', 'content', 'ÂÜÖÂÆπ', 'String', '20', '/20', '1', NULL, '2', '1', '2017-08-25 02:27:30', NULL, NULL, '{\"fieldParamType\": \"multiText\", \"length\": 32}');
 
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '∏ˆ»À', '1', '2', '1', '2017-08-24 04:26:25', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '…Ã∆∑∑ø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '¥Ê¡ø∑ø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ºØ◊ ∑ø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '∆Ωº€∑ø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '¡Æ◊‚◊°∑ø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'æ≠º√  ”√◊°∑ø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'π´‘¢ Ω◊°’¨', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
-INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '∆‰À˚', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
 
--- ’–…Ã add by xiongying20171026
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`)
+VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, 'ÂÜôÂ≠óÊ•º', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`)
+VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, 'ÂïÜÈì∫', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`)
+VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, 'ÂéÇÊàø', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`)
+VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, 'ËΩ¶‰Ωç', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`)
+VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', 214, 'ÂÖ∂‰ªñ', '1', '2', '1', '2017-09-14 08:03:29', NULL, NULL);
+
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '‰∏™‰∫∫', '1', '2', '1', '2017-08-24 04:26:25', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ÂïÜÂìÅÊàø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'Â≠òÈáèÊàø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ÈõÜËµÑÊàø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'Âπ≥‰ª∑Êàø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ÂªâÁßü‰ΩèÊàø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ÁªèÊµéÈÄÇÁî®‰ΩèÊàø', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ÂÖ¨ÂØìÂºè‰ΩèÂÆÖ', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', 'ÂÖ∂‰ªñ', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+
+-- ÈªòËÆ§ÂéªÂ§ÑÁêÜÊåâÈíÆÊñáÊú¨  add by xq.tian 2017/10/25
+update eh_flow_nodes set goto_process_button_name='ÂéªÂ§ÑÁêÜ' where goto_process_button_name is null or goto_process_button_name='';
+-- by Sir Xiongying.V.Breg
+update eh_var_field_groups set name = 'com.everhomes.customer.CustomerTracking' where title = 'Ë∑üËøõ‰ø°ÊÅØ';
+update eh_var_field_groups set name = 'com.everhomes.customer.CustomerTrackingPlan' where title = 'ËÆ°Âàí‰ø°ÊÅØ'
+
+-- Â∑•‰ΩúÊµÅÁöÑÊñáÊú¨‰øÆÊîπ  add by xq.tian 2017/10/25
+UPDATE eh_locale_templates SET `text` = 'Âú® ${nodeName} ÊâßË°å ${buttonName}' WHERE scope='flow' AND code=20001;
+UPDATE eh_locale_templates SET `text` = '‰ªªÂä°Ë∂ÖÊó∂ Â∑≤ÂèñÊ∂à‰ªªÂä°' WHERE scope='flow' AND code=20003;
+
+-- Âõ≠Âå∫ÂÖ•È©ª add by sw 20171026
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+  VALUES ('apply.entry.lease.project.detail.url', '/park-entry/dist/index.html?hideNavigationBar=1#/project_intro/%s', NULL, '0', NULL);
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`)
+	VALUES ('40103', 'È°πÁõÆ‰ªãÁªç', '40100', NULL, 'react:/project-intro/project-list', '0', '2', '/40000/40100/40103', 'park', '411', '40100', '3', NULL, 'module');
+update eh_web_menus set name = 'Ê•ºÊ†ã‰ªãÁªç' where id = 40105;
+set @id = (select MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	select (@id := @id + 1), '40103', '', 'EhNamespaces', owner_id, '2' from eh_web_menu_scopes where menu_id = 40100;
+
+UPDATE eh_general_forms set template_text = '[{\"dataSourceType\":\"USER_NAME\",\"dynamicFlag\":1,\"fieldDisplayName\":\"Áî®Êà∑ÂßìÂêç\",\"fieldExtra\":\"{\\\"limitWord\\\":10}\",\"fieldName\":\"USER_NAME\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"USER_PHONE\",\"dynamicFlag\":1,\"fieldDisplayName\":\"ÊâãÊú∫Âè∑Á†Å\",\"fieldExtra\":\"{\\\"limitWord\\\":11}\",\"fieldName\":\"USER_PHONE\",\"fieldType\":\"INTEGER_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"USER_COMPANY\",\"dynamicFlag\":1,\"fieldDisplayName\":\"ÂÖ¨Âè∏ÂêçÁß∞\",\"fieldExtra\":\"{\\\"limitWord\\\":20}\",\"fieldName\":\"USER_COMPANY\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"LEASE_PROJECT_NAME\",\"dynamicFlag\":1,\"fieldDisplayName\":\"È°πÁõÆÂêçÁß∞\",\"fieldExtra\":\"{\\\"limitWord\\\":20}\",\"fieldName\":\"LEASE_PROJECT_NAME\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"LEASE_PROMOTION_BUILDING\",\"dynamicFlag\":1,\"fieldDisplayName\":\"Ê•ºÊ†ãÂêçÁß∞\",\"fieldExtra\":\"{\\\"limitWord\\\":20}\",\"fieldName\":\"LEASE_PROMOTION_BUILDING\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"LEASE_PROMOTION_APARTMENT\",\"dynamicFlag\":1,\"fieldDisplayName\":\"Èó®ÁâåÂè∑Á†Å\",\"fieldExtra\":\"{\\\"limitWord\\\":20}\",\"fieldName\":\"LEASE_PROMOTION_APARTMENT\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":0,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"LEASE_PROMOTION_DESCRIPTION\",\"dynamicFlag\":0,\"fieldDisplayName\":\"Â§áÊ≥®ËØ¥Êòé\",\"fieldName\":\"LEASE_PROMOTION_DESCRIPTION\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":0,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"CUSTOM_DATA\",\"dynamicFlag\":0,\"fieldName\":\"CUSTOM_DATA\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"visibleType\":\"HIDDEN\"}]' where owner_type = 'EhLeasePromotions';
+UPDATE eh_general_forms set template_text = '[{\"dataSourceType\":\"USER_NAME\",\"dynamicFlag\":1,\"fieldDisplayName\":\"Áî®Êà∑ÂßìÂêç\",\"fieldExtra\":\"{\\\"limitWord\\\":10}\",\"fieldName\":\"USER_NAME\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"USER_PHONE\",\"dynamicFlag\":1,\"fieldDisplayName\":\"ÊâãÊú∫Âè∑Á†Å\",\"fieldExtra\":\"{\\\"limitWord\\\":11}\",\"fieldName\":\"USER_PHONE\",\"fieldType\":\"INTEGER_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"USER_COMPANY\",\"dynamicFlag\":1,\"fieldDisplayName\":\"ÂÖ¨Âè∏ÂêçÁß∞\",\"fieldExtra\":\"{\\\"limitWord\\\":20}\",\"fieldName\":\"USER_COMPANY\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"LEASE_PROJECT_NAME\",\"dynamicFlag\":1,\"fieldDisplayName\":\"È°πÁõÆÂêçÁß∞\",\"fieldExtra\":\"{\\\"limitWord\\\":20}\",\"fieldName\":\"LEASE_PROJECT_NAME\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"LEASE_PROMOTION_BUILDING\",\"dynamicFlag\":1,\"fieldDisplayName\":\"Ê•ºÊ†ãÂêçÁß∞\",\"fieldExtra\":\"{\\\"limitWord\\\":20}\",\"fieldName\":\"LEASE_PROMOTION_BUILDING\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"LEASE_PROMOTION_DESCRIPTION\",\"dynamicFlag\":0,\"fieldDisplayName\":\"Â§áÊ≥®ËØ¥Êòé\",\"fieldName\":\"LEASE_PROMOTION_DESCRIPTION\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":0,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"CUSTOM_DATA\",\"dynamicFlag\":0,\"fieldName\":\"CUSTOM_DATA\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"visibleType\":\"HIDDEN\"}]' where owner_type = 'EhBuildings';
+
+set @id = (select MAX(id) FROM eh_general_forms);
+set @id = @id + 1;
+INSERT INTO `eh_general_forms` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `form_name`, `form_origin_id`, `form_version`, `template_type`, `template_text`, `status`, `update_time`, `create_time`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`)
+  VALUES (@id, '0', '0', '0', 'EhLeaseProjects', NULL, NULL, 'ÊãõÁßüÁÆ°ÁêÜÈªòËÆ§Ë°®Âçï', @id, '0', 'DEFAULT_JSON', '[{\"dataSourceType\":\"USER_NAME\",\"dynamicFlag\":1,\"fieldDisplayName\":\"Áî®Êà∑ÂßìÂêç\",\"fieldExtra\":\"{\\\"limitWord\\\":10}\",\"fieldName\":\"USER_NAME\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"USER_PHONE\",\"dynamicFlag\":1,\"fieldDisplayName\":\"ÊâãÊú∫Âè∑Á†Å\",\"fieldExtra\":\"{\\\"limitWord\\\":11}\",\"fieldName\":\"USER_PHONE\",\"fieldType\":\"INTEGER_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"USER_COMPANY\",\"dynamicFlag\":1,\"fieldDisplayName\":\"ÂÖ¨Âè∏ÂêçÁß∞\",\"fieldExtra\":\"{\\\"limitWord\\\":20}\",\"fieldName\":\"USER_COMPANY\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"LEASE_PROJECT_NAME\",\"dynamicFlag\":1,\"fieldDisplayName\":\"È°πÁõÆÂêçÁß∞\",\"fieldExtra\":\"{\\\"limitWord\\\":20}\",\"fieldName\":\"LEASE_PROJECT_NAME\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"LEASE_PROMOTION_DESCRIPTION\",\"dynamicFlag\":0,\"fieldDisplayName\":\"Â§áÊ≥®ËØ¥Êòé\",\"fieldName\":\"LEASE_PROMOTION_DESCRIPTION\",\"fieldType\":\"MULTI_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":0,\"validatorType\":\"TEXT_LIMIT\",\"visibleType\":\"EDITABLE\"},{\"dataSourceType\":\"CUSTOM_DATA\",\"dynamicFlag\":0,\"fieldName\":\"CUSTOM_DATA\",\"fieldType\":\"SINGLE_LINE_TEXT\",\"renderType\":\"DEFAULT\",\"requiredFlag\":1,\"visibleType\":\"HIDDEN\"}]', '2', '2017-06-10 18:46:36', '2017-06-10 18:45:48', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+set @id = IFNULL((select MAX(id) FROM eh_lease_configs), 1);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999975', NULL, NULL, 'displayNameStr', 'È°πÁõÆ‰ªãÁªç,ÂæÖÁßüÁâ©‰∏ö', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999975', NULL, NULL, 'displayOrderStr', '1,2', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999971', NULL, NULL, 'displayNameStr', 'ÂäûÂÖ¨ÊãõÁßü,ÂïÜÊà∑ÊãõÁßü', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999971', NULL, NULL, 'displayOrderStr', '1,2', NULL, NULL);
+
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '1000000', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999983', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999985', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999977', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999975', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999976', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999974', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999993', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999972', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999971', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999970', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999991', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999969', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999965', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999967', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '1000000', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999983', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999977', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999975', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999976', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999974', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999993', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999973', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999972', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999970', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999965', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999967', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999985', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999985', NULL, NULL, 'rentAmountUnit', 'MONTH_UNIT', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999977', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999977', NULL, NULL, 'rentAmountUnit', 'MONTH_UNIT', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999975', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999975', NULL, NULL, 'rentAmountUnit', 'MONTH_UNIT', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999976', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999976', NULL, NULL, 'rentAmountUnit', 'MONTH_UNIT', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999974', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999974', NULL, NULL, 'rentAmountUnit', 'MONTH_UNIT', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999993', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999993', NULL, NULL, 'rentAmountUnit', 'MONTH_UNIT', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999973', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999973', NULL, NULL, 'rentAmountUnit', 'MONTH_UNIT', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999970', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999970', NULL, NULL, 'rentAmountUnit', 'MONTH_UNIT', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999991', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999991', NULL, NULL, 'rentAmountUnit', 'MONTH_UNIT', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999969', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999969', NULL, NULL, 'rentAmountUnit', 'MONTH_UNIT', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999965', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999965', NULL, NULL, 'rentAmountUnit', 'MONTH_UNIT', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999967', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999967', NULL, NULL, 'rentAmountUnit', 'MONTH_UNIT', NULL, NULL);
+
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999985', NULL, NULL, 'issuingLeaseFlag', '1', NULL, NULL);
+
+-- janson 20171025
+SET @max_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@max_id := @max_id + 1), '50800', '0', '10041', '', '0', now());
+
+-- ÊãõÂïÜ add by xiongying20171026
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '1', 'zh_CN', '∏˙Ω¯∑Ω Ω', 'µÁª∞', '0');
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '1', 'zh_CN', 'Ë∑üËøõÊñπÂºè', 'ÁîµËØù', '0');
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '2', 'zh_CN', '∏˙Ω¯∑Ω Ω', '∂Ã–≈', '0');
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '2', 'zh_CN', 'Ë∑üËøõÊñπÂºè', 'Áü≠‰ø°', '0');
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '3', 'zh_CN', '∏˙Ω¯∑Ω Ω', '” º˛', '0');
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '3', 'zh_CN', 'Ë∑üËøõÊñπÂºè', 'ÈÇÆ‰ª∂', '0');
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '4', 'zh_CN', '∏˙Ω¯∑Ω Ω', '∆‰À˚', '0');
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '4', 'zh_CN', 'Ë∑üËøõÊñπÂºè', 'ÂÖ∂‰ªñ', '0');
 
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '10', 'zh_CN', 'øÕªß ¬º˛', '–¬‘ˆøÕªß', '0');
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '10', 'zh_CN', 'ÂÆ¢Êà∑‰∫ã‰ª∂', 'Êñ∞Â¢ûÂÆ¢Êà∑', '0');
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '20', 'zh_CN', 'øÕªß ¬º˛', '…æ≥˝øÕªß', '0');
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '20', 'zh_CN', 'ÂÆ¢Êà∑‰∫ã‰ª∂', 'Âà†Èô§ÂÆ¢Êà∑', '0');
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '30', 'zh_CN', 'øÕªß ¬º˛', '–ﬁ∏ƒ${display}:”…${oldData}∏¸∏ƒŒ™${newData}', '0');
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '30', 'zh_CN', 'ÂÆ¢Êà∑‰∫ã‰ª∂', '‰øÆÊîπ${display}:Áî±${oldData}Êõ¥Êîπ‰∏∫${newData}', '0');
 
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
- VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'tracking.notification', '1', 'zh_CN', 'º∆ªÆø™ ºÃ·–—', '°æ∏˙Ω¯º∆ªÆ°ø${customerName}${taskName}Ω´”⁄${time}ø™ º°£', '0');
+ VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'tracking.notification', '1', 'zh_CN', 'ËÆ°ÂàíÂºÄÂßãÊèêÈÜí', '„ÄêË∑üËøõËÆ°Âàí„Äë${customerName}${taskName}Â∞Ü‰∫é${time}ÂºÄÂßã„ÄÇ', '0');

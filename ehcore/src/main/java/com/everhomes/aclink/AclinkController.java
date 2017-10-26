@@ -75,6 +75,7 @@ import com.everhomes.rest.aclink.ListDoorAuthCommand;
 import com.everhomes.rest.aclink.ListDoorAuthResponse;
 import com.everhomes.rest.aclink.QueryDoorMessageCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageResponse;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
 
@@ -96,6 +97,9 @@ public class AclinkController extends ControllerBase {
     
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+    
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
     
     /**
      * <b>URL: /aclink/activing</b>
@@ -214,24 +218,16 @@ public class AclinkController extends ControllerBase {
         RestResponse response = new RestResponse(resp);
         List<DoorAccessDTO> dtos = new ArrayList<DoorAccessDTO>();
         resp.setDoors(dtos);
-        Long role = 1l;
+        Long role = 0l;
         
         if(cmd.getOrganizationId() != null) {
-            
-            //Only for active door
+       
             try {
-                rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkManager);
+                userPrivilegeMgr.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ACLINK_MANAGER);
+                //rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkInnerManager);
                 role = 1l;
-            } catch(Exception e) {
-                
-            }
+            } catch(Exception e) {}
             
-            try {
-                rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkInnerManager);
-                role = 1l;
-            } catch(Exception e) {
-                
-            }
         }
         
         resp.setRole(role);

@@ -500,6 +500,7 @@ public class FieldServiceImpl implements FieldService {
                     CustomerTrademarkDTO dto = customerTrademarkDTOS.get(j);
                     setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
+                break;
             case "专利信息":
                 ListCustomerPatentsCommand cmd3 = new ListCustomerPatentsCommand();
                 cmd3.setCustomerId(customerId);
@@ -513,6 +514,7 @@ public class FieldServiceImpl implements FieldService {
                     CustomerPatentDTO dto = customerPatentDTOS.get(j);
                     setMutilRowDatas(fields, data, dto,communityId,namespaceId,moduleName);
                 }
+                break;
             case "证书":
                 ListCustomerCertificatesCommand cmd4 = new ListCustomerCertificatesCommand();
                 cmd4.setCustomerId(customerId);
@@ -959,12 +961,12 @@ public class FieldServiceImpl implements FieldService {
                     try {
                         Cell cell = row.getCell(k);
                         String cellValue = "";
-                        String cellCopy = "";
+
+                        Byte mandatoryFlag = fieldDTO.getMandatoryFlag();
                         //cell不为null时特殊处理status和projectSource
                         if(cell!=null){
                             cellValue = ExcelUtils.getCellValue(cell);
-                            cellCopy = cellValue;
-                            if(fieldName.equals("status") ||
+                            if((fieldName.equals("status") ||
                                     fieldName.equals("gender") ||
                                     (fieldName.indexOf("id")==fieldName.length()-2 && fieldName.indexOf("id")!=0&& fieldName.indexOf("id")!=-1) ||
                                     (fieldName.indexOf("Id")==fieldName.length()-2 && fieldName.indexOf("Id")!=0&& fieldName.indexOf("Id")!=-1) ||
@@ -972,7 +974,7 @@ public class FieldServiceImpl implements FieldService {
                                     fieldName.indexOf("Type") == fieldName.length()-4 ||
                                     fieldName.equals("type")    ||
                                     fieldName.indexOf("Flag") == fieldName.length() - 4
-                                    ){
+                                    )&& !StringUtils.isEmpty(cellValue)){
                                 //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
                                 ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cellValue);
                                 if(item!=null&&item.getItemId()!=null){
@@ -1008,13 +1010,15 @@ public class FieldServiceImpl implements FieldService {
                                         split = split1;
                                     }
                                 }
-                                for(String projectSource : split){
-                                    ScopeFieldItem projectSourceItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), projectSource);
-                                    if(projectSourceItem!=null){
-                                        sb.append((projectSourceItem.getItemId()==null?"":projectSourceItem.getItemId())+",");
-                                    }else{
-                                        response.setFailCause("枚举值"+fieldDTO.getFieldDisplayName()+"不正确，请按照excel下载里“"+sheetName+"”模板说明里进行填写");
-                                        return response;
+                                if(split.length>0){
+                                    for(String projectSource : split){
+                                        ScopeFieldItem projectSourceItem = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), projectSource);
+                                        if(projectSourceItem!=null){
+                                            sb.append((projectSourceItem.getItemId()==null?"":projectSourceItem.getItemId())+",");
+                                        }else{
+                                            response.setFailCause("枚举值"+fieldDTO.getFieldDisplayName()+"不正确，请按照excel下载里“"+sheetName+"”模板说明里进行填写");
+                                            return response;
+                                        }
                                     }
                                 }
                                 if(sb.toString().trim().length()>0){
@@ -1023,7 +1027,7 @@ public class FieldServiceImpl implements FieldService {
                                 }
                             }
                         }
-                        Byte mandatoryFlag = fieldDTO.getMandatoryFlag();
+
                         if(mandatoryFlag == 1 && (cellValue == null || (cellValue.equals("")))){
                             LOGGER.error("必填项"+fieldDTO.getFieldDisplayName()+"没有填写");
 //                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -1078,7 +1082,7 @@ public class FieldServiceImpl implements FieldService {
             //此时获得一个sheet的list对象，进行存储
             fieldProvider.saveFieldGroups(cmd.getCustomerType(),cmd.getCustomerId(),objects,clazz.getSimpleName());
             sheets++;
-            rows++;
+            rows = rows + objects.size();
         }
         response.setFailCause("导入数据成功，导入"+sheets+"sheet页,共"+rows+"行数据");
         return response;

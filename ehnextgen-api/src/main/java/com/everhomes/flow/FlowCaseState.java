@@ -28,6 +28,8 @@ public class FlowCaseState {
     private List<FlowEvaluate> flowEvas;
     private Stack<FlowCaseStateStackType> processStack;
 
+    private boolean continueFlag = true;
+
     public FlowCaseState() {
         extra = new ConcurrentHashMap<>();
         logs = new ArrayList<>();
@@ -51,6 +53,14 @@ public class FlowCaseState {
             return this.module.getModuleId();
         }
         return null;
+    }
+
+    public boolean isContinueFlag() {
+        return continueFlag;
+    }
+
+    public void setContinueFlag(boolean continueFlag) {
+        this.continueFlag = continueFlag;
     }
 
     public FlowModuleInfo getModule() {
