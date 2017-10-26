@@ -221,6 +221,7 @@ SET @max_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@max_id := @max_id + 1), '50800', '0', '10041', '', '0', now());
 
 -- 招商 add by xiongying20171026
+set @eh_locale_templates_id = (SELECT MAX(id) FROM `eh_locale_templates`);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
 VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '1', 'zh_CN', '跟进方式', '电话', '0');
 
