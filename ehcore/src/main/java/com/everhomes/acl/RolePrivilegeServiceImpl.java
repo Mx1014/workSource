@@ -1523,19 +1523,20 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	private OrganizationContactDTO processOrganizationContactDTO(OrganizationMember member){
 		OrganizationContactDTO dto = new OrganizationContactDTO();
-		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+		if(OrganizationMemberTargetType.USER.getCode().equals(member.getTargetType())){
 			User user = userProvider.findUserById(member.getTargetId());
 			if(null != user)
 				dto.setNickName(user.getNickName());
+				dto.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
 		}
 
-		//	added by R. 添加头像
-		if (OrganizationMemberTargetType.USER.getCode().equals(member.getTargetType())) {
-			User user = userProvider.findUserById(member.getTargetId());
-			if (null != user) {
-				dto.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
-			}
-		}
+//		//	added by R. 添加头像
+//		if (OrganizationMemberTargetType.USER.getCode().equals(member.getTargetType())) {
+//			User user = userProvider.findUserById(member.getTargetId());
+//			if (null != user) {
+//				dto.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
+//			}
+//		}
 		dto.setContactName(member.getContactName());
 		dto.setGender(member.getGender());
 		dto.setTargetId(member.getTargetId());
