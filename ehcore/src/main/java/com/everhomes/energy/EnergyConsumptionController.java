@@ -628,4 +628,26 @@ public class EnergyConsumptionController extends ControllerBase {
         return resp;
     }
 
+    /**
+     * <p>同步计划索引</p>
+     * <b>URL: /energy/syncEnergyPlanIndex</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("syncEnergyPlanIndex")
+    public RestResponse syncEnergyPlanIndex() {
+        energyPlanSearcher.syncFromDb();
+        return success();
+    }
+
+    /**
+     * <p>同步任务索引</p>
+     * <b>URL: /energy/syncEnergyTaskIndex</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("syncEnergyTaskIndex")
+    public RestResponse syncEnergyTaskIndex() {
+        energyMeterTaskSearcher.syncFromDb();
+        return success();
+    }
+
 }

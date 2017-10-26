@@ -19,6 +19,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationJobPositionMap;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pmNotify.PmNotifyRecord;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -30,12 +31,14 @@ import com.everhomes.rest.energy.*;
 import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.pmNotify.*;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
+import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
@@ -2989,6 +2992,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         dealEnergyPlanGroups(plan, cmd.getGroups());
         dealEnergyPlanMeters(plan, cmd.getMeters());
+
+        energyPlanSearcher.feedDoc(plan);
         return toEnergyPlanDTO(plan);
     }
 
@@ -3272,5 +3277,125 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             throw new RuntimeException(e);
         }
         return images;
+    }
+
+    public void createTask(CreateEnergyTaskCommand cmd) {
+        EnergyPlan plan = energyPlanProvider.findEnergyPlanById(cmd.getPlanId());
+        if(plan == null || CommonStatus.ACTIVE.equals(CommonStatus.fromCode(plan.getStatus()))) {
+            LOGGER.info("EnergyScheduleJob plan is not exist or active! planId = " + cmd.getPlanId());
+            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_PLAN_NOT_ACTIVE, "The energy meter plan is not exist or active");
+        }
+
+        List<EnergyPlanMeterMap> maps = energyPlanProvider.listMetersByEnergyPlan(cmd.getPlanId());
+        if(maps != null && maps.size() > 0) {
+            boolean isRepeat = repeatService.isRepeatSettingActive(plan.getRepeatSettingId());
+            LOGGER.info("EnergyScheduleJob: plan id = " + plan.getId()
+                    + "repeat setting id = "+ plan.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
+
+            for(EnergyPlanMeterMap map : maps) {
+                EnergyMeter meter = meterProvider.findById(cmd.getNamespaceId(), map.getMeterId());
+                if(meter == null || meter.getStatus() == null
+                        || !EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
+                    LOGGER.info("EnergyScheduleJob meter is not exist or active! meterId = " + map.getMeterId());
+                    continue;
+                } else if(isRepeat){
+                    this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_ENERGY_TASK.getCode()).tryEnter(()-> {
+                        creatMeterTask(map, plan);
+                    });
+                }
+            }
+        }
+
+    }
+
+    public void creatMeterTask(EnergyPlanMeterMap map, EnergyPlan plan) {
+        EnergyMeterTask task = new EnergyMeterTask();
+        task.setNamespaceId(plan.getNamespaceId());
+        task.setOwnerId(plan.getOwnerId());
+        task.setOwnerType(plan.getOwnerType());
+        task.setTargetType(plan.getTargetType());
+        task.setTargetId(plan.getTargetId());
+        task.setPlanId(plan.getId());
+        task.setMeterId(map.getMeterId());
+        EnergyMeterReadingLog lastReading = meterReadingLogProvider.findLastReadingLogByMeterId(plan.getNamespaceId(), map.getMeterId());
+        task.setLastTaskReading(lastReading.getReading());
+        task.setDefaultOrder(map.getDefaultOrder());
+
+        RepeatSettings rs = repeatService.findRepeatSettingById(plan.getRepeatSettingId());
+        List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(rs.getTimeRanges());
+        if(timeRanges != null && timeRanges.size() > 0) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("creatMeterTask, timeRanges = " + timeRanges);
+            }
+            long current = System.currentTimeMillis();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+            String day = sdf.format(current);
+            int i = 0;
+            for (TimeRangeDTO timeRange : timeRanges) {
+                i++;
+                String duration = timeRange.getDuration();
+                String start = timeRange.getStartTime();
+                String str = day + " " + start;
+//                Timestamp startTime = strToTimestamp(str);
+//                Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
+//                task.setExecutiveStartTime(startTime);
+//                task.setExecutiveExpireTime(expiredTime);
+//                long now = System.currentTimeMillis();
+//                if (i < 10) {
+//
+//                    String taskName = standard.getName() + type.getName() +
+//                            timestampToStr(new Timestamp(now)).substring(2) + "0" + i;
+//                    task.setTaskName(taskName);
+//                } else {
+//                    String taskName = standard.getName() + type.getName() +
+//                            timestampToStr(new Timestamp(now)).substring(2) + i;
+//                    task.setTaskName(taskName);
+//                }
+//                energyMeterTaskProvider.createEnergyMeterTask(task);
+//                energyMeterTaskSearcher.feedDoc(task);
+//
+////				启动提醒
+//                ListPmNotifyParamsCommand command = new ListPmNotifyParamsCommand();
+//                command.setCommunityId(task.getTargetId());
+//                command.setNamespaceId(task.getNamespaceId());
+//                List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
+//                if(paramDTOs != null && paramDTOs.size() > 0) {
+//                    for (PmNotifyParamDTO notifyParamDTO : paramDTOs) {
+//                        List<PmNotifyReceiverDTO> receivers = notifyParamDTO.getReceivers();
+//                        if(receivers != null && receivers.size() > 0) {
+//                            PmNotifyRecord record = ConvertHelper.convert(notifyParamDTO, PmNotifyRecord.class);
+//                            PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
+//                            List<PmNotifyReceiver> pmNotifyReceivers = new ArrayList<>();
+//                            receivers.forEach(receiver -> {
+//                                PmNotifyReceiver pmNotifyReceiver = new PmNotifyReceiver();
+//                                if(receiver != null) {
+//                                    pmNotifyReceiver.setReceiverType(receiver.getReceiverType());
+//                                    if(receiver.getReceivers() != null) {
+//                                        List<Long> ids = receiver.getReceivers().stream().map(receiverName -> {
+//                                            return receiverName.getId();
+//                                        }).collect(Collectors.toList());
+//                                        pmNotifyReceiver.setReceiverIds(ids);
+//                                    }
+//                                    pmNotifyReceivers.add(pmNotifyReceiver);
+//                                }
+//                            });
+//                            receiverList.setReceivers(pmNotifyReceivers);
+//                            record.setReceiverJson(receiverList.toString());
+//                            record.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
+//                            record.setOwnerId(task.getId());
+//
+//                            //notify_time
+//                            Timestamp delaytime = minusMinutes(task.getExecutiveExpireTime(), notifyParamDTO.getNotifyTickMinutes());
+//                            record.setNotifyTime(delaytime);
+//
+//                            pmNotifyService.pushPmNotifyRecord(record);
+//                        }
+//
+//                    }
+//                }
+            }
+        }
+
+
     }
 }

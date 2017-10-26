@@ -15,6 +15,7 @@ import java.util.List;
  *     <li>rate: 倍率参数</li>
  *     <li>amountFormulaId: 用量计算公式 </li>
  *     <li>costFormulaId: 费用计算公式 </li>
+ *     <li>costFormulaSource: 费用计算公式来源 </li>
  *     <li>rateStart: 倍率开始时间 </li>
  *     <li>rateEnd: 倍率结束时间 </li>
  *     <li>priceStart: 价格开始时间 </li>
