@@ -6796,6 +6796,7 @@ public class PunchServiceImpl implements PunchService {
 		PunchSchedulingDTO dto = new PunchSchedulingDTO();
 		dto.setMonth(startDate.getTime());
 		List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(startDate,endDate,pr.getId(),pr.getStatus()) ;
+		// TODO: 2017/10/25  按照今日分割查不同status的
 
 		if(null != schedulings){
 			Map<Long, List<PunchScheduling>> scheMap = new HashMap<>();
