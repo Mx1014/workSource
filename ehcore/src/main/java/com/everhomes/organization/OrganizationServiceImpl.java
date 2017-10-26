@@ -11036,7 +11036,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 for (OrganizationMember depart:departs){
                     Organization org = this.organizationProvider.findOrganizationById(depart.getOrganizationId());
                     if(org != null && org.getStatus().equals(OrganizationStatus.ACTIVE.getCode())){
-                        departmentName.append(org.getName()+"/");
+                        departmentName.append(org.getName()+" ");
                     }
                 }
             }
