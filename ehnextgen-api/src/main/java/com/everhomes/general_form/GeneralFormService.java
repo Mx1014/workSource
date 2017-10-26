@@ -37,4 +37,6 @@ public interface GeneralFormService {
 			List<GeneralFormFieldDTO> fieldDTOs, boolean showDefaultFields);
 
 	List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd, boolean showDefaultFields);
+
+	GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd);
 }

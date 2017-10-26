@@ -196,4 +196,19 @@ public class GeneralApprovalAdminController extends ControllerBase {
     	
     	return response;
     }
+	/**
+	 * <b>URL: /admin/general_approval/verifyApprovalFormName</b>
+	 * <p> 判断是否重名 </p>
+	 * @return
+	 */
+	@RequestMapping("verifyApprovalFormName")
+	@RestReturn(value=String.class)
+	public RestResponse verifyApprovalFormName(@Valid VerifyApprovalFormNameCommand cmd) {
+        generalFormService.verifyApprovalFormName(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
 }

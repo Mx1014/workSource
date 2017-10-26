@@ -543,9 +543,20 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 	public GeneralFormDTO getGeneralForm(GeneralFormIdCommand cmd) {
 		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
 				.getFormOriginId());
-		return processGeneralFormDTO(form);
+		GeneralFormDTO dto = processGeneralFormDTO(form);
+		//	added by LiMingDang for approval1.6
+		if (cmd.getModuleType() != null)
+			dto.setModuleType(cmd.getModuleType());
+		return dto;
 	}
 
-
-
+    @Override
+    public GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd) {
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByName(cmd.getModuleId(),
+                cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFormName());
+        if (form != null)
+            return ConvertHelper.convert(form, GeneralFormDTO.class);
+        return null;
+    }
 }
+

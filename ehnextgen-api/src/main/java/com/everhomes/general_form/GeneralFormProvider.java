@@ -29,4 +29,6 @@ public interface GeneralFormProvider {
 
     GeneralFormTemplate findGeneralFormTemplateByIdAndModuleId(Long id, Long moduleId);
 
+	GeneralForm getActiveGeneralFormByName(Long moduleId, Long ownerId, String ownerType, String formName);
+
 }
