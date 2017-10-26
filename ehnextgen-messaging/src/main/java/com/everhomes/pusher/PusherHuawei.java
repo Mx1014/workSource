@@ -105,7 +105,6 @@ public class PusherHuawei implements PusherVender {
         JSONArray deviceTokens = new JSONArray();//目标设备Token
         deviceTokens.add(deviceToken);
 //        deviceTokens.add("22345678901234561234567890123456");
-//        deviceTokens.add("32345678901234561234567890123456");
           
         JSONObject body = new JSONObject();//仅通知栏消息需要设置标题和内容，透传消息key和value为用户自定义
         if(devMessage.getTitle() == null) {
@@ -117,10 +116,11 @@ public class PusherHuawei implements PusherVender {
         body.put("content", devMessage.getAlert());//消息内容体
         
         JSONObject param = new JSONObject();
-        param.put("appPkgName", appPkgName);//定义需要打开的appPkgName
+//        param.put("appPkgName", appPkgName);//定义需要打开的appPkgName
+        param.put("intent", "#Intent;action=zl-1://app/main?action_Type=16&action_Data=xx;"+appPkgName+";end");
         
         JSONObject action = new JSONObject();
-        action.put("type", 3);//类型3为打开APP，其他行为请参考接口文档设置
+        action.put("type", 1);//类型3为打开APP，其他行为请参考接口文档设置
         action.put("param", param);//消息点击动作参数
         
         JSONObject msg = new JSONObject();
@@ -129,7 +129,7 @@ public class PusherHuawei implements PusherVender {
         msg.put("body", body);//通知栏消息body内容
         
         JSONObject ext = new JSONObject();//扩展信息，含BI消息统计，特定展示风格，消息折叠。
-        ext.put("biTag", "Normal");//设置消息标签，如果带了这个标签，会在回执中推送给CP用于检测某种类型消息的到达率和状态
+        ext.put("biTag", "Trump");//设置消息标签，如果带了这个标签，会在回执中推送给CP用于检测某种类型消息的到达率和状态
         if(devMessage.getIcon() != null && devMessage.getIcon().startsWith("http://")) {
             ext.put("icon", devMessage.getIcon());//自定义推送消息在通知栏的图标,value为一个公网可以访问的URL    
         }

@@ -1390,15 +1390,15 @@ INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`,
 	VALUES (10002, 'rentalOrder', 999966, 'EhOrganizations', 1035830, null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), null);
 INSERT INTO `eh_payment_service_configs`(`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
 	VALUES (20002, '资源预约', 'rentalOrder', 999966, 'EhOrganizations', 1035830, null, null, NULL, 1, 1020, UTC_TIMESTAMP(), null);
-	
+
 -- 添加两个服务联盟入口
 SET @category_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
 set @category_id = @category_id + 1;
 SET @service_alliance_id = (SELECT MAX(id) FROM `eh_service_alliances`);
 set @service_alliance_id = @service_alliance_id + 1;
-INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`, `display_mode`, `display_destination`, `selected_logo_url`, `entry_id`) VALUES 
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`, `display_mode`, `display_destination`, `selected_logo_url`, `entry_id`) VALUES
 (@category_id, 'community', '240111044331050371', '0', '腾讯入驻申请', '腾讯入驻申请', '0', '2', '1', '2016-12-28 12:20:51', '0', NULL, '999966', '', '1', '0', '', '22');
-INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `range`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`, `description_height`, `display_flag`, `summary_description`, `enable_comment`) VALUES 
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `range`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`, `description_height`, `display_flag`, `summary_description`, `enable_comment`) VALUES
 (@service_alliance_id, '0', 'organaization', '1035830', 'all', '腾讯入驻申请', '腾讯入驻申请', @category_id, '', NULL, '', '', '2', @service_alliance_id, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2', NULL, '2', '1', '', '0');
 
 SET @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
@@ -1414,9 +1414,9 @@ SET @category_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
 set @category_id = @category_id + 1;
 SET @service_alliance_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
 set @service_alliance_id = @service_alliance_id + 1;
-INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`, `display_mode`, `display_destination`, `selected_logo_url`, `entry_id`) VALUES 
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`, `display_mode`, `display_destination`, `selected_logo_url`, `entry_id`) VALUES
 (@category_id, 'community', '240111044331050371', '0', '园区入驻申请', '园区入驻申请', '0', '2', '1', '2016-12-28 12:20:51', '0', NULL, '999966', '', '1', '0', '', '23');
-INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `range`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`, `description_height`, `display_flag`, `summary_description`, `enable_comment`) VALUES 
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `range`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`, `description_height`, `display_flag`, `summary_description`, `enable_comment`) VALUES
 (@service_alliance_id, '0', 'organaization', '1035830', 'all', '园区入驻申请', '园区入驻申请', @category_id, '', NULL, '', '','2', @service_alliance_id, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2', NULL, '2', '1', '', '0');
 
 SET @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
@@ -1442,9 +1442,9 @@ SET @category_id = (SELECT MAX(id) FROM `eh_service_alliance_categories`);
 set @category_id = @category_id + 1;
 SET @service_alliance_id = (SELECT MAX(id) FROM `eh_service_alliances`);
 set @service_alliance_id = @service_alliance_id + 1;
-INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`, `display_mode`, `display_destination`, `selected_logo_url`, `entry_id`) VALUES 
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`, `display_mode`, `display_destination`, `selected_logo_url`, `entry_id`) VALUES
 (@category_id, 'community', '240111044331050371', '0', '党群新闻中心', '党群新闻中心', '0', '2', '1', now(), '0', NULL, '999966', '', '1', '0', '', '24');
-INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `range`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`, `description_height`, `display_flag`, `summary_description`, `enable_comment`) VALUES 
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `range`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`, `module_url`, `contact_memid`, `support_type`, `button_title`, `description_height`, `display_flag`, `summary_description`, `enable_comment`) VALUES
 (@service_alliance_id, '0', 'organaization', '1035830', 'all', '党群新闻中心', '党群新闻中心', @category_id, '', NULL, '', '','2', @service_alliance_id, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2', NULL, '2', '1', '', '0');
 
 SET @skip_rule_id = (SELECT MAX(id) FROM `eh_service_alliance_skip_rule`);
@@ -1479,4 +1479,8 @@ INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`,
     VALUES(10005, 'activitySignupOrder', '999966', 'EhOrganizations', '1035830', null, null, '1', '微信', 'cs://1/image/aW1hZ2UvTVRveU1UUmtaRFExTTJSbFpETXpORE5rTjJNME9Ua3dOVFkxTVRNek1HWXpOZw', '{\"payType\":\"no_credit\"}', UTC_TIMESTAMP(), NULL);
 INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
     VALUES(10006, 'activitySignupOrder', '999966', 'EhOrganizations', '1035830', null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
+
+
+-- added by janson fix home url error
+UPDATE `eh_configurations` SET `value`='https://core.szbay.com' WHERE `name`='home.url' and namespaceId = 999966;
 
