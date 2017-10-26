@@ -2,10 +2,12 @@
 package com.everhomes.organization;
 
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
@@ -19,6 +21,7 @@ import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
@@ -1815,6 +1818,10 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("cleanWrongStatusOrganizationMembers")
     @RestReturn(value = String.class)
     public RestResponse cleanWrongStatusOrganizationMembers(GetRemainBroadcastCountCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), 1000750L)){
+            resolver.checkCurrentUserAuthority(1000750L, PrivilegeConstants.ORG_ADMIN_CREATE);
+        }
         Integer count = this.organizationService.cleanWrongStatusOrganizationMembers(cmd.getNamespaceId());
         RestResponse response = new RestResponse(count);
         response.setErrorCode(ErrorCodes.SUCCESS);
