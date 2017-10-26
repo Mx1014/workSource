@@ -637,7 +637,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
 
         //  approval icon
-        result.setIconUrl(contentServerService.parserUri(result.getIconUri()));
+        if (result.getIconUri() != null)
+            result.setIconUrl(contentServerService.parserUri(result.getIconUri()));
         return result;
     }
 
