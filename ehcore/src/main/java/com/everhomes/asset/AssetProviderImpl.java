@@ -707,24 +707,28 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroupsRules rule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("rule");
         EhPaymentBillGroups bg = Tables.EH_PAYMENT_BILL_GROUPS.as("bg");
-        EhPaymentChargingItems ci = Tables.EH_PAYMENT_CHARGING_ITEMS.as("ci");
+        EhPaymentChargingItemScopes ci = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("ci");
+
+
         ShowCreateBillDTO response = new ShowCreateBillDTO();
         List<BillItemDTO> list = new ArrayList<>();
         final String[] billRuleName = {""};
-        context.select(rule.ID,rule.CHARGING_ITEM_NAME,bg.NAME)
-                .from(bg,rule,ci)
-                .where(bg.ID.eq(rule.BILL_GROUP_ID))
-                .and(rule.CHARGING_ITEM_ID.eq(ci.ID))
-                .and(bg.ID.eq(billGroupId))
-                .orderBy(ci.DEFAULT_ORDER)
+        context.select(rule.ID,rule.CHARGING_ITEM_NAME,)
+                .from(rule,ci)
+                .where(rule.CHARGING_ITEM_ID.eq(ci.CHARGING_ITEM_ID))
+                .and(rule.OWNERID.eq(ci.OWNER_ID))
+                .and(rule.BILL_GROUP_ID.eq(billGroupId))
                 .fetch()
                 .map(r -> {
                     BillItemDTO dto = new BillItemDTO();
                     dto.setBillItemId(r.getValue(rule.ID));
-                    dto.setBillItemName(r.getValue(rule.CHARGING_ITEM_NAME));
+                    dto.setBillItemName(r.getValue(ci.PROJECT_LEVEL_NAME));
                     billRuleName[0] = r.getValue(bg.NAME);
                     list.add(dto);
                     return null;});
+        context.select()
+                .from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
+                .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq())
         response.setBillGroupId(billGroupId);
         response.setBillGroupName(billRuleName[0]);
         response.setBillItemDTOList(list);
