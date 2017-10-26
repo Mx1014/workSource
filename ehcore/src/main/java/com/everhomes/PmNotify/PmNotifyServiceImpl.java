@@ -173,6 +173,11 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_BEFORE_BEGIN;
                     smsCode = SmsTemplateCode.PM_NOTIFY_BEFORE_TASK;
                 } else if(PmNotifyType.BEFORE_DELAY.equals(notify)){
+                    //不是待执行或者是待维修的不用提醒
+                    if(!(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
+                            || EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus())))) {
+                        return;
+                    }
                     time = task.getExecutiveExpireTime();
                     code = EquipmentNotificationTemplateCode.EQUIPMENT_TASK_BEFORE_DELAY;
                     smsCode = SmsTemplateCode.PM_NOTIFY_BEFORE_TASK_DELAY;

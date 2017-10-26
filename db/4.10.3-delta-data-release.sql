@@ -247,3 +247,8 @@ VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracki
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
  VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'tracking.notification', '1', 'zh_CN', '计划开始提醒', '【跟进计划】${customerName}${taskName}将于${time}开始。', '0');
+ 
+-- fix 17566 add by xiongying20171026
+set @id = (select MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
+	((@id := @id + 1), 'customer', '10018', 'zh_CN', '有合同的客户不能删除');
