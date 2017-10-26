@@ -23,7 +23,7 @@ import java.util.List;
 public class ListChargingItemsForBillGroupDTO {
     private Long billGroupRuleId;
     private Long defaultOrder;
-    private String groupChargingItemName;
+    private String projectChargingItemName;
     private String chargingStandardName;
     private String formula;
     @ItemType(ChargingItemVariable.class)
@@ -69,12 +69,12 @@ public class ListChargingItemsForBillGroupDTO {
         this.defaultOrder = defaultOrder;
     }
 
-    public String getGroupChargingItemName() {
-        return groupChargingItemName;
+    public String getProjectChargingItemName() {
+        return projectChargingItemName;
     }
 
-    public void setGroupChargingItemName(String groupChargingItemName) {
-        this.groupChargingItemName = groupChargingItemName;
+    public void setProjectChargingItemName(String projectChargingItemName) {
+        this.projectChargingItemName = projectChargingItemName;
     }
 
     public String getChargingStandardName() {

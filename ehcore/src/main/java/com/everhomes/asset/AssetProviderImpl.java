@@ -2263,6 +2263,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .where(t1.ID.eq(rule.getBillGroupId()))
                     .fetchOneInto(PaymentBillGroup.class);
             String ItemName = context.select(t4.PROJECT_LEVEL_NAME)
+                    .from(t4)
                     .where(t4.CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
                     .and(t4.OWNER_ID.eq(group.getOwnerId()))
                     .and(t4.OWNER_TYPE.eq(group.getOwnerType()))
@@ -2280,7 +2281,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .where(t3.ID.eq(rule.getChargingStandardsId()))
                     .fetchOneInto(PaymentChargingStandards.class);
             dto.setFormula(standard.getFormula());
-            dto.setGroupChargingItemName(ItemName==null?"":ItemName);
+            dto.setProjectChargingItemName(ItemName==null?"":ItemName);
             dto.setChargingStandardName(standard.getName());
             dto.setBillItemGenerationMonth(rule.getBillItemMonthOffset());
             dto.setBillItemGenerationDay(rule.getBillItemDayOffset());
