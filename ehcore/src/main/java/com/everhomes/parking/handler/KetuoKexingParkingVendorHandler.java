@@ -699,6 +699,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		LinkedHashMap<String, Object> param = new LinkedHashMap<>();
 		param.put("parkId", parkingId);
 		param.put("plateNo", plateNumber);
+		param.put("pageIndex", "1");
 
 		JSONObject params = createRequestParam(param);
 		String json = Utils.post(url + GET_PARKING_CAR_INFO, params);
@@ -711,6 +712,12 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 				 return list.get(0);
 			}
 		}
-		return carInfo;
+		//TODO：测试
+		KetuoCarInfo carInfo1 = new KetuoCarInfo();
+		carInfo1.setPlateNo(plateNumber);
+		carInfo1.setEntryTime("2016-10-26 00:00:00");
+		carInfo1.setParkingTime(1000);
+		return carInfo1;
+//		return carInfo;
 	}
 }

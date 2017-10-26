@@ -101,7 +101,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=ParkingExpiredRechargeInfoDTO.class)
     public RestResponse getExpiredRechargeInfo(GetExpiredRechargeInfoCommand cmd) {
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(parkingService.getExpiredRechargeInfo(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
