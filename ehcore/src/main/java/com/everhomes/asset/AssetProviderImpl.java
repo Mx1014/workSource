@@ -712,8 +712,8 @@ public class AssetProviderImpl implements AssetProvider {
 
         ShowCreateBillDTO response = new ShowCreateBillDTO();
         List<BillItemDTO> list = new ArrayList<>();
-        final String[] billRuleName = {""};
-        context.select(rule.ID,rule.CHARGING_ITEM_NAME,)
+
+        context.select(rule.CHARGING_ITEM_ID,ci.PROJECT_LEVEL_NAME)
                 .from(rule,ci)
                 .where(rule.CHARGING_ITEM_ID.eq(ci.CHARGING_ITEM_ID))
                 .and(rule.OWNERID.eq(ci.OWNER_ID))
@@ -721,16 +721,12 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetch()
                 .map(r -> {
                     BillItemDTO dto = new BillItemDTO();
-                    dto.setBillItemId(r.getValue(rule.ID));
+                    dto.setBillItemId(r.getValue(rule.CHARGING_ITEM_ID));
                     dto.setBillItemName(r.getValue(ci.PROJECT_LEVEL_NAME));
-                    billRuleName[0] = r.getValue(bg.NAME);
                     list.add(dto);
                     return null;});
-        context.select()
-                .from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
-                .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_ID.eq())
+
         response.setBillGroupId(billGroupId);
-        response.setBillGroupName(billRuleName[0]);
         response.setBillItemDTOList(list);
         return response;
     }
