@@ -68,3 +68,30 @@ INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name
 INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '经济适用住房', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
 INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '公寓式住宅', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
 INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ((@eh_var_field_items_id:= @eh_var_field_items_id +1 ), 'enterprise_customer', '188', '其他', '1', '2', '1', '2017-10-10 02:35:31', NULL, NULL);
+
+-- 招商 add by xiongying20171026
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '1', 'zh_CN', '跟进方式', '电话', '0');
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '2', 'zh_CN', '跟进方式', '短信', '0');
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '3', 'zh_CN', '跟进方式', '邮件', '0');
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '4', 'zh_CN', '跟进方式', '其他', '0');
+
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '10', 'zh_CN', '客户事件', '新增客户', '0');
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '20', 'zh_CN', '客户事件', '删除客户', '0');
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '30', 'zh_CN', '客户事件', '修改${display}:由${oldData}更改为${newData}', '0');
+
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+ VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'tracking.notification', '1', 'zh_CN', '计划开始提醒', '【跟进计划】${customerName}${taskName}将于${time}开始。', '0');
