@@ -57,19 +57,17 @@ public abstract class DefaultParkingVendorHandler implements ParkingVendorHandle
         parkingCardDTO.setCardStatus(ParkingCardStatus.NORMAL.getCode());
 
         if (expireTime < now) {
-            parkingCardDTO.setCardStatus(ParkingCardStatus.SUPPORT_EXPIRED_RECHARGE.getCode());
+            parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
 
             Byte isSupportRecharge = parkingLot.getExpiredRechargeFlag();
             if(ParkingConfigFlag.SUPPORT.getCode() == isSupportRecharge)	{
                 Integer cardReserveDay = parkingLot.getMaxExpiredDay();
                 long cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
 
-                if (expireTime + cardReserveTime < now) {
-                    parkingCardDTO.setCardStatus(ParkingCardStatus.EXPIRED.getCode());
-
+                if (expireTime + cardReserveTime >= now) {
+                    parkingCardDTO.setCardStatus(ParkingCardStatus.SUPPORT_EXPIRED_RECHARGE.getCode());
                 }
             }
-
         }
     }
 
