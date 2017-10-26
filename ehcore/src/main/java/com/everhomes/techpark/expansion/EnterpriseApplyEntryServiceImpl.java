@@ -365,11 +365,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 			//添加楼栋关联关系
 			String buildingName = addEnterpriseOpRequestBuildings(request, resourceCategories);
-
-			if(null != resourceCategories[0] && null!= resourceCategories[0].getResourceCategryId()) {
-				projectId = resourceCategories[0].getResourceCategryId();
-				projectType = EntityType.RESOURCE_CATEGORY.getCode();
-			}
+			//TODO:暂时屏蔽掉
+//			if(null != resourceCategories[0] && null!= resourceCategories[0].getResourceCategryId()) {
+//				projectId = resourceCategories[0].getResourceCategryId();
+//				projectType = EntityType.RESOURCE_CATEGORY.getCode();
+//			}
 
 			FlowCase flowCase1 = null;
     		if (LeaseIssuerType.ORGANIZATION.getCode().equals(request.getIssuerType())) {
@@ -597,7 +597,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
     private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId, String projectType, String buildingName) {
 
-		String tempOwnerId = String.valueOf(request.getCommunityId()) + convertSourceType(request.getSourceType());
+		String sourceType = request.getSourceType();
+
+		if (sourceType.equals(ApplyEntrySourceType.LEASE_PROJECT.getCode())) {
+			sourceType = ApplyEntrySourceType.BUILDING.getCode();
+		}
+
+		String tempOwnerId = String.valueOf(request.getCommunityId()) + convertSourceType(sourceType);
 
 		Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID,
 				null, Long.valueOf(tempOwnerId), FlowOwnerType.LEASE_PROMOTION.getCode());

@@ -1741,6 +1741,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@Caching(evict={@CacheEvict(value="listEquipmentInspectionTasksUseCache", allEntries = true)})
 	@Override
 	public void closeTask(EquipmentInspectionTasks task) {
+		LOGGER.debug("EquipmentInspectionTasks closeTask before close: {}", task);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		
 		if(task.getStatus().equals(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()))
@@ -1754,7 +1755,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);
 		EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
         dao.update(t);
-		LOGGER.debug("EquipmentInspectionTasks closeTask: {}", task);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionTasks.class, t.getId());
 		
 	}

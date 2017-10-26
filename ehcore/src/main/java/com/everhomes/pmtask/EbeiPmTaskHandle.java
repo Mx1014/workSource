@@ -746,7 +746,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
         return Collections.singletonList(dto);
     }
 
-    private CategoryDTO createCategoryDTO() {
+    public CategoryDTO createCategoryDTO() {
         CategoryDTO dto = new CategoryDTO();
         dto.setId(PmTaskHandle.EBEI_TASK_CATEGORY);
         dto.setName("物业报修");
