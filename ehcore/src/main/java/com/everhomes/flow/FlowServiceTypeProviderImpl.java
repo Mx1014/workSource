@@ -10,8 +10,10 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhFlowServiceTypesDao;
 import com.everhomes.server.schema.tables.pojos.EhFlowServiceTypes;
+import com.everhomes.server.schema.tables.records.EhFlowServiceTypesRecord;
 import com.everhomes.util.ConvertHelper;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -50,9 +52,14 @@ public class FlowServiceTypeProviderImpl implements FlowServiceTypeProvider {
 	}
 
     @Override
-    public <T> List<T> listFlowServiceType(Integer namespaceId, Class<T> clazz) {
+    public <T> List<T> listFlowServiceType(Integer namespaceId, Long moduleId, Class<T> clazz) {
         com.everhomes.server.schema.tables.EhFlowServiceTypes t = Tables.EH_FLOW_SERVICE_TYPES;
-        return context().selectFrom(t).where(t.NAMESPACE_ID.eq(namespaceId)).fetchInto(clazz);
+        SelectQuery<EhFlowServiceTypesRecord> query = context().selectFrom(t).getQuery();
+        query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+        if (moduleId != null) {
+            // query.addConditions(t.MODULE_ID.eq(moduleId));
+        }
+        return query.fetchInto(clazz);
     }
 
     private EhFlowServiceTypesDao rwDao() {

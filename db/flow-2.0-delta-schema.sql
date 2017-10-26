@@ -194,3 +194,5 @@ ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag10` BIGINT;
 ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag11` BIGINT;
 ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag12` BIGINT;
 ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag13` BIGINT;
+
+ALTER TABLE `eh_flow_service_types` ADD COLUMN `module_id` BIGINT NOT NULL DEFAULT 0;

@@ -5306,13 +5306,13 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public ListFlowServiceTypeResponse listFlowServiceTypes(ListFlowServiceTypesCommand cmd) {
         List<FlowServiceTypeDTO> serviceTypes = new ArrayList<>();
-        serviceTypes.addAll(flowListenerManager.listFlowServiceTypes(UserContext.getCurrentNamespaceId()));
+        serviceTypes.addAll(flowListenerManager.listFlowServiceTypes(UserContext.getCurrentNamespaceId(), cmd.getModuleId()));
 
         List<FlowServiceTypeDTO> nsServiceTypes = flowServiceTypeProvider.listFlowServiceType(
-                UserContext.getCurrentNamespaceId(), FlowServiceTypeDTO.class);
+                UserContext.getCurrentNamespaceId(), cmd.getModuleId(), FlowServiceTypeDTO.class);
         if (nsServiceTypes.size() == 0) {
             nsServiceTypes = flowServiceTypeProvider.listFlowServiceType(
-                    Namespace.DEFAULT_NAMESPACE, FlowServiceTypeDTO.class);
+                    Namespace.DEFAULT_NAMESPACE, cmd.getModuleId(), FlowServiceTypeDTO.class);
         }
         serviceTypes.addAll(nsServiceTypes);
 
