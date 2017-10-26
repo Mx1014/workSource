@@ -2725,7 +2725,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         plan.setDeleterUid(UserContext.currentUserId());
         plan.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         energyPlanProvider.updateEnergyPlan(plan);
-
+        energyPlanSearcher.feedDoc(plan);
     }
 
     @Override
@@ -3366,19 +3366,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     PmNotifyRecord record = new PmNotifyRecord();
                     PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
                     List<PmNotifyReceiver> pmNotifyReceivers = new ArrayList<>();
-//                    receivers.forEach(receiver -> {
-//                        PmNotifyReceiver pmNotifyReceiver = new PmNotifyReceiver();
-//                        if(receiver != null) {
-//                            pmNotifyReceiver.setReceiverType(receiver.getReceiverType());
-//                            if(receiver.getReceivers() != null) {
-//                                List<Long> ids = receiver.getReceivers().stream().map(receiverName -> {
-//                                    return receiverName.getId();
-//                                }).collect(Collectors.toList());
-//                                pmNotifyReceiver.setReceiverIds(ids);
-//                            }
-//                            pmNotifyReceivers.add(pmNotifyReceiver);
-//                        }
-//                    });
+                    groupMaps.forEach(receiver -> {
+                        PmNotifyReceiver pmNotifyReceiver = new PmNotifyReceiver();
+                        if(receiver != null) {
+                            pmNotifyReceiver.setReceiverType(PmNotifyReceiverType.EXECUTOR.getCode());
+                            pmNotifyReceivers.add(pmNotifyReceiver);
+                        }
+                    });
                     receiverList.setReceivers(pmNotifyReceivers);
                     record.setReceiverJson(receiverList.toString());
                     record.setOwnerType(EntityType.ENERGY_TASK.getCode());

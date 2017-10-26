@@ -94,6 +94,7 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
             XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
             builder.field("planName", plan.getName());
+            builder.field("notifyTickMinutes", plan.getNotifyTickMinutes());
             builder.field("communityId", plan.getTargetId());
             builder.field("ownerId", plan.getOwnerId());
             builder.field("namespaceId", plan.getNamespaceId());
@@ -102,6 +103,7 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
                 builder.field("startTime", rs.getStartDate());
                 builder.field("endTime", rs.getEndDate());
                 builder.field("repeatType", rs.getRepeatType());
+                builder.field("repeatInterval", rs.getRepeatInterval());
             }
             List<EnergyPlanGroupMap> groupMaps = energyPlanProvider.listGroupsByEnergyPlan(plan.getId());
             if(groupMaps != null && groupMaps.size() > 0) {
@@ -225,12 +227,14 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
                 Map<String, Object> source = sd.getSource();
 
                 dto.setName(String.valueOf(source.get("planName")));
+                dto.setNotifyTickMinutes(Integer.valueOf(String.valueOf(source.get("notifyTickMinutes"))));
                 dto.setNamespaceId(Integer.valueOf(String.valueOf(source.get("namespaceId"))));
                 RepeatSettingsDTO repeat = new RepeatSettingsDTO();
 
                 repeat.setStartDate(convertStrToTimestamp(String.valueOf(source.get("startTime"))));
                 repeat.setEndDate(convertStrToTimestamp(String.valueOf(source.get("endTime"))));
                 repeat.setRepeatType(Byte.valueOf(String.valueOf(source.get("repeatType"))));
+                repeat.setRepeatInterval(Integer.valueOf(String.valueOf(source.get("repeatInterval"))));
                 dto.setRepeat(repeat);
 
                 String[] groupNames = String.valueOf(source.get("groupName")).split(",");
