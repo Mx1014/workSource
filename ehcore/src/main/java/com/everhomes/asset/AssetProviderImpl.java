@@ -2301,10 +2301,11 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBillGroupsRulesDao dao = new EhPaymentBillGroupsRulesDao(writeContext.configuration());
         com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = readOnlyContext.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(cmd.getBillGroupId())).fetchOneInto(PaymentBillGroup.class);
-        List<Long> fetch = readOnlyContext.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID).from(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
-                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(group.getId())).fetch(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID);
+
+        List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t).where(t.OWNERID.eq(group.getOwnerId()))
+                .fetch(t.CHARGING_ITEM_ID);
         if(fetch.contains(cmd.getChargingItemId())){
-            response.setFailCause("添加失败，在一个账单组里不能重复添加收费项");
+            response.setFailCause("添加失败，一个收费项目只能在一个账单组里添加一次");
             return response;
         }
         if(ruleId == null){
