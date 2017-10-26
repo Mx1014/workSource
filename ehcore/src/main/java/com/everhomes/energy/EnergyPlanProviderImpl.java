@@ -92,6 +92,14 @@ public class EnergyPlanProviderImpl implements EnergyPlanProvider {
     }
 
     @Override
+    public List<EnergyPlan> listActivePlan() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_PLANS)
+                .where(Tables.EH_ENERGY_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+                .fetchInto(EnergyPlan.class);
+    }
+
+    @Override
     public void createEnergyPlanGroupMap(EnergyPlanGroupMap groupMap) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnergyPlanGroupMap.class));
 

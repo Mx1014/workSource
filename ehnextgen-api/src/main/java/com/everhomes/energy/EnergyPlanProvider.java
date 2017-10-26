@@ -13,6 +13,7 @@ public interface EnergyPlanProvider {
     void updateEnergyPlan(EnergyPlan plan);
     EnergyPlan findEnergyPlanById(Long planId);
     List<EnergyPlan> listEnergyPlans(long pageAnchor, int pageSize);
+    List<EnergyPlan> listActivePlan();
 
     void createEnergyPlanGroupMap(EnergyPlanGroupMap groupMap);
     void deleteEnergyPlanGroupMap(EnergyPlanGroupMap groupMap);
