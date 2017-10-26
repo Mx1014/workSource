@@ -278,14 +278,35 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	@Override
 	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
 		String plateNumber = order.getPlateNumber();
+
+		KetuoCard cardInfo = getCard(plateNumber);
+
 		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(order.getRateToken())) {
 			//过期没有优惠
 			//TODO:
+			List<KetuoCardType> types = getCardType();
+			String carType = cardInfo.getCarType();
+
+			KetuoCardType type = null;
+			for(KetuoCardType kt: types) {
+				if(carType.equals(kt.getCarType())) {
+					type = kt;
+					break;
+				}
+			}
+			ParkingExpiredRechargeInfoDTO dto = getExpiredRate(order.getPlateNumber(), cardInfo, parkingLot, System.currentTimeMillis(), type);
+
+			if (order.getPrice().compareTo(dto.getPrice()) != 0) {
+				LOGGER.error("Invalid order price, orderPrice={}, ratePrice={}", order.getPrice(), dto.getPrice());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Invalid order price.");
+			}
+
 			order.setRateName(EXPIRE_CUSTOM_RATE_TOKEN);
 			order.setOriginalPrice(order.getPrice());
+			order.setStartPeriod(new Timestamp(dto.getStartPeriod()));
 //			order.setCarPresenceFlag(ParkingCarPresenceFlag.PRESENCE.getCode());
 		}else {
-			KetuoCard cardInfo = getCard(plateNumber);
 			KetuoCardRate ketuoCardRate = null;
 			String cardType = CAR_TYPE;
 			Integer freeMoney = 0;
