@@ -6321,5 +6321,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             LOGGER.debug("getRequestInfo new GetRequestInfoResponse(GroupMemberStatus.INACTIVE.getCode())");
 		return new GetRequestInfoResponse(GroupMemberStatus.INACTIVE.getCode());
 	}
-    
+
+	@Override
+	public DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd) {
+		return null;
+	}
 }

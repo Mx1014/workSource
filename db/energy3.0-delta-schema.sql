@@ -99,3 +99,41 @@ CREATE TABLE `eh_energy_meter_logs` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 缴费、客户里面增加计价条款的设置
+CREATE TABLE `eh_default_charging_item_properties` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  `default_charging_item_id` BIGINT NOT NULL COMMENT 'id of eh_contract_charging_items',
+  `property_type` TINYINT COMMENT '0: community; 1: building; 2: apartment',
+  `property_id` BIGINT,
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: waiting for approval; 2: active',
+  `create_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_default_charging_items` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  `community_id` BIGINT NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the charging, organizationowner,asset, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `charging_item_id` BIGINT COMMENT '收费项',
+  `charging_standard_id` BIGINT COMMENT '收费标准',
+  `formula` VARCHAR(1024),
+  `formula_type` TINYINT COMMENT '1: fixed fee; 2: normal formula; 3: gradient varied on variable price; 4: gradients varied functions on each variable section',
+  `billing_cycle` TINYINT,
+  `late_fee_standard_id` BIGINT COMMENT '滞纳金标准',
+  `charging_variables` VARCHAR(1024) COMMENT '计费金额参数 json: {"variables":[{"variableIdentifier":"22","variableName":"面积","variableValue":"960.00"}]}',
+  `charging_start_time` DATETIME,
+  `charging_expired_time` DATETIME,
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: waiting for approval; 2: active',
+  `create_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

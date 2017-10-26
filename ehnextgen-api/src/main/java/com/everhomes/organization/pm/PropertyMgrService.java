@@ -465,4 +465,7 @@ public interface PropertyMgrService {
 	GetApartmentDetailResponse getApartmentDetail(GetApartmentDetailCommand cmd);
 
     ListApartmentsResponse listApartments(ListApartmentsCommand cmd);
+
+    DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd);
+    List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd);
 }
