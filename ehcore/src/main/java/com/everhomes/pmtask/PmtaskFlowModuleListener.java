@@ -7,6 +7,7 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.flow.*;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
@@ -442,6 +443,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
 		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, defaultId, null,
 				null, null);
+
+		if(namespaceId == 999983) {
+			EbeiPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+			CategoryDTO dto = handler.createCategoryDTO();
+			Category category = ConvertHelper.convert(dto, Category.class);
+			categories.add(category);
+		}
 
 		return categories.stream().map(c -> {
 			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
