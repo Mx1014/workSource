@@ -60,3 +60,6 @@ CREATE TABLE `eh_questionnaire_ranges` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 版本号  add by xq.tian  2017/10/26
+ALTER TABLE eh_version_urls ADD COLUMN version_encoded_value BIGINT NOT NULL DEFAULT 0;
