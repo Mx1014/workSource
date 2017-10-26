@@ -7189,15 +7189,17 @@ public class PunchServiceImpl implements PunchService {
                 intervalDTO.getPunchLogs().add(dto2);
                 if (null == statusList) {
                     intervalDTO.setStatus(processIntevalStatus(String.valueOf(dto1.getClockStatus()),String.valueOf(dto2.getClockStatus())));
-                    //对于当日的 并且是缺卡的(只打了一次卡),还要进行特殊处理
-                    if(dateSF.get().format(pDate).equals(dateSF.get().format(punchTime))){
-                    	if(intervalDTO.getStatus().equals(String.valueOf(PunchStatus.FORGOT.getCode()))){
-                    		intervalDTO.setStatus(String.valueOf(dto1.getClockStatus()));
-                    	}
-                    }
+
                 }else{
                     intervalDTO.setStatus(statusList[punchIntervalNo-1]);
                 }
+				//对于当日的 并且是缺卡的(只打了一次卡),还要进行特殊处理
+
+				if(dateSF.get().format(pDate).equals(dateSF.get().format(punchTime))){
+					if(intervalDTO.getStatus().equals(String.valueOf(PunchStatus.FORGOT.getCode()))){
+						intervalDTO.setStatus(String.valueOf(dto1.getClockStatus()));
+					}
+				}
                 PunchExceptionRequest exceptionRequest = punchProvider.findPunchExceptionRequest(userId, cmd.getEnterpriseId(),
                         cmd.getQueryTime(), punchIntervalNo);
                 if(null != exceptionRequest) {
