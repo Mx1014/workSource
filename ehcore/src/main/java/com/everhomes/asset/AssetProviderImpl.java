@@ -2197,6 +2197,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
         query.addConditions(t1.OWNER_ID.eq(cmd.getOwnerId()));
         query.addConditions(t1.OWNER_TYPE.eq(cmd.getOwnerType()));
+        query.addLimit(cmd.getPageAnchor().intValue(),cmd.getPageSize()+1);
         query.fetch().map(r -> {
             ListChargingStandardsDTO dto = new ListChargingStandardsDTO();
             dto.setBillingCycle(r.getValue(t.BILLING_CYCLE));
@@ -2243,7 +2244,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId) {
+    public List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId,Long pageAnchor,Integer pageSize) {
         List<ListChargingItemsForBillGroupDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
@@ -2254,6 +2255,7 @@ public class AssetProviderImpl implements AssetProvider {
         SelectQuery<Record> query = context.selectQuery();
         List<PaymentBillGroupRule> rules = context.selectFrom(t)
                 .where(t.BILL_GROUP_ID.eq(billGroupId))
+                .limit(pageAnchor.intValue(),pageSize)
                 .fetchInto(PaymentBillGroupRule.class);
         for(int i = 0 ; i < rules.size(); i ++){
             PaymentBillGroupRule rule = rules.get(i);

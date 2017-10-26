@@ -1817,8 +1817,23 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
-        return assetProvider.listOnlyChargingStandards(cmd);
+    public ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
+        ListChargingStandardsResponse response = new ListChargingStandardsResponse();
+        if(cmd.getPageSize() ==null){
+            cmd.setPageSize(20);
+        }
+        if(cmd.getPageAnchor() == null){
+            cmd.setPageAnchor(0l);
+        }
+        List<ListChargingStandardsDTO> list =  assetProvider.listOnlyChargingStandards(cmd);
+        if(list.size() > cmd.getPageSize()){
+            response.setNextPageAnchor(cmd.getPageAnchor()+cmd.getPageSize().longValue());
+            list.remove(list.size()-1);
+            response.setList(list);
+        }else{
+            response.setNextPageAnchor(null);
+        }
+        return response;
     }
 
 
@@ -1828,8 +1843,23 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(BillGroupIdCommand cmd) {
-        return assetProvider.listChargingItemsForBillGroup(cmd.getBillGroupId());
+    public ListChargingItemsForBillGroupResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd) {
+        ListChargingItemsForBillGroupResponse response = new ListChargingItemsForBillGroupResponse();
+        if(cmd.getPageSize()==null){
+            cmd.setPageSize(20);
+        }
+        if(cmd.getPageAnchor()== null){
+            cmd.setPageAnchor(0l);
+        }
+        List<ListChargingItemsForBillGroupDTO> list =  assetProvider.listChargingItemsForBillGroup(cmd.getBillGroupId(),cmd.getPageAnchor(),cmd.getPageSize());
+        if(list.size() > cmd.getPageSize()){
+            response.setNextPageAnchor(cmd.getPageAnchor()+cmd.getPageSize().longValue());
+            list.remove(list.size()-1);
+            response.setList(list);
+        }else{
+            response.setNextPageAnchor(null);
+        }
+        return response;
     }
 
     @Override

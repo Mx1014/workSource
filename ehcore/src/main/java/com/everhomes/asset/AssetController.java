@@ -355,10 +355,10 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/listOnlyChargingStandards</b>
      */
     @RequestMapping("listOnlyChargingStandards")
-    @RestReturn(value = ListChargingStandardsDTO.class, collection = true)
+    @RestReturn(value = ListChargingStandardsResponse.class, collection = true)
     public RestResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
-        List<ListChargingStandardsDTO> list = assetService.listOnlyChargingStandards(cmd);
-        RestResponse response = new RestResponse(list);
+        ListChargingStandardsResponse resp = assetService.listOnlyChargingStandards(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
@@ -520,9 +520,9 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/listChargingStandardForBillGroup</b>
      */
     @RequestMapping("listChargingStandardForBillGroup")
-    @RestReturn(value = ListChargingItemsForBillGroupDTO.class, collection = true)
+    @RestReturn(value = ListChargingItemsForBillGroupResponse.class, collection = true)
     public RestResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd) {
-        List<ListChargingItemsForBillGroupDTO> list = assetService.listChargingItemsForBillGroup(cmd);
+        ListChargingItemsForBillGroupResponse list = assetService.listChargingItemsForBillGroup(cmd);
         RestResponse response = new RestResponse(list);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

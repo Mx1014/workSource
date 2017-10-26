@@ -33,6 +33,8 @@ public class ListChargingStandardsDTO {
     private List<String> variableNames;
     private BigDecimal suggestUnitPrice;
     private Integer areaSizeType;
+
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -102,7 +102,7 @@ public interface AssetService {
 
     void updateBillSwitchOnTime();
 
-    List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
+    ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 
 
     void configChargingItems(ConfigChargingItemsCommand cmd);
@@ -127,7 +127,7 @@ public interface AssetService {
 
     void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd);
 
-    List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(BillGroupIdCommand cmd);
+    ListChargingItemsForBillGroupResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd);
 
     AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
 
