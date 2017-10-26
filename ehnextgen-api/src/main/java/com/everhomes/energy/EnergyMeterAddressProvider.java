@@ -1,5 +1,6 @@
 package com.everhomes.energy;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -7,6 +8,7 @@ import java.util.Map;
  */
 public interface EnergyMeterAddressProvider {
     Map<Long, EnergyMeterAddress> findByMeterId(Long meterId);
+    List<EnergyMeterAddress> listByMeterId(Long meterId);
 
     void createEnergyMeterAddress(EnergyMeterAddress address);
     void updateEnergyMeterAddress(EnergyMeterAddress address);

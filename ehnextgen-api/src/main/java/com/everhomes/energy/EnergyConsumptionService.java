@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 能耗管理的service
@@ -255,4 +256,8 @@ public interface EnergyConsumptionService {
     ListEnergyPlanMetersResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd);
     ListUserEnergyPlanTasksResponse listUserEnergyPlanTasks(ListUserEnergyPlanTasksCommand cmd);
     void readTaskMeter(ReadTaskMeterCommand cmd);
+
+    void createTask(CreateEnergyTaskCommand cmd);
+    void creatMeterTask(EnergyPlanMeterMap map, EnergyPlan plan);
+    Set<Long> getTaskGroupUsers(Long taskId);
 }

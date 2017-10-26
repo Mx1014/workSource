@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,22 @@ public class EnergyMeterAddressProviderImpl implements EnergyMeterAddressProvide
         Map<Long, EnergyMeterAddress> results = new HashMap<>();
         query.fetch().map((r) -> {
             results.put(r.getId(), ConvertHelper.convert(r, EnergyMeterAddress.class));
+            return null;
+        });
+
+        return results;
+    }
+
+    @Override
+    public List<EnergyMeterAddress> listByMeterId(Long meterId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnergyMeterAddressesRecord> query = context.selectQuery(Tables.EH_ENERGY_METER_ADDRESSES);
+        query.addConditions(Tables.EH_ENERGY_METER_ADDRESSES.METER_ID.eq(meterId));
+        query.addConditions(Tables.EH_ENERGY_METER_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnergyMeterAddress> results = new ArrayList<>();
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, EnergyMeterAddress.class));
             return null;
         });
 

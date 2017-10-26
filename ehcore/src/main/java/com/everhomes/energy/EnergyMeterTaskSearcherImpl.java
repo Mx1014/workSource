@@ -159,9 +159,9 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
-        if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
-            builder.addSort("id", SortOrder.DESC);
-        }
+//        if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
+//            builder.addSort("id", SortOrder.DESC);
+//        }
         SearchResponse rsp = builder.execute().actionGet();
 
         if(LOGGER.isDebugEnabled())

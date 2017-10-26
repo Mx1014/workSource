@@ -1,6 +1,9 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -11,6 +14,7 @@ import com.everhomes.util.StringHelper;
  *     <li>meterNumber: 表计号码</li>
  *     <li>meterName: 表计名称</li>
  *     <li>defaultOrder: 排序</li>
+ *     <li>addresses: 表记所属楼栋门牌 参考{@link com.everhomes.rest.energy.EnergyMeterAddressDTO}</li>
  * </ul>
  * Created by ying.xiong on 2017/10/19.
  */
@@ -22,6 +26,16 @@ public class EnergyPlanMeterDTO {
     private String meterNumber;
     private String meterName;
     private Integer defaultOrder;
+    @ItemType(EnergyMeterAddressDTO.class)
+    private List<EnergyMeterAddressDTO> addresses;
+
+    public List<EnergyMeterAddressDTO> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<EnergyMeterAddressDTO> addresses) {
+        this.addresses = addresses;
+    }
 
     public Integer getDefaultOrder() {
         return defaultOrder;

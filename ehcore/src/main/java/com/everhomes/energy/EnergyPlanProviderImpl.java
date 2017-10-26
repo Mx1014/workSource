@@ -226,6 +226,7 @@ public class EnergyPlanProviderImpl implements EnergyPlanProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEnergyPlanMeterMapRecord> query = context.selectQuery(Tables.EH_ENERGY_PLAN_METER_MAP);
         query.addConditions(Tables.EH_ENERGY_PLAN_METER_MAP.PLAN_ID.eq(planId));
+        query.addOrderBy(Tables.EH_ENERGY_PLAN_METER_MAP.DEFAULT_ORDER);
         query.fetch().map((r) -> {
             map.add(ConvertHelper.convert(r, EnergyPlanMeterMap.class));
             return null;

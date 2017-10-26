@@ -583,6 +583,21 @@ public class EnergyConsumptionController extends ControllerBase {
     }
 
     /**
+     * <p>创建计划的任务</p>
+     * <b>URL: /energy/createTask</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("createTask")
+    public RestResponse createTask(CreateEnergyTaskCommand cmd) {
+        energyConsumptionService.createTask(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
      * <p>计划关联的表计排序 实时</p>
      * <b>URL: /energy/setEnergyPlanMeterOrder</b>
      */

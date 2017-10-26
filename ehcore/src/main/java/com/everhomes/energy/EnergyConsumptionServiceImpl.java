@@ -1,15 +1,20 @@
 package com.everhomes.energy;
 
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.equipment.EquipmentInspectionStandardGroupMap;
+import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
@@ -28,6 +33,8 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.energy.*;
 import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.pmNotify.*;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
@@ -37,6 +44,7 @@ import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
+import com.everhomes.scheduler.EnergyTaskScheduleJob;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
@@ -62,11 +70,15 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -91,6 +103,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -224,6 +237,50 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private PmNotifyService pmNotifyService;
 
+    @Autowired
+    private OrganizationService organizationService;
+
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
+
+    static final String TASK_EXECUTE = "energyTask.isexecute";
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+    @PostConstruct
+    public void init() {
+        String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
+        String energyTaskTriggerName = "EnergyTask " + System.currentTimeMillis();
+
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(TASK_EXECUTE, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        String token = getEnergyTaskToken(redisTemplate);
+        if(StringUtils.isEmpty(token)) {
+            //manual cache it to redis
+            redisTemplate.opsForValue().set(TASK_EXECUTE, "executing", 1, TimeUnit.DAYS);
+            scheduleProvider.scheduleCronJob(energyTaskTriggerName, energyTaskTriggerName,
+                    cronExpression, EnergyTaskScheduleJob.class, null);
+        }
+    }
+
+    private String getEnergyTaskToken(RedisTemplate redisTemplate) {
+        Map<String, String> map = makeEnergyTaskToken(redisTemplate);
+        if(map == null) {
+            return null;
+        }
+        String accessToken = map.get(TASK_EXECUTE);
+        return accessToken;
+    }
+
+    private Map<String, String> makeEnergyTaskToken(RedisTemplate redisTemplate) {
+        Object o = redisTemplate.opsForValue().get(TASK_EXECUTE);
+        if(o != null) {
+            Map<String, String> keys = new HashMap<String, String>();
+            keys.put(TASK_EXECUTE, (String)o);
+            return keys;
+        } else {
+            return null;
+        }
+    }
 
     //    @Override
 //    public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
@@ -2965,8 +3022,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         List<EnergyPlanMeterMap> meterMaps = energyPlanProvider.listMetersByEnergyPlan(plan.getId());
         if(meterMaps != null && meterMaps.size() > 0) {
             List<EnergyPlanMeterDTO> meters = new ArrayList<>();
-            meterMaps.forEach(meter -> {
-                EnergyPlanMeterDTO meterDTO = ConvertHelper.convert(meter, EnergyPlanMeterDTO.class);
+            meterMaps.forEach(meterMap -> {
+                EnergyPlanMeterDTO meterDTO = ConvertHelper.convert(meterMap, EnergyPlanMeterDTO.class);
+                EnergyMeter meter = meterProvider.findById(plan.getNamespaceId(), meterMap.getMeterId());
+                if(meter != null) {
+                    meterDTO.setMeterName(meter.getName());
+                    meterDTO.setMeterNumber(meter.getMeterNumber());
+                    meterDTO.setMeterType(meter.getMeterType());
+                }
+
+                meterDTO.setAddresses(populateEnergyMeterAddresses(meterMap.getMeterId()));
                 meters.add(meterDTO);
             });
             dto.setMeters(meters);
@@ -3295,6 +3360,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return images;
     }
 
+    @Override
     public void createTask(CreateEnergyTaskCommand cmd) {
         EnergyPlan plan = energyPlanProvider.findEnergyPlanById(cmd.getPlanId());
         if(plan == null || CommonStatus.ACTIVE.equals(CommonStatus.fromCode(plan.getStatus()))) {
@@ -3324,6 +3390,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     }
 
+    @Override
     public void creatMeterTask(EnergyPlanMeterMap map, EnergyPlan plan) {
         EnergyMeterTask task = new EnergyMeterTask();
         task.setNamespaceId(plan.getNamespaceId());
@@ -3389,6 +3456,38 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
             }
         }
+    }
+
+    @Override
+    public Set<Long> getTaskGroupUsers(Long taskId) {
+        EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskById(taskId);
+        List<EnergyPlanGroupMap> groupMaps = energyPlanProvider.listGroupsByEnergyPlan(task.getPlanId());
+        if(groupMaps != null && groupMaps.size() > 0) {
+            Set<Long> userIds = new HashSet<>();
+            groupMaps.forEach(map -> {
+                if(map.getPositionId() == null || map.getPositionId() == 0L) {
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembers(map.getGroupId(), null);
+                    if (members != null) {
+                        for (OrganizationMember member : members) {
+                            userIds.add(member.getTargetId());
+                        }
+                    }
+                } else {
+                    ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
+                    command.setOrganizationId(map.getGroupId());
+                    command.setJobPositionId(map.getPositionId());
+                    List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
+
+                    if (contacts != null && contacts.size() > 0) {
+                        for (OrganizationContactDTO contact : contacts) {
+                            userIds.add(contact.getTargetId());
+                        }
+                    }
+                }
+            });
+            return userIds;
+        }
+        return null;
     }
 
     private Timestamp minusMinutes(Timestamp startTime, int minus) {

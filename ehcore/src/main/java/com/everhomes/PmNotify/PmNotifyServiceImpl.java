@@ -1,5 +1,6 @@
 package com.everhomes.PmNotify;
 
+import com.everhomes.energy.*;
 import com.everhomes.entity.EntityType;
 import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.equipment.EquipmentProvider;
@@ -15,6 +16,7 @@ import com.everhomes.pmNotify.PmNotifyService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.energy.EnergyNotificationTemplateCode;
 import com.everhomes.rest.equipment.EquipmentNotificationTemplateCode;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -83,6 +85,15 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
 
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private EnergyConsumptionService energyConsumptionService;
+
+    @Autowired
+    private EnergyMeterTaskProvider energyMeterTaskProvider;
+
+    @Autowired
+    private EnergyMeterProvider energyMeterProvider;
 
     private String queueDelay = "pmtaskdelays";
     private String queueNoDelay = "pmtasknodelays";
@@ -179,6 +190,14 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     equipmentProvider.closeTask(task);
                 }
             }
+
+            if(EntityType.ENERGY_TASK.getCode().equals(record.getOwnerType())) {
+                EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskById(record.getOwnerId());
+                time = task.getExecutiveExpireTime();
+                EnergyMeter meter = energyMeterProvider.findById(task.getNamespaceId(), task.getMeterId());
+                taskName = meter.getName();
+                code = EnergyNotificationTemplateCode.ENERGY_TASK_BEFORE_DELAY;
+            }
             for (Long userId : notifyUsers) {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("processPmNotifyRecord, userId={}, recordId={}", userId, record.getId());
@@ -250,6 +269,13 @@ public class PmNotifyServiceImpl implements PmNotifyService, ApplicationListener
                     if(EntityType.EQUIPMENT_TASK.getCode().equals(ownerType)) {
                         LOGGER.info("processPmNotifyRecord ownerType: EhEquipmentInspectionTasks");
                         Set<Long> ids = equipmentService.getTaskGroupUsers(ownerId, QualityGroupType.EXECUTIVE_GROUP.getCode());
+                        if(ids != null && ids.size() > 0) {
+                            userIds.addAll(ids);
+                        }
+                    }
+                    if(EntityType.ENERGY_TASK.getCode().equals(ownerType)) {
+                        LOGGER.info("processPmNotifyRecord ownerType: EhEnergyMeterTasks");
+                        Set<Long> ids = energyConsumptionService.getTaskGroupUsers(ownerId);
                         if(ids != null && ids.size() > 0) {
                             userIds.addAll(ids);
                         }

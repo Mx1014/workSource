@@ -67,3 +67,7 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
     VALUES((@module_privilege_id := @module_privilege_id + 1),'49140','0',21000,'能耗管理 参数设置权限','0',NOW());  
     
+-- 提醒
+SET @max_template_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 1);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@max_template_id := @max_template_id + 1), 'energy.notification', 1, 'zh_CN', '任务过期前提醒', '你的抄表任务${taskName}将在${time}结束，请尽快处理。', 0);
