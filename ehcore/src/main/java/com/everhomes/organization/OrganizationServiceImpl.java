@@ -124,6 +124,7 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.*;
+import org.apache.xmlbeans.impl.jam.mutable.MMember;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -11027,7 +11028,20 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         for (OrganizationMember member : members) {
-            dtos.add(ConvertHelper.convert(member, OrganizationContactDTO.class));
+            //:todo 寻找部门名
+            StringBuffer departmentName = new StringBuffer();
+            OrganizationContactDTO dto = ConvertHelper.convert(member, OrganizationContactDTO.class);
+            List<OrganizationMember> departs = this.organizationProvider.listOrganizationMembersByDetailId(dto.getDetailId(), Collections.singletonList(OrganizationGroupType.DEPARTMENT.getCode()));
+            if(departs != null && departs.size() > 0){
+                for (OrganizationMember depart:departs){
+                    Organization org = this.organizationProvider.findOrganizationById(depart.getOrganizationId());
+                    if(org != null && org.getStatus().equals(OrganizationStatus.ACTIVE.getCode())){
+                        departmentName.append(org.getName()+"/");
+                    }
+                }
+            }
+            dto.setDepartmentName(departmentName.toString());
+            dtos.add(dto);
         }
         return dtos;
     }

@@ -17,6 +17,7 @@ import java.sql.Timestamp;
  * <li>jobPosition: 岗位</li>
  * <li>detailId: 用户档案id</li>
  * <li>visibleFlag: 隐私保护: 0-显示(不受保护) 1-隐藏(保护) 参考{@link com.everhomes.rest.organization.VisibleFlag} </li>
+ * <li>departmentName: 部门名字</li>
  * </ul>
  */
 public class OrganizationContactDTO {
@@ -43,6 +44,8 @@ public class OrganizationContactDTO {
     private String jobPosition;
     private Long detailId;
     private Byte visibleFlag;
+
+    private String departmentName;
 
     public OrganizationContactDTO() {
     }
@@ -204,4 +207,11 @@ public class OrganizationContactDTO {
         return StringHelper.toJsonString(this);
     }
 
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
 }
