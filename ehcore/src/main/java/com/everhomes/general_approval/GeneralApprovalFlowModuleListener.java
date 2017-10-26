@@ -101,8 +101,8 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseCreating(FlowCase flowCase) {
-        // 服务联盟的审批拼接工作流 content字符串
-        flowCase.setContent(null);
+/*        // 服务联盟的审批拼接工作流 content字符串
+        flowCase.setContent(null);*/
         String content = localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请人") + " : " + flowCase.getApplierName() + "\n";
         PostApprovalFormCommand cmd = JSON.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
         List<FlowCaseEntity> entities = processEntities(cmd.getValues());
@@ -111,6 +111,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                 break;
             content += entities.get(i).getKey() + " : " + entities.get(i).getValue() + "\n";
         }
+        flowCase.setContent(content);
     }
 
     private List<FlowCaseEntity> processEntities(List<PostApprovalFormItem> values) {
