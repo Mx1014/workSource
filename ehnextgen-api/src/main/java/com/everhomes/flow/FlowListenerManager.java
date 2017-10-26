@@ -80,5 +80,5 @@ public interface FlowListenerManager {
 
     Map<String,String> onFlowVariableRender(FlowCaseState ctx, List<String> vars);
 
-    List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId);
+    List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId);
 }

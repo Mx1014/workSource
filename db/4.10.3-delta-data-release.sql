@@ -100,6 +100,8 @@ INSERT INTO `eh_general_forms` (`id`, `namespace_id`, `organization_id`, `owner_
 
 set @id = IFNULL((select MAX(id) FROM eh_lease_configs), 1);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999973', NULL, NULL, 'displayNameStr', '楼幢介绍,虚伪以待', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 	VALUES ((@id := @id + 1), '999975', NULL, NULL, 'displayNameStr', '项目介绍,待租物业', NULL, NULL);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 	VALUES ((@id := @id + 1), '999975', NULL, NULL, 'displayOrderStr', '1,2', NULL, NULL);
@@ -107,6 +109,8 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, 
 	VALUES ((@id := @id + 1), '999971', NULL, NULL, 'displayNameStr', '办公招租,商户招租', NULL, NULL);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 	VALUES ((@id := @id + 1), '999971', NULL, NULL, 'displayOrderStr', '1,2', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999973', NULL, NULL, 'displayOrderStr', '1,2', NULL, NULL);
 
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 	VALUES ((@id := @id + 1), '1000000', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
@@ -219,3 +223,36 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, 
 -- janson 20171025
 SET @max_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@max_id := @max_id + 1), '50800', '0', '10041', '', '0', now());
+
+-- 招商 add by xiongying20171026
+set @eh_locale_templates_id = (SELECT MAX(id) FROM `eh_locale_templates`);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '1', 'zh_CN', '跟进方式', '电话', '0');
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '2', 'zh_CN', '跟进方式', '短信', '0');
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '3', 'zh_CN', '跟进方式', '邮件', '0');
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '4', 'zh_CN', '跟进方式', '其他', '0');
+
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '10', 'zh_CN', '客户事件', '新增客户', '0');
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '20', 'zh_CN', '客户事件', '删除客户', '0');
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'customer.tracking', '30', 'zh_CN', '客户事件', '修改${display}:由${oldData}更改为${newData}', '0');
+
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+ VALUES ((@eh_locale_templates_id:=@eh_locale_templates_id +1 ), 'tracking.notification', '1', 'zh_CN', '计划开始提醒', '【跟进计划】${customerName}${taskName}将于${time}开始。', '0');
+ 
+-- fix 17566 add by xiongying20171026
+set @id = (select MAX(id) FROM eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
+	((@id := @id + 1), 'customer', '10018', 'zh_CN', '有合同的客户不能删除');

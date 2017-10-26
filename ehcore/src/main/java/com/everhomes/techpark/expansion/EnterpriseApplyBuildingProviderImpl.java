@@ -49,7 +49,7 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
         SelectQuery<EhLeaseBuildingsRecord> query = context.selectQuery(Tables.EH_LEASE_BUILDINGS);
 
         if (null != pageAnchor && pageAnchor != 0L) {
-            query.addConditions(Tables.EH_LEASE_BUILDINGS.ID.gt(pageAnchor));
+            query.addConditions(Tables.EH_LEASE_BUILDINGS.DEFAULT_ORDER.lt(pageAnchor));
         }
 
         if (null != namespaceId) {
