@@ -20,7 +20,7 @@ public interface QuestionnaireProvider {
 	List<Questionnaire> listQuestionnaireByOwner(ListQuestionnairesCommand cmd,Integer namespaceId,
 												 int pageSize);
 
-	List<QuestionnaireDTO> listTargetQuestionnaireByOwner(Integer namespaceId, Timestamp nowTime, Byte collectFlag, Long UserId,
+	List<QuestionnaireDTO> listTargetQuestionnaireByOwner(Integer namespaceId, Timestamp nowTime, Byte collectFlag, Long UserId,Long organizationID,
 														  Byte answerFlagAnchor, Long publishTimeAnchor, int pageSize);
 
 }

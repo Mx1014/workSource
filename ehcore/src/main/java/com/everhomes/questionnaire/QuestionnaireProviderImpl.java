@@ -120,7 +120,7 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 	}
 
 	@Override
-	public List<QuestionnaireDTO> listTargetQuestionnaireByOwner(Integer namespaceId, Timestamp nowTime, Byte collectFlag, Long UserId,
+	public List<QuestionnaireDTO> listTargetQuestionnaireByOwner(Integer namespaceId, Timestamp nowTime, Byte collectFlag, Long UserId,Long organizationID,
 																 Byte answerFlagAnchor, Long publishTimeAnchor, int pageSize) {
 		Condition condition = DSL.trueCondition();
 		QuestionnaireCollectFlagType collectFlagType = QuestionnaireCollectFlagType.fromCode(collectFlag);
@@ -139,7 +139,9 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 				.from(Tables.EH_QUESTIONNAIRES).leftOuterJoin(Tables.EH_QUESTIONNAIRE_ANSWERS)
 				//连接条件
 				.on(Tables.EH_QUESTIONNAIRES.ID.eq(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID))
-				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.CREATOR_UID.eq(UserId))
+				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.CREATOR_UID.eq(UserId).
+						or(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(QuestionnaireTargetType.ORGANIZATION.getCode())
+								.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(organizationID))))
 				.where(Tables.EH_QUESTIONNAIRES.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_QUESTIONNAIRES.STATUS.eq(QuestionnaireStatus.ACTIVE.getCode()))
 				.and(condition)

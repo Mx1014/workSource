@@ -891,7 +891,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
 		List<QuestionnaireDTO> questionnaires = questionnaireProvider.listTargetQuestionnaireByOwner(namespaceId,cmd.getNowTime(),
-				cmd.getCollectFlag(),UserContext.current().getUser().getId(),answeredFlagAnchor,publishTimeAnchor,questionnariePageSize);
+				cmd.getCollectFlag(),UserContext.current().getUser().getId(),cmd.getTargetId(),answeredFlagAnchor,publishTimeAnchor,questionnariePageSize);
 		return new ListTargetQuestionnairesResponse(generateNextPageAnchor(cmd,questionnaires,pageSize,answeredFlagAnchor,publishTimeAnchor), questionnaires);
 	}
 
