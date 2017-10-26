@@ -40,6 +40,8 @@ import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.uniongroup.*;
 import com.everhomes.util.*;
+
+import org.apache.commons.codec.language.bm.RuleType;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -129,6 +131,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -4999,41 +5002,34 @@ public class PunchServiceImpl implements PunchService {
 	public void dayRefreshPunchGroupScheduled() {
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
 			// TODO: 2017/10/17 把状态为新增和更新的找出来,然后置状态为使用中,更新的把之前的正常废弃.然后用组织架构的接口改version为0
-			Set<Organization> orgs = new HashSet<>();
+			Set<Long> orgIds = new HashSet<>();
 			List<Byte> statusList = new ArrayList<>();
 			statusList.add(PunchRuleStatus.MODIFYED.getCode());
 			statusList.add(PunchRuleStatus.NEW.getCode());
 			List<PunchRule> punchRules = punchProvider.listPunchRulesByStatus(statusList);
 			if(null != punchRules)
 				for (PunchRule pr : punchRules) {
-					try {
-						Organization org = organizationProvider.findOrganizationById(pr.getOwnerId());
-						//对ptr表,psd表的处理
-						processTimeRule2Active(pr);
-//					if (pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
-//						//copy from addpunchgroup
-//					} else if (pr.getStatus().equals(PunchRuleStatus.MODIFYED.getCode())) {
-//
-//					}
-						//排班处理
-						List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(pr.getId(),pr.getStatus()) ;
-						for(PunchScheduling ps : schedulings){
-							//删除现在active的,然后把自己变成active的
-							ps.setStatus( PunchRuleStatus.ACTIVE.getCode());
-							punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(ps.getOwnerType(), ps.getOwnerId(),
-									ps.getTargetType(), ps.getTargetId(), ps.getRuleDate(), ps.getStatus());
-							punchSchedulingProvider.updatePunchScheduling(ps);
+					this.coordinationProvider.getNamedLock(CoordinationLocks.REFRESH_PUNCH_RULE.getCode()+pr.getId()).enter(() -> {
+						try {
+							if(!pr.getStatus().equals(PunchRuleStatus.ACTIVE.getCode())){
+								
+								Organization org = organizationProvider.findOrganizationById(pr.getOwnerId());
+								//对ptr表,psd表的处理
+								processTimeRule2Active(pr); 
+								pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
+								punchProvider.updatePunchRule(pr);
+								orgIds.add(org.getId());
+							}
+						} catch (Exception e) {
+							LOGGER.error("dayRefreshPunchGroupScheduled error!!! pr id : "+pr.getId());
+							LOGGER.error("update pr from modify to active error!!",e);
 						}
-						pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
-						punchProvider.updatePunchRule(pr);
-						orgs.add(org);
-					} catch (Exception e) {
-						LOGGER.error("dayRefreshPunchGroupScheduled error!!!");
-						LOGGER.error("update pr from modify to active error!!",e);
-					}
+						return null;
+					});
 				}
 			//把uniongroup相关表version改为0
-			for (Organization org : orgs) {
+			for (Long orgId : orgIds) {
+				Organization org = organizationProvider.findOrganizationById(orgId);
 				try {
 					UniongroupVersion unionGroupVersion = getPunchGroupVersion(org.getId());
 					unionGroupVersion.setCurrentVersionCode(unionGroupVersion.getCurrentVersionCode() + 1);
@@ -5061,6 +5057,19 @@ public class PunchServiceImpl implements PunchService {
 				timeRule.setStatus(PunchRuleStatus.ACTIVE.getCode());
 				punchProvider.updatePunchTimeRule(timeRule);
 			}
+		}
+
+		if(pr.getRuleType().equals(PunchRuleType.PAIBAN.getCode())){
+		//排班处理
+			List<PunchScheduling> schedulings = punchSchedulingProvider.queryPunchSchedulings(pr.getId(),pr.getStatus()) ;
+			if(null != schedulings)
+				for(PunchScheduling ps : schedulings){
+					//删除现在active的,然后把自己变成active的
+					ps.setStatus( PunchRuleStatus.ACTIVE.getCode());
+					punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(ps.getOwnerType(), ps.getOwnerId(),
+							ps.getTargetType(), ps.getTargetId(), ps.getRuleDate(), ps.getStatus());
+					punchSchedulingProvider.updatePunchScheduling(ps);
+				}
 		}
 	}
 
@@ -5155,7 +5164,8 @@ public class PunchServiceImpl implements PunchService {
 					if (null != punchSchedulings) {
 						for (PunchScheduling punchScheduling : punchSchedulings) {
 							OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(punchScheduling.getTargetId());
-							refreshDayLogAndMonthStat(memberDetail.getTargetId(), pr.getOwnerId(), schedulingCalendar);
+							if(null != memberDetail)
+								refreshDayLogAndMonthStat(memberDetail.getTargetId(), pr.getOwnerId(), schedulingCalendar);
 						}
 					}
 				}
@@ -7081,12 +7091,14 @@ public class PunchServiceImpl implements PunchService {
         PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
         GetPunchDayStatusResponse response = new GetPunchDayStatusResponse();
 		Date punchTime = new Date();
+		Calendar punCalendar = Calendar.getInstance();
+		punCalendar.setTime(punchTime);
+		//现在打卡属于哪一天
+		java.sql.Date pDate = calculatePunchDate(punCalendar, cmd.getEnterpriseId(), userId);
 		if (null == cmd.getQueryTime()) {
 			cmd.setQueryTime(punchTime.getTime());
             if(null != pr) {
-				Calendar punCalendar = Calendar.getInstance();
-				punCalendar.setTime(punchTime);
-				java.sql.Date pDate = calculatePunchDate(punCalendar, cmd.getEnterpriseId(), userId);
+				
 				PunchLogDTO punchLog = getPunchType(userId, cmd.getEnterpriseId(), punchTime, pDate);
 				if (null != punchLog) {
 					if (null != punchLog.getExpiryTime()) {
@@ -7177,6 +7189,12 @@ public class PunchServiceImpl implements PunchService {
                 intervalDTO.getPunchLogs().add(dto2);
                 if (null == statusList) {
                     intervalDTO.setStatus(processIntevalStatus(String.valueOf(dto1.getClockStatus()),String.valueOf(dto2.getClockStatus())));
+                    //对于当日的 并且是缺卡的(只打了一次卡),还要进行特殊处理
+                    if(dateSF.get().format(pDate).equals(dateSF.get().format(punchTime))){
+                    	if(intervalDTO.getStatus().equals(String.valueOf(PunchStatus.FORGOT.getCode()))){
+                    		intervalDTO.setStatus(String.valueOf(dto1.getClockStatus()));
+                    	}
+                    }
                 }else{
                     intervalDTO.setStatus(statusList[punchIntervalNo-1]);
                 }

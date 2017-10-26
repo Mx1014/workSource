@@ -133,16 +133,16 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
         this.deleteAll();
         List<Organization> orgs = this.organizationProvider.listHeadEnterprises();
         for (Organization org : orgs) {
-            this.syncUniongroupDetailsAtOrg(org, UniongroupType.SALARYGROUP.getCode());
-            this.syncUniongroupDetailsAtOrg(org, UniongroupType.PUNCHGROUP.getCode());
+            this.syncUniongroupDetailsAtOrg(org, UniongroupType.SALARYGROUP.getCode(), DEFAULT_VERSION_CODE);
+            this.syncUniongroupDetailsAtOrg(org, UniongroupType.PUNCHGROUP.getCode(), DEFAULT_VERSION_CODE);
         }
 //        this.optimize(1);
         this.refresh();
     }
 
     @Override
-    public void syncUniongroupDetailsAtOrg(Organization org, String groupType) {
-        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(org.getNamespaceId(), org.getId(), UniongroupType.fromCode(groupType).getCode());
+    public void syncUniongroupDetailsAtOrg(Organization org, String groupType, Integer versionCode) {
+        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(org.getNamespaceId(), org.getId(), UniongroupType.fromCode(groupType).getCode(), DEFAULT_VERSION_CODE);
         if (details != null && details.size() > 0) {
             //查询部门和岗位和工号
             for (UniongroupMemberDetail detail : details) {

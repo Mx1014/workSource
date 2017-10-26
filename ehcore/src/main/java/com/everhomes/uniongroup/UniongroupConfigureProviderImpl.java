@@ -468,7 +468,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
-    public List<UniongroupMemberDetail> listUniongroupMemberDetailByGroupType(Integer namespaceId, Long ownerId, String groupType) {
+    public List<UniongroupMemberDetail> listUniongroupMemberDetailByGroupType(Integer namespaceId, Long ownerId, String groupType, Integer versionCode) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         List<UniongroupMemberDetail> list = new ArrayList<>();
         list = context.select(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ID,
@@ -487,6 +487,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
                 .where(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType))
                 .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.ENTERPRISE_ID.eq(ownerId))
+                .and(Tables.EH_UNIONGROUP_MEMBER_DETAILS.VERSION_CODE.eq(versionCode))
                 .fetch().map(r -> {
                     return RecordHelper.convert(r, UniongroupMemberDetail.class);
                 });
