@@ -842,6 +842,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         ListGeneralApprovalRecordsResponse response = listGeneralApprovalRecords(cmd);
         if (response.getRecords() == null || response.getRecords().size() < 1 || cmd.getApprovalType() == null)
             return;
+
         //  1. Set the main title of the sheet
         String mainTitle = "审批记录";
         //  2. Set the subtitle of the sheet
@@ -851,9 +852,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         //  3. Set the title of the approval lists
         Long flowCaseId = response.getRecords().get(0).getFlowCaseId();
         List<FlowCaseEntity> titles = getApprovalDetails(flowCaseId);
-
-
-        XSSFWorkbook workbook = exportGeneralApprovalRecordsFile(mainTitle, subTitle, titles);
+        //  4. Start to write the excel
+        XSSFWorkbook workbook = exportGeneralApprovalRecordsFile(mainTitle, subTitle, titles, response.getRecords());
 
         List<Long> flowCaseIds = response.getRecords().stream().map(r -> {
             return r.getFlowCaseId();
@@ -866,17 +866,18 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         return generalApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
     }
 
-    private XSSFWorkbook exportGeneralApprovalRecordsFile(String mainTitle, String subTitle, List<FlowCaseEntity> titles) {
+    private XSSFWorkbook exportGeneralApprovalRecordsFile(String mainTitle, String subTitle, List<FlowCaseEntity> titles, List<GeneralApprovalRecordDTO> data) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("审批记录");
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 12));
         sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 12));
-        //  Export titles
+        //  1. Write titles
         createGeneralApprovalRecordsFileTitle(workbook, sheet, mainTitle, subTitle, titles);
-/*        for (int rowIndex = 1; rowIndex < values.size(); rowIndex++) {
-            Row dataRow = sheet.createRow(rowIndex);
-            createArchivesEmployeesFilesContent(workbook, dataRow, values.get(rowIndex - 1).getVals());
-        }*/
+        //  2. Write data
+        for (int rowIndex = 0; rowIndex < data.size(); rowIndex++) {
+            Row dataRow = sheet.createRow(rowIndex + 3);
+            createGeneralApprovalRecordsFileData(workbook, dataRow, data.get(rowIndex));
+        }
         return workbook;
     }
 
@@ -902,15 +903,28 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
         //  3.Set the value of the approval lists
         Row titleRow = sheet.createRow(2);
-        int titleList = list.size();
-        for (int i = 0; i < titleList; i++) {
+        for (int i = 0; i < list.size(); i++) {
             Cell cell = titleRow.createCell(i);
             cell.setCellValue(list.get(i).getKey());
         }
-        titleRow.createCell(titleList + 0).setCellValue("审批状态");
-        titleRow.createCell(titleList + 1).setCellValue("审批记录");
-        titleRow.createCell(titleList + 2).setCellValue("当前审批人");
-        titleRow.createCell(titleList + 3).setCellValue("督办人");
+        titleRow.createCell(list.size() + 0).setCellValue("审批状态");
+        titleRow.createCell(list.size() + 1).setCellValue("审批记录");
+        titleRow.createCell(list.size() + 2).setCellValue("当前审批人");
+        titleRow.createCell(list.size() + 3).setCellValue("督办人");
+    }
+
+    private void createGeneralApprovalRecordsFileData(XSSFWorkbook workbook, Row dataRow, GeneralApprovalRecordDTO data) {
+        List<FlowCaseEntity> entities = getApprovalDetails(data.getFlowCaseId());
+        for (int i = 0; i < entities.size(); i++) {
+            dataRow.createCell(i).setCellValue(entities.get(i).getValue());
+        }
+        if (FlowCaseStatus.PROCESS.getCode().equals(data.getApprovalStatus()))
+            dataRow.createCell(entities.size() + 0).setCellValue("处理中");
+        else if (FlowCaseStatus.FINISHED.getCode().equals(data.getApprovalStatus()))
+            dataRow.createCell(entities.size() + 0).setCellValue("已完成");
+        else
+            dataRow.createCell(entities.size() + 0).setCellValue("已取消");
+//        dataRow.createCell(entities.size() + 1).set
     }
 
     private void writeExcel(XSSFWorkbook workbook, HttpServletResponse httpResponse) {
