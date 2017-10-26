@@ -171,7 +171,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     	if(searchType.equals(FlowCaseSearchType.APPLIER)) {
     		cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));
     		cond = cond.and(Tables.EH_FLOW_CASES.PARENT_ID.eq(0L));
-    		cond = cond.and(Tables.EH_FLOW_CASES.DELETE_STATUS.eq(TrueOrFalseFlag.FALSE.getCode()));
+    		cond = cond.and(Tables.EH_FLOW_CASES.DELETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
 
     	    if(locator.getAnchor() != null) {
     	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));

@@ -4573,7 +4573,7 @@ public class FlowServiceImpl implements FlowService {
                 FlowCaseStatus status = FlowCaseStatus.fromCode(flowCase.getStatus());
                 if (status != FlowCaseStatus.INVALID &&
                         (status == FlowCaseStatus.ABSORTED || status == FlowCaseStatus.FINISHED)) {
-                    flowCase.setDeleteStatus(TrueOrFalseFlag.TRUE.getCode());
+                    flowCase.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
                     flowCaseProvider.updateFlowCase(flowCase);
                     return true;
                 }
