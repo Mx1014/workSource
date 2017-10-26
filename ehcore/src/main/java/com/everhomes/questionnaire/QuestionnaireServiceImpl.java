@@ -1094,7 +1094,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"targetType error, targetType=" + cmd.getTargetType());
 		}
-		
+
+
 		QuestionnaireDTO questionnaireDTO = cmd.getQuestionnaire();
 		Questionnaire questionnaire = findQuestionnaireById(questionnaireDTO.getId());
 		if (QuestionnaireStatus.fromCode(questionnaire.getStatus()) != QuestionnaireStatus.ACTIVE) {
@@ -1105,6 +1106,23 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		if(!targetType.getCode().equals(questionnaire.getTargetType())){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"questionnaire type = " + questionnaire.getTargetType() + " summit type = "+cmd.getTargetType());
+		}
+
+		if(targetType == QuestionnaireTargetType.ORGANIZATION){
+			List<QuestionnaireRange> ranges = questionnaireRangeProvider.listQuestionnaireRangeByQuestionnaireId(cmd.getQuestionnaire().getId());
+			boolean isvaildTargetId = false;
+			for (QuestionnaireRange range : ranges) {
+				if(range.getRange().equals(String.valueOf(cmd.getTargetId()))){
+					isvaildTargetId = true;
+					break;
+				}
+			}
+			if(!isvaildTargetId){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"unknown TargetId = " + cmd.getTargetId() + ",ranges = "+StringHelper.toJsonString(ranges));
+			}
+		}else if(targetType == QuestionnaireTargetType.USER){
+			cmd.setTargetId(UserContext.current().getUser().getId());
 		}
 
 		//支持匿名
