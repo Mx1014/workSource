@@ -1184,7 +1184,33 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		List<User> users = userProvider.listUserByIds(namespaceId, userIdentifiers.stream().map(r -> Long.valueOf(r.getOwnerUid())).collect(Collectors.toList()));
 		Map<String,User> userMaps = generateUserMaps(userIdentifiers,users);
 
-		return new ListUsersbyIdentifiersResponse(cmd.getIdentifiers().stream().map(r->convertToQuestionnaireUserDTOs(r,userMaps)).collect(Collectors.toList()));
+		return new ListUsersbyIdentifiersResponse(sortQuestionnaireUserDTOs(cmd.getIdentifiers(),userMaps));
+	}
+
+	private List<QuestionnaireUserDTO> sortQuestionnaireUserDTOs(List<String> identifiers, Map<String, User> userMaps) {
+		List<QuestionnaireUserDTO> dtoRights = new ArrayList<>();
+		List<QuestionnaireUserDTO> dtoUndefineds = new ArrayList<>();
+		for (String sidentifier : identifiers) {
+			QuestionnaireUserDTO dto = new QuestionnaireUserDTO();
+			dto.setIdentifierToken(sidentifier);
+			User user = userMaps.get(sidentifier);
+			if(user!=null) {
+				dto.setId(user.getId());
+				dto.setAccountName(user.getNickName());
+				dto.setVerifyStatus(QuestionnaireCommonStatus.TRUE.getCode());
+				dtoRights.add(dto);
+				continue;
+			}
+			if(isRightFormatSidentifier(sidentifier)){
+				dto.setAccountName("手机号未注册");
+			}else{
+				dto.setAccountName("手机号有误");
+			}
+			dto.setVerifyStatus(QuestionnaireCommonStatus.FALSE.getCode());
+			dtoUndefineds.add(dto);
+		}
+		dtoRights.addAll(dtoUndefineds);
+		return dtoRights;
 	}
 
 	private Map<String,User> generateUserMaps(List<UserIdentifier> userIdentifiers, List<User> users) {
@@ -1199,25 +1225,6 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		return maps;
 	}
 
-	private QuestionnaireUserDTO convertToQuestionnaireUserDTOs(String sidentifier, Map<String,User> userMaps) {
-		QuestionnaireUserDTO dtos = new QuestionnaireUserDTO();
-		dtos.setIdentifierToken(sidentifier);
-		User user = userMaps.get(sidentifier);
-		if(user!=null) {
-			dtos.setId(user.getId());
-			dtos.setAccountName(user.getNickName());
-			dtos.setVerifyStatus(QuestionnaireCommonStatus.TRUE.getCode());
-			return dtos;
-		}
-		if(isRightFormatSidentifier(sidentifier)){
-			dtos.setAccountName("手机号未注册");
-			dtos.setVerifyStatus(QuestionnaireCommonStatus.FALSE.getCode());
-		}else{
-			dtos.setAccountName("手机号有误");
-			dtos.setVerifyStatus(QuestionnaireCommonStatus.FALSE.getCode());
-		}
-		return dtos;
-	}
 	private static Pattern formatSidentifier = Pattern.compile("^\\d{11}$");
 	private boolean isRightFormatSidentifier(String sidentifier) {
 		Matcher matcher = formatSidentifier.matcher(sidentifier);
