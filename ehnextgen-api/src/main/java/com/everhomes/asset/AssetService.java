@@ -129,7 +129,7 @@ public interface AssetService {
 
     List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(BillGroupIdCommand cmd);
 
-    void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
+    AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
 
     void deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd);
 

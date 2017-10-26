@@ -2291,7 +2291,8 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
+    public AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
+        AddOrModifyRuleForBillGroupResponse response = new AddOrModifyRuleForBillGroupResponse();
         Long ruleId = cmd.getBillGroupRuleId();
         EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
         com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule = new PaymentBillGroupRule();
@@ -2300,6 +2301,12 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBillGroupsRulesDao dao = new EhPaymentBillGroupsRulesDao(writeContext.configuration());
         com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = readOnlyContext.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS)
                 .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(cmd.getBillGroupId())).fetchOneInto(PaymentBillGroup.class);
+        List<Long> fetch = readOnlyContext.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID).from(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(group.getId())).fetch(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID);
+        if(fetch.contains(cmd.getChargingItemId())){
+            response.setFailCause("添加失败，在一个账单组里不能重复添加收费项");
+            return response;
+        }
         if(ruleId == null){
             //新增 一条billGroupRule
             long nextRuleId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules.class));
@@ -2339,6 +2346,7 @@ public class AssetProviderImpl implements AssetProvider {
                     .execute();
             dao.insert(rule);
         }
+        return response;
     }
 
     @Override

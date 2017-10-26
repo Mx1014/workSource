@@ -191,7 +191,7 @@ public interface AssetProvider {
 
     List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId);
 
-    void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
+    AddOrModifyRuleForBillGroupResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
 
     EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId);
 

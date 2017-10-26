@@ -544,16 +544,16 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
-    // this is for 为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改       4
+    // this is for 为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改，一个账单组不能重复收费项目id       4
     /**
      * <p>为一个账单组添加或修改一个收费项目，如果billGroupRuleId不为空则为修改</p>
      * <b>URL: /asset/addOrModifyRuleForBillGroup</b>
      */
     @RequestMapping("addOrModifyRuleForBillGroup")
-    @RestReturn(value = String.class)
+    @RestReturn(value = AddOrModifyRuleForBillGroupResponse.class)
     public RestResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-        assetService.addOrModifyRuleForBillGroup(cmd);
-        RestResponse response = new RestResponse();
+        AddOrModifyRuleForBillGroupResponse res = assetService.addOrModifyRuleForBillGroup(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
