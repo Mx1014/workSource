@@ -507,7 +507,14 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         GeneralApproval ga = ConvertHelper.convert(cmd, GeneralApproval.class);
         ga.setNamespaceId(UserContext.getCurrentNamespaceId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
-
+        if(cmd.getApprovalAttribute() == null)
+            ga.setApprovalAttribute(GeneralApprovalAttribute.DEFAULT.getCode());
+        if(cmd.getModifyFlag() == null)
+            ga.setModifyFlag(Byte.valueOf("1"));
+        if(cmd.getDeleteFlag() == null)
+            ga.setDeleteFlag(Byte.valueOf("1"));
+        if(cmd.getIconUri() == null)
+        ga.setIconUri("cs://1/image/aW1hZ2UvTVRvMU9EVTBNR1psWW1Kak1XSTNZalUwT0RVeVlUQXdOak0zWWpObE1ERmpZUQ");
         // 新增加审批的时候可能并为设置 formId
         // GeneralForm form =
         // this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
