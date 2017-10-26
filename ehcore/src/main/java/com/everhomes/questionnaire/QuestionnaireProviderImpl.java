@@ -128,9 +128,11 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 		if(collectFlagType == QuestionnaireCollectFlagType.COLLECTING){
 			condition = condition.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.ge(nowTime));
 			orderby = new SortField<?>[]{getSortAnswerTimeField().desc(), Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc()};
-		}else{
+		}else if(collectFlagType == QuestionnaireCollectFlagType.FINISHED){
 			condition = condition.and(Tables.EH_QUESTIONNAIRES.CUT_OFF_TIME.lt(nowTime));
 			orderby = new SortField<?>[]{getSortAnswerTimeField().asc(), Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc()};
+		}else{
+			orderby = new SortField<?>[]{Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc()};
 		}
 		condition = condition.and(Tables.EH_QUESTIONNAIRES.USER_SCOPE.like("%"+UserId+"%"));
 		SelectOffsetStep<Record> limit = getReadOnlyContext().selectDistinct(getFieldLists())
