@@ -5002,7 +5002,7 @@ public class PunchServiceImpl implements PunchService {
 	public void dayRefreshPunchGroupScheduled() {
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
 			// TODO: 2017/10/17 把状态为新增和更新的找出来,然后置状态为使用中,更新的把之前的正常废弃.然后用组织架构的接口改version为0
-			Set<Organization> orgs = new HashSet<>();
+			Set<Long> orgIds = new HashSet<>();
 			List<Byte> statusList = new ArrayList<>();
 			statusList.add(PunchRuleStatus.MODIFYED.getCode());
 			statusList.add(PunchRuleStatus.NEW.getCode());
@@ -5018,7 +5018,7 @@ public class PunchServiceImpl implements PunchService {
 								processTimeRule2Active(pr); 
 								pr.setStatus(PunchRuleStatus.ACTIVE.getCode());
 								punchProvider.updatePunchRule(pr);
-								orgs.add(org);
+								orgIds.add(org.getId());
 							}
 						} catch (Exception e) {
 							LOGGER.error("dayRefreshPunchGroupScheduled error!!! pr id : "+pr.getId());
@@ -5028,7 +5028,8 @@ public class PunchServiceImpl implements PunchService {
 					});
 				}
 			//把uniongroup相关表version改为0
-			for (Organization org : orgs) {
+			for (Long orgId : orgIds) {
+				Organization org = organizationProvider.findOrganizationById(orgId);
 				try {
 					UniongroupVersion unionGroupVersion = getPunchGroupVersion(org.getId());
 					unionGroupVersion.setCurrentVersionCode(unionGroupVersion.getCurrentVersionCode() + 1);
