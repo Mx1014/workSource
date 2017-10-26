@@ -508,7 +508,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         ga.setNamespaceId(UserContext.getCurrentNamespaceId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
         if(cmd.getApprovalAttribute() == null)
-            ga.setApprovalAttribute(GeneralApprovalAttribute.DEFAULT.getCode());
+            ga.setApprovalAttribute(GeneralApprovalAttribute.CUSTOMIZE.getCode());
         if(cmd.getModifyFlag() == null)
             ga.setModifyFlag(Byte.valueOf("1"));
         if(cmd.getDeleteFlag() == null)
