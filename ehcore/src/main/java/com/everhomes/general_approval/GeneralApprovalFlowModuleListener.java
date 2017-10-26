@@ -106,6 +106,11 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         String content = localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请人") + " : " + flowCase.getApplierName() + "\n";
         PostApprovalFormCommand cmd = JSON.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
         List<FlowCaseEntity> entities = processEntities(cmd.getValues());
+        for (int i = 0; i < entities.size(); i++) {
+            if (i == 3)
+                break;
+            content += entities.get(i).getKey() + " : " + entities.get(i).getValue() + "\n";
+        }
     }
 
     private List<FlowCaseEntity> processEntities(List<PostApprovalFormItem> values) {
