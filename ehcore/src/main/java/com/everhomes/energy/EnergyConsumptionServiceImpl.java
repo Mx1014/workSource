@@ -15,10 +15,7 @@ import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.module.ServiceModuleService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationJobPositionMap;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.*;
 import com.everhomes.pmNotify.PmNotifyRecord;
 import com.everhomes.pmNotify.PmNotifyService;
 import com.everhomes.repeat.RepeatService;
@@ -2961,6 +2958,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         if(null != plan.getRepeatSettingId() && plan.getRepeatSettingId() != 0) {
             RepeatSettings repeat = repeatService.findRepeatSettingById(plan.getRepeatSettingId());
             RepeatSettingsDTO repeatDTO = ConvertHelper.convert(repeat, RepeatSettingsDTO.class);
+            repeatDTO.setStartDate(repeat.getStartDate().getTime());
+            repeatDTO.setEndDate(repeat.getEndDate().getTime());
             dto.setRepeat(repeatDTO);
         }
         List<EnergyPlanMeterMap> meterMaps = energyPlanProvider.listMetersByEnergyPlan(plan.getId());
@@ -2977,6 +2976,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             List<EnergyPlanGroupDTO> groups = new ArrayList<>();
             groupMaps.forEach(group -> {
                 EnergyPlanGroupDTO groupDTO = ConvertHelper.convert(group, EnergyPlanGroupDTO.class);
+                StringBuilder sb = new StringBuilder();
+                Organization org = organizationProvider.findOrganizationById(group.getGroupId());
+                OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(group.getPositionId());
+                if(org != null) {
+                    sb.append(org.getName());
+
+                }
+                if(position != null) {
+                    sb.append(position.getName());
+                }
+                groupDTO.setGroupName(sb.toString());
                 groups.add(groupDTO);
             });
             dto.setGroups(groups);
