@@ -70,6 +70,20 @@ public class Utils {
     }
 
     /**
+     * 原有时间加n秒
+     * @param source
+     * @param second
+     * @return
+     */
+    static Long getLongByAddSecond(Long source, int second) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(source);
+        calendar.add(Calendar.SECOND, second);
+
+        return calendar.getTimeInMillis();
+    }
+
+    /**
      * 原有时间计算月
      * @param source
      * @param month
@@ -82,6 +96,7 @@ public class Utils {
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
 
         int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
         //如果当前天数是当前月的最后一天，直接往上加月数
@@ -104,6 +119,7 @@ public class Utils {
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
 
         if(isLastDayOfMonth(calendar)){
             calendar.add(Calendar.MONTH, month);
@@ -116,6 +132,27 @@ public class Utils {
         }
 
         return calendar.getTimeInMillis();
+    }
+
+    static Long getFirstDayOfMonth(Long time) {
+        Calendar tempCalendar = Calendar.getInstance();
+        tempCalendar.setTimeInMillis(time);
+        tempCalendar.set(Calendar.DAY_OF_MONTH, 1);
+        tempCalendar.set(Calendar.HOUR_OF_DAY, 0);
+        tempCalendar.set(Calendar.MINUTE, 0);
+        tempCalendar.set(Calendar.SECOND, 0);
+        tempCalendar.set(Calendar.MILLISECOND, 0);
+        return tempCalendar.getTimeInMillis();
+    }
+
+    static Long getNewDay(Long time) {
+        Calendar tempCalendar = Calendar.getInstance();
+        tempCalendar.setTimeInMillis(time);
+        tempCalendar.set(Calendar.HOUR_OF_DAY, 0);
+        tempCalendar.set(Calendar.MINUTE, 0);
+        tempCalendar.set(Calendar.SECOND, 0);
+        tempCalendar.set(Calendar.MILLISECOND, 0);
+        return tempCalendar.getTimeInMillis();
     }
 
     static boolean isLastDayOfMonth(Calendar calendar) {

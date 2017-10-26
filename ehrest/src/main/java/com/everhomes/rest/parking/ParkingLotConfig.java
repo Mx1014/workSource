@@ -20,6 +20,16 @@ public class ParkingLotConfig {
 
     private Byte invoiceFlag;
 
+    private byte businessLicenseFlag;
+
+    public byte getBusinessLicenseFlag() {
+        return businessLicenseFlag;
+    }
+
+    public void setBusinessLicenseFlag(byte businessLicenseFlag) {
+        this.businessLicenseFlag = businessLicenseFlag;
+    }
+
     public Byte getTempfeeFlag() {
         return tempfeeFlag;
     }

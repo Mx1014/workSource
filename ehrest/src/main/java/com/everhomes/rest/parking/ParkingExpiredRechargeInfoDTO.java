@@ -18,11 +18,20 @@ public class ParkingExpiredRechargeInfoDTO {
     private BigDecimal price;
     private String cardTypeId;
     private String cardTypeName;
-    private Long newValidityPeriod;
+    private Long startPeriod;
+    private Long endPeriod;
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getStartPeriod() {
+        return startPeriod;
+    }
+
+    public void setStartPeriod(Long startPeriod) {
+        this.startPeriod = startPeriod;
     }
 
     public String getOwnerType() {
@@ -97,11 +106,11 @@ public class ParkingExpiredRechargeInfoDTO {
         this.cardTypeName = cardTypeName;
     }
 
-    public Long getNewValidityPeriod() {
-        return newValidityPeriod;
+    public Long getEndPeriod() {
+        return endPeriod;
     }
 
-    public void setNewValidityPeriod(Long newValidityPeriod) {
-        this.newValidityPeriod = newValidityPeriod;
+    public void setEndPeriod(Long endPeriod) {
+        this.endPeriod = endPeriod;
     }
 }
