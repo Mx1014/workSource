@@ -20,6 +20,7 @@ import com.everhomes.organization.OrganizationJobPositionMap;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pmNotify.PmNotifyRecord;
+import com.everhomes.pmNotify.PmNotifyService;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -222,6 +223,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private EnergyMeterTaskProvider energyMeterTaskProvider;
+
+    @Autowired
+    private PmNotifyService pmNotifyService;
 
 
     //    @Override
@@ -2915,6 +2919,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     maps.remove(group.getId());
                 } else {
                     EnergyPlanGroupMap groupMap = ConvertHelper.convert(group, EnergyPlanGroupMap.class);
+                    groupMap.setPlanId(plan.getId());
                     energyPlanProvider.createEnergyPlanGroupMap(groupMap);
                 }
             });
@@ -2937,6 +2942,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     maps.remove(meter.getId());
                 } else {
                     EnergyPlanMeterMap meterMap = ConvertHelper.convert(meter, EnergyPlanMeterMap.class);
+                    meterMap.setPlanId(plan.getId());
                     energyPlanProvider.createEnergyPlanMeterMap(meterMap);
                 }
             });
@@ -3336,66 +3342,72 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 String duration = timeRange.getDuration();
                 String start = timeRange.getStartTime();
                 String str = day + " " + start;
-//                Timestamp startTime = strToTimestamp(str);
-//                Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
-//                task.setExecutiveStartTime(startTime);
-//                task.setExecutiveExpireTime(expiredTime);
-//                long now = System.currentTimeMillis();
-//                if (i < 10) {
-//
-//                    String taskName = standard.getName() + type.getName() +
-//                            timestampToStr(new Timestamp(now)).substring(2) + "0" + i;
-//                    task.setTaskName(taskName);
-//                } else {
-//                    String taskName = standard.getName() + type.getName() +
-//                            timestampToStr(new Timestamp(now)).substring(2) + i;
-//                    task.setTaskName(taskName);
-//                }
-//                energyMeterTaskProvider.createEnergyMeterTask(task);
-//                energyMeterTaskSearcher.feedDoc(task);
-//
-////				启动提醒
-//                ListPmNotifyParamsCommand command = new ListPmNotifyParamsCommand();
-//                command.setCommunityId(task.getTargetId());
-//                command.setNamespaceId(task.getNamespaceId());
-//                List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
-//                if(paramDTOs != null && paramDTOs.size() > 0) {
-//                    for (PmNotifyParamDTO notifyParamDTO : paramDTOs) {
-//                        List<PmNotifyReceiverDTO> receivers = notifyParamDTO.getReceivers();
-//                        if(receivers != null && receivers.size() > 0) {
-//                            PmNotifyRecord record = ConvertHelper.convert(notifyParamDTO, PmNotifyRecord.class);
-//                            PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
-//                            List<PmNotifyReceiver> pmNotifyReceivers = new ArrayList<>();
-//                            receivers.forEach(receiver -> {
-//                                PmNotifyReceiver pmNotifyReceiver = new PmNotifyReceiver();
-//                                if(receiver != null) {
-//                                    pmNotifyReceiver.setReceiverType(receiver.getReceiverType());
-//                                    if(receiver.getReceivers() != null) {
-//                                        List<Long> ids = receiver.getReceivers().stream().map(receiverName -> {
-//                                            return receiverName.getId();
-//                                        }).collect(Collectors.toList());
-//                                        pmNotifyReceiver.setReceiverIds(ids);
-//                                    }
-//                                    pmNotifyReceivers.add(pmNotifyReceiver);
-//                                }
-//                            });
-//                            receiverList.setReceivers(pmNotifyReceivers);
-//                            record.setReceiverJson(receiverList.toString());
-//                            record.setOwnerType(EntityType.EQUIPMENT_TASK.getCode());
-//                            record.setOwnerId(task.getId());
-//
-//                            //notify_time
-//                            Timestamp delaytime = minusMinutes(task.getExecutiveExpireTime(), notifyParamDTO.getNotifyTickMinutes());
-//                            record.setNotifyTime(delaytime);
-//
-//                            pmNotifyService.pushPmNotifyRecord(record);
+                Timestamp startTime = strToTimestamp(str);
+                Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
+                task.setExecutiveStartTime(startTime);
+                task.setExecutiveExpireTime(expiredTime);
+
+                energyMeterTaskProvider.createEnergyMeterTask(task);
+                energyMeterTaskSearcher.feedDoc(task);
+
+//				启动提醒
+                List<EnergyPlanGroupMap> groupMaps = energyPlanProvider.listGroupsByEnergyPlan(plan.getId());
+                if(groupMaps != null && groupMaps.size() > 0) {
+                    PmNotifyRecord record = new PmNotifyRecord();
+                    PmNotifyReceiverList receiverList = new PmNotifyReceiverList();
+                    List<PmNotifyReceiver> pmNotifyReceivers = new ArrayList<>();
+//                    receivers.forEach(receiver -> {
+//                        PmNotifyReceiver pmNotifyReceiver = new PmNotifyReceiver();
+//                        if(receiver != null) {
+//                            pmNotifyReceiver.setReceiverType(receiver.getReceiverType());
+//                            if(receiver.getReceivers() != null) {
+//                                List<Long> ids = receiver.getReceivers().stream().map(receiverName -> {
+//                                    return receiverName.getId();
+//                                }).collect(Collectors.toList());
+//                                pmNotifyReceiver.setReceiverIds(ids);
+//                            }
+//                            pmNotifyReceivers.add(pmNotifyReceiver);
 //                        }
-//
-//                    }
-//                }
+//                    });
+                    receiverList.setReceivers(pmNotifyReceivers);
+                    record.setReceiverJson(receiverList.toString());
+                    record.setOwnerType(EntityType.ENERGY_TASK.getCode());
+                    record.setOwnerId(task.getId());
+                    record.setNotifyType(PmNotifyType.BEFORE_DELAY.getCode());
+                    record.setNotifyMode(PmNotifyMode.MESSAGE.getCode());
+
+                    //notify_time
+                    Timestamp delaytime = minusMinutes(task.getExecutiveExpireTime(), plan.getNotifyTickMinutes());
+                    record.setNotifyTime(delaytime);
+
+                    pmNotifyService.pushPmNotifyRecord(record);
+                }
+
             }
         }
+    }
 
+    private Timestamp minusMinutes(Timestamp startTime, int minus) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startTime);
+        calendar.add(Calendar.MINUTE, -minus);
+        Timestamp time = new Timestamp(calendar.getTimeInMillis());
+        return time;
+    }
 
+    private Timestamp strToTimestamp(String str) {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
+
+        Timestamp ts = null;
+        try {
+            ts = new Timestamp(sdf.parse(str).getTime());
+        } catch (ParseException e) {
+            LOGGER.error("validityPeriod data format is not yyyymmdd.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "validityPeriod data format is not yyyymmdd.");
+        }
+
+        return ts;
     }
 }

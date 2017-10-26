@@ -17,6 +17,7 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EnergyPlanSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.util.StringHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -233,10 +234,11 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
                     }
                     dto.setGroups(groups);
                 }
+                LOGGER.debug("source: {}, plandto: {}", StringHelper.toJsonString(dto));
                 dtos.add(dto);
             }
             catch(Exception ex) {
-                LOGGER.info("getTopicIds error " + ex.getMessage());
+                LOGGER.info("getEnergyPlanDTOs error " + ex.getMessage());
             }
         }
 
