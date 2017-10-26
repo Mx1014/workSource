@@ -100,6 +100,8 @@ INSERT INTO `eh_general_forms` (`id`, `namespace_id`, `organization_id`, `owner_
 
 set @id = IFNULL((select MAX(id) FROM eh_lease_configs), 1);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999973', NULL, NULL, 'displayNameStr', '楼幢介绍,虚伪以待', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 	VALUES ((@id := @id + 1), '999975', NULL, NULL, 'displayNameStr', '项目介绍,待租物业', NULL, NULL);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 	VALUES ((@id := @id + 1), '999975', NULL, NULL, 'displayOrderStr', '1,2', NULL, NULL);
@@ -107,6 +109,8 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, 
 	VALUES ((@id := @id + 1), '999971', NULL, NULL, 'displayNameStr', '办公招租,商户招租', NULL, NULL);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 	VALUES ((@id := @id + 1), '999971', NULL, NULL, 'displayOrderStr', '1,2', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999973', NULL, NULL, 'displayOrderStr', '1,2', NULL, NULL);
 
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 	VALUES ((@id := @id + 1), '1000000', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
