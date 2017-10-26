@@ -1,44 +1,32 @@
 package com.everhomes.general_approval;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.spi.LocaleServiceProvider;
-import java.util.stream.Collectors;
-
-import com.everhomes.flow.*;
-import com.everhomes.general_form.GeneralForm;
-import com.everhomes.general_form.GeneralFormProvider;
-
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.rest.general_approval.*;
-import com.everhomes.server.schema.Tables;
-import org.apache.commons.lang.StringUtils;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.flow.*;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowCaseFileDTO;
-import com.everhomes.rest.flow.FlowCaseFileValue;
-import com.everhomes.rest.flow.FlowReferType;
-import com.everhomes.rest.flow.FlowServiceTypeDTO;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.*;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 @Component
 public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 	protected static List<String> DEFUALT_FIELDS = new ArrayList<String>();
@@ -369,6 +357,10 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
                 Integer.MAX_VALUE - 1, (locator, query) -> {
                     query.addConditions(Tables.EH_GENERAL_APPROVALS.NAMESPACE_ID.eq(namespaceId));
+                    query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.in(
+                            GeneralApprovalStatus.RUNNING.getCode(),
+                            GeneralApprovalStatus.INVALID.getCode())
+                    );
                     return query;
                 });
         if(gas != null) {
