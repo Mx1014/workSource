@@ -334,7 +334,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
 				stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
 				flowService.processAutoStep(stepDTO);
-				// ctx.setContinueStep(false);
+				ctx.setContinueFlag(false);
 
 			}else
 			if ("ASSIGNING".equals(nodeType)) {
@@ -347,7 +347,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
                     stepDTO.setSubjectId(subject.getId());
                 }
 				flowService.processAutoStep(stepDTO);
-				// ctx.setContinueStep(false);
+				ctx.setContinueFlag(false);
 
 
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
