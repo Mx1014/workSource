@@ -404,3 +404,5 @@ ALTER TABLE eh_customer_patents modify COLUMN status TINYINT DEFAULT 2 COMMENT '
 ALTER TABLE eh_customer_tracking_plans modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
 ALTER TABLE eh_customer_trackings modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
 ALTER TABLE eh_customer_trademarks modify COLUMN status TINYINT DEFAULT 2 COMMENT '0: inactive; 1: waiting for approval; 2: active';
+
+ALTER TABLE `eh_flow_service_types` ADD COLUMN `module_id` BIGINT NOT NULL DEFAULT 0;
