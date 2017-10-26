@@ -5048,6 +5048,7 @@ public class FlowServiceImpl implements FlowService {
         // 详情信息
         List<FlowCaseEntity> entities = getFlowCaseEntities(flowUserTypes, ctx.getGrantParentState().getFlowCase());
         dto.setEntities(entities);
+        dto.setCustomObject(ctx.getGrantParentState().getFlowCase().getCustomObject());
 
         // 后台管理界面不显示按钮
         if (needFlowButton) {
@@ -5243,6 +5244,7 @@ public class FlowServiceImpl implements FlowService {
 
         List<FlowCaseEntity> entities = getFlowCaseEntities(flowUserTypes, ctx.getGrantParentState().getFlowCase());
         dto.setEntities(entities);
+        dto.setCustomObject(ctx.getGrantParentState().getFlowCase().getCustomObject());
 
         List<FlowLaneLogDTO> list = getFlowLaneLogDTOList(flowGraph, flowUserTypes, flowCase, allFlowCase, laneList);
         for (int i = list.size() - 1; i >= 0; i--) {
@@ -5361,11 +5363,10 @@ public class FlowServiceImpl implements FlowService {
             }
             return flowListenerManager.onFlowCaseDetailRender(flowCase, null);
         } catch (Exception e) {
-            LOGGER.error("Flow module listener onFlowCaseDetailRender error", e);
-            // throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_DETAIL_RENDER,
-            //         "Flow module listener onFlowCaseDetailRender error");
+            LOGGER.error("Flow module listener onFlowCaseDetailRender error, flowCaseId = "+flowCase.getId(), e);
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_DETAIL_RENDER,
+                    "Flow module listener onFlowCaseDetailRender error, flowCaseId=%s", flowCase.getId());
         }
-        return new ArrayList<>();
     }
 
     private List<FlowButtonDTO> getFlowButtonDTOList(FlowGraph flowGraph, Long userId, List<FlowUserType> flowUserTypes, boolean checkProcessor, FlowCase flowCase, List<FlowNode> nodes, List<FlowLane> laneList) {
