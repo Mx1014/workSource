@@ -94,6 +94,7 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
             XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
             builder.field("planName", plan.getName());
+            builder.field("status", plan.getStatus());
             builder.field("notifyTickMinutes", plan.getNotifyTickMinutes());
             builder.field("communityId", plan.getTargetId());
             builder.field("ownerId", plan.getOwnerId());

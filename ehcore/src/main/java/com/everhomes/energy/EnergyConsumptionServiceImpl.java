@@ -2799,6 +2799,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             List<EnergyPlanMeterDTO> meters = new ArrayList<>();
             meterMaps.forEach(meter -> {
                 EnergyPlanMeterDTO meterDTO = ConvertHelper.convert(meter, EnergyPlanMeterDTO.class);
+                EnergyMeter energyMeter = meterProvider.findById(cmd.getNamespaceId(), meter.getMeterId());
+                if(energyMeter != null) {
+                    meterDTO.setMeterName(energyMeter.getName());
+                    meterDTO.setMeterNumber(energyMeter.getMeterNumber());
+                    meterDTO.setMeterType(energyMeter.getMeterType());
+                }
+
+                meterDTO.setAddresses(populateEnergyMeterAddresses(meter.getMeterId()));
                 meters.add(meterDTO);
             });
             response.setMeters(meters);
