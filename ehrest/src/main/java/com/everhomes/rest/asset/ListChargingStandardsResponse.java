@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.List;
 
 /**
@@ -13,6 +15,7 @@ import java.util.List;
  *</ul>
  */
 public class ListChargingStandardsResponse {
+    @ItemType(ListChargingStandardsDTO.class)
     private List<ListChargingStandardsDTO> list;
     private Long nextPageAnchor;
 
