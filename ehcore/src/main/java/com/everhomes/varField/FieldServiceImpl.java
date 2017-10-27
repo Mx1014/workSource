@@ -659,7 +659,7 @@ public class FieldServiceImpl implements FieldService {
             LOGGER.info("begin to handle field "+fieldName+" parameter namespaceid is "+ namespaceId + "communityid is "+ communityId + " moduleName is "+ moduleName + ", fieldName is "+ fieldName+" class is "+clz.toString());
             if(!invoke.getClass().getSimpleName().equals("String")){
                 long l = Long.parseLong(invoke.toString());
-                ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(namespaceId, communityId,l);
+                ScopeFieldItem item = findScopeFieldItemByFieldItemId(namespaceId, communityId,l);
                 if(item!=null&&item.getItemId()!=null){
                     invoke = String.valueOf(item.getItemDisplayName());
                     LOGGER.info("field transferred to item id is "+invoke);
@@ -976,7 +976,7 @@ public class FieldServiceImpl implements FieldService {
                                     fieldName.indexOf("Flag") == fieldName.length() - 4
                                     )&& !StringUtils.isEmpty(cellValue)){
                                 //特殊处理status，将value转为对应的id？如果转不到，则设为“”，由set方法设为null
-                                ScopeFieldItem item = fieldProvider.findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cellValue);
+                                ScopeFieldItem item = findScopeFieldItemByDisplayName(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), cellValue);
                                 if(item!=null&&item.getItemId()!=null){
                                     cellValue = String.valueOf(item.getItemId());
                                     LOGGER.info("field transferred to item id is "+cellValue);
