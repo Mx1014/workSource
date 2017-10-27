@@ -43,7 +43,7 @@ public interface UserActivityProvider {
 
     List<UserProfile> findProfileByUid(Long uid);
 
-    List<User> listUnAuthUsersByProfileCommunityId(Integer namespaceId, Long communityId, Long anchor, int pagesize,  Byte CommunityType);
+    List<User> listUnAuthUsersByProfileCommunityId(Integer namespaceId, Long communityId, Long anchor, int pagesize,  Byte CommunityType, Byte userSourceType);
 
     void updateUserProfile(UserProfile userProfile);
 

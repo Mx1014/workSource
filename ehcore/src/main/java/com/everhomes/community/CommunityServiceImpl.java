@@ -1564,6 +1564,13 @@ public class CommunityServiceImpl implements CommunityService {
 				c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
 			}
             query.addConditions(c);
+
+			if(UserSourceType.WEIXIN == UserSourceType.fromCode(cmd.getUserSourceType())){
+				query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
+			}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
+				query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
+			}
+
             if(null != locator.getAnchor())
             	query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
             //query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
@@ -1977,7 +1984,7 @@ public class CommunityServiceImpl implements CommunityService {
 				if(UserSourceType.WEIXIN == UserSourceType.fromCode(cmd.getUserSourceType())){
 					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
 				}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
-					query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.isNotNull());
+					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
 				}
 
 				if(null != cmd.getCommunityId()){
@@ -2085,7 +2092,7 @@ public class CommunityServiceImpl implements CommunityService {
 		CommunityUserResponse response = new CommunityUserResponse();
 		List<CommunityUserDto> dtos = new ArrayList<>();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.COMMERCIAL.getCode());
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.COMMERCIAL.getCode(), cmd.getUserSourceType());
 		if(users != null){
 			if(users.size() > pageSize){
 				users.remove(pageSize);
@@ -2127,7 +2134,7 @@ public class CommunityServiceImpl implements CommunityService {
 		CommunityUserAddressResponse response = new CommunityUserAddressResponse();
 		List<CommunityUserAddressDTO> dtos = new ArrayList<>();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.RESIDENTIAL.getCode());
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.RESIDENTIAL.getCode(), cmd.getUserSourceType());
 		if(users != null){
 			if(users.size() > pageSize){
 				users.remove(pageSize);
@@ -2451,7 +2458,7 @@ public class CommunityServiceImpl implements CommunityService {
 		int authingCount = memberIds.size() - authCount;
 
 		//未认证用户 userprofile表中的用户-已认证或者认证中的用户
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode());
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode(), null);
 		//未认证
 		int notAuthCount = authMemberIds.size();
 
@@ -2518,7 +2525,7 @@ public class CommunityServiceImpl implements CommunityService {
 		int wxAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.WX.getCode(), null);
 
 		//未认证用户 userprofile表中的用户-已认证或者认证中的用户
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode());
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null);
 		if(users == null){
 			users = new ArrayList<>();
 		}

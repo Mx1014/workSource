@@ -232,7 +232,7 @@ public class UserActivityProviderImpl implements UserActivityProvider {
     }
 
     @Override
-    public List<User> listUnAuthUsersByProfileCommunityId(Integer namespaceId, Long communityId, Long anchor, int pagesize, Byte communityType) {
+    public List<User> listUnAuthUsersByProfileCommunityId(Integer namespaceId, Long communityId, Long anchor, int pagesize, Byte communityType, Byte userSourceType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
 
         SelectQuery<Record> query = context.select(Tables.EH_USERS.fields()).from(Tables.EH_USERS).getQuery();
@@ -244,6 +244,12 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         }
         if(namespaceId != null){
             query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+        }
+
+        if(UserSourceType.WEIXIN == UserSourceType.fromCode(userSourceType)){
+            query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
+        }else if(UserSourceType.APP == UserSourceType.fromCode(userSourceType)){
+            query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
         }
 
         excludeAuthUser(context, query, namespaceId, communityType);

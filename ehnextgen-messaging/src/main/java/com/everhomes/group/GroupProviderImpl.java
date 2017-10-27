@@ -826,6 +826,8 @@ public class GroupProviderImpl implements GroupProvider {
     				 if(null != pageSize){
     					 query.addLimit(count);
     				 }
+
+                    query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_GROUP_MEMBERS.MEMBER_ID));
     				
     				 List<GroupMember> groupList = query.fetch().map((r) -> {
     					 return RecordHelper.convert(r, GroupMember.class);
