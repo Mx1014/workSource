@@ -1,6 +1,12 @@
 package com.everhomes.rest.organization.pm;
 
 /**
+ * <ul>
+ *     <li>namespaceId: 域空间id</li>
+ *     <li>communityId: 园区id</li>
+ *     <li>ownerType: 所属主体类型</li>
+ *     <li>ownerId: 所属主体id</li>
+ * </ul>
  * Created by ying.xiong on 2017/10/26.
  */
 public class ListDefaultChargingItemsCommand {
