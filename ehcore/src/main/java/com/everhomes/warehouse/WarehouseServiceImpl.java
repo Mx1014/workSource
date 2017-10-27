@@ -1359,7 +1359,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             createFlowCaseCommand.setReferId(request.getId());
             createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
             createFlowCaseCommand.setContent(request.getRemark());
-            createFlowCaseCommand.setServiceType(EntityType.WAREHOUSE_REQUEST.getCode());
+            createFlowCaseCommand.setServiceType("领用申请");
             createFlowCaseCommand.setProjectId(request.getOwnerId());
             createFlowCaseCommand.setProjectType(request.getOwnerType());
 

@@ -256,3 +256,11 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 set @id = (select MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 	((@id := @id + 1), 'customer', '10018', 'zh_CN', '有合同的客户不能删除');
+
+-- 工作流 add by xiongying20171027
+SET @ns_id = 0;
+SET @flow_service_types_id = IFNULL((SELECT MAX(id) FROM `eh_flow_service_types`), 1);
+INSERT INTO `eh_flow_service_types` (`id`, `namespace_id`, `service_name`) 
+  VALUES ((@flow_service_types_id := @flow_service_types_id + 1), @ns_id, '合同申请');
+INSERT INTO `eh_flow_service_types` (`id`, `namespace_id`, `service_name`) 
+  VALUES ((@flow_service_types_id := @flow_service_types_id + 1), @ns_id, '领用申请');
