@@ -867,7 +867,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd) {
         SimpleDateFormat sdf_dateStrD = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat sdf_dateStr = new SimpleDateFormat("yyyy-MM");
+//        SimpleDateFormat sdf_dateStr = new SimpleDateFormat("yyyy-MM");
         Gson gson = new Gson();
         //获得所有计价条款包裹（内有标准，数据，和住址）
 
@@ -926,7 +926,7 @@ public class AssetServiceImpl implements AssetService {
                         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                 }
                 //计算
-                List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle,cmd,property);
+                List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle,cmd,property,standard);
 
                 long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), billItemsExpectancies.size());
                 long currentBillItemSeq = nextBillItemBlock - billItemsExpectancies.size() + 1;
@@ -1121,7 +1121,7 @@ public class AssetServiceImpl implements AssetService {
         });
     }
 
-    private List<BillItemsExpectancy> assetFeeHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd,ContractProperty property) {
+    private List<BillItemsExpectancy> assetFeeHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd,ContractProperty property,EhPaymentChargingStandards standard) {
         //返回的列表
         List<BillItemsExpectancy> list = new ArrayList<>();
         //计算的时间区间
@@ -1775,11 +1775,11 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula, float duration) {
-        Gson gson = new Gson();
+
         HashMap<String,String> map = new HashMap();
         for(int i = 0; i < variableIdAndValueList.size(); i++){
             VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
-            map.put((String)variableIdAndValue.getVaribleIdentifier(),((BigDecimal)variableIdAndValue.getVariableValue()).toString());
+            map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
         }
         for(Map.Entry<String,String> entry : map.entrySet()){
             formula = formula.replace(entry.getKey(),entry.getValue());
@@ -1787,7 +1787,31 @@ public class AssetServiceImpl implements AssetService {
         formula += "*"+duration;
         BigDecimal response = CalculatorUtil.arithmetic(formula);
         response.setScale(2,BigDecimal.ROUND_CEILING);
+
         return response;
+    }
+    private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula, float duration,EhPaymentChargingStandards standard) {
+        Byte formulaType = standard.getFormulaType();
+        BigDecimal result = null;
+        if(formulaType == 1 || formulaType ==2){
+
+            HashMap<String,String> map = new HashMap();
+            for(int i = 0; i < variableIdAndValueList.size(); i++){
+                VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
+                map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
+            }
+            for(Map.Entry<String,String> entry : map.entrySet()){
+                formula = formula.replace(entry.getKey(),entry.getValue());
+            }
+            formula += "*"+duration;
+            result = CalculatorUtil.arithmetic(formula);
+            result.setScale(2,BigDecimal.ROUND_CEILING);
+
+        }
+        else if(formulaType == 3 || formulaType == 4){
+            //阶梯
+        }
+        return result;
     }
     @Scheduled(cron = "0 0 0 * * ?")
     @Override
