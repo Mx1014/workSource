@@ -21,10 +21,7 @@ import com.everhomes.server.schema.tables.records.EhEnergyPlanMeterMapRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.JoinType;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -251,10 +248,12 @@ public class EnergyPlanProviderImpl implements EnergyPlanProvider {
     public List<PlanMeter> listByEnergyMeter(Long meterId) {
         List<PlanMeter> map = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhEnergyPlanMeterMapRecord> query = context.selectQuery(Tables.EH_ENERGY_PLAN_METER_MAP);
-        query.addConditions(Tables.EH_ENERGY_PLAN_METER_MAP.METER_ID.eq(meterId));
+        SelectQuery<Record> query = context.selectQuery();
+        query.addSelect(Tables.EH_ENERGY_PLAN_METER_MAP.METER_ID,Tables.EH_ENERGY_PLANS.ID,Tables.EH_ENERGY_PLANS.REPEAT_SETTING_ID);
+        query.addFrom(Tables.EH_ENERGY_PLAN_METER_MAP);
         query.addJoin(Tables.EH_ENERGY_PLANS, JoinType.LEFT_OUTER_JOIN,
                 Tables.EH_ENERGY_PLANS.ID.eq(Tables.EH_ENERGY_PLAN_METER_MAP.PLAN_ID));
+        query.addConditions(Tables.EH_ENERGY_PLAN_METER_MAP.METER_ID.eq(meterId));
         query.addConditions(Tables.EH_ENERGY_PLANS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
         query.fetch().map((r) -> {
             PlanMeter planMeter = new PlanMeter();
