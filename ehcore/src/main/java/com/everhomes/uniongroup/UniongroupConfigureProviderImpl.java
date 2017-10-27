@@ -261,7 +261,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
             Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUniongroupConfigures.class));
             r.setId(id);
             r.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            r.setOperatorUid(UserContext.current().getUser().getId());
+//            r.setOperatorUid(UserContext.current().getUser().getId());
             if(n2 != null){
                 r.setVersionCode(n2);
             }
@@ -287,7 +287,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
             Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUniongroupMemberDetails.class));
             r.setId(id);
             r.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            r.setOperatorUid(UserContext.current().getUser().getId());
+//            r.setOperatorUid(UserContext.current().getUser().getId());
             if(n2 != null){
                 r.setVersionCode(n2);
             }
