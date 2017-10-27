@@ -81,6 +81,8 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         if(tasks != null && tasks.size() > 0) {
             tasks.forEach(task -> {
 //                paymentExpectancies_re_struct();
+                //task关联的表关联的门牌有没有合同
+                //门牌有没有默认计价条款、所属楼栋有没有默认计价条款、所属园区有没有默认计价条款
                 task.setGeneratePaymentFlag(TaskGeneratePaymentFlag.GENERATED.getCode());
                 taskProvider.updateEnergyMeterTask(task);
             });

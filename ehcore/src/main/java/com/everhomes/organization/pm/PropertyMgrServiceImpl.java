@@ -46,6 +46,7 @@ import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
@@ -6331,21 +6332,83 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public void deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd) {
+		DefaultChargingItem item = findDefaultChargingItem(cmd.getId());
+		item.setStatus(CommonStatus.INACTIVE.getCode());
+		item.setDeleteUid(UserContext.currentUserId());
+		item.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
+		defaultChargingItemProvider.updateDefaultChargingItem(item);
+	}
+
+	private DefaultChargingItem findDefaultChargingItem(Long id) {
+		DefaultChargingItem item = defaultChargingItemProvider.findById(id);
+		if(item == null || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(item.getStatus()))) {
+			LOGGER.error("DefaultChargingItem id: {} is not exist or active!", id);
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"DefaultChargingItem id is not exist or active.");
+		}
+		return item;
 	}
 
 	@Override
 	public DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd) {
-		return null;
+		DefaultChargingItem defaultChargingItem = ConvertHelper.convert(cmd, DefaultChargingItem.class);
+		if(cmd.getChargingStartTime() != null) {
+			defaultChargingItem.setChargingStartTime(new Timestamp(cmd.getChargingStartTime()));
+		}
+		if(cmd.getChargingExpiredTime() != null) {
+			defaultChargingItem.setChargingExpiredTime(new Timestamp(cmd.getChargingExpiredTime()));
+		}
+		defaultChargingItem.setStatus(CommonStatus.ACTIVE.getCode());
+		if(cmd.getId() == null) {
+			defaultChargingItemProvider.createDefaultChargingItem(defaultChargingItem);
+			dealDefaultChargingItemProperty(defaultChargingItem, cmd.getApartments());
+		} else {
+			DefaultChargingItem exist = findDefaultChargingItem(cmd.getId());
+			defaultChargingItem.setCreateUid(exist.getCreateUid());
+			defaultChargingItem.setCreateTime(exist.getCreateTime());
+			defaultChargingItemProvider.updateDefaultChargingItem(defaultChargingItem);
+		}
+		return toDefaultChargingItemDTO(defaultChargingItem);
 	}
 
 	@Override
 	public List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd) {
+		List<DefaultChargingItem> items = defaultChargingItemProvider.listDefaultChargingItems(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(items != null && items.size() > 0) {
+			return items.stream().map(item -> toDefaultChargingItemDTO(item)).collect(Collectors.toList());
+		}
 		return null;
 	}
 
-	private void dealDefaultChargingItemProperty(List<DefaultChargingItemPropertyDTO> apartments) {
+	private void dealDefaultChargingItemProperty(DefaultChargingItem item, List<DefaultChargingItemPropertyDTO> apartments) {
+		List<DefaultChargingItemProperty> existItemProperties = defaultChargingItemProvider.findByItemId(item.getId());
+		Map<Long, DefaultChargingItemProperty> map = new HashMap<>();
+		if(existItemProperties != null && existItemProperties.size() > 0) {
+			existItemProperties.forEach(address -> {
+				map.put(address.getId(), address);
+			});
+		}
 
+		if(apartments != null && apartments.size() > 0) {
+			apartments.forEach(itemProperty -> {
+				if(itemProperty.getId() == null) {
+					DefaultChargingItemProperty property = ConvertHelper.convert(itemProperty, DefaultChargingItemProperty.class);
+					property.setDefaultChargingItemId(item.getId());
+					property.setNamespaceId(item.getNamespaceId());
+					property.setStatus(CommonStatus.ACTIVE.getCode());
+					defaultChargingItemProvider.createDefaultChargingItemProperty(property);
+				} else {
+					map.remove(itemProperty.getId());
+				}
+			});
+		}
+		if(map.size() > 0) {
+			map.forEach((id, property) -> {
+				property.setStatus(CommonStatus.INACTIVE.getCode());
+				defaultChargingItemProvider.updateDefaultChargingItemProperty(property);
+			});
+		}
 	}
 
 	private DefaultChargingItemDTO toDefaultChargingItemDTO(DefaultChargingItem item) {

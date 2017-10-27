@@ -100,7 +100,8 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
             builder.field("namespaceId", task.getNamespaceId());
             builder.field("startTime", task.getExecutiveStartTime());
             builder.field("endTime", task.getExecutiveExpireTime());
-            builder.field("status", task.getStatus());
+            Byte status = task.getStatus() == null ? 0 : task.getStatus();
+            builder.field("status", status);
             EnergyMeter meter = energyMeterProvider.findById(task.getNamespaceId(), task.getMeterId());
             if(meter != null) {
                 builder.field("meter", meter.getName());
@@ -159,6 +160,10 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
             RangeFilterBuilder rf = new RangeFilterBuilder("endTime");
             rf.lt(cmd.getEndTime());
             fb = FilterBuilders.andFilter(fb, rf);
+        }
+
+        if(cmd.getStatus() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
         }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());

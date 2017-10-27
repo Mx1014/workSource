@@ -17,6 +17,7 @@ import java.util.List;
  *     <li>chargingStandardName: 收费标准名称</li>
  *     <li>formula: 公式</li>
  *     <li>formulaType: 公式类型</li>
+ *     <li>billingCycle: 计费周期</li>
  *     <li>lateFeeStandardId: 滞纳金标准id</li>
  *     <li>chargingVariables: PaymentVariable对象的json字符串</li>
  *     <li>chargingStartTime: 起记日期</li>
@@ -35,6 +36,7 @@ public class UpdateDefaultChargingItemCommand {
     private Long chargingStandardId;
     private String formula;
     private Byte formulaType;
+    private Byte billingCycle;
     private Long lateFeeStandardId;
     private String chargingVariables;
     private Long chargingStartTime;
@@ -44,6 +46,14 @@ public class UpdateDefaultChargingItemCommand {
 
     public List<DefaultChargingItemPropertyDTO> getApartments() {
         return apartments;
+    }
+
+    public Byte getBillingCycle() {
+        return billingCycle;
+    }
+
+    public void setBillingCycle(Byte billingCycle) {
+        this.billingCycle = billingCycle;
     }
 
     public void setApartments(List<DefaultChargingItemPropertyDTO> apartments) {
