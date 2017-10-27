@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.parking.clearance;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.flow.*;
@@ -11,9 +10,7 @@ import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
-import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.parking.ParkingLocalStringCode;
 import com.everhomes.rest.parking.clearance.ParkingClearanceLogStatus;
@@ -160,7 +157,7 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
     }
 
     @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase) {
+    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         return flowCase.getContent();
     }
 

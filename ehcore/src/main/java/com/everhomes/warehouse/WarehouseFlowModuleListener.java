@@ -1,23 +1,12 @@
 package com.everhomes.warehouse;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.flow.*;
-import com.everhomes.general_approval.GeneralApproval;
-import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
-import com.everhomes.module.ServiceModule;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.general_approval.*;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.warehouse.CreateRequestCommand;
 import com.everhomes.rest.warehouse.ReviewResult;
 import com.everhomes.search.WarehouseRequestMaterialSearcher;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
@@ -72,7 +61,7 @@ public class WarehouseFlowModuleListener implements FlowModuleListener {
     }
 
     @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase) {
+    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         return null;
     }
 
