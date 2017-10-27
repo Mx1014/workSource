@@ -71,6 +71,97 @@ CREATE TABLE `eh_customer_tracking_plans` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- 4.10.3，合并记得删
+-- 园区入驻3.6 add by sw 20171023
+DROP TABLE IF EXISTS `eh_lease_configs`;
+DROP TABLE IF EXISTS `eh_lease_configs2`;
+
+CREATE TABLE `eh_lease_configs` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) DEFAULT NULL COMMENT 'owner type, e.g EhCommunities',
+  `owner_id` bigint(20) DEFAULT NULL COMMENT 'owner id, e.g eh_communities id',
+  `config_name` varchar(128) DEFAULT NULL,
+  `config_value` varchar(128) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `creator_uid` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_lease_project_communities` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `lease_project_id` bigint(20) NOT NULL COMMENT 'lease project id',
+  `community_id` bigint(20) NOT NULL COMMENT 'community id',
+  `creator_uid` bigint(20) NOT NULL,
+  `create_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE `eh_lease_projects` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `project_id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `city_id` bigint(20) NOT NULL COMMENT 'city id in region table',
+  `city_name` varchar(64) DEFAULT NULL COMMENT 'redundant for query optimization',
+  `area_id` bigint(20) NOT NULL COMMENT 'area id in region table',
+  `area_name` varchar(64) DEFAULT NULL COMMENT 'redundant for query optimization',
+  `address` varchar(512) DEFAULT NULL,
+  `longitude` double DEFAULT NULL,
+  `latitude` double DEFAULT NULL,
+  `contact_name` varchar(128) DEFAULT NULL,
+  `contact_phone` varchar(128) DEFAULT NULL COMMENT 'the phone number',
+  `description` text,
+  `traffic_description` text,
+  `poster_uri` varchar(256) DEFAULT NULL,
+  `extra_info_json` text,
+
+  `creator_uid` bigint(20) DEFAULT NULL COMMENT 'user who suggested the creation',
+  `create_time` datetime DEFAULT NULL,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 帖子增加置顶功能  add by yanjun 201710231623
+ALTER TABLE `eh_forum_posts` ADD COLUMN `stick_flag`  tinyint(4) NOT NULL DEFAULT 0 COMMENT '是否置顶，0-否，1-是';
+ALTER TABLE `eh_activities` ADD COLUMN `stick_flag`  tinyint(4) NOT NULL DEFAULT 0 COMMENT '是否置顶，0-否，1-是';
+
+-- merge from feature-customer add by xiongying20171024
+CREATE TABLE `eh_customer_events` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER  NOT NULL COMMENT '域空间id',
+  `customer_type` TINYINT NOT NULL COMMENT '所属客户类型',
+  `customer_id`  BIGINT    COMMENT '所属客户id',
+  `customer_name` VARCHAR(128)   COMMENT '客户名称',
+  `contact_name` VARCHAR(64) ,
+  `content`  TEXT,
+  `creator_uid`  BIGINT   COMMENT '创建人uid',
+  `create_time` DATETIME  ,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_customer_tracking_plans` (
+  `id` BIGINT  NOT NULL,
+  `namespace_id` INTEGER  NOT NULL COMMENT '域空间id',
+  `customer_type` TINYINT  NOT NULL COMMENT '所属客户类型',
+  `customer_id`  BIGINT   COMMENT '所属客户id',
+  `customer_name` VARCHAR(128)   COMMENT '客户名称',
+  `contact_name` VARCHAR(64)   COMMENT '联系人',
+  `tracking_type` BIGINT   COMMENT '计划跟进类型',
+  `tracking_time` DATETIME   COMMENT '跟进时间',
+  `notify_time` DATETIME   COMMENT '提醒时间',
+  `title` VARCHAR(128) DEFAULT NULL COMMENT '标题',
+  `content` TEXT  COMMENT '内容',
+  `status`  TINYINT  NOT NULL COMMENT '0: inactive; 1: waiting for approval; 2: active',
+  `creator_uid` BIGINT     COMMENT '创建人uid',
+  `create_time` DATETIME   COMMENT '创建时间',
+  `update_uid`  BIGINT     COMMENT '修改人uid',
+  `update_time` DATETIME   COMMENT '修改时间',
+  `delete_uid`  BIGINT     COMMENT '删除人uid',
+  `delete_time` DATETIME   COMMENT '删除时间',
+  `notify_status` TINYINT  DEFAULT NULL COMMENT '提醒状态  0:无需提醒   1:待提醒   2:已提醒',
+  `read_status` TINYINT DEFAULT '0' COMMENT 'is read?  0:no  1:yes',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_customer_trackings` (
   `id` BIGINT  NOT NULL,
