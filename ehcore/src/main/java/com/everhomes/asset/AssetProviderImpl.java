@@ -2266,7 +2266,7 @@ public class AssetProviderImpl implements AssetProvider {
         SelectQuery<Record> query = context.selectQuery();
         List<PaymentBillGroupRule> rules = context.selectFrom(t)
                 .where(t.BILL_GROUP_ID.eq(billGroupId))
-                .limit(pageAnchor.intValue(),pageSize)
+                .limit(pageAnchor.intValue(),pageSize+1)
                 .fetchInto(PaymentBillGroupRule.class);
         for(int i = 0 ; i < rules.size(); i ++){
             PaymentBillGroupRule rule = rules.get(i);
