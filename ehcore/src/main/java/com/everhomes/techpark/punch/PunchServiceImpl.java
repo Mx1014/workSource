@@ -5000,6 +5000,7 @@ public class PunchServiceImpl implements PunchService {
 	@Scheduled(cron = "1 50 5 * * ?")
 	@Override
 	public void dayRefreshPunchGroupScheduled() {
+		LOGGER.debug("dayRefreshPunchGroupScheduled BEGIN !!! ");
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
 			// TODO: 2017/10/17 把状态为新增和更新的找出来,然后置状态为使用中,更新的把之前的正常废弃.然后用组织架构的接口改version为0
 			Set<Long> orgIds = new HashSet<>();
@@ -5045,6 +5046,8 @@ public class PunchServiceImpl implements PunchService {
 				}
 			}
 		}
+
+		LOGGER.debug("dayRefreshPunchGroupScheduled ---------- END ");
 	}
 
 	private void processTimeRule2Active(PunchRule pr) {
