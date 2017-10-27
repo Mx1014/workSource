@@ -6,6 +6,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
+import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
@@ -22,25 +23,20 @@ import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
-import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
-import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
-import com.everhomes.rest.techpark.expansion.ExpansionConst;
-import com.everhomes.rest.techpark.expansion.ApplyEntryErrorCodes;
+import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.yellowPage.YellowPage;
 import com.everhomes.yellowPage.YellowPageProvider;
-
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -86,6 +82,8 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     private EnterpriseApplyBuildingProvider enterpriseApplyBuildingProvider;
     @Autowired
     private EnterpriseOpRequestBuildingProvider enterpriseOpRequestBuildingProvider;
+    @Autowired
+    private CommunityProvider communityProvider;
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
 
@@ -126,18 +124,21 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         EnterpriseOpRequest applyEntry = enterpriseApplyEntryProvider.getApplyEntryById(flowCase.getReferId());
         if (applyEntry != null) {
+            String locale = UserContext.current().getUser().getLocale();
+
+            String defaultValue = localeStringService.getLocalizedString(ApplyEntryErrorCodes.SCOPE, String.valueOf(ApplyEntryErrorCodes.WU), locale, "");
+
             EnterpriseApplyEntryDTO dto = ConvertHelper.convert(applyEntry, EnterpriseApplyEntryDTO.class);
 
-            if (null != applyEntry.getAddressId()){
+            if (null != applyEntry.getAddressId()) {
                 Address address = addressProvider.findAddressById(applyEntry.getAddressId());
-                if (null != address){
+                if (null != address) {
                     dto.setApartmentName(address.getApartmentName());
                     dto.setBuildingName(address.getBuildingName());
                 }
             }
             flowCase.setCustomObject(JSONObject.toJSONString(dto));
 
-            String locale = UserContext.current().getUser().getLocale();
             Map<String, Object> map = new HashMap<>();
 
             String buildingName = processBuildingName(applyEntry);
@@ -152,7 +153,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 //            String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE,
 //                    applyEntry.getApplyType() + "", locale, "");
             ApplyEntrySourceType applyEntrySourceType = ApplyEntrySourceType.fromType(applyEntry.getSourceType());
-            String sourceType = null != applyEntrySourceType? applyEntrySourceType.getDescription() : "";
+            String sourceType = null != applyEntrySourceType ? applyEntrySourceType.getDescription() : "";
 
             GetLeasePromotionConfigCommand cmd = new GetLeasePromotionConfigCommand();
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -160,21 +161,21 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             byte i = -1;
             if (ApplyEntrySourceType.BUILDING == applyEntrySourceType) {
                 i = LeasePromotionOrder.PARK_INTRODUCE.getCode();
-            }else if (ApplyEntrySourceType.FOR_RENT == applyEntrySourceType) {
+            } else if (ApplyEntrySourceType.FOR_RENT == applyEntrySourceType) {
                 i = LeasePromotionOrder.LEASE_PROMOTION.getCode();
             }
-            if (null != config.getDisplayNames() ) {
-                for (Integer k: config.getDisplayOrders()) {
-                    if (k.byteValue() ==i) {
-                        sourceType =config.getDisplayNames().get(k - 1);
+            if (null != config.getDisplayNames()) {
+                for (Integer k : config.getDisplayOrders()) {
+                    if (k.byteValue() == i) {
+                        sourceType = config.getDisplayNames().get(k - 1);
                     }
                 }
             }
 
             map.put("sourceType", defaultIfNull(sourceType, ""));
 
-            map.put("description", defaultIfNull(applyEntry.getDescription(), ""));
-            
+            map.put("description", StringUtils.isBlank(applyEntry.getDescription()) ? defaultValue : applyEntry.getDescription());
+
             String jsonStr;
 
             jsonStr = localeTemplateService.getLocaleTemplateString(ApplyEntryErrorCodes.SCOPE, ApplyEntryErrorCodes.FLOW_DETAIL_CONTENT_CODE, locale, map, "[]");
@@ -184,7 +185,6 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             cmd2.setSourceId(dto.getId());
             List<FlowCaseEntity> formEntities = generalFormService.getGeneralFormFlowEntities(cmd2);
 
-            String defaultValue = localeStringService.getLocalizedString(ApplyEntryErrorCodes.SCOPE, String.valueOf(ApplyEntryErrorCodes.WU), locale, "");
 
             formEntities.forEach(r -> {
                 if (StringUtils.isBlank(r.getValue())) {
@@ -201,14 +201,14 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
         return new ArrayList<>();
     }
 
-    private Object defaultIfNull(Object obj, Object defaultValue) {
+    private String defaultIfNull(String obj, String defaultValue) {
         return obj != null ? obj : defaultValue;
     }
 
     private String processBuildingName(EnterpriseOpRequest applyEntry) {
         String buildingName = "";
-        if(ApplyEntryApplyType.fromType(applyEntry.getApplyType()).equals(ApplyEntryApplyType.RENEW)){
-			//续租的
+        if (ApplyEntryApplyType.fromType(applyEntry.getApplyType()).equals(ApplyEntryApplyType.RENEW)) {
+            //续租的
             if (null != applyEntry.getContractId()) {
                 Contract contract = contractProvider.findContractById(applyEntry.getContractId());
 
@@ -219,35 +219,45 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
                 StringBuilder sb = new StringBuilder();
                 int n = 1;
-                for (String name: buildingNames) {
+                for (String name : buildingNames) {
 
                     if (n == buildingNames.size()) {
                         sb.append(name);
-                    }else {
+                    } else {
                         sb.append(name).append(",");
                     }
                     n++;
                 }
 
                 buildingName = sb.toString();
-            }else {
+            } else {
                 buildingName = getBuildingName(applyEntry.getId());
             }
 
 		}else if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
+
+            Community community = communityProvider.findCommunityById(applyEntry.getCommunityId());
 			//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
             LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(applyEntry.getSourceId());
-			if(null != leaseBuilding){
+			if(null != leaseBuilding) {
+                buildingName = community.getName() + leaseBuilding.getName();
+            }
+        } else if (ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())) {
+            //园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
+            LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(applyEntry.getSourceId());
+            if (null != leaseBuilding) {
                 buildingName = leaseBuilding.getName();
             }
-		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType())){
+        } else if (ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType())) {
+
+            Community community = communityProvider.findCommunityById(applyEntry.getCommunityId());
 
             LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
 
             if (leasePromotion.getBuildingId() == EnterpriseApplyEntryService.OTHER_BUILDING_ID) {
 
                 buildingName = leasePromotion.getBuildingName();
-            }else {
+            } else {
                 LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(leasePromotion.getBuildingId());
                 if (null != leaseBuilding) {
                     buildingName = leaseBuilding.getName();
@@ -255,22 +265,23 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             }
 
             Address address = addressProvider.findAddressById(applyEntry.getAddressId());
-
+            String apartmentName = defaultIfNull(leasePromotion.getApartmentName(), "");
             if (null != address) {
-                buildingName = address.getBuildingName() + " " + address.getApartmentName();
+                apartmentName = address.getApartmentName();
             }
-		}else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(applyEntry.getSourceType())){
-			//创客入驻处的申请，申请来源=“创客申请” 创客入驻处的申请，楼栋=创客空间所在的楼栋
-			YellowPage yellowPage = yellowPageProvider.getYellowPageById(applyEntry.getSourceId());
-			if(null != yellowPage){
+            buildingName = community.getName() + buildingName + apartmentName;
+        } else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(applyEntry.getSourceType())) {
+            //创客入驻处的申请，申请来源=“创客申请” 创客入驻处的申请，楼栋=创客空间所在的楼栋
+            YellowPage yellowPage = yellowPageProvider.getYellowPageById(applyEntry.getSourceId());
+            if (null != yellowPage) {
                 if (null != yellowPage.getBuildingId()) {
                     LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingByBuildingId(yellowPage.getBuildingId());
-                    if(null != leaseBuilding){
+                    if (null != leaseBuilding) {
                         buildingName = leaseBuilding.getName();
                     }
                 }
-			}
-		}
+            }
+        }
 
         return buildingName;
     }
@@ -279,7 +290,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
         EnterpriseOpRequestBuilding enterpriseOpRequestBuilding = getEnterpriseOpRequestBuildingByRequestId(applyEntryId);
         if (null != enterpriseOpRequestBuilding) {
             LeaseBuilding leaseBuilding = enterpriseApplyBuildingProvider.findLeaseBuildingById(enterpriseOpRequestBuilding.getBuildingId());
-            if(null != leaseBuilding){
+            if (null != leaseBuilding) {
                 return leaseBuilding.getName();
             }
         }
@@ -298,7 +309,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
                 });
         if (opRequestBuildings.isEmpty()) {
             return null;
-        }else {
+        } else {
             return opRequestBuildings.get(0);
         }
     }
@@ -327,21 +338,21 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
     }
 
-	@Override
-	public void onFlowCaseCreating(FlowCase flowCase) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void onFlowCaseCreating(FlowCase flowCase) {
+        // TODO Auto-generated method stub
 
-	@Override
-	public void onFlowCaseCreated(FlowCase flowCase) {
-		// TODO Auto-generated method stub
-		
-	}
+    }
 
-	@Override
-	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
-			List<Tuple<String, Object>> variables) {
+    @Override
+    public void onFlowCaseCreated(FlowCase flowCase) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
+                                        List<Tuple<String, Object>> variables) {
 
         FlowCase flowCase = ctx.getFlowCase();
         EnterpriseOpRequest applyEntry = enterpriseApplyEntryProvider.getApplyEntryById(flowCase.getReferId());
@@ -352,16 +363,16 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             smsProvider.addToTupleList(variables, "applyUserName", applyUserName);
             smsProvider.addToTupleList(variables, "applyContact", applyContact);
 
-        }else if (SmsTemplateCode.APPLY_ENTRY_PROCESSING_BUTTON_APPROVE_CODE == templateId){
+        } else if (SmsTemplateCode.APPLY_ENTRY_PROCESSING_BUTTON_APPROVE_CODE == templateId) {
             //TODO: 给被分配的人发短信
 
             FlowEventLog flowEventLog = null;
             List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(ctx.getNextNode().getFlowNode().getId()
                     , ctx.getFlowCase().getId()
                     , ctx.getFlowCase().getStepCount()); ////stepCount 不加 1 的原因是，目标节点处理人是当前 stepCount 计算的 node_enter 的值
-            if(logs != null && logs.size() > 0) {
-                for(FlowEventLog log : logs) {
-                    if(log.getFlowUserId() != null && log.getFlowUserId() > 0) {
+            if (logs != null && logs.size() > 0) {
+                for (FlowEventLog log : logs) {
+                    if (log.getFlowUserId() != null && log.getFlowUserId() > 0) {
                         flowEventLog = log;
                     }
                 }
@@ -376,15 +387,15 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
                 }
             }
 
-        }else if (SmsTemplateCode.APPLY_ENTRY_PROCESSING_BUTTON_ABSORT_CODE == templateId){
+        } else if (SmsTemplateCode.APPLY_ENTRY_PROCESSING_BUTTON_ABSORT_CODE == templateId) {
             //
-        }else if (SmsTemplateCode.APPLY_ENTRY_PROCESSING_BUTTON_REMINDER_CODE == templateId){
+        } else if (SmsTemplateCode.APPLY_ENTRY_PROCESSING_BUTTON_REMINDER_CODE == templateId) {
             smsProvider.addToTupleList(variables, "applyUserName", applyUserName);
             smsProvider.addToTupleList(variables, "applyContact", applyContact);
 
-        }else if (SmsTemplateCode.APPLY_ENTRY_COMPLETED_CODE == templateId){
+        } else if (SmsTemplateCode.APPLY_ENTRY_COMPLETED_CODE == templateId) {
 
         }
-		
-	}
+
+    }
 }

@@ -1,15 +1,30 @@
 // @formatter:off
 package com.everhomes.sequence;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.admin.GetSequenceCommand;
 import com.everhomes.rest.admin.GetSequenceDTO;
-import com.everhomes.schema.tables.pojos.*;
+import com.everhomes.schema.tables.pojos.EhAclPrivileges;
+import com.everhomes.schema.tables.pojos.EhAclRoleAssignments;
+import com.everhomes.schema.tables.pojos.EhAclRoles;
+import com.everhomes.schema.tables.pojos.EhAcls;
+import com.everhomes.schema.tables.pojos.EhConfigurations;
+import com.everhomes.schema.tables.pojos.EhContentShardMap;
+import com.everhomes.schema.tables.pojos.EhMessageBoxs;
+import com.everhomes.schema.tables.pojos.EhMessages;
+import com.everhomes.schema.tables.pojos.EhNamespaces;
+import com.everhomes.schema.tables.pojos.EhServerShardMap;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhAclinkFirmware;
@@ -182,6 +197,8 @@ import com.everhomes.server.schema.tables.pojos.EhLeaseBuildings;
 import com.everhomes.server.schema.tables.pojos.EhLeaseConfigs;
 import com.everhomes.server.schema.tables.pojos.EhLeaseIssuerAddresses;
 import com.everhomes.server.schema.tables.pojos.EhLeaseIssuers;
+import com.everhomes.server.schema.tables.pojos.EhLeaseProjectCommunities;
+import com.everhomes.server.schema.tables.pojos.EhLeaseProjects;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotionAttachments;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotionCommunities;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
@@ -477,12 +494,6 @@ import com.everhomes.server.schema.tables.pojos.EhYzxSmsLogs;
 import com.everhomes.server.schema.tables.pojos.EhZjSyncdataBackup;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class SequenceServiceImpl implements SequenceService {
@@ -2183,6 +2194,24 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhActivityCategories.class, Tables.EH_ACTIVITY_CATEGORIES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ACTIVITY_CATEGORIES.ID.max()).from(Tables.EH_ACTIVITY_CATEGORIES).fetchOne().value1();
         });
+        syncTableSequence(null, EhFlowConditions.class, Tables.EH_FLOW_CONDITIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_CONDITIONS.ID.max()).from(Tables.EH_FLOW_CONDITIONS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowConditionExpressions.class, Tables.EH_FLOW_CONDITION_EXPRESSIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_CONDITION_EXPRESSIONS.ID.max()).from(Tables.EH_FLOW_CONDITION_EXPRESSIONS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowLanes.class, Tables.EH_FLOW_LANES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_LANES.ID.max()).from(Tables.EH_FLOW_LANES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowLinks.class, Tables.EH_FLOW_LINKS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_LINKS.ID.max()).from(Tables.EH_FLOW_LINKS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowPredefinedParams.class, Tables.EH_FLOW_PREDEFINED_PARAMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_PREDEFINED_PARAMS.ID.max()).from(Tables.EH_FLOW_PREDEFINED_PARAMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowBranches.class, Tables.EH_FLOW_BRANCHES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_BRANCHES.ID.max()).from(Tables.EH_FLOW_BRANCHES).fetchOne().value1();
+        });
         syncTableSequence(null, EhExpressParamSettings.class, Tables.EH_EXPRESS_PARAM_SETTINGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EXPRESS_PARAM_SETTINGS.ID.max()).from(Tables.EH_EXPRESS_PARAM_SETTINGS).fetchOne().value1();
         });
@@ -2210,6 +2239,22 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhPmNotifyLogs.class, Tables.EH_PM_NOTIFY_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_NOTIFY_LOGS.ID.max()).from(Tables.EH_PM_NOTIFY_LOGS).fetchOne().value1();
         });
+        
+        syncTableSequence(null, EhCustomerTrackings.class, Tables.EH_CUSTOMER_TRACKINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_CUSTOMER_TRACKINGS.ID.max()).from(Tables.EH_CUSTOMER_TRACKINGS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhCustomerTrackingPlans.class, Tables.EH_CUSTOMER_TRACKING_PLANS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_CUSTOMER_TRACKING_PLANS.ID.max()).from(Tables.EH_CUSTOMER_TRACKING_PLANS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhCustomerEvents.class, Tables.EH_CUSTOMER_EVENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_CUSTOMER_EVENTS.ID.max()).from(Tables.EH_CUSTOMER_EVENTS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhTrackingNotifyLogs.class, Tables.EH_TRACKING_NOTIFY_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_TRACKING_NOTIFY_LOGS.ID.max()).from(Tables.EH_TRACKING_NOTIFY_LOGS).fetchOne().value1();
+        });
 
         syncTableSequence(null, EhCommunityMapShops.class, Tables.EH_COMMUNITY_MAP_SHOPS.getName(), (dbContext) -> {
                     return dbContext.select(Tables.EH_COMMUNITY_MAP_SHOPS.ID.max()).from(Tables.EH_COMMUNITY_MAP_SHOPS).fetchOne().value1();
@@ -2233,7 +2278,6 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhServiceAllianceComments.class, Tables.EH_SERVICE_ALLIANCE_COMMENTS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENTS).fetchOne().value1();
         });
-
 
         syncTableSequence(null, EhRegions.class, Tables.EH_REGIONS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_REGIONS.ID.max()).from(Tables.EH_REGIONS).fetchOne().value1();
@@ -2281,6 +2325,14 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhNewsTagVals.class, Tables.EH_NEWS_TAG_VALS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_NEWS_TAG_VALS.ID.max()).from(Tables.EH_NEWS_TAG_VALS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhLeaseProjects.class, Tables.EH_LEASE_PROJECTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_LEASE_PROJECTS.ID.max()).from(Tables.EH_LEASE_PROJECTS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhLeaseProjectCommunities.class, Tables.EH_LEASE_PROJECT_COMMUNITIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_LEASE_PROJECT_COMMUNITIES.ID.max()).from(Tables.EH_LEASE_PROJECT_COMMUNITIES).fetchOne().value1();
         });
     }
 

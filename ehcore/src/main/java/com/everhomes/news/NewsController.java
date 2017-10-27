@@ -43,6 +43,23 @@ public class NewsController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /news/updateNews</b>
+	 * <p>
+	 * 修改一条新闻
+	 * </p>
+	 */
+	@RequestMapping("updateNews")
+	@RestReturn(String.class)
+	public RestResponse updateNews(UpdateNewsCommand cmd) {
+		newsService.updateNews(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /news/importNews</b>
 	 * <p>
 	 * 批量导入新闻
@@ -122,6 +139,24 @@ public class NewsController extends ControllerBase {
 		GetNewsDetailInfoResponse getNewsDetailInfoResponse = newsService.getNewsDetailInfo(cmd);
 
 		RestResponse response = new RestResponse(getNewsDetailInfoResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /news/getNewsDetail</b>
+	 * <p>
+	 * 查询新闻详情（编辑用）
+	 * </p>
+	 */
+	@RequestMapping("getNewsDetail")
+	@RestReturn(GetNewsDetailResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse getNewsDetail(GetNewsDetailInfoCommand cmd) {
+		GetNewsDetailResponse getNewsDetailResponse = newsService.getNewsDetail(cmd);
+
+		RestResponse response = new RestResponse(getNewsDetailResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

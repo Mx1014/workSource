@@ -14,16 +14,16 @@ package com.everhomes.rest.flow;
  *
  */
 public enum FlowCaseStatus {
-	INVALID((byte)0),
-    INITIAL((byte)1),
-    PROCESS((byte)2),
-    ABSORTED((byte)3),
-    FINISHED((byte)4),
-    EVALUATE((byte)5);
+    INVALID((byte) 0),
+    INITIAL((byte) 1),
+    PROCESS((byte) 2),
+    ABSORTED((byte) 3),
+    FINISHED((byte) 4),
+    EVALUATE((byte) 5);
 
-	private byte code;
+    private Byte code;
 
-    public byte getCode() {
+    public Byte getCode() {
         return this.code;
     }
 
@@ -32,28 +32,17 @@ public enum FlowCaseStatus {
     }
 
     public int getCodeInt() {
-        return (int)this.code;
+        return (int) this.code;
     }
 
     public static FlowCaseStatus fromCode(Byte code) {
-        if(code == null)
-            return null;
-        
-        switch(code.byteValue()) {
-        case 0 :
-            return INVALID;
-        case 1 :
-        		return INITIAL;
-        case 2 :
-            return PROCESS;
-        case 3 :
-            return ABSORTED;
-        case 4 :
-            return FINISHED;
-        case 5 :
-            return EVALUATE;
+        if (code != null) {
+            for (FlowCaseStatus status : FlowCaseStatus.values()) {
+                if (status.getCode().equals(code)) {
+                    return status;
+                }
+            }
         }
-        
         return null;
     }
 }

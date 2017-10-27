@@ -59,6 +59,7 @@ import com.everhomes.rest.forum.*;
 import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
+import com.everhomes.rest.forum.StickPostCommand;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.hotTag.HotFlag;
@@ -1981,7 +1982,58 @@ public class ForumServiceImpl implements ForumService {
             LOGGER.error("Failed to update the dislike count of post, userId=" + operatorId + ", topicId=" + topicId, e);
         }
     }
-    
+
+    @Override
+    public void stickPost(StickPostCommand cmd) {
+        User operator = UserContext.current().getUser();
+        Long operatorId = operator.getId();
+
+        checkStickPostPrivilege(operatorId, cmd.getOrganizationId());
+        checkStickPostParameter(operatorId, cmd.getPostId(), cmd.getStickFlag());
+
+        dbProvider.execute((status) -> {
+            Post post = this.forumProvider.findPostById(cmd.getPostId());
+            post.setStickFlag(cmd.getStickFlag());
+            forumProvider.updatePost(post);
+            if(post.getEmbeddedAppId() != null &&  post.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY){
+                Activity activity = activityProvider.findSnapshotByPostId(cmd.getPostId());
+                activity.setStickFlag(cmd.getStickFlag());
+                activityProivider.updateActivity(activity);
+            }
+            return null;
+        });
+    }
+
+    private void checkStickPostPrivilege(Long operatorId, Long organizationId) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
+        //检查园区企业管理员
+        if(resolver.checkSuperAdmin(operatorId, organizationId)){
+            return;
+        }
+        //检查超级管理员，此处不成立会报错
+        resolver.checkUserPrivilege(operatorId, 0);
+
+    }
+
+    private Post checkStickPostParameter(Long operatorId, Long postId, Byte stickFlag) {
+        if(postId == null || StickFlag.fromCode(stickFlag) == null) {
+            LOGGER.error("invalid parameter, postId or stickFlag is invalid, operatorId={}, postId={}, stickFlag={}", operatorId, postId, stickFlag);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, postId or stickFlag is null");
+        }
+
+        Post post = this.forumProvider.findPostById(postId);
+        if(post == null) {
+            LOGGER.error("Forum post not found, operatorId={}, postId={}, stickFlag={}", operatorId, postId, stickFlag);
+            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
+                    ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
+        }
+
+        return post;
+    }
+
     @Override
     public ListPostCommandResponse listTopicComments(ListTopicCommentCommand cmd) {
     	// 非登录用户只能看第一页 add by xiongying20161009
@@ -4113,31 +4165,25 @@ public class ForumServiceImpl implements ForumService {
         String creatorAvatar = post.getCreatorAvatar();
         
         Long forumId = post.getForumId();
-        Forum forum = null;
-        Group group = null;
-        GroupMember member = null;
-
         if(forumId != null) {
             // 普通圈使用圈成员的信息
-            forum = forumProvider.findForumById(forumId);
-        }
-
-        if(forum != null && EntityType.GROUP.getCode().equalsIgnoreCase(forum.getOwnerType())) {
-            group = groupProvider.findGroupById(forum.getOwnerId());
-            member = groupProvider.findGroupMemberByMemberInfo(forum.getOwnerId(), EntityType.USER.getCode(), post.getCreatorUid());
-        }
-
-        if(member != null) {
-            creatorNickName = member.getMemberNickName();
-            creatorAvatar = member.getMemberAvatar();
-            if(creatorNickName == null || creatorNickName.trim().length() == 0) {
-                creatorNickName = member.getMemberNickName();
-            }
-            if(creatorAvatar == null || creatorAvatar.trim().length() == 0){
-                creatorAvatar = member.getMemberAvatar();
+            Forum forum = forumProvider.findForumById(forumId);
+            if(forum != null && EntityType.GROUP.getCode().equalsIgnoreCase(forum.getOwnerType())) {
+                GroupMember member = groupProvider.findGroupMemberByMemberInfo(forum.getOwnerId(), 
+                    EntityType.USER.getCode(), post.getCreatorUid());
+                if(member != null) {
+                    creatorNickName = member.getMemberNickName();
+                    creatorAvatar = member.getMemberAvatar();
+                    if(creatorNickName == null || creatorNickName.trim().length() == 0) {
+                        creatorNickName = member.getMemberNickName();
+                    }
+                    if(creatorAvatar == null || creatorAvatar.trim().length() == 0){
+                        creatorAvatar = member.getMemberAvatar();
+                    }
+                }
             }
         }
-
+        
         // 无昵称时直接使用USER表中的信息作为发帖人的信息
         User creator = userProvider.findUserById(post.getCreatorUid());
         if(creator != null) {
@@ -4146,12 +4192,6 @@ public class ForumServiceImpl implements ForumService {
                 creatorNickName = creator.getNickName();
             }
             if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
-                creatorAvatar = creator.getAvatar();
-            }
-
-            // 在俱乐部里发帖的时候显示的昵称和头像用eh_users表里的   add by xq.tian  2017/09/18
-            if (group != null && PrivateFlag.fromCode(group.getPrivateFlag()) == PrivateFlag.PUBLIC) {
-                creatorNickName = creator.getNickName();
                 creatorAvatar = creator.getAvatar();
             }
         }

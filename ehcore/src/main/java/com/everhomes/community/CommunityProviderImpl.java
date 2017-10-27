@@ -1419,6 +1419,39 @@ public class CommunityProviderImpl implements CommunityProvider {
 	}
 
     @Override
+    public List<Community> listCommunitiesByCityIdAndAreaId(Integer namespaceId, Long cityId, Long areaId, String keyword, Long pageAnchor,
+                                                     Integer pageSize) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class));
+
+        SelectJoinStep<Record> query = context.select(Tables.EH_COMMUNITIES.fields()).from(Tables.EH_COMMUNITIES);
+        Condition cond = Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId);
+        cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        if(null != pageAnchor && pageAnchor != 0){
+            cond = cond.and(Tables.EH_COMMUNITIES.ID.gt(pageAnchor));
+        }
+        if(null != cityId){
+            cond = cond.and(Tables.EH_COMMUNITIES.CITY_ID.eq(cityId));
+        }
+        if(null != areaId){
+            cond = cond.and(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId));
+        }
+
+        if(!StringUtils.isEmpty(keyword)){
+            cond = cond.and(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%'))
+                    .or(Tables.EH_COMMUNITIES.ADDRESS.like('%'+keyword+'%')));
+        }
+        query.orderBy(Tables.EH_COMMUNITIES.ID.asc());
+        if(null != pageSize) {
+            query.limit(pageSize);
+        }
+
+        List<Community> communities = query.where(cond).fetch().
+                map(new DefaultRecordMapper(Tables.EH_COMMUNITIES.recordType(), Community.class));
+
+        return communities;
+    }
+
+    @Override
     public List<Community> listCommunitiesByFeedbackForumId(Long feedbackForumId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
         final List<Community> communities = new ArrayList<Community>();

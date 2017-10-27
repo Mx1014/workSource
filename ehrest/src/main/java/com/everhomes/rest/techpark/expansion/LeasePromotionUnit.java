@@ -7,7 +7,8 @@ package com.everhomes.rest.techpark.expansion;
  * */
 public enum LeasePromotionUnit {
 
-	MONTH_UNIT("MONTH_UNIT", "元/㎡/月");
+	MONTH_UNIT("MONTH_UNIT", "元/m²/月"),
+    DAY_UNIT("DAY_UNIT", "元/m²/天");
 
     private String code;
     private String description;

@@ -9,7 +9,7 @@ import java.util.List;
  * <ul>
  *     <li>namespaceId: 域空间id</li>
  *     <li>communityId: 项目id</li>
- *     <li>fieldId: 所属字段系统id</li>
+ *     <li>fieldIds: 所属字段系统id列表</li>
  *     <li>items: 字段选择项信息， 参考{@link ScopeFieldItemInfo}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
@@ -19,7 +19,8 @@ public class UpdateFieldItemsCommand {
 
     private Long communityId;
 
-    private Long fieldId;
+    @ItemType(Long.class)
+    private List<Long> fieldIds;
 
     @ItemType(ScopeFieldItemInfo.class)
     private List<ScopeFieldItemInfo> items;
@@ -32,12 +33,12 @@ public class UpdateFieldItemsCommand {
         this.communityId = communityId;
     }
 
-    public Long getFieldId() {
-        return fieldId;
+    public List<Long> getFieldIds() {
+        return fieldIds;
     }
 
-    public void setFieldId(Long fieldId) {
-        this.fieldId = fieldId;
+    public void setFieldIds(List<Long> fieldIds) {
+        this.fieldIds = fieldIds;
     }
 
     public Integer getNamespaceId() {

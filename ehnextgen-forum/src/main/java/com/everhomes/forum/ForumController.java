@@ -3,7 +3,9 @@ package com.everhomes.forum;
 
 import javax.validation.Valid;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.forum.*;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -388,17 +390,17 @@ public class ForumController extends ControllerBase {
         return response;
     }
 
-
     /**
-     * <b>URL: /forum/listForumCategory</b>
-     * <p>获取论坛入口</p>
+     * <b>URL: /forum/stickPost</b>
+     * <p>管理员置顶帖子</p>
+     * @param cmd 参数命令
      * @return
      */
-    @RequestMapping("listForumCategory")
-    @RestReturn(value=ListForumCategoryResponse.class)
-    public RestResponse listForumCategory(ListForumCategoryCommand cmd) {
-        ListForumCategoryResponse  res  = this.forumService.listForumCategory(cmd);
-        RestResponse response = new RestResponse(res);
+    @RequestMapping("stickPost")
+    @RestReturn(value=String.class)
+    public RestResponse stickPost(StickPostCommand cmd) {
+        forumService.stickPost(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -416,6 +418,22 @@ public class ForumController extends ControllerBase {
     public RestResponse findForumCategory(FindForumCategoryCommand cmd) {
         ForumCategoryDTO dto = this.forumService.findForumCategory(cmd);
         RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+	
+	
+    /**
+     * <b>URL: /forum/listForumCategory</b>
+     * <p>获取论坛入口</p>
+     * @return
+     */
+    @RequestMapping("listForumCategory")
+    @RestReturn(value=ListForumCategoryResponse.class)
+    public RestResponse listForumCategory(ListForumCategoryCommand cmd) {
+        ListForumCategoryResponse  res  = this.forumService.listForumCategory(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -8,14 +8,16 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>flowCases: flowCase列表{@link com.everhomes.rest.flow.FlowCaseDTO}</li>
  *     <li>nextPageAnchor: 下一页锚点</li>
+ *     <li>flowCases: flowCase列表{@link com.everhomes.rest.flow.FlowCaseDTO}</li>
  * </ul>
  */
 public class SearchFlowCaseResponse {
+
+    private Long nextPageAnchor;
+
     @ItemType(FlowCaseDTO.class)
     private List<FlowCaseDTO> flowCases;
-    private Long nextPageAnchor;
 
     public List<FlowCaseDTO> getFlowCases() {
         return flowCases;

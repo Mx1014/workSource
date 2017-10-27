@@ -128,4 +128,7 @@ public interface CommunityProvider {
 
     //在给予的communityIds的范围内根据参数中的经纬度进行排序
     List<CommunityGeoPoint> listCommunityGeoPointByGeoHashInCommunities(double latitude, double longitude, int geoHashLength, List<Long> communityIds);
+
+    List<Community> listCommunitiesByCityIdAndAreaId(Integer namespaceId, Long cityId, Long areaId, String keyword, Long pageAnchor,
+                                                     Integer pageSize);
 }

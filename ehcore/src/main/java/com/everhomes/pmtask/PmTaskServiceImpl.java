@@ -29,6 +29,7 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.*;
+import com.everhomes.organization.*;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
 import com.everhomes.pmtask.ebei.EbeiPmtaskLogDTO;
@@ -88,11 +89,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationAddress;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -608,14 +604,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		if (null == cmd.getOrganizationId()) {
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-			OrganizationMember member = null;
-			if (cmd.getFlowOrganizationId()!=null)
-				member = organizationProvider.findOrganizationMemberByOrgIdAndToken(userIdentifier.getIdentifierToken(),cmd.getFlowOrganizationId());
+			List<OrganizationMember> list = organizationProvider.listOrganizationMembersByPhoneAndNamespaceId(userIdentifier.getIdentifierToken(),namespaceId);
 			//真实姓名
-			if (member==null )
+			if (list==null || list.size()==0)
 				return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
 			else
-				return handler.createTask(cmd, user.getId(), member.getContactName(), userIdentifier.getIdentifierToken());
+				return handler.createTask(cmd, user.getId(), list.get(0).getContactName(), userIdentifier.getIdentifierToken());
 		}else {
 			String requestorPhone = cmd.getRequestorPhone();
 			String requestorName = cmd.getRequestorName();
@@ -1933,6 +1927,51 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}else{
 			response.setCommunities(dtos);
 		}
+		return response;
+	}
+
+	@Override
+	public ListAuthorizationCommunityByUserResponse listOrganizationCommunityByUser(ListOrganizationCommunityByUserCommand cmd) {
+
+		ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
+
+		long userId = UserContext.currentUserId();
+		List<OrganizationMember> orgMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId(
+				"/" + cmd.getOrganizationId() + "/", userId);
+
+		List<CommunityDTO> result = new ArrayList<>();
+		if (null != orgMembers) {
+			orgMembers.stream().filter(r->
+				r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || r.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())
+			).forEach(m -> {
+				OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(m.getOrganizationId());
+				if (null != request) {
+					Community community = communityProvider.findCommunityById(request.getCommunityId());
+					if (null != community) {
+						boolean flag = true;
+						for (CommunityDTO d: result) {
+							if (d.getUuid().equals(community.getUuid())) {
+								flag = false;
+								break;
+							}
+						}
+						if (flag) {
+							result.add(ConvertHelper.convert(community, CommunityDTO.class));
+						}
+					}
+				}
+			});
+		}
+		if (result.size() == 0) {
+			OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getOrganizationId());
+			if (null != request) {
+				Community community = communityProvider.findCommunityById(request.getCommunityId());
+				if (null != community) {
+					result.add(ConvertHelper.convert(community, CommunityDTO.class));
+				}
+			}
+		}
+		response.setCommunities(result);
 		return response;
 	}
 

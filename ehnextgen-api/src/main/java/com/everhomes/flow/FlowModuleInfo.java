@@ -1,10 +1,11 @@
 package com.everhomes.flow;
 
-import java.util.Map;
-
 import com.everhomes.util.StringHelper;
 
+import java.util.Map;
+
 public class FlowModuleInfo implements Comparable<FlowModuleInfo> {
+
 	private Long moduleId;
 	private String moduleName;
 	private Integer priority;

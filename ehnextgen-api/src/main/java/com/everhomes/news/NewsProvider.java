@@ -37,6 +37,8 @@ public interface NewsProvider {
 
 	void createNewsTagVals(NewsTagVals newsTagVals);
 
+	void deletNewsTagVals(Long newsId);
+
 	List<NewsTagVals> listNewsTagVals(Long newsId);
 
 	NewsTag findNewsTagById(Long id);

@@ -19,6 +19,8 @@ public interface NewsService {
 
 	CreateNewsResponse createNews(CreateNewsCommand cmd);
 
+	void updateNews(UpdateNewsCommand cmd);
+
 	void importNews(ImportNewsCommand cmd, MultipartFile[] files);
 
 	ListNewsResponse listNews(ListNewsCommand cmd);
@@ -26,6 +28,8 @@ public interface NewsService {
 	SearchNewsResponse searchNews(SearchNewsCommand cmd);
 
 	GetNewsDetailInfoResponse getNewsDetailInfo(GetNewsDetailInfoCommand cmd);
+
+	GetNewsDetailResponse getNewsDetail(GetNewsDetailInfoCommand cmd);
 
 	void setNewsTopFlag(SetNewsTopFlagCommand cmd);
 

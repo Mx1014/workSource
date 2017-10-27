@@ -607,6 +607,10 @@ public class ForumProviderImpl implements ForumProvider {
                 if(queryBuilderCallback != null) {
                     queryBuilderCallback.buildCondition(locator, query);
                 }
+
+                //置顶的优先排序  add by yanjun 20171023
+                query.addOrderBy(Tables.EH_FORUM_POSTS.STICK_FLAG.desc());
+
                 query.addOrderBy(Tables.EH_FORUM_POSTS.CREATE_TIME.desc());
                 query.addLimit(limit[0]);
                 
@@ -677,7 +681,10 @@ public class ForumProviderImpl implements ForumProvider {
         	//query.addConditions(Tables.EH_FORUM_POSTS.ID.lt(locator.getAnchor()));
             query.addConditions(Tables.EH_FORUM_POSTS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
         }
-        
+
+        //置顶的优先排序  add by yanjun 20171023
+        query.addOrderBy(Tables.EH_FORUM_POSTS.STICK_FLAG.desc());
+
         query.addOrderBy(Tables.EH_FORUM_POSTS.CREATE_TIME.desc());
         query.addLimit(count);
         

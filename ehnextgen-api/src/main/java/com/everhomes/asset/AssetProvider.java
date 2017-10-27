@@ -94,7 +94,7 @@ public interface AssetProvider {
 
     void saveContractVariables(List<EhPaymentContractReceiver> contractDateList);
 
-    List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId,Long ownerId,String ownerType);
+    List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId);
 
     void increaseNoticeTime(List<Long> billIds);
 
@@ -165,5 +165,7 @@ public interface AssetProvider {
     PaymentAccount findPaymentAccount();
 
     void changeBillStatusOnPaiedOff(List<Long> billIds);
+
+    List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 
 }

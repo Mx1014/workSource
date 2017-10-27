@@ -8,12 +8,14 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>organizationId: 组织id</li>
  *     <li>logId: 记录id</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class DeleteEnergyMeterReadingLogCommand {
 
     @NotNull private Long organizationId;
     @NotNull private Long logId;
+    private Integer namespaceId;
 
     public Long getLogId() {
         return logId;
@@ -30,6 +32,14 @@ public class DeleteEnergyMeterReadingLogCommand {
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {

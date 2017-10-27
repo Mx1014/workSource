@@ -10,7 +10,7 @@ package com.everhomes.rest.approval;
 public enum TrueOrFalseFlag {
 	TRUE((byte)1, "是"), FALSE((byte)0, "否");
 	
-	private byte code;
+	private Byte code;
 	private String text;
 	
 	private TrueOrFalseFlag(byte code, String text) {
@@ -18,7 +18,7 @@ public enum TrueOrFalseFlag {
 		this.text = text;
 	}
 	
-	public byte getCode() {
+	public Byte getCode() {
 		return this.code;
 	}
 	
@@ -29,7 +29,7 @@ public enum TrueOrFalseFlag {
 	public static TrueOrFalseFlag fromCode(Byte code) {
 		if (code != null) {
 			for (TrueOrFalseFlag trueOrFalseFlag : TrueOrFalseFlag.values()) {
-				if (trueOrFalseFlag.getCode() == code.byteValue()) {
+				if (trueOrFalseFlag.getCode().equals(code)) {
 					return trueOrFalseFlag;
 				}
 			}

@@ -5,9 +5,20 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>contentServer: 内容服务器地址。如果用户为登录，则此字段不返回</li>
+ * <li>uploadUrlInBrowser: 通过 pc 上传文件的 url 链接地址</li>
+ * <li>accessPoints: borderServer 的链接地址。如果用户不登录，则此地址不返回</li>
+ * <li>paymentPlatform：0旧支付  1新支付</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class SystemInfoResponse {
     private String contentServer;
     private String uploadUrlInBrowser;
+    private Long paymentPlatform;
 
     @ItemType(String.class)
     private List<String> accessPoints;
@@ -35,7 +46,15 @@ public class SystemInfoResponse {
     public void setAccessPoints(List<String> accessPoints) {
         this.accessPoints = accessPoints;
     }
-    
+
+    public Long getPaymentPlatform() {
+        return paymentPlatform;
+    }
+
+    public void setPaymentPlatform(Long paymentPlatform) {
+        this.paymentPlatform = paymentPlatform;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

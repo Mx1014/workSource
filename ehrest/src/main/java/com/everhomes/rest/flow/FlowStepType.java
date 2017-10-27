@@ -2,6 +2,7 @@ package com.everhomes.rest.flow;
 
 /**
  * <ul>
+ * <li>no_step: 无</li>
  * <li>approve_step: 下一步</li>
  * <li>reject_step: 驳回</li>
  * <li>transfer_step: 转交</li>
@@ -9,6 +10,8 @@ package com.everhomes.rest.flow;
  * <li>absort_step: 终止</li>
  * <li>reminder_step: 催办</li>
  * <li>evaluate_step: 评价</li>
+ * <li>go_to_process: 去处理</li>
+ * <li>supervise: 去处理</li>
  * </ul>
  * @author janson
  *
@@ -24,22 +27,24 @@ public enum FlowStepType {
     REMINDER_STEP("reminder_step"),
     EVALUATE_STEP("evaluate_step"),
     END_STEP("end_step"),
+    GO_TO_PROCESS("go_to_process"),
+    SUPERVISE("supervise"),
     ;
-	
+
 	private String code;
     private FlowStepType(String code) {
         this.code = code;
     }
-    
+
     public String getCode() {
         return this.code;
     }
-    
+
     public static FlowStepType fromCode(String code) {
     	if(code == null) {
     		return null;
     	}
-    	
+
     	for(FlowStepType t : FlowStepType.values()) {
     		if(code.equalsIgnoreCase(t.getCode())) {
     			return t;
@@ -48,7 +53,7 @@ public enum FlowStepType {
 
         return null;
     }
-    
+
     public int getCodeInt() {
     	int i = 0;
     	for(FlowStepType t : FlowStepType.values()) {

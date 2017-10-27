@@ -75,6 +75,25 @@ public class EnterpriseApplyEntryDTO {
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
 
+	private Long communityId;
+	private String communityName;
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public String getCommunityName() {
+		return communityName;
+	}
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
+
 	public List<PostApprovalFormItem> getFormValues() {
 		return formValues;
 	}

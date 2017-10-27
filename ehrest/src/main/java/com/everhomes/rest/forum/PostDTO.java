@@ -66,6 +66,7 @@ import com.everhomes.util.StringHelper;
  *     <li>cloneFlag: 克隆标识，参考{@link com.everhomes.rest.forum.PostCloneFlag}</li>
  *     <li>forumEntryId: 论坛应用入口Id</li>
  *     <li>interactFlag: 是否支持评论 0-no, 1-yes 参考{@link InteractFlag}</li>
+ *	   <li>stickFlag: 置顶标志，0-否，1-是，参考{@link StickFlag}</li>
  * </ul>
  */
 public class PostDTO {
@@ -185,6 +186,8 @@ public class PostDTO {
     private Long forumEntryId;
 
     private Byte interactFlag;
+	
+	private Byte stickFlag;
 
     public Long getGroupId() {
         return groupId;
@@ -640,6 +643,13 @@ public class PostDTO {
 
     public void setInteractFlag(Byte interactFlag) {
         this.interactFlag = interactFlag;
+    }
+	public Byte getStickFlag() {
+        return stickFlag;
+    }
+
+    public void setStickFlag(Byte stickFlag) {
+        this.stickFlag = stickFlag;
     }
 
     @Override
