@@ -242,7 +242,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             cmd.setPageSize(20);
 
         List<Long> detailIds = archivesProvider.listArchivesStickyContactsIds(namespaceId, cmd.getOrganizationId(), stickCount);    //  保存置顶人员
-        if (!StringUtils.isEmpty(cmd.getKeywords())) {
+        if (!StringUtils.isEmpty(cmd.getKeywords()) || detailIds == null) {
             //  有查询的时候已经不需要置顶了，直接查询对应人员
             List<ArchivesContactDTO> contacts = new ArrayList<>();
             contacts.addAll(listArchivesContacts(cmd, response, null));
