@@ -1,0 +1,65 @@
+{
+  "eh_flow_predefined_params": [
+    {
+      "id": 1,
+      "namespace_id": 999992,
+      "owner_id": 1,
+      "owner_type": "EhFlows",
+      "module_id": 1,
+      "module_type": "any-module",
+      "entity_type": "flow_button",
+      "display_name": "参数1",
+      "name": "var_1",
+      "text": "{\"AAA\":\"CCC\"}",
+      "status": 2
+    },
+    {
+      "id": 2,
+      "namespace_id": 999992,
+      "owner_id": 2,
+      "owner_type": "EhFlows",
+      "module_id": 1,
+      "module_type": "any-module",
+      "entity_type": "flow_button",
+      "display_name": "参数2",
+      "name": "var_1",
+      "text": "{\"AAA\":\"CCC\"}",
+      "status": 2
+    }
+  ],
+  "eh_flows": [
+    {
+      "id": 801,
+      "namespace_id": 1000000,
+      "owner_id": 240111044331048623,
+      "owner_type": "COMMUNITY",
+      "organization_id": 1000001,
+      "module_id": 40100,
+      "module_type": "any-module",
+      "flow_main_id": 0,
+      "flow_version": 27,
+      "flow_name": "test flow",
+      "status": 4,
+      "stop_time": "2017-08-31 18:00:47",
+      "run_time": "2017-08-31 18:00:47",
+      "update_time": "2017-08-31 18:00:47",
+      "create_time": "2017-08-31 18:00:47",
+      "start_node": 3231,
+      "end_node": 3234,
+      "last_node": 0,
+      "integral_tag1": 0,
+      "integral_tag2": 0,
+      "integral_tag3": 0,
+      "integral_tag4": 0,
+      "integral_tag5": 0,
+      "project_id": 240111044331048623,
+      "project_type": "EhCommunities",
+      "need_evaluate": 1,
+      "evaluate_start": 1,
+      "evaluate_end": 3,
+      "evaluate_step": "no_step",
+      "description": "",
+      "allow_flow_case_end_evaluate": 0
+    }
+  ]
+}

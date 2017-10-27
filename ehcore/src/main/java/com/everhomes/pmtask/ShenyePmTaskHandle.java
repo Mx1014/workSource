@@ -218,7 +218,7 @@ class ShenyePmTaskHandle implements PmTaskHandle {
 		}
 
 		List<Category> list;
-		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L && (null == cmd.getParentId() || cmd.getParentId() == 0L)) {
+		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L) {
 			Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
 			list = new ArrayList<>();
 			list.add(category);

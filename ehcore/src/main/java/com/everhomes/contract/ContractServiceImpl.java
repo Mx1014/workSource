@@ -707,7 +707,7 @@ public class ContractServiceImpl implements ContractService {
 		createFlowCaseCommand.setReferId(contract.getId());
 		createFlowCaseCommand.setReferType(EntityType.CONTRACT.getCode());
 		createFlowCaseCommand.setContent(contract.getContractNumber());
-
+		createFlowCaseCommand.setServiceType("合同申请");
 		createFlowCaseCommand.setProjectId(contract.getCommunityId());
 		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
 
@@ -991,9 +991,8 @@ public class ContractServiceImpl implements ContractService {
 			contract.setDownpaymentTime(new Timestamp(cmd.getDownpaymentTime()));
 		}
 		contract.setCreateTime(exist.getCreateTime());
-
+		Double rentSize = dealContractApartments(contract, cmd.getApartments());
 		if(cmd.getRentSize() == null) {
-			Double rentSize = dealContractApartments(contract, cmd.getApartments());
 			contract.setRentSize(rentSize);
 		}
 

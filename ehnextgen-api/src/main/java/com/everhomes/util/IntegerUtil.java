@@ -34,4 +34,17 @@ public class IntegerUtil {
         objs[1] = Float.parseFloat("0" + s.substring(s.indexOf(".")));
         return objs;
     }
+
+    /**
+     * 判断一个string是否含有数字
+     */
+    public final boolean hasDigit(String iden) {
+        char[] chars = iden.toCharArray();
+        for(char c : chars){
+            if(Character.isDigit(c)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -89,7 +89,6 @@ public enum CoordinationLocks {
 
     PAY_CREATE_PREORDER("pay.create.preorder"),
 
-
     BILL_STATUS_UPDATE("bill.status.update"),
     SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
 
@@ -97,9 +96,14 @@ public enum CoordinationLocks {
  
     EVENT_STAT_SCHEDULE("event.stat.schedule"),
 
-    ADD_ORGANIZATION_PERSONEL("add.organization.personel");
+    ADD_ORGANIZATION_PERSONEL("add.organization.personel"),
 
-    ; 
+    FLOW_LANE("flow.lane"),
+    FLOW("flow"),
+
+    CLEANWRONGSTATUS_ORGANIZATIONMEMBERS("cleanwrongstatus.organizationmembers"),
+    ;
+ 
     private String code;
     private CoordinationLocks(String code) {
         this.code = code;
