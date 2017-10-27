@@ -2844,29 +2844,35 @@ public class FlowServiceImpl implements FlowService {
         cmd.setPageSize(count);
         ListingLocator locator = new ListingLocator();
 
-        List<FlowCaseDetail> details = null;
+        int type;
+        FlowUserType flowUserType;
+        List<FlowCaseDetail> details;
 
-        int type = 0;
         if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.APPLIER.getCode())) {
             type = 1;
+            flowUserType = FlowUserType.APPLIER;
             details = flowCaseProvider.findApplierFlowCases(locator, count, cmd, callback);
         } else if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
             type = 2;
+            flowUserType = FlowUserType.PROCESSOR;
             details = flowCaseProvider.findAdminFlowCases(locator, count, cmd, callback);
         } else {
             type = 3;
+            flowUserType = FlowUserType.PROCESSOR;
             details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd, callback);
         }
 
         List<FlowCaseDTO> dtos = new ArrayList<FlowCaseDTO>();
         if (details != null) {
             for (FlowCaseDetail detail : details) {
+                detail.setContent(onFlowCaseBriefRender(flowUserType, detail));
+
                 FlowCaseDTO dto = ConvertHelper.convert(detail, FlowCaseDTO.class);
                 FlowNode flowNode = flowNodeProvider.getFlowNodeById(dto.getCurrentNodeId());
                 if (flowNode != null) {
                     updateCaseDTO(detail, flowNode, dto, type);
                 }
-                if (dto.getTitle() != null) {
+                if (dto.getTitle() != null && dto.getModuleName() == null) {
                     dto.setModuleName(dto.getTitle());
                 }
                 dtos.add(dto);
@@ -2878,6 +2884,16 @@ public class FlowServiceImpl implements FlowService {
 
         resp.setFlowCases(dtos);
         return resp;
+    }
+
+    private String onFlowCaseBriefRender(FlowUserType flowUserType, FlowCase flowCase) {
+        String flowCaseContent = flowCase.getContent();
+        try {
+            flowCaseContent = flowListenerManager.onFlowCaseBriefRender(flowCase, flowUserType);
+        } catch (Exception e) {
+            LOGGER.error("Flow listener onFlowCaseBriefRender error, flowCaseId = "+flowCase.getId(), e);
+        }
+        return flowCaseContent;
     }
 
     @Override

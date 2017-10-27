@@ -46,9 +46,10 @@ public interface FlowListenerManager {
 	/**
 	 * FlowCase 的描述性内容
 	 * @param flowCase
-	 * @return
+	 * @param flowUserType
+     * @return
 	 */
-	String onFlowCaseBriefRender(FlowCase flowCase);
+	String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType);
 	
 	/**
 	 * FlowCase 的详细信息列表
