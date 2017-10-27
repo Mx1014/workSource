@@ -133,7 +133,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			List<QuestionnaireAnswer> answers = questionnaireAnswerProvider.listQuestionnaireAnswerByQuestionnaireId(questionnaire.getId(), questionnaire.getTargetType());
 			if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.ORGANIZATION){
 				List<QuestionnaireRange> originalRanges = questionnaireRangeProvider.listQuestionnaireRangeByQuestionnaireId(questionnaire.getId());
-				userLevelRanges = calculateUnAnsweredQuesionnaireRange(originalRanges,answers);
+				userLevelRanges = calculateUnAnsweredQuesionnaireRange(questionnaire,originalRanges,answers);
 			}else{
 				userLevelRanges = calculateUnAnsweredQuesionnaireRange(questionnaire,answers);
 			}
@@ -145,7 +145,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 
 	}
 
-	private Set<String> calculateUnAnsweredQuesionnaireRange(List<QuestionnaireRange> originalRanges, List<QuestionnaireAnswer> answers) {
+	private Set<String> calculateUnAnsweredQuesionnaireRange(Questionnaire questionnaire,List<QuestionnaireRange> originalRanges, List<QuestionnaireAnswer> answers) {
 		Set<String> userLevelRanges = new HashSet<String>();
 		for (QuestionnaireRange originalRange : originalRanges) {
 			boolean answered = false;
@@ -157,9 +157,12 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 				}
 			}
 			if (!answered){
-				userLevelRanges.addAll(getOrganizationAdministrators(originalRange.getRange()));
+				List<String> adminlists = getOrganizationAdministrators(originalRange.getRange());
+				originalRange.setAdminlists(adminlists);
+				userLevelRanges.addAll(adminlists);
 			}
 		}
+		questionnaire.setRanges(originalRanges);
 		return userLevelRanges;
 	}
 	private Set<String> calculateUnAnsweredQuesionnaireRange(Questionnaire questionnaire, List<QuestionnaireAnswer> answers) {
@@ -190,7 +193,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 
 			//部分不用循环创建的对象
 			Namespace namespace = namespaceProvider.findNamespaceById(questionnaire.getNamespaceId());
-			String string1 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN1, "zh_CN", "邀请您参与《");
+			String string1 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN1, "zh_CN", "邀请%s参与《");
 			String string2 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN2, "zh_CN", "》问卷调查。");
 			String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://core.zuolin.com");
 			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s/0");
@@ -212,8 +215,12 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
 
 			String body = new StringBuffer().append(namespace.getName()).append(string1).append(questionnaire.getQuestionnaireName()).append(string2).append(questionnaire.getDescription()).toString();
+			Map<String,Set<String>> userMapingOrganizationList = new HashMap<>();
+			if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.ORGANIZATION){
+				userMapingOrganizationList = generateUserMapingOrganizationList(questionnaire);
+			}
 			MessageDTO messageDto = new MessageDTO();
-			ranges.forEach(range -> {
+			for (String range : ranges) {
 				messageDto.setAppId(AppConstants.APPID_MESSAGING);
 				messageDto.setSenderUid(User.SYSTEM_UID);
 				messageDto.setChannels(
@@ -222,17 +229,49 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 				);
 
 				messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-				messageDto.setBody(body);
 				messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 				messageDto.setMeta(meta);
 
-				messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-						range, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-				sendedranges.add(range);
-			});
+				if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.USER) {
+					messageDto.setBody(String.format(body,"您"));
+					messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+							range, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+					sendedranges.add(range);
+				}else if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.ORGANIZATION) {
+					for (String organizationName : userMapingOrganizationList.get(range)) {
+						messageDto.setBody(String.format(body,organizationName));
+						messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+								range, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+						sendedranges.add(range);
+					}
+				}
+			}
 		}finally {
 			return sendedranges;
 		}
+	}
+
+	//返回 人员-》公司列表 map
+	private Map<String,Set<String>> generateUserMapingOrganizationList(Questionnaire questionnaire) {
+		Map<String,Set<String>> map = new HashMap<>();
+		if(questionnaire.getRanges()==null && questionnaire.getRanges().size()== 0) {
+			return map;
+		}
+		for (QuestionnaireRange range : questionnaire.getRanges()) {
+			if(range.getAdminlists() == null || range.getAdminlists().size() == 0){
+				continue;
+			}
+			for (String s : range.getAdminlists()) {
+				Set<String> set = map.get(s);
+				if(set == null){
+					set = new HashSet<>();
+					map.put(s,set);
+				}
+				set.add(range.getRangeDescription());
+			}
+
+		}
+		return map;
 	}
 
 	private Set<String> calculateQuesionnaireRange(Questionnaire questionnaireDTO) {
@@ -272,12 +311,17 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 				}
 			}else if (targetType == QuestionnaireTargetType.ORGANIZATION){
 				if (QuestionnaireRangeType.ENTERPRISE == enumRangeType){
-					userLevelRanges.addAll(getOrganizationAdministrators(originalRange.getRange()));
+					List<String> adminList  = getOrganizationAdministrators(originalRange.getRange());
+					originalRange.setAdminlists(adminList);
+					userLevelRanges.addAll(adminList);
 				}else{
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"status error, targetType = organization, unknown rangeType = "+originalRange.getRangeType());
 				}
 			}
+		}
+		if (targetType == QuestionnaireTargetType.ORGANIZATION){
+			questionnaireDTO.setRanges(originalRanges);
 		}
 		return userLevelRanges;
 	}
