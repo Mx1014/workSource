@@ -650,7 +650,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         }
         if (keyword != null && keyword.length() > 0) {
             String kw = "%" + keyword + "%";
-            query.addConditions(flowCase.CONTENT.like(kw).or(flowCase.TITLE.like(kw)));
+            query.addConditions(flowCase.CONTENT.like(kw).or(flowCase.TITLE.like(kw)).or(flowCase.MODULE_NAME.like(kw)));
         }
         query.addOrderBy(log.ID.desc());
 

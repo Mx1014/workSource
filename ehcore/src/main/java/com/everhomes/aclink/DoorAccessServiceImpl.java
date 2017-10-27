@@ -3675,7 +3675,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	                    cmd.setPhone(userInfo.getPhones().get(0));
 	                }
 	                cmd.setRightOpen((byte)1);
-	                cmd.setRightRemote((byte)1);
+	                cmd.setRightRemote(lv.getRightRemote());
+	                cmd.setRightVisitor(lv.getRightVisitor());
 	                cmd.setUserId(userId);
 	                createDoorAuth(cmd);
 	            }

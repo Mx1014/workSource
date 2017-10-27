@@ -116,7 +116,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     }
 
     @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase) {
+    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         return flowCase.getContent();
     }
 
@@ -175,8 +175,6 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             map.put("sourceType", defaultIfNull(sourceType, ""));
 
             map.put("description", StringUtils.isBlank(applyEntry.getDescription()) ? defaultValue : applyEntry.getDescription());
-            
-            map.put("description", defaultIfNull(applyEntry.getDescription(), ""));
 
             String jsonStr;
 

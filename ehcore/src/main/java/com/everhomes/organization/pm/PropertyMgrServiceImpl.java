@@ -4711,6 +4711,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         if (cmd.getBirthday() != null) {
             owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
         }
+		owner.setCommunityId(cmd.getCommunityId().toString());
         owner.setOrgOwnerTypeId(ownerType.getId());
         owner.setNamespaceId(currentUser.getNamespaceId());
         owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());

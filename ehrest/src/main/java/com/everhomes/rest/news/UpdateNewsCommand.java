@@ -46,7 +46,7 @@ public class UpdateNewsCommand {
     private Long publishTime;
     private String sourceDesc;
     private String sourceUrl;
-    private Long phone;
+    private String phone;
     @ItemType(Long.class)
     private List<Long> communityIds;
     @ItemType(NewsTagValsDTO.class)
@@ -162,11 +162,11 @@ public class UpdateNewsCommand {
         this.categoryId = categoryId;
     }
 
-    public Long getPhone() {
+    public String getPhone() {
         return phone;
     }
 
-    public void setPhone(Long phone) {
+    public void setPhone(String phone) {
         this.phone = phone;
     }
 
