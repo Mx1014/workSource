@@ -43,7 +43,7 @@ public class BriefNewsDTO {
 	private Byte topFlag;
 	private Byte likeFlag;
 	private String newsUrl;
-	private Long phone;
+	private String phone;
 	private Long categoryId;
 	private Byte commentFlag;
 	private String visibleType;
@@ -187,11 +187,11 @@ public class BriefNewsDTO {
 		this.categoryId = categoryId;
 	}
 
-	public Long getPhone() {
+	public String getPhone() {
 		return phone;
 	}
 
-	public void setPhone(Long phone) {
+	public void setPhone(String phone) {
 		this.phone = phone;
 	}
 

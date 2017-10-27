@@ -34,6 +34,10 @@ public enum LeasePromotionUnit {
         if(code.equalsIgnoreCase(MONTH_UNIT.getCode())) {
         	return MONTH_UNIT;
         }
+
+        if(code.equalsIgnoreCase(DAY_UNIT.getCode())) {
+            return DAY_UNIT;
+        }
         return null;
     }
 }

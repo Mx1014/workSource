@@ -2580,8 +2580,11 @@ public class PunchServiceImpl implements PunchService {
             if(null != r1) {
                 PunchTimeRuleDTO dto1 = convertPunchTimeRule2DTO(r1);
                 PunchTimeIntervalDTO interval = dto1.getPunchTimeIntervals().get(punchTimeNo - 1);
-				BigDecimal b = new BigDecimal(statistic.getUnpunchCount()
-						+ (interval.getLeaveTime() - interval.getArriveTime()));
+                long unpunchTimeLong =interval.getLeaveTime() - interval.getArriveTime();
+                if(dto1.getPunchTimeIntervals().equals((byte)2) && dto1.getAfternoonArriveTime() != null && dto1.getNoonLeaveTime()!=null){
+                	unpunchTimeLong = unpunchTimeLong -dto1.getAfternoonArriveTime()+dto1.getNoonLeaveTime();
+                }
+				BigDecimal b = new BigDecimal(unpunchTimeLong);
 				statistic.setUnpunchCount(statistic.getUnpunchCount()+b.divide(new BigDecimal(3600000), 2, RoundingMode.HALF_UP).doubleValue());
             }
         }  else if (status.equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
@@ -6075,6 +6078,9 @@ public class PunchServiceImpl implements PunchService {
 				dto.setDaySchedulings(new ArrayList<>());
 				for(int i = 1 ; i<=days;i++){
 					String val = r.getCells().get(GetExcelLetter(i + 1));
+					if(!StringUtils.isEmpty(val)){
+						val = val.replace(" ","");
+					}
 					dto.getDaySchedulings().add(val);
 				}
 				result.getEmployees().add(dto);

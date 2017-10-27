@@ -15,6 +15,7 @@ import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
+import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
 import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicators;
 import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
@@ -404,6 +405,14 @@ public class FieldProviderImpl implements FieldProvider {
                     list7.add((EhCustomerPatents)objects.get(i));
                 }
                 dao7.insert(list7);
+                break;
+            case "CustomerCertificate":
+                EhCustomerCertificatesDao dao8 = new EhCustomerCertificatesDao(context.configuration());
+                List<EhCustomerCertificates> list8 = new ArrayList<>();
+                for(int i = 0; i < objects.size(); i ++){
+                    list8.add((EhCustomerCertificates)objects.get(i));
+                }
+                dao8.insert(list8);
                 break;
         }
     }

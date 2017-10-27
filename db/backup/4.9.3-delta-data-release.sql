@@ -295,7 +295,7 @@ VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '门禁', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：https://core.zuolin.com/evh/aclink/v?id=${id}（24小时有效）', 999993);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '门禁', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：${link}/aclink/v?id=${id}（24小时有效）', 0);
+VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '门禁通用(描述做逻辑, 不可修改)${link}', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：${link}/aclink/v?id=${id}（24小时有效）', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 9, 'zh_CN', '看楼申请', '用户${userName}（手机号：${userPhone}）于${applyTime}提交了预约${applyType}申请：参观位置：${location}\n面积需求：${area}\n公司名称：${enterpriseName}\n备注：${description}', 1000000);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)

@@ -2207,6 +2207,24 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhActivityCategories.class, Tables.EH_ACTIVITY_CATEGORIES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ACTIVITY_CATEGORIES.ID.max()).from(Tables.EH_ACTIVITY_CATEGORIES).fetchOne().value1();
         });
+        syncTableSequence(null, EhFlowConditions.class, Tables.EH_FLOW_CONDITIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_CONDITIONS.ID.max()).from(Tables.EH_FLOW_CONDITIONS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowConditionExpressions.class, Tables.EH_FLOW_CONDITION_EXPRESSIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_CONDITION_EXPRESSIONS.ID.max()).from(Tables.EH_FLOW_CONDITION_EXPRESSIONS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowLanes.class, Tables.EH_FLOW_LANES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_LANES.ID.max()).from(Tables.EH_FLOW_LANES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowLinks.class, Tables.EH_FLOW_LINKS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_LINKS.ID.max()).from(Tables.EH_FLOW_LINKS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowPredefinedParams.class, Tables.EH_FLOW_PREDEFINED_PARAMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_PREDEFINED_PARAMS.ID.max()).from(Tables.EH_FLOW_PREDEFINED_PARAMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowBranches.class, Tables.EH_FLOW_BRANCHES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_BRANCHES.ID.max()).from(Tables.EH_FLOW_BRANCHES).fetchOne().value1();
+        });
         syncTableSequence(null, EhExpressParamSettings.class, Tables.EH_EXPRESS_PARAM_SETTINGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EXPRESS_PARAM_SETTINGS.ID.max()).from(Tables.EH_EXPRESS_PARAM_SETTINGS).fetchOne().value1();
         });
@@ -2273,7 +2291,6 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhServiceAllianceComments.class, Tables.EH_SERVICE_ALLIANCE_COMMENTS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_COMMENTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_COMMENTS).fetchOne().value1();
         });
-
 
         syncTableSequence(null, EhRegions.class, Tables.EH_REGIONS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_REGIONS.ID.max()).from(Tables.EH_REGIONS).fetchOne().value1();

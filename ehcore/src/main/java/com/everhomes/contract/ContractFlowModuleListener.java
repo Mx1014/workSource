@@ -12,14 +12,12 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -123,7 +121,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     }
 
     @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase) {
+    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         return null;
     }
 

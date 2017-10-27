@@ -716,7 +716,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 
     @Override
     public void createActivityCategories(ActivityCategories activityCategory) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(ActivityCategories.class));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhActivityCategories.class));
 
         activityCategory.setId(id);
         activityCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

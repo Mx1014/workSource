@@ -13,8 +13,6 @@ import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.*;
 
-import com.everhomes.rest.user.InvitationRoster;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
@@ -491,4 +489,8 @@ public interface OrganizationProvider {
 			Long orgId, String memberGroup, Long userId);
 
 	List<Organization> findNamespaceUnifiedSocialCreditCode(String unifiedSocialCreditCode, Integer namespaceId);
+
+    List listLapseOrganizations(Integer namespaceId);
+
+	Integer updateOrganizationMembersToInactiveByPath(String path,Timestamp now);
 }

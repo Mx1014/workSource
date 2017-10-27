@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
@@ -20,7 +21,7 @@ import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.common.ThirdPartActionData;
-import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.messaging.*;
 
@@ -52,9 +53,6 @@ import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.module.ServiceModule;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
@@ -501,5 +499,19 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		}
 		LOGGER.info("onFlowMessageSend title = {}",flowCase.getTitle());
 		metaMap.put(MessageMetaConstant.MESSAGE_SUBJECT, flowCase.getTitle());
+	}
+
+	@Override
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+		List<ServiceAllianceCategories> serviceAllianceCategories = yellowPageProvider.listChildCategories(null, null, namespaceId, 0L, null, null);
+		if(serviceAllianceCategories == null || serviceAllianceCategories.size() == 0 ){
+			return new ArrayList<>();
+		}
+		return serviceAllianceCategories.stream().map(r->{
+			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+			dto.setNamespaceId(namespaceId);
+			dto.setServiceName(r.getName());
+			return dto;
+		}).collect(Collectors.toList());
 	}
 }

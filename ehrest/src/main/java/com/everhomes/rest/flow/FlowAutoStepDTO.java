@@ -6,17 +6,19 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>stepCount: 当前跳转的次数，通过这个值可以避免多次跳转</li>
  * <li>autoStepType: {@link com.everhomes.rest.flow.FlowStepType}</li>
+ * <li>eventType: 本次事件类型 {@link com.everhomes.rest.flow.FlowEventType}</li>
  * </ul>
  * @author janson
- *
  */
 public class FlowAutoStepDTO {
+
 	private Long flowCaseId;
 	private Long flowNodeId;
 	private Long flowMainId;
 	private Integer flowVersion;
 	private Long stepCount;
 	private String autoStepType;
+	private String eventType;
 	private Long flowTargetId;
 	private Long operatorId;
 	private Long subjectId;
@@ -91,6 +93,14 @@ public class FlowAutoStepDTO {
 
     public void setSubjectId(Long subjectId) {
         this.subjectId = subjectId;
+    }
+
+    public String getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
     }
 
     @Override
