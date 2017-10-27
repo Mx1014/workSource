@@ -2310,25 +2310,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setPageAnchor(9223372036854775807L);
 		int pageSize = PaginationConfigHelper.getPageSize(
 				configurationProvider, cmd.getPageSize());
-		List<Byte> status = null;
-		if (cmd.getBillStatus()!=null) {
-			status = new ArrayList<>();
-			if (cmd.getBillStatus().equals(BillQueryStatus.UNPAY.getCode())) {
-				status.add(SiteBillStatus.LOCKED.getCode());
-				status.add(SiteBillStatus.RESERVED.getCode());
-				status.add(SiteBillStatus.PAYINGFINAL.getCode());
-			}
-			if (cmd.getBillStatus().equals(BillQueryStatus.VALID.getCode())) {
-				status.add(SiteBillStatus.SUCCESS.getCode());
-			} else if (cmd.getBillStatus().equals(BillQueryStatus.CANCELED.getCode())) {
-				status.add(SiteBillStatus.FAIL.getCode());
-				status.add(SiteBillStatus.REFUNDED.getCode());
-				status.add(SiteBillStatus.REFUNDING.getCode());
-			} else if (cmd.getBillStatus().equals(BillQueryStatus.FINISHED.getCode())) {
-				status.add(SiteBillStatus.COMPLETE.getCode());
-				status.add(SiteBillStatus.OVERTIME.getCode());
-			}
+		List<Byte> status = status = new ArrayList<>();
+
+		if (cmd.getBillStatus().equals(BillQueryStatus.UNPAY.getCode())) {
+			status.add(SiteBillStatus.LOCKED.getCode());
+			status.add(SiteBillStatus.RESERVED.getCode());
+			status.add(SiteBillStatus.PAYINGFINAL.getCode());
 		}
+		if (cmd.getBillStatus().equals(BillQueryStatus.VALID.getCode())) {
+			status.add(SiteBillStatus.SUCCESS.getCode());
+		} else if (cmd.getBillStatus().equals(BillQueryStatus.CANCELED.getCode())) {
+			status.add(SiteBillStatus.FAIL.getCode());
+			status.add(SiteBillStatus.REFUNDED.getCode());
+			status.add(SiteBillStatus.REFUNDING.getCode());
+		} else if (cmd.getBillStatus().equals(BillQueryStatus.FINISHED.getCode())) {
+			status.add(SiteBillStatus.COMPLETE.getCode());
+			status.add(SiteBillStatus.OVERTIME.getCode());
+		}
+
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		List<RentalOrder> billList = this.rentalv2Provider.listRentalBills(userId,
