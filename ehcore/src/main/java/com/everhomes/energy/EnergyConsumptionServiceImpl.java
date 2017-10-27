@@ -3376,7 +3376,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public void createTask(CreateEnergyTaskCommand cmd) {
         EnergyPlan plan = energyPlanProvider.findEnergyPlanById(cmd.getPlanId());
-        if(plan == null || CommonStatus.ACTIVE.equals(CommonStatus.fromCode(plan.getStatus()))) {
+        if(plan == null || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(plan.getStatus()))) {
             LOGGER.info("EnergyScheduleJob plan is not exist or active! planId = " + cmd.getPlanId());
             throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_PLAN_NOT_ACTIVE, "The energy meter plan is not exist or active");
         }
