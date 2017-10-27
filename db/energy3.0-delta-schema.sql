@@ -73,6 +73,7 @@ CREATE TABLE `eh_energy_meter_tasks` (
   `executive_expire_time` DATETIME,
   `last_task_reading` DECIMAL(10,1),
   `reading` DECIMAL(10,1),
+  `generate_payment_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: 未生成, 1: 已生成',
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: 未抄, 1: 已抄',
   `default_order` INTEGER DEFAULT 0,
   `create_time` DATETIME,		
