@@ -2,6 +2,7 @@ package com.everhomes.rest.organization.pm;
 
 import com.everhomes.discover.ItemType;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**<ul>
@@ -39,8 +40,8 @@ public class DefaultChargingItemDTO {
     private Long lateFeeStandardId;
     private String lateFeeStandardName;
     private String chargingVariables;
-    private Long chargingStartTime;
-    private Long chargingExpiredTime;
+    private Timestamp chargingStartTime;
+    private Timestamp chargingExpiredTime;
     @ItemType(DefaultChargingItemPropertyDTO.class)
     private List<DefaultChargingItemPropertyDTO> apartments;
 
@@ -76,11 +77,11 @@ public class DefaultChargingItemDTO {
         this.apartments = apartments;
     }
 
-    public Long getChargingExpiredTime() {
+    public Timestamp getChargingExpiredTime() {
         return chargingExpiredTime;
     }
 
-    public void setChargingExpiredTime(Long chargingExpiredTime) {
+    public void setChargingExpiredTime(Timestamp chargingExpiredTime) {
         this.chargingExpiredTime = chargingExpiredTime;
     }
 
@@ -100,11 +101,11 @@ public class DefaultChargingItemDTO {
         this.chargingStandardId = chargingStandardId;
     }
 
-    public Long getChargingStartTime() {
+    public Timestamp getChargingStartTime() {
         return chargingStartTime;
     }
 
-    public void setChargingStartTime(Long chargingStartTime) {
+    public void setChargingStartTime(Timestamp chargingStartTime) {
         this.chargingStartTime = chargingStartTime;
     }
 

@@ -1,7 +1,10 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.discover.ItemType;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -53,6 +56,16 @@ public class EnergyMeterTaskDTO {
     private Timestamp createTime;
     private Long operatorUid;
     private Timestamp updateTime;
+    @ItemType(EnergyPlanGroupDTO.class)
+    private List<EnergyPlanGroupDTO> groups;
+
+    public List<EnergyPlanGroupDTO> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<EnergyPlanGroupDTO> groups) {
+        this.groups = groups;
+    }
 
     public String getAddress() {
         return address;

@@ -1,7 +1,11 @@
 package com.everhomes.energy;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationJobPosition;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.energy.EnergyMeterTaskDTO;
+import com.everhomes.rest.energy.EnergyPlanGroupDTO;
 import com.everhomes.rest.energy.SearchTasksByEnergyPlanCommand;
 import com.everhomes.rest.energy.SearchTasksByEnergyPlanResponse;
 import com.everhomes.search.AbstractElasticSearch;
@@ -46,6 +50,12 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
 
     @Autowired
     private EnergyMeterAddressProvider energyMeterAddressProvider;
+
+    @Autowired
+    private EnergyPlanProvider energyPlanProvider;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     @Override
     public String getIndexType() {
@@ -188,6 +198,28 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
                     dto.setApartmentFloor(addressMap.get(0).getApartmentFloor());
                     dto.setAddress(addressMap.get(0).getApartmentName());
                 }
+
+                List<EnergyPlanGroupMap> groupMaps = energyPlanProvider.listGroupsByEnergyPlan(task.getPlanId());
+                if(groupMaps != null && groupMaps.size() > 0) {
+                    List<EnergyPlanGroupDTO> groups = new ArrayList<>();
+                    groupMaps.forEach(group -> {
+                        EnergyPlanGroupDTO groupDTO = ConvertHelper.convert(group, EnergyPlanGroupDTO.class);
+                        StringBuilder sb = new StringBuilder();
+                        Organization org = organizationProvider.findOrganizationById(group.getGroupId());
+                        OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(group.getPositionId());
+                        if(org != null) {
+                            sb.append(org.getName());
+
+                        }
+                        if(position != null) {
+                            sb.append(position.getName());
+                        }
+                        groupDTO.setGroupName(sb.toString());
+                        groups.add(groupDTO);
+                    });
+                    dto.setGroups(groups);
+                }
+
 
                 taskDTOs.add(dto);
             });

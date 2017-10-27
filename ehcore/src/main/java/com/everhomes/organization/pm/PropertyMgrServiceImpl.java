@@ -8,6 +8,7 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.asset.AssetProvider;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.community.Building;
@@ -248,6 +249,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Autowired
 	private ContractProvider contractProvider;
+
+	@Autowired
+	private AssetProvider assetProvider;
+
+	@Autowired
+	private DefaultChargingItemProvider defaultChargingItemProvider;
     
     private String queueName = "property-mgr-push";
 
@@ -6343,7 +6350,41 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	private DefaultChargingItemDTO toDefaultChargingItemDTO(DefaultChargingItem item) {
 		DefaultChargingItemDTO dto = ConvertHelper.convert(item, DefaultChargingItemDTO.class);
+		String itemName = assetProvider.findChargingItemNameById(dto.getChargingItemId());
+		dto.setChargingItemName(itemName);
+		String standardName = assetProvider.getStandardNameById(dto.getChargingStandardId());
+		dto.setChargingStandardName(standardName);
 
+		processDefaultChargingItemAddresses(dto);
 		return dto;
+	}
+
+	private void processDefaultChargingItemAddresses(DefaultChargingItemDTO dto) {
+		List<DefaultChargingItemProperty> itemAddresses = defaultChargingItemProvider.findByItemId(dto.getId());
+		if(itemAddresses != null && itemAddresses.size() > 0) {
+			List<DefaultChargingItemPropertyDTO> addressDtos = new ArrayList<>();
+			itemAddresses.forEach(address -> {
+				DefaultChargingItemPropertyDTO propertyDTO = ConvertHelper.convert(address, DefaultChargingItemPropertyDTO.class);
+
+				if(propertyDTO.getPropertyType() == DefaultChargingItemPropertyType.COMMUNITY.getCode()) {
+					Community community = communityProvider.findCommunityById(propertyDTO.getPropertyId());
+					if(community != null) {
+						propertyDTO.setPropertyName(community.getName());
+					}
+				} else if(propertyDTO.getPropertyType() == DefaultChargingItemPropertyType.BUILDING.getCode()) {
+					Building building = communityProvider.findBuildingById(propertyDTO.getPropertyId());
+					if(building != null) {
+						propertyDTO.setPropertyName(building.getName());
+					}
+				} else if(propertyDTO.getPropertyType() == DefaultChargingItemPropertyType.APARTMENT.getCode()) {
+					Address addr = addressProvider.findAddressById(propertyDTO.getPropertyId());
+					if(addr != null) {
+						propertyDTO.setPropertyName(addr.getApartmentName());
+					}
+				}
+				addressDtos.add(propertyDTO);
+			});
+			dto.setApartments(addressDtos);
+		}
 	}
 }

@@ -17,13 +17,13 @@ public class DefaultChargingItemPropertyDTO {
     private Long defaultChargingItemId;
     private Byte propertyType;
     private Long propertyId;
-    private Long propertyName;
+    private String propertyName;
 
-    public Long getPropertyName() {
+    public String getPropertyName() {
         return propertyName;
     }
 
-    public void setPropertyName(Long propertyName) {
+    public void setPropertyName(String propertyName) {
         this.propertyName = propertyName;
     }
 
