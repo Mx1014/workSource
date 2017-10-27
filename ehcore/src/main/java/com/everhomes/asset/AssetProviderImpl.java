@@ -2316,6 +2316,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(cmd.getBillGroupId())).fetchOneInto(PaymentBillGroup.class);
 
         List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t).where(t.OWNERID.eq(group.getOwnerId()))
+                .and(t.OWNERTYPE.eq(group.getOwnerType()))
                 .fetch(t.CHARGING_ITEM_ID);
         if(fetch.contains(cmd.getChargingItemId())){
             response.setFailCause("添加失败，一个收费项目只能在一个账单组里添加一次");
