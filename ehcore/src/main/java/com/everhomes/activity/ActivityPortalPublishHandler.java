@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -182,6 +183,9 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 			entryCategory = new ActivityCategories();
 			entryCategory.setOwnerId(0L);
 			entryCategory.setParentId(-1L);
+			if(StringUtils.isEmpty(name)){
+				name = "default";
+			}
 			entryCategory.setName(name);
 			entryCategory.setDefaultOrder(0);
 			entryCategory.setStatus((byte)2);
@@ -214,7 +218,9 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 				if(dto.getId() != null){
 					ActivityCategories oldCategory = activityProvider.findActivityCategoriesById(dto.getId());
-					oldCategory.setName(dto.getName());
+					if(dto.getName() != null){
+						oldCategory.setName(dto.getName());
+					}
 					oldCategory.setIconUri(dto.getIconUri());
 					oldCategory.setSelectedIconUri(dto.getSelectedIconUri());
 					oldCategory.setEnabled(dto.getEnabled());
@@ -229,6 +235,9 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 					newCategory.setDefaultOrder(0);
 					newCategory.setStatus((byte)2);
 					newCategory.setCreatorUid(1L);
+					if(newCategory.getName() == null){
+						newCategory.setName("default");
+					}
 					newCategory.setNamespaceId(namespaceId);
 					if(newCategory.getAllFlag() == null){
 						newCategory.setAllFlag((byte)0);
