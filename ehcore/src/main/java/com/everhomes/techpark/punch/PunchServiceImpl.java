@@ -2581,7 +2581,7 @@ public class PunchServiceImpl implements PunchService {
                 PunchTimeRuleDTO dto1 = convertPunchTimeRule2DTO(r1);
                 PunchTimeIntervalDTO interval = dto1.getPunchTimeIntervals().get(punchTimeNo - 1);
                 long unpunchTimeLong =interval.getLeaveTime() - interval.getArriveTime();
-                if(dto1.getPunchTimeIntervals().equals((byte)2) && dto1.getAfternoonArriveTime() != null && dto1.getNoonLeaveTime()!=null){
+                if(dto1.getPunchTimeIntervals().size()==1 && dto1.getAfternoonArriveTime() != null && dto1.getNoonLeaveTime()!=null){
                 	unpunchTimeLong = unpunchTimeLong -dto1.getAfternoonArriveTime()+dto1.getNoonLeaveTime();
                 }
 				BigDecimal b = new BigDecimal(unpunchTimeLong);
