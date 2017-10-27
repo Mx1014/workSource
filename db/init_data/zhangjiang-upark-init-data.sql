@@ -2208,7 +2208,7 @@ INSERT INTO `eh_namespace_masks` VALUES ('2', '999971', '园区服务', '3', '�
 -- 删除原有的门牌
 DELETE FROM eh_addresses WHERE namespace_id = 999971 AND community_id = 240111044331050388;
 -- 删除原有的楼栋
-<<<<<<< HEAD
+
 DELETE FROM eh_buildings WHERE namespace_id = 999971 AND community_id = 240111044331050388;
 
 -- added by wh add 搜索 快讯
@@ -2224,7 +2224,8 @@ INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `
   
 -- aded by wh  张江高科--企业管理员后台内部管理->审批管理去掉
 DELETE FROM  eh_web_menu_scopes WHERE menu_id = 520000 AND owner_type = 'EhNamespaces' AND  owner_id = 999971;
-=======
 DELETE from eh_buildings WHERE namespace_id = 999971 AND community_id = 240111044331050388;
 
->>>>>>> origin/contract-august-payment-2.0
+-- add by xq.tian 2017/10/27
+UPDATE eh_launch_pad_items SET default_order = 20 WHERE scene_type='default' AND item_group='Bizs' AND item_label='服务热线' AND namespace_id=999971;
+UPDATE eh_launch_pad_items SET default_order = 10 WHERE scene_type='default' AND item_group='Bizs' AND item_label='租赁指南' AND namespace_id=999971;
