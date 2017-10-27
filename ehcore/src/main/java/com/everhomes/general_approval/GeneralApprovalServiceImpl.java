@@ -789,6 +789,14 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     @Override
+    public GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd){
+        GeneralApproval approval = this.generalApprovalProvider.getGeneralApprovalByName(cmd.getModuleId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getApprovalName());
+        if (approval != null)
+            return ConvertHelper.convert(approval, GeneralApprovalDTO.class);
+        return null;
+    }
+
+    @Override
     public ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd) {
         ListGeneralApprovalRecordsResponse response = new ListGeneralApprovalRecordsResponse();
         ListingLocator locator = new ListingLocator();

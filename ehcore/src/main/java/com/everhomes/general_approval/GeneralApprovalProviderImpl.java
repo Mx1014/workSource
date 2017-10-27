@@ -130,4 +130,16 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
             return results;
         return null;
     }
+
+    @Override
+    public GeneralApproval getGeneralApprovalByName(Long moduleId, Long ownerId, String ownerType, String approvalName){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralApprovalTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVAL_TEMPLATES);
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_TEMPLATES.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_TEMPLATES.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_TEMPLATES.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_GENERAL_APPROVAL_TEMPLATES.APPROVAL_NAME.eq(approvalName));
+        return query.fetchAnyInto(GeneralApproval.class);
+    }
+
 }

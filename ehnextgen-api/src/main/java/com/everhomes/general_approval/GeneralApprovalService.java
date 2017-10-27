@@ -56,6 +56,8 @@ public interface GeneralApprovalService {
 
 	void exportGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd, HttpServletResponse httpResponse);
 
+	GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd);
+
 //	/**
 //	 * 直接通过表单id获取表单
 //	 */
