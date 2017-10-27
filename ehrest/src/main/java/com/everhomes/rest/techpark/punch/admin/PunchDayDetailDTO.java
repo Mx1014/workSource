@@ -25,7 +25,7 @@ import com.everhomes.util.StringHelper;
  * <li>statuString：状态文字</li>
  * <li>approvalStatuString：校正状态文字</li>
  * <li>punchLogs：打卡记录列表 参照{@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
- * <li>approvalRecords：审批列表 参照{@link com.everhomes.rest.general_approval.GeneralApprovalRecordDTO}</li>
+ * <li>approvalRecords：列表 参照{@link com.everhomes.rest.general_approval.GeneralApprovalRecordDTO}</li>
  * </ul>
  */
 public class PunchDayDetailDTO {
@@ -56,8 +56,7 @@ public class PunchDayDetailDTO {
 	@ItemType(PunchLogDTO.class)
 	private List<PunchLogDTO> punchLogs;
 	@ItemType(GeneralApprovalRecordDTO.class)
-	private
-	List<GeneralApprovalRecordDTO> approvalRecords;
+	private List<GeneralApprovalRecordDTO> approvalRecords;
 	
 	public java.lang.Byte getMorningApprovalStatus() {
 		return morningApprovalStatus;

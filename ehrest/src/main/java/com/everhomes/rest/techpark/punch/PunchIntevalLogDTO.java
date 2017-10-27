@@ -41,15 +41,7 @@ public class PunchIntevalLogDTO {
     public void setStatus(String status) {
         this.status = status;
     }
-
-    public String getRequestToken() {
-        return requestToken;
-    }
-
-    public void setRequestToken(String requestToken) {
-        this.requestToken = requestToken;
-    }
-
+ 
 
 	public Integer getPunchIntervalNo() {
 		return punchIntervalNo;
