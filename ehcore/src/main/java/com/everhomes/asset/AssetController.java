@@ -306,12 +306,27 @@ public class AssetController extends ControllerBase {
     // this is for 展示所有收费项目   4
     /**
      * <p>获取园区启用的收费项目列表</p>
+     * <b>URL: /asset/listAllChargingItems</b>
+     */
+    @RequestMapping("listAllChargingItems")
+    @RestReturn(value = ListChargingItemsDTO.class, collection = true)
+    public RestResponse listAllChargingItems(OwnerIdentityCommand cmd) {
+        List<ListChargingItemsDTO> list = assetService.listChargingItems(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+
+    // this is for 展示所有收费项目   4
+    /**
+     * <p>获取园区启用的收费项目列表</p>
      * <b>URL: /asset/listChargingItems</b>
      */
     @RequestMapping("listChargingItems")
     @RestReturn(value = ListChargingItemsDTO.class, collection = true)
     public RestResponse listChargingItems(OwnerIdentityCommand cmd) {
-        List<ListChargingItemsDTO> list = assetService.listChargingItems(cmd);
+        List<ListChargingItemsDTO> list = assetService.listAvailableChargingItems(cmd);
         RestResponse response = new RestResponse(list);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);

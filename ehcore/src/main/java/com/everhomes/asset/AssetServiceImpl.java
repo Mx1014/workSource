@@ -1621,6 +1621,11 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
+    public List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd) {
+        return assetProvider.listAvailableChargingItems(cmd);
+    }
+
+    @Override
     public void configChargingItems(ConfigChargingItemsCommand cmd) {
         assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId());
     }

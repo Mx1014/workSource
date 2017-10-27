@@ -209,4 +209,5 @@ public interface AssetProvider {
 
     ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(Long billGroupRuleId);
 
+    List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
 }

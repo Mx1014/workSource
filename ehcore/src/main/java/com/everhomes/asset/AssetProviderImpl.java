@@ -1221,7 +1221,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentVariables t2 = Tables.EH_PAYMENT_VARIABLES.as("t2");
         EhPaymentBillGroupsRules t3 = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t3");
         SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t3.VARIABLES_JSON_STRING,t.FORMULA_TYPE);
+        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t3.VARIABLES_JSON_STRING,t.FORMULA_TYPE,t.FORMULA_JSON);
         query.addFrom(t,t1,t3);
         query.addConditions(t.CHARGING_ITEMS_ID.eq(chargingItemId));
         query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
@@ -2454,6 +2454,27 @@ public class AssetProviderImpl implements AssetProvider {
         dto.setFormula(standard.getFormula());
         dto.setGroupChargingItemName(rule.getChargingItemName());
         return dto;
+    }
+
+    @Override
+    public List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd) {
+        List<ListChargingItemsDTO> list = new ArrayList<>();
+        DSLContext context = getReadOnlyContext();
+        EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
+        List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
+                .where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .fetchInto(PaymentChargingItemScope.class);
+
+        for(int j = 0; j < scopes.size(); j ++){
+            ListChargingItemsDTO dto = new ListChargingItemsDTO();
+            PaymentChargingItemScope scope = scopes.get(j);
+            dto.setChargingItemName(scope.getProjectLevelName());
+            dto.setChargingItemId(scope.getChargingItemId());
+            list.add(dto);
+        }
+
+        return list;
     }
 
 
