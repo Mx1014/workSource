@@ -1833,7 +1833,6 @@ public class AssetServiceImpl implements AssetService {
             response.setNextPageAnchor(null);
         }
         response.setList(list);
-        System.out.println("what");
         return response;
     }
 
