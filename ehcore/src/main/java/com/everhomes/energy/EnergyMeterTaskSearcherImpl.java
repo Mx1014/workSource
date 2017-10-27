@@ -133,8 +133,7 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
             builder.addHighlightedField("planName").addHighlightedField("groupName");
         }
 
-        FilterBuilder fb = null;
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 
         if(cmd.getStartTime() != null) {

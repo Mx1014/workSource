@@ -2081,6 +2081,21 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
+	 * <p>删除计价条款</p>
+	 * <b>URL: /pm/deleteDefaultChargingItem</b>
+	 */
+	@RequestMapping("deleteDefaultChargingItem")
+	@RestReturn(String.class)
+	public RestResponse deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd){
+		propertyMgrService.deleteDefaultChargingItem(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <p>列出计价条款</p>
 	 * <b>URL: /pm/listDefaultChargingItems</b>
 	 */

@@ -6323,6 +6323,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
+	public void deleteDefaultChargingItem(DeleteDefaultChargingItemCommand cmd) {
+
+	}
+
+	@Override
 	public DefaultChargingItemDTO updateDefaultChargingItem(UpdateDefaultChargingItemCommand cmd) {
 		return null;
 	}
@@ -6330,5 +6335,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	@Override
 	public List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd) {
 		return null;
+	}
+
+	private void dealDefaultChargingItemProperty(List<DefaultChargingItemPropertyDTO> apartments) {
+
+	}
+
+	private DefaultChargingItemDTO toDefaultChargingItemDTO(DefaultChargingItem item) {
+		DefaultChargingItemDTO dto = ConvertHelper.convert(item, DefaultChargingItemDTO.class);
+
+		return dto;
 	}
 }

@@ -6,6 +6,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.energy.TaskGeneratePaymentFlag;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterTasksDao;
@@ -74,6 +75,15 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
         return context.selectFrom(Tables.EH_ENERGY_METER_TASKS)
                 .where(Tables.EH_ENERGY_METER_TASKS.ID.ge(pageAnchor))
                 .limit(pageSize).fetchInto(EnergyMeterTask.class);
+    }
+
+    @Override
+    public List<EnergyMeterTask> listNotGeneratePaymentEnergyMeterTasks() {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_METER_TASKS)
+                .where(Tables.EH_ENERGY_METER_TASKS.EXECUTIVE_EXPIRE_TIME.le(new Timestamp(DateHelper.currentGMTTime().getTime())))
+                .and(Tables.EH_ENERGY_METER_TASKS.GENERATE_PAYMENT_FLAG.eq(TaskGeneratePaymentFlag.NON_GENERATE.getCode()))
+                .fetchInto(EnergyMeterTask.class);
     }
 
     @Override

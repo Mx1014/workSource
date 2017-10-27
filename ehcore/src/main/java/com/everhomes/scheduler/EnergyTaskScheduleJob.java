@@ -8,6 +8,7 @@ import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.asset.FeeRules;
 import com.everhomes.rest.energy.CreateEnergyTaskCommand;
 import com.everhomes.rest.energy.EnergyMeterStatus;
+import com.everhomes.rest.energy.TaskGeneratePaymentFlag;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ExecutorUtil;
 import org.quartz.JobExecutionContext;
@@ -47,6 +48,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
     @Autowired
     private EnergyConsumptionService energyConsumptionService;
 
+    @Autowired
+    private EnergyMeterTaskProvider taskProvider;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         if(LOGGER.isInfoEnabled()) {
@@ -73,6 +77,14 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
     }
 
     private void generatePaymentExpectancies() {
+        List<EnergyMeterTask> tasks = taskProvider.listNotGeneratePaymentEnergyMeterTasks();
+        if(tasks != null && tasks.size() > 0) {
+            tasks.forEach(task -> {
+//                paymentExpectancies_re_struct();
+                task.setGeneratePaymentFlag(TaskGeneratePaymentFlag.GENERATED.getCode());
+                taskProvider.updateEnergyMeterTask(task);
+            });
+        }
 
     }
 
