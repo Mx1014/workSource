@@ -454,6 +454,14 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		form.setNamespaceId(UserContext.getCurrentNamespaceId());
 		form.setFormVersion(0L);
 		form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
+
+		if(cmd.getDeleteFlag() == null)
+			form.setDeleteFlag(Byte.valueOf("1"));
+		if(cmd.getModifyFlag() == null)
+			form.setModifyFlag(Byte.valueOf("1"));
+		if(cmd.getFormAttribute() == null)
+			form.setFormAttribute(GeneralApprovalAttribute.CUSTOMIZE.getCode());
+
 		this.generalFormProvider.createGeneralForm(form);
 		return processGeneralFormDTO(form);
 	}
