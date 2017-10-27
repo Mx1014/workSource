@@ -15,6 +15,8 @@ public class FlowPredefinedParamDTO {
     private Long id;
     private String entityType;
     private String displayName;
+    private String ownerType;
+    private Long ownerId;
     private String text;
 
     public Long getId() {

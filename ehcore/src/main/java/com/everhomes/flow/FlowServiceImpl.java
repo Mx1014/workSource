@@ -4589,6 +4589,11 @@ public class FlowServiceImpl implements FlowService {
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
+        // 先去listener获取
+        Flow flow = flowProvider.getFlowById(cmd.getFlowId());
+        List<FlowPredefinedParamDTO> dtoList = flowListenerManager.listPredefinedParam(
+                flow, FlowEntityType.fromCode(cmd.getEntityType()), cmd.getOwnerType(), cmd.getOwnerId());
+
         List<FlowPredefinedParam> paramList = flowPredefinedParamProvider.listPredefinedParam(namespaceId,
                 cmd.getModuleType(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
 
@@ -4597,11 +4602,9 @@ public class FlowServiceImpl implements FlowService {
                     cmd.getModuleType(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
         }
 
-        List<FlowPredefinedParamDTO> dtoList = paramList.stream().map(this::toPredefinedParamDTO).collect(Collectors.toList());
+        dtoList.addAll(paramList.stream().map(this::toPredefinedParamDTO).collect(Collectors.toList()));
 
-        ListFlowPredefinedParamResponse response = new ListFlowPredefinedParamResponse();
-        response.setParams(dtoList);
-        return response;
+        return new ListFlowPredefinedParamResponse(dtoList);
     }
 
     private FlowPredefinedParamDTO toPredefinedParamDTO(FlowPredefinedParam param) {
@@ -5326,7 +5329,7 @@ public class FlowServiceImpl implements FlowService {
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, 20);
 
         List<FlowOperateLogDTO> operateLogs = flowEventLogProvider.searchOperateLogs(
-                cmd.getFlowCaseId(), userId, cmd.getServiceType(), cmd.getKeyword(), pageSize, locator);
+                cmd.getModuleId(), cmd.getFlowCaseId(), userId, cmd.getServiceType(), cmd.getKeyword(), pageSize, locator);
         SearchFlowOperateLogResponse response = new SearchFlowOperateLogResponse();
         response.setLogs(operateLogs);
         response.setNextPageAnchor(locator.getAnchor());

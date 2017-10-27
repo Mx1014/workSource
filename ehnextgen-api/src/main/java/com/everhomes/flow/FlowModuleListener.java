@@ -1,8 +1,6 @@
 package com.everhomes.flow;
 
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowServiceTypeDTO;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.Tuple;
 
@@ -91,4 +89,14 @@ public interface FlowModuleListener {
      */
     @Deprecated
     default String onFlowVariableRender(FlowCaseState ctx, String variable) { return null;}
+
+    /**
+     * 获取预定义的参数
+     * @param flow  工作流
+     * @param flowEntityType 不同地方的参数，比如条件，节点，按钮等
+     * @param ownerType 归属类型
+     * @param ownerId   归属id
+     * @return  返回参数列表
+     */
+    List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
 }

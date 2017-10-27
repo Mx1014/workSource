@@ -5,8 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>moduleType: moduleType</li>
- *     <li>moduleId: moduleId</li>
+ *     <li>flowId: flowId</li>
  *     <li>ownerType: ownerType</li>
  *     <li>ownerId: ownerId</li>
  *     <li>entityType: entityType {@link com.everhomes.rest.flow.FlowEntityType}</li>
@@ -14,11 +13,18 @@ import com.everhomes.util.StringHelper;
  */
 public class ListPredefinedParamCommand {
 
-    private String moduleType;
-    private Long moduleId;
+    private Long flowId;
+    private String entityType;
     private String ownerType;
     private Long ownerId;
-    private String entityType;
+
+    public Long getFlowId() {
+        return flowId;
+    }
+
+    public void setFlowId(Long flowId) {
+        this.flowId = flowId;
+    }
 
     public String getOwnerType() {
         return ownerType;
@@ -34,22 +40,6 @@ public class ListPredefinedParamCommand {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
-    }
-
-    public String getModuleType() {
-        return moduleType;
-    }
-
-    public void setModuleType(String moduleType) {
-        this.moduleType = moduleType;
-    }
-
-    public Long getModuleId() {
-        return moduleId;
-    }
-
-    public void setModuleId(Long moduleId) {
-        this.moduleId = moduleId;
     }
 
     public String getEntityType() {

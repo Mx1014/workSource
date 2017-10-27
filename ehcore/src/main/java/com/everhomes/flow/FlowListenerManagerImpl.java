@@ -1,9 +1,6 @@
 package com.everhomes.flow;
 
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowServiceTypeDTO;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
@@ -191,6 +188,19 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
             }
         });
         return serviceTypes;
+    }
+
+    @Override
+    public List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+        FlowModuleInst inst = moduleMap.get(flow.getModuleId());
+        if (inst != null) {
+            FlowModuleListener listener = inst.getListener();
+            List<FlowPredefinedParamDTO> dtoList = listener.listPredefinedParam(flow, flowEntityType, ownerType, ownerId);
+            if (dtoList != null) {
+                return dtoList;
+            }
+        }
+        return new ArrayList<>();
     }
 
     @Override

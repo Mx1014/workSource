@@ -624,7 +624,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     }
 
     @Override
-    public List<FlowOperateLogDTO> searchOperateLogs(Long flowCaseId, Long userId, String serviceType, String keyword, Integer pageSize, ListingLocator locator) {
+    public List<FlowOperateLogDTO> searchOperateLogs(Long moduleId, Long flowCaseId, Long userId, String serviceType, String keyword, Integer pageSize, ListingLocator locator) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         com.everhomes.server.schema.tables.EhFlowEventLogs log = Tables.EH_FLOW_EVENT_LOGS;
@@ -636,17 +636,20 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                 .join(flowCase).on(log.FLOW_CASE_ID.eq(flowCase.ID))
                 .getQuery();
 
-        if (flowCaseId != null) {
+        if (moduleId != null && moduleId != 0) {
+            query.addConditions(flowCase.MODULE_ID.eq(moduleId));
+        }
+        if (flowCaseId != null && flowCaseId != 0) {
             query.addConditions(flowCase.ID.eq(flowCaseId));
         }
-        if (userId != null) {
+        if (userId != null && userId != 0) {
             query.addConditions(log.FLOW_USER_ID.eq(userId));
         }
 
         query.addConditions(log.LOG_TYPE.eq(FlowLogType.BUTTON_FIRED.getCode()));
 
         if (serviceType != null) {
-            query.addConditions(flowCase.TITLE.eq(serviceType));
+            query.addConditions(flowCase.SERVICE_TYPE.eq(serviceType));
         }
         if (keyword != null && keyword.length() > 0) {
             String kw = "%" + keyword + "%";
