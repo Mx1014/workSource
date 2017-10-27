@@ -91,7 +91,7 @@ public interface Rentalv2Provider {
 
 	RentalOrderPayorderMap findRentalBillPaybillMapByOrderNo(String orderNo);
 
-	List<RentalOrder> listRentalBills(Long userId, Long resourceTypeId, ListingLocator locator,
+	List<RentalOrder> listRentalBills(Long id,Long userId, Long resourceTypeId, ListingLocator locator,
 			int count, List<Byte> status, Byte payMode);
 
 	int countRentalSites(Long  resourceTypeId,String keyword,List<Byte>  status,List<Long>  siteIds);
