@@ -70,7 +70,7 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 		keywords = keywords == null ? "" : keywords;
 		Condition cond = DSL.trueCondition();
 		if(targetFrom != null){
-			cond.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_FROM.eq(targetFrom));
+			cond = cond.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_FROM.eq(targetFrom));
 		}
 		return getReadOnlyContext().selectDistinct(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID, Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE,
 				Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_NAME, Tables.EH_QUESTIONNAIRE_ANSWERS.CREATE_TIME,
