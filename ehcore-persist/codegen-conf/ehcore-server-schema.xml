@@ -209,9 +209,6 @@
 	eh_incubator_applies | eh_incubator_project_types | eh_incubator_apply_attachments |
             eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types | eh_asset_payment_order | eh_asset_payment_order_bills |
             eh_payment_formula |
-
-
-
             eh_community_map_shops |
             eh_pm_notify_configurations | eh_pm_notify_records | eh_pm_notify_logs |
             eh_lease_buildings | eh_lease_promotion_communities |
