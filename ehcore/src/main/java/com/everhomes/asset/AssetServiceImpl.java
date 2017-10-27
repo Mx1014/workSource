@@ -864,6 +864,7 @@ public class AssetServiceImpl implements AssetService {
      * 重构费用计算方法
      * 数据来源 1：公式和日期期限的数字来自于调用者； 2：日期的设置来自于rule，公式设置来自于standard
      */
+    @Override
     public void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd) {
         SimpleDateFormat sdf_dateStrD = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat sdf_dateStr = new SimpleDateFormat("yyyy-MM");

@@ -140,4 +140,6 @@ public interface AssetService {
     PreOrderDTO placeAnAssetOrder(PlaceAnAssetOrderCommand cmd);
 
     List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
+
+    void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd);
 }
