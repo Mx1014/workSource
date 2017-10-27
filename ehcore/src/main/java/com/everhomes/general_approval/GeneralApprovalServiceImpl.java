@@ -727,9 +727,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 for (GeneralApprovalTemplate approval : templates) {
                     if (approval.getFormTemplateId().longValue() == 0) {
                         //  Create Approvals directly.
-                        GeneralApproval ga = convertApprovalFromTemplate(approval, null, cmd);
-                        generalApprovalProvider.createGeneralApproval(ga);
-                    } else {
+                        createGeneralApprovalByTemplate(approval, cmd);
+                   } else {
                         //  Create Forms before creating approvals.
                         GeneralFormTemplate form = generalFormProvider.findGeneralFormTemplateByIdAndModuleId(
                                 approval.getFormTemplateId(), cmd.getModuleId());
@@ -743,6 +742,14 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 return null;
             });
         }
+    }
+
+    private void createGeneralApprovalByTemplate(GeneralApprovalTemplate approval, CreateApprovalTemplatesCommand cmd){
+        GeneralApproval ga = convertApprovalFromTemplate(approval, null, cmd);
+        //  TODO:查找与之对应的唯一模板
+        GeneralApproval result = generalApprovalProvider;
+        generalApprovalProvider.createGeneralApproval(ga);
+
     }
 
     private GeneralApproval convertApprovalFromTemplate(GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
