@@ -3,6 +3,8 @@ package com.everhomes.rest.energy;
 /**
  * <ul>
  *     <li>meterType: 表计类型 参考{@link com.everhomes.rest.energy.EnergyMeterType}</li>
+ *     <li>buildingId: 楼栋id</li>
+ *     <li>buildingName: 楼栋名称</li>
  *     <li>apartmentFloor: 楼层</li>
  *     <li>status: 状态 参考{@link com.everhomes.rest.energy.EnergyMeterTaskStatus}</li>
  *     <li>ownerType: 所有者类型 如：PM</li>
@@ -16,6 +18,8 @@ package com.everhomes.rest.energy;
  */
 public class ListUserEnergyPlanTasksCommand {
     private Byte meterType;
+    private Long buildingId;
+    private String buildingName;
     private String apartmentFloor;
     private Byte status;
     private String targetType;
@@ -25,6 +29,22 @@ public class ListUserEnergyPlanTasksCommand {
 
     private Long pageAnchor;
     private Integer pageSize;
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
 
     public Long getPageAnchor() {
         return pageAnchor;

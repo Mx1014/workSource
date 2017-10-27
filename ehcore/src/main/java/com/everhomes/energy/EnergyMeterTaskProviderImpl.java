@@ -6,6 +6,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.energy.EnergyTaskStatus;
 import com.everhomes.rest.energy.TaskGeneratePaymentFlag;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -41,7 +42,7 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
 
         task.setId(id);
         task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
+        task.setStatus(EnergyTaskStatus.NON_READ.getCode());
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnergyMeterTasks.class));
         EhEnergyMeterTasksDao dao = new EhEnergyMeterTasksDao(context.configuration());
         dao.insert(task);

@@ -25,5 +25,6 @@ public interface EnergyPlanProvider {
     void updateEnergyPlanMeterMap(EnergyPlanMeterMap meterMap);
     void deleteEnergyPlanMeterMap(EnergyPlanMeterMap meterMap);
     List<EnergyPlanMeterMap> listMetersByEnergyPlan(Long planId);
+    List<PlanMeter> listByEnergyMeter(Long meterId);
     Map<Long, EnergyPlanMeterMap> listMeterMapsByEnergyPlan(Long planId);
 }

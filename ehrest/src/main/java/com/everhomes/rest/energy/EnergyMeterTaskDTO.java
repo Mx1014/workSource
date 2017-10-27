@@ -19,8 +19,10 @@ import java.util.List;
  *     <li>meterNumber: 表记号码</li>
  *     <li>meterType: 表记类型</li>
  *     <li>meterName: 表记名称</li>
+ *     <li>buildingId: 楼栋id</li>
+ *     <li>buildingName: 楼栋名称</li>
  *     <li>apartmentFloor: 楼层</li>
- *     <li>address: 楼栋门牌</li>
+ *     <li>apartmentName: 楼栋门牌</li>
  *     <li>executiveStartTime: 任务开始时间</li>
  *     <li>executiveExpireTime: 任务结束时间</li>
  *     <li>lastTaskReading: 上次任务读表数</li>
@@ -30,6 +32,10 @@ import java.util.List;
  *     <li>createTime: 创建时间</li>
  *     <li>operatorUid: 操作人</li>
  *     <li>updateTime: 操作时间</li>
+ *     <li>dayPrompt: 每日读表提示</li>
+ *     <li>monthPrompt: 每月读表提示</li>
+ *     <li>maxReading: 最大量程</li>
+ *     <li>startReading: 起始读数</li>
  * </ul>
  * Created by ying.xiong on 2017/10/23.
  */
@@ -45,8 +51,10 @@ public class EnergyMeterTaskDTO {
     private Byte meterType;
     private String meterNumber;
     private String meterName;
+    private Long buildingId;
+    private String buildingName;
     private String apartmentFloor;
-    private String address;
+    private String apartmentName;
     private Timestamp executiveStartTime;
     private Timestamp executiveExpireTime;
     private BigDecimal lastTaskReading;
@@ -59,6 +67,43 @@ public class EnergyMeterTaskDTO {
     @ItemType(EnergyPlanGroupDTO.class)
     private List<EnergyPlanGroupDTO> groups;
 
+    private BigDecimal dayPrompt;
+    private BigDecimal monthPrompt;
+    private BigDecimal startReading;
+    private BigDecimal maxReading;
+
+    public BigDecimal getDayPrompt() {
+        return dayPrompt;
+    }
+
+    public void setDayPrompt(BigDecimal dayPrompt) {
+        this.dayPrompt = dayPrompt;
+    }
+
+    public BigDecimal getMaxReading() {
+        return maxReading;
+    }
+
+    public void setMaxReading(BigDecimal maxReading) {
+        this.maxReading = maxReading;
+    }
+
+    public BigDecimal getMonthPrompt() {
+        return monthPrompt;
+    }
+
+    public void setMonthPrompt(BigDecimal monthPrompt) {
+        this.monthPrompt = monthPrompt;
+    }
+
+    public BigDecimal getStartReading() {
+        return startReading;
+    }
+
+    public void setStartReading(BigDecimal startReading) {
+        this.startReading = startReading;
+    }
+
     public List<EnergyPlanGroupDTO> getGroups() {
         return groups;
     }
@@ -67,12 +112,12 @@ public class EnergyMeterTaskDTO {
         this.groups = groups;
     }
 
-    public String getAddress() {
-        return address;
+    public String getApartmentName() {
+        return apartmentName;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
     }
 
     public String getApartmentFloor() {
@@ -81,6 +126,22 @@ public class EnergyMeterTaskDTO {
 
     public void setApartmentFloor(String apartmentFloor) {
         this.apartmentFloor = apartmentFloor;
+    }
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
     }
 
     public Timestamp getCreateTime() {

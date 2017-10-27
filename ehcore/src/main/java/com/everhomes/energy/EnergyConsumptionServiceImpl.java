@@ -42,6 +42,7 @@ import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.repeat.RepeatServiceErrorCode;
+import com.everhomes.rest.repeat.RepeatSettingStatus;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.scheduler.EnergyTaskScheduleJob;
@@ -256,7 +257,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         String token = getEnergyTaskToken(redisTemplate);
         if(StringUtils.isEmpty(token)) {
             //manual cache it to redis
-            redisTemplate.opsForValue().set(TASK_EXECUTE, "executing", 1, TimeUnit.DAYS);
+            redisTemplate.opsForValue().set(TASK_EXECUTE, "executing", 3, TimeUnit.HOURS);
             scheduleProvider.scheduleCronJob(energyTaskTriggerName, energyTaskTriggerName,
                     cronExpression, EnergyTaskScheduleJob.class, null);
         }
@@ -503,10 +504,22 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
         //楼栋门牌信息
         dto.setAddresses(populateEnergyMeterAddresses(meter.getId()));
+
+        List<PlanMeter> maps = energyPlanProvider.listByEnergyMeter(meter.getId());
+        Boolean assignFlag = false;
+        if(maps != null && maps.size() > 0) {
+            for(PlanMeter map : maps) {
+                if(repeatService.repeatSettingStillWork(map.getRepeatSettingId())) {
+                    assignFlag = true;
+                }
+            }
+        }
+        dto.setAssignedPlan(assignFlag);
         return dto;
     }
 
-    private BigDecimal processDayPrompt(EnergyMeter meter) {
+    @Override
+    public BigDecimal processDayPrompt(EnergyMeter meter) {
         Timestamp lastReadTime = meter.getLastReadTime();
         EnergyMeterDefaultSetting dayPromptSetting = defaultSettingProvider.findBySettingType(currNamespaceId(), EnergyMeterSettingType.DAY_PROMPT);
         if (lastReadTime != null && dayPromptSetting != null && Objects.equals(dayPromptSetting.getStatus(), EnergyCommonStatus.ACTIVE.getCode())) {
@@ -596,7 +609,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return null;
     }
 
-    private BigDecimal processMonthPrompt(EnergyMeter meter) {
+    @Override
+    public  BigDecimal processMonthPrompt(EnergyMeter meter) {
         Timestamp lastReadTime = meter.getLastReadTime();
         EnergyMeterDefaultSetting monthPromptSetting = defaultSettingProvider.findBySettingType(currNamespaceId(), EnergyMeterSettingType.MONTH_PROMPT);
         if (lastReadTime != null && monthPromptSetting != null && Objects.equals(monthPromptSetting.getStatus(), EnergyCommonStatus.ACTIVE.getCode())) {
@@ -2856,11 +2870,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     dto.setMeterName(meter.getName());
                     dto.setMeterNumber(meter.getMeterNumber());
                     dto.setMeterType(meter.getMeterType());
-
-                    Map<Long, EnergyMeterAddress> addressMap = energyMeterAddressProvider.findByMeterId(task.getMeterId());
+                    dto.setMaxReading(meter.getMaxReading());
+                    dto.setStartReading(meter.getStartReading());
+                    // 日读表差
+                    dto.setDayPrompt(this.processDayPrompt(meter));
+                    // 月读表差
+                    dto.setMonthPrompt(this.processMonthPrompt(meter));
+                    List<EnergyMeterAddress> addressMap = energyMeterAddressProvider.listByMeterId(task.getMeterId());
                     if(addressMap != null && addressMap.size() > 0) {
                         dto.setApartmentFloor(addressMap.get(0).getApartmentFloor());
-                        dto.setAddress(addressMap.get(0).getApartmentName());
+                        dto.setBuildingId(addressMap.get(0).getBuildingId());
+                        dto.setBuildingName(addressMap.get(0).getBuildingName());
+                        dto.setApartmentName(addressMap.get(0).getApartmentName());
                     }
                     return dto;
                 }).collect(Collectors.toList());
@@ -2946,6 +2967,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         }
         task.setReading(cmd.getCurrReading());
+        task.setStatus(EnergyTaskStatus.READ.getCode());
         task.setOperatorUid(UserContext.currentUserId());
         task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         energyMeterTaskProvider.updateEnergyMeterTask(task);
@@ -3074,6 +3096,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyPlanDTO updateEnergyPlan(UpdateEnergyPlanCommand cmd) {
+        checkMeterPlanAssigment(cmd.getId(), cmd.getMeters());
         EnergyPlan plan = ConvertHelper.convert(cmd, EnergyPlan.class);
         RepeatSettings repeat = dealEnergyPlanRepeat(cmd.getRepeat());
         plan.setRepeatSettingId(repeat.getId());
@@ -3089,6 +3112,25 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         energyPlanSearcher.feedDoc(plan);
         return toEnergyPlanDTO(plan);
+    }
+
+    private void checkMeterPlanAssigment(Long planId, List<EnergyPlanMeterDTO> meters) {
+        if(meters != null && meters.size() > 0) {
+            meters.forEach(planMeter -> {
+                List<PlanMeter> maps = energyPlanProvider.listByEnergyMeter(planMeter.getMeterId());
+                if(maps != null && maps.size() > 0) {
+                    for(PlanMeter map : maps) {
+                        if(repeatService.repeatSettingStillWork(map.getRepeatSettingId())) {
+                            if(!map.getPlanId().equals(planId)) {
+                                LOGGER.error("meter id: {} already assigned to plan id: {}!", map.getMeterId(), map.getPlanId());
+                                throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_HAS_ASSIGN_PLAN, "The energy meter has assigned to plan!");
+                            }
+                        }
+                    }
+                }
+            });
+
+        }
     }
 
     @Override

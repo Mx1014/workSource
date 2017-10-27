@@ -31,6 +31,7 @@ import java.util.List;
  *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType}</li>
  *     <li>priceConfig: 梯度价格方案 参考{@link com.everhomes.rest.energy.EnergyMeterPriceConfigDTO}</li>
  *     <li>addresses: 表记所属楼栋门牌</li>
+ *     <li>assignedPlan: 是否关联计划</li>
  * </ul>
  */
 public class EnergyMeterDTO {
@@ -56,10 +57,19 @@ public class EnergyMeterDTO {
     private BigDecimal dayPrompt;
     private BigDecimal monthPrompt;
 
+    private Boolean assignedPlan;
     private Byte calculationType;
     private EnergyMeterPriceConfigDTO priceConfig;
     @ItemType(EnergyMeterAddressDTO.class)
     private List<EnergyMeterAddressDTO> addresses;
+
+    public Boolean getAssignedPlan() {
+        return assignedPlan;
+    }
+
+    public void setAssignedPlan(Boolean assignedPlan) {
+        this.assignedPlan = assignedPlan;
+    }
 
     public List<EnergyMeterAddressDTO> getAddresses() {
         return addresses;

@@ -9,6 +9,8 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>organizationId: 组织id</li>
  *     <li>communityId: 小区id</li>
+ *     <li>addressId: 门牌id</li>
+ *     <li>buildingId: 楼栋id</li>
  *     <li>keyword: 关键字</li>
  *     <li>meterNumber: 表记号码</li>
  *     <li>billCategoryId: 表记项目id</li>
@@ -29,9 +31,27 @@ public class SearchEnergyMeterCommand {
     private Long serviceCategoryId;
     @EnumType(value = EnergyMeterType.class, nullValue = true)
     private Byte meterType;
+    private Long addressId;
+    private Long buildingId;
     private Long status;
     private Long pageAnchor;
     private Integer pageSize;
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
 
     public Long getOrganizationId() {
         return organizationId;

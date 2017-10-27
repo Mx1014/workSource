@@ -57,6 +57,9 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
     @Autowired
     private OrganizationProvider organizationProvider;
 
+    @Autowired
+    private EnergyConsumptionService energyConsumptionService;
+
     @Override
     public String getIndexType() {
         return SearchUtils.ENERGY_TASK;
@@ -193,10 +196,16 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
                 dto.setMeterNumber(meter.getMeterNumber());
                 dto.setMeterType(meter.getMeterType());
 
+                dto.setMaxReading(meter.getMaxReading());
+                dto.setStartReading(meter.getStartReading());
+                // 日读表差
+                dto.setDayPrompt(energyConsumptionService.processDayPrompt(meter));
+                // 月读表差
+                dto.setMonthPrompt(energyConsumptionService.processMonthPrompt(meter));
                 List<EnergyMeterAddress> addressMap = energyMeterAddressProvider.listByMeterId(task.getMeterId());
                 if(addressMap != null && addressMap.size() > 0) {
                     dto.setApartmentFloor(addressMap.get(0).getApartmentFloor());
-                    dto.setAddress(addressMap.get(0).getApartmentName());
+                    dto.setApartmentName(addressMap.get(0).getApartmentName());
                 }
 
                 List<EnergyPlanGroupMap> groupMaps = energyPlanProvider.listGroupsByEnergyPlan(task.getPlanId());

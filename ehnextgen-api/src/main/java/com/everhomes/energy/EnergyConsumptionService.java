@@ -9,6 +9,7 @@ import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -260,4 +261,7 @@ public interface EnergyConsumptionService {
     void createTask(CreateEnergyTaskCommand cmd);
     void creatMeterTask(EnergyPlanMeterMap map, EnergyPlan plan);
     Set<Long> getTaskGroupUsers(Long taskId);
+
+    BigDecimal processMonthPrompt(EnergyMeter meter);
+    BigDecimal processDayPrompt(EnergyMeter meter);
 }

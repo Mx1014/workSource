@@ -20,7 +20,8 @@ public interface RepeatService {
 	List<RepeatExpressionDTO> analyzeExpression(String expression);
 	
 	List<RepeatExpressionDTO> test();
-	
+
+	boolean repeatSettingStillWork(Long repeatSettingId);
 	boolean isRepeatSettingActive(Long repeatSettingId);
 	
 	String getExecutionFrequency(RepeatSettingsDTO rs);
