@@ -7,6 +7,8 @@ import java.util.List;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.general_approval.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -55,6 +57,8 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     protected GeneralFormProvider generalFormProvider;
     @Autowired
     protected LocaleStringService localeStringService;
+    @Autowired
+    protected OrganizationProvider organizationProvider;
 
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
@@ -103,8 +107,11 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     public void onFlowCaseCreating(FlowCase flowCase) {
 /*        // 服务联盟的审批拼接工作流 content字符串
         flowCase.setContent(null);*/
-        String content = localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请人") + " : " + flowCase.getApplierName() + "\n";
         PostApprovalFormCommand cmd = JSON.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getApprovalId());
+        if (detail != null)
+            flowCase.setApplierName(detail.getContactName());
+        String content = localeStringService.getLocalizedString("general_approval.key", "1", "zh_CN", "申请人") + " : " + flowCase.getApplierName() + "\n";
         List<FlowCaseEntity> entities = processEntities(cmd.getValues());
         for (int i = 0; i < entities.size(); i++) {
             if (i == 3)

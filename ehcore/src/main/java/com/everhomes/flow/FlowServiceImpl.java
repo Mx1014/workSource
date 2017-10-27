@@ -33,6 +33,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -2413,11 +2414,17 @@ public class FlowServiceImpl implements FlowService {
         if (flowCase.getApplyUserId() == null) {
             flowCase.setApplyUserId(UserContext.current().getUser().getId());
         }
+
+        /*change nickName to contactName by approval 1.6
+        flowCase.setApplierName(userInfo.getNickName());*/
+
         UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(flowCase.getApplyUserId());
-        flowCase.setApplierName(userInfo.getNickName());
         if (userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
             flowCase.setApplierPhone(userInfo.getPhones().get(0));
         }
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(userInfo.getId());
+        if (detail != null)
+            flowCase.setApplierName(detail.getContactName());
 
         FlowModuleDTO moduleDTO = this.getModuleById(snapshotFlow.getModuleId());
         if (FlowModuleType.SERVICE_ALLIANCE.getCode().equals(snapshotFlow.getModuleType())) {

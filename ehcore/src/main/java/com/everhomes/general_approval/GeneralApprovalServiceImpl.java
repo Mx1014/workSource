@@ -222,19 +222,19 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
             cmd21.setTitle(ga.getApprovalName());
 
-            //  存储更多的信息
+            //  存储更多的信息 added by approval1.6
             GeneralApprovalFlowCaseAdditionalFieldDTO fieldDTO = new GeneralApprovalFlowCaseAdditionalFieldDTO();
             List<OrganizationMember> member = organizationProvider.listOrganizationMembersByUId(user.getId());
-            member.stream().filter(r -> {
+            member = member.stream().filter(r -> {
                 return r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode());
-            });
+            }).collect(Collectors.toList());
             if (member != null && member.size() > 0) {
                 Organization department = organizationProvider.findOrganizationById(member.get(0).getOrganizationId());
                 //  存储部门 id 及名称
                 fieldDTO.setDepartment(department.getName());
                 fieldDTO.setDepartmentId(department.getId());
             }
-            //  设置审批编号
+            //  设置审批编号 added by approval1.6
             String countKey = "general_approval_no" + user.getNamespaceId() + cmd.getOrganizationId();
             String count;
             if (op.get(countKey) == null) {
