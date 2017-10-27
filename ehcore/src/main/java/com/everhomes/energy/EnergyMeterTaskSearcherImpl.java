@@ -183,7 +183,7 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
                 dto.setMeterNumber(meter.getMeterNumber());
                 dto.setMeterType(meter.getMeterType());
 
-                Map<Long, EnergyMeterAddress> addressMap = energyMeterAddressProvider.findByMeterId(task.getMeterId());
+                List<EnergyMeterAddress> addressMap = energyMeterAddressProvider.listByMeterId(task.getMeterId());
                 if(addressMap != null && addressMap.size() > 0) {
                     dto.setApartmentFloor(addressMap.get(0).getApartmentFloor());
                     dto.setAddress(addressMap.get(0).getApartmentName());
