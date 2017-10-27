@@ -119,7 +119,13 @@ public class PusherHuawei implements PusherVender {
         
         JSONObject param = new JSONObject();
 //        param.put("appPkgName", appPkgName);//定义需要打开的appPkgName
-        param.put("intent",  MessageFormat.format("zl-1://message/open-session?dstChannel={0}&dstChannelId={1}&srcChannel={2}&srcChannelId={3}&senderUid={4}",msgBox.getChannelType(),destLogin.getUserId(), ChannelType.USER.getCode(), senderLogin.getUserId(), msgBox.getSenderUid()));
+        param.put("intent",  String.format("zl-1://message/open-session?dstChannel=%s&dstChannelId=%s&srcChannel=%s&srcChannelId=%s&senderUid=%s#Intent;launchFlags=0x10000000;package=com.everhomes.android.oa.debug;end"
+                , ChannelType.USER.getCode()
+                , String.valueOf(senderLogin.getUserId())
+                , msgBox.getChannelType()
+                , msgBox.getChannelToken()
+                , String.valueOf(msgBox.getSenderUid()))
+                );
 
         JSONObject action = new JSONObject();
         action.put("type", 1);//类型3为打开APP，其他行为请参考接口文档设置
