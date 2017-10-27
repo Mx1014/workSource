@@ -2927,10 +2927,10 @@ public class ForumServiceImpl implements ForumService {
             }
 
             //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
-            if(StringUtils.isEmpty(cmd.getEntryId())){
+            if(StringUtils.isEmpty(cmd.getForumEntryId())){
                 query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(0L));
             }else {
-                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getEntryId()));
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getForumEntryId()));
             }
             
             if(visibilityCondition != null) {
@@ -3119,10 +3119,10 @@ public class ForumServiceImpl implements ForumService {
             }
 
             //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
-            if(StringUtils.isEmpty(cmd.getEntryId())){
+            if(StringUtils.isEmpty(cmd.getForumEntryId())){
                 query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(0L));
             }else {
-                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getEntryId()));
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getForumEntryId()));
             }
 
             if(null != condition){
@@ -5844,10 +5844,10 @@ public class ForumServiceImpl implements ForumService {
             }
 
             //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
-            if(StringUtils.isEmpty(cmd.getEntryId())){
+            if(StringUtils.isEmpty(cmd.getForumEntryId())){
                 query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(0L));
             }else {
-                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getEntryId()));
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ENTRY_ID.eq(cmd.getForumEntryId()));
             }
 
             return query;
