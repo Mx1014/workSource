@@ -118,6 +118,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         List<FlowCaseEntity> entities = new ArrayList<>();
         for (PostApprovalFormItem value : values) {
             FlowCaseEntity e = new FlowCaseEntity();
+            e.setKey(value.getFieldDisplayName() == null ? value.getFieldName() : value.getFieldDisplayName());
             switch (GeneralFormFieldType.fromCode(value.getFieldType())) {
                 case SINGLE_LINE_TEXT:
                 case NUMBER_TEXT:
