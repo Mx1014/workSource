@@ -53,7 +53,7 @@ public interface FlowModuleListener {
 	/**
 	 * FlowCase 的描述性内容
 	 */
-	String onFlowCaseBriefRender(FlowCase flowCase);
+	String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType);
 
 	/**
 	 * FlowCase 的详细信息列表

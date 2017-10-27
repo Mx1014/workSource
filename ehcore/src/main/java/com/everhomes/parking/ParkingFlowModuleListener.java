@@ -116,7 +116,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public String onFlowCaseBriefRender(FlowCase flowCase) {
+	public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
 		// TODO Auto-generated method stub
 		return null;
 	}

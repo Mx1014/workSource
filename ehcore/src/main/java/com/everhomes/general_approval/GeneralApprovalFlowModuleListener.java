@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Component
 public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 	protected static List<String> DEFUALT_FIELDS = new ArrayList<String>();
@@ -111,7 +112,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public String onFlowCaseBriefRender(FlowCase flowCase) {
+	public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
 		// TODO Auto-generated method stub
 		return null;
 	}
