@@ -3012,3 +3012,11 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('20910', '权限设置', '20900', NULL, 'vehicle_setting', '0', '2', '/20000/20900/20910', 'park', '301', '20900', '3', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('20920', '放行记录', '20900', NULL, 'release_record', '0', '2', '/20000/20900/20920', 'park', '302', '20900', '3', NULL, 'module');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES ('20930', '工作流设置', '20900', NULL, 'react:/working-flow/flow-list/vehicle-release/20900', '0', '2', '/20000/20900/20930', 'park', '303', '20900', '3', NULL, 'module');
+
+
+-- 园区入驻 add by sw 20171027
+set @id = IFNULL((select MAX(id) FROM eh_lease_configs), 1);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999966', NULL, NULL, 'areaSearchFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999966', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);

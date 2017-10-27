@@ -1484,3 +1484,5 @@ INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`,
 -- added by janson fix home url error
 UPDATE `eh_configurations` SET `value`='https://core.szbay.com' WHERE `name`='home.url' and namespaceId = 999966;
 
+
+
