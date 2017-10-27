@@ -5127,6 +5127,10 @@ public class PunchServiceImpl implements PunchService {
 				}
 
 				if (PunchRuleType.GUDING.equals(PunchRuleType.fromCode(pr.getRuleType()))) {
+					//只刷新有效状态的-针对固定班次
+					if (!ptr.getStatus().equals(PunchRuleStatus.ACTIVE.getCode())) {
+						continue;
+					}
 					//看昨天是否为特殊日期
 					PunchSpecialDay specialDay = punchProvider.findSpecialDayByDateAndOrgId(pr.getPunchOrganizationId(), yesterday.getTime());
 					if (null != specialDay) {
