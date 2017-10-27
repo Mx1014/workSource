@@ -553,7 +553,7 @@ public class AssetController extends ControllerBase {
     @RestReturn(value = ListChargingItemDetailForBillGroupDTO.class)
     public RestResponse listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd) {
         ListChargingItemDetailForBillGroupDTO dto = assetService.listChargingItemDetailForBillGroup(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(dto);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;

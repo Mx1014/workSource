@@ -15,6 +15,8 @@ import java.util.List;
  * <li>chargingStandardId:收费项目id</li>
  * <li>formula:公式</li>
  * <li>billCycle:计费周期，2：按月；3：按季；4：按年</li>
+ * <li>monthOffset:月份偏移</li>
+ * <li>dayOffset:日偏移</li>
  * <li>variables:变量集合，参考{@link com.everhomes.rest.asset.ChargingItemVariable}</li>
  *</ul>
  */
