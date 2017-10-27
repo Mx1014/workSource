@@ -5048,6 +5048,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DEPARTMENT.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
 		//added by wh 2016-10-13 把被拒绝的过滤掉
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
