@@ -104,7 +104,3 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/news" -d '
 
 }
 '
-~                                                                                                                                                                                                                                                                             
-~                                                                                                                                                                                                                                                                             
-~                                                                                                                                                                                                                                                                             
-~  
