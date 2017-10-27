@@ -1829,10 +1829,10 @@ public class AssetServiceImpl implements AssetService {
         if(list.size() > cmd.getPageSize()){
             response.setNextPageAnchor(cmd.getPageAnchor()+cmd.getPageSize().longValue());
             list.remove(list.size()-1);
-            response.setList(list);
         }else{
             response.setNextPageAnchor(null);
         }
+        response.setList(list);
         return response;
     }
 
@@ -1855,10 +1855,10 @@ public class AssetServiceImpl implements AssetService {
         if(list.size() > cmd.getPageSize()){
             response.setNextPageAnchor(cmd.getPageAnchor()+cmd.getPageSize().longValue());
             list.remove(list.size()-1);
-            response.setList(list);
         }else{
             response.setNextPageAnchor(null);
         }
+        response.setList(list);
         return response;
     }
 
