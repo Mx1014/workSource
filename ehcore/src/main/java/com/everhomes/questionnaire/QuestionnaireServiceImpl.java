@@ -2,6 +2,8 @@
 package com.everhomes.questionnaire;
 
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -11,6 +13,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.constants.Constants;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.approval.CommonStatus;
@@ -985,7 +988,22 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			sortQuestions(questionDTOs);
 			questionnaireDTOs.add(convertToQuestionnaireDTO(questionnaire, questionDTOs));
 		});
-		return questionnaireDTOs.get(0);
+		QuestionnaireDTO dto =  questionnaireDTOs.get(0);
+		generateShareUrl(dto);
+		return dto;
+	}
+
+	private void generateShareUrl(QuestionnaireDTO dto) {
+		try {
+			String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://core.zuolin.com");
+			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s/0");
+			String srcUrl = String.format(homeUrl+contextUrl, dto.getId());
+			String shareContext = String.format("evh/wxauth/authReq?ns=%s&src_url=%s",dto.getNamespaceId(), URLEncoder.encode(srcUrl,"utf-8"));
+			dto.setShareUrl(homeUrl+shareContext);
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.warn("generate share url = "+dto);
+		}
+
 	}
 
 	private void sortQuestions(List<QuestionnaireQuestionDTO> questionDTOs) {
