@@ -2318,11 +2318,11 @@ public class AssetProviderImpl implements AssetProvider {
         List<Long> fetch = readOnlyContext.select(t.CHARGING_ITEM_ID).from(t).where(t.OWNERID.eq(group.getOwnerId()))
                 .and(t.OWNERTYPE.eq(group.getOwnerType()))
                 .fetch(t.CHARGING_ITEM_ID);
-        if(fetch.contains(cmd.getChargingItemId())){
-            response.setFailCause("添加失败，一个收费项目只能在一个账单组里添加一次");
-            return response;
-        }
         if(ruleId == null){
+            if(fetch.contains(cmd.getChargingItemId())){
+                response.setFailCause("添加失败，一个收费项目只能在一个账单组里添加一次");
+                return response;
+            }
             //新增 一条billGroupRule
             long nextRuleId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules.class));
             rule.setId(nextRuleId);

@@ -566,10 +566,12 @@ public class ContractServiceImpl implements ContractService {
 
 		if(adjusts != null && adjusts.size() > 0) {
 			List<RentAdjust> rentAdjusts = generateRentAdjust(adjusts);
+			command.setRentAdjusts(rentAdjusts);
 		}
 
 		if(frees != null && frees.size() > 0) {
 			List<RentFree> rentFrees = generateRentFree(frees);
+			command.setRentFrees(rentFrees);
 		}
 		command.setNamesapceId(contract.getNamespaceId());
 		command.setOwnerId(contract.getCommunityId());
