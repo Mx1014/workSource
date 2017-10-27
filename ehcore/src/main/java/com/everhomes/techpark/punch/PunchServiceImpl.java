@@ -5002,6 +5002,11 @@ public class PunchServiceImpl implements PunchService {
 	public void dayRefreshPunchGroupScheduled() {
 		LOGGER.debug("dayRefreshPunchGroupScheduled BEGIN !!! ");
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			if(null ==UserContext.current().getUser() ){
+	    		User user = userProvider.findUserById(User.SYSTEM_UID);
+	    		UserContext.current().setUser(user);
+//	    		UserContext.current().setNamespaceId(flowCase.getNamespaceId());
+    		}
 			// TODO: 2017/10/17 把状态为新增和更新的找出来,然后置状态为使用中,更新的把之前的正常废弃.然后用组织架构的接口改version为0
 			Set<Long> orgIds = new HashSet<>();
 			List<Byte> statusList = new ArrayList<>();

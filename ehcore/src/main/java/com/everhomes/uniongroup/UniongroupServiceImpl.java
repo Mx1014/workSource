@@ -413,6 +413,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             uniongroupMemberDetails.setNamespaceId(namespaceId);
             uniongroupMemberDetails.setContactName(organizationMember.getContactName());
             uniongroupMemberDetails.setContactToken(organizationMember.getContactToken());
+            uniongroupMemberDetails.setVersionCode(DEFAULT_VERSION_CODE);
 
             String finalGroupType = groupType;
             dbProvider.execute((TransactionStatus status) -> {
@@ -656,8 +657,9 @@ public class UniongroupServiceImpl implements UniongroupService {
             }
             Organization org = checkOrganization(r);
             if (org != null) {
-                //对每一个已存在的部门找到其下的子部门集合
+                //查询是否有分配过策略组的子部门
                 List<String> underOrgPaths = checkUnderOrganizationsPathAtConfigures(org.getPath(), old_orgs);
+                LOGGER.debug("underOrgPaths: " + underOrgPaths.toString());
                 //如果存在子部门
                 if (underOrgPaths.size() > 0) {
                     //找到在部门下但并不在这些子部门下（即已分配薪酬组的）的人
@@ -667,6 +669,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 //                        throw RuntimeErrorException.errorWith(UniongroupErrorCode.SCOPE, UniongroupErrorCode.ERROR_INVALID_PARAMETER,
 //                                "memberIds is not found。");
                     }
+                    LOGGER.debug("guys who active save: " + memberIds.toString());
                     //去掉配置表中单独勾选的人员id
                     memberIds.removeAll(old_detail_ids);
 

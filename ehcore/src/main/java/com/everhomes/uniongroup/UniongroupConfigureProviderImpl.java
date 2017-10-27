@@ -257,17 +257,17 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     public void batchCreateUniongroupConfigresToVersion(List<EhUniongroupConfigures> unionConfiguresist, Integer n2) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         List<EhUniongroupConfigures> list = new ArrayList<>();
-        unionConfiguresist.stream().map(r -> {
-            Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUniongroupConfigures.class));
-            r.setId(id);
+        long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhUniongroupConfigures.class),unionConfiguresist.size());
+        for(EhUniongroupConfigures r : unionConfiguresist){
+            r.setId(beginId);
             r.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            r.setOperatorUid(UserContext.current().getUser().getId());
+//            r.setOperatorUid(UserContext.current().getUser().getId());
             if(n2 != null){
                 r.setVersionCode(n2);
             }
             list.add(r);
-            return null;
-        }).collect(Collectors.toList());
+            beginId ++;
+        }
         EhUniongroupConfiguresDao dao = new EhUniongroupConfiguresDao(context.configuration());
         LOGGER.debug("batchCreateUniongroupConfiguresDao data.size()" + list.size());
         dao.insert(list);
@@ -283,17 +283,17 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     public void batchCreateUniongroupMemberDetailToVersion(List<EhUniongroupMemberDetails> unionDetailList, Integer n2) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         List<EhUniongroupMemberDetails> list = new ArrayList<>();
-        unionDetailList.stream().map(r -> {
-            Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUniongroupMemberDetails.class));
-            r.setId(id);
+        long beginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhUniongroupMemberDetails.class), unionDetailList.size());
+        for(EhUniongroupMemberDetails r : unionDetailList){
+            r.setId(beginId);
             r.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            r.setOperatorUid(UserContext.current().getUser().getId());
+//            r.setOperatorUid(UserContext.current().getUser().getId());
             if(n2 != null){
                 r.setVersionCode(n2);
             }
             list.add(r);
-            return null;
-        }).collect(Collectors.toList());
+            beginId ++;
+        }
         EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
         LOGGER.debug("batchCreateUniongroupMemberDetail data.size()" + list.size());
         dao.insert(list);
