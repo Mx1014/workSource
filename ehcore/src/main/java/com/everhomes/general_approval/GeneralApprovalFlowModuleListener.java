@@ -119,6 +119,9 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         for (PostApprovalFormItem value : values) {
             FlowCaseEntity e = new FlowCaseEntity();
             switch (GeneralFormFieldType.fromCode(value.getFieldType())) {
+                case SINGLE_LINE_TEXT:
+                case NUMBER_TEXT:
+                case DATE:
                 case DROP_BOX:
                     processDropBoxField(entities, e, value.getFieldValue());
                     break;
@@ -159,12 +162,6 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                 case ABNORMAL_PUNCH:
                     //打卡异常
                     processAbnormalPunchField(entities, e, value.getFieldValue());
-                    break;
-                default:
-                    e = new FlowCaseEntity();
-                    e.setKey(value.getFieldName());
-                    e.setValue(value.getFieldValue());
-                    entities.add(e);
                     break;
             }
         }
