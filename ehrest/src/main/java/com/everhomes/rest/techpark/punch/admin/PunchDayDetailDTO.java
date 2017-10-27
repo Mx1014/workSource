@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_approval.GeneralApprovalRecordDTO;
 import com.everhomes.rest.techpark.punch.PunchLogDTO;
 import com.everhomes.util.StringHelper;
 
@@ -19,18 +20,12 @@ import com.everhomes.util.StringHelper;
  * <li>arriveTime：上班打卡时间</li>
  * <li>leaveTime：下班打卡时间</li>
  * <li>workTime：工作时间</li>
- * <li>punchCount：打卡次数</li>
- * <li>status：打卡状态{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
- * <li>morningStatus：早上打卡状态{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
- * <li>afternoonStatus：下午打卡状态{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
- * <li>approvalStatus：考勤状态{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
- * <li>morningApprovalStatus：上午考勤状态{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
- * <li>afternoonApprovalStatus：下午考勤状态{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
- * <li>exceptionStatus：状态{@link com.everhomes.rest.techpark.punch.ExceptionStatus}</li>
- * <li>punchTimesPerDay：打卡状态</li> 
+ * <li>punchCount：打卡次数</li>  
  * <li>deviceChangeFlag：设备改变  0-没变 1-改变标红</li> 
  * <li>statuString：状态文字</li>
+ * <li>approvalStatuString：校正状态文字</li>
  * <li>punchLogs：打卡记录列表 参照{@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
+ * <li>approvalRecords：审批列表 参照{@link com.everhomes.rest.general_approval.GeneralApprovalRecordDTO}</li>
  * </ul>
  */
 public class PunchDayDetailDTO {
@@ -57,8 +52,13 @@ public class PunchDayDetailDTO {
     private Byte exceptionStatus ;
     private Byte deviceChangeFlag;
     private String statuString;
+    private String approvalStatuString;
 	@ItemType(PunchLogDTO.class)
 	private List<PunchLogDTO> punchLogs;
+	@ItemType(GeneralApprovalRecordDTO.class)
+	private
+	List<GeneralApprovalRecordDTO> approvalRecords;
+	
 	public java.lang.Byte getMorningApprovalStatus() {
 		return morningApprovalStatus;
 	}
@@ -257,5 +257,21 @@ public class PunchDayDetailDTO {
 
 	public void setPunchLogs(List<PunchLogDTO> punchLogs) {
 		this.punchLogs = punchLogs;
+	}
+
+	public String getApprovalStatuString() {
+		return approvalStatuString;
+	}
+
+	public void setApprovalStatuString(String approvalStatuString) {
+		this.approvalStatuString = approvalStatuString;
+	}
+
+	public List<GeneralApprovalRecordDTO> getApprovalRecords() {
+		return approvalRecords;
+	}
+
+	public void setApprovalRecords(List<GeneralApprovalRecordDTO> approvalRecords) {
+		this.approvalRecords = approvalRecords;
 	}
 }

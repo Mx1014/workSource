@@ -10,7 +10,6 @@ import java.util.List;
  * <li>punchIntervalNo：第几个打卡时间段</li>
  * <li>status： 班次打卡状态</li>
  * <li>punchLogs：打卡记录列表 参考{@link com.everhomes.rest.techpark.punch.PunchLogDTO}</li>
- * <li>requestToken： 异常申请的token </li>
  * </ul>
  */
 public class PunchIntevalLogDTO {
@@ -20,7 +19,6 @@ public class PunchIntevalLogDTO {
     @ItemType(PunchLogDTO.class)
     private List<PunchLogDTO> punchLogs;
     private String status;
-    private String requestToken;
 
     @Override
     public String toString() {

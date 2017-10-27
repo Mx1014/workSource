@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>latitude： 维度</li>
  * <li>longitude： 经度</li>
  * <li>clockStatus：打卡状态 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
+ * <li>requestToken： 异常申请的token </li>
  * </ul>
  */
 public class PunchLogDTO {
@@ -27,6 +28,7 @@ public class PunchLogDTO {
 	private Double longitude;
 	private Double latitude;
 	private String identification;
+    private String requestToken;
 
       
 

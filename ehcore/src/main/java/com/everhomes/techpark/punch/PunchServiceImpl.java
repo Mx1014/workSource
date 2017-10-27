@@ -7122,17 +7122,17 @@ public class PunchServiceImpl implements PunchService {
                 }else{
                     intervalDTO.setStatus(statusList[punchIntervalNo-1]);
                 }
-                PunchExceptionRequest exceptionRequest = punchProvider.findPunchExceptionRequest(userId, cmd.getEnterpriseId(),
-                        cmd.getQueryTime(), punchIntervalNo);
-                if(null != exceptionRequest) {
-                    FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getRequestId(),
-                            ApprovalRequestDefaultHandler.REFER_TYPE, PunchConstants.PUNCH_MODULE_ID);
-                    if (null != flowCase)
-                        intervalDTO.setRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(),
-                                FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
-                    else
-                        intervalDTO.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
-                }
+//                PunchExceptionRequest exceptionRequest = punchProvider.findPunchExceptionRequest(userId, cmd.getEnterpriseId(),
+//                        cmd.getQueryTime(), punchIntervalNo);
+//                if(null != exceptionRequest) {
+//                    FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getRequestId(),
+//                            ApprovalRequestDefaultHandler.REFER_TYPE, PunchConstants.PUNCH_MODULE_ID);
+//                    if (null != flowCase)
+//                        intervalDTO.setRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(),
+//                                FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
+//                    else
+//                        intervalDTO.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+//                }
                 response.getIntervals().add(intervalDTO);
             }
         }
