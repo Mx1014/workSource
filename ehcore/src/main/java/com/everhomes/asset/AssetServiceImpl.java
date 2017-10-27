@@ -148,9 +148,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private DbProvider dbProvider;
-	
-	@Autowired
-	private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Autowired
     private CoordinationProvider coordinationProvider;
@@ -228,8 +228,8 @@ public class AssetServiceImpl implements AssetService {
         ListBillsResponse response = new ListBillsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
             if(UserContext.getCurrentNamespaceId()!=999971){
-//                cmd.setPageAnchor(0l);
-                cmd.setPageAnchor(1l);
+                cmd.setPageAnchor(0l);
+//                cmd.setPageAnchor(1l);
             }else{
                 cmd.setPageAnchor(1l);
             }
@@ -239,12 +239,12 @@ public class AssetServiceImpl implements AssetService {
         }
         int pageOffSet = cmd.getPageAnchor().intValue();
         List<ListBillsDTO> list = handler.listBills(cmd.getCommunityIdentifier(),cmd.getContractNum(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getBuildingName(),cmd.getApartmentName(),cmd.getAddressId(),cmd.getBillGroupName(),cmd.getBillGroupId(),cmd.getBillStatus(),cmd.getDateStrBegin(),cmd.getDateStrEnd(),pageOffSet,cmd.getPageSize(),cmd.getTargetName(),cmd.getStatus(),cmd.getTargetType(), response);
-            if(list.size() <= cmd.getPageSize()){
+        if(list.size() <= cmd.getPageSize()){
 //                response.setNextPageAnchor(null);
-            }else if(UserContext.getCurrentNamespaceId()!=999971){
-                response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
-                list.remove(list.size()-1);
-            }
+        }else if(UserContext.getCurrentNamespaceId()!=999971){
+            response.setNextPageAnchor(((Integer)(pageOffSet+cmd.getPageSize())).longValue());
+            list.remove(list.size()-1);
+        }
         response.setListBillsDTOS(list);
         return response;
     }
@@ -257,8 +257,8 @@ public class AssetServiceImpl implements AssetService {
         ListBillItemsResponse response = new ListBillItemsResponse();
         if (cmd.getPageAnchor() == null || cmd.getPageAnchor() < 1) {
             if(UserContext.getCurrentNamespaceId()!=999971){
-//                cmd.setPageAnchor(0l);
-                cmd.setPageAnchor(1l);
+                cmd.setPageAnchor(0l);
+//                cmd.setPageAnchor(1l);
             }else{
                 cmd.setPageAnchor(1l);
             }
@@ -315,8 +315,8 @@ public class AssetServiceImpl implements AssetService {
             LOGGER.error("YZX MAIL SEND FAILED");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "YZX MAIL SEND FAILED");
-            }
-            //客户在系统内，把需要推送的uid放在list中
+        }
+        //客户在系统内，把需要推送的uid放在list中
         for (int i = 0; i < noticeInfos.size(); i++) {
             NoticeInfo noticeInfo = noticeInfos.get(i);
             Long targetId = noticeInfo.getTargetId();
@@ -337,41 +337,41 @@ public class AssetServiceImpl implements AssetService {
                 }
             }
         }
-            try {
-                for (int k = 0; k < uids.size(); k++) {
-                    MessageDTO messageDto = new MessageDTO();
-                    messageDto.setAppId(AppConstants.APPID_MESSAGING);
-                    messageDto.setSenderUid(User.SYSTEM_UID);
-                    messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
-                    messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-                    //insert into eh_locale_template values(@xx+1,user_notification,3?,zh_CN,物业账单通知用户,text,999985)
-                    //这个逻辑是张江高科的， 但为了测试统一，999971先改为999985用华润测试
-                    Map<String, Object> map = new HashMap<>();
-                    User targetUser = userProvider.findUserById(uids.get(k));
-                    map.put("targetName", targetUser.getNickName());
-                    String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(), UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
-                    messageDto.setBody(notifyTextForApplicant);
-                    messageDto.setMetaAppId(AppConstants.APPID_USER);
-                    if (!notifyTextForApplicant.trim().equals("")) {
-                        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-                                uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-                        }
-                    }
-                } catch (Exception e) {
-                    LOGGER.error("MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                            "MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
-                }
-                if (UserContext.getCurrentNamespaceId() != 999971) {
-                    //催缴次数加1
-                    List<BillIdAndType> billIdAndTypes = cmd.getBillIdAndTypes();
-                    List<Long> billIds = new ArrayList<>();
-                    for (int i = 0; i < billIdAndTypes.size(); i++) {
-                        billIds.add(Long.parseLong(billIdAndTypes.get(i).getBillId()));
-                    }
-                    assetProvider.increaseNoticeTime(billIds);
+        try {
+            for (int k = 0; k < uids.size(); k++) {
+                MessageDTO messageDto = new MessageDTO();
+                messageDto.setAppId(AppConstants.APPID_MESSAGING);
+                messageDto.setSenderUid(User.SYSTEM_UID);
+                messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uids.get(k).toString()));
+                messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+                //insert into eh_locale_template values(@xx+1,user_notification,3?,zh_CN,物业账单通知用户,text,999985)
+                //这个逻辑是张江高科的， 但为了测试统一，999971先改为999985用华润测试
+                Map<String, Object> map = new HashMap<>();
+                User targetUser = userProvider.findUserById(uids.get(k));
+                map.put("targetName", targetUser.getNickName());
+                String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(UserContext.getCurrentNamespaceId(), UserNotificationTemplateCode.SCOPE, UserNotificationTemplateCode.USER_PAYMENT_NOTICE, UserContext.current().getUser().getLocale(), map, "");
+                messageDto.setBody(notifyTextForApplicant);
+                messageDto.setMetaAppId(AppConstants.APPID_USER);
+                if (!notifyTextForApplicant.trim().equals("")) {
+                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                            uids.get(k).toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
                 }
             }
+        } catch (Exception e) {
+            LOGGER.error("MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "MAIL SEND SUCCESSFULLY，app SENDING MESSAGE FAILED");
+        }
+        if (UserContext.getCurrentNamespaceId() != 999971) {
+            //催缴次数加1
+            List<BillIdAndType> billIdAndTypes = cmd.getBillIdAndTypes();
+            List<Long> billIds = new ArrayList<>();
+            for (int i = 0; i < billIdAndTypes.size(); i++) {
+                billIds.add(Long.parseLong(billIdAndTypes.get(i).getBillId()));
+            }
+            assetProvider.increaseNoticeTime(billIds);
+        }
+    }
 
 
     @Override
@@ -427,8 +427,8 @@ public class AssetServiceImpl implements AssetService {
     public void OneKeyNotice(OneKeyNoticeCommand cmd) {
         ListBillsCommand convertedCmd = ConvertHelper.convert(cmd, ListBillsCommand.class);
         if(UserContext.getCurrentNamespaceId()!=999971){
-//            convertedCmd.setPageAnchor(0l);
-            convertedCmd.setPageAnchor(1l);
+            convertedCmd.setPageAnchor(0l);
+//            convertedCmd.setPageAnchor(1l);
         }else{
             convertedCmd.setPageAnchor(1l);
         }
@@ -669,7 +669,7 @@ public class AssetServiceImpl implements AssetService {
             List<PaymentExpectancyDTO> dtos1 = new ArrayList<>();
             FeeRules rule = feesRules.get(i);
             List<ContractProperty> var1 = rule.getProperties();
-            List<VariableIdAndValue> variableIdAndValueList = assetProvider.findPreInjectedVariablesForCal(rule.getChargingStandardId());
+            List<VariableIdAndValue> variableIdAndValueList = assetProvider.findPreInjectedVariablesForCal(rule.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType());
             List<VariableIdAndValue> var2 = rule.getVariableIdAndValueList();
             coverVariables(var2,variableIdAndValueList);
             String formula = assetProvider.findFormulaByChargingStandardId(rule.getChargingStandardId());
@@ -1405,10 +1405,10 @@ public class AssetServiceImpl implements AssetService {
         Long templateVersion = 0L;
         List<Field> fields = new ArrayList<Field>();
         if(fieldMap.keySet().size() > 0) {
-        	templateVersion = fieldMap.keySet().iterator().next();
-        	fields = fieldMap.get(templateVersion);
+            templateVersion = fieldMap.keySet().iterator().next();
+            fields = fieldMap.get(templateVersion);
         }
-        
+
 
         ImportDataResponse importDataResponse = new ImportDataResponse();
         try {
@@ -1446,46 +1446,46 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private List<String> convertToStrList(List list) {
-		List<String> result = new ArrayList<String>();
-		boolean firstRow = true;
-		for (Object o : list) {
-			if(firstRow){
-				firstRow = false;
-				continue;
-			}
-			RowResult r = (RowResult)o;
-			StringBuffer sb = new StringBuffer();
-			sb.append(r.getA()).append("||");
-			sb.append(r.getB()).append("||");
-			sb.append(r.getC()).append("||");
-			sb.append(r.getD()).append("||");
-			sb.append(r.getE()).append("||");
-			sb.append(r.getF()).append("||");
-			sb.append(r.getG()).append("||");
-			sb.append(r.getH()).append("||");
-			sb.append(r.getI()).append("||");
-			sb.append(r.getJ()).append("||");
-			sb.append(r.getK()).append("||");
-			sb.append(r.getL()).append("||");
-			sb.append(r.getM()).append("||");
-			sb.append(r.getN()).append("||");
-			sb.append(r.getO()).append("||");
-			sb.append(r.getP()).append("||");
-			sb.append(r.getQ()).append("||");
-			sb.append(r.getR()).append("||");
-			sb.append(r.getS()).append("||");
-			sb.append(r.getT()).append("||");
-			sb.append(r.getU()).append("||");
-			sb.append(r.getV()).append("||");
-			sb.append(r.getW()).append("||");
-			sb.append(r.getX()).append("||");
-				
-			
-			result.add(sb.toString());
-		}
-		return result;
-	}
-    
+        List<String> result = new ArrayList<String>();
+        boolean firstRow = true;
+        for (Object o : list) {
+            if(firstRow){
+                firstRow = false;
+                continue;
+            }
+            RowResult r = (RowResult)o;
+            StringBuffer sb = new StringBuffer();
+            sb.append(r.getA()).append("||");
+            sb.append(r.getB()).append("||");
+            sb.append(r.getC()).append("||");
+            sb.append(r.getD()).append("||");
+            sb.append(r.getE()).append("||");
+            sb.append(r.getF()).append("||");
+            sb.append(r.getG()).append("||");
+            sb.append(r.getH()).append("||");
+            sb.append(r.getI()).append("||");
+            sb.append(r.getJ()).append("||");
+            sb.append(r.getK()).append("||");
+            sb.append(r.getL()).append("||");
+            sb.append(r.getM()).append("||");
+            sb.append(r.getN()).append("||");
+            sb.append(r.getO()).append("||");
+            sb.append(r.getP()).append("||");
+            sb.append(r.getQ()).append("||");
+            sb.append(r.getR()).append("||");
+            sb.append(r.getS()).append("||");
+            sb.append(r.getT()).append("||");
+            sb.append(r.getU()).append("||");
+            sb.append(r.getV()).append("||");
+            sb.append(r.getW()).append("||");
+            sb.append(r.getX()).append("||");
+
+
+            result.add(sb.toString());
+        }
+        return result;
+    }
+
     private List<String> importAssetBills(ImportOwnerCommand cmd, List<String> list, List<Field> fields, Long userId, Long templateVersion){
         List<String> errorDataLogs = new ArrayList<String>();
 
@@ -1503,18 +1503,18 @@ public class AssetServiceImpl implements AssetService {
                 int i = 0;
                 for(Field field : fields) {
                     try {
-                    	field.setAccessible(true);
-                    	if("class java.sql.Timestamp".equals(field.getType().toString())) {
-                    		field.set(bill, covertStrToTimestamp(s[i]));
-                    	} else if("class java.math.BigDecimal".equals(field.getType().toString())) {
-                    		if(s[i] != null && !"null".equals(s[i])) {
-                    			field.set(bill, new BigDecimal(s[i]));
-                    		}
-                    			
-                    	} else {
-                    		field.set(bill, field.getType().getConstructor(field.getType()).newInstance(s[i]));
-                    	}
-                        
+                        field.setAccessible(true);
+                        if("class java.sql.Timestamp".equals(field.getType().toString())) {
+                            field.set(bill, covertStrToTimestamp(s[i]));
+                        } else if("class java.math.BigDecimal".equals(field.getType().toString())) {
+                            if(s[i] != null && !"null".equals(s[i])) {
+                                field.set(bill, new BigDecimal(s[i]));
+                            }
+
+                        } else {
+                            field.set(bill, field.getType().getConstructor(field.getType()).newInstance(s[i]));
+                        }
+
                         i++;
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -1527,42 +1527,42 @@ public class AssetServiceImpl implements AssetService {
         return errorDataLogs;
 
     }
-    
+
     private Timestamp covertStrToTimestamp(String str) {
-    	String formatStr = configurationProvider.getValue("asset.accountperiod.format", "yyyyMMdd");
-    	SimpleDateFormat format = new SimpleDateFormat(formatStr);
-    	try {
-			Date date=format.parse(str);
-			return new Timestamp(date.getTime());
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-    	return null;
+        String formatStr = configurationProvider.getValue("asset.accountperiod.format", "yyyyMMdd");
+        SimpleDateFormat format = new SimpleDateFormat(formatStr);
+        try {
+            Date date=format.parse(str);
+            return new Timestamp(date.getTime());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     //非当月则没有滞纳金 所以数据库里面不加lateFee
     private void getTotalAmount(AssetBill bill) {
-    	BigDecimal rental = bill.getRental() == null ? new BigDecimal(0) : bill.getRental();
-    	BigDecimal propertyManagementFee = bill.getPropertyManagementFee() == null ? new BigDecimal(0) : bill.getPropertyManagementFee();
-    	BigDecimal unitMaintenanceFund = bill.getUnitMaintenanceFund() == null ? new BigDecimal(0) : bill.getUnitMaintenanceFund();
-    	BigDecimal privateWaterFee = bill.getPrivateWaterFee() == null ? new BigDecimal(0) : bill.getPrivateWaterFee();
-    	BigDecimal privateElectricityFee = bill.getPrivateElectricityFee() == null ? new BigDecimal(0) : bill.getPrivateElectricityFee();
-    	BigDecimal publicWaterFee = bill.getPublicWaterFee() == null ? new BigDecimal(0) : bill.getPublicWaterFee();
-    	BigDecimal publicElectricityFee = bill.getPublicElectricityFee() == null ? new BigDecimal(0) : bill.getPublicElectricityFee();
-    	BigDecimal wasteDisposalFee = bill.getWasteDisposalFee() == null ? new BigDecimal(0) : bill.getWasteDisposalFee();
-    	BigDecimal pollutionDischargeFee = bill.getPollutionDischargeFee() == null ? new BigDecimal(0) : bill.getPollutionDischargeFee();
-    	BigDecimal extraAirConditionFee = bill.getExtraAirConditionFee() == null ? new BigDecimal(0) : bill.getExtraAirConditionFee();
-    	BigDecimal coolingWaterFee = bill.getCoolingWaterFee() == null ? new BigDecimal(0) : bill.getCoolingWaterFee();
-    	BigDecimal weakCurrentSlotFee = bill.getWeakCurrentSlotFee() == null ? new BigDecimal(0) : bill.getWeakCurrentSlotFee();
-    	BigDecimal depositFromLease = bill.getDepositFromLease() == null ? new BigDecimal(0) : bill.getDepositFromLease();
-    	BigDecimal maintenanceFee = bill.getMaintenanceFee() == null ? new BigDecimal(0) : bill.getMaintenanceFee();
-    	BigDecimal gasOilProcessFee = bill.getGasOilProcessFee() == null ? new BigDecimal(0) : bill.getGasOilProcessFee();
-    	BigDecimal hatchServiceFee = bill.getHatchServiceFee() == null ? new BigDecimal(0) : bill.getHatchServiceFee();
-    	BigDecimal pressurizedFee = bill.getPressurizedFee() == null ? new BigDecimal(0) : bill.getPressurizedFee();
-    	BigDecimal parkingFee = bill.getParkingFee() == null ? new BigDecimal(0) : bill.getParkingFee();
-    	BigDecimal other = bill.getOther() == null ? new BigDecimal(0) : bill.getOther();
-        
-    	BigDecimal periodAccountAmount = rental.add(propertyManagementFee).add(unitMaintenanceFund)
+        BigDecimal rental = bill.getRental() == null ? new BigDecimal(0) : bill.getRental();
+        BigDecimal propertyManagementFee = bill.getPropertyManagementFee() == null ? new BigDecimal(0) : bill.getPropertyManagementFee();
+        BigDecimal unitMaintenanceFund = bill.getUnitMaintenanceFund() == null ? new BigDecimal(0) : bill.getUnitMaintenanceFund();
+        BigDecimal privateWaterFee = bill.getPrivateWaterFee() == null ? new BigDecimal(0) : bill.getPrivateWaterFee();
+        BigDecimal privateElectricityFee = bill.getPrivateElectricityFee() == null ? new BigDecimal(0) : bill.getPrivateElectricityFee();
+        BigDecimal publicWaterFee = bill.getPublicWaterFee() == null ? new BigDecimal(0) : bill.getPublicWaterFee();
+        BigDecimal publicElectricityFee = bill.getPublicElectricityFee() == null ? new BigDecimal(0) : bill.getPublicElectricityFee();
+        BigDecimal wasteDisposalFee = bill.getWasteDisposalFee() == null ? new BigDecimal(0) : bill.getWasteDisposalFee();
+        BigDecimal pollutionDischargeFee = bill.getPollutionDischargeFee() == null ? new BigDecimal(0) : bill.getPollutionDischargeFee();
+        BigDecimal extraAirConditionFee = bill.getExtraAirConditionFee() == null ? new BigDecimal(0) : bill.getExtraAirConditionFee();
+        BigDecimal coolingWaterFee = bill.getCoolingWaterFee() == null ? new BigDecimal(0) : bill.getCoolingWaterFee();
+        BigDecimal weakCurrentSlotFee = bill.getWeakCurrentSlotFee() == null ? new BigDecimal(0) : bill.getWeakCurrentSlotFee();
+        BigDecimal depositFromLease = bill.getDepositFromLease() == null ? new BigDecimal(0) : bill.getDepositFromLease();
+        BigDecimal maintenanceFee = bill.getMaintenanceFee() == null ? new BigDecimal(0) : bill.getMaintenanceFee();
+        BigDecimal gasOilProcessFee = bill.getGasOilProcessFee() == null ? new BigDecimal(0) : bill.getGasOilProcessFee();
+        BigDecimal hatchServiceFee = bill.getHatchServiceFee() == null ? new BigDecimal(0) : bill.getHatchServiceFee();
+        BigDecimal pressurizedFee = bill.getPressurizedFee() == null ? new BigDecimal(0) : bill.getPressurizedFee();
+        BigDecimal parkingFee = bill.getParkingFee() == null ? new BigDecimal(0) : bill.getParkingFee();
+        BigDecimal other = bill.getOther() == null ? new BigDecimal(0) : bill.getOther();
+
+        BigDecimal periodAccountAmount = rental.add(propertyManagementFee).add(unitMaintenanceFund)
                 .add(privateWaterFee).add(privateElectricityFee).add(publicWaterFee)
                 .add(publicElectricityFee).add(wasteDisposalFee).add(pollutionDischargeFee)
                 .add(extraAirConditionFee).add(coolingWaterFee).add(weakCurrentSlotFee)
@@ -1571,7 +1571,7 @@ public class AssetServiceImpl implements AssetService {
 
         bill.setPeriodAccountAmount(periodAccountAmount);
         bill.setPeriodUnpaidAccountAmount(bill.getPeriodAccountAmount());
-        
+
     }
 
     @Override
@@ -1673,7 +1673,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd) {
-    //只要有未缴账单就推送 但根据租户信息 一个租户在一个园区多月未缴 有多个地址未缴 只推一条
+        //只要有未缴账单就推送 但根据租户信息 一个租户在一个园区多月未缴 有多个地址未缴 只推一条
 
         List<AssetBill> bills = assetProvider.listUnpaidBillsGroupByTenant(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
 
@@ -1859,7 +1859,7 @@ public class AssetServiceImpl implements AssetService {
         if(dtos != null && dtos.size() > 0) {
             Class c=CreatAssetBillCommand.class;
             try {
-            	Long templateVersion = 0L;
+                Long templateVersion = 0L;
                 for(AssetBillTemplateFieldDTO dto : dtos) {
                     if(AssetBillTemplateSelectedFlag.SELECTED.equals(AssetBillTemplateSelectedFlag.fromCode(dto.getSelectedFlag()))) {
                         templateVersion = dto.getTemplateVersion();
