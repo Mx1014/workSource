@@ -73,7 +73,7 @@ INSERT INTO `eh_var_field_items` (`id`, `module_name`, `field_id`, `display_name
 update eh_flow_nodes set goto_process_button_name='去处理' where goto_process_button_name is null or goto_process_button_name='';
 -- by Sir Xiongying.V.Breg
 update eh_var_field_groups set name = 'com.everhomes.customer.CustomerTracking' where title = '跟进信息';
-update eh_var_field_groups set name = 'com.everhomes.customer.CustomerTrackingPlan' where title = '计划信息'
+update eh_var_field_groups set name = 'com.everhomes.customer.CustomerTrackingPlan' where title = '计划信息';
 
 -- 工作流的文本修改  add by xq.tian 2017/10/25
 UPDATE eh_locale_templates SET `text` = '在 ${nodeName} 执行 ${buttonName}' WHERE scope='flow' AND code=20001;
