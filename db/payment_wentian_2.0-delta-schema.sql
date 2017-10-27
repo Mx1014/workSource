@@ -45,8 +45,32 @@ ALTER TABLE `eh_payment_bills` ADD COLUMN `charge_status` TINYINT DEFAULT 0 COMM
 ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `decoupling_flag` TINYINT DEFAULT 0 COMMENT '解耦标志，0:耦合中，收到域名下全部设置的影响;1:副本解耦';
 ALTER TABLE `eh_payment_bills` ADD COLUMN `real_paid_time` DATETIME DEFAULT NULL COMMENT '实际付款时间';
 
-
--- 4.10.3
+-- 少张表， 合并记得删
+DROP TABLE IF EXISTS `eh_customer_tracking_plans`;
+CREATE TABLE `eh_customer_tracking_plans` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) NOT NULL COMMENT '域空间id',
+  `customer_type` tinyint(4) NOT NULL COMMENT '所属客户类型',
+  `customer_id` bigint(20) DEFAULT NULL COMMENT '所属客户id',
+  `customer_name` varchar(128) DEFAULT NULL COMMENT '客户名称',
+  `contact_name` varchar(64) DEFAULT NULL COMMENT '联系人',
+  `tracking_type` bigint(20) DEFAULT NULL COMMENT '计划跟进类型',
+  `tracking_time` datetime DEFAULT NULL COMMENT '跟进时间',
+  `notify_time` datetime DEFAULT NULL COMMENT '提醒时间',
+  `title` varchar(128) DEFAULT NULL COMMENT '标题',
+  `content` text COMMENT '内容',
+  `status` tinyint(4) NOT NULL DEFAULT '2' COMMENT '0: inactive; 1: waiting for approval; 2: active',
+  `creator_uid` bigint(20) DEFAULT NULL COMMENT '创建人uid',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_uid` bigint(20) DEFAULT NULL COMMENT '修改人uid',
+  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+  `delete_uid` bigint(20) DEFAULT NULL COMMENT '删除人uid',
+  `delete_time` datetime DEFAULT NULL COMMENT '删除时间',
+  `notify_status` tinyint(4) DEFAULT NULL COMMENT '提醒状态  0:无需提醒   1:待提醒   2:已提醒',
+  `read_status` tinyint(4) DEFAULT '0' COMMENT 'is read?  0:no  1:yes',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- 4.10.3，合并记得删
 
 CREATE TABLE `eh_customer_trackings` (
   `id` BIGINT  NOT NULL,
