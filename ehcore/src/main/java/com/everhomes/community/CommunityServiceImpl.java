@@ -1533,6 +1533,9 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setGender(user.getGender());
 			dto.setPhone(identifier.getIdentifierToken());
 			dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+			if(NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
+				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+			}
 			//添加地址信息
 			addGroupAddressDto(dto, userGroups);
 
@@ -1597,6 +1600,10 @@ public class CommunityServiceImpl implements CommunityService {
 				if(null != userIdentifier)
 					dto.setPhone(userIdentifier.getIdentifierToken());
 				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+
+				if(NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
+					dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+				}
 
 				List<UserGroup> userGroups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
 				//添加地址信息
@@ -2073,7 +2080,8 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 			}
 
-			if(NamespaceUserType.fromCode(r.getNamespaceUserType()) == NamespaceUserType.WX){
+			User user = userProvider.findUserById(r.getUserId());
+			if(user != null && NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
 				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
 			}
 
