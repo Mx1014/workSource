@@ -32,12 +32,14 @@ SET @config_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` VALUES (@config_id := @config_id +1, 'archives.form.origin.id', @form_id, null, 0, null);
 
 -- 菜单的修改与添加
-INSERT INTO `ehcore`.`eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES (50450, '员工档案', '50000', NULL, 'react:/employee-record/employee-list/1', '0', '2', '/50000/50450', 'park', '539', NULL, '2', NULL, 'module');
+INSERT INTO `ehcore`.`eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`) VALUES (50450, '人事档案', '50000', NULL, 'react:/employee-record/employee-list/1', '0', '2', '/50000/50450', 'park', '539', NULL, '2', NULL, 'module');
 SET @scope_id = (SELECT MAX(id) FROM eh_web_menu_scopes);
 -- 注意此处的域空间为 1
 INSERT INTO `eh_web_menu_scopes` VALUES(@scope_id := @scope_id + 1,50450,'','EhNamespaces',1,2);
+-- 注意此处只对域空间为 1 生效
+DELETE FROM eh_web_menu_scopes where menu_id IN (50100,50110,50200) AND owner_id = 1;
 
-UPDATE `ehcore`.`eh_web_menus` SET `data_type`='react:/address-book/address-list', `sort_num`='538' WHERE `name` like '%人员管理%';
+UPDATE `ehcore`.`eh_web_menus` SET `data_type`='react:/address-book/address-list', `sort_num`='538', `name`= '组织架构' WHERE `name` like '%人员管理%';
 
 -- 中文模板字段的添加
 SET @template_id = (SELECT MAX(id) FROM `eh_locale_templates`);
