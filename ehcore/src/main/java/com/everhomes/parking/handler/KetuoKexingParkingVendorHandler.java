@@ -245,12 +245,22 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 					ketuoCardRate.setCarType(type.getCarType());
 					ketuoCardRate.setTypeName(type.getTypeName());
 
-					ParkingRechargeRateDTO rateDTO =  convertParkingRechargeRateDTO(parkingLot, ketuoCardRate);
+					ParkingRechargeRateDTO rateDTO = convertParkingRechargeRateDTO(parkingLot, ketuoCardRate);
 					dto = ConvertHelper.convert(rateDTO, ParkingExpiredRechargeInfoDTO.class);
 
 					dto.setStartPeriod(startPeriod);
 
 					dto.setEndPeriod(Utils.getLongByAddNatureMonth(Utils.getlastDayOfMonth(now), parkingLot.getExpiredRechargeMonthCount() -1));
+
+					//计算优惠
+					if (null != parkingLot.getMonthlyDiscountFlag()) {
+						if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()) {
+							dto.setOriginalPrice(dto.getPrice());
+							BigDecimal newPrice = dto.getPrice().multiply(new BigDecimal(parkingLot.getMonthlyDiscount()))
+									.divide(new BigDecimal(10), 2, RoundingMode.HALF_UP);
+							dto.setPrice(newPrice);
+						}
+					}
 				}
 			}
 		}
@@ -282,7 +292,6 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		KetuoCard cardInfo = getCard(plateNumber);
 
 		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(order.getRateToken())) {
-			//过期没有优惠
 			//TODO:
 			List<KetuoCardType> types = getCardType();
 			String carType = cardInfo.getCarType();
@@ -303,7 +312,8 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			}
 
 			order.setRateName(EXPIRE_CUSTOM_RATE_TOKEN);
-			order.setOriginalPrice(order.getPrice());
+			order.setOriginalPrice(dto.getOriginalPrice());
+			order.setPrice(dto.getPrice());
 			order.setStartPeriod(new Timestamp(dto.getStartPeriod()));
 //			order.setCarPresenceFlag(ParkingCarPresenceFlag.PRESENCE.getCode());
 		}else {
@@ -582,7 +592,19 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
 		//TODO: 正中会没有临时车
-		return null;
+
+		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+
+		dto.setPlateNumber(plateNumber);
+		dto.setEntryTime(strToLong("2017-10-27 00:00:00"));
+		dto.setPayTime(System.currentTimeMillis());
+		dto.setParkingTime(200);
+		dto.setDelayTime(15);
+		dto.setPrice(new BigDecimal(1000));
+
+		dto.setOrderToken("100");
+		return dto;
+
 	}
 
 	@Override
@@ -738,6 +760,14 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 			KetuoCarInfo carInfo1 = new KetuoCarInfo();
 			carInfo1.setPlateNo(plateNumber);
 			carInfo1.setEntryTime("2017-09-05 07:48:24");
+			carInfo1.setParkingTime(91143);
+			return carInfo1;
+		}
+
+		if (plateNumber.equals("粤B905DG")) {
+			KetuoCarInfo carInfo1 = new KetuoCarInfo();
+			carInfo1.setPlateNo(plateNumber);
+			carInfo1.setEntryTime("2017-08-05 07:48:24");
 			carInfo1.setParkingTime(91143);
 			return carInfo1;
 		}

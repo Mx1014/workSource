@@ -15,6 +15,7 @@ public class ParkingExpiredRechargeInfoDTO {
     private String rateToken;
     private String rateName;
     private BigDecimal monthCount;
+    private BigDecimal originalPrice;
     private BigDecimal price;
     private String cardTypeId;
     private String cardTypeName;
@@ -24,6 +25,14 @@ public class ParkingExpiredRechargeInfoDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public BigDecimal getOriginalPrice() {
+        return originalPrice;
+    }
+
+    public void setOriginalPrice(BigDecimal originalPrice) {
+        this.originalPrice = originalPrice;
     }
 
     public Long getStartPeriod() {
