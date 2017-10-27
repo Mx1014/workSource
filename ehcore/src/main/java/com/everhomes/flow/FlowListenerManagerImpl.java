@@ -129,11 +129,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase) {
+    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         FlowModuleInst inst = moduleMap.get(flowCase.getModuleId());
         if (inst != null) {
             FlowModuleListener listener = inst.getListener();
-            return listener.onFlowCaseBriefRender(flowCase);
+            return listener.onFlowCaseBriefRender(flowCase, flowUserType);
         }
         return null;
     }

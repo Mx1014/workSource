@@ -57,7 +57,7 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener {
     }
 
     @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase) {
+    public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
         // TODO Auto-generated method stub
         return "testKey1: testValue1\ntestKey2: testValue2";
     }
