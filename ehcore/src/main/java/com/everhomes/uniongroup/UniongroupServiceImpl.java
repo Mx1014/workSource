@@ -413,6 +413,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             uniongroupMemberDetails.setNamespaceId(namespaceId);
             uniongroupMemberDetails.setContactName(organizationMember.getContactName());
             uniongroupMemberDetails.setContactToken(organizationMember.getContactToken());
+            uniongroupMemberDetails.setVersionCode(DEFAULT_VERSION_CODE);
 
             String finalGroupType = groupType;
             dbProvider.execute((TransactionStatus status) -> {
