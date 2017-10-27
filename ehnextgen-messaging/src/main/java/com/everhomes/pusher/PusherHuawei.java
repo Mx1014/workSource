@@ -117,7 +117,7 @@ public class PusherHuawei implements PusherVender {
         
         JSONObject param = new JSONObject();
 //        param.put("appPkgName", appPkgName);//定义需要打开的appPkgName
-        param.put("intent", "#Intent;action=zl-1://app/main?action_Type=16&action_Data=xx;"+appPkgName+";end");
+        param.put("intent", "zl-1://app/main?action_Type=16&action_Data=xx#Intent;launchFlags=0x10000000;package=com.everhomes.android.oa.debug;end");
         
         JSONObject action = new JSONObject();
         action.put("type", 1);//类型3为打开APP，其他行为请参考接口文档设置
