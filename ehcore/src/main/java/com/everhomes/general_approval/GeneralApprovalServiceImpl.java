@@ -719,7 +719,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     @Override
     public void createApprovalTemplates(CreateApprovalTemplatesCommand cmd) {
         List<GeneralApprovalTemplate> templates = generalApprovalProvider.listGeneralApprovalTemplateByModuleId(cmd.getModuleId());
-        //  1.判断审批模板中是否有对directly应的表单模板
+        //  1.判断审批模板中是否有对应的表单模板
         //  2.没有则直接创建审批
         //  3.有则先创建表单拿去表单 id,在创建审批与生成的 id 关联
         if (templates != null || templates.size() > 0) {

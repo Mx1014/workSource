@@ -194,7 +194,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 				.readOnly());
 		SelectQuery<EhGeneralFormsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORMS);
 		query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(moduleId));
-		query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(moduleId));
+		query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_GENERAL_FORMS.FORM_NAME.eq(formName));
 		return query.fetchAnyInto(GeneralForm.class);
