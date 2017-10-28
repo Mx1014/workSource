@@ -110,7 +110,7 @@ public class GeneralApprovalController extends ControllerBase {
 	 * <b>URL: /general_approval/verifyApprovalTemplates</b>
 	 * <p> 判断是否需要创建审批模板 </p>
 	 */
-	@RequestMapping("createApprovalTemplates")
+	@RequestMapping("verifyApprovalTemplates")
 	@RestReturn(value=Long.class)
 	public RestResponse verifyApprovalTemplates(@Valid VerifyApprovalTemplatesCommand cmd) {
 		Long result = generalApprovalService.verifyApprovalTemplates(cmd);
