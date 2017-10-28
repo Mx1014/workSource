@@ -714,6 +714,12 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
 
+    //  判断是否需要创建模板
+    @Override
+    public Long verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd) {
+        return null;
+    }
+
     //  创建审批模板的接口
     @Override
     public void createApprovalTemplates(CreateApprovalTemplatesCommand cmd) {
