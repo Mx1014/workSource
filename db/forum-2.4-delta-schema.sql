@@ -14,4 +14,4 @@ CREATE TABLE `eh_forum_categories` (
 
 ALTER TABLE `eh_forum_posts` ADD COLUMN `forum_entry_id`  bigint(20) NULL DEFAULT 0 COMMENT 'forum_category  entry_id' ;
 
-ALTER TABLE `eh_forum_posts` ADD COLUMN `interact_flag`  tinyint(4) NULL DEFAULT 1 COMMENT 'support interact, 0-no, 1-yes' ;
+ALTER TABLE `eh_forum_posts` ADD COLUMN `interact_flag`  tinyint(4) NOT NULL DEFAULT 1 COMMENT 'support interact, 0-no, 1-yes' ;
