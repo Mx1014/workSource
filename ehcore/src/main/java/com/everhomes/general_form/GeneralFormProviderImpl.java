@@ -197,6 +197,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_GENERAL_FORMS.FORM_NAME.eq(formName));
+		query.addConditions(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
 		return query.fetchAnyInto(GeneralForm.class);
 	}
 }

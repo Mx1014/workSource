@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.approval.ApprovalStatus;
+import com.everhomes.rest.general_approval.GeneralApprovalStatus;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalTemplatesRecord;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -134,11 +136,12 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
     @Override
     public GeneralApproval getGeneralApprovalByName(Long moduleId, Long ownerId, String ownerType, String approvalName){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhGeneralApprovalTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVAL_TEMPLATES);
-        query.addConditions(Tables.EH_GENERAL_APPROVAL_TEMPLATES.MODULE_ID.eq(moduleId));
-        query.addConditions(Tables.EH_GENERAL_APPROVAL_TEMPLATES.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_GENERAL_APPROVAL_TEMPLATES.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_GENERAL_APPROVAL_TEMPLATES.APPROVAL_NAME.eq(approvalName));
+        SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.APPROVAL_NAME.eq(approvalName));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.INVALID.getCode()));
         return query.fetchAnyInto(GeneralApproval.class);
     }
 

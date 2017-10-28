@@ -747,7 +747,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     private void createGeneralApprovalByTemplate(GeneralApprovalTemplate approval, CreateApprovalTemplatesCommand cmd){
         GeneralApproval ga = convertApprovalFromTemplate(approval, null, cmd);
         //  TODO:查找与之对应的唯一模板
-        GeneralApproval result = generalApprovalProvider;
+//        GeneralApproval result = generalApprovalProvider;
         generalApprovalProvider.createGeneralApproval(ga);
 
     }
