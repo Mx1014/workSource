@@ -42,4 +42,13 @@ public class VariableIdAndValue {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+    public VariableIdAndValue(Long variableId, BigDecimal variableValue, String varibleIdentifier) {
+        this.variableId = variableId;
+        this.variableValue = variableValue;
+        this.varibleIdentifier = varibleIdentifier;
+    }
+
+    public VariableIdAndValue() {
+    }
 }

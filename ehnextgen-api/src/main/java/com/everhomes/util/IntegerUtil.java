@@ -3,6 +3,8 @@ package com.everhomes.util;
 
 import org.apache.commons.lang.StringUtils;
 
+import java.math.BigDecimal;
+
 /**
  * Created by Wentian Wang on 2017/9/28.
  */
@@ -46,5 +48,41 @@ public class IntegerUtil {
             }
         }
         return false;
+    }
+
+    /**
+     *
+     * 求两个区间的交集大小（不考虑开闭区间），使用迭代也可求多个区间交集，原理一样,
+     */
+    public static BigDecimal getIntersectionDecimal(BigDecimal start1,BigDecimal end1, BigDecimal start2, BigDecimal end2) {
+        BigDecimal minEnd = null;
+        if(end1==null && end2!=null){
+            minEnd = end2;
+        }else if(end1 !=null && end2 == null){
+            minEnd = end1;
+        }else if(end1 != null && end2!=null){
+            minEnd = new BigDecimal(Math.min(end1.doubleValue(),end2.doubleValue()));
+        }
+        BigDecimal maxStart = null;
+        if(start1==null && start2!=null){
+            maxStart = start2;
+        }else if(start1 !=null && start2 == null){
+            maxStart = start1;
+        }else if(start1 != null && start2!=null){
+            maxStart = new BigDecimal(Math.max(end1.doubleValue(),end2.doubleValue()));
+        }
+
+        if(minEnd!=null && maxStart!=null){
+            BigDecimal zero = new BigDecimal("0");
+
+            BigDecimal subtract = minEnd.subtract(maxStart);
+            if(subtract.compareTo(zero)==1){
+                return subtract;
+            }
+        }
+        return new BigDecimal("0");
+
+
+
     }
 }

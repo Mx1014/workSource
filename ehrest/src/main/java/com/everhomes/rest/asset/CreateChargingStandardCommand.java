@@ -16,7 +16,7 @@ import java.util.List;
  * <li>ownerType:所属者类型</li>
  * <li>chargingItemId:收费项目id</li>
  * <li>chargingStandardName:收费标准名称</li>
- * <li>formulaType:公式类型,1:固定金额;2:普通公式;3:斜率跟着变量区间总体变化;4:斜率在不同变量区间取值不同;</li>
+ * <li>formulaType:公式类型,1:固定金额;2:普通公式;3:斜率跟着变量区间总体变化(斜面);4:斜率在不同变量区间取值不同（阶梯）（楼梯）;</li>
  * <li>billingCycle:计费周期,1:按天;2:按月;3:按季度;4:按年;</li>
  * <li>priceUnitType:价格单位类型,1:日单价;2:月单价;</li>
  * <li>formulaJson:公式的json</li>

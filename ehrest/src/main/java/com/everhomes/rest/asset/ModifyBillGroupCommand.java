@@ -12,8 +12,8 @@ import javax.validation.constraints.NotNull;
  * <li>billGroupName:账单组名称</li>
  * <li>billingCycle:生成账单周期,2:按月;3:按季度;4:按年</li>
  * <li>billDay:出账单日</li>
- * <li>dueDate:最晚还款日</li>
- * <li>dueDateType:最晚还款日的单位类型，1:日; 2:月</li>
+ * <li>dueDay:最晚还款日</li>
+ * <li>dueDayType:最晚还款日的单位类型，1:日; 2:月</li>
  *</ul>
  */
 public class ModifyBillGroupCommand {
@@ -26,9 +26,9 @@ public class ModifyBillGroupCommand {
     @NotNull
     private Integer billDay;
     @NotNull
-    private Integer dueDate;
+    private Integer dueDay;
     @NotNull
-    private Byte dueDateType;
+    private Byte dueDayType;
 
     @Override
     public String toString() {
@@ -67,20 +67,20 @@ public class ModifyBillGroupCommand {
         this.billDay = billDay;
     }
 
-    public Integer getDueDate() {
-        return dueDate;
+    public Integer getDueDay() {
+        return dueDay;
     }
 
-    public void setDueDate(Integer dueDate) {
-        this.dueDate = dueDate;
+    public void setDueDay(Integer dueDay) {
+        this.dueDay = dueDay;
     }
 
-    public Byte getDueDateType() {
-        return dueDateType;
+    public Byte getDueDayType() {
+        return dueDayType;
     }
 
-    public void setDueDateType(Byte dueDateType) {
-        this.dueDateType = dueDateType;
+    public void setDueDayType(Byte dueDayType) {
+        this.dueDayType = dueDayType;
     }
 
     public ModifyBillGroupCommand() {

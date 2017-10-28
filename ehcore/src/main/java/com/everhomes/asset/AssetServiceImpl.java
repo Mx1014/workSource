@@ -310,7 +310,9 @@ public class AssetServiceImpl implements AssetService {
                 smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
                 String templateLocale = UserContext.current().getUser().getLocale();
                 //phoneNums make it fake during test
-                smsProvider.sendSms(UserContext.getCurrentNamespaceId(), telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
+                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+                nameSpaceId = 999971;
+                smsProvider.sendSms(nameSpaceId, telNOs, SmsTemplateCode.SCOPE, SmsTemplateCode.PAYMENT_NOTICE_CODE, templateLocale, variables);
             }
         } catch(Exception e){
             LOGGER.error("YZX MAIL SEND FAILED");
@@ -883,6 +885,7 @@ public class AssetServiceImpl implements AssetService {
 
         //遍历计价条款包裹
         for(int i = 0; i < feesRules.size(); i++) {
+            List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> innerBillItemsList = new ArrayList<>();
             //获取单一包裹
             FeeRules rule = feesRules.get(i);
             //获得包裹中的地址包裹
@@ -890,12 +893,32 @@ public class AssetServiceImpl implements AssetService {
 
             //获得标准
             EhPaymentChargingStandards standard = assetProvider.findChargingStandardById(rule.getChargingStandardId());
+
+            //获得formula的额外内容
+            List<PaymentFormula> formulaCondition = null;
+            if(standard.getFormulaType()==3 || standard.getFormulaType() == 4){
+                formulaCondition = assetProvider.getFormulas(standard.getId());
+            }
+            //获得standard公式
+            String formula = null;
+            if(standard.getFormulaType()==1 || standard.getFormulaType() == 2){
+                formulaCondition = assetProvider.getFormulas(standard.getId());
+                if(formulaCondition!=null){
+                    if(formulaCondition.size()>0){
+                        LOGGER.error("普通公式的标准的id为"+standard.getId()+",对应了"+formulaCondition.size()+"条公式!");
+                    }
+                    PaymentFormula paymentFormula = formulaCondition.get(0);
+                    formula = paymentFormula.getFormulaJson();
+                }else{
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"找不到公式,标准的id为"+standard.getId()+"");
+                }
+            }
+
             //获得包裹中的数据包
 
             List<VariableIdAndValue> var2 = rule.getVariableIdAndValueList();
 
-            //获得standard公式
-            String formula = standard.getFormulaJson();
+
             //获得standard时间设置
             Byte billingCycle = standard.getBillingCycle();
             //获得groupRule的时间设置
@@ -926,7 +949,7 @@ public class AssetServiceImpl implements AssetService {
                         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
                 }
                 //计算
-                List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle,cmd,property,standard);
+                List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition);
 
                 long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), billItemsExpectancies.size());
                 long currentBillItemSeq = nextBillItemBlock - billItemsExpectancies.size() + 1;
@@ -976,12 +999,12 @@ public class AssetServiceImpl implements AssetService {
                     item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     //放到数组中去
                     billItemsList.add(item);
+                    innerBillItemsList.add(item);
                 }
                 //再算bill
                 for(int g = 0; g< billItemsExpectancies.size(); g++){
                     BillItemsExpectancy exp = billItemsExpectancies.get(g);
-                    String billCycleStart = exp.getBillCycleStart();
-                    String billCycleEnd = exp.getBillCycleEnd();
+
 
                     //每一个周期的bill,先判断是否是此周期的bill已经建立了
                     BillIdentity identity = new BillIdentity();
@@ -1004,11 +1027,12 @@ public class AssetServiceImpl implements AssetService {
                         newBill.setApartmentName(property.getApartmentName());
                         //周期时间
                         newBill.setDateStr(exp.getBillDateStr());
-                        newBill.setDateStrBegin(billCycleStart);
-                        newBill.setDateStrEnd(billCycleEnd);
+                        newBill.setDateStrBegin(exp.getBillCycleStart());
+                        newBill.setDateStrEnd(exp.getBillCycleEnd());
                         newBill.setDateStrDue(exp.getBillDateDue());
                         newBill.setDueDayDeadline(exp.getBillDateDeadline());
                         //归档字段
+                        newBill.setBillGroupId(group.getId());
                         newBill.setNamespaceId(cmd.getNamesapceId());
                         newBill.setNoticetel(cmd.getNoticeTel());
                         newBill.setOwnerId(cmd.getOwnerId());
@@ -1043,16 +1067,18 @@ public class AssetServiceImpl implements AssetService {
 //                    for(){
 //                        //减免项目，用有序列表和时间控制循环次数
 //                    }
-                    for(int k = 0 ; k < billItemsList.size(); k ++){
-                        EhPaymentBillItems item = billItemsList.get(k);
+                    for(int k = 0 ; k < innerBillItemsList.size(); k ++){
+                        EhPaymentBillItems item = innerBillItemsList.get(k);
                         String dateGeneration = item.getDateStrGeneration();
+                        String billCycleStart = newBill.getDateStrBegin();
+                        String billCycleEnd = newBill.getDateStrEnd();
                         //费用产生时分要比账单产生的时分要早, 费用产生周期要在周期内
-                        if(dateGeneration.compareTo(billCycleEnd)!=1 //闭区间
-                                && dateGeneration.compareTo(billCycleStart) != -1){
+                        if((dateGeneration.compareTo(billCycleEnd)!=1 //闭区间
+                                && dateGeneration.compareTo(billCycleStart) != -1)&&item.getBillId()==null){
+
                             newBill.setAmountOwed(newBill.getAmountOwed().add(item.getAmountOwed()));
                             newBill.setAmountReceivable(newBill.getAmountReceivable().add(item.getAmountReceivable()));
                             item.setBillId(newBill.getId());
-                            break;
                         }
                     }
                     //更新状态
@@ -1121,7 +1147,7 @@ public class AssetServiceImpl implements AssetService {
         });
     }
 
-    private List<BillItemsExpectancy> assetFeeHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd,ContractProperty property,EhPaymentChargingStandards standard) {
+    private List<BillItemsExpectancy> assetFeeHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd,ContractProperty property,EhPaymentChargingStandards standard,List<PaymentFormula> formulaCondition) {
         //返回的列表
         List<BillItemsExpectancy> list = new ArrayList<>();
         //计算的时间区间
@@ -1180,7 +1206,7 @@ public class AssetServiceImpl implements AssetService {
                 float divided = daysBetween(d2,d_assist);
                 r = divider/divided;
             }
-            BigDecimal amount = calculateFee(var2, formula, r);
+            BigDecimal amount = calculateFee(var2, formula, r,standard,formulaCondition);
             //组装对象
             BillItemsExpectancy obj = new BillItemsExpectancy();
             obj.setAmountReceivable(amount);
@@ -1796,9 +1822,24 @@ public class AssetServiceImpl implements AssetService {
 
         return response;
     }
-    private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula, float duration,EhPaymentChargingStandards standard) {
+    private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula) {
+
+        HashMap<String,String> map = new HashMap();
+        for(int i = 0; i < variableIdAndValueList.size(); i++){
+            VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
+            map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
+        }
+        for(Map.Entry<String,String> entry : map.entrySet()){
+            formula = formula.replace(entry.getKey(),entry.getValue());
+        }
+        BigDecimal response = CalculatorUtil.arithmetic(formula);
+        response.setScale(2,BigDecimal.ROUND_CEILING);
+
+        return response;
+    }
+    private BigDecimal calculateFee(List<VariableIdAndValue> variableIdAndValueList, String formula, float duration,EhPaymentChargingStandards standard,List<PaymentFormula> formulaCondition) {
         Byte formulaType = standard.getFormulaType();
-        BigDecimal result = null;
+        BigDecimal result = new BigDecimal("0");
         if(formulaType == 1 || formulaType ==2){
 
             HashMap<String,String> map = new HashMap();
@@ -1816,10 +1857,134 @@ public class AssetServiceImpl implements AssetService {
         }
         else if(formulaType == 3 || formulaType == 4){
             //阶梯或者区间
-            standard.get
+            //解开条件计算
+            BigDecimal conditonedAmount = new BigDecimal("0");
+            for( int i = 0 ; i < formulaCondition.size(); i ++){
+                PaymentFormula condition = formulaCondition.get(i);
+                // 3:斜率跟着变量区间总体变化()
+                //此时命中：符合条件即可
+                // 斜面，最后一个命中的变量为决定者
+
+                // ;4:斜率在不同变量区间取值不同（阶梯）（楼梯，）
+                // 每条记录均默认为命中，对于每个变量，有个总值，每条对应这个变量的命中取 value 为条件与变量取值范围的交集，计算公式，叠加
+                // 每个命中均计算，若变量值大于命中区间
+                if(formulaType == 3){
+                    conditonedAmount  = (getConditionedAmount(variableIdAndValueList,condition,formulaType==3));
+                }else if(formulaType == 4){
+                    conditonedAmount.add((getConditionedAmount(variableIdAndValueList,condition,formulaType==3)));
+                }
+            }
+            result = conditonedAmount;
         }
         return result;
     }
+
+    private BigDecimal getConditionedAmount(List<VariableIdAndValue> variableIdAndValueList, PaymentFormula condition,boolean isSlope) {
+        BigDecimal result = new BigDecimal("0");
+        if (isSlope) {
+            //斜面计算
+            for (int i = 0; i < variableIdAndValueList.size(); i++) {
+                VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
+                String varibleIdentifier = variableIdAndValue.getVaribleIdentifier();
+                BigDecimal variableValue = variableIdAndValue.getVariableValue();
+                if (!condition.getConstraintVariableIdentifer().equals(varibleIdentifier)) {
+                    continue;
+                }
+                Byte startConstraint = condition.getStartConstraint();
+                Byte endConstraint = condition.getEndConstraint();
+                BigDecimal startNum = condition.getStartNum();
+                BigDecimal endNum = condition.getEndNum();
+                String formulaJson = condition.getFormulaJson();
+
+                if (startConstraint == null && endConstraint == null) {
+
+                }
+                if (startConstraint != null && endConstraint == null) {
+                    result = checkVariableConditon(startConstraint, variableValue, startNum, variableIdAndValueList, formulaJson);
+                }
+                if (startConstraint == null && endConstraint != null) {
+                    result = checkVariableConditon(endConstraint, variableValue, endNum, variableIdAndValueList, formulaJson);
+                }
+                if (startConstraint != null && endConstraint != null) {
+                    switch (startConstraint) {
+                        case 1:
+                            if (variableValue.compareTo(startNum) == 1) {
+                                result = checkVariableConditon(endConstraint, variableValue, endNum, variableIdAndValueList, formulaJson);
+                            }
+                        case 2:
+                            if (variableValue.compareTo(startNum) != -1) {
+                                result = checkVariableConditon(endConstraint, variableValue, endNum, variableIdAndValueList, formulaJson);
+                            }
+                        case 3:
+                            if (variableValue.compareTo(startNum) == -1) {
+                                result = checkVariableConditon(endConstraint, variableValue, endNum, variableIdAndValueList, formulaJson);
+                            }
+                        case 4:
+                            if (variableValue.compareTo(startNum) != 1) {
+                                result = checkVariableConditon(endConstraint, variableValue, endNum, variableIdAndValueList, formulaJson);
+                            }
+                        default:
+                            LOGGER.error("公式id为" + condition.getId() + ",斜面的区间关系只允许大于，大于等于，小于，小于等于");
+                    }
+                }
+
+
+            }
+        } else {
+            //阶梯
+            for (int i = 0; i < variableIdAndValueList.size(); i++) {
+                VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
+                String varibleIdentifier = variableIdAndValue.getVaribleIdentifier();
+                BigDecimal variableValue = variableIdAndValue.getVariableValue();
+                if (!condition.getConstraintVariableIdentifer().equals(varibleIdentifier)) {
+                    continue;
+                }
+                BigDecimal startNum = condition.getStartNum();
+                BigDecimal endNum = condition.getEndNum();
+                String formulaJson = condition.getFormulaJson();
+                BigDecimal variableStartNum = new BigDecimal("0");
+                List<VariableIdAndValue> copy = new ArrayList<>();
+                for (int k = 0; k < variableIdAndValueList.size(); k++) {
+                    VariableIdAndValue var_temp_orig = variableIdAndValueList.get(k);
+                    BigDecimal realValue = var_temp_orig.getVariableValue();
+                    if (var_temp_orig.getVaribleIdentifier().equals(varibleIdentifier)) {
+                        realValue = IntegerUtil.getIntersectionDecimal(startNum, endNum, variableStartNum, variableValue);
+                    }
+                    VariableIdAndValue var_temp = new VariableIdAndValue(var_temp_orig.getVariableId(), realValue, var_temp_orig.getVaribleIdentifier());
+                    copy.add(var_temp);
+                }
+                result.add(calculateFee(copy, formulaJson));
+            }
+        }
+        return result;
+    }
+
+    private BigDecimal checkVariableConditon(Byte startConstraint, BigDecimal variableValue, BigDecimal targetNum,List<VariableIdAndValue> variableIdAndValueList, String formulaJson) {
+        switch (startConstraint){
+            case 1:
+                if(variableValue.compareTo(targetNum) == 1){
+                    return calculateFee(variableIdAndValueList,formulaJson);
+                }
+                return new BigDecimal("0");
+            case 2:
+                if(variableValue.compareTo(targetNum) != -1){
+                    return calculateFee(variableIdAndValueList,formulaJson);
+                }
+                return new BigDecimal("0");
+            case 3:
+                if(variableValue.compareTo(targetNum) == -1){
+                    return calculateFee(variableIdAndValueList,formulaJson);
+                }
+                return new BigDecimal("0");
+            case 4:
+                if(variableValue.compareTo(targetNum) != 1){
+                    return calculateFee(variableIdAndValueList,formulaJson);
+                }
+                return new BigDecimal("0");
+        }
+        return new BigDecimal("0");
+    }
+
     @Scheduled(cron = "0 0 0 * * ?")
     @Override
     public void updateBillSwitchOnTime() {

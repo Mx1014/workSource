@@ -800,13 +800,12 @@ public class AssetProviderImpl implements AssetProvider {
             if(list2!=null) {
                 //bill exemption
                 List<com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems> exemptionItems = new ArrayList<>();
-                long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class), list2.size());
-                long currentExemItemSeq = nextExemItemBlock - list2.size() + 1;
-                if(currentExemItemSeq == 0){
-                    currentExemItemSeq = currentExemItemSeq+1;
-                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
-                }
+//                long nextExemItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class), list2.size());
                 for(int i = 0; i < list2.size(); i++){
+                    long currentExemItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
+                    if(currentExemItemSeq == 0){
+                        currentExemItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentExemptionItems.class));
+                    }
                     ExemptionItemDTO exemptionItemDTO = list2.get(i);
                     PaymentExemptionItems exemptionItem = new PaymentExemptionItems();
                     BigDecimal amount = exemptionItemDTO.getAmount();
@@ -851,14 +850,14 @@ public class AssetProviderImpl implements AssetProvider {
             if(list1!=null){
                 //billItems assemble
                 List<com.everhomes.server.schema.tables.pojos.EhPaymentBillItems> billItemsList = new ArrayList<>();
-                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class), list1.size());
-                long currentBillItemSeq = nextBillItemBlock - list1.size() + 1;
-                if(currentBillItemSeq == 0){
-                    currentBillItemSeq = currentBillItemSeq+1;
-                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
-                }
+//                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class), list1.size());
+//                long currentBillItemSeq = nextBillItemBlock - list1.size() + 1;
 
                 for(int i = 0; i < list1.size() ; i++) {
+                    long currentBillItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
+                    if(currentBillItemSeq == 0){
+                        this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
+                    }
                     BillItemDTO dto = list1.get(i);
                     PaymentBillItems item = new PaymentBillItems();
                     item.setAddressId(dto.getAddressId());
@@ -2188,7 +2187,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .set(t.NAME,cmd.getBillGroupName())
                 .set(t.BILLS_DAY,cmd.getBillDay())
                 .set(t.BALANCE_DATE_TYPE,cmd.getBillingCycle())
-                .set(t.DUE_DAY_TYPE,cmd.getDueDateType())
+                .set(t.DUE_DAY,cmd.getDueDay())
+                .set(t.DUE_DAY_TYPE,cmd.getDueDayType())
                 .where(t.ID.eq(cmd.getBillGroupId()))
                 .execute();
     }
@@ -2487,6 +2487,14 @@ public class AssetProviderImpl implements AssetProvider {
         }
 
         return list;
+    }
+
+    @Override
+    public List<PaymentFormula> getFormulas(Long id) {
+        DSLContext context = getReadOnlyContext();
+        return context.selectFrom(Tables.EH_PAYMENT_FORMULA)
+                .where(Tables.EH_PAYMENT_FORMULA.CHARGING_STANDARD_ID.eq(id))
+                .fetchInto(PaymentFormula.class);
     }
 
 
