@@ -145,4 +145,16 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
         return query.fetchAnyInto(GeneralApproval.class);
     }
 
+    @Override
+    public GeneralApproval getGeneralApprovalByTemplateId(Long moduleId, Long ownerId, String ownerType, Long templateId){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGeneralApprovalsRecord> query = context.selectQuery(Tables.EH_GENERAL_APPROVALS);
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(moduleId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.APPROVAL_TEMPLATE_ID.eq(templateId));
+        query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralApprovalStatus.DELETED.getCode()));
+        return query.fetchOneInto(GeneralApproval.class);
+    }
+
 }

@@ -22,7 +22,6 @@ import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormTemplate;
-import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.flow.*;
@@ -727,16 +726,12 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                 for (GeneralApprovalTemplate approval : templates) {
                     if (approval.getFormTemplateId().longValue() == 0) {
                         //  Create Approvals directly.
-                        createGeneralApprovalByTemplate(approval, cmd);
+                        createGeneralApprovalByTemplate(approval, null, cmd);
                    } else {
                         //  Create Forms before creating approvals.
-                        GeneralFormTemplate form = generalFormProvider.findGeneralFormTemplateByIdAndModuleId(
-                                approval.getFormTemplateId(), cmd.getModuleId());
-                        GeneralForm gf = convertFormFromTemplate(form, cmd);
-                        Long formOriginId = generalFormProvider.createGeneralForm(gf);
+                        Long formOriginId= createGeneralFormByTemplate(approval, cmd);
                         //  Then, start to create approvals.
-                        GeneralApproval ga = convertApprovalFromTemplate(approval, formOriginId, cmd);
-                        generalApprovalProvider.createGeneralApproval(ga);
+                        createGeneralApprovalByTemplate(approval, formOriginId, cmd);
                     }
                 }
                 return null;
@@ -744,16 +739,35 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         }
     }
 
-    private void createGeneralApprovalByTemplate(GeneralApprovalTemplate approval, CreateApprovalTemplatesCommand cmd){
-        GeneralApproval ga = convertApprovalFromTemplate(approval, null, cmd);
-        //  TODO:查找与之对应的唯一模板
-//        GeneralApproval result = generalApprovalProvider;
-        generalApprovalProvider.createGeneralApproval(ga);
-
+    private void createGeneralApprovalByTemplate(GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(cmd.getModuleId(), cmd.getOwnerId(),
+                cmd.getOwnerType(), approval.getId());
+        if (ga != null) {
+            ga = convertApprovalFromTemplate(ga, approval, formOriginId, cmd);
+            generalApprovalProvider.updateGeneralApproval(ga);
+        } else {
+            ga = ConvertHelper.convert(approval, GeneralApproval.class);
+            ga = convertApprovalFromTemplate(ga, approval, formOriginId, cmd);
+            generalApprovalProvider.createGeneralApproval(ga);
+        }
     }
 
-    private GeneralApproval convertApprovalFromTemplate(GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
-        GeneralApproval ga = ConvertHelper.convert(approval, GeneralApproval.class);
+    private Long createGeneralFormByTemplate(GeneralApprovalTemplate approval, CreateApprovalTemplatesCommand cmd) {
+        GeneralFormTemplate form = generalFormProvider.findGeneralFormTemplateByIdAndModuleId(
+                approval.getFormTemplateId(), cmd.getModuleId());
+        GeneralForm gf = generalFormProvider.getGeneralFormByTemplateId(cmd.getModuleId(), cmd.getOwnerId(),
+                cmd.getOwnerType(), form.getId());
+        if (gf != null) {
+            gf = convertFormFromTemplate(gf, form, cmd);
+            generalFormProvider.updateGeneralForm(gf);
+            return gf.getFormOriginId();
+        } else {
+            gf = ConvertHelper.convert(form, GeneralForm.class);
+            Long formOriginId = generalFormProvider.createGeneralForm(gf);
+            return formOriginId;
+        }
+    }
+    private GeneralApproval convertApprovalFromTemplate(GeneralApproval ga, GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
         ga.setNamespaceId(UserContext.getCurrentNamespaceId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
         ga.setOwnerId(cmd.getOwnerId());
@@ -761,17 +775,19 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         ga.setOrganizationId(cmd.getOrganizationId());
         ga.setProjectId(cmd.getProjectId());
         ga.setProjectType(cmd.getProjectType());
+        ga.setApprovalTemplateId(approval.getId());
         if (formOriginId != null)
             ga.setFormOriginId(formOriginId);
         ga.setSupportType(cmd.getSupportType());
         return ga;
     }
 
-    private GeneralForm convertFormFromTemplate(GeneralFormTemplate form, CreateApprovalTemplatesCommand cmd) {
-        GeneralForm gf = ConvertHelper.convert(form, GeneralForm.class);
+    private GeneralForm convertFormFromTemplate(GeneralForm gf, GeneralFormTemplate form, CreateApprovalTemplatesCommand cmd) {
         gf.setStatus(GeneralFormStatus.CONFIG.getCode());
         gf.setNamespaceId(UserContext.getCurrentNamespaceId());
         gf.setFormVersion(0L);
+        gf.setFormTemplateId(form.getId());
+        gf.setFormTemplateVersion(form.getVersion());
         gf.setOwnerId(cmd.getOwnerId());
         gf.setOwnerId(cmd.getOwnerId());
         gf.setOwnerType(cmd.getOwnerType());
