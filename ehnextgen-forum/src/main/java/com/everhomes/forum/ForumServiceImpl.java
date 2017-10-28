@@ -4718,8 +4718,13 @@ public class ForumServiceImpl implements ForumService {
             topicCmd.setVisibleRegionType(visibleRegionType.getCode());
         }
         topicCmd.setVisibleRegionId(visibleRegionId);
+
+        //老客户端来的默认入口论坛
+        if(topicCmd.getForumEntryId() == null){
+            topicCmd.setForumEntryId(0L);
+        }
         
-        return this.createTopic((NewTopicCommand) topicCmd);
+        return this.createTopic(topicCmd);
     }
     
     @Override
