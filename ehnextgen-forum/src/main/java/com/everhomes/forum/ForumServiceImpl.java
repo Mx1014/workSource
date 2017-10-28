@@ -3234,10 +3234,11 @@ public class ForumServiceImpl implements ForumService {
         post.setCloneFlag(cmd.getCloneFlag());
         post.setRealPostId(cmd.getRealPostId());
 
-        //论坛多入口，老客户端没有这个参数，默认入口为0  add by yanjun 20171025
         post.setForumEntryId(cmd.getForumEntryId());
 
-        
+        post.setInteractFlag(InteractFlag.SUPPORT.getCode());
+        post.setStickFlag(StickFlag.DEFAULT.getCode());
+
         return post;
     }
     
@@ -3998,7 +3999,7 @@ public class ForumServiceImpl implements ForumService {
                 populateOwnerToken(post);
 
                 //添加是否支持评论字段 add by yanjun 20171025
-                populateCommemtFlag(post);
+                populateInteractFlag(post);
                 
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
                 String relativeUrl = configProvider.getValue(ConfigConstants.POST_SHARE_URL, "");
@@ -4043,9 +4044,9 @@ public class ForumServiceImpl implements ForumService {
      *添加是否支持评论字段 add by yanjun 20171025
      * @param post
      */
-    private void populateCommemtFlag(Post post){
+    private void populateInteractFlag(Post post){
         //如果帖子时关闭评论的，直接是关闭
-        if(post.getInteractFlag() != null || post.getInteractFlag() == 0){
+        if(post.getInteractFlag() != null && InteractFlag.fromCode(post.getInteractFlag()) == InteractFlag.UNSUPPORT){
             return;
         }
 
