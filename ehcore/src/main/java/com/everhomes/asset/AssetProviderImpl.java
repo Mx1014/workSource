@@ -1211,7 +1211,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentChargingStandardsScopes standardScopeT = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScopeT");
         EhPaymentChargingStandards standardT = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("standardT");
         DSLContext context = getReadOnlyContext();
-        List<String> formulaJsons = new ArrayList<>();
+
         List<Long> suggestPrices = new ArrayList<>();
         context.select()
                 .from(standardScopeT,standardT)
@@ -1227,28 +1227,41 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setFormula(r.getValue(standardT.FORMULA));
                     dto.setFormulaType(r.getValue(standardT.FORMULA_TYPE));
                     dto.setChargingStandardId(r.getValue(standardT.ID));
-                    formulaJsons.add(r.getValue(standardT.FORMULA_JSON));
+//                    formulaJsons.add(r.getValue(standardT.FORMULA_JSON));
                     suggestPrices.add(r.getValue(standardT.SUGGEST_UNIT_PRICE)==null?null:r.getValue(standardT.SUGGEST_UNIT_PRICE).longValue());
                    list.add(dto);
                     return null;
                 });
-        for(int i =0; i < formulaJsons.size();i++){
+        List<List<String>> formus = new ArrayList<>();
+        for(int i =0; i < list.size(); i++){
             ListChargingStandardsDTO dto = list.get(i);
-            String formulaJson = formulaJsons.get(i);
+            List<String> fetch = context.select(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON)
+                    .from(Tables.EH_PAYMENT_FORMULA)
+                    .where(Tables.EH_PAYMENT_FORMULA.CHARGING_STANDARD_ID.eq(dto.getChargingStandardId()))
+                    .fetch(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON);
+            formus.add(fetch);
+
+        }
+        for(int j = 0; j < formus.size(); j++){
+            ListChargingStandardsDTO dto = list.get(j);
+            List<String> formulaJsons = formus.get(j);
             Set<String> replaces = new HashSet<>();
-            if(formulaJson!=null){
-                char[] formularChars = formulaJson.toCharArray();
-                int index = 0;
-                int start = 0;
-                while(index < formularChars.length){
-                    if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
-                        String substring = formulaJson.substring(start, index == formulaJson.length() - 1 ? index + 1 : index);
-                        if(!hasDigit(substring)){
-                            replaces.add(substring);
+            for(int i =0; i < formulaJsons.size();i++){
+                String formulaJson = formulaJsons.get(i);
+                if(formulaJson!=null){
+                    char[] formularChars = formulaJson.toCharArray();
+                    int index = 0;
+                    int start = 0;
+                    while(index < formularChars.length){
+                        if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
+                            String substring = formulaJson.substring(start, index == formulaJson.length() - 1 ? index + 1 : index);
+                            if(!hasDigit(substring)){
+                                replaces.add(substring);
+                            }
+                            start = index+1;
                         }
-                        start = index+1;
+                        index++;
                     }
-                    index++;
                 }
             }
             List<PaymentVariable> vars = new ArrayList<>();
@@ -1260,7 +1273,7 @@ public class AssetProviderImpl implements AssetProvider {
                 var.setVariableIdentifier(varIden);
                 var.setVariableName(varName);
                 if(varIden.equals("dj")){
-                    var.setVariableValue(suggestPrices.get(i)==null?null:new BigDecimal(suggestPrices.get(i)));
+                    var.setVariableValue(suggestPrices.get(j)==null?null:new BigDecimal(suggestPrices.get(j)));
                 }
                 vars.add(var);
             }
@@ -2223,8 +2236,9 @@ public class AssetProviderImpl implements AssetProvider {
         });
         List<String> fetch = context.select(t3.NAME)
                 .from(t3)
-                .where(t3.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()))
+//                .where(t3.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()))
                 .fetch(t3.NAME);
+
         for(int i = 0; i < list.size(); i ++){
             ListChargingStandardsDTO dto = list.get(i);
             dto.setVariableNames(fetch);

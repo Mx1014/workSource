@@ -2072,7 +2072,7 @@ public class AssetServiceImpl implements AssetService {
     public void modifyChargingStandard(ModifyChargingStandardCommand cmd) {
         checkNullProhibit("chargingStandardId",cmd.getChargingStandardId());
         checkNullProhibit("new chargingStandardName",cmd.getChargingStandardName());
-        checkNullProhibit("new areaSizeType",cmd.getAreaSizeType());
+
         assetProvider.modifyChargingStandard(cmd);
     }
 
