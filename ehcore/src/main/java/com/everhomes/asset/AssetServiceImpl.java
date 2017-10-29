@@ -1277,10 +1277,12 @@ public class AssetServiceImpl implements AssetService {
                     break outter;
                 }
                 inner:for(int j = 0; j < rentProperties.size(); j ++){
-                    if(rentProperties.get(j).getAddressId() == property.getAddressId()){
+                    if(rentProperties.get(j).getAddressId().equals(property.getAddressId())){
                         break inner;
                     }
-                    break outter;
+                    if(j == rentProperties.size()-1){
+                        break outter;
+                    }
                 }
                 //进行调组
 
@@ -1288,7 +1290,7 @@ public class AssetServiceImpl implements AssetService {
                 Calendar start = Calendar.getInstance();
                 start.setTime(rent.getStart());
                 Calendar end = Calendar.getInstance();
-                end.setTime(rent.getStart());
+                end.setTime(rent.getEnd());
                 if(end.compareTo(dateStrEnd)!=-1){
                     end.setTime(dateStrEnd.getTime());
                 }
@@ -1302,7 +1304,9 @@ public class AssetServiceImpl implements AssetService {
                         if(separationTime<1) separationTime = 1f;
                         start_copy.add(Calendar.DAY_OF_MONTH,separationTime.intValue());
                         while(start_copy.compareTo(end)==-1){
-                            insertTimes.add(start_copy);
+                            Calendar start_copy_copy =Calendar.getInstance();
+                            start_copy_copy.setTime(start_copy.getTime());
+                            insertTimes.add(start_copy_copy);
                             start_copy.add(Calendar.DAY_OF_MONTH,separationTime.intValue());
                         }
                         break;
@@ -1312,8 +1316,14 @@ public class AssetServiceImpl implements AssetService {
 
                         start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
                         start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
+
+//                        String test1 = yyyyMMdd.format(start_copy_1.getTime());
+//                        String test2 = yyyyMMdd.format(end.getTime());
+
                         while(start_copy_1.compareTo(end)==-1){
-                            insertTimes.add(start_copy_1);
+                            Calendar start_copy_1_copy =Calendar.getInstance();
+                            start_copy_1_copy.setTime(start_copy_1.getTime());
+                            insertTimes.add(start_copy_1_copy);
                             start_copy_1.add(Calendar.MONTH,(Integer) interAndFloat[0]);
                             start_copy_1.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_1.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat[1]));
                         }
@@ -1328,7 +1338,9 @@ public class AssetServiceImpl implements AssetService {
                         start_copy_2.add(Calendar.DAY_OF_MONTH,(int)((float) start_copy_2.getActualMaximum(Calendar.DAY_OF_MONTH) * (float) interAndFloat_2[1]));
 
                         while(start_copy_2.compareTo(end)==-1){
-                            insertTimes.add(start_copy_2);
+                            Calendar start_copy_2_copy =Calendar.getInstance();
+                            start_copy_2_copy.setTime(start_copy_2.getTime());
+                            insertTimes.add(start_copy_2_copy);
 
                             start_copy_2.add(Calendar.YEAR,(Integer) interAndFloat_1[0]);
                             start_copy_2.add(Calendar.MONTH,(Integer) interAndFloat_2[0]);
@@ -1345,6 +1357,9 @@ public class AssetServiceImpl implements AssetService {
                         a.setTime(item.getDateStrBegin());
                         Calendar d2 = Calendar.getInstance();
                         d2.setTime(item.getDateStrEnd());
+
+                        String test1 = yyyyMMdd.format(d2.getTime());
+                        String test2 = yyyyMMdd.format(longinus.getTime());
 
                         if(d2.compareTo(longinus)!=-1){
                             //插中了！获得 插入点 到 整个计价标准的结束
@@ -1372,10 +1387,12 @@ public class AssetServiceImpl implements AssetService {
                     break outter;
                 }
                 inner:for(int j = 0; j < rentProperties.size(); j ++){
-                    if(rentProperties.get(j).getAddressId() == property.getAddressId()){
+                    if(rentProperties.get(j).getAddressId().equals( property.getAddressId())){
                         break inner;
                     }
-                    break outter;
+                    if(j == rentProperties.size()-1){
+                        break outter;
+                    }
                 }
                 //开始免租
 //            //此计价条款在此资产上的终止时间
@@ -1397,7 +1414,7 @@ public class AssetServiceImpl implements AssetService {
                         item.setAmountOwed(item.getAmountOwed().subtract(amount_free));
                     }
                     //左包不全，右包全
-                    else if(start.compareTo(item_start)==1 && end.compareTo(item_end)!=-1){
+                    else if(start.compareTo(item_start)==1 && start.compareTo(item_end) == -1 && end.compareTo(item_end)!=-1){
                         //代码不能重用，提取没有意义,overfitting
                         Calendar item_start_c = Calendar.getInstance();
                         item_start_c.setTime(item_start);
@@ -1408,7 +1425,7 @@ public class AssetServiceImpl implements AssetService {
                         item.setAmountOwed(item.getAmountOwed().subtract(amount_free_real));
                     }
                     //左包全，右包不全
-                    else if(start.compareTo(item_start)!=1 && end.compareTo(item_end)==-1){
+                    else if(start.compareTo(item_start)!=1 && end.compareTo(start) == 1 &&end.compareTo(item_end)==-1){
                         Calendar item_start_c = Calendar.getInstance();
                         item_start_c.setTime(item_start);
                         Float f = (float)daysBetween_date(end,item_start)/ (float)item_start_c.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -1441,6 +1458,9 @@ public class AssetServiceImpl implements AssetService {
     private void reCalFee(List<BillItemsExpectancy> list, int m, RentAdjust rent) {
         Byte adjustType = rent.getAdjustType();
         BigDecimal adjustAmplitude = rent.getAdjustAmplitude();
+        if(m >= list.size()-1){
+            return;
+        }
         for(int i = m; i < list.size(); i ++) {
             BillItemsExpectancy item = list.get(m);
             BigDecimal amount = item.getAmountOwed();
@@ -1541,14 +1561,16 @@ public class AssetServiceImpl implements AssetService {
         long time1 = c1.getTimeInMillis();
         long time2 = c2.getTimeInMillis();
         long between_days=Math.abs(time2-time1)/(1000*3600*24);
-        return Integer.parseInt(String.valueOf(between_days));
+//        return Integer.parseInt(String.valueOf(between_days));
+        return Integer.parseInt(String.valueOf(between_days))+1;
     }
     private int daysBetween_date(Date c1,Date c2)
     {
         long time1 = c1.getTime();
         long time2 = c2.getTime();
         long between_days=Math.abs(time2-time1)/(1000*3600*24);
-        return Integer.parseInt(String.valueOf(between_days));
+//        return Integer.parseInt(String.valueOf(between_days));
+        return Integer.parseInt(String.valueOf(between_days))+1;
     }
 
     private void NaturalMonthHandler(List<PaymentExpectancyDTO> dtos1, FeeRules rule, List<VariableIdAndValue> variableIdAndValueList, String formula, String chargingItemName, Integer billDay, List<PaymentExpectancyDTO> dtos2, ContractProperty property) {

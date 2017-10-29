@@ -609,7 +609,15 @@ public class ContractServiceImpl implements ContractService {
 			rentAdjust.setEnd(new Date(adjust.getChangeExpiredTime()));
 			rentAdjust.setAdjustType(adjust.getChangeMethod());
 			rentAdjust.setSeparationTime(adjust.getChangePeriod().floatValue());
-			rentAdjust.setSeperationType(adjust.getPeriodUnit());
+			if(adjust.getPeriodUnit() == PeriodUnit.DAY.getCode()){
+				rentAdjust.setSeperationType((byte)1);
+			}
+			if(adjust.getPeriodUnit() == PeriodUnit.MONTH.getCode()){
+				rentAdjust.setSeperationType((byte)2);
+			}
+			if(adjust.getPeriodUnit() == PeriodUnit.YEAR.getCode()){
+				rentAdjust.setSeperationType((byte)3);
+			}
 			rentAdjust.setAdjustAmplitude(adjust.getChangeRange());
 			rentAdjust.setChargingItemId(adjust.getChargingItemId());
 			if(adjust.getApartments() != null && adjust.getApartments().size() > 0) {

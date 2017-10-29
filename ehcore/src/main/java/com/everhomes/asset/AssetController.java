@@ -929,7 +929,7 @@ public class AssetController extends ControllerBase {
 //            }
 //        }
 //        return assetService.paymentExpectancies(cmd);
-//    }
+//    }http://wangwt.lab.everhomes.com/evh/asset/listBillExpectanciesOnContract
 
     /**
      * <p>展示预期的费用清单</p>
