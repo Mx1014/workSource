@@ -49,7 +49,7 @@ public interface GeneralApprovalService {
 
     Boolean checkNumberDefaultValue(String defaultValue, Map<String, Integer> map);
 
-    Long verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd);
+    VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd);
 
     void createApprovalTemplates(CreateApprovalTemplatesCommand cmd);
 

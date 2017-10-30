@@ -716,7 +716,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     //  判断是否需要创建模板
     @Override
-    public Long verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd) {
+    public VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd) {
         return null;
     }
 
@@ -770,6 +770,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         } else {
             gf = ConvertHelper.convert(form, GeneralForm.class);
             gf = convertFormFromTemplate(gf, form, cmd);
+            gf.setStatus(GeneralFormStatus.CONFIG.getCode());
             gf.setFormVersion(0L);
             Long formOriginId = generalFormProvider.createGeneralForm(gf);
             return formOriginId;
@@ -791,7 +792,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     private GeneralForm convertFormFromTemplate(GeneralForm gf, GeneralFormTemplate form, CreateApprovalTemplatesCommand cmd) {
-        gf.setStatus(GeneralFormStatus.CONFIG.getCode());
+        gf.setFormAttribute(GeneralApprovalAttribute.DEFAULT.getCode());
         gf.setNamespaceId(UserContext.getCurrentNamespaceId());
         gf.setFormTemplateId(form.getId());
         gf.setFormTemplateVersion(form.getVersion());

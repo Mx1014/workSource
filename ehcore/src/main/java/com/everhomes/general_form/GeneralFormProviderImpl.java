@@ -202,7 +202,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
     @Override
-    public GeneralForm getGeneralFormByTemplateId(Long moduleId, Long ownerId, String ownerType, Long templateId){
+    public GeneralForm getGeneralFormByTemplateId(Long moduleId, Long ownerId, String ownerType, Long templateId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhGeneralFormsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORMS);
         query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(moduleId));
@@ -210,6 +210,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
         query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_GENERAL_FORMS.FORM_TEMPLATE_ID.eq(templateId));
         query.addConditions(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
-        return query.fetchOneInto(GeneralForm.class);
+        query.addOrderBy(Tables.EH_GENERAL_FORMS.FORM_VERSION.desc());
+        return query.fetchAnyInto(GeneralForm.class);
     }
 }

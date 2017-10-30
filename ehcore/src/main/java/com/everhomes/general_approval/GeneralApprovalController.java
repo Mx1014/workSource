@@ -111,10 +111,10 @@ public class GeneralApprovalController extends ControllerBase {
 	 * <p> 判断是否需要创建审批模板 </p>
 	 */
 	@RequestMapping("verifyApprovalTemplates")
-	@RestReturn(value=Long.class)
+	@RestReturn(value=VerifyApprovalTemplatesResponse.class)
 	public RestResponse verifyApprovalTemplates(@Valid VerifyApprovalTemplatesCommand cmd) {
-		Long result = generalApprovalService.verifyApprovalTemplates(cmd);
-		RestResponse response = new RestResponse();
+        VerifyApprovalTemplatesResponse res = generalApprovalService.verifyApprovalTemplates(cmd);
+		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 

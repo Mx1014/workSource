@@ -1,5 +1,7 @@
 package com.everhomes.rest.general_approval;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId </li>
@@ -51,5 +53,10 @@ public class VerifyApprovalTemplatesCommand {
 
     public void setModuleType(String moduleType) {
         this.moduleType = moduleType;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
