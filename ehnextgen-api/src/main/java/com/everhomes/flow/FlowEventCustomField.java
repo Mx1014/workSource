@@ -18,8 +18,9 @@ public enum FlowEventCustomField {
     TRACKER_PROCESSOR("integral_tag1", "integralTag1", Tables.EH_FLOW_EVENT_LOGS.INTEGRAL_TAG1),
     TRACKER_APPLIER("integral_tag2", "integralTag2", Tables.EH_FLOW_EVENT_LOGS.INTEGRAL_TAG2),
 
-    NONE("integral_tag2", "integralTag2", Tables.EH_FLOW_EVENT_LOGS.INTEGRAL_TAG2);
-    
+    NONE("integral_tag2", "integralTag2", Tables.EH_FLOW_EVENT_LOGS.INTEGRAL_TAG2),
+    CROSS_LANE_REJECT_FLAG("integral_tag3", "integralTag3", Tables.EH_FLOW_EVENT_LOGS.INTEGRAL_TAG3);
+
     private String fieldName;
     private String propertyName;
     private TableField<?, ?> field;

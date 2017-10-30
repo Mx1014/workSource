@@ -23,6 +23,7 @@ public class FlowLaneLogDTO {
     private Integer laneLevel;
     private String laneName;
     private Byte isCurrentLane;
+    private Byte isRejectLane;
     private Byte needSelectNextNode;
     private Long laneEnterTime;
 
@@ -87,6 +88,14 @@ public class FlowLaneLogDTO {
 
     public void setLaneEnterTime(Long laneEnterTime) {
         this.laneEnterTime = laneEnterTime;
+    }
+
+    public Byte getIsRejectLane() {
+        return isRejectLane;
+    }
+
+    public void setIsRejectLane(Byte isRejectLane) {
+        this.isRejectLane = isRejectLane;
     }
 
     @Override

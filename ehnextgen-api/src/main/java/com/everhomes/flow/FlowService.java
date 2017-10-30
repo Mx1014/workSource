@@ -460,4 +460,6 @@ public interface FlowService {
     FlowEvaluateItemDTO updateFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
 
     List<FlowCase> getAllFlowCase(Long flowCaseId);
+
+    FlowConditionDTO createOrUpdateFlowCondition(CreateFlowConditionCommand cmd);
 }

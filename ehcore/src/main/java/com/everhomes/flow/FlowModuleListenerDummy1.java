@@ -1,8 +1,6 @@
 package com.everhomes.flow;
 
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.util.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,6 +15,16 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener {
     private FlowService flowService;
 
     private Long moduleId = 40100L;
+
+    @Override
+    public List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+        return null;
+    }
+
+    @Override
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+        return null;
+    }
 
     @Override
     public FlowModuleInfo initModule() {

@@ -27,6 +27,7 @@ public class FlowNodeLogDTO {
 	private String nodeName;
 	private Byte allowComment;
 	private Byte isCurrentNode;
+	private Byte isRejectNode;
 	private Long commentButtonId;
 	private String params;
     private Byte needSelectNextNode;
@@ -130,5 +131,13 @@ public class FlowNodeLogDTO {
 
     public void setNodeEnterTime(Long nodeEnterTime) {
         this.nodeEnterTime = nodeEnterTime;
+    }
+
+    public Byte getIsRejectNode() {
+        return isRejectNode;
+    }
+
+    public void setIsRejectNode(Byte isRejectNode) {
+        this.isRejectNode = isRejectNode;
     }
 }

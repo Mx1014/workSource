@@ -2971,7 +2971,7 @@ public class FlowServiceImpl implements FlowService {
 
                     // 第一个节点的驳回按钮特殊处理
                     if (flowCase.getCurrentNodeId().equals(nodes.get(1).getId())
-                            && button.getFlowStepType().equals(FlowStepType.REJECT_STEP.getCode())) {
+                            && button.getFlowStepType().equals(FlowStepType.REJECT_TRACKER.getCode())) {
                         isAdd = false;
                     }
 
@@ -4591,15 +4591,20 @@ public class FlowServiceImpl implements FlowService {
 
         // 先去listener获取
         Flow flow = flowProvider.getFlowById(cmd.getFlowId());
+        if (flow == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
+                    "Flow not exist, flowId = %s", cmd.getFlowId());
+        }
+
         List<FlowPredefinedParamDTO> dtoList = flowListenerManager.listPredefinedParam(
                 flow, FlowEntityType.fromCode(cmd.getEntityType()), cmd.getOwnerType(), cmd.getOwnerId());
 
         List<FlowPredefinedParam> paramList = flowPredefinedParamProvider.listPredefinedParam(namespaceId,
-                cmd.getModuleType(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+                flow.getModuleType(), flow.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
 
         if (paramList.isEmpty()) {
             paramList = flowPredefinedParamProvider.listPredefinedParam(Namespace.DEFAULT_NAMESPACE,
-                    cmd.getModuleType(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+                    flow.getModuleType(), flow.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
         }
 
         dtoList.addAll(paramList.stream().map(this::toPredefinedParamDTO).collect(Collectors.toList()));
@@ -4827,6 +4832,31 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
+    public FlowConditionDTO createOrUpdateFlowCondition(CreateFlowConditionCommand cmd) {
+        Flow flow = flowProvider.getFlowById(cmd.getFlowId());
+        if (flow == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
+                    "flow not exist flowId=%s", cmd.getFlowId());
+        }
+        dbProvider.execute(status -> {
+            flowMarkUpdated(flow);
+
+            // 创建condition
+            if (cmd.getConditions() != null) {
+                flowConditionProvider.deleteFlowCondition(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
+                for (FlowConditionCommand conditionCmd : cmd.getConditions()) {
+                    // conditionCmd.setFlowNodeId(nodeLevelToNodeIdMap.get(conditionCmd.getFlowNodeLevel()));
+                    // conditionCmd.setNextNodeId(nodeLevelToNodeIdMap.get(conditionCmd.getNextNodeLevel()));
+                    // conditionCmd.setFlowLinkId(linkLevelToLinkIdMap.get(conditionCmd.getFlowLinkLevel()));
+                    createFlowCondition(flow, conditionCmd);
+                }
+            }
+            return true;
+        });
+        return null;
+    }
+
+    @Override
     public FlowGraphDTO createOrUpdateFlowGraph(CreateFlowGraphCommand cmd) {
         ValidatorUtil.validate(cmd);
 
@@ -4893,16 +4923,16 @@ public class FlowServiceImpl implements FlowService {
             }
 
             // 创建link
-            Map<Integer, Long> linkLevelToLinkIdMap = new HashMap<>();
+            // Map<Integer, Long> linkLevelToLinkIdMap = new HashMap<>();
             flowLinkProvider.deleteFlowLink(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
             for (FlowLinkCommand flowLinkCmd : cmd.getLinks()) {
                 flowLinkCmd.setFromNodeId(nodeLevelToNodeIdMap.get(flowLinkCmd.getFromNodeLevel()));
                 flowLinkCmd.setToNodeId(nodeLevelToNodeIdMap.get(flowLinkCmd.getToNodeLevel()));
                 FlowLinkDTO flowLink = createFlowLink(flow, flowLinkCmd);
-                linkLevelToLinkIdMap.put(flowLink.getLinkLevel(), flowLink.getId());
+                // linkLevelToLinkIdMap.put(flowLink.getLinkLevel(), flowLink.getId());
             }
 
-            // 创建condition
+            /*// 创建condition
             if (cmd.getConditions() != null) {
                 flowConditionProvider.deleteFlowCondition(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
                 for (FlowConditionCommand conditionCmd : cmd.getConditions()) {
@@ -4911,7 +4941,7 @@ public class FlowServiceImpl implements FlowService {
                     conditionCmd.setFlowLinkId(linkLevelToLinkIdMap.get(conditionCmd.getFlowLinkLevel()));
                     createFlowCondition(flow, conditionCmd);
                 }
-            }
+            }*/
             return true;
         });
 
@@ -5602,6 +5632,9 @@ public class FlowServiceImpl implements FlowService {
                     prefixLane.setIsCurrentLane(TrueOrFalseFlag.TRUE.getCode());
                     prefixLane.setNeedSelectNextNode(nodeLogDTO.getNeedSelectNextNode());
                 }
+                if (nodeLogDTO.getIsRejectNode() != null) {
+                    prefixLane.setIsRejectLane(nodeLogDTO.getIsRejectNode());
+                }
                 prefixLane.getLogs().addAll(nodeLogDTO.getLogs());
             } else {
                 FlowLane lane = laneMap.get(nodeLogDTO.getLaneId());
@@ -5619,6 +5652,9 @@ public class FlowServiceImpl implements FlowService {
                 prefixLane.setLaneName(lane.getDisplayName());
                 prefixLane.setLogs(nodeLogDTO.getLogs());
                 prefixLane.setLaneEnterTime(nodeLogDTO.getNodeEnterTime());
+                if (nodeLogDTO.getIsRejectNode() != null) {
+                    prefixLane.setIsRejectLane(nodeLogDTO.getIsRejectNode());
+                }
 
                 laneLogDTOS.add(prefixLane);
                 // 判断当前泳道
@@ -5703,6 +5739,17 @@ public class FlowServiceImpl implements FlowService {
                 }
                 nodeLogDTO.getLogs().add(eventDTO);
             });
+        }
+
+        // 驳回节点需要特殊显示
+        List<FlowEventLog> rejectTrackerLogs = flowEventLogProvider.findRejectEventLogsByNodeId(currNode.getId(), flowCaseId, stepCount);
+        if (rejectTrackerLogs != null) {
+            for (FlowEventLog rejectLog : rejectTrackerLogs) {
+                if (Objects.equals(rejectLog.getCrossLaneRejectFlag(), 1L)) {
+                    nodeLogDTO.setIsRejectNode(TrueOrFalseFlag.TRUE.getCode());
+                    break;
+                }
+            }
         }
     }
 

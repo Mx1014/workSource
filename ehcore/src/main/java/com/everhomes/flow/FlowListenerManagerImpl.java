@@ -204,6 +204,40 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
+    public boolean evaluateFlowConditionVariableRelational(FlowCaseState ctx, FlowConditionRelationalOperatorType relationalOperatorType, FlowConditionExpression exp) {
+        FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
+        if (inst == null) {
+            return false;
+        }
+        ctx.setModule(inst.getInfo());
+        FlowModuleListener listener = inst.getListener();
+        if (listener instanceof FlowModuleConditionEvaluator) {
+            FlowModuleConditionEvaluator evaluator = (FlowModuleConditionEvaluator) listener;
+            switch (relationalOperatorType) {
+                case EQUAL:
+                    return evaluator.evaluateEqual(ctx, exp);
+                case NOT_EQUAL:
+                    return !evaluator.evaluateEqual(ctx, exp);
+                case GREATER_THEN:
+                    return evaluator.evaluateGreaterThen(ctx, exp);
+                case LESS_THEN:
+                    return evaluator.evaluateLessThen(ctx, exp);
+                case GREATER_OR_EQUAL:
+                    return evaluator.evaluateGreaterThen(ctx, exp) || evaluator.evaluateEqual(ctx, exp);
+                case LESS_OR_EQUAL:
+                    return evaluator.evaluateLessThen(ctx, exp) || evaluator.evaluateEqual(ctx, exp);
+                case CONTAIN:
+                    return evaluator.evaluateContains(ctx, exp);
+                case NOT_CONTAIN:
+                    return !evaluator.evaluateContains(ctx, exp);
+                default:
+                    return evaluator.evaluateCustomize(ctx, exp);
+            }
+        }
+        return false;
+    }
+
+    @Override
     public void onApplicationEvent(ContextRefreshedEvent arg0) {
         for (FlowModuleListener listener : allListeners) {
             try {

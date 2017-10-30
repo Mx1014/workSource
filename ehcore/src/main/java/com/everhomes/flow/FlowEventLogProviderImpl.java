@@ -700,4 +700,15 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         }
         return null;
     }
+
+    @Override
+    public List<FlowEventLog> findRejectEventLogsByNodeId(Long nodeId, Long flowCaseId, Long stepCount) {
+        return this.queryFlowEventLogs(new ListingLocator(), 1, (locator, query) -> {
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(flowCaseId));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.REJECT_TRACKER.getCode()));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
+            return query;
+        });
+    }
 }

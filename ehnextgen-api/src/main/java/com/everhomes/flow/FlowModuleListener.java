@@ -21,7 +21,9 @@ public interface FlowModuleListener {
 
 	default void onFlowCreating(Flow flow) { }
 
-    default List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {return null;}
+    default List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+	    return null;
+	}
 
 	/**
 	 * 当 FlowCase 开始运行时
@@ -82,13 +84,17 @@ public interface FlowModuleListener {
      * @param vars  变量名称，比如：${amount}
      * @return  参数名称对应的参数的值，比如：key=${amount}, value=100
      */
-    default Map<String, String> onFlowVariableRender(FlowCaseState ctx, List<String> vars) { return null;}
+    default Map<String, String> onFlowVariableRender(FlowCaseState ctx, List<String> vars) {
+        return null;
+    }
 
     /**
      * FlowCase 的变量渲染, 见 onFlowVariableRender(FlowCaseState ctx, List<String> vars)
      */
     @Deprecated
-    default String onFlowVariableRender(FlowCaseState ctx, String variable) { return null;}
+    default String onFlowVariableRender(FlowCaseState ctx, String variable) {
+        return null;
+    }
 
     /**
      * 获取预定义的参数
@@ -98,5 +104,7 @@ public interface FlowModuleListener {
      * @param ownerId   归属id
      * @return  返回参数列表
      */
-    List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
+    default List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+        return null;
+    }
 }

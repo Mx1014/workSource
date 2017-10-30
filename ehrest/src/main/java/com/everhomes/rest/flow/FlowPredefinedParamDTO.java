@@ -7,6 +7,8 @@ import com.everhomes.util.StringHelper;
  *     <li>id: id</li>
  *     <li>entityType: entityType {@link com.everhomes.rest.flow.FlowEntityType}</li>
  *     <li>displayName: 显示名称</li>
+ *     <li>ownerType: ownerType</li>
+ *     <li>ownerId: ownerId</li>
  *     <li>text: 参数值</li>
  * </ul>
  */
@@ -49,6 +51,22 @@ public class FlowPredefinedParamDTO {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override
