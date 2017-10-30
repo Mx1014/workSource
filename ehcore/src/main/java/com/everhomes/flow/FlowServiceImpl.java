@@ -1315,6 +1315,8 @@ public class FlowServiceImpl implements FlowService {
     public Boolean enableFlow(Long flowId) {
         Flow flow = flowProvider.getFlowById(flowId);
 
+        checkFlowValidationStatus(flow);
+
         // 避免同时启用工作流的问题
         String lockKey = String.format("%s:%s:%s:%s:%s:%s:%s:%s",
                 CoordinationLocks.FLOW.getCode(), flow.getNamespaceId(), flow.getProjectType(), flow.getProjectId(),
@@ -1473,6 +1475,17 @@ public class FlowServiceImpl implements FlowService {
             return isOk;
         });
         return tuple.first();
+    }
+
+    private void checkFlowValidationStatus(Flow flow) {
+        FlowValidationStatus validationStatus = FlowValidationStatus.fromCode(flow.getValidationStatus());
+        switch (validationStatus) {
+            case INVALID:
+                throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_VALIDATION_INVALID,
+                        "Flow validation invalid");
+            case VALID:
+                break;
+        }
     }
 
     private FlowGraphBranch getFlowGraphBranch(FlowBranch branch) {
@@ -4619,7 +4632,7 @@ public class FlowServiceImpl implements FlowService {
 
         if (paramList.isEmpty()) {
             paramList = flowPredefinedParamProvider.listPredefinedParam(namespaceId,
-                    FlowModuleType.NO_MODULE.getCode(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+                    FlowModuleType.NO_MODULE.getCode(), flow.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
         }
         if (paramList.isEmpty()) {
             paramList = flowPredefinedParamProvider.listPredefinedParam(Namespace.DEFAULT_NAMESPACE,
@@ -4627,7 +4640,7 @@ public class FlowServiceImpl implements FlowService {
         }
         if (paramList.isEmpty()) {
             paramList = flowPredefinedParamProvider.listPredefinedParam(Namespace.DEFAULT_NAMESPACE,
-                    FlowModuleType.NO_MODULE.getCode(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+                    FlowModuleType.NO_MODULE.getCode(), flow.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
         }
 
         dtoList.addAll(paramList.stream().map(this::toPredefinedParamDTO).collect(Collectors.toList()));
@@ -4896,6 +4909,20 @@ public class FlowServiceImpl implements FlowService {
             return true;
         });
         return null;
+    }
+
+    @Override
+    public void updateFlowValidationStatus(UpdateFlowValidationStatusCommand cmd) {
+        Flow flow = flowProvider.getFlowById(cmd.getFlowId());
+        if (flow == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
+                    "flow not exist flowId=%s", cmd.getFlowId());
+        }
+        dbProvider.execute(status -> {
+            flow.setValidationStatus(cmd.getValidationStatus());
+            flowMarkUpdated(flow);
+            return true;
+        });
     }
 
     @Override
@@ -5750,6 +5777,7 @@ public class FlowServiceImpl implements FlowService {
             if (lane != null) {
                 laneLogDTO.setLaneName(lane.getDisplayNameAbsort());
             }
+            laneLogDTO.setIsAbsortLane(TrueOrFalseFlag.TRUE.getCode());
             //异常结束 BUG 6052, 本来取消任务的跟踪是在中间节点的，要把他放到结束节点
             /*out:
             for (int j = laneLogDTOS.size() - 2; j >= 0; j--) {

@@ -27,7 +27,7 @@ public interface FlowVariableUserResolver {
 	String N_NODE_PROCESSOR = "flow-variable-n-node-processor";
 	String SUPERVISOR = "flow-variable-supervisor";
 	String TARGET_NODE_PROCESSOR = "flow-variable-target-node-processor";
-	String PREFIX_NODE_PROCESSORS = "flow-variable-prefix-node-processors";
+	String PREFIX_NODE_PROCESSORS = "flow-variable-prefix-node-processors";// flow-variable-prefix-node-processors
 	String CURR_NODE_PROCESSORS = "flow-variable-curr-node-processors";
 	String TARGET_NODE_TRANSFER = "flow-variable-target-node-transfer";
 
