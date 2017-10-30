@@ -2889,7 +2889,10 @@ public class FlowServiceImpl implements FlowService {
     private String onFlowCaseBriefRender(FlowUserType flowUserType, FlowCase flowCase) {
         String flowCaseContent = flowCase.getContent();
         try {
-            flowCaseContent = flowListenerManager.onFlowCaseBriefRender(flowCase, flowUserType);
+            String content = flowListenerManager.onFlowCaseBriefRender(flowCase, flowUserType);
+            if (content != null) {
+                flowCaseContent = content;
+            }
         } catch (Exception e) {
             LOGGER.error("Flow listener onFlowCaseBriefRender error, flowCaseId = "+flowCase.getId(), e);
         }
