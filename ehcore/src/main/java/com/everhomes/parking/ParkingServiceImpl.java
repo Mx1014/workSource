@@ -1490,6 +1490,19 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
+	public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(GetExpiredRechargeInfoCommand cmd) {
+		checkPlateNumber(cmd.getPlateNumber());
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		String vendor = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+
+		ParkingExpiredRechargeInfoDTO dto = handler.getExpiredRechargeInfo(parkingLot, cmd);
+
+		return dto;
+	}
+
+	@Override
 	public SurplusCardCountDTO getSurplusCardCount(GetParkingRequestCardConfigCommand cmd) {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
     	
