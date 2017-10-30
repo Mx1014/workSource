@@ -506,14 +506,14 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         GeneralApproval ga = ConvertHelper.convert(cmd, GeneralApproval.class);
         ga.setNamespaceId(UserContext.getCurrentNamespaceId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
-        if(cmd.getApprovalAttribute() == null)
+        if (cmd.getApprovalAttribute() == null)
             ga.setApprovalAttribute(GeneralApprovalAttribute.CUSTOMIZE.getCode());
-        if(cmd.getModifyFlag() == null)
+        if (cmd.getModifyFlag() == null)
             ga.setModifyFlag(Byte.valueOf("1"));
-        if(cmd.getDeleteFlag() == null)
+        if (cmd.getDeleteFlag() == null)
             ga.setDeleteFlag(Byte.valueOf("1"));
-        if(cmd.getIconUri() == null)
-        ga.setIconUri("cs://1/image/aW1hZ2UvTVRvMU9EVTBNR1psWW1Kak1XSTNZalUwT0RVeVlUQXdOak0zWWpObE1ERmpZUQ");
+        if (cmd.getIconUri() == null)
+            ga.setIconUri("cs://1/image/aW1hZ2UvTVRvMU9EVTBNR1psWW1Kak1XSTNZalUwT0RVeVlUQXdOak0zWWpObE1ERmpZUQ");
         // 新增加审批的时候可能并为设置 formId
         // GeneralForm form =
         // this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
@@ -744,9 +744,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
                     if (approval.getFormTemplateId().longValue() == 0) {
                         //  Create Approvals directly.
                         createGeneralApprovalByTemplate(approval, null, cmd);
-                   } else {
+                    } else {
                         //  Create Forms before creating approvals.
-                        Long formOriginId= createGeneralFormByTemplate(approval, cmd);
+                        Long formOriginId = createGeneralFormByTemplate(approval, cmd);
                         //  Then, start to create approvals.
                         createGeneralApprovalByTemplate(approval, formOriginId, cmd);
                     }
@@ -787,6 +787,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             return formOriginId;
         }
     }
+
     private GeneralApproval convertApprovalFromTemplate(GeneralApproval ga, GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
         ga.setNamespaceId(UserContext.getCurrentNamespaceId());
         ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
@@ -831,8 +832,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     @Override
-    public GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd){
-        GeneralApproval approval = this.generalApprovalProvider.getGeneralApprovalByName(cmd.getModuleId(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getApprovalName());
+    public GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd) {
+        GeneralApproval approval = this.generalApprovalProvider.getGeneralApprovalByName(cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getApprovalName());
         if (approval != null)
             return ConvertHelper.convert(approval, GeneralApprovalDTO.class);
         return null;
@@ -905,24 +906,19 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         cmd.setPageAnchor(null);
         cmd.setPageSize(1000000);
         ListGeneralApprovalRecordsResponse response = listGeneralApprovalRecords(cmd);
-        if (response.getRecords() == null || response.getRecords().size() < 1 || cmd.getApprovalType() == null)
-            return;
-
         //  1. Set the main title of the sheet
         String mainTitle = "审批记录";
         //  2. Set the subtitle of the sheet
         String subTitle = "申请时间:" + approvalNoFormat.format(cmd.getStartTime()) + " ~ " + approvalNoFormat.format(cmd.getEndTime());
-        if (response.getRecords() == null || response.getRecords().size() < 1)
-            return;
         //  3. Set the title of the approval lists
-        Long flowCaseId = response.getRecords().get(0).getFlowCaseId();
-        List<FlowCaseEntity> titles = getApprovalDetails(flowCaseId);
+        List<String> titles = Arrays.asList("审批编号", "提交时间", "申请人", "申请人部门", "表单内容",
+                "审批状态", "审批记录", "当前审批人", "督办人");
         //  4. Start to write the excel
         XSSFWorkbook workbook = exportGeneralApprovalRecordsFile(mainTitle, subTitle, titles, response.getRecords());
 
-        List<Long> flowCaseIds = response.getRecords().stream().map(r -> {
+/*        List<Long> flowCaseIds = response.getRecords().stream().map(r -> {
             return r.getFlowCaseId();
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toList());*/
         writeExcel(workbook, httpResponse);
     }
 
@@ -931,22 +927,25 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         return generalApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
     }
 
-    private XSSFWorkbook exportGeneralApprovalRecordsFile(String mainTitle, String subTitle, List<FlowCaseEntity> titles, List<GeneralApprovalRecordDTO> data) {
+    private XSSFWorkbook exportGeneralApprovalRecordsFile(
+            String mainTitle, String subTitle, List<String> titles, List<GeneralApprovalRecordDTO> data) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("审批记录");
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 12));
-        sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 12));
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 8));
+        sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 8));
         //  1. Write titles
         createGeneralApprovalRecordsFileTitle(workbook, sheet, mainTitle, subTitle, titles);
         //  2. Write data
-        for (int rowIndex = 0; rowIndex < data.size(); rowIndex++) {
-            Row dataRow = sheet.createRow(rowIndex + 3);
-            createGeneralApprovalRecordsFileData(workbook, dataRow, data.get(rowIndex));
+        if (data != null && data.size() > 0) {
+            for (int rowIndex = 0; rowIndex < data.size(); rowIndex++) {
+                Row dataRow = sheet.createRow(rowIndex + 3);
+                createGeneralApprovalRecordsFileData(workbook, dataRow, data.get(rowIndex));
+            }
         }
         return workbook;
     }
 
-    private void createGeneralApprovalRecordsFileTitle(XSSFWorkbook workbook, Sheet sheet, String mainTitle, String subTitle, List<FlowCaseEntity> list) {
+    private void createGeneralApprovalRecordsFileTitle(XSSFWorkbook workbook, Sheet sheet, String mainTitle, String subTitle, List<String> list) {
 
         //  1.Set the style(center)
         Row mainTitleRow = sheet.createRow(0);
@@ -966,32 +965,36 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         subTitleCell.setCellStyle(subTitleStyle);
         subTitleCell.setCellValue(subTitle);
 
-        //  3.Set the value of the approval lists
+        //  3.Set the title of the approval lists
         Row titleRow = sheet.createRow(2);
         for (int i = 0; i < list.size(); i++) {
+            sheet.setColumnWidth(i,15*256);
             Cell cell = titleRow.createCell(i);
-            cell.setCellValue(list.get(i).getKey());
+            cell.setCellValue(list.get(i));
         }
-        titleRow.createCell(list.size() + 0).setCellValue("审批状态");
-        titleRow.createCell(list.size() + 1).setCellValue("审批记录");
-        titleRow.createCell(list.size() + 2).setCellValue("当前审批人");
-        titleRow.createCell(list.size() + 3).setCellValue("督办人");
     }
 
     private void createGeneralApprovalRecordsFileData(XSSFWorkbook workbook, Row dataRow, GeneralApprovalRecordDTO data) {
-        List<FlowCaseEntity> entities = getApprovalDetails(data.getFlowCaseId());
+        //  1. basic data from approvalRecords
+        dataRow.createCell(0).setCellValue(data.getApprovalNo());
+        dataRow.createCell(1).setCellValue(data.getCreateTime());
+        dataRow.createCell(2).setCellValue(data.getCreatorName());
+        dataRow.createCell(3).setCellValue(data.getCreatorDepartment());
 
-        //  1. basic data from flowCase
-        for (int i = 0; i < entities.size(); i++) {
-            dataRow.createCell(i).setCellValue(entities.get(i).getValue());
+        //  2. form data
+        List<FlowCaseEntity> entities = getApprovalDetails(data.getFlowCaseId());
+        String entitiesValue = "";
+        for (int i = 4; i < entities.size(); i++) {
+            entitiesValue += entities.get(i).getKey() + " : " + entities.get(i).getValue() + "\n";
         }
-        //  2. approval status
+        dataRow.createCell(4).setCellValue(entitiesValue);
+        //  3. approval status
         if (FlowCaseStatus.PROCESS.getCode().equals(data.getApprovalStatus()))
-            dataRow.createCell(entities.size() + 0).setCellValue("处理中");
+            dataRow.createCell(5).setCellValue("处理中");
         else if (FlowCaseStatus.FINISHED.getCode().equals(data.getApprovalStatus()))
-            dataRow.createCell(entities.size() + 0).setCellValue("已完成");
+            dataRow.createCell(5).setCellValue("已完成");
         else
-            dataRow.createCell(entities.size() + 0).setCellValue("已取消");
+            dataRow.createCell(5).setCellValue("已取消");
         //  3. the operator logs of the approval
         SearchFlowOperateLogsCommand logsCommand = new SearchFlowOperateLogsCommand();
         logsCommand.setFlowCaseId(data.getFlowCaseId());
