@@ -1994,11 +1994,26 @@ public class ForumServiceImpl implements ForumService {
 
         dbProvider.execute((status) -> {
             Post post = this.forumProvider.findPostById(cmd.getPostId());
+
             post.setStickFlag(cmd.getStickFlag());
+
+            if(StickFlag.fromCode(cmd.getStickFlag()) == StickFlag.TOP){
+                post.setStickTime(new Timestamp(System.currentTimeMillis()));
+            }else {
+                post.setStickTime(null);
+            }
+
             forumProvider.updatePost(post);
             if(post.getEmbeddedAppId() != null &&  post.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY){
                 Activity activity = activityProvider.findSnapshotByPostId(cmd.getPostId());
                 activity.setStickFlag(cmd.getStickFlag());
+
+                if(StickFlag.fromCode(cmd.getStickFlag()) == StickFlag.TOP){
+                    activity.setStickTime(new Timestamp(System.currentTimeMillis()));
+                }else {
+                    activity.setStickTime(null);
+                }
+
                 activityProivider.updateActivity(activity);
             }
             return null;

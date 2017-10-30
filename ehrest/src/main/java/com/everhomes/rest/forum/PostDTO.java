@@ -67,6 +67,7 @@ import com.everhomes.util.StringHelper;
  *     <li>forumEntryId: 论坛应用入口Id</li>
  *     <li>interactFlag: 是否支持评论 0-no, 1-yes 参考{@link InteractFlag}</li>
  *	   <li>stickFlag: 置顶标志，0-否，1-是，参考{@link StickFlag}</li>
+ *	   <li>stickTime: 置顶时间</li>
  * </ul>
  */
 public class PostDTO {
@@ -188,6 +189,8 @@ public class PostDTO {
     private Byte interactFlag;
 	
 	private Byte stickFlag;
+
+    private Timestamp stickTime;
 
     public Long getGroupId() {
         return groupId;
@@ -650,6 +653,14 @@ public class PostDTO {
 
     public void setStickFlag(Byte stickFlag) {
         this.stickFlag = stickFlag;
+    }
+
+    public Timestamp getStickTime() {
+        return stickTime;
+    }
+
+    public void setStickTime(Timestamp stickTime) {
+        this.stickTime = stickTime;
     }
 
     @Override

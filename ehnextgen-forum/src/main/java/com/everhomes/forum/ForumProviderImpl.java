@@ -608,6 +608,7 @@ public class ForumProviderImpl implements ForumProvider {
 
                 //置顶的优先排序  add by yanjun 20171023
                 query.addOrderBy(Tables.EH_FORUM_POSTS.STICK_FLAG.desc());
+                query.addOrderBy(Tables.EH_FORUM_POSTS.STICK_TIME.desc());
 
                 query.addOrderBy(Tables.EH_FORUM_POSTS.CREATE_TIME.desc());
                 query.addLimit(limit[0]);
@@ -682,6 +683,7 @@ public class ForumProviderImpl implements ForumProvider {
 
         //置顶的优先排序  add by yanjun 20171023
         query.addOrderBy(Tables.EH_FORUM_POSTS.STICK_FLAG.desc());
+        query.addOrderBy(Tables.EH_FORUM_POSTS.STICK_TIME.desc());
 
         query.addOrderBy(Tables.EH_FORUM_POSTS.CREATE_TIME.desc());
         query.addLimit(count);
