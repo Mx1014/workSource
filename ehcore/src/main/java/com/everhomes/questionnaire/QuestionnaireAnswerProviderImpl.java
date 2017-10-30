@@ -79,7 +79,7 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 		.from(Tables.EH_QUESTIONNAIRE_ANSWERS)
 		.where(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID.eq(questionnaireId))
 		.and(cond)
-		.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_NAME.like("%"+keywords+"%"))
+		.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_NAME.like("%"+keywords+"%").or(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_PHONE.like("%"+keywords+"%")))
 		.orderBy(Tables.EH_QUESTIONNAIRE_ANSWERS.CREATE_TIME.asc())
 		.limit((pageAnchor-1)*pageSize, pageSize)
 		.fetch()
