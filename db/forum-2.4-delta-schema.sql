@@ -6,7 +6,6 @@ CREATE TABLE `eh_forum_categories` (
   `entry_id` bigint(20) NOT NULL COMMENT 'entry id',
   `name` varchar(255) DEFAULT NULL,
   `activity_entry_id` bigint(20) DEFAULT '0' COMMENT 'activity entry id',
-  `interact_flag` tinyint(4) NOT NULL DEFAULT '1' COMMENT 'support interact, 0-no, 1-yes',
   `create_time` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -27,3 +26,5 @@ CREATE TABLE `eh_interact_settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_forum_posts` ADD COLUMN `forum_entry_id`  bigint(20) NULL DEFAULT 0 COMMENT 'forum_category  entry_id' ;
+
+ALTER TABLE `eh_forum_posts` ADD COLUMN `interact_flag`  tinyint(4) NOT NULL DEFAULT 1 COMMENT 'support interact, 0-no, 1-yes' ;
