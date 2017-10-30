@@ -118,15 +118,27 @@ public class PusherHuawei implements PusherVender {
         body.put("content", devMessage.getAlert());//消息内容体
         
         JSONObject param = new JSONObject();
-//        param.put("appPkgName", appPkgName);//定义需要打开的appPkgName
-        param.put("intent",  String.format("zl-1://message/open-session?dstChannel=%s&dstChannelId=%s&srcChannel=%s&srcChannelId=%s&senderUid=%s#Intent;launchFlags=0x10000000;package=com.everhomes.android.oa.debug;end"
-                , ChannelType.USER.getCode()
-                , String.valueOf(senderLogin.getUserId())
-                , msgBox.getChannelType()
-                , msgBox.getChannelToken()
-                , String.valueOf(msgBox.getSenderUid()))
-                );
-
+//      param.put("appPkgName", appPkgName);//定义需要打开的appPkgName
+        String intent = "#Intent;launchFlags=0x10000000;package=com.everhomes.android.oa.debug;end";
+        if (ChannelType.GROUP.getCode().equals(msgBox.getChannelType())) {
+            param.put("intent",  String.format("zl-1://message/open-session?dstChannel=%s&dstChannelId=%s&senderUid=%s"
+                    , msgBox.getChannelType()
+                    , msgBox.getChannelToken()
+                    , String.valueOf(msgBox.getSenderUid()))
+                    );
+            
+        } else {
+            param.put("intent",  String.format("zl-1://message/open-session?dstChannel=%s&dstChannelId=%s&srcChannel=%s&srcChannelId=%s&senderUid=%s%s"
+                    , msgBox.getChannelType()
+                    , msgBox.getChannelToken()
+                    , ChannelType.USER.getCode()
+                    , String.valueOf(senderLogin.getUserId())
+                    , String.valueOf(msgBox.getSenderUid())
+                    , intent)
+                    );
+    
+        }
+        
         JSONObject action = new JSONObject();
         action.put("type", 1);//类型3为打开APP，其他行为请参考接口文档设置
         action.put("param", param);//消息点击动作参数
