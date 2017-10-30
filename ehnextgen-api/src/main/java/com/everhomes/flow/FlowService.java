@@ -461,5 +461,7 @@ public interface FlowService {
 
     List<FlowCase> getAllFlowCase(Long flowCaseId);
 
-    FlowConditionDTO createOrUpdateFlowCondition(CreateFlowConditionCommand cmd);
+    FlowGraphDTO createOrUpdateFlowCondition(CreateFlowConditionCommand cmd);
+
+    void updateFlowValidationStatus(UpdateFlowValidationStatusCommand cmd);
 }

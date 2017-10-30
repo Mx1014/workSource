@@ -26,7 +26,7 @@ import java.sql.Timestamp;
  *     <li>ownerId: ownerId</li>
  *     <li>projectId: projectId</li>
  *     <li>projectType: projectType</li>
- *     <li>stringTag1: stringTag1</li>
+ *     <li>validationStatus: 检测状态</li>
  * </ul>
  */
 public class FlowDTO {
@@ -50,6 +50,7 @@ public class FlowDTO {
     private Long ownerId;
     private Long projectId;
     private String projectType;
+    private Byte validationStatus;
 
     private String stringTag1;
 
@@ -219,6 +220,14 @@ public class FlowDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Byte getValidationStatus() {
+        return validationStatus;
+    }
+
+    public void setValidationStatus(Byte validationStatus) {
+        this.validationStatus = validationStatus;
     }
 
     @Override
