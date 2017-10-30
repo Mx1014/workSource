@@ -2262,6 +2262,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				address.setDecorateStatus(cmd.getDecorateStatus());
 			}else if (cmd.getOrientation() != null) {
 				address.setOrientation(cmd.getOrientation());
+			}else if (cmd.getApartmentFloor() != null) {
+				address.setApartmentFloor(cmd.getApartmentFloor());
 			}
 	    	addressProvider.updateAddress(address);
 
@@ -4709,6 +4711,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         if (cmd.getBirthday() != null) {
             owner.setBirthday(new java.sql.Date(cmd.getBirthday()));
         }
+		owner.setCommunityId(cmd.getCommunityId().toString());
         owner.setOrgOwnerTypeId(ownerType.getId());
         owner.setNamespaceId(currentUser.getNamespaceId());
         owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
@@ -5135,10 +5138,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             Address address = addressProvider.findAddressById(r.getAddressId());
             OrganizationOwnerAddressDTO dto = new OrganizationOwnerAddressDTO();
             String locale = currentLocale();
-            dto.setBuilding(address.getBuildingName());
-            dto.setAddress(address.getAddress());
-            dto.setAddressId(address.getId());
-            dto.setApartment(address.getApartmentName());
+			if(address != null) {
+				dto.setBuilding(address.getBuildingName());
+				dto.setAddress(address.getAddress());
+				dto.setAddressId(address.getId());
+				dto.setApartment(address.getApartmentName());
+			}
+
             LocaleString addressStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.AUTH_TYPE_SCOPE,
                     String.valueOf(r.getAuthType()), locale);
             if (addressStatusLocale != null) {
@@ -6052,7 +6058,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         ArrayList resultList = processorExcel(file[0]);
         List<CommunityPmOwner> ownerList = dbProvider.execute(status -> processorOrganizationOwner(user.getId(),
                 cmd.getOrganizationId(), cmd.getCommunityId(), resultList));
-        pmOwnerSearcher.bulkUpdate(ownerList);
+		//用 bulkUpdate不会更新 by xiongying20171009
+//        pmOwnerSearcher.bulkUpdate(ownerList);
     }
 
 	private ArrayList processorExcel(MultipartFile file) {
@@ -6119,7 +6126,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setStatus(OrganizationOwnerStatus.NORMAL.getCode());
 
 				long ownerId = propertyMgrProvider.createPropOwner(owner);
-
+				pmOwnerSearcher.feedDoc(owner);
 				Byte livingStatus = parseLivingStatus(RowResult.trimString(result.getF()));
 				createOrganizationOwnerAddress(address.getId(), livingStatus, currentNamespaceId(), ownerId, OrganizationOwnerAddressAuthType.INACTIVE);
 

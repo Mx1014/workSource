@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.parking.handler.DefaultParkingVendorHandler;
 import com.everhomes.rest.parking.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -15,6 +16,8 @@ import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.UserContext;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,7 +34,11 @@ import com.everhomes.util.ConvertHelper;
 
 @Component
 public class ParkingProviderImpl implements ParkingProvider {
-    @Autowired 
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ParkingProviderImpl.class);
+
+
+	@Autowired
     private SequenceProvider sequenceProvider;
     
     @Autowired
@@ -212,6 +219,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 		query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.PARKING_LOT_ID.eq(parkingLotId));
 		query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.CARD_TYPE.eq(cardType));
 		query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.MONTH_COUNT.eq(monthCount));
+
+		LOGGER.debug(query.getSQL());
+		LOGGER.debug(JSONObject.toJSONString(query.getBindValues()));
 
 		return ConvertHelper.convert(query.fetchOne(), ParkingRechargeRate.class);
 	}

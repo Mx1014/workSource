@@ -79,9 +79,9 @@ public interface FlowListenerManager {
 
     Map<String,String> onFlowVariableRender(FlowCaseState ctx, List<String> vars);
 
-    List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId);
-
     List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId);
+
+    List<FlowServiceTypeDTO> listFlowServiceTypes(Integer namespaceId, Long moduleId);
 
     boolean evaluateFlowConditionVariableRelational(FlowCaseState ctx, FlowConditionRelationalOperatorType relationalOperatorType, FlowConditionExpression exp);
 }

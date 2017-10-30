@@ -471,6 +471,20 @@ public class UserProviderImpl implements UserProvider {
         return null;
     }
 
+    @Override
+    public int countUserByNamespaceIdAndNamespaceUserType(Integer namespaceId, String namespaceUserType){
+        final Integer[] count = new Integer[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_USERS)
+                            .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+                            .and(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(namespaceUserType))
+                            .fetchOneInto(Integer.class);
+                    return true;
+                });
+
+        return count[0];
+    }
     @Cacheable(value = "UserIdentifier-OwnerAndType", key="{#ownerUid, #identifierType}", unless="#result == null")
     @Override
     public UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerUid, byte identifierType) {
@@ -1260,22 +1274,6 @@ public class UserProviderImpl implements UserProvider {
 		return list;
 	}
 
-    @Override
-    public int countUserByNamespaceIdAndNamespaceUserType(Integer namespaceId, String namespaceUserType){
-        final Integer[] count = new Integer[1];
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null,
-                (DSLContext context, Object reducingContext)-> {
-                    count[0] = context.selectCount().from(Tables.EH_USERS)
-                            .where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
-                            .and(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(namespaceUserType))
-                            .fetchOneInto(Integer.class);
-                    return true;
-        });
-
-        return count[0];
-    }
-
-
 	@Override
 	public int countUserByNamespaceId(Integer namespaceId, Boolean isAuth) {
 		
@@ -1662,5 +1660,23 @@ public class UserProviderImpl implements UserProvider {
             }
         }
         return null;
+    }
+    
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    @Cacheable(value = "checkCacheStatus", key="'cache.heartbeat'", unless="#result == null")
+    @Override
+    public String checkCacheStatus() {
+        return String.valueOf(System.currentTimeMillis());
+    }
+    
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    @Caching(evict={@CacheEvict(value="checkCacheStatus", key="'cache.heartbeat'")})
+    @Override
+    public void updateCacheStatus() {
+        // 只需要去掉缓存，使可缓存可测
     }
 }

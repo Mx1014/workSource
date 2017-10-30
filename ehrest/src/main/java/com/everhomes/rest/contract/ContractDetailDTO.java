@@ -57,8 +57,10 @@ import java.util.List;
  *     <li>attachments: 合同附件 参考{@link com.everhomes.rest.contract.ContractAttachmentDTO}</li>
  *     <li>status: 合同状态 参考{@link com.everhomes.rest.contract.ContractStatus}</li>
  *     <li>remark: 备注</li>
- *     <li>layout: 房型</li>
- *     <li>settled: 入住方</li>
+ *     <li>layout: 房型（房型改为了选项类型）</li>
+ *     <li>layoutName: 房型名</li>
+ *     <li>adjusts: 调租计划列表 参考{@link com.everhomes.rest.contract.ContractChargingChangeDTO}</li>
+ *     <li>frees: 免租计划列表 参考{@link com.everhomes.rest.contract.ContractChargingChangeDTO}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/3.
  */
@@ -113,8 +115,38 @@ public class ContractDetailDTO {
     private Long createUid;
     private String creatorName;
     private String layout;
-    private Byte status;
+    private String layoutName;
     private String settled;
+    private Byte status;
+
+    @ItemType(ContractChargingChangeDTO.class)
+    private List<ContractChargingChangeDTO> adjusts;
+    @ItemType(ContractChargingChangeDTO.class)
+    private List<ContractChargingChangeDTO> frees;
+
+    public List<ContractChargingChangeDTO> getAdjusts() {
+        return adjusts;
+    }
+
+    public void setAdjusts(List<ContractChargingChangeDTO> adjusts) {
+        this.adjusts = adjusts;
+    }
+
+    public List<ContractChargingChangeDTO> getFrees() {
+        return frees;
+    }
+
+    public void setFrees(List<ContractChargingChangeDTO> frees) {
+        this.frees = frees;
+    }
+
+    public String getLayoutName() {
+        return layoutName;
+    }
+
+    public void setLayoutName(String layoutName) {
+        this.layoutName = layoutName;
+    }
 
     public String getSettled() {
         return settled;

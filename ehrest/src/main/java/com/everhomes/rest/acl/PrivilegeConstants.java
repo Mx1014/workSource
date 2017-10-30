@@ -168,5 +168,8 @@ public interface PrivilegeConstants {
     long PMTASK_DETAIL_CATEGORY_DELETE = 30095L;
     long PMTASK_TASK_STATISTICS_LIST = 30096L;
     long PMTASK_ALL_TASK_STATISTICS_LIST = 30097L;
+    
+    // ---------------- 门禁权限 -----------------------
+    long MODULE_ACLINK_MANAGER = 10041L; //公司门禁 管理员
 
 }

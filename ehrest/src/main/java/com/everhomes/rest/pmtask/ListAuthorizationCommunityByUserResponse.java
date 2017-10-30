@@ -7,7 +7,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.util.StringHelper;
 
 public class ListAuthorizationCommunityByUserResponse {
-private Long nextPageAnchor;
+	private Long nextPageAnchor;
     
     @ItemType(CommunityDTO.class)
     private List<CommunityDTO> communities;

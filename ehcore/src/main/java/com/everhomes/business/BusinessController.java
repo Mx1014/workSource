@@ -6,6 +6,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.CheckPaymentUserCommand;
+import com.everhomes.rest.asset.CheckPaymentUserResponse;
 import com.everhomes.rest.business.*;
 import com.everhomes.util.RequireAuthentication;
 
@@ -210,4 +212,5 @@ public class BusinessController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
 }

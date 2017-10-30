@@ -13,6 +13,7 @@ public class LeaseBuildingDTO {
     private Long id;
     private Integer namespaceId;
     private Long communityId;
+    private String communityName;
     private Long buildingId;
     private String buildingName;
     private String name;
@@ -238,6 +239,14 @@ public class LeaseBuildingDTO {
 
     public void setDefaultOrder(Long defaultOrder) {
         this.defaultOrder = defaultOrder;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
     }
 
     @Override

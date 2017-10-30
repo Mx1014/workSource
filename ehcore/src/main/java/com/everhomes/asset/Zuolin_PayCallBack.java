@@ -3,8 +3,8 @@ package com.everhomes.asset;
 
 import com.everhomes.db.DbProvider;
 import com.everhomes.order.PaymentCallBackHandler;
-import com.everhomes.rest.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.SrvOrderPaymentNotificationCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class Zuolin_PayCallBack implements PaymentCallBackHandler{
     private DbProvider dbProvider;
 
     @Override
-    public void paySuccess(OrderPaymentNotificationCommand cmd) {
+    public void paySuccess(SrvOrderPaymentNotificationCommand cmd) {
         Long orderId = cmd.getOrderId();
         AssetPaymentOrder order = assetProvider.findAssetPaymentById(orderId);
         List<AssetPaymentOrderBills> bills = assetProvider.findBillsById(orderId);
@@ -53,7 +53,7 @@ public class Zuolin_PayCallBack implements PaymentCallBackHandler{
     }
 
     @Override
-    public void payFail(OrderPaymentNotificationCommand cmd) {
+    public void payFail(SrvOrderPaymentNotificationCommand cmd) {
         LOGGER.info("pay failed for zjgk, returned notificationCmd = {}",cmd.toString());
         this.dbProvider.execute((TransactionStatus status) -> {
             assetProvider.changeOrderStaus(cmd.getOrderId(),(byte)1);
@@ -62,7 +62,7 @@ public class Zuolin_PayCallBack implements PaymentCallBackHandler{
     }
 
     @Override
-    public void refundSuccess(OrderPaymentNotificationCommand cmd) {
+    public void refundSuccess(SrvOrderPaymentNotificationCommand cmd) {
         LOGGER.info("pay failed for zjgk, returned notificationCmd = {}",cmd.toString());
         this.dbProvider.execute((TransactionStatus status) -> {
             assetProvider.changeOrderStaus(cmd.getOrderId(),(byte)6);
@@ -71,7 +71,7 @@ public class Zuolin_PayCallBack implements PaymentCallBackHandler{
     }
 
     @Override
-    public void refundFail(OrderPaymentNotificationCommand cmd) {
+    public void refundFail(SrvOrderPaymentNotificationCommand cmd) {
         LOGGER.info("pay failed for zjgk, returned notificationCmd = {}",cmd.toString());
         this.dbProvider.execute((TransactionStatus status) -> {
             assetProvider.changeOrderStaus(cmd.getOrderId(),(byte)7);

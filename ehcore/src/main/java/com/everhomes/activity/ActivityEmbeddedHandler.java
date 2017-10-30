@@ -263,6 +263,10 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         if(cmd.getTag() != null) {
             post.setTag(cmd.getTag());
         }
+
+        //保证帖子和活动的clone状态是一致的  add by yanjun 20170807
+        cmd.setCloneFlag(post.getCloneFlag());
+
         
 //        if (OfficialFlag.fromCode(cmd.getOfficialFlag())!=OfficialFlag.YES) {
 //			cmd.setOfficialFlag(OfficialFlag.NO.getCode());
@@ -364,6 +368,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         if(cmd.getWechatSignup() == null){
 			GetRosterOrderSettingCommand getRosterOrderSettingCommand = new GetRosterOrderSettingCommand();
 			getRosterOrderSettingCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+			getRosterOrderSettingCommand.setCategoryId(cmd.getCategoryId());
 			RosterOrderSettingDTO rosterOrderSettingDTO = activityService.getRosterOrderSetting(getRosterOrderSettingCommand);
 
 			if(rosterOrderSettingDTO != null){
@@ -408,6 +413,10 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 					tag.setName(cmd.getTag());
 					tag.setHotFlag(HotFlag.NORMAL.getCode());
 					tag.setServiceType(HotTagServiceType.ACTIVITY.getCode());
+
+					Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+					tag.setNamespaceId(namespaceId);
+
 					hotTagSearcher.feedDoc(tag);
 				}catch (Exception e){
 					LOGGER.error("feedDoc activity tag error",e);

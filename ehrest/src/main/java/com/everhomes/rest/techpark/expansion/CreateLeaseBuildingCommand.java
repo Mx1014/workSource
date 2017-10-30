@@ -11,6 +11,7 @@ import java.util.List;
  */
 public class CreateLeaseBuildingCommand {
 
+    private Integer namespaceId;
     private Long communityId;
     private String name;
     private String aliasName;
@@ -31,6 +32,14 @@ public class CreateLeaseBuildingCommand {
 
     @ItemType(PostApprovalFormItem.class)
     private List<PostApprovalFormItem> formValues;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public List<PostApprovalFormItem> getFormValues() {
         return formValues;

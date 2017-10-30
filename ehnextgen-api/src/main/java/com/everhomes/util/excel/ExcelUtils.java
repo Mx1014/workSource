@@ -314,15 +314,15 @@ public class ExcelUtils {
         // 设置表格默认列宽度为20个字节
         sheet.setDefaultColumnWidth((short) 20);
         // 生成一个样式
-        HSSFCellStyle style = workbook.createCellStyle();
+        HSSFCellStyle style_non_m = workbook.createCellStyle();
         // 设置这些样式
 //        style.setFillForegroundColor(HSSFColor.GREEN.index);
 //        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-        style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-        style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-        style.setBorderRight(HSSFCellStyle.BORDER_THIN);
-        style.setBorderTop(HSSFCellStyle.BORDER_THIN);
-        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        style_non_m.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        style_non_m.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        style_non_m.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        style_non_m.setBorderTop(HSSFCellStyle.BORDER_THIN);
+        style_non_m.setAlignment(HSSFCellStyle.ALIGN_CENTER);
         // 生成一个内容字体
         HSSFCellStyle style_content = workbook.createCellStyle();
         HSSFFont font = workbook.createFont();
@@ -334,13 +334,17 @@ public class ExcelUtils {
         font2.setColor(HSSFColor.BLACK.index);
         font2.setFontHeightInPoints((short) 16);
         font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-        style.setFont(font2);
+        style_non_m.setFont(font2);
         //必填的字体和样式
 
         HSSFCellStyle style_m = workbook.createCellStyle();
         // 设置这些样式
 //        style.setFillForegroundColor(HSSFColor.GREEN.index);
 //        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        style_m.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        style_m.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        style_m.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        style_m.setBorderTop(HSSFCellStyle.BORDER_THIN);
         style_m.setAlignment(HSSFCellStyle.ALIGN_CENTER);
 
         HSSFFont font4 = workbook.createFont();
@@ -350,11 +354,12 @@ public class ExcelUtils {
 
         style_m.setFont(font4);
         // 指定当单元格内容显示不下时自动换行
-        style.setWrapText(true);
+        style_non_m.setWrapText(true);
+        style_content.setWrapText(true);
         //产生说明
         HSSFFont font3 = workbook.createFont();
         font3.setColor(HSSFColor.BLACK.index);
-        font3.setFontHeightInPoints((short) 18);
+        font3.setFontHeightInPoints((short) 12);
         font3.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 
         HSSFCellStyle introStyle = workbook.createCellStyle();
@@ -368,11 +373,69 @@ public class ExcelUtils {
         introRow.setHeightInPoints(130);
         HSSFCell introCell = introRow.createCell(0);
         introCell.setCellStyle(introStyle);
+        //这里可以根据sheet决定怎么显示枚举，晚上搞这个
+        String instruction = "";
+        switch (sheetTitle){
+            case "人才团队信息":
+                instruction =
+                            "性别: 男、女 \n" +
+                            "技术职称: 高级、中级、初级 \n" +
+                            "是否海归: 是、否 \n"  +
+                            "个人评定: 否、上海（千人批次）、中央（千人批次）、浦江人才、两院院士、高层次人才、其他 \n";
+                break;
+            case "申报项目":
+                instruction =
+                            "项目来源: 国家、上海市、嘉定区、其他（可多选） \n" +
+                            "项目状态: 进行中、已完结 \n";
+                break;
+            case "工商信息":
+                instruction =
+                            "企业类型: 企业、事业单位、政府机关、社会团体、民办非企业单位、基金会、其他组织机构 \n" +
+                            "企业控股情况: 国有控股、集体控股、私人控股、港澳台商控股、外商投资、其他 \n";
+                break;
+            case "投融情况":
+                break;
+            case "经济指标":
+                break;
+            case "商标信息":
+                instruction =
+                            "商标类型: 文字商标、图片商标、品牌商标、著名商标 \n" +
+                            "企业控股情况: 国有控股、集体控股、私人控股、港澳台商控股、外商投资、其他 \n";
+
+                break;
+            case "专利信息":
+                instruction =
+                        "专利类型: 发明专利、实用新型、外观设计、集成电路布图、软件著作权、证书 \n" +
+                        "专利状态: 申请、授权 \n";
+                break;
+            case "证书":
+                break;
+            case "跟进信息":
+                break;
+            case "计划信息":
+                break;
+        }
         introCell.setCellValue("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
                 "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
                 "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
                 "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
-                "4、红色字段为必填项。");
+                "4、红色字段为必填项,不填将导致导入失败。\n" +
+                "以下字段请按枚举值填写，否则导入将失败 \n" +
+                instruction
+        );
+//        "户型: 单间、一室一厅、两室一厅、两室两厅、三室一厅、三室两厅、三室三厅、四室两厅、其他 \n" +
+//                "资产类型: 住宅、写字楼、酒店式公寓、厂房、库房、车位、其他 \n" +
+//                "资产来源: 自管、业主放盘、大业主交管、其他 \n" +
+//                "资产状态: 已租、已售、自用、待租、待售、其他 \n" +
+//                "装修状态: 已装修、未装修 \n" +
+//                "朝向: 坐北朝南、坐南朝北、坐东朝西、坐西朝东、其他 \n" +
+//                "产权归属: 自有、出售、非产权 \n" +
+//                "入住状况: 已入住、未入住 \n" +
+//                "资产来源: 自管、业主放盘、大业主交管、其他 \n" +
+//                "门牌类型: 住宅、写字楼、商铺，酒店式公寓、厂房、库房、车位、其他 \n" +
+//                "门牌来源: 自管、业主放盘、大业主交管、其他 \n" +
+//                "门牌状态: 已租、已售、自用、待租、待售、其他 \n" +
+//                "表计类型: 应收部分、应付部分、自用部分、公共计量部分、其他 \n"
 
         // 产生表格标题行
         HSSFRow row = sheet.createRow(1);
@@ -383,12 +446,12 @@ public class ExcelUtils {
             if(mandatory[i].equals("1")){
                 cell.setCellStyle(style_m);
             }else{
-                cell.setCellStyle(style);
+                cell.setCellStyle(style_non_m);
             }
             HSSFRichTextString text = new HSSFRichTextString(headers[i]);
             cell.setCellValue(text.toString());
         }
-        style.setFont(font);
+
         // 遍历集合数据，产生数据行
         if (result != null) {
             int index = 1;

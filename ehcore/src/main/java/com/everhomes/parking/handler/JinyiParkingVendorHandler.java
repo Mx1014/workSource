@@ -14,6 +14,7 @@ import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.MD5Utils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,7 +136,7 @@ public class JinyiParkingVendorHandler extends DefaultParkingVendorHandler {
 		});
 		String p = sb.substring(0,sb.length() - 1);
 
-		String md5Sign = Utils.md5(p + appkey);
+		String md5Sign = MD5Utils.getMD5(p + appkey);
 		params.put("sign", md5Sign);
 
 		return params;

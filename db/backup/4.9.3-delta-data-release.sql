@@ -295,7 +295,7 @@ VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '门禁', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：https://core.zuolin.com/evh/aclink/v?id=${id}（24小时有效）', 999993);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '门禁', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：${link}/aclink/v?id=${id}（24小时有效）', 0);
+VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 8, 'zh_CN', '门禁通用(描述做逻辑, 不可修改)${link}', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：${link}/aclink/v?id=${id}（24小时有效）', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES ((@max_template_id := @max_template_id + 1), 'sms.default', 9, 'zh_CN', '看楼申请', '用户${userName}（手机号：${userPhone}）于${applyTime}提交了预约${applyType}申请：参观位置：${location}\n面积需求：${area}\n公司名称：${enterpriseName}\n备注：${description}', 1000000);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
@@ -394,10 +394,6 @@ INSERT INTO `eh_parking_invoice_types` (`id`, `namespace_id`, `owner_type`, `own
   VALUES ('2', '999983', 'community', '240111044331055940', '10006', '个人', '2', '1', '2017-09-19 10:46:18', NULL, NULL, '1');
 INSERT INTO `eh_parking_invoice_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `name`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`, `invoice_token`)
   VALUES ('3', '999983', 'community', '240111044331055940', '10006', '车牌号码', '2', '1', '2017-09-19 10:46:18', NULL, NULL, '2');
-update eh_configurations set `value` = 'http://220.160.111.114:9090' where `name` = 'parking.kexing.url';
-update eh_configurations set `value` = 'F7A0B971B199FD2A1017CEC5' where `name` = 'parking.kexing.key';
-update eh_configurations set `value` = 'ktapi' where `name` = 'parking.kexing.user';
-update eh_configurations set `value` = '0306A9' where `name` = 'parking.kexing.pwd';
 INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `card_type_id`, `card_type_name`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
   VALUES ('1', '999983', 'community', '240111044331055940', '10006', '2', '月租车', '2', '1', '2017-09-19 10:49:48', NULL, NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)

@@ -319,7 +319,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 	
 	@Override
-	public List<LaunchPadItem> searchLaunchPadItemsByKeyword(Integer namespaceId, String sceneType, Map<Byte, Long> scopeMap, String keyword, int offset, int pageSize) {
+	public List<LaunchPadItem> searchLaunchPadItemsByKeyword(Integer namespaceId, String sceneType, Map<Byte, Long> scopeMap, Map<Byte, Long> defalutScopeMap, String keyword, int offset, int pageSize) {
 		
 		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
@@ -331,21 +331,14 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 			condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
 		}
 //		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LOCATION.eq("/home");
-		
+
 		Condition scopeConditionAll = null;
-		if(scopeMap != null){
-			for(Map.Entry<Byte, Long> entry: scopeMap.entrySet()){
-				if(entry.getValue() == null){
-					continue;
-				}
-				Condition scopeCondition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(entry.getKey());
-				scopeCondition = scopeCondition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(entry.getValue()));
-				if(scopeConditionAll == null){
-					scopeConditionAll = scopeCondition;
-				}else{
-					scopeConditionAll = scopeConditionAll.or(scopeCondition);
-				}
-			}
+		//多加一个范围参数，因此将代码段抽取成一个方法
+		addScopeCondition(scopeConditionAll, scopeMap);
+		//多加一个范围参数，因此将代码段抽取成一个方法
+		addScopeCondition(scopeConditionAll, defalutScopeMap);
+
+		if(scopeConditionAll != null){
 			condition = condition.and(scopeConditionAll);
 		}
 
@@ -373,6 +366,25 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		});
 
 		return items;
+	}
+
+
+	private void addScopeCondition(Condition scopeConditionAll, Map<Byte, Long> scopeMap){
+		if(scopeMap == null  || scopeMap.size() == 0){
+			return;
+		}
+		for(Map.Entry<Byte, Long> entry: scopeMap.entrySet()){
+			if(entry.getValue() == null){
+				continue;
+			}
+			Condition scopeCondition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(entry.getKey());
+			scopeCondition = scopeCondition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(entry.getValue()));
+			if(scopeConditionAll == null){
+				scopeConditionAll = scopeCondition;
+			}else{
+				scopeConditionAll = scopeConditionAll.or(scopeCondition);
+			}
+		}
 	}
 	
 	@Override

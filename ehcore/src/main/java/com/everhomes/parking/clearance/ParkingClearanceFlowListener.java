@@ -11,6 +11,8 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowServiceTypeDTO;
+import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.parking.ParkingLocalStringCode;
 import com.everhomes.rest.parking.clearance.ParkingClearanceLogStatus;
@@ -30,10 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.MODULE_ID;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
@@ -299,4 +298,13 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
 		// TODO Auto-generated method stub
 		
 	}
+
+    @Override
+    public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+        List<FlowServiceTypeDTO> result = new ArrayList<>();
+        FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+        dto.setNamespaceId(namespaceId);
+        dto.setServiceName("车辆放行");
+        return result;
+    }
 }

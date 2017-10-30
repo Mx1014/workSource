@@ -9,7 +9,6 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId：范围具体Id，域名对应的机构id，后面需要讨论是否直接通过域名来获取当前公司</li>
  * <li>namespaceId：域空间</li>
  * <li>moduleId：模块id</li>
- * <li>actionTypeFlag：模块是否有actionType 0是没有 1是有</li>
  * </ul>
  */
 public class TreeServiceModuleCommand {
@@ -19,8 +18,6 @@ public class TreeServiceModuleCommand {
 	private Long ownerId;
 
 	private Integer namespaceId;
-
-	private Byte actionTypeFlag;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -44,14 +41,6 @@ public class TreeServiceModuleCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
-	}
-
-	public Byte getActionTypeFlag() {
-		return actionTypeFlag;
-	}
-
-	public void setActionTypeFlag(Byte actionTypeFlag) {
-		this.actionTypeFlag = actionTypeFlag;
 	}
 
 	@Override

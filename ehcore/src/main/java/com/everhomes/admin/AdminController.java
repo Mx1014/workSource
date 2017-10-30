@@ -76,6 +76,7 @@ import com.everhomes.rest.persist.server.UpdatePersistServerCommand;
 import com.everhomes.rest.repeat.ExpressionDTO;
 import com.everhomes.rest.rpc.server.PingRequestPdu;
 import com.everhomes.rest.rpc.server.PingResponsePdu;
+import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
@@ -954,6 +955,20 @@ public class AdminController extends ControllerBase {
         MailHandler handler = PlatformContext.getComponent(handlerName);
         handler.sendMail(0, null, toMail, "the mail subject", "the mail body");
     	return new RestResponse();
+    }
+    
+    /**
+     * <b>URL: /user/checkCpnStatus</b>
+     * <p>用于检查一些关键组件的状态，比如是否有内存可创建对象、是否可以正常连接redis，是否可以正常连接数据库等；</p>
+     */
+    @RequestMapping("checkCpnStatus")
+    @RestReturn(value = String.class )
+    @RequireAuthentication(false)
+    public RestResponse checkCpnStatus() {
+        RestResponse response = new RestResponse(userService.checkServerStatus());
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
 }

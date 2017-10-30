@@ -36,7 +36,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.openapi.ContractBuildingMapping;
-import com.everhomes.organization.OrganizationOwner;
+import com.everhomes.organization.*;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.approval.CommonStatus;
@@ -54,6 +54,8 @@ import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+import com.everhomes.varField.FieldProvider;
+import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
@@ -74,9 +76,6 @@ import com.everhomes.coordinator.NamedLock;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
-import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.organization.OrganizationServiceUser;
@@ -165,6 +164,14 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private IndividualCustomerProvider individualCustomerProvider;
+
+	@Autowired
+	private FieldProvider fieldProvider;
+
+	@Autowired
+	private ContractChargingChangeProvider contractChargingChangeProvider;
+	@Autowired
+	private ContractChargingChangeAddressProvider contractChargingChangeAddressProvider;
 
 	@PostConstruct
 	public void setup(){
@@ -527,6 +534,8 @@ public class ContractServiceImpl implements ContractService {
 		Double totalSize = dealContractApartments(contract, cmd.getApartments());
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
+		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
+
 
 		contract.setRentSize(totalSize);
 		contractProvider.updateContract(contract);
@@ -629,7 +638,7 @@ public class ContractServiceImpl implements ContractService {
 		createFlowCaseCommand.setReferId(contract.getId());
 		createFlowCaseCommand.setReferType(EntityType.CONTRACT.getCode());
 		createFlowCaseCommand.setContent(contract.getContractNumber());
-
+		createFlowCaseCommand.setServiceType("合同申请");
 		createFlowCaseCommand.setProjectId(contract.getCommunityId());
 		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
 
@@ -774,6 +783,86 @@ public class ContractServiceImpl implements ContractService {
 		}
 	}
 
+	private void dealContractChargingChanges(Contract contract, List<ContractChargingChangeDTO> adjusts, List<ContractChargingChangeDTO> frees) {
+		// 没有id的，增加
+		//有id的，修改且从已有列表中删除，然后把已有列表中剩余的数据删除
+		List<ContractChargingChange> existChargingChanges = contractChargingChangeProvider.listByContractId(contract.getId());
+		Map<Long, ContractChargingChange> map = new HashMap<>();
+		if(existChargingChanges != null && existChargingChanges.size() > 0) {
+			existChargingChanges.forEach(change -> {
+				map.put(change.getId(), change);
+			});
+		}
+
+		if(adjusts != null && adjusts.size() > 0) {
+			dealChanges(contract, map, adjusts, ChangeType.ADJUST);
+		}
+		if(frees != null && frees.size() > 0) {
+			dealChanges(contract, map, frees, ChangeType.FREE);
+		}
+		if(map.size() > 0) {
+			map.forEach((id, change) -> {
+				contractChargingChangeProvider.deleteContractChargingChange(change);
+			});
+		}
+	}
+
+	private Map<Long, ContractChargingChange> dealChanges(Contract contract, Map<Long, ContractChargingChange> map, List<ContractChargingChangeDTO> changes, ChangeType changeType) {
+		changes.forEach(change -> {
+			ContractChargingChange contractChargingChange = ConvertHelper.convert(change, ContractChargingChange.class);
+			if(change.getChangeStartTime() != null) {
+				contractChargingChange.setChangeStartTime(new Timestamp(change.getChangeStartTime()));
+			}
+			if(change.getChangeExpiredTime() != null) {
+				contractChargingChange.setChangeExpiredTime(new Timestamp(change.getChangeExpiredTime()));
+			}
+			if(change.getId() == null) {
+				contractChargingChange.setContractId(contract.getId());
+				contractChargingChange.setNamespaceId(contract.getNamespaceId());
+				contractChargingChange.setChangeType(changeType.getCode());
+				contractChargingChange.setStatus(CommonStatus.ACTIVE.getCode());
+				contractChargingChangeProvider.createContractChargingChange(contractChargingChange);
+				dealContractChargingChangeAddresses(contractChargingChange, change.getApartments());
+			} else {
+				ContractChargingChange exist = contractChargingChangeProvider.findById(change.getId());
+				contractChargingChange.setCreateUid(exist.getCreateUid());
+				contractChargingChange.setCreateTime(exist.getCreateTime());
+				contractChargingChangeProvider.updateContractChargingChange(contractChargingChange);
+				map.remove(change.getId());
+			}
+		});
+		return map;
+	}
+
+	private void dealContractChargingChangeAddresses(ContractChargingChange contractChargingChange, List<BuildingApartmentDTO> apartments ) {
+		List<ContractChargingChangeAddress> existChangeAddresses = contractChargingChangeAddressProvider.findByChangeId(contractChargingChange.getId());
+		Map<Long, ContractChargingChangeAddress> map = new HashMap<>();
+		if(existChangeAddresses != null && existChangeAddresses.size() > 0) {
+			existChangeAddresses.forEach(address -> {
+				map.put(address.getId(), address);
+			});
+		}
+
+		if(apartments != null && apartments.size() > 0) {
+			apartments.forEach(apartment -> {
+				if(apartment.getId() == null) {
+					ContractChargingChangeAddress address = ConvertHelper.convert(apartment, ContractChargingChangeAddress.class);
+					address.setChargingChangeId(contractChargingChange.getId());
+					address.setNamespaceId(contractChargingChange.getNamespaceId());
+					address.setStatus(CommonStatus.ACTIVE.getCode());
+					contractChargingChangeAddressProvider.createContractChargingChangeAddress(address);
+				} else {
+					map.remove(apartment.getId());
+				}
+			});
+		}
+		if(map.size() > 0) {
+			map.forEach((id, changeAddress) -> {
+				changeAddress.setStatus(CommonStatus.INACTIVE.getCode());
+				contractChargingChangeAddressProvider.updateContractChargingChangeAddress(changeAddress);
+			});
+		}
+	}
 	private void dealContractAttachments(Long contractId, List<ContractAttachmentDTO> attachments) {
 		List<ContractAttachment> existAttachments = contractAttachmentProvider.listByContractId(contractId);
 		Map<Long, ContractAttachment> map = new HashMap<>();
@@ -802,7 +891,7 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	public ContractDTO updateContract(UpdateContractCommand cmd) {
+	public ContractDetailDTO updateContract(UpdateContractCommand cmd) {
 		Contract exist = checkContract(cmd.getId());
 		Contract contract = ConvertHelper.convert(cmd, Contract.class);
 		Contract existContract = contractProvider.findActiveContractByContractNumber(cmd.getNamespaceId(), cmd.getContractNumber());
@@ -833,14 +922,17 @@ public class ContractServiceImpl implements ContractService {
 			contract.setDownpaymentTime(new Timestamp(cmd.getDownpaymentTime()));
 		}
 		contract.setCreateTime(exist.getCreateTime());
-
 		Double rentSize = dealContractApartments(contract, cmd.getApartments());
-		contract.setRentSize(rentSize);
+		if(cmd.getRentSize() == null) {
+			contract.setRentSize(rentSize);
+		}
+
 		contractProvider.updateContract(contract);
 
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
 		contractSearcher.feedDoc(contract);
+		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			addToFlowCase(contract);
 		}
@@ -852,7 +944,7 @@ public class ContractServiceImpl implements ContractService {
 			}
 		});
 
-		return ConvertHelper.convert(contract, ContractDTO.class);
+		return ConvertHelper.convert(contract, ContractDetailDTO.class);
 	}
 
 	@Override
@@ -1070,6 +1162,16 @@ public class ContractServiceImpl implements ContractService {
 			dto.setCreatorName(creator.getNickName());
 		}
 
+		if(contract.getPartyAId() != null && contract.getPartyAType() != null) {
+			if(0 == contract.getPartyAType()) {
+				Organization organization = organizationProvider.findOrganizationById(contract.getPartyAId());
+				if(organization != null) {
+					dto.setPartyAName(organization.getName());
+				}
+			}
+
+		}
+
 		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(dto.getCustomerType()))) {
 			EnterpriseCustomer customer = enterpriseCustomerProvider.findById(dto.getCustomerId());
 			if(customer != null) {
@@ -1095,9 +1197,17 @@ public class ContractServiceImpl implements ContractService {
 				dto.setRootContractNumber(rootContract.getContractNumber());
 			}
 		}
+
+		if(contract.getLayout() != null && StringUtils.isNotBlank(contract.getLayout()) && StringUtils.isNumeric(contract.getLayout())) {
+			ScopeFieldItem item =  fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(), Long.valueOf(contract.getLayout()));
+			if(item != null) {
+				dto.setLayoutName(item.getItemDisplayName());
+			}
+		}
 		processContractApartments(dto);
 		processContractChargingItems(dto);
 		processContractAttachments(dto);
+		processContractChargingChanges(dto);
 		return dto;
 	}
 
@@ -1209,6 +1319,69 @@ public class ContractServiceImpl implements ContractService {
 				return apartmentDto;
 			}).collect(Collectors.toList());
 			dto.setApartments(apartmentDtos);
+		}
+	}
+
+	private void processContractChargingChanges(ContractDetailDTO dto) {
+		List<ContractChargingChange> contractChargingChanges = contractChargingChangeProvider.listByContractId(dto.getId());
+		if(contractChargingChanges != null && contractChargingChanges.size() > 0) {
+			List<ContractChargingChangeDTO> adjusts = new ArrayList<>();
+			List<ContractChargingChangeDTO> frees = new ArrayList<>();
+			contractChargingChanges.forEach(change -> {
+				ContractChargingChangeDTO changeDTO = ConvertHelper.convert(change, ContractChargingChangeDTO.class);
+				String itemName = assetProvider.findChargingItemNameById(change.getChargingItemId());
+				changeDTO.setChargingItemName(itemName);
+				if(change.getChangeStartTime() != null) {
+					changeDTO.setChangeStartTime(change.getChangeStartTime().getTime());
+				}
+				if(change.getChangeExpiredTime() != null) {
+					changeDTO.setChangeExpiredTime(change.getChangeExpiredTime().getTime());
+				}
+				processContractChargingChangeAddresses(changeDTO);
+
+				if(ChangeType.ADJUST.equals(ChangeType.fromStatus(change.getChangeType()))) {
+					adjusts.add(changeDTO);
+				} else if(ChangeType.FREE.equals(ChangeType.fromStatus(change.getChangeType()))) {
+					frees.add(changeDTO);
+				}
+			});
+
+			dto.setAdjusts(adjusts);
+			dto.setFrees(frees);
+		}
+	}
+
+	private void processContractChargingChangeAddresses(ContractChargingChangeDTO dto) {
+		List<ContractChargingChangeAddress> changeAddresses = contractChargingChangeAddressProvider.findByChangeId(dto.getId());
+		if(changeAddresses != null && changeAddresses.size() > 0) {
+			List<BuildingApartmentDTO> addressDtos = new ArrayList<>();
+			List<Long> addressIds = new ArrayList<>();
+			changeAddresses.forEach(address -> {
+				addressIds.add(address.getAddressId());
+			});
+
+			//一把取出关联的门牌地址
+			List<Address> addresses =  addressProvider.listAddressByIds(dto.getNamespaceId(), addressIds);
+			Map<Long, Address> addressMap = new HashMap<>();
+			if(addresses != null && addresses.size() > 0) {
+				addresses.forEach(address -> {
+					addressMap.put(address.getId(), address);
+				});
+			}
+
+			changeAddresses.forEach(changeAddress -> {
+				BuildingApartmentDTO apartmentDto = new BuildingApartmentDTO();
+				apartmentDto.setId(changeAddress.getId());
+				apartmentDto.setAddressId(changeAddress.getAddressId());
+				Address address = addressMap.get(changeAddress.getAddressId());
+				if(address != null) {
+					apartmentDto.setApartmentName(address.getApartmentName());
+					apartmentDto.setBuildingName(address.getBuildingName());
+				}
+				addressDtos.add(apartmentDto);
+			});
+
+			dto.setApartments(addressDtos);
 		}
 	}
 

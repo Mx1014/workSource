@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.flow;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -34,6 +35,9 @@ public class CreateFlowCaseCommand {
     @NotNull
     private Long currentOrganizationId;
     private String serviceType;
+
+    @ItemType(FlowCaseAdditionalFieldDTO.class)
+    private FlowCaseAdditionalFieldDTO additionalFieldDTO;
 
     public Long getFlowMainId() {
         return flowMainId;
@@ -121,6 +125,14 @@ public class CreateFlowCaseCommand {
 
     public void setServiceType(String serviceType) {
         this.serviceType = serviceType;
+    }
+
+    public FlowCaseAdditionalFieldDTO getAdditionalFieldDTO() {
+        return additionalFieldDTO;
+    }
+
+    public void setAdditionalFieldDTO(FlowCaseAdditionalFieldDTO additionalFieldDTO) {
+        this.additionalFieldDTO = additionalFieldDTO;
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
+ *     <li>orderId: 业务订单ID</li>
  *     <li>orderId: 业务订单id</li>
  *     <li>expiredIntervalTime: 订单失效间隔时间，单位为秒</li>
  *     <li>amount: 支付金额，以分为单位</li>
@@ -49,16 +50,16 @@ public class PreOrderDTO {
         return amount;
     }
 
-    public void setAmount(Long amount) {
-        this.amount = amount;
-    }
-
     public Long getOrderId() {
         return orderId;
     }
 
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
+    }
+
+    public void setAmount(Long amount) {
+        this.amount = amount;
     }
 
     public String getOrderCommitUrl() {

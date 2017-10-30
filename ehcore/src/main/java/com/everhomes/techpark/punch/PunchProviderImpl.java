@@ -1068,7 +1068,8 @@ long id = sequenceProvider.getNextSequence(key);
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.greaterOrEqual(startDate));
-			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.lt(endDate));
+			//modify by 2017-09-30 由于月刷新的endate是前一天,所以要包含enddate
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.lessOrEqual(endDate));
 		}
 		// modify by wh 2017-4-25 order by punch date asc
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
