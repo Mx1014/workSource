@@ -9,8 +9,8 @@ import com.everhomes.util.StringHelper;
  *     <li>originalNodeLevel: 分支开始节点level</li>
  *     <li>convergenceNodeId: convergenceNodeId</li>
  *     <li>convergenceNodeLevel: 分支汇总节点level</li>
- *     <li>processMode: 执行模式{@link FlowBranchProcessMode}</li>
- *     <li>branchDecider: 唯一分支下的分支决策者{@link FlowBranchDecider}</li>
+ *     <li>processMode: 执行模式{@link com.everhomes.rest.flow.FlowBranchProcessMode}</li>
+ *     <li>branchDecider: 唯一分支下的分支决策者{@link com.everhomes.rest.flow.FlowBranchDecider}</li>
  * </ul>
  */
 public class FlowBranchCommand {

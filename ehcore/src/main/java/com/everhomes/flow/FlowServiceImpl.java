@@ -1212,7 +1212,7 @@ public class FlowServiceImpl implements FlowService {
             action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
             action.setTrackerApplier(actionInfo.getTrackerApplier());
             action.setTrackerProcessor(actionInfo.getTrackerProcessor());
-            action.setStatus(FlowActionStatus.ENABLED.getCode());
+            action.setStatus(actionInfo.getEnabled() != null ? actionInfo.getEnabled() : FlowActionStatus.ENABLED.getCode());
             action.setRenderText(actionInfo.getRenderText());
             flowActionProvider.createFlowAction(action);
 
@@ -1314,6 +1314,8 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public Boolean enableFlow(Long flowId) {
         Flow flow = flowProvider.getFlowById(flowId);
+
+        checkFlowValidationStatus(flow);
 
         // 避免同时启用工作流的问题
         String lockKey = String.format("%s:%s:%s:%s:%s:%s:%s:%s",
@@ -1473,6 +1475,17 @@ public class FlowServiceImpl implements FlowService {
             return isOk;
         });
         return tuple.first();
+    }
+
+    private void checkFlowValidationStatus(Flow flow) {
+        FlowValidationStatus validationStatus = FlowValidationStatus.fromCode(flow.getValidationStatus());
+        switch (validationStatus) {
+            case INVALID:
+                throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_VALIDATION_INVALID,
+                        "Flow validation invalid");
+            case VALID:
+                break;
+        }
     }
 
     private FlowGraphBranch getFlowGraphBranch(FlowBranch branch) {
@@ -1917,6 +1930,7 @@ public class FlowServiceImpl implements FlowService {
         if (flowVer.equals(0)) {
             return getConfigGraph(flowId);
         }
+        graphMap.clear();
         String fmt = String.format("%d:%d", flowId, flowVer);
         return graphMap.computeIfAbsent(fmt, k -> getSnapshotGraph(flowId, flowVer));
     }
@@ -2048,6 +2062,7 @@ public class FlowServiceImpl implements FlowService {
                 lane.setId(0L);
                 lane.setLaneLevel(flowNode.getNodeLevel());
                 lane.setDisplayName(flowNode.getNodeName());
+                lane.setDisplayNameAbsort(buttonDefName(Namespace.DEFAULT_NAMESPACE, FlowStepType.ABSORT_STEP));
                 lane.setFlowNodeLevel(flowNode.getNodeLevel());
                 graphLane.setFlowLane(lane);
                 flowNode.setFlowLaneId(0L);
@@ -4604,18 +4619,8 @@ public class FlowServiceImpl implements FlowService {
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        // 先去listener获取
-        Flow flow = flowProvider.getFlowById(cmd.getFlowId());
-        if (flow == null) {
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
-                    "Flow not exist, flowId = %s", cmd.getFlowId());
-        }
-
-        List<FlowPredefinedParamDTO> dtoList = flowListenerManager.listPredefinedParam(
-                flow, FlowEntityType.fromCode(cmd.getEntityType()), cmd.getOwnerType(), cmd.getOwnerId());
-
         List<FlowPredefinedParam> paramList = flowPredefinedParamProvider.listPredefinedParam(namespaceId,
-                flow.getModuleType(), flow.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+                cmd.getModuleType(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
 
         if (paramList.isEmpty()) {
             paramList = flowPredefinedParamProvider.listPredefinedParam(namespaceId,
@@ -4623,16 +4628,18 @@ public class FlowServiceImpl implements FlowService {
         }
         if (paramList.isEmpty()) {
             paramList = flowPredefinedParamProvider.listPredefinedParam(Namespace.DEFAULT_NAMESPACE,
-                    flow.getModuleType(), flow.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
+                    cmd.getModuleType(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
         }
         if (paramList.isEmpty()) {
             paramList = flowPredefinedParamProvider.listPredefinedParam(Namespace.DEFAULT_NAMESPACE,
                     FlowModuleType.NO_MODULE.getCode(), cmd.getModuleId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEntityType());
         }
 
-        dtoList.addAll(paramList.stream().map(this::toPredefinedParamDTO).collect(Collectors.toList()));
+        List<FlowPredefinedParamDTO> dtoList = paramList.stream().map(this::toPredefinedParamDTO).collect(Collectors.toList());
 
-        return new ListFlowPredefinedParamResponse(dtoList);
+        ListFlowPredefinedParamResponse response = new ListFlowPredefinedParamResponse();
+        response.setParams(dtoList);
+        return response;
     }
 
     private FlowPredefinedParamDTO toPredefinedParamDTO(FlowPredefinedParam param) {
@@ -4874,28 +4881,58 @@ public class FlowServiceImpl implements FlowService {
     }
 
     @Override
-    public FlowConditionDTO createOrUpdateFlowCondition(CreateFlowConditionCommand cmd) {
+    public FlowGraphDTO createOrUpdateFlowCondition(CreateFlowConditionCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        Flow flow = flowProvider.getFlowById(cmd.getFlowId());
+        if (flow == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
+                    "flow not exist flowId=%s", cmd.getFlowId());
+        }
+
+        FlowNode flowNode = flowNodeProvider.getFlowNodeById(cmd.getFlowNodeId());
+        dbProvider.execute(status -> {
+            flowMarkUpdated(flow);
+
+            if (cmd.getBranch() != null) {
+                FlowBranch flowBranch = flowBranchProvider.findBranchByOriginalNodeId(flow.getId(), FlowConstants.FLOW_CONFIG_VER, cmd.getFlowNodeId());
+                if (flowBranch != null) {
+                    FlowBranchCommand branchCmd = cmd.getBranch();
+                    flowBranch.setProcessMode(branchCmd.getProcessMode());
+                    flowBranch.setBranchDecider(branchCmd.getBranchDecider());
+                    flowBranchProvider.updateFlowBranch(flowBranch);
+                }
+            } else {
+                throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR,
+                        "param error");
+            }
+
+            // 创建condition
+            if (cmd.getConditions() != null) {
+                flowConditionProvider.deleteFlowCondition(flow.getId(), cmd.getFlowNodeId(), FlowConstants.FLOW_CONFIG_VER);
+                for (FlowConditionCommand conditionCmd : cmd.getConditions()) {
+                    conditionCmd.setFlowNodeId(cmd.getFlowNodeId());
+                    conditionCmd.setFlowNodeLevel(flowNode.getNodeLevel());
+                    createFlowCondition(flow, conditionCmd);
+                }
+            }
+            return true;
+        });
+        return toFlowGraphDTO(flow);
+    }
+
+    @Override
+    public void updateFlowValidationStatus(UpdateFlowValidationStatusCommand cmd) {
         Flow flow = flowProvider.getFlowById(cmd.getFlowId());
         if (flow == null) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
                     "flow not exist flowId=%s", cmd.getFlowId());
         }
         dbProvider.execute(status -> {
+            flow.setValidationStatus(cmd.getValidationStatus());
             flowMarkUpdated(flow);
-
-            // 创建condition
-            if (cmd.getConditions() != null) {
-                flowConditionProvider.deleteFlowCondition(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
-                for (FlowConditionCommand conditionCmd : cmd.getConditions()) {
-                    // conditionCmd.setFlowNodeId(nodeLevelToNodeIdMap.get(conditionCmd.getFlowNodeLevel()));
-                    // conditionCmd.setNextNodeId(nodeLevelToNodeIdMap.get(conditionCmd.getNextNodeLevel()));
-                    // conditionCmd.setFlowLinkId(linkLevelToLinkIdMap.get(conditionCmd.getFlowLinkLevel()));
-                    createFlowCondition(flow, conditionCmd);
-                }
-            }
             return true;
         });
-        return null;
     }
 
     @Override
@@ -5750,6 +5787,7 @@ public class FlowServiceImpl implements FlowService {
             if (lane != null) {
                 laneLogDTO.setLaneName(lane.getDisplayNameAbsort());
             }
+            laneLogDTO.setIsAbsortLane(TrueOrFalseFlag.TRUE.getCode());
             //异常结束 BUG 6052, 本来取消任务的跟踪是在中间节点的，要把他放到结束节点
             /*out:
             for (int j = laneLogDTOS.size() - 2; j >= 0; j--) {
