@@ -87,6 +87,24 @@ public class EnergyMeterProviderImpl implements EnergyMeterProvider {
                 .fetchAnyInto(EnergyMeter.class);
     }
 
+    @Override
+    public EnergyMeter findByName(Long communityId, String name) {
+        return context().selectFrom(EH_ENERGY_METERS)
+                .where(EH_ENERGY_METERS.COMMUNITY_ID.eq(communityId))
+                .and(EH_ENERGY_METERS.STATUS.ne(EnergyMeterStatus.INACTIVE.getCode()))
+                .and(EH_ENERGY_METERS.NAME.eq(name))
+                .fetchAnyInto(EnergyMeter.class);
+    }
+
+    @Override
+    public EnergyMeter findByNumber(Long communityId, String number) {
+        return context().selectFrom(EH_ENERGY_METERS)
+                .where(EH_ENERGY_METERS.COMMUNITY_ID.eq(communityId))
+                .and(EH_ENERGY_METERS.STATUS.ne(EnergyMeterStatus.INACTIVE.getCode()))
+                .and(EH_ENERGY_METERS.METER_NUMBER.eq(number))
+                .fetchAnyInto(EnergyMeter.class);
+    }
+
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());
     }

@@ -1,3 +1,4 @@
+
 package com.everhomes.energy;
 
 import com.everhomes.rest.energy.*;
@@ -9,9 +10,11 @@ import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 能耗管理的service
@@ -247,4 +250,19 @@ public interface EnergyConsumptionService {
     String getEnergyMeterQRCode(GetEnergyMeterQRCodeCommand cmd);
     void exportEnergyMeterQRCode(ExportEnergyMeterQRCodeCommand cmd, HttpServletResponse response);
     void exportSearchEnergyMeterQRCode(SearchEnergyMeterCommand cmd, HttpServletResponse response);
+
+    EnergyPlanDTO updateEnergyPlan(UpdateEnergyPlanCommand cmd);
+    EnergyPlanDTO findEnergyPlanDetails(FindEnergyPlanDetailsCommand cmd);
+    void deleteEnergyPlan(DeleteEnergyPlanCommand cmd);
+    ListEnergyPlanMetersResponse listEnergyPlanMeters(ListEnergyPlanMetersCommand cmd);
+    ListEnergyPlanMetersResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd);
+    ListUserEnergyPlanTasksResponse listUserEnergyPlanTasks(ListUserEnergyPlanTasksCommand cmd);
+    void readTaskMeter(ReadTaskMeterCommand cmd);
+
+    void createTask(CreateEnergyTaskCommand cmd);
+    void creatMeterTask(EnergyPlanMeterMap map, EnergyPlan plan);
+    Set<Long> getTaskGroupUsers(Long taskId);
+
+    BigDecimal processMonthPrompt(EnergyMeter meter,Integer namespaceId);
+    BigDecimal processDayPrompt(EnergyMeter meter,Integer namespaceId);
 }

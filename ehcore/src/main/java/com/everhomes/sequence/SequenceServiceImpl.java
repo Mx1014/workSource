@@ -101,6 +101,8 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
 import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
+import com.everhomes.server.schema.tables.pojos.EhDefaultChargingItemProperties;
+import com.everhomes.server.schema.tables.pojos.EhDefaultChargingItems;
 import com.everhomes.server.schema.tables.pojos.EhDockingMappings;
 import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
@@ -109,15 +111,21 @@ import com.everhomes.server.schema.tables.pojos.EhDoorCommand;
 import com.everhomes.server.schema.tables.pojos.EhDoorUserPermission;
 import com.everhomes.server.schema.tables.pojos.EhEnergyCountStatistics;
 import com.everhomes.server.schema.tables.pojos.EhEnergyDateStatistics;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterAddresses;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterCategories;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterChangeLogs;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterDefaultSettings;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterFormulas;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterLogs;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterPriceConfig;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterReadingLogs;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterSettingLogs;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterTasks;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeters;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMonthStatistics;
+import com.everhomes.server.schema.tables.pojos.EhEnergyPlanGroupMap;
+import com.everhomes.server.schema.tables.pojos.EhEnergyPlanMeterMap;
+import com.everhomes.server.schema.tables.pojos.EhEnergyPlans;
 import com.everhomes.server.schema.tables.pojos.EhEnergyYoyStatistics;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseAttachments;
@@ -2382,16 +2390,12 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_PAYMENT_FORMULA.ID.max())
                     .from(Tables.EH_PAYMENT_FORMULA).fetchOne().value1();
         });
-
-
         syncTableSequence(null, EhNewsTag.class, Tables.EH_NEWS_TAG.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_NEWS_TAG.ID.max()).from(Tables.EH_NEWS_TAG).fetchOne().value1();
         });
-
         syncTableSequence(null, EhNewsTagVals.class, Tables.EH_NEWS_TAG_VALS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_NEWS_TAG_VALS.ID.max()).from(Tables.EH_NEWS_TAG_VALS).fetchOne().value1();
         });
-
         syncTableSequence(null, EhLeaseProjects.class, Tables.EH_LEASE_PROJECTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_LEASE_PROJECTS.ID.max()).from(Tables.EH_LEASE_PROJECTS).fetchOne().value1();
         });
@@ -2399,6 +2403,31 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhLeaseProjectCommunities.class, Tables.EH_LEASE_PROJECT_COMMUNITIES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_LEASE_PROJECT_COMMUNITIES.ID.max()).from(Tables.EH_LEASE_PROJECT_COMMUNITIES).fetchOne().value1();
         });
+        syncTableSequence(null, EhEnergyMeterAddresses.class, Tables.EH_ENERGY_METER_ADDRESSES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_METER_ADDRESSES.ID.max()).from(Tables.EH_ENERGY_METER_ADDRESSES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyPlans.class, Tables.EH_ENERGY_PLANS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_PLANS.ID.max()).from(Tables.EH_ENERGY_PLANS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyPlanGroupMap.class, Tables.EH_ENERGY_PLAN_GROUP_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_PLAN_GROUP_MAP.ID.max()).from(Tables.EH_ENERGY_PLAN_GROUP_MAP).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyPlanMeterMap.class, Tables.EH_ENERGY_PLAN_METER_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_PLAN_METER_MAP.ID.max()).from(Tables.EH_ENERGY_PLAN_METER_MAP).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyMeterTasks.class, Tables.EH_ENERGY_METER_TASKS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_METER_TASKS.ID.max()).from(Tables.EH_ENERGY_METER_TASKS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyMeterLogs.class, Tables.EH_ENERGY_METER_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_METER_LOGS.ID.max()).from(Tables.EH_ENERGY_METER_LOGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhDefaultChargingItemProperties.class, Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.ID.max()).from(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhDefaultChargingItems.class, Tables.EH_DEFAULT_CHARGING_ITEMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_DEFAULT_CHARGING_ITEMS.ID.max()).from(Tables.EH_DEFAULT_CHARGING_ITEMS).fetchOne().value1();
+        });
+
     }
 
     @SuppressWarnings("rawtypes")

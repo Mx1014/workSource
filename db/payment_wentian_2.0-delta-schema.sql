@@ -457,3 +457,145 @@ ALTER TABLE eh_customer_trademarks modify COLUMN status TINYINT DEFAULT 2 COMMEN
 ALTER TABLE `eh_flow_service_types` ADD COLUMN `module_id` BIGINT NOT NULL DEFAULT 0;
 -- 更改号码类型 --by st.zheng
 ALTER TABLE `eh_news` CHANGE COLUMN `phone` `phone` VARCHAR(32) NULL DEFAULT '0' ;
+
+-- merge from energy3.0 by xiongying20171030
+ALTER TABLE eh_energy_meters ADD COLUMN `cost_formula_source` TINYINT DEFAULT '0' COMMENT '0: 能耗设置, 1: 缴费模块';
+ALTER TABLE eh_energy_meter_setting_logs ADD COLUMN `formula_source` TINYINT DEFAULT '0' COMMENT '0: 能耗设置, 1: 缴费模块';
+
+-- 表计关联门牌
+CREATE TABLE `eh_energy_meter_addresses` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `meter_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'reference to id of eh_groups',
+  `building_id` BIGINT NOT NULL DEFAULT '0',
+  `building_name` VARCHAR(128) DEFAULT NULL,
+  `address_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'reference to id of eh_addresses',
+  `apartment_name` VARCHAR(128) DEFAULT NULL,
+  `apartment_floor` VARCHAR(16) DEFAULT NULL,
+  `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+  `creator_uid` BIGINT DEFAULT NULL COMMENT 'record creator user id',
+  `create_time` DATETIME DEFAULT NULL,
+  `operator_uid` BIGINT DEFAULT NULL COMMENT 'redundant auditing info',
+  `update_time` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `meter_address_meter_id` (`meter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 能耗抄表计划
+CREATE TABLE `eh_energy_plans` (
+  `id` BIGINT NOT NULL COMMENT 'id',		  
+  `namespace_id` INTEGER,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the plan, enterprise, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the plan, community, etc',
+  `target_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to the id of who own the plan',
+  `name` VARCHAR(1024),
+  `repeat_setting_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_repeat_settings',
+  `notify_tick_minutes` INTEGER COMMENT '提前多少分钟',
+  `notify_tick_unit` TINYINT COMMENT '提醒时间显示单位',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: not completed, 2: active',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
+  `create_time` DATETIME,
+  `operator_uid` BIGINT COMMENT 'operator uid of last operation',
+  `update_time` DATETIME,
+  `deleter_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'deleter id',
+  `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_energy_plan_group_map` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `plan_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_energy_plans',
+  `group_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organizations',
+  `position_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organization_job_positions',
+  `create_time` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_energy_plan_meter_map` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `plan_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_energy_plans',
+  `meter_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_energy_meters',
+  `default_order` INTEGER DEFAULT 0,
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 按计划生成工单
+CREATE TABLE `eh_energy_meter_tasks` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `namespace_id` INTEGER,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, organization, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the group of who own the task, community, etc',		
+  `target_id` BIGINT NOT NULL DEFAULT 0,
+  `plan_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_energy_plans',
+  `meter_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_energy_meters',
+  `executive_start_time` DATETIME,
+  `executive_expire_time` DATETIME,
+  `last_task_reading` DECIMAL(10,1),
+  `reading` DECIMAL(10,1),
+  `generate_payment_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: 未生成, 1: 已生成',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: 未抄, 1: 已抄',
+  `default_order` INTEGER DEFAULT 0,
+  `create_time` DATETIME,		
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  		
+  PRIMARY KEY (`id`),		
+  KEY `plan_id` (`plan_id`),		
+  KEY `status` (`status`),		
+  KEY `target_id` (`target_id`),		
+  KEY `executive_expire_time` (`executive_expire_time`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 操作记录表 目前只有计划操作记录
+CREATE TABLE `eh_energy_meter_logs` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the log, enterprise, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'plan, etc',
+  `target_id` BIGINT NOT NULL DEFAULT 0,
+  `process_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: insert, 2: update, 3: delete',
+  `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record operator user id',
+  `create_time` DATETIME,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 缴费、客户里面增加计价条款的设置
+CREATE TABLE `eh_default_charging_item_properties` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  `default_charging_item_id` BIGINT NOT NULL COMMENT 'id of eh_contract_charging_items',
+  `property_type` TINYINT COMMENT '0: community; 1: building; 2: apartment',
+  `property_id` BIGINT,
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: waiting for approval; 2: active',
+  `create_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_default_charging_items` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  `community_id` BIGINT NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the charging, organizationowner,asset, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `charging_item_id` BIGINT COMMENT '收费项',
+  `charging_standard_id` BIGINT COMMENT '收费标准',
+  `formula` VARCHAR(1024),
+  `formula_type` TINYINT COMMENT '1: fixed fee; 2: normal formula; 3: gradient varied on variable price; 4: gradients varied functions on each variable section',
+  `billing_cycle` TINYINT,
+  `late_fee_standard_id` BIGINT COMMENT '滞纳金标准',
+  `charging_variables` VARCHAR(1024) COMMENT '计费金额参数 json: {"variables":[{"variableIdentifier":"22","variableName":"面积","variableValue":"960.00"}]}',
+  `charging_start_time` DATETIME,
+  `charging_expired_time` DATETIME,
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive; 1: waiting for approval; 2: active',
+  `create_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

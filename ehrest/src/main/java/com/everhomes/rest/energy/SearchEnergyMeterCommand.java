@@ -1,3 +1,4 @@
+
 package com.everhomes.rest.energy;
 
 import com.everhomes.rest.energy.util.EnumType;
@@ -9,6 +10,8 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>organizationId: 组织id</li>
  *     <li>communityId: 小区id</li>
+ *     <li>addressId: 门牌id</li>
+ *     <li>buildingId: 楼栋id</li>
  *     <li>keyword: 关键字</li>
  *     <li>meterNumber: 表记号码</li>
  *     <li>billCategoryId: 表记项目id</li>
@@ -17,7 +20,6 @@ import javax.validation.constraints.NotNull;
  *     <li>status: 表记状态 {@link com.everhomes.rest.energy.EnergyMeterStatus}</li>
  *     <li>pageAnchor: 下页锚点</li>
  *     <li>pageSize: 每页数量</li>
- *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class SearchEnergyMeterCommand {
@@ -30,10 +32,36 @@ public class SearchEnergyMeterCommand {
     private Long serviceCategoryId;
     @EnumType(value = EnergyMeterType.class, nullValue = true)
     private Byte meterType;
+    private Long addressId;
+    private Long buildingId;
     private Long status;
     private Long pageAnchor;
     private Integer pageSize;
     private Integer namespaceId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
 
     public Long getOrganizationId() {
         return organizationId;
@@ -114,17 +142,10 @@ public class SearchEnergyMeterCommand {
     public void setStatus(Long status) {
         this.status = status;
     }
-    
-    public Integer getNamespaceId() {
-		return namespaceId;
-	}
-
-    public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 }
+

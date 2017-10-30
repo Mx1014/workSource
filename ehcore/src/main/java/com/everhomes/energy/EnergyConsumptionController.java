@@ -9,6 +9,8 @@ import com.everhomes.rest.energy.*;
 import com.everhomes.rest.equipment.ExportEquipmentsCardCommand;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
+import com.everhomes.search.EnergyMeterTaskSearcher;
+import com.everhomes.search.EnergyPlanSearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,6 +32,12 @@ public class EnergyConsumptionController extends ControllerBase {
 
     @Autowired
     private EnergyConsumptionService energyConsumptionService;
+
+    @Autowired
+    private EnergyPlanSearcher energyPlanSearcher;
+
+    @Autowired
+    private EnergyMeterTaskSearcher energyMeterTaskSearcher;
 
     /**
      * <b>URL: /energy/listAuthorizationCommunityByUser</b>
@@ -517,6 +525,144 @@ public class EnergyConsumptionController extends ControllerBase {
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
+    }
+
+    /**
+     * <p>新建、修改计划 修改不会影响已生成的任务</p>
+     * <b>URL: /energy/updateEnergyPlan</b>
+     */
+    @RestReturn(EnergyPlanDTO.class)
+    @RequestMapping("updateEnergyPlan")
+    public RestResponse updateEnergyPlan(UpdateEnergyPlanCommand cmd) {
+        return response(energyConsumptionService.updateEnergyPlan(cmd));
+    }
+
+    /**
+     * <p>删除计划</p>
+     * <b>URL: /energy/deleteEnergyPlan</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("deleteEnergyPlan")
+    public RestResponse deleteEnergyPlan(DeleteEnergyPlanCommand cmd) {
+        energyConsumptionService.deleteEnergyPlan(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <p>列出计划列表 搜索</p>
+     * <b>URL: /energy/searchEnergyPlans</b>
+     */
+    @RestReturn(SearchEnergyPlansResponse.class)
+    @RequestMapping("searchEnergyPlans")
+    public RestResponse searchEnergyPlans(SearchEnergyPlansCommand cmd) {
+        return response(energyPlanSearcher.query(cmd));
+    }
+
+    /**
+     * <p>列出计划详情</p>
+     * <b>URL: /energy/findEnergyPlanDetails</b>
+     */
+    @RestReturn(EnergyPlanDTO.class)
+    @RequestMapping("findEnergyPlanDetails")
+    public RestResponse findEnergyPlanDetails(FindEnergyPlanDetailsCommand cmd) {
+        return response(energyConsumptionService.findEnergyPlanDetails(cmd));
+    }
+
+    /**
+     * <p>列出计划关联的表计</p>
+     * <b>URL: /energy/listEnergyPlanMeters</b>
+     */
+    @RestReturn(ListEnergyPlanMetersResponse.class)
+    @RequestMapping("listEnergyPlanMeters")
+    public RestResponse listEnergyPlanMeters(ListEnergyPlanMetersCommand cmd) {
+        return response(energyConsumptionService.listEnergyPlanMeters(cmd));
+    }
+
+    /**
+     * <p>创建计划的任务</p>
+     * <b>URL: /energy/createTask</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("createTask")
+    public RestResponse createTask(CreateEnergyTaskCommand cmd) {
+        energyConsumptionService.createTask(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <p>计划关联的表计排序 实时</p>
+     * <b>URL: /energy/setEnergyPlanMeterOrder</b>
+     */
+    @RestReturn(ListEnergyPlanMetersResponse.class)
+    @RequestMapping("setEnergyPlanMeterOrder")
+    public RestResponse setEnergyPlanMeterOrder(SetEnergyPlanMeterOrderCommand cmd) {
+        return response(energyConsumptionService.setEnergyPlanMeterOrder(cmd));
+    }
+
+    /**
+     * <p>查看计划的任务</p>
+     * <b>URL: /energy/searchTasksByEnergyPlan</b>
+     */
+    @RestReturn(SearchTasksByEnergyPlanResponse.class)
+    @RequestMapping("searchTasksByEnergyPlan")
+    public RestResponse searchTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd) {
+        return response(energyMeterTaskSearcher.searchTasksByEnergyPlan(cmd));
+    }
+
+    /**
+     * <p>列出抄表任务 app</p>
+     * <b>URL: /energy/listUserEnergyPlanTasks</b>
+     */
+    @RestReturn(ListUserEnergyPlanTasksResponse.class)
+    @RequestMapping("listUserEnergyPlanTasks")
+    public RestResponse listUserEnergyPlanTasks(ListUserEnergyPlanTasksCommand cmd) {
+        return response(energyConsumptionService.listUserEnergyPlanTasks(cmd));
+    }
+
+    //执行抄表任务
+    /**
+     * <p>执行抄表任务</p>
+     * <b>URL: /energy/readTaskMeter</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("readTaskMeter")
+    public RestResponse readTaskMeter(ReadTaskMeterCommand cmd) {
+        energyConsumptionService.readTaskMeter(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <p>同步计划索引</p>
+     * <b>URL: /energy/syncEnergyPlanIndex</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("syncEnergyPlanIndex")
+    public RestResponse syncEnergyPlanIndex() {
+        energyPlanSearcher.syncFromDb();
+        return success();
+    }
+
+    /**
+     * <p>同步任务索引</p>
+     * <b>URL: /energy/syncEnergyTaskIndex</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("syncEnergyTaskIndex")
+    public RestResponse syncEnergyTaskIndex() {
+        energyMeterTaskSearcher.syncFromDb();
+        return success();
     }
 
 }

@@ -25,4 +25,11 @@ public interface EnergyConsumptionServiceErrorCode {
     int ERR_PRICE_CONFIG_HAS_BEEN_REFERENCE = 10015;// 单价方案已被引用，不可删除
     int ERROR_DOWNLOAD_FILE = 10016;// 文件导出错误
 
+    int ERROR_METER_NAME_EXIST = 10017;// 表计名称存在
+    int ERROR_METER_NUMBER_EXIST = 10018;// 表计号码存在
+
+    int ERR_METER_TASK_NOT_EXIST = 10019;//任务不存在
+    int ERR_METER_PLAN_NOT_ACTIVE = 10020;//计划不存在
+    int ERR_METER_TASK_ALREADY_CLOSE = 10021;//任务已关闭
+    int ERR_METER_HAS_ASSIGN_PLAN = 10022;//表计已关联计划
 }
