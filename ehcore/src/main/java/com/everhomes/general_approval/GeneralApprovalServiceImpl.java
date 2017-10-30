@@ -769,6 +769,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             return gf.getFormOriginId();
         } else {
             gf = ConvertHelper.convert(form, GeneralForm.class);
+            gf = convertFormFromTemplate(gf, form, cmd);
+            gf.setFormVersion(0L);
             Long formOriginId = generalFormProvider.createGeneralForm(gf);
             return formOriginId;
         }
@@ -791,7 +793,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     private GeneralForm convertFormFromTemplate(GeneralForm gf, GeneralFormTemplate form, CreateApprovalTemplatesCommand cmd) {
         gf.setStatus(GeneralFormStatus.CONFIG.getCode());
         gf.setNamespaceId(UserContext.getCurrentNamespaceId());
-        gf.setFormVersion(0L);
         gf.setFormTemplateId(form.getId());
         gf.setFormTemplateVersion(form.getVersion());
         gf.setOwnerId(cmd.getOwnerId());
