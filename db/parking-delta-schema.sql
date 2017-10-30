@@ -1,3 +1,21 @@
+CREATE TABLE `eh_parking_car_verifications` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0',
+  `parking_lot_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'reference to id of eh_parking_lots',
+  `requestor_enterprise_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'the id of organization where the requestor is in',
+  `requestor_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'requestor id',
+  `plate_number` varchar(64) DEFAULT NULL,
+  `plate_owner_name` varchar(64) DEFAULT NULL COMMENT 'the name of plate owner',
+  `plate_owner_phone` varchar(64) DEFAULT NULL COMMENT 'the phone of plate owner',
+  `status` tinyint(4) DEFAULT NULL COMMENT '0: inactive, 1: queueing, 2: notified, 3: issued',
+  `creator_uid` bigint(20) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `flow_case_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'flow case id',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- 园区入驻3.6 add by sw 20171023
 DROP TABLE IF EXISTS `eh_lease_configs`;
 DROP TABLE IF EXISTS `eh_lease_configs2`;

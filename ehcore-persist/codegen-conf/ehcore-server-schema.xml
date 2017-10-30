@@ -206,6 +206,7 @@
             eh_lease_projects | eh_lease_project_communities |
             eh_customer_events  | eh_customer_tracking_plans  | eh_customer_trackings  |   eh_tracking_notify_logs  | 
             eh_address_attachments | eh_contract_charging_changes | eh_contract_charging_change_addresses |
+            eh_parking_car_verifications |
         </includes>
 
             <!-- All elements that are excluded from your schema
