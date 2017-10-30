@@ -202,7 +202,7 @@
             eh_incubator_applies | eh_incubator_project_types | eh_incubator_apply_attachments |
             eh_payment_users | eh_payment_accounts | eh_payment_service_configs | eh_payment_order_records | eh_payment_types | eh_asset_payment_order | eh_asset_payment_order_bills |
             eh_news_tag | eh_news_tag_vals |
-	    eh_forum_categories |
+	    eh_forum_categories | eh_interact_settings |
             eh_lease_projects | eh_lease_project_communities |
             eh_customer_events  | eh_customer_tracking_plans  | eh_customer_trackings  |   eh_tracking_notify_logs  | 
             eh_address_attachments | eh_contract_charging_changes | eh_contract_charging_change_addresses |
