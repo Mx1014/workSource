@@ -30,3 +30,4 @@ ALTER TABLE `eh_forum_posts` ADD COLUMN `forum_entry_id`  bigint(20) NULL DEFAUL
 ALTER TABLE `eh_forum_posts` ADD COLUMN `interact_flag`  tinyint(4) NOT NULL DEFAULT 1 COMMENT 'support interact, 0-no, 1-yes' ;
 
 ALTER TABLE `eh_forum_posts` ADD COLUMN `stick_time`  datetime NULL;
+ALTER TABLE `eh_activities` ADD COLUMN `stick_time`  datetime NULL;
