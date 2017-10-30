@@ -1490,4 +1490,8 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, 
 	VALUES ((@id := @id + 1), '999966', NULL, NULL, 'areaSearchFlag', '1', NULL, NULL);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 	VALUES ((@id := @id + 1), '999966', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999966', NULL, NULL, 'displayOrderStr', '2', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999966', NULL, NULL, 'displayNameStr', '房源招租', NULL, NULL);
 
