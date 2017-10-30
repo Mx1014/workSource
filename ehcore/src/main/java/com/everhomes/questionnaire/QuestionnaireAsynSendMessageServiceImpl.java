@@ -371,13 +371,6 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
 				}
 
-
-				if(UserSourceType.WEIXIN == UserSourceType.fromCode(cmd.getUserSourceType())){
-					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
-				}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
-					query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.isNotNull());
-				}
-
 				if(null != cmd.getCommunityId()){
 					query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 				}
