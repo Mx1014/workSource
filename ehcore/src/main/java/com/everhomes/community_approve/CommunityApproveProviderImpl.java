@@ -93,4 +93,15 @@ public class CommunityApproveProviderImpl implements CommunityApproveProvider {
 
         return objs;
     }
+
+    @Override
+    public List<CommunityApprove> queryCommunityApprovesByNamespaceId(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunityApprove.class));
+        SelectQuery<EhCommunityApproveRecord> query = context.selectQuery(Tables.EH_COMMUNITY_APPROVE);
+        query.addConditions(Tables.EH_COMMUNITY_APPROVE.NAMESPACE_ID.eq(namespaceId));
+        List<CommunityApprove> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, CommunityApprove.class);
+        });
+        return objs;
+    }
 }

@@ -143,4 +143,13 @@ public interface UserProvider {
 
     int countUserByNamespaceIdAndNamespaceUserType(Integer namespaceId, String namespaceUserType);
 
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    String checkCacheStatus();
+    
+    /**
+     * 用于测试缓存使用是否正常，不要用于业务使用 by lqs 20171019
+     */
+    void updateCacheStatus();
 }

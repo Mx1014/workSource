@@ -29,4 +29,15 @@ public interface EnterpriseApplyBuildingProvider {
 
     void createLeaseBuildings(List<LeaseBuilding> leaseBuildings);
 
+    void createLeaseProject(LeaseProject leaseProject);
+
+    void updateLeaseProject(LeaseProject leaseProject);
+
+    LeaseProject findLeaseProjectByProjectId(Long projectId);
+
+    void createLeaseProjectCommunity(LeaseProjectCommunity leaseProjectCommunity);
+
+    void deleteLeaseProjectCommunity(Long leaseProjectId);
+
+    List<Long> listLeaseProjectCommunities(Long leaseProjectId);
 }

@@ -73,6 +73,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 			Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
 
 			createFlowCaseCommand.setTitle(taskCategory.getName());
+			createFlowCaseCommand.setServiceType(taskCategory.getName());
 			createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
 			createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());

@@ -187,8 +187,14 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         Long payTimeMill = LongUtil.convert(map.get("createTime"));
         if(payTimeMill != null) {
             Date date = new Date(payTimeMill);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String format = sdf.format(date);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            String format = "";
+            try{
+                format = sdf.format(date);
+            }catch(Exception e){
+                sdf = new SimpleDateFormat("yyyy-MM-dd");
+                format = sdf.format(date);
+            }
             paymentBill.setPayTime(format);
         }
         return paymentBill;
@@ -289,7 +295,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
 //            }
 //        }
         if(cmd.getPayTime() != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//            SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
+            SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd");
             Date time = sdf.parse(cmd.getPayTime());
             Calendar todayStart = Calendar.getInstance();
             todayStart.setTime(time);

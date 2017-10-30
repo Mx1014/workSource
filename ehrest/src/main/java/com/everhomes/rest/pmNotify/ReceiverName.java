@@ -9,6 +9,8 @@ public class ReceiverName {
 
     private String name;
 
+    private String contactToken;
+
     public Long getId() {
         return id;
     }
@@ -23,5 +25,13 @@ public class ReceiverName {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getContactToken() {
+        return contactToken;
+    }
+
+    public void setContactToken(String contactToken) {
+        this.contactToken = contactToken;
     }
 }

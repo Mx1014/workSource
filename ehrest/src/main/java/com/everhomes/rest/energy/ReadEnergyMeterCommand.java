@@ -13,6 +13,7 @@ import java.math.BigDecimal;
  *     <li>lastReading: 上次读数</li>
  *     <li>currReading: 这次读数</li>
  *     <li>resetMeterFlag: 是否为复始计量 {@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class ReadEnergyMeterCommand {
@@ -23,6 +24,7 @@ public class ReadEnergyMeterCommand {
     private Byte resetMeterFlag;
     private BigDecimal lastReading;
     @NotNull private BigDecimal currReading;
+    private Integer namespaceId; 
 
     public Long getOrganizationId() {
         return organizationId;
@@ -71,6 +73,14 @@ public class ReadEnergyMeterCommand {
     public void setMeterId(Long meterId) {
         this.meterId = meterId;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {

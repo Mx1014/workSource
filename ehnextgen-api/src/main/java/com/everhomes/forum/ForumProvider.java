@@ -282,4 +282,9 @@ public interface ForumProvider {
 	List<Post> listForumCommentByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
 
 	List<Post> listForumCommentByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
+
+
+    Forum findForumByNamespaceId(Integer namespaceId);
+
+    List<Post> listPostsByRealPostId(Long realPostId);
 }

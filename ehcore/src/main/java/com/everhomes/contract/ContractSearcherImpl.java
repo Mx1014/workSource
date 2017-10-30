@@ -202,8 +202,12 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
-        if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
-            builder.addSort("contractEndDate", SortOrder.DESC);
+        if(cmd.getSortField() != null && cmd.getSortType() != null) {
+            if(cmd.getSortType() == 0) {
+                builder.addSort(cmd.getSortField(), SortOrder.ASC);
+            } else if(cmd.getSortType() == 1) {
+                builder.addSort(cmd.getSortField(), SortOrder.DESC);
+            }
         }
         SearchResponse rsp = builder.execute().actionGet();
 

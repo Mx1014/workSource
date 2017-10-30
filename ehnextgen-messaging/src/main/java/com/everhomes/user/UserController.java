@@ -1381,4 +1381,19 @@ public class UserController extends ControllerBase {
 		return resp;
 
 	}
+	
+	/**
+     * <b>URL: /user/systemInfo</b>
+     * <p>登录</p>
+     * @return {@link SystemInfoResponse}
+     */
+    @RequestMapping("systemInfo")
+    @RestReturn(SystemInfoResponse.class)
+    public RestResponse systemInfo(@Valid SystemInfoCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+        SystemInfoResponse obj = userService.updateUserBySystemInfo(cmd, request, response);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp; 
+    }
 }

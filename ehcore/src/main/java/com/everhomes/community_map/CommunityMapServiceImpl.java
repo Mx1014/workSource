@@ -8,13 +8,13 @@ import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community_map.*;
@@ -23,10 +23,13 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.WebTokenGenerator;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -130,56 +133,106 @@ public class CommunityMapServiceImpl implements CommunityMapService {
     }
 
     private SearchCommunityMapContentsResponse searchShops(SearchCommunityMapContentsCommand cmd) {
+
+        Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
         SearchCommunityMapContentsResponse response = new SearchCommunityMapContentsResponse();
+        List<CommunityMapShopDTO> result = new ArrayList<>();
 
         SearchContentsBySceneCommand cmd2 = ConvertHelper.convert(cmd, SearchContentsBySceneCommand.class);
-        SearchContentsBySceneReponse resp = businessService.searchShops(cmd2);
+        cmd2.setPageSize(pageSize);
 
-        response.setShops(new ArrayList<>());
+        Long pageAnchor = cmd.getPageAnchor();
+        if (null == pageAnchor || pageAnchor < Integer.MAX_VALUE) {
+                SearchContentsBySceneReponse resp = businessService.searchShops(cmd2);
 
-        if (null != resp) {
-            response.setNextPageAnchor(resp.getNextPageAnchor());
-            response.getShops().addAll(resp.getShopDTOs().stream().map(r -> {
-                CommunityMapShopDTO shop = ConvertHelper.convert(r, CommunityMapShopDTO.class);
-
-                if (StringUtils.isNotBlank(r.getBuildingId())) {
-                    List<CommunityMapBuildingDTO> buildings = new ArrayList<>();
-
-                    Building building = communityProvider.findBuildingById(Long.valueOf(r.getBuildingId()));
-                    if (null != building) {
-                        CommunityMapBuildingDTO dto = ConvertHelper.convert(building, CommunityMapBuildingDTO.class);
-
-                        List<CommunityBuildingGeo> geos = communityMapProvider.listCommunityBuildingGeos(building.getId());
-
-                        if (!geos.isEmpty()) {
-                            CommunityBuildingGeo centerGeo = geos.get(geos.size() - 1);
-                            geos.remove(centerGeo);
-                            dto.setCenterLatitude(centerGeo.getLatitude());
-                            dto.setCenterLongitude(centerGeo.getLongitude());
-                            dto.setGeos(geos.stream().map(g -> ConvertHelper.convert(g, CommunityMapBuildingGeoDTO.class))
-                                    .collect(Collectors.toList()));
+                if (null != resp) {
+                    response.setNextPageAnchor(resp.getNextPageAnchor());
+                    result.addAll(resp.getShopDTOs().stream().map(r -> {
+                        CommunityMapShopDTO shop = ConvertHelper.convert(r, CommunityMapShopDTO.class);
+                        Long buildingId = null;
+                        Long apartmentId = null;
+                        if (StringUtils.isNotBlank(r.getBuildingId())) {
+                            buildingId = Long.valueOf(r.getBuildingId());
                         }
-
                         if (StringUtils.isNotBlank(r.getApartmentId())) {
-                            List<ApartmentDTO> apartmentDTOS = new ArrayList<ApartmentDTO>();
-                            Address address = addressProvider.findAddressById(Long.valueOf(r.getApartmentId()));
-                            ApartmentDTO apartmentDTO = new ApartmentDTO();
-                            apartmentDTO.setApartmentName(address.getApartmentName());
-                            apartmentDTO.setAddressId(address.getId());
-                            apartmentDTOS.add(apartmentDTO);
-                            dto.setApartments(apartmentDTOS);
+                            apartmentId = Long.valueOf(r.getApartmentId());
                         }
-
-                        buildings.add(dto);
-                        shop.setBuildings(buildings);
-                    }
+                        populateShopAddressInfo(shop, buildingId, apartmentId);
+                        shop.setShopFlag(CommunityMapShopFlag.OPEN_IN_BIZ.getCode());
+                        return shop;
+                    }).collect(Collectors.toList()));
                 }
-
-                return shop;
-            }).collect(Collectors.toList()));
         }
 
+        Long userId = UserContext.currentUserId();
+
+        if (result.size() < pageSize) {
+            //TODO:超过pageSize时，做一个截取，因为是从电商 和core server同时查询店铺数据
+            Integer tempPageSize = pageSize - result.size();
+
+            SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+            Integer namespaceId = sceneTokenDto.getNamespaceId();
+
+            List<CommunityMapShopDetail> shops = communityMapProvider.searchCommunityMapShops(namespaceId, null,
+                    null, cmd.getBuildingId(), cmd.getKeyword(), cmd.getPageAnchor(), tempPageSize);
+            result.addAll(shops.stream().map(r -> {
+                CommunityMapShopDTO shop = new CommunityMapShopDTO();
+                shop.setShopNo(String.valueOf(r.getId()));
+                shop.setShopName(r.getShopName());
+
+                String url = contentServerService.parserUri(r.getShopAvatarUri(), EntityType.USER.getCode(), userId);
+                shop.setShopLogo(url);
+
+                populateShopAddressInfo(shop, r.getBuildingId(), r.getAddressId());
+                shop.setShopFlag(CommunityMapShopFlag.NOT_OPEN_IN_BIZ.getCode());
+                return shop;
+            }).collect(Collectors.toList()));
+
+            if(result.size() != pageSize){
+                response.setNextPageAnchor(null);
+            }else{
+                response.setNextPageAnchor(shops.get(shops.size() - 1).getCreateTime().getTime());
+            }
+        }
+
+        response.setShops(result);
         return response;
+    }
+
+    private void populateShopAddressInfo(CommunityMapShopDTO shop, Long buildingId, Long apartmentId) {
+        if (null != buildingId) {
+            List<CommunityMapBuildingDTO> buildings = new ArrayList<>();
+
+            Building building = communityProvider.findBuildingById(buildingId);
+            if (null != building) {
+                CommunityMapBuildingDTO dto = ConvertHelper.convert(building, CommunityMapBuildingDTO.class);
+
+                List<CommunityBuildingGeo> geos = communityMapProvider.listCommunityBuildingGeos(building.getId());
+
+                if (!geos.isEmpty()) {
+                    CommunityBuildingGeo centerGeo = geos.get(geos.size() - 1);
+                    geos.remove(centerGeo);
+                    dto.setCenterLatitude(centerGeo.getLatitude());
+                    dto.setCenterLongitude(centerGeo.getLongitude());
+                    dto.setGeos(geos.stream().map(g -> ConvertHelper.convert(g, CommunityMapBuildingGeoDTO.class))
+                            .collect(Collectors.toList()));
+                }
+
+                if (null != apartmentId) {
+                    List<ApartmentDTO> apartmentDTOS = new ArrayList<ApartmentDTO>();
+                    Address address = addressProvider.findAddressById(apartmentId);
+                    ApartmentDTO apartmentDTO = new ApartmentDTO();
+                    apartmentDTO.setApartmentName(address.getApartmentName());
+                    apartmentDTO.setAddressId(address.getId());
+                    apartmentDTOS.add(apartmentDTO);
+                    dto.setApartments(apartmentDTOS);
+                }
+
+                buildings.add(dto);
+                shop.setBuildings(buildings);
+            }
+        }
     }
 
     private SearchCommunityMapContentsResponse searchBuildings(SearchCommunityMapContentsCommand cmd) {
@@ -384,5 +437,100 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         dto.setBuildings(tempBuildings);
 
         return dto;
+    }
+
+    @Override
+    public void deleteCommunityMapShop(DeleteCommunityMapShopCommand cmd) {
+        CommunityMapShopDetail shop = communityMapProvider.getCommunityMapShopDetailById(cmd.getShopId());
+        if (null == shop) {
+            LOGGER.error("Shop not found, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Shop not found.");
+        }
+        shop.setStatus(CommunityMapShopStatus.INACTIVE.getCode());
+        communityMapProvider.updateCommunityMapShop(shop);
+    }
+
+    @Override
+    public CommunityMapShopDetailDTO updateCommunityMapShop(UpdateCommunityMapShopCommand cmd) {
+        CommunityMapShopDetail shop = communityMapProvider.getCommunityMapShopDetailById(cmd.getShopId());
+        if (null == shop) {
+            LOGGER.error("Shop not found, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Shop not found.");
+        }
+        BeanUtils.copyProperties(cmd, shop);
+        communityMapProvider.updateCommunityMapShop(shop);
+        return ConvertHelper.convert(shop, CommunityMapShopDetailDTO.class);
+    }
+
+    @Override
+    public CommunityMapShopDetailDTO createCommunityMapShop(CreateCommunityMapShopCommand cmd) {
+        CommunityMapShopDetail shop = ConvertHelper.convert(cmd, CommunityMapShopDetail.class);
+        shop.setNamespaceId(UserContext.getCurrentNamespaceId());
+        communityMapProvider.createCommunityMapShop(shop);
+
+        return ConvertHelper.convert(shop, CommunityMapShopDetailDTO.class);
+    }
+
+    @Override
+    public CommunityMapShopDetailDTO getCommunityMapShopDetailById(GetCommunityMapShopDetailByIdCommand cmd) {
+
+        CommunityMapShopDetail shop = communityMapProvider.getCommunityMapShopDetailById(cmd.getShopId());
+
+        if (null == shop) {
+            LOGGER.error("Shop not found, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Shop not found.");
+        }
+        CommunityMapShopDetailDTO dto = ConvertHelper.convert(shop, CommunityMapShopDetailDTO.class);
+        populateShop(dto, shop);
+        return dto;
+    }
+
+    private void populateShop(CommunityMapShopDetailDTO dto, CommunityMapShopDetail shop) {
+        Building building = communityProvider.findBuildingById(shop.getBuildingId());
+
+        if (null != building) {
+            dto.setBuildingName(building.getName());
+        }
+
+        Address address = addressProvider.findAddressById(shop.getAddressId());
+
+        if (null != address) {
+            dto.setApartmentName(address.getApartmentName());
+        }
+        if (null != shop.getShopAvatarUri()) {
+            String url = contentServerService.parserUri(shop.getShopAvatarUri(), EntityType.USER.getCode(), UserContext.currentUserId());
+            dto.setShopAvatarUrl(url);
+        }
+    }
+
+    @Override
+    public SearchCommunityMapShopsResponse searchCommunityMapShops(SearchCommunityMapShopsCommand cmd) {
+        SearchCommunityMapShopsResponse response = new SearchCommunityMapShopsResponse();
+        Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        List<CommunityMapShopDetail> shops = communityMapProvider.searchCommunityMapShops(namespaceId, cmd.getOwnerType(),
+                cmd.getOwnerId(), cmd.getBuildingId(), cmd.getKeyword(), cmd.getPageAnchor(), pageSize);
+
+        int size = shops.size();
+        if(size > 0){
+            response.setShops(shops.stream().map(r -> {
+                CommunityMapShopDetailDTO dto = ConvertHelper.convert(r, CommunityMapShopDetailDTO.class);
+                populateShop(dto, r);
+                return dto;
+            }).collect(Collectors.toList()));
+
+            if(size != pageSize){
+                response.setNextPageAnchor(null);
+            }else{
+                response.setNextPageAnchor(shops.get(size-1).getCreateTime().getTime());
+            }
+        }
+
+        return response;
     }
 }

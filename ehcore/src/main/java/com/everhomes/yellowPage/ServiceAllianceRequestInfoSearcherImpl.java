@@ -569,11 +569,13 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 					if(null==templateMap.get("flowCase"+requestInfo.getFlowCaseId())){
 						GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(requestInfo.getFlowCaseId(),
 								GeneralFormDataSourceType.USER_NAME.getCode());
-						GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
-								val.getFormOriginId(), val.getFormVersion());
-						//使用表单名称+表单id作为sheet的名称 by dengs 20170510
-						requestInfo.setTemplateType("flowCase"+form.getId());
-						templateMap.put("flowCase"+form.getId(), form.getFormName()+form.getId());
+						if(val!=null){
+							GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
+									val.getFormOriginId(), val.getFormVersion());
+							//使用表单名称+表单id作为sheet的名称 by dengs 20170510
+							requestInfo.setTemplateType("flowCase"+form.getId());
+							templateMap.put("flowCase"+form.getId(), form.getFormName()+form.getId());
+						}
 					}
 				}else{
 					extrasInfo = userActivityService.getCustomRequestInfo(command);

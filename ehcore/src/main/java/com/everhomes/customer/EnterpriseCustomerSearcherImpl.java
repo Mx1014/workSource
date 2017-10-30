@@ -2,6 +2,8 @@ package com.everhomes.customer;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
@@ -15,6 +17,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+
+import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -26,6 +30,7 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +39,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +61,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     @Autowired
     private FieldProvider fieldProvider;
+    
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
     @Autowired
     private FieldService fieldService;
@@ -102,7 +114,13 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("categoryItemId", customer.getCategoryItemId());
             builder.field("levelItemId", customer.getLevelItemId());
             builder.field("status", customer.getStatus());
-
+            builder.field("trackingUid",customer.getTrackingUid());
+            builder.field("trackingName",customer.getTrackingName() == null ? "" : customer.getTrackingName());
+            builder.field("lastTrackingTime" , customer.getLastTrackingTime());
+            builder.field("propertyType" , customer.getPropertyType());
+            builder.field("propertyUnitPrice" , customer.getPropertyUnitPrice());
+            builder.field("propertyArea" , customer.getPropertyArea());
+           
             builder.endObject();
             return builder;
         } catch (IOException e) {
@@ -145,11 +163,13 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                     .field("name", 1.5f)
                     .field("contactName", 1.2f)
                     .field("contactAddress", 1.2f)
-                    .field("contactMobile", 1.0f);
+                    .field("contactMobile", 1.0f)
+                    .field("trackingName" , 1.0f);
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("name").addHighlightedField("contactName").addHighlightedField("contactAddress").addHighlightedField("contactMobile");
+            builder.addHighlightedField("name").addHighlightedField("contactName").addHighlightedField("contactAddress").addHighlightedField("contactMobile")
+            		.addHighlightedField("trackingName");
         }
 
         FilterBuilder fb = null;
@@ -162,8 +182,54 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryItemId", cmd.getCustomerCategoryId()));
 
         if(cmd.getLevelId() != null)
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("levelItemId", cmd.getLevelId()));
-
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("levelItemId", cmd.getLevelId().split(",")));
+        
+        //查询全部客户、我的客户、公共客户
+        if(null != cmd.getType()){
+        	if(2 == cmd.getType()){
+        		fb = FilterBuilders.andFilter(fb ,FilterBuilders.termFilter("trackingUid", UserContext.currentUserId()));
+        	}else if(3 == cmd.getType()){
+        		fb = FilterBuilders.andFilter(fb ,FilterBuilders.termFilter("trackingUid", -1l));
+        	}
+        }
+        //跟进时间、资产类型、资产面积、资产单价增加筛选
+        if(null != cmd.getLastTrackingTime() && cmd.getLastTrackingTime() > 0){
+        	RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
+        	Long startTime = getTomorrowLastTimestamp(cmd.getLastTrackingTime());
+        	rf.gte(startTime);
+        	fb = FilterBuilders.andFilter(fb, rf); 
+        }
+        
+        if(null != cmd.getPropertyType()){
+        	fb = FilterBuilders.andFilter(fb ,FilterBuilders.inFilter("propertyType", cmd.getPropertyType().split(",")));
+        }
+        
+        if(null != cmd.getPropertyArea()){
+        	RangeFilterBuilder rf = new RangeFilterBuilder("propertyArea");
+        	if(cmd.getPropertyArea().indexOf(",") > -1 && cmd.getPropertyArea().split(",").length == 2){
+        		if(null != cmd.getPropertyArea().split(",")[0] && !"@".equals(cmd.getPropertyArea().split(",")[0])){
+        			rf.gte(Double.parseDouble(cmd.getPropertyArea().split(",")[0]));
+        		}
+        		if(null != cmd.getPropertyArea().split(",")[1] && !"@".equals(cmd.getPropertyArea().split(",")[1])){
+        			rf.lte(Double.parseDouble(cmd.getPropertyArea().split(",")[1]));
+        		}
+        		fb = FilterBuilders.andFilter(fb, rf); 
+        	}
+        	
+        }
+        if(null != cmd.getPropertyUnitPrice()){
+        	RangeFilterBuilder rf = new RangeFilterBuilder("propertyUnitPrice");
+        	if(cmd.getPropertyUnitPrice().indexOf(",") > -1 && cmd.getPropertyUnitPrice().split(",").length == 2){
+        		if(null != cmd.getPropertyUnitPrice().split(",")[0] && !"@".equals(cmd.getPropertyUnitPrice().split(",")[0])){
+        			rf.gte(Double.parseDouble(cmd.getPropertyUnitPrice().split(",")[0]));
+        		}
+        		if(null != cmd.getPropertyUnitPrice().split(",")[1] && !"@".equals(cmd.getPropertyUnitPrice().split(",")[1])){
+        			rf.lte(Double.parseDouble(cmd.getPropertyUnitPrice().split(",")[1]));
+        		}
+        		fb = FilterBuilders.andFilter(fb, rf); 
+        	}
+        }
+        
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -174,8 +240,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
-        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
-            builder.addSort("id", SortOrder.DESC);
+        if(cmd.getSortField() != null && cmd.getSortType() != null) {
+            if(cmd.getSortType() == 0) {
+                builder.addSort(cmd.getSortField(), SortOrder.ASC);
+            } else if(cmd.getSortType() == 1) {
+                builder.addSort(cmd.getSortField(), SortOrder.DESC);
+            }
         }
         SearchResponse rsp = builder.execute().actionGet();
 
@@ -207,10 +277,43 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 if(levelItem != null) {
                     dto.setLevelItemName(levelItem.getItemDisplayName());
                 }
+                if(null != dto.getCorpIndustryItemId()){
+                	ScopeFieldItem corpIndustryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getCorpIndustryItemId());
+                	if(null != corpIndustryItem){
+                		dto.setCorpIndustryItemName(corpIndustryItem.getItemDisplayName());
+                	}
+                }
+                if(null != dto.getContactGenderItemId()){
+                	ScopeFieldItem contactGenderItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getContactGenderItemId());
+                	if(null != contactGenderItem){
+                		dto.setContactGenderItemName(contactGenderItem.getItemDisplayName());
+                	}
+                }
+                if(dto.getTrackingUid() != null && dto.getTrackingUid() != -1) {
+                	dto.setTrackingName(dto.getTrackingName());
+                }
+                if(null != dto.getPropertyType()){
+                	ScopeFieldItem propertyTypeItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(),dto.getPropertyType());
+                	if(null != propertyTypeItem){
+                		dto.setPropertyTypeName(propertyTypeItem.getItemDisplayName());
+                	}
+                }
                 dtos.add(dto);
             });
         }
+        Collections.sort(dtos);
         response.setDtos(dtos);
         return response;
     }
+    
+    private Long getTomorrowLastTimestamp(Integer lastTrackingTime) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		calendar.add(Calendar.DAY_OF_MONTH, -(lastTrackingTime-1));
+	    calendar.set(Calendar.HOUR_OF_DAY, 0);
+	    calendar.set(Calendar.MINUTE, 0);
+	    calendar.set(Calendar.SECOND, 0);
+	    calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTime().getTime();
+	}
 }

@@ -57,6 +57,7 @@ import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
+import com.everhomes.server.schema.tables.pojos.EhBuildings;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -393,28 +394,77 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         List<BuildingDTO> results = new ArrayList<BuildingDTO>();
         long startTime = System.currentTimeMillis();
         int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null,
+        //从地址表中查会导致初始化时没有门牌的楼栋永远无法添加门牌，现改为从楼栋表中取 bug16081 add by xiongying20170925
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhBuildings.class), null,
                 (DSLContext context, Object reducingContext) -> {
 
                     String likeVal = "%" + cmd.getKeyword() + "%";
-                    context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
-                            .from(Tables.EH_ADDRESSES)
-                            .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
-                                    .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
-                                    .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(likeVal)
-                                            .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))
+
+//                    context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
+//                            .from(Tables.EH_ADDRESSES)
+//                            .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
+//                                    .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+//                                    .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(likeVal)
+//                                            .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))
+//                                    ))
+//                            .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
+//                            .fetch().map((r) -> {
+//                        BuildingDTO building = new BuildingDTO();
+//                        building.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
+//                        building.setBuildingAliasName(r.getValue(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME));
+//                        results.add(building);
+//                        return null;
+//                    });
+                    // 添加日志方便调试，在深圳湾环境，当导入门牌数据时，若楼栋“创投大厦”已经存在，则会自动创建出
+                    // 一个“创投大厦chuang xintou”新楼栋，需要打日志来确认为什么会这样 by lqs 20170822
+                    SelectQuery<Record2<String, String>> query = context.selectDistinct(Tables.EH_BUILDINGS.NAME, Tables.EH_BUILDINGS.ALIAS_NAME)
+                            .from(Tables.EH_BUILDINGS)
+                            .where(Tables.EH_BUILDINGS.COMMUNITY_ID.equal(cmd.getCommunityId())
+                                    .and(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId))
+                                    .and(Tables.EH_BUILDINGS.NAME.like(likeVal)
+                                            .or(Tables.EH_BUILDINGS.ALIAS_NAME.like(likeVal))
                                     ))
-                            .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
-                            .fetch().map((r) -> {
+                            .and(Tables.EH_BUILDINGS.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
+                            .orderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc()).getQuery();
+
+                    query.fetch().map((r) -> {
                         BuildingDTO building = new BuildingDTO();
-                        building.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
-                        building.setBuildingAliasName(r.getValue(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME));
+                        building.setBuildingName(r.getValue(Tables.EH_BUILDINGS.NAME));
+                        building.setBuildingAliasName(r.getValue(Tables.EH_BUILDINGS.ALIAS_NAME));
                         results.add(building);
                         return null;
                     });
 
+                    if(LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Query buildings by keyword, sql=" + query.getSQL());
+                        LOGGER.debug("Query buildings by keyword, bindValues=" + query.getBindValues());
+                    }
+
+
                     return true;
                 });
+//        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null,
+//                (DSLContext context, Object reducingContext) -> {
+//
+//                    String likeVal = "%" + cmd.getKeyword() + "%";
+//                    context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
+//                            .from(Tables.EH_ADDRESSES)
+//                            .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
+//                                    .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+//                                    .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(likeVal)
+//                                            .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))
+//                                    ))
+//                            .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
+//                            .fetch().map((r) -> {
+//                        BuildingDTO building = new BuildingDTO();
+//                        building.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
+//                        building.setBuildingAliasName(r.getValue(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME));
+//                        results.add(building);
+//                        return null;
+//                    });
+//
+//                    return true;
+//                });
         long endTime = System.currentTimeMillis();
         LOGGER.info("List buildings by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
         return new Tuple<Integer, List<BuildingDTO>>(ErrorCodes.SUCCESS, results);
@@ -1862,6 +1912,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             building.setName(data.getBuildingName());
             building.setOperatorUid(UserContext.current().getUser().getId());
             building = communityProvider.createBuilding(building.getOperatorUid(), building);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Add new building, communityId={}, buildingName={}, building={}", community.getId(), data.getBuildingName(), building);
+            }
         }
 
         double areaSize = 0;
@@ -2010,6 +2063,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 building.setName(arr[0]);
                 building.setOperatorUid(UserContext.current().getUser().getId());
                 building = communityProvider.createBuilding(building.getOperatorUid(), building);
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Add new building, communityId={}, buildingName={}, building={}", community.getId(), arr[0], building);
+                }
             }
 
             double areaSize = 0;

@@ -75,4 +75,76 @@ public class CommunityMapController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /community_map/searchCommunityMapShops</b>
+     * <p>搜索园区地图店铺</p>
+     */
+    @RequestMapping("searchCommunityMapShops")
+    @RestReturn(value=SearchCommunityMapShopsResponse.class)
+    public RestResponse searchCommunityMapShops(SearchCommunityMapShopsCommand cmd) {
+        RestResponse response = new RestResponse(communityMapService.searchCommunityMapShops(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+    /**
+     * <b>URL: /community_map/getCommunityMapShopDetailById</b>
+     * <p>根据ID园区地图店铺</p>
+     */
+    @RequestMapping("getCommunityMapShopDetailById")
+    @RestReturn(value=CommunityMapShopDetailDTO.class)
+    public RestResponse getCommunityMapShopDetailById(GetCommunityMapShopDetailByIdCommand cmd) {
+        RestResponse response = new RestResponse(communityMapService.getCommunityMapShopDetailById(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+    /**
+     * <b>URL: /community_map/createCommunityMapShop</b>
+     * <p>创建园区地图店铺</p>
+     */
+    @RequestMapping("createCommunityMapShop")
+    @RestReturn(value=CommunityMapShopDetailDTO.class)
+    public RestResponse createCommunityMapShop(CreateCommunityMapShopCommand cmd) {
+        RestResponse response = new RestResponse(communityMapService.createCommunityMapShop(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+    /**
+     * <b>URL: /community_map/updateCommunityMapShop</b>
+     * <p>修改园区地图店铺</p>
+     */
+    @RequestMapping("updateCommunityMapShop")
+    @RestReturn(value=CommunityMapShopDetailDTO.class)
+    public RestResponse updateCommunityMapShop(UpdateCommunityMapShopCommand cmd) {
+        RestResponse response = new RestResponse(communityMapService.updateCommunityMapShop(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+    /**
+     * <b>URL: /community_map/deleteCommunityMapShop</b>
+     * <p>删除园区地图店铺</p>
+     */
+    @RequestMapping("deleteCommunityMapShop")
+    @RestReturn(value=String.class)
+    public RestResponse deleteCommunityMapShop(DeleteCommunityMapShopCommand cmd) {
+
+        communityMapService.deleteCommunityMapShop(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
 }

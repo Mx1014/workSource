@@ -13,9 +13,12 @@ import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.organization.*;
 
+<<<<<<< HEAD
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.uniongroup.UniongroupMemberDetail;
+=======
+>>>>>>> master
 import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
@@ -135,10 +138,10 @@ public interface OrganizationProvider {
 
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyworks);
 
-	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
+	List<OrganizationMember> listOrganizationPersonnels(Integer namespaceId, String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
 
 
-	Integer countOrganizationPersonnels(Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag);
+	Integer countOrganizationPersonnels(Integer namespaceId, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag);
 	
 
 	OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone);
@@ -492,5 +495,8 @@ public interface OrganizationProvider {
 			Long orgId, String memberGroup, Long userId);
 
 	List<Organization> findNamespaceUnifiedSocialCreditCode(String unifiedSocialCreditCode, Integer namespaceId);
+ 
+    List listLapseOrganizations(Integer namespaceId);
 
+	Integer updateOrganizationMembersToInactiveByPath(String path,Timestamp now); 
 }
