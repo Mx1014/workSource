@@ -4051,15 +4051,33 @@ public class ForumServiceImpl implements ForumService {
         }
 
         //帖子时开放的，查看入口配置，没有配置或者配置成1的话是开放的，其他时候关闭
-        ForumCategory category = forumProvider.findForumCategoryByForumIdAndEntryId(post.getForumId(), post.getForumEntryId());
-        if(category == null || InteractFlag.fromCode(category.getInteractFlag()) == InteractFlag.SUPPORT){
+        InteractSetting setting = findInteractSettingByPost(post);
+        if(setting == null || InteractFlag.fromCode(setting.getInteractFlag()) == InteractFlag.SUPPORT){
             post.setInteractFlag(InteractFlag.SUPPORT.getCode());
             return;
         }else {
             post.setInteractFlag(InteractFlag.UNSUPPORT.getCode());
         }
-
     }
+
+
+    private InteractSetting findInteractSettingByPost(Post post){
+        InteractSetting setting = null;
+
+        if(post.getActivityCategoryId() != null && post.getActivityCategoryId().longValue() != 0){
+            //活动应用的帖子
+            setting = forumProvider.findInteractSetting(post.getNamespaceId(), post.getForumId(), InteractSettingType.ACTIVITY.getCode(), post.getActivityCategoryId());
+        }else if(post.getForumEntryId() != null){
+            //论坛应用的帖子
+            setting = forumProvider.findInteractSetting(post.getNamespaceId(), post.getForumId(), InteractSettingType.FORUM.getCode(), post.getForumEntryId());
+        }else if(post.getCategoryId() == 1003){
+            //公告应用的帖子
+            setting = forumProvider.findInteractSetting(post.getNamespaceId(), post.getForumId(), InteractSettingType.ANNOUNCEMENT.getCode(), null);
+        }
+
+        return setting;
+    }
+
     /**
      *添加ownerToken, 当前字段在评论时使用 add by yanjun 20170601
      * @param post

@@ -12,10 +12,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectQuery;
+import com.everhomes.server.schema.tables.records.EhInteractSettingsRecord;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1092,13 +1090,19 @@ public class ForumProviderImpl implements ForumProvider {
                 .fetchOneInto(ForumCategory.class);
     }
 
-    @Cacheable(value = "findForumCategoryByForumIdAndEntryId", key="{#forumId, #entryId}", unless="#result == null")
+    @Cacheable(value="findInteractSetting", key="{#namespaceId, #forumId, #type, #entryId}", unless="#result == null")
     @Override
-    public ForumCategory findForumCategoryByForumIdAndEntryId(Long forumId, Long entryId) {
+    public InteractSetting findInteractSetting(Integer namespaceId, Long forumId, String type, Long entryId) {
+
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        return context.select().from(Tables.EH_FORUM_CATEGORIES)
-                .where(Tables.EH_FORUM_CATEGORIES.FORUM_ID.eq(forumId).and(Tables.EH_FORUM_CATEGORIES.ENTRY_ID.eq(entryId)))
-                .fetchOneInto(ForumCategory.class);
+        SelectQuery<EhInteractSettingsRecord> query = context.selectQuery(Tables.EH_INTERACT_SETTINGS);
+        query.addConditions(Tables.EH_INTERACT_SETTINGS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_INTERACT_SETTINGS.FORUM_ID.eq(forumId));
+        query.addConditions(Tables.EH_INTERACT_SETTINGS.TYPE.eq(type));
+        if(entryId != null){
+            query.addConditions(Tables.EH_INTERACT_SETTINGS.ENTRY_ID.eq(entryId));
+        }
+        return query.fetchAnyInto(InteractSetting.class);
     }
 	
  }

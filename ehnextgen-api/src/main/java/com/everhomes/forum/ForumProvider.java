@@ -292,7 +292,8 @@ public interface ForumProvider {
 
     ForumCategory findForumCategoryById(Long Id);
 
+    InteractSetting findInteractSetting(Integer namespaceId, Long forumId, String type, Long entryId);
+
     //ForumCategory findForumCategory(Long forumId, Long entryId);
 
-    ForumCategory findForumCategoryByForumIdAndEntryId(Long forumId, Long entryId);
 }
