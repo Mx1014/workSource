@@ -27,6 +27,7 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.util.DateHelper;
@@ -975,19 +976,22 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     private void createGeneralApprovalRecordsFileData(XSSFWorkbook workbook, Row dataRow, GeneralApprovalRecordDTO data) {
-        //  1. basic data from approvalRecords
+        //  1. basic data from flowCases
         dataRow.createCell(0).setCellValue(data.getApprovalNo());
         dataRow.createCell(1).setCellValue(data.getCreateTime());
         dataRow.createCell(2).setCellValue(data.getCreatorName());
         dataRow.createCell(3).setCellValue(data.getCreatorDepartment());
 
-        //  2. form data
-        List<FlowCaseEntity> entities = getApprovalDetails(data.getFlowCaseId());
-        String entitiesValue = "";
-        for (int i = 4; i < entities.size(); i++) {
-            entitiesValue += entities.get(i).getKey() + " : " + entities.get(i).getValue() + "\n";
+        //  2. data from form
+        List<FlowCaseEntity> entitiyLists = getApprovalDetails(data.getFlowCaseId());
+        if (entitiyLists != null && entitiyLists.size() > 4) {
+            String formLogs = "";
+            for (int i = 4; i < entitiyLists.size(); i++) {
+                formLogs += entitiyLists.get(i).getKey() + " : " + entitiyLists.get(i).getValue() + "\n";
+            }
+            dataRow.createCell(4).setCellValue(formLogs);
         }
-        dataRow.createCell(4).setCellValue(entitiesValue);
+
         //  3. approval status
         if (FlowCaseStatus.PROCESS.getCode().equals(data.getApprovalStatus()))
             dataRow.createCell(5).setCellValue("处理中");
@@ -995,14 +999,42 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             dataRow.createCell(5).setCellValue("已完成");
         else
             dataRow.createCell(5).setCellValue("已取消");
-        //  3. the operator logs of the approval
+
+        //  4. the operator logs of the approval
         SearchFlowOperateLogsCommand logsCommand = new SearchFlowOperateLogsCommand();
         logsCommand.setFlowCaseId(data.getFlowCaseId());
         logsCommand.setPageSize(100000);
-        SearchFlowOperateLogResponse resLogs = flowService.searchFlowOperateLogs(logsCommand);
+        List<FlowOperateLogDTO> operateLogLists = flowService.searchFlowOperateLogs(logsCommand).getLogs();
+        if (operateLogLists != null && operateLogLists.size() > 0) {
+            String operateLogs = "";
+            for (int i = 0; i < operateLogLists.size(); i++) {
+                operateLogs += operateLogLists.get(i).getFlowCaseContent() + "\n";
+            }
+            dataRow.createCell(6).setCellValue(operateLogs);
+        }
 
-//        dataRow.createCell(entities.size() + 1).set
+        //  5. the current operator
+        List<UserInfo> processorLists = flowService.getCurrentProcessors(data.getFlowCaseId());
+        if (processorLists != null && processorLists.size() > 0) {
+            String processors = "";
+            for (int i = 0; i < processorLists.size(); i++) {
+                processors += processorLists.get(i).getNickName() + ", ";
+            }
+            processors = processors.substring(0, processors.length()-1);
+            dataRow.createCell(7).setCellValue(processors);
+        }
 
+        //  6. the current supervisor
+        FlowCase flowCase = flowService.getFlowCaseById(data.getFlowCaseId());
+        List<UserInfo> supervisorLists = flowService.getSupervisor(flowCase);
+        if (supervisorLists != null && supervisorLists.size() > 0) {
+            String supervisors = "";
+            for (int i = 0; i < processorLists.size(); i++) {
+                supervisors += supervisorLists.get(i).getNickName() + ", ";
+            }
+            supervisors = supervisors.substring(0, supervisors.length()-1);
+            dataRow.createCell(8).setCellValue(supervisors);
+        }
     }
 
     private void writeExcel(XSSFWorkbook workbook, HttpServletResponse httpResponse) {
