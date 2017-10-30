@@ -8,8 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>namespaceId: 域空间id</li>
  * <li>questionnaireId: 问卷id</li>
- * <li>targetType: 目标类型，organization</li>
- * <li>targetId: 目标id，organization</li>
+ * <li>targetType: 目标类型，参考{@link com.everhomes.rest.questionnaire.QuestionnaireTargetType}</li>
+ * <li>targetId: 目标id</li>
  * </ul>
  */
 public class GetTargetQuestionnaireDetailCommand {
