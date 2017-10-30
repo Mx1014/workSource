@@ -5029,9 +5029,7 @@ public class FlowServiceImpl implements FlowService {
             return null;
         }
 
-        if (dto.getTitle() != null && dto.getModuleName() == null) {
-            dto.setModuleName(dto.getTitle());
-        } else {
+        if (dto.getTitle() == null) {
             dto.setTitle(dto.getModuleName());
         }
 
@@ -5208,9 +5206,7 @@ public class FlowServiceImpl implements FlowService {
         FlowGraph flowGraph = ctx.getFlowGraph();
 
         FlowCaseBriefDTO dto = ConvertHelper.convert(flowCase, FlowCaseBriefDTO.class);
-        if (dto.getTitle() != null && dto.getModuleName() == null) {
-            dto.setModuleName(dto.getTitle());
-        } else {
+        if (dto.getTitle() == null) {
             dto.setTitle(dto.getModuleName());
         }
 
