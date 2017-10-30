@@ -81,6 +81,11 @@ public interface ForumService {
      * @return 帖子列表
      */
     SearchTopicAdminCommandResponse searchTopic(SearchTopicAdminCommand cmd);
+
+    Byte getInteractFlag(Post post);
+
+    InteractSetting findInteractSettingByPost(Post post);
+
     SearchTopicAdminCommandResponse searchComment(SearchTopicAdminCommand cmd);
     
     void updateUsedAndRental(UsedAndRentalCommand cmd);

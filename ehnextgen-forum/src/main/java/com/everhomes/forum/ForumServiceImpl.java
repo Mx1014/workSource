@@ -87,6 +87,7 @@ import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import net.greghaines.jesque.Job;
+import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.elasticsearch.common.text.Text;
@@ -3999,7 +4000,8 @@ public class ForumServiceImpl implements ForumService {
                 populateOwnerToken(post);
 
                 //添加是否支持评论字段 add by yanjun 20171025
-                populateInteractFlag(post);
+                Byte flag = getInteractFlag(post);
+                post.setInteractFlag(flag);
                 
                 String homeUrl = configProvider.getValue(ConfigConstants.HOME_URL, "");
                 String relativeUrl = configProvider.getValue(ConfigConstants.POST_SHARE_URL, "");
@@ -4044,35 +4046,41 @@ public class ForumServiceImpl implements ForumService {
      *添加是否支持评论字段 add by yanjun 20171025
      * @param post
      */
-    private void populateInteractFlag(Post post){
+    @Override
+    public Byte getInteractFlag(Post post){
         //如果帖子时关闭评论的，直接是关闭
         if(post.getInteractFlag() != null && InteractFlag.fromCode(post.getInteractFlag()) == InteractFlag.UNSUPPORT){
-            return;
+            return InteractFlag.UNSUPPORT.getCode();
         }
 
         //帖子时开放的，查看入口配置，没有配置或者配置成1的话是开放的，其他时候关闭
         InteractSetting setting = findInteractSettingByPost(post);
         if(setting == null || InteractFlag.fromCode(setting.getInteractFlag()) == InteractFlag.SUPPORT){
-            post.setInteractFlag(InteractFlag.SUPPORT.getCode());
-            return;
+            return InteractFlag.SUPPORT.getCode();
         }else {
-            post.setInteractFlag(InteractFlag.UNSUPPORT.getCode());
+            return InteractFlag.UNSUPPORT.getCode();
         }
     }
 
 
-    private InteractSetting findInteractSettingByPost(Post post){
+    @Override
+    public InteractSetting findInteractSettingByPost(Post post){
         InteractSetting setting = null;
+
+        Integer namespaceId = post.getNamespaceId();
+        if(namespaceId == null){
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
 
         if(post.getActivityCategoryId() != null && post.getActivityCategoryId().longValue() != 0){
             //活动应用的帖子
-            setting = forumProvider.findInteractSetting(post.getNamespaceId(), post.getForumId(), InteractSettingType.ACTIVITY.getCode(), post.getActivityCategoryId());
+            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ACTIVITY.getCode(), post.getActivityCategoryId());
         }else if(post.getForumEntryId() != null){
             //论坛应用的帖子
-            setting = forumProvider.findInteractSetting(post.getNamespaceId(), post.getForumId(), InteractSettingType.FORUM.getCode(), post.getForumEntryId());
+            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.FORUM.getCode(), post.getForumEntryId());
         }else if(post.getCategoryId() == 1003){
             //公告应用的帖子
-            setting = forumProvider.findInteractSetting(post.getNamespaceId(), post.getForumId(), InteractSettingType.ANNOUNCEMENT.getCode(), null);
+            setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ANNOUNCEMENT.getCode(), null);
         }
 
         return setting;
