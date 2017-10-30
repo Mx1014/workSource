@@ -2273,6 +2273,13 @@ public class ForumServiceImpl implements ForumService {
 //		
 //		sendMessageToUser(toUserId, content, meta, MessageBodyType.INNER_LINK.getCode());
 	}
+
+	@Override
+    public void sendMessageToUserWhenCommentNotSupport(User user) {
+        String text = localeStringService.getLocalizedString(ForumLocalStringCode.SCOPE,String.valueOf(ForumLocalStringCode.POST_COMMENT_NOT_SUPPORT), user.getLocale(), "comment not support");
+
+        sendMessageToUser(user.getId(), text, null, MessageBodyType.TEXT.getCode());
+    }
 	
 	private String getPostNameUrl(Post post) {
 		if (null != post.getEmbeddedAppId() && AppConstants.APPID_ACTIVITY == post.getEmbeddedAppId().longValue()) {

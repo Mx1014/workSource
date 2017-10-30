@@ -15,6 +15,7 @@ import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.user.User;
 
 import java.util.List;
 
@@ -72,6 +73,9 @@ public interface ForumService {
      */
     void updatePostPrivacy(Long forumId, Long postId, PostPrivacy privacy);
     PostDTO createComment(NewCommentCommand cmd);
+
+    void sendMessageToUserWhenCommentNotSupport(User user);
+
     void assignTopicScope(AssignTopicScopeCommand cmd);
     List<AssignedScopeDTO> listTopicAssignedScope(ListTopicAssignedScopeCommand cmd);
     

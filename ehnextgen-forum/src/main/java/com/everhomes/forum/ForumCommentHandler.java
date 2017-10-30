@@ -6,7 +6,10 @@ import com.everhomes.rest.comment.AttachmentDTO;
 import com.everhomes.rest.comment.DeleteCommonCommentCommand;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +25,25 @@ public class ForumCommentHandler implements CommentHandler {
 
 	@Autowired
 	private ForumService forumService;
+	@Autowired
+	private ForumProvider forumProvider;
 
 	@Override
 	public CommentDTO addComment(AddCommentCommand cmd) {
 		OwnerTokenDTO ownerTokenDto =  WebTokenGenerator.getInstance().fromWebToken(cmd.getOwnerToken(), OwnerTokenDTO.class);
+
+		Post post = this.forumProvider.findPostById(ownerTokenDto.getId());
+
+		Byte interactFlag = forumService.getInteractFlag(post);
+
+		//不支持评论
+		if(interactFlag == null || InteractFlag.fromCode(interactFlag) == InteractFlag.UNSUPPORT){
+			User user = UserContext.current().getUser();
+			forumService.sendMessageToUserWhenCommentNotSupport(user);
+
+			throw RuntimeErrorException.errorWith(ForumLocalStringCode.SCOPE, ForumLocalStringCode.POST_COMMENT_NOT_SUPPORT,
+					"comment not support");
+		}
 
 		NewCommentCommand forumCmd  = ConvertHelper.convert(cmd, NewCommentCommand.class);
 		forumCmd.setTopicId(ownerTokenDto.getId());
