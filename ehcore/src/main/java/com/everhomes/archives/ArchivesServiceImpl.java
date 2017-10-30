@@ -6,6 +6,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
@@ -22,6 +24,8 @@ import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -46,6 +50,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -79,6 +84,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Autowired
     private GeneralFormService generalFormService;
+
+    @Autowired
+    private GeneralFormProvider generalFormProvider;
 
     @Autowired
     private ConfigurationProvider configurationProvider;
@@ -578,6 +586,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         listCommand.setOrganizationId(cmd.getOrganizationId());
         listCommand.setKeywords(cmd.getKeywords());
         listCommand.setPageSize(10000);
+        listCommand.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CHILD_ENTERPRISE.getCode()));
         ListArchivesContactsResponse response = listArchivesContacts(listCommand);
         if (response.getContacts() != null && response.getContacts().size() > 0) {
             //  1.设置导出文件名与 sheet 名
@@ -1609,7 +1618,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  2.如果有 formOriginId 时则说明已经拥有了表单，此时在组织架构做修改，同时业务表单组同步记录
 
         if (cmd.getFormOriginId() == 0L) {
-            //  新增时，在组织架构增加表单
+            //  1.先在组织架构增加表单
             CreateApprovalFormCommand createCommand = new CreateApprovalFormCommand();
             createCommand.setOwnerId(cmd.getOrganizationId());
             createCommand.setOwnerType(ARCHIVE_OWNER_TYPE);
@@ -1619,24 +1628,25 @@ public class ArchivesServiceImpl implements ArchivesService {
             createCommand.setFormGroups(cmd.getFormGroups());
             GeneralFormDTO form = dbProvider.execute((TransactionStatus status) -> {
                 GeneralFormDTO dto = generalFormService.createGeneralForm(createCommand);
-                //  在业务表单组新增记录
+                //  2.在业务表单组新增记录
                 createArchivesForm(dto);
                 return dto;
             });
             return form;
         } else {
-            //  修改时，在组织架构修改表单
-            UpdateApprovalFormCommand updateCommand = new UpdateApprovalFormCommand();
+            //  1.先在组织架构修改表单
+            /*UpdateApprovalFormCommand updateCommand = new UpdateApprovalFormCommand();
             updateCommand.setFormOriginId(cmd.getFormOriginId());
             updateCommand.setOwnerId(cmd.getOrganizationId());
             updateCommand.setOwnerType(ARCHIVE_OWNER_TYPE);
             updateCommand.setOrganizationId(cmd.getOrganizationId());
             updateCommand.setFormFields(cmd.getFormFields());
             updateCommand.setFormGroups(cmd.getFormGroups());
-            updateCommand.setFormName(ARCHIVES_FORM);
+            updateCommand.setFormName(ARCHIVES_FORM);*/
             GeneralFormDTO form = dbProvider.execute((TransactionStatus status) -> {
-                GeneralFormDTO dto = generalFormService.updateGeneralForm(updateCommand);
-                //  在业务表单同步记录
+                //  2.为人事档案单独做一个表单的更新处理
+                GeneralFormDTO dto = updateGeneralFormForArchives(cmd);
+                //  3.在业务表单同步记录
                 ArchivesFroms archivesFroms = archivesProvider.findArchivesFormOriginId(UserContext.getCurrentNamespaceId(), cmd.getOrganizationId());
                 archivesFroms.setFormOriginId(dto.getFormOriginId());
                 archivesFroms.setFormVersion(dto.getFormVersion());
@@ -1645,6 +1655,18 @@ public class ArchivesServiceImpl implements ArchivesService {
             });
             return form;
         }
+    }
+
+    private GeneralFormDTO updateGeneralFormForArchives(UpdateArchivesFormCommand cmd){
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(cmd
+                .getFormOriginId());
+        if (null == form )
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "form not found");
+        form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
+        generalFormProvider.updateGeneralForm(form);
+        return ConvertHelper.convert(form, GeneralFormDTO.class);
     }
 
     /**
