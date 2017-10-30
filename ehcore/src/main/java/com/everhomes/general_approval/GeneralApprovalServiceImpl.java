@@ -717,7 +717,18 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     //  判断是否需要创建模板
     @Override
     public VerifyApprovalTemplatesResponse verifyApprovalTemplates(VerifyApprovalTemplatesCommand cmd) {
-        return null;
+        VerifyApprovalTemplatesResponse response = new VerifyApprovalTemplatesResponse();
+        response.setResult(1L);
+        List<GeneralApprovalTemplate> templates = generalApprovalProvider.listGeneralApprovalTemplateByModuleId(cmd.getModuleId());
+        for (GeneralApprovalTemplate template : templates) {
+            GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(cmd.getModuleId(), cmd.getOwnerId(),
+                    cmd.getOwnerType(), template.getId());
+            if (ga == null) {
+                response.setResult(0L);
+                break;
+            }
+        }
+        return response;
     }
 
     //  创建审批模板的接口
