@@ -12,7 +12,7 @@ public interface EnergyMeterTaskProvider {
     EnergyMeterTask findEnergyMeterTaskById(Long taskId);
     List<EnergyMeterTask> listEnergyMeterTasks(long pageAnchor, int pageSize);
     List<EnergyMeterTask> listNotGeneratePaymentEnergyMeterTasks();
-    List<EnergyMeterTask> listEnergyMeterTasksByPlan(List<Long> planIds, long pageAnchor, int pageSize);
+    List<EnergyMeterTask> listEnergyMeterTasksByPlan(List<Long> planIds, Long targetId, Long ownerId, long pageAnchor, int pageSize);
 
     Map<Long, EnergyMeterTask> listEnergyMeterTasks(List<Long> ids);
 }

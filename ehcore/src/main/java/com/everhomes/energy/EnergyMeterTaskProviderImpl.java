@@ -88,11 +88,13 @@ public class EnergyMeterTaskProviderImpl implements EnergyMeterTaskProvider {
     }
 
     @Override
-    public List<EnergyMeterTask> listEnergyMeterTasksByPlan(List<Long> planIds, long pageAnchor, int pageSize) {
+    public List<EnergyMeterTask> listEnergyMeterTasksByPlan(List<Long> planIds, Long targetId, Long ownerId, long pageAnchor, int pageSize) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_ENERGY_METER_TASKS)
                 .where(Tables.EH_ENERGY_METER_TASKS.ID.ge(pageAnchor))
                 .and(Tables.EH_ENERGY_METER_TASKS.PLAN_ID.in(planIds))
+                .and(Tables.EH_ENERGY_METER_TASKS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_ENERGY_METER_TASKS.TARGET_ID.eq(targetId))
                 .orderBy(Tables.EH_ENERGY_METER_TASKS.PLAN_ID, Tables.EH_ENERGY_METER_TASKS.DEFAULT_ORDER)
                 .limit(pageSize).fetchInto(EnergyMeterTask.class);
     }

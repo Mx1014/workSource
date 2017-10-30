@@ -51,6 +51,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
     @Autowired
     private EnergyMeterTaskProvider taskProvider;
 
+    @Autowired
+    private EnergyMeterAddressProvider meterAddressProvider;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         if(LOGGER.isInfoEnabled()) {
@@ -83,6 +86,13 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 //                paymentExpectancies_re_struct();
                 //task关联的表关联的门牌有没有合同
                 //门牌有没有默认计价条款、所属楼栋有没有默认计价条款、所属园区有没有默认计价条款
+                List<EnergyMeterAddress> addresses = meterAddressProvider.listByMeterId(task.getMeterId());
+                if(addresses != null && addresses.size() > 0) {
+                    EnergyMeterAddress address = addresses.get(0);
+//                    eh_contract_charging_item_addresses eh_contract_charging_change_addresses
+
+//                    eh_default_charging_item_properties
+                }
                 task.setGeneratePaymentFlag(TaskGeneratePaymentFlag.GENERATED.getCode());
                 taskProvider.updateEnergyMeterTask(task);
             });

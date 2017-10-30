@@ -2856,7 +2856,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             List<Long> planIds = maps.stream().map(map -> {
                 return map.getPlanId();
             }).collect(Collectors.toList());
-            List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasksByPlan(planIds, cmd.getPageAnchor(), pageSize+1);
+            List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasksByPlan(planIds, cmd.getTargetId(), cmd.getOwnerId(), cmd.getPageAnchor(), pageSize+1);
 
             if(tasks != null && tasks.size() > 0) {
                 if (tasks.size() > pageSize) {
