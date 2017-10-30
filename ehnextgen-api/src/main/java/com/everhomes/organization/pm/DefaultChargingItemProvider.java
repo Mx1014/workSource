@@ -14,4 +14,5 @@ public interface DefaultChargingItemProvider {
     void createDefaultChargingItemProperty(DefaultChargingItemProperty property);
     void updateDefaultChargingItemProperty(DefaultChargingItemProperty property);
     List<DefaultChargingItemProperty> findByItemId(Long defaultChargingItemId);
+    List<DefaultChargingItemProperty> findByPropertyId(Byte propertyType, Long propertyId, Byte meterType);
 }

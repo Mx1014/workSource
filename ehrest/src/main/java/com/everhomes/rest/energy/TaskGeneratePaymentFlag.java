@@ -4,7 +4,7 @@ package com.everhomes.rest.energy;
  * Created by ying.xiong on 2017/10/27.
  */
 public enum TaskGeneratePaymentFlag {
-    NON_GENERATE((byte) 0), GENERATED((byte) 1);
+    NON_GENERATE((byte) 0), GENERATED((byte) 1), NON_CHARGING_ITEM((byte) 2);
 
     private Byte code;
 

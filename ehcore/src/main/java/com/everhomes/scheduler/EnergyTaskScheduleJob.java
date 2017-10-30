@@ -1,14 +1,21 @@
 package com.everhomes.scheduler;
 
 import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.contract.ContractChargingItem;
+import com.everhomes.contract.ContractChargingItemAddress;
+import com.everhomes.contract.ContractChargingItemAddressProvider;
+import com.everhomes.contract.ContractChargingItemProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.energy.*;
+import com.everhomes.organization.pm.DefaultChargingItemProperty;
+import com.everhomes.organization.pm.DefaultChargingItemProvider;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.asset.FeeRules;
 import com.everhomes.rest.energy.CreateEnergyTaskCommand;
 import com.everhomes.rest.energy.EnergyMeterStatus;
 import com.everhomes.rest.energy.TaskGeneratePaymentFlag;
+import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyType;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ExecutorUtil;
 import org.quartz.JobExecutionContext;
@@ -54,6 +61,18 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
     @Autowired
     private EnergyMeterAddressProvider meterAddressProvider;
 
+    @Autowired
+    private EnergyMeterProvider energyMeterProvider;
+
+    @Autowired
+    private ContractChargingItemAddressProvider contractChargingItemAddressProvider;
+
+    @Autowired
+    private ContractChargingItemProvider contractChargingItemProvider;
+
+    @Autowired
+    private DefaultChargingItemProvider defaultChargingItemProvider;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         if(LOGGER.isInfoEnabled()) {
@@ -83,17 +102,50 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         List<EnergyMeterTask> tasks = taskProvider.listNotGeneratePaymentEnergyMeterTasks();
         if(tasks != null && tasks.size() > 0) {
             tasks.forEach(task -> {
-//                paymentExpectancies_re_struct();
+                Boolean generateFlag = false;
+                EnergyMeter meter = energyMeterProvider.findById(task.getNamespaceId(), task.getMeterId());
+                if(meter == null || !EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
+                    return ;
+                }
                 //task关联的表关联的门牌有没有合同
-                //门牌有没有默认计价条款、所属楼栋有没有默认计价条款、所属园区有没有默认计价条款
+
                 List<EnergyMeterAddress> addresses = meterAddressProvider.listByMeterId(task.getMeterId());
                 if(addresses != null && addresses.size() > 0) {
                     EnergyMeterAddress address = addresses.get(0);
-//                    eh_contract_charging_item_addresses
+                    //eh_contract_charging_item_addresses
+                    List<ContractChargingItemAddress> contractChargingItemAddresses = contractChargingItemAddressProvider.findByAddressId(address.getId(), meter.getMeterType());
+                    if(contractChargingItemAddresses != null && contractChargingItemAddresses.size() > 0) {
+                        contractChargingItemAddresses.forEach(contractChargingItemAddress -> {
+                            ContractChargingItem item = contractChargingItemProvider.findById(contractChargingItemAddress.getContractChargingItemId());
+                        });
+                        //suanqian paymentExpectancies_re_struct();
+                        generateFlag = true;
+                    } else {//门牌有没有默认计价条款、所属楼栋有没有默认计价条款、所属园区有没有默认计价条款 eh_default_charging_item_properties
+                        List<DefaultChargingItemProperty> properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.APARTMENT.getCode(), address.getId(), meter.getMeterType());
+                        if(properties != null) {
+                            //suanqian paymentExpectancies_re_struct();
+                            generateFlag = true;
+                        } else {
+                            properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), address.getBuildingId(), meter.getMeterType());
+                            if(properties != null) {
+                                //suanqian paymentExpectancies_re_struct();
+                                generateFlag = true;
+                            } else {
+                                properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), meter.getCommunityId(), meter.getMeterType());
+                                if(properties != null) {
+                                    //suanqian paymentExpectancies_re_struct();
+                                    generateFlag = true;
+                                }
+                            }
+                        }
+                    }
 
-//                    eh_default_charging_item_properties
                 }
-                task.setGeneratePaymentFlag(TaskGeneratePaymentFlag.GENERATED.getCode());
+                if(generateFlag) {
+                    task.setGeneratePaymentFlag(TaskGeneratePaymentFlag.GENERATED.getCode());
+                } else {
+                    task.setGeneratePaymentFlag(TaskGeneratePaymentFlag.NON_CHARGING_ITEM.getCode());
+                }
                 taskProvider.updateEnergyMeterTask(task);
             });
         }

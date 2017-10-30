@@ -6,6 +6,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.energy.EnergyMeterType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhDefaultChargingItemPropertiesDao;
@@ -18,6 +19,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.JoinType;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,6 +123,38 @@ public class DefaultChargingItemProviderImpl implements DefaultChargingItemProvi
         SelectQuery<EhDefaultChargingItemPropertiesRecord> query = context.selectQuery(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES);
         query.addConditions(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.DEFAULT_CHARGING_ITEM_ID.eq(defaultChargingItemId));
         query.addConditions(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<DefaultChargingItemProperty> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, DefaultChargingItemProperty.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
+    public List<DefaultChargingItemProperty> findByPropertyId(Byte propertyType, Long propertyId, Byte meterType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhDefaultChargingItemPropertiesRecord> query = context.selectQuery(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES);
+        query.addJoin(Tables.EH_DEFAULT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
+                Tables.EH_DEFAULT_CHARGING_ITEMS.ID.eq(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.DEFAULT_CHARGING_ITEM_ID));
+
+        query.addConditions(Tables.EH_DEFAULT_CHARGING_ITEMS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.PROPERTY_ID.eq(propertyId));
+        query.addConditions(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.PROPERTY_TYPE.eq(propertyType));
+        query.addConditions(Tables.EH_DEFAULT_CHARGING_ITEM_PROPERTIES.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        if(meterType != null) {
+            if(EnergyMeterType.ELECTRIC.equals(EnergyMeterType.fromCode(meterType))) {
+                query.addJoin(Tables.EH_PAYMENT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
+                        Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_ITEM_ID));
+                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("电费"));
+            } else if(EnergyMeterType.WATER.equals(EnergyMeterType.fromCode(meterType))) {
+                query.addJoin(Tables.EH_PAYMENT_CHARGING_ITEMS, JoinType.LEFT_OUTER_JOIN,
+                        Tables.EH_PAYMENT_CHARGING_ITEMS.ID.eq(Tables.EH_DEFAULT_CHARGING_ITEMS.CHARGING_ITEM_ID));
+                query.addConditions(Tables.EH_PAYMENT_CHARGING_ITEMS.NAME.eq("水费"));
+            }
+        }
 
         List<DefaultChargingItemProperty> result = new ArrayList<>();
         query.fetch().map((r) -> {
