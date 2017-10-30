@@ -6816,7 +6816,7 @@ public class PunchServiceImpl implements PunchService {
 	private PunchTimeRuleDTO convertPunchTimeRule2DTO(PunchTimeRule r) {
 		PunchTimeRuleDTO dto = ConvertHelper.convert(r, PunchTimeRuleDTO.class);
 		dto.setFlexTime(r.getFlexTimeLong());
-		dto.setAfternoonArriveTime(r.getAfternoonArriveTimeLong());
+		dto.setNoonLeaveTime(r.getNoonLeaveTimeLong());
 		dto.setBeginPunchTime(r.getBeginPunchTime());
 		dto.setEndPunchTime(r.getEndPunchTime());
 		dto.setAfternoonArriveTime(r.getAfternoonArriveTimeLong());
