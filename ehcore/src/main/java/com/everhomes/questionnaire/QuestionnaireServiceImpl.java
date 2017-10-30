@@ -1041,7 +1041,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			Questionnaire questionnaire = questionnaireProvider.findQuestionnaireById(questionnaireId);
 			Integer count = questionnaireAnswerProvider.countQuestionnaireAnswerByQuestionnaireId(questionnaireId);
 			questionnaire.setCollectionCount(count);
-			questionnaire.setCollectionCount((questionnaire.getCollectionCount()==null?0:questionnaire.getCollectionCount())+1);
+//			questionnaire.setCollectionCount((questionnaire.getCollectionCount()==null?0:questionnaire.getCollectionCount())+1);
 			questionnaireProvider.updateQuestionnaire(questionnaire);
 			return null;
 		});
@@ -1052,7 +1052,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			QuestionnaireOption option = questionnaireOptionProvider.findQuestionnaireOptionById(optionId);
 			Integer count = questionnaireAnswerProvider.countQuestionnaireAnswerByOptionId(optionId);
 			option.setCheckedCount(count);
-			option.setCheckedCount((option.getCheckedCount()==null?0:option.getCheckedCount())+1);
+//			option.setCheckedCount((option.getCheckedCount()==null?0:option.getCheckedCount())+1);
 			questionnaireOptionProvider.updateQuestionnaireOption(option);
 			return null;
 		});
