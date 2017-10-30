@@ -42,11 +42,20 @@ public class DefaultChargingItemDTO {
     private String chargingVariables;
     private Timestamp chargingStartTime;
     private Timestamp chargingExpiredTime;
+    private Byte billingCycle;
     @ItemType(DefaultChargingItemPropertyDTO.class)
     private List<DefaultChargingItemPropertyDTO> apartments;
 
     public List<DefaultChargingItemPropertyDTO> getApartments() {
         return apartments;
+    }
+
+    public Byte getBillingCycle() {
+        return billingCycle;
+    }
+
+    public void setBillingCycle(Byte billingCycle) {
+        this.billingCycle = billingCycle;
     }
 
     public String getChargingItemName() {

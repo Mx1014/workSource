@@ -89,7 +89,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 List<EnergyMeterAddress> addresses = meterAddressProvider.listByMeterId(task.getMeterId());
                 if(addresses != null && addresses.size() > 0) {
                     EnergyMeterAddress address = addresses.get(0);
-//                    eh_contract_charging_item_addresses eh_contract_charging_change_addresses
+//                    eh_contract_charging_item_addresses
 
 //                    eh_default_charging_item_properties
                 }
