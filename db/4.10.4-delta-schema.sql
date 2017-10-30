@@ -22,4 +22,4 @@ CREATE TABLE `eh_uniongroup_version` (
   `operator_uid` BIGINT(20) DEFAULT NULL,
   `update_time` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
