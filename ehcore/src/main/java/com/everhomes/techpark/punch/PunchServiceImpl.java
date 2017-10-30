@@ -2466,11 +2466,12 @@ public class PunchServiceImpl implements PunchService {
 //			Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, statistic );
 
 			statistic.setUserName(member.getContactName());
-			OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());
-			statistic.setDeptId(dept.getId());
-			statistic.setDeptName(dept.getName());
+//			OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());
+//			statistic.setDeptId(dept.getId());
+//			statistic.setDeptName(dept.getName());
 //			statistic.setWorkDayCount(workDayCount);
-
+			String department = getDepartment(punchOrg.getNamespaceId(), member.getDetailId());
+			statistic.setDeptName(department);
 	 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
 							dateSF.get().format(endCalendar.getTime()) );
 			List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
@@ -4776,10 +4777,12 @@ public class PunchServiceImpl implements PunchService {
 
 		if (null != member) {
 			dto.setUserName( member.getContactName());
-			OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());
-			if(null != dept){
-				dto.setDeptName(dept.getName());
-			}
+//			OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());
+//			if(null != dept){
+//				dto.setDeptName(dept.getName());
+//			}
+			String department = getDepartment(member.getNamespaceId(), member.getDetailId());
+			dto.setDeptName(department);
 
 
 //				dto.setUserPhoneNumber(member.getContactToken());
@@ -6574,7 +6577,17 @@ public class PunchServiceImpl implements PunchService {
 		Organization org = organizationProvider.findOrganizationById(cmd.getId());
 		return getPunchGroupDTOByOrg(org);
 	}
-
+	public String getDepartment(Integer namespaceId, Long detailId){
+		Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(namespaceId,detailId,OrganizationGroupType.DEPARTMENT.getCode());
+		String department = "";
+		if(!StringUtils.isEmpty(departMap)){
+			for(Long k : departMap.keySet()){
+				department += (departMap.get(k) + ",");
+			}
+			department = department.substring(0,department.length()-1);
+		}
+		return department;
+	}
 	@Override
 	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd) {
 		ListPunchGroupsResponse response = new ListPunchGroupsResponse();
@@ -6586,15 +6599,8 @@ public class PunchServiceImpl implements PunchService {
 		if (null != details && details.size()>0)
 			response.setUnjoinPunchGroupEmployees(details.stream().map(r ->{
 				OrganizationMemberDetailDTO dto = ConvertHelper.convert(r, OrganizationMemberDetailDTO.class);
-				Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(org.getNamespaceId(),r.getId(),OrganizationGroupType.DEPARTMENT.getCode());
-		        String department = "";
-		        if(!StringUtils.isEmpty(departMap)){
-		            for(Long k : departMap.keySet()){
-		                department += (departMap.get(k) + ",");
-		            }
-		            department = department.substring(0,department.length()-1);
-		        }
-		        dto.setDepartment(department);
+				String department = getDepartment(org.getNamespaceId(), r.getId());
+				dto.setDepartment(department);
 				return dto;
 			}).collect(Collectors.toList()));
 
