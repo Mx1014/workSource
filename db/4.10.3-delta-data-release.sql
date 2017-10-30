@@ -195,7 +195,7 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, 
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 	VALUES ((@id := @id + 1), '999973', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
-	VALUES ((@id := @id + 1), '999973', NULL, NULL, 'rentAmountUnit', 'MONTH_UNIT', NULL, NULL);
+	VALUES ((@id := @id + 1), '999973', NULL, NULL, 'rentAmountUnit', 'DAY_UNIT', NULL, NULL);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
 	VALUES ((@id := @id + 1), '999970', NULL, NULL, 'rentAmountFlag', '1', NULL, NULL);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
