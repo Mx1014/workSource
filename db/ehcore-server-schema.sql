@@ -2507,61 +2507,63 @@ DROP TABLE IF EXISTS `eh_contracts`;
 
 
 CREATE TABLE `eh_contracts` (
-  `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `customer_id` BIGINT,
-  `customer_name` VARCHAR(64),
+  `id` BIGINT(20) NOT NULL,
+  `namespace_id` INT(11) NOT NULL DEFAULT '0',
+  `customer_id` BIGINT(20) DEFAULT NULL,
+  `customer_name` VARCHAR(64) DEFAULT NULL,
   `contract_number` VARCHAR(128) NOT NULL,
-  `contract_end_date` DATETIME COMMENT '合同结束日期',
-  `status` TINYINT,
-  `create_time` DATETIME,
-  `community_id` BIGINT COMMENT '园区id',
-  `contract_start_date` DATETIME COMMENT '合同开始日期',
-  `rent_cycle` INTEGER COMMENT '租赁周期',
-  `name` VARCHAR(128) COMMENT '合同名称',
-  `contract_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0:新签合同、1:续约合同、2:变更合同、3:退约合同',
-  `create_uid` BIGINT COMMENT '经办人id',
-  `party_a_type` TINYINT NOT NULL DEFAULT 0 COMMENT '合同甲方类型 0: organization; 1: individual',
-  `party_a_id` BIGINT COMMENT '合同甲方id',
-  `party_a_name` VARCHAR(64) COMMENT '合同甲方名称',
-  `customer_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: organization; 1: individual',
+  `contract_end_date` DATETIME DEFAULT NULL COMMENT '合同结束日期',
+  `status` TINYINT(4) DEFAULT NULL,
+  `create_time` DATETIME DEFAULT NULL,
+  `community_id` BIGINT(20) DEFAULT NULL COMMENT '园区id',
+  `contract_start_date` DATETIME DEFAULT NULL COMMENT '合同开始日期',
+  `rent_cycle` INT(11) DEFAULT NULL COMMENT '租赁周期',
+  `name` VARCHAR(128) DEFAULT NULL COMMENT '合同名称',
+  `contract_type` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0:新签合同、1:续约合同、2:变更合同、3:退约合同',
+  `create_uid` BIGINT(20) DEFAULT NULL COMMENT '经办人id',
+  `party_a_type` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '合同甲方类型 0: organization; 1: individual',
+  `party_a_id` BIGINT(20) DEFAULT NULL COMMENT '合同甲方id',
+  `party_a_name` VARCHAR(64) DEFAULT NULL COMMENT '合同甲方名称',
+  `customer_type` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0: organization; 1: individual',
   `contract_situation` TEXT COMMENT '合同情况',
-  `category_item_id` BIGINT COMMENT '合同类型: 资源租赁合同、物业服务合同、车位服务合同..., refer to the id of eh_var_field_items',
-  `category_item_name` VARCHAR(128) COMMENT '合同类型: 资源租赁合同、物业服务合同、车位服务合同..., refer to the display_name of eh_var_field_items',
-  `advanced_notify_days` INTEGER NOT NULL DEFAULT 0 COMMENT '提前提醒天数',
-  `filing_place` VARCHAR(64) COMMENT '归档地',
-  `record_number` VARCHAR(32) COMMENT '备案号',
-  `invalid_uid` BIGINT COMMENT '作废人id',
-  `invalid_time` DATETIME COMMENT '作废时间',
-  `invalid_reason` VARCHAR(256) COMMENT '作废原因',
-  `review_uid` BIGINT COMMENT '审阅人id',
-  `review_time` DATETIME COMMENT '审阅时间',
-  `delete_uid` BIGINT COMMENT '删除人id',
-  `delete_time` DATETIME COMMENT '删除时间',
-  `signed_time` DATETIME COMMENT '签约时间',
-  `parent_id` BIGINT COMMENT '父合同id',
-  `root_parent_id` BIGINT COMMENT '根合同id',
-  `rent_size` DOUBLE COMMENT '出租面积',
-  `rent` DECIMAL(10,2) COMMENT '租金',
-  `downpayment` DECIMAL(10,2) COMMENT '首付款',
-  `downpayment_time` DATETIME COMMENT '首付截止日期',
-  `deposit` DECIMAL(10,2) COMMENT '定金',
-  `deposit_time` DATETIME COMMENT '定金最迟收取日期',
-  `contractual_penalty` DECIMAL(10,2) COMMENT '违约金',
-  `penalty_remark` VARCHAR(256) COMMENT '违约说明',
-  `commission` DECIMAL(10,2) COMMENT '佣金',
-  `paid_type` VARCHAR(32) COMMENT '付款方式',
-  `free_days` INTEGER COMMENT '免租期天数',
-  `free_parking_space` INTEGER COMMENT '赠送车位数量',
-  `decorate_begin_date` DATETIME COMMENT '装修开始日期',
-  `decorate_end_date` DATETIME COMMENT '装修结束日期',
-  `signed_purpose` VARCHAR(128) COMMENT '签约原因',
-  `source` VARCHAR(32) COMMENT 'contract source like zuolin...',
-  `source_id` VARCHAR(128) COMMENT 'contract source unique identifier...',
-  `denunciation_reason` VARCHAR(256) COMMENT '为退约合同的时候',
-  `denunciation_time` DATETIME COMMENT '为退约合同的时候',
-  `denunciation_uid` BIGINT COMMENT '为退约合同的时候',
+  `category_item_id` BIGINT(20) DEFAULT NULL COMMENT '合同类型: 资源租赁合同、物业服务合同、车位服务合同..., refer to the id of eh_var_field_items',
+  `category_item_name` VARCHAR(128) DEFAULT NULL COMMENT '合同类型: 资源租赁合同、物业服务合同、车位服务合同..., refer to the display_name of eh_var_field_items',
+  `advanced_notify_days` INT(11) NOT NULL DEFAULT '0' COMMENT '提前提醒天数',
+  `filing_place` VARCHAR(64) DEFAULT NULL COMMENT '归档地',
+  `record_number` VARCHAR(32) DEFAULT NULL COMMENT '备案号',
+  `invalid_uid` BIGINT(20) DEFAULT NULL COMMENT '作废人id',
+  `invalid_time` DATETIME DEFAULT NULL COMMENT '作废时间',
+  `invalid_reason` VARCHAR(256) DEFAULT NULL COMMENT '作废原因',
+  `review_uid` BIGINT(20) DEFAULT NULL COMMENT '审阅人id',
+  `review_time` DATETIME DEFAULT NULL COMMENT '审阅时间',
+  `delete_uid` BIGINT(20) DEFAULT NULL COMMENT '删除人id',
+  `delete_time` DATETIME DEFAULT NULL COMMENT '删除时间',
+  `signed_time` DATETIME DEFAULT NULL COMMENT '签约时间',
+  `parent_id` BIGINT(20) DEFAULT NULL COMMENT '父合同id',
+  `root_parent_id` BIGINT(20) DEFAULT NULL COMMENT '根合同id',
+  `rent_size` DOUBLE DEFAULT NULL COMMENT '出租面积',
+  `rent` DECIMAL(10,2) DEFAULT NULL COMMENT '租金',
+  `downpayment` DECIMAL(10,2) DEFAULT NULL COMMENT '首付款',
+  `downpayment_time` DATETIME DEFAULT NULL COMMENT '首付截止日期',
+  `deposit` DECIMAL(10,2) DEFAULT NULL COMMENT '定金',
+  `deposit_time` DATETIME DEFAULT NULL COMMENT '定金最迟收取日期',
+  `contractual_penalty` DECIMAL(10,2) DEFAULT NULL COMMENT '违约金',
+  `penalty_remark` VARCHAR(256) DEFAULT NULL COMMENT '违约说明',
+  `commission` DECIMAL(10,2) DEFAULT NULL COMMENT '佣金',
+  `paid_type` VARCHAR(32) DEFAULT NULL COMMENT '付款方式',
+  `free_days` INT(11) DEFAULT NULL COMMENT '免租期天数',
+  `free_parking_space` INT(11) DEFAULT NULL COMMENT '赠送车位数量',
+  `decorate_begin_date` DATETIME DEFAULT NULL COMMENT '装修开始日期',
+  `decorate_end_date` DATETIME DEFAULT NULL COMMENT '装修结束日期',
+  `signed_purpose` VARCHAR(128) DEFAULT NULL COMMENT '签约原因',
+  `source` VARCHAR(32) DEFAULT NULL COMMENT 'contract source like zuolin...',
+  `source_id` VARCHAR(128) DEFAULT NULL COMMENT 'contract source unique identifier...',
+  `denunciation_reason` VARCHAR(256) DEFAULT NULL COMMENT '为退约合同的时候',
+  `denunciation_time` DATETIME DEFAULT NULL COMMENT '为退约合同的时候',
+  `denunciation_uid` BIGINT(20) DEFAULT NULL COMMENT '为退约合同的时候',
   `remark` TEXT COMMENT '备注',
+  `settled` VARCHAR(128) DEFAULT NULL,
+  `layout` VARCHAR(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -4832,7 +4834,7 @@ CREATE TABLE `eh_flow_branches` (
 
 DROP TABLE IF EXISTS `eh_flow_buttons`;
 
-REATE TABLE `eh_flow_buttons` (
+CREATE TABLE `eh_flow_buttons` (
   `id` BIGINT(20) NOT NULL,
   `namespace_id` INT(11) NOT NULL DEFAULT '0',
   `flow_main_id` BIGINT(20) NOT NULL,
@@ -13594,7 +13596,7 @@ CREATE TABLE `eh_uniongroup_member_details` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniongroup_member_uniqueIndex` (`group_type`,`group_id`,`detail_id`,`contact_token`),
   KEY `index_detailId` (`detail_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_user_activities`;
 
@@ -13626,7 +13628,7 @@ CREATE TABLE `eh_user_activities` (
   KEY `i_eh_imei_number` (`imei_number`) USING HASH,
   KEY `i_eh_app_version_name` (`app_version_name`),
   KEY `i_eh_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_user_appeal_logs`;
 
@@ -13649,7 +13651,7 @@ CREATE TABLE `eh_user_appeal_logs` (
   `update_uid` BIGINT,
   `update_time` DATETIME(3),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_user_behaviors`;
 
@@ -13664,7 +13666,7 @@ CREATE TABLE `eh_user_behaviors` (
   `create_time` DATETIME,
 
    PRIMARY KEY (`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_user_blacklist`;
@@ -13681,7 +13683,7 @@ CREATE TABLE `eh_user_blacklist` (
   UNIQUE KEY `u_eh_usr_blk_owner_target` (`owner_uid`,`target_type`,`target_id`),
   KEY `i_eh_usr_blk_owner` (`owner_uid`),
   KEY `i_eh_usr_blk_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -13719,7 +13721,7 @@ CREATE TABLE `eh_user_blacklists` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -13740,7 +13742,7 @@ CREATE TABLE `eh_user_communities` (
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_usr_community`(`owner_uid`, `community_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -13759,7 +13761,7 @@ CREATE TABLE `eh_user_contacts`(
   `create_time` DATETIME,
 
   PRIMARY KEY  (`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -13779,7 +13781,7 @@ CREATE TABLE `eh_user_favorites` (
   UNIQUE KEY `u_eh_usr_favorite_target`(`owner_uid`, `target_type`, `target_id`),
   KEY `i_eh_usr_favorite_owner`(`owner_uid`),
   KEY `i_eh_usr_favorite_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -13801,7 +13803,7 @@ CREATE TABLE `eh_user_followed_families`(
   UNIQUE KEY `i_eh_usr_ffmy_followed`(`owner_uid`, `followed_family`),
   KEY `i_eh_usr_ffmy_owner`(`owner_uid`),
   KEY `i_eh_usr_ffmy_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -13822,7 +13824,7 @@ CREATE TABLE `eh_user_group_histories` (
   `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -13849,7 +13851,7 @@ CREATE TABLE `eh_user_groups` (
   UNIQUE KEY `u_eh_usr_grp_owner_group`(`owner_uid`, `group_id`),
   KEY `i_eh_usr_grp_owner`(`owner_uid`),
   KEY `i_eh_usr_grp_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_user_identifier_logs`;
 
@@ -13866,7 +13868,7 @@ CREATE TABLE `eh_user_identifier_logs` (
   `notify_time` DATETIME(3),
   `create_time` DATETIME(3),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_user_identifiers`;
 
@@ -13891,7 +13893,7 @@ CREATE TABLE `eh_user_identifiers` (
   KEY `i_eh_user_idf_create_time`(`create_time`),
   KEY `i_eh_user_idf_notify_time` (`notify_time`),
   KEY `i_eh_user_owner_status` (`owner_uid`,`claim_status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -13913,7 +13915,7 @@ CREATE TABLE `eh_user_impersonations`(
   `create_time` DATETIME,
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -13935,7 +13937,7 @@ CREATE TABLE `eh_user_installed_apps`(
   `create_time` DATETIME,
 
   PRIMARY KEY  (`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_user_invitation_roster`;
@@ -13950,7 +13952,7 @@ CREATE TABLE `eh_user_invitation_roster` (
   PRIMARY KEY (`id`),
   KEY `fk_eh_invite_roster_invite_id` (`invite_id`),
   CONSTRAINT `eh_user_invitation_roster_ibfk_1` FOREIGN KEY (`invite_id`) REFERENCES `eh_user_invitations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -13978,7 +13980,7 @@ CREATE TABLE `eh_user_invitations` (
   KEY `u_eh_invite_expiration`(`expiration`),
   KEY `u_eh_invite_code_status`(`invite_code`, `status`),
   KEY `u_eh_invite_create_time`(`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_user_launch_pad_items`;
@@ -13998,7 +14000,7 @@ CREATE TABLE `eh_user_launch_pad_items`(
   `create_time` DATETIME,
   `item_name` VARCHAR(32),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -14019,7 +14021,7 @@ CREATE TABLE `eh_user_likes` (
   UNIQUE KEY `u_eh_usr_like_target` (`owner_uid`,`target_type`,`target_id`),
   KEY `i_eh_usr_like_owner` (`owner_uid`),
   KEY `i_eh_usr_like_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -14040,7 +14042,7 @@ CREATE TABLE `eh_user_locations` (
   `report_time_ms` BIGINT NOT NULL DEFAULT 0,
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_user_notification_settings`;
 
@@ -14059,7 +14061,7 @@ CREATE TABLE `eh_user_notification_settings` (
   `update_uid` BIGINT,
   `update_time` DATETIME(3),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_user_organizations`;
 
@@ -14078,7 +14080,7 @@ CREATE TABLE `eh_user_organizations` (
   PRIMARY KEY (`id`),
   KEY `user_organization_user_id` (`user_id`),
   KEY `user_organization_organization_id` (`organization_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 -- member of eh_users partition
@@ -14097,7 +14099,7 @@ CREATE TABLE `eh_user_posts` (
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_usr_post_id` (`owner_uid`,`target_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -14133,7 +14135,7 @@ CREATE TABLE `eh_user_profiles` (
   KEY `i_eh_uprof_itag2` (`integral_tag2`),
   KEY `i_eh_uprof_stag1` (`string_tag1`),
   KEY `i_eh_uprof_stag2` (`string_tag2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -14153,7 +14155,7 @@ CREATE TABLE `eh_user_scores` (
   `create_time` DATETIME,
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -14180,7 +14182,7 @@ CREATE TABLE `eh_user_service_addresses` (
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_usr_service_address_id` (`owner_uid`,`address_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -14253,7 +14255,7 @@ CREATE TABLE `eh_users` (
   UNIQUE KEY `u_eh_user_account_name` (`account_name`),
   KEY `i_eh_user_create_time` (`create_time`),
   KEY `i_eh_user_nick_name` (`nick_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_var_field_group_scopes`;
 
@@ -14273,7 +14275,7 @@ CREATE TABLE `eh_var_field_group_scopes` (
   `community_id` BIGINT COMMENT '园区id',
   `group_parent_id` BIGINT COMMENT '父组系统id',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_var_field_groups`;
 
@@ -14293,7 +14295,7 @@ CREATE TABLE `eh_var_field_groups` (
   `operator_uid` BIGINT,
   `update_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_var_field_item_scopes`;
 
@@ -14313,7 +14315,7 @@ CREATE TABLE `eh_var_field_item_scopes` (
   `update_time` DATETIME,
   `community_id` BIGINT COMMENT '园区id',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_var_field_items`;
 
@@ -14330,7 +14332,7 @@ CREATE TABLE `eh_var_field_items` (
   `operator_uid` BIGINT,
   `update_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_var_field_scopes`;
 
@@ -14353,7 +14355,7 @@ CREATE TABLE `eh_var_field_scopes` (
   `community_id` BIGINT COMMENT '园区id',
   `group_path` VARCHAR(128) COMMENT 'path from the root',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4; 
 
 DROP TABLE IF EXISTS `eh_var_fields`; 
 
@@ -14375,7 +14377,7 @@ CREATE TABLE `eh_var_fields` (
   `update_time` DATETIME,
   `field_param` VARCHAR(128),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 -- member of global sharding group
@@ -14393,7 +14395,7 @@ CREATE TABLE `eh_version_realm` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_ver_realm` (`realm`,`namespace_id`),
   KEY `i_eh_ver_realm_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_version_upgrade_rules`;
@@ -14416,7 +14418,7 @@ CREATE TABLE `eh_version_upgrade_rules` (
   KEY `i_eh_ver_upgrade_order` (`order`),
   KEY `i_eh_ver_upgrade_create_time` (`create_time`),
   CONSTRAINT `eh_version_upgrade_rules_ibfk_1` FOREIGN KEY (`realm_id`) REFERENCES `eh_version_realm` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_version_urls`;
@@ -14436,7 +14438,7 @@ CREATE TABLE `eh_version_urls` (
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_ver_url` (`realm_id`,`target_version`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_versioned_content`;
@@ -14457,7 +14459,7 @@ CREATE TABLE `eh_versioned_content` (
   KEY `i_eh_ver_content_order` (`order`),
   KEY `i_eh_ver_content_create_time` (`create_time`),
   CONSTRAINT `eh_versioned_content_ibfk_1` FOREIGN KEY (`realm_id`) REFERENCES `eh_version_realm` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_warehouse_material_categories`;
@@ -14479,7 +14481,7 @@ CREATE TABLE `eh_warehouse_material_categories` (
   `delete_uid` BIGINT,
   `delete_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_warehouse_materials`;
@@ -14506,7 +14508,7 @@ CREATE TABLE `eh_warehouse_materials` (
   `delete_uid` BIGINT,
   `delete_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_warehouse_request_materials`;
@@ -14530,7 +14532,7 @@ CREATE TABLE `eh_warehouse_request_materials` (
   `delivery_uid` BIGINT,
   `delivery_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_warehouse_requests`;
@@ -14551,7 +14553,7 @@ CREATE TABLE `eh_warehouse_requests` (
   `create_time` DATETIME,
   `update_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_warehouse_stock_logs`;
@@ -14573,7 +14575,7 @@ CREATE TABLE `eh_warehouse_stock_logs` (
   `delivery_uid` BIGINT,
   `create_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_warehouse_stocks`;
@@ -14594,7 +14596,7 @@ CREATE TABLE `eh_warehouse_stocks` (
   `delete_uid` BIGINT,
   `delete_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_warehouse_units`;
@@ -14612,7 +14614,7 @@ CREATE TABLE `eh_warehouse_units` (
   `deletor_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record deleter user id',
   `delete_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_warehouses`;
@@ -14636,7 +14638,7 @@ CREATE TABLE `eh_warehouses` (
   `delete_uid` BIGINT,
   `delete_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_warning_contacts`;
@@ -14650,7 +14652,7 @@ CREATE TABLE `eh_warning_contacts` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_warning_settings`;
@@ -14667,7 +14669,7 @@ CREATE TABLE `eh_warning_settings` (
   `operator_uid` BIGINT,
   `category_id` BIGINT COMMENT '入口id',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -14687,7 +14689,7 @@ CREATE TABLE `eh_web_menu_privileges` (
   `sort_num` INTEGER COMMENT 'sort number',
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -14705,7 +14707,7 @@ CREATE TABLE `eh_web_menu_scopes` (
   `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: delete , 1: override, 2: revert',
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_menu_scope_owner` (`menu_id`,`owner_type`,`owner_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 -- web menu
@@ -14729,7 +14731,7 @@ CREATE TABLE `eh_web_menus` (
   `condition_type` VARCHAR(32),
   `category` VARCHAR(32),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_wifi_settings`;
@@ -14746,7 +14748,7 @@ CREATE TABLE `eh_wifi_settings` (
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0 : inactive, 1: active',
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -14764,7 +14766,7 @@ CREATE TABLE `eh_yellow_page_attachments` (
   `create_time` DATETIME,
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -14804,7 +14806,7 @@ CREATE TABLE `eh_yellow_pages` (
   `create_time` DATETIME,
   `building_id` BIGINT COMMENT 'eh_buildings id',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_yzb_devices`;
@@ -14823,7 +14825,7 @@ CREATE TABLE `eh_yzb_devices` (
   `create_time` DATETIME,
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_yzx_sms_logs`;
 
@@ -14848,7 +14850,7 @@ CREATE TABLE `eh_yzx_sms_logs` (
   `create_time` DATETIME,
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_contact_token` (`sms_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_zj_syncdata_backup`;
 
@@ -14867,4 +14869,4 @@ CREATE TABLE `eh_zj_syncdata_backup` (
   `creator_uid` BIGINT,
   `update_time` DATETIME,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
