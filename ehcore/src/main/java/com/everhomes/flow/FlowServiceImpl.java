@@ -5024,7 +5024,7 @@ public class FlowServiceImpl implements FlowService {
         }
 
         if (FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB) {
-            return ConvertHelper.convert(getDumpFlowCaseBrief(flowCase), FlowCaseDetailDTOV2.class);
+            return getDumpFlowCaseBrief(flowCase, FlowCaseDetailDTOV2.class);
         }
 
         FlowCaseDetailDTOV2 dto = ConvertHelper.convert(flowCase, FlowCaseDetailDTOV2.class);
@@ -5192,7 +5192,7 @@ public class FlowServiceImpl implements FlowService {
         }
 
         if (FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB) {
-            return getDumpFlowCaseBrief(flowCase);
+            return getDumpFlowCaseBrief(flowCase, FlowCaseBriefDTO.class);
         }
 
         FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
@@ -5290,12 +5290,16 @@ public class FlowServiceImpl implements FlowService {
         return dto;
     }
 
-    private FlowCaseBriefDTO getDumpFlowCaseBrief(FlowCase flowCase) {
-        FlowCaseBriefDTO dto = ConvertHelper.convert(flowCase, FlowCaseBriefDTO.class);
+    private <DTO> DTO getDumpFlowCaseBrief(FlowCase flowCase, Class<DTO> clazz) {
+        DTO dto = ConvertHelper.convert(flowCase, clazz);
         List<FlowUserType> flowUserTypes = new ArrayList<>();
         flowUserTypes.add(FlowUserType.APPLIER);
         List<FlowCaseEntity> entities = getFlowCaseEntities(flowUserTypes, flowCase);
-        dto.setEntities(entities);
+        if (dto instanceof FlowCaseBriefDTO) {
+            ((FlowCaseBriefDTO) dto).setEntities(entities);
+        } else if (dto instanceof FlowCaseDetailDTOV2) {
+            ((FlowCaseDetailDTOV2) dto).setEntities(entities);
+        }
         return dto;
     }
 
