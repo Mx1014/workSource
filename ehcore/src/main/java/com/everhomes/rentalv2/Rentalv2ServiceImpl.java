@@ -1636,9 +1636,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//状态为已完成时 创建门禁授权
 		if (SiteBillStatus.COMPLETE.getCode() == status){
 			RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-			Long doorAuthId = createDoorAuth(order.getRentalUid(),order.getAuthStartTime().getTime(),order.getAuthEndTime().getTime(),
-					rs.getAclinkId(),rs.getCreatorUid());
-			rentalv2Provider.setAuthDoorId(order.getId(),doorAuthId);
+			if (rs.getAclinkId()!=null) {
+				Long doorAuthId = createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
+						rs.getAclinkId(), rs.getCreatorUid());
+				rentalv2Provider.setAuthDoorId(order.getId(), doorAuthId);
+			}
 		}
 
 
@@ -3136,8 +3138,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//线下模式和审批线上模式 都走工作流
 		if(bill.getPayMode().equals(PayMode.OFFLINE_PAY.getCode())
 				|| bill.getPayMode().equals(PayMode.APPROVE_ONLINE_PAY.getCode())) {
-			this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()+bill.getRentalResourceId())
-					.enter(() -> {
+
+			//TODO
+//			this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()+bill.getRentalResourceId())
+//					.enter(() -> {
 						List<RentalBillRuleDTO> rules = new ArrayList<>();
 						//验证订单下的资源是否足够
 						List<RentalResourceOrder> rsbs = rentalv2Provider
@@ -3162,8 +3166,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 						rentalv2Provider.updateRentalBill(bill);
 
-						return null;
-					});
+//						return null;
+//					});
 		}else {
 			rentalv2Provider.updateRentalBill(bill);
 
@@ -3240,7 +3244,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setFlowMainId(flow.getFlowMainId());
 			cmd.setFlowVersion(flow.getFlowVersion());
 			return flowService.createFlowCase(cmd);
-		}else{
+		}else if (PayMode.ONLINE_PAY.getCode()==order.getPayMode()){
 			//预约成功 授权门禁
 			RentalResource rentalResource = rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
 			if (rentalResource.getAclinkId()!=null) {
@@ -3261,7 +3265,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			gm.setOrganizationId(cmd.getCurrentOrganizationId());
 			return flowService.createDumpFlowCase(gm,cmd);
 		}
-
+			return null;
     	}
 
 
