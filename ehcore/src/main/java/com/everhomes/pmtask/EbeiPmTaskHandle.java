@@ -655,11 +655,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
         dbProvider.execute((TransactionStatus status) -> {
 
             EbeiPmTaskDTO ebeiPmTask = getTaskDetail(task);
-            //TODO  枚举值更新
-            Integer state = ebeiPmTask.getState()==6 ? PmTaskStatus.INACTIVE.getCode():ebeiPmTask.getState();
-            task.setStatus(state.byteValue() > PmTaskStatus.PROCESSED.getCode() ? PmTaskStatus.PROCESSED.getCode(): state.byteValue() );
-            //pmTaskProvider.updateTask(task);
-            dto.setStatus(task.getStatus());
+
+            dto.setStatus(ebeiPmTask.getState().byteValue());
 
 
             CategoryDTO taskCategory = createCategoryDTO();
