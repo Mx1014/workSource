@@ -968,10 +968,10 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	
 	private QuestionnaireDTO getTargetQuestionnaireDetail(Long questionnaireId, Long organizationId){
 		List<QuestionnaireOption> questionnaireOptions = questionnaireOptionProvider.listOptionsByQuestionnaireId(questionnaireId);
-		return convertToQuestionnaireDTO(questionnaireOptions, organizationId);
+		return convertToQuestionnaireDTO(questionnaireOptions, organizationId, UserContext.current().getUser().getId());
 	}
 
-	private QuestionnaireDTO convertToQuestionnaireDTO(List<QuestionnaireOption> questionnaireOptions, Long organizationId) {
+	private QuestionnaireDTO convertToQuestionnaireDTO(List<QuestionnaireOption> questionnaireOptions, Long organizationId, Long userId) {
 		List<QuestionnaireDTO> questionnaireDTOs = new ArrayList<>();
 		// k1为问卷的id，k2为问题的id
 		Map<Long, Map<Long, List<QuestionnaireOption>>> map = questionnaireOptions.parallelStream().collect(Collectors.groupingBy(QuestionnaireOption::getQuestionnaireId,Collectors.groupingBy(QuestionnaireOption::getQuestionId)));
@@ -982,7 +982,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			if(QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(questionnaire.getTargetType())){
 				sTargetId = organizationId;
 			}else {
-				sTargetId = UserContext.current().getUser().getId();
+				sTargetId = userId;
 			}
 			final Long targetId = sTargetId;
 			Byte[] answersFlag = new Byte[1];
@@ -1264,5 +1264,15 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public GetTargetQuestionnaireDetailResponse getAnsweredQuestionnaireDetail(GetTargetQuestionnaireDetailCommand cmd) {
+		List<QuestionnaireOption> questionnaireOptions = questionnaireOptionProvider.listOptionsByQuestionnaireId(cmd.getQuestionnaireId());
+		if(QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(cmd.getTargetType())){
+			return new GetTargetQuestionnaireDetailResponse(convertToQuestionnaireDTO(questionnaireOptions,cmd.getTargetId(),null));
+		}
+		return new GetTargetQuestionnaireDetailResponse(convertToQuestionnaireDTO(questionnaireOptions,null,cmd.getTargetId()));
+
 	}
 }
