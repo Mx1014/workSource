@@ -1845,8 +1845,7 @@ public class ForumServiceImpl implements ForumService {
 
 
         this.forumProvider.populatePostAttachments(posts);
-        
-        locator.setAnchor(null);
+
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
             //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
@@ -1854,6 +1853,8 @@ public class ForumServiceImpl implements ForumService {
             // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
             Long nextpageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
             locator.setAnchor(nextpageAnchor);
+        }else {
+            locator.setAnchor(null);
         }
         
         populatePosts(user.getId(), posts, null, false);
