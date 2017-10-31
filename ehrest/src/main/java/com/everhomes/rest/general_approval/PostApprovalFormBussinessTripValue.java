@@ -4,8 +4,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>startTime: 开始时间</li>
- * <li>endTime: 结束时间</li>
+ * <li>startTime: 开始时间 格式为:yy-MM-dd HH:mm</li>
+ * <li>endTime: 结束时间 格式为:yy-MM-dd HH:mm</li>
  * <li>duration: 出差时长</li>
  * </ul>
  */
