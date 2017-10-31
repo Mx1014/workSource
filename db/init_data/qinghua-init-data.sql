@@ -3017,6 +3017,6 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 -- 园区入驻 add by sw 20171027
 set @id = IFNULL((select MAX(id) FROM eh_lease_configs), 1);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
-	VALUES ((@id := @id + 1), '999966', NULL, NULL, 'areaSearchFlag', '1', NULL, NULL);
+	VALUES ((@id := @id + 1), '999984', NULL, NULL, 'areaSearchFlag', '1', NULL, NULL);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
-	VALUES ((@id := @id + 1), '999966', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+	VALUES ((@id := @id + 1), '999984', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
