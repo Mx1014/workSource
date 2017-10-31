@@ -2001,6 +2001,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private EnergyMeterFormulaDTO toEnergyMeterFormulaDTO(EnergyMeterFormula formula) {
+        if(formula == null) {
+            return null;
+        }
         EnergyMeterFormulaDTO dto = ConvertHelper.convert(formula, EnergyMeterFormulaDTO.class);
         dto.setExpression(formula.getDisplayExpression());
         return dto;
