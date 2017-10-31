@@ -141,11 +141,11 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 
 	@Override
 	public List<QuestionnaireAnswer> listTargetQuestionnaireAnswerByQuestionId(Long questionId, String targetType,
-			Long createUid) {
+			Long targetId) {
 		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_ANSWERS)
 				.where(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTION_ID.eq(questionId))
 				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(targetType))
-				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.CREATOR_UID.eq(createUid))
+				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(targetId))
 				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireAnswer.class));
 	}
 
