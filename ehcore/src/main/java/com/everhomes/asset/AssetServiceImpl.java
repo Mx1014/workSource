@@ -305,7 +305,8 @@ public class AssetServiceImpl implements AssetService {
                 List<Tuple<String, Object>> variables = new ArrayList<>();
                 smsProvider.addToTupleList(variables, "targetName", noticeInfo.getTargetName());
                 //模板改了，所以这个也要改
-                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
+//                smsProvider.addToTupleList(variables, "dateStr", noticeInfo.getDateStr());
+                smsProvider.addToTupleList(variables, "dateStr", "2017-10");
 //            smsProvider.addToTupleList(variables,"amount2",noticeInfo.getAmountOwed());
                 smsProvider.addToTupleList(variables, "appName", noticeInfo.getAppName());
                 String templateLocale = UserContext.current().getUser().getLocale();
