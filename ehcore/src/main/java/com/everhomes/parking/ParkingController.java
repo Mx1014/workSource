@@ -696,7 +696,7 @@ public class ParkingController extends ControllerBase {
 
     /**
      * <b>URL: /parking/deleteCarVerification</b>
-     * <p>获取车辆认证申请</p>
+     * <p>删除车辆认证</p>
      */
     @RequestMapping("deleteCarVerification")
     @RestReturn(value=String.class)
