@@ -45,27 +45,27 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
     
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21008, '0', '能耗管理 删除抄表记录权限', '能耗管理 删除抄表记录权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'49120','0',21000,'能耗管理 删除抄表记录权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'49120','0',21008,'能耗管理 删除抄表记录权限','0',NOW());
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21009, '0', '能耗管理 查看每日水电总表权限', '能耗管理 查看每日水电总表权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'49130','0',21000,'能耗管理 查看每日水电总表权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'49130','0',21009,'能耗管理 查看每日水电总表权限','0',NOW());
     
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21010, '0', '能耗管理 查看月度水电分析表权限', '能耗管理 查看月度水电分析表权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'49130','0',21000,'能耗管理 查看月度水电分析表权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'49130','0',21010,'能耗管理 查看月度水电分析表权限','0',NOW());
     
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21011, '0', '能耗管理 查看年度水电用量收支对比表', '能耗管理 查看年度水电用量收支对比表', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'49130','0',21000,'能耗管理 查看年度水电用量收支对比表','0',NOW());    
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'49130','0',21011,'能耗管理 查看年度水电用量收支对比表','0',NOW());    
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21012, '0', '能耗管理 查看各项目月水电能耗情况权限', '能耗管理 查看各项目月水电能耗情况权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'49130','0',21000,'能耗管理 查看各项目月水电能耗情况权限','0',NOW());  
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'49130','0',21012,'能耗管理 查看各项目月水电能耗情况权限','0',NOW());  
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (21013, '0', '能耗管理 参数设置权限', '能耗管理 参数设置权限', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'49140','0',21000,'能耗管理 参数设置权限','0',NOW());  
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'49140','0',21013,'能耗管理 参数设置权限','0',NOW());  
     
 -- 提醒
 SET @max_template_id = IFNULL((SELECT MAX(id) FROM `eh_locale_templates`), 1);
