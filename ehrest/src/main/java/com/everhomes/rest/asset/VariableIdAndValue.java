@@ -78,4 +78,13 @@ public class VariableIdAndValue {
     public void setVaribleIdentifier(Object varibleIdentifier) {
         this.varibleIdentifier = varibleIdentifier;
     }
+
+    public VariableIdAndValue() {
+    }
+
+    public VariableIdAndValue(Object variableId, Object variableValue, Object varibleIdentifier) {
+        this.variableId = variableId;
+        this.variableValue = variableValue;
+        this.varibleIdentifier = varibleIdentifier;
+    }
 }

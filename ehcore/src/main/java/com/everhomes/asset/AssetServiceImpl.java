@@ -1110,7 +1110,8 @@ public class AssetServiceImpl implements AssetService {
             Map<String,String> variableMap = new HashMap<>();
             for(int k = 0; k< var2.size(); k++){
                 VariableIdAndValue variableIdAndValue = var2.get(k);
-                variableMap.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
+//                variableMap.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
+                variableMap.put((String)variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
             }
             json = gson.toJson(variableMap, Map.class);
             entity.setVariablesJsonString(json);
@@ -1849,7 +1850,8 @@ public class AssetServiceImpl implements AssetService {
         HashMap<String,String> map = new HashMap();
         for(int i = 0; i < variableIdAndValueList.size(); i++){
             VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
-            map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
+//            map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
+            map.put((String)variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
         }
         for(Map.Entry<String,String> entry : map.entrySet()){
             formula = formula.replace(entry.getKey(),entry.getValue());
@@ -1865,7 +1867,8 @@ public class AssetServiceImpl implements AssetService {
         HashMap<String,String> map = new HashMap();
         for(int i = 0; i < variableIdAndValueList.size(); i++){
             VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
-            map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
+            map.put((String)variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
+//            map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
         }
         for(Map.Entry<String,String> entry : map.entrySet()){
             formula = formula.replace(entry.getKey(),entry.getValue());
@@ -1923,8 +1926,10 @@ public class AssetServiceImpl implements AssetService {
             //斜面计算
             for (int i = 0; i < variableIdAndValueList.size(); i++) {
                 VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
-                String varibleIdentifier = variableIdAndValue.getVaribleIdentifier();
-                BigDecimal variableValue = variableIdAndValue.getVariableValue();
+//                String varibleIdentifier = variableIdAndValue.getVaribleIdentifier();
+//                BigDecimal variableValue = variableIdAndValue.getVariableValue();
+                String varibleIdentifier = (String)variableIdAndValue.getVaribleIdentifier();
+                BigDecimal variableValue = new BigDecimal(variableIdAndValue.getVariableValue().toString());
                 if (!condition.getConstraintVariableIdentifer().equals(varibleIdentifier)) {
                     continue;
                 }
@@ -1972,8 +1977,11 @@ public class AssetServiceImpl implements AssetService {
             //阶梯
             for (int i = 0; i < variableIdAndValueList.size(); i++) {
                 VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
-                String varibleIdentifier = variableIdAndValue.getVaribleIdentifier();
-                BigDecimal variableValue = variableIdAndValue.getVariableValue();
+//                String varibleIdentifier = variableIdAndValue.getVaribleIdentifier();
+//                BigDecimal variableValue = variableIdAndValue.getVariableValue();
+
+                String varibleIdentifier = (String)variableIdAndValue.getVaribleIdentifier();
+                BigDecimal variableValue = new BigDecimal(variableIdAndValue.getVariableValue().toString());
                 if (!condition.getConstraintVariableIdentifer().equals(varibleIdentifier)) {
                     continue;
                 }
@@ -1984,7 +1992,8 @@ public class AssetServiceImpl implements AssetService {
                 List<VariableIdAndValue> copy = new ArrayList<>();
                 for (int k = 0; k < variableIdAndValueList.size(); k++) {
                     VariableIdAndValue var_temp_orig = variableIdAndValueList.get(k);
-                    BigDecimal realValue = var_temp_orig.getVariableValue();
+//                    BigDecimal realValue = var_temp_orig.getVariableValue();
+                    BigDecimal realValue = new BigDecimal(var_temp_orig.getVariableValue().toString());
                     if (var_temp_orig.getVaribleIdentifier().equals(varibleIdentifier)) {
                         realValue = IntegerUtil.getIntersectionDecimal(startNum, endNum, variableStartNum, variableValue);
                     }
