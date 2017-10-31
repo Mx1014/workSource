@@ -2,14 +2,14 @@
 package com.everhomes.rest.asset;
 
 /**
- * Created by Wentian Wang on 2017/10/12.
+ * Created by Wentian Wang on 2017/10/31.
  */
 /**
  *<ul>
- * <li>failCause:回馈消息</li>
+ * <li>failCause:失败或成功的描述</li>
  *</ul>
  */
-public class DeleteChargingStandardDTO {
+public class DeleteChargingItemForBillGroupResponse {
     private String failCause;
 
     public String getFailCause() {

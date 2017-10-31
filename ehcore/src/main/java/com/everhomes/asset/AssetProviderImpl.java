@@ -654,7 +654,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.AMOUNT_OWED,t.APARTMENT_NAME,t.BUILDING_NAME)
+        dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
                 .fetch()
@@ -2334,7 +2334,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetch(t.CHARGING_ITEM_ID);
         if(ruleId == null){
             if(fetch.contains(cmd.getChargingItemId())){
-                response.setFailCause("添加失败，一个收费项目只能在一个账单组里添加一次");
+                response.setFailCause(AssetPaymentStrings.CREATE_CHARGING_ITEM_FAIL);
                 return response;
             }
             //新增 一条billGroupRule
@@ -2350,13 +2350,15 @@ public class AssetProviderImpl implements AssetProvider {
             rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
             rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
             dao.insert(rule);
+            response.setFailCause(AssetPaymentStrings.SAVE_SUCCESS);
         }else{
             rule = readOnlyContext.selectFrom(t)
                     .where(t.ID.eq(ruleId))
                     .fetchOneInto(PaymentBillGroupRule.class);
-            boolean workFlag = isInWorkGroupRule(rule,false);
+            boolean workFlag = isInWorkGroupRule(rule);
             if(workFlag){
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_ACCESS_DENIED,"已关联合同，不能修改");
+                response.setFailCause(AssetPaymentStrings.MODIFY_GROUP_RULE_UNSAFE);
+                return response;
             }
             //如果没有关联则不修改
             rule.setBillGroupId(cmd.getBillGroupId());
@@ -2368,12 +2370,8 @@ public class AssetProviderImpl implements AssetProvider {
             rule.setOwnertype(group.getOwnerType());
             rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
             rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
-            dao.insert(rule);
-
-            writeContext.delete(t)
-                    .where(t.ID.eq(rule.getId()))
-                    .execute();
-            dao.insert(rule);
+            dao.update(rule);
+            response.setFailCause(AssetPaymentStrings.MODIFY_SUCCESS);
         }
         return response;
     }
@@ -2386,21 +2384,35 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchOneInto(PaymentBillGroupRule.class);
     }
     @Override
-    public boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule, boolean b) {
+    public boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule) {
         DSLContext context = getReadOnlyContext();
         EhPaymentContractReceiver t = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t");
-        if(!b){
-            List<PaymentContractReceiver> list = context.selectFrom(t)
-                    .where(t.OWNER_ID.eq(rule.getOwnerid()))
-                    .and(t.OWNER_TYPE.eq(rule.getOwnertype()))
-                    .and(t.NAMESPACE_ID.eq(rule.getNamespaceId()))
-                    .and(t.EH_PAYMENT_CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
-                    .and(t.EH_PAYMENT_CHARGING_STANDARD_ID.eq(rule.getChargingStandardsId()))
-                    .fetchInto(PaymentContractReceiver.class);
-            if(list!=null && list.size()>0){
+        EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
+        //看是否关联了合同
+        List<Long> fetch1 = context.select(t.ID)
+                .from(t)
+                .where(t.OWNER_ID.eq(rule.getOwnerid()))
+                .and(t.OWNER_TYPE.eq(rule.getOwnertype()))
+                .and(t.NAMESPACE_ID.eq(rule.getNamespaceId()))
+                .and(t.EH_PAYMENT_CHARGING_ITEM_ID.eq(rule.getChargingItemId()))
+                .and(t.EH_PAYMENT_CHARGING_STANDARD_ID.eq(rule.getChargingStandardsId()))
+                .fetch(t.ID);
+        if(fetch1.size()>0){
+            return true;
+        }
+        //先看是否产生了账单
+        List<Long> fetch = context.select(bills.ID)
+                .from(bills)
+                .where(bills.BILL_GROUP_ID.eq(rule.getBillGroupId()))
+                .fetch(bills.ID);
+
+        if(fetch.size()>0){
+            List<Long> fetch2 = context.select(Tables.EH_PAYMENT_BILL_ITEMS.ID)
+                    .from(Tables.EH_PAYMENT_BILL_ITEMS)
+                    .where(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID.eq(rule.getChargingItemId()))
+                    .fetch(Tables.EH_PAYMENT_BILL_ITEMS.ID);
+            if(fetch2.size()>0){
                 return true;
-            }else{
-                return false;
             }
         }
         return false;
@@ -2433,13 +2445,17 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public boolean checkBillsByBillGroupId(Long billGroupId) {
         DSLContext context = getReadOnlyContext();
-        List<Long> fetch = context.select(Tables.EH_PAYMENT_BILLS.ID).from(Tables.EH_PAYMENT_BILLS)
-                .where(Tables.EH_PAYMENT_BILLS.BILL_GROUP_ID.eq(billGroupId)).fetch(Tables.EH_PAYMENT_BILLS.ID);
-        if(fetch.size()>0){
-            return true;
-        }else{
-            return false;
+        List<PaymentBillGroupRule> rules = context.selectFrom(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(billGroupId))
+                .fetchInto(PaymentBillGroupRule.class);
+        for(int i = 0; i < rules.size(); i ++) {
+            boolean inWorkGroupRule = isInWorkGroupRule(rules.get(i));
+            if(inWorkGroupRule){
+                return true;
+            }
         }
+        return  false;
+
     }
 
     @Override
@@ -2509,6 +2525,19 @@ public class AssetProviderImpl implements AssetProvider {
         return context.selectFrom(Tables.EH_PAYMENT_FORMULA)
                 .where(Tables.EH_PAYMENT_FORMULA.CHARGING_STANDARD_ID.eq(id))
                 .fetchInto(PaymentFormula.class);
+    }
+
+    @Override
+    public boolean cheackGroupRuleExistByChargingStandard(Long chargingStandardId) {
+        DSLContext context = getReadOnlyContext();
+        List<Long> fetch = context.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID)
+                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+                .fetch(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID);
+        if(fetch.size()>0){
+            return true;
+        }
+        return false;
     }
 
 
