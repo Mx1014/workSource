@@ -3139,9 +3139,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(bill.getPayMode().equals(PayMode.OFFLINE_PAY.getCode())
 				|| bill.getPayMode().equals(PayMode.APPROVE_ONLINE_PAY.getCode())) {
 
-			//TODO
-//			this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()+bill.getRentalResourceId())
-//					.enter(() -> {
+
+			this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()+bill.getRentalResourceId())
+					.enter(() -> {
 						List<RentalBillRuleDTO> rules = new ArrayList<>();
 						//验证订单下的资源是否足够
 						List<RentalResourceOrder> rsbs = rentalv2Provider
@@ -3166,8 +3166,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 						rentalv2Provider.updateRentalBill(bill);
 
-//						return null;
-//					});
+						return null;
+					});
 		}else {
 			rentalv2Provider.updateRentalBill(bill);
 
