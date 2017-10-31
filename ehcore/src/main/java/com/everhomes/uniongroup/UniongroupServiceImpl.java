@@ -509,15 +509,16 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Override
     public void syncUniongroupAfterLeaveTheJob(Long detailId) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-//<<<<<<< HEAD
         //1.删除配置表和关系表中的数据(删除时应该删除所有薪酬组的数据)
         this.uniongroupConfigureProvider.deleteUniongroupConfigresByCurrentIdAndGroupTypeAndVersion(detailId, null, null);
         List<UniongroupMemberDetail> uds = this.uniongroupConfigureProvider.findUniongroupMemberDetailByDetailIdWithoutGroupType(namespaceId, detailId);
         this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(Collections.singletonList(detailId), null, null);
-        //2.删除搜索引擎中的失效索引
-        uds.forEach(r -> {
-            this.uniongroupSearcher.deleteById(r.getId());
-        });
+        if(uds != null && uds.size() > 0){
+            //2.删除搜索引擎中的失效索引
+            uds.forEach(r -> {
+                this.uniongroupSearcher.deleteById(r.getId());
+            });
+        }
     }
 
     @Override

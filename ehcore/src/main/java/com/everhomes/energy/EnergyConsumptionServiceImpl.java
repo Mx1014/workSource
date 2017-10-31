@@ -2579,14 +2579,23 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyMeterDTO findEnergyMeterByQRCode(FindEnergyMeterByQRCodeCommand cmd) {
+        if(!isNumeric(cmd.getMeterQRCode())) {
+            LOGGER.error("EnergyMeter not exist, id = {}", cmd.getMeterQRCode());
+            throw errorWith(SCOPE, ERR_METER_NOT_EXIST, "The meter is not exist id = %s", cmd.getMeterQRCode());
+        }
 //        EnergyMeterCodeDTO meterCodeDTO = WebTokenGenerator.getInstance().fromWebToken(cmd.getMeterQRCode(), EnergyMeterCodeDTO.class);
-        EnergyMeter meter = meterProvider.findById((cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId():cmd.getNamespaceId()), cmd.getMeterQRCode());
+        EnergyMeter meter = meterProvider.findById((cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId():cmd.getNamespaceId()), Long.valueOf(cmd.getMeterQRCode()));
         if (meter == null || !EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
             LOGGER.error("EnergyMeter not exist, id = {}", cmd.getMeterQRCode());
             throw errorWith(SCOPE, ERR_METER_NOT_EXIST, "The meter is not exist id = %s", cmd.getMeterQRCode());
         }
 
         return toEnergyMeterDTO(meter,cmd.getNamespaceId());
+    }
+
+    public static boolean isNumeric(String str){
+        Pattern pattern = Pattern.compile("[0-9]*");
+        return pattern.matcher(str).matches();
     }
 
     @Override

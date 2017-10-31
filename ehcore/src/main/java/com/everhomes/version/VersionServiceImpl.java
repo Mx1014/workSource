@@ -1,44 +1,24 @@
 package com.everhomes.version;
 
-import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.rest.version.*;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
-import com.everhomes.namespace.NamespaceProvider;
-import com.everhomes.rest.version.CreateVersionCommand;
-import com.everhomes.rest.version.DeleteVersionCommand;
-import com.everhomes.rest.version.GetUpgradeContentCommand;
-import com.everhomes.rest.version.GetUpgradeContentResponse;
-import com.everhomes.rest.version.ListVersionInfoCommand;
-import com.everhomes.rest.version.ListVersionInfoResponse;
-import com.everhomes.rest.version.UpdateVersionCommand;
-import com.everhomes.rest.version.UpgradeInfoResponse;
-import com.everhomes.rest.version.VersionDTO;
-import com.everhomes.rest.version.VersionInfoDTO;
-import com.everhomes.rest.version.VersionRealmDTO;
-import com.everhomes.rest.version.VersionRequestCommand;
-import com.everhomes.rest.version.VersionServiceErrorCode;
-import com.everhomes.rest.version.VersionUrlResponse;
-import com.everhomes.rest.version.WithoutCurrentVersionRequestCommand;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Version;
-import com.everhomes.util.VersionRange;
+import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class VersionServiceImpl implements VersionService {
@@ -255,13 +235,17 @@ public class VersionServiceImpl implements VersionService {
 			rule.setMatchingLowerBound(versionRange.getLowerBound());
 			rule.setMatchingUpperBound(versionRange.getUpperBound());
 			rule.setOrder(0);
-			rule.setTargetVersion(cmd.getTargetVersion());
+            rule.setTargetVersion(cmd.getTargetVersion());
 			rule.setForceUpgrade(cmd.getForceUpgrade());
 			rule.setNamespaceId(realm.getNamespaceId());
 			versionProvider.createVersionUpgradeRule(rule);
 			
 			VersionUrl url = new VersionUrl();
-			url.setRealmId(cmd.getRealmId());
+
+            Version version = Version.fromVersionString(cmd.getTargetVersion());
+            url.setVersionEncodedValue(version.getEncodedValue());
+
+            url.setRealmId(cmd.getRealmId());
 			url.setTargetVersion(cmd.getTargetVersion());
 			url.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
 			url.setUpgradeDescription(cmd.getUpgradeDescription());
