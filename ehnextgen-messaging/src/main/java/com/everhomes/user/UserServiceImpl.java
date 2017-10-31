@@ -3013,7 +3013,7 @@ public class UserServiceImpl implements UserService {
 //        }
 		sceneDto.setTitleName(titlieName.toString());
 		sceneDto.setName(fullName);
-        sceneDto.setAliasName(aliasName);
+        sceneDto.setAliasName(organizaitonName);
 		sceneDto.setAvatar(organizationDto.getAvatarUri());
 		sceneDto.setAvatarUrl(organizationDto.getAvatarUrl());
 		sceneDto.setCommunityName(communityName);
@@ -3214,7 +3214,7 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setSceneType(sceneType.getCode());
 		sceneDto.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
 		sceneDto.setName(fullName);
-		sceneDto.setAliasName(aliasName);
+		sceneDto.setAliasName(communityName);
 
 		String entityContent = StringHelper.toJsonString(community);
 		sceneDto.setEntityContent(entityContent);
