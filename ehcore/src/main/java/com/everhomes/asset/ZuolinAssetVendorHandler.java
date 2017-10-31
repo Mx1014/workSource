@@ -317,8 +317,15 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         if(targetType.equals("eh_user")) {
             targetId = UserContext.current().getUser().getId();
         }
-        Long cid = Long.parseLong(contractId);
-        List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId,isOwedBill,cid);
+        String contractNum = null;
+        Long cid = null;
+        try{
+            cid = Long.parseLong(contractId);
+        }catch (Exception e){
+            cid = null;
+            contractNum = contractId;
+        }
+        List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId,isOwedBill,cid,contractNum);
         HashSet<String> dateStrFilter = new HashSet<>();
         BigDecimal amountOwed = new BigDecimal("0");
         for(int i = 0; i < billDetailDTOList.size(); i++) {

@@ -50,7 +50,7 @@ public interface AssetProvider {
 
     List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds);
 
-    List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,Long contractId);
+    List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,Long contractId,String contractNum);
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 

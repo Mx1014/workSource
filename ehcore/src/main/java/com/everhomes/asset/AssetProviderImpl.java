@@ -604,7 +604,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,Long contractId) {
+    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,Long contractId,String contractNum) {
         List<BillDetailDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
@@ -628,6 +628,9 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t.SWITCH.eq((byte)1));
         if(contractId!=null){
             query.addConditions(t.CONTRACT_ID.eq(contractId));
+        }
+        if(contractNum!=null){
+            query.addConditions(t.CONTRACT_NUM.eq(contractNum));
         }
         if(isOwedBill==1){
             query.addConditions(t.STATUS.eq((byte)0));
