@@ -257,7 +257,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.LIST.getCode());
 			e.setKey("状态");
-			e.setValue(pmTaskCommonService.convertStatus(dto.getStatus()));
+			e.setValue(EbeiPmTaskStatus.fromCode(dto.getStatus()).getDesc());
 			entities.add(e);
 		}
 
