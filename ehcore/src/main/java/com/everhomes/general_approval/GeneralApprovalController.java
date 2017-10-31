@@ -106,6 +106,21 @@ public class GeneralApprovalController extends ControllerBase {
 //    	
 //    	return response;
 //    }
+	/**
+	 * <b>URL: /general_approval/verifyApprovalTemplates</b>
+	 * <p> 判断是否需要创建审批模板 </p>
+	 */
+	@RequestMapping("verifyApprovalTemplates")
+	@RestReturn(value=VerifyApprovalTemplatesResponse.class)
+	public RestResponse verifyApprovalTemplates(@Valid VerifyApprovalTemplatesCommand cmd) {
+        VerifyApprovalTemplatesResponse res = generalApprovalService.verifyApprovalTemplates(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
 
 	/**
 	 * <b>URL: /general_approval/createApprovalTemplates</b>

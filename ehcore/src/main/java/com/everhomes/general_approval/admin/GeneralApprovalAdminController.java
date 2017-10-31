@@ -197,15 +197,30 @@ public class GeneralApprovalAdminController extends ControllerBase {
     	return response;
     }
 	/**
+	 * <b>URL: /admin/general_approval/verifyApprovalName</b>
+	 * <p> 判断审批是否重名 </p>
+	 * @return
+	 */
+	@RequestMapping("verifyApprovalName")
+	@RestReturn(value=GeneralApprovalDTO.class)
+	public RestResponse verifyApprovalName(@Valid VerifyApprovalNameCommand cmd) {
+		GeneralApprovalDTO result = generalApprovalService.verifyApprovalName(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+	/**
 	 * <b>URL: /admin/general_approval/verifyApprovalFormName</b>
-	 * <p> 判断是否重名 </p>
+	 * <p> 判断审批表单是否重名 </p>
 	 * @return
 	 */
 	@RequestMapping("verifyApprovalFormName")
-	@RestReturn(value=String.class)
+	@RestReturn(value=GeneralFormDTO.class)
 	public RestResponse verifyApprovalFormName(@Valid VerifyApprovalFormNameCommand cmd) {
-        generalFormService.verifyApprovalFormName(cmd);
-		RestResponse response = new RestResponse();
+		GeneralFormDTO result = generalFormService.verifyApprovalFormName(cmd);
+		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 
