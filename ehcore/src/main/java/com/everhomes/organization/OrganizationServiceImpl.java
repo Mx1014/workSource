@@ -13630,7 +13630,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 return r != null;
             }).collect(Collectors.toList());
 
-            return result.get(0);
+            if(result != null){
+                return result.get(0);
+            }
+
+            return null;
         }
     }
 }
