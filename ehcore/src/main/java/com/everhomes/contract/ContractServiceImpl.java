@@ -597,8 +597,8 @@ public class ContractServiceImpl implements ContractService {
 				}
 			}
 		}
-		assetService.paymentExpectancies(command);
-//		assetService.paymentExpectancies_re_struct(command);
+//		assetService.paymentExpectancies(command);
+		assetService.paymentExpectancies_re_struct(command);
 	}
 
 	private List<RentAdjust> generateRentAdjust(List<ContractChargingChangeDTO> adjusts) {
