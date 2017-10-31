@@ -1912,4 +1912,29 @@ public class ParkingServiceImpl implements ParkingService {
 
 		return dtos;
 	}
+
+	@Override
+	public SearchParkingCarVerificationResponse searchParkingCarVerifications(SearchParkingCarVerificationsCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public ListParkingCarVerificationsResponse listParkingCarVerifications(ListParkingCarVerificationsCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public ParkingCarVerificationDTO getParkingCarVerificationById(GetParkingCarVerificationByIdCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public ParkingCarVerificationDTO requestCarVerification(RequestCarVerificationCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void deleteCarVerification(DeleteCarVerificationCommand cmd) {
+
+	}
 }

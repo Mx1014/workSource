@@ -99,4 +99,14 @@ public interface ParkingService {
     ParkingCardType getParkingCardType(String ownerType, Long ownerId, Long parkingLotId, String cardTypeId);
 
     ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(GetExpiredRechargeInfoCommand cmd);
+
+    SearchParkingCarVerificationResponse searchParkingCarVerifications(SearchParkingCarVerificationsCommand cmd);
+
+    ListParkingCarVerificationsResponse listParkingCarVerifications(ListParkingCarVerificationsCommand cmd);
+
+    ParkingCarVerificationDTO getParkingCarVerificationById(GetParkingCarVerificationByIdCommand cmd);
+
+    ParkingCarVerificationDTO requestCarVerification(RequestCarVerificationCommand cmd);
+
+    void deleteCarVerification(DeleteCarVerificationCommand cmd);
 }
