@@ -5104,6 +5104,14 @@ public class FlowServiceImpl implements FlowService {
         // 节点日志
         List<FlowLaneLogDTO> laneLogList = getFlowLaneLogDTOList(flowGraph, flowUserTypes, flowCase, allFlowCase, laneList);
         dto.setLanes(laneLogList);
+
+        for (int i = laneLogList.size() - 1; i >= 0; i--) {
+            FlowLaneLogDTO laneLogDTO = laneLogList.get(i);
+            if (laneLogDTO.getLogs().size() > 0 || TrueOrFalseFlag.TRUE.getCode().equals(laneLogDTO.getIsCurrentLane())) {
+                dto.setCurrNodeParams(laneLogDTO.getCurrNodeParams());
+                break;
+            }
+        }
         return dto;
     }
 
@@ -5284,6 +5292,7 @@ public class FlowServiceImpl implements FlowService {
             FlowLaneLogDTO laneLogDTO = list.get(i);
             if (laneLogDTO.getLogs().size() > 0 || TrueOrFalseFlag.TRUE.getCode().equals(laneLogDTO.getIsCurrentLane())) {
                 dto.setCurrentLane(laneLogDTO);
+                dto.setCurrNodeParams(laneLogDTO.getCurrNodeParams());
                 break;
             }
         }
@@ -5644,6 +5653,7 @@ public class FlowServiceImpl implements FlowService {
                 if (flowCase.getCurrentLaneId().equals(prefixLane.getLaneId()) && Objects.equals(nodeLogDTO.getIsCurrentNode(), TrueOrFalseFlag.TRUE.getCode())) {
                     prefixLane.setIsCurrentLane(TrueOrFalseFlag.TRUE.getCode());
                     prefixLane.setNeedSelectNextNode(nodeLogDTO.getNeedSelectNextNode());
+                    prefixLane.setCurrNodeParams(nodeLogDTO.getParams());
                 }
                 prefixLane.getLogs().addAll(nodeLogDTO.getLogs());
             } else {
@@ -5668,6 +5678,7 @@ public class FlowServiceImpl implements FlowService {
                 if (flowCase.getCurrentLaneId().equals(lane.getId()) && Objects.equals(nodeLogDTO.getIsCurrentNode(), TrueOrFalseFlag.TRUE.getCode())) {
                     prefixLane.setIsCurrentLane(TrueOrFalseFlag.TRUE.getCode());
                     prefixLane.setNeedSelectNextNode(nodeLogDTO.getNeedSelectNextNode());
+                    prefixLane.setCurrNodeParams(nodeLogDTO.getParams());
                 }
             }
         }
