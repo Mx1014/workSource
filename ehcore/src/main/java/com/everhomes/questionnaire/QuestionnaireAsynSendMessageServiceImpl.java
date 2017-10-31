@@ -114,7 +114,12 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		//计算推送消息的用户范围
 		Set<String> userLevelRanges = calculateQuesionnaireRange(questionnaire);
 		//保存文件的范围和用户数量
-		questionnaire.setTargetUserNum(userLevelRanges.size());
+		QuestionnaireTargetType targetType = QuestionnaireTargetType.fromCode(questionnaire.getTargetType());
+		if(targetType == QuestionnaireTargetType.USER) {
+			questionnaire.setTargetUserNum(userLevelRanges.size());
+		}else if(targetType == QuestionnaireTargetType.ORGANIZATION){
+			questionnaire.setTargetUserNum(questionnaire.getRanges().size());
+		}
 		questionnaire.setUserScope(StringHelper.toJsonString(userLevelRanges));
 		//发送消息
 		questionnaire.setScopeSentMessageUsers(StringHelper.toJsonString(sendMessage(questionnaire)));
