@@ -215,5 +215,9 @@ public interface AssetProvider {
 
     boolean cheackGroupRuleExistByChargingStandard(Long chargingStandardId);
 
-    void setInworkFlagInContractReceiver(Long contractId);
+    void setInworkFlagInContractReceiver(Long contractId,String contractNum);
+
+    void setInworkFlagInContractReceiverWell(Long contractId, String contractNum);
+
+    Boolean checkContractInWork(String contractNum);
 }

@@ -885,7 +885,8 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd) {
         Long contractId = cmd.getContractId();
-        assetProvider.setInworkFlagInContractReceiver(contractId);
+        String contractNum = cmd.getContractNum();
+        assetProvider.setInworkFlagInContractReceiver(contractId,contractNum);
         SimpleDateFormat sdf_dateStrD = new SimpleDateFormat("yyyy-MM-dd");
 //        SimpleDateFormat sdf_dateStr = new SimpleDateFormat("yyyy-MM");
         Gson gson = new Gson();
@@ -1075,10 +1076,16 @@ public class AssetServiceImpl implements AssetService {
                         //初始化账单状态（未缴，缴清）
                         newBill.setStatus((byte)0);
                         //设定缴费状态（正常，欠费）
-                        String today = sdf_dateStrD.format(Calendar.getInstance().getTime());
-                        if(today.compareTo(exp.getBillDateDeadline())==1){
-                            newBill.setChargeStatus((byte)1);
-                        }else{
+                        Date today = Calendar.getInstance().getTime();
+                        Date x_v = null;
+                        try{
+                             x_v = sdf_dateStrD.parse(exp.getBillDateDeadline());
+                            if(today.compareTo(x_v)!=-1){
+                                newBill.setChargeStatus((byte)1);
+                            }else{
+                                newBill.setChargeStatus((byte)0);
+                            }
+                        }catch (Exception e){
                             newBill.setChargeStatus((byte)0);
                         }
                     }
@@ -1087,9 +1094,17 @@ public class AssetServiceImpl implements AssetService {
 //                    }
                     for(int k = 0 ; k < innerBillItemsList.size(); k ++){
                         EhPaymentBillItems item = innerBillItemsList.get(k);
-                        String dateGeneration = item.getDateStrGeneration();
-                        String billCycleStart = newBill.getDateStrBegin();
-                        String billCycleEnd = newBill.getDateStrEnd();
+                        Date dateGeneration = null;
+                        Date billCycleEnd = null;
+                        Date billCycleStart = null;
+                        try{
+                             dateGeneration = sdf_dateStrD.parse(item.getDateStrGeneration());
+                             billCycleEnd = sdf_dateStrD.parse(newBill.getDateStrEnd());
+                             billCycleStart = sdf_dateStrD.parse(newBill.getDateStrBegin());
+                        }catch (Exception e){
+                            continue;
+                        }
+
                         //费用产生时分要比账单产生的时分要早, 费用产生周期要在周期内
                         if((dateGeneration.compareTo(billCycleEnd)!=1 //闭区间
                                 && dateGeneration.compareTo(billCycleStart) != -1)&&item.getBillId()==null){
@@ -1164,6 +1179,7 @@ public class AssetServiceImpl implements AssetService {
             assetProvider.saveContractVariables(contractDateList);
             return null;
         });
+        assetProvider.setInworkFlagInContractReceiverWell(contractId,contractNum);
     }
 
     private List<BillItemsExpectancy> assetFeeHandler(List<VariableIdAndValue> var2, String formula, PaymentBillGroupRule groupRule, PaymentBillGroup group, FeeRules rule,Integer cycle,PaymentExpectanciesCommand cmd,ContractProperty property,EhPaymentChargingStandards standard,List<PaymentFormula> formulaCondition) {

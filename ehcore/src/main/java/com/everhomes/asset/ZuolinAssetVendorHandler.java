@@ -7,6 +7,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contract.ContractService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -541,6 +542,12 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         }
         if(cmd.getPageOffset()==null||cmd.getPageOffset()<0){
             cmd.setPageSize(0);
+        }
+        //先查看任务
+        Boolean inWork = assetProvider.checkContractInWork(cmd.getContractNum());
+        if(inWork){
+//            return response;
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_ACCESS_DENIED,"Mission in process");
         }
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize());
         if(dtos.size() <= cmd.getPageSize()){

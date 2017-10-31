@@ -2566,12 +2566,44 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void setInworkFlagInContractReceiver(Long contractId) {
+    public void setInworkFlagInContractReceiver(Long contractId,String contractNum) {
         DSLContext writeContext = getReadWriteContext();
         PaymentContractReceiver cr = new PaymentContractReceiver();
         long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver.class));
         cr.setId(nextSequence);
-        cr.set
+        cr.setContractId(contractId);
+        cr.setContractNum(contractNum);
+        cr.setInWork((byte)1);
+        cr.setIsRecorder((byte)1);
+        EhPaymentContractReceiverDao dao = new EhPaymentContractReceiverDao(writeContext.configuration());
+        dao.insert(cr);
+    }
+
+    @Override
+    public void setInworkFlagInContractReceiverWell(Long contractId, String contractNum) {
+        DSLContext writeContext = getReadWriteContext();
+        PaymentContractReceiver cr = new PaymentContractReceiver();
+        EhPaymentContractReceiver contract = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract");
+        writeContext.update(contract)
+                .set(contract.IN_WORK,(byte)0)
+                .where(contract.CONTRACT_ID.eq(contractId))
+                .and(contract.CONTRACT_NUM.eq(contractNum))
+                .execute();
+    }
+
+    @Override
+    public Boolean checkContractInWork(String contractNum) {
+        EhPaymentContractReceiver contract = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract");
+        DSLContext context = getReadOnlyContext();
+        Byte aByte = context.select(contract.IN_WORK)
+                .from(contract)
+                .where(contract.IS_RECORDER.eq((byte) 1))
+                .and(contract.CONTRACT_NUM.eq(contractNum))
+                .fetchOne(contract.IN_WORK);
+        if(aByte == (byte)0){
+            return false;
+        }
+        return true;
     }
 
 
