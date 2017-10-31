@@ -1112,7 +1112,10 @@ public class ForumServiceImpl implements ForumService {
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
             //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
-            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+            //nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         
         populatePosts(userId, posts, communityId, false);
@@ -1263,7 +1266,10 @@ public class ForumServiceImpl implements ForumService {
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
             //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
-            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+            //nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         
         populatePosts(operatorId, posts, communityId, false);
@@ -1316,7 +1322,8 @@ public class ForumServiceImpl implements ForumService {
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
             //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
-            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         List<PostDTO> postDtoList = posts.stream().map((r) -> {
         	
@@ -1843,7 +1850,10 @@ public class ForumServiceImpl implements ForumService {
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
             //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
-            locator.setAnchor(posts.get(posts.size() - 1).getCreateTime().getTime());
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            Long nextpageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
+            locator.setAnchor(nextpageAnchor);
         }
         
         populatePosts(user.getId(), posts, null, false);
@@ -2094,7 +2104,10 @@ public class ForumServiceImpl implements ForumService {
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
             //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
-            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+            //nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         
         populatePosts(operatorId, posts, null, true);
@@ -2977,7 +2990,10 @@ public class ForumServiceImpl implements ForumService {
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
             //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
-            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+            //nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         
         populatePosts(userId, posts, communityId, false);
@@ -3168,7 +3184,10 @@ public class ForumServiceImpl implements ForumService {
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
             //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
-            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+            //nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         
         populatePosts(userId, posts, cmd.getCommunityId(), false);
@@ -5801,7 +5820,7 @@ public class ForumServiceImpl implements ForumService {
             
             if(posts.size() > pageSize) {
                 posts.remove(posts.size() - 1);
-                nextPageAnchor = posts.get(posts.size() - 1).getId();
+                nextPageAnchor = cmd.getPageAnchor() == null ? 2 : cmd.getPageAnchor() + 1;
             }
             
             populatePosts(userId, posts, communityId, false);
@@ -5912,7 +5931,10 @@ public class ForumServiceImpl implements ForumService {
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
             //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
-            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+            //nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = locator.getAnchor() == null ? 2 : locator.getAnchor() + 1;
         }
         
         populatePosts(userId, posts, communityId, false);
@@ -6187,7 +6209,10 @@ public class ForumServiceImpl implements ForumService {
         if(resultPostList.size() > thisPageSize) {
         	resultPostList.remove(resultPostList.size() - 1);
         	 //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
-            nextPageAnchor = resultPostList.get(resultPostList.size() - 1).getCreateTime().getTime();
+            //nextPageAnchor = resultPostList.get(resultPostList.size() - 1).getCreateTime().getTime();
+
+            // MD，加上置顶功能后无法使用锚点排序，一页页来 add by yanjun 20171031
+            nextPageAnchor = pageAnchor == null ? 2 : pageAnchor + 1;
         }
         
         populatePosts(userId, resultPostList, communityId, false);
