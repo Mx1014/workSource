@@ -4,17 +4,19 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *      <li>categoryId: 活动类型id</li>
- *   	<li>contentCategoryId: 内容类型ID，{@link com.everhomes.rest.category.CategoryConstants}</li>
- *      <li>orderBy: 排序方式 1-报名人数降序，2-报名人数升序，3-发布时间降序，4-发布时间升序，5-发布活动数升序，6-发布活动数升序 参考 {@link com.everhomes.rest.activity.StatisticsOrderByFlag}</li>
+ *     <li>categoryId: 活动类型id</li>
+ *     <li>contentCategoryId: 内容类型ID，{@link com.everhomes.rest.category.CategoryConstants}</li>
+ *     <li>orderBy: 排序方式 1-报名人数降序，2-报名人数升序，3-发布时间降序，4-发布时间升序，5-发布活动数升序，6-发布活动数升序 参考 {@link com.everhomes.rest.activity.StatisticsOrderByFlag}</li>
+ *     <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class StatisticsTagCommand {
 
 	private Long categoryId;
 	private Long contentCategoryId;
-    private Byte orderBy;
-    
+	private Byte orderBy;
+	private Integer namespaceId;
+
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -38,8 +40,17 @@ public class StatisticsTagCommand {
 	public void setOrderBy(Byte orderBy) {
 		this.orderBy = orderBy;
 	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	@Override
 	public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+		return StringHelper.toJsonString(this);
+	}
 }

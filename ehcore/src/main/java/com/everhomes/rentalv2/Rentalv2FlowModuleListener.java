@@ -1,11 +1,19 @@
 package com.everhomes.rentalv2;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import com.everhomes.flow.*;
+import com.everhomes.flow.node.FlowGraphNodeEnd;
 import com.everhomes.organization.Organization;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,21 +28,12 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowLogType;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.rentalv2.RentalFlowNodeParams;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -42,8 +41,6 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
  
 import com.everhomes.util.Tuple;
-
-import javax.annotation.Resource;
 
 @Component
 public class Rentalv2FlowModuleListener implements FlowModuleListener {
@@ -163,7 +160,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public String onFlowCaseBriefRender(FlowCase flowCase) {
+	public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -642,4 +639,16 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}
 	}
 
+	@Override
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+		List<RentalResourceType> resourceTypes =  this.rentalv2Provider.findRentalResourceTypes(namespaceId, ResourceTypeStatus.NORMAL.getCode(), null);
+		List<FlowServiceTypeDTO> dtos = resourceTypes.stream().map(r->{
+			FlowServiceTypeDTO dto =new FlowServiceTypeDTO();
+			dto.setId(r.getId());
+			dto.setNamespaceId(r.getNamespaceId());
+			dto.setServiceName(r.getName());
+			return dto;
+		}).collect(Collectors.toList());
+		return dtos;
+	}
 }

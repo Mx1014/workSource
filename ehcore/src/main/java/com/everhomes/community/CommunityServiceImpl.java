@@ -246,8 +246,6 @@ public class CommunityServiceImpl implements CommunityService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid areaId parameter,area is not found.");
 		}
-		community.setName(cmd.getName());
-		community.setAliasName(cmd.getAliasName());
 		community.setAreaId(cmd.getAreaId());
 		community.setCityId(cmd.getCityId());
 		community.setOperatorUid(userId);
@@ -257,7 +255,7 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setAreaSize(cmd.getAreaSize());
 		this.dbProvider.execute((TransactionStatus status) ->  {
 			this.communityProvider.updateCommunity(community);
-
+			communitySearcher.feedDoc(community);
 			List<CommunityGeoPointDTO> geoList = cmd.getGeoPointList();
 			
 			if(geoList != null && geoList.size() > 0){
@@ -561,7 +559,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<Community> list = this.communityProvider.listCommunitiesByKeyWord(locator, pageSize+1,cmd.getKeyword());
+		List<Community> list = this.communityProvider.listCommunitiesByKeyWord(locator, pageSize+1,cmd.getKeyword(), cmd.getNamespaceId(), cmd.getCommunityType());
 
 		ListCommunitiesByKeywordCommandResponse response = new ListCommunitiesByKeywordCommandResponse();
 		if(list != null && list.size() > pageSize){
@@ -1879,13 +1877,6 @@ public class CommunityServiceImpl implements CommunityService {
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
 				}
 
-
-				if(UserSourceType.WEIXIN == UserSourceType.fromCode(cmd.getUserSourceType())){
-					query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
-				}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
-					query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.isNotNull());
-				}
-
 				if(null != cmd.getCommunityId()){
 					query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 				}
@@ -1961,14 +1952,6 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setOrganizations(organizations);
 			} else {
 				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
-			}
-
-			if(NamespaceUserType.fromCode(r.getNamespaceUserType()) == NamespaceUserType.WX){
-				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
-			}
-
-			if(null != dto.getPhone()){
-				dto.setUserSourceType(UserSourceType.APP.getCode());
 			}
 			userCommunities.add(dto);
 		}
@@ -2102,8 +2085,6 @@ public class CommunityServiceImpl implements CommunityService {
 				CountCommunityUserResponse resp = new CountCommunityUserResponse();
 				resp.setCommunityUsers(allCount);
 				resp.setAuthUsers(authCount);
-				resp.setWxUserCount(authCount);
-				resp.setAppUserCount(allCount - authCount);
 				resp.setNotAuthUsers(allCount - authCount);
 				
 				return resp;
@@ -2111,8 +2092,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 			}
 		}
-
-
 		int authUserCount = 0;
 		if(namespaceId == Namespace.DEFAULT_NAMESPACE){
 			if(null == cmd.getOrganizationId() && null == cmd.getCommunityId()){
@@ -2127,17 +2106,9 @@ public class CommunityServiceImpl implements CommunityService {
 			if(null == cmd.getCommunityId())
 				communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
 			else
-				communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId());
+				communityUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null);
 
-			if(CommunityUserStatisticsType.fromCode(cmd.getStatisticsType()) == CommunityUserStatisticsType.AUTHENTICATION){
-				authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
-			}else{
-				if(null == cmd.getCommunityId())
-					authUserCount = userProvider.countUserByNamespaceIdAndNamespaceUserType(namespaceId, NamespaceUserType.WX.getCode());
-				else
-					authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), null, NamespaceUserType.WX.getCode());
-
-			}
+			authUserCount = organizationProvider.countUserOrganization(namespaceId, cmd.getCommunityId(), UserOrganizationStatus.ACTIVE.getCode());
 
 		}
 
@@ -2146,8 +2117,6 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
 		resp.setCommunityUsers(communityUserCount);
-		resp.setWxUserCount(authUserCount);
-		resp.setAppUserCount(notAuthUsers);
 		resp.setAuthUsers(authUserCount);
 		resp.setNotAuthUsers(notAuthUsers);
 
@@ -3418,4 +3387,32 @@ public class CommunityServiceImpl implements CommunityService {
         }
         return new CommunityAuthPopupConfigDTO(Byte.valueOf(conf.getValue()));
     }
+	
+		@Override
+	public ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd) {
+		if(cmd.getPageAnchor()==null)
+			cmd.setPageAnchor(0L);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
+		ListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<Community> list = this.communityProvider.listCommunitiesByOrgId(locator, pageSize+1,cmd.getOrgId(), cmd.getKeyword());
+
+		ListCommunitiesByOrgIdResponse response = new ListCommunitiesByOrgIdResponse();
+		if(list != null && list.size() > pageSize){
+			list.remove(list.size()-1);
+			response.setNextPageAnchor(list.get(list.size()-1).getId());
+		}
+		if(list != null){
+			List<CommunityDTO> resultList = list.stream().map((c) -> {
+				return ConvertHelper.convert(c, CommunityDTO.class);
+			}).collect(Collectors.toList());
+
+			response.setList(resultList);
+		}
+
+		return response;
+
+	}
 }
+

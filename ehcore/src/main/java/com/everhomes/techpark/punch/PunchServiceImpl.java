@@ -986,7 +986,6 @@ public class PunchServiceImpl implements PunchService {
 			if(onDutyLog == null){
 				onDutyLog = new PunchLog();
 				onDutyLog.setStatus(PunchStatus.UNPUNCH.getCode());
-				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			}
 			PunchLog offDutyLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(), 1);
 			if(offDutyLog == null){
@@ -2467,11 +2466,12 @@ public class PunchServiceImpl implements PunchService {
 //			Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, statistic );
 
 			statistic.setUserName(member.getContactName());
-			OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());
-			statistic.setDeptId(dept.getId());
-			statistic.setDeptName(dept.getName());
+//			OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());
+//			statistic.setDeptId(dept.getId());
+//			statistic.setDeptName(dept.getName());
 //			statistic.setWorkDayCount(workDayCount);
-
+			String department = getDepartment(punchOrg.getNamespaceId(), member.getDetailId());
+			statistic.setDeptName(department);
 	 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
 							dateSF.get().format(endCalendar.getTime()) );
 			List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
@@ -2581,8 +2581,11 @@ public class PunchServiceImpl implements PunchService {
             if(null != r1) {
                 PunchTimeRuleDTO dto1 = convertPunchTimeRule2DTO(r1);
                 PunchTimeIntervalDTO interval = dto1.getPunchTimeIntervals().get(punchTimeNo - 1);
-				BigDecimal b = new BigDecimal(statistic.getUnpunchCount()
-						+ (interval.getLeaveTime() - interval.getArriveTime()));
+                long unpunchTimeLong =interval.getLeaveTime() - interval.getArriveTime();
+                if(dto1.getPunchTimeIntervals().size()==1 && dto1.getAfternoonArriveTime() != null && dto1.getNoonLeaveTime()!=null){
+                	unpunchTimeLong = unpunchTimeLong -dto1.getAfternoonArriveTime()+dto1.getNoonLeaveTime();
+                }
+				BigDecimal b = new BigDecimal(unpunchTimeLong);
 				statistic.setUnpunchCount(statistic.getUnpunchCount()+b.divide(new BigDecimal(3600000), 2, RoundingMode.HALF_UP).doubleValue());
             }
         }  else if (status.equals(String.valueOf(PunchStatus.LEAVEEARLY.getCode()))) {
@@ -3838,7 +3841,7 @@ public class PunchServiceImpl implements PunchService {
 		if(null== members || members.size() == 0)
 			return null;
 		for(OrganizationMember member : members){
-			if(member.getTargetId().equals(targetId))
+			if(member!=null && member.getTargetId()!=null && member.getTargetId().equals(targetId))
 				return member;
 		}
 		return null;
@@ -4180,7 +4183,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 		else{
 			org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, org, ContactSignUpStatus.SIGNEDUP.getCode(),
+			organizationMembers = this.organizationProvider.listOrganizationPersonnels(org.getNamespaceId(), userName, org, ContactSignUpStatus.SIGNEDUP.getCode(),
 					null,null, Integer.MAX_VALUE-1);
 			}
 		if(null == organizationMembers)
@@ -4774,10 +4777,12 @@ public class PunchServiceImpl implements PunchService {
 
 		if (null != member) {
 			dto.setUserName( member.getContactName());
-			OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());
-			if(null != dept){
-				dto.setDeptName(dept.getName());
-			}
+//			OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());
+//			if(null != dept){
+//				dto.setDeptName(dept.getName());
+//			}
+			String department = getDepartment(member.getNamespaceId(), member.getDetailId());
+			dto.setDeptName(department);
 
 
 //				dto.setUserPhoneNumber(member.getContactToken());
@@ -6069,10 +6074,16 @@ public class PunchServiceImpl implements PunchService {
 			for(int rowIndex=3;rowIndex<list.size();rowIndex++){
 				RowResult r = (RowResult)list.get(rowIndex);
 				PunchSchedulingEmployeeDTO dto = new PunchSchedulingEmployeeDTO();
-				dto.setContactName(r.getCells().get("A"));
+				// 名字去空格
+				if(r.getCells().get("A")==null || StringUtils.isEmpty(r.getCells().get("A")))
+					continue;
+				dto.setContactName(r.getCells().get("A").replace(" ",""));
 				dto.setDaySchedulings(new ArrayList<>());
 				for(int i = 1 ; i<=days;i++){
 					String val = r.getCells().get(GetExcelLetter(i + 1));
+					if(!StringUtils.isEmpty(val)){
+						val = val.replace(" ","");
+					}
 					dto.getDaySchedulings().add(val);
 				}
 				result.getEmployees().add(dto);
@@ -6566,7 +6577,17 @@ public class PunchServiceImpl implements PunchService {
 		Organization org = organizationProvider.findOrganizationById(cmd.getId());
 		return getPunchGroupDTOByOrg(org);
 	}
-
+	public String getDepartment(Integer namespaceId, Long detailId){
+		Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(namespaceId,detailId,OrganizationGroupType.DEPARTMENT.getCode());
+		String department = "";
+		if(!StringUtils.isEmpty(departMap)){
+			for(Long k : departMap.keySet()){
+				department += (departMap.get(k) + ",");
+			}
+			department = department.substring(0,department.length()-1);
+		}
+		return department;
+	}
 	@Override
 	public ListPunchGroupsResponse listPunchGroups(ListPunchGroupsCommand cmd) {
 		ListPunchGroupsResponse response = new ListPunchGroupsResponse();
@@ -6578,15 +6599,8 @@ public class PunchServiceImpl implements PunchService {
 		if (null != details && details.size()>0)
 			response.setUnjoinPunchGroupEmployees(details.stream().map(r ->{
 				OrganizationMemberDetailDTO dto = ConvertHelper.convert(r, OrganizationMemberDetailDTO.class);
-				Map<Long,String> departMap = this.organizationProvider.listOrganizationsOfDetail(org.getNamespaceId(),r.getId(),OrganizationGroupType.DEPARTMENT.getCode());
-		        String department = "";
-		        if(!StringUtils.isEmpty(departMap)){
-		            for(Long k : departMap.keySet()){
-		                department += (departMap.get(k) + ",");
-		            }
-		            department = department.substring(0,department.length()-1);
-		        }
-		        dto.setDepartment(department);
+				String department = getDepartment(org.getNamespaceId(), r.getId());
+				dto.setDepartment(department);
 				return dto;
 			}).collect(Collectors.toList()));
 
@@ -6808,7 +6822,7 @@ public class PunchServiceImpl implements PunchService {
 	private PunchTimeRuleDTO convertPunchTimeRule2DTO(PunchTimeRule r) {
 		PunchTimeRuleDTO dto = ConvertHelper.convert(r, PunchTimeRuleDTO.class);
 		dto.setFlexTime(r.getFlexTimeLong());
-		dto.setAfternoonArriveTime(r.getAfternoonArriveTimeLong());
+		dto.setNoonLeaveTime(r.getNoonLeaveTimeLong());
 		dto.setBeginPunchTime(r.getBeginPunchTime());
 		dto.setEndPunchTime(r.getEndPunchTime());
 		dto.setAfternoonArriveTime(r.getAfternoonArriveTimeLong());

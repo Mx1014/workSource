@@ -54,6 +54,8 @@ public class PortalItemDTO {
     private String creatorUName;
     private String operatorUName;
 
+    private Integer bgcolor;
+
     @ItemType(PortalContentScopeDTO.class)
     private List<PortalContentScopeDTO> scopes;
 
@@ -250,6 +252,13 @@ public class PortalItemDTO {
         this.iconUri = iconUri;
     }
 
+    public Integer getBgcolor() {
+        return bgcolor;
+    }
+
+    public void setBgcolor(Integer bgcolor) {
+        this.bgcolor = bgcolor;
+    }
 
     public List<PortalContentScopeDTO> getScopes() {
         return scopes;

@@ -289,19 +289,34 @@ public class PmTaskController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /pmtask/listAuthorizationCommunityByUser</b>
-	 * <p>授权人员 管理小区列表</p>
+	 * <b>URL: /pmtask/listOrganizationCommunityByUser</b>
+	 * <p>获取机构人员 办公地点小区列表</p>
 	 */
-	@RequestMapping("listAuthorizationCommunityByUser")
-	@RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
-	public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
+	@RequestMapping("listOrganizationCommunityByUser")
+	@RestReturn(value=ListOrganizationCommunityByUserResponse.class)
+	public RestResponse listOrganizationCommunityByUser(ListOrganizationCommunityByUserCommand cmd) {
         //TODO:
-		ListAuthorizationCommunityByUserResponse resp = pmTaskService.listAuthorizationCommunityByUser(cmd);
+		ListAuthorizationCommunityByUserResponse resp = pmTaskService.listOrganizationCommunityByUser(cmd);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+    /**
+     * <b>URL: /pmtask/listAuthorizationCommunityByUser</b>
+     * <p>授权人员 管理小区列表</p>
+     */
+    @RequestMapping("listAuthorizationCommunityByUser")
+    @RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
+    public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
+        //TODO:
+        ListAuthorizationCommunityByUserResponse resp = pmTaskService.listAuthorizationCommunityByUser(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 	
 	/**

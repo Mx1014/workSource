@@ -75,6 +75,7 @@ import com.everhomes.rest.aclink.ListDoorAuthCommand;
 import com.everhomes.rest.aclink.ListDoorAuthResponse;
 import com.everhomes.rest.aclink.QueryDoorMessageCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageResponse;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
 
@@ -96,6 +97,9 @@ public class AclinkController extends ControllerBase {
     
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+    
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
     
     /**
      * <b>URL: /aclink/activing</b>
@@ -217,21 +221,13 @@ public class AclinkController extends ControllerBase {
         Long role = 0l;
         
         if(cmd.getOrganizationId() != null) {
-            
-            //Only for active door
+       
             try {
-                rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkManager);
+                userPrivilegeMgr.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ACLINK_MANAGER);
+                //rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkInnerManager);
                 role = 1l;
-            } catch(Exception e) {
-                
-            }
+            } catch(Exception e) {}
             
-            try {
-                rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkInnerManager);
-                role = 1l;
-            } catch(Exception e) {
-                
-            }
         }
         
         resp.setRole(role);
@@ -703,16 +699,29 @@ public class AclinkController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /aclink/faceTest</b>
+     * <p>alitest 002</p>
+     * @return 
+     */
+    @SuppressDiscover
+    @RequireAuthentication(false)
+    @RequestMapping("faceTest")
+    public String faceTest(HttpServletRequest request) {
+        return doorAccessService.faceTest();
+    }
+    
+    /**
      * 
      * <b>URL: /aclink/v</b>
      * <p>列出所有二维码门禁列表 </p>
      * @return
      */
-    @RequestMapping("doorTest3")
+    /*@RequestMapping("doorTest3")
     @RequireAuthentication(false)
     public Object doorTest3(HttpServletRequest request) {
+        doorAccessService.sendXiaomiMessage();
         Map<String,Long> m = new HashMap<String,Long>();
         m.put("result", 0l);
         return m;
-    }
+    }*/
 }

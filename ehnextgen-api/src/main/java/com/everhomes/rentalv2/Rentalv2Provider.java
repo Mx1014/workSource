@@ -261,10 +261,6 @@ public interface Rentalv2Provider {
 
 
 	RentalCell getRentalCellById(Long cellId);
-
-
-	String getPriceStringByResourceId(Long rentalSiteId);
-
  
 	void deleteRentalCellsByResourceId(Long rentalSiteId); 
 

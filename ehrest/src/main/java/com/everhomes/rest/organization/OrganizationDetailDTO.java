@@ -44,7 +44,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class OrganizationDetailDTO {
-	
+
 	private Long     id;
 	private Long     organizationId;
 	private String   description;
@@ -56,50 +56,50 @@ public class OrganizationDetailDTO {
 	private Long     memberCount;
 	private Long checkinDate;
 	private String name;
-	
-    private String avatarUri;
-    private String avatarUrl;
-    
-    private Long updateTime;
-    private Long createTime;
-    
-    private String accountPhone; 
-    private String accountName;
-    private Long assignmentId;
-    
-    private String postUri;
-    private String postUrl;
-    
-    private String longitude;
-    
-    private String latitude;
-    
-    private OrganizationMemberDTO member;
-    
-    private CommunityDTO community;
 
-    private String emailDomain;
-    	//TODO address info ?
-    @ItemType(value = AddressDTO.class)
-    private List<AddressDTO> addresses;
-    
-    @ItemType(value = AttachmentDescriptor.class)
-    private List<AttachmentDescriptor> attachments = new ArrayList<AttachmentDescriptor>();
-    
-    private Long communityId;
+	private String avatarUri;
+	private String avatarUrl;
+
+	private Long updateTime;
+	private Long createTime;
+
+	private String accountPhone;
+	private String accountName;
+	private Long assignmentId;
+
+	private String postUri;
+	private String postUrl;
+
+	private String longitude;
+
+	private String latitude;
+
+	private OrganizationMemberDTO member;
+
+	private CommunityDTO community;
+
+	private String emailDomain;
+	//TODO address info ?
+	@ItemType(value = AddressDTO.class)
+	private List<AddressDTO> addresses;
+
+	@ItemType(value = AttachmentDescriptor.class)
+	private List<AttachmentDescriptor> attachments = new ArrayList<AttachmentDescriptor>();
+
+	private Long communityId;
 
 	private String communityName;
 
-    private Integer signupCount;
-    
-    private Long serviceUserId;
-    
-    private String serviceUserName;
-    
-    private String serviceUserPhone;
-    
-    @ItemType(OrganizationMemberDTO.class)
-    private List<OrganizationContactDTO> adminMembers;
+	private Integer signupCount;
+
+	private Long serviceUserId;
+
+	private String serviceUserName;
+
+	private String serviceUserPhone;
+
+	@ItemType(OrganizationMemberDTO.class)
+	private List<OrganizationContactDTO> adminMembers;
 
 	private String website;
 
@@ -511,9 +511,9 @@ public class OrganizationDetailDTO {
 
 
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 
 

@@ -2150,6 +2150,12 @@ UPDATE eh_launch_pad_items SET action_data = CONCAT('{"resourceTypeId":',@resour
 DELETE FROM eh_rentalv2_resource_types WHERE namespace_id = 999979 AND `NAME` = '会议室';
 UPDATE eh_rentalv2_resource_types SET `name` = '会议室' WHERE namespace_id = 999979 AND `NAME` = '场地预约';
 
+-- 园区入驻 add by sw 20171027
+set @id = IFNULL((select MAX(id) FROM eh_lease_configs), 1);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999979', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999979', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
 
 
 

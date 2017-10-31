@@ -1,8 +1,8 @@
 package com.everhomes.rest.common;
 
-import java.io.Serializable;
-
 import com.everhomes.util.StringHelper;
+
+import java.io.Serializable;
 
 /**
  * <ul> 
@@ -10,7 +10,8 @@ import com.everhomes.util.StringHelper;
  * <li>livePrivilege: 是否有直播权限，1有0无，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li> 
  * <li>listStyle: 列表样式，1，2，参考{@link com.everhomes.rest.common.ActivityListStyleFlag}</li>
  * <li>categoryId: 活动入口id，用于区分不同的活动入口</li> 
- * <li>style: 主题分类项的样式，参考{@link com.everhomes.rest.widget.AssociactionCategoryStyle}</li> 
+ * <li>displayName: 界面显示标题</li>
+ * <li>style: 主题分类项的样式，参考{@link com.everhomes.rest.widget.AssociactionCategoryStyle}</li>
  * </ul>
  */
 public class ActivityActionData implements Serializable {
@@ -28,6 +29,8 @@ public class ActivityActionData implements Serializable {
 	private Long categoryId;
 	
 	private Byte style;
+
+	private String displayName;
 
 	@Override
 	public String toString() {
@@ -82,4 +85,11 @@ public class ActivityActionData implements Serializable {
 		this.categoryId = categoryId;
 	}
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 }

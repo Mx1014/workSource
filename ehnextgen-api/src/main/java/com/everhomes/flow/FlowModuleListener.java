@@ -1,11 +1,13 @@
 package com.everhomes.flow;
 
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowServiceTypeDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.Tuple;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 业务模块必须实现的接口
@@ -13,88 +15,80 @@ import java.util.List;
  *
  */
 public interface FlowModuleListener {
+
 	/**
 	 * 模块初始化
-	 * @return
 	 */
 	FlowModuleInfo initModule();
-	
-	void onFlowCreating(Flow flow);
-	
+
+	default void onFlowCreating(Flow flow) { }
+
+    default List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {return null;}
+
 	/**
 	 * 当 FlowCase 开始运行时
-	 * @param ctx
 	 */
-	void onFlowCaseStart(FlowCaseState ctx);
-	
+	default void onFlowCaseStart(FlowCaseState ctx) { }
+
 	/**
 	 * 当 FlowCase 被异常终止时
-	 * @param ctx
 	 */
-	void onFlowCaseAbsorted(FlowCaseState ctx);
-	
+	default void onFlowCaseAbsorted(FlowCaseState ctx) { }
+
 	/**
 	 * 当 FlowCase 状态态变化时
-	 * @param ctx
 	 */
-	void onFlowCaseStateChanged(FlowCaseState ctx);
-	
+	default void onFlowCaseStateChanged(FlowCaseState ctx) { }
+
 	/**
 	 * 当 FlowCase 整个运行周期结束时
-	 * @param ctx
 	 */
-	void onFlowCaseEnd(FlowCaseState ctx);
-	
+	default void onFlowCaseEnd(FlowCaseState ctx) { }
+
 	/**
 	 * 当执行某一个动作时，比如前置脚本被运行时调用
-	 * @param ctx
 	 */
-	void onFlowCaseActionFired(FlowCaseState ctx);
-	
+	default void onFlowCaseActionFired(FlowCaseState ctx) { }
+
 	/**
 	 * FlowCase 的描述性内容
-	 * @param flowCase
-	 * @return
 	 */
-	String onFlowCaseBriefRender(FlowCase flowCase);
-	
+	String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType);
+
 	/**
 	 * FlowCase 的详细信息列表
-	 * @param flowCase
-	 * @return
 	 */
 	List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType);
-	
-	/**
-	 * FlowCase 的变量渲染
-	 * @param ctx
-	 * @param variable
-	 * @return
-	 */
-	String onFlowVariableRender(FlowCaseState ctx, String variable);
 
-	/**
-	 * 当事件触发的时候
-	 * @param ctx
-	 */
-	void onFlowButtonFired(FlowCaseState ctx);
+    /**
+     * 当事件触发的时候
+     */
+    void onFlowButtonFired(FlowCaseState ctx);
 
-	void onFlowCaseCreating(FlowCase flowCase);
+	default void onFlowCaseCreating(FlowCase flowCase) { }
 
-	void onFlowCaseCreated(FlowCase flowCase);
-	
+	default void onFlowCaseCreated(FlowCase flowCase) { }
+
 	/**
 	 * 发短信
-	 * @param ctx
-	 * @param templateId
-	 * @param variables
 	 */
-	void onFlowSMSVariableRender(FlowCaseState ctx, int templateId, List<Tuple<String, Object>> variables);
+	default void onFlowSMSVariableRender(FlowCaseState ctx, int templateId, List<Tuple<String, Object>> variables) { }
 
     /**
      * 发送消息前业务可以对消息进行自定义
-     * @param ctx
-     * @param messageDto
      */
     default void onFlowMessageSend(FlowCaseState ctx, MessageDTO messageDto) { }
+
+    /**
+     * 预定义参数、自定义参数渲染
+     * @param vars  变量名称，比如：${amount}
+     * @return  参数名称对应的参数的值，比如：key=${amount}, value=100
+     */
+    default Map<String, String> onFlowVariableRender(FlowCaseState ctx, List<String> vars) { return null;}
+
+    /**
+     * FlowCase 的变量渲染, 见 onFlowVariableRender(FlowCaseState ctx, List<String> vars)
+     */
+    @Deprecated
+    default String onFlowVariableRender(FlowCaseState ctx, String variable) { return null;}
 }

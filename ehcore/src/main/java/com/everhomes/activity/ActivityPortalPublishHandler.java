@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,14 +57,17 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		//删除内容分类
 		deleteContentCategory(config, namespaceId);
 
-		//如果没有则增加默认分类
-		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() ==0){
+		//如果没有则增加默认分类、或者子分类关闭
+		if(config.getCategoryDTOList() == null || config.getCategoryDTOList().size() ==0
+				|| config.getCategoryFlag() == null || config.getCategoryFlag().byteValue() == 0){
 				List<ActivityCategoryDTO> listDto = new ArrayList<>();
 				ActivityCategoryDTO newDto = new ActivityCategoryDTO();
 				newDto.setAllFlag(AllFlagType.YES.getCode());
 				newDto.setName("all");
 				listDto.add(newDto);
 				config.setCategoryDTOList(listDto);
+
+				config.setCategoryFlag((byte)1);
 
 		}
 
@@ -179,6 +183,9 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 			entryCategory = new ActivityCategories();
 			entryCategory.setOwnerId(0L);
 			entryCategory.setParentId(-1L);
+			if(StringUtils.isEmpty(name)){
+				name = "default";
+			}
 			entryCategory.setName(name);
 			entryCategory.setDefaultOrder(0);
 			entryCategory.setStatus((byte)2);
@@ -211,7 +218,9 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 
 				if(dto.getId() != null){
 					ActivityCategories oldCategory = activityProvider.findActivityCategoriesById(dto.getId());
-					oldCategory.setName(dto.getName());
+					if(dto.getName() != null){
+						oldCategory.setName(dto.getName());
+					}
 					oldCategory.setIconUri(dto.getIconUri());
 					oldCategory.setSelectedIconUri(dto.getSelectedIconUri());
 					oldCategory.setEnabled(dto.getEnabled());
@@ -226,6 +235,9 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 					newCategory.setDefaultOrder(0);
 					newCategory.setStatus((byte)2);
 					newCategory.setCreatorUid(1L);
+					if(newCategory.getName() == null){
+						newCategory.setName("default");
+					}
 					newCategory.setNamespaceId(namespaceId);
 					if(newCategory.getAllFlag() == null){
 						newCategory.setAllFlag((byte)0);
@@ -252,7 +264,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 		}
 
 		//新发布的没有则删除全部，如果有则一个个对比
-		if(config.getCategoryFlag() == 0 || config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
+		if(config.getCategoryFlag() == null || config.getCategoryFlag() == 0 || config.getCategoryDTOList() == null || config.getCategoryDTOList().size() == 0){
 			for(int i=0; i<oldContentCategories.size(); i++){
 				activityProvider.deleteActivityCategories(oldContentCategories.get(i).getId());
 			}

@@ -2952,7 +2952,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 		}
 		List<EquipmentInspectionTasks> allTasks = null;
-
 //		Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
 //		List<Long> ownerIds = new ArrayList<>();
 //
@@ -3005,6 +3004,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			allTasks.remove(allTasks.size() - 1);
 			response.setNextPageAnchor((long) (offset + 1));
 		}
+
 
 		Timestamp current = new Timestamp(System.currentTimeMillis());
 		tasks = allTasks.stream().map(r -> {
@@ -4319,6 +4319,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 									ReceiverName receiverName = new ReceiverName();
 									receiverName.setId(member.getId());
 									receiverName.setName(member.getContactName());
+									receiverName.setContactToken(member.getContactToken());
 									dtoReceivers.add(receiverName);
 								});
 								dto.setReceivers(dtoReceivers);

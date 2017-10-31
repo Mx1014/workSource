@@ -2582,14 +2582,20 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		Integer namespaceId = sceneTokenDto.getNamespaceId();
 		String sceneType = sceneTokenDto.getScene();
 		
-		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
-		
+		SearchTypes searchType = userService.getSearchTypes(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
+
 		//根据场景获取应用scope：配置为all和user的固定选择，配置为organization和community的根据场景sceneType获取 
 		//switch内的逻辑根据this.getLaunchPadItemsByScene方法改编
 		//add by yanjun 20170419
 		Map<Byte, Long> scopeMap = new HashMap<Byte, Long>();		
 		scopeMap.put(ScopeType.USER.getCode(), userId);
-		scopeMap.put(ScopeType.ALL.getCode(), 0L);
+
+		//园区的item包括当前园区和0园区的，不能使用一个map  add by yanjun
+		Map<Byte, Long> defaultScopeMap = new HashMap<Byte, Long>();
+		defaultScopeMap.put(ScopeType.ALL.getCode(), 0L);
+		defaultScopeMap.put(ScopeType.COMMUNITY.getCode(), 0L);
+		defaultScopeMap.put(ScopeType.RESIDENTIAL.getCode(), 0L);
+
 		if(SceneType.fromCode(sceneType) != null){
 			switch(SceneType.fromCode(sceneType)) {
 			case DEFAULT:
@@ -2628,7 +2634,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 		Integer offset = pageSize * Integer.valueOf(pageAnchor.intValue());
-		List<LaunchPadItem> launchPadItems= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, sceneType, scopeMap, cmd.getKeyword(), offset, pageSize + 1);
+		List<LaunchPadItem> launchPadItems= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, sceneType, scopeMap, defaultScopeMap, cmd.getKeyword(), offset, pageSize + 1);
 		// 处理分页
 		Long nextPageAnchor = null;
 		if (launchPadItems.size() > pageSize) {

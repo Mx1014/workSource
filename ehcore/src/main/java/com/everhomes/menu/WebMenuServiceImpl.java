@@ -154,9 +154,12 @@ public class WebMenuServiceImpl implements WebMenuService {
 		if(null != menu){
 			path = menu.getPath() + "/%";
 		}
-		if(resolver.checkOrganizationAdmin(userId, organizationId)){
+		Boolean isAdmin = resolver.checkOrganizationAdmin(userId, organizationId);
+		LOGGER.debug("listEnterpriseWebMenu: userId: {}, organizationId: {}, isAdmin: {}", userId, organizationId, isAdmin);
+		if(isAdmin){
 			menus = webMenuProvider.listWebMenuByType(WebMenuType.ORGANIZATION.getCode(), categories, path, null);
 		}
+		LOGGER.debug("listEnterpriseWebMenu menus: {}", menus);
 		if(null == menus || menus.size() == 0){
 			if(null != menu)
 				menus.add(menu);
@@ -164,6 +167,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 				return new ArrayList<>();
 		}
 		menus = filterMenus(menus, organizationId);
+		LOGGER.debug("listEnterpriseWebMenu after filter menus: {}", menus);
 		return processWebMenus(menus.stream().map(r->{
 			return ConvertHelper.convert(r, WebMenuDTO.class);
 		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
@@ -228,6 +232,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		List<WebMenu> filterMenus = new ArrayList<>();
 		for (WebMenu menu: menus) {
 			WebMenuScope scope = filterMap.get(menu.getId());
+			LOGGER.debug("listEnterpriseWebMenu filterMenus scope: {}", scope);
 			if(null != scope){
 				if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
 					//override menu
@@ -240,6 +245,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 			}
 		}
 		filterMenus.sort((o1, o2) -> o1.getSortNum() - o2.getSortNum());
+		LOGGER.debug("listEnterpriseWebMenu filterMenus: {}", filterMenus);
 		return filterMenus;
 	}
 

@@ -15,6 +15,7 @@ import java.math.BigDecimal;
  *     <li>settingStatus: 状态 {@link com.everhomes.rest.energy.EnergyCommonStatus}</li>
  *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType} </li>
  *     <li>configId: 价格方案id </li>
+ *     <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class UpdateEnergyMeterDefaultSettingCommand {
@@ -30,6 +31,8 @@ public class UpdateEnergyMeterDefaultSettingCommand {
     private Long configId;
     private Long ownerId;
     private String ownerType;
+    
+    private Integer namespaceId;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -102,6 +105,14 @@ public class UpdateEnergyMeterDefaultSettingCommand {
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+    public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
     @Override
     public String toString() {

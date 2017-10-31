@@ -411,11 +411,7 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	actionInfo2.setUserSelections(us2);
     	upBtnCmd.setSmsAction(actionInfo2);
     	
-    	List<Long> scriptIds = new ArrayList<Long>();
-    	scriptIds.add(1l);
-    	scriptIds.add(2l);
-    	scriptIds.add(3l);
-    	upBtnCmd.setEnterScriptIds(scriptIds);
+    	upBtnCmd.setEnterScriptId(1L);
     	
     	FlowButtonDetailDTO btnDetail2 = flowService.updateFlowButton(upBtnCmd);
     	Assert.assertTrue(btnDetail2.getPushMessage() != null);
@@ -491,7 +487,7 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	ListFlowVariablesCommand cmd = new ListFlowVariablesCommand();
     	cmd.setFlowVariableType(FlowVariableType.TEXT.getCode());
     	FlowVariableResponse resp = flowService.listFlowVariables(cmd);
-    	Assert.assertTrue(resp.getDtos().size() == 4);
+    	Assert.assertTrue(resp.getFlowVars().size() == 4);
     }
     
     private void setTestContext(Long userId) {

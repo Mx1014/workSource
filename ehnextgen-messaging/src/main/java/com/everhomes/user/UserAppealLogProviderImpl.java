@@ -73,7 +73,7 @@ public class UserAppealLogProviderImpl implements UserAppealLogProvider {
 
         if (logList != null && logList.size() > pageSize) {
             locator.setAnchor(logList.get(logList.size() - 1).getId());
-            logList = logList.subList(0, pageSize);
+            logList.remove(logList.size() - 1);
         } else {
             locator.setAnchor(null);
         }

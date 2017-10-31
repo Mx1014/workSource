@@ -122,7 +122,6 @@ public class ZJContractHandler implements ContractService{
                 if(dto.getContractNumber() == null) {
                     dto.setContractNumber(contract.getName());
                 }
-                dto.setRent(contract.getAmount());
                 dto.setBuildings(contract.getApartments());
                 dto.setContractStartDate(strToTimestamp(contract.getContractStartDate()));
                 dto.setContractEndDate(strToTimestamp(contract.getContractEndDate()));
@@ -159,7 +158,7 @@ public class ZJContractHandler implements ContractService{
     }
 
     @Override
-    public ContractDTO updateContract(UpdateContractCommand cmd) {
+    public ContractDetailDTO updateContract(UpdateContractCommand cmd) {
         LOGGER.error("Insufficient privilege, zjgkhandler createContract");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
@@ -250,7 +249,7 @@ public class ZJContractHandler implements ContractService{
         ContractDetailDTO dto = new ContractDetailDTO();
         dto.setPartyAId(0L);
         dto.setContractNumber(zjContract.getContractNum());
-        dto.setLayout(zjContract.getLayout());
+        dto.setLayoutName(zjContract.getLayout());
         dto.setSettled(zjContract.getSettled());
         //张江高科合同名和合同编号一样
         dto.setName(zjContract.getContractNum());

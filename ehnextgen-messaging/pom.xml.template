@@ -135,6 +135,11 @@
             <artifactId>ehutil-common</artifactId>
             <version>${ehutil-common.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.xiaomi.miliao</groupId>
+            <artifactId>xmpush-server-api</artifactId>
+            <version>0.0.9-20171017.103132-1</version>
+        </dependency>
     </dependencies>
 
     <build>

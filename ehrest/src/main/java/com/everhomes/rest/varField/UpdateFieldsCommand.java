@@ -10,6 +10,7 @@ import java.util.List;
  *     <li>namespaceId: 域空间id</li>
  *     <li>communityId: 项目id</li>
  *     <li>moduleName: 字段所属的模块类型名</li>
+ *     <li>groupId: 字段直属组id</li>
  *     <li>groupPath: 字段所属的组路径</li>
  *     <li>fields: 字段信息， 参考{@link ScopeFieldInfo}</li>
  * </ul>
@@ -24,8 +25,18 @@ public class UpdateFieldsCommand {
 
     private String groupPath;
 
+    private Long groupId;
+
     @ItemType(ScopeFieldInfo.class)
     private List<ScopeFieldInfo> fields;
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
 
     public String getGroupPath() {
         return groupPath;
