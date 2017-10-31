@@ -3209,36 +3209,39 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		String moduleType = FlowModuleType.NO_MODULE.getCode();
 		Long ownerId = order.getResourceTypeId();
 		String ownerType = FlowOwnerType.RENTALRESOURCETYPE.getCode();
-    	Flow flow = flowService.getEnabledFlow(order.getNamespaceId(), Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
-    	LOGGER.debug("parames : " +order.getNamespaceId()+"*"+ Rentalv2Controller.moduleId+"*"+ moduleType+"*"+ ownerId+"*"+ ownerType );
-    	LOGGER.debug("\n flow is "+flow);
+		Flow flow = flowService.getEnabledFlow(order.getNamespaceId(), Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
+		LOGGER.debug("parames : " +order.getNamespaceId()+"*"+ Rentalv2Controller.moduleId+"*"+ moduleType+"*"+ ownerId+"*"+ ownerType );
+		LOGGER.debug("\n flow is "+flow);
+		if(null!=flow){
+			CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
+			cmd.setApplyUserId(order.getRentalUid());
+			cmd.setFlowMainId(flow.getFlowMainId());
+			cmd.setFlowVersion(flow.getFlowVersion());
+			cmd.setReferId(order.getId());
+			cmd.setReferType(REFER_TYPE);
+			cmd.setProjectId(order.getCommunityId());
+			cmd.setProjectType(EntityType.COMMUNITY.getCode());
 
-	    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
-	    	cmd.setApplyUserId(order.getRentalUid());
 
-	    	cmd.setReferId(order.getId());
-	    	cmd.setReferType(REFER_TYPE);
-	    	cmd.setProjectId(order.getCommunityId());
-	    	cmd.setProjectType(EntityType.COMMUNITY.getCode());
-	    	
-	
-	    	Map<String, String> map = new HashMap<>();
-	        map.put("resourceName", order.getResourceName());
-	        String useDetail = order.getUseDetail();
-	        if(useDetail.contains("\n")){
-	        	String[] splitUseDetail = useDetail.split("\n");
-	        	useDetail = splitUseDetail[0]+"...";
-	        }
-	        map.put("useDetail", useDetail ); 
-			String contentString = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.FLOW_SCOPE, 
+			Map<String, String> map = new HashMap<>();
+			map.put("resourceName", order.getResourceName());
+			String useDetail = order.getUseDetail();
+			if(useDetail.contains("\n")){
+				String[] splitUseDetail = useDetail.split("\n");
+				useDetail = splitUseDetail[0]+"...";
+			}
+			map.put("useDetail", useDetail );
+			String contentString = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.FLOW_SCOPE,
 					RentalNotificationTemplateCode.RENTAL_FLOW_CONTENT, RentalNotificationTemplateCode.locale, map, "");
 			RentalResourceType resourceType = rentalv2Provider.getRentalResourceTypeById(order.getResourceTypeId());
 			cmd.setTitle(resourceType.getName());
 			cmd.setServiceType(resourceType.getName());
-	    	cmd.setContent(contentString);
+			cmd.setContent(contentString);
 //	    	LOGGER.debug("cmd = \n"+cmd);
 
-	    	return flowService.createFlowCase(cmd);
+			return flowService.createFlowCase(cmd);
+		}
+		return null;
     	}
 
 
