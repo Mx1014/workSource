@@ -335,7 +335,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
     @Override
     public EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd) {
-        validate(cmd);
+//        validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
         userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.METER_CREATE);
 
