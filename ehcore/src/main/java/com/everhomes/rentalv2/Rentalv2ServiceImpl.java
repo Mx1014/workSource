@@ -3486,10 +3486,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//微信公众号支付，重新设置ClientName，设置支付方式和参数
 		if(paymentType != null && paymentType.intValue() == PaymentType.WECHAT_JS_PAY.getCode()){
 
-			if(preOrderCommand.getClientAppName() == null){
-				Integer namespaceId = UserContext.getCurrentNamespaceId();
-				preOrderCommand.setClientAppName("wechat_" + namespaceId);
-			}
+//			if(preOrderCommand.getClientAppName() == null){
+//				Integer namespaceId = UserContext.getCurrentNamespaceId();
+//				preOrderCommand.setClientAppName("wechat_" + namespaceId);
+//			}
 			preOrderCommand.setPaymentType(PaymentType.WECHAT_JS_PAY.getCode());
 			PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
 			paymentParamsDTO.setPayType("no_credit");
