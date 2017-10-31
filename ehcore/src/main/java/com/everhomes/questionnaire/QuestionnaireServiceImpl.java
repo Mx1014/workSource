@@ -962,16 +962,15 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Override
 	public GetTargetQuestionnaireDetailResponse getTargetQuestionnaireDetail(GetTargetQuestionnaireDetailCommand cmd) {
-		return new GetTargetQuestionnaireDetailResponse(getTargetQuestionnaireDetail(cmd.getQuestionnaireId(), cmd.getTargetType(), cmd.getTargetId()));
+		return new GetTargetQuestionnaireDetailResponse(getTargetQuestionnaireDetail(cmd.getQuestionnaireId(), cmd.getOrganizationId()));
 	}
 	
-	private QuestionnaireDTO getTargetQuestionnaireDetail(Long questionnaireId, String targetType, Long targetId){
+	private QuestionnaireDTO getTargetQuestionnaireDetail(Long questionnaireId, Long organizationId){
 		List<QuestionnaireOption> questionnaireOptions = questionnaireOptionProvider.listOptionsByQuestionnaireId(questionnaireId);
-		return convertToQuestionnaireDTO(questionnaireOptions, targetType, targetId);
+		return convertToQuestionnaireDTO(questionnaireOptions, organizationId);
 	}
-
-	private QuestionnaireDTO convertToQuestionnaireDTO(List<QuestionnaireOption> questionnaireOptions,
-			String targetType, Long targetId) {
+//todo-------
+	private QuestionnaireDTO convertToQuestionnaireDTO(List<QuestionnaireOption> questionnaireOptions, Long organizationId) {
 		List<QuestionnaireDTO> questionnaireDTOs = new ArrayList<>();
 		// k1为问卷的id，k2为问题的id
 		Map<Long, Map<Long, List<QuestionnaireOption>>> map = questionnaireOptions.parallelStream().collect(Collectors.groupingBy(QuestionnaireOption::getQuestionnaireId,Collectors.groupingBy(QuestionnaireOption::getQuestionId)));
@@ -1032,8 +1031,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			});
 			return null;
 		});
-		
-		return new CreateTargetQuestionnaireResponse(getTargetQuestionnaireDetail(cmd.getQuestionnaire().getId(), cmd.getTargetType(), cmd.getTargetId()));
+		Long organizationId = QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(cmd.getTargetType())?cmd.getTargetId():null;
+		return new CreateTargetQuestionnaireResponse(getTargetQuestionnaireDetail(cmd.getQuestionnaire().getId(), organizationId));
 	}
 
 	private void updateQuestionnaireCollectionCount(Long questionnaireId) {
