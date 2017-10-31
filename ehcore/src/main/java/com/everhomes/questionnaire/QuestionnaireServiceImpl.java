@@ -1009,7 +1009,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	private void generateShareUrl(QuestionnaireDTO dto) {
 		try {
 			String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://core.zuolin.com");
-			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s/0");
+			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s");
 			String srcUrl = String.format(homeUrl+contextUrl, dto.getId());
 			String shareContext = String.format("evh/wxauth/authReq?ns=%s&src_url=%s",dto.getNamespaceId(), URLEncoder.encode(srcUrl,"utf-8"));
 			dto.setShareUrl(homeUrl+shareContext);
