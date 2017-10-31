@@ -2136,15 +2136,23 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd) {
         DeleteChargingStandardDTO dto = new DeleteChargingStandardDTO();
-        Object obj = null;
-        //通过熊颖的接口获得收费标准是否已经被引用
-        if(obj == null){
+        boolean safe = checkSafeDeleteId(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(),cmd.getChargingStandardId());
+        if(safe){
             assetProvider.deleteChargingStandard(cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType());
-            dto.setMessage("success");
+            dto.setFailCause(AssetPaymentStrings.DELETE_SUCCCESS);
         }else{
-            dto.setMessage("failed");
+            dto.setFailCause(AssetPaymentStrings.DELETE_CHARGING_STANDARD_UNSAFE);
         }
         return dto;
+    }
+
+    private boolean checkSafeDeleteId(String name, Long chargingStandardId) {
+        Boolean safe = false;
+        if(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName().equals(name)){
+            boolean exist = assetProvider.cheackGroupRuleExistByChargingStandard(chargingStandardId);
+            if(!exist) safe = true;
+        }
+        return safe;
     }
 
     @Override
@@ -2314,13 +2322,17 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public void deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd) {
+    public DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd) {
+        DeleteChargingItemForBillGroupResponse response = new DeleteChargingItemForBillGroupResponse();
         EhPaymentBillGroupsRules rule = assetProvider.findBillGroupRuleById(cmd.getBillGroupRuleId());
         boolean workFlag = isInWorkGroupRule(rule,false);
         if(workFlag){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_ACCESS_DENIED,"已关联合同，不能删除");
+            response.setFailCause(AssetPaymentStrings.DELETE_GROUP_RULE_UNSAFE);
+            return response;
         }
         assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId());
+        response.setFailCause(AssetPaymentStrings.DELETE_SUCCCESS);
+        return response;
     }
 
     /**
@@ -2345,7 +2357,7 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private boolean isInWorkGroupRule(EhPaymentBillGroupsRules rule, boolean b) {
-        return assetProvider.isInWorkGroupRule(rule,b);
+        return assetProvider.isInWorkGroupRule(rule);
     }
 
 

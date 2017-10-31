@@ -195,7 +195,7 @@ public interface AssetProvider {
 
     EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId);
 
-    boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule, boolean b);
+    boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule);
 
     void deleteBillGroupRuleById(Long billGroupRuleId);
 
@@ -212,4 +212,6 @@ public interface AssetProvider {
     List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
 
     List<PaymentFormula> getFormulas(Long id);
+
+    boolean cheackGroupRuleExistByChargingStandard(Long chargingStandardId);
 }

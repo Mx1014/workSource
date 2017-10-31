@@ -580,10 +580,9 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/deleteChargingItemForBillGroup</b>
      */
     @RequestMapping("deleteChargingItemForBillGroup")
-    @RestReturn(value = String.class)
+    @RestReturn(value = DeleteChargingItemForBillGroupResponse.class)
     public RestResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd) {
-        assetService.deleteChargingItemForBillGroup(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(assetService.deleteChargingItemForBillGroup(cmd));
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
