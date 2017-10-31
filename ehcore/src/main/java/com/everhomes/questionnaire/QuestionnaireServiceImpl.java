@@ -969,7 +969,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		List<QuestionnaireOption> questionnaireOptions = questionnaireOptionProvider.listOptionsByQuestionnaireId(questionnaireId);
 		return convertToQuestionnaireDTO(questionnaireOptions, organizationId);
 	}
-//todo-------
+
 	private QuestionnaireDTO convertToQuestionnaireDTO(List<QuestionnaireOption> questionnaireOptions, Long organizationId) {
 		List<QuestionnaireDTO> questionnaireDTOs = new ArrayList<>();
 		// k1为问卷的id，k2为问题的id
@@ -977,15 +977,29 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		map.forEach((k1, v1)->{
 			Questionnaire questionnaire = findQuestionnaireById(k1);
 			List<QuestionnaireQuestionDTO> questionDTOs = new ArrayList<>();
+			Long sTargetId = null;
+			if(QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(questionnaire.getTargetType())){
+				sTargetId = organizationId;
+			}else {
+				sTargetId = UserContext.current().getUser().getId();
+			}
+			final Long targetId = sTargetId;
+			Byte[] answersFlag = new Byte[1];
+			answersFlag[0] = QuestionnaireCommonStatus.FALSE.getCode();
 			v1.forEach((k2, v2)->{
 				QuestionnaireQuestion question = questionnaireQuestionProvider.findQuestionnaireQuestionById(k2);
-				List<QuestionnaireAnswer> questionnaireAnswers = questionnaireAnswerProvider.listTargetQuestionnaireAnswerByQuestionId(question.getId(), targetType, UserContext.current().getUser().getId());
+				List<QuestionnaireAnswer> questionnaireAnswers = questionnaireAnswerProvider.listTargetQuestionnaireAnswerByQuestionId(question.getId(), questionnaire.getTargetType(), targetId);
+				if(questionnaireAnswers!=null && questionnaireAnswers.size()>0){
+					answersFlag[0] = QuestionnaireCommonStatus.TRUE.getCode();
+				}
 				List<QuestionnaireOptionDTO> optionDTOs =  v2.stream().map(o->convertToOptionDTO(o, questionnaireAnswers)).collect(Collectors.toList());
 				questionDTOs.add(convertToQuestionDTO(question, optionDTOs));
 			});
 			// 经过map处理后顺序会乱，所以要重新排序下
 			sortQuestions(questionDTOs);
-			questionnaireDTOs.add(convertToQuestionnaireDTO(questionnaire, questionDTOs));
+			QuestionnaireDTO e = convertToQuestionnaireDTO(questionnaire, questionDTOs);
+			e.setAnsweredFlag(answersFlag[0]);
+			questionnaireDTOs.add(e);
 		});
 		QuestionnaireDTO dto =  questionnaireDTOs.get(0);
 		generateShareUrl(dto);
