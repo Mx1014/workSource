@@ -1886,7 +1886,8 @@ public class AssetServiceImpl implements AssetService {
             HashMap<String,String> map = new HashMap();
             for(int i = 0; i < variableIdAndValueList.size(); i++){
                 VariableIdAndValue variableIdAndValue = variableIdAndValueList.get(i);
-                map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
+//                map.put(variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
+                map.put((String)variableIdAndValue.getVaribleIdentifier(),variableIdAndValue.getVariableValue().toString());
             }
             for(Map.Entry<String,String> entry : map.entrySet()){
                 formula = formula.replace(entry.getKey(),entry.getValue());
