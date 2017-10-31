@@ -16,10 +16,7 @@ import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.pm.CommunityPmOwner;
-import com.everhomes.organization.pm.DefaultChargingItemProperty;
-import com.everhomes.organization.pm.DefaultChargingItemProvider;
-import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.*;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.ChargingVariablesDTO;
@@ -146,25 +143,54 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                     //eh_contract_charging_item_addresses
                     List<ContractChargingItemAddress> contractChargingItemAddresses = contractChargingItemAddressProvider.findByAddressId(address.getAddressId(), meter.getMeterType());
                     if(contractChargingItemAddresses != null && contractChargingItemAddresses.size() > 0) {
+                        List<FeeRules> feeRules = new ArrayList<>();
                         contractChargingItemAddresses.forEach(contractChargingItemAddress -> {
                             ContractChargingItem item = contractChargingItemProvider.findById(contractChargingItemAddress.getContractChargingItemId());
+                            FeeRules feeRule = generateChargingItemsFeeRule(item.getChargingItemId(), item.getChargingStandardId(),
+                                    item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
+                            feeRules.add(feeRule);
                         });
                         //suanqian paymentExpectancies_re_struct();
+                        paymentExpectancies_re_struct(task, address, feeRules);
                         generateFlag = true;
                     } else {//门牌有没有默认计价条款、所属楼栋有没有默认计价条款、所属园区有没有默认计价条款 eh_default_charging_item_properties
                         List<DefaultChargingItemProperty> properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.APARTMENT.getCode(), address.getAddressId(), meter.getMeterType());
                         if(properties != null) {
+                            List<FeeRules> feeRules = new ArrayList<>();
+                            properties.forEach(property -> {
+                                DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
+                                FeeRules feeRule = generateChargingItemsFeeRule(item.getChargingItemId(), item.getChargingStandardId(),
+                                        item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
+                                feeRules.add(feeRule);
+                            });
                             //suanqian paymentExpectancies_re_struct();
+                            paymentExpectancies_re_struct(task, address, feeRules);
                             generateFlag = true;
                         } else {
                             properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), address.getBuildingId(), meter.getMeterType());
                             if(properties != null) {
+                                List<FeeRules> feeRules = new ArrayList<>();
+                                properties.forEach(property -> {
+                                    DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
+                                    FeeRules feeRule = generateChargingItemsFeeRule(item.getChargingItemId(), item.getChargingStandardId(),
+                                            item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
+                                    feeRules.add(feeRule);
+                                });
                                 //suanqian paymentExpectancies_re_struct();
+                                paymentExpectancies_re_struct(task, address, feeRules);
                                 generateFlag = true;
                             } else {
                                 properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), meter.getCommunityId(), meter.getMeterType());
                                 if(properties != null) {
+                                    List<FeeRules> feeRules = new ArrayList<>();
+                                    properties.forEach(property -> {
+                                        DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
+                                        FeeRules feeRule = generateChargingItemsFeeRule(item.getChargingItemId(), item.getChargingStandardId(),
+                                                item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
+                                        feeRules.add(feeRule);
+                                    });
                                     //suanqian paymentExpectancies_re_struct();
+                                    paymentExpectancies_re_struct(task, address, feeRules);
                                     generateFlag = true;
                                 }
                             }
@@ -183,14 +209,10 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 
     }
 
-    private void paymentExpectancies_re_struct(EnergyMeterTask task, EnergyMeterAddress address, List<ContractChargingItemDTO> chargingItems) {
+    private void paymentExpectancies_re_struct(EnergyMeterTask task, EnergyMeterAddress address, List<FeeRules> feeRules) {
         PaymentExpectanciesCommand command = new PaymentExpectanciesCommand();
 
-        if(chargingItems != null && chargingItems.size() > 0) {
-            List<FeeRules> feeRules = generateChargingItemsFeeRules(chargingItems);
-            command.setFeesRules(feeRules);
-        }
-
+        command.setFeesRules(feeRules);
         command.setNamesapceId(task.getNamespaceId());
         command.setOwnerId(task.getTargetId());
         command.setOwnerType("community");
@@ -215,12 +237,12 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 }
             }
         }
-        assetService.paymentExpectancies_re_struct(command);
+//        assetService.paymentExpectancies_re_struct(command);
     }
 
-    private List<FeeRules> generateChargingItemsFeeRules(Long chargingItemId, Long chargingStandardId, Long chargingStartTime, Long chargingExpiredTime, EnergyMeterAddress address) {
+    private FeeRules generateChargingItemsFeeRule(Long chargingItemId, Long chargingStandardId,
+            Long chargingStartTime, Long chargingExpiredTime, String chargingVariables, EnergyMeterAddress address) {
         Gson gson = new Gson();
-        List<FeeRules> feeRules = new ArrayList<>();
         FeeRules feeRule = new FeeRules();
         feeRule.setChargingItemId(chargingItemId);
         feeRule.setChargingStandardId(chargingStandardId);
@@ -234,21 +256,20 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         contractProperties.add(cp);
         feeRule.setProperties(contractProperties);
 
-//        ChargingVariablesDTO chargingVariables = gson.fromJson(chargingItem.getChargingVariables(), new TypeToken<ChargingVariablesDTO>() {}.getType());
-//        List<PaymentVariable> pvs = chargingVariables.getChargingVariables();
-//        List<VariableIdAndValue> vv = new ArrayList<>();
-//        if(pvs != null && pvs.size() > 0) {
-//            pvs.forEach(pv -> {
-//                VariableIdAndValue variableIdAndValue = new VariableIdAndValue();
+        ChargingVariablesDTO chargingVariableDTO = gson.fromJson(chargingVariables, new TypeToken<ChargingVariablesDTO>() {}.getType());
+        List<PaymentVariable> pvs = chargingVariableDTO.getChargingVariables();
+        List<VariableIdAndValue> vv = new ArrayList<>();
+        if(pvs != null && pvs.size() > 0) {
+            pvs.forEach(pv -> {
+                VariableIdAndValue variableIdAndValue = new VariableIdAndValue();
 //                variableIdAndValue.setVaribleIdentifier(pv.getVariableIdentifier());
-//                variableIdAndValue.setVariableValue(pv.getVariableValue());
-//                vv.add(variableIdAndValue);
-//            });
-//        }
-//        feeRule.setVariableIdAndValueList(vv);
-        feeRules.add(feeRule);
+                variableIdAndValue.setVariableValue(pv.getVariableValue());
+                vv.add(variableIdAndValue);
+            });
+        }
+        feeRule.setVariableIdAndValueList(vv);
 
-        return feeRules;
+        return feeRule;
     }
 
     private void createTask() {
