@@ -1,6 +1,8 @@
 package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.flow.*;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
@@ -53,7 +55,10 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     private PropertyMgrProvider propertyMgrProvider;
 
     @Autowired
-    private ContractService contractService;
+    private ConfigurationProvider configurationProvider;
+
+//    @Autowired
+//    private ContractService contractService;
 
     @Override
     public FlowModuleInfo initModule() {
@@ -141,6 +146,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         cmd.setNamespaceId(flowCase.getNamespaceId());
         cmd.setCommunityId(flowCase.getProjectId());
 
+        ContractService contractService = getContractService(flowCase.getNamespaceId());
         ContractDetailDTO contractDetailDTO = contractService.findContract(cmd);
 
         flowCase.setCustomObject(JSONObject.toJSONString(contractDetailDTO));
@@ -185,6 +191,11 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     private String timeToStr(Timestamp time) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.format(time);
+    }
+
+    private ContractService getContractService(Integer namespaceId) {
+        String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+        return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
     }
 
     @Override
