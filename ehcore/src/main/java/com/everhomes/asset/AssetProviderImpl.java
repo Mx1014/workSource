@@ -2565,6 +2565,15 @@ public class AssetProviderImpl implements AssetProvider {
         return false;
     }
 
+    @Override
+    public void setInworkFlagInContractReceiver(Long contractId) {
+        DSLContext writeContext = getReadWriteContext();
+        PaymentContractReceiver cr = new PaymentContractReceiver();
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver.class));
+        cr.setId(nextSequence);
+        cr.set
+    }
+
 
     private DSLContext getReadOnlyContext(){
        return this.dbProvider.getDslContext(AccessSpec.readOnly());

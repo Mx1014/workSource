@@ -214,4 +214,6 @@ public interface AssetProvider {
     List<PaymentFormula> getFormulas(Long id);
 
     boolean cheackGroupRuleExistByChargingStandard(Long chargingStandardId);
+
+    void setInworkFlagInContractReceiver(Long contractId);
 }
