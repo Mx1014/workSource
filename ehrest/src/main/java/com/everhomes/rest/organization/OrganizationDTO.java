@@ -43,6 +43,8 @@ import java.util.List;
  * <li>doorplateAddress：门牌地址</li>
  * <li>managers：经理列表 {@link com.everhomes.rest.organization.OrganizationManagerDTO}</li>
  * <li>emailDomain: 邮箱域名 </li>
+ * <li>order:排序</li>
+ * <li>errorCode:错误码</li>
  * </ul>
  */
 public class OrganizationDTO {
@@ -99,6 +101,8 @@ public class OrganizationDTO {
     private String emailDomain;
 
     private Integer order;
+
+    private Integer errorCode;
 	
 	public String getEnterpriseContactor() {
 		return enterpriseContactor;
@@ -394,5 +398,13 @@ public class OrganizationDTO {
 
 	public void setOrder(Integer order) {
 		this.order = order;
+	}
+
+	public Integer getErrorCode() {
+		return errorCode;
+	}
+
+	public void setErrorCode(Integer errorCode) {
+		this.errorCode = errorCode;
 	}
 }
