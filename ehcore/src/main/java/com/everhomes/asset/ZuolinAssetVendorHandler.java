@@ -468,11 +468,11 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         if(!cmd.getOwnerType().equals("community")){
             throw new RuntimeException("保存账单不在一个园区");
         }
-        TargetDTO targetDto = userService.findTargetByNameAndAddress(cmd.getContractNum(), cmd.getTargetName(), cmd.getOwnerId(), cmd.getNoticeTel(), cmd.getOwnerType(), cmd.getTargetType());
-        if(targetDto!=null){
-            cmd.setContractId(targetDto.getContractId());
-            cmd.setTargetId(targetDto.getTargetId());
-        }
+//        TargetDTO targetDto = userService.findTargetByNameAndAddress(cmd.getContractNum(), cmd.getTargetName(), cmd.getOwnerId(), cmd.getNoticeTel(), cmd.getOwnerType(), cmd.getTargetType());
+//        if(targetDto!=null){
+//            cmd.setContractId(targetDto.getContractId());
+//            cmd.setTargetId(targetDto.getTargetId());
+//        }
 //        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
         return assetProvider.creatPropertyBill(cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getContractNum(),cmd.getContractId());
     }
@@ -538,6 +538,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize());
         if(dtos.size() <= cmd.getPageSize()){
 //            response.setNextPageOffset(cmd.getPageOffset());
+            response.setNextPageOffset(null);
         }else{
             response.setNextPageOffset(cmd.getPageOffset()+cmd.getPageSize());
             dtos.remove(dtos.size()-1);

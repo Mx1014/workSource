@@ -172,4 +172,20 @@ public interface PrivilegeConstants {
     // ---------------- 门禁权限 -----------------------
     long MODULE_ACLINK_MANAGER = 10041L; //公司门禁 管理员
 
+    // 能耗权限
+    long METER_CREATE = 21000L;
+    long METER_BATCHUPDATE = 21001L;
+    long METER_IMPORT = 21002L;
+    long METER_READ = 21003L;
+    long METER_LIST = 21004L;
+    long METER_CHANGE = 21005L;
+    long METER_INACTIVE = 21006L;
+    long METER_READING_SEARCH = 21007L;
+    long METER_READING_DELETE = 21008L;
+    long ENERGY_STAT_BY_DAY = 21009L;
+    long ENERGY_STAT_BY_MONTH = 21010L;
+    long ENERGY_STAT_BY_YEAR = 21011L;
+    long ENERGY_STAT_BY_YOY = 21012L;
+    long ENERGY_SETTING = 21013L;
+
 }

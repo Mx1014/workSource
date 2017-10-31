@@ -1,6 +1,7 @@
 package com.everhomes.energy;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.rest.energy.EnergyMeterAddressDTO;
 import com.everhomes.rest.energy.SearchEnergyMeterCommand;
 import com.everhomes.rest.energy.SearchEnergyMeterResponse;
 import com.everhomes.search.AbstractElasticSearch;
@@ -8,6 +9,7 @@ import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.mysql.jdbc.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -49,6 +52,9 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
 
     @Autowired
     private EnergyConsumptionService energyConsumptionService;
+
+    @Autowired
+    private EnergyMeterAddressProvider energyMeterAddressProvider;
 
     @Override
     public void deleteById(Long id) {
@@ -88,6 +94,13 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             builder.field("name", meter.getName());
             builder.field("meterNumber", meter.getMeterNumber());
             builder.field("createTime", meter.getCreateTime().getTime());
+
+            List<EnergyMeterAddress> existAddress = energyMeterAddressProvider.listByMeterId(meter.getId());
+            if(existAddress != null && existAddress.size() > 0) {
+                builder.field("buildingId", existAddress.get(0).getBuildingId());
+                builder.field("addressId", existAddress.get(0).getAddressId());
+            }
+
             builder.endObject();
             return builder;
         } catch (IOException e) {
@@ -170,6 +183,17 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             TermFilterBuilder statusFilter = FilterBuilders.termFilter("status", cmd.getStatus());
             filterBuilders.add(statusFilter);
         }
+
+        if (cmd.getBuildingId() != null) {
+            TermFilterBuilder buildingIdFilter = FilterBuilders.termFilter("buildingId", cmd.getBuildingId());
+            filterBuilders.add(buildingIdFilter);
+        }
+
+        if (cmd.getAddressId() != null) {
+            TermFilterBuilder addressIdFilter = FilterBuilders.termFilter("addressId", cmd.getAddressId());
+            filterBuilders.add(addressIdFilter);
+        }
+
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
