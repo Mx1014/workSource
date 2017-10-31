@@ -3212,11 +3212,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Flow flow = flowService.getEnabledFlow(order.getNamespaceId(), Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
 		LOGGER.debug("parames : " +order.getNamespaceId()+"*"+ Rentalv2Controller.moduleId+"*"+ moduleType+"*"+ ownerId+"*"+ ownerType );
 		LOGGER.debug("\n flow is "+flow);
-		if(null!=flow){
+
 			CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
 			cmd.setApplyUserId(order.getRentalUid());
-			cmd.setFlowMainId(flow.getFlowMainId());
-			cmd.setFlowVersion(flow.getFlowVersion());
 			cmd.setReferId(order.getId());
 			cmd.setReferType(REFER_TYPE);
 			cmd.setProjectId(order.getCommunityId());
@@ -3238,10 +3236,32 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cmd.setServiceType(resourceType.getName());
 			cmd.setContent(contentString);
 //	    	LOGGER.debug("cmd = \n"+cmd);
-
+		if(null!=flow){
+			cmd.setFlowMainId(flow.getFlowMainId());
+			cmd.setFlowVersion(flow.getFlowVersion());
 			return flowService.createFlowCase(cmd);
+		}else{
+			//预约成功 授权门禁
+			RentalResource rentalResource = rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
+			if (rentalResource.getAclinkId()!=null) {
+				Long doorAuthId = createDoorAuth(order.getRentalUid(), order.getAuthStartTime().getTime(), order.getAuthEndTime().getTime(),
+						rentalResource.getAclinkId(), rentalResource.getCreatorUid());
+				rentalv2Provider.setAuthDoorId(order.getId(),doorAuthId);
+			}
+
+			//创建哑工作流
+			GeneralModuleInfo gm = new GeneralModuleInfo();
+			gm.setModuleId(Rentalv2Controller.moduleId);
+			gm.setModuleType(moduleType);
+			gm.setNamespaceId(order.getNamespaceId());
+			gm.setOwnerId(ownerId);
+			gm.setOwnerType(ownerType);
+			gm.setProjectId(order.getCommunityId());
+			gm.setProjectType(EntityType.COMMUNITY.getCode());
+			gm.setOrganizationId(cmd.getCurrentOrganizationId());
+			return flowService.createDumpFlowCase(gm,cmd);
 		}
-		return null;
+
     	}
 
 
