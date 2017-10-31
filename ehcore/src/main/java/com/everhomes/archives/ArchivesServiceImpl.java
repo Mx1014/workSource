@@ -510,7 +510,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  TODO:英文名校验
 
-
+        //  手机号
         if (StringUtils.isEmpty(data.getContactToken())) {
             LOGGER.warn("Contact token is empty. data = {}", data);
             log.setData(data);
@@ -518,6 +518,30 @@ public class ArchivesServiceImpl implements ArchivesService {
             log.setCode(ArchivesServiceErrorCode.ERROR_CONTACT_TOKEN_ISEMPTY);
             return log;
         }
+
+        //  部门
+        if(!StringUtils.isEmpty(data.getDepartment())){
+           if(organizationService.getOrganizationNameByNameAndType(data.getDepartment(), OrganizationGroupType.DEPARTMENT.getCode()) == null){
+               LOGGER.warn("Department not found. data = {}", data);
+               log.setData(data);
+               log.setErrorLog("Department not found");
+               log.setCode(ArchivesServiceErrorCode.ERROR_DEPARTMENT_NOT_FOUND);
+               return log;
+           }
+        }
+
+        //  职务
+        if(!StringUtils.isEmpty(data.getJobPosition())){
+           if(organizationService.getOrganizationNameByNameAndType(data.getJobPosition(), OrganizationGroupType.JOB_POSITION.getCode()) == null){
+               LOGGER.warn("JobPosition not found. data = {}", data);
+               log.setData(data);
+               log.setErrorLog("JobPosition not found");
+               log.setCode(ArchivesServiceErrorCode.ERROR_JOB_POSITION_NOT_FOUND);
+               return log;
+           }
+        }
+
+
         return null;
     }
 

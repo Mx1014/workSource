@@ -10,4 +10,6 @@ public interface ArchivesServiceErrorCode {
     int ERROR_CONTACT_TOKEN_WRONGFORMAT = 100005;  //  手机号格式错误
     int ERROR_CHECK_IN_TIME_ISEMPTY = 100006;  //  入职时间不能为空
     int ERROR_EMPLOYEE_TYPE_ISEMPTY = 100007;  //  员工类型不能为空
+    int ERROR_DEPARTMENT_NOT_FOUND = 100003; //  部门不存在
+    int ERROR_JOB_POSITION_NOT_FOUND = 100003; //  职务不存在
 }
