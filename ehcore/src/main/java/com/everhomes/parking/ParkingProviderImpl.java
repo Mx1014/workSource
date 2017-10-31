@@ -851,7 +851,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhParkingUserInvoices.class));
 
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingUserInvoices.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhParkingUserInvoicesDao dao = new EhParkingUserInvoicesDao(context.configuration());
 
 		parkingUserInvoice.setId(id);
@@ -863,4 +863,117 @@ public class ParkingProviderImpl implements ParkingProvider {
 
 	}
 
+	@Override
+	public List<ParkingCarVerification> searchParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
+																	  String plateNumber, String plateOwnerName, String plateOwnerPhone,
+																	  Timestamp startDate, Timestamp endDate, Byte status,
+																	  String requestorEnterpriseName, Long pageAnchor, Integer pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCarVerifications.class));
+		SelectQuery<EhParkingCarVerificationsRecord> query = context.selectQuery(Tables.EH_PARKING_CAR_VERIFICATIONS);
+
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PARKING_LOT_ID.eq(parkingLotId));
+
+		if (null != pageAnchor && pageAnchor != 0L) {
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.le(new Timestamp(pageAnchor)));
+		}
+		if (StringUtils.isNotBlank(plateNumber)) {
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_NUMBER.eq(plateNumber));
+		}
+		if (StringUtils.isNotBlank(plateOwnerName)) {
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_NAME.eq(plateOwnerName));
+		}
+		if (StringUtils.isNotBlank(plateOwnerPhone)) {
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_PHONE.eq(plateOwnerPhone));
+		}
+		if (null != startDate) {
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.ge(startDate));
+		}
+		if (null != endDate) {
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.le(endDate));
+		}
+
+		if (null != status) {
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.eq(status));
+		}else {
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.ne(ParkingCarVerificationStatus.INACTIVE.getCode()));
+		}
+
+		if (StringUtils.isNotBlank(requestorEnterpriseName)) {
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.REQUESTOR_ENTPERISE_NAME.eq(requestorEnterpriseName));
+		}
+
+		query.addOrderBy(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.desc());
+		if (null != pageSize) {
+			query.addLimit(pageSize);
+		}
+		return query.fetch().map(r -> ConvertHelper.convert(query.fetchOne(), ParkingCarVerification.class));
+	}
+
+	@Override
+	public List<ParkingCarVerification> listParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
+																	  Long requestorUid, Long pageAnchor, Integer pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCarVerifications.class));
+		SelectQuery<EhParkingCarVerificationsRecord> query = context.selectQuery(Tables.EH_PARKING_CAR_VERIFICATIONS);
+
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PARKING_LOT_ID.eq(parkingLotId));
+
+		if (null != pageAnchor && pageAnchor != 0L) {
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.le(new Timestamp(pageAnchor)));
+		}
+		if (requestorUid != null) {
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.REQUESTOR_UID.eq(requestorUid));
+		}
+
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.STATUS.ne(ParkingCarVerificationStatus.INACTIVE.getCode()));
+
+		query.addOrderBy(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.desc());
+		if (null != pageSize) {
+			query.addLimit(pageSize);
+		}
+		return query.fetch().map(r -> ConvertHelper.convert(query.fetchOne(), ParkingCarVerification.class));
+	}
+
+	@Override
+	public ParkingCarVerification findParkingCarVerificationById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingCarVerificationsDao dao = new EhParkingCarVerificationsDao(context.configuration());
+
+		return ConvertHelper.convert(dao.findById(id), ParkingCarVerification.class);
+
+	}
+
+	@Override
+	public void updateParkingCarVerification(ParkingCarVerification parkingCarVerification) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingCarVerificationsDao dao = new EhParkingCarVerificationsDao(context.configuration());
+
+		dao.update(parkingCarVerification);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingCarVerifications.class, null);
+
+	}
+
+	@Override
+	public void createParkingCarVerification(ParkingCarVerification parkingCarVerification) {
+
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhParkingCarVerifications.class));
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingCarVerificationsDao dao = new EhParkingCarVerificationsDao(context.configuration());
+
+		parkingCarVerification.setId(id);
+		Long userId = UserContext.currentUserId();
+		parkingCarVerification.setRequestorUid(userId);
+		parkingCarVerification.setCreatorUid(userId);
+		parkingCarVerification.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
+		dao.insert(parkingCarVerification);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingCarVerifications.class, null);
+
+	}
 }

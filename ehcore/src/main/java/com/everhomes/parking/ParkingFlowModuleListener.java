@@ -86,18 +86,23 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		String stepType = ctx.getStepType().getCode();
 		String param = flowNode.getParams();
 		
-		Long flowId = flowNode.getFlowMainId();
-		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
 		Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		String tag1 = flow.getStringTag1();
 		
-		long now = System.currentTimeMillis();
-		LOGGER.debug("update parking request, stepType={}, tag1={}, param={}", stepType, tag1, param);
-		
-		parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
-		parkingCardRequest.setCancelTime(new Timestamp(System.currentTimeMillis()));
-		parkingProvider.updateParkingCardRequest(parkingCardRequest);
-		
+		LOGGER.info("update parking request, stepType={}, tag1={}, param={}", stepType, tag1, param);
+
+		if (flowCase.getReferType().equals(EntityType.PARKING_CAR_VERIFICATION.getCode())) {
+			ParkingCarVerification verification = parkingProvider.findParkingCarVerificationById(flowCase.getReferId());
+
+			verification.setStatus(ParkingCarVerificationStatus.FAILED.getCode());
+
+			parkingProvider.updateParkingCarVerification(verification);
+		}else if (flowCase.getReferType().equals(EntityType.PARKING_CARD_REQUEST.getCode())){
+			ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
+			parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
+			parkingCardRequest.setCancelTime(new Timestamp(System.currentTimeMillis()));
+			parkingProvider.updateParkingCardRequest(parkingCardRequest);
+		}
 	}
 
 	@Override
@@ -241,8 +246,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
 					parkingCardRequest.setAuditSucceedTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
-			}
-			else if("QUEUEING".equals(nodeType)) {
+			}else if("QUEUEING".equals(nodeType)) {
 				
 				ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingCardRequest.getOwnerType(), 
 						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId);
@@ -306,9 +310,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 				parkingCardRequest.setCancelTime(new Timestamp(now));
 				parkingProvider.updateParkingCardRequest(parkingCardRequest);
 			}
-			
 		}
-		
 	}
 
 	@Override

@@ -23,9 +23,18 @@ public class SearchParkingCarVerificationsCommand {
 
     private Long startTime;
     private Long endTime;
+    private Byte status;
 
     private Long pageAnchor;
     private Integer pageSize;
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
 
     public Long getPageAnchor() {
         return pageAnchor;

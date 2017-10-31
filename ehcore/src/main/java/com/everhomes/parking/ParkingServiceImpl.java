@@ -1124,7 +1124,7 @@ public class ParkingServiceImpl implements ParkingService {
 		
 	}
 	
-    private ParkingLot checkParkingLot(String ownerType,Long ownerId,Long parkingLotId){
+    private ParkingLot checkParkingLot(String ownerType, Long ownerId, Long parkingLotId){
     	if(null == ownerId) {
         	LOGGER.error("OwnerId cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -1915,26 +1915,139 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public SearchParkingCarVerificationResponse searchParkingCarVerifications(SearchParkingCarVerificationsCommand cmd) {
-		return null;
+		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		Timestamp startTime = null;
+		Timestamp endTime = null;
+		if (null != cmd.getStartTime()) {
+			startTime = new Timestamp(cmd.getStartTime());
+		}
+		if (null != cmd.getEndTime()) {
+			endTime = new Timestamp(cmd.getEndTime());
+		}
+
+		List<ParkingCarVerification> verifications = parkingProvider.searchParkingCarVerifications(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), cmd.getPlateOwnerPhone(), startTime, endTime,
+				cmd.getStatus(), cmd.getRequestorEnterpriseName(), cmd.getPageAnchor(), pageSize);
+
+		SearchParkingCarVerificationResponse response = new SearchParkingCarVerificationResponse();
+
+		int size = verifications.size();
+		if(size > 0){
+			response.setRequests(verifications.stream().map(r -> {
+				ParkingCarVerificationDTO dto = ConvertHelper.convert(r, ParkingCarVerificationDTO.class);
+				return dto;
+			}).collect(Collectors.toList()));
+
+			if(size != pageSize){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(verifications.get(size-1).getCreateTime().getTime());
+			}
+		}
+
+		return response;
 	}
 
 	@Override
 	public ListParkingCarVerificationsResponse listParkingCarVerifications(ListParkingCarVerificationsCommand cmd) {
-		return null;
+		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		Long userId = UserContext.currentUserId();
+
+		List<ParkingCarVerification> verifications = parkingProvider.listParkingCarVerifications(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getParkingLotId(), userId, cmd.getPageAnchor(), pageSize);
+
+		ListParkingCarVerificationsResponse response = new ListParkingCarVerificationsResponse();
+
+		int size = verifications.size();
+		if(size > 0){
+			response.setRequests(verifications.stream().map(r -> {
+				ParkingCarVerificationDTO dto = ConvertHelper.convert(r, ParkingCarVerificationDTO.class);
+
+				return dto;
+			}).collect(Collectors.toList()));
+
+			if(size != pageSize){
+				response.setNextPageAnchor(null);
+			}else{
+				response.setNextPageAnchor(verifications.get(size-1).getCreateTime().getTime());
+			}
+		}
+
+		return response;
 	}
 
 	@Override
 	public ParkingCarVerificationDTO getParkingCarVerificationById(GetParkingCarVerificationByIdCommand cmd) {
-		return null;
+		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		ParkingCarVerification verification = parkingProvider.findParkingCarVerificationById(cmd.getId());
+
+		ParkingCarVerificationDTO dto = ConvertHelper.convert(verification, ParkingCarVerificationDTO.class);
+
+		return dto;
 	}
 
 	@Override
 	public ParkingCarVerificationDTO requestCarVerification(RequestCarVerificationCommand cmd) {
-		return null;
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		ParkingCarVerification verification = ConvertHelper.convert(cmd, ParkingCarVerification.class);
+		if (parkingLot.getLockCarFlag() == ParkingConfigFlag.SUPPORT.getCode()) {
+			verification.setStatus(ParkingCarVerificationStatus.AUDITING.getCode());
+			parkingProvider.createParkingCarVerification(verification);
+
+			String ownerType = FlowOwnerType.PARKING_CAR_VERIFICATION.getCode();
+			Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
+					FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
+
+			FlowCase flowCase = createFlowCase(verification, flow, UserContext.currentUserId());
+			if (null != flowCase) {
+				verification.setFlowCaseId(flowCase.getId());
+				parkingProvider.updateParkingCarVerification(verification);
+			}
+		}else {
+			verification.setStatus(ParkingCarVerificationStatus.SUCCEED.getCode());
+			parkingProvider.createParkingCarVerification(verification);
+		}
+
+		return ConvertHelper.convert(verification, ParkingCarVerificationDTO.class);
 	}
 
 	@Override
 	public void deleteCarVerification(DeleteCarVerificationCommand cmd) {
+		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
+		ParkingCarVerification verification = parkingProvider.findParkingCarVerificationById(cmd.getId());
+
+		verification.setStatus(ParkingCarVerificationStatus.INACTIVE.getCode());
+
+		parkingProvider.updateParkingCarVerification(verification);
+
+	}
+
+	private FlowCase createFlowCase(ParkingCarVerification verification, Flow flow, Long userId) {
+
+		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+		createFlowCaseCommand.setApplyUserId(userId);
+		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+		createFlowCaseCommand.setReferId(verification.getId());
+		createFlowCaseCommand.setReferType(EntityType.PARKING_CAR_VERIFICATION.getCode());
+		createFlowCaseCommand.setContent("车牌号码：" + verification.getPlateNumber());
+		createFlowCaseCommand.setCurrentOrganizationId(verification.getRequestorEnterpriseId());
+
+		if (UserContext.getCurrentNamespaceId().equals(999983)) {
+			createFlowCaseCommand.setTitle("车辆认证申请");
+		}
+
+		FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
+
+		return flowCase;
 	}
 }

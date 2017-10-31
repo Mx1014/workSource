@@ -107,4 +107,18 @@ public interface ParkingProvider {
 
     ParkingRechargeRate findParkingRechargeRateByMonthCount(String ownerType, Long ownerId, Long parkingLotId,
                                                             String cardType, BigDecimal monthCount);
+
+    void createParkingCarVerification(ParkingCarVerification parkingCarVerification);
+
+    void updateParkingCarVerification(ParkingCarVerification parkingCarVerification);
+
+    ParkingCarVerification findParkingCarVerificationById(Long id);
+
+    List<ParkingCarVerification> searchParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
+                                                               String plateNumber, String plateOwnerName, String plateOwnerPhone,
+                                                               Timestamp startDate, Timestamp endDate, Byte status,
+                                                               String requestorEnterpriseName, Long pageAnchor, Integer pageSize);
+
+    List<ParkingCarVerification> listParkingCarVerifications(String ownerType, Long ownerId, Long parkingLotId,
+                                                             Long requestorUid, Long pageAnchor, Integer pageSize);
 }

@@ -9,7 +9,7 @@ package com.everhomes.rest.parking;
  * </ul>
  */
 public enum ParkingCarVerificationStatus {
-    FAILED((byte)0), AUDITING((byte)1), SUCCEED((byte)2);
+    FAILED((byte)0), AUDITING((byte)1), SUCCEED((byte)2), INACTIVE((byte)3);
 
     private byte code;
 
