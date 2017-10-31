@@ -295,7 +295,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         //同级重名校验
         Organization down_organization = organizationProvider.findOrganizationByParentAndName(parOrg.getId(),cmd.getName());
         if(down_organization != null){
-            return null;
+            OrganizationDTO orgDto_error = new OrganizationDTO();
+            orgDto_error.setErrorCode(OrganizationServiceErrorCode.ERROR_DEPARTMENT_EXISTS);
+            return orgDto_error;
         }
 
         //default show navi, add by sfyan 20160505

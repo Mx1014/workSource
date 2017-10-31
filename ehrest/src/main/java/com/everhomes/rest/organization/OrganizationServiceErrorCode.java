@@ -92,4 +92,6 @@ public interface OrganizationServiceErrorCode {
     int ERROR_CONTACTNAME_FORMAT_WRONG = 900025;    //  姓名长度需小于16
     int ERROR_UNIFIEDSOCIALCREDITCODE_EXIST = 900026;    //  unifiedSocialCreditCode唯一性
 
+    static final int ERROR_DEPARTMENT_EXISTS = 300002; //部门已存在
+
 }
