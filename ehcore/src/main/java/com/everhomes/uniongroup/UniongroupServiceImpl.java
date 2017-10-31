@@ -417,7 +417,7 @@ public class UniongroupServiceImpl implements UniongroupService {
         //按层级退化
 //        Collections.sort(departments, new Comparator<Organization>() {
 //            @Override
-//            public int compare(Organization o1, Organization o2) {
+//            public int compareTo(Organization o1, Organization o2) {
 //                if(o1.getPath().split("/").length > o2.getPath().split("/").length){
 //                    return -1;
 //                }

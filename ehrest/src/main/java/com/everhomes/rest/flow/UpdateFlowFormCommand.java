@@ -4,16 +4,24 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *     <li>flowId: flowId</li>
  *     <li>formOriginId: formOriginId</li>
  *     <li>formVersion: formVersion</li>
- *     <li>name: name</li>
  * </ul>
  */
-public class FlowFormDTO {
+public class UpdateFlowFormCommand {
 
+    private Long flowId;
     private Long formOriginId;
     private Long formVersion;
-    private String name;
+
+    public Long getFlowId() {
+        return flowId;
+    }
+
+    public void setFlowId(Long flowId) {
+        this.flowId = flowId;
+    }
 
     public Long getFormOriginId() {
         return formOriginId;
@@ -31,17 +39,8 @@ public class FlowFormDTO {
         this.formVersion = formVersion;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 }
-

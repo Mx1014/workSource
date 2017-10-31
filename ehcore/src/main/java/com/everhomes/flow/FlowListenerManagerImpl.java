@@ -167,14 +167,27 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
-    public Map<String, String> onFlowVariableRender(FlowCaseState ctx, List<String> vars) {
+    public String onFlowVariableRender(FlowCaseState ctx, String variable) {
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
         if (inst != null) {
             ctx.setModule(inst.getInfo());
             FlowModuleListener listener = inst.getListener();
-            return listener.onFlowVariableRender(ctx, vars);
+            return listener.onFlowVariableRender(ctx, variable);
         }
         return null;
+    }
+
+    @Override
+    public List<FlowPredefinedParamDTO> listFlowPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+        FlowModuleInst inst = moduleMap.get(flow.getModuleId());
+        if (inst != null) {
+            FlowModuleListener listener = inst.getListener();
+            List<FlowPredefinedParamDTO> dtoList = listener.listFlowPredefinedParam(flow, flowEntityType, ownerType, ownerId);
+            if (dtoList != null) {
+                return dtoList;
+            }
+        }
+        return new ArrayList<>();
     }
 
     @Override
@@ -202,11 +215,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
-    public List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+    public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
         FlowModuleInst inst = moduleMap.get(flow.getModuleId());
         if (inst != null) {
             FlowModuleListener listener = inst.getListener();
-            List<FlowPredefinedParamDTO> dtoList = listener.listPredefinedParam(flow, flowEntityType, ownerType, ownerId);
+            List<FlowConditionVariableDTO> dtoList = listener.listFlowConditionVariables(flow, flowEntityType, ownerType, ownerId);
             if (dtoList != null) {
                 return dtoList;
             }
@@ -215,37 +228,14 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
     }
 
     @Override
-    public boolean evaluateFlowConditionVariableRelational(FlowCaseState ctx, FlowConditionRelationalOperatorType relationalOperatorType, FlowConditionExpression exp) {
+    public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable) {
         FlowModuleInst inst = moduleMap.get(ctx.getModuleId());
-        if (inst == null) {
-            return false;
+        if (inst != null) {
+            ctx.setModule(inst.getInfo());
+            FlowModuleListener listener = inst.getListener();
+            return listener.onFlowConditionVariableRender(ctx, variable);
         }
-        ctx.setModule(inst.getInfo());
-        FlowModuleListener listener = inst.getListener();
-        if (listener instanceof FlowModuleConditionEvaluator) {
-            FlowModuleConditionEvaluator evaluator = (FlowModuleConditionEvaluator) listener;
-            switch (relationalOperatorType) {
-                case EQUAL:
-                    return evaluator.evaluateEqual(ctx, exp);
-                case NOT_EQUAL:
-                    return !evaluator.evaluateEqual(ctx, exp);
-                case GREATER_THEN:
-                    return evaluator.evaluateGreaterThen(ctx, exp);
-                case LESS_THEN:
-                    return evaluator.evaluateLessThen(ctx, exp);
-                case GREATER_OR_EQUAL:
-                    return evaluator.evaluateGreaterThen(ctx, exp) || evaluator.evaluateEqual(ctx, exp);
-                case LESS_OR_EQUAL:
-                    return evaluator.evaluateLessThen(ctx, exp) || evaluator.evaluateEqual(ctx, exp);
-                case CONTAIN:
-                    return evaluator.evaluateContains(ctx, exp);
-                case NOT_CONTAIN:
-                    return !evaluator.evaluateContains(ctx, exp);
-                default:
-                    return evaluator.evaluateCustomize(ctx, exp);
-            }
-        }
-        return false;
+        return null;
     }
 
     @Override

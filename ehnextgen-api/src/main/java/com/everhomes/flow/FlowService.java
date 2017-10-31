@@ -464,4 +464,16 @@ public interface FlowService {
     FlowConditionDTO createOrUpdateFlowCondition(CreateFlowConditionCommand cmd);
 
     void updateFlowValidationStatus(UpdateFlowValidationStatusCommand cmd);
+
+    FlowConditionVariable getFormFieldValueByVariable(FlowCaseState ctx, String variable);
+
+    ListFlowConditionVariablesResponse listFlowConditionVariables(ListFlowConditionVariablesCommand cmd);
+
+    ListFlowFormsResponse listFlowForms(ListFlowFormsCommand cmd);
+
+    FlowFormDTO updateFlowFormVersion(UpdateFlowFormCommand cmd);
+
+    FlowFormDTO createFlowForm(UpdateFlowFormCommand cmd);
+
+    void deleteFlowForm(UpdateFlowFormCommand cmd);
 }

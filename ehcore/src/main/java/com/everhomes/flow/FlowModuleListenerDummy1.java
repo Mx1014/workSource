@@ -17,7 +17,7 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener {
     private Long moduleId = 40100L;
 
     @Override
-    public List<FlowPredefinedParamDTO> listPredefinedParam(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+    public List<FlowPredefinedParamDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
         return null;
     }
 
