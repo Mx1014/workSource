@@ -66,6 +66,8 @@ import com.everhomes.util.StringHelper;
  * <li>payMode: 支付模式</li>
  * <li>sitePriceRules: 价格策略，参考{@link com.everhomes.rest.rentalv2.SitePriceRuleDTO}</li>
  * <li>unauthVisible: 非认证用户是否可见，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ * <li>AclinkId: 门禁组id</li>
+ * <li>AclinkName: 门禁组名</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -129,7 +131,9 @@ public class RentalSiteDTO {
     private Byte payMode;
 
     private Byte unauthVisible;
-    
+
+	private Long aclinkId;
+	private String aclinkName;
     @ItemType(SitePriceRuleDTO.class)
     private List<SitePriceRuleDTO> sitePriceRules;
     
@@ -683,5 +687,21 @@ public class RentalSiteDTO {
 
 	public void setRentalEndTime(Long rentalEndTime) {
 		this.rentalEndTime = rentalEndTime;
+	}
+
+	public Long getAclinkId() {
+		return aclinkId;
+	}
+
+	public void setAclinkId(Long aclinkId) {
+		aclinkId = aclinkId;
+	}
+
+	public String getAclinkName() {
+		return aclinkName;
+	}
+
+	public void setAclinkName(String aclinkName) {
+		aclinkName = aclinkName;
 	}
 }

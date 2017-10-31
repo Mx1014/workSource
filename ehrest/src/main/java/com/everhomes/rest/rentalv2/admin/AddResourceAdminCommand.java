@@ -64,7 +64,7 @@ public class AddResourceAdminCommand {
 	private String confirmationPrompt;
     private String offlineCashierAddress;
     private String offlinePayeeUid;
-    private Long AclinkId;
+    private Long aclinkId;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -223,10 +223,10 @@ public class AddResourceAdminCommand {
 	}
 
 	public Long getAclinkId() {
-		return AclinkId;
+		return aclinkId;
 	}
 
 	public void setAclinkId(Long aclinkId) {
-		AclinkId = aclinkId;
+		aclinkId = aclinkId;
 	}
 }

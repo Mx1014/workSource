@@ -35,6 +35,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
@@ -203,6 +204,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private PayService payService;
 	@Autowired
 	private DoorAccessService doorAccessService;
+	@Autowired
+	DoorAccessProvider doorAccessProvider;
 
 	/**cellList : 当前线程用到的单元格 */
 	private static ThreadLocal<List<RentalCell>> cellList = new ThreadLocal<List<RentalCell>>() {
@@ -855,7 +858,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		rSiteDTO.setDetailUrl(homeUrl + detailUrl);
 		rSiteDTO.setResourceTypeId(resourceType.getId());
 		rSiteDTO.setPayMode(resourceType.getPayMode());
-
+		rSiteDTO.setAclinkId(rentalSite.getAclinkId());
+		if (rSiteDTO.getAclinkId()!=null)
+			rSiteDTO.setAclinkName(doorAccessProvider.getDoorAccessById(rentalSite.getAclinkId()).getName());
 //		if(null!=rentalSite.getDayBeginTime()) {
 //			rSiteDTO.setDayBeginTime(convertTimeToGMTMillisecond(rentalSite.getDayBeginTime()));
 //		}
