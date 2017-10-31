@@ -220,6 +220,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		QuestionnaireOptionDTO optionDTO = new QuestionnaireOptionDTO();
 		optionDTO.setOptionName(answer.getTargetName());
 		optionDTO.setOptionContent(answer.getOptionContent());
+		optionDTO.setTargetPhone(answer.getTargetPhone());
 		return optionDTO;
 	}
 	
