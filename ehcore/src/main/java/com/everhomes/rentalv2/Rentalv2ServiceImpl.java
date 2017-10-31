@@ -3240,8 +3240,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	    	return flowService.createFlowCase(cmd);
     	}
-    	return null;
-	}
+
 
 	private Long createDoorAuth(Long userId,Long timeBegin,Long timeEnd,Long doorId,Long authUserId){
 		CreateDoorAuthCommand cmd = new CreateDoorAuthCommand();
