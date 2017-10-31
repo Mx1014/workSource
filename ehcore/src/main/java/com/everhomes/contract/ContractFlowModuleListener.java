@@ -55,9 +55,6 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     private PropertyMgrProvider propertyMgrProvider;
 
     @Autowired
-    private ContractService contractService;
-
-    @Autowired
     private ConfigurationProvider configurationProvider;
 
     @Override
