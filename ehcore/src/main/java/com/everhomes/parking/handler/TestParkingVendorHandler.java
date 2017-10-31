@@ -16,6 +16,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
+import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -91,7 +92,20 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 		updateParkingRechargeOrderRateInfo(parkingLot, order);
 
 	}
-    
+
+	@Override
+	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
+		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+		dto.setPlateNumber(plateNumber);
+		dto.setPrice(new BigDecimal(0.02));
+		dto.setOriginalPrice(new BigDecimal(0.02));
+		dto.setPayTime(System.currentTimeMillis());
+		dto.setEntryTime(System.currentTimeMillis() - 5000000);
+		dto.setOrderToken("11");
+		dto.setParkingTime(1000);
+		return null;
+	}
+
     @Override
     public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,String plateNumber,String cardNo) {
     	List<ParkingRechargeRate> parkingRechargeRateList;
