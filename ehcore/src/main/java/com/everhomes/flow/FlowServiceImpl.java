@@ -2889,7 +2889,10 @@ public class FlowServiceImpl implements FlowService {
     private String onFlowCaseBriefRender(FlowUserType flowUserType, FlowCase flowCase) {
         String flowCaseContent = flowCase.getContent();
         try {
-            flowCaseContent = flowListenerManager.onFlowCaseBriefRender(flowCase, flowUserType);
+            String content = flowListenerManager.onFlowCaseBriefRender(flowCase, flowUserType);
+            if (content != null) {
+                flowCaseContent = content;
+            }
         } catch (Exception e) {
             LOGGER.error("Flow listener onFlowCaseBriefRender error, flowCaseId = "+flowCase.getId(), e);
         }
@@ -5029,9 +5032,7 @@ public class FlowServiceImpl implements FlowService {
             return null;
         }
 
-        if (dto.getTitle() != null && dto.getModuleName() == null) {
-            dto.setModuleName(dto.getTitle());
-        } else {
+        if (dto.getTitle() == null) {
             dto.setTitle(dto.getModuleName());
         }
 
@@ -5208,9 +5209,7 @@ public class FlowServiceImpl implements FlowService {
         FlowGraph flowGraph = ctx.getFlowGraph();
 
         FlowCaseBriefDTO dto = ConvertHelper.convert(flowCase, FlowCaseBriefDTO.class);
-        if (dto.getTitle() != null && dto.getModuleName() == null) {
-            dto.setModuleName(dto.getTitle());
-        } else {
+        if (dto.getTitle() == null) {
             dto.setTitle(dto.getModuleName());
         }
 
