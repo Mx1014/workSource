@@ -884,6 +884,8 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd) {
+        Long contractId = cmd.getContractId();
+        assetProvider.setInworkFlagInContractReceiver(contractId);
         SimpleDateFormat sdf_dateStrD = new SimpleDateFormat("yyyy-MM-dd");
 //        SimpleDateFormat sdf_dateStr = new SimpleDateFormat("yyyy-MM");
         Gson gson = new Gson();

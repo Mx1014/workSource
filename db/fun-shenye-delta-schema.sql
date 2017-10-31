@@ -44,7 +44,8 @@ ALTER TABLE `eh_payment_bills` ADD COLUMN `charge_status` TINYINT DEFAULT 0 COMM
 
 ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `decoupling_flag` TINYINT DEFAULT 0 COMMENT '解耦标志，0:耦合中，收到域名下全部设置的影响;1:副本解耦';
 ALTER TABLE `eh_payment_bills` ADD COLUMN `real_paid_time` DATETIME DEFAULT NULL COMMENT '实际付款时间';
-
+ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `inWork` TINYINT DEFAULT 0 COMMENT '0:工作完成；1：正在生成';
+ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `recorder` TINYINT DEFAULT 1 COMMENT '0：合同状态记录者，不保存计价数据；1：不是合同状态记录者';
 
 -- 4.10.3，合并记得删
 -- 园区入驻3.6 add by sw 20171023
