@@ -535,8 +535,8 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
         addCommand.setGender(gender);
         addCommand.setContactShortToken(data.getContactShortToken());
-        addCommand.setRegionCode(getRealContactToken(data.getContactToken(), "regionCode"));
-        addCommand.setContactToken(getRealContactToken(data.getContactToken(), "contactToken"));
+        addCommand.setRegionCode(getRealContactToken(data.getContactToken(), ArchivesParameter.REGION_CODE));
+        addCommand.setContactToken(getRealContactToken(data.getContactToken(), ArchivesParameter.CONTACT_TOKEN));
         addCommand.setWorkEmail(data.getWorkEmail());
         if (StringUtils.isEmpty(data.getDepartment())) {
             List<Long> ids = new ArrayList<>();
@@ -573,11 +573,20 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     private String getRealContactToken(String tokens, String type) {
         String token[] = tokens.split(" ");
-        token[0] = token[0].substring(1, token[0].length());
-        if (type.equals("contactToken"))
-            return token[1];
-        else
-            return token[0];
+        //  1.native users do not need to write region code
+        if (token.length == 1) {
+            if (type.equals(ArchivesParameter.CONTACT_TOKEN))
+                return token[0];
+            else
+                return "86";
+        } else {
+            //  2.foreigners need to write region code
+            token[0] = token[0].substring(1, token[0].length());
+            if (type.equals(ArchivesParameter.CONTACT_TOKEN))
+                return token[1];
+            else
+                return token[0];
+        }
     }
 
     @Override

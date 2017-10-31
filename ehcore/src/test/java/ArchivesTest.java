@@ -10,6 +10,7 @@ public class ArchivesTest {
 
     private SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
 
+
     public void test() {
 /*        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         try{
@@ -41,8 +42,7 @@ public class ArchivesTest {
         System.out.println(j==i);*/
 
     }
-    @Test
-    public void testDate(){
+/*    public void testDate(){
         java.util.Date now = new java.util.Date();
         System.out.println(format.format(now));
 
@@ -56,5 +56,14 @@ public class ArchivesTest {
 
         Long a = null;
         System.out.println(String.valueOf(a));
+    }*/
+    @Test
+    public void testToken(){
+        String num1 = "+86 123456";
+        String num2 = "123456";
+        String token1[] = num1.split(" ");
+        String token2[] = num2.split(" ");
+        System.out.println(token1.length + " : " + token1.toString());
+        System.out.println(token2.length + " : " + token2.toString());
     }
 }
