@@ -16,4 +16,5 @@ public interface ForumLocalStringCode {
     static final int POST_MEMU_PARK_ONLY = 107; // 本园区
     static final int POST_MEMU_PARK_GROUP = 108; // 园区圈
     static final int POST_MEMU_PM_COMMUNITY_GROUP = 109; // 社区圈
+    static final int POST_COMMENT_NOT_SUPPORT = 10020; // 不支持评论
 }
