@@ -517,10 +517,9 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>创建子机构</p>
      */
     @RequestMapping("createChildrenOrganization")
-    @RestReturn(value = String.class, collection = true)
+    @RestReturn(value = OrganizationDTO.class)
     public RestResponse createChildrenOrganization(@Valid CreateOrganizationCommand cmd) {
-        organizationService.createChildrenOrganization(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(organizationService.createChildrenOrganization(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
