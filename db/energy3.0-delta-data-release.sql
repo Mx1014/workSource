@@ -1,9 +1,9 @@
 -- 能耗权限细化
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(49100,'能耗管理',49100,'/20000/49100','1','2','2','0',NOW()); 
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(49110,'表计管理',49100,'/20000/49100/49110','1','3','2','0',NOW()); 
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(49120,'抄表记录',49100,'/20000/49100/49120','1','3','2','0',NOW()); 
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(49130,'统计信息',49100,'/20000/49100/49130','1','3','2','0',NOW()); 
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES(49140,'参数设置',49100,'/20000/49100/49140','1','3','2','0',NOW()); 
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(49100,'能耗管理',49100,'/20000/49100','1','2','2','0',NOW(), 1, 1); 
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(49110,'表计管理',49100,'/20000/49100/49110','1','3','2','0',NOW(), 1, 1); 
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(49120,'抄表记录',49100,'/20000/49100/49120','1','3','2','0',NOW(), 1, 1); 
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(49130,'统计信息',49100,'/20000/49100/49130','1','3','2','0',NOW(), 1, 1); 
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `operator_uid`, `creator_uid`) VALUES(49140,'参数设置',49100,'/20000/49100/49140','1','3','2','0',NOW(), 1, 1); 
 
 SET @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
 SET @privilege_id = (SELECT MAX(id) FROM `eh_acl_privileges`);

@@ -360,13 +360,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             LOGGER.error("The energy meter formula is not exist, id = {}", cmd.getAmountFormulaId());
             throw errorWith(SCOPE, ERR_METER_FORMULA_NOT_EXIST, "The energy meter formula is not exist, id = %s", cmd.getAmountFormulaId());
         }
-        if(cmd.getCostFormulaSource() == null || cmd.getCostFormulaSource() == 0) {
-            formula = meterFormulaProvider.findById(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCostFormulaId());
-            if (formula == null) {
-                LOGGER.error("The energy meter formula is not exist, id = {}", cmd.getCostFormulaId());
-                throw errorWith(SCOPE, ERR_METER_FORMULA_NOT_EXIST, "The energy meter formula is not exist, id = %s", cmd.getCostFormulaId());
-            }
-        }
+//        if(cmd.getCostFormulaSource() == null || cmd.getCostFormulaSource() == 0) {
+//            formula = meterFormulaProvider.findById(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCostFormulaId());
+//            if (formula == null) {
+//                LOGGER.error("The energy meter formula is not exist, id = {}", cmd.getCostFormulaId());
+//                throw errorWith(SCOPE, ERR_METER_FORMULA_NOT_EXIST, "The energy meter formula is not exist, id = %s", cmd.getCostFormulaId());
+//            }
+//        }
 
         if (cmd.getStartReading().doubleValue() > cmd.getMaxReading().doubleValue()) {
             LOGGER.error("The energy meter start reading is greater then max reading");
