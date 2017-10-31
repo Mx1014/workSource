@@ -48,4 +48,13 @@ INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `de
 INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '3', 'zh_CN', '档案详情', '入职于 ${firstDate}，离职于 ${nextDate}', '0');
 INSERT INTO `ehcore`.`eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@template_id := @template_id + 1, 'archives.notification', '4', 'zh_CN', '档案详情', '调整至 ${new}', '0');
 
+-- 导入错误提示信息
+SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `ehcore`.`eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100001', 'zh_CN', '姓名不能为空');
+INSERT INTO `ehcore`.`eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100002', 'zh_CN', '姓名过长');
+INSERT INTO `ehcore`.`eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100004', 'zh_CN', '手机号不能为空');
+INSERT INTO `ehcore`.`eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100005', 'zh_CN', '手机号格式错误');
+INSERT INTO `ehcore`.`eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100006', 'zh_CN', '入职时间不能为空');
+INSERT INTO `ehcore`.`eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '100007', 'zh_CN', '员工类型不能为空');
+
 -- R ended --

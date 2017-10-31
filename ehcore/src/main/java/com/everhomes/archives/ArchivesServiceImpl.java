@@ -494,7 +494,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesServiceErrorCode.SCOPE);
 
         //  姓名
-        if (!StringUtils.isEmpty(data.getContactName())) {
+        if (StringUtils.isEmpty(data.getContactName())) {
             LOGGER.warn("Contact name is empty. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact name is empty.");
