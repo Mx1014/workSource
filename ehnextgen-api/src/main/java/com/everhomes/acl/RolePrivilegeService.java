@@ -408,4 +408,7 @@ public interface RolePrivilegeService {
 	void createOrganizationSuperAdmins(CreateOrganizationAdminsCommand cmd);
 	//	移交管理员权限 added by R 20170912.
     void transferOrganizationSuperAdmin(TransferOrganizationSuperAdminCommand cmd);
+
+    // 新版设置模块管理员 added by lei.lv 20171101
+	void resetServiceModuleAdministrators(CreateServiceModuleAdministratorsCommand cmd);
 }

@@ -3198,6 +3198,83 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		});
 	}
 
+	@Override
+	public void resetServiceModuleAdministrators(CreateServiceModuleAdministratorsCommand cmd) {
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Authorization authorization = ConvertHelper.convert(cmd, Authorization.class);
+		authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
+		authorization.setIdentityType(IdentityType.MANAGE.getCode());
+		authorization.setNamespaceId(namespaceId);
+		authorization.setCreatorUid(user.getId());
+		authorization.setOperatorUid(user.getId());
+		authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+//		authorization.setModuleAppId(cmd.getModule_app_id());
+//		authorization.setModuleControlType(cmd.getModule_app_control_type());
+//		authorization.setAllCommunityControlFlag(cmd.getAll_community_control_flag());
+//		authorization.setCommunityControlJson(cmd.getCommunity_control_json());
+//		authorization.setAllOrgControlFlag(cmd.getAll_org_control_flag());
+//		authorization.setOrgControl(cmd.getOrg_control_json());
+
+		dbProvider.execute((TransactionStatus status) -> {
+			// todo: 保存按园区范围控制的应用
+			for (ModuleAppTarget target : cmd.getCommunity_target()){
+				authorization.setAuthId(target.getModuleId());
+				authorization.setModuleAppId(target.getAppId());
+				authorization.setModuleControlType(cmd.getModule_app_control_type());
+				authorization.setAllCommunityControlFlag(cmd.getAll_community_control_flag());
+				authorization.setCommunityControlJson(cmd.getCommunity_control_json());
+				authorization.setAllOrgControlFlag(cmd.getAll_org_control_flag());
+				authorization.setOrgControl(cmd.getOrg_control_json());
+			}
+
+			// todo: 保存按OA范围控制的应用
+			for (ModuleAppTarget target : cmd.getOrg_target()){
+				authorization.setAuthId(target.getModuleId());
+				authorization.setModuleAppId(target.getAppId());
+				authorization.setModuleControlType(cmd.getModule_app_control_type());
+				authorization.setAllCommunityControlFlag(cmd.getAll_community_control_flag());
+				authorization.setCommunityControlJson(cmd.getCommunity_control_json());
+				authorization.setAllOrgControlFlag(cmd.getAll_org_control_flag());
+				authorization.setOrgControl(cmd.getOrg_control_json());
+			}
+
+			// todo: 保存无范围控制的应用
+			for (ModuleAppTarget target : cmd.getUnlimit_target()){
+				authorization.setAuthId(target.getModuleId());
+				authorization.setModuleAppId(target.getAppId());
+				authorization.setModuleControlType(cmd.getModule_app_control_type());
+				authorization.setAllCommunityControlFlag(cmd.getAll_community_control_flag());
+				authorization.setCommunityControlJson(cmd.getCommunity_control_json());
+				authorization.setAllOrgControlFlag(cmd.getAll_org_control_flag());
+				authorization.setOrgControl(cmd.getOrg_control_json());
+			}
+
+
+			return  null;
+		});
+
+
+		dbProvider.execute((TransactionStatus status) -> {
+
+			if(AllFlagType.fromCode(authorization.getAllFlag()) == AllFlagType.YES){
+				authorization.setAuthId(0L);
+				authorizationProvider.createAuthorization(authorization);
+				//给对象分配全部模块管理员的权限
+				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
+			}else{
+				for (Long moduleId: cmd.getModuleIds()) {
+					authorization.setAuthId(moduleId);
+					authorizationProvider.createAuthorization(authorization);
+					//给对象分配每个模块管理员的权限
+					assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+				}
+			}
+			return null;
+		});
+	}
+
 
 	public static void main(String[] args) {
 //		System.out.println(GeoHashUtils.encode(41.843665, 123.455102));
