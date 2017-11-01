@@ -659,7 +659,7 @@ public class NewsServiceImpl implements NewsService {
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 
 		News news = findNewsById(userId, newsId);
-		newsProvider.increaseViewCount(newsId);
+		newsProvider.increaseViewCount(newsId,news.getViewCount());
 		news.setViewCount(news.getViewCount()+1L);
 
 		List<NewsTagVals> list = newsProvider.listNewsTagVals(newsId);
