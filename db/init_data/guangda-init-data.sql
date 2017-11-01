@@ -2160,5 +2160,5 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, 
 -- 【光企云】分享顶部信息配置
 UPDATE eh_app_urls  SET download_url = 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.gdwg',NAME ='光企云',description ='企业成长伙伴，员工生活家园',logo_url= 'cs://1/image/aW1hZ2UvTVRveU1EVmhOVEUzWW1WaVpXSTJORGswTnpGak9UTTBaRGswTlRNME5XWTBaZw' WHERE namespace_id =999979;
 
-
-
+-- 【光企云】资源预订配置成“非认证用户也可以预订”
+UPDATE eh_rentalv2_resource_types SET unauth_visible = 1 WHERE namespace_id = 999979;
