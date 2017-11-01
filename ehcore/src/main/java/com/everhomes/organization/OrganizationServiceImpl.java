@@ -5394,6 +5394,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                     deleteOrganizaitonMemberUnderEnterprise(enterpriseIds, groupTypes_full, leaveMembers, token);
                     //重复添加纪录
                     repeatCreateOrganizationmembers(departmentIds, token, enterpriseIds, enterprise_member);
+                    OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                    memberDetail.setDepartmentIds(JSON.toJSONString(departmentIds));
+                    memberDetail.setDepartment(convertToOrganizationName(departmentIds));
                 }
             });
 
@@ -5416,6 +5419,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 OrganizationMember enterprise_member = getEnableEnterprisePersonel(org, detailId);
                 String token = enterprise_member.getContactToken();
                 repeatCreateOrganizationmembers(cmd.getJobPositionIds(), token, enterpriseIds, enterprise_member);
+                OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                memberDetail.setJobLevelIds(JSON.toJSONString(cmd.getJobPositionIds()));
+                memberDetail.setDepartment(convertToOrganizationName(cmd.getJobPositionIds()));
             });
         }
 
@@ -5428,6 +5434,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 OrganizationMember enterprise_member = getEnableEnterprisePersonel(org, detailId);
                 String token = enterprise_member.getContactToken();
                 repeatCreateOrganizationmembers(cmd.getJobLevelIds(), token, enterpriseIds, enterprise_member);
+                OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                memberDetail.setDepartmentIds(JSON.toJSONString(cmd.getJobLevelIds()));
+                memberDetail.setDepartment(convertToOrganizationName(cmd.getJobLevelIds()));
             });
         }
     }

@@ -155,16 +155,8 @@ public class ArchivesServiceImpl implements ArchivesService {
                 transferCommand.setDepartmentIds(cmd.getDepartmentIds());
                 transferCommand.setJobPositionIds(cmd.getJobPositionIds());
                 transferCommand.setJobLevelIds(cmd.getJobLevelIds());
+                //  调整部门、岗位、职级并同步到detail表
                 organizationService.transferOrganizationPersonels(transferCommand);
-
-                //  同步部门、岗位、职级名称
-                for (Long detailId : cmd.getDetailIds()) {
-                    OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                    detail.setDepartment(convertToArchivesInfo(cmd.getDepartmentIds(), ArchivesParameter.DEPARTMENT_IDS));
-                    detail.setJobLevel(convertToArchivesInfo(cmd.getJobLevelIds(), ArchivesParameter.DEPARTMENT_IDS));
-                    detail.setJobPosition(convertToArchivesInfo(cmd.getJobPositionIds(), ArchivesParameter.DEPARTMENT_IDS));
-                    organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
-                }
 
                 //  添加档案记录
                 TransferArchivesEmployeesCommand logCommand = ConvertHelper.convert(cmd, TransferArchivesEmployeesCommand.class);
@@ -822,9 +814,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                     memberDetail.setEmploymentTime(cmd.getEmploymentTime());
                 memberDetail.setEmployeeNo(cmd.getEmployeeNo());
                 memberDetail.setEnName(cmd.getEnName());
-                memberDetail.setDepartment(convertToArchivesInfo(cmd.getDepartmentIds(), ArchivesParameter.DEPARTMENT_IDS));
-                memberDetail.setJobPosition(convertToArchivesInfo(cmd.getJobPositionIds(), ArchivesParameter.DEPARTMENT_IDS));
-                memberDetail.setJobLevel(convertToArchivesInfo(cmd.getJobLevelIds(), ArchivesParameter.DEPARTMENT_IDS));
                 memberDetail.setContactShortToken(cmd.getContactShortToken());
                 memberDetail.setWorkEmail(cmd.getWorkEmail());
                 memberDetail.setContractPartyId(cmd.getContractPartyId());
@@ -1562,16 +1551,8 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     public void transferArchivesEmployees(TransferArchivesEmployeesCommand cmd) {
         dbProvider.execute((TransactionStatus status) -> {
-            //  1.调整员工部门
+            //  调整员工部门、岗位、职级并同步到 detail 表
             organizationService.transferOrganizationPersonels(cmd);
-            //  2.同步部门、岗位、职级名称
-            for (Long detailId : cmd.getDetailIds()) {
-                OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                employee.setDepartment(convertToArchivesInfo(cmd.getDepartmentIds(), ArchivesParameter.DEPARTMENT_IDS));
-                employee.setJobPosition(convertToArchivesInfo(cmd.getJobPositionIds(), ArchivesParameter.DEPARTMENT_IDS));
-                employee.setJobLevel(convertToArchivesInfo(cmd.getJobLevelIds(), ArchivesParameter.DEPARTMENT_IDS));
-                organizationProvider.updateOrganizationMemberDetails(employee, employee.getId());
-            }
             return null;
         });
     }
