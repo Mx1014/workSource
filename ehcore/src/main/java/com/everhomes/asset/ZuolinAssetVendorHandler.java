@@ -7,6 +7,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contract.ContractService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -317,8 +318,15 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         if(targetType.equals("eh_user")) {
             targetId = UserContext.current().getUser().getId();
         }
-        Long cid = Long.parseLong(contractId);
-        List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId,isOwedBill,cid);
+        String contractNum = null;
+        Long cid = null;
+        try{
+            cid = Long.parseLong(contractId);
+        }catch (Exception e){
+            cid = null;
+            contractNum = contractId;
+        }
+        List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId,isOwedBill,cid,contractNum);
         HashSet<String> dateStrFilter = new HashSet<>();
         BigDecimal amountOwed = new BigDecimal("0");
         for(int i = 0; i < billDetailDTOList.size(); i++) {
@@ -534,6 +542,12 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         }
         if(cmd.getPageOffset()==null||cmd.getPageOffset()<0){
             cmd.setPageSize(0);
+        }
+        //先查看任务
+        Boolean inWork = assetProvider.checkContractInWork(cmd.getContractNum());
+        if(inWork){
+//            return response;
+            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in process");
         }
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize());
         if(dtos.size() <= cmd.getPageSize()){

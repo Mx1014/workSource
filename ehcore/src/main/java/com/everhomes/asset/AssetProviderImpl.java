@@ -156,7 +156,7 @@ public class AssetProviderImpl implements AssetProvider {
             LOGGER.debug("findTemplateFieldByTemplateVersion, sql=" + query.getSQL());
             LOGGER.debug("findTemplateFieldByTemplateVersion, bindValues=" + query.getBindValues());
         }
-       
+
         List<AssetBillTemplateFieldDTO> templateVersions = new ArrayList<>();
         query.fetch().map((EhAssetBillTemplateFieldsRecord record) -> {
             templateVersions.add(ConvertHelper.convert(record, AssetBillTemplateFieldDTO.class));
@@ -288,7 +288,7 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public List<BigDecimal> listPeriodUnpaidAccountAmount(Long ownerId, String ownerType, Long targetId, String targetType,
-                                Long addressId, String tenantType, Long tenantId, Timestamp currentAccountPeriod) {
+                                                          Long addressId, String tenantType, Long tenantId, Timestamp currentAccountPeriod) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
         query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
@@ -545,33 +545,33 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillDTO> dtos = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-        EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
+//        EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
         EhAddresses t2 = Tables.EH_ADDRESSES.as("t2");
         context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME)
                 .from(t)
-                .leftOuterJoin(t1)
-                .on(t.CHARGING_ITEMS_ID.eq(t1.ID))
+//               .leftOuterJoin(t1)
+//                .on(t.CHARGING_ITEMS_ID.eq(t1.ID))
                 .leftOuterJoin(t2)
                 .on(t.ADDRESS_ID.eq(t2.ID))
                 .where(t.BILL_ID.eq(billId))
-                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
-                .orderBy(t1.DEFAULT_ORDER)
+//                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
+//                .orderBy(t1.DEFAULT_ORDER)
                 .limit(pageOffSet,pageSize+1)
                 .fetch()
                 .map(r ->{
-            BillDTO dto =new BillDTO();
-            dto.setTargetName(targetName);
-            dto.setDateStr(r.getValue(t.DATE_STR));
-            dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
-            dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
-            dto.setAmountReceived(r.getValue(t.AMOUNT_RECEIVED));
-            dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
-            dto.setBillStatus(r.getValue(t.STATUS));
-            dto.setBillItemId(r.getValue(t.ID));
-            dto.setApartmentName(r.getValue(t2.APARTMENT_NAME));
-            dto.setBuildingName(r.getValue(t2.BUILDING_NAME));
-            dtos.add(dto);
-            return null;});
+                    BillDTO dto =new BillDTO();
+                    dto.setTargetName(targetName);
+                    dto.setDateStr(r.getValue(t.DATE_STR));
+                    dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+                    dto.setAmountReceived(r.getValue(t.AMOUNT_RECEIVED));
+                    dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
+                    dto.setBillStatus(r.getValue(t.STATUS));
+                    dto.setBillItemId(r.getValue(t.ID));
+                    dto.setApartmentName(r.getValue(t2.APARTMENT_NAME));
+                    dto.setBuildingName(r.getValue(t2.BUILDING_NAME));
+                    dtos.add(dto);
+                    return null;});
         return dtos;
     }
 
@@ -579,19 +579,19 @@ public class AssetProviderImpl implements AssetProvider {
     public List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<NoticeInfo> list = new ArrayList<>();
-                dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGET_NAME)
+        dslContext.select(Tables.EH_PAYMENT_BILLS.NOTICETEL,Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE,Tables.EH_PAYMENT_BILLS.AMOUNT_OWED,Tables.EH_PAYMENT_BILLS.TARGET_ID,Tables.EH_PAYMENT_BILLS.TARGET_TYPE,Tables.EH_PAYMENT_BILLS.TARGET_NAME)
                 .from(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.ID.in(billIds))
                 .fetch().map(r -> {
-                    NoticeInfo info = new NoticeInfo();
-                    info.setPhoneNums(r.getValue(Tables.EH_PAYMENT_BILLS.NOTICETEL));
-                    info.setAmountRecevable(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE));
-                    info.setAmountOwed(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED));
-                    info.setTargetId(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_ID));
-                    info.setTargetType(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_TYPE));
-                    info.setTargetName(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_NAME));
-                    list.add(info);
-                    return null;});
+            NoticeInfo info = new NoticeInfo();
+            info.setPhoneNums(r.getValue(Tables.EH_PAYMENT_BILLS.NOTICETEL));
+            info.setAmountRecevable(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_RECEIVABLE));
+            info.setAmountOwed(r.getValue(Tables.EH_PAYMENT_BILLS.AMOUNT_OWED));
+            info.setTargetId(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_ID));
+            info.setTargetType(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_TYPE));
+            info.setTargetName(r.getValue(Tables.EH_PAYMENT_BILLS.TARGET_NAME));
+            list.add(info);
+            return null;});
         List<String> fetch = dslContext.select(Tables.EH_APP_URLS.NAME)
                 .from(Tables.EH_APP_URLS)
                 .where(Tables.EH_APP_URLS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
@@ -604,7 +604,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,Long contractId) {
+    public List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,Long contractId,String contractNum) {
         List<BillDetailDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
@@ -628,6 +628,9 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(t.SWITCH.eq((byte)1));
         if(contractId!=null){
             query.addConditions(t.CONTRACT_ID.eq(contractId));
+        }
+        if(contractNum!=null){
+            query.addConditions(t.CONTRACT_NUM.eq(contractNum));
         }
         if(isOwedBill==1){
             query.addConditions(t.STATUS.eq((byte)0));
@@ -654,6 +657,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<ShowBillDetailForClientDTO> dtos = new ArrayList<>();
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+
         dslContext.select(t.AMOUNT_OWED,t.CHARGING_ITEM_NAME,t.DATE_STR,t.APARTMENT_NAME,t.BUILDING_NAME,t.AMOUNT_RECEIVABLE)
                 .from(t)
                 .where(t.BILL_ID.eq(billId))
@@ -663,6 +667,7 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
                     dto.setAddressName(r.getValue(t.BUILDING_NAME)+r.getValue(t.APARTMENT_NAME));
+                    dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                     dtos.add(dto);
                     dateStr[0] = r.getValue(t.DATE_STR);
                     amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
@@ -758,6 +763,7 @@ public class AssetProviderImpl implements AssetProvider {
                         ShowBillDetailForClientDTO dto = new ShowBillDetailForClientDTO();
                         dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                         dto.setBillItemName(r.getValue(t.CHARGING_ITEM_NAME));
+                        dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
                         dtos.add(dto);
                         amountOwed[0] = amountOwed[0].add(r.getValue(t.AMOUNT_OWED));
                         amountReceivable[0] = amountReceivable[0].add(r.getValue(t.AMOUNT_RECEIVABLE));
@@ -1491,31 +1497,48 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId) {
+    public List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId,Long ownerId,String ownerType) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<VariableIdAndValue> list = new ArrayList<>();
-
-
-        com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards standard = findChargingStandardById(chargingStandardId);
-        String formulaJson = standard.getFormulaJson();
-
-        //获得不重复的字母的变量标识的集合
-
-        String formulaCopy = formulaJson;
-        Set<String> variableIdentifiers = new HashSet<>();
-        int index = 0;
-        getVaraibleIdenInHashset(formulaCopy, variableIdentifiers, index);
-        Iterator<String> iterator = variableIdentifiers.iterator();
-        while(iterator.hasNext()){
-            String iden = iterator.next();
-            com.everhomes.server.schema.tables.pojos.EhPaymentVariables varia = findVariableByIden(iden);
-            VariableIdAndValue viv = new VariableIdAndValue();
-            viv.setVaribleIdentifier(iden);
-            viv.setVariableId(varia.getId());
-            if(viv.equals("dj")){
-                viv.setVariableValue(standard.getSuggestUnitPrice());
-            }
-            list.add(viv);
+//<<<<<<< HEAD
+        EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
+        String variableJson = context.select(t.VARIABLES_JSON_STRING)
+                .from(t)
+                .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+                .and(t.OWNERID.eq(ownerId))
+                .and(t.OWNERTYPE.eq(ownerType))
+                .fetchOne(0, String.class);
+        Gson gson = new Gson();
+        Map<String,String> map = gson.fromJson(variableJson, Map.class);
+        for(Map.Entry entry : map.entrySet()){
+            VariableIdAndValue vid = new VariableIdAndValue();
+            vid.setVariableValue(entry.getValue());
+            vid.setVariableId(entry.getKey());
+            list.add(vid);
+//=======
+//
+//
+//        com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards standard = findChargingStandardById(chargingStandardId);
+//        String formulaJson = standard.getFormulaJson();
+//
+//        //获得不重复的字母的变量标识的集合
+//
+//        String formulaCopy = formulaJson;
+//        Set<String> variableIdentifiers = new HashSet<>();
+//        int index = 0;
+//        getVaraibleIdenInHashset(formulaCopy, variableIdentifiers, index);
+//        Iterator<String> iterator = variableIdentifiers.iterator();
+//        while(iterator.hasNext()){
+//            String iden = iterator.next();
+//            com.everhomes.server.schema.tables.pojos.EhPaymentVariables varia = findVariableByIden(iden);
+//            VariableIdAndValue viv = new VariableIdAndValue();
+//            viv.setVaribleIdentifier(iden);
+//            viv.setVariableId(varia.getId());
+//            if(viv.equals("dj")){
+//                viv.setVariableValue(standard.getSuggestUnitPrice());
+//            }
+//            list.add(viv);
+//>>>>>>> payment_wentian_2.0
         }
         return list;
     }
@@ -1593,6 +1616,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(t)
                 .where(t.CHARGING_ITEM_ID.eq(chargingItemId))
                 .and(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+                .and(t.OWNERTYPE.eq(ownerType))
+                .and(t.OWNERID.eq(ownerId))
                 .fetch()
                 .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
         return rules.get(0);
@@ -1881,7 +1906,7 @@ public class AssetProviderImpl implements AssetProvider {
         Random r = new Random();
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < 17; i++){
-               sb.append(r.nextInt(10));
+            sb.append(r.nextInt(10));
         }
         order.setOrderNo(Long.parseLong(sb.toString()));
         order.setUid(UserContext.currentUserId());
@@ -2538,6 +2563,47 @@ public class AssetProviderImpl implements AssetProvider {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void setInworkFlagInContractReceiver(Long contractId,String contractNum) {
+        DSLContext writeContext = getReadWriteContext();
+        PaymentContractReceiver cr = new PaymentContractReceiver();
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver.class));
+        cr.setId(nextSequence);
+        cr.setContractId(contractId);
+        cr.setContractNum(contractNum);
+        cr.setInWork((byte)1);
+        cr.setIsRecorder((byte)1);
+        EhPaymentContractReceiverDao dao = new EhPaymentContractReceiverDao(writeContext.configuration());
+        dao.insert(cr);
+    }
+
+    @Override
+    public void setInworkFlagInContractReceiverWell(Long contractId, String contractNum) {
+        DSLContext writeContext = getReadWriteContext();
+        PaymentContractReceiver cr = new PaymentContractReceiver();
+        EhPaymentContractReceiver contract = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract");
+        writeContext.update(contract)
+                .set(contract.IN_WORK,(byte)0)
+                .where(contract.CONTRACT_ID.eq(contractId))
+                .and(contract.CONTRACT_NUM.eq(contractNum))
+                .execute();
+    }
+
+    @Override
+    public Boolean checkContractInWork(String contractNum) {
+        EhPaymentContractReceiver contract = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract");
+        DSLContext context = getReadOnlyContext();
+        Byte aByte = context.select(contract.IN_WORK)
+                .from(contract)
+                .where(contract.IS_RECORDER.eq((byte) 1))
+                .and(contract.CONTRACT_NUM.eq(contractNum))
+                .fetchOne(contract.IN_WORK);
+        if(aByte == (byte)0){
+            return false;
+        }
+        return true;
     }
 
 

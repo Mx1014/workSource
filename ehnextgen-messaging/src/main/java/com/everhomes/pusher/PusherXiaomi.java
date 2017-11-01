@@ -2,6 +2,8 @@ package com.everhomes.pusher;
 
 import java.io.IOException;
 
+import com.everhomes.msgbox.Message;
+import com.everhomes.user.UserLogin;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,7 @@ public class PusherXiaomi implements PusherVender {
     }
     
     @Override
-    public void sendPushMessage(String deviceToken, com.everhomes.msgbox.Message msgBox, DeviceMessage devMessage) {
+    public void sendPushMessage(String deviceToken, Message msgBox, DeviceMessage devMessage, UserLogin senderLogin, UserLogin destLogin) {
         String messagePayload = StringHelper.toJsonString(devMessage);
         String title = devMessage.getTitle();
         if(title == null) {

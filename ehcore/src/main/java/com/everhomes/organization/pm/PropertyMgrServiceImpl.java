@@ -5146,10 +5146,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             Address address = addressProvider.findAddressById(r.getAddressId());
             OrganizationOwnerAddressDTO dto = new OrganizationOwnerAddressDTO();
             String locale = currentLocale();
-            dto.setBuilding(address.getBuildingName());
-            dto.setAddress(address.getAddress());
-            dto.setAddressId(address.getId());
-            dto.setApartment(address.getApartmentName());
+			if(address != null) {
+				dto.setBuilding(address.getBuildingName());
+				dto.setAddress(address.getAddress());
+				dto.setAddressId(address.getId());
+				dto.setApartment(address.getApartmentName());
+			}
+
             LocaleString addressStatusLocale = localeStringProvider.find(OrganizationOwnerLocaleStringScope.AUTH_TYPE_SCOPE,
                     String.valueOf(r.getAuthType()), locale);
             if (addressStatusLocale != null) {
