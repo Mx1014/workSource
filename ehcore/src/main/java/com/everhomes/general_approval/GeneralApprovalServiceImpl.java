@@ -722,7 +722,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         response.setResult(1L);
         List<GeneralApprovalTemplate> templates = generalApprovalProvider.listGeneralApprovalTemplateByModuleId(cmd.getModuleId());
         for (GeneralApprovalTemplate template : templates) {
-            GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(cmd.getModuleId(), cmd.getOwnerId(),
+            GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(),
                     cmd.getOwnerType(), template.getId());
             if (ga == null) {
                 response.setResult(0L);
@@ -758,7 +758,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     private void createGeneralApprovalByTemplate(GeneralApprovalTemplate approval, Long formOriginId, CreateApprovalTemplatesCommand cmd) {
-        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(cmd.getModuleId(), cmd.getOwnerId(),
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalByTemplateId(UserContext.getCurrentNamespaceId(), cmd.getModuleId(), cmd.getOwnerId(),
                 cmd.getOwnerType(), approval.getId());
         if (ga != null) {
             ga = convertApprovalFromTemplate(ga, approval, formOriginId, cmd);
@@ -817,6 +817,12 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     @Override
+    public GeneralApproval getGeneralApprovalByAttribute(Long ownerId, String attribute){
+        GeneralApproval approval = generalApprovalProvider.getGeneralApprovalByAttribute(UserContext.getCurrentNamespaceId(), ownerId, attribute);
+        return approval;
+    }
+
+    @Override
     public ListGeneralApprovalResponse listActiveGeneralApproval(
             ListActiveGeneralApprovalCommand cmd) {
         ListGeneralApprovalCommand cmd2 = ConvertHelper.convert(cmd, ListGeneralApprovalCommand.class);
@@ -834,7 +840,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Override
     public GeneralApprovalDTO verifyApprovalName(VerifyApprovalNameCommand cmd) {
-        GeneralApproval approval = this.generalApprovalProvider.getGeneralApprovalByName(cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getApprovalName());
+        GeneralApproval approval = this.generalApprovalProvider.getGeneralApprovalByName(UserContext.getCurrentNamespaceId(),
+                cmd.getModuleId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getApprovalName());
         if (approval != null)
             return ConvertHelper.convert(approval, GeneralApprovalDTO.class);
         return null;

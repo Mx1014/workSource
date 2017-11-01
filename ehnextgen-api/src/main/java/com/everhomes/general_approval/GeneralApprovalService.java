@@ -53,6 +53,8 @@ public interface GeneralApprovalService {
 
     void createApprovalTemplates(CreateApprovalTemplatesCommand cmd);
 
+    GeneralApproval getGeneralApprovalByAttribute(Long ownerId, String attribute);
+
     ListGeneralApprovalResponse listActiveGeneralApproval(ListActiveGeneralApprovalCommand cmd);
 
     ListGeneralApprovalRecordsResponse listGeneralApprovalRecords(ListGeneralApprovalRecordsCommand cmd);
