@@ -917,13 +917,15 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (cmd.getDismiss() != null) {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("firstDate", format.format(employee.getCheckInTime()));
+            if(employee.getDismissTime()!=null)
             map.put("nextDate", format.format(employee.getDismissTime()));
             employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_DISMISS_CASE, "zh_CN", map, "");
         } else {
             if (employee.getEmployeeStatus().equals(EmployeeStatus.ON_THE_JOB.getCode())) {
                 Map<String, Object> map = new LinkedHashMap<>();
                 map.put("firstDate", format.format(employee.getCheckInTime()));
-                map.put("nextDate", format.format(employee.getContractEndTime()));
+                if(employee.getContractEndTime()!=null)
+                    map.put("nextDate", format.format(employee.getContractEndTime()));
                 employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_ON_THE_JOB_CASE, "zh_CN", map, "");
             } else {
                 Map<String, Object> map = new LinkedHashMap<>();
