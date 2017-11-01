@@ -1510,45 +1510,45 @@ public class CommunityServiceImpl implements CommunityService {
 		for (Group group : groups) {
 			groupIds.add(group.getId());
 		}
-		
-		if(StringUtils.isNotBlank(cmd.getKeywords())){
-			UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId , cmd.getKeywords());
-			
-			if(null == identifier){
-				return res;
-			}
-			
-			List<UserGroup> userGroups = userProvider.listUserGroups(identifier.getOwnerUid(), GroupDiscriminator.FAMILY.getCode());
-			
-			if(null == userGroups || userGroups.size() == 0){
-				return res;
-			}
-
-			User user = userProvider.findUserById(identifier.getOwnerUid());
-			CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
-			dto.setUserId(user.getId());
-			dto.setUserName(user.getNickName());
-			dto.setNikeName(user.getNickName());
-			dto.setApplyTime(user.getCreateTime());
-			dto.setGender(user.getGender());
-			dto.setPhone(identifier.getIdentifierToken());
-			dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
-			if(NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
-				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
-			}
-			//添加地址信息
-			addGroupAddressDto(dto, userGroups);
-
-			//最新活跃时间 add by sfyan 20170620
-			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(user.getId(), 1);
-			if(userActivities.size() > 0){
-				dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
-			}
-
-			dtos.add(dto);
-			res.setDtos(dtos);
-			return res;
-		}
+		//哪有加了一个keyword搜索条件就另写一段代码的 edit by yj 20171101
+//		if(StringUtils.isNotBlank(cmd.getKeywords())){
+//			UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId , cmd.getKeywords());
+//
+//			if(null == identifier){
+//				return res;
+//			}
+//
+//			List<UserGroup> userGroups = userProvider.listUserGroups(identifier.getOwnerUid(), GroupDiscriminator.FAMILY.getCode());
+//
+//			if(null == userGroups || userGroups.size() == 0){
+//				return res;
+//			}
+//
+//			User user = userProvider.findUserById(identifier.getOwnerUid());
+//			CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
+//			dto.setUserId(user.getId());
+//			dto.setUserName(user.getNickName());
+//			dto.setNikeName(user.getNickName());
+//			dto.setApplyTime(user.getCreateTime());
+//			dto.setGender(user.getGender());
+//			dto.setPhone(identifier.getIdentifierToken());
+//			dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
+//			if(NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
+//				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+//			}
+//			//添加地址信息
+//			addGroupAddressDto(dto, userGroups);
+//
+//			//最新活跃时间 add by sfyan 20170620
+//			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(user.getId(), 1);
+//			if(userActivities.size() > 0){
+//				dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+//			}
+//
+//			dtos.add(dto);
+//			res.setDtos(dtos);
+//			return res;
+//		}
 
 
 		
@@ -1572,6 +1572,12 @@ public class CommunityServiceImpl implements CommunityService {
 				query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.eq(NamespaceUserType.WX.getCode()));
 			}else if(UserSourceType.APP == UserSourceType.fromCode(cmd.getUserSourceType())){
 				query.addConditions(Tables.EH_USERS.NAMESPACE_USER_TYPE.isNull());
+			}
+
+			if(!StringUtils.isEmpty(cmd.getKeywords())){
+				Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + cmd.getKeywords() + "%");
+				cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
+				query.addConditions(cond);
 			}
 
             if(null != locator.getAnchor())
@@ -1999,7 +2005,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 
 				if(!StringUtils.isEmpty(cmd.getKeywords())){
-					Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(cmd.getKeywords());
+					Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like("%" + cmd.getKeywords() + "%");
 					cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
 					cond = cond.or(Tables.EH_ORGANIZATIONS.NAME.like("%" + cmd.getKeywords() + "%"));
 					query.addConditions(cond);
@@ -2109,7 +2115,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		List<CommunityUserDto> dtos = new ArrayList<>();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.COMMERCIAL.getCode(), cmd.getUserSourceType());
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.COMMERCIAL.getCode(), cmd.getUserSourceType(), cmd.getKeywords());
 		if(users != null){
 			if(users.size() > pageSize){
 				users.remove(pageSize);
@@ -2156,7 +2162,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		List<CommunityUserAddressDTO> dtos = new ArrayList<>();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.RESIDENTIAL.getCode(), cmd.getUserSourceType());
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.RESIDENTIAL.getCode(), cmd.getUserSourceType(), cmd.getKeywords());
 		if(users != null){
 			if(users.size() > pageSize){
 				users.remove(pageSize);
@@ -2480,7 +2486,7 @@ public class CommunityServiceImpl implements CommunityService {
 		int authingCount = memberIds.size() - authCount;
 
 		//未认证用户 userprofile表中的用户-已认证或者认证中的用户
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode(), null);
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode(), null, null);
 
 		//未认证
 		int notAuthCount = 0;
@@ -2551,7 +2557,7 @@ public class CommunityServiceImpl implements CommunityService {
 		int wxAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.WX.getCode(), null);
 
 		//未认证用户 userprofile表中的用户-已认证或者认证中的用户
-		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null);
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
 		if(users == null){
 			users = new ArrayList<>();
 		}
