@@ -2009,7 +2009,7 @@ public class CommunityServiceImpl implements CommunityService {
 					query.addConditions(Tables.EH_USERS.GENDER.eq(cmd.getGender()));
 				}
 
-				if(null != cmd.getExecutiveFlag()){
+				if(ExecutiveFlag.fromCode(cmd.getExecutiveFlag()) == ExecutiveFlag.YES){
 					query.addConditions(Tables.EH_USER_ORGANIZATIONS.EXECUTIVE_TAG.eq(cmd.getExecutiveFlag()));
 				}
 
@@ -2037,6 +2037,11 @@ public class CommunityServiceImpl implements CommunityService {
 				}else if(AuthFlag.PENDING_AUTHENTICATION == AuthFlag.fromCode(cmd.getIsAuth())){
 					cond = cond.and(" `eh_users`.`id` not in (select user_id from eh_user_organizations where status = " + UserOrganizationStatus.ACTIVE.getCode() + ")");
 				}
+
+				if(ExecutiveFlag.fromCode(cmd.getExecutiveFlag()) == ExecutiveFlag.NO){
+					cond = cond.and(" `eh_users`.`id` not in (select user_id from eh_user_organizations where executive_tag = " + ExecutiveFlag.YES.getCode()  + ")");
+				}
+
 				query.addHaving(cond);
 
 				return query;
