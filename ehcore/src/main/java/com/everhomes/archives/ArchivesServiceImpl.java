@@ -589,7 +589,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         verifyCommand.setPhone(contactToken);
         VerifyPersonnelByPhoneCommandResponse verifyRes = organizationService.verifyPersonnelByPhone(verifyCommand);
 
-        if (null != verifyRes && null != verifyRes.getDto()) {
+        if (null != verifyRes.getDto() && null != verifyRes.getDto()) {
             return true;
         } else
             return false;
