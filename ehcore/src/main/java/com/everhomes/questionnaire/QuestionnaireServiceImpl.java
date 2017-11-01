@@ -219,6 +219,13 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	private QuestionnaireOptionDTO convertToOptionDTO(QuestionnaireAnswer answer) {
 		QuestionnaireOptionDTO optionDTO = new QuestionnaireOptionDTO();
 		optionDTO.setOptionName(answer.getTargetName());
+		if(QuestionnaireCommonStatus.fromCode(answer.getAnonymousFlag()) == QuestionnaireCommonStatus.TRUE){
+			if(QuestionnaireTargetType.fromCode(answer.getTargetType()) == QuestionnaireTargetType.ORGANIZATION) {
+				optionDTO.setOptionName(stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN3,"zh_CN","匿名企业"));
+			}else{
+				optionDTO.setOptionName(stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN4,"zh_CN","匿名用户"));
+			}
+		}
 		optionDTO.setOptionContent(answer.getOptionContent());
 		optionDTO.setTargetPhone(answer.getTargetPhone());
 		return optionDTO;
