@@ -267,7 +267,7 @@ public class NewsProviderImpl implements NewsProvider {
 	public void increaseViewCount(Long newsId, Long nViewCount) {
 		Long newViewCount = (nViewCount==null?0:nViewCount)+1;
 		dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_NEWS).set(Tables.EH_NEWS.VIEW_COUNT,newViewCount)
-				.where(Tables.EH_NEWS.ID.eq(newsId));
+				.where(Tables.EH_NEWS.ID.eq(newsId)).execute();
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhNews.class, null);
 	}
 
