@@ -2143,7 +2143,7 @@ public class AssetServiceImpl implements AssetService {
         boolean safe = checkSafeDeleteId(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(),cmd.getChargingStandardId());
         if(safe){
             assetProvider.deleteChargingStandard(cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType());
-            dto.setFailCause(AssetPaymentStrings.DELETE_SUCCCESS);
+//            dto.setFailCause(AssetPaymentStrings.DELETE_SUCCCESS);
         }else{
             dto.setFailCause(AssetPaymentStrings.DELETE_CHARGING_STANDARD_UNSAFE);
         }
