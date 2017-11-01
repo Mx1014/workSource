@@ -1445,7 +1445,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			//用基于服务器平台的锁添加订单（包括验证和添加）
 			Tuple<Long, Boolean> tuple = this.coordinationProvider
-					.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode())
+					.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode() + rs.getId())
 					.enter(() -> {
 						// this.groupProvider.updateGroup(group);
 						this.valiRentalBill(cmd.getRules());
