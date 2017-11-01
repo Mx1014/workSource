@@ -8,6 +8,7 @@ import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rentalv2.RentalOrder;
 import com.everhomes.rest.general_approval.*;
 
 import org.apache.commons.lang.StringUtils;
@@ -27,8 +28,10 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowGraphNode;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
+import com.everhomes.flow.FlowNode;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
@@ -38,6 +41,7 @@ import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowServiceTypeDTO;
+import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -103,11 +107,20 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     public void onFlowCaseAbsorted(FlowCaseState ctx) {
         // TODO Auto-generated method stub
     	FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
+        GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
+        handler.onFlowCaseAbsorted(flowCase);
     	
     }
     
 
 
+    
+	public GeneralApprovalHandler getGeneralApprovalHandler(Long referId) { 
+
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(referId);
+		return getGeneralApprovalHandler(ga.getApprovalAttribute());
+	}
+	
 	public GeneralApprovalHandler getGeneralApprovalHandler(String generalApprovalAttribute) {
 		if (generalApprovalAttribute != null) {
 			GeneralApprovalHandler handler = PlatformContext.getComponent(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX
@@ -136,9 +149,9 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                 break;
             content += entities.get(i).getKey() + " : " + entities.get(i).getValue() + "\n";
         }
-        flowCase.setContent(content);
-        
-        getGeneralApprovalHandler(flowCase.gg)
+        flowCase.setContent(content);  	
+        GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
+        handler.onFlowCaseCreating(flowCase);
     }
 
     private List<FlowCaseEntity> processEntities(List<PostApprovalFormItem> values) {
@@ -198,14 +211,22 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseStateChanged(FlowCaseState ctx) {
-        // TODO Auto-generated method stub
-
+//    	FlowGraphNode graphNode = ctx.getPrefixNode();
+//		if (null != graphNode) {
+//			ctx.getCurrentEvent().getFiredButtonId();
+//			String stepType = ctx.getStepType().getCode();
+//			if (FlowStepType.APPROVE_STEP.getCode().equals(stepType)) { 
+//				
+//			}
+//		}
     }
 
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
-        // TODO Auto-generated method stub
-
+        // 审批通过
+    	FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
+        GeneralApprovalHandler handler = getGeneralApprovalHandler(flowCase.getReferId());
+        handler.onFlowCaseEnd(flowCase);
     }
 
     @Override
