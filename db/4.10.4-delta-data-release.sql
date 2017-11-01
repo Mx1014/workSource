@@ -55,4 +55,8 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- merge from forum-2.4 add by yanjun 201710311836
 
-
+-- 所有配置的收费项目第一版只能计费周期为月 -- by wentian
+update `eh_payment_charging_standards` set billing_cycle = 2;
+-- 物业缴费错误码 -- by wentian
+SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10001', 'zh_CN', '正在生成中');

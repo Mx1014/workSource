@@ -533,7 +533,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             cmd.setPageSize(20);
         }
         if(cmd.getPageOffset()==null||cmd.getPageOffset()<0){
-            cmd.setPageSize(0);
+            cmd.setPageOffset(0);
         }
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize());
         if(dtos.size() <= cmd.getPageSize()){
