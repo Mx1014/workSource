@@ -1113,10 +1113,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                     case ArchivesParameter.WORK_EMAIL:
                         employee.setWorkEmail(itemValue.getFieldValue());
                         break;
-                    //  TODO:合同主体的转化
-/*                    case ArchivesParameter.CONTRACT_PARTY_ID:
-                        employee.setContractPartyId(Long.valueOf(itemValue.getFieldValue()));
-                        break;*/
                     case ArchivesParameter.WORK_START_TIME:
                         employee.setWorkStartTime(ArchivesUtil.parseDate(itemValue.getFieldValue()));
                         break;
