@@ -25,12 +25,14 @@ import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
@@ -48,6 +50,8 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
@@ -182,6 +186,9 @@ public class AssetServiceImpl implements AssetService {
 
 //    @Autowired
 //    private ZhangjianggaokeAssetVendor handler;
+
+    @Autowired
+    private NamespaceResourceService namespaceResourceService;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -599,9 +606,6 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {
-        if(cmd.getOwnerId()==null){
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-        }
         return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId());
     }
 
@@ -2100,6 +2104,20 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void configChargingItems(ConfigChargingItemsCommand cmd) {
+        List<Long> communityIds = new ArrayList<>();
+        if(cmd.getOwnerId() == null){
+            //全部的情况
+            ListCommunityByNamespaceCommand cmd1 = new ListCommunityByNamespaceCommand();
+            cmd1.setNamespaceId(cmd.getNamespaceId());
+            ListCommunityByNamespaceCommandResponse communitResponse = namespaceResourceService.listCommunityByNamespace(cmd1);
+            List<CommunityDTO> communities = communitResponse.getCommunities();
+            if(communities == null || communities.size() < 1){
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.)
+            }
+            for(int i = 0; i < communities.size(); i++){
+
+            }
+        }
         assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId());
     }
 

@@ -6,6 +6,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.namespace.NamespaceResourceService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentUser;
@@ -84,6 +85,7 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+
 
     @Override
     public void creatAssetBill(AssetBill bill) {

@@ -9,4 +9,5 @@ public class AssetErrorCodes {
     static final String SCOPE = "assetv2";
 
     static final int ERROR_IN_GENERATING = 10001;
+    static final int NO_COMMUNITY_CHOSE = 10002;
 }
