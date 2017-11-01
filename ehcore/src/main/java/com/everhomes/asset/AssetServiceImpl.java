@@ -1074,7 +1074,7 @@ public class AssetServiceImpl implements AssetService {
                             newBill.setChargeStatus((byte)0);
                         }
                         try{
-                            x_v = sdf_dateStrD.parse(newBill.getDateStrEnd());
+                            x_v = sdf_dateStrD.parse(newBill.getDateStrDue());
                             if(today.compareTo(x_v)!=-1){
                                 newBill.setNextSwitch((byte)1);
                             }else{
