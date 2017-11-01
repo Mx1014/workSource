@@ -2103,6 +2103,10 @@ public class CommunityServiceImpl implements CommunityService {
 
 	private CommunityUserResponse listUnAuthUsersForCommercial(ListCommunityUsersCommand cmd){
 		CommunityUserResponse response = new CommunityUserResponse();
+		//未认证的用户就不是高管，反正后面就是当这个参数没有。就在这限制一下吧，不然要是前端没限制这个条件会吓到测试
+		if(ExecutiveFlag.fromCode(cmd.getExecutiveFlag()) == ExecutiveFlag.YES){
+			return response;
+		}
 		List<CommunityUserDto> dtos = new ArrayList<>();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.COMMERCIAL.getCode(), cmd.getUserSourceType());
@@ -2145,6 +2149,11 @@ public class CommunityServiceImpl implements CommunityService {
 
 	private CommunityUserAddressResponse listUnAuthUsersForResidential(ListCommunityUsersCommand cmd){
 		CommunityUserAddressResponse response = new CommunityUserAddressResponse();
+
+		//未认证的用户就不是高管，反正后面就是当这个参数没有。就在这限制一下吧，不然要是前端没限制这个条件会吓到测试
+		if(ExecutiveFlag.fromCode(cmd.getExecutiveFlag()) == ExecutiveFlag.YES){
+			return response;
+		}
 		List<CommunityUserAddressDTO> dtos = new ArrayList<>();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize + 1, CommunityType.RESIDENTIAL.getCode(), cmd.getUserSourceType());
