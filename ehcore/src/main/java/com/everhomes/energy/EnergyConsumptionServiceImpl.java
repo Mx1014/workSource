@@ -636,7 +636,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyMeterDTO updateEnergyMeter(UpdateEnergyMeterCommand cmd) {
-        validate(cmd);
+//        validate(cmd);
 //        checkCurrentUserNotInOrg(cmd.getOrganizationId());
         Tuple<EnergyMeter, Boolean> result = coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER.getCode() + cmd.getMeterId()).enter(() -> {
             EnergyMeter meter = this.findMeterById(cmd.getMeterId(),cmd.getNamespaceId());
