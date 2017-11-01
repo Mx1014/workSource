@@ -7860,4 +7860,9 @@ public class PunchServiceImpl implements PunchService {
 				.map(c -> ConvertHelper.convert(c, ApprovalCategoryDTO.class)).collect(Collectors.toList()));
 
 	}
+	@Override
+	public CheckAbnormalStatusResponse checkAbnormalStatus(CheckPunchAdminCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
