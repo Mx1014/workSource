@@ -541,7 +541,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             cmd.setPageSize(20);
         }
         if(cmd.getPageOffset()==null||cmd.getPageOffset()<0){
-            cmd.setPageSize(0);
+            cmd.setPageOffset(0);
         }
         //先查看任务
         Boolean inWork = assetProvider.checkContractInWork(cmd.getContractNum());
