@@ -57,6 +57,16 @@ public class LeaseProjectDTO {
     @ItemType(LeaseBuildingDTO.class)
     private List<LeaseBuildingDTO> buildings;
 
+    private Byte consultFlag;
+
+    public Byte getConsultFlag() {
+        return consultFlag;
+    }
+
+    public void setConsultFlag(Byte consultFlag) {
+        this.consultFlag = consultFlag;
+    }
+
     public List<LeaseBuildingDTO> getBuildings() {
         return buildings;
     }

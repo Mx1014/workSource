@@ -193,6 +193,11 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 
 		populateLeaseBuildingDTO(dto, leaseBuilding);
 
+		GetLeasePromotionConfigCommand cmd2 = new GetLeasePromotionConfigCommand();
+		cmd2.setNamespaceId(leaseBuilding.getNamespaceId());
+		LeasePromotionConfigDTO configDTO = enterpriseApplyEntryService.getLeasePromotionConfig(cmd2);
+		dto.setConsultFlag(configDTO.getConsultFlag());
+
 		return dto;
 	}
 
@@ -530,6 +535,8 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 				return d;
 			}).collect(Collectors.toList()));
 		}
+
+		dto.setConsultFlag(config.getConsultFlag());
 
 		return dto;
 	}
