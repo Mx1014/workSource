@@ -3,8 +3,8 @@ package com.everhomes.rest.organization;
 /**
  * <p>员工类型</p>
  * <ul>
- * <li>PROBATION(0): 试用期</li>
- * <li>ON_THE_JOB(1): 在职</li>
+ * <li>PROBATION(0): 试用</li>
+ * <li>ON_THE_JOB(1): 正式</li>
  * <li>INTERSHIP(2): 实习</li>
  * </ul>
  */

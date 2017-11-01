@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.acl.*;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
@@ -124,7 +125,6 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.*;
-import org.apache.xmlbeans.impl.jam.mutable.MMember;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -10153,9 +10153,15 @@ public class OrganizationServiceImpl implements OrganizationService {
                 jobPositions.addAll(repeatCreateOrganizationmembers(jobPositionIds, cmd.getContactToken(), enterpriseIds, organizationMember));
                 jobLevels.addAll(repeatCreateOrganizationmembers(jobLevelIds, cmd.getContactToken(), enterpriseIds, organizationMember));
 
+                //同步部门、岗位、职级的修改
                 OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(organizationMember.getDetailId());
-
-
+                memberDetail.setDepartmentIds(JSON.toJSONString(departmentIds));
+                memberDetail.setDepartment(convertToOrganizationName(departmentIds));
+                memberDetail.setJobPositionIds(JSON.toJSONString(jobPositionIds));
+                memberDetail.setJobPosition(convertToOrganizationName(jobPositionIds));
+                memberDetail.setJobLevelIds(JSON.toJSONString(jobLevelIds));
+                memberDetail.setJobLevelIds(convertToOrganizationName(jobLevelIds));
+                organizationProvider.updateOrganizationMemberDetails(memberDetail,memberDetail.getId());
 
                 dto.setGroups(groups);
 
@@ -10191,6 +10197,21 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
         return dto;
+    }
+
+    private String convertToOrganizationName(List<Long> ids) {
+        String departmentName = "";
+        if (ids != null && ids.size() > 0) {
+            for (Long id : ids) {
+                Organization org = organizationProvider.findOrganizationById(id);
+                if (org != null) {
+                    departmentName += org.getName() + ",";
+                }
+            }
+            departmentName = departmentName.substring(0, departmentName.length() - 1);
+            return departmentName;
+        } else
+            return "";
     }
 
 

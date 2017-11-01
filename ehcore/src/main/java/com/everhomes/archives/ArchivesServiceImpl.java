@@ -129,9 +129,10 @@ public class ArchivesServiceImpl implements ArchivesService {
                 memberDetail.setEnName(cmd.getContactEnName());
                 memberDetail.setRegionCode(cmd.getRegionCode());
                 memberDetail.setContactShortToken(cmd.getContactShortToken());
-                memberDetail.setDepartment(convertToArchivesInfo(cmd.getDepartmentIds(), ArchivesParameter.DEPARTMENT_IDS));
-                memberDetail.setJobPosition(convertToArchivesInfo(cmd.getJobPositionIds(), ArchivesParameter.DEPARTMENT_IDS));
-                memberDetail.setJobLevel(convertToArchivesInfo(cmd.getJobLevelIds(), ArchivesParameter.DEPARTMENT_IDS));
+                memberDetail.setCheckInTime(ArchivesUtil.currentDate());
+                memberDetail.setEmploymentTime(ArchivesUtil.currentDate());
+                memberDetail.setEmployeeType(EmployeeType.FULLTIME.getCode());
+                memberDetail.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
                 memberDetail.setWorkEmail(cmd.getWorkEmail());
                 organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
                 dto.setDetailId(detailId);
@@ -815,7 +816,10 @@ public class ArchivesServiceImpl implements ArchivesService {
                 memberDetail.setCheckInTime(cmd.getCheckInTime());
                 memberDetail.setEmployeeType(cmd.getEmployeeType());
                 memberDetail.setEmployeeStatus(cmd.getEmployeeStatus());
-                memberDetail.setEmploymentTime(cmd.getEmploymentTime());
+                if (cmd.getEmploymentTime() == null)
+                    memberDetail.setEmploymentTime(cmd.getCheckInTime());
+                else
+                    memberDetail.setEmploymentTime(cmd.getEmploymentTime());
                 memberDetail.setEmployeeNo(cmd.getEmployeeNo());
                 memberDetail.setEnName(cmd.getEnName());
                 memberDetail.setDepartment(convertToArchivesInfo(cmd.getDepartmentIds(), ArchivesParameter.DEPARTMENT_IDS));
