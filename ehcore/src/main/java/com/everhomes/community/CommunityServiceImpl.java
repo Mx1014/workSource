@@ -2085,9 +2085,9 @@ public class CommunityServiceImpl implements CommunityService {
 				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
 			}
 
-			if(null != dto.getPhone()){
-				dto.setUserSourceType(UserSourceType.APP.getCode());
-			}
+//			if(null != dto.getPhone()){
+//				dto.setUserSourceType(UserSourceType.APP.getCode());
+//			}
 			userCommunities.add(dto);
 		}
 		LOGGER.debug("Get user detail list time:{}", System.currentTimeMillis() - time);
