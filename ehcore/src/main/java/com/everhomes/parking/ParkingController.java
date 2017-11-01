@@ -688,7 +688,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=ParkingCarVerificationDTO.class)
     public RestResponse requestCarVerification(RequestCarVerificationCommand cmd) {
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(parkingService.requestCarVerification(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -702,6 +702,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse deleteCarVerification(DeleteCarVerificationCommand cmd) {
 
+        parkingService.deleteCarVerification(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
