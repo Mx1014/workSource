@@ -660,7 +660,7 @@ public class NewsServiceImpl implements NewsService {
 
 		News news = findNewsById(userId, newsId);
 		newsProvider.increaseViewCount(newsId,news.getViewCount());
-		news.setViewCount(news.getViewCount()+1L);
+		news.setViewCount((news.getViewCount()+1L)/2);//web端一次浏览，调用了两次接口。这里除以2
 
 		List<NewsTagVals> list = newsProvider.listNewsTagVals(newsId);
 		list.forEach(r->{
