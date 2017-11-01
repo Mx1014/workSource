@@ -15,6 +15,15 @@ public class ParkingCarLockInfoDTO {
     private Long lockCarTime;
     private Byte lockStatus;
     private Byte carVerificationFlag;
+    private String flowCaseUrl;
+
+    public String getFlowCaseUrl() {
+        return flowCaseUrl;
+    }
+
+    public void setFlowCaseUrl(String flowCaseUrl) {
+        this.flowCaseUrl = flowCaseUrl;
+    }
 
     public Byte getCarVerificationFlag() {
         return carVerificationFlag;

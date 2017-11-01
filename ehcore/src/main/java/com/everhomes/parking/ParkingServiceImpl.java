@@ -18,6 +18,7 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.PayService;
 import com.everhomes.rentalv2.RentalUtils;
 import com.everhomes.rest.RestResponse;
@@ -1588,6 +1589,10 @@ public class ParkingServiceImpl implements ParkingService {
 		}else if (verification.getStatus() == ParkingCarVerificationStatus.AUDITING.getCode()) {
 			ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
 			dto.setCarVerificationFlag(ParkingCarVerificationStatus.AUDITING.getCode());
+
+			String flowCaseUrl = configProvider.getValue(ConfigConstants.PARKING_CAR_VERIFICATION_FLOWCASE_URL, "");
+
+			dto.setFlowCaseUrl(String.format(flowCaseUrl, verification.getflowCaseId));
 			return dto;
 		}else if (verification.getStatus() == ParkingCarVerificationStatus.SUCCEED.getCode()) {
 			String vendorName = parkingLot.getVendorName();

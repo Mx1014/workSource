@@ -122,4 +122,6 @@ public interface ConfigConstants {
     public static final String PORTAL_ITEM_MORE_TITLE = "portal.item.more.title";
     public static final String PAY_V2_HOME_URL = "pay.v2.home.url";
 
+    String PARKING_CAR_VERIFICATION_FLOWCASE_URL = "parking.car.verification.flowCase.url";
+
 }
