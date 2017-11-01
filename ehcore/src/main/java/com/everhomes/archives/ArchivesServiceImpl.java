@@ -587,12 +587,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         verifyCommand.setEnterpriseId(organizationId);
         verifyCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
         verifyCommand.setPhone(contactToken);
-        VerifyPersonnelByPhoneCommandResponse verifyRes = organizationService.verifyPersonnelByPhone(verifyCommand);
-
-        if (null != verifyRes.getDto() && null != verifyRes.getDto()) {
+        try {
+            VerifyPersonnelByPhoneCommandResponse verifyRes = organizationService.verifyPersonnelByPhone(verifyCommand);
+        } catch (Exception e) {
             return true;
-        } else
-            return false;
+        }
+        return false;
     }
 
     private String getRealContactToken(String tokens, String type) {
