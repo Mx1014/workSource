@@ -50,7 +50,7 @@ ALTER TABLE `eh_payment_bills` ADD COLUMN `real_paid_time` DATETIME DEFAULT NULL
 ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `in_work` TINYINT DEFAULT 0 COMMENT '0:工作完成；1：正在生成';
 ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `is_recorder` TINYINT DEFAULT 1 COMMENT '0：合同状态记录者，不保存计价数据；1：不是合同状态记录者';
 ALTER TABLE `eh_payment_bills` ADD COLUMN `next_switch` TINYINT DEFAULT NULL COMMENT '下一次switch的值';
-
+ALTER TABLE `eh_payment_charging_items` ADD COLUMN  `sovereighty_flag` TINYINT DEFAULT 1 COMMENT '0:和全部的情况进行联动；1：只能单独设置';
 
 -- 4.10.3，合并记得删
 -- 园区入驻3.6 add by sw 20171023

@@ -54,6 +54,7 @@ import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
+import com.sun.xml.ws.api.SOAPVersion;
 import freemarker.core.ArithmeticEngine;
 import freemarker.core.ReturnInstruction;
 import org.apache.log4j.spi.ErrorCode;
@@ -2060,7 +2061,25 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType,Integer namespaceId) {
+    public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType,Integer namespaceId,List<Long> communityIds) {
+        Byte sovereighty = 1;
+        if(communityIds!=null && communityIds.size() >1){
+            for(int i = 0; i < communityIds.size(); i ++){
+                Long cid = communityIds.get(i);
+                //只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
+                Boolean hasSovereign = checkSovereighty(communityId);
+                if(!hasSovereign){
+                    sovereighty = 0;
+                    configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, cid, sovereighty);
+                }
+            }
+        }else{
+            //只有一个园区,不是list过来的
+            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, communityId, sovereighty);
+        }
+    }
+
+    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Long cid, Byte sovereighty) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
         EhPaymentChargingItemScopesDao dao = new EhPaymentChargingItemScopesDao(context.configuration());
@@ -2075,21 +2094,19 @@ public class AssetProviderImpl implements AssetProvider {
             scope.setOwnerId(communityId);
             scope.setOwnerType(ownerType);
             scope.setProjectLevelName(vo.getProjectChargingItemName());
+            scope.setSovereightyFlag(sovereighty);
             list.add(scope);
         }
         this.dbProvider.execute((TransactionStatus status) -> {
             context.delete(t)
                     .where(t.OWNER_TYPE.eq(ownerType))
-                    .and(t.OWNER_ID.eq(communityId))
+                    .and(t.OWNER_ID.eq(cid))
                     .execute();
             if(list.size()>0){
                 dao.insert(list);
             }
             return null;
         });
-
-
-
     }
 
     @Override

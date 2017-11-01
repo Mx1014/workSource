@@ -2112,13 +2112,13 @@ public class AssetServiceImpl implements AssetService {
             ListCommunityByNamespaceCommandResponse communitResponse = namespaceResourceService.listCommunityByNamespace(cmd1);
             List<CommunityDTO> communities = communitResponse.getCommunities();
             if(communities == null || communities.size() < 1){
-                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.)
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NO_COMMUNITY_CHOSE,"no communities is available");
             }
             for(int i = 0; i < communities.size(); i++){
-
+                communityIds.add(communities.get(i).getId());
             }
         }
-        assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId());
+        assetProvider.configChargingItems(cmd.getChargingItemConfigs(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getNamespaceId(),communityIds);
     }
 
     @Override
