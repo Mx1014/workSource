@@ -215,6 +215,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
             cmd21.setApplyUserId(user.getId());
             cmd21.setReferType(FlowReferType.APPROVAL.getCode());
+            cmd21.setReferId(ga.getId());
             cmd21.setProjectType(ga.getOwnerType());
             cmd21.setProjectId(ga.getOwnerId());
             // 把command作为json传到content里，给flowcase的listener进行处理
