@@ -1,46 +1,68 @@
 package com.everhomes.equipment;
 
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.URL;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
-import java.util.*;
-import java.util.stream.Collectors;
-
-
-import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletResponse;
-
-
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.RoleAssignment;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.appurl.AppUrlService;
-import com.everhomes.forum.Attachment;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.*;
 import com.everhomes.pmNotify.PmNotifyConfigurations;
 import com.everhomes.pmNotify.PmNotifyProvider;
 import com.everhomes.pmNotify.PmNotifyRecord;
 import com.everhomes.pmNotify.PmNotifyService;
+import com.everhomes.repeat.RepeatService;
+import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.ServiceModuleAuthorizationsDTO;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
+import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.*;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pmNotify.*;
+import com.everhomes.rest.quality.OwnerType;
+import com.everhomes.rest.quality.ProcessType;
+import com.everhomes.rest.quality.QualityGroupType;
+import com.everhomes.rest.quality.QualityServiceErrorCode;
+import com.everhomes.rest.repeat.RepeatServiceErrorCode;
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
+import com.everhomes.rest.repeat.TimeRangeDTO;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.search.*;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
-
-import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.rest.equipment.*;
-
 import com.everhomes.util.*;
-
 import com.everhomes.util.doc.DocUtil;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.zxing.WriterException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -55,74 +77,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
-
-
-import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.RoleAssignment;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationJobPosition;
-import com.everhomes.organization.OrganizationJobPositionMap;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.repeat.RepeatService;
-import com.everhomes.repeat.RepeatSettings;
-import com.everhomes.rest.acl.RoleConstants;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.category.CategoryAdminStatus;
-import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.category.CategoryDTO;
-
-import com.everhomes.rest.forum.AttachmentDTO;
-
-import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationNaviFlag;
-import com.everhomes.rest.quality.OwnerType;
-import com.everhomes.rest.quality.ProcessType;
-import com.everhomes.rest.quality.QualityGroupType;
-import com.everhomes.rest.quality.QualityServiceErrorCode;
-import com.everhomes.rest.repeat.RepeatServiceErrorCode;
-import com.everhomes.rest.repeat.RepeatSettingsDTO;
-import com.everhomes.rest.repeat.TimeRangeDTO;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.admin.ImportDataResponse;import com.everhomes.search.EquipmentAccessoriesSearcher;
-import com.everhomes.search.EquipmentSearcher;
-import com.everhomes.search.EquipmentStandardMapSearcher;
-import com.everhomes.search.EquipmentStandardSearcher;
-import com.everhomes.search.EquipmentTasksSearcher;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.techpark.rental.RentalServiceImpl;
-import com.everhomes.util.excel.RowResult;
-import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import sun.misc.BASE64Encoder;
+
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.URL;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class EquipmentServiceImpl implements EquipmentService {
@@ -283,7 +252,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 			equipmentProvider.updateEquipmentStandard(standard);
 			
-			List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
+			/*List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 			if(maps != null && maps.size() > 0) {
 				for(EquipmentStandardMap map : maps) {
 					if(EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus()))) {
@@ -292,7 +261,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				}
 			}
 			
-			inactiveTasksByStandardId(standard.getId());
+			inactiveTasksByStandardId(standard.getId());*/
 			
 		}
 		
