@@ -175,10 +175,11 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void deleteArchivesContacts(DeleteArchivesContactsCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
             if (cmd.getDetailIds() != null) {
                 for (Long detailId : cmd.getDetailIds()) {
-                    //  组织架构删除
+                    //  1.组织架构删除
                     OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
                     DeleteOrganizationPersonnelByContactTokenCommand deleteOrganizationPersonnelByContactTokenCommand = new DeleteOrganizationPersonnelByContactTokenCommand();
                     deleteOrganizationPersonnelByContactTokenCommand.setOrganizationId(cmd.getOrganizationId());
@@ -186,8 +187,11 @@ public class ArchivesServiceImpl implements ArchivesService {
                     deleteOrganizationPersonnelByContactTokenCommand.setScopeType(DeleteOrganizationContactScopeType.ALL_NOTE.getCode());
                     organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
 
+                    //  2.置顶表删除
+                    ArchivesStickyContacts stickyContact = archivesProvider.findArchivesStickyContactsByDetailIdAndOrganizationId(namespaceId, cmd.getOrganizationId(),detailId);
+                    archivesProvider.deleteArchivesStickyContacts(stickyContact);
                 }
-                //  添加档案记录
+                //  3.添加档案记录
                 DismissArchivesEmployeesCommand dismissCommand = new DismissArchivesEmployeesCommand();
                 dismissCommand.setDetailIds(cmd.getDetailIds());
                 dismissCommand.setOrganizationId(cmd.getOrganizationId());
