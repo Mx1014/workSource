@@ -51,6 +51,7 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -66,6 +67,8 @@ public class ArchivesServiceImpl implements ArchivesService {
     private static final String ARCHIVE_OWNER_TYPE = "archives_owner_type";
 
     private static final String ARCHIVES_FORM_ORIGIN_ID = "archives.form.origin.id";
+
+    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
     @Autowired
     private DbProvider dbProvider;
@@ -920,19 +923,19 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  6.拼接员工状态
         if (cmd.getDismiss() != null) {
             Map<String, Object> map = new LinkedHashMap<>();
-            map.put("firstDate", employee.getCheckInTime().toString());
-            map.put("nextDate", employee.getDismissTime()).toString();
+            map.put("firstDate", format.format(employee.getCheckInTime()));
+            map.put("nextDate", format.format(employee.getDismissTime()));
             employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_DISMISS_CASE, "zh_CN", map, "");
         } else {
             if (employee.getEmployeeStatus().equals(EmployeeStatus.ON_THE_JOB.getCode())) {
                 Map<String, Object> map = new LinkedHashMap<>();
-                map.put("firstDate", employee.getCheckInTime());
-                map.put("nextDate", employee.getContractEndTime());
+                map.put("firstDate", format.format(employee.getCheckInTime()));
+                map.put("nextDate", format.format(employee.getContractEndTime()));
                 employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_ON_THE_JOB_CASE, "zh_CN", map, "");
             } else {
                 Map<String, Object> map = new LinkedHashMap<>();
-                map.put("firstDate", employee.getCheckInTime());
-                map.put("nextDate", employee.getEmploymentTime());
+                map.put("firstDate", format.format(employee.getCheckInTime()));
+                map.put("nextDate", format.format(employee.getEmploymentTime()));
                 employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_PROBATION_CASE, "zh_CN", map, "");
             }
         }
@@ -1575,11 +1578,18 @@ public class ArchivesServiceImpl implements ArchivesService {
 
     @Override
     public void dismissArchivesEmployeesConfig(DismissArchivesEmployeesCommand cmd) {
+
         dbProvider.execute((TransactionStatus status) -> {
-            //  1.若为当天则立即执行
+            //  1.更新员工离职时间
+            for (Long detailId : cmd.getDetailIds()) {
+                OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                detail.setDismissTime(cmd.getDismissTime());
+                organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
+            }
+            //  2.若为当天则立即执行
             if (cmd.getDismissTime().toString().equals(ArchivesUtil.currentDate().toString()))
                 dismissArchivesEmployees(cmd);
-                //  2.若为其它时间则添加离职配置
+                //  3.若为其它时间则添加离职配置
             else {
                 ArchivesConfigurations configuration = new ArchivesConfigurations();
                 configuration.setOrganizationId(cmd.getOrganizationId());
