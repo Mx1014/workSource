@@ -115,6 +115,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		Set<String> userLevelRanges = calculateQuesionnaireRange(questionnaire);
 		//保存文件的范围和用户数量
 		QuestionnaireTargetType targetType = QuestionnaireTargetType.fromCode(questionnaire.getTargetType());
+		//目标数量，面向用户则计算用户数量，面向企业则计算企业数量。
 		if(targetType == QuestionnaireTargetType.USER) {
 			questionnaire.setTargetUserNum(userLevelRanges.size());
 		}else if(targetType == QuestionnaireTargetType.ORGANIZATION){
@@ -327,6 +328,8 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		}
 		if (targetType == QuestionnaireTargetType.ORGANIZATION){
 			questionnaireDTO.setRanges(originalRanges);
+			List<String> sOrganizationList = originalRanges.stream().map(r->r.getRange()).collect(Collectors.toList());
+			questionnaireDTO.setOrganizationScope(StringHelper.toJsonString(sOrganizationList));
 		}
 		return userLevelRanges;
 	}
