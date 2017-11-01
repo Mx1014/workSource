@@ -81,7 +81,7 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 		.and(cond)
 		.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_NAME.like("%"+keywords+"%").or(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_PHONE.like("%"+keywords+"%")))
 		.orderBy(Tables.EH_QUESTIONNAIRE_ANSWERS.CREATE_TIME.asc())
-		.limit((pageAnchor-1)*pageSize, pageSize)
+		.limit((pageAnchor-1)*(pageSize-1), pageSize)
 		.fetch()
 		.map(r->RecordHelper.convert(r, QuestionnaireAnswer.class));
 	}
