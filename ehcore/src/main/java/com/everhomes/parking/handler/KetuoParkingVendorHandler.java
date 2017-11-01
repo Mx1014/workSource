@@ -420,9 +420,15 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		}
 		
 		OpenCardInfoDTO dto = new OpenCardInfoDTO();
+		String cardTypeId = parkingCardRequest.getCardTypeId();
+		if (StringUtils.isBlank(cardTypeId)) {
+			List<ParkingCardRequestType> types = parkingProvider.listParkingCardTypes(parkingCardRequest.getOwnerType(),
+					parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId());
+			cardTypeId = types.get(0).getCardTypeId();
+		}
 
 		//月租车
-		List<KetuoCardRate> rates = getCardRule(parkingCardRequest.getCardTypeId());
+		List<KetuoCardRate> rates = getCardRule(cardTypeId);
 		if(null != rates && !rates.isEmpty()) {
 			
 			KetuoCardRate rate = null;

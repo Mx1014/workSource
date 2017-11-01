@@ -1484,5 +1484,14 @@ INSERT INTO `eh_payment_types`(`id`, `order_type`, `namespace_id`, `owner_type`,
 -- added by janson fix home url error
 UPDATE `eh_configurations` SET `value`='https://core.szbay.com' WHERE `name`='home.url' and namespaceId = 999966;
 
-
+-- 园区入驻 add by sw 20171027
+set @id = IFNULL((select MAX(id) FROM eh_lease_configs), 1);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999966', NULL, NULL, 'areaSearchFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999966', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999966', NULL, NULL, 'displayOrderStr', '2', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999966', NULL, NULL, 'displayNameStr', '房源招租', NULL, NULL);
 
