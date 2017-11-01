@@ -57,6 +57,8 @@ public class CreateServiceModuleAdministratorsCommand {
 
     private String org_control_json;
 
+    private Byte all_unlimit_control_flag;
+
     @ItemType(Long.class)
     private List<ModuleAppTarget> community_target;
 
@@ -199,5 +201,13 @@ public class CreateServiceModuleAdministratorsCommand {
 
     public void setUnlimit_target(List<ModuleAppTarget> unlimit_target) {
         this.unlimit_target = unlimit_target;
+    }
+
+    public Byte getAll_unlimit_control_flag() {
+        return all_unlimit_control_flag;
+    }
+
+    public void setAll_unlimit_control_flag(Byte all_unlimit_control_flag) {
+        this.all_unlimit_control_flag = all_unlimit_control_flag;
     }
 }
