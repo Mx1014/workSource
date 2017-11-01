@@ -14,6 +14,8 @@ import com.everhomes.util.StringHelper;
  * <li>longitude： 经度</li>
  * <li>clockStatus：打卡状态 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
  * <li>requestToken： 异常申请的token </li>
+ * <li>approvalStatus： 审批的状态 参考{@link com.everhomes.rest.approval.ApprovalStatus}  </li>
+ * <li>smartAlignment： 智能校准 1-是智能校准 0-不是智能校准 </li>
  * </ul>
  */
 public class PunchLogDTO {
@@ -29,8 +31,8 @@ public class PunchLogDTO {
 	private Double latitude;
 	private String identification;
     private String requestToken;
-
-      
+    private Byte approvalStatus;
+    private Byte smartAlignment;
 
     @Override
     public String toString() {
@@ -115,6 +117,30 @@ public class PunchLogDTO {
 
 	public void setPunchIntervalNo(Integer punchIntervalNo) {
 		this.punchIntervalNo = punchIntervalNo;
+	}
+
+	public String getRequestToken() {
+		return requestToken;
+	}
+
+	public void setRequestToken(String requestToken) {
+		this.requestToken = requestToken;
+	}
+
+	public Byte getApprovalStatus() {
+		return approvalStatus;
+	}
+
+	public void setApprovalStatus(Byte approvalStatus) {
+		this.approvalStatus = approvalStatus;
+	}
+
+	public Byte getSmartAlignment() {
+		return smartAlignment;
+	}
+
+	public void setSmartAlignment(Byte smartAlignment) {
+		this.smartAlignment = smartAlignment;
 	}
  
     
