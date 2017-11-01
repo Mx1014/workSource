@@ -547,7 +547,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         Boolean inWork = assetProvider.checkContractInWork(cmd.getContractNum());
         if(inWork){
 //            return response;
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_ACCESS_DENIED,"Mission in process");
+            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in process");
         }
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize());
         if(dtos.size() <= cmd.getPageSize()){

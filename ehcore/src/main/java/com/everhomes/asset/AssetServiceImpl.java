@@ -1079,11 +1079,21 @@ public class AssetServiceImpl implements AssetService {
                         Date today = Calendar.getInstance().getTime();
                         Date x_v = null;
                         try{
-                             x_v = sdf_dateStrD.parse(exp.getBillDateDeadline());
+                             x_v = sdf_dateStrD.parse(newBill.getDueDayDeadline());
                             if(today.compareTo(x_v)!=-1){
                                 newBill.setChargeStatus((byte)1);
                             }else{
                                 newBill.setChargeStatus((byte)0);
+                            }
+                        }catch (Exception e){
+                            newBill.setChargeStatus((byte)0);
+                        }
+                        try{
+                            x_v = sdf_dateStrD.parse(newBill.getDateStrEnd());
+                            if(today.compareTo(x_v)!=-1){
+                                newBill.setNextSwitch((byte)1);
+                            }else{
+                                newBill.setNextSwitch((byte)0);
                             }
                         }catch (Exception e){
                             newBill.setChargeStatus((byte)0);

@@ -1653,7 +1653,7 @@ public class AssetProviderImpl implements AssetProvider {
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
             context.update(t)
-                    .set(t.SWITCH,(byte)0)
+                    .set(t.SWITCH,t.NEXT_SWITCH)
                     .where(t.CONTRACT_ID.eq(contractId))
                     .and(t.SWITCH.eq((byte)3))
                     .execute();
