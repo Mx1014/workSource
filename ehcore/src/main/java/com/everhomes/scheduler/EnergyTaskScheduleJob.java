@@ -237,7 +237,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 }
             }
         }
-//        assetService.paymentExpectancies_re_struct(command);
+        assetService.paymentExpectancies_re_struct(command);
     }
 
     private FeeRules generateChargingItemsFeeRule(Long chargingItemId, Long chargingStandardId,
