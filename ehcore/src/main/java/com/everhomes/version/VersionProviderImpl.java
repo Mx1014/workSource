@@ -436,8 +436,8 @@ public class VersionProviderImpl implements VersionProvider {
         if(targetVersion != null)
             query.addConditions(Tables.EH_VERSION_URLS.TARGET_VERSION.eq(targetVersion));
         
-        query.addOrderBy(Tables.EH_VERSION_URLS.TARGET_VERSION.desc());
-        query.fetch().map((r)-> { 
+        query.addOrderBy(Tables.EH_VERSION_URLS.VERSION_ENCODED_VALUE.desc(), Tables.EH_VERSION_URLS.TARGET_VERSION.desc());
+        query.fetch().map((r)-> {
         	versionUrls.add(ConvertHelper.convert(r, VersionUrl.class));
         	return null;
         });
