@@ -2350,7 +2350,7 @@ public class AssetProviderImpl implements AssetProvider {
             rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
             rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
             dao.insert(rule);
-            response.setFailCause(AssetPaymentStrings.SAVE_SUCCESS);
+//            response.setFailCause(AssetPaymentStrings.SAVE_SUCCESS);
         }else{
             rule = readOnlyContext.selectFrom(t)
                     .where(t.ID.eq(ruleId))
@@ -2371,7 +2371,7 @@ public class AssetProviderImpl implements AssetProvider {
             rule.setBillItemMonthOffset(cmd.getBillItemMonthOffset());
             rule.setBillItemDayOffset(cmd.getBillItemDayOffset());
             dao.update(rule);
-            response.setFailCause(AssetPaymentStrings.MODIFY_SUCCESS);
+//            response.setFailCause(AssetPaymentStrings.MODIFY_SUCCESS);
         }
         return response;
     }

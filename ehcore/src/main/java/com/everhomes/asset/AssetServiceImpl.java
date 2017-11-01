@@ -2335,7 +2335,7 @@ public class AssetServiceImpl implements AssetService {
             return response;
         }
         assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId());
-        response.setFailCause(AssetPaymentStrings.DELETE_SUCCCESS);
+//        response.setFailCause(AssetPaymentStrings.DELETE_SUCCCESS);
         return response;
     }
 
