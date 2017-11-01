@@ -5024,7 +5024,7 @@ public class FlowServiceImpl implements FlowService {
         }
 
         if (FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB) {
-            return ConvertHelper.convert(getDumpFlowCaseBrief(flowCase), FlowCaseDetailDTOV2.class);
+            return getDumpFlowCaseBrief(flowCase, FlowCaseDetailDTOV2.class);
         }
 
         FlowCaseDetailDTOV2 dto = ConvertHelper.convert(flowCase, FlowCaseDetailDTOV2.class);
@@ -5104,6 +5104,14 @@ public class FlowServiceImpl implements FlowService {
         // 节点日志
         List<FlowLaneLogDTO> laneLogList = getFlowLaneLogDTOList(flowGraph, flowUserTypes, flowCase, allFlowCase, laneList);
         dto.setLanes(laneLogList);
+
+        for (int i = laneLogList.size() - 1; i >= 0; i--) {
+            FlowLaneLogDTO laneLogDTO = laneLogList.get(i);
+            if (laneLogDTO.getLogs().size() > 0 || TrueOrFalseFlag.TRUE.getCode().equals(laneLogDTO.getIsCurrentLane())) {
+                dto.setCurrNodeParams(laneLogDTO.getCurrNodeParams());
+                break;
+            }
+        }
         return dto;
     }
 
@@ -5192,7 +5200,7 @@ public class FlowServiceImpl implements FlowService {
         }
 
         if (FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB) {
-            return getDumpFlowCaseBrief(flowCase);
+            return getDumpFlowCaseBrief(flowCase, FlowCaseBriefDTO.class);
         }
 
         FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
@@ -5284,18 +5292,23 @@ public class FlowServiceImpl implements FlowService {
             FlowLaneLogDTO laneLogDTO = list.get(i);
             if (laneLogDTO.getLogs().size() > 0 || TrueOrFalseFlag.TRUE.getCode().equals(laneLogDTO.getIsCurrentLane())) {
                 dto.setCurrentLane(laneLogDTO);
+                dto.setCurrNodeParams(laneLogDTO.getCurrNodeParams());
                 break;
             }
         }
         return dto;
     }
 
-    private FlowCaseBriefDTO getDumpFlowCaseBrief(FlowCase flowCase) {
-        FlowCaseBriefDTO dto = ConvertHelper.convert(flowCase, FlowCaseBriefDTO.class);
+    private <DTO> DTO getDumpFlowCaseBrief(FlowCase flowCase, Class<DTO> clazz) {
+        DTO dto = ConvertHelper.convert(flowCase, clazz);
         List<FlowUserType> flowUserTypes = new ArrayList<>();
         flowUserTypes.add(FlowUserType.APPLIER);
         List<FlowCaseEntity> entities = getFlowCaseEntities(flowUserTypes, flowCase);
-        dto.setEntities(entities);
+        if (dto instanceof FlowCaseBriefDTO) {
+            ((FlowCaseBriefDTO) dto).setEntities(entities);
+        } else if (dto instanceof FlowCaseDetailDTOV2) {
+            ((FlowCaseDetailDTOV2) dto).setEntities(entities);
+        }
         return dto;
     }
 
@@ -5640,6 +5653,7 @@ public class FlowServiceImpl implements FlowService {
                 if (flowCase.getCurrentLaneId().equals(prefixLane.getLaneId()) && Objects.equals(nodeLogDTO.getIsCurrentNode(), TrueOrFalseFlag.TRUE.getCode())) {
                     prefixLane.setIsCurrentLane(TrueOrFalseFlag.TRUE.getCode());
                     prefixLane.setNeedSelectNextNode(nodeLogDTO.getNeedSelectNextNode());
+                    prefixLane.setCurrNodeParams(nodeLogDTO.getParams());
                 }
                 prefixLane.getLogs().addAll(nodeLogDTO.getLogs());
             } else {
@@ -5664,6 +5678,7 @@ public class FlowServiceImpl implements FlowService {
                 if (flowCase.getCurrentLaneId().equals(lane.getId()) && Objects.equals(nodeLogDTO.getIsCurrentNode(), TrueOrFalseFlag.TRUE.getCode())) {
                     prefixLane.setIsCurrentLane(TrueOrFalseFlag.TRUE.getCode());
                     prefixLane.setNeedSelectNextNode(nodeLogDTO.getNeedSelectNextNode());
+                    prefixLane.setCurrNodeParams(nodeLogDTO.getParams());
                 }
             }
         }

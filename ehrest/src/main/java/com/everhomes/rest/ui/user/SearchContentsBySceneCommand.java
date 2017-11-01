@@ -1,6 +1,9 @@
 package com.everhomes.rest.ui.user;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  *<ul>
@@ -13,6 +16,9 @@ import com.everhomes.util.StringHelper;
  */
 public class SearchContentsBySceneCommand {
 
+	@ItemType(Long.class)
+	private List<Long> communityIds;
+
 	private Long buildingId;
 
 	private String sceneToken;
@@ -24,6 +30,14 @@ public class SearchContentsBySceneCommand {
 	private Long pageAnchor;
     
     private Integer pageSize;
+
+	public List<Long> getCommunityIds() {
+		return communityIds;
+	}
+
+	public void setCommunityIds(List<Long> communityIds) {
+		this.communityIds = communityIds;
+	}
 
 	public Long getBuildingId() {
 		return buildingId;

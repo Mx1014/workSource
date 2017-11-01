@@ -264,9 +264,10 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
-	public void increaseViewCount(Long newsId) {
-		dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_NEWS).set(Tables.EH_NEWS.VIEW_COUNT,Tables.EH_NEWS.VIEW_COUNT.add(1))
-				.where(Tables.EH_NEWS.ID.eq(newsId));
+	public void increaseViewCount(Long newsId, Long nViewCount) {
+		Long newViewCount = (nViewCount==null?0:nViewCount)+1;
+		dbProvider.getDslContext(AccessSpec.readWrite()).update(Tables.EH_NEWS).set(Tables.EH_NEWS.VIEW_COUNT,newViewCount)
+				.where(Tables.EH_NEWS.ID.eq(newsId)).execute();
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhNews.class, null);
 	}
 

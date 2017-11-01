@@ -851,12 +851,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}).collect(Collectors.toList()));
 		//暂时用枚举，如果拓展单位类型，则须在表中添加字段
 
-		LeasePromotionConfig unitConfig = enterpriseLeaseIssuerProvider.findLeasePromotionConfig(leasePromotion.getNamespaceId(),
-				"rentAmountUnit");
-		if (null != unitConfig) {
-			dto.setUnit(LeasePromotionUnit.fromType(unitConfig.getConfigValue()).getDescription());
-		}
-
 		//	启用表单，则查询表单值
 		if (LeasePromotionFlag.ENABLED.getCode() == leasePromotion.getCustomFormFlag()) {
 
@@ -875,6 +869,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		dto.setProjectDTOS(getProjectDTOs(dto.getId()));
+
+		GetLeasePromotionConfigCommand configCmd = new GetLeasePromotionConfigCommand();
+		configCmd.setNamespaceId(leasePromotion.getNamespaceId());
+		LeasePromotionConfigDTO config = getLeasePromotionConfig(configCmd);
+		dto.setConsultFlag(config.getConsultFlag());
+		dto.setUnit(config.getRentAmountUnit());
 
 	}
 
