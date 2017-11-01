@@ -422,8 +422,8 @@ public abstract class KetuoParkingVendorHandler extends DefaultParkingVendorHand
 		OpenCardInfoDTO dto = new OpenCardInfoDTO();
 		String cardTypeId = parkingCardRequest.getCardTypeId();
 		if (StringUtils.isBlank(cardTypeId)) {
-			List<ParkingCardRequestType> types = parkingProvider.listParkingCardTypes(cmd.getOwnerType(), cmd.getOwnerId(),
-					parkingCardRequest.getParkingLotId());
+			List<ParkingCardRequestType> types = parkingProvider.listParkingCardTypes(parkingCardRequest.getOwnerType(),
+					parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId());
 			cardTypeId = types.get(0).getCardTypeId();
 		}
 
