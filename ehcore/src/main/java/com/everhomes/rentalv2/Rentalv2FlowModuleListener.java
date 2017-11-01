@@ -10,6 +10,7 @@ import java.util.*;
 
 import com.everhomes.flow.*;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
+import com.everhomes.flow.node.FlowGraphNodeStart;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
@@ -117,12 +118,17 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				}
 				if (null != curNodeParam) {
 					Byte status = convertFlowStatus(curNodeParam);
-					Boolean cancelOtherOrderFlag = false;
-					//支付成功之后 cancelOtherOrderFlag设置成true，取消其他竞争状态的订单
-					if (null != status && SiteBillStatus.SUCCESS.getCode() == status) {
-						cancelOtherOrderFlag = true;
+
+					if (graphNode instanceof FlowGraphNodeStart && SiteBillStatus.APPROVING.getCode() == status) {
+
+					}else {
+						Boolean cancelOtherOrderFlag = false;
+						//支付成功之后 cancelOtherOrderFlag设置成true，取消其他竞争状态的订单
+						if (null != status && SiteBillStatus.SUCCESS.getCode() == status) {
+							cancelOtherOrderFlag = true;
+						}
+						rentalv2Service.changeRentalOrderStatus(order, status, cancelOtherOrderFlag);
 					}
-					rentalv2Service.changeRentalOrderStatus(order, status, cancelOtherOrderFlag);
 				}
 			}else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)){
 				rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.FAIL.getCode(), false);
