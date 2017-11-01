@@ -144,25 +144,25 @@ public class CommunityMapServiceImpl implements CommunityMapService {
 
         Long pageAnchor = cmd.getPageAnchor();
         if (null == pageAnchor || pageAnchor < Integer.MAX_VALUE) {
-                SearchContentsBySceneReponse resp = businessService.searchShops(cmd2);
+            SearchContentsBySceneReponse resp = businessService.searchShops(cmd2);
 
-                if (null != resp) {
-                    response.setNextPageAnchor(resp.getNextPageAnchor());
-                    result.addAll(resp.getShopDTOs().stream().map(r -> {
-                        CommunityMapShopDTO shop = ConvertHelper.convert(r, CommunityMapShopDTO.class);
-                        Long buildingId = null;
-                        Long apartmentId = null;
-                        if (StringUtils.isNotBlank(r.getBuildingId())) {
-                            buildingId = Long.valueOf(r.getBuildingId());
-                        }
-                        if (StringUtils.isNotBlank(r.getApartmentId())) {
-                            apartmentId = Long.valueOf(r.getApartmentId());
-                        }
-                        populateShopAddressInfo(shop, buildingId, apartmentId);
-                        shop.setShopFlag(CommunityMapShopFlag.OPEN_IN_BIZ.getCode());
-                        return shop;
-                    }).collect(Collectors.toList()));
-                }
+            if (null != resp) {
+                response.setNextPageAnchor(resp.getNextPageAnchor());
+                result.addAll(resp.getShopDTOs().stream().map(r -> {
+                    CommunityMapShopDTO shop = ConvertHelper.convert(r, CommunityMapShopDTO.class);
+                    Long buildingId = null;
+                    Long apartmentId = null;
+                    if (StringUtils.isNotBlank(r.getBuildingId())) {
+                        buildingId = Long.valueOf(r.getBuildingId());
+                    }
+                    if (StringUtils.isNotBlank(r.getApartmentId())) {
+                        apartmentId = Long.valueOf(r.getApartmentId());
+                    }
+                    populateShopAddressInfo(shop, buildingId, apartmentId);
+                    shop.setShopFlag(CommunityMapShopFlag.OPEN_IN_BIZ.getCode());
+                    return shop;
+                }).collect(Collectors.toList()));
+            }
         }
 
         Long userId = UserContext.currentUserId();
@@ -378,6 +378,7 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         cmd3.setBuildingId(cmd.getBuildingId());
         cmd3.setPageSize(5);
         cmd3.setSceneToken(cmd.getSceneToken());
+        cmd3.setCommunityIds(Collections.singletonList(buildingDTO.getCommunityId()));
 
         SearchCommunityMapContentsResponse orgResponse = this.searchEnterprise(cmd3);
         SearchCommunityMapContentsResponse shopResponse = this.searchShops(cmd3);

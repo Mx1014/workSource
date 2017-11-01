@@ -1,6 +1,9 @@
 package com.everhomes.rest.community_map;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * @author sw on 2017/8/14.
@@ -20,6 +23,17 @@ public class SearchCommunityMapContentsCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    @ItemType(Long.class)
+    private List<Long> communityIds;
+
+    public List<Long> getCommunityIds() {
+        return communityIds;
+    }
+
+    public void setCommunityIds(List<Long> communityIds) {
+        this.communityIds = communityIds;
+    }
 
     public String getGeoType() {
         return geoType;
