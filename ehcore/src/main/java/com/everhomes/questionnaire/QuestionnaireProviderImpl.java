@@ -139,7 +139,7 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 		condition = condition.and((Tables.EH_QUESTIONNAIRES.TARGET_TYPE.eq(QuestionnaireTargetType.USER.getCode())
 						.and(Tables.EH_QUESTIONNAIRES.USER_SCOPE.like("%"+UserId+"%")
 						.and(Tables.EH_QUESTIONNAIRES.ORGANIZATION_SCOPE.isNull())))
-				.or((Tables.EH_QUESTIONNAIRES.TARGET_TYPE.eq(QuestionnaireTargetType.USER.getCode())
+				.or((Tables.EH_QUESTIONNAIRES.TARGET_TYPE.eq(QuestionnaireTargetType.ORGANIZATION.getCode())
 						.and(Tables.EH_QUESTIONNAIRES.ORGANIZATION_SCOPE.like("%"+organizationID+"%")))));
 		// 连接条件
 		Condition joinCondition = Tables.EH_QUESTIONNAIRES.ID.eq(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID);
