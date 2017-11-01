@@ -5,12 +5,18 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * <ul>
- * <li>DEFAULT("DEFAULT"): 默认字段组 </li>
- * <li>CUSTOMIZE("CUSTOMIZE"): 自定义</li>
+ * <li>DEFAULT("DEFAULT"): 默认审批 </li>
+ * <li>CUSTOMIZE("CUSTOMIZE"): 自定义审批 </li>
+ * <li>ASK_FOR_LEAVE("ASK_FOR_LEAVE"): 请假审批</li>
+ * <li>BUSINESS_TRIP("BUSINESS_TRIP"): 出差审批</li>
+ * <li>OVERTIME("OVERTIME"): 加班审批</li>
+ * <li>GO_OUT("GO_OUT"): 外出审批</li>
+ * <li>ABNORMAL_PUNCH("ABNORMAL_PUNCH"): 打卡异常审批</li>
  * </ul>
  */
 public enum GeneralApprovalAttribute {
-    DEFAULT("DEFAULT"), CUSTOMIZE("CUSTOMIZE");
+    DEFAULT("DEFAULT"), CUSTOMIZE("CUSTOMIZE"), ASK_FOR_LEAVE("ASK_FOR_LEAVE"), CANCEL_FOR_LEAVE("CANCEL_FOR_LEAVE"), BUSINESS_TRIP("BUSINESS_TRIP"),
+    OVERTIME("OVERTIME"), GO_OUT("GO_OUT"), ABNORMAL_PUNCH("ABNORMAL_PUNCH");
 
     private String code;
 
