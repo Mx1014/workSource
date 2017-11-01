@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.techpark.punch.*;
-
 import com.everhomes.rest.techpark.punch.admin.*;
+
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -224,4 +224,6 @@ public interface PunchService {
 	void invalidPunchQRCode(GetPunchQRCodeCommand cmd);
 
 	ListApprovalCategoriesResponse listApprovalCategories();
+
+	public CheckAbnormalStatusResponse checkAbnormalStatus(CheckPunchAdminCommand cmd);
 }
