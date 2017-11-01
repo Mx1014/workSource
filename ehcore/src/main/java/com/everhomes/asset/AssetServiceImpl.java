@@ -1096,7 +1096,7 @@ public class AssetServiceImpl implements AssetService {
                                 newBill.setNextSwitch((byte)0);
                             }
                         }catch (Exception e){
-                            newBill.setChargeStatus((byte)0);
+                            newBill.setNextSwitch((byte)0);
                         }
                     }
 //                    for(){
