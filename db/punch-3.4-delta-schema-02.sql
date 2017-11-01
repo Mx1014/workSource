@@ -194,11 +194,15 @@ ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag11` BIGINT;
 ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag12` BIGINT;
 ALTER TABLE `eh_flow_cases` ADD COLUMN `integral_tag13` BIGINT;
 
-
 -- added by R for form
+ALTER TABLE `eh_general_forms` ADD COLUMN `form_template_id` BIGINT COMMENT 'the id in eh_general_form_templates';
+ALTER TABLE `eh_general_forms` ADD COLUMN `form_template_version` BIGINT COMMENT 'the version in eh_general_form_templates';
+ALTER TABLE `eh_general_forms` ADD COLUMN `form_attribute` VARCHAR(128) DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE';
 ALTER TABLE `eh_general_forms` ADD COLUMN `modify_flag` TINYINT DEFAULT 1 COMMENT 'whether the form can be modified from desk, 0: no, 1: yes';
 ALTER TABLE `eh_general_forms` ADD COLUMN `delete_flag` TINYINT DEFAULT 1 COMMENT 'whether the form can be deleted from desk, 0: no, 1: yes';
 
+ALTER TABLE `eh_general_approvals` ADD COLUMN `approval_template_id` BIGINT COMMENT 'the id in eh_general_approval_templates';
+ALTER TABLE `eh_general_approvals` ADD COLUMN `approval_template_version` BIGINT COMMENT 'the version in eh_general_approval_templates';
 ALTER TABLE `eh_general_approvals` ADD COLUMN `approval_attribute` VARCHAR(128) DEFAULT 'CUSTOMIZE' COMMENT 'DEFAULT,CUSTOMIZE';
 ALTER TABLE `eh_general_approvals` ADD COLUMN `modify_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be modified from desk, 0: no, 1: yes';
 ALTER TABLE `eh_general_approvals` ADD COLUMN `delete_flag` TINYINT DEFAULT 1 COMMENT 'whether the approval can be deleted from desk, 0: no, 1: yes';
@@ -238,6 +242,7 @@ CREATE TABLE `eh_general_form_templates` (
   `module_id` BIGINT DEFAULT 0 COMMENT 'the module id',
   `module_type` VARCHAR(64),
   `form_name` VARCHAR(64) NOT NULL,
+  `version` BIGINT NOT NULL DEFAULT '0' COMMENT 'the version of the form template',
   `template_type` VARCHAR(128) NOT NULL COMMENT 'the type of template text',
   `template_text` TEXT COMMENT 'json 存放表单字段',
   `modify_flag` TINYINT DEFAULT 1 COMMENT 'whether the form can be modified from desk, 0: no, 1: yes',
