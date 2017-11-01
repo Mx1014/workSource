@@ -25,6 +25,7 @@ import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
@@ -1573,35 +1574,51 @@ public class ParkingServiceImpl implements ParkingService {
 		Long parkingLotId = cmd.getParkingLotId();
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
 
-		String vendorName = parkingLot.getVendorName();
-		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
 
-		ParkingCarLockInfoDTO dto = handler.getParkingCarLockInfo(cmd);
+		ParkingCarVerification verification = parkingProvider.findParkingCarVerificationByUserId(cmd.getOwnerType(), cmd.getOwnerId(),
+				parkingLotId, userId);
 
-		if (null != dto) {
-			dto.setOwnerId(cmd.getOwnerId());
-			dto.setOwnerType(cmd.getOwnerType());
-			dto.setParkingLotId(cmd.getParkingLotId());
-			dto.setPlateNumber(cmd.getPlateNumber());
-			dto.setParkingLotName(parkingLot.getName());
+		if (null == verification || verification.getStatus() == ParkingCarVerificationStatus.INACTIVE.getCode()
+				|| verification.getStatus() == ParkingCarVerificationStatus.FAILED.getCode()) {
+			ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
+			dto.setCarVerificationFlag(ParkingCarVerificationStatus.INACTIVE.getCode());
+			return dto;
+		}else if (verification.getStatus() == ParkingCarVerificationStatus.AUDITING.getCode()) {
+			ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
+			dto.setCarVerificationFlag(ParkingCarVerificationStatus.AUDITING.getCode());
+			return dto;
+		}else if (verification.getStatus() == ParkingCarVerificationStatus.SUCCEED.getCode()) {
+			String vendorName = parkingLot.getVendorName();
+			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
-			Long organizationId = cmd.getOrganizationId();
-			User user = UserContext.current().getUser();
-			Long userId = user.getId();
-			String plateOwnerName = user.getNickName();
+			ParkingCarLockInfoDTO dto = handler.getParkingCarLockInfo(cmd);
 
-			if(null != organizationId) {
-				OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
-				if(null != organizationMember) {
-					plateOwnerName = organizationMember.getContactName();
+			if (null != dto) {
+				dto.setOwnerId(cmd.getOwnerId());
+				dto.setOwnerType(cmd.getOwnerType());
+				dto.setParkingLotId(cmd.getParkingLotId());
+				dto.setPlateNumber(cmd.getPlateNumber());
+				dto.setParkingLotName(parkingLot.getName());
+
+				Long organizationId = cmd.getOrganizationId();
+
+				String plateOwnerName = user.getNickName();
+
+				if(null != organizationId) {
+					OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+					if(null != organizationMember) {
+						plateOwnerName = organizationMember.getContactName();
+					}
+				}
+				if(StringUtils.isBlank(dto.getPlateOwnerName())) {
+					dto.setPlateOwnerName(plateOwnerName);
 				}
 			}
-			if(StringUtils.isBlank(dto.getPlateOwnerName())) {
-				dto.setPlateOwnerName(plateOwnerName);
-			}
+			return dto;
 		}
-
-		return dto;
+		return null;
 	}
 
 	@Override
@@ -2019,6 +2036,12 @@ public class ParkingServiceImpl implements ParkingService {
 			Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
 					FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
 
+			if(null == flow) {
+				LOGGER.error("Enable flow not found, moduleId={}", ParkingFlowConstant.PARKING_RECHARGE_MODULE);
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+						"Enable flow not found.");
+			}
+
 			FlowCase flowCase = createFlowCase(verification, flow, UserContext.currentUserId());
 			if (null != flowCase) {
 				verification.setFlowCaseId(flowCase.getId());
@@ -2028,6 +2051,9 @@ public class ParkingServiceImpl implements ParkingService {
 			verification.setStatus(ParkingCarVerificationStatus.SUCCEED.getCode());
 			parkingProvider.createParkingCarVerification(verification);
 		}
+
+		addAttachments(cmd.getAttachments(), UserContext.currentUserId(), verification.getId(),
+				ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
 
 		return ConvertHelper.convert(verification, ParkingCarVerificationDTO.class);
 	}

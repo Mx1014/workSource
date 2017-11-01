@@ -21,6 +21,14 @@ public class RequestCarVerificationCommand {
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
 
+    public List<AttachmentDescriptor> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<AttachmentDescriptor> attachments) {
+        this.attachments = attachments;
+    }
+
     public String getOwnerType() {
         return ownerType;
     }

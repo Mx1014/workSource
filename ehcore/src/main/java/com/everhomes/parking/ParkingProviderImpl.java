@@ -938,6 +938,20 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 
 	@Override
+	public ParkingCarVerification findParkingCarVerificationByUserId(String ownerType, Long ownerId, Long parkingLotId, Long userId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCarVerifications.class));
+		SelectQuery<EhParkingCarVerificationsRecord> query = context.selectQuery(Tables.EH_PARKING_CAR_VERIFICATIONS);
+
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PARKING_LOT_ID.eq(parkingLotId));
+		query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.REQUESTOR_UID.eq(userId));
+
+		return ConvertHelper.convert(query.fetchOne(), ParkingCarVerification.class);
+
+	}
+
+	@Override
 	public ParkingCarVerification findParkingCarVerificationById(Long id) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhParkingCarVerificationsDao dao = new EhParkingCarVerificationsDao(context.configuration());

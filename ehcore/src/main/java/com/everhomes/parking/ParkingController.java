@@ -646,7 +646,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=SearchParkingCarVerificationResponse.class)
     public RestResponse searchParkingCarVerifications(SearchParkingCarVerificationsCommand cmd) {
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(parkingService.searchParkingCarVerifications(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -660,7 +660,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=ListParkingCarVerificationsResponse.class)
     public RestResponse listParkingCarVerifications(ListParkingCarVerificationsCommand cmd) {
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(parkingService.listParkingCarVerifications(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -674,7 +674,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=ParkingCarVerificationDTO.class)
     public RestResponse getParkingCarVerificationById(GetParkingCarVerificationByIdCommand cmd) {
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(parkingService.getParkingCarVerificationById(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

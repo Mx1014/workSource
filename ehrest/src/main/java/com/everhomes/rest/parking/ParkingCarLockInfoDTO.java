@@ -14,6 +14,15 @@ public class ParkingCarLockInfoDTO {
     private Long entryTime;
     private Long lockCarTime;
     private Byte lockStatus;
+    private Byte carVerificationFlag;
+
+    public Byte getCarVerificationFlag() {
+        return carVerificationFlag;
+    }
+
+    public void setCarVerificationFlag(Byte carVerificationFlag) {
+        this.carVerificationFlag = carVerificationFlag;
+    }
 
     public Byte getLockStatus() {
         return lockStatus;
