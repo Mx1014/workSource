@@ -1,9 +1,8 @@
 -- version 1 的手动复制出来
 SET @conf_id := (SELECT MAX(id) FROM eh_uniongroup_configures);
 SET @member_id := (SELECT MAX(id) FROM eh_uniongroup_configures);
-;
-INSERT INTO eh_uniongroup_configures 
 
+INSERT INTO eh_uniongroup_configures 
 SELECT
   @conf_id + id id,
   `namespace_id`,
@@ -16,8 +15,7 @@ SELECT
   `operator_uid`,
   `update_time`,
   1 version_code
-FROM `eh_uniongroup_configures`
- ;
+FROM `eh_uniongroup_configures`;
  INSERT INTO eh_uniongroup_member_details 
  SELECT
   @member_id  + `id` id,
