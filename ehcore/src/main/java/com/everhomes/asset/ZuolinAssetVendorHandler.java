@@ -535,6 +535,12 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         if(cmd.getPageOffset()==null||cmd.getPageOffset()<0){
             cmd.setPageOffset(0);
         }
+        //先查看任务
+        Boolean inWork = assetProvider.checkContractInWork(cmd.getContractNum());
+        if(inWork){
+//            return response;
+            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.ERROR_IN_GENERATING,"Mission in process");
+        }
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize());
         if(dtos.size() <= cmd.getPageSize()){
 //            response.setNextPageOffset(cmd.getPageOffset());

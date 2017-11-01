@@ -656,6 +656,11 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public PaymentExpectanciesResponse paymentExpectancies(PaymentExpectanciesCommand cmd) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date today = Calendar.getInstance().getTime();
+        String contractNum = cmd.getContractNum();
+        Long contractId = cmd.getContractId();
+        assetProvider.setInworkFlagInContractReceiver(contractId,contractNum);
         //calculate the details of payment expectancies
         PaymentExpectanciesResponse response = new PaymentExpectanciesResponse();
         List<PaymentExpectancyDTO> dtos = new ArrayList<>();
@@ -786,6 +791,18 @@ public class AssetServiceImpl implements AssetService {
                             newBill.setNoticeTimes(0);
                             newBill.setStatus((byte)0);
                             newBill.setSwitch((byte)3);
+
+                            Date x_v = null;
+                            try{
+                                x_v = sdf.parse(item.getDateStrDue());
+                                if(today.compareTo(x_v)!=-1){
+                                    newBill.setNextSwitch((byte)1);
+                                }else{
+                                    newBill.setNextSwitch((byte)0);
+                                }
+                            }catch (Exception e){
+                                newBill.setNextSwitch((byte)0);
+                            }
                             map.put(identity,newBill);
                         }
                         //if the billing cycle is on quarter or year, just change the way how the billIdentity defines that muliti bills should be merged as one or be independently
@@ -852,6 +869,7 @@ public class AssetServiceImpl implements AssetService {
             return null;
         });
         response.setList(dtos);
+        assetProvider.setInworkFlagInContractReceiverWell(contractId,contractNum);
         return response;
     }
 
@@ -1135,7 +1153,7 @@ public class AssetServiceImpl implements AssetService {
                 for (int i = 0; i < list.size(); i++) {
                     PaymentBillGroup paymentBillGroup = list.get(i);
                     Calendar c = Calendar.getInstance();
-                    if (c.get(Calendar.DAY_OF_MONTH) == paymentBillGroup.getBillsDay()) {
+                    if (c.get(Calendar.DAY_OF_MONTH) == paymentBillGroup.getBillsDay().intValue()) {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
                         String billDateStr = sdf.format(c.getTime());
                         assetProvider.updateBillSwitchOnTime(billDateStr);

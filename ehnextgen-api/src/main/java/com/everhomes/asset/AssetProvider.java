@@ -168,4 +168,9 @@ public interface AssetProvider {
 
     List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 
+    void setInworkFlagInContractReceiver(Long contractId, String contractNum);
+
+    void setInworkFlagInContractReceiverWell(Long contractId, String contractNum);
+
+    Boolean checkContractInWork(String contractNum);
 }
