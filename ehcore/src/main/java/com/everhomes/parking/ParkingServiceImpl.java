@@ -1990,8 +1990,8 @@ public class ParkingServiceImpl implements ParkingService {
 
 		ParkingCarVerificationDTO dto = ConvertHelper.convert(verification, ParkingCarVerificationDTO.class);
 
-		List<ParkingAttachment> attachments = parkingProvider.listParkingAttachments(parkingCardRequest.getId(),
-				ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
+		List<ParkingAttachment> attachments = parkingProvider.listParkingAttachments(verification.getId(),
+				ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
 
 		List<ParkingAttachmentDTO> attachmentDtos = attachments.stream().map(r -> {
 			ParkingAttachmentDTO attachmentDto = ConvertHelper.convert(r, ParkingAttachmentDTO.class);
