@@ -6,10 +6,10 @@ import java.util.List;
 
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
-
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.general_approval.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +18,9 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.approval.ApprovalRequestDefaultHandler;
+import com.everhomes.approval.ApprovalRequestHandler;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
@@ -99,10 +102,25 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
     @Override
     public void onFlowCaseAbsorted(FlowCaseState ctx) {
         // TODO Auto-generated method stub
-
+    	FlowCase flowCase = ctx.getGrantParentState().getFlowCase();
+    	
     }
+    
 
 
+	public GeneralApprovalHandler getGeneralApprovalHandler(String generalApprovalAttribute) {
+		if (generalApprovalAttribute != null) {
+			GeneralApprovalHandler handler = PlatformContext.getComponent(GeneralApprovalHandler.GENERAL_APPROVAL_PREFIX
+					+ generalApprovalAttribute);
+			if (handler != null) {
+				return handler;
+			}
+		}
+		return PlatformContext.getComponent(GeneralApprovalDefaultHandler.GENERAL_APPROVAL_DEFAULT_HANDLER_NAME);
+	}
+
+
+    
     @Override
     public void onFlowCaseCreating(FlowCase flowCase) {
 /*        // 服务联盟的审批拼接工作流 content字符串
@@ -119,6 +137,8 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
             content += entities.get(i).getKey() + " : " + entities.get(i).getValue() + "\n";
         }
         flowCase.setContent(content);
+        
+        getGeneralApprovalHandler(flowCase.gg)
     }
 
     private List<FlowCaseEntity> processEntities(List<PostApprovalFormItem> values) {

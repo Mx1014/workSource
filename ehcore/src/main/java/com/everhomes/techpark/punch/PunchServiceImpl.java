@@ -85,6 +85,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -102,6 +104,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalCategoryDTO;
 import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -207,6 +210,9 @@ public class PunchServiceImpl implements PunchService {
     };
     private static ThreadLocal<List<PunchTimeRule>> targetTimeRules = new ThreadLocal<List<PunchTimeRule>>() ;
 
+	@Autowired
+	private GeneralApprovalService generalApprovalService;
+	
 	@Autowired
 	private SequenceProvider sequenceProvider;
 
@@ -7862,7 +7868,12 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public CheckAbnormalStatusResponse checkAbnormalStatus(CheckPunchAdminCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		CheckAbnormalStatusResponse response = new CheckAbnormalStatusResponse();
+		cmd.setOrganizationId(getTopEnterpriseId(cmd.getOrganizationId()));
+		GeneralApproval approval = generalApprovalService.getGeneralApprovalByAttribute(cmd.getOrganizationId(), GeneralApprovalAttribute.ABNORMAL_PUNCH.getCode());
+		if(null != approval){
+			response.setAbnormalStatus(approval.getStatus());
+		}
+		return response;
 	}
 }
