@@ -4967,7 +4967,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 					SelectQuery<Record> query = context.selectQuery();
 					query.addSelect(Tables.EH_USERS.ID,Tables.EH_USERS.NAMESPACE_USER_TYPE,Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID,Tables.EH_USER_ORGANIZATIONS.STATUS,
 							Tables.EH_USERS.NICK_NAME,Tables.EH_USERS.GENDER,Tables.EH_USERS.CREATE_TIME,Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID,
-							Tables.EH_USERS.EXECUTIVE_TAG,Tables.EH_USERS.POSITION_TAG,Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN,Tables.EH_USER_ORGANIZATIONS.CREATE_TIME);
+							Tables.EH_USERS.EXECUTIVE_TAG,Tables.EH_USERS.POSITION_TAG,Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN);
 					query.addFrom(Tables.EH_USERS);
 					query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
 					query.addJoin(context.select().from(Tables.EH_USER_ORGANIZATIONS).where(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.ACTIVE.getCode()).or(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(UserOrganizationStatus.WAITING_FOR_APPROVAL.getCode()))).asTable(Tables.EH_USER_ORGANIZATIONS.getName()),
@@ -4992,7 +4992,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						userOrganizations.setStatus(r.getValue(Tables.EH_USER_ORGANIZATIONS.STATUS));
 						userOrganizations.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
 						userOrganizations.setGender(r.getValue(Tables.EH_USERS.GENDER));
-						userOrganizations.setRegisterTime(r.getValue(Tables.EH_USER_ORGANIZATIONS.CREATE_TIME));
+						userOrganizations.setRegisterTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
 						userOrganizations.setCommunityId(r.getValue(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID));
 						userOrganizations.setExecutiveTag(r.getValue(Tables.EH_USERS.EXECUTIVE_TAG));
 						userOrganizations.setPosition(r.getValue(Tables.EH_USERS.POSITION_TAG));

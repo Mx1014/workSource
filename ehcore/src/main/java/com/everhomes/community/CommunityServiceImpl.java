@@ -2094,7 +2094,6 @@ public class CommunityServiceImpl implements CommunityService {
 			User user = userProvider.findUserById(r.getUserId());
 			if(user != null && NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
 				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
-				dto.setCreateTime(user.getCreateTime());
 			}
 
 //			if(null != dto.getPhone()){
@@ -2126,8 +2125,7 @@ public class CommunityServiceImpl implements CommunityService {
 				CommunityUserDto dto = new CommunityUserDto();
 				dto.setUserName(u.getNickName());
 				// dto.setPhone(r.getPhoneNumber());
-				//dto.setApplyTime(u.getCreateTime());
-				dto.setCreateTime(u.getCreateTime());
+				dto.setApplyTime(u.getCreateTime());
 				dto.setIdentityNumber(u.getIdentityNumberTag());
 				dto.setGender(u.getGender());
 				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
@@ -2302,7 +2300,7 @@ public class CommunityServiceImpl implements CommunityService {
 			tempRow.createCell(6).setCellValue(positionFlag.toString());
 			tempRow.createCell(7).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
 			tempRow.createCell(8).setCellValue(UserSourceType.fromCode(dto.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
-			tempRow.createCell(9).setCellValue(null != dto.getCreateTime() ? sdf.format(dto.getCreateTime()) : "");
+			tempRow.createCell(9).setCellValue(null != dto.getApplyTime() ? sdf.format(dto.getApplyTime()) : "");
 			tempRow.createCell(10).setCellValue(null != dto.getRecentlyActiveTime() ? sdf.format(dto.getRecentlyActiveTime()) : "");
 
 		}
@@ -2375,7 +2373,7 @@ public class CommunityServiceImpl implements CommunityService {
 			tempRow.createCell(4).setCellValue(address.toString());
 			tempRow.createCell(5).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
 			tempRow.createCell(6).setCellValue(UserSourceType.fromCode(dto.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
-			tempRow.createCell(7).setCellValue(null != dto.getCreateTime() ? sdf.format(dto.getCreateTime()) : "");
+			tempRow.createCell(7).setCellValue(null != dto.getApplyTime() ? sdf.format(dto.getApplyTime()) : "");
 			tempRow.createCell(8).setCellValue(null != dto.getRecentlyActiveTime() ? sdf.format(dto.getRecentlyActiveTime()) : "");
 
 		}
