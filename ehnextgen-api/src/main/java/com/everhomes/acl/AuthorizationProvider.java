@@ -61,4 +61,7 @@ public interface AuthorizationProvider {
     List<String> getAuthorizationScopesByAuthAndTargets(String authType, Long authId, List<Target> targets);
 
     List<Project> getManageAuthorizationProjectsByAuthAndTargets(String authType, Long authId, List<Target> targets);
+
+    // eh_authorization_control_configs表的接口
+//    Long createAuthorizationControlConfig(Authorization authorization);
 }

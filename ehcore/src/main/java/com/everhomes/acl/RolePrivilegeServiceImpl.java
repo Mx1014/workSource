@@ -3286,7 +3286,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 			// todo: 保存按园区范围控制的应用
 			if(AllFlagType.fromCode(cmd.getAll_community_control_flag()) == AllFlagType.YES){
+				// 先构建control_config表的记录
+
 				processAuthorization(authorization, 0L, 0L, ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAll_community_control_flag(),"");
+				// authorization表
 				authorizationProvider.createAuthorization(authorization);
 				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
 			}
