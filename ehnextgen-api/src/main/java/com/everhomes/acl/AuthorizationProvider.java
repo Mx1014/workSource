@@ -5,6 +5,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
 import com.everhomes.rest.module.Project;
+import com.everhomes.server.schema.tables.pojos.EhAuthorizationControlConfigs;
 
 import java.util.List;
 
@@ -62,6 +63,10 @@ public interface AuthorizationProvider {
 
     List<Project> getManageAuthorizationProjectsByAuthAndTargets(String authType, Long authId, List<Target> targets);
 
+    Long getMaxControlIdInAuthorizations();
+
     // eh_authorization_control_configs表的接口
-//    Long createAuthorizationControlConfig(Authorization authorization);
+    Long createAuthorizationControlConfig(AuthorizationControlConfig authorizationControlConfig);
+    // batch
+    Long createAuthorizationControlConfigs(List<AuthorizationControlConfig> authorizationControlConfigs);
 }

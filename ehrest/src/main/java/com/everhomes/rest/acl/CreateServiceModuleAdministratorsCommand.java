@@ -2,6 +2,7 @@ package com.everhomes.rest.acl;
 
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.module.AssignmentTarget;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -19,7 +20,7 @@ import java.util.List;
  * <li>module_app_id: 应用id</li>
  * <li>module_app_control_type: 应用控制类型</>
  * <li>all_community_control_flag: 全部园区标识</li>
- * <li>community_control_json: 园区范围详情</li>
+ * <li>community_control_ids: 园区范围详情</li>
  * <li>all_org_control_flag: 全公司范围标识</li>
  * <li>org_control_json: 组织架构范围详情</li>
  * </ul>
@@ -48,7 +49,8 @@ public class CreateServiceModuleAdministratorsCommand {
     //
     private Byte all_community_control_flag;
 
-    private String community_control_json;
+    @NotNull
+    private List<Long> community_control_ids;
 
     @ItemType(Long.class)
     private List<ModuleAppTarget> community_target;
@@ -56,7 +58,9 @@ public class CreateServiceModuleAdministratorsCommand {
     //
     private Byte all_org_control_flag;
 
-    private String org_control_json;
+
+    @ItemType(AssignmentTarget.class)
+    private List<AssignmentTarget> org_control_details;
 
     @ItemType(Long.class)
     private List<ModuleAppTarget> org_target;
@@ -137,14 +141,6 @@ public class CreateServiceModuleAdministratorsCommand {
         this.all_community_control_flag = all_community_control_flag;
     }
 
-    public String getCommunity_control_json() {
-        return community_control_json;
-    }
-
-    public void setCommunity_control_json(String community_control_json) {
-        this.community_control_json = community_control_json;
-    }
-
     public Byte getAll_org_control_flag() {
         return all_org_control_flag;
     }
@@ -191,5 +187,13 @@ public class CreateServiceModuleAdministratorsCommand {
 
     public void setAll_unlimit_control_flag(Byte all_unlimit_control_flag) {
         this.all_unlimit_control_flag = all_unlimit_control_flag;
+    }
+
+    public List<Long> getCommunity_control_ids() {
+        return community_control_ids;
+    }
+
+    public void setCommunity_control_ids(List<Long> community_control_ids) {
+        this.community_control_ids = community_control_ids;
     }
 }

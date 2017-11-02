@@ -15,8 +15,10 @@ import com.everhomes.rest.acl.IdentityType;
 import com.everhomes.rest.module.Project;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhAuthorizationControlConfigsDao;
 import com.everhomes.server.schema.tables.daos.EhAuthorizationRelationsDao;
 import com.everhomes.server.schema.tables.daos.EhAuthorizationsDao;
+import com.everhomes.server.schema.tables.pojos.EhAuthorizationControlConfigs;
 import com.everhomes.server.schema.tables.pojos.EhAuthorizationRelations;
 import com.everhomes.server.schema.tables.pojos.EhAuthorizations;
 import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord;
@@ -87,6 +89,37 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	@Override
 	public List<Project> getManageAuthorizationProjectsByAuthAndTargets(String authType, Long authId, List<Target> targets){
 		return this.getAuthorizationProjectsByAuthIdAndTargets(IdentityType.MANAGE.getCode(), authType, authId, targets);
+	}
+
+    @Override
+    public Long getMaxControlIdInAuthorizations() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select(Tables.EH_AUTHORIZATIONS.CONTROL_ID.max()).fetchOne().value1();
+    }
+
+	@Override
+	public Long createAuthorizationControlConfig(AuthorizationControlConfig authorizationControlConfig) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAuthorizationControlConfigs.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizationControlConfigs.class));
+		authorizationControlConfig.setId(id);
+		EhAuthorizationControlConfigsDao dao = new EhAuthorizationControlConfigsDao(context.configuration());
+		dao.insert(authorizationControlConfig);
+		return id;
+	}
+
+	@Override
+	public Long createAuthorizationControlConfigs(List<AuthorizationControlConfig> authorizationControlConfigs) {
+		long id = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhAuthorizationControlConfigs.class), (long)authorizationControlConfigs.size());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizationControlConfigs.class));
+		List<EhAuthorizationControlConfigs> auths = new ArrayList<>();
+		for (AuthorizationControlConfig authorizationControlConfig: authorizationControlConfigs) {
+			id ++;
+			authorizationControlConfig.setId(id);
+			auths.add(ConvertHelper.convert(authorizationControlConfig, EhAuthorizationControlConfigs.class));
+		}
+		EhAuthorizationControlConfigsDao dao = new EhAuthorizationControlConfigsDao(context.configuration());
+		dao.insert(auths);
+		return id;
 	}
 
 	@Override

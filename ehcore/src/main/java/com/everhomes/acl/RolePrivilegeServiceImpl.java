@@ -22,6 +22,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.ActivationFlag;
 import com.everhomes.rest.common.AllFlagType;
+import com.everhomes.rest.common.IncludeChildFlagType;
 import com.everhomes.rest.community.ResourceCategoryType;
 import com.everhomes.rest.module.AssignmentTarget;
 import com.everhomes.rest.module.Project;
@@ -31,6 +32,8 @@ import com.everhomes.rest.organization.pm.PmMemberTargetType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.sequence.SequenceService;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -53,6 +56,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import scala.Int;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -108,6 +112,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private ServiceModuleAppProvider serviceModuleAppProvider;
+
+	@Autowired
+	private SequenceProvider sequenceProvider;
 
 
 	@Override
@@ -3285,22 +3292,29 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		dbProvider.execute((TransactionStatus status) -> {
 
 			// todo: 保存按园区范围控制的应用
-			if(AllFlagType.fromCode(cmd.getAll_community_control_flag()) == AllFlagType.YES){
-				// 先构建control_config表的记录
+			// 保存control_config表
+			Long control_id_c = this.sequenceProvider.getNextSequence("authControlId");
+			List<AuthorizationControlConfig> configs_c = processAuthorizationControlConfig(namespaceId, control_id_c, cmd.getCommunity_control_ids());
+			authorizationProvider.createAuthorizationControlConfigs(configs_c);
 
-				processAuthorization(authorization, 0L, 0L, ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAll_community_control_flag(),"");
-				// authorization表
+			if(AllFlagType.fromCode(cmd.getAll_community_control_flag()) == AllFlagType.YES){
+				processAuthorization(authorization, 0L, 0L, ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAll_community_control_flag(), control_id_c);
 				authorizationProvider.createAuthorization(authorization);
 				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
 			}
 			for (ModuleAppTarget target : cmd.getCommunity_target()){
-				processAuthorization(authorization, target.getModuleId(), target.getAppId(), target.getControl_type(), cmd.getAll_community_control_flag(),cmd.getCommunity_control_json());
+				processAuthorization(authorization, target.getModuleId(), target.getAppId(), target.getControl_type(), cmd.getAll_community_control_flag(), control_id_c);
 				authorizationProvider.createAuthorization(authorization);
 				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
 			}
 
 
 			// todo: 保存按OA范围控制的应用
+			// 保存control_config表
+			Long control_id_oa = this.sequenceProvider.getNextSequence("authControlId");
+			List<AuthorizationControlConfig> configs_oa = processAuthorizationControlConfig(namespaceId, control_id_oa, cmd.getCommunity_control_ids());
+			authorizationProvider.createAuthorizationControlConfigs(configs);
+
 			if(AllFlagType.fromCode(cmd.getAll_org_control_flag()) == AllFlagType.YES) {
 				processAuthorization(authorization, 0L, 0L, ModuleManagementType.ORG_CONTROL.getCode(), cmd.getAll_org_control_flag(),"");
 				authorizationProvider.createAuthorization(authorization);
@@ -3348,12 +3362,27 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 //		});
 	}
 
-	private void processAuthorization(Authorization authorization, Long authId, Long moduleAppId, String controlType, Byte controlByte, String controlJson){
+	private void processAuthorization(Authorization authorization, Long authId, Long moduleAppId, String controlType, Byte controlByte, Long controlId){
 		authorization.setAuthId(authId);
 		authorization.setModuleAppId(moduleAppId);
 		authorization.setModuleControlType(controlType);
 		authorization.setAllControlFlag(controlByte);
-		authorization.setControlJson(controlJson);
+		authorization.setControlId(controlId);
+	}
+
+
+	private List<AuthorizationControlConfig> processAuthorizationControlConfig(Integer namespaceId, Long controlId, List<Long> communityIds){
+		List<AuthorizationControlConfig> configs = new ArrayList<>();
+		for(Long communityId : communityIds){
+			AuthorizationControlConfig config = new AuthorizationControlConfig();
+			config.setControlId(controlId);
+			config.setNamespaceId(namespaceId);
+			config.setTargetType(EntityType.COMMUNITY.getCode());
+			config.setTargetId(communityId);
+			config.setIncludeChildFlag(IncludeChildFlagType.YES.getCode());
+			configs.add(config);
+		}
+		return configs;
 	}
 
 
