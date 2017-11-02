@@ -44,14 +44,9 @@ ALTER TABLE `eh_payment_bills` ADD COLUMN `charge_status` TINYINT DEFAULT 0 COMM
 
 ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `decoupling_flag` TINYINT DEFAULT 0 COMMENT '解耦标志，0:耦合中，收到域名下全部设置的影响;1:副本解耦';
 ALTER TABLE `eh_payment_bills` ADD COLUMN `real_paid_time` DATETIME DEFAULT NULL COMMENT '实际付款时间';
--- fun-shenye by wentian
- -- 记得张江高科和物业缴费的重构，修改zjgkcode为wuyecode，但先查下wuyecode是否存在
-
 ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `in_work` TINYINT DEFAULT 0 COMMENT '0:工作完成；1：正在生成';
 ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `is_recorder` TINYINT DEFAULT 1 COMMENT '0：合同状态记录者，不保存计价数据；1：不是合同状态记录者';
 ALTER TABLE `eh_payment_bills` ADD COLUMN `next_switch` TINYINT DEFAULT NULL COMMENT '下一次switch的值';
-ALTER TABLE `eh_payment_charging_items` ADD COLUMN  `sovereighty_flag` TINYINT DEFAULT 1 COMMENT '0:和全部的情况进行联动；1：只能单独设置';
-
 -- 4.10.3，合并记得删
 -- 园区入驻3.6 add by sw 20171023
 DROP TABLE IF EXISTS `eh_lease_configs`;
@@ -467,7 +462,6 @@ ALTER TABLE `eh_news` CHANGE COLUMN `phone` `phone` VARCHAR(32) NULL DEFAULT '0'
 -- merge from energy3.0 by xiongying20171030
 ALTER TABLE eh_energy_meters ADD COLUMN `cost_formula_source` TINYINT DEFAULT '0' COMMENT '0: 能耗设置, 1: 缴费模块';
 ALTER TABLE eh_energy_meter_setting_logs ADD COLUMN `formula_source` TINYINT DEFAULT '0' COMMENT '0: 能耗设置, 1: 缴费模块';
-ALTER TABLE eh_energy_meter_reading_logs ADD COLUMN `task_id` BIGINT DEFAULT '0';
 
 -- 表计关联门牌
 CREATE TABLE `eh_energy_meter_addresses` (
@@ -489,7 +483,7 @@ CREATE TABLE `eh_energy_meter_addresses` (
 
 -- 能耗抄表计划
 CREATE TABLE `eh_energy_plans` (
-  `id` BIGINT NOT NULL COMMENT 'id',		  
+  `id` BIGINT NOT NULL COMMENT 'id',
   `namespace_id` INTEGER,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the plan, enterprise, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
@@ -533,7 +527,7 @@ CREATE TABLE `eh_energy_meter_tasks` (
   `namespace_id` INTEGER,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, organization, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
-  `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the group of who own the task, community, etc',		
+  `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the group of who own the task, community, etc',
   `target_id` BIGINT NOT NULL DEFAULT 0,
   `plan_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_energy_plans',
   `meter_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_energy_meters',
@@ -544,14 +538,14 @@ CREATE TABLE `eh_energy_meter_tasks` (
   `generate_payment_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: 未生成, 1: 已生成',
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: 未抄, 1: 已抄',
   `default_order` INTEGER DEFAULT 0,
-  `create_time` DATETIME,		
+  `create_time` DATETIME,
   `operator_uid` BIGINT,
   `update_time` DATETIME,
-  		
-  PRIMARY KEY (`id`),		
-  KEY `plan_id` (`plan_id`),		
-  KEY `status` (`status`),		
-  KEY `target_id` (`target_id`),		
+
+  PRIMARY KEY (`id`),
+  KEY `plan_id` (`plan_id`),
+  KEY `status` (`status`),
+  KEY `target_id` (`target_id`),
   KEY `executive_expire_time` (`executive_expire_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 

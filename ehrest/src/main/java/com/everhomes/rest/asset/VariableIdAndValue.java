@@ -10,45 +10,81 @@ import java.math.BigDecimal;
  */
 
 public class VariableIdAndValue {
-    private Long variableId;
-    private BigDecimal variableValue;
-    private String varibleIdentifier;
+//    private Long variableId;
+//    private BigDecimal variableValue;
+//    private String varibleIdentifier;
+//
+//    public Long getVariableId() {
+//        return variableId;
+//    }
+//
+//    public void setVariableId(Long variableId) {
+//        this.variableId = variableId;
+//    }
+//
+//    public BigDecimal getVariableValue() {
+//        return variableValue;
+//    }
+//
+//    public void setVariableValue(BigDecimal variableValue) {
+//        this.variableValue = variableValue;
+//    }
+//
+//    public String getVaribleIdentifier() {
+//        return varibleIdentifier;
+//    }
+//
+//    public void setVaribleIdentifier(String varibleIdentifier) {
+//        this.varibleIdentifier = varibleIdentifier;
+//    }
+//
+//    @Override
+//    public String toString() {
+//        return StringHelper.toJsonString(this);
+//    }
+//
+//    public VariableIdAndValue(Long variableId, BigDecimal variableValue, String varibleIdentifier) {
+//        this.variableId = variableId;
+//        this.variableValue = variableValue;
+//        this.varibleIdentifier = varibleIdentifier;
+//    }
+//
+//    public VariableIdAndValue() {
+//    }
+    private Object variableId;
+    private Object variableValue;
+    private Object varibleIdentifier;
 
-    public Long getVariableId() {
+    public Object getVariableId() {
         return variableId;
     }
 
-    public void setVariableId(Long variableId) {
+    public void setVariableId(Object variableId) {
         this.variableId = variableId;
     }
 
-    public BigDecimal getVariableValue() {
+    public Object getVariableValue() {
         return variableValue;
     }
 
-    public void setVariableValue(BigDecimal variableValue) {
+    public void setVariableValue(Object variableValue) {
         this.variableValue = variableValue;
     }
 
-    public String getVaribleIdentifier() {
+    public Object getVaribleIdentifier() {
         return varibleIdentifier;
     }
 
-    public void setVaribleIdentifier(String varibleIdentifier) {
-        this.varibleIdentifier = varibleIdentifier;
-    }
-
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
-    public VariableIdAndValue(Long variableId, BigDecimal variableValue, String varibleIdentifier) {
-        this.variableId = variableId;
-        this.variableValue = variableValue;
+    public void setVaribleIdentifier(Object varibleIdentifier) {
         this.varibleIdentifier = varibleIdentifier;
     }
 
     public VariableIdAndValue() {
+    }
+
+    public VariableIdAndValue(Object variableId, Object variableValue, Object varibleIdentifier) {
+        this.variableId = variableId;
+        this.variableValue = variableValue;
+        this.varibleIdentifier = varibleIdentifier;
     }
 }

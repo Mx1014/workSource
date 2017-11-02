@@ -208,6 +208,7 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
                 dto.setDayPrompt(energyConsumptionService.processDayPrompt(meter,meter.getNamespaceId()));
                 // 月读表差
                 dto.setMonthPrompt(energyConsumptionService.processMonthPrompt(meter,meter.getNamespaceId()));
+
                 List<EnergyMeterAddress> addressMap = energyMeterAddressProvider.listByMeterId(task.getMeterId());
                 if(addressMap != null && addressMap.size() > 0) {
                     dto.setApartmentFloor(addressMap.get(0).getApartmentFloor());

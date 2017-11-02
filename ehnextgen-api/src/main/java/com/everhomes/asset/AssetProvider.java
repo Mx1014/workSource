@@ -50,7 +50,7 @@ public interface AssetProvider {
 
     List<NoticeInfo> listNoticeInfoByBillId(List<Long> billIds);
 
-    List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,Long contractId);
+    List<BillDetailDTO> listBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,Long contractId,String contractNum);
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 
@@ -92,7 +92,7 @@ public interface AssetProvider {
 
     void saveContractVariables(List<EhPaymentContractReceiver> contractDateList);
 
-    List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId);
+    List<VariableIdAndValue> findPreInjectedVariablesForCal(Long chargingStandardId,Long ownerId,String ownerType);
 
     void increaseNoticeTime(List<Long> billIds);
 
@@ -165,7 +165,7 @@ public interface AssetProvider {
     void changeBillStatusOnPaiedOff(List<Long> billIds);
 
 
-    void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId,String ownerType, Integer namespaceId);
+    void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId,String ownerType, Integer namespaceId,List<Long> communityIds);
 
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
@@ -214,4 +214,10 @@ public interface AssetProvider {
     List<PaymentFormula> getFormulas(Long id);
 
     boolean cheackGroupRuleExistByChargingStandard(Long chargingStandardId);
+
+    void setInworkFlagInContractReceiver(Long contractId,String contractNum);
+
+    void setInworkFlagInContractReceiverWell(Long contractId, String contractNum);
+
+    Boolean checkContractInWork(String contractNum);
 }

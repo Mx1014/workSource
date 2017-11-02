@@ -1029,11 +1029,11 @@ public class AssetController extends ControllerBase {
 
         /**
      * <p>测试清单产生</p>
-     * <b>URL: /asset/xxd</b>
+     * <b>URL: /asset/doctor</b>
      *
      * 这个会自动生成一个错误的doctor！restresponse，因为我写的@RequestBody？下次测试下
      */
-    @RequestMapping("doctor!")
+    @RequestMapping("doctor")
     @RestReturn(String.class)
     public String hi(@RequestBody PaymentExpectanciesCommand cmd){
 //        List<FeeRules> feesRules = cmd.getFeesRules();

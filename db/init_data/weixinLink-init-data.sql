@@ -1146,7 +1146,11 @@ UPDATE eh_launch_pad_items set action_data = '{"url": "https://biz.zuolin.com/zl
 
 --  重配服务广场  edit by yanjun 20170914 end 到 1144行
 
-
+-- fix 17710 add by xiongying20171027
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40300,'', 'EhNamespaces', 999991,2);
+SET @module_scope_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) VALUES ((@module_scope_id := @module_scope_id + 1), '999991', '40300', '', 'EhNamespaces', '999991', NULL, '2');
 
 
 

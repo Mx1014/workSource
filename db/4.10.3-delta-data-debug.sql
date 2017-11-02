@@ -33,3 +33,49 @@ INSERT INTO `eh_general_forms` (`id`, `namespace_id`, `organization_id`, `owner_
 set @item_id = (select MAX(id) FROM eh_launch_pad_items);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
     VALUES ((@item_id := @item_id + 1), 999992, 0, 0, 0, '/home', 'Bizs', '招商', '招商', 'cs://1/image/aW1hZ2UvTVRwaE5qVTJNbVZoTW1KaU1qRmlNbVV6TVdabE5UQXdaRGN5TmpkbE5qTmlaQQ', 1, 1, 13, '{\"url\":\"http://alpha.lab.everhomes.com/customer/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 10, 0, 1, 1, '1', 0, NULL, NULL, NULL, 1, 'pm_admin', 0, 221, NULL, 10, NULL);
+
+-- wentian 支付2.0 beta版本
+-- config
+set @eh_payment_service_configs_id = (select MAX(id) from `eh_payment_service_configs`);
+INSERT INTO `eh_payment_service_configs` (`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
+VALUES
+(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '张江高科缴费','zjgkrentalcode', '999971', 'EhOrganizations', '1012516', null, null, null, '2', 1037, UTC_TIMESTAMP(), NULL);
+
+
+-- 支付类型
+set @eh_payment_types_id = (select max(id) from `eh_payment_types`);
+INSERT INTO `eh_payment_types`
+(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
+VALUES
+(@eh_payment_types_id:=@eh_payment_types_id+1, 'zjgkrentalcode', '999971', 'EhOrganizations', '1012516', null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
+
+
+-- 收款方
+set @eh_payment_users_id = (select MAX(id) from `eh_payment_users`);
+INSERT INTO `eh_payment_users`
+(`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
+VALUES
+(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', '1012516', '2', 1037, UTC_TIMESTAMP());
+
+
+-- config
+set @eh_payment_service_configs_id = (select MAX(id) from `eh_payment_service_configs`);
+INSERT INTO `eh_payment_service_configs` (`id`, `name`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_split_rule_id`, `payment_user_type`, `payment_user_id`, `create_time`, `update_time`)
+VALUES
+(@eh_payment_service_configs_id:=@eh_payment_service_configs_id+1, '左邻物业缴费','wuyeCode', 999992, 'EhOrganizations', '999992', null, null, null, '2', 1038, UTC_TIMESTAMP(), NULL);
+
+
+-- 支付类型
+set @eh_payment_types_id = (select max(id) from `eh_payment_types`);
+INSERT INTO `eh_payment_types`
+(`id`, `order_type`, `namespace_id`, `owner_type`, `owner_id`, `resource_type`, `resource_id`, `payment_type`, `payment_name`, `payment_logo`, `paymentParams`, `create_time`, `update_time`)
+VALUES
+(@eh_payment_types_id:=@eh_payment_types_id+1, 'wuyeCode', 999992, 'EhOrganizations', 999992, null, null, '8', '支付宝', 'cs://1/image/aW1hZ2UvTVRvelpEZ3pZalV6WmpGbFkyRXhNamRoTkdJd04yWTFNR0ZrTnpGaE5ERm1Zdw', '{\"payType\":\"A01\"}', UTC_TIMESTAMP(), NULL);
+
+
+-- 收款方
+set @eh_payment_users_id = (select MAX(id) from `eh_payment_users`);
+INSERT INTO `eh_payment_users`
+(`id`, `owner_type`, `owner_id`, `payment_user_type`, `payment_user_id`, `create_time`)
+VALUES
+(@eh_payment_users_id:=@eh_payment_users_id+1, 'EhOrganizations', 999992, '2', 1038, UTC_TIMESTAMP());

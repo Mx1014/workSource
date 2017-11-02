@@ -3,7 +3,6 @@ package com.everhomes.pusher;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -11,6 +10,9 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.everhomes.msgbox.Message;
+import com.everhomes.rest.messaging.ChannelType;
+import com.everhomes.user.UserLogin;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +82,7 @@ public class PusherHuawei implements PusherVender {
     
     //发送Push消息
     @Override
-    public void sendPushMessage(String deviceToken, com.everhomes.msgbox.Message msgBox, DeviceMessage devMessage) {
+    public void sendPushMessage(String deviceToken, Message msgBox, DeviceMessage devMessage, UserLogin senderLogin, UserLogin destLogin) {
         String token;
         
         rwl.readLock().lock();
@@ -100,7 +102,7 @@ public class PusherHuawei implements PusherVender {
             rwl.readLock().unlock();
            }
         
-        /*PushManager.requestToken为客户端申请token的方法，可以调用多次以防止申请token失败*/
+        /*PushManager.requestToken为客户端申请token的方法，可以调用多次以防止申请!token失败*/
         /*PushToken不支持手动编写，需使用客户端的onToken方法获取*/
         JSONArray deviceTokens = new JSONArray();//目标设备Token
         deviceTokens.add(deviceToken);
@@ -116,8 +118,26 @@ public class PusherHuawei implements PusherVender {
         body.put("content", devMessage.getAlert());//消息内容体
         
         JSONObject param = new JSONObject();
-//        param.put("appPkgName", appPkgName);//定义需要打开的appPkgName
-        param.put("intent", "#Intent;action=zl-1://app/main?action_Type=16&action_Data=xx;"+appPkgName+";end");
+//      param.put("appPkgName", appPkgName);//定义需要打开的appPkgName
+        String intent = "#Intent;launchFlags=0x10000000;package=com.everhomes.android.oa.debug;end";
+        if (ChannelType.GROUP.getCode().equals(msgBox.getChannelType())) {
+            param.put("intent",  String.format("zl-1://message/open-session?dstChannel=%s&dstChannelId=%s&senderUid=%s"
+                    , msgBox.getChannelType()
+                    , msgBox.getChannelToken()
+                    , String.valueOf(msgBox.getSenderUid()))
+                    );
+            
+        } else {
+            param.put("intent",  String.format("zl-1://message/open-session?dstChannel=%s&dstChannelId=%s&srcChannel=%s&srcChannelId=%s&senderUid=%s%s"
+                    , msgBox.getChannelType()
+                    , msgBox.getChannelToken()
+                    , ChannelType.USER.getCode()
+                    , String.valueOf(senderLogin.getUserId())
+                    , String.valueOf(msgBox.getSenderUid())
+                    , intent)
+                    );
+    
+        }
         
         JSONObject action = new JSONObject();
         action.put("type", 1);//类型3为打开APP，其他行为请参考接口文档设置
