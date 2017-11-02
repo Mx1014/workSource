@@ -5039,9 +5039,11 @@ public class PunchServiceImpl implements PunchService {
 				//把uniongroup相关表version改为0
 				for (Long orgId : orgIds) {
 					Organization org = organizationProvider.findOrganizationById(orgId);
+					Integer versionId= 0;
 					try {
 						UniongroupVersion unionGroupVersion = getPunchGroupVersion(org.getId());
-						unionGroupVersion.setCurrentVersionCode(unionGroupVersion.getCurrentVersionCode() + 1);
+						versionId=unionGroupVersion.getCurrentVersionCode() + 1
+						unionGroupVersion.setCurrentVersionCode(versionId);
 						//把config版本复制一份新的,
 						uniongroupService.cloneGroupTypeDataToVersion(org.getNamespaceId(), org.getId(), UniongroupType.PUNCHGROUP.getCode(),
 								CONFIG_VERSION_CODE, unionGroupVersion.getCurrentVersionCode());
@@ -5049,7 +5051,7 @@ public class PunchServiceImpl implements PunchService {
 						//更新当前版本到新的
 						uniongroupVersionProvider.updateUniongroupVersion(unionGroupVersion);
 					} catch (Exception e) {
-						LOGGER.error("dayRefreshPunchGroupScheduled error!!!+ org id : "+orgId +" current version : "+ unionGroupVersion.getCurrentVersionCode());
+						LOGGER.error("dayRefreshPunchGroupScheduled error!!!+ org id : "+orgId +" current version : "+ versionId);
 						LOGGER.error("switch union group version error!!!",e);
 					}
 				}
