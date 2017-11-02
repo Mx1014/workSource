@@ -2285,8 +2285,8 @@ public class CommunityServiceImpl implements CommunityService {
 
             if(enterprises != null && enterprises.length() > 0 && executiveFlag != null && executiveFlag.length() > 0 && positionFlag != null && positionFlag.length() > 0){
 				enterprises.deleteCharAt(enterprises.length() - 1);
-				executiveFlag.deleteCharAt(enterprises.length() - 1);
-				positionFlag.deleteCharAt(enterprises.length() - 1);
+				executiveFlag.deleteCharAt(executiveFlag.length() - 1);
+				positionFlag.deleteCharAt(positionFlag.length() - 1);
 			}
 
 			tempRow.createCell(0).setCellValue(dto.getUserName());
