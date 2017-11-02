@@ -25,15 +25,13 @@ import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord
 import com.everhomes.server.schema.tables.records.EhAuthorizationsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import scala.Int;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -433,6 +431,40 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		}
 		return authorizations;
 	}
+
+
+	@Override
+	public void deleteAuthorizationWithConditon(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, String moduleControlType, Long appId, Long controlId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizations.class));
+		DeleteQuery query = context.deleteQuery(Tables.EH_AUTHORIZATIONS);
+		if (namespaceId != null)
+			query.addConditions(Tables.EH_AUTHORIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		if (ownerId != null)
+			query.addConditions(Tables.EH_AUTHORIZATIONS.OWNER_ID.eq(ownerId));
+		if (!StringUtils.isEmpty(ownerType))
+			query.addConditions(Tables.EH_AUTHORIZATIONS.OWNER_TYPE.eq(ownerType));
+		if (!StringUtils.isEmpty(targetType))
+			query.addConditions(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(targetType));
+		if (targetId != null)
+			query.addConditions(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(targetId));
+		if (!StringUtils.isEmpty(authType))
+			query.addConditions(Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(authType));
+		if (authId != null)
+			query.addConditions(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+		if (!StringUtils.isEmpty(identityType))
+			query.addConditions(Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE.eq(identityType));
+		if (!StringUtils.isEmpty(moduleControlType))
+			query.addConditions(Tables.EH_AUTHORIZATIONS.MODULE_CONTROL_TYPE.eq(moduleControlType));
+		if (appId != null)
+			query.addConditions(Tables.EH_AUTHORIZATIONS.MODULE_APP_ID.eq(appId));
+		if (controlId != null)
+			query.addConditions(Tables.EH_AUTHORIZATIONS.CONTROL_ID.eq(controlId));
+
+		query.execute();
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAuthorizations.class, null);
+	}
+
 
 	@Override
 	public void deleteAuthorizationById(Long id){

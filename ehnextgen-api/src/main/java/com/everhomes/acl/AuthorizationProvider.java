@@ -29,6 +29,8 @@ public interface AuthorizationProvider {
 
     void deleteAuthorizationById(Long id);
 
+    void deleteAuthorizationWithConditon(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, String moduleControlType, Long appId, Long controlId);
+
     List<Long> getAuthorizationModuleIdsByTarget(List<Target> targets);
 
     List<Authorization> listTargetAuthorizations(String ownerType, Long ownerId, String authType, Long authId, String identityType);
@@ -67,6 +69,9 @@ public interface AuthorizationProvider {
 
     // eh_authorization_control_configs表的接口
     Long createAuthorizationControlConfig(AuthorizationControlConfig authorizationControlConfig);
+
     // batch
     Long createAuthorizationControlConfigs(List<AuthorizationControlConfig> authorizationControlConfigs);
+
+    void delteAuthorizationControlConfigsWithCondition(Integer namespaceId,);
 }
