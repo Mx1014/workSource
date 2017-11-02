@@ -888,7 +888,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		String buildingDetailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_BUILDING_DETAIL_URL, "");
 
-		buildingDetailUrl = String.format(buildingDetailUrl, dto.getBuildingId());
+		buildingDetailUrl = String.format(buildingDetailUrl, dto.getBuildingId(), dto.getNamespaceId());
 		dto.setBuildingDetailUrl(homeUrl + buildingDetailUrl);
     }
 
