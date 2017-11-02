@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  * 图片值：{@link com.everhomes.rest.general_approval.PostApprovalFormImageValue}
  * 文件值：{@link com.everhomes.rest.general_approval.PostApprovalFormFileValue}
  * 子表单值：{@link com.everhomes.rest.general_approval.PostApprovalFormSubformValue}
- * <li>fieldAttribute: 字段属性 比如：系统字段 {@link com.everhomes.rest.general_approval.GeneralFormFieldAttributeType}</li>
+ * <li>fieldAttribute: 字段属性 比如：系统字段 {@link GeneralFormFieldAttribute}</li>
  * </li>
  * <ul>
  * @author janson

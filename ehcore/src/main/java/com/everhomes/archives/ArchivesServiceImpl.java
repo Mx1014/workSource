@@ -11,7 +11,6 @@ import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.*;
-import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.*;
@@ -851,7 +850,7 @@ public class ArchivesServiceImpl implements ArchivesService {
 
             //  3.更新自定义字段值
             List<PostApprovalFormItem> dynamicItems = cmd.getValues().stream().filter(r -> {
-                return !GeneralFormFieldAttributeType.DEFAULT.getCode().equals(r.getFieldAttribute());
+                return !GeneralFormFieldAttribute.DEFAULT.getCode().equals(r.getFieldAttribute());
             }).map(r -> {
                 return r;
             }).collect(Collectors.toList());
@@ -889,7 +888,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         //  4.赋值
         for (GeneralFormFieldDTO dto : form.getFormFields()) {
             //  4-1.赋值给系统默认字段
-            if (GeneralFormFieldAttributeType.DEFAULT.getCode().equals(dto.getFieldAttribute())) {
+            if (GeneralFormFieldAttribute.DEFAULT.getCode().equals(dto.getFieldAttribute())) {
                 dto.setFieldValue(employeeDefaultMaps.get(dto.getFieldName()));
             }
             //  4-2.赋值给非系统默认字段
@@ -910,15 +909,20 @@ public class ArchivesServiceImpl implements ArchivesService {
         if (cmd.getDismiss() != null) {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("firstDate", format.format(employee.getCheckInTime()));
-            if(employee.getDismissTime()!=null)
-            map.put("nextDate", format.format(employee.getDismissTime()));
+            if (employee.getDismissTime() != null)
+                map.put("nextDate", format.format(employee.getDismissTime()));
+            else
+                map.put("nextDate", "   无");
             employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_DISMISS_CASE, "zh_CN", map, "");
+
         } else {
             if (employee.getEmployeeStatus().equals(EmployeeStatus.ON_THE_JOB.getCode())) {
                 Map<String, Object> map = new LinkedHashMap<>();
                 map.put("firstDate", format.format(employee.getCheckInTime()));
-                if(employee.getContractEndTime()!=null)
+                if (employee.getContractEndTime() != null)
                     map.put("nextDate", format.format(employee.getContractEndTime()));
+                else
+                    map.put("nextDate", "   无");
                 employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_ON_THE_JOB_CASE, "zh_CN", map, "");
             } else {
                 Map<String, Object> map = new LinkedHashMap<>();
@@ -998,7 +1002,7 @@ public class ArchivesServiceImpl implements ArchivesService {
      */
     private OrganizationMemberDetails convertToEmployeeDetail(OrganizationMemberDetails employee, List<PostApprovalFormItem> itemValues) {
         for (PostApprovalFormItem itemValue : itemValues) {
-            if (!GeneralFormFieldAttributeType.DEFAULT.getCode().equals(itemValue.getFieldAttribute()))
+            if (!GeneralFormFieldAttribute.DEFAULT.getCode().equals(itemValue.getFieldAttribute()))
                 continue;
             else {
                 switch (itemValue.getFieldName()) {

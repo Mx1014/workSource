@@ -25,7 +25,7 @@ import com.everhomes.util.StringHelper;
  * <li>renderType: 渲染类型，{@link GeneralFormRenderType}</li>
  * <li>fieldValue: 字段值</li>
  * <li>fieldGroupName: 字段组名称</li>
- * <li>fieldAttribute: 字段属性 比如：DEFAULT-系统字段 {@link com.everhomes.rest.general_approval.GeneralFormFieldAttributeType}</li>
+ * <li>fieldAttribute: 字段属性 比如：DEFAULT-系统字段 {@link GeneralFormFieldAttribute}</li>
  * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
  * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
  * </ul>

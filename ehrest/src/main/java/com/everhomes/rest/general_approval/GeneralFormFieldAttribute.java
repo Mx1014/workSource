@@ -9,12 +9,12 @@ import org.apache.commons.lang.StringUtils;
  * <li>CUSTOMIZE("CUSTOMIZE"): 自定义</li>
  * </ul>
  */
-public enum GeneralFormFieldAttributeType {
+public enum GeneralFormFieldAttribute {
     DEFAULT("DEFAULT"), CUSTOMIZE("CUSTOMIZE");
 
     private String code;
 
-    private GeneralFormFieldAttributeType(String code) {
+    private GeneralFormFieldAttribute(String code) {
         this.code = code;
     }
 
@@ -22,8 +22,8 @@ public enum GeneralFormFieldAttributeType {
         return code;
     }
 
-    public static GeneralFormFieldAttributeType fromCode(String code) {
-        for (GeneralFormFieldAttributeType v : GeneralFormFieldAttributeType.values()) {
+    public static GeneralFormFieldAttribute fromCode(String code) {
+        for (GeneralFormFieldAttribute v : GeneralFormFieldAttribute.values()) {
             if (StringUtils.equals(v.getCode(), code))
                 return v;
         }
