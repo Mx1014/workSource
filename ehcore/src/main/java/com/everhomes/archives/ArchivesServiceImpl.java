@@ -933,9 +933,12 @@ public class ArchivesServiceImpl implements ArchivesService {
         }
 
         //  7.设置部门、岗位、职级ids
-        response.setDepartmentIds(JSONObject.parseArray(employee.getDepartmentIds(),Long.class));
-        response.setJobPositionIds(JSONObject.parseArray(employee.getJobLevelIds(),Long.class));
-        response.setJobLevelIds(JSONObject.parseArray(employee.getJobLevelIds(),Long.class));
+        if (employee.getDepartmentIds() != null)
+            response.setDepartmentIds(JSONObject.parseArray(employee.getDepartmentIds(), Long.class));
+        if (employee.getJobPositionIds() != null)
+            response.setJobPositionIds(JSONObject.parseArray(employee.getJobLevelIds(), Long.class));
+        if (employee.getJobLevelIds() != null)
+            response.setJobLevelIds(JSONObject.parseArray(employee.getJobLevelIds(), Long.class));
 
         //  摒弃冗余字段
         //  由于业务的特殊性，此处的 formOriginId 由另外的接口去提供
