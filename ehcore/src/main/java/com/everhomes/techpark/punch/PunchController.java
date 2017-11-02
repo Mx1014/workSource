@@ -4,6 +4,7 @@ import javax.validation.Valid;
 
 import com.everhomes.rest.techpark.punch.*;
 
+import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -200,8 +201,24 @@ public class PunchController extends ControllerBase {
 		res.setResponseObject(pdl);
 		return res;
 	}
-	
-	
+
+
+	/**
+	 * <b>URL: /techpark/punch/listApprovalCategories</b>
+	 * <p>
+	 * 根据请求 companyid和日期 取一年的打卡记录
+	 * </p>
+	 */
+	@RequestMapping("listApprovalCategories")
+	@RestReturn(value = ListApprovalCategoriesResponse.class)
+	public RestResponse listApprovalCategories() {
+
+		RestResponse res = new RestResponse(punchService.listApprovalCategories());
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
 //	/**
 //	 * <b>URL: /techpark/punch/addPunchRule</b>
 //	 * <p>

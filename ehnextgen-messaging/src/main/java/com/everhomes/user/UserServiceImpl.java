@@ -73,6 +73,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
@@ -1448,8 +1449,9 @@ public class UserServiceImpl implements UserService {
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
 		Object maxLoginId = accessor.getMapValueObject(hkeyIndex);
 		if(maxLoginId != null) {
-			LOGGER.debug("maxLoginId: "+maxLoginId);
-			LOGGER.debug("maxLoginId.toString: "+maxLoginId.toString());
+		    // 日志太多，先注释掉 by lqs 20171102
+			// LOGGER.debug("maxLoginId: "+maxLoginId);
+			// LOGGER.debug("maxLoginId.toString: "+maxLoginId.toString());
 			for(int i = 1; i <= Integer.parseInt(maxLoginId.toString()); i++) {
 				String hkeyLogin = String.valueOf(i);
 				Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
@@ -2109,7 +2111,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Gen the default avatar for user by gender, userId=" + userId 
+			LOGGER.debug("Gen the default avatar for user by gender, userId=" + userId
 					+ ", namespaceId=" + namespaceId + ", gener=" + gener + ", avatarUri=" + avatarUri);
 		}
 
@@ -3012,7 +3014,7 @@ public class UserServiceImpl implements UserService {
 //        }
 		sceneDto.setTitleName(titlieName.toString());
 		sceneDto.setName(fullName);
-        sceneDto.setAliasName(aliasName);
+        sceneDto.setAliasName(organizaitonName);
 		sceneDto.setAvatar(organizationDto.getAvatarUri());
 		sceneDto.setAvatarUrl(organizationDto.getAvatarUrl());
 		sceneDto.setCommunityName(communityName);
@@ -3213,7 +3215,7 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setSceneType(sceneType.getCode());
 		sceneDto.setEntityType(UserCurrentEntityType.COMMUNITY.getCode());
 		sceneDto.setName(fullName);
-		sceneDto.setAliasName(aliasName);
+		sceneDto.setAliasName(communityName);
 
 		String entityContent = StringHelper.toJsonString(community);
 		sceneDto.setEntityContent(entityContent);
@@ -4850,6 +4852,13 @@ public class UserServiceImpl implements UserService {
 	private List<SceneDTO> addOrganizationSceneToList(Long userId, Integer namespaceId, List<SceneDTO> sceneList){
 		// 处于某个公司对应的场景
 		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+
+		//:todo 校验
+ 		if(userId < User.MAX_SYSTEM_USER_ID){
+			LOGGER.error("userId is not legal! userId: {}", userId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "userId is not legal! userId: {}", userId);
+		}
+
 		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
 		for(OrganizationDTO orgDto : organizationList) {
 			String orgType = orgDto.getOrganizationType();
@@ -5302,14 +5311,24 @@ public class UserServiceImpl implements UserService {
             String userKey = NameMapper.getCacheKey("user", user.getId(), null);
             Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, String.valueOf(login.getLoginId()));
             UserLogin newLogin = accessor.getMapValueObject(String.valueOf(login.getLoginId()));
-            if(newLogin != null && newLogin.getLoginId() == login.getLoginId() && newLogin.getLoginInstanceNumber() == newLogin.getLoginInstanceNumber()) {
-                newLogin.setPusherIdentify(cmd.getPusherIdentify());
-                newLogin.setDeviceIdentifier(cmd.getDeviceIdentifier());
-
-                //update device info
+            if(newLogin != null 
+                    && newLogin.getLoginId() == login.getLoginId() 
+                    && newLogin.getLoginInstanceNumber() == newLogin.getLoginInstanceNumber()
+                    ) {
+              //update device info
                 login.setPusherIdentify(cmd.getPusherIdentify());
                 login.setDeviceIdentifier(cmd.getDeviceIdentifier());
-                accessor.putMapValueObject(String.valueOf(newLogin.getLoginId()), newLogin);
+                
+                if(!(newLogin.getPusherIdentify() != null 
+                        && newLogin.getPusherIdentify().equals(cmd.getPusherIdentify())
+                        && newLogin.getDeviceIdentifier() != null
+                        && newLogin.getDeviceIdentifier().equals(cmd.getPusherIdentify()))) {
+                    //not equal, set the newLogin
+                    newLogin.setPusherIdentify(cmd.getPusherIdentify());
+                    newLogin.setDeviceIdentifier(cmd.getDeviceIdentifier());
+                    accessor.putMapValueObject(String.valueOf(newLogin.getLoginId()), newLogin);    
+                }
+                
             }
             
             List<Border> borders = this.borderProvider.listAllBorders();
@@ -5320,6 +5339,9 @@ public class UserServiceImpl implements UserService {
             resp.setAccessPoints(borderStrs);
             resp.setContentServer(contentServerService.getContentServer());
         }
+
+        Long l = configurationProvider.getLongValue(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), ConfigConstants.PAY_PLATFORM, 0l);
+        resp.setPaymentPlatform(l);
         
         return resp;
     }

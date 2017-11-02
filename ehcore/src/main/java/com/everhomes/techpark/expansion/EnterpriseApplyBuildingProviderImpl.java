@@ -26,8 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,7 +49,7 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
         SelectQuery<EhLeaseBuildingsRecord> query = context.selectQuery(Tables.EH_LEASE_BUILDINGS);
 
         if (null != pageAnchor && pageAnchor != 0L) {
-            query.addConditions(Tables.EH_LEASE_BUILDINGS.ID.gt(pageAnchor));
+            query.addConditions(Tables.EH_LEASE_BUILDINGS.DEFAULT_ORDER.lt(pageAnchor));
         }
 
         if (null != namespaceId) {
@@ -152,7 +150,7 @@ public class EnterpriseApplyBuildingProviderImpl implements EnterpriseApplyBuild
 
         query.addConditions(Tables.EH_LEASE_BUILDINGS.BUILDING_ID.eq(buildingId));
 
-        return ConvertHelper.convert(query.fetchOne(), LeaseBuilding.class);
+        return ConvertHelper.convert(query.fetchAny(), LeaseBuilding.class);
     }
 
     @Override

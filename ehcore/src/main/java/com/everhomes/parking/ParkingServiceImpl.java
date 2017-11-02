@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.configuration.ConfigConstants;
@@ -51,17 +52,12 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
-import com.everhomes.flow.FlowProvider;
-import com.everhomes.flow.FlowService;
+import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.order.OrderEmbeddedHandler;
@@ -69,17 +65,13 @@ import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.VendorType;
+
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -88,6 +80,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import org.springframework.web.context.request.async.DeferredResult;
+
 
 @Component
 public class ParkingServiceImpl implements ParkingService {
@@ -342,7 +335,7 @@ public class ParkingServiceImpl implements ParkingService {
 		if (UserContext.getCurrentNamespaceId().equals(999983)) {
 			createFlowCaseCommand.setTitle("停车月卡申请");
 		}
-
+		createFlowCaseCommand.setServiceType("停车月卡申请");
 		FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 
 		return flowCase;
@@ -1520,9 +1513,59 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public ParkingCardDTO getRechargeResult(GetRechargeResultCommand cmd) {
 
-		
-		return null;
-		
+		long startTime = System.currentTimeMillis();
+		//这个接口兼容老版本，用轮询阻塞10秒钟
+		long endTime = startTime + 10 * 1000;
+		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
+
+		if(null == order) {
+			LOGGER.error("Order not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Order not found.");
+		}
+
+//		if (order.getStatus() > ParkingRechargeOrderStatus.PAID.getCode()) {
+//			ParkingCardDTO dto = new ParkingCardDTO();
+//			dto.setOwnerId(cmd.getOwnerId());
+//			dto.setOwnerType(cmd.getOwnerType());
+//			dto.setParkingLotId(order.getParkingLotId());
+//			dto.setPlateNumber(order.getPlateNumber());
+//			dto.setPlateOwnerName(order.getPlateOwnerName());
+//			dto.setPlateOwnerPhone(order.getPlateOwnerPhone());
+//			dto.setEndTime(order.getEndPeriod().getTime());
+//			return dto;
+//		}
+//		boolean flag = true;
+		while(/*flag && */order.getStatus() == ParkingRechargeOrderStatus.UNPAID.getCode()
+				&& endTime >= startTime) {
+			try {
+
+				order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
+
+//				if (order.getStatus() > ParkingRechargeOrderStatus.PAID.getCode()) {
+//					flag = false;
+//				}
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			startTime = System.currentTimeMillis();
+		}
+
+		ParkingCardDTO dto = new ParkingCardDTO();
+
+		dto.setOwnerId(cmd.getOwnerId());
+		dto.setOwnerType(cmd.getOwnerType());
+		dto.setParkingLotId(order.getParkingLotId());
+		dto.setPlateNumber(order.getPlateNumber());
+		dto.setPlateOwnerName(order.getPlateOwnerName());
+		dto.setPlateOwnerPhone(order.getPlateOwnerPhone());
+		dto.setEndTime(order.getEndPeriod().getTime());
+
+		return dto;
+
 	}
 
 	@Override

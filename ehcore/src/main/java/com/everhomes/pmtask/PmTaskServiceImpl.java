@@ -604,12 +604,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		if (null == cmd.getOrganizationId()) {
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-			List<OrganizationMember> list = organizationProvider.listOrganizationMembersByPhoneAndNamespaceId(userIdentifier.getIdentifierToken(),namespaceId);
+			OrganizationMember member = null;
+			if (cmd.getFlowOrganizationId()!=null)
+				member = organizationProvider.findOrganizationMemberByOrgIdAndToken(userIdentifier.getIdentifierToken(),cmd.getFlowOrganizationId());
 			//真实姓名
-			if (list==null || list.size()==0)
+			if (member==null )
 				return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
 			else
-				return handler.createTask(cmd, user.getId(), list.get(0).getContactName(), userIdentifier.getIdentifierToken());
+				return handler.createTask(cmd, user.getId(), member.getContactName(), userIdentifier.getIdentifierToken());
 		}else {
 			String requestorPhone = cmd.getRequestorPhone();
 			String requestorName = cmd.getRequestorName();
@@ -1941,13 +1943,33 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		List<CommunityDTO> result = new ArrayList<>();
 		if (null != orgMembers) {
-			for (OrganizationMember m: orgMembers) {
+			orgMembers.stream().filter(r->
+				r.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode()) || r.getGroupType().equals(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode())
+			).forEach(m -> {
 				OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(m.getOrganizationId());
 				if (null != request) {
 					Community community = communityProvider.findCommunityById(request.getCommunityId());
 					if (null != community) {
-						result.add(ConvertHelper.convert(community, CommunityDTO.class));
+						boolean flag = true;
+						for (CommunityDTO d: result) {
+							if (d.getUuid().equals(community.getUuid())) {
+								flag = false;
+								break;
+							}
+						}
+						if (flag) {
+							result.add(ConvertHelper.convert(community, CommunityDTO.class));
+						}
 					}
+				}
+			});
+		}
+		if (result.size() == 0) {
+			OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getOrganizationId());
+			if (null != request) {
+				Community community = communityProvider.findCommunityById(request.getCommunityId());
+				if (null != community) {
+					result.add(ConvertHelper.convert(community, CommunityDTO.class));
 				}
 			}
 		}
@@ -2613,27 +2635,31 @@ public class PmTaskServiceImpl implements PmTaskService {
         if(list==null || list.size()==0)
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ORDER_ID,
                     "OrderId does not exist.");
+        if (cmd.getStateId()==null || cmd.getStateId()<1 || cmd.getStateId()>6)
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_STATE_ID,
+					"Illegal stateId");
 		PmTask task = list.get(0);
 
-		PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
-		//TODO  枚举值更新
-		Byte state = cmd.getStateId()==6?PmTaskStatus.INACTIVE.getCode():cmd.getStateId();
+
+		EbeiPmTaskStatus state = EbeiPmTaskStatus.fromCode(cmd.getStateId());
 
 		dbProvider.execute((TransactionStatus status) -> {
 
-			task.setStatus(state > PmTaskStatus.PROCESSED.getCode()
-					? PmTaskStatus.PROCESSED.getCode(): state );
-			pmTaskProvider.updateTask(task);
-			dto.setStatus(task.getStatus());
 
 			//更新工作流case状态
 			FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
 
 			if (FlowCaseStatus.INVALID.getCode() != flowCase.getStatus()) {
-				Byte flowCaseStatus = state >= PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
-						(state == PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.ABSORTED.getCode() :
-								FlowCaseStatus.PROCESS.getCode());
-
+				Byte flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
+				switch (state){
+					case UNPROCESSED: flowCaseStatus = FlowCaseStatus.INITIAL.getCode();break;
+					case PROCESSING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();task.setStatus(PmTaskFlowStatus.PROCESSING.getCode());break;
+					case INACTIVE: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());break;
+                    case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());break; //已关闭
+                    case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());break;
+					default: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
+				}
+				pmTaskProvider.updateTask(task);
 				if (flowCaseStatus == FlowCaseStatus.ABSORTED.getCode() && flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode())
 					cancelTask(task.getId());
 				else if (flowCaseStatus == FlowCaseStatus.FINISHED.getCode() && flowCase.getStatus() == FlowCaseStatus.PROCESS.getCode())
@@ -2647,6 +2673,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 	private void cancelTask(Long id){
 		PmTask task = checkPmTask(id);
+
 		//更新工作流case状态
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
 		flowCase.setStatus(FlowCaseStatus.ABSORTED.getCode());
@@ -2662,6 +2689,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	private void finishTask(Long id){
 		PmTask task = checkPmTask(id);
+
 		//更新工作流case状态
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
 		flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());
@@ -2673,4 +2701,5 @@ public class PmTaskServiceImpl implements PmTaskService {
 		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
 		flowService.processAutoStep(stepDTO);
 	}
+
 }

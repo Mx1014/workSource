@@ -45,6 +45,7 @@ import java.util.List;
  * <li>approveTime: 审核时间</li>
  * <li>operatorName: 审核人</li>
  * <li>operatorPhone: 审核人电话</li>
+ * <li>departmentName: 部门名称</>
  * </ul>
  */
 public class OrganizationMemberDTO {
@@ -118,6 +119,8 @@ public class OrganizationMemberDTO {
     private Long approveTime;
     private String operatorName;
     private String operatorPhone;
+
+    private String departmentName;
 
     public OrganizationMemberDTO() {
     }
@@ -483,5 +486,13 @@ public class OrganizationMemberDTO {
 
     public void setSalaryGroupId(Long salaryGroupId) {
         this.salaryGroupId = salaryGroupId;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 }

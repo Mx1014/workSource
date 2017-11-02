@@ -1071,3 +1071,74 @@ DELETE FROM eh_web_menu_scopes WHERE `menu_id`=20160 AND  `owner_id` =  999973 	
 -- added by wh 4.9.0 保集release 分享微信logo配置错误
 UPDATE eh_app_urls SET logo_url = 'cs://1/image/aW1hZ2UvTVRvMVptWTNNVEpoWmpjMlpqaGhOV00xWVRRMVlXSXlPR1poTUdNeVpEUm1aUQ' WHERE namespace_id = 999973;
 
+-- add by xq.tian 2017/10/27
+UPDATE eh_lease_configs SET config_value='楼幢介绍,虚位以待' WHERE namespace_id=999973 AND config_name='displayNameStr';
+SET @id  = (SELECT MAX(id) FROM eh_lease_configs);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+VALUES ((@id := @id + 1), '999973', NULL, NULL, 'rentAmountUnit', 'DAY_UNIT', NULL, NULL);
+
+-- 不是独立部署的只需修改@ns_id为域空间id，修改门户配置为域空间App对应配置后执行
+--
+SET @ns_id = 999973;
+
+--
+-- 门户配置（修改这里） add by xq.tian 2017/10/27
+--
+SET @stat_event_portal_configs_id = IFNULL((SELECT MAX(id) FROM `eh_stat_event_portal_configs`), 1);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), @ns_id, 0, 2, '服务', '0', '主页', '服务广场', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), @ns_id, 0, 2, '活动', '1', '活动', '活动', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), @ns_id, 0, 2, '我', '2', '我', '个人中心', 4, NULL, NULL, NULL, NULL);
+-- 下面的不用修改
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), @ns_id, 0, 1, 'Address', 'Address', '公司认证', '公司认证', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), @ns_id, 0, 1, 'Search', 'Search', '搜索', '搜索', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), @ns_id, 0, 1, 'Scan', 'Scan', '扫一扫', '扫一扫', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), @ns_id, 0, 1, 'MessageBox', 'MessageBox', '消息', '消息', 4, NULL, NULL, NULL, NULL);
+INSERT INTO `eh_stat_event_portal_configs` (`id`, `namespace_id`, `parent_id`, `config_type`, `config_name`, `identifier`, `display_name`, `description`, `status`, `creator_uid`, `update_uid`, `create_time`, `update_time`) VALUES ((@stat_event_portal_configs_id := @stat_event_portal_configs_id + 1), @ns_id, 0, 1, 'Settings', 'Settings', '设置', '设置', 4, NULL, NULL, NULL, NULL);
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 41330, '', 'EhNamespaces', @ns_id, 2);
+
+SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), @ns_id, 41500, '用户行为统计', 'EhNamespaces', @ns_id, NULL, 2);
+
+
+-- add by xq.tian 2017/10/27
+SET @launch_pad_layouts_id = IFNULL((SELECT MAX(id) FROM `eh_launch_pad_layouts`), 1);
+
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`)
+VALUES ((@launch_pad_layouts_id := @launch_pad_layouts_id + 1), 999973, 'ResourceLayout', '{"versionCode":"2017110101","versionName":"3.0.0","layoutName":"ResourceLayout","displayName":"预订中心","groups":[{"groupName":"预订中心","widget":"Navigator","instanceConfig":{"itemGroup":"ResGroup"},"style":"Default","defaultOrder":10,"separatorFlag":0,"separatorHeight":0,"columnCount":4}]}', 2017110117, 2015061701, 2, NOW(), 'pm_admin', 0, 0, 0);
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`)
+VALUES ((@launch_pad_layouts_id := @launch_pad_layouts_id + 1), 999973, 'ResourceLayout', '{"versionCode":"2017110101","versionName":"3.0.0","layoutName":"ResourceLayout","displayName":"预订中心","groups":[{"groupName":"预订中心","widget":"Navigator","instanceConfig":{"itemGroup":"ResGroup"},"style":"Default","defaultOrder":10,"separatorFlag":0,"separatorHeight":0,"columnCount":4}]}', 2017110117, 2015061701, 2, NOW(), 'park_tourist', 0, 0, 0);
+
+SET @eh_launch_pad_items_id = IFNULL((SELECT MAX(id) FROM `eh_launch_pad_items`), 1);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+  SELECT (@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, 'ResGroup', 'POSITION_APPLY', '场地预订', 'cs://1/image/aW1hZ2UvTVRvME1tSXlZamd3TW1Zd01EQmtOemcwTkRBeE5tWTFPV05rWkRJMU1qazNNZw', `item_width`, `item_height`, `action_type`, '{"pageType":0,"resourceTypeId":11034}', 10, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`
+  FROM eh_launch_pad_items WHERE namespace_id = 999973 AND item_label='预订中心';
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+  SELECT (@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, 'ResGroup', 'LED_APPLY', '电子屏预订', 'cs://1/image/aW1hZ2UvTVRvMllUYzRPVGswT0RBd01qQmlPRGxrTlRjMU56STFZelJoTlRReU5URTFZUQ', `item_width`, `item_height`, `action_type`, '{"pageType":0,"resourceTypeId":11030}', 20, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`
+  FROM eh_launch_pad_items WHERE namespace_id = 999973 AND item_label='预订中心';
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`)
+  SELECT (@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, 'ResGroup', 'METTING_APPLY', '会议中心', 'cs://1/image/aW1hZ2UvTVRvM04yUXpNVGRqWldNM1ltVm1ZalU0TnpobFkyRTRNV1ZrT0RFMk9UQTJZdw', `item_width`, `item_height`, `action_type`, '{"pageType":0,"resourceTypeId":11029}', 30, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`, `categry_name`
+  FROM eh_launch_pad_items WHERE namespace_id = 999973 AND item_label='预订中心';
+
+UPDATE eh_launch_pad_items SET action_type = 2, action_data = '{"itemLocation":"/home/resource","layoutName":"ResourceLayout","title":"预订中心","entityTag":"RES"}' WHERE namespace_id = 999973 AND item_label='预订中心';
+ 
+
+-- 执行SQL【保集e智谷】增加蒙层提示
+INSERT INTO `eh_configurations` (`name`,`value`,`description`,`namespace_id`,`display_name`) VALUES ( 'mask.key', '1', '默认启用蒙版', '999973', '');
+
+ -- 【保集e智谷】预订中心门户里面，配置的三个icon，icon排列一列，按照如下顺序
+UPDATE eh_launch_pad_layouts SET layout_json = 
+'{"versionCode":"2017110202","versionName":"3.0.0","layoutName":"ResourceLayout","displayName":"预订中心","groups":[{"groupName":"预订中心","widget":"Navigator","instanceConfig":{"itemGroup":"ResGroup"},"style":"Gallery","defaultOrder":10,"separatorFlag":0,"separatorHeight":0,"columnCount":1,"paddingTop":20,"paddingLeft":20,"paddingBottom":0,"paddingRight":20,"lineSpacing":16,"columnSpacing":16,"backgroundColor":"#EFEFF4"}]}',
+version_code = 2017110202 WHERE namespace_id = 999973  AND NAME = 'ResourceLayout';
+UPDATE  eh_launch_pad_items  SET icon_uri ='cs://1/image/aW1hZ2UvTVRwaU9Ea3dNbVV4TkRsak9XVmhaams0TmpsbE1tWXpNVEkwTjJVelkyWmpPQQ' WHERE namespace_id = 999973 AND item_group = 'ResGroup' AND item_label='场地预订';
+UPDATE  eh_launch_pad_items  SET icon_uri ='cs://1/image/aW1hZ2UvTVRvME5qRTBORE13WVRZeFlXTmxaRE00TVdJeU1HSmhNamhtWVROa1pXWmhNdw'  WHERE namespace_id = 999973 AND item_group = 'ResGroup' AND item_label='电子屏预订';
+UPDATE  eh_launch_pad_items  SET icon_uri ='cs://1/image/aW1hZ2UvTVRvNFl6bGtNRFEwTlRFNE1tSXdNamN4T1dRd09EazROelF3TVRkbVlXUTNNUQ'  ,item_label='会议室预订'  WHERE namespace_id = 999973 AND item_group = 'ResGroup' AND item_label='会议中心';
+
+UPDATE eh_rentalv2_resource_types SET NAME = '会议室预订' WHERE NAME = '会议中心' AND namespace_id = 999973;
+
+UPDATE eh_rentalv2_resource_types SET NAME = '场地预订' WHERE NAME = '场地预定' AND namespace_id = 999973;

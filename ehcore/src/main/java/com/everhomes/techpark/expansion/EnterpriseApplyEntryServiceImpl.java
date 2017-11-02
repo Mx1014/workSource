@@ -365,11 +365,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 			//添加楼栋关联关系
 			String buildingName = addEnterpriseOpRequestBuildings(request, resourceCategories);
-
-			if(null != resourceCategories[0] && null!= resourceCategories[0].getResourceCategryId()) {
-				projectId = resourceCategories[0].getResourceCategryId();
-				projectType = EntityType.RESOURCE_CATEGORY.getCode();
-			}
+			//TODO:暂时屏蔽掉
+//			if(null != resourceCategories[0] && null!= resourceCategories[0].getResourceCategryId()) {
+//				projectId = resourceCategories[0].getResourceCategryId();
+//				projectType = EntityType.RESOURCE_CATEGORY.getCode();
+//			}
 
 			FlowCase flowCase1 = null;
     		if (LeaseIssuerType.ORGANIZATION.getCode().equals(request.getIssuerType())) {
@@ -597,7 +597,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
     private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId, String projectType, String buildingName) {
 
-		String tempOwnerId = String.valueOf(request.getCommunityId()) + convertSourceType(request.getSourceType());
+		String sourceType = request.getSourceType();
+
+		if (sourceType.equals(ApplyEntrySourceType.LEASE_PROJECT.getCode())) {
+			sourceType = ApplyEntrySourceType.BUILDING.getCode();
+		}
+
+		String tempOwnerId = String.valueOf(request.getCommunityId()) + convertSourceType(sourceType);
 
 		Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID,
 				null, Long.valueOf(tempOwnerId), FlowOwnerType.LEASE_PROMOTION.getCode());
@@ -821,9 +827,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				dto.setCommunityId(building.getCommunityId());
 				Community community = communityProvider.findCommunityById(building.getCommunityId());
 				dto.setCommunityName(community.getName());
-			}else {
-				dto.setCommunityName("其他");
 			}
+		}else {
+			dto.setCommunityName("其他");
 		}
 		//兼容历史app，rentPosition字段值返回的就是楼栋名称
 		dto.setRentPosition(dto.getBuildingName());
@@ -845,12 +851,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}).collect(Collectors.toList()));
 		//暂时用枚举，如果拓展单位类型，则须在表中添加字段
 
-		LeasePromotionConfig unitConfig = enterpriseLeaseIssuerProvider.findLeasePromotionConfig(leasePromotion.getNamespaceId(),
-				"rentAmountUnit");
-		if (null != unitConfig) {
-			dto.setUnit(LeasePromotionUnit.fromType(unitConfig.getConfigValue()).getDescription());
-		}
-
 		//	启用表单，则查询表单值
 		if (LeasePromotionFlag.ENABLED.getCode() == leasePromotion.getCustomFormFlag()) {
 
@@ -870,13 +870,19 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		dto.setProjectDTOS(getProjectDTOs(dto.getId()));
 
+		GetLeasePromotionConfigCommand configCmd = new GetLeasePromotionConfigCommand();
+		configCmd.setNamespaceId(leasePromotion.getNamespaceId());
+		LeasePromotionConfigDTO config = getLeasePromotionConfig(configCmd);
+		dto.setConsultFlag(config.getConsultFlag());
+		dto.setUnit(config.getRentAmountUnit());
+
 	}
 
     private void processDetailUrl(BuildingForRentDTO dto) {
 		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
 		String detailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_DETAIL_URL, "");
 
-		detailUrl = String.format(detailUrl, dto.getId());
+		detailUrl = String.format(detailUrl, dto.getId(), dto.getNamespaceId());
 
 		dto.setDetailUrl(homeUrl + detailUrl);
 

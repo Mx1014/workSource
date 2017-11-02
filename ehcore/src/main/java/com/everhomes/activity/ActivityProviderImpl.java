@@ -544,6 +544,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 
         //置顶的优先排序  add by yanjun 20171023
         query.addOrderBy(Tables.EH_ACTIVITIES.STICK_FLAG.desc());
+        query.addOrderBy(Tables.EH_ACTIVITIES.STICK_TIME.desc());
 
         //排序：1、待确认， 2、正常。排序会影响性能，需要待确认状态的活动时才按这个排序  add by yanjun 20170516  
         if(needTemporary != null && needTemporary.byteValue() == 1){
@@ -716,7 +717,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 
     @Override
     public void createActivityCategories(ActivityCategories activityCategory) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(ActivityCategories.class));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhActivityCategories.class));
 
         activityCategory.setId(id);
         activityCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

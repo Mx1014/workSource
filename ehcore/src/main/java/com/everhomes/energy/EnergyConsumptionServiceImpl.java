@@ -2102,9 +2102,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //                    String paramsStr = "{AMOUNT:" + amount +
 //                            ", TIMES:" + rateSetting.getSettingValue() +
 //                            "}";
-//                    LOGGER.error("evaluate formula error, amountFormula={}, params={}", amountFormula, paramsStr);
+//                    LOGGER.error("isTrue formula error, amountFormula={}, params={}", amountFormula, paramsStr);
 //                    e.printStackTrace();
-//                    throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
+//                    throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "isTrue formula error", e);
 //                }
 
                 if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
@@ -2155,9 +2155,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     ", AMOUNT:" + engine.get(MeterFormulaVariable.AMOUNT.getCode()) +
                     ", TIMES:" + engine.get(MeterFormulaVariable.TIMES.getCode()) +
                     "}";
-            LOGGER.error("evaluate formula error, costFormula={}, params={}", costFormula, paramsStr);
+            LOGGER.error("isTrue formula error, costFormula={}, params={}", costFormula, paramsStr);
             e.printStackTrace();
-            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
+            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "isTrue formula error", e);
         }
 
         return realCost;
@@ -2216,9 +2216,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             String paramsStr = "{PRICE:" + engine.get(MeterFormulaVariable.REAL_AMOUNT.getCode()) +
                     ", REALAMOUNT:" + engine.get(MeterFormulaVariable.AMOUNT.getCode()) +
                     "}";
-            LOGGER.error("evaluate formula error, costFormula={}, params={}", costFormula, paramsStr);
+            LOGGER.error("isTrue formula error, costFormula={}, params={}", costFormula, paramsStr);
             e.printStackTrace();
-            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
+            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "isTrue formula error", e);
         }
         return cost;
     }
@@ -2579,14 +2579,23 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyMeterDTO findEnergyMeterByQRCode(FindEnergyMeterByQRCodeCommand cmd) {
+        if(!isNumeric(cmd.getMeterQRCode())) {
+            LOGGER.error("EnergyMeter not exist, id = {}", cmd.getMeterQRCode());
+            throw errorWith(SCOPE, ERR_METER_NOT_EXIST, "The meter is not exist id = %s", cmd.getMeterQRCode());
+        }
 //        EnergyMeterCodeDTO meterCodeDTO = WebTokenGenerator.getInstance().fromWebToken(cmd.getMeterQRCode(), EnergyMeterCodeDTO.class);
-        EnergyMeter meter = meterProvider.findById((cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId():cmd.getNamespaceId()), cmd.getMeterQRCode());
+        EnergyMeter meter = meterProvider.findById((cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId():cmd.getNamespaceId()), Long.valueOf(cmd.getMeterQRCode()));
         if (meter == null || !EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
             LOGGER.error("EnergyMeter not exist, id = {}", cmd.getMeterQRCode());
             throw errorWith(SCOPE, ERR_METER_NOT_EXIST, "The meter is not exist id = %s", cmd.getMeterQRCode());
         }
 
         return toEnergyMeterDTO(meter,cmd.getNamespaceId());
+    }
+
+    public static boolean isNumeric(String str){
+        Pattern pattern = Pattern.compile("[0-9]*");
+        return pattern.matcher(str).matches();
     }
 
     @Override

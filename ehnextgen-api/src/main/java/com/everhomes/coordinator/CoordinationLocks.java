@@ -14,6 +14,7 @@ public enum CoordinationLocks {
     CREATE_F_BILL_ACCOUNT("family.bill.account.create"),
     CREATE_RENTAL_BILL("techpark.rental.bill.create"),
     CREATE_PUNCH_LOG("techpark.punch.log.create"),
+    REFRESH_PUNCH_RULE("techpark.punch.rule.refresh"),
     DOOR_ACCESS("aclink.door.access"),
     SCHEDULE_QUALITY_TASK("quality.task.schedule"),
     SCHEDULE_QUALITY_STAT("quality.task.stat"),
@@ -86,9 +87,9 @@ public enum CoordinationLocks {
     USER_APPEAL_LOG("user.appeal.log"),
 	SALARY_GROUP_LOCK("salary.group"), 
     UNION_GROUP_LOCK("union.group"),
+    UNION_GROUP_CLONE_LOCK("union_group_clone"),
 
     PAY_CREATE_PREORDER("pay.create.preorder"),
-
 
     BILL_STATUS_UPDATE("bill.status.update"),
     SYNC_ENTERPRISE_CUSTOMER("sync.enterprise.customer"),
@@ -97,9 +98,14 @@ public enum CoordinationLocks {
  
     EVENT_STAT_SCHEDULE("event.stat.schedule"),
 
-    ADD_ORGANIZATION_PERSONEL("add.organization.personel");
+    ADD_ORGANIZATION_PERSONEL("add.organization.personel"),
 
-    ; 
+    FLOW_LANE("flow.lane"),
+    FLOW("flow"),
+
+    CLEANWRONGSTATUS_ORGANIZATIONMEMBERS("cleanwrongstatus.organizationmembers"),
+    ;
+ 
     private String code;
     private CoordinationLocks(String code) {
         this.code = code;

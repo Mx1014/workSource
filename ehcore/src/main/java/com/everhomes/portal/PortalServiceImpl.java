@@ -22,6 +22,8 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.activity.ActivityActionData;
+import com.everhomes.rest.activity.ActivityEntryConfigulation;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.MoreActionData;
 import com.everhomes.rest.common.NavigationActionData;
@@ -46,10 +48,7 @@ import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.ExecutorUtil;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
+import com.everhomes.util.*;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -1734,18 +1733,23 @@ public class PortalServiceImpl implements PortalService {
 	@Override
 	public void syncLaunchPadData(SyncLaunchPadDataCommand cmd){
 
-		if(StringUtils.isEmpty(cmd.getLocation())){
-			cmd.setLocation("/home");
-		}
+		List<Tuple<String, String>> list = new ArrayList<>();
 
-		if(StringUtils.isEmpty(cmd.getName())){
-			cmd.setName("ServiceMarketLayout");
+		if(StringUtils.isEmpty(cmd.getLocation()) || StringUtils.isEmpty(cmd.getName())){
+			list.add(new Tuple<>("/home", "ServiceMarketLayout"));
+			list.add(new Tuple<>("/secondhome", "SecondServiceMarketLayout"));
+			list.add(new Tuple<>("/association", "AssociationLayout"));
+		}else {
+			list.add(new Tuple<>(cmd.getLocation(), cmd.getName()));
 		}
 
 		dbProvider.execute((status) -> {
-			syncLayout(cmd.getNamespaceId(), cmd.getLocation(), cmd.getName());
+			for (Tuple<String, String> t: list) {
+				syncLayout(cmd.getNamespaceId(), t.first(), t.second());
+			}
 			return null;
 		});
+
 	}
 
 
@@ -1829,6 +1833,24 @@ public class PortalServiceImpl implements PortalService {
 							if(OPPushWidgetStyle.LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
 								moduleId = 10600L;
 								itemGroup.setContentType(EntityType.ACTIVITY.getCode());
+
+								//最新活动的items是指向实际已存在的活动，此处查询已有应用与其关联，不需要新建应用  edit by yanjun  (还有点问题，可能这时候应用还没创建还不存在，暂时注释掉)
+//								ActivityActionData padActionData = (ActivityActionData)StringHelper.fromJsonString(padItems.get(0).getActionData(), ActivityActionData.class);
+//								Long categoryId = padActionData.getCategoryId();
+//								if(categoryId == null){
+//									categoryId = 1L;
+//								}
+//								List<ServiceModuleApp> moduleApps = serviceModuleAppProvider.listServiceModuleApp(itemGroup.getNamespaceId(), 10600L);
+//								for (ServiceModuleApp app: moduleApps){
+//									ActivityEntryConfigulation configulation = (ActivityEntryConfigulation)StringHelper.fromJsonString(app.getInstanceConfig(), ActivityEntryConfigulation.class);
+//									if(configulation.getEntryId() != null && configulation.getEntryId() == categoryId.longValue()){
+//										config.setModuleAppId(app.getId());
+//										//不需要新建应用
+//										moduleId = null;
+//										break;
+//									}
+//								}
+
 							}else if(OPPushWidgetStyle.LARGE_IMAGE_LIST_VIEW == OPPushWidgetStyle.fromCode(padLayoutGroup.getStyle())){
 								moduleId = 40500L;
 								itemGroup.setContentType(EntityType.SERVICE_ALLIANCE.getCode());

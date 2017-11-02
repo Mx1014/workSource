@@ -56,7 +56,6 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
         configuration.setId(id);
         configuration.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
         configuration.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        LOGGER.info("createPmNotifyConfigurations: " + configuration);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhPmNotifyConfigurationsDao dao = new EhPmNotifyConfigurationsDao(context.configuration());
@@ -123,7 +122,6 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
         record.setId(id);
         record.setStatus(PmNotifyRecordStatus.WAITING_FOR_SEND_OUT.getCode());
         record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        LOGGER.info("createPmNotifyRecord: " + record);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhPmNotifyRecordsDao dao = new EhPmNotifyRecordsDao(context.configuration());
@@ -139,7 +137,6 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
         log.setId(id);
         log.setStatus(PmNotifyConfigurationStatus.VAILD.getCode());
         log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        LOGGER.info("createPmNotifyLog: " + log);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhPmNotifyLogsDao dao = new EhPmNotifyLogsDao(context.configuration());

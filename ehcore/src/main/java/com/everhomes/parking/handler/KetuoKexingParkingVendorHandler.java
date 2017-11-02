@@ -292,7 +292,6 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 		KetuoCard cardInfo = getCard(plateNumber);
 
 		if(EXPIRE_CUSTOM_RATE_TOKEN.equals(order.getRateToken())) {
-			//TODO:
 			List<KetuoCardType> types = getCardType();
 			String carType = cardInfo.getCarType();
 
@@ -349,7 +348,7 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 
 	}
 
-	boolean openMonthCard(ParkingRechargeOrder order){
+	private boolean openMonthCard(ParkingRechargeOrder order){
 
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -592,19 +591,24 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(ParkingLot parkingLot, String plateNumber) {
 		//TODO: 正中会没有临时车
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if (flag) {
+			if (plateNumber.startsWith("粤B")) {
+				ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
 
-		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
+				dto.setPlateNumber(plateNumber);
+				dto.setEntryTime(strToLong("2017-10-27 00:00:00"));
+				dto.setPayTime(System.currentTimeMillis());
+				dto.setParkingTime(200);
+				dto.setDelayTime(15);
+				dto.setPrice(new BigDecimal(1000));
 
-		dto.setPlateNumber(plateNumber);
-		dto.setEntryTime(strToLong("2017-10-27 00:00:00"));
-		dto.setPayTime(System.currentTimeMillis());
-		dto.setParkingTime(200);
-		dto.setDelayTime(15);
-		dto.setPrice(new BigDecimal(1000));
+				dto.setOrderToken("100");
+				return dto;
+			}
+		}
 
-		dto.setOrderToken("100");
-		return dto;
-
+		return null;
 	}
 
 	@Override
@@ -756,50 +760,52 @@ public class KetuoKexingParkingVendorHandler extends KetuoParkingVendorHandler {
 	private KetuoCarInfo getKetuoCarInfo(String plateNumber) {
 
 		//TODO：测试
-		if (plateNumber.equals("粤B6723M")) {
-			KetuoCarInfo carInfo1 = new KetuoCarInfo();
-			carInfo1.setPlateNo(plateNumber);
-			carInfo1.setEntryTime("2017-09-05 07:48:24");
-			carInfo1.setParkingTime(91143);
-			return carInfo1;
-		}
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if (flag) {
+			if (plateNumber.equals("粤B6723M")) {
+				KetuoCarInfo carInfo1 = new KetuoCarInfo();
+				carInfo1.setPlateNo(plateNumber);
+				carInfo1.setEntryTime("2017-09-05 07:48:24");
+				carInfo1.setParkingTime(91143);
+				return carInfo1;
+			}
 
-		if (plateNumber.equals("粤B905DG")) {
-			KetuoCarInfo carInfo1 = new KetuoCarInfo();
-			carInfo1.setPlateNo(plateNumber);
-			carInfo1.setEntryTime("2017-08-05 07:48:24");
-			carInfo1.setParkingTime(91143);
-			return carInfo1;
-		}
+			if (plateNumber.equals("粤B905DG")) {
+				KetuoCarInfo carInfo1 = new KetuoCarInfo();
+				carInfo1.setPlateNo(plateNumber);
+				carInfo1.setEntryTime("2017-08-05 07:48:24");
+				carInfo1.setParkingTime(91143);
+				return carInfo1;
+			}
 
-		if (plateNumber.equals("粤BK8929")) {
-			return null;
-//			KetuoCarInfo carInfo1 = new KetuoCarInfo();
-//			carInfo1.setPlateNo(plateNumber);
-//			carInfo1.setEntryTime("2017-09-05 07:48:24");
-//			carInfo1.setParkingTime(91143);
-//			return carInfo1;
+			if (plateNumber.equals("粤BK8929")) {
+				return null;
+			}
 		}
 
 		KetuoCarInfo carInfo = null;
-		String parkingId = configProvider.getValue("parking.kexing.searchCar.parkId", "");
-		String url = configProvider.getValue("parking.kexing.searchCar.url", "");
+		try{
+			String parkingId = configProvider.getValue("parking.kexing.searchCar.parkId", "");
+			String url = configProvider.getValue("parking.kexing.searchCar.url", "");
 
-		LinkedHashMap<String, Object> param = new LinkedHashMap<>();
-		param.put("parkId", parkingId);
-		param.put("plateNo", plateNumber);
-		param.put("pageIndex", "1");
+			LinkedHashMap<String, Object> param = new LinkedHashMap<>();
+			param.put("parkId", parkingId);
+			param.put("plateNo", plateNumber);
+			param.put("pageIndex", "1");
 
-		JSONObject params = createRequestParam(param);
-		String json = Utils.post(url + GET_PARKING_CAR_INFO, params);
+			JSONObject params = createRequestParam(param);
+			String json = Utils.post(url + GET_PARKING_CAR_INFO, params);
 
-		KetuoJsonEntity<KetuoCarInfo> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoCarInfo>>(){});
+			KetuoJsonEntity<KetuoCarInfo> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoCarInfo>>(){});
 
-		if(entity.isSuccess()){
-			List<KetuoCarInfo> list = entity.getData();
-			if(null != list && !list.isEmpty()) {
-				 return list.get(0);
+			if(entity.isSuccess()){
+				List<KetuoCarInfo> list = entity.getData();
+				if(null != list && !list.isEmpty()) {
+					carInfo = list.get(0);
+				}
 			}
+		}catch (Exception e){
+			LOGGER.error("Parking request getKetuoCarInfo error", e);
 		}
 
 		return carInfo;

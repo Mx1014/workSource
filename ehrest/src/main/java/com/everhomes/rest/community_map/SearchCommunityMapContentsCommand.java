@@ -1,6 +1,9 @@
 package com.everhomes.rest.community_map;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * @author sw on 2017/8/14.

@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 
-public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
-
-    @Autowired
-    private OrganizationProvider organizationProvider;
+public class  OrganizationMemberDetails extends EhOrganizationMemberDetails {
 
     private String targetType;
     private Long targetId;
@@ -106,4 +103,5 @@ public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

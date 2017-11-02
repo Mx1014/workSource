@@ -4,7 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.flow.*;
+import com.everhomes.flow.node.FlowGraphNodeEnd;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
@@ -27,6 +30,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class PmtaskFlowModuleListener implements FlowModuleListener {
@@ -51,7 +55,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
-	private FlowEventLogProvider flowEventLogProvider;
+	private ConfigurationProvider configProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 
@@ -175,7 +179,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public String onFlowCaseBriefRender(FlowCase flowCase) {
+	public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
 		return null;
 	}
 
@@ -253,7 +257,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.LIST.getCode());
 			e.setKey("状态");
-			e.setValue(pmTaskCommonService.convertStatus(dto.getStatus()));
+			e.setValue(EbeiPmTaskStatus.fromCode(dto.getStatus()).getDesc());
 			entities.add(e);
 		}
 
@@ -331,7 +335,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
 				stepDTO.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
 				flowService.processAutoStep(stepDTO);
-				ctx.setContinueStep(false);
+				ctx.setContinueFlag(false);
 
 			}else
 			if ("ASSIGNING".equals(nodeType)) {
@@ -344,7 +348,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
                     stepDTO.setSubjectId(subject.getId());
                 }
 				flowService.processAutoStep(stepDTO);
-				ctx.setContinueStep(false);
+				ctx.setContinueFlag(false);
 
 
 //				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
@@ -432,5 +436,27 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			smsProvider.addToTupleList(variables, "categoryName", category.getName());
 		}
 
+	}
+
+	@Override
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, defaultId, null,
+				null, null);
+
+		if(namespaceId == 999983) {
+			EbeiPmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+			CategoryDTO dto = handler.createCategoryDTO();
+			Category category = ConvertHelper.convert(dto, Category.class);
+			categories.add(category);
+		}
+
+		return categories.stream().map(c -> {
+			FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+			dto.setId(c.getId());
+			dto.setNamespaceId(namespaceId);
+			dto.setServiceName(c.getName());
+			return dto;
+		}).collect(Collectors.toList());
 	}
 }

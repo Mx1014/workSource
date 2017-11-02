@@ -1,9 +1,12 @@
 // @formatter:off
 package com.everhomes.rest.flow;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <ul>
@@ -22,9 +25,12 @@ import java.sql.Timestamp;
  * <li>subjectRequiredFlag: 填写内容是否必填{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>remindCount: ??</li>
  * <li>description: 描述</li>
+ * <li>params: 参数</li>
+ * <li>needSelectBranch: 下一个节点是判断节点并且是需要用户选择分支为1，否则为0{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ * <li>conditionNodeId: 下一个条件节点id</li>
+ * <li>evaluateStep: 评价跳转 no_step:不跳转</li>
+ * <li>goToProcessFlowNode: 去处理的按钮的弹窗信息 </li>
  * </ul>
- * @author janson
- *
  */
 public class FlowButtonDTO {
 
@@ -44,6 +50,22 @@ public class FlowButtonDTO {
     private Byte subjectRequiredFlag;
     private Integer remindCount;
     private String description;
+    private String evaluateStep;
+    private String params;
+    private Integer defaultOrder;
+
+    private Byte needSelectBranch;
+    private Long conditionNodeId;
+    @ItemType(FlowCaseGoToProcessDTO.class)
+    private List<FlowCaseGoToProcessDTO> goToProcessFlowCase = new ArrayList<>();
+
+    public Byte getNeedSelectBranch() {
+        return needSelectBranch;
+    }
+
+    public void setNeedSelectBranch(Byte needSelectBranch) {
+        this.needSelectBranch = needSelectBranch;
+    }
 
     public Byte getNeedProcessor() {
         return needProcessor;
@@ -171,6 +193,46 @@ public class FlowButtonDTO {
 
     public void setSubjectRequiredFlag(Byte subjectRequiredFlag) {
         this.subjectRequiredFlag = subjectRequiredFlag;
+    }
+
+    public String getParams() {
+        return params;
+    }
+
+    public void setParams(String params) {
+        this.params = params;
+    }
+
+    public Long getConditionNodeId() {
+        return conditionNodeId;
+    }
+
+    public void setConditionNodeId(Long conditionNodeId) {
+        this.conditionNodeId = conditionNodeId;
+    }
+
+    public String getEvaluateStep() {
+        return evaluateStep;
+    }
+
+    public void setEvaluateStep(String evaluateStep) {
+        this.evaluateStep = evaluateStep;
+    }
+
+    public Integer getDefaultOrder() {
+        return defaultOrder;
+    }
+
+    public void setDefaultOrder(Integer defaultOrder) {
+        this.defaultOrder = defaultOrder;
+    }
+
+    public List<FlowCaseGoToProcessDTO> getGoToProcessFlowCase() {
+        return goToProcessFlowCase;
+    }
+
+    public void setGoToProcessFlowCase(List<FlowCaseGoToProcessDTO> goToProcessFlowCase) {
+        this.goToProcessFlowCase = goToProcessFlowCase;
     }
 
     @Override

@@ -2059,16 +2059,16 @@ UPDATE `eh_configurations` SET VALUE = '2' WHERE  `name`= 'video.official.suppor
 
 -- 配置业务模块 add by sfyan 20170126
 SET @service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
-INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) select (@service_module_scopes_id := @service_module_scopes_id + 1), ewms.owner_id, ifnull(ewm.module_id, ewm.id),2 from eh_web_menu_scopes ewms left join eh_web_menus ewm on ewms.menu_id = ewm.id where ewms.owner_type = 'EhNamespaces' and ewms.owner_id = 999979 and (ewm.path like '%/10000/%' or ewm.path like '%/20000/%' or ewm.path like '%/30000/%' or ewm.path like '%/40000/%' or ewm.id in (10000, 20000, 30000, 40000))  group by ifnull(ewm.module_id, ewm.id),ewms.owner_id;
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `apply_policy`) SELECT (@service_module_scopes_id := @service_module_scopes_id + 1), ewms.owner_id, IFNULL(ewm.module_id, ewm.id),2 FROM eh_web_menu_scopes ewms LEFT JOIN eh_web_menus ewm ON ewms.menu_id = ewm.id WHERE ewms.owner_type = 'EhNamespaces' AND ewms.owner_id = 999979 AND (ewm.path LIKE '%/10000/%' OR ewm.path LIKE '%/20000/%' OR ewm.path LIKE '%/30000/%' OR ewm.path LIKE '%/40000/%' OR ewm.id IN (10000, 20000, 30000, 40000))  GROUP BY IFNULL(ewm.module_id, ewm.id),ewms.owner_id;
 
 -- add by sw 20180816
-UPDATE eh_launch_pad_items set action_data = '{"url":"http://www.chelaile.net.cn"}' where item_label = '实时公交' and namespace_id = 999979;
-UPDATE eh_launch_pad_items set action_data = '{"url":"http://www.dgairport.cn/mobile/index.html"}' where item_label = '城市候机楼' and namespace_id = 999979;
-UPDATE eh_launch_pad_items set action_data = '{"url":"http://h5.wybashi.com/webapp/page/index.html"}' where item_label = '网约巴士' and namespace_id = 999979;
-UPDATE eh_launch_pad_items set action_data = '{"url":"http://m.zuche.com/?utm_source=shenmasem&utm_term=m_20170519041393"}' where item_label = '神州租车' and namespace_id = 999979;
-UPDATE eh_launch_pad_items set action_data = '{"url":"https://mp.weixin.qq.com/mp/homepage?__biz=MzA5OTgxOTg1OQ==&hid=2&sn=d5201e463f6827dfad5ba008e814c988&uin=&key=&devicetype=android-23&version=6204014f&lang=zh_CN&nettype=WIFI&wx_header=1&scene=1&winzoom=1"}' where item_label = '冒泡旅游' and namespace_id = 999979;
-UPDATE eh_launch_pad_items set action_data = '{"url":"https://m.mafengwo.cn"}' where item_label = '商务出行' and namespace_id = 999979;
-UPDATE eh_launch_pad_items set action_data = '{"url":"http://waimai.baidu.com/mobile/waimai?qt=shoplist&address=%E5%85%89%E5%A4%A7We%E8%B0%B7%E4%BA%A7%E4%B8%9A%E5%9B%AD&lat=2610902.02&lng=12679458.02"}' where item_label = '叫外卖' and namespace_id = 999979;
+UPDATE eh_launch_pad_items SET action_data = '{"url":"http://www.chelaile.net.cn"}' WHERE item_label = '实时公交' AND namespace_id = 999979;
+UPDATE eh_launch_pad_items SET action_data = '{"url":"http://www.dgairport.cn/mobile/index.html"}' WHERE item_label = '城市候机楼' AND namespace_id = 999979;
+UPDATE eh_launch_pad_items SET action_data = '{"url":"http://h5.wybashi.com/webapp/page/index.html"}' WHERE item_label = '网约巴士' AND namespace_id = 999979;
+UPDATE eh_launch_pad_items SET action_data = '{"url":"http://m.zuche.com/?utm_source=shenmasem&utm_term=m_20170519041393"}' WHERE item_label = '神州租车' AND namespace_id = 999979;
+UPDATE eh_launch_pad_items SET action_data = '{"url":"https://mp.weixin.qq.com/mp/homepage?__biz=MzA5OTgxOTg1OQ==&hid=2&sn=d5201e463f6827dfad5ba008e814c988&uin=&key=&devicetype=android-23&version=6204014f&lang=zh_CN&nettype=WIFI&wx_header=1&scene=1&winzoom=1"}' WHERE item_label = '冒泡旅游' AND namespace_id = 999979;
+UPDATE eh_launch_pad_items SET action_data = '{"url":"https://m.mafengwo.cn"}' WHERE item_label = '商务出行' AND namespace_id = 999979;
+UPDATE eh_launch_pad_items SET action_data = '{"url":"http://waimai.baidu.com/mobile/waimai?qt=shoplist&address=%E5%85%89%E5%A4%A7We%E8%B0%B7%E4%BA%A7%E4%B8%9A%E5%9B%AD&lat=2610902.02&lng=12679458.02"}' WHERE item_label = '叫外卖' AND namespace_id = 999979;
 
 -- 【光大we谷】 服务联盟配置 add by sfyan 20170823
 SET @namespace_id = 999979;
@@ -2079,7 +2079,7 @@ SET @skip_rule_id = IFNULL((SELECT MAX(id) FROM `eh_service_alliance_skip_rule`)
 SET @parent_id = @parent_id + 1;
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES (@parent_id, 'community', @community_id, '0', '人才公寓', '人才公寓', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
-SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+SET @sa_id = (SELECT MAX(id) FROM `eh_service_alliances`);
 INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
     VALUES ((@sa_id := @sa_id + 1), '0', 'community', @community_id, '人才公寓', '人才公寓', @parent_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
@@ -2090,7 +2090,7 @@ UPDATE `eh_launch_pad_items` SET action_type = 33, action_data = CONCAT('{"type"
 SET @parent_id = @parent_id + 1;
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES (@parent_id, 'community', @community_id, '0', '周边租房', '周边租房', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
-SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+SET @sa_id = (SELECT MAX(id) FROM `eh_service_alliances`);
 INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
     VALUES ((@sa_id := @sa_id + 1), '0', 'community', @community_id, '周边租房', '周边租房', @parent_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
@@ -2101,7 +2101,7 @@ UPDATE `eh_launch_pad_items` SET action_type = 33, action_data = CONCAT('{"type"
 SET @parent_id = @parent_id + 1;
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES (@parent_id, 'community', @community_id, '0', '松山湖酒店', '松山湖酒店', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
-SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+SET @sa_id = (SELECT MAX(id) FROM `eh_service_alliances`);
 INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
     VALUES ((@sa_id := @sa_id + 1), '0', 'community', @community_id, '松山湖酒店', '松山湖酒店', @parent_id, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
@@ -2145,13 +2145,20 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
     VALUES (@id:=@id+1, 999979, 0, 0, 0, '/secondhome', 'peitao', '中港直通车', '中港直通车', 'cs://1/image/aW1hZ2UvTVRwa1pERmlNekUwTTJWbU4yUTRaRGN5T0dabE5UUm1NbUk0T1dWaU5EaGtZUQ', 1, 1, 14, '', 8, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 0, 17, NULL, 0, NULL);
 
 -- 光大资源预约 会议室-删除， 场地预约修改为会议室 by dengs,已在线网执行。
-SET @resourceType_id = select id from eh_rentalv2_resource_types WHERE namespace_id = 999979 AND `NAME` = '场地预约';
+SET @resourceType_id = SELECT id FROM eh_rentalv2_resource_types WHERE namespace_id = 999979 AND `NAME` = '场地预约';
 UPDATE eh_launch_pad_items SET action_data = CONCAT('{"resourceTypeId":',@resourceType_id,',"pageType":0,"payMode":1}') WHERE item_group = 'TabGroup' AND item_label = '会议室';
 DELETE FROM eh_rentalv2_resource_types WHERE namespace_id = 999979 AND `NAME` = '会议室';
 UPDATE eh_rentalv2_resource_types SET `name` = '会议室' WHERE namespace_id = 999979 AND `NAME` = '场地预约';
 
+-- 园区入驻 add by sw 20171027
+SET @id = IFNULL((SELECT MAX(id) FROM eh_lease_configs), 1);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999979', NULL, NULL, 'renewFlag', '1', NULL, NULL);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
+	VALUES ((@id := @id + 1), '999979', NULL, NULL, 'buildingIntroduceFlag', '1', NULL, NULL);
 
+-- 【光企云】分享顶部信息配置
+UPDATE eh_app_urls  SET download_url = 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.gdwg',NAME ='光企云',description ='企业成长伙伴，员工生活家园',logo_url= 'cs://1/image/aW1hZ2UvTVRveU1EVmhOVEUzWW1WaVpXSTJORGswTnpGak9UTTBaRGswTlRNME5XWTBaZw' WHERE namespace_id =999979;
 
-
-
-
+-- 【光企云】资源预订配置成“非认证用户也可以预订”
+UPDATE eh_rentalv2_resource_types SET unauth_visible = 1 WHERE namespace_id = 999979;

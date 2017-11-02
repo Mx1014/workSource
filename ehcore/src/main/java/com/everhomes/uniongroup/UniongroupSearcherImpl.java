@@ -52,6 +52,8 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
     @Autowired
     private UniongroupService uniongroupService;
 
+    private Integer DEFAULT_VERSION_CODE = 0;
+
     @Override
     public void deleteById(Long id) {
         deleteById(id.toString());
@@ -131,15 +133,16 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
         this.deleteAll();
         List<Organization> orgs = this.organizationProvider.listHeadEnterprises();
         for (Organization org : orgs) {
-            this.syncUniongroupDetailsAtOrg(org, UniongroupType.SALARYGROUP.getCode());
+            this.syncUniongroupDetailsAtOrg(org, UniongroupType.SALARYGROUP.getCode(), DEFAULT_VERSION_CODE);
+            this.syncUniongroupDetailsAtOrg(org, UniongroupType.PUNCHGROUP.getCode(), DEFAULT_VERSION_CODE);
         }
 //        this.optimize(1);
         this.refresh();
     }
 
     @Override
-    public void syncUniongroupDetailsAtOrg(Organization org, String groupType) {
-        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(org.getNamespaceId(), org.getId(), null, UniongroupType.fromCode(groupType).getCode());
+    public void syncUniongroupDetailsAtOrg(Organization org, String groupType, Integer versionCode) {
+        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(org.getNamespaceId(), org.getId(), UniongroupType.fromCode(groupType).getCode(), DEFAULT_VERSION_CODE);
         if (details != null && details.size() > 0) {
             //查询部门和岗位和工号
             for (UniongroupMemberDetail detail : details) {
@@ -161,7 +164,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
 
 
     @Override
-    public List  query(SearchUniongroupDetailCommand cmd) {
+    public List query(SearchUniongroupDetailCommand cmd) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         BoolQueryBuilder bqb = new BoolQueryBuilder();
 
@@ -174,6 +177,12 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
         if (cmd.getGroupId() != null && cmd.getGroupId() != 0L) {
             bqb = bqb.must(QueryBuilders.termQuery("groupId", cmd.getGroupId()));
         }
+        if(cmd.getVersionCode() != null){
+            bqb = bqb.must(QueryBuilders.termQuery("versionCode", cmd.getVersionCode()));
+        }else{
+            bqb = bqb.must(QueryBuilders.termQuery("versionCode", DEFAULT_VERSION_CODE));
+        }
+
         if (cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
             bqb = bqb.must(QueryBuilders.matchQuery("contactName", cmd.getKeyword()));
 //            bqb = bqb.should(QueryBuilders.matchQuery("employeeNo", cmd.getKeyword()));
@@ -181,6 +190,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
         if(cmd.getIsNormal() != null && !cmd.getIsNormal().isEmpty()){
             bqb = bqb.must(QueryBuilders.matchQuery("isNormal", cmd.getIsNormal()));
         }
+
 
         builder.setFrom(cmd.getPageAnchor().intValue() * cmd.getPageSize()).setSize(cmd.getPageSize() + 1);
         builder.setQuery(bqb);
@@ -201,6 +211,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             detail.setEnterpriseId(Long.valueOf(m.get("enterpriseId").toString()));
             detail.setContactName(m.get("contactName").toString());
             detail.setContactToken(m.get("contactToken").toString());
+            detail.setVersionCode(Integer.valueOf(m.get("versionCode").toString()));
             if (m.get("department") != null) {
                 List<Map> department = (List<Map>) m.get("department");
                 Map<Long, String> departmentMap = new HashMap<>();
@@ -275,6 +286,7 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
             b.field("updateTime", uniongroupMemberDetail.getUpdateTime());
             b.field("operatorUid", uniongroupMemberDetail.getOperatorUid());
             b.field("employeeNo", uniongroupMemberDetail.getEmployeeNo());
+            b.field("versionCode", uniongroupMemberDetail.getVersionCode());
             b.field("isNormal", checkSalaryEmployeeIsNormal(uniongroupMemberDetail.getDetailId(), groupDetailIds, wageDetailIds));
             Map<Long, String> department = uniongroupMemberDetail.getDepartment();
             if (department != null && department.size() > 0) {

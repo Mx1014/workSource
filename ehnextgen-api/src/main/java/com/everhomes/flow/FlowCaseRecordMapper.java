@@ -1,12 +1,11 @@
 package com.everhomes.flow;
 
-import java.sql.Timestamp;
-
+import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
-import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
+import java.sql.Timestamp;
 
 public class FlowCaseRecordMapper implements RecordMapper<Record, EhFlowCasesRecord> {
 
@@ -49,6 +48,7 @@ public class FlowCaseRecordMapper implements RecordMapper<Record, EhFlowCasesRec
 			o.setIntegralTag2(r.getValue((Field<Long>)r.field("integral_tag2")));
 			o.setIntegralTag3(r.getValue((Field<Long>)r.field("integral_tag3")));
 			o.setIntegralTag4(r.getValue((Field<Long>)r.field("integral_tag4")));
+			o.setIntegralTag5(r.getValue((Field<Long>)r.field("integral_tag5")));
 			o.setIntegralTag5(r.getValue((Field<Long>)r.field("integral_tag5")));
 			return o;
 		}

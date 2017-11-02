@@ -48,7 +48,7 @@ public class GetNewsDetailInfoResponse {
 	private String coverUri;
 	private Byte commentFlag;
 	private Integer namespaceId;
-	private Long phone;
+	private String phone;
 	@ItemType(NewsTagValsDTO.class)
 	private List<NewsTagValsDTO> tags;
 
@@ -201,11 +201,11 @@ public class GetNewsDetailInfoResponse {
 		this.tags = tags;
 	}
 
-	public Long getPhone() {
+	public String getPhone() {
 		return phone;
 	}
 
-	public void setPhone(Long phone) {
+	public void setPhone(String phone) {
 		this.phone = phone;
 	}
 }

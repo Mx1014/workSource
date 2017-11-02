@@ -27,6 +27,10 @@ public class FlowCase extends EhFlowCases {
 		this.customObject = customObject;
 	}
 
+	public void incrStepCount() {
+	    this.setStepCount(this.getStepCount() + 1);
+    }
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

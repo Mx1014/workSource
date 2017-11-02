@@ -3906,7 +3906,7 @@ public class ActivityServiceImpl implements ActivityService {
 	//华润要求只能看到当前小区的活动，因此增加一种位置范围-COMMUNITY。根据传来的范围参数，如果是小区使用新的方法，否则使用老方法。
 	private ListActivitiesReponse listActivitiesByScope(SceneTokenDTO sceneTokenDto, ListNearbyActivitiesBySceneCommand cmd,
 														int geoCharCount, Long communityId, ActivityLocationScope scope){
-		if(scope.getCode() == ActivityLocationScope.COMMUNITY.getCode()){
+		if(scope != null && scope.getCode() == ActivityLocationScope.COMMUNITY.getCode()){
 			return listOfficialActivitiesByScene(cmd);
 		}else{
 			return listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, communityId);
@@ -3915,7 +3915,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 	//华润要求只能看到当前小区的活动，因此增加一种位置范围-COMMUNITY。根据传来的范围参数，如果是小区使用新的方法，否则使用老方法。
 	private  ListActivitiesReponse listOrgActivitiesByScope(ListOrgNearbyActivitiesCommand execOrgCmd){
-		if(execOrgCmd.getScope() == ActivityLocationScope.COMMUNITY.getCode()){
+		if(execOrgCmd.getScope() != null && execOrgCmd.getScope() == ActivityLocationScope.COMMUNITY.getCode()){
 			ListNearbyActivitiesBySceneCommand command = ConvertHelper.convert(execOrgCmd, ListNearbyActivitiesBySceneCommand.class);
 			return listOfficialActivitiesByScene(command);
 		}else{
@@ -4460,6 +4460,9 @@ public class ActivityServiceImpl implements ActivityService {
 				dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
 			}
 			fixupVideoInfo(dto);
+
+			Byte flag = forumService.getInteractFlag(post);
+			dto.setInteractFlag(flag);
 			return dto;
 		}).filter(r -> r != null).collect(Collectors.toList());
 

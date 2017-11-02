@@ -520,15 +520,12 @@ public class ContractServiceImpl implements ContractService {
 		contractProvider.createContract(contract);
 
 		//调用计算明细
-		if(cmd.getChargingItems() != null && cmd.getChargingItems().size() > 0) {
-			ExecutorUtil.submit(new Runnable() {
-				@Override
-				public void run() {
-					generatePaymentExpectancies(contract, cmd.getChargingItems());
-				}
-			});
-
-		}
+		ExecutorUtil.submit(new Runnable() {
+			@Override
+			public void run() {
+				generatePaymentExpectancies(contract, cmd.getChargingItems(), cmd.getAdjusts(), cmd.getFrees());
+			}
+		});
 
 		//计算总的租赁面积
 		Double totalSize = dealContractApartments(contract, cmd.getApartments());
@@ -551,12 +548,118 @@ public class ContractServiceImpl implements ContractService {
 		return contractDetailDTO;
 	}
 
-	private void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems) {
+	private void generatePaymentExpectancies(Contract contract, List<ContractChargingItemDTO> chargingItems, List<ContractChargingChangeDTO> adjusts, List<ContractChargingChangeDTO> frees) {
 		assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentStrings.CONTRACT_CANCEL);
+
+		if((chargingItems == null || chargingItems.size() == 0)
+				&& (adjusts == null || adjusts.size() == 0) && (frees == null || frees.size() == 0)) {
+			return ;
+		}
+
 		PaymentExpectanciesCommand command = new PaymentExpectanciesCommand();
 		command.setContractNum(contract.getContractNumber());
-		List<FeeRules> feeRules = new ArrayList<>();
+
+		if(chargingItems != null && chargingItems.size() > 0) {
+			List<FeeRules> feeRules = generateChargingItemsFeeRules(chargingItems);
+			command.setFeesRules(feeRules);
+		}
+
+		if(adjusts != null && adjusts.size() > 0) {
+			List<RentAdjust> rentAdjusts = generateRentAdjust(adjusts);
+			command.setRentAdjusts(rentAdjusts);
+		}
+
+		if(frees != null && frees.size() > 0) {
+			List<RentFree> rentFrees = generateRentFree(frees);
+			command.setRentFrees(rentFrees);
+		}
+		command.setNamesapceId(contract.getNamespaceId());
+		command.setOwnerId(contract.getCommunityId());
+		command.setOwnerType("community");
+		command.setContractId(contract.getId());
+		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+			command.setTargetType("eh_organization");
+			EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+			if(customer != null) {
+				command.setTargetId(customer.getOrganizationId());
+				command.setTargetName(customer.getName());
+				command.setNoticeTel(customer.getContactMobile());
+			}
+		} else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+			command.setTargetType("eh_user");
+			OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(contract.getCustomerId());
+			if(owner != null) {
+				command.setTargetName(owner.getContactName());
+				command.setNoticeTel(owner.getContactToken());
+				UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(owner.getNamespaceId(), owner.getContactToken());
+				if(identifier != null) {
+					command.setTargetId(identifier.getOwnerUid());
+				}
+			}
+		}
+//		assetService.paymentExpectancies(command);
+		assetService.paymentExpectancies_re_struct(command);
+	}
+
+	private List<RentFree> generateRentFree(List<ContractChargingChangeDTO> frees) {
+		List<RentFree> rentFrees = new ArrayList<>();
+		frees.forEach(free -> {
+			RentFree rentFree = new RentFree();
+			rentFree.setChargingItemId(free.getChargingItemId());
+			rentFree.setStartDate(new Date(free.getChangeStartTime()));
+			rentFree.setEndDate(new Date(free.getChangeExpiredTime()));
+			rentFree.setAmount(free.getChangeRange());
+			rentFree.setRemark(free.getRemark());
+			if(free.getApartments() != null && free.getApartments().size() > 0) {
+				List<ContractProperty> properties = new ArrayList<ContractProperty>();
+				free.getApartments().forEach(apartmentDTO -> {
+					ContractProperty cp = ConvertHelper.convert(apartmentDTO, ContractProperty.class);
+					cp.setPropertyName(cp.getBuldingName() + "-" + cp.getApartmentName());
+					properties.add(cp);
+				});
+				rentFree.setProperties(properties);
+			}
+			rentFrees.add(rentFree);
+		});
+		return rentFrees;
+	}
+
+	private List<RentAdjust> generateRentAdjust(List<ContractChargingChangeDTO> adjusts) {
+		List<RentAdjust> rentAdjusts = new ArrayList<>();
+		adjusts.forEach(adjust -> {
+			RentAdjust rentAdjust = new RentAdjust();
+			rentAdjust.setStart(new Date(adjust.getChangeStartTime()));
+			rentAdjust.setEnd(new Date(adjust.getChangeExpiredTime()));
+			rentAdjust.setAdjustType(adjust.getChangeMethod());
+			rentAdjust.setSeparationTime(adjust.getChangePeriod().floatValue());
+			if(adjust.getPeriodUnit() == PeriodUnit.DAY.getCode()){
+				rentAdjust.setSeperationType((byte)1);
+			}
+			if(adjust.getPeriodUnit() == PeriodUnit.MONTH.getCode()){
+				rentAdjust.setSeperationType((byte)2);
+			}
+			if(adjust.getPeriodUnit() == PeriodUnit.YEAR.getCode()){
+				rentAdjust.setSeperationType((byte)3);
+			}
+			rentAdjust.setAdjustAmplitude(adjust.getChangeRange());
+			rentAdjust.setChargingItemId(adjust.getChargingItemId());
+			if(adjust.getApartments() != null && adjust.getApartments().size() > 0) {
+				List<ContractProperty> properties = new ArrayList<ContractProperty>();
+				adjust.getApartments().forEach(apartmentDTO -> {
+					ContractProperty cp = ConvertHelper.convert(apartmentDTO, ContractProperty.class);
+					cp.setPropertyName(cp.getBuldingName() + "-" + cp.getApartmentName());
+					properties.add(cp);
+				});
+				rentAdjust.setProperties(properties);
+			}
+			rentAdjusts.add(rentAdjust);
+		});
+		return rentAdjusts;
+	}
+
+	private List<FeeRules> generateChargingItemsFeeRules(List<ContractChargingItemDTO> chargingItems) {
 		Gson gson = new Gson();
+		List<FeeRules> feeRules = new ArrayList<>();
 		chargingItems.forEach(chargingItem -> {
 			FeeRules feeRule = new FeeRules();
 			feeRule.setChargingItemId(chargingItem.getChargingItemId());
@@ -583,6 +686,7 @@ public class ContractServiceImpl implements ContractService {
 			if(pvs != null && pvs.size() > 0) {
 				pvs.forEach(pv -> {
 					VariableIdAndValue variableIdAndValue = new VariableIdAndValue();
+					variableIdAndValue.setVaribleIdentifier(pv.getVariableIdentifier());
 					variableIdAndValue.setVariableId(pv.getVariableIdentifier());
 					variableIdAndValue.setVariableValue(pv.getVariableValue());
 					vv.add(variableIdAndValue);
@@ -591,33 +695,10 @@ public class ContractServiceImpl implements ContractService {
 			feeRule.setVariableIdAndValueList(vv);
 			feeRules.add(feeRule);
 		});
-		command.setFeesRules(feeRules);
-		command.setNamesapceId(contract.getNamespaceId());
-		command.setOwnerId(contract.getCommunityId());
-		command.setOwnerType("community");
-		command.setContractId(contract.getId());
-		if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
-			command.setTargetType("eh_organization");
-			EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
-			if(customer != null) {
-				command.setTargetId(customer.getOrganizationId());
-				command.setTargetName(customer.getName());
-				command.setNoticeTel(customer.getContactMobile());
-			}
-		} else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
-			command.setTargetType("eh_user");
-			OrganizationOwner owner = individualCustomerProvider.findOrganizationOwnerById(contract.getCustomerId());
-			if(owner != null) {
-				command.setTargetName(owner.getContactName());
-				command.setNoticeTel(owner.getContactToken());
-				UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(owner.getNamespaceId(), owner.getContactToken());
-				if(identifier != null) {
-					command.setTargetId(identifier.getOwnerUid());
-				}
-			}
-		}
-		assetService.paymentExpectancies(command);
+
+		return feeRules;
 	}
+
 
 	private void addToFlowCase(Contract contract) {
 		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(), FlowConstants.CONTRACT_MODULE,
@@ -638,7 +719,7 @@ public class ContractServiceImpl implements ContractService {
 		createFlowCaseCommand.setReferId(contract.getId());
 		createFlowCaseCommand.setReferType(EntityType.CONTRACT.getCode());
 		createFlowCaseCommand.setContent(contract.getContractNumber());
-
+		createFlowCaseCommand.setServiceType("合同申请");
 		createFlowCaseCommand.setProjectId(contract.getCommunityId());
 		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
 
@@ -922,9 +1003,8 @@ public class ContractServiceImpl implements ContractService {
 			contract.setDownpaymentTime(new Timestamp(cmd.getDownpaymentTime()));
 		}
 		contract.setCreateTime(exist.getCreateTime());
-
+		Double rentSize = dealContractApartments(contract, cmd.getApartments());
 		if(cmd.getRentSize() == null) {
-			Double rentSize = dealContractApartments(contract, cmd.getApartments());
 			contract.setRentSize(rentSize);
 		}
 
@@ -932,7 +1012,7 @@ public class ContractServiceImpl implements ContractService {
 
 		dealContractChargingItems(contract, cmd.getChargingItems());
 		dealContractAttachments(contract.getId(), cmd.getAttachments());
-		contractSearcher.feedDoc(contract);
+//		contractSearcher.feedDoc(contract);
 		dealContractChargingChanges(contract, cmd.getAdjusts(), cmd.getFrees());
 		if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
 			addToFlowCase(contract);
@@ -941,7 +1021,7 @@ public class ContractServiceImpl implements ContractService {
 		ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {
-				generatePaymentExpectancies(contract, cmd.getChargingItems());
+				generatePaymentExpectancies(contract, cmd.getChargingItems(), cmd.getAdjusts(), cmd.getFrees());
 			}
 		});
 

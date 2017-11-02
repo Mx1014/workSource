@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -31,10 +32,6 @@ import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.flow.FlowNode;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
@@ -124,7 +121,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public String onFlowCaseBriefRender(FlowCase flowCase) {
+	public String onFlowCaseBriefRender(FlowCase flowCase, FlowUserType flowUserType) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -368,5 +365,14 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 			smsProvider.addToTupleList(variables, "parkingLotName", parkingLotName);
 			smsProvider.addToTupleList(variables, "plateNumber", plateNumber);
 		}
+	}
+
+	@Override
+	public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId) {
+		List<FlowServiceTypeDTO> result = new ArrayList<>();
+		FlowServiceTypeDTO dto = new FlowServiceTypeDTO();
+		dto.setNamespaceId(namespaceId);
+		dto.setServiceName("停车月卡申请");
+		return result;
 	}
 }

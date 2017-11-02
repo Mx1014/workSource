@@ -119,7 +119,8 @@ public class Utils {
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
-        calendar.set(Calendar.MILLISECOND, 999);
+        //不要计算毫秒，mysql不能存储毫秒，会自动转成秒，999ms 会转成 1S
+//        calendar.set(Calendar.MILLISECOND, 999);
 
         if(isLastDayOfMonth(calendar)){
             calendar.add(Calendar.MONTH, month);
