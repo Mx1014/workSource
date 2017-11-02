@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.parking.handler.DefaultParkingVendorHandler;
 import com.everhomes.rest.parking.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -879,13 +878,13 @@ public class ParkingProviderImpl implements ParkingProvider {
 			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.le(new Timestamp(pageAnchor)));
 		}
 		if (StringUtils.isNotBlank(plateNumber)) {
-			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_NUMBER.eq(plateNumber));
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_NUMBER.like("%" + plateNumber + "%"));
 		}
 		if (StringUtils.isNotBlank(plateOwnerName)) {
-			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_NAME.eq(plateOwnerName));
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_NAME.like("%" + plateOwnerName + "%"));
 		}
 		if (StringUtils.isNotBlank(plateOwnerPhone)) {
-			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_PHONE.eq(plateOwnerPhone));
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.PLATE_OWNER_PHONE.like("%" + plateOwnerPhone + "%"));
 		}
 		if (null != startDate) {
 			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.ge(startDate));
@@ -901,14 +900,14 @@ public class ParkingProviderImpl implements ParkingProvider {
 		}
 
 		if (StringUtils.isNotBlank(requestorEnterpriseName)) {
-			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.REQUESTOR_ENTPERISE_NAME.eq(requestorEnterpriseName));
+			query.addConditions(Tables.EH_PARKING_CAR_VERIFICATIONS.REQUESTOR_ENTERPRISE_NAME.like("%" + requestorEnterpriseName + "%"));
 		}
 
 		query.addOrderBy(Tables.EH_PARKING_CAR_VERIFICATIONS.CREATE_TIME.desc());
 		if (null != pageSize) {
 			query.addLimit(pageSize);
 		}
-		return query.fetch().map(r -> ConvertHelper.convert(query.fetchOne(), ParkingCarVerification.class));
+		return query.fetch().map(r -> ConvertHelper.convert(r, ParkingCarVerification.class));
 	}
 
 	@Override
@@ -934,7 +933,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 		if (null != pageSize) {
 			query.addLimit(pageSize);
 		}
-		return query.fetch().map(r -> ConvertHelper.convert(query.fetchOne(), ParkingCarVerification.class));
+		return query.fetch().map(r -> ConvertHelper.convert(r, ParkingCarVerification.class));
 	}
 
 	@Override

@@ -2025,6 +2025,7 @@ public class ParkingServiceImpl implements ParkingService {
 			return attachmentDto;
 		}).collect(Collectors.toList());
 
+		dto.setAttachments(attachmentDtos);
 		return dto;
 	}
 
