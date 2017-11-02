@@ -897,13 +897,6 @@ public class ArchivesServiceImpl implements ArchivesService {
                 dto.setFieldValue(employeeDynamicMaps.get(dto.getFieldName()));
             }
         }
-        //  摒弃冗余字段
-        //  由于业务的特殊性，此处的 formOriginId 由另外的接口去提供
-        //  故屏蔽掉此处的返回以免造成误解
-        form.setTemplateText(null);
-        form.setFormOriginId(null);
-        form.setFormVersion(null);
-        response.setForm(form);
 
         //  5.获取档案记录
         List<ArchivesLogs> logs = archivesProvider.listArchivesLogs(cmd.getOrganizationId(), cmd.getDetailId());
@@ -934,6 +927,19 @@ public class ArchivesServiceImpl implements ArchivesService {
                 employeeCase = localeTemplateService.getLocaleTemplateString(ArchivesTemplateCode.SCOPE, ArchivesTemplateCode.ARCHIVES_PROBATION_CASE, "zh_CN", map, "");
             }
         }
+
+        //  7.设置部门、岗位、职级ids
+        response.setDepartmentIds(JSONObject.parseArray(employee.getDepartmentIds(),Long.class));
+        response.setJobPositionIds(JSONObject.parseArray(employee.getJobLevelIds(),Long.class));
+        response.setJobLevelIds(JSONObject.parseArray(employee.getJobLevelIds(),Long.class));
+
+        //  摒弃冗余字段
+        //  由于业务的特殊性，此处的 formOriginId 由另外的接口去提供
+        //  故屏蔽掉此处的返回以免造成误解
+        form.setTemplateText(null);
+        form.setFormOriginId(null);
+        form.setFormVersion(null);
+        response.setForm(form);
         response.setEmployeeCase(employeeCase);
         return response;
     }
