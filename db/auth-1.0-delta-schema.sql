@@ -12,6 +12,7 @@ ALTER TABLE `eh_authorizations` ADD COLUMN `control_id` bigint(20) ;
 CREATE TABLE `eh_authorization_control_configs` (
   `id` bigint(20) NOT NULL,
   `control_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
   `namespace_id` int(11) NOT NULL,
   `target_type` varchar(32) NOT NULL,
   `target_id` bigint(20) NOT NULL,

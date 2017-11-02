@@ -3380,13 +3380,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 
-	private List<AuthorizationControlConfig> processAuthorizationControlConfig(Integer namespaceId, Long controlId, List<Long> communityIds, List<OrgControlTarget> orgControlTargets){
+	private List<AuthorizationControlConfig> processAuthorizationControlConfig(Integer namespaceId, Long controlId, Long userId, List<Long> communityIds, List<OrgControlTarget> orgControlTargets){
 		List<AuthorizationControlConfig> configs = new ArrayList<>();
 		if(communityIds != null){
 			for(Long communityId : communityIds){
 				AuthorizationControlConfig config = new AuthorizationControlConfig();
 				config.setControlId(controlId);
 				config.setNamespaceId(namespaceId);
+				config.setUserId(userId);
 				config.setTargetType(ModuleManagementType.COMMUNITY_CONTROL.getCode());
 				config.setTargetId(communityId);
 				config.setIncludeChildFlag(IncludeChildFlagType.YES.getCode());
