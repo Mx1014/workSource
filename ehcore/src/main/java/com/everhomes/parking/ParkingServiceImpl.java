@@ -50,7 +50,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -63,7 +62,6 @@ import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -71,51 +69,16 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.VendorType;
-import com.everhomes.rest.parking.*;
-import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
-import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
-import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.*;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.SortField;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @Component
 public class ParkingServiceImpl implements ParkingService {
@@ -1548,9 +1511,59 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public ParkingCardDTO getRechargeResult(GetRechargeResultCommand cmd) {
 
-		
-		return null;
-		
+		long startTime = System.currentTimeMillis();
+		//这个接口兼容老版本，用轮询阻塞10秒钟
+		long endTime = startTime + 10 * 1000;
+		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
+
+		if(null == order) {
+			LOGGER.error("Order not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Order not found.");
+		}
+
+//		if (order.getStatus() > ParkingRechargeOrderStatus.PAID.getCode()) {
+//			ParkingCardDTO dto = new ParkingCardDTO();
+//			dto.setOwnerId(cmd.getOwnerId());
+//			dto.setOwnerType(cmd.getOwnerType());
+//			dto.setParkingLotId(order.getParkingLotId());
+//			dto.setPlateNumber(order.getPlateNumber());
+//			dto.setPlateOwnerName(order.getPlateOwnerName());
+//			dto.setPlateOwnerPhone(order.getPlateOwnerPhone());
+//			dto.setEndTime(order.getEndPeriod().getTime());
+//			return dto;
+//		}
+//		boolean flag = true;
+		while(/*flag && */order.getStatus() == ParkingRechargeOrderStatus.UNPAID.getCode()
+				&& endTime >= startTime) {
+			try {
+
+				order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
+
+//				if (order.getStatus() > ParkingRechargeOrderStatus.PAID.getCode()) {
+//					flag = false;
+//				}
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			startTime = System.currentTimeMillis();
+		}
+
+		ParkingCardDTO dto = new ParkingCardDTO();
+
+		dto.setOwnerId(cmd.getOwnerId());
+		dto.setOwnerType(cmd.getOwnerType());
+		dto.setParkingLotId(order.getParkingLotId());
+		dto.setPlateNumber(order.getPlateNumber());
+		dto.setPlateOwnerName(order.getPlateOwnerName());
+		dto.setPlateOwnerPhone(order.getPlateOwnerPhone());
+		dto.setEndTime(order.getEndPeriod().getTime());
+
+		return dto;
+
 	}
 
 	@Override
