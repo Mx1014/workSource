@@ -5049,7 +5049,7 @@ public class PunchServiceImpl implements PunchService {
 						//更新当前版本到新的
 						uniongroupVersionProvider.updateUniongroupVersion(unionGroupVersion);
 					} catch (Exception e) {
-						LOGGER.error("dayRefreshPunchGroupScheduled error!!!");
+						LOGGER.error("dayRefreshPunchGroupScheduled error!!!+ org id : "+orgId +" current version : "+unionGroupVersion.getCurrentVersionCode());
 						LOGGER.error("switch union group version error!!!",e);
 					}
 				}
