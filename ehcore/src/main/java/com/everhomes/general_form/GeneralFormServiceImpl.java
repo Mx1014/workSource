@@ -516,9 +516,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 						Condition condititon = DSL.trueCondition();
 						if (cmd.getModuleId()!=null && cmd.getModuleType()!=null){
 							condititon = condititon.or(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(cmd.getModuleId()).and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(cmd.getModuleType())));
-							if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(cmd.getModuleType())){
-								condititon = condititon.or(Tables.EH_GENERAL_FORMS.MODULE_ID.isNull().and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.isNull()));
-							}
+//							if(FlowModuleType.SERVICE_ALLIANCE.getCode().equals(cmd.getModuleType())){
+//								condititon = condititon.or(Tables.EH_GENERAL_FORMS.MODULE_ID.isNull().and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.isNull()));
+//							}
 						}
 						query.addConditions(condititon);
 						query.addConditions(Tables.EH_GENERAL_FORMS.STATUS
