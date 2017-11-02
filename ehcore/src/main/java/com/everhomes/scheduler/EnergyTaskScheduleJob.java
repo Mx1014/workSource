@@ -18,6 +18,7 @@ import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.*;
 import com.everhomes.repeat.RepeatService;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.ChargingVariablesDTO;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
@@ -43,6 +44,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -101,6 +103,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
     @Autowired
     private AssetService assetService;
 
+    @Autowired
+    private EnergyMeterReadingLogProvider meterReadingLogProvider;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         if(LOGGER.isInfoEnabled()) {
@@ -126,26 +131,100 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 
     }
 
+    public void calculateTaskFeeByTaskId(Long taskId) {
+        EnergyMeterTask task = taskProvider.findEnergyMeterTaskById(taskId);
+        generateTaskPaymentExpectancies(task);
+    }
+
     private void generatePaymentExpectancies() {
         List<EnergyMeterTask> tasks = taskProvider.listNotGeneratePaymentEnergyMeterTasks();
         if(tasks != null && tasks.size() > 0) {
             tasks.forEach(task -> {
-                Boolean generateFlag = false;
-                EnergyMeter meter = energyMeterProvider.findById(task.getNamespaceId(), task.getMeterId());
-                if(meter == null || !EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
-                    return ;
-                }
-                //task关联的表关联的门牌有没有合同
+                generateTaskPaymentExpectancies(task);
+            });
+        }
 
-                List<EnergyMeterAddress> addresses = meterAddressProvider.listByMeterId(task.getMeterId());
-                if(addresses != null && addresses.size() > 0) {
-                    EnergyMeterAddress address = addresses.get(0);
-                    //eh_contract_charging_item_addresses
-                    List<ContractChargingItemAddress> contractChargingItemAddresses = contractChargingItemAddressProvider.findByAddressId(address.getAddressId(), meter.getMeterType());
-                    if(contractChargingItemAddresses != null && contractChargingItemAddresses.size() > 0) {
+    }
+
+    private BigDecimal calculateAmount(EnergyMeterTask task) {
+        // 拿出单个表统计当天的所有的读表记录
+        List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByTask(task.getId());
+
+        // 重置flag
+        Byte resetFlag = TrueOrFalseFlag.FALSE.getCode();
+        // 换表flag
+        Byte changeFlag = TrueOrFalseFlag.FALSE.getCode();
+
+        //查看是否有换表,是否有归零
+        if(meterReadingLogs != null) {
+            for(EnergyMeterReadingLog log : meterReadingLogs) {
+                // 有归零 量程设置为最大值-锚点,锚点设置为0
+                if(TrueOrFalseFlag.fromCode(log.getResetMeterFlag()) == TrueOrFalseFlag.TRUE) {
+                    resetFlag = TrueOrFalseFlag.TRUE.getCode();
+                    amount = amount.add(meter.getMaxReading().subtract(readingAnchor));
+                    readingAnchor = new BigDecimal(0);
+                    dayStat.setResetMeterFlag(resetFlag);
+                }
+                // 有换表 量程加上旧表读数-锚点,锚点重置为新读数
+                if(TrueOrFalseFlag.fromCode(log.getChangeMeterFlag()) == TrueOrFalseFlag.TRUE) {
+                    changeFlag = TrueOrFalseFlag.TRUE.getCode();
+                    EnergyMeterChangeLog changeLog = this.meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
+                    amount = amount.add(changeLog.getOldReading().subtract(readingAnchor));
+                    readingAnchor = changeLog.getNewReading();
+                    dayStat.setChangeMeterFlag(changeFlag);
+                }
+            }
+        }
+
+        //计算当天走了多少字 量程+昨天最后一次读数-锚点
+        amount = amount.add(dayCurrReading.subtract(readingAnchor));
+        dayStat.setCurrentAmount(amount);
+        LOGGER.info("dayStat amount : {}", dayStat);
+    }
+
+    private void generateTaskPaymentExpectancies(EnergyMeterTask task) {
+        Boolean generateFlag = false;
+        EnergyMeter meter = energyMeterProvider.findById(task.getNamespaceId(), task.getMeterId());
+        if(meter == null || !EnergyMeterStatus.ACTIVE.equals(EnergyMeterStatus.fromCode(meter.getStatus()))) {
+            return ;
+        }
+        //task关联的表关联的门牌有没有合同
+        List<EnergyMeterAddress> addresses = meterAddressProvider.listByMeterId(task.getMeterId());
+        if(addresses != null && addresses.size() > 0) {
+            task.getReading().subtract(task.getLastTaskReading());
+            EnergyMeterAddress address = addresses.get(0);
+            //eh_contract_charging_item_addresses
+            List<ContractChargingItemAddress> contractChargingItemAddresses = contractChargingItemAddressProvider.findByAddressId(address.getAddressId(), meter.getMeterType());
+            if(contractChargingItemAddresses != null && contractChargingItemAddresses.size() > 0) {
+                List<FeeRules> feeRules = new ArrayList<>();
+                contractChargingItemAddresses.forEach(contractChargingItemAddress -> {
+                    ContractChargingItem item = contractChargingItemProvider.findById(contractChargingItemAddress.getContractChargingItemId());
+                    FeeRules feeRule = generateChargingItemsFeeRule(item.getChargingItemId(), item.getChargingStandardId(),
+                            item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
+                    feeRules.add(feeRule);
+                });
+                //suanqian paymentExpectancies_re_struct();
+                paymentExpectancies_re_struct(task, address, feeRules);
+                generateFlag = true;
+            } else {//门牌有没有默认计价条款、所属楼栋有没有默认计价条款、所属园区有没有默认计价条款 eh_default_charging_item_properties
+                List<DefaultChargingItemProperty> properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.APARTMENT.getCode(), address.getAddressId(), meter.getMeterType());
+                if(properties != null) {
+                    List<FeeRules> feeRules = new ArrayList<>();
+                    properties.forEach(property -> {
+                        DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
+                        FeeRules feeRule = generateChargingItemsFeeRule(item.getChargingItemId(), item.getChargingStandardId(),
+                                item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
+                        feeRules.add(feeRule);
+                    });
+                    //suanqian paymentExpectancies_re_struct();
+                    paymentExpectancies_re_struct(task, address, feeRules);
+                    generateFlag = true;
+                } else {
+                    properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), address.getBuildingId(), meter.getMeterType());
+                    if(properties != null) {
                         List<FeeRules> feeRules = new ArrayList<>();
-                        contractChargingItemAddresses.forEach(contractChargingItemAddress -> {
-                            ContractChargingItem item = contractChargingItemProvider.findById(contractChargingItemAddress.getContractChargingItemId());
+                        properties.forEach(property -> {
+                            DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
                             FeeRules feeRule = generateChargingItemsFeeRule(item.getChargingItemId(), item.getChargingStandardId(),
                                     item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
                             feeRules.add(feeRule);
@@ -153,8 +232,8 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                         //suanqian paymentExpectancies_re_struct();
                         paymentExpectancies_re_struct(task, address, feeRules);
                         generateFlag = true;
-                    } else {//门牌有没有默认计价条款、所属楼栋有没有默认计价条款、所属园区有没有默认计价条款 eh_default_charging_item_properties
-                        List<DefaultChargingItemProperty> properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.APARTMENT.getCode(), address.getAddressId(), meter.getMeterType());
+                    } else {
+                        properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), meter.getCommunityId(), meter.getMeterType());
                         if(properties != null) {
                             List<FeeRules> feeRules = new ArrayList<>();
                             properties.forEach(property -> {
@@ -166,47 +245,18 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                             //suanqian paymentExpectancies_re_struct();
                             paymentExpectancies_re_struct(task, address, feeRules);
                             generateFlag = true;
-                        } else {
-                            properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), address.getBuildingId(), meter.getMeterType());
-                            if(properties != null) {
-                                List<FeeRules> feeRules = new ArrayList<>();
-                                properties.forEach(property -> {
-                                    DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
-                                    FeeRules feeRule = generateChargingItemsFeeRule(item.getChargingItemId(), item.getChargingStandardId(),
-                                            item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
-                                    feeRules.add(feeRule);
-                                });
-                                //suanqian paymentExpectancies_re_struct();
-                                paymentExpectancies_re_struct(task, address, feeRules);
-                                generateFlag = true;
-                            } else {
-                                properties = defaultChargingItemProvider.findByPropertyId(DefaultChargingItemPropertyType.BUILDING.getCode(), meter.getCommunityId(), meter.getMeterType());
-                                if(properties != null) {
-                                    List<FeeRules> feeRules = new ArrayList<>();
-                                    properties.forEach(property -> {
-                                        DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
-                                        FeeRules feeRule = generateChargingItemsFeeRule(item.getChargingItemId(), item.getChargingStandardId(),
-                                                item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
-                                        feeRules.add(feeRule);
-                                    });
-                                    //suanqian paymentExpectancies_re_struct();
-                                    paymentExpectancies_re_struct(task, address, feeRules);
-                                    generateFlag = true;
-                                }
-                            }
                         }
                     }
+                }
+            }
 
-                }
-                if(generateFlag) {
-                    task.setGeneratePaymentFlag(TaskGeneratePaymentFlag.GENERATED.getCode());
-                } else {
-                    task.setGeneratePaymentFlag(TaskGeneratePaymentFlag.NON_CHARGING_ITEM.getCode());
-                }
-                taskProvider.updateEnergyMeterTask(task);
-            });
         }
-
+        if(generateFlag) {
+            task.setGeneratePaymentFlag(TaskGeneratePaymentFlag.GENERATED.getCode());
+        } else {
+            task.setGeneratePaymentFlag(TaskGeneratePaymentFlag.NON_CHARGING_ITEM.getCode());
+        }
+        taskProvider.updateEnergyMeterTask(task);
     }
 
     private void paymentExpectancies_re_struct(EnergyMeterTask task, EnergyMeterAddress address, List<FeeRules> feeRules) {
@@ -262,8 +312,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         if(pvs != null && pvs.size() > 0) {
             pvs.forEach(pv -> {
                 VariableIdAndValue variableIdAndValue = new VariableIdAndValue();
-//                variableIdAndValue.setVaribleIdentifier(pv.getVariableIdentifier());
-                variableIdAndValue.setVariableValue(pv.getVariableValue());
+                variableIdAndValue.setVaribleIdentifier(pv.getVariableIdentifier());
+                //用量
+                variableIdAndValue.setVariableValue();
                 vv.add(variableIdAndValue);
             });
         }
