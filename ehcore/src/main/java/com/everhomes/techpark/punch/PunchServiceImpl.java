@@ -5005,22 +5005,22 @@ public class PunchServiceImpl implements PunchService {
 	@Scheduled(cron = "1 50 5 * * ?")
 	@Override
 	public void dayRefreshPunchGroupScheduled() {
-		LOGGER.debug("dayRefreshPunchGroupScheduled BEGIN !!! ");
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
-			if(null ==UserContext.current().getUser() ){
-	    		User user = userProvider.findUserById(User.SYSTEM_UID);
-	    		UserContext.current().setUser(user);
-//	    		UserContext.current().setNamespaceId(flowCase.getNamespaceId());
-    		}
-			// TODO: 2017/10/17 把状态为新增和更新的找出来,然后置状态为使用中,更新的把之前的正常废弃.然后用组织架构的接口改version为0
-			Set<Long> orgIds = new HashSet<>();
-			List<Byte> statusList = new ArrayList<>();
-			statusList.add(PunchRuleStatus.MODIFYED.getCode());
-			statusList.add(PunchRuleStatus.NEW.getCode());
-			List<PunchRule> punchRules = punchProvider.listPunchRulesByStatus(statusList);
-			if(null != punchRules)
-				for (PunchRule pr : punchRules) {
-					this.coordinationProvider.getNamedLock(CoordinationLocks.REFRESH_PUNCH_RULE.getCode()+pr.getId()).enter(() -> {
+			this.coordinationProvider.getNamedLock(CoordinationLocks.REFRESH_PUNCH_RULE.getCode() ).enter(() -> {
+				LOGGER.debug("dayRefreshPunchGroupScheduled BEGIN !!! ");
+				if(null ==UserContext.current().getUser() ){
+		    		User user = userProvider.findUserById(User.SYSTEM_UID);
+		    		UserContext.current().setUser(user);
+	//	    		UserContext.current().setNamespaceId(flowCase.getNamespaceId());
+	    		}
+				// TODO: 2017/10/17 把状态为新增和更新的找出来,然后置状态为使用中,更新的把之前的正常废弃.然后用组织架构的接口改version为0
+				Set<Long> orgIds = new HashSet<>();
+				List<Byte> statusList = new ArrayList<>();
+				statusList.add(PunchRuleStatus.MODIFYED.getCode());
+				statusList.add(PunchRuleStatus.NEW.getCode());
+				List<PunchRule> punchRules = punchProvider.listPunchRulesByStatus(statusList);
+				if(null != punchRules)
+					for (PunchRule pr : punchRules) {
 						try {
 							if(!pr.getStatus().equals(PunchRuleStatus.ACTIVE.getCode())){
 								
@@ -5035,29 +5035,29 @@ public class PunchServiceImpl implements PunchService {
 							LOGGER.error("dayRefreshPunchGroupScheduled error!!! pr id : "+pr.getId());
 							LOGGER.error("update pr from modify to active error!!",e);
 						}
-						return null;
-					});
-				}
-			//把uniongroup相关表version改为0
-			for (Long orgId : orgIds) {
-				Organization org = organizationProvider.findOrganizationById(orgId);
-				try {
-					UniongroupVersion unionGroupVersion = getPunchGroupVersion(org.getId());
-					unionGroupVersion.setCurrentVersionCode(unionGroupVersion.getCurrentVersionCode() + 1);
-					//把config版本复制一份新的,
-					uniongroupService.cloneGroupTypeDataToVersion(org.getNamespaceId(), org.getId(), UniongroupType.PUNCHGROUP.getCode(),
-							CONFIG_VERSION_CODE, unionGroupVersion.getCurrentVersionCode());
-
-					//更新当前版本到新的
-					uniongroupVersionProvider.updateUniongroupVersion(unionGroupVersion);
-				} catch (Exception e) {
-					LOGGER.error("dayRefreshPunchGroupScheduled error!!!");
-					LOGGER.error("switch union group version error!!!",e);
+					}
+				//把uniongroup相关表version改为0
+				for (Long orgId : orgIds) {
+					Organization org = organizationProvider.findOrganizationById(orgId);
+					try {
+						UniongroupVersion unionGroupVersion = getPunchGroupVersion(org.getId());
+						unionGroupVersion.setCurrentVersionCode(unionGroupVersion.getCurrentVersionCode() + 1);
+						//把config版本复制一份新的,
+						uniongroupService.cloneGroupTypeDataToVersion(org.getNamespaceId(), org.getId(), UniongroupType.PUNCHGROUP.getCode(),
+								CONFIG_VERSION_CODE, unionGroupVersion.getCurrentVersionCode());
+	
+						//更新当前版本到新的
+						uniongroupVersionProvider.updateUniongroupVersion(unionGroupVersion);
+					} catch (Exception e) {
+						LOGGER.error("dayRefreshPunchGroupScheduled error!!!");
+						LOGGER.error("switch union group version error!!!",e);
+					}
 				}
 			}
-		}
-
-		LOGGER.debug("dayRefreshPunchGroupScheduled ---------- END ");
+	
+			LOGGER.debug("dayRefreshPunchGroupScheduled ---------- END ");
+			return null;
+		});
 	}
 
 	private void processTimeRule2Active(PunchRule pr) {
