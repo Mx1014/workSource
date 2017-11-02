@@ -1126,12 +1126,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
   FROM eh_launch_pad_items WHERE namespace_id = 999973 AND item_label='预订中心';
 
 UPDATE eh_launch_pad_items SET action_type = 2, action_data = '{"itemLocation":"/home/resource","layoutName":"ResourceLayout","title":"预订中心","entityTag":"RES"}' WHERE namespace_id = 999973 AND item_label='预订中心';
+ 
 
-
-SET @id = IFNULL((SELECT MAX(id) FROM eh_lease_configs), 1);
-INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
-	VALUES ((@id := @id + 1), '999973', NULL, NULL, 'displayNameStr', '项目介绍,房源招租', NULL, NULL);
-INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `owner_type`, `owner_id`, `config_name`, `config_value`, `create_time`, `creator_uid`)
-	VALUES ((@id := @id + 1), '999973', NULL, NULL, 'displayOrderStr', '1,2', NULL, NULL);
 -- 执行SQL【保集e智谷】增加蒙层提示
 INSERT INTO `eh_configurations` (`name`,`value`,`description`,`namespace_id`,`display_name`) VALUES ( 'mask.key', '1', '默认启用蒙版', '999973', '');
