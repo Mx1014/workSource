@@ -21,7 +21,8 @@ import java.util.List;
  *     <li>buildingName: buildingName</li>
  *     <li>addressId: addressId</li>
  *     <li>addressName: addressName</li>
- *     <li>applyTime: 注册时间</li>
+ *     <li>applyTime: 申请时间</li>
+ *     <li>createTime: 注册时间</li>
  *     <li>phone: phone</li>
  *     <li>executiveFlag: 是否高管 0-否 1-是</li>
  *     <li>position: 职位</li>
@@ -59,6 +60,8 @@ public class CommunityUserDto {
 	private String addressName;
 
 	private Timestamp applyTime;
+
+	private Timestamp createTime;
 
 	private String phone;
 
@@ -232,6 +235,14 @@ public class CommunityUserDto {
 
 	public void setOrganizationMemberName(String organizationMemberName) {
 		this.organizationMemberName = organizationMemberName;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
 	}
 
 	public Byte getUserSourceType() {

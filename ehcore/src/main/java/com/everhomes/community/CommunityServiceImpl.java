@@ -2094,6 +2094,7 @@ public class CommunityServiceImpl implements CommunityService {
 			User user = userProvider.findUserById(r.getUserId());
 			if(user != null && NamespaceUserType.fromCode(user.getNamespaceUserType()) == NamespaceUserType.WX){
 				dto.setUserSourceType(UserSourceType.WEIXIN.getCode());
+				dto.setCreateTime(user.getCreateTime());
 			}
 
 //			if(null != dto.getPhone()){
@@ -2125,7 +2126,8 @@ public class CommunityServiceImpl implements CommunityService {
 				CommunityUserDto dto = new CommunityUserDto();
 				dto.setUserName(u.getNickName());
 				// dto.setPhone(r.getPhoneNumber());
-				dto.setApplyTime(u.getCreateTime());
+				//dto.setApplyTime(u.getCreateTime());
+				dto.setCreateTime(u.getCreateTime());
 				dto.setIdentityNumber(u.getIdentityNumberTag());
 				dto.setGender(u.getGender());
 				dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
@@ -2236,15 +2238,17 @@ public class CommunityServiceImpl implements CommunityService {
 		sheet.setDefaultColumnWidth(20);
 		sheet.setDefaultRowHeightInPoints(20);
 		Row row = sheet.createRow(0);
-		row.createCell(0).setCellValue("昵称");
-		row.createCell(1).setCellValue("手机号");
-		row.createCell(2).setCellValue("性别");
-		row.createCell(3).setCellValue("注册时间");
-		row.createCell(4).setCellValue("认证状态");
-		row.createCell(5).setCellValue("绑定信息");
-		row.createCell(6).setCellValue("企业");
-		row.createCell(7).setCellValue("是否高管");
-		row.createCell(8).setCellValue("职位");
+		row.createCell(0).setCellValue("姓名");
+		row.createCell(1).setCellValue("昵称");
+		row.createCell(2).setCellValue("手机号");
+		row.createCell(3).setCellValue("性别");
+		row.createCell(4).setCellValue("企业");
+		row.createCell(5).setCellValue("是否高管");
+		row.createCell(6).setCellValue("职位");
+		row.createCell(7).setCellValue("用户状态");
+		row.createCell(8).setCellValue("社交账号绑定");
+		row.createCell(9).setCellValue("注册时间");
+		row.createCell(10).setCellValue("最近活跃时间");
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -2290,14 +2294,16 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 
 			tempRow.createCell(0).setCellValue(dto.getUserName());
-			tempRow.createCell(1).setCellValue(dto.getPhone());
-			tempRow.createCell(2).setCellValue(UserGender.fromCode(dto.getGender()).getText());
-			tempRow.createCell(3).setCellValue(null != dto.getApplyTime() ? sdf.format(dto.getApplyTime()) : "");
-			tempRow.createCell(4).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
-			tempRow.createCell(5).setCellValue(UserSourceType.fromCode(dto.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
-			tempRow.createCell(6).setCellValue(enterprises.toString());
-			tempRow.createCell(7).setCellValue(executiveFlag.toString());
-			tempRow.createCell(8).setCellValue(positionFlag.toString());
+			tempRow.createCell(1).setCellValue(dto.getNikeName());
+			tempRow.createCell(2).setCellValue(dto.getPhone());
+			tempRow.createCell(3).setCellValue(UserGender.fromCode(dto.getGender()).getText());
+			tempRow.createCell(4).setCellValue(enterprises.toString());
+			tempRow.createCell(5).setCellValue(executiveFlag.toString());
+			tempRow.createCell(6).setCellValue(positionFlag.toString());
+			tempRow.createCell(7).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
+			tempRow.createCell(8).setCellValue(UserSourceType.fromCode(dto.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
+			tempRow.createCell(9).setCellValue(null != dto.getCreateTime() ? sdf.format(dto.getCreateTime()) : "");
+			tempRow.createCell(10).setCellValue(null != dto.getRecentlyActiveTime() ? sdf.format(dto.getRecentlyActiveTime()) : "");
 
 		}
 		ByteArrayOutputStream out = null;
@@ -2331,12 +2337,15 @@ public class CommunityServiceImpl implements CommunityService {
 		sheet.setDefaultColumnWidth(20);
 		sheet.setDefaultRowHeightInPoints(20);
 		Row row = sheet.createRow(0);
-		row.createCell(0).setCellValue("昵称");
-		row.createCell(1).setCellValue("手机号");
-		row.createCell(2).setCellValue("性别");
-		row.createCell(3).setCellValue("注册时间");
-		row.createCell(4).setCellValue("认证状态");
-		row.createCell(5).setCellValue("绑定信息");
+		row.createCell(0).setCellValue("姓名");
+		row.createCell(1).setCellValue("昵称");
+		row.createCell(2).setCellValue("手机号");
+		row.createCell(3).setCellValue("性别");
+		row.createCell(4).setCellValue("家庭地址");
+		row.createCell(5).setCellValue("用户状态");
+		row.createCell(6).setCellValue("社交账号绑定");
+		row.createCell(7).setCellValue("注册时间");
+		row.createCell(8).setCellValue("最近活跃时间");
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -2346,11 +2355,28 @@ public class CommunityServiceImpl implements CommunityService {
 			CommunityUserAddressDTO dto = dtos.get(i);
 
 			tempRow.createCell(0).setCellValue(dto.getUserName());
-			tempRow.createCell(1).setCellValue(dto.getPhone());
-			tempRow.createCell(2).setCellValue(UserGender.fromCode(dto.getGender()).getText());
-			tempRow.createCell(3).setCellValue(null != dto.getCreateTime() ? sdf.format(dto.getCreateTime()) : "");
-			tempRow.createCell(4).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
-			tempRow.createCell(5).setCellValue(UserSourceType.fromCode(dto.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
+			tempRow.createCell(1).setCellValue(dto.getNikeName());
+			tempRow.createCell(2).setCellValue(dto.getPhone());
+			tempRow.createCell(3).setCellValue(UserGender.fromCode(dto.getGender()).getText());
+
+			StringBuffer address = new StringBuffer();
+			if(dto.getAddressDtos() != null){
+				for (AddressDTO addressDTO: dto.getAddressDtos()){
+					address.append(addressDTO.getAddress());
+					address.append("-");
+					address.append(addressDTO.getApartmentName());
+					address.append("、");
+				}
+			}
+			if(address.length() > 0){
+				address.deleteCharAt(address.length() -1);
+			}
+
+			tempRow.createCell(4).setCellValue(address.toString());
+			tempRow.createCell(5).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
+			tempRow.createCell(6).setCellValue(UserSourceType.fromCode(dto.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
+			tempRow.createCell(7).setCellValue(null != dto.getCreateTime() ? sdf.format(dto.getCreateTime()) : "");
+			tempRow.createCell(8).setCellValue(null != dto.getRecentlyActiveTime() ? sdf.format(dto.getRecentlyActiveTime()) : "");
 
 		}
 		ByteArrayOutputStream out = null;
