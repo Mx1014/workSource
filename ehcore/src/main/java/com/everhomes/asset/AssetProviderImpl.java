@@ -2062,7 +2062,7 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType,Integer namespaceId,List<Long> communityIds) {
-        Byte sovereighty = 1;
+        Byte de_coupling = 1;
         if(communityIds!=null && communityIds.size() >1){
             for(int i = 0; i < communityIds.size(); i ++){
                 Long cid = communityIds.get(i);
@@ -2075,11 +2075,11 @@ public class AssetProviderImpl implements AssetProvider {
             }
         }else{
             //只有一个园区,不是list过来的
-            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, communityId, sovereighty);
+            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, communityId, de_coupling);
         }
     }
 
-    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Long cid, Byte sovereighty) {
+    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Long cid, Byte decouplingFlag) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
         EhPaymentChargingItemScopesDao dao = new EhPaymentChargingItemScopesDao(context.configuration());
@@ -2095,6 +2095,7 @@ public class AssetProviderImpl implements AssetProvider {
             scope.setOwnerType(ownerType);
             scope.setProjectLevelName(vo.getProjectChargingItemName());
 //            scope.setSovereightyFlag(sovereighty);
+            scope.setDecouplingFlag(decouplingFlag);
             list.add(scope);
         }
         this.dbProvider.execute((TransactionStatus status) -> {
@@ -2619,7 +2620,10 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(contract.IS_RECORDER.eq((byte) 1))
                 .and(contract.CONTRACT_NUM.eq(contractNum))
                 .fetchOne(contract.IN_WORK);
-        if(aByte == (byte)0){
+        if ( aByte == null) {
+            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");
+        }
+        if( aByte == (byte)0){
             return false;
         }
         return true;

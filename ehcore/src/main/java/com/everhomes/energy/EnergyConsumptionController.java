@@ -666,16 +666,16 @@ public class EnergyConsumptionController extends ControllerBase {
         return success();
     }
 
-    /**
-     * <p>计算任务费用</p>
-     * <b>URL: /energy/calculateTaskFeeByTaskId</b>
-     */
-    @RestReturn(value = String.class)
-    @RequestMapping("calculateTaskFeeByTaskId")
-    public RestResponse calculateTaskFeeByTaskId(CalculateTaskFeeByTaskIdCommand cmd) {
-        EnergyTaskScheduleJob job = new EnergyTaskScheduleJob();
-        job.calculateTaskFeeByTaskId(cmd.getTaskId());
-        return success();
-    }
+//    /**
+//     * <p>计算任务费用</p>
+//     * <b>URL: /energy/calculateTaskFeeByTaskId</b>
+//     */
+//    @RestReturn(value = String.class)
+//    @RequestMapping("calculateTaskFeeByTaskId")
+//    public RestResponse calculateTaskFeeByTaskId(CalculateTaskFeeByTaskIdCommand cmd) {
+//        EnergyTaskScheduleJob job = new EnergyTaskScheduleJob();
+//        job.calculateTaskFeeByTaskId(cmd.getTaskId());
+//        return success();
+//    }
 
 }
