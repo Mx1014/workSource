@@ -144,3 +144,13 @@ INSERT INTO `eh_payment_formula` (`id`, `charging_standard_id`, `name`, `constra
 INSERT INTO `eh_payment_formula` (`id`, `charging_standard_id`, `name`, `constraint_variable_identifer`, `start_constraint`, `start_num`, `end_constraint`, `end_num`, `variables_json_string`, `formula`, `formula_json`, `formula_type`, `price_unit_type`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) VALUES ('235', '218', '固定金额', NULL, NULL, NULL, NULL, NULL, NULL, '固定金额', 'gdje', '1', NULL, '0', '2017-11-02 18:38:31', NULL, '2017-11-02 18:38:31');
 
 
+-- 科兴论坛数据分离 新建'二手交易'和'招聘与求职'入口，并处理老数据  add by yanjun 201711021957
+set @forum_id = (SELECT MAX(id) from eh_forum_categories);
+INSERT INTO `eh_forum_categories` (`id`, `uuid`, `namespace_id`, `forum_id`, `entry_id`, `name`, `activity_entry_id`, `create_time`, `update_time`) VALUES ((@forum_id := @forum_id + 1), UUID(), '999983', '187002', '1', '园区生活', '0', NOW(), NOW());
+INSERT INTO `eh_forum_categories` (`id`, `uuid`, `namespace_id`, `forum_id`, `entry_id`, `name`, `activity_entry_id`, `create_time`, `update_time`) VALUES ((@forum_id := @forum_id + 1), UUID(), '999983', '187002', '2', '招聘与求职', '0', NOW(), NOW());
+
+UPDATE eh_forum_posts set forum_entry_id = 1 where tag = '二手交易' and forum_id = 187002;
+UPDATE eh_forum_posts set forum_entry_id = 2 where tag = '招聘与求职' and forum_id = 187002;
+
+UPDATE eh_launch_pad_items set action_data = '{"tag":"二手交易","forumEntryId":"1"}' where namespace_id = 999983 and item_name = '园区生活';
+UPDATE eh_launch_pad_items set action_data = '{"tag":"招聘与求职","forumEntryId":"2"}' where namespace_id = 999983 and item_name = '招聘与求职';
