@@ -25,10 +25,7 @@ import com.everhomes.rest.contract.ChargingVariablesDTO;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
 import com.everhomes.rest.contract.PeriodUnit;
 import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.energy.CreateEnergyTaskCommand;
-import com.everhomes.rest.energy.EnergyMeterSettingType;
-import com.everhomes.rest.energy.EnergyMeterStatus;
-import com.everhomes.rest.energy.TaskGeneratePaymentFlag;
+import com.everhomes.rest.energy.*;
 import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyType;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
@@ -48,9 +45,13 @@ import org.springframework.transaction.TransactionStatus;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
+
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.SCOPE;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 /**
  * Created by ying.xiong on 2017/10/26.
@@ -112,6 +113,12 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 
     @Autowired
     private EnergyMeterChangeLogProvider meterChangeLogProvider;
+
+    @Autowired
+    private EnergyMeterSettingLogProvider meterSettingLogProvider;
+
+    @Autowired
+    private EnergyMeterFormulaProvider meterFormulaProvider;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -188,27 +195,32 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         //计算走了多少字 量程+任务最后一次读数-锚点
         amount = amount.add(taskReading.subtract(readingAnchor));
 
-//        EnergyMeterSettingLog amountSetting = meterSettingLogProvider
-//                .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA ,yesterdayBegin);
-//        String amountFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
-//        ScriptEngineManager manager = new ScriptEngineManager();
-//        ScriptEngine engine = manager.getEngineByName("js");
-//
-//        engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
-//        engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
-//        try {
-//                double ra = Double.valueOf(engine.eval(amountFormula).toString());
-//                realAmount = BigDecimal.valueOf(ra);
-//                engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), realAmount);
-//            } catch (ScriptException e) {
-//                String paramsStr = "{AMOUNT:" + amount +
-//                        ", TIMES:" + rateSetting.getSettingValue() +
-//                        "}";
-//                LOGGER.error("evaluate formula error, amountFormula={}, params={}", amountFormula, paramsStr);
-//                e.printStackTrace();
-//                throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
-//            }
+        //获取公式,计算当天的费用
+        EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,task.getExecutiveStartTime());
+        EnergyMeterSettingLog amountSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.AMOUNT_FORMULA ,task.getExecutiveStartTime());
+        if(amountSetting == null || rateSetting == null) {
+            return null;
+        }
 
+        String aoumtFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
+
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName("js");
+
+        engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
+        engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
+
+        BigDecimal realAmount = new BigDecimal(0);
+
+        try {
+            realAmount = BigDecimal.valueOf((double) engine.eval(aoumtFormula));
+        } catch (ScriptException e) {
+            e.printStackTrace();
+            LOGGER.error("The energy meter error");
+            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter error");
+        }
+
+        return realAmount;
     }
 
     private void generateTaskPaymentExpectancies(EnergyMeterTask task) {
@@ -220,7 +232,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         //task关联的表关联的门牌有没有合同
         List<EnergyMeterAddress> addresses = meterAddressProvider.listByMeterId(task.getMeterId());
         if(addresses != null && addresses.size() > 0) {
-            task.getReading().subtract(task.getLastTaskReading());
+            BigDecimal amount = calculateAmount(task, meter);
             EnergyMeterAddress address = addresses.get(0);
             //eh_contract_charging_item_addresses
             List<ContractChargingItemAddress> contractChargingItemAddresses = contractChargingItemAddressProvider.findByAddressId(address.getAddressId(), meter.getMeterType());
@@ -228,7 +240,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 List<FeeRules> feeRules = new ArrayList<>();
                 contractChargingItemAddresses.forEach(contractChargingItemAddress -> {
                     ContractChargingItem item = contractChargingItemProvider.findById(contractChargingItemAddress.getContractChargingItemId());
-                    FeeRules feeRule = generateChargingItemsFeeRule(item.getChargingItemId(), item.getChargingStandardId(),
+                    FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
                             item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
                     feeRules.add(feeRule);
                 });
@@ -241,7 +253,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                     List<FeeRules> feeRules = new ArrayList<>();
                     properties.forEach(property -> {
                         DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
-                        FeeRules feeRule = generateChargingItemsFeeRule(item.getChargingItemId(), item.getChargingStandardId(),
+                        FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
                                 item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
                         feeRules.add(feeRule);
                     });
@@ -254,7 +266,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                         List<FeeRules> feeRules = new ArrayList<>();
                         properties.forEach(property -> {
                             DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
-                            FeeRules feeRule = generateChargingItemsFeeRule(item.getChargingItemId(), item.getChargingStandardId(),
+                            FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
                                     item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
                             feeRules.add(feeRule);
                         });
@@ -267,7 +279,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                             List<FeeRules> feeRules = new ArrayList<>();
                             properties.forEach(property -> {
                                 DefaultChargingItem item = defaultChargingItemProvider.findById(property.getDefaultChargingItemId());
-                                FeeRules feeRule = generateChargingItemsFeeRule(item.getChargingItemId(), item.getChargingStandardId(),
+                                FeeRules feeRule = generateChargingItemsFeeRule(amount, item.getChargingItemId(), item.getChargingStandardId(),
                                         item.getChargingStartTime().getTime(), item.getChargingExpiredTime().getTime(), item.getChargingVariables(), address);
                                 feeRules.add(feeRule);
                             });
@@ -319,7 +331,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         assetService.paymentExpectancies_re_struct(command);
     }
 
-    private FeeRules generateChargingItemsFeeRule(Long chargingItemId, Long chargingStandardId,
+    private FeeRules generateChargingItemsFeeRule(BigDecimal amount, Long chargingItemId, Long chargingStandardId,
             Long chargingStartTime, Long chargingExpiredTime, String chargingVariables, EnergyMeterAddress address) {
         Gson gson = new Gson();
         FeeRules feeRule = new FeeRules();
@@ -343,7 +355,7 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 VariableIdAndValue variableIdAndValue = new VariableIdAndValue();
                 variableIdAndValue.setVaribleIdentifier(pv.getVariableIdentifier());
                 //用量
-                variableIdAndValue.setVariableValue();
+                variableIdAndValue.setVariableValue(amount);
                 vv.add(variableIdAndValue);
             });
         }
