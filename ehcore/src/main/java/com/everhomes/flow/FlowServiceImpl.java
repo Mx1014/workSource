@@ -5538,10 +5538,14 @@ public class FlowServiceImpl implements FlowService {
         if (flowCase.getStatus().equals(FlowCaseStatus.FINISHED.getCode())
                 && flowGraph.getFlow().getAllowFlowCaseEndEvaluate().equals(TrueOrFalseFlag.TRUE.getCode())
                 && flowCase.getEvaluateStatus().equals(TrueOrFalseFlag.FALSE.getCode())) {
-            FlowButtonDTO evalBtn = new FlowButtonDTO();
-            evalBtn.setButtonName(buttonDefName(flowCase.getNamespaceId(), FlowStepType.EVALUATE_STEP));
-            evalBtn.setFlowStepType(FlowStepType.EVALUATE_STEP.getCode());
-            btnList.add(evalBtn);
+
+            List<FlowEvaluateItem> items = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+            if (items != null && items.size() > 0) {
+                FlowButtonDTO evalBtn = new FlowButtonDTO();
+                evalBtn.setButtonName(buttonDefName(flowCase.getNamespaceId(), FlowStepType.EVALUATE_STEP));
+                evalBtn.setFlowStepType(FlowStepType.EVALUATE_STEP.getCode());
+                btnList.add(evalBtn);
+            }
         }
         return btnList;
     }
