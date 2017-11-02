@@ -3294,16 +3294,16 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			// todo: 保存按园区范围控制的应用
 			// 保存control_config表
 			Long control_id_c = this.sequenceProvider.getNextSequence("authControlId");
-			List<AuthorizationControlConfig> configs_c = processAuthorizationControlConfig(namespaceId, control_id_c, cmd.getCommunity_control_ids());
+			List<AuthorizationControlConfig> configs_c = processAuthorizationControlConfig(namespaceId, control_id_c, cmd.getCommunityControlIds());
 			authorizationProvider.createAuthorizationControlConfigs(configs_c);
 
-			if(AllFlagType.fromCode(cmd.getAll_community_control_flag()) == AllFlagType.YES){
-				processAuthorization(authorization, 0L, 0L, ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAll_community_control_flag(), control_id_c);
+			if(AllFlagType.fromCode(cmd.getAllCommunityControlFlag()) == AllFlagType.YES){
+				processAuthorization(authorization, 0L, 0L, ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c);
 				authorizationProvider.createAuthorization(authorization);
 				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
 			}
 			for (ModuleAppTarget target : cmd.getCommunity_target()){
-				processAuthorization(authorization, target.getModuleId(), target.getAppId(), target.getControl_type(), cmd.getAll_community_control_flag(), control_id_c);
+				processAuthorization(authorization, target.getModuleId(), target.getAppId(), target.getControl_type(), cmd.getAllCommunityControlFlag(), control_id_c);
 				authorizationProvider.createAuthorization(authorization);
 				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
 			}
@@ -3315,13 +3315,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			List<AuthorizationControlConfig> configs_oa = processAuthorizationControlConfig(namespaceId, control_id_oa, cmd.getCommunity_control_ids());
 			authorizationProvider.createAuthorizationControlConfigs(configs);
 
-			if(AllFlagType.fromCode(cmd.getAll_org_control_flag()) == AllFlagType.YES) {
-				processAuthorization(authorization, 0L, 0L, ModuleManagementType.ORG_CONTROL.getCode(), cmd.getAll_org_control_flag(),"");
+			if(AllFlagType.fromCode(cmd.getAllOrgControlFlag()) == AllFlagType.YES) {
+				processAuthorization(authorization, 0L, 0L, ModuleManagementType.ORG_CONTROL.getCode(), cmd.getAllOrgControlFlag(),"");
 				authorizationProvider.createAuthorization(authorization);
 				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
 			}
 			for (ModuleAppTarget target : cmd.getOrg_target()){
-				processAuthorization(authorization, target.getModuleId(), target.getAppId(), target.getControl_type(), cmd.getAll_org_control_flag(),cmd.getOrg_control_json());
+				processAuthorization(authorization, target.getModuleId(), target.getAppId(), target.getControl_type(), cmd.getAllOrgControlFlag(),cmd.getOrg_control_json());
 				authorizationProvider.createAuthorization(authorization);
 				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
 			}

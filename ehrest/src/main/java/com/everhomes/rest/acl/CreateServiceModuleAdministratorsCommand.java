@@ -2,7 +2,7 @@ package com.everhomes.rest.acl;
 
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.module.AssignmentTarget;
+import com.everhomes.rest.module.OrgControlTarget;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -47,29 +47,29 @@ public class CreateServiceModuleAdministratorsCommand {
     private List<Long> moduleIds;
 
     //
-    private Byte all_community_control_flag;
+    private Byte allCommunityControlFlag;
 
     @NotNull
-    private List<Long> community_control_ids;
+    private List<Long> communityControlIds;
 
     @ItemType(Long.class)
-    private List<ModuleAppTarget> community_target;
+    private List<ModuleAppTarget> communityTarget;
 
     //
-    private Byte all_org_control_flag;
+    private Byte allOrgControlFlag;
 
 
-    @ItemType(AssignmentTarget.class)
-    private List<AssignmentTarget> org_control_details;
+    @ItemType(OrgControlTarget.class)
+    private List<OrgControlTarget> orgControlDetails;
 
     @ItemType(Long.class)
-    private List<ModuleAppTarget> org_target;
+    private List<ModuleAppTarget> orgTarget;
 
     //
-    private Byte all_unlimit_control_flag;
+    private Byte allUnlimitControlFlag;
 
     @ItemType(Long.class)
-    private List<ModuleAppTarget> unlimit_target;
+    private List<ModuleAppTarget> unlimitTarget;
 
 
     public Long getOrganizationId() {
@@ -133,67 +133,67 @@ public class CreateServiceModuleAdministratorsCommand {
         return StringHelper.toJsonString(this);
     }
 
-    public Byte getAll_community_control_flag() {
-        return all_community_control_flag;
+    public Byte getAllCommunityControlFlag() {
+        return allCommunityControlFlag;
     }
 
-    public void setAll_community_control_flag(Byte all_community_control_flag) {
-        this.all_community_control_flag = all_community_control_flag;
+    public void setAllCommunityControlFlag(Byte allCommunityControlFlag) {
+        this.allCommunityControlFlag = allCommunityControlFlag;
     }
 
-    public Byte getAll_org_control_flag() {
-        return all_org_control_flag;
+    public List<Long> getCommunityControlIds() {
+        return communityControlIds;
     }
 
-    public void setAll_org_control_flag(Byte all_org_control_flag) {
-        this.all_org_control_flag = all_org_control_flag;
+    public void setCommunityControlIds(List<Long> communityControlIds) {
+        this.communityControlIds = communityControlIds;
     }
 
-    public String getOrg_control_json() {
-        return org_control_json;
+    public List<ModuleAppTarget> getCommunityTarget() {
+        return communityTarget;
     }
 
-    public void setOrg_control_json(String org_control_json) {
-        this.org_control_json = org_control_json;
+    public void setCommunityTarget(List<ModuleAppTarget> communityTarget) {
+        this.communityTarget = communityTarget;
     }
 
-    public List<ModuleAppTarget> getCommunity_target() {
-        return community_target;
+    public Byte getAllOrgControlFlag() {
+        return allOrgControlFlag;
     }
 
-    public void setCommunity_target(List<ModuleAppTarget> community_target) {
-        this.community_target = community_target;
+    public void setAllOrgControlFlag(Byte allOrgControlFlag) {
+        this.allOrgControlFlag = allOrgControlFlag;
     }
 
-    public List<ModuleAppTarget> getOrg_target() {
-        return org_target;
+    public List<OrgControlTarget> getOrgControlDetails() {
+        return orgControlDetails;
     }
 
-    public void setOrg_target(List<ModuleAppTarget> org_target) {
-        this.org_target = org_target;
+    public void setOrgControlDetails(List<OrgControlTarget> orgControlDetails) {
+        this.orgControlDetails = orgControlDetails;
     }
 
-    public List<ModuleAppTarget> getUnlimit_target() {
-        return unlimit_target;
+    public List<ModuleAppTarget> getOrgTarget() {
+        return orgTarget;
     }
 
-    public void setUnlimit_target(List<ModuleAppTarget> unlimit_target) {
-        this.unlimit_target = unlimit_target;
+    public void setOrgTarget(List<ModuleAppTarget> orgTarget) {
+        this.orgTarget = orgTarget;
     }
 
-    public Byte getAll_unlimit_control_flag() {
-        return all_unlimit_control_flag;
+    public Byte getAllUnlimitControlFlag() {
+        return allUnlimitControlFlag;
     }
 
-    public void setAll_unlimit_control_flag(Byte all_unlimit_control_flag) {
-        this.all_unlimit_control_flag = all_unlimit_control_flag;
+    public void setAllUnlimitControlFlag(Byte allUnlimitControlFlag) {
+        this.allUnlimitControlFlag = allUnlimitControlFlag;
     }
 
-    public List<Long> getCommunity_control_ids() {
-        return community_control_ids;
+    public List<ModuleAppTarget> getUnlimitTarget() {
+        return unlimitTarget;
     }
 
-    public void setCommunity_control_ids(List<Long> community_control_ids) {
-        this.community_control_ids = community_control_ids;
+    public void setUnlimitTarget(List<ModuleAppTarget> unlimitTarget) {
+        this.unlimitTarget = unlimitTarget;
     }
 }
