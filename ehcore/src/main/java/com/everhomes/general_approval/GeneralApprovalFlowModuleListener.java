@@ -137,10 +137,8 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
                     processMultiLineTextField(entities, e, value.getFieldValue());
                     break;
                 case IMAGE:
-                    processImageField(entities, e, value.getFieldValue());
                     break;
                 case FILE:
-                    processFileField(entities, e, value.getFieldValue());
                     break;
                 case INTEGER_TEXT:
                     processIntegerTextField(entities, e, value.getFieldValue());
