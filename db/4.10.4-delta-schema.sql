@@ -63,3 +63,47 @@ CREATE TABLE `eh_questionnaire_ranges` (
 
 -- 版本号  add by xq.tian  2017/10/26
 ALTER TABLE eh_version_urls ADD COLUMN version_encoded_value BIGINT NOT NULL DEFAULT 0;
+
+
+-- merge from forum-2.4 add by yanjun 201710311836
+
+CREATE TABLE `eh_forum_categories` (
+  `id` bigint(20) NOT NULL,
+  `uuid` varchar(128) NOT NULL,
+  `namespace_id` int(11) NOT NULL,
+  `forum_id` bigint(20) NOT NULL COMMENT 'forum id',
+  `entry_id` bigint(20) NOT NULL COMMENT 'entry id',
+  `name` varchar(255) DEFAULT NULL,
+  `activity_entry_id` bigint(20) DEFAULT '0' COMMENT 'activity entry id',
+  `create_time` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 是否支持评论功能
+CREATE TABLE `eh_interact_settings` (
+  `id` bigint(20) NOT NULL,
+  `uuid` varchar(128) NOT NULL,
+  `namespace_id` int(11) NOT NULL,
+  `forum_id` bigint(20) NOT NULL,
+  `type` varchar(32) NOT NULL COMMENT 'forum, activity, announcement',
+  `entry_id` bigint(20) DEFAULT NULL,
+  `interact_flag` tinyint(4) NOT NULL COMMENT 'support interact, 0-no, 1-yes',
+  `create_time` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_forum_posts` ADD COLUMN `forum_entry_id`  bigint(20) NULL DEFAULT 0 COMMENT 'forum_category  entry_id' ;
+
+ALTER TABLE `eh_forum_posts` ADD COLUMN `interact_flag`  tinyint(4) NOT NULL DEFAULT 1 COMMENT 'support interact, 0-no, 1-yes' ;
+
+ALTER TABLE `eh_forum_posts` ADD COLUMN `stick_time`  datetime NULL;
+ALTER TABLE `eh_activities` ADD COLUMN `stick_time`  datetime NULL;
+
+-- merge from forum-2.4 add by yanjun 201710311836
+
+-- 增加缴费的工作id   wentian
+ALTER TABLE `eh_payment_bills` ADD COLUMN `next_switch` TINYINT DEFAULT 0 COMMENT '下一次switch的值';
+ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `in_work` TINYINT DEFAULT 0 COMMENT '0:工作完成；1：正在生成';
+ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `is_recorder` TINYINT DEFAULT 1 COMMENT '0：合同状态记录者，不保存计价数据；1：不是合同状态记录者';

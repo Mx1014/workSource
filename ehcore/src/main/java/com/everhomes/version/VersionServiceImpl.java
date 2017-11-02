@@ -286,28 +286,30 @@ public class VersionServiceImpl implements VersionService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Not found versionUpgradeRule: cmd="+cmd);
 		}
-		
-		VersionUrl versionUrl = null;
-		if (cmd.getUrlId() != null) {
-			versionUrl = versionProvider.findVersionUrlById(cmd.getUrlId());
-		}
-		final VersionUrl url = versionUrl;
-		
-		VersionInfoDTO versionInfoDTO = ConvertHelper.convert(cmd, VersionInfoDTO.class);
-		
-		dbProvider.execute(s->{
-			rule.setRealmId(cmd.getRealmId());
-			VersionRange versionRange = new VersionRange("["+cmd.getMinVersion()+","+cmd.getMaxVersion()+")");
-			rule.setMatchingLowerBound(versionRange.getLowerBound());
-			rule.setMatchingUpperBound(versionRange.getUpperBound());
-			rule.setOrder(0);
-			rule.setTargetVersion(cmd.getTargetVersion());
-			rule.setForceUpgrade(cmd.getForceUpgrade());
-			rule.setNamespaceId(realm.getNamespaceId());
-			versionProvider.updateVersionUpgradeRule(rule);
-			
-			VersionUrl innerUrl = url;
-			if (innerUrl != null) {
+
+        VersionUrl versionUrl = null;
+        if (cmd.getUrlId() != null) {
+            versionUrl = versionProvider.findVersionUrlById(cmd.getUrlId());
+        }
+        final VersionUrl url = versionUrl;
+
+        VersionInfoDTO versionInfoDTO = ConvertHelper.convert(cmd, VersionInfoDTO.class);
+        Version version = Version.fromVersionString(cmd.getTargetVersion());
+
+        dbProvider.execute(s->{
+            rule.setRealmId(cmd.getRealmId());
+            VersionRange versionRange = new VersionRange("["+cmd.getMinVersion()+","+cmd.getMaxVersion()+")");
+            rule.setMatchingLowerBound(versionRange.getLowerBound());
+            rule.setMatchingUpperBound(versionRange.getUpperBound());
+            rule.setOrder(0);
+            rule.setTargetVersion(cmd.getTargetVersion());
+            rule.setForceUpgrade(cmd.getForceUpgrade());
+            rule.setNamespaceId(realm.getNamespaceId());
+            versionProvider.updateVersionUpgradeRule(rule);
+
+            VersionUrl innerUrl = url;
+            if (innerUrl != null) {
+                innerUrl.setVersionEncodedValue(version.getEncodedValue());
 				innerUrl.setRealmId(cmd.getRealmId());
 				innerUrl.setTargetVersion(cmd.getTargetVersion());
 				innerUrl.setDownloadUrl(processUrl(cmd.getDownloadUrl()));
@@ -319,6 +321,7 @@ public class VersionServiceImpl implements VersionService {
 				versionProvider.updateVersionUrl(innerUrl);
 			}else {
 				innerUrl = new VersionUrl();
+                innerUrl.setVersionEncodedValue(version.getEncodedValue());
 				innerUrl.setRealmId(cmd.getRealmId());
 				innerUrl.setTargetVersion(cmd.getTargetVersion());
 				innerUrl.setDownloadUrl(processUrl(cmd.getDownloadUrl()));

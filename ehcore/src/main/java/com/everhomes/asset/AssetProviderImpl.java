@@ -1546,7 +1546,7 @@ public class AssetProviderImpl implements AssetProvider {
         this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
             context.update(t)
-                    .set(t.SWITCH,(byte)0)
+                    .set(t.SWITCH,t.NEXT_SWITCH)
                     .where(t.CONTRACT_ID.eq(contractId))
                     .and(t.SWITCH.eq((byte)3))
                     .execute();
@@ -1777,6 +1777,47 @@ public class AssetProviderImpl implements AssetProvider {
         return list;
     }
 
+    @Override
+    public void setInworkFlagInContractReceiver(Long contractId, String contractNum) {
+        DSLContext writeContext = getReadWriteContext();
+        PaymentContractReceiver cr = new PaymentContractReceiver();
+        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver.class));
+        cr.setId(nextSequence);
+        cr.setContractId(contractId);
+        cr.setContractNum(contractNum);
+        cr.setInWork((byte)1);
+        cr.setIsRecorder((byte)1);
+        EhPaymentContractReceiverDao dao = new EhPaymentContractReceiverDao(writeContext.configuration());
+        dao.insert(cr);
+    }
+
+    @Override
+    public void setInworkFlagInContractReceiverWell(Long contractId, String contractNum) {
+        DSLContext writeContext = getReadWriteContext();
+        PaymentContractReceiver cr = new PaymentContractReceiver();
+        EhPaymentContractReceiver contract = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract");
+        writeContext.update(contract)
+                .set(contract.IN_WORK,(byte)0)
+                .where(contract.CONTRACT_ID.eq(contractId))
+                .and(contract.CONTRACT_NUM.eq(contractNum))
+                .execute();
+    }
+
+    @Override
+    public Boolean checkContractInWork(String contractNum) {
+        EhPaymentContractReceiver contract = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("contract");
+        DSLContext context = getReadOnlyContext();
+        Byte aByte = context.select(contract.IN_WORK)
+                .from(contract)
+                .where(contract.IS_RECORDER.eq((byte) 1))
+                .and(contract.CONTRACT_NUM.eq(contractNum))
+                .fetchOne(contract.IN_WORK);
+        if(aByte == (byte)0){
+            return false;
+        }
+        return true;
+    }
+
 
     @Override
     public Long saveAnOrderCopy(String payerType, String payerId, String amountOwed, String clientAppName, Long communityId, String contactNum, String openid, String payerName,Long expireTimePeriod,Integer namespaceId) {
@@ -1955,5 +1996,13 @@ public class AssetProviderImpl implements AssetProvider {
                 .execute();
 
     }
-
+    private DSLContext getReadOnlyContext(){
+        return this.dbProvider.getDslContext(AccessSpec.readOnly());
+    }
+    private DSLContext getReadWriteContext(){
+        return this.dbProvider.getDslContext(AccessSpec.readWrite());
+    }
+    private Long getNextSequence(Class clz){
+        return this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(clz));
+    }
 }

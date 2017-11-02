@@ -2338,6 +2338,13 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_QUESTIONNAIRE_RANGES.ID.max()).from(Tables.EH_QUESTIONNAIRE_RANGES).fetchOne().value1();
         });
 
+        syncTableSequence(null, EhForumCategories.class, Tables.EH_FORUM_CATEGORIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FORUM_CATEGORIES.ID.max()).from(Tables.EH_FORUM_CATEGORIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhInteractSettings.class, Tables.EH_INTERACT_SETTINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_INTERACT_SETTINGS.ID.max()).from(Tables.EH_INTERACT_SETTINGS).fetchOne().value1();
+        });
+
     }
 
     @SuppressWarnings("rawtypes")

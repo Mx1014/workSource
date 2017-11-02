@@ -103,7 +103,7 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 		dto.setEntryTime(System.currentTimeMillis() - 5000000);
 		dto.setOrderToken("11");
 		dto.setParkingTime(1000);
-		return null;
+		return dto;
 	}
 
     @Override

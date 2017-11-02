@@ -1964,6 +1964,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     	    forumCmd.setExcludeCategories(cmd.getExcludeCategories());
     	    forumCmd.setCategoryId(cmd.getCategoryId());
             forumCmd.setTag(cmd.getTag());
+            forumCmd.setForumEntryId(cmd.getForumEntryId());
     	    response = forumService.listTopicsByForums(forumCmd);
 	        break;
 	    case COMMUNITY_ALL:

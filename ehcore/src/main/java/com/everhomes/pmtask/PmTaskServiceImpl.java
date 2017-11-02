@@ -2701,4 +2701,5 @@ public class PmTaskServiceImpl implements PmTaskService {
 		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
 		flowService.processAutoStep(stepDTO);
 	}
+
 }
