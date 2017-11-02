@@ -77,12 +77,8 @@ public class PusherVendorServiceImpl implements PusherVendorService {
             cmd.setOsType((byte)1);
             AppUrlDTO dto = appUrlService.getAppInfo(cmd);
             if(dto != null) {
-                if(devMessage.getTitle() == null) {
-                    devMessage.setTitle(dto.getName());
-                    }
-                if(devMessage.getIcon() == null) {
-                    devMessage.setIcon(dto.getLogoUrl());
-                    }
+                devMessage.setTitle(dto.getName());
+                devMessage.setIcon(dto.getLogoUrl());
             }
             
             String json = new String(cert.getData());
