@@ -11,6 +11,7 @@ import com.everhomes.messaging.PusherVendorService;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.messaging.DeviceMessage;
+import com.everhomes.rest.user.OSType;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.ThreadUtil;
@@ -63,6 +64,16 @@ public class PusherVendorServiceImpl implements PusherVendorService {
         int namespaceId = destLogin.getNamespaceId();
         String name = String.format("namespaceId:%d:%s", namespaceId, venderType.getCode());
         PusherVender pusher = pusherMap.get(name);
+        
+        GetAppInfoCommand cmd = new GetAppInfoCommand();
+        cmd.setNamespaceId(namespaceId);
+        cmd.setOsType(OSType.Android.getCode());
+        AppUrlDTO dto = appUrlService.getAppInfo(cmd);
+        if(dto != null) {
+            devMessage.setTitle(dto.getName());
+            devMessage.setIcon(dto.getLogoUrl());
+        }
+        
         if(pusher == null) {
             Cert cert = certProvider.findCertByName(name);
             if (cert == null || cert.getData() == null) {
@@ -70,15 +81,6 @@ public class PusherVendorServiceImpl implements PusherVendorService {
                     LOGGER.warn("Pushing name= " + name + " not find");
                     return;
                 }
-            }
-            
-            GetAppInfoCommand cmd = new GetAppInfoCommand();
-            cmd.setNamespaceId(namespaceId);
-            cmd.setOsType((byte)1);
-            AppUrlDTO dto = appUrlService.getAppInfo(cmd);
-            if(dto != null) {
-                devMessage.setTitle(dto.getName());
-                devMessage.setIcon(dto.getLogoUrl());
             }
             
             String json = new String(cert.getData());
