@@ -2,6 +2,7 @@
 package com.everhomes.rest.acl;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -17,6 +18,12 @@ import java.util.List;
  * <li>allFlag：是否全部业务模块 1：是 0：否</li>
  * <li>modules：模块列表，{@link com.everhomes.rest.acl.ServiceModuleDTO}</li>
  * <li>projects：项目列表，{@link com.everhomes.rest.acl.ProjectDTO}</li>
+ * <li>community_control_flag: 受项目控制的全部标识</li>
+ * <li>org_control_flag：受OA控制的全部标识</li>
+ * <li>unlimit_control_flag： 不受范围控制的全部标识</li>
+ * <li>community_apps: 项目控制的应用</li>
+ * <li>org_apps：OA控制的应用</li>
+ * <li>unlimit_apps：不受范围控制的应用</li>
  * </ul>
  */
 public class ServiceModuleAuthorizationsDTO {
@@ -41,6 +48,22 @@ public class ServiceModuleAuthorizationsDTO {
 
     @ItemType(ServiceModuleDTO.class)
     private List<ServiceModuleDTO> modules;
+
+    private Byte community_control_flag;
+
+    private Byte org_control_flag;
+
+    private Byte unlimit_control_flag;
+
+    @ItemType(ServiceModuleAppDTO.class)
+    private List<ServiceModuleAppDTO> community_apps;
+
+    @ItemType(ServiceModuleAppDTO.class)
+    private List<ServiceModuleAppDTO> org_apps;
+
+    @ItemType(ServiceModuleAppDTO.class)
+    private List<ServiceModuleAppDTO> unlimit_apps;
+
 
     @ItemType(ProjectDTO.class)
     private List<ProjectDTO> projects;
@@ -141,4 +164,51 @@ public class ServiceModuleAuthorizationsDTO {
         return StringHelper.toJsonString(this);
     }
 
+    public Byte getCommunity_control_flag() {
+        return community_control_flag;
+    }
+
+    public void setCommunity_control_flag(Byte community_control_flag) {
+        this.community_control_flag = community_control_flag;
+    }
+
+    public Byte getOrg_control_flag() {
+        return org_control_flag;
+    }
+
+    public void setOrg_control_flag(Byte org_control_flag) {
+        this.org_control_flag = org_control_flag;
+    }
+
+    public Byte getUnlimit_control_flag() {
+        return unlimit_control_flag;
+    }
+
+    public void setUnlimit_control_flag(Byte unlimit_control_flag) {
+        this.unlimit_control_flag = unlimit_control_flag;
+    }
+
+    public List<ServiceModuleAppDTO> getCommunity_apps() {
+        return community_apps;
+    }
+
+    public void setCommunity_apps(List<ServiceModuleAppDTO> community_apps) {
+        this.community_apps = community_apps;
+    }
+
+    public List<ServiceModuleAppDTO> getOrg_apps() {
+        return org_apps;
+    }
+
+    public void setOrg_apps(List<ServiceModuleAppDTO> org_apps) {
+        this.org_apps = org_apps;
+    }
+
+    public List<ServiceModuleAppDTO> getUnlimit_apps() {
+        return unlimit_apps;
+    }
+
+    public void setUnlimit_apps(List<ServiceModuleAppDTO> unlimit_apps) {
+        this.unlimit_apps = unlimit_apps;
+    }
 }

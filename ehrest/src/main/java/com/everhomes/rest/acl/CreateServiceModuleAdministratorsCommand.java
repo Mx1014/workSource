@@ -45,25 +45,24 @@ public class CreateServiceModuleAdministratorsCommand {
     @ItemType(Long.class)
     private List<Long> moduleIds;
 
-    private Long module_app_id;
-
-    private String module_app_control_type;
-
+    //
     private Byte all_community_control_flag;
 
     private String community_control_json;
 
+    @ItemType(Long.class)
+    private List<ModuleAppTarget> community_target;
+
+    //
     private Byte all_org_control_flag;
 
     private String org_control_json;
 
-    private Byte all_unlimit_control_flag;
-
-    @ItemType(Long.class)
-    private List<ModuleAppTarget> community_target;
-
     @ItemType(Long.class)
     private List<ModuleAppTarget> org_target;
+
+    //
+    private Byte all_unlimit_control_flag;
 
     @ItemType(Long.class)
     private List<ModuleAppTarget> unlimit_target;
@@ -130,15 +129,6 @@ public class CreateServiceModuleAdministratorsCommand {
         return StringHelper.toJsonString(this);
     }
 
-
-    public Long getModule_app_id() {
-        return module_app_id;
-    }
-
-    public void setModule_app_id(Long module_app_id) {
-        this.module_app_id = module_app_id;
-    }
-
     public Byte getAll_community_control_flag() {
         return all_community_control_flag;
     }
@@ -169,14 +159,6 @@ public class CreateServiceModuleAdministratorsCommand {
 
     public void setOrg_control_json(String org_control_json) {
         this.org_control_json = org_control_json;
-    }
-
-    public String getModule_app_control_type() {
-        return module_app_control_type;
-    }
-
-    public void setModule_app_control_type(String module_app_control_type) {
-        this.module_app_control_type = module_app_control_type;
     }
 
     public List<ModuleAppTarget> getCommunity_target() {

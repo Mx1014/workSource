@@ -172,8 +172,15 @@ public interface RolePrivilegeService {
 	 * 业务模块管理员列表
 	 * @param cmd
 	 * @return
-     */
+	 */
 	List<ServiceModuleAuthorizationsDTO> listServiceModuleAdministrators(ListServiceModuleAdministratorsCommand cmd);
+
+	/**
+	 * 业务模块管理员列表(应用)
+	 * @param cmd
+	 * @return
+	 */
+	List<ServiceModuleAuthorizationsDTO> listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd);
 
 	/**
 	 * 超级管理员列表

@@ -16,6 +16,8 @@ public interface AuthorizationProvider {
 
     List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType);
 
+    List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, String moduleControlType, Byte all_control_flag, Boolean targetFlag);
+
     Long createAuthorization(Authorization authorization);
 
     long createAuthorizations(List<Authorization> authorizations);
