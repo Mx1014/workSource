@@ -154,3 +154,6 @@ UPDATE eh_forum_posts set forum_entry_id = 2 where tag = '招聘与求职' and f
 
 UPDATE eh_launch_pad_items set action_data = '{"tag":"二手交易","forumEntryId":"1"}' where namespace_id = 999983 and item_name = '园区生活';
 UPDATE eh_launch_pad_items set action_data = '{"tag":"招聘与求职","forumEntryId":"2"}' where namespace_id = 999983 and item_name = '招聘与求职';
+
+-- 停车 add by sw 20171102
+UPDATE eh_parking_card_requests set card_type_id = '2' where owner_id = 240111044331055940 and card_type_id is NULL;
