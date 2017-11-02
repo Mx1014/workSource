@@ -17,7 +17,6 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.sql.Date;
@@ -139,7 +138,25 @@ public class ArchivesProviderImpl implements ArchivesProvider {
     }
 
     @Override
-    public void createArchivesForm(ArchivesFroms form){
+    public ArchivesDismissEmployees getArchivesDismissEmployeesByDetailId(Long organizationId, Long detailId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhArchivesDismissEmployeesRecord> query = context.selectQuery(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES);
+        query.addConditions(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+        query.addConditions(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ARCHIVES_DISMISS_EMPLOYEES.DETAIL_ID.eq(detailId));
+        return query.fetchOneInto(ArchivesDismissEmployees.class);
+    }
+
+    @Override
+    public void deleteArchivesDismissEmployees(ArchivesDismissEmployees dismissEmployee) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhArchivesDismissEmployeesDao dao = new EhArchivesDismissEmployeesDao(context.configuration());
+        dao.deleteById(dismissEmployee.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhArchivesDismissEmployees.class, dismissEmployee.getId());
+    }
+
+    @Override
+    public void createArchivesForm(ArchivesFroms form) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhArchivesForms.class));
         form.setId(id);
         form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

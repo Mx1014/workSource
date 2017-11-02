@@ -19,6 +19,10 @@ public interface ArchivesProvider {
 
     ArchivesStickyContacts findArchivesStickyContactsByDetailIdAndOrganizationId(Integer namespaceId, Long organizationId, Long detailId);
 
+    void deleteArchivesDismissEmployees(ArchivesDismissEmployees dismissEmployee);
+
+    ArchivesDismissEmployees getArchivesDismissEmployeesByDetailId(Long organizationId, Long detailId);
+
     void createArchivesDismissEmployee(ArchivesDismissEmployees archivesDismissEmployee);
 
     List<ArchivesDismissEmployees> listArchivesDismissEmployees(Integer offset, Integer count, Integer namespaceId, Condition condition);
