@@ -308,11 +308,20 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 					case COMMUNITY_ALL:
 						userLevelRanges.addAll(getCommunityUsers(originalRange.getRange(),0));
 						break;
-					case COMMUNITY_UNAUTHORIZED:
+					case COMMUNITY_AUTHENTICATED:
 						userLevelRanges.addAll(getCommunityUsers(originalRange.getRange(),1));
 						break;
-					case COMMUNITY_AUTHENTICATED:
+					case COMMUNITY_UNAUTHORIZED:
 						userLevelRanges.addAll(getCommunityUsers(originalRange.getRange(),2));
+						break;
+					case NAMESPACE_ALL:
+						userLevelRanges.addAll(getNamespaceUsers(originalRange.getRange(),0));
+						break;
+					case NAMESPACE_AUTHENTICATED:
+						userLevelRanges.addAll(getNamespaceUsers(originalRange.getRange(),1));
+						break;
+					case NAMESPACE_UNAUTHORIZED:
+						userLevelRanges.addAll(getNamespaceUsers(originalRange.getRange(),2));
 						break;
 				}
 			}else if (targetType == QuestionnaireTargetType.ORGANIZATION){
@@ -346,6 +355,16 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
 		cmd.setCommunityId(Long.valueOf(range));
 		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		cmd.setPageSize(10000000);
+		cmd.setIsAuth(isAuthor);
+		//这里只需要查询userID，其他的附加查询不需要，所以自己搞了个查询。
+		List<UserOrganizations> userOrganizations = listUserCommunities(cmd);
+		return userOrganizations.stream().map(r->String.valueOf(r.getUserId())).collect(Collectors.toList());
+	}
+
+	private  List<String> getNamespaceUsers(String range, Integer isAuthor) {
+		ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
+		cmd.setNamespaceId(Integer.valueOf(range));
 		cmd.setPageSize(10000000);
 		cmd.setIsAuth(isAuthor);
 		//这里只需要查询userID，其他的附加查询不需要，所以自己搞了个查询。

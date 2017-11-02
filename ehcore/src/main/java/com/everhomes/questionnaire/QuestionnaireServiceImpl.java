@@ -303,6 +303,13 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			QuestionnaireRange questionnaireRange = ConvertHelper.convert(r,QuestionnaireRange.class);
 			questionnaireRange.setQuestionnaireId(questionnaireId);
 			questionnaireRange.setStatus(CommonStatus.ACTIVE.getCode());
+			questionnaireRange.setNamespaceId(UserContext.getCurrentNamespaceId());
+			QuestionnaireRangeType rangeType = QuestionnaireRangeType.fromCode(r.getRangeType());
+			if(rangeType == QuestionnaireRangeType.NAMESPACE_ALL ||
+					rangeType == QuestionnaireRangeType.NAMESPACE_AUTHENTICATED ||
+					rangeType == QuestionnaireRangeType.NAMESPACE_UNAUTHORIZED){
+				questionnaireRange.setRange(""+UserContext.getCurrentNamespaceId());
+			}
 			questionnaireRangeProvider.createQuestionnaireRange(questionnaireRange);
 		});
 	}
