@@ -5042,7 +5042,7 @@ public class PunchServiceImpl implements PunchService {
 					Integer versionId= 0;
 					try {
 						UniongroupVersion unionGroupVersion = getPunchGroupVersion(org.getId());
-						versionId=unionGroupVersion.getCurrentVersionCode() + 1
+						versionId=unionGroupVersion.getCurrentVersionCode() + 1;
 						unionGroupVersion.setCurrentVersionCode(versionId);
 						//把config版本复制一份新的,
 						uniongroupService.cloneGroupTypeDataToVersion(org.getNamespaceId(), org.getId(), UniongroupType.PUNCHGROUP.getCode(),
