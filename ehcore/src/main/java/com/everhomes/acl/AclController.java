@@ -630,4 +630,20 @@ public class AclController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /acl/resetServiceModuleAdministrators</b>
+     * <p>重建对象授权关系</p>
+     */
+    @RequestMapping("resetServiceModuleAdministrators")
+    @RestReturn(value=String.class)
+    public RestResponse resetServiceModuleAdministrators(@Valid CreateServiceModuleAdministratorsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.AUTH_RELATION_CREATE);
+        rolePrivilegeService.resetServiceModuleAdministrators(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
