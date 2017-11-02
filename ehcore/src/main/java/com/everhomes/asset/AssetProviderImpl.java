@@ -2067,11 +2067,11 @@ public class AssetProviderImpl implements AssetProvider {
             for(int i = 0; i < communityIds.size(); i ++){
                 Long cid = communityIds.get(i);
                 //只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
-                Boolean hasSovereign = checkSovereighty(communityId);
-                if(!hasSovereign){
-                    sovereighty = 0;
-                    configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, cid, sovereighty);
-                }
+//                Boolean hasSovereign = checkSovereighty(communityId);
+//                if(!hasSovereign){
+//                    sovereighty = 0;
+//                    configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, cid, sovereighty);
+//                }
             }
         }else{
             //只有一个园区,不是list过来的
@@ -2094,7 +2094,7 @@ public class AssetProviderImpl implements AssetProvider {
             scope.setOwnerId(communityId);
             scope.setOwnerType(ownerType);
             scope.setProjectLevelName(vo.getProjectChargingItemName());
-            scope.setSovereightyFlag(sovereighty);
+//            scope.setSovereightyFlag(sovereighty);
             list.add(scope);
         }
         this.dbProvider.execute((TransactionStatus status) -> {
