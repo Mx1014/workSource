@@ -18,6 +18,7 @@ import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.*;
 import com.everhomes.repeat.RepeatService;
+import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.contract.ChargingVariablesDTO;
@@ -25,6 +26,7 @@ import com.everhomes.rest.contract.ContractChargingItemDTO;
 import com.everhomes.rest.contract.PeriodUnit;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.energy.CreateEnergyTaskCommand;
+import com.everhomes.rest.energy.EnergyMeterSettingType;
 import com.everhomes.rest.energy.EnergyMeterStatus;
 import com.everhomes.rest.energy.TaskGeneratePaymentFlag;
 import com.everhomes.rest.organization.pm.DefaultChargingItemPropertyType;
@@ -44,6 +46,8 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
@@ -106,6 +110,9 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
     @Autowired
     private EnergyMeterReadingLogProvider meterReadingLogProvider;
 
+    @Autowired
+    private EnergyMeterChangeLogProvider meterChangeLogProvider;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         if(LOGGER.isInfoEnabled()) {
@@ -146,10 +153,13 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
 
     }
 
-    private BigDecimal calculateAmount(EnergyMeterTask task) {
+    private BigDecimal calculateAmount(EnergyMeterTask task, EnergyMeter meter) {
         // 拿出单个表统计当天的所有的读表记录
         List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByTask(task.getId());
 
+        BigDecimal amount = new BigDecimal("0");
+        BigDecimal taskReading = task.getReading();
+        BigDecimal readingAnchor = task.getLastTaskReading();
         // 重置flag
         Byte resetFlag = TrueOrFalseFlag.FALSE.getCode();
         // 换表flag
@@ -161,25 +171,44 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
                 // 有归零 量程设置为最大值-锚点,锚点设置为0
                 if(TrueOrFalseFlag.fromCode(log.getResetMeterFlag()) == TrueOrFalseFlag.TRUE) {
                     resetFlag = TrueOrFalseFlag.TRUE.getCode();
+
                     amount = amount.add(meter.getMaxReading().subtract(readingAnchor));
                     readingAnchor = new BigDecimal(0);
-                    dayStat.setResetMeterFlag(resetFlag);
                 }
                 // 有换表 量程加上旧表读数-锚点,锚点重置为新读数
                 if(TrueOrFalseFlag.fromCode(log.getChangeMeterFlag()) == TrueOrFalseFlag.TRUE) {
                     changeFlag = TrueOrFalseFlag.TRUE.getCode();
-                    EnergyMeterChangeLog changeLog = this.meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
+                    EnergyMeterChangeLog changeLog = meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
                     amount = amount.add(changeLog.getOldReading().subtract(readingAnchor));
                     readingAnchor = changeLog.getNewReading();
-                    dayStat.setChangeMeterFlag(changeFlag);
                 }
             }
         }
 
-        //计算当天走了多少字 量程+昨天最后一次读数-锚点
-        amount = amount.add(dayCurrReading.subtract(readingAnchor));
-        dayStat.setCurrentAmount(amount);
-        LOGGER.info("dayStat amount : {}", dayStat);
+        //计算走了多少字 量程+任务最后一次读数-锚点
+        amount = amount.add(taskReading.subtract(readingAnchor));
+
+//        EnergyMeterSettingLog amountSetting = meterSettingLogProvider
+//                .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA ,yesterdayBegin);
+//        String amountFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
+//        ScriptEngineManager manager = new ScriptEngineManager();
+//        ScriptEngine engine = manager.getEngineByName("js");
+//
+//        engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
+//        engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
+//        try {
+//                double ra = Double.valueOf(engine.eval(amountFormula).toString());
+//                realAmount = BigDecimal.valueOf(ra);
+//                engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), realAmount);
+//            } catch (ScriptException e) {
+//                String paramsStr = "{AMOUNT:" + amount +
+//                        ", TIMES:" + rateSetting.getSettingValue() +
+//                        "}";
+//                LOGGER.error("evaluate formula error, amountFormula={}, params={}", amountFormula, paramsStr);
+//                e.printStackTrace();
+//                throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
+//            }
+
     }
 
     private void generateTaskPaymentExpectancies(EnergyMeterTask task) {
