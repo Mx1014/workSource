@@ -269,7 +269,7 @@ public interface PunchProvider {
 	public PunchExceptionRequest findPunchExceptionRequest(Long userId, Long ownerId, Long punchDate,
 														   Integer intervalTimeNo);
 
-	public PunchExceptionRequest findPunchExceptionRequestByRequestId(Long ownerId, Long creatorUid, Long id);
+	public PunchExceptionRequest findPunchExceptionRequestByRequestId(Long enterpriseId, Long userId, Long requestId);
 
 	public void deletePunchExceptionRequest(PunchExceptionRequest punchExceptionRequest);
 
