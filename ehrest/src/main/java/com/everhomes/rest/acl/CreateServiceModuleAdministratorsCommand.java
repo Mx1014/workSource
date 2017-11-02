@@ -50,6 +50,7 @@ public class CreateServiceModuleAdministratorsCommand {
     private Byte allCommunityControlFlag;
 
     @NotNull
+    @ItemType(Long.class)
     private List<Long> communityControlIds;
 
     @ItemType(Long.class)
