@@ -67,3 +67,24 @@ public class ArchivesTest {
         System.out.println(token2.length + " : " + token2.toString());
     }
 }
+class Father{
+    protected void mine(){
+
+    }
+}
+
+class Son extends Father{
+    @Override
+    protected void mine() {
+        super.mine();
+    }
+}
+/*
+class Son extends Father{
+
+    //  子类
+    public void mine(){
+        //  父类
+        super.mine();
+    }
+}*/
