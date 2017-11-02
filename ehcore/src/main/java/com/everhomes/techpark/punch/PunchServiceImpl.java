@@ -7144,11 +7144,11 @@ public class PunchServiceImpl implements PunchService {
 		Calendar punCalendar = Calendar.getInstance();
 		punCalendar.setTime(punchTime);
 		//现在打卡属于哪一天
-		java.sql.Date pDate = calculatePunchDate(punCalendar, cmd.getEnterpriseId(), userId);
+		java.sql.Date pDate = new java.sql.Date(punchTime.getTime()); 
 		if (null == cmd.getQueryTime()) {
 			cmd.setQueryTime(punchTime.getTime());
             if(null != pr) {
-				
+        		pDate = calculatePunchDate(punCalendar, cmd.getEnterpriseId(), userId);
 				PunchLogDTO punchLog = getPunchType(userId, cmd.getEnterpriseId(), punchTime, pDate);
 				if (null != punchLog) {
 					if (null != punchLog.getExpiryTime()) {
