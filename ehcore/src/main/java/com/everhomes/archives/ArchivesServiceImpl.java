@@ -1504,9 +1504,9 @@ public class ArchivesServiceImpl implements ArchivesService {
                 organizationProvider.updateOrganizationMemberDetails(detail, detail.getId());
             }
             //  2.若为当前日期则立即执行
-            if (cmd.getEmploymentTime().toString().equals(ArchivesUtil.currentDate().toString()))
+/*            if (cmd.getEmploymentTime().toString().equals(ArchivesUtil.currentDate().toString()))
                 employArchivesEmployees(cmd);
-            else {
+            else {*/
                 //  3.若为其它时间则增加转正配置
                 ArchivesConfigurations configuration = new ArchivesConfigurations();
                 configuration.setOrganizationId(cmd.getOrganizationId());
@@ -1515,7 +1515,7 @@ public class ArchivesServiceImpl implements ArchivesService {
                 configuration.setOperationInformation(JSON.toJSONString(cmd));
                 archivesProvider.createArchivesConfigurations(configuration);
 
-            }
+//            }
             //  4.更新人员变动记录
             employArchivesEmployeesLogs(cmd);
             return null;
@@ -1542,18 +1542,18 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public void transferArchivesEmployeesConfig(TransferArchivesEmployeesCommand cmd) {
         dbProvider.execute((TransactionStatus status) -> {
-/*            //  1.若为当天则立即执行
+            //  1.若为当天则立即执行
             if (cmd.getEffectiveTime().toString().equals(ArchivesUtil.currentDate().toString()))
                 transferArchivesEmployees(cmd);
                 //  2.若为其它时间则添加调整配置
-            else {*/
+            else {
                 ArchivesConfigurations configuration = new ArchivesConfigurations();
                 configuration.setOrganizationId(cmd.getOrganizationId());
                 configuration.setOperationType(ArchivesOperationType.TRANSFER.getCode());
                 configuration.setOperationTime(cmd.getEffectiveTime());
                 configuration.setOperationInformation(JSON.toJSONString(cmd));
                 archivesProvider.createArchivesConfigurations(configuration);
-//            }
+            }
             //  3.更新人员调整记录
             transferArchivesEmployeesLogs(cmd);
             return null;
