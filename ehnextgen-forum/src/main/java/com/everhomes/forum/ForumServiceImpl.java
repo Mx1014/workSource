@@ -4117,10 +4117,10 @@ public class ForumServiceImpl implements ForumService {
         if(post.getActivityCategoryId() != null && post.getActivityCategoryId().longValue() != 0){
             //活动应用的帖子
             setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ACTIVITY.getCode(), post.getActivityCategoryId());
-        }else if(post.getForumEntryId() != null){
+        }else if(post.getForumEntryId() != null && (post.getCategoryId() == null || post.getCategoryId() != 1003)){
             //论坛应用的帖子
             setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.FORUM.getCode(), post.getForumEntryId());
-        }else if(post.getCategoryId() == 1003){
+        }else if(post.getCategoryId() != null && post.getCategoryId() == 1003){
             //公告应用的帖子
             setting = forumProvider.findInteractSetting(namespaceId, post.getForumId(), InteractSettingType.ANNOUNCEMENT.getCode(), null);
         }

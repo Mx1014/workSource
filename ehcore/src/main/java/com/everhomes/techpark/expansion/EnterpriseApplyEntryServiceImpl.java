@@ -882,13 +882,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
 		String detailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_DETAIL_URL, "");
 
-		detailUrl = String.format(detailUrl, dto.getId());
+		detailUrl = String.format(detailUrl, dto.getId(), dto.getNamespaceId());
 
 		dto.setDetailUrl(homeUrl + detailUrl);
 
 		String buildingDetailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_BUILDING_DETAIL_URL, "");
 
-		buildingDetailUrl = String.format(buildingDetailUrl, dto.getBuildingId(), dto.getNamespaceId());
+		buildingDetailUrl = String.format(buildingDetailUrl, dto.getBuildingId());
 		dto.setBuildingDetailUrl(homeUrl + buildingDetailUrl);
     }
 
