@@ -121,6 +121,16 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
+	public void delteAuthorizationControlConfigsWithCondition(Integer namespaceId, Long userId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAuthorizationControlConfigs.class));
+		DeleteQuery query = context.deleteQuery(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS);
+		query.addConditions(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.USER_ID.eq(userId));
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAuthorizationControlConfigs.class, null);
+	}
+
+	@Override
 	public List<Project> getAuthorizationProjectsByAuthIdAndTargets(String identityType, String authType, Long authId, List<Target> targets){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<Project> result  = new ArrayList<>();

@@ -8,7 +8,7 @@ package com.everhomes.rest.oauth2;
  * </ul>
  */
 public enum ModuleManagementType {
-    COMMUNITY_CONTROL("community_control"), ORG_CONTROL("org_control"), UNLIMIT("unlimit");
+    COMMUNITY_CONTROL("community_control"), ORG_CONTROL("org_control"), UNLIMIT("unlimit_control");
 
     private String code;
     private ModuleManagementType(String code) {

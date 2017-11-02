@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 public class ModuleAppTarget {
     private Long moduleId;
     private Long appId;
-    private String controlType;
+//    private String controlType;
 
     public Long getModuleId() {
         return moduleId;
@@ -28,11 +28,11 @@ public class ModuleAppTarget {
         return StringHelper.toJsonString(this);
     }
 
-    public String getControlType() {
-        return controlType;
-    }
-
-    public void setControlType(String controlType) {
-        this.controlType = controlType;
-    }
+//    public String getControlType() {
+//        return controlType;
+//    }
+//
+//    public void setControlType(String controlType) {
+//        this.controlType = controlType;
+//    }
 }
