@@ -4,7 +4,7 @@ CREATE TABLE `eh_parking_car_verifications` (
   `owner_id` bigint(20) NOT NULL DEFAULT '0',
   `parking_lot_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'reference to id of eh_parking_lots',
   `requestor_enterprise_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'the id of organization where the requestor is in',
-  `requestor_entperise_name` varchar(64) DEFAULT NULL COMMENT 'the enterprise name of plate owner',
+  `requestor_enterprise_name` varchar(64) DEFAULT NULL COMMENT 'the enterprise name of plate owner',
   `requestor_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'requestor id',
   `plate_number` varchar(64) DEFAULT NULL,
   `plate_owner_name` varchar(64) DEFAULT NULL COMMENT 'the name of plate owner',
