@@ -5395,7 +5395,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //重复添加纪录
                     repeatCreateOrganizationmembers(departmentIds, token, enterpriseIds, enterprise_member);
                     OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                    memberDetail.setDepartmentIds(JSON.toJSONString(departmentIds));
+                    if (departmentIds != null && departmentIds.size() > 0)
+                        memberDetail.setDepartmentIds(JSON.toJSONString(departmentIds));
                     memberDetail.setDepartment(convertToOrganizationName(departmentIds));
                 }
             });
@@ -5420,8 +5421,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 String token = enterprise_member.getContactToken();
                 repeatCreateOrganizationmembers(cmd.getJobPositionIds(), token, enterpriseIds, enterprise_member);
                 OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                memberDetail.setJobLevelIds(JSON.toJSONString(cmd.getJobPositionIds()));
-                memberDetail.setDepartment(convertToOrganizationName(cmd.getJobPositionIds()));
+                if (cmd.getJobPositionIds() != null && cmd.getJobPositionIds().size() > 0)
+                    memberDetail.setJobPositionIds(JSON.toJSONString(cmd.getJobPositionIds()));
+                memberDetail.setJobPosition(convertToOrganizationName(cmd.getJobPositionIds()));
             });
         }
 
@@ -5435,8 +5437,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 String token = enterprise_member.getContactToken();
                 repeatCreateOrganizationmembers(cmd.getJobLevelIds(), token, enterpriseIds, enterprise_member);
                 OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
-                memberDetail.setDepartmentIds(JSON.toJSONString(cmd.getJobLevelIds()));
-                memberDetail.setDepartment(convertToOrganizationName(cmd.getJobLevelIds()));
+                if (cmd.getJobLevelIds() != null && cmd.getJobLevelIds().size() > 0)
+                    memberDetail.setJobLevelIds(JSON.toJSONString(cmd.getJobLevelIds()));
+                memberDetail.setJobLevel(convertToOrganizationName(cmd.getJobLevelIds()));
             });
         }
     }
@@ -10164,13 +10167,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 //同步部门、岗位、职级的修改
                 OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(organizationMember.getDetailId());
-                memberDetail.setDepartmentIds(JSON.toJSONString(departmentIds));
+                if (departmentIds != null && departmentIds.size() > 0)
+                    memberDetail.setDepartmentIds(JSON.toJSONString(departmentIds));
                 memberDetail.setDepartment(convertToOrganizationName(departmentIds));
-                memberDetail.setJobPositionIds(JSON.toJSONString(jobPositionIds));
+
+                if (jobPositionIds != null && jobPositionIds.size() > 0)
+                    memberDetail.setJobPositionIds(JSON.toJSONString(jobPositionIds));
                 memberDetail.setJobPosition(convertToOrganizationName(jobPositionIds));
-                memberDetail.setJobLevelIds(JSON.toJSONString(jobLevelIds));
-                memberDetail.setJobLevelIds(convertToOrganizationName(jobLevelIds));
-                organizationProvider.updateOrganizationMemberDetails(memberDetail,memberDetail.getId());
+
+                if (jobLevelIds != null && jobLevelIds.size() > 0)
+                    memberDetail.setJobLevelIds(JSON.toJSONString(jobLevelIds));
+                memberDetail.setJobLevel(convertToOrganizationName(jobLevelIds));
+
+                organizationProvider.updateOrganizationMemberDetails(memberDetail, memberDetail.getId());
 
                 dto.setGroups(groups);
 
