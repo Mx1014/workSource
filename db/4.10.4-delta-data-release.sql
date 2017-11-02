@@ -64,3 +64,5 @@ UPDATE eh_configurations set `value` = '/park-entry/dist/index.html?hideNavigati
 UPDATE eh_configurations set `value` = '/park-entry/dist/index.html?hideNavigationBar=1#/building_detail/%s/%s' where `name` = 'apply.entry.lease.building.detail.url';
 UPDATE eh_configurations set `value` = '/park-entry/dist/index.html?hideNavigationBar=1#/rent_detail/%s/%s' where `name` = 'apply.entry.detail.url';
 
+-- dengs,是否始终是店铺管理的开关 2017.11.02 #18195
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('always.store.management', 'true', '是否始终是店铺管理', 0, NULL);
