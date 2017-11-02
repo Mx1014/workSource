@@ -5049,15 +5049,16 @@ public class PunchServiceImpl implements PunchService {
 						//更新当前版本到新的
 						uniongroupVersionProvider.updateUniongroupVersion(unionGroupVersion);
 					} catch (Exception e) {
-						LOGGER.error("dayRefreshPunchGroupScheduled error!!!+ org id : "+orgId +" current version : "+unionGroupVersion.getCurrentVersionCode());
+						LOGGER.error("dayRefreshPunchGroupScheduled error!!!+ org id : "+orgId +" current version : "+unionGroupVersion);
 						LOGGER.error("switch union group version error!!!",e);
 					}
 				}
-			}
+
+				LOGGER.debug("dayRefreshPunchGroupScheduled ---------- END ");
+				return null;
+			});
+		}
 	
-			LOGGER.debug("dayRefreshPunchGroupScheduled ---------- END ");
-			return null;
-		});
 	}
 
 	private void processTimeRule2Active(PunchRule pr) {
