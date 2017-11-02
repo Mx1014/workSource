@@ -5,11 +5,12 @@ package com.everhomes.rest.flow;
  * <ul>
  *     <li>INVALID((byte) 1): INVALID</li>
  *     <li>VALID((byte) 2): VALID</li>
+ *     <li>UNKNOWN((byte) 3): UNKNOWN</li>
  * </ul>
  */
 public enum FlowValidationStatus {
 
-    INVALID((byte) 1), VALID((byte) 2);
+    INVALID((byte) 1), VALID((byte) 2), UNKNOWN((byte) 3);
 
     private Byte code;
 
