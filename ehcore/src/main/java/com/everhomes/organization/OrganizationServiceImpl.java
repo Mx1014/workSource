@@ -6419,6 +6419,23 @@ public class OrganizationServiceImpl implements OrganizationService {
         return (Integer) tuple.first();
     }
 
+    @Override
+    public List<OrganizationManagerDTO> getManagerByTargetIdAndOrgId(Long orgId, Long targetId, Integer level) {
+        OrganizationMember member  = this.organizationProvider.findDepartmentMemberByTargetIdAndOrgId(targetId, orgId);
+        List<OrganizationManagerDTO> managers =  new ArrayList<>();
+        if(member != null){
+            // todo 本部门
+            Long org_id = member.getOrganizationId();
+            int i = 0;
+            while (i < level){
+                org_id = checkOrganization(org_id).getParentId();
+            }
+            managers = getOrganizationManagers(org_id);
+        }
+
+        return managers;
+    }
+
 
     private UserIdentifier createUserAndIdentifier(Integer namespaceId, String nickName, String identifierToken){
         User user = new User();
