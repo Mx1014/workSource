@@ -66,3 +66,7 @@ UPDATE eh_configurations set `value` = '/park-entry/dist/index.html?hideNavigati
 
 -- dengs,是否始终是店铺管理的开关 2017.11.02 #18195
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('always.store.management', 'true', '是否始终是店铺管理', 0, NULL);
+
+
+-- 删除分类  add by yanjun 20171102 已在beta、alpha执行
+DELETE from eh_categories WHERE name in ('二手和租售', '免费物品', '失物招领', '紧急通知');

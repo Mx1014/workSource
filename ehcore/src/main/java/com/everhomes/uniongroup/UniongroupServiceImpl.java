@@ -758,6 +758,7 @@ public class UniongroupServiceImpl implements UniongroupService {
                         LOGGER.error("memberIds is not found。namespaceId = {}, orgPath = {}", namespaceId, org.getPath());
 //                        throw RuntimeErrorException.errorWith(UniongroupErrorCode.SCOPE, UniongroupErrorCode.ERROR_INVALID_PARAMETER,
 //                                "memberIds is not found。");
+                        return null;
                     }
                     LOGGER.debug("guys who active save: " + memberIds.toString());
                     //去掉配置表中单独勾选的人员id
@@ -770,6 +771,7 @@ public class UniongroupServiceImpl implements UniongroupService {
                         LOGGER.error("memberIds is not found。namespaceId = {}, orgPath = {}", namespaceId, org.getPath());
 //                        throw RuntimeErrorException.errorWith(UniongroupErrorCode.SCOPE, UniongroupErrorCode.ERROR_INVALID_PARAMETER,
 //                                "memberIds is not found。");
+                        return null;
                     }
                     //去掉配置表中单独勾选的人员id
                     if (null != old_detail_ids) {
