@@ -58,3 +58,9 @@ update `eh_payment_charging_standards` set billing_cycle = 2;
 -- 物业缴费错误码 -- by wentian
 SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10001', 'zh_CN', '正在生成中');
+
+-- 园区入驻 add by sw 20171102
+UPDATE eh_configurations set `value` = '/park-entry/dist/index.html?hideNavigationBar=1#/project_intro/%s/%s' where `name` = 'apply.entry.lease.project.detail.url';
+UPDATE eh_configurations set `value` = '/park-entry/dist/index.html?hideNavigationBar=1#/building_detail/%s/%s' where `name` = 'apply.entry.lease.building.detail.url';
+UPDATE eh_configurations set `value` = '/park-entry/dist/index.html?hideNavigationBar=1#/rent_detail/%s/%s' where `name` = 'apply.entry.detail.url';
+
