@@ -16,9 +16,6 @@ import java.util.List;
  */
 public class SearchContentsBySceneCommand {
 
-	@ItemType(Long.class)
-	private List<Long> communityIds;
-
 	private Long buildingId;
 
 	private String sceneToken;
@@ -30,14 +27,6 @@ public class SearchContentsBySceneCommand {
 	private Long pageAnchor;
     
     private Integer pageSize;
-
-	public List<Long> getCommunityIds() {
-		return communityIds;
-	}
-
-	public void setCommunityIds(List<Long> communityIds) {
-		this.communityIds = communityIds;
-	}
 
 	public Long getBuildingId() {
 		return buildingId;

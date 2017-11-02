@@ -5,7 +5,6 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.business.BusinessService;
 import com.everhomes.community.Building;
-import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -95,8 +94,6 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         }
         CommunityMapSearchContentType contentType = CommunityMapSearchContentType.fromCode(cmd.getContentType());
 
-        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
-        cmd.setCommunityIds(communities.stream().map(Community::getId).collect(Collectors.toList()));
         SearchCommunityMapContentsResponse response = new SearchCommunityMapContentsResponse();
         switch(contentType) {
 

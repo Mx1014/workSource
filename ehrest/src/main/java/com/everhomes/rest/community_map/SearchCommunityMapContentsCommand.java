@@ -24,17 +24,6 @@ public class SearchCommunityMapContentsCommand {
 
     private Integer pageSize;
 
-    @ItemType(Long.class)
-    private List<Long> communityIds;
-
-    public List<Long> getCommunityIds() {
-        return communityIds;
-    }
-
-    public void setCommunityIds(List<Long> communityIds) {
-        this.communityIds = communityIds;
-    }
-
     public String getGeoType() {
         return geoType;
     }

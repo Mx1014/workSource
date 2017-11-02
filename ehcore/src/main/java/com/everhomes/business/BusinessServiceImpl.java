@@ -10,10 +10,7 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityGeoPoint;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.CommunityService;
+import com.everhomes.community.*;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -2084,6 +2081,18 @@ public class BusinessServiceImpl implements BusinessService {
 	}
 
 	@Override
+	public List<BuildingDTO> listBuildingsByKeywordAndNameSpace(ListBuildingsByKeywordAndNameSpaceCommand cmd) {
+		List<Building> buildings = communityProvider.ListBuildingsBykeywordAndNameSpace(cmd.getNamespaceId(), cmd.getKeyword());
+		return buildings.stream().map(r -> {
+			BuildingDTO dto = new BuildingDTO();
+			dto.setBuildingId(r.getId());
+			dto.setBuildingName(r.getName());
+			dto.setCommunityId(r.getCommunityId());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
 	public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(
 			ListPropApartmentsByKeywordCommand cmd) {
 		return addressService.listApartmentsByKeywordForBusiness(cmd);
@@ -2488,7 +2497,6 @@ public class BusinessServiceImpl implements BusinessService {
     	
         Map<String, Object> param = new HashMap<>();
         param.put("namespaceId", namespaceId);
-		param.put("communityIds", cmd.getCommunityIds());
 		param.put("buildingId", cmd.getBuildingId());
         param.put("keyword", cmd.getKeyword()==null?"":cmd.getKeyword());
 //        param.put("shopNo", String.valueOf(searchShopsCommand.getShopNo()));
