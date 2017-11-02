@@ -462,6 +462,7 @@ ALTER TABLE `eh_news` CHANGE COLUMN `phone` `phone` VARCHAR(32) NULL DEFAULT '0'
 -- merge from energy3.0 by xiongying20171030
 ALTER TABLE eh_energy_meters ADD COLUMN `cost_formula_source` TINYINT DEFAULT '0' COMMENT '0: 能耗设置, 1: 缴费模块';
 ALTER TABLE eh_energy_meter_setting_logs ADD COLUMN `formula_source` TINYINT DEFAULT '0' COMMENT '0: 能耗设置, 1: 缴费模块';
+ALTER TABLE eh_energy_meter_reading_logs ADD COLUMN `task_id` BIGINT DEFAULT '0';
 
 -- 表计关联门牌
 CREATE TABLE `eh_energy_meter_addresses` (

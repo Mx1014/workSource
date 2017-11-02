@@ -9,6 +9,7 @@ import com.everhomes.rest.energy.*;
 import com.everhomes.rest.equipment.ExportEquipmentsCardCommand;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
+import com.everhomes.scheduler.EnergyTaskScheduleJob;
 import com.everhomes.search.EnergyMeterTaskSearcher;
 import com.everhomes.search.EnergyPlanSearcher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -662,6 +663,18 @@ public class EnergyConsumptionController extends ControllerBase {
     @RequestMapping("syncEnergyTaskIndex")
     public RestResponse syncEnergyTaskIndex() {
         energyMeterTaskSearcher.syncFromDb();
+        return success();
+    }
+
+    /**
+     * <p>计算任务费用</p>
+     * <b>URL: /energy/calculateTaskFeeByTaskId</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("calculateTaskFeeByTaskId")
+    public RestResponse calculateTaskFeeByTaskId(CalculateTaskFeeByTaskIdCommand cmd) {
+        EnergyTaskScheduleJob job = new EnergyTaskScheduleJob();
+        job.calculateTaskFeeByTaskId(cmd.getTaskId());
         return success();
     }
 

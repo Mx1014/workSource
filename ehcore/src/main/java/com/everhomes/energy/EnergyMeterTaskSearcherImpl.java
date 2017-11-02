@@ -149,6 +149,7 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
 
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("planId", cmd.getPlanId()));
 
         if(cmd.getStartTime() != null) {
             RangeFilterBuilder rf = new RangeFilterBuilder("startTime");
