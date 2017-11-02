@@ -1592,7 +1592,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 			String flowCaseUrl = configProvider.getValue(ConfigConstants.PARKING_CAR_VERIFICATION_FLOWCASE_URL, "");
 
-			dto.setFlowCaseUrl(String.format(flowCaseUrl, verification.getFlowCaseId));
+			dto.setFlowCaseUrl(String.format(flowCaseUrl, verification.getFlowCaseId()));
 			return dto;
 		}else if (verification.getStatus() == ParkingCarVerificationStatus.SUCCEED.getCode()) {
 			String vendorName = parkingLot.getVendorName();
