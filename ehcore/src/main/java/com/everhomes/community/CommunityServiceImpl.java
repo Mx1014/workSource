@@ -2237,8 +2237,8 @@ public class CommunityServiceImpl implements CommunityService {
 		sheet.setDefaultRowHeightInPoints(20);
 		Row row = sheet.createRow(0);
 		row.createCell(0).setCellValue("昵称");
-		row.createCell(1).setCellValue("性别");
-		row.createCell(2).setCellValue("手机号");
+		row.createCell(1).setCellValue("手机号");
+		row.createCell(2).setCellValue("性别");
 		row.createCell(3).setCellValue("注册时间");
 		row.createCell(4).setCellValue("认证状态");
 		row.createCell(5).setCellValue("绑定信息");
@@ -2290,8 +2290,8 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 
 			tempRow.createCell(0).setCellValue(dto.getUserName());
-			tempRow.createCell(1).setCellValue(UserGender.fromCode(dto.getGender()).getText());
-			tempRow.createCell(2).setCellValue(dto.getPhone());
+			tempRow.createCell(1).setCellValue(dto.getPhone());
+			tempRow.createCell(2).setCellValue(UserGender.fromCode(dto.getGender()).getText());
 			tempRow.createCell(3).setCellValue(null != dto.getApplyTime() ? sdf.format(dto.getApplyTime()) : "");
 			tempRow.createCell(4).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
 			tempRow.createCell(5).setCellValue(UserSourceType.fromCode(dto.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
@@ -2332,14 +2332,11 @@ public class CommunityServiceImpl implements CommunityService {
 		sheet.setDefaultRowHeightInPoints(20);
 		Row row = sheet.createRow(0);
 		row.createCell(0).setCellValue("昵称");
-		row.createCell(1).setCellValue("性别");
-		row.createCell(2).setCellValue("手机号");
+		row.createCell(1).setCellValue("手机号");
+		row.createCell(2).setCellValue("性别");
 		row.createCell(3).setCellValue("注册时间");
 		row.createCell(4).setCellValue("认证状态");
 		row.createCell(5).setCellValue("绑定信息");
-//		row.createCell(5).setCellValue("企业");
-//		row.createCell(6).setCellValue("是否高管");
-//		row.createCell(7).setCellValue("职位");
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -2347,53 +2344,13 @@ public class CommunityServiceImpl implements CommunityService {
 		for(int i = 0; i < size; i++){
 			Row tempRow = sheet.createRow(i + 1);
 			CommunityUserAddressDTO dto = dtos.get(i);
-			//List<OrganizationDetailDTO> organizations = dto.getAddressDtos();
-
-			StringBuilder enterprises = new StringBuilder();
-			StringBuilder executiveFlag = new StringBuilder();
-			StringBuilder positionFlag = new StringBuilder();
-//			if (organizations != null) {
-//				for (int k = 0; k < organizations.size(); k++) {
-//					OrganizationDetailDTO org = organizations.get(k);
-//					enterprises.append(organizations.get(k).getDisplayName() + ",");
-//
-//					//是否高管、职位
-//					if(org.getCommunityUserOrgDetailDTO() != null){
-//						if(org.getCommunityUserOrgDetailDTO().getExecutiveFlag() == null || org.getCommunityUserOrgDetailDTO().getExecutiveFlag() == 0){
-//							executiveFlag.append("否,");
-//						}else {
-//							executiveFlag.append("是,");
-//						}
-//
-//						if(org.getCommunityUserOrgDetailDTO().getPositionTag() == null || org.getCommunityUserOrgDetailDTO().getPositionTag().equals("")){
-//							positionFlag.append("#,");
-//						}else {
-//							positionFlag.append(org.getCommunityUserOrgDetailDTO().getPositionTag() + ",");
-//						}
-//
-//					}else {
-//						executiveFlag.append("#,");
-//						positionFlag.append("#,");
-//					}
-//				}
-//			}
-
-			if(enterprises != null && enterprises.length() > 0 && executiveFlag != null && executiveFlag.length() > 0 && positionFlag != null && positionFlag.length() > 0){
-				enterprises.deleteCharAt(enterprises.length() - 1);
-				executiveFlag.deleteCharAt(enterprises.length() - 1);
-				positionFlag.deleteCharAt(enterprises.length() - 1);
-			}
 
 			tempRow.createCell(0).setCellValue(dto.getUserName());
-			tempRow.createCell(1).setCellValue(UserGender.fromCode(dto.getGender()).getText());
-			tempRow.createCell(2).setCellValue(dto.getPhone());
+			tempRow.createCell(1).setCellValue(dto.getPhone());
+			tempRow.createCell(2).setCellValue(UserGender.fromCode(dto.getGender()).getText());
 			tempRow.createCell(3).setCellValue(null != dto.getCreateTime() ? sdf.format(dto.getCreateTime()) : "");
 			tempRow.createCell(4).setCellValue(AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.AUTHENTICATED ? "认证" : AuthFlag.fromCode(dto.getIsAuth()) == AuthFlag.PENDING_AUTHENTICATION ? "待认证" : "非认证");
 			tempRow.createCell(5).setCellValue(UserSourceType.fromCode(dto.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
-
-//			tempRow.createCell(5).setCellValue(enterprises.toString());
-//			tempRow.createCell(6).setCellValue(executiveFlag.toString());
-//			tempRow.createCell(7).setCellValue(positionFlag.toString());
 
 		}
 		ByteArrayOutputStream out = null;
