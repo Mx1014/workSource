@@ -888,6 +888,8 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd) {
+        LOGGER.error("STARTTTTTTTTTTTT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
         Long contractId = cmd.getContractId();
         String contractNum = cmd.getContractNum();
 
@@ -929,7 +931,7 @@ public class AssetServiceImpl implements AssetService {
             if(standard.getFormulaType()==1 || standard.getFormulaType() == 2){
                 formulaCondition = assetProvider.getFormulas(standard.getId());
                 if(formulaCondition!=null){
-                    if(formulaCondition.size()>0){
+                    if(formulaCondition.size()>1){
                         LOGGER.error("普通公式的标准的id为"+standard.getId()+",对应了"+formulaCondition.size()+"条公式!");
                     }
                     PaymentFormula paymentFormula = formulaCondition.get(0);
@@ -1184,7 +1186,7 @@ public class AssetServiceImpl implements AssetService {
             billList.add(entry.getValue());
         }
 
-        LOGGER.debug("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
+        LOGGER.error("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
 
         this.dbProvider.execute((TransactionStatus status) -> {
             if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
@@ -1195,8 +1197,9 @@ public class AssetServiceImpl implements AssetService {
             assetProvider.saveContractVariables(contractDateList);
             return null;
         });
-
+        LOGGER.error("插入完成");
         assetProvider.setInworkFlagInContractReceiverWell(contractId,contractNum);
+        LOGGER.error("工作flag完成");
 
     }
 
@@ -1314,7 +1317,6 @@ public class AssetServiceImpl implements AssetService {
             //继续循环
             time++;
         }
-        LOGGER.info("账单产生了"+time+"项目,真实为"+list.size());
         //拆卸调组的包裹
         List<RentAdjust> rentAdjusts = cmd.getRentAdjusts();
         if(rentAdjusts!=null){

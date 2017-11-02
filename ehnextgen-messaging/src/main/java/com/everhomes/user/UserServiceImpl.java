@@ -2110,7 +2110,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Gen the default avatar for user by gender, userId=" + userId 
+			LOGGER.debug("Gen the default avatar for user by gender, userId=" + userId
 					+ ", namespaceId=" + namespaceId + ", gener=" + gener + ", avatarUri=" + avatarUri);
 		}
 

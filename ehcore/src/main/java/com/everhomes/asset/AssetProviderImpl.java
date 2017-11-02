@@ -1975,15 +1975,9 @@ public class AssetProviderImpl implements AssetProvider {
         List<AssetPaymentOrderBills> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t");
-        context.select()
-                .from(t)
+        context.selectFrom(t)
                 .where(t.ORDER_ID.eq(orderId))
-                .fetch()
-                .map(r -> {
-                    list.add(ConvertHelper.convert(r,AssetPaymentOrderBills.class));
-                    return null;
-                });
-
+                .fetchInto(AssetPaymentOrderBills.class);
         return list;
     }
 
