@@ -122,6 +122,7 @@ public class ZJContractHandler implements ContractService{
                 if(dto.getContractNumber() == null) {
                     dto.setContractNumber(contract.getName());
                 }
+                dto.setRent(contract.getAmount());
                 dto.setBuildings(contract.getApartments());
                 dto.setContractStartDate(strToTimestamp(contract.getContractStartDate()));
                 dto.setContractEndDate(strToTimestamp(contract.getContractEndDate()));
