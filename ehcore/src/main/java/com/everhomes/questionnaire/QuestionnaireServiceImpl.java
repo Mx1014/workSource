@@ -225,6 +225,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			}else{
 				optionDTO.setOptionName(stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN4,"zh_CN","匿名用户"));
 			}
+			optionDTO.setTargetPhone(null);
 		}
 		optionDTO.setOptionContent(answer.getOptionContent());
 		optionDTO.setTargetPhone(answer.getTargetPhone());
@@ -869,6 +870,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			}else{
 				dto.setTargetName(stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE,QuestionnaireServiceErrorCode.UNKNOWN4,"zh_CN","匿名用户"));
 			}
+			dto.setTargetPhone(null);
 		}
 		return dto;
 	}
