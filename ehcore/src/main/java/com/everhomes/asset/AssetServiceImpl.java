@@ -888,6 +888,14 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd) {
+//        List<RentAdjust> rentAdjusts = cmd.getRentAdjusts();
+//        List<RentFree> rentFrees = cmd.getRentFrees();
+//        if(rentAdjusts!=null && rentAdjusts.size()>0){
+//            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.RENT_CHANGE_NOT_SUPPORTED,"rent adjust or rent free not supported");
+//        }
+//        if(rentFrees!=null && rentFrees.size()>0){
+//            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.RENT_CHANGE_NOT_SUPPORTED,"rent adjust or rent free not supported");
+//        }
         LOGGER.error("STARTTTTTTTTTTTT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
         Long contractId = cmd.getContractId();
@@ -1317,8 +1325,17 @@ public class AssetServiceImpl implements AssetService {
             //继续循环
             time++;
         }
-        //拆卸调组的包裹
         List<RentAdjust> rentAdjusts = cmd.getRentAdjusts();
+        List<RentFree> rentFrees = cmd.getRentFrees();
+        if(rentAdjusts!=null && rentAdjusts.size()>0){
+            return list;
+        }
+        if(rentFrees!=null && rentFrees.size()>0){
+            return list;
+        }
+
+        //拆卸调组的包裹
+//        List<RentAdjust> rentAdjusts = cmd.getRentAdjusts();
         if(rentAdjusts!=null){
 
             outter:for(int i = 0; i < rentAdjusts.size(); i ++){
@@ -1429,7 +1446,7 @@ public class AssetServiceImpl implements AssetService {
         }
 
         //拆卸免租的包裹
-        List<RentFree> rentFrees = cmd.getRentFrees();
+//        List<RentFree> rentFrees = cmd.getRentFrees();
         if(rentFrees!=null){
 
             //是否对应一个资源和收费项，不对应则不进行调组
