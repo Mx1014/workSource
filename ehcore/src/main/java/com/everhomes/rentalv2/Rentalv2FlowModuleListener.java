@@ -255,6 +255,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd hh:mm");
 			e.setValue(dateFormat.format(new Date(order.getAuthStartTime().getTime()))+"到"+
 			dateFormat.format(new Date(order.getAuthEndTime().getTime())));
+			entities.add(e);
 		}
 
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
