@@ -100,16 +100,27 @@ public class ZJContractHandler implements ContractService{
         String pageSize = cmd.getPageSize() == null ? "" : cmd.getPageSize().toString();
 
         ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
-        String categoryName = item == null ? "" : item.getItemDisplayName();
+        String categoryName = item == null ? "none" : item.getItemDisplayName();
         Map<String, String> params = generateParams(communityIdentifier, contractStatus, contractAttribute, categoryName, cmd.getKeywords(), pageOffset, pageSize);
         StringBuilder sb = new StringBuilder();
         if(community != null && CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
-            sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
+            if(cmd.getCustomerType() == null || CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
+                sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
+            }
         } else if(community != null && CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
-            sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
+            if(cmd.getCustomerType() == null || CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
+                sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
+            }
         } else {
-            sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
-            sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
+            if(cmd.getCustomerType() == null) {
+                sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
+                sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
+            } else if(CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getCustomerType()))){
+                sb.append(postToShenzhou(params, SEARCH_ENTERPRISE_CONTRACTS, null));
+            } else if(CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(cmd.getCustomerType()))){
+                sb.append(postToShenzhou(params, LIST_USER_CONTRACTS, null));
+            }
+
         }
 
         String enterprises = sb.toString();
@@ -488,15 +499,13 @@ public class ZJContractHandler implements ContractService{
         ContractStatus contractStatus = ContractStatus.fromStatus(status);
         if(contractStatus != null) {
             switch (contractStatus) {
-                case ACTIVE:
-                case EXPIRING:
-                    return "执行中";
+                case ACTIVE: return "执行中";
                 case WAITING_FOR_APPROVAL: return "审核中";
                 case EXPIRED: return "已到期";
                 case HISTORY: return "终止";
                 case DENUNCIATION: return "退租完成";
                 case DRAFT: return "草稿";
-                default: return "";
+                default: return "NONE";
             }
         }
         return "";
