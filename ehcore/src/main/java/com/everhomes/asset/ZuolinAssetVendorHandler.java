@@ -7,6 +7,7 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contract.ContractService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -153,7 +154,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public AssetBillTemplateValueDTO findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType,
-                    Long templateVersion, Long organizationId, String dateStr, Long tenantId, String tenantType, Long addressId) {
+                                                   Long templateVersion, Long organizationId, String dateStr, Long tenantId, String tenantType, Long addressId) {
         AssetBillTemplateValueDTO dto = new AssetBillTemplateValueDTO();
         AssetBill bill = null;
         if(id != null) {
@@ -281,7 +282,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         dto.setUnpaidAmount(BigDecimal.ZERO);
         Set<Timestamp> accountPeriod = new HashSet<>();
         bills.forEach(bill -> {
-        	dto.setUnpaidAmount(dto.getUnpaidAmount().add(bill.getPeriodAccountAmount()));
+            dto.setUnpaidAmount(dto.getUnpaidAmount().add(bill.getPeriodAccountAmount()));
             accountPeriod.add(bill.getAccountPeriod());
         });
         BigDecimal unpaidMonth = new BigDecimal(accountPeriod.size());
@@ -317,8 +318,15 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         if(targetType.equals("eh_user")) {
             targetId = UserContext.current().getUser().getId();
         }
-        Long cid = Long.parseLong(contractId);
-        List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId,isOwedBill,cid);
+        String contractNum = null;
+        Long cid = null;
+        try{
+            cid = Long.parseLong(contractId);
+        }catch (Exception e){
+            cid = null;
+            contractNum = contractId;
+        }
+        List<BillDetailDTO> billDetailDTOList = assetProvider.listBillForClient(ownerId,ownerType,targetType,targetId,billGroupId,isOwedBill,cid,contractNum);
         HashSet<String> dateStrFilter = new HashSet<>();
         BigDecimal amountOwed = new BigDecimal("0");
         for(int i = 0; i < billDetailDTOList.size(); i++) {
@@ -468,11 +476,11 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         if(!cmd.getOwnerType().equals("community")){
             throw new RuntimeException("保存账单不在一个园区");
         }
-        TargetDTO targetDto = userService.findTargetByNameAndAddress(cmd.getContractNum(), cmd.getTargetName(), cmd.getOwnerId(), cmd.getNoticeTel(), cmd.getOwnerType(), cmd.getTargetType());
-        if(targetDto!=null){
-            cmd.setContractId(targetDto.getContractId());
-            cmd.setTargetId(targetDto.getTargetId());
-        }
+//        TargetDTO targetDto = userService.findTargetByNameAndAddress(cmd.getContractNum(), cmd.getTargetName(), cmd.getOwnerId(), cmd.getNoticeTel(), cmd.getOwnerType(), cmd.getTargetType());
+//        if(targetDto!=null){
+//            cmd.setContractId(targetDto.getContractId());
+//            cmd.setTargetId(targetDto.getTargetId());
+//        }
 //        List<AddressIdAndName> addressByPossibleName = addressProvider.findAddressByPossibleName(UserContext.getCurrentNamespaceId(), cmd.getOwnerId(), cmd.getBuildingName(), cmd.getApartmentName());
         return assetProvider.creatPropertyBill(cmd.getBillGroupDTO(),cmd.getDateStr(),cmd.getIsSettled(),cmd.getNoticeTel(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetName(),cmd.getTargetId(),cmd.getTargetType(),cmd.getContractNum(),cmd.getContractId());
     }
@@ -544,6 +552,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         List<PaymentExpectancyDTO> dtos = assetProvider.listBillExpectanciesOnContract(cmd.getContractNum(),cmd.getPageOffset(),cmd.getPageSize());
         if(dtos.size() <= cmd.getPageSize()){
 //            response.setNextPageOffset(cmd.getPageOffset());
+            response.setNextPageOffset(null);
         }else{
             response.setNextPageOffset(cmd.getPageOffset()+cmd.getPageSize());
             dtos.remove(dtos.size()-1);
@@ -612,7 +621,8 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
         //组装command ， 请求支付模块的下预付单
         PreOrderCommand cmd2pay = new PreOrderCommand();
-        cmd2pay.setAmount(amountsInCents);
+//        cmd2pay.setAmount(amountsInCents);
+        cmd2pay.setAmount(1l);
         cmd2pay.setClientAppName(cmd.getClientAppName());
         cmd2pay.setExpiration(ZjgkPaymentConstants.EXPIRE_TIME_15_MIN_IN_SEC);
         cmd2pay.setNamespaceId(cmd.getNamespaceId());

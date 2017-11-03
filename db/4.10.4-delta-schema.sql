@@ -105,7 +105,7 @@ ALTER TABLE `eh_activities` ADD COLUMN `stick_time`  datetime NULL;
 
 -- 增加缴费的工作id   wentian
 ALTER TABLE `eh_payment_bills` ADD COLUMN `next_switch` TINYINT DEFAULT 0 COMMENT '下一次switch的值';
-ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `in_work` TINYINT DEFAULT 0 COMMENT '0:工作完成；1：正在生成';
+ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `in_work` TINYINT DEFAULT NULL COMMENT '0:工作完成；1：正在生成';
 ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `is_recorder` TINYINT DEFAULT 1 COMMENT '0：合同状态记录者，不保存计价数据；1：不是合同状态记录者';
 
 
@@ -121,3 +121,46 @@ ALTER TABLE eh_customer_tracking_plans MODIFY COLUMN status TINYINT NOT NULL DEF
 ALTER TABLE eh_customer_trackings MODIFY COLUMN status TINYINT NOT NULL DEFAULT 2;
 ALTER TABLE eh_customer_trademarks MODIFY COLUMN status TINYINT NOT NULL DEFAULT 2;
 ALTER TABLE eh_enterprise_customers MODIFY COLUMN status TINYINT NOT NULL DEFAULT 2;
+
+-- wentian jiaofei schema changes
+ALTER TABLE `eh_payment_charging_standards` ADD COLUMN `instruction` VARCHAR(1024) DEFAULT NULL COMMENT '说明';
+ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `due_day` INTEGER DEFAULT NULL COMMENT '最晚还款日，距离账单日的距离，单位可以为月 ';
+ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `due_day_type` TINYINT DEFAULT 1 COMMENT '1:日，2：月 ';
+DROP TABLE IF EXISTS `eh_payment_formula`;
+CREATE TABLE `eh_payment_formula` (
+  `id` bigint(20) NOT NULL,
+  `charging_standard_id` bigint(20) DEFAULT NULL,
+  `name` varchar(10) DEFAULT NULL,
+  `constraint_variable_identifer` varchar(255) DEFAULT NULL,
+  `start_constraint` tinyint(4) DEFAULT NULL COMMENT '1:大于；2：大于等于；3：小于；4：小于等于',
+  `start_num` decimal(10,2) DEFAULT '0.00',
+  `end_constraint` tinyint(4) DEFAULT NULL COMMENT '1:大于；2：大于等于；3：小于；4：小于等于',
+  `end_num` decimal(10,2) DEFAULT '0.00',
+  `variables_json_string` varchar(2048) DEFAULT NULL COMMENT 'json strings of variables injected for a particular formula',
+  `formula` varchar(1024) DEFAULT NULL,
+  `formula_json` varchar(2048) DEFAULT NULL,
+  `formula_type` tinyint(4) DEFAULT NULL COMMENT '1: fixed fee; 2: normal formula; 3: gradient varied on variable price; 4: gradients varied functions on each variable section',
+  `price_unit_type` tinyint(4) DEFAULT NULL COMMENT '1:日单价; 2:月单价; 3:季单价; 4:年单价',
+  `creator_uid` bigint(20) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='收费标准公式表';
+ALTER TABLE `eh_payment_charging_standards` ADD COLUMN `suggest_unit_price` DECIMAL(10,2) DEFAULT NULL COMMENT '建议单价';
+ALTER TABLE `eh_payment_bill_groups_rules` ADD COLUMN `bill_item_month_offset` INTEGER DEFAULT NULL COMMENT '收费项产生时间偏离当前月的月数';
+ALTER TABLE `eh_payment_bill_groups_rules` ADD COLUMN `bill_item_day_offset` INTEGER DEFAULT NULL COMMENT '收费项产生时间偏离当前月的日数';
+ALTER TABLE `eh_payment_charging_standards` ADD COLUMN `area_size_type` INTEGER DEFAULT 1 COMMENT '计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积';
+ALTER TABLE `eh_payment_bill_groups` MODIFY COLUMN `name` VARCHAR(50) DEFAULT NULL COMMENT '账单组名称';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `due_day_deadline` varchar(30) DEFAULT NULL COMMENT '最后付款日期';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `date_str_begin` varchar(30) DEFAULT NULL COMMENT '账期开始日期';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `date_str_end` varchar(30) DEFAULT NULL COMMENT '账期结束日期';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `date_str_due` varchar(30) DEFAULT NULL COMMENT '出账单日期';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `due_day_deadline` varchar(30) DEFAULT NULL COMMENT '最后付款日期';
+ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `project_level_name` VARCHAR(30) DEFAULT NULL COMMENT '园区自定义的收费项目名字';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `date_str_generation` VARCHAR(40) DEFAULT NULL COMMENT '费用产生日期';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `charge_status` TINYINT DEFAULT 0 COMMENT '缴费状态，0：正常；1：欠费';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `real_paid_time` DATETIME DEFAULT NULL COMMENT '实际付款时间';
+ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `decoupling_flag` TINYINT DEFAULT 0 COMMENT '解耦标志，0:耦合中，收到域名下全部设置的影响;1:副本解耦';
+
+ALTER TABLE `eh_payment_variables` MODIFY COLUMN charging_items_id BIGINT DEFAULT NULL;
