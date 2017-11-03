@@ -1,3 +1,4 @@
+-- 一下到分割线为止已经在true-4上了，应该删除
 ALTER TABLE `eh_payment_charging_standards` ADD COLUMN `instruction` VARCHAR(1024) DEFAULT NULL COMMENT '说明';
 ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `due_day` INTEGER DEFAULT NULL COMMENT '最晚还款日，距离账单日的距离，单位可以为月 ';
 ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `due_day_type` TINYINT DEFAULT 1 COMMENT '1:日，2：月 ';
@@ -52,6 +53,13 @@ ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN `is_recorder` TINYINT DEFA
 ALTER TABLE `eh_payment_bills` ADD COLUMN `next_switch` TINYINT DEFAULT NULL COMMENT '下一次switch的值';
 
 ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `decoupling_flag` TINYINT DEFAULT 0 COMMENT '解耦标志，0:耦合中，收到域名下全部设置的影响;1:副本解耦';
+-- 分割线
+-- payment_wentian_v2 new sql
+
+ALTER TABLE `eh_payment_charging_standards_scopes` ADD COLUMN namespace_id INTEGER DEFAULT 0;
+ALTER TABLE `eh_payment_bills` ADD COLUMN bill_group_rule_id BIGINT DEFAULT NULL;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN bill_group_rule_id BIGINT DEFAULT NULL;
+
 
 -- 4.10.3，合并记得删
 -- 园区入驻3.6 add by sw 20171023

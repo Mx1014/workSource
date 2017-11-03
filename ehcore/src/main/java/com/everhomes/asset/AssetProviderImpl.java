@@ -1246,15 +1246,24 @@ public class AssetProviderImpl implements AssetProvider {
                     return null;
                 });
         List<List<String>> formus = new ArrayList<>();
+        List<List<String>> conditionVarIdens = new ArrayList<>();
         for(int i =0; i < list.size(); i++){
             ListChargingStandardsDTO dto = list.get(i);
-            List<String> fetch = context.select(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON)
-                    .from(Tables.EH_PAYMENT_FORMULA)
-                    .where(Tables.EH_PAYMENT_FORMULA.CHARGING_STANDARD_ID.eq(dto.getChargingStandardId()))
-                    .fetch(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON);
-            formus.add(fetch);
-
+            List<String> formu = new ArrayList<>();
+            List<String> conditionVarIden = new ArrayList<>();
+            context.select(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON,Tables.EH_PAYMENT_FORMULA.CONSTRAINT_VARIABLE_IDENTIFER)
+                .from(Tables.EH_PAYMENT_FORMULA)
+                .where(Tables.EH_PAYMENT_FORMULA.CHARGING_STANDARD_ID.eq(dto.getChargingStandardId()))
+                .fetch()
+                .map(r -> {
+                    formu.add(r.getValue(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON));
+                    conditionVarIden.add(r.getValue(Tables.EH_PAYMENT_FORMULA.CONSTRAINT_VARIABLE_IDENTIFER));
+                   return null;
+                });
+            formus.add(formu);
+            conditionVarIdens.add(conditionVarIden);
         }
+        //从公式中取得参数值
         for(int j = 0; j < formus.size(); j++){
             ListChargingStandardsDTO dto = list.get(j);
             List<String> formulaJsons = formus.get(j);
@@ -1276,6 +1285,10 @@ public class AssetProviderImpl implements AssetProvider {
                         index++;
                     }
                 }
+            }
+            List<String> conditionVarIden = conditionVarIdens.get(j);
+            for(int i = 0; i < conditionVarIden.size(); i ++){
+                replaces.add(conditionVarIden.get(i));
             }
             List<PaymentVariable> vars = new ArrayList<>();
             Iterator<String> iterator = replaces.iterator();

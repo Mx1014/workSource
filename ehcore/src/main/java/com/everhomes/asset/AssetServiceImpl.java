@@ -949,6 +949,9 @@ public class AssetServiceImpl implements AssetService {
             //获得standard时间设置
             Byte billingCycle = standard.getBillingCycle();
             //获得groupRule的时间设置
+            /**
+             * 这个获得groupRule的逻辑是建立在一个收费项只能在一个账单组存在，如果这个逻辑成为一个收费标准只能在一个账单组存在+收费标准本身（不是scope）为多例 = ok。如果不行，那么需要传递ruleId（也可以）
+             */
             PaymentBillGroupRule groupRule = assetProvider.getBillGroupRule(rule.getChargingItemId(),rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
             Integer monthOffset = groupRule.getBillItemMonthOffset();
             Integer dayOffset = groupRule.getBillItemDayOffset();
