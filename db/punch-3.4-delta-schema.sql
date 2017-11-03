@@ -6,3 +6,4 @@ ALTER TABLE `eh_punch_exception_requests` ADD COLUMN `approval_attribute` VARCHA
 ALTER TABLE `eh_punch_exception_approvals` ADD COLUMN `punch_type` TINYINT DEFAULT 2 COMMENT ' 0- 上班打卡 ; 1- 下班打卡';  
 
 ALTER TABLE `eh_punch_logs` ADD COLUMN `approval_status` TINYINT DEFAULT NULL COMMENT '校正后的打卡状态 0-正常';
+ALTER TABLE `eh_punch_day_logs` ADD COLUMN `smart_alignment` VARCHAR(128) DEFAULT NULL COMMENT '智能校准状态:1-未智能校准 0-未校准 例如:0;1/0;1/1/0/1';
