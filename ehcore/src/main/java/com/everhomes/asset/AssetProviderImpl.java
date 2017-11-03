@@ -732,7 +732,7 @@ public class AssetProviderImpl implements AssetProvider {
         ShowCreateBillDTO response = new ShowCreateBillDTO();
         List<BillItemDTO> list = new ArrayList<>();
 
-        context.select(rule.CHARGING_ITEM_ID,ci.PROJECT_LEVEL_NAME)
+        context.select(rule.CHARGING_ITEM_ID,ci.PROJECT_LEVEL_NAME,rule.ID)
                 .from(rule,ci)
                 .where(rule.CHARGING_ITEM_ID.eq(ci.CHARGING_ITEM_ID))
                 .and(rule.OWNERID.eq(ci.OWNER_ID))
