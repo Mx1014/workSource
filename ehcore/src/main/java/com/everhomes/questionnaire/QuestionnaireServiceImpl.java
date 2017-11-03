@@ -218,6 +218,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		if(dto.getTargetUserNum()==null){
 			dto.setTargetUserNum(0);
 		}
+		generateShareUrl(dto);
 		return dto;
 	}
 	
@@ -610,6 +611,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 				if(rangeType==null){
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"Invalid parameters,rangeType = "+dto.getRangeType());
+				}
+
+				if(targetType == QuestionnaireTargetType.ORGANIZATION && rangeType!=QuestionnaireRangeType.ENTERPRISE){
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"Invalid parameters,rangeType = "+dto.getRangeType()+", targetType = "+targetType.getCode());
 				}
 
 				switch (rangeType){
