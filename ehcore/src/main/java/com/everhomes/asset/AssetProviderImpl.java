@@ -1,6 +1,7 @@
 package com.everhomes.asset;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -86,6 +87,9 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
 
     @Override
@@ -1242,15 +1246,24 @@ public class AssetProviderImpl implements AssetProvider {
                     return null;
                 });
         List<List<String>> formus = new ArrayList<>();
+        List<List<String>> conditionVarIdens = new ArrayList<>();
         for(int i =0; i < list.size(); i++){
             ListChargingStandardsDTO dto = list.get(i);
-            List<String> fetch = context.select(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON)
-                    .from(Tables.EH_PAYMENT_FORMULA)
-                    .where(Tables.EH_PAYMENT_FORMULA.CHARGING_STANDARD_ID.eq(dto.getChargingStandardId()))
-                    .fetch(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON);
-            formus.add(fetch);
-
+            List<String> formu = new ArrayList<>();
+            List<String> conditionVarIden = new ArrayList<>();
+            context.select(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON,Tables.EH_PAYMENT_FORMULA.CONSTRAINT_VARIABLE_IDENTIFER)
+                .from(Tables.EH_PAYMENT_FORMULA)
+                .where(Tables.EH_PAYMENT_FORMULA.CHARGING_STANDARD_ID.eq(dto.getChargingStandardId()))
+                .fetch()
+                .map(r -> {
+                    formu.add(r.getValue(Tables.EH_PAYMENT_FORMULA.FORMULA_JSON));
+                    conditionVarIden.add(r.getValue(Tables.EH_PAYMENT_FORMULA.CONSTRAINT_VARIABLE_IDENTIFER));
+                   return null;
+                });
+            formus.add(formu);
+            conditionVarIdens.add(conditionVarIden);
         }
+        //从公式中取得参数值
         for(int j = 0; j < formus.size(); j++){
             ListChargingStandardsDTO dto = list.get(j);
             List<String> formulaJsons = formus.get(j);
@@ -1272,6 +1285,10 @@ public class AssetProviderImpl implements AssetProvider {
                         index++;
                     }
                 }
+            }
+            List<String> conditionVarIden = conditionVarIdens.get(j);
+            for(int i = 0; i < conditionVarIden.size(); i ++){
+                replaces.add(conditionVarIden.get(i));
             }
             List<PaymentVariable> vars = new ArrayList<>();
             Iterator<String> iterator = replaces.iterator();
@@ -1673,23 +1690,26 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         EhPaymentContractReceiver t1 = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t1");
         EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
-        this.dbProvider.execute((TransactionStatus status) -> {
-            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-            List<Long> billIds = context.select(t.ID)
-                    .from(t)
-                    .where(t.CONTRACT_ID.eq(contractId))
-                    .and(t.SWITCH.eq((byte) 3))
-                    .fetch(t.ID);
-            context.delete(t)
-                    .where(t.ID.in(billIds))
-                    .execute();
-            context.delete(t2)
-                    .where(t2.BILL_ID.in(billIds))
-                    .or(t2.CONTRACT_ID.eq(contractId))
-                    .execute();
-            context.delete(t1)
-                    .where(t1.CONTRACT_ID.eq(contractId))
-                    .execute();
+        this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
+            this.dbProvider.execute((TransactionStatus status) -> {
+                DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+                List<Long> billIds = context.select(t.ID)
+                        .from(t)
+                        .where(t.CONTRACT_ID.eq(contractId))
+                        .and(t.SWITCH.eq((byte) 3))
+                        .fetch(t.ID);
+                context.delete(t)
+                        .where(t.ID.in(billIds))
+                        .execute();
+                context.delete(t2)
+                        .where(t2.BILL_ID.in(billIds))
+                        .or(t2.CONTRACT_ID.eq(contractId))
+                        .execute();
+                context.delete(t1)
+                        .where(t1.CONTRACT_ID.eq(contractId))
+                        .execute();
+                return null;
+            });
             return null;
         });
     }
@@ -1975,15 +1995,9 @@ public class AssetProviderImpl implements AssetProvider {
         List<AssetPaymentOrderBills> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhAssetPaymentOrderBills t = Tables.EH_ASSET_PAYMENT_ORDER_BILLS.as("t");
-        context.select()
-                .from(t)
+        context.selectFrom(t)
                 .where(t.ORDER_ID.eq(orderId))
-                .fetch()
-                .map(r -> {
-                    list.add(ConvertHelper.convert(r,AssetPaymentOrderBills.class));
-                    return null;
-                });
-
+                .fetchInto(AssetPaymentOrderBills.class);
         return list;
     }
 
@@ -2062,24 +2076,30 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType,Integer namespaceId,List<Long> communityIds) {
-        Byte sovereighty = 1;
+        byte de_coupling = 1;
         if(communityIds!=null && communityIds.size() >1){
             for(int i = 0; i < communityIds.size(); i ++){
                 Long cid = communityIds.get(i);
-                //只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
-//                Boolean hasSovereign = checkSovereighty(communityId);
-//                if(!hasSovereign){
-//                    sovereighty = 0;
-//                    configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, cid, sovereighty);
-//                }
+//                只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
+                Boolean coupled = checkCoupling(communityId,ownerType);
+                if(coupled){
+                    de_coupling = 0;
+                    configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, cid, de_coupling);
+                }
             }
         }else{
             //只有一个园区,不是list过来的
-            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, communityId, sovereighty);
+            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, communityId, de_coupling);
         }
     }
 
-    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Long cid, Byte sovereighty) {
+    private Boolean checkCoupling(Long communityId, String ownerType) {
+        boolean coupled = true;
+//        assetS
+        return false;
+    }
+
+    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Long cid, Byte decouplingFlag) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
         EhPaymentChargingItemScopesDao dao = new EhPaymentChargingItemScopesDao(context.configuration());
@@ -2094,7 +2114,8 @@ public class AssetProviderImpl implements AssetProvider {
             scope.setOwnerId(communityId);
             scope.setOwnerType(ownerType);
             scope.setProjectLevelName(vo.getProjectChargingItemName());
-//            scope.setSovereightyFlag(sovereighty);
+            scope.setDecouplingFlag(decouplingFlag);
+            scope.setDecouplingFlag(decouplingFlag);
             list.add(scope);
         }
         this.dbProvider.execute((TransactionStatus status) -> {
@@ -2619,7 +2640,10 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(contract.IS_RECORDER.eq((byte) 1))
                 .and(contract.CONTRACT_NUM.eq(contractNum))
                 .fetchOne(contract.IN_WORK);
-        if(aByte == (byte)0){
+        if ( aByte == null) {
+            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.FAIL_IN_GENERATION,"mission failed");
+        }
+        if( aByte == (byte)0){
             return false;
         }
         return true;

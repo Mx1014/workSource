@@ -888,6 +888,8 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd) {
+//        LOGGER.error("STARTTTTTTTTTTTT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
         Long contractId = cmd.getContractId();
         String contractNum = cmd.getContractNum();
 
@@ -929,7 +931,7 @@ public class AssetServiceImpl implements AssetService {
             if(standard.getFormulaType()==1 || standard.getFormulaType() == 2){
                 formulaCondition = assetProvider.getFormulas(standard.getId());
                 if(formulaCondition!=null){
-                    if(formulaCondition.size()>0){
+                    if(formulaCondition.size()>1){
                         LOGGER.error("普通公式的标准的id为"+standard.getId()+",对应了"+formulaCondition.size()+"条公式!");
                     }
                     PaymentFormula paymentFormula = formulaCondition.get(0);
@@ -947,6 +949,9 @@ public class AssetServiceImpl implements AssetService {
             //获得standard时间设置
             Byte billingCycle = standard.getBillingCycle();
             //获得groupRule的时间设置
+            /**
+             * 这个获得groupRule的逻辑是建立在一个收费项只能在一个账单组存在，如果这个逻辑成为一个收费标准只能在一个账单组存在+收费标准本身（不是scope）为多例 = ok。如果不行，那么需要传递ruleId（也可以）
+             */
             PaymentBillGroupRule groupRule = assetProvider.getBillGroupRule(rule.getChargingItemId(),rule.getChargingStandardId(),cmd.getOwnerType(),cmd.getOwnerId());
             Integer monthOffset = groupRule.getBillItemMonthOffset();
             Integer dayOffset = groupRule.getBillItemDayOffset();
@@ -976,12 +981,12 @@ public class AssetServiceImpl implements AssetService {
                 //计算
                 List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition);
 
-                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), billItemsExpectancies.size());
-                long currentBillItemSeq = nextBillItemBlock - billItemsExpectancies.size() + 1;
-                if(currentBillItemSeq == 0){
-                    currentBillItemSeq = currentBillItemSeq+1;
-                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()));
-                }
+//                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), billItemsExpectancies.size());
+//                long currentBillItemSeq = nextBillItemBlock - billItemsExpectancies.size() + 1;
+//                if(currentBillItemSeq == 0){
+//                    currentBillItemSeq = currentBillItemSeq+1;
+//                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()));
+//                }
 
                 //先算出所有的item
                 for(int g = 0; g < billItemsExpectancies.size(); g++){
@@ -1009,8 +1014,8 @@ public class AssetServiceImpl implements AssetService {
                     item.setDueDayDeadline(exp.getBillDateDeadline());
                     item.setDateStrGeneration(exp.getBillDateGeneration());
                     //归档字段
-                    item.setId(currentBillItemSeq);
-                    currentBillItemSeq += 1;
+                    item.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentBillItems.class)));
+//                    currentBillItemSeq += 1;
                     item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setCreatorUid(UserContext.currentUserId());
                     item.setNamespaceId(cmd.getNamesapceId());
@@ -1184,19 +1189,22 @@ public class AssetServiceImpl implements AssetService {
             billList.add(entry.getValue());
         }
 
-        LOGGER.debug("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
-
-        this.dbProvider.execute((TransactionStatus status) -> {
-            if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Bills generation failed, "+billList.size()+" bill generated, "+billItemsList.size()+" billItem generated, "+contractDateList.size()+" contract receiver generated before store");
-            }
-            assetProvider.saveBillItems(billItemsList);
-            assetProvider.saveBills(billList);
-            assetProvider.saveContractVariables(contractDateList);
+        LOGGER.error("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
+        this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
+            this.dbProvider.execute((TransactionStatus status) -> {
+                if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Bills generation failed, "+billList.size()+" bill generated, "+billItemsList.size()+" billItem generated, "+contractDateList.size()+" contract receiver generated before store");
+                }
+                assetProvider.saveBillItems(billItemsList);
+                assetProvider.saveBills(billList);
+                assetProvider.saveContractVariables(contractDateList);
+                return null;
+            });
             return null;
         });
-
+        LOGGER.error("插入完成");
         assetProvider.setInworkFlagInContractReceiverWell(contractId,contractNum);
+        LOGGER.error("工作flag完成");
 
     }
 
@@ -1314,7 +1322,6 @@ public class AssetServiceImpl implements AssetService {
             //继续循环
             time++;
         }
-        LOGGER.info("账单产生了"+time+"项目,真实为"+list.size());
         //拆卸调组的包裹
         List<RentAdjust> rentAdjusts = cmd.getRentAdjusts();
         if(rentAdjusts!=null){

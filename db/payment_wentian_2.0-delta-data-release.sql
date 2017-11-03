@@ -42,7 +42,7 @@ INSERT INTO `eh_payment_variables` (`id`, `charging_standard_id`, `charging_item
 SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10001', 'zh_CN', '正在生成中');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10002', 'zh_CN', '操作失败，该域名下没有可用园区');
-
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'assetv2', '10003', 'zh_CN', '生成失败，请返回上一步重新设置进行生成');
 
 -- merge from energy3.0 by xiongying20171030
 -- 能耗权限细化
