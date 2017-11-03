@@ -1427,7 +1427,7 @@ public class AssetServiceImpl implements AssetService {
                         if(d2.compareTo(longinus)!=-1){
                             //插中了！获得 插入点 到 整个计价标准的结束
                             reCalFee(longinus,d2,item,rent);
-                            reCalFee(list,m+1,rent);
+                            reCalFee(list,k+1,rent);
                             continue longinusBase;
                         }
                     }
@@ -1471,42 +1471,55 @@ public class AssetServiceImpl implements AssetService {
                     BillItemsExpectancy item = list.get(j);
                     Date item_start = item.getDateStrBegin();
                     Date item_end = item.getDateStrEnd();
-                    //全包裹
-                    if(start.compareTo(item_start)!=1 && end.compareTo(item_end)!= -1){
-                        item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free));
-                        item.setAmountOwed(item.getAmountOwed().subtract(amount_free));
+                    //完全没有交集的kick out
+                    if(end.compareTo(item_start) != 1 || start.compareTo(item_end) != -1){
+                        continue;
                     }
-                    //左包不全，右包全
-                    else if(start.compareTo(item_start)==1 && start.compareTo(item_end) == -1 && end.compareTo(item_end)!=-1){
-                        //代码不能重用，提取没有意义,overfitting
-                        Calendar item_start_c = Calendar.getInstance();
-                        item_start_c.setTime(item_start);
-                        Float f = (float)daysBetween_date(start,item_end)/ (float)item_start_c.getActualMaximum(Calendar.DAY_OF_MONTH);
-                        BigDecimal f_c = new BigDecimal(f);
-                        BigDecimal amount_free_real = amount_free.multiply(f_c);
-                        item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free_real));
-                        item.setAmountOwed(item.getAmountOwed().subtract(amount_free_real));
-                    }
-                    //左包全，右包不全
-                    else if(start.compareTo(item_start)!=1 && end.compareTo(start) == 1 &&end.compareTo(item_end)==-1){
-                        Calendar item_start_c = Calendar.getInstance();
-                        item_start_c.setTime(item_start);
-                        Float f = (float)daysBetween_date(end,item_start)/ (float)item_start_c.getActualMaximum(Calendar.DAY_OF_MONTH);
-                        BigDecimal f_c = new BigDecimal(f);
-                        BigDecimal amount_free_real = amount_free.multiply(f_c);
-                        item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free_real));
-                        item.setAmountOwed(item.getAmountOwed().subtract(amount_free_real));
-                    }
-                    //左保不全，右也包步全
-                    else if(start.compareTo(item_start)==1 && end.compareTo(item_end)==-1){
-                        Calendar item_start_c = Calendar.getInstance();
-                        item_start_c.setTime(item_start);
-                        Float f = (float)daysBetween_date(end,start)/ (float)item_start_c.getActualMaximum(Calendar.DAY_OF_MONTH);
-                        BigDecimal f_c = new BigDecimal(f);
-                        BigDecimal amount_free_real = amount_free.multiply(f_c);
-                        item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free_real));
-                        item.setAmountOwed(item.getAmountOwed().subtract(amount_free_real));
-                    }
+                    Calendar minEnd = Calendar.getInstance();
+                    minEnd.setTime(end.compareTo(item_end) == -1 ? end : item_end);
+                    Calendar maxStart = Calendar.getInstance();
+                    maxStart.setTime(start.compareTo(item_start)==1 ? start : item_start);
+                    float f = (float)daysBetween(maxStart, minEnd) / (float) daysBetween_date(start, end);
+                    item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free.multiply(new BigDecimal(f))));
+                    item.setAmountOwed(item.getAmountReceivable());
+
+//                    //全包裹
+//                    if(start.compareTo(item_start)!=1 && end.compareTo(item_end)!= -1){
+//                        float f = (float)daysBetween_date(item_start, item_end)/(float)daysBetween_date(start,end);
+//                        item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free.multiply(new BigDecimal(f))));
+//                        item.setAmountOwed(item.getAmountReceivable());
+//                    }
+//                    //左包不全，右包全
+//                    else if(start.compareTo(item_start)==1 && start.compareTo(item_end) == -1 && end.compareTo(item_end)!=-1){
+//                        //代码不能重用，提取没有意义,overfitting
+//                        Calendar item_start_c = Calendar.getInstance();
+//                        item_start_c.setTime(item_start);
+//                        Float f = (float)daysBetween_date(start,item_end)/ (float)item_start_c.getActualMaximum(Calendar.DAY_OF_MONTH);
+//                        BigDecimal f_c = new BigDecimal(f);
+//                        BigDecimal amount_free_real = amount_free.multiply(f_c);
+//                        item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free_real));
+//                        item.setAmountOwed(item.getAmountOwed().subtract(amount_free_real));
+//                    }
+//                    //左包全，右包不全
+//                    else if(start.compareTo(item_start)!=1 && end.compareTo(start) == 1 &&end.compareTo(item_end)==-1){
+//                        Calendar item_start_c = Calendar.getInstance();
+//                        item_start_c.setTime(item_start);
+//                        Float f = (float)daysBetween_date(end,item_start)/ (float)item_start_c.getActualMaximum(Calendar.DAY_OF_MONTH);
+//                        BigDecimal f_c = new BigDecimal(f);
+//                        BigDecimal amount_free_real = amount_free.multiply(f_c);
+//                        item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free_real));
+//                        item.setAmountOwed(item.getAmountOwed().subtract(amount_free_real));
+//                    }
+//                    //左保不全，右也包步全
+//                    else if(start.compareTo(item_start)==1 && end.compareTo(item_end)==-1){
+//                        Calendar item_start_c = Calendar.getInstance();
+//                        item_start_c.setTime(item_start);
+//                        Float f = (float)daysBetween_date(end,start)/ (float)item_start_c.getActualMaximum(Calendar.DAY_OF_MONTH);
+//                        BigDecimal f_c = new BigDecimal(f);
+//                        BigDecimal amount_free_real = amount_free.multiply(f_c);
+//                        item.setAmountReceivable(item.getAmountReceivable().subtract(amount_free_real));
+//                        item.setAmountOwed(item.getAmountOwed().subtract(amount_free_real));
+//                    }
                 }
                 //免租结束
 
@@ -1518,14 +1531,14 @@ public class AssetServiceImpl implements AssetService {
         return list;
     }
 
-    private void reCalFee(List<BillItemsExpectancy> list, int m, RentAdjust rent) {
+    private void reCalFee(List<BillItemsExpectancy> list, int k, RentAdjust rent) {
         Byte adjustType = rent.getAdjustType();
         BigDecimal adjustAmplitude = rent.getAdjustAmplitude();
-        if(m >= list.size()-1){
+        if(k > list.size()){
             return;
         }
-        for(int i = m; i < list.size(); i ++) {
-            BillItemsExpectancy item = list.get(m);
+        for(int i = k; i < list.size(); i ++) {
+            BillItemsExpectancy item = list.get(i);
             BigDecimal amount = item.getAmountOwed();
             switch (adjustType){
                 case 1:
@@ -1557,7 +1570,12 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private void reCalFee(Calendar longinus, Calendar d2, BillItemsExpectancy item, RentAdjust rent) {
-        float i = (float)daysBetween(longinus, d2) / (float)longinus.getActualMaximum(Calendar.DAY_OF_MONTH);
+        float i = 0f;
+        if(longinus.getActualMaximum(Calendar.DAY_OF_MONTH) == 31 || longinus.getActualMaximum(Calendar.DAY_OF_MONTH) == 29){
+            i = (float)(daysBetween(longinus, d2)-1) / (float)(longinus.getActualMaximum(Calendar.DAY_OF_MONTH)-1);
+        }else{
+            i = (float)daysBetween(longinus, d2) / (float)longinus.getActualMaximum(Calendar.DAY_OF_MONTH);
+        }
         BigDecimal d = new BigDecimal(String.valueOf(i));
         Byte adjustType = rent.getAdjustType();
         BigDecimal adjustAmplitude = rent.getAdjustAmplitude();
