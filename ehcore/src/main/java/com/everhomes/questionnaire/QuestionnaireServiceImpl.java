@@ -1046,6 +1046,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	}
 
 	private void generateShareUrl(QuestionnaireDTO dto) {
+		if(QuestionnaireCommonStatus.FALSE == QuestionnaireCommonStatus.fromCode(dto.getAnonymousFlag())){
+			return;
+		}
 		try {
 			String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://core.zuolin.com");
 			homeUrl = homeUrl.endsWith("/")?homeUrl.substring(0,homeUrl.length()-1):homeUrl;
