@@ -1337,14 +1337,14 @@ public class AssetServiceImpl implements AssetService {
                 Long rentChargingItemId = rent.getChargingItemId();
                 Long feeChargingItemId = rule.getChargingItemId();
                 if(feeChargingItemId != rentChargingItemId){
-                    break outter;
+                    continue outter;
                 }
                 inner:for(int j = 0; j < rentProperties.size(); j ++){
                     if(rentProperties.get(j).getAddressId().equals(property.getAddressId())){
                         break inner;
                     }
                     if(j == rentProperties.size()-1){
-                        break outter;
+                        continue outter;
                     }
                 }
                 //进行调组
@@ -1447,14 +1447,14 @@ public class AssetServiceImpl implements AssetService {
                 Long rentChargingItemId = rent.getChargingItemId();
                 Long feeChargingItemId = rule.getChargingItemId();
                 if(feeChargingItemId != rentChargingItemId){
-                    break outter;
+                    continue outter;
                 }
                 inner:for(int j = 0; j < rentProperties.size(); j ++){
                     if(rentProperties.get(j).getAddressId().equals( property.getAddressId())){
                         break inner;
                     }
                     if(j == rentProperties.size()-1){
-                        break outter;
+                        continue outter;
                     }
                 }
                 //开始免租
