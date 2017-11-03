@@ -694,7 +694,7 @@ public class RentalSiteDTO {
 	}
 
 	public void setAclinkId(Long aclinkId) {
-		aclinkId = aclinkId;
+		this.aclinkId = aclinkId;
 	}
 
 	public String getAclinkName() {
@@ -702,6 +702,6 @@ public class RentalSiteDTO {
 	}
 
 	public void setAclinkName(String aclinkName) {
-		aclinkName = aclinkName;
+		this.aclinkName = aclinkName;
 	}
 }
