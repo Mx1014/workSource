@@ -34,6 +34,7 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
+import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1172,6 +1173,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		if(!targetType.getCode().equals(questionnaire.getTargetType())){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"questionnaire type = " + questionnaire.getTargetType() + " summit type = "+cmd.getTargetType());
+		}
+
+		if(questionnaire.getCutOffTime().after(new Timestamp(System.currentTimeMillis()))){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"提交失败，问卷已结束！" + questionnaire.getStatus());
 		}
 
 		if(targetType == QuestionnaireTargetType.ORGANIZATION){
