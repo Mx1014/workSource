@@ -1,5 +1,5 @@
 -- 行业协会类型
-CREATE TABLE `eh_guild_types` (
+CREATE TABLE `eh_industry_types` (
   `id` bigint(20) NOT NULL,
   `uuid` varchar(128) NOT NULL,
   `namespace_id` int(11) NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE `eh_guild_applies` (
   `email` varchar(255) DEFAULT NULL,
   `organization_name` varchar(255) DEFAULT NULL,
   `registered_capital` varchar(255) DEFAULT NULL,
-  `industry` varchar(255) DEFAULT NULL,
+  `industry_type` varchar(255) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `update_uid` bigint(22) DEFAULT NULL,
