@@ -192,8 +192,9 @@ public class ArchivesServiceImpl implements ArchivesService {
                     organizationService.deleteOrganizationPersonnelByContactToken(deleteOrganizationPersonnelByContactTokenCommand);
 
                     //  2.置顶表删除
-                    ArchivesStickyContacts stickyContact = archivesProvider.findArchivesStickyContactsByDetailIdAndOrganizationId(namespaceId, cmd.getOrganizationId(),detailId);
-                    archivesProvider.deleteArchivesStickyContacts(stickyContact);
+                    ArchivesStickyContacts stickyContact = archivesProvider.findArchivesStickyContactsByDetailIdAndOrganizationId(namespaceId, cmd.getOrganizationId(), detailId);
+                    if (stickyContact != null)
+                        archivesProvider.deleteArchivesStickyContacts(stickyContact);
                 }
                 //  3.添加档案记录
                 DismissArchivesEmployeesCommand dismissCommand = new DismissArchivesEmployeesCommand();
