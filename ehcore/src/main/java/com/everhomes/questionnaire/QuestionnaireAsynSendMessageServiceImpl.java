@@ -386,10 +386,10 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 	private List<UserOrganizations> listUserCommunities(
 			ListCommunityUsersCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+//		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		return organizationProvider.listUserOrganizations(locator, pageSize, new ListingQueryBuilderCallback() {
+		return organizationProvider.listUserOrganizations(locator, cmd.getPageSize(), new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
