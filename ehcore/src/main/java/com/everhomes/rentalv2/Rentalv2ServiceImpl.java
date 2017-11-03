@@ -3209,7 +3209,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public void onOrderSuccess(RentalOrder order) {
 		//加工作流
-		createflowCase(order);
+		FlowCase flowCase= createflowCase(order);
+		if (order.getPayMode()==PayMode.ONLINE_PAY.getCode()){
+			order.setFlowCaseId(flowCase.getId());
+			rentalv2Provider.updateRentalBill(order);
+		}
+
 		//发消息给管理员
 		addOrderSendMessage(order);
 		//发短信在对接支付的handler  RentalOrderEmbeddedHandler //TODO:看是否需要移到这里

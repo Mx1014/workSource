@@ -252,7 +252,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 					"authTime", RentalNotificationTemplateCode.locale, ""));
-			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd hh:mm");
+			SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm");
 			e.setValue(dateFormat.format(new Date(order.getAuthStartTime().getTime()))+"到"+
 			dateFormat.format(new Date(order.getAuthEndTime().getTime())));
 			entities.add(e);
