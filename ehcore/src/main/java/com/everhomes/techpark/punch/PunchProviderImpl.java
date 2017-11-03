@@ -2604,7 +2604,7 @@ long id = sequenceProvider.getNextSequence(key);
 				.and(Tables.EH_PUNCH_TIME_RULES.STATUS.eq(status));
 		step.where(condition);
 		List<PunchTimeRule> result = step
-				.orderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc()).fetch()
+				.orderBy(Tables.EH_PUNCH_TIME_RULES.ID.desc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, PunchTimeRule.class);
 				});

@@ -190,7 +190,8 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.equal(userId));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(punchruleId));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.STATUS.equal(PunchRuleStatus.ACTIVE.getCode()));
-//				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
+				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.ID.desc());
+
 				return null;
 			}
 		});
