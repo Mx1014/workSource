@@ -1,6 +1,7 @@
 package com.everhomes.asset;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -86,6 +87,9 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
 
     @Override
@@ -1673,23 +1677,26 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         EhPaymentContractReceiver t1 = Tables.EH_PAYMENT_CONTRACT_RECEIVER.as("t1");
         EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
-        this.dbProvider.execute((TransactionStatus status) -> {
-            DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-            List<Long> billIds = context.select(t.ID)
-                    .from(t)
-                    .where(t.CONTRACT_ID.eq(contractId))
-                    .and(t.SWITCH.eq((byte) 3))
-                    .fetch(t.ID);
-            context.delete(t)
-                    .where(t.ID.in(billIds))
-                    .execute();
-            context.delete(t2)
-                    .where(t2.BILL_ID.in(billIds))
-                    .or(t2.CONTRACT_ID.eq(contractId))
-                    .execute();
-            context.delete(t1)
-                    .where(t1.CONTRACT_ID.eq(contractId))
-                    .execute();
+        this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
+            this.dbProvider.execute((TransactionStatus status) -> {
+                DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+                List<Long> billIds = context.select(t.ID)
+                        .from(t)
+                        .where(t.CONTRACT_ID.eq(contractId))
+                        .and(t.SWITCH.eq((byte) 3))
+                        .fetch(t.ID);
+                context.delete(t)
+                        .where(t.ID.in(billIds))
+                        .execute();
+                context.delete(t2)
+                        .where(t2.BILL_ID.in(billIds))
+                        .or(t2.CONTRACT_ID.eq(contractId))
+                        .execute();
+                context.delete(t1)
+                        .where(t1.CONTRACT_ID.eq(contractId))
+                        .execute();
+                return null;
+            });
             return null;
         });
     }
@@ -2056,21 +2063,27 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public void configChargingItems(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType,Integer namespaceId,List<Long> communityIds) {
-        Byte de_coupling = 1;
+        byte de_coupling = 1;
         if(communityIds!=null && communityIds.size() >1){
             for(int i = 0; i < communityIds.size(); i ++){
                 Long cid = communityIds.get(i);
-                //只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
-//                Boolean hasSovereign = checkSovereighty(communityId);
-//                if(!hasSovereign){
-//                    sovereighty = 0;
-//                    configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, cid, sovereighty);
-//                }
+//                只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
+                Boolean coupled = checkCoupling(communityId,ownerType);
+                if(coupled){
+                    de_coupling = 0;
+                    configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, cid, de_coupling);
+                }
             }
         }else{
             //只有一个园区,不是list过来的
             configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, communityId, de_coupling);
         }
+    }
+
+    private Boolean checkCoupling(Long communityId, String ownerType) {
+        boolean coupled = true;
+//        assetS
+        return false;
     }
 
     private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Long cid, Byte decouplingFlag) {
@@ -2088,7 +2101,7 @@ public class AssetProviderImpl implements AssetProvider {
             scope.setOwnerId(communityId);
             scope.setOwnerType(ownerType);
             scope.setProjectLevelName(vo.getProjectChargingItemName());
-//            scope.setSovereightyFlag(sovereighty);
+            scope.setDecouplingFlag(decouplingFlag);
             scope.setDecouplingFlag(decouplingFlag);
             list.add(scope);
         }

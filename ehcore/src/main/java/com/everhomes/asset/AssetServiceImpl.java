@@ -888,7 +888,7 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public void paymentExpectancies_re_struct(PaymentExpectanciesCommand cmd) {
-        LOGGER.error("STARTTTTTTTTTTTT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//        LOGGER.error("STARTTTTTTTTTTTT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
         Long contractId = cmd.getContractId();
         String contractNum = cmd.getContractNum();
@@ -978,12 +978,12 @@ public class AssetServiceImpl implements AssetService {
                 //计算
                 List<BillItemsExpectancy> billItemsExpectancies = assetFeeHandler(var2,formula,groupRule,group,rule,cycle,cmd,property,standard,formulaCondition);
 
-                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), billItemsExpectancies.size());
-                long currentBillItemSeq = nextBillItemBlock - billItemsExpectancies.size() + 1;
-                if(currentBillItemSeq == 0){
-                    currentBillItemSeq = currentBillItemSeq+1;
-                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()));
-                }
+//                long nextBillItemBlock = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()), billItemsExpectancies.size());
+//                long currentBillItemSeq = nextBillItemBlock - billItemsExpectancies.size() + 1;
+//                if(currentBillItemSeq == 0){
+//                    currentBillItemSeq = currentBillItemSeq+1;
+//                    this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_ITEMS.getClass()));
+//                }
 
                 //先算出所有的item
                 for(int g = 0; g < billItemsExpectancies.size(); g++){
@@ -1011,8 +1011,8 @@ public class AssetServiceImpl implements AssetService {
                     item.setDueDayDeadline(exp.getBillDateDeadline());
                     item.setDateStrGeneration(exp.getBillDateGeneration());
                     //归档字段
-                    item.setId(currentBillItemSeq);
-                    currentBillItemSeq += 1;
+                    item.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentBillItems.class)));
+//                    currentBillItemSeq += 1;
                     item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setCreatorUid(UserContext.currentUserId());
                     item.setNamespaceId(cmd.getNamesapceId());
@@ -1187,14 +1187,16 @@ public class AssetServiceImpl implements AssetService {
         }
 
         LOGGER.error("Asset Fee calculated！ bill list length={}，item length = {}",billList.size(),billItemsList.size());
-
-        this.dbProvider.execute((TransactionStatus status) -> {
-            if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Bills generation failed, "+billList.size()+" bill generated, "+billItemsList.size()+" billItem generated, "+contractDateList.size()+" contract receiver generated before store");
-            }
-            assetProvider.saveBillItems(billItemsList);
-            assetProvider.saveBills(billList);
-            assetProvider.saveContractVariables(contractDateList);
+        this.coordinationProvider.getNamedLock(contractId.toString()).enter(() -> {
+            this.dbProvider.execute((TransactionStatus status) -> {
+                if(billList.size()<1 || billItemsList.size()<1 || contractDateList.size()<1){
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"Bills generation failed, "+billList.size()+" bill generated, "+billItemsList.size()+" billItem generated, "+contractDateList.size()+" contract receiver generated before store");
+                }
+                assetProvider.saveBillItems(billItemsList);
+                assetProvider.saveBills(billList);
+                assetProvider.saveContractVariables(contractDateList);
+                return null;
+            });
             return null;
         });
         LOGGER.error("插入完成");
