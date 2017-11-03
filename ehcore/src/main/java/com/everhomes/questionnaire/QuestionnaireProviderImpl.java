@@ -144,9 +144,9 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 		// 连接条件
 		Condition joinCondition = Tables.EH_QUESTIONNAIRES.ID.eq(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID);
 		if(QuestionnaireTargetType.ORGANIZATION == QuestionnaireTargetType.fromCode(targetType)){
-			joinCondition = joinCondition.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(QuestionnaireTargetType.USER.getCode()).and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(UserId)));
-		}else if(QuestionnaireTargetType.USER == QuestionnaireTargetType.fromCode(targetType)){
 			joinCondition = joinCondition.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(QuestionnaireTargetType.ORGANIZATION.getCode()).and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(organizationID)));
+		}else if(QuestionnaireTargetType.USER == QuestionnaireTargetType.fromCode(targetType)){
+			joinCondition = joinCondition.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(QuestionnaireTargetType.USER.getCode()).and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(UserId)));
 		}else{
 			joinCondition = joinCondition.and(
 					(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(QuestionnaireTargetType.USER.getCode()).and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(UserId))).
