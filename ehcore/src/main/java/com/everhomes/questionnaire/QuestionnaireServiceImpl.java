@@ -1026,10 +1026,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	private void generateShareUrl(QuestionnaireDTO dto) {
 		try {
 			String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://core.zuolin.com");
+			homeUrl = homeUrl.endsWith("//")?homeUrl.substring(0,homeUrl.length()-1):homeUrl;
 			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s");
 			String srcUrl = String.format(homeUrl+contextUrl, dto.getId());
 			String shareContext = String.format("/evh/wxauth/authReq?ns=%s&src_url=%s",dto.getNamespaceId(), URLEncoder.encode(srcUrl,"utf-8"));
-			dto.setShareUrl(homeUrl.endsWith("//")?homeUrl.substring(0,homeUrl.length()-1):homeUrl+shareContext);
+			dto.setShareUrl(homeUrl+shareContext);
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.warn("generate share url = "+dto);
 		}
