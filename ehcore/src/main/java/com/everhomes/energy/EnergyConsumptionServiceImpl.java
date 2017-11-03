@@ -2281,7 +2281,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //                engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
                 engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
 
-                BigDecimal realAmount = new BigDecimal(0);
+//                BigDecimal realAmount = new BigDecimal(0);
                 BigDecimal realCost = new BigDecimal(0);
 
 //                try {
@@ -2298,16 +2298,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //                    throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
 //                }
 
-                if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
-                        PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
-                    engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), amount);
-                    realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
-                }
+//                if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
+//                        PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
+//                    engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), amount);
+//                    realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
+//                }
 
-                if(PriceCalculationType.BLOCK_TARIFF.equals(
-                        PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
-                    realCost = calculateBlockTariff(manager,priceSetting,amount, costFormula);
-                }
+//                if(PriceCalculationType.BLOCK_TARIFF.equals(
+//                        PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
+//                    realCost = calculateBlockTariff(manager,priceSetting,amount, costFormula);
+//                }
 
                 //删除昨天的记录（手工刷的时候）
                 energyDateStatisticProvider.deleteEnergyDateStatisticByDate(meter.getId(), new Date(yesterdayBegin.getTime()));
@@ -2335,84 +2335,84 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
         }
     }
+//能耗3.0开始 费用到缴费里面算
+//    private BigDecimal calculateStandingChargeTariff(ScriptEngine engine, EnergyMeterSettingLog priceSetting, String costFormula) {
+//        engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
+//        BigDecimal realCost = new BigDecimal(0);
+//        try {
+//            realCost = BigDecimal.valueOf(Double.valueOf(engine.eval(costFormula).toString()));
+//        } catch (ScriptException e) {
+//            String paramsStr = "{PRICE:" + priceSetting.getSettingValue() +
+//                    ", AMOUNT:" + engine.get(MeterFormulaVariable.AMOUNT.getCode()) +
+//                    ", TIMES:" + engine.get(MeterFormulaVariable.TIMES.getCode()) +
+//                    "}";
+//            LOGGER.error("evaluate formula error, costFormula={}, params={}", costFormula, paramsStr);
+//            e.printStackTrace();
+//            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
+//        }
+//
+//        return realCost;
+//    }
 
-    private BigDecimal calculateStandingChargeTariff(ScriptEngine engine, EnergyMeterSettingLog priceSetting, String costFormula) {
-        engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
-        BigDecimal realCost = new BigDecimal(0);
-        try {
-            realCost = BigDecimal.valueOf(Double.valueOf(engine.eval(costFormula).toString()));
-        } catch (ScriptException e) {
-            String paramsStr = "{PRICE:" + priceSetting.getSettingValue() +
-                    ", AMOUNT:" + engine.get(MeterFormulaVariable.AMOUNT.getCode()) +
-                    ", TIMES:" + engine.get(MeterFormulaVariable.TIMES.getCode()) +
-                    "}";
-            LOGGER.error("evaluate formula error, costFormula={}, params={}", costFormula, paramsStr);
-            e.printStackTrace();
-            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
-        }
-
-        return realCost;
-    }
-
-    private BigDecimal calculateBlockTariff(ScriptEngineManager manager, EnergyMeterSettingLog priceSetting, BigDecimal realAmount, String costFormula) {
-        EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(priceSetting.getConfigId());
-        EnergyMeterPriceConfigDTO priceConfigDTO = toEnergyMeterPriceConfigDTO(priceConfig);
-        BigDecimal totalCost = new BigDecimal(0);
-        if(priceConfigDTO != null && priceConfigDTO.getExpression() != null) {
-            ScriptEngine engine = manager.getEngineByName("javascript");
-            List<EnergyMeterRangePriceDTO> rangePriceDTOs = priceConfigDTO.getExpression().getRangePrice();
-            if(rangePriceDTOs != null && rangePriceDTOs.size() > 0) {
-                BigDecimal zero = new BigDecimal(0);
-
-                for(EnergyMeterRangePriceDTO rangePriceDTO : rangePriceDTOs) {
-
-                    BigDecimal minValue = StringUtils.isEmpty(rangePriceDTO.getMinValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMinValue());
-                    BigDecimal maxValue = StringUtils.isEmpty(rangePriceDTO.getMaxValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMaxValue());
-                    RangeBoundaryType lowerBoundary = RangeBoundaryType.fromCode(rangePriceDTO.getLowerBoundary());
-                    RangeBoundaryType upperBoundary = RangeBoundaryType.fromCode(rangePriceDTO.getUpperBoundary());
-                    //在区间内
-                    if((minValue.compareTo(zero) < 0 || calculateLowerBoundary(lowerBoundary, minValue, realAmount))
-                            && (maxValue.compareTo(zero) < 0  || calculateUpperBoundary(upperBoundary, maxValue, realAmount))) {
-                        engine.put(MeterFormulaVariable.PRICE.getCode(),rangePriceDTO.getPrice());
-                        engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), realAmount.subtract(minValue));
-                        totalCost.add(calculateBlockTariffByCostFormula(engine, costFormula));
-
-                    }
-                    //比该区间最大值大
-                    if(maxValue.compareTo(zero) >= 0 && greaterThanMax(upperBoundary, maxValue, realAmount)) {
-                        if(minValue.compareTo(zero) < 0) {
-                            engine.put(MeterFormulaVariable.PRICE.getCode(),rangePriceDTO.getPrice());
-                            engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), maxValue.subtract(zero));
-                            totalCost.add(calculateBlockTariffByCostFormula(engine, costFormula));
-                        } else {
-                            engine.put(MeterFormulaVariable.PRICE.getCode(),rangePriceDTO.getPrice());
-                            engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), maxValue.subtract(minValue));
-                            totalCost.add(calculateBlockTariffByCostFormula(engine, costFormula));
-
-                        }
-
-                    }
-                    //比该区间最小值小则不计算
-                }
-            }
-        }
-        return totalCost;
-    }
-
-    private BigDecimal calculateBlockTariffByCostFormula(ScriptEngine engine, String costFormula) {
-        BigDecimal cost = new BigDecimal(0);
-        try {
-            cost.add(BigDecimal.valueOf(Double.valueOf(engine.eval(costFormula).toString())));
-        } catch (ScriptException e) {
-            String paramsStr = "{PRICE:" + engine.get(MeterFormulaVariable.REAL_AMOUNT.getCode()) +
-                    ", REALAMOUNT:" + engine.get(MeterFormulaVariable.AMOUNT.getCode()) +
-                    "}";
-            LOGGER.error("evaluate formula error, costFormula={}, params={}", costFormula, paramsStr);
-            e.printStackTrace();
-            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
-        }
-        return cost;
-    }
+//    private BigDecimal calculateBlockTariff(ScriptEngineManager manager, EnergyMeterSettingLog priceSetting, BigDecimal realAmount, String costFormula) {
+//        EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(priceSetting.getConfigId());
+//        EnergyMeterPriceConfigDTO priceConfigDTO = toEnergyMeterPriceConfigDTO(priceConfig);
+//        BigDecimal totalCost = new BigDecimal(0);
+//        if(priceConfigDTO != null && priceConfigDTO.getExpression() != null) {
+//            ScriptEngine engine = manager.getEngineByName("javascript");
+//            List<EnergyMeterRangePriceDTO> rangePriceDTOs = priceConfigDTO.getExpression().getRangePrice();
+//            if(rangePriceDTOs != null && rangePriceDTOs.size() > 0) {
+//                BigDecimal zero = new BigDecimal(0);
+//
+//                for(EnergyMeterRangePriceDTO rangePriceDTO : rangePriceDTOs) {
+//
+//                    BigDecimal minValue = StringUtils.isEmpty(rangePriceDTO.getMinValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMinValue());
+//                    BigDecimal maxValue = StringUtils.isEmpty(rangePriceDTO.getMaxValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMaxValue());
+//                    RangeBoundaryType lowerBoundary = RangeBoundaryType.fromCode(rangePriceDTO.getLowerBoundary());
+//                    RangeBoundaryType upperBoundary = RangeBoundaryType.fromCode(rangePriceDTO.getUpperBoundary());
+//                    //在区间内
+//                    if((minValue.compareTo(zero) < 0 || calculateLowerBoundary(lowerBoundary, minValue, realAmount))
+//                            && (maxValue.compareTo(zero) < 0  || calculateUpperBoundary(upperBoundary, maxValue, realAmount))) {
+//                        engine.put(MeterFormulaVariable.PRICE.getCode(),rangePriceDTO.getPrice());
+//                        engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), realAmount.subtract(minValue));
+//                        totalCost.add(calculateBlockTariffByCostFormula(engine, costFormula));
+//
+//                    }
+//                    //比该区间最大值大
+//                    if(maxValue.compareTo(zero) >= 0 && greaterThanMax(upperBoundary, maxValue, realAmount)) {
+//                        if(minValue.compareTo(zero) < 0) {
+//                            engine.put(MeterFormulaVariable.PRICE.getCode(),rangePriceDTO.getPrice());
+//                            engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), maxValue.subtract(zero));
+//                            totalCost.add(calculateBlockTariffByCostFormula(engine, costFormula));
+//                        } else {
+//                            engine.put(MeterFormulaVariable.PRICE.getCode(),rangePriceDTO.getPrice());
+//                            engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), maxValue.subtract(minValue));
+//                            totalCost.add(calculateBlockTariffByCostFormula(engine, costFormula));
+//
+//                        }
+//
+//                    }
+//                    //比该区间最小值小则不计算
+//                }
+//            }
+//        }
+//        return totalCost;
+//    }
+//
+//    private BigDecimal calculateBlockTariffByCostFormula(ScriptEngine engine, String costFormula) {
+//        BigDecimal cost = new BigDecimal(0);
+//        try {
+//            cost.add(BigDecimal.valueOf(Double.valueOf(engine.eval(costFormula).toString())));
+//        } catch (ScriptException e) {
+//            String paramsStr = "{PRICE:" + engine.get(MeterFormulaVariable.REAL_AMOUNT.getCode()) +
+//                    ", REALAMOUNT:" + engine.get(MeterFormulaVariable.AMOUNT.getCode()) +
+//                    "}";
+//            LOGGER.error("evaluate formula error, costFormula={}, params={}", costFormula, paramsStr);
+//            e.printStackTrace();
+//            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
+//        }
+//        return cost;
+//    }
 
     private Boolean calculateLowerBoundary(RangeBoundaryType lowerBoundary, BigDecimal minValue, BigDecimal realAmount) {
         Boolean rangeFlag = false;
@@ -2528,21 +2528,21 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
             BigDecimal realCost = new BigDecimal(0);
 
-            if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
-                    PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
+//            if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
+//                    PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
                 ScriptEngine engine = manager.getEngineByName("js");
                 engine.put(MeterFormulaVariable.AMOUNT.getCode(), currentAmount);
                 //由于currentAmount其实是realAmount  已经算了一遍times，所以此处times赋值为1 by xiongying20170401
                 engine.put(MeterFormulaVariable.TIMES.getCode(), 1);
                 engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), currentAmount);
-                realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
-            }
+//                realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
+//            }
 
-            if(PriceCalculationType.BLOCK_TARIFF.equals(
-                    PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
-                realCost = calculateBlockTariff(manager,priceSetting,currentAmount, costFormula);
-            }
-            monthStat.setCurrentCost(realCost);
+//            if(PriceCalculationType.BLOCK_TARIFF.equals(
+//                    PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
+//                realCost = calculateBlockTariff(manager,priceSetting,currentAmount, costFormula);
+//            }
+//            monthStat.setCurrentCost(realCost);
 
             //delete
             energyMonthStatisticProvider.deleteEnergyMonthStatisticByDate(meter.getId(), monthSF.get().format(monthBegin));
