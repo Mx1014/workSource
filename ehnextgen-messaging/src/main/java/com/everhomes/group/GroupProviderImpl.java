@@ -20,9 +20,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
-import com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord;
-import com.everhomes.server.schema.tables.records.EhGroupsRecord;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -923,4 +921,51 @@ public class GroupProviderImpl implements GroupProvider {
 	public List<GroupMember> searchPublicGroupMembersByStatus(Long groupId, String keyword, Byte status, Long from, int pageSize) {
 		return listPublicGroupMembersByStatus(groupId, keyword, status, from, pageSize, true, 0L);
 	}
+
+    @Override
+    public GuildApply findGuildApplyById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGuildApplies.class, id));
+        EhGuildAppliesDao dao = new EhGuildAppliesDao(context.configuration());
+        EhGuildApplies result = dao.findById(id);
+        if (result == null) {
+            return null;
+        }
+        return ConvertHelper.convert(result, GuildApply.class);
+    }
+
+    @Override
+    public IndustryType findIndustryTypeById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhIndustryTypes.class, id));
+        EhIndustryTypesDao dao = new EhIndustryTypesDao(context.configuration());
+        EhIndustryTypes result = dao.findById(id);
+        if (result == null) {
+            return null;
+        }
+        return ConvertHelper.convert(result, IndustryType.class);
+    }
+
+    @Override
+    public List<IndustryType> listIndustryTypes(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhIndustryTypesRecord> query = context.selectQuery(Tables.EH_INDUSTRY_TYPES);
+        query.addConditions(Tables.EH_INDUSTRY_TYPES.NAMESPACE_ID.eq(namespaceId));
+
+        return query.fetch().map(r->ConvertHelper.convert(r, IndustryType.class));
+    }
+
+    @Override
+    public List<GuildApply> listGuildApplies(Integer namespaceId, Long groupId, Long applicantUid) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGuildAppliesRecord> query = context.selectQuery(Tables.EH_GUILD_APPLIES);
+        query.addConditions(Tables.EH_GUILD_APPLIES.NAMESPACE_ID.eq(namespaceId));
+
+        if(groupId != null){
+            query.addConditions(Tables.EH_GUILD_APPLIES.GROUP_ID.eq(groupId));
+        }
+        if(applicantUid != null){
+            query.addConditions(Tables.EH_GUILD_APPLIES.APPLICANT_UID.eq(applicantUid));
+        }
+
+        return query.fetch().map(r->ConvertHelper.convert(r, GuildApply.class));
+    }
 }

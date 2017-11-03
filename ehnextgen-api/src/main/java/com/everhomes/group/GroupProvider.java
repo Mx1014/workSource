@@ -87,4 +87,12 @@ public interface GroupProvider {
     List<GroupMember> listPublicGroupMembersByStatus(Long groupId, Byte status, Long from, int pageSize, boolean includeCreator, Long creatorId);
 
     List<GroupMember> searchPublicGroupMembersByStatus(Long groupId, String keyword, Byte status, Long from, int pageSize);
+
+    GuildApply findGuildApplyById(Long id);
+
+    IndustryType findIndustryTypeById(Long id);
+
+    List<IndustryType> listIndustryTypes(Integer namespaceId);
+
+    List<GuildApply> listGuildApplies(Integer namespaceId, Long groupId, Long applicantUid);
 }

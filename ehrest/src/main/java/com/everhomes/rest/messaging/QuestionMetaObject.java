@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>requestTime: 请求时间</li>
  * <li>requestInfo: 申请描述</li>
  * <li>requestId: 申请id</li>
+ * <li>jsonInfo:</li>
  * </ul>
  */
 public class QuestionMetaObject {
@@ -33,6 +34,7 @@ public class QuestionMetaObject {
     private Timestamp requestTime;
     private String requestInfo;
     private Long requestId;
+
     
     public Long getRequestId() {
 		return requestId;

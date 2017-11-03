@@ -896,4 +896,54 @@ public class GroupController extends ControllerBase {
 		groupService.cancelGroupRequest(cmd);
 		return new RestResponse();
 	}
+
+
+
+    @RequestMapping("findGuildApplyById")
+    @RestReturn(GuildApplyDTO.class)
+    public GuildApplyDTO findGuildApply(FindGuildApplyCommand cmd){
+
+        ListGroupCommandResponse cmdResponse = this.groupService.searchGroup(cmd);
+
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    @RequestMapping("findIndustryTypeById")
+    @RestReturn(IndustryTypeDTO.class)
+    public IndustryTypeDTO findIndustryType(ListIndustryTypesCommand cmd){
+
+        ListGroupCommandResponse cmdResponse = this.groupService.searchGroup(cmd);
+
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    @RequestMapping("listIndustryTypes")
+    @RestReturn(String.class)
+    List<IndustryTypeDTO> listIndustryTypes(FindIndustryTypeCommand cmd){
+
+        ListGroupCommandResponse cmdResponse = this.groupService.searchGroup(cmd);
+
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    @RequestMapping("cancelGroupRequest")
+    @RestReturn(String.class)
+    List<GuildApplyDTO> listGuildApplies(ListGuildAppliesCommand cmd){
+
+        ListGroupCommandResponse cmdResponse = this.groupService.searchGroup(cmd);
+
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
