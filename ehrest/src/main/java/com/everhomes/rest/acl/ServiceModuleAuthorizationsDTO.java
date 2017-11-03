@@ -2,9 +2,11 @@
 package com.everhomes.rest.acl;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.module.ControlTarget;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -49,20 +51,28 @@ public class ServiceModuleAuthorizationsDTO {
     @ItemType(ServiceModuleDTO.class)
     private List<ServiceModuleDTO> modules;
 
-    private Byte community_control_flag;
+    private Byte communityControlFlag;
 
-    private Byte org_control_flag;
+    private Byte orgControlFlag;
 
-    private Byte unlimit_control_flag;
+    private Byte unlimitControlFlag;
+
+    @NotNull
+    @ItemType(Long.class)
+    private List<Long> communityControlIds;
+
 
     @ItemType(ServiceModuleAppDTO.class)
-    private List<ServiceModuleAppDTO> community_apps;
+    private List<ServiceModuleAppDTO> communityApps;
+
+    @ItemType(ControlTarget.class)
+    private List<ControlTarget> orgControlDetails;
 
     @ItemType(ServiceModuleAppDTO.class)
-    private List<ServiceModuleAppDTO> org_apps;
+    private List<ServiceModuleAppDTO> orgApps;
 
     @ItemType(ServiceModuleAppDTO.class)
-    private List<ServiceModuleAppDTO> unlimit_apps;
+    private List<ServiceModuleAppDTO> unlimitApps;
 
 
     @ItemType(ProjectDTO.class)
@@ -164,51 +174,68 @@ public class ServiceModuleAuthorizationsDTO {
         return StringHelper.toJsonString(this);
     }
 
-    public Byte getCommunity_control_flag() {
-        return community_control_flag;
+    public Byte getCommunityControlFlag() {
+        return communityControlFlag;
     }
 
-    public void setCommunity_control_flag(Byte community_control_flag) {
-        this.community_control_flag = community_control_flag;
+    public void setCommunityControlFlag(Byte communityControlFlag) {
+        this.communityControlFlag = communityControlFlag;
     }
 
-    public Byte getOrg_control_flag() {
-        return org_control_flag;
+
+    public Byte getUnlimitControlFlag() {
+        return unlimitControlFlag;
     }
 
-    public void setOrg_control_flag(Byte org_control_flag) {
-        this.org_control_flag = org_control_flag;
+    public void setUnlimitControlFlag(Byte unlimitControlFlag) {
+        this.unlimitControlFlag = unlimitControlFlag;
     }
 
-    public Byte getUnlimit_control_flag() {
-        return unlimit_control_flag;
+    public List<ServiceModuleAppDTO> getCommunityApps() {
+        return communityApps;
     }
 
-    public void setUnlimit_control_flag(Byte unlimit_control_flag) {
-        this.unlimit_control_flag = unlimit_control_flag;
+    public void setCommunityApps(List<ServiceModuleAppDTO> communityApps) {
+        this.communityApps = communityApps;
     }
 
-    public List<ServiceModuleAppDTO> getCommunity_apps() {
-        return community_apps;
+    public List<ServiceModuleAppDTO> getOrgApps() {
+        return orgApps;
     }
 
-    public void setCommunity_apps(List<ServiceModuleAppDTO> community_apps) {
-        this.community_apps = community_apps;
+    public void setOrgApps(List<ServiceModuleAppDTO> orgApps) {
+        this.orgApps = orgApps;
     }
 
-    public List<ServiceModuleAppDTO> getOrg_apps() {
-        return org_apps;
+    public List<ServiceModuleAppDTO> getUnlimitApps() {
+        return unlimitApps;
     }
 
-    public void setOrg_apps(List<ServiceModuleAppDTO> org_apps) {
-        this.org_apps = org_apps;
+    public void setUnlimitApps(List<ServiceModuleAppDTO> unlimitApps) {
+        this.unlimitApps = unlimitApps;
     }
 
-    public List<ServiceModuleAppDTO> getUnlimit_apps() {
-        return unlimit_apps;
+    public Byte getOrgControlFlag() {
+        return orgControlFlag;
     }
 
-    public void setUnlimit_apps(List<ServiceModuleAppDTO> unlimit_apps) {
-        this.unlimit_apps = unlimit_apps;
+    public void setOrgControlFlag(Byte orgControlFlag) {
+        this.orgControlFlag = orgControlFlag;
+    }
+
+    public List<Long> getCommunityControlIds() {
+        return communityControlIds;
+    }
+
+    public void setCommunityControlIds(List<Long> communityControlIds) {
+        this.communityControlIds = communityControlIds;
+    }
+
+    public List<ControlTarget> getOrgControlDetails() {
+        return orgControlDetails;
+    }
+
+    public void setOrgControlDetails(List<ControlTarget> orgControlDetails) {
+        this.orgControlDetails = orgControlDetails;
     }
 }

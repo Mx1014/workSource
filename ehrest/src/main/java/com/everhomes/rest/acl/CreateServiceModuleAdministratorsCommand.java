@@ -2,7 +2,7 @@ package com.everhomes.rest.acl;
 
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.module.OrgControlTarget;
+import com.everhomes.rest.module.ControlTarget;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -60,8 +60,8 @@ public class CreateServiceModuleAdministratorsCommand {
     private Byte allOrgControlFlag;
 
 
-    @ItemType(OrgControlTarget.class)
-    private List<OrgControlTarget> orgControlDetails;
+    @ItemType(ControlTarget.class)
+    private List<ControlTarget> orgControlDetails;
 
     @ItemType(Long.class)
     private List<ModuleAppTarget> orgTarget;
@@ -166,11 +166,11 @@ public class CreateServiceModuleAdministratorsCommand {
         this.allOrgControlFlag = allOrgControlFlag;
     }
 
-    public List<OrgControlTarget> getOrgControlDetails() {
+    public List<ControlTarget> getOrgControlDetails() {
         return orgControlDetails;
     }
 
-    public void setOrgControlDetails(List<OrgControlTarget> orgControlDetails) {
+    public void setOrgControlDetails(List<ControlTarget> orgControlDetails) {
         this.orgControlDetails = orgControlDetails;
     }
 

@@ -12,6 +12,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.acl.IdentityType;
+import com.everhomes.rest.module.ControlTarget;
 import com.everhomes.rest.module.Project;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -31,12 +32,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import scala.Int;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class AuthorizationProviderImpl implements AuthorizationProvider {
@@ -128,6 +127,22 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		query.addConditions(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.USER_ID.eq(userId));
 		query.execute();
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAuthorizationControlConfigs.class, null);
+	}
+
+	@Override
+	public List<ControlTarget> listAuthorizationControlConfigs(Integer namespaceId, Long userId, Long controlId) {
+		List<ControlTarget> result = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		context.select()
+				.from(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS)
+				.where(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.CONTROL_ID.eq(controlId))
+				.and(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.USER_ID.eq(userId)).fetch()
+				.map(r -> {
+					result.add(new ControlTarget(r.getValue(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.TARGET_ID), r.getValue(Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.INCLUDE_CHILD_FLAG)));
+					return null;
+				});
+		return result;
 	}
 
 	@Override

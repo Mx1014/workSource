@@ -646,4 +646,20 @@ public class AclController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+
+    /**
+     * <b>URL: /acl/listServiceModuleAppsAdministrators</b>
+     * <p>业务模块应用管理员列表</p>
+     */
+    @RequestMapping("listServiceModuleAppsAdministrators")
+    @RestReturn(value=ServiceModuleAppsAuthorizationsDto.class, collection = true)
+    public RestResponse listServiceModuleAppsAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_LIST);
+        RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAppsAdministrators(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

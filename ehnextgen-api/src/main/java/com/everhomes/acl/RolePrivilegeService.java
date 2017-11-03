@@ -180,7 +180,7 @@ public interface RolePrivilegeService {
 	 * @param cmd
 	 * @return
 	 */
-	List<ServiceModuleAuthorizationsDTO> listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd);
+	List<ServiceModuleAppsAuthorizationsDto> listServiceModuleAppsAdministrators(ListServiceModuleAdministratorsCommand cmd);
 
 	/**
 	 * 超级管理员列表

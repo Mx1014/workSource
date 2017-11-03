@@ -4,7 +4,17 @@ import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
 
-public class OrgControlTarget {
+public class ControlTarget {
+
+    public ControlTarget(){
+
+    }
+
+    public ControlTarget(Long id, Byte includeChildFlag) {
+        this.id = id;
+        this.includeChildFlag = includeChildFlag;
+    }
+
     @NotNull
     private Long id;
 
