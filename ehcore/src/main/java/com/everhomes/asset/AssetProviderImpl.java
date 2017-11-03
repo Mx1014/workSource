@@ -552,17 +552,12 @@ public class AssetProviderImpl implements AssetProvider {
         List<BillDTO> dtos = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
-//        EhPaymentChargingItems t1 = Tables.EH_PAYMENT_CHARGING_ITEMS.as("t1");
         EhAddresses t2 = Tables.EH_ADDRESSES.as("t2");
         context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME)
                 .from(t)
-//               .leftOuterJoin(t1)
-//                .on(t.CHARGING_ITEMS_ID.eq(t1.ID))
                 .leftOuterJoin(t2)
                 .on(t.ADDRESS_ID.eq(t2.ID))
                 .where(t.BILL_ID.eq(billId))
-//                .and(t.CHARGING_ITEMS_ID.eq(t1.ID))
-//                .orderBy(t1.DEFAULT_ORDER)
                 .limit(pageOffSet,pageSize+1)
                 .fetch()
                 .map(r ->{
@@ -575,10 +570,22 @@ public class AssetProviderImpl implements AssetProvider {
                     dto.setAmountOwed(r.getValue(t.AMOUNT_OWED));
                     dto.setBillStatus(r.getValue(t.STATUS));
                     dto.setBillItemId(r.getValue(t.ID));
+                    dto.setBillGroupRuleId(r.getValue(t.BILL_GROUP_RULE_ID));
                     dto.setApartmentName(r.getValue(t2.APARTMENT_NAME));
                     dto.setBuildingName(r.getValue(t2.BUILDING_NAME));
                     dtos.add(dto);
                     return null;});
+        for(int i = 0; i < dtos.size(); i ++){
+            if(org.apache.commons.lang.StringUtils.isEmpty(dtos.get(i).getBillItemName())) {
+                BillDTO dto = dtos.get(i);
+                String projectLevelName = context.select(itemScope.PROJECT_LEVEL_NAME)
+                    .from(itemScope, groupRule)
+                    .where(groupRule.CHARGING_STANDARDS_ID.eq(itemScope.ID))
+                    .and(groupRule.ID.eq(dto.getBillGroupRuleId()))
+                    .fetchOne(itemScope.PROJECT_LEVEL_NAME);
+                dto.setBillItemName(projectLevelName);
+            }
+        }
         return dtos;
     }
 
@@ -718,7 +725,7 @@ public class AssetProviderImpl implements AssetProvider {
     public ShowCreateBillDTO showCreateBill(Long billGroupId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillGroupsRules rule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("rule");
-        EhPaymentBillGroups bg = Tables.EH_PAYMENT_BILL_GROUPS.as("bg");
+//        EhPaymentBillGroups bg = Tables.EH_PAYMENT_BILL_GROUPS.as("bg");
         EhPaymentChargingItemScopes ci = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("ci");
 
 
@@ -735,6 +742,7 @@ public class AssetProviderImpl implements AssetProvider {
                     BillItemDTO dto = new BillItemDTO();
                     dto.setBillItemId(r.getValue(rule.CHARGING_ITEM_ID));
                     dto.setBillItemName(r.getValue(ci.PROJECT_LEVEL_NAME));
+                    dto.setBillGroupRuleId(r.getValue(rule.ID));
                     list.add(dto);
                     return null;});
 
@@ -873,6 +881,7 @@ public class AssetProviderImpl implements AssetProvider {
                     }
                     BillItemDTO dto = list1.get(i);
                     PaymentBillItems item = new PaymentBillItems();
+                    item.setBillGroupRuleId(dto.getBillGroupRuleId());
                     item.setAddressId(dto.getAddressId());
                     item.setBuildingName(dto.getBuildingName());
                     item.setApartmentName(dto.getApartmentName());
@@ -892,7 +901,6 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setCreatorUid(UserContext.currentUserId());
                     item.setDateStr(dateStr);
                     item.setId(currentBillItemSeq);
-                    currentBillItemSeq += 1;
                     item.setNamespaceId(UserContext.getCurrentNamespaceId());
                     item.setOwnerType(ownerType);
                     item.setOwnerId(ownerId);
@@ -925,7 +933,6 @@ public class AssetProviderImpl implements AssetProvider {
 
             com.everhomes.server.schema.tables.pojos.EhPaymentBills newBill = new PaymentBills();
             //  缺少创造者信息，先保存在其他地方，比如持久化日志
-
             newBill.setAmountOwed(amountOwed);
             newBill.setAmountReceivable(amountReceivable);
             newBill.setAmountReceived(zero);
@@ -2094,9 +2101,18 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     private Boolean checkCoupling(Long communityId, String ownerType) {
-        boolean coupled = true;
-//        assetS
-        return false;
+        DSLContext context = getReadOnlyContext();
+        List<Byte> flags = context.select(itemScope.DECOUPLING_FLAG)
+                .from(itemScope)
+                .where(itemScope.OWNER_TYPE.eq(ownerType))
+                .and(itemScope.OWNER_ID.eq(communityId))
+                .fetch(itemScope.DECOUPLING_FLAG);
+        for(int i = 0; i < flags.size(); i ++){
+            if(flags.get(i).byteValue() == (byte)1){
+                return false;
+            }
+        }
+        return true;
     }
 
     private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Long cid, Byte decouplingFlag) {
@@ -2104,6 +2120,12 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
         EhPaymentChargingItemScopesDao dao = new EhPaymentChargingItemScopesDao(context.configuration());
         List<com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes> list = new ArrayList<>();
+        if(configChargingItems == null){
+            context.delete(t)
+                    .where(t.OWNER_TYPE.eq(ownerType))
+                    .and(t.OWNER_ID.eq(communityId))
+                    .execute();
+        }
         for(int i = 0; i < configChargingItems.size(); i ++) {
             ConfigChargingItems vo = configChargingItems.get(i);
             PaymentChargingItemScope scope = new PaymentChargingItemScope();
@@ -2659,6 +2681,9 @@ public class AssetProviderImpl implements AssetProvider {
     private Long getNextSequence(Class clz){
         return this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(clz));
     }
+    private static EhPaymentChargingStandards standard = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("alias");
+    private static EhPaymentChargingItemScopes itemScope = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("alias");
+    private static EhPaymentBillGroupsRules groupRule = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("alias");
 
 
 }

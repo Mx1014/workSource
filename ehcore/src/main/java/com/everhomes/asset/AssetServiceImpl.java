@@ -1016,6 +1016,7 @@ public class AssetServiceImpl implements AssetService {
                     //归档字段
                     item.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentBillItems.class)));
 //                    currentBillItemSeq += 1;
+                    item.setBillGroupRuleId(groupRule.getId());
                     item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     item.setCreatorUid(UserContext.currentUserId());
                     item.setNamespaceId(cmd.getNamesapceId());
@@ -1027,6 +1028,7 @@ public class AssetServiceImpl implements AssetService {
                     item.setContractNum(cmd.getContractNum());
                     item.setTargetName(cmd.getTargetName());
                     item.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
                     //放到数组中去
                     billItemsList.add(item);
                     innerBillItemsList.add(item);
@@ -1165,6 +1167,7 @@ public class AssetServiceImpl implements AssetService {
                     addressIds.append(var1.get(l).getPropertyName()+",");
                 }
             }
+            entity.setBillGroupRuleId(groupRule.getId());
             entity.setAddressIdsJson(addressIds.toString());
             entity.setContractId(cmd.getContractId());
             entity.setContractNum(cmd.getContractNum());
@@ -2167,6 +2170,7 @@ public class AssetServiceImpl implements AssetService {
         s.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.getClass())));
         s.setOwnerType(cmd.getOwnerType());
         s.setOwnerId(cmd.getOwnerId());
+        s.setNamespaceId(cmd.getNamespaceId());
         s.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
         assetProvider.createChargingStandard(c,s,f);
@@ -2396,12 +2400,14 @@ public class AssetServiceImpl implements AssetService {
      * 如果已经关联合同（不论状态）或者新增账单被使用，则不能修改或删除
      */
     @Override
-    public void deleteBillGroup(DeleteBillGroupCommand cmd) {
+    public DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd) {
+        DeleteBillGroupReponse response = new DeleteBillGroupReponse();
         boolean workFlag = isInWorkGroup(cmd.getBillGroupId(),false);
         if(workFlag){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_ACCESS_DENIED,"账单组已经在工作，不能删除");
+            response.setFailCause(AssetPaymentStrings.DELTE_GROUP_UNSAFE);
         }
         assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId());
+        return response;
     }
 
     @Override

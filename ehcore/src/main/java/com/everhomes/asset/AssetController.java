@@ -520,10 +520,10 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/deleteBillGroup</b>
      */
     @RequestMapping("deleteBillGroup")
-    @RestReturn(value = String.class)
+    @RestReturn(value = DeleteBillGroupReponse.class)
     public RestResponse deleteBillGroup(DeleteBillGroupCommand cmd) {
-        assetService.deleteBillGroup(cmd);
-        RestResponse response = new RestResponse();
+        DeleteBillGroupReponse res = assetService.deleteBillGroup(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;

@@ -56,6 +56,7 @@ public class CreateChargingStandardCommand {
     private Long chargingStandardId;
 
 
+
     public BigDecimal getSuggestUnitPrice() {
         return suggestUnitPrice;
     }
