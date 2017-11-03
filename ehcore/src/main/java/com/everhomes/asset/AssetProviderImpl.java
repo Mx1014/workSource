@@ -553,7 +553,7 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
         EhAddresses t2 = Tables.EH_ADDRESSES.as("t2");
-        context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME)
+        context.select(t.DATE_STR,t.CHARGING_ITEM_NAME,t.AMOUNT_RECEIVABLE,t.AMOUNT_RECEIVED,t.AMOUNT_OWED,t.STATUS,t.ID,t2.APARTMENT_NAME,t2.BUILDING_NAME,t.BILL_GROUP_RULE_ID)
                 .from(t)
                 .leftOuterJoin(t2)
                 .on(t.ADDRESS_ID.eq(t2.ID))
