@@ -5885,18 +5885,18 @@ public class OrganizationServiceImpl implements OrganizationService {
         for (OrganizationMember m : members) {
             if (OrganizationGroupType.fromCode(m.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
 
-                //记录删除log
-                OrganizationMemberLog orgLog = new OrganizationMemberLog();
-                orgLog.setOrganizationId(m.getOrganizationId());
-                orgLog.setContactName(m.getContactName());
-                orgLog.setContactToken(m.getContactToken());
-                orgLog.setUserId(m.getTargetId());
-                orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                orgLog.setOperationType(OperationType.QUIT.getCode());
-                orgLog.setRequestType(RequestType.ADMIN.getCode());
-                orgLog.setOperatorUid(UserContext.current().getUser().getId());
-                orgLog.setContactDescription(m.getContactDescription());
-                this.organizationProvider.createOrganizationMemberLog(orgLog);
+//                //记录删除log
+//                OrganizationMemberLog orgLog = new OrganizationMemberLog();
+//                orgLog.setOrganizationId(m.getOrganizationId());
+//                orgLog.setContactName(m.getContactName());
+//                orgLog.setContactToken(m.getContactToken());
+//                orgLog.setUserId(m.getTargetId());
+//                orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//                orgLog.setOperationType(OperationType.QUIT.getCode());
+//                orgLog.setRequestType(RequestType.ADMIN.getCode());
+//                orgLog.setOperatorUid(UserContext.current().getUser().getId());
+//                orgLog.setContactDescription(m.getContactDescription());
+//                this.organizationProvider.createOrganizationMemberLog(orgLog);
 
                 if(OrganizationMemberGroupType.fromCode(m.getMemberGroup()) == OrganizationMemberGroupType.MANAGER){
                     List<OrganizationMember> managers = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(m.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(), null);
