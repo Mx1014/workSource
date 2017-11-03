@@ -12,7 +12,7 @@ import com.everhomes.rest.organization.OrganizationDetailDTO;
  *     <li>id: id</li>
  *     <li>userId: 用户id</li>
  *     <li>userName: 用户姓名</li>
- *     <li>nikeName: 用户昵称</li>
+ *     <li>nickName: 用户昵称</li>
  *     <li>communityId: 小区id</li>
  *     <li>isAuth: 认证状态  1认证 2未认证</li>
  *     <li>applyTime: 注册时间</li>
@@ -37,7 +37,7 @@ public class CommunityUserAddressDTO {
 
 	private String userName;
 
-	private String nikeName;
+	private String nickName;
 
 	private Long communityId;
 
@@ -156,14 +156,13 @@ public class CommunityUserAddressDTO {
 		this.phone = phone;
 	}
 
-	public String getNikeName() {
-		return nikeName;
+	public String getNickName() {
+		return nickName;
 	}
 
-	public void setNikeName(String nikeName) {
-		this.nikeName = nikeName;
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
 	}
-
 
 	public Byte getGender() {
 		return gender;

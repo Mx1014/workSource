@@ -1600,7 +1600,7 @@ public class CommunityServiceImpl implements CommunityService {
 				CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
 				dto.setUserId(user.getId());
 				//dto.setUserName(user.getNickName());
-				dto.setNikeName(user.getNickName());
+				dto.setNickName(user.getNickName());
 				dto.setGender(user.getGender());
 				dto.setApplyTime(user.getCreateTime());
 				if(null != userIdentifier)
@@ -1684,7 +1684,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 			
 			dto.setUserName(organizationOwner.getContactName());
-			dto.setNikeName(organizationOwner.getContactName());
+			dto.setNickName(organizationOwner.getContactName());
 			dto.setPhone(organizationOwner.getContactToken());
 			dtos.add(dto);
 		}
@@ -2060,7 +2060,7 @@ public class CommunityServiceImpl implements CommunityService {
 		for(UserOrganizations r: users){
 			CommunityUserDto dto = ConvertHelper.convert(r, CommunityUserDto.class);
 			//dto.setUserName(r.getNickName());
-			dto.setNikeName(r.getNickName());
+			dto.setNickName(r.getNickName());
 			dto.setPhone(r.getPhoneNumber());
 			dto.setApplyTime(r.getRegisterTime());
 			dto.setIdentityNumber(r.getIdentityNumberTag());
@@ -2125,7 +2125,7 @@ public class CommunityServiceImpl implements CommunityService {
 			for(User u: users){
 				CommunityUserDto dto = new CommunityUserDto();
 				//dto.setUserName(u.getNickName());
-				dto.setNikeName(u.getNickName());
+				dto.setNickName(u.getNickName());
 				// dto.setPhone(r.getPhoneNumber());
 				dto.setApplyTime(u.getCreateTime());
 				dto.setIdentityNumber(u.getIdentityNumberTag());
@@ -2173,7 +2173,7 @@ public class CommunityServiceImpl implements CommunityService {
 			for(User u: users){
 				CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
 				//dto.setUserName(u.getNickName());
-				dto.setNikeName(u.getNickName());
+				dto.setNickName(u.getNickName());
 				// dto.setPhone(r.getPhoneNumber());
 				dto.setApplyTime(u.getCreateTime());
 				dto.setIdentityNumber(u.getIdentityNumberTag());
@@ -2295,7 +2295,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 
 			tempRow.createCell(0).setCellValue(dto.getUserName());
-			tempRow.createCell(1).setCellValue(dto.getNikeName());
+			tempRow.createCell(1).setCellValue(dto.getNickName());
 			tempRow.createCell(2).setCellValue(dto.getPhone());
 			tempRow.createCell(3).setCellValue(UserGender.fromCode(dto.getGender()).getText());
 			tempRow.createCell(4).setCellValue(enterprises.toString());
@@ -2356,7 +2356,7 @@ public class CommunityServiceImpl implements CommunityService {
 			CommunityUserAddressDTO dto = dtos.get(i);
 
 			tempRow.createCell(0).setCellValue(dto.getUserName());
-			tempRow.createCell(1).setCellValue(dto.getNikeName());
+			tempRow.createCell(1).setCellValue(dto.getNickName());
 			tempRow.createCell(2).setCellValue(dto.getPhone());
 			tempRow.createCell(3).setCellValue(UserGender.fromCode(dto.getGender()).getText());
 

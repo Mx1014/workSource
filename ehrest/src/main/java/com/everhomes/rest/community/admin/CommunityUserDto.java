@@ -12,7 +12,7 @@ import java.util.List;
  *     <li>id: id</li>
  *     <li>userId: userId</li>
  *     <li>userName: userName</li>
- *     <li>nikeName: nikeName</li>
+ *     <li>nickName: nickName</li>
  *     <li>organizationMemberName: organizationMemberName</li>
  *     <li>communityId: communityId</li>
  *     <li>isAuth: isAuth</li>
@@ -40,7 +40,7 @@ public class CommunityUserDto {
 
 	private String userName;
 
-	private String nikeName;
+	private String nickName;
 
 	private String organizationMemberName;
 
@@ -202,12 +202,12 @@ public class CommunityUserDto {
 		this.phone = phone;
 	}
 
-	public String getNikeName() {
-		return nikeName;
+	public String getNickName() {
+		return nickName;
 	}
 
-	public void setNikeName(String nikeName) {
-		this.nikeName = nikeName;
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
 	}
 
 	public Byte getGender() {
