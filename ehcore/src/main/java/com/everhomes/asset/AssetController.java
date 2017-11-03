@@ -320,7 +320,7 @@ public class AssetController extends ControllerBase {
 
     // this is for 展示所有收费项目   4
     /**
-     * <p>获取园区启用的收费项目列表</p>
+     * <p>获取账单组启用的收费项目列表</p>
      * <b>URL: /asset/listChargingItems</b>
      */
     @RequestMapping("listChargingItems")

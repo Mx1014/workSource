@@ -2606,11 +2606,22 @@ public class AssetProviderImpl implements AssetProvider {
         List<ListChargingItemsDTO> list = new ArrayList<>();
         DSLContext context = getReadOnlyContext();
         EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
-        List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
-                .where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+//        List<Long> availableIds = context.select(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID)
+//                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+//                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(cmd.getOwnerId()))
+//                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(cmd.getOwnerType()))
+//                .fetch(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID);
+//        List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
+//                .where(t1.CHARGING_ITEM_ID.in(availableIds))
+//                .and(t1.OWNER_ID.eq(cmd.getOwnerId()))
+//                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+//                .fetchInto(PaymentChargingItemScope.class);
+        List<PaymentChargingItemScope> scopes = context.select(t1.fields())
+                .from(Tables.EH_PAYMENT_BILL_GROUPS_RULES,t1)
+                .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.CHARGING_ITEM_ID.eq(t1.CHARGING_ITEM_ID))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERTYPE.eq(cmd.getOwnerType()))
+                .and(Tables.EH_PAYMENT_BILL_GROUPS_RULES.OWNERID.eq(cmd.getOwnerId()))
                 .fetchInto(PaymentChargingItemScope.class);
-
         for(int j = 0; j < scopes.size(); j ++){
             ListChargingItemsDTO dto = new ListChargingItemsDTO();
             PaymentChargingItemScope scope = scopes.get(j);
