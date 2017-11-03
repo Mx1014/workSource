@@ -1642,11 +1642,20 @@ public class AssetProviderImpl implements AssetProvider {
         List<PaymentBillGroupRule> rules = context.select()
                 .from(t)
                 .where(t.CHARGING_ITEM_ID.eq(chargingItemId))
-                .and(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
                 .and(t.OWNERTYPE.eq(ownerType))
                 .and(t.OWNERID.eq(ownerId))
                 .fetch()
                 .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
+        if(rules.size() > 1){
+            List<PaymentBillGroupRule> rules2 = context.select()
+                    .from(t)
+                    .where(t.CHARGING_STANDARDS_ID.eq(chargingStandardId))
+                    .and(t.OWNERTYPE.eq(ownerType))
+                    .and(t.OWNERID.eq(ownerId))
+                    .fetch()
+                    .map(r -> ConvertHelper.convert(r, PaymentBillGroupRule.class));
+            return rules2.get(0);
+        }
         return rules.get(0);
     }
 
