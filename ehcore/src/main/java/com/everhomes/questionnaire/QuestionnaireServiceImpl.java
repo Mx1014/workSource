@@ -172,15 +172,15 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Override
 	public GetQuestionnaireDetailResponse getQuestionnaireDetail(GetQuestionnaireDetailCommand cmd) {
 		List<QuestionnaireOption> questionnaireOptions = questionnaireOptionProvider.listOptionsByQuestionnaireId(cmd.getQuestionnaireId());
-		return new GetQuestionnaireDetailResponse(convertToQuestionnaireDTO(questionnaireOptions));
+		return new GetQuestionnaireDetailResponse(convertToQuestionnaireDTO(cmd.getQuestionnaireId(),questionnaireOptions));
 	}
 
-	private QuestionnaireDTO convertToQuestionnaireDTO(List<QuestionnaireOption> questionnaireOptions) {
-		return convertToQuestionnaireDTO(questionnaireOptions, false, null);
+	private QuestionnaireDTO convertToQuestionnaireDTO(Long questionnaireId,List<QuestionnaireOption> questionnaireOptions) {
+		return convertToQuestionnaireDTO(questionnaireId,questionnaireOptions, false, null);
 	}
 	
 	// 是否包含填空题，统计时用
-	private QuestionnaireDTO convertToQuestionnaireDTO(List<QuestionnaireOption> questionnaireOptions, boolean containBlank, Integer pageSize) {
+	private QuestionnaireDTO convertToQuestionnaireDTO(Long questionnaireId,List<QuestionnaireOption> questionnaireOptions, boolean containBlank, Integer pageSize) {
 		List<QuestionnaireDTO> questionnaireDTOs = new ArrayList<>();
 		// k1为问卷的id，k2为问题的id
 		Map<Long, Map<Long, List<QuestionnaireOption>>> map = questionnaireOptions.parallelStream().collect(Collectors.groupingBy(QuestionnaireOption::getQuestionnaireId,Collectors.groupingBy(QuestionnaireOption::getQuestionId)));
@@ -205,7 +205,12 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			sortQuestions(questionDTOs);
 			questionnaireDTOs.add(convertToQuestionnaireDTO(questionnaire, questionDTOs));
 		});
-		QuestionnaireDTO dto = questionnaireDTOs.get(0);
+		QuestionnaireDTO dto = null;
+		if(questionnaireDTOs.size()>0) {
+			dto = questionnaireDTOs.get(0);
+		}else{
+			dto = convertToQuestionnaireDTO(findQuestionnaireById(questionnaireId),(List<QuestionnaireQuestionDTO>)null);
+		}
 		dto.setPercentComplete(generatePercentComplete(dto.getTargetUserNum(),dto.getCollectionCount()));
 		if(dto.getCollectionCount() == null){
 			dto.setCollectionCount(0);
@@ -882,7 +887,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Override
 	public GetQuestionnaireResultSummaryResponse getQuestionnaireResultSummary(GetQuestionnaireResultSummaryCommand cmd) {
 		List<QuestionnaireOption> questionnaireOptions = questionnaireOptionProvider.listOptionsByQuestionnaireId(cmd.getQuestionnaireId());
-		return new GetQuestionnaireResultSummaryResponse(convertToQuestionnaireDTO(questionnaireOptions, true, cmd.getPageSize()));
+		return new GetQuestionnaireResultSummaryResponse(convertToQuestionnaireDTO(cmd.getQuestionnaireId(),questionnaireOptions, true, cmd.getPageSize()));
 	}
 
 	@Override
