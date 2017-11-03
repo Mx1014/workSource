@@ -2541,6 +2541,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			// 无限制范围数据
             ServiceModuleAuthorizationsDTO u_dto = processServiceModuleApps(r, ModuleManagementType.UNLIMIT_CONTROL.getCode());
 
+            dto.setTargetType(c_dto.getTargetType());
+            dto.setTargetId(c_dto.getTargetId());
+            dto.setNickName(c_dto.getNickName());
+            dto.setIdentifierToken(c_dto.getIdentifierToken());
+            dto.setOwnerType(c_dto.getOwnerType());
+            dto.setOwnerId(c_dto.getOwnerId());
+            dto.setAllFlag(c_dto.getAllFlag());
+
             dto.setCommunityControlApps(c_dto);
             dto.setOrgControlApps(o_dto);
             dto.setUnlimitControlApps(u_dto);
