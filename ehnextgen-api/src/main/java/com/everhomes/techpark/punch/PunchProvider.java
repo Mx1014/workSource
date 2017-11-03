@@ -331,5 +331,5 @@ public interface PunchProvider {
 
 	void deletePunchTimeRuleByRuleId(Long id);
 
-	void approveAbnormalPunch(Long userId, Date punchDate, Integer punchIntervalNo, Byte punchType);
+	Integer approveAbnormalPunch(Long userId, Date punchDate, Integer punchIntervalNo, Byte punchType);
 }

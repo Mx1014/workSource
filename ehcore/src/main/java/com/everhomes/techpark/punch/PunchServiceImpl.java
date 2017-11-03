@@ -896,11 +896,14 @@ public class PunchServiceImpl implements PunchService {
 
 	private PunchLogsDay calculateDayLogByeverypunch(Long userId, Long companyId,
                 Calendar logDay, PunchLogsDay pdl, PunchDayLog punchDayLog) throws ParseException {
-		List<PunchLog> punchLogs =                                                                                                                  punchProvider.listPunchLogsByDate(userId,
+		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
 			companyId, dateSF.get().format(logDay.getTime()), ClockCode.SUCESS.getCode());
 		if(null != punchLogs){
 			pdl.setPunchCount(punchLogs.size());
 			for (PunchLog log : punchLogs){
+				if (log.getPunchTime() == null) {
+					continue;
+				}
 				pdl.getPunchLogs().add(ConvertHelper.convert(log,PunchLogDTO.class ));
 				if(null == pdl.getArriveTime()||pdl.getArriveTime() > log.getPunchTime().getTime())
 					pdl.setArriveTime(log.getPunchTime().getTime());
@@ -1024,43 +1027,17 @@ public class PunchServiceImpl implements PunchService {
 			}else{
 	//			/**上班时间*/
 				Calendar arriveCalendar = Calendar.getInstance();
-	//			PunchLog punchLog = findPunchLog(punchLogs, PunchType.ON_DUTY.getCode(),1);
 				arriveCalendar.setTime(onDutyLog.getPunchTime());
 				Calendar leaveCalendar = Calendar.getInstance();
 				leaveCalendar.setTime(offDutyLog.getPunchTime());
-	
-	//			if(null == punchLog){
-	//                pdl.setStatusList(PunchStatus.UNPUNCH.getCode()+"");
-	//                pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
-	//				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-	//				makeExceptionForDayList(userId, companyId, logDay, pdl);
-	//				return pdl;
-	//			}else{
-	//				arriveCalendar.setTime(punchLog.getPunchTime());
-	//				/**下班时间*/
-	//				punchLog = findPunchLog(punchLogs, PunchType.OFF_DUTY.getCode(),1);
-	//				if(null == punchLog){
-	//					pdl.setStatusList(PunchStatus.FORGOT.getCode()+"");
-	//					pdl.setPunchStatus(PunchStatus.FORGOT.getCode());
-	//					pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-	//					makeExceptionForDayList(userId, companyId, logDay, pdl);
-	//					return pdl;
-	//				}else{
-	//				leaveCalendar.setTime(punchLog.getPunchTime());
-	//				}
-	//			}
-	//
-	//
 				long realWorkTime = leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis();
 				if(null != punchTimeRule.getNoonLeaveTimeLong()) {
 					/**最早上班时间*/
 					Calendar startMinTime = Calendar.getInstance();
 					/**最晚上班时间*/
 					Calendar startMaxTime = Calendar.getInstance();
-	//			Calendar workTime = Calendar.getInstance();
 					startMinTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getStartEarlyTimeLong());
 					startMaxTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getStartLateTimeLong());
-	//			workTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getWorkTimeLong());
 					Calendar AfternoonArriveCalendar = Calendar.getInstance();
 					AfternoonArriveCalendar.setTimeInMillis((punchLogs.get(0).getPunchDate().getTime() +
 							punchTimeRule.getAfternoonArriveTimeLong()));
@@ -7879,6 +7856,20 @@ public class PunchServiceImpl implements PunchService {
 		//审批通过
 		//批量更新那个人那一天那班次那上下班的卡状态为正常
 
-		punchProvider.approveAbnormalPunch(request.getUserId(), request.getPunchDate(), request.getPunchIntervalNo(), request.getPunchType());
+		Integer updateNum = punchProvider.approveAbnormalPunch(request.getUserId(), request.getPunchDate(), request.getPunchIntervalNo(), request.getPunchType());
+		if(updateNum <1){
+			PunchLog pl = new PunchLog();
+			pl.setUserId(request.getUserId());
+			pl.setEnterpriseId(request.getEnterpriseId());
+			pl.setPunchDate(request.getPunchDate());
+			pl.setApprovalStatus(PunchStatus.NORMAL.getCode());
+			pl.setPunchType(request.getPunchType());
+			pl.setPunchIntervalNo(request.getPunchIntervalNo());
+			PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), request.getEnterpriseId(),
+					request.getEnterpriseId());
+			PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr, request.getPunchDate(),request.getUserId());
+			pl.setRuleTime(findRuleTime(ptr, request.getPunchType(), request.getPunchIntervalNo()));
+			pl.setStatus(PunchStatus.UNPUNCH.getCode());
+		}
 	}
 }
