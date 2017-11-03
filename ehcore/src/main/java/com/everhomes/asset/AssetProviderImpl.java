@@ -1267,6 +1267,7 @@ public class AssetProviderImpl implements AssetProvider {
                     conditionVarIden.add(r.getValue(Tables.EH_PAYMENT_FORMULA.CONSTRAINT_VARIABLE_IDENTIFER));
                    return null;
                 });
+
             formus.add(formu);
             conditionVarIdens.add(conditionVarIden);
         }
@@ -1302,7 +1303,13 @@ public class AssetProviderImpl implements AssetProvider {
             while(iterator.hasNext()){
                 PaymentVariable var = new PaymentVariable();
                 String varIden = iterator.next();
+                if(varIden == null ){
+                    continue;
+                }
                 String varName = getNameByVariableIdenfitier(varIden);
+                if(StringUtils.isNullOrEmpty(varName)){
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_GENERAL_EXCEPTION,"formula variable name does not exist in schema");
+                }
                 var.setVariableIdentifier(varIden);
                 var.setVariableName(varName);
                 if(varIden.equals("dj")){
