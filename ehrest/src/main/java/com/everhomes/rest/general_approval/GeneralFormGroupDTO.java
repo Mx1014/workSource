@@ -5,14 +5,17 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>fieldGroupName: 表单字段组名</li>
- * <li>fieldAttribute: 字段属性 比如：系统默认字段 {@link GeneralFormFieldAttribute}</li>
+ * <li>fieldGroupDisplayName: 表单字段组显示名</li>
+ * <li>fieldGroupAttribute: 字段属性 比如：系统默认字段 {@link GeneralFormFieldAttribute}</li>
  * </ul>
  */
 public class GeneralFormGroupDTO {
 
     private String fieldGroupName;
 
-    private String fieldAttribute;
+    private String fieldGroupDisplayName;
+
+    private String fieldGroupAttribute;
 
     public GeneralFormGroupDTO() {
     }
@@ -25,12 +28,20 @@ public class GeneralFormGroupDTO {
         this.fieldGroupName = fieldGroupName;
     }
 
-    public String getFieldAttribute() {
-        return fieldAttribute;
+    public String getFieldGroupDisplayName() {
+        return fieldGroupDisplayName;
     }
 
-    public void setFieldAttribute(String fieldAttribute) {
-        this.fieldAttribute = fieldAttribute;
+    public void setFieldGroupDisplayName(String fieldGroupDisplayName) {
+        this.fieldGroupDisplayName = fieldGroupDisplayName;
+    }
+
+    public String getFieldGroupAttribute() {
+        return fieldGroupAttribute;
+    }
+
+    public void setFieldGroupAttribute(String fieldGroupAttribute) {
+        this.fieldGroupAttribute = fieldGroupAttribute;
     }
 
     @Override

@@ -3,7 +3,9 @@ import org.junit.Test;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class ArchivesTest {
     String str = "1506859877968";
@@ -66,25 +68,22 @@ public class ArchivesTest {
         System.out.println(token1.length + " : " + token1.toString());
         System.out.println(token2.length + " : " + token2.toString());
     }
-}
-class Father{
-    protected void mine(){
 
+    @Test
+    public void listRemove(){
+        List<String> strs = new ArrayList<>();
+        strs.add("abc");
+        strs.add("cba");
+        strs.add("acb");
+
+        String str = "cba";
+        strs.forEach(r ->{
+            System.out.println(r);
+        });
+        System.out.println("After remove:");
+        strs.remove(str);
+        strs.forEach(r ->{
+            System.out.println(r);
+        });
     }
 }
-
-class Son extends Father{
-    @Override
-    protected void mine() {
-        super.mine();
-    }
-}
-/*
-class Son extends Father{
-
-    //  子类
-    public void mine(){
-        //  父类
-        super.mine();
-    }
-}*/
