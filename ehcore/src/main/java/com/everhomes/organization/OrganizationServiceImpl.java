@@ -6428,7 +6428,13 @@ public class OrganizationServiceImpl implements OrganizationService {
             Long org_id = member.getOrganizationId();
             int i = 0;
             while (i < level){
-                org_id = checkOrganization(org_id).getParentId();
+                Long temp_org_id = checkOrganization(org_id).getParentId();
+                if (temp_org_id != 0) {
+                    org_id = temp_org_id;
+                    i++;
+                } else {
+                    return new ArrayList<>();
+                }
             }
             managers = getOrganizationManagers(org_id);
         }
