@@ -417,6 +417,10 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		questionnaireDTO.setPublishTime(questionnaire.getPublishTime()==null?null:questionnaire.getPublishTime().getTime());
 		List<QuestionnaireRange> listRanges = questionnaireRangeProvider.listQuestionnaireRangeByQuestionnaireId(questionnaire.getId());
 		questionnaireDTO.setRanges(listRanges.stream().map(r->ConvertHelper.convert(r,QuestionnaireRangeDTO.class)).collect(Collectors.toList()));
+		if(questionnaire.getPosterUri()!=null){
+			String url = contentServerService.parserUri(questionnaire.getPosterUri());
+			questionnaireDTO.setPosterUrl(url);
+		}
 		return questionnaireDTO;
 	}
 	
