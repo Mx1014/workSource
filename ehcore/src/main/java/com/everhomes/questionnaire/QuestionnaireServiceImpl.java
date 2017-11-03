@@ -1051,7 +1051,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 			homeUrl = homeUrl.endsWith("/")?homeUrl.substring(0,homeUrl.length()-1):homeUrl;
 			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s");
 			String srcUrl = String.format(homeUrl+contextUrl, dto.getId());
-			String shareContext = String.format("/evh/wxauth/authReq?ns=%s&src_url=%s",dto.getNamespaceId(), URLEncoder.encode(srcUrl,"utf-8")).toLowerCase();
+			String shareContext = String.format("/evh/wxauth/authReq?ns=%s&src_url=%s",dto.getNamespaceId(), URLEncoder.encode(srcUrl,"utf-8"));
 			dto.setShareUrl(homeUrl+shareContext);
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.warn("generate share url = "+dto);
@@ -1179,7 +1179,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 					"questionnaire type = " + questionnaire.getTargetType() + " summit type = "+cmd.getTargetType());
 		}
 
-		if(questionnaire.getCutOffTime().after(new Timestamp(System.currentTimeMillis()))){
+		if(questionnaire.getCutOffTime().before(new Timestamp(System.currentTimeMillis()))){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"提交失败，问卷已结束！" + questionnaire.getStatus());
 		}
