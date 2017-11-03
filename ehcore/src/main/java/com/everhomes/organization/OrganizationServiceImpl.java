@@ -5395,6 +5395,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //重复添加纪录
                     repeatCreateOrganizationmembers(departmentIds, token, enterpriseIds, enterprise_member);
                     OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+                    departmentIds.remove(cmd.getOrganizationId());
                     if (departmentIds != null && departmentIds.size() > 0)
                         memberDetail.setDepartmentIds(JSON.toJSONString(departmentIds));
                     memberDetail.setDepartment(convertToOrganizationName(departmentIds));
@@ -10167,6 +10168,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 //同步部门、岗位、职级的修改
                 OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(organizationMember.getDetailId());
+                departmentIds.remove(cmd.getOrganizationId());
                 if (departmentIds != null && departmentIds.size() > 0)
                     memberDetail.setDepartmentIds(JSON.toJSONString(departmentIds));
                 memberDetail.setDepartment(convertToOrganizationName(departmentIds));
