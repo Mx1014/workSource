@@ -300,34 +300,38 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	}
 
 	private void createRanges(Long questionnaireId, List<QuestionnaireRangeDTO> ranges) {
-		ranges.forEach(r->{
-			QuestionnaireRange questionnaireRange = ConvertHelper.convert(r,QuestionnaireRange.class);
-			questionnaireRange.setQuestionnaireId(questionnaireId);
-			questionnaireRange.setStatus(CommonStatus.ACTIVE.getCode());
-			questionnaireRange.setNamespaceId(UserContext.getCurrentNamespaceId());
-			QuestionnaireRangeType rangeType = QuestionnaireRangeType.fromCode(r.getRangeType());
-			if(rangeType == QuestionnaireRangeType.NAMESPACE_ALL ||
-					rangeType == QuestionnaireRangeType.NAMESPACE_AUTHENTICATED ||
-					rangeType == QuestionnaireRangeType.NAMESPACE_UNAUTHORIZED){
-				questionnaireRange.setRange(""+UserContext.getCurrentNamespaceId());
-			}
-			questionnaireRangeProvider.createQuestionnaireRange(questionnaireRange);
-		});
+		if(ranges!=null) {
+			ranges.forEach(r -> {
+				QuestionnaireRange questionnaireRange = ConvertHelper.convert(r, QuestionnaireRange.class);
+				questionnaireRange.setQuestionnaireId(questionnaireId);
+				questionnaireRange.setStatus(CommonStatus.ACTIVE.getCode());
+				questionnaireRange.setNamespaceId(UserContext.getCurrentNamespaceId());
+				QuestionnaireRangeType rangeType = QuestionnaireRangeType.fromCode(r.getRangeType());
+				if (rangeType == QuestionnaireRangeType.NAMESPACE_ALL ||
+						rangeType == QuestionnaireRangeType.NAMESPACE_AUTHENTICATED ||
+						rangeType == QuestionnaireRangeType.NAMESPACE_UNAUTHORIZED) {
+					questionnaireRange.setRange("" + UserContext.getCurrentNamespaceId());
+				}
+				questionnaireRangeProvider.createQuestionnaireRange(questionnaireRange);
+			});
+		}
 	}
 
 	private List<QuestionnaireQuestionDTO> createQuestions(Long questionnaireId, List<QuestionnaireQuestionDTO> questions) {
 		List<QuestionnaireQuestionDTO> resultDTOs = new ArrayList<>();
-		for (QuestionnaireQuestionDTO questionDTO : questions) {
-			QuestionnaireQuestion question = ConvertHelper.convert(questionDTO, QuestionnaireQuestion.class);
-			question.setQuestionnaireId(questionnaireId);
-			questionnaireQuestionProvider.createQuestionnaireQuestion(question);
-			List<QuestionnaireOptionDTO> optionDTOs = null;
-			if (QuestionType.fromCode(questionDTO.getQuestionType()) != QuestionType.BLANK) {
-				optionDTOs = createOptions(questionnaireId, question.getId(), questionDTO.getOptions());
-			}else {
-				optionDTOs = createBlankOption(questionnaireId, question.getId());
+		if(questions!=null) {
+			for (QuestionnaireQuestionDTO questionDTO : questions) {
+				QuestionnaireQuestion question = ConvertHelper.convert(questionDTO, QuestionnaireQuestion.class);
+				question.setQuestionnaireId(questionnaireId);
+				questionnaireQuestionProvider.createQuestionnaireQuestion(question);
+				List<QuestionnaireOptionDTO> optionDTOs = null;
+				if (QuestionType.fromCode(questionDTO.getQuestionType()) != QuestionType.BLANK) {
+					optionDTOs = createOptions(questionnaireId, question.getId(), questionDTO.getOptions());
+				} else {
+					optionDTOs = createBlankOption(questionnaireId, question.getId());
+				}
+				resultDTOs.add(convertToQuestionDTO(question, optionDTOs));
 			}
-			resultDTOs.add(convertToQuestionDTO(question, optionDTOs));
 		}
 		
 		return resultDTOs;
@@ -910,8 +914,10 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		if(namespaceId == null){
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
+		Long userId = UserContext.current().getUser().getId();
+		Long organizationId = cmd.getOrganizationId();
 		List<QuestionnaireDTO> questionnaires = questionnaireProvider.listTargetQuestionnaireByOwner(namespaceId,cmd.getNowTime(),
-				cmd.getCollectFlag(),cmd.getTargetType(),UserContext.current().getUser().getId(),cmd.getOrganizationId(),answeredFlagAnchor,publishTimeAnchor,questionnariePageSize);
+				cmd.getCollectFlag(),cmd.getTargetType(),userId,organizationId,answeredFlagAnchor,publishTimeAnchor,questionnariePageSize);
 		return new ListTargetQuestionnairesResponse(generateNextPageAnchor(cmd,questionnaires,pageSize,answeredFlagAnchor,publishTimeAnchor), questionnaires);
 	}
 
@@ -1026,7 +1032,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	private void generateShareUrl(QuestionnaireDTO dto) {
 		try {
 			String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://core.zuolin.com");
-			homeUrl = homeUrl.endsWith("//")?homeUrl.substring(0,homeUrl.length()-1):homeUrl;
+			homeUrl = homeUrl.endsWith("/")?homeUrl.substring(0,homeUrl.length()-1):homeUrl;
 			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s");
 			String srcUrl = String.format(homeUrl+contextUrl, dto.getId());
 			String shareContext = String.format("/evh/wxauth/authReq?ns=%s&src_url=%s",dto.getNamespaceId(), URLEncoder.encode(srcUrl,"utf-8"));
