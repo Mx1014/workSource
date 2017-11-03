@@ -1398,3 +1398,8 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),506000,'', 'EhNamespaces', 999966,2);
 -- 增加考勤管理模塊
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`) VALUES('50600','考勤管理','50000','/50000/50600','1','2','2','0','2016-12-06 11:40:51','','23','2017-09-08 10:45:46','0','0','0','0');
+
+
+-- 新增新左邻运营后台配置 add by xujuan 20171103
+set @domain_id = IFNULL((SELECT MAX(id) FROM `eh_domains`), 1);
+insert into `eh_domains` (`id`, `namespace_id`, `portal_type`, `portal_id`, `domain`, `create_uid`, `create_time`) values((@domain_id := @domain_id + 1),'0','EhZuolinAdmins',0, 'opv2.szbay.com', 0, now());
