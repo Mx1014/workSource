@@ -330,4 +330,6 @@ public interface PunchProvider {
 	List<PunchTimeRule> listPunchTimeRulesBySplitTime(long beginTime, long endTime);
 
 	void deletePunchTimeRuleByRuleId(Long id);
+
+	void approveAbnormalPunch(Long userId, Date punchDate, Integer punchIntervalNo, Byte punchType);
 }

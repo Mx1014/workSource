@@ -2,6 +2,7 @@ package com.everhomes.techpark.punch;
 
 import java.sql.Time;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.*;
 
@@ -19,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.approval.ApprovalRule;
 
 public interface PunchService {
-	 
 	public ListYearPunchLogsCommandResponse getlistPunchLogs(ListYearPunchLogsCommand cmd);
 
 	public PunchClockResponse createPunchLog(PunchClockCommand cmd);
@@ -48,8 +49,11 @@ public interface PunchService {
 
 	public GetPunchNewExceptionCommandResponse getPunchNewException( GetPunchNewExceptionCommand cmd);
 
+	PunchDayLog refreshPunchDayLog(Long userId, Long companyId1,
+								   Calendar logDay) throws ParseException;
+
 	public PunchLogsDay makePunchLogsDayListInfo(Long userId, Long companyId,
-			Calendar logDay) throws ParseException;
+												 Calendar logDay) throws ParseException;
 
 	public PunchLogsDay getDayPunchLogs(GetDayPunchLogsCommand cmd);
 
@@ -111,6 +115,10 @@ public interface PunchService {
 
 	public ListPunchMonthLogsResponse listPunchMonthLogs(ListPunchMonthLogsCommand cmd);
 
+	void refreshPunchDayLog(Long userId, Long companyId, Long startDay, Long endDay);
+
+	void refreshPunchDayLog(Long userId, Long companyId, Date startDay, Date endDay);
+
 	public ListPunchDetailsResponse listPunchDetails(ListPunchDetailsCommand cmd);
 
 	public HttpServletResponse exportPunchStatistics(ListPunchCountCommand cmd, HttpServletResponse response);
@@ -143,6 +151,8 @@ public interface PunchService {
 
 	public void deleteTargetPunchAllRule(GetTargetPunchAllRuleCommand cmd);
 
+	List<String> getTimeIntervalApprovalAttribute();
+
 	String statusToString(Byte status);
  
 
@@ -173,7 +183,9 @@ public interface PunchService {
 	public void updatePunchSchedulings(UpdatePunchSchedulingMonthCommand cmd);
 
 	public ListPunchWiFisResponse listPunchWiFis(ListPunchRulesCommonCommand cmd);
- 
+
+
+	java.sql.Date calculatePunchDate(Calendar punCalendar, Long enterpriseId, Long userId);
 
 	Long convertTimeToGMTMillisecond(Time time);
 
@@ -226,4 +238,6 @@ public interface PunchService {
 	ListApprovalCategoriesResponse listApprovalCategories();
 
 	public CheckAbnormalStatusResponse checkAbnormalStatus(CheckPunchAdminCommand cmd);
+
+	void approveAbnormalPunch(PunchExceptionRequest request);
 }

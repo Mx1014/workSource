@@ -4,26 +4,17 @@ import com.alibaba.fastjson.JSON;
 import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.PostApprovalFormAbnormalPunchValue;
-import com.everhomes.rest.general_approval.PostApprovalFormAskForLeaveValue;
-import com.everhomes.rest.general_approval.PostApprovalFormBussinessTripValue;
-import com.everhomes.rest.general_approval.PostApprovalFormGoOutValue;
-import com.everhomes.rest.general_approval.PostApprovalFormOverTimeValue;
-import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.approval.ApprovalRequestDefaultHandler;
-import com.everhomes.approval.ApprovalRequestHandler;
 import com.everhomes.flow.FlowCase;
-import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.Calendar;
 
 /**
  * 
@@ -48,7 +39,9 @@ public class GeneralApprovalAbnormalPunchHandler extends GeneralApprovalDefaultH
 				GeneralFormFieldType.ABNORMAL_PUNCH.getCode());
 		PostApprovalFormAbnormalPunchValue valDTO= JSON.parseObject(val.getFieldStr3(), PostApprovalFormAbnormalPunchValue.class);
 
-		request.setPunchDate( java.sql.Date.valueOf(valDTO.getAbnormalDate()));
+		request.setPunchDate(java.sql.Date.valueOf(valDTO.getAbnormalDate()));
+		request.setPunchType(valDTO.getPunchType());
+		request.setPunchIntervalNo(valDTO.getPunchIntervalNo());
 		request.setApprovalAttribute(ga.getApprovalAttribute());
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		request.setCreatorUid(UserContext.currentUserId());
@@ -64,10 +57,23 @@ public class GeneralApprovalAbnormalPunchHandler extends GeneralApprovalDefaultH
 //
 //	}
 //
-//	@Override
-//	public void onFlowCaseEnd(FlowCase flowCase) {
-//		// TODO Auto-generated method stub
-//		super();
-//	}
+	@Override
+	public PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase) {
+        //把狀態置为审批通过
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
+        PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
+        request.setStatus(ApprovalStatus.AGREEMENT.getCode());
+        punchService.approveAbnormalPunch(request);
+        Calendar punCalendar = Calendar.getInstance();
+        punCalendar.setTime(request.getPunchDate());
+        try {
+            punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), punCalendar);
+        } catch (ParseException e) {
+            LOGGER.error("refresh punchDayLog ParseException : userid ["+request.getUserId()+"],enterpriseid ["
+                    +request.getEnterpriseId()+"] day["+request.getPunchDate()+"]");
+        }
+        return request;
+
+	}
 //
 }

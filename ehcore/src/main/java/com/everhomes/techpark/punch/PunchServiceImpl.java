@@ -184,11 +184,23 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 public class PunchServiceImpl implements PunchService {
 	final String downloadDir ="download/";
 
+	private static final List<String> timeIntervalApprovalAttribute;
+	static {
+		timeIntervalApprovalAttribute = new ArrayList<>();
+		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.ASK_FOR_LEAVE.getCode());
+		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.BUSINESS_TRIP.getCode());
+		timeIntervalApprovalAttribute.add(GeneralApprovalAttribute.GO_OUT.getCode());
+	}
+	@Override
+	public List<String> getTimeIntervalApprovalAttribute(){
+		return timeIntervalApprovalAttribute;
+	}
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(PunchServiceImpl.class);
 	@Autowired
 	private FlowCaseProvider flowCaseProvider;
-    private static ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>(){
+
+	private static ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>(){
     	protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy-MM-dd");
         }
@@ -570,8 +582,9 @@ public class PunchServiceImpl implements PunchService {
 	/**
 	 * 刷新取某人某日的打卡日状态
 	 * */
-	private PunchDayLog refreshPunchDayLog(Long userId, Long companyId1,
-			Calendar logDay) throws ParseException {
+	@Override
+	public PunchDayLog refreshPunchDayLog(Long userId, Long companyId1,
+										  Calendar logDay) throws ParseException {
 		Long companyId = getTopEnterpriseId(companyId1);
 		PunchLogsDay pdl = new PunchLogsDay();
 		pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
@@ -1366,7 +1379,8 @@ public class PunchServiceImpl implements PunchService {
 	 * 1.看昨天的刷新时间
 	 * 2.看今天的刷新时间
 	 * 3.如果今天没排班,看明天的最早上班*/
-	private java.sql.Date calculatePunchDate(Calendar punCalendar, Long enterpriseId, Long userId) {
+	@Override
+	public java.sql.Date calculatePunchDate(Calendar punCalendar, Long enterpriseId, Long userId) {
 
 //		try {
 //			punCalendar.setTime(datetimeSF.get().parse(punchTime));
@@ -4565,59 +4579,40 @@ public class PunchServiceImpl implements PunchService {
 			if(null == userIdentifier){
 				continue;
 			}
-			Calendar start = Calendar.getInstance();
-			Calendar end = Calendar.getInstance();
-			start.setTimeInMillis(cmd.getStartDay());
-			end.setTimeInMillis(cmd.getEndDay());
-			while (start.before(end)) {
+			refreshPunchDayLog(userId, companyId, cmd.getStartDay(), cmd.getEndDay());
 
-//				coordinationProvider.getNamedLock(CoordinationLocks.PUNCH_DAY_SCHEDULE.getCode()+start.getTimeInMillis()).tryEnter(() -> {
-					try {
-						this.refreshPunchDayLog(userId, companyId, start);
-//						PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
-//										companyId, dateSF.get().format(start.getTime()));
-//						if (null == punchDayLog) {
-//							// 数据库没有计算好的数据
-//							PunchLogsDay pdl = new PunchLogsDay();
-//							pdl.setPunchDay(String.valueOf(start.get(Calendar.DAY_OF_MONTH)));
-//							pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
-//
-//
-//							PunchDayLog newPunchDayLog = new PunchDayLog();
-//							pdl = calculateDayLog(userId, companyId, start, pdl,newPunchDayLog);
-//							if (null == pdl) {
-////								start.add(Calendar.DAY_OF_MONTH, 1);
-////								continue  ;
-//								return;
-//							}
-//                            newPunchDayLog.setStatusList(pdl.getStatusList());
-//							newPunchDayLog.setUserId(userId);
-//							newPunchDayLog.setEnterpriseId(companyId);
-//							newPunchDayLog.setCreatorUid(userId);
-//							newPunchDayLog.setPunchDate(java.sql.Date.valueOf(dateSF.get().format(start
-//									.getTime())));
-//							newPunchDayLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-//									.getTime()));
-//							newPunchDayLog.setPunchTimesPerDay(pdl.getPunchTimesPerDay());
-//							newPunchDayLog.setStatus(pdl.getPunchStatus());
-//							newPunchDayLog.setMorningStatus(pdl.getMorningPunchStatus());
-//							newPunchDayLog.setAfternoonStatus(pdl.getAfternoonPunchStatus());
-//							newPunchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
-//							newPunchDayLog.setExceptionStatus(pdl.getExceptionStatus());
-//							newPunchDayLog.setDeviceChangeFlag(getDeviceChangeFlag(userId,java.sql.Date.valueOf(dateSF.get().format(start
-//									.getTime())),companyId));
-//							punchProvider.createPunchDayLog(newPunchDayLog);
-//
-//							}
-					} catch (Exception e) {
-						LOGGER.error("refresh day log wrong  userId["+userId+"],  day"+start.getTime(),e);
-					}
-//				});
-
-				start.add(Calendar.DAY_OF_MONTH, 1);
-			}
 		}
 	}
+	@Override
+	public void refreshPunchDayLog(Long userId, Long companyId, Long startDay, Long endDay) {
+		Calendar start = Calendar.getInstance();
+		Calendar end = Calendar.getInstance();
+		start.setTimeInMillis(startDay);
+		end.setTimeInMillis(endDay);
+		refreshPunchDayLog(userId, companyId, start, end);
+	}
+	@Override
+	public void refreshPunchDayLog(Long userId, Long companyId, Date startDay, Date endDay) {
+		Calendar start = Calendar.getInstance();
+		Calendar end = Calendar.getInstance();
+		start.setTime(startDay);
+		end.setTime(endDay);
+		refreshPunchDayLog(userId, companyId, start, end);
+	}
+
+	private void refreshPunchDayLog(Long userId, Long companyId, Calendar start, Calendar end) {
+		while (start.before(end)) {
+
+			try {
+				this.refreshPunchDayLog(userId, companyId, start);
+			} catch (Exception e) {
+				LOGGER.error("refresh day log wrong  userId["+userId+"],  day"+start.getTime(),e);
+			}
+
+			start.add(Calendar.DAY_OF_MONTH, 1);
+		}
+	}
+
 	public static int getPageSize(ConfigurationProvider configProvider, Integer requestedPageSize) {
 		if(requestedPageSize == null) {
 			return configProvider.getIntValue("pagination.default.size", AppConstants.PAGINATION_DEFAULT_SIZE);
@@ -7875,5 +7870,15 @@ public class PunchServiceImpl implements PunchService {
 			response.setAbnormalStatus(approval.getStatus());
 		}
 		return response;
+	}
+	/**
+	 * 审批通过- 异常处理更改approval_status
+	 * */
+	@Override
+	public void approveAbnormalPunch(PunchExceptionRequest request) {
+		//审批通过
+		//批量更新那个人那一天那班次那上下班的卡状态为正常
+
+		punchProvider.approveAbnormalPunch(request.getUserId(), request.getPunchDate(), request.getPunchIntervalNo(), request.getPunchType());
 	}
 }

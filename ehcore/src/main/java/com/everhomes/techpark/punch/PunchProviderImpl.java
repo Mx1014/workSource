@@ -34,7 +34,6 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.approval.ExceptionRequestType;
 import com.everhomes.rest.approval.ListTargetType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -2735,6 +2734,17 @@ long id = sequenceProvider.getNextSequence(key);
 		Condition condition = Tables.EH_PUNCH_TIME_RULES.PUNCH_RULE_ID.eq(id);
 		step.where(condition);
 		step.execute();
+	}
+
+	@Override
+	public void approveAbnormalPunch(Long userId, Date punchDate, Integer punchIntervalNo, Byte punchType) {
+
+		DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_PUNCH_LOGS).set(Tables.EH_PUNCH_LOGS.APPROVAL_STATUS, PunchStatus.NORMAL.getCode())
+				.where(Tables.EH_PUNCH_LOGS.PUNCH_DATE.eq(punchDate))
+				.and(Tables.EH_PUNCH_LOGS.PUNCH_INTERVAL_NO.eq(punchIntervalNo))
+				.and(Tables.EH_PUNCH_LOGS.PUNCH_TYPE.eq(punchType))
+				.and(Tables.EH_PUNCH_LOGS.USER_ID.eq(userId));
 	}
 
 
