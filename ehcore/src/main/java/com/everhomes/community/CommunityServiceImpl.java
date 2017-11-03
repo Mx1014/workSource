@@ -1732,7 +1732,8 @@ public class CommunityServiceImpl implements CommunityService {
 //		}
 		if(null != user){
 			dto.setUserId(user.getId());
-			dto.setUserName(user.getNickName());
+			//dto.setUserName(user.getNickName());
+			dto.setNickName(user.getNickName());
 			dto.setGender(user.getGender());
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
@@ -1771,7 +1772,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 		if(null != user){
 			dto.setUserId(user.getId());
-			dto.setUserName(user.getNickName());
+			//dto.setUserName(user.getNickName());
+			dto.setNickName(user.getNickName());
 			dto.setGender(user.getGender());
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
