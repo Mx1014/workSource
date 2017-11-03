@@ -5535,7 +5535,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if (!StringUtils.isEmpty(keywords)) {
 			Condition cond1 = t2.field("contact_token").eq(keywords);
 			cond1 = cond1.or(t2.field("contact_name").like("%" + keywords + "%"));
-			cond1 = cond1.or(t2.field("employee_no").like("%" + keywords + "%"));
+//			cond1 = cond1.or(t2.field("employee_no").like("%" + keywords + "%"));
 			cond = cond.and(cond1);
 		}
 
