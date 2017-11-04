@@ -1,9 +1,13 @@
 package com.everhomes.energy;
 
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.building.Building;
+import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -243,6 +247,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
+
+    @Autowired
+    private AddressProvider addressProvider;
+
+    @Autowired
+    private BuildingProvider buildingProvider;
 
     static final String TASK_EXECUTE = "energyTask.isexecute";
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -1136,67 +1146,59 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             if (category != null) {
                 meter.setBillCategoryId(category.getId());
             } else {
-                LOGGER.error("Import energy meter error, error field meterType");
+                LOGGER.error("Import energy meter error, error field category");
                 throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field category");
             }
             category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getE());
             if (category != null) {
                 meter.setServiceCategoryId(category.getId());
             } else {
-                LOGGER.error("Import energy meter error, error field meterType");
+                LOGGER.error("Import energy meter error, error field category");
                 throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field category");
             }
-            if (NumberUtils.isNumber(result.getF())) {
-                meter.setMaxReading(new BigDecimal(result.getF()));
+
+
+            if (NumberUtils.isNumber(result.getH())) {
+                meter.setMaxReading(new BigDecimal(result.getH()));
             } else {
-                LOGGER.error("Import energy meter error, error field meterType");
-                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field category");
+                LOGGER.error("Import energy meter error, error field MaxReading");
+                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field MaxReading");
             }
-            if (NumberUtils.isNumber(result.getG())) {
-                meter.setStartReading(new BigDecimal(result.getG()));
+            if (NumberUtils.isNumber(result.getI())) {
+                meter.setStartReading(new BigDecimal(result.getI()));
             } else {
                 meter.setStartReading(new BigDecimal("0"));
             }
-            if (NumberUtils.isNumber(result.getH())) {
-                meter.setPrice(new BigDecimal(result.getH()));
-            }
-//            else {
-//                meter.setStartReading(new BigDecimal("1"));
-//            }
+
             if (NumberUtils.isNumber(result.getI())) {
                 meter.setRate(new BigDecimal(result.getI()));
-            } else {
-                meter.setStartReading(new BigDecimal("1"));
             }
-            EnergyMeterFormula formula = meterFormulaProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getJ());
+
+            EnergyMeterFormula formula = meterFormulaProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getK());
             if (formula != null) {
                 meter.setAmountFormulaId(formula.getId());
-            } else {
-                LOGGER.error("Import energy meter error, error field meterType");
-                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field formula");
             }
-            formula = meterFormulaProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), result.getK());
-            if (formula != null) {
-                meter.setCostFormulaId(formula.getId());
-            } else {
-                LOGGER.error("Import energy meter error, error field meterType");
-                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field formula");
-            }
-            if(NumberUtils.isNumber(result.getL())) {
-                meter.setCalculationType(Byte.valueOf(result.getL()));
-            }
-            if(!StringUtils.isEmpty(result.getM())) {
-                EnergyMeterPriceConfig priceConfig = priceConfigProvider.findByName(result.getM(), cmd.getOwnerId(),
-                        cmd.getOwnerType(), cmd.getCommunityId(), UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
-                if(priceConfig != null) {
-                    meter.setConfigId(priceConfig.getId());
-                } else {
-                    LOGGER.error("Import energy meter error, error field price config");
-                    throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field price config");
-                }
-            }
+
             dbProvider.execute(r -> {
                 meterProvider.createEnergyMeter(meter);
+
+                if(!StringUtils.isEmpty(result.getF()) && !StringUtils.isEmpty(result.getG())) {
+                    Address address = addressProvider.findApartmentAddress(meter.getNamespaceId(), meter.getCommunityId(), result.getF(), result.getG());
+                    if(address != null) {
+                        EnergyMeterAddress ma = new EnergyMeterAddress();
+                        ma.setBuildingName(address.getBuildingName());
+                        ma.setApartmentName(address.getApartmentName());
+                        ma.setAddressId(address.getId());
+                        ma.setApartmentFloor(address.getApartmentFloor());
+                        Building building = buildingProvider.findBuildingByName(meter.getNamespaceId(), meter.getCommunityId(), address.getBuildingName());
+                        if(building != null) {
+                            ma.setBuildingId(building.getId());
+                        }
+                        ma.setMeterId(meter.getId());
+                        energyMeterAddressProvider.createEnergyMeterAddress(ma);
+                    }
+                }
+
                 // 创建setting log 记录
                 UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
                 updateCmd.setPrice(meter.getPrice());
