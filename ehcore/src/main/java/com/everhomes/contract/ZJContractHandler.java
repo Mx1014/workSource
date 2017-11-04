@@ -98,10 +98,16 @@ public class ZJContractHandler implements ContractService{
         String communityIdentifier = community == null ? "" : community.getNamespaceCommunityToken();
         String pageOffset = cmd.getPageAnchor() == null ? "" : cmd.getPageAnchor().toString();
         String pageSize = cmd.getPageSize() == null ? "" : cmd.getPageSize().toString();
+        Map<String, String> params = new HashMap<>();
+        if(cmd.getCategoryItemId() == null) {
+            String categoryName = "";
+            params = generateParams(communityIdentifier, contractStatus, contractAttribute, categoryName, cmd.getKeywords(), pageOffset, pageSize);
+        } else {
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
+            String categoryName = item == null ? "none" : item.getItemDisplayName();
+            params = generateParams(communityIdentifier, contractStatus, contractAttribute, categoryName, cmd.getKeywords(), pageOffset, pageSize);
+        }
 
-        ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
-        String categoryName = item == null ? "none" : item.getItemDisplayName();
-        Map<String, String> params = generateParams(communityIdentifier, contractStatus, contractAttribute, categoryName, cmd.getKeywords(), pageOffset, pageSize);
         StringBuilder sb = new StringBuilder();
         if(community != null && CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
             if(cmd.getCustomerType() == null || CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(cmd.getCustomerType()))) {
