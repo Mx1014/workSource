@@ -57,7 +57,7 @@ ALTER TABLE `eh_payment_charging_item_scopes` ADD COLUMN `decoupling_flag` TINYI
 -- payment_wentian_v2 new sql
 
 ALTER TABLE `eh_payment_charging_standards_scopes` ADD COLUMN namespace_id INTEGER DEFAULT 0;
-ALTER TABLE `eh_payment_bills` ADD COLUMN bill_group_rule_id BIGINT DEFAULT NULL;
+ALTER TABLE `eh_payment_contract_receiver` ADD COLUMN bill_group_rule_id BIGINT DEFAULT NULL;
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN bill_group_rule_id BIGINT DEFAULT NULL;
 
 
