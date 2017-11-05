@@ -22,7 +22,7 @@ import java.sql.Timestamp;
  *     <li>create_time: create_time</li>
  *     <li>update_time: update_time</li>
  *     <li>update_uid: update_uid</li>
- *     <li>status: 0-applying,1-reject,2-agree</li>
+ *     <li>status: 申请状态 0-applying,1-reject,2-agree 参考 {@link GuildApplyStatus}</li>
  * </ul>
  */
 public class GuildApplyDTO {
