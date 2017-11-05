@@ -14,6 +14,7 @@ CREATE TABLE `eh_guild_applies` (
   `namespace_id` int(11) NOT NULL,
   `group_id` bigint(22) NOT NULL,
   `applicant_uid` bigint(22) NOT NULL,
+  `group_member_id` bigint(22) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `phone` varchar(18) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
