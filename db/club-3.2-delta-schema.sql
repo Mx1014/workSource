@@ -26,3 +26,9 @@ CREATE TABLE `eh_guild_applies` (
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0-applying,1-reject,2-agree',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 俱乐部类型，普通俱乐部、行业协会
+ALTER TABLE `eh_group_settings` ADD COLUMN `club_type`  tinyint(4) NOT NULL DEFAULT 0 COMMENT '0-normal club, 1-guild club' ;
+-- 未加入俱乐部成员在俱乐部论坛的权限 0-不可见，1-可见，2-可交互
+ALTER TABLE `eh_groups` ADD COLUMN `tourist_post_policy`  tinyint(4) NOT NULL DEFAULT 2 COMMENT '0-hide, 1-see only, 2-interact';
+
