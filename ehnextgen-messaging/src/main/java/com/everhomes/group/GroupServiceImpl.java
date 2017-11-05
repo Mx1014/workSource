@@ -5547,7 +5547,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public GuildApplyDTO FindGuildApplyByGroupMemberId(FindGuildApplyByGroupMemberIdCommand cmd) {
+    public GuildApplyDTO findGuildApplyByGroupMemberId(FindGuildApplyByGroupMemberIdCommand cmd) {
         GuildApply guildApply = groupProvider.FindGuildApplyByGroupMemberId(cmd.getGroupMemberId());
         return ConvertHelper.convert(guildApply, GuildApplyDTO.class);
     }
