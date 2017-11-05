@@ -49,6 +49,7 @@ import com.everhomes.util.StringHelper;
  *     <li>website: 企业官网</li>
  *     <li>unifiedSocialCreditCode: 统一社会信用代码</li>
  *     <li>communityUserOrgDetailDTO: 用户企业信息 {@link CommunityUserOrgDetailDTO}</li>
+ *     <li>organizationMemberName: 当前用户在企业的contact_name</li>
  * </ul>
  */
 public class OrganizationDetailDTO {
@@ -114,6 +115,8 @@ public class OrganizationDetailDTO {
 	private String unifiedSocialCreditCode;
 
 	private CommunityUserOrgDetailDTO communityUserOrgDetailDTO;
+
+	private String organizationMemberName;
 
 	public String getUnifiedSocialCreditCode() {
 		return unifiedSocialCreditCode;
@@ -456,6 +459,14 @@ public class OrganizationDetailDTO {
 
 	public void setCommunityUserOrgDetailDTO(CommunityUserOrgDetailDTO communityUserOrgDetailDTO) {
 		this.communityUserOrgDetailDTO = communityUserOrgDetailDTO;
+	}
+
+	public String getOrganizationMemberName() {
+		return organizationMemberName;
+	}
+
+	public void setOrganizationMemberName(String organizationMemberName) {
+		this.organizationMemberName = organizationMemberName;
 	}
 
 	@Override

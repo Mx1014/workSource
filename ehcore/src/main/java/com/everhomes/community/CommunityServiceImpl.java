@@ -1841,6 +1841,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 			OrganizationDetailDTO detailDto = ConvertHelper.convert(detail, OrganizationDetailDTO.class);
 
+			detailDto.setOrganizationMemberName(member.getContactName());
+
 			List<OrganizationAddress> orgAddresses = organizationProvider.findOrganizationAddressByOrganizationId(detailDto.getOrganizationId());
 
 			List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
@@ -2084,7 +2086,7 @@ public class CommunityServiceImpl implements CommunityService {
 					if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
 						dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 					}
-					dto.setOrganizationMemberName(member.getContactName());
+					//dto.setOrganizationMemberName(member.getContactName());
 					ms.add(member);
 				}
 				List<OrganizationDetailDTO> organizations = new ArrayList<>();

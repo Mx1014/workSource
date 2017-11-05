@@ -13,7 +13,6 @@ import java.util.List;
  *     <li>userId: userId</li>
  *     <li>userName: userName</li>
  *     <li>nickName: nickName</li>
- *     <li>organizationMemberName: organizationMemberName</li>
  *     <li>communityId: communityId</li>
  *     <li>isAuth: isAuth</li>
  *     <li>enterpriseName: enterpriseName</li>
@@ -41,8 +40,6 @@ public class CommunityUserDto {
 	private String userName;
 
 	private String nickName;
-
-	private String organizationMemberName;
 
 	private Long communityId;
 
@@ -224,14 +221,6 @@ public class CommunityUserDto {
 
 	public void setRecentlyActiveTime(Long recentlyActiveTime) {
 		this.recentlyActiveTime = recentlyActiveTime;
-	}
-
-	public String getOrganizationMemberName() {
-		return organizationMemberName;
-	}
-
-	public void setOrganizationMemberName(String organizationMemberName) {
-		this.organizationMemberName = organizationMemberName;
 	}
 
 	public Byte getUserSourceType() {
