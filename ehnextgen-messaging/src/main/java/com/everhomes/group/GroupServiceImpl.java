@@ -182,7 +182,7 @@ public class GroupServiceImpl implements GroupService {
     	//创建俱乐部需要从后台获取设置的参数判断允不允许创建俱乐部， add by tt, 20161102
     	GroupSetting groupSetting = null;
     	if (cmd.getPrivateFlag() != null && GroupPrivacy.fromCode(cmd.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
-    		groupSetting = groupSettingProvider.findGroupSettingByNamespaceId(namespaceId);
+    		groupSetting = groupSettingProvider.findGroupSettingByNamespaceId(namespaceId, cmd.getClubType());
         	if (groupSetting != null && groupSetting.getCreateFlag() != null && TrueOrFalseFlag.fromCode(groupSetting.getCreateFlag()) == TrueOrFalseFlag.FALSE && !checkAdmin(cmd.getVisibleRegionId())) {
         		Map<String, Object> map = new HashMap<String, Object>();
                 map.put("clubPlaceholderName", getClubPlaceholderName(namespaceId));
@@ -334,6 +334,9 @@ public class GroupServiceImpl implements GroupService {
             if (group.getStatus() == null) {
             	group.setStatus(GroupAdminStatus.ACTIVE.getCode());
 			}
+
+			group.setTouristPostPolicy(cmd.getTouristPostPolicy());
+            group.setClubType(cmd.getClubType());
 
             this.groupProvider.createGroup(group);
     
@@ -1209,6 +1212,15 @@ public class GroupServiceImpl implements GroupService {
 				}
 			}
             
+        }
+
+        //行业协会需要增加额外表单
+        if(GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && ClubType.fromCode(group.getClubType()) == ClubType.GUILD){
+            GuildApply guildApply = ConvertHelper.convert(cmd, GuildApply.class);
+            guildApply.setNamespaceId(UserContext.getCurrentNamespaceId());
+            guildApply.setApplicantUid(userId);
+            guildApply.setGroupMemberId(member.getId());
+            groupProvider.createGuildApply(guildApply);
         }
     }
     
@@ -5013,7 +5025,7 @@ public class GroupServiceImpl implements GroupService {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"not exist group!");
 			}
-			Integer remainCount = getRemainBroadcastCount(group.getNamespaceId(), group.getId());
+			Integer remainCount = getRemainBroadcastCount(group.getNamespaceId(), group.getId(), group.getClubType());
 			if (remainCount <= 0) {
 				throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_BEYOND_BROADCAST_COUNT,
 						"beyond avalable count!");
@@ -5101,7 +5113,7 @@ public class GroupServiceImpl implements GroupService {
 	public GroupParametersResponse setGroupParameters(SetGroupParametersCommand cmd) {
 		if (cmd.getNamespaceId() == null || TrueOrFalseFlag.fromCode(cmd.getCreateFlag()) == null || TrueOrFalseFlag.fromCode(cmd.getVerifyFlag()) == null
 				|| TrueOrFalseFlag.fromCode(cmd.getMemberPostFlag()) == null || TrueOrFalseFlag.fromCode(cmd.getMemberCommentFlag()) == null
-				|| TrueOrFalseFlag.fromCode(cmd.getAdminBroadcastFlag()) == null || cmd.getBroadcastCount() == null) {
+				|| TrueOrFalseFlag.fromCode(cmd.getAdminBroadcastFlag()) == null || cmd.getBroadcastCount() == null || cmd.getClubType() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters");
 		}
@@ -5113,7 +5125,7 @@ public class GroupServiceImpl implements GroupService {
 		groupSetting.setUpdateTime(groupSetting.getCreateTime());
 		groupSetting.setOperatorUid(groupSetting.getCreatorUid());
 		GroupSetting old = null;
-		if ((old = getGroupSetting(cmd.getNamespaceId())) == null) {
+		if ((old = getGroupSetting(cmd.getNamespaceId(), cmd.getClubType())) == null) {
 			groupSettingProvider.createGroupSetting(groupSetting);
 		}else {
 			groupSetting.setCreateTime(old.getCreateTime());
@@ -5131,17 +5143,22 @@ public class GroupServiceImpl implements GroupService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters");
 		}
-		return getGroupParameters(cmd.getNamespaceId());
+
+		//老客户端只有普通俱乐部，并且不会传这个参数
+		if(cmd.getClubType() == null){
+		    cmd.setClubType((byte) 0);
+        }
+		return getGroupParameters(cmd.getNamespaceId(), cmd.getClubType());
 	}
 
-	private GroupSetting getGroupSetting(Integer namespaceId){
-		return groupSettingProvider.findGroupSettingByNamespaceId(namespaceId);
+	private GroupSetting getGroupSetting(Integer namespaceId, Byte clubType){
+		return groupSettingProvider.findGroupSettingByNamespaceId(namespaceId, clubType);
 	}
 	
-	private GroupParametersResponse getGroupParameters(Integer namespaceId) {
-		GroupSetting groupSetting = getGroupSetting(namespaceId);
+	private GroupParametersResponse getGroupParameters(Integer namespaceId, Byte clubType) {
+		GroupSetting groupSetting = getGroupSetting(namespaceId, clubType);
 		if (groupSetting == null) {
-			return new GroupParametersResponse(namespaceId, TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), 1);
+			return new GroupParametersResponse(namespaceId, TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), 1, clubType);
 		}
 		return ConvertHelper.convert(groupSetting, GroupParametersResponse.class);
 	}
@@ -5396,12 +5413,14 @@ public class GroupServiceImpl implements GroupService {
 	                ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters, groupId"+cmd.getGroupId());
 		}
 		checkGroupExists(userId, cmd.getGroupId());
+
+		Group group = groupProvider.findGroupById(cmd.getGroupId());
 		
-		return new GetRemainBroadcastCountResponse(getRemainBroadcastCount(cmd.getNamespaceId(), cmd.getGroupId()));
+		return new GetRemainBroadcastCountResponse(getRemainBroadcastCount(cmd.getNamespaceId(), cmd.getGroupId(), group.getClubType()));
 	}
 
-	private Integer getRemainBroadcastCount(Integer namespaceId, Long groupId) {
-		Integer availableCount = getGroupParameters(namespaceId).getBroadcastCount();
+	private Integer getRemainBroadcastCount(Integer namespaceId, Long groupId, Byte clubType) {
+		Integer availableCount = getGroupParameters(namespaceId, clubType).getBroadcastCount();
 		
 		Integer usedCount = broadcastProvider.selectBroadcastCountToday(namespaceId, BroadcastOwnerType.GROUP.getCode(), groupId);
 		
@@ -5524,6 +5543,12 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public GuildApplyDTO findGuildApply(FindGuildApplyCommand cmd) {
         GuildApply guildApply = groupProvider.findGuildApplyById(cmd.getId());
+        return ConvertHelper.convert(guildApply, GuildApplyDTO.class);
+    }
+
+    @Override
+    public GuildApplyDTO FindGuildApplyByGroupMemberId(FindGuildApplyByGroupMemberIdCommand cmd) {
+        GuildApply guildApply = groupProvider.FindGuildApplyByGroupMemberId(cmd.getGroupMemberId());
         return ConvertHelper.convert(guildApply, GuildApplyDTO.class);
     }
 

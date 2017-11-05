@@ -924,7 +924,13 @@ public class GroupProviderImpl implements GroupProvider {
 
     @Override
     public void createGuildApply(GuildApply guildApply) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGuildApplies.class));
 
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(GuildApply.class, id));
+        EhGuildAppliesDao dao = new EhGuildAppliesDao(context.configuration());
+        dao.insert(guildApply);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, GuildApply.class, null);
     }
 
     @Override
@@ -936,6 +942,16 @@ public class GroupProviderImpl implements GroupProvider {
             return null;
         }
         return ConvertHelper.convert(result, GuildApply.class);
+    }
+
+    @Override
+    public GuildApply FindGuildApplyByGroupMemberId(Long groupMemberId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGuildAppliesRecord> query = context.selectQuery(Tables.EH_GUILD_APPLIES);
+
+        query.addConditions(Tables.EH_GUILD_APPLIES.GROUP_MEMBER_ID.eq(groupMemberId));
+
+        return query.fetchAny().into(GuildApply.class);
     }
 
     @Override

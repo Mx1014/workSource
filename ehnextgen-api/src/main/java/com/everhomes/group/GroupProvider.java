@@ -92,6 +92,8 @@ public interface GroupProvider {
 
     GuildApply findGuildApplyById(Long id);
 
+    GuildApply FindGuildApplyByGroupMemberId(Long groupMemberId);
+
     IndustryType findIndustryTypeById(Long id);
 
     List<IndustryType> listIndustryTypes(Integer namespaceId);

@@ -174,6 +174,8 @@ public interface GroupService {
 
     GuildApplyDTO findGuildApply(FindGuildApplyCommand cmd);
 
+    GuildApplyDTO findGuildApplyByGroupMemberId(FindGuildApplyByGroupMemberIdCommand cmd);
+
     IndustryTypeDTO findIndustryType(FindIndustryTypeCommand cmd);
 
     ListIndustryTypesResponse listIndustryTypes(ListIndustryTypesCommand cmd);

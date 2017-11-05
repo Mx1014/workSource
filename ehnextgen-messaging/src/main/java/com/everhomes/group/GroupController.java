@@ -898,21 +898,6 @@ public class GroupController extends ControllerBase {
 	}
 
     /**
-     * <p>申请加入行业协会</p>
-     * <b>URL: /group/newGuildApply</b>
-     */
-    @RequestMapping("newGuildApply")
-    @RestReturn(String.class)
-    public RestResponse newGuildApply(NewGuildApplyCommand cmd){
-
-        groupService.newGuildApply(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
      * <p>获取行业协会申请信息</p>
      * <b>URL: /group/findGuildApply</b>
      */
@@ -921,6 +906,22 @@ public class GroupController extends ControllerBase {
     public RestResponse findGuildApply(FindGuildApplyCommand cmd){
 
         GuildApplyDTO cmdResponse = groupService.findGuildApply(cmd);
+
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>获取行业协会申请信息</p>
+     * <b>URL: /group/findGuildApplyByGroupMemberId</b>
+     */
+    @RequestMapping("findGuildApplyByGroupMemberId")
+    @RestReturn(GuildApplyDTO.class)
+    public RestResponse findGuildApplyByGroupMemberId(FindGuildApplyByGroupMemberIdCommand cmd){
+
+        GuildApplyDTO cmdResponse = groupService.findGuildApplyByGroupMemberId(cmd);
 
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
