@@ -10,36 +10,36 @@ import java.sql.Timestamp;
  * <ul>
  *     <li>id: id</li>
  *     <li>uuid: uuid</li>
- *     <li>namespace_id: namespace_id</li>
- *     <li>group_id: group_id</li>
- *     <li>applicant_uid: applicant_uid</li>
+ *     <li>namespaceId: namespaceId</li>
+ *     <li>groupId: groupId</li>
+ *     <li>applicantUid: applicantUid</li>
  *     <li>name: name</li>
  *     <li>phone: phone</li>
  *     <li>email: email</li>
- *     <li>organization_name: organization_name</li>
- *     <li>registered_capital: registered_capital</li>
+ *     <li>organizationName: organizationName</li>
+ *     <li>registeredCapital: registeredCapital</li>
  *     <li>industryType: industryType</li>
- *     <li>create_time: create_time</li>
- *     <li>update_time: update_time</li>
- *     <li>update_uid: update_uid</li>
+ *     <li>createTime: createTime</li>
+ *     <li>updateTime: updateTime</li>
+ *     <li>updateUid: updateUid</li>
  *     <li>status: 申请状态 0-applying,1-reject,2-agree 参考 {@link GuildApplyStatus}</li>
  * </ul>
  */
 public class GuildApplyDTO {
     private Long id;
     private String uuid;
-    private Integer namespace_id;
-    private Long group_id;
-    private Long applicant_uid;
+    private Integer namespaceId;
+    private Long groupId;
+    private Long applicantUid;
     private String name;
     private String phone;
     private String email;
-    private String organization_name;
-    private String registered_capital;
+    private String organizationName;
+    private String registeredCapital;
     private String industryType;
-    private Timestamp create_time;
-    private Timestamp update_time;
-    private Long update_uid;
+    private Timestamp createTime;
+    private Timestamp updateTime;
+    private Long updateUid;
     private Byte status;
 
     public Long getId() {
@@ -58,28 +58,28 @@ public class GuildApplyDTO {
         this.uuid = uuid;
     }
 
-    public Integer getNamespace_id() {
-        return namespace_id;
+    public Integer getNamespaceId() {
+        return namespaceId;
     }
 
-    public void setNamespace_id(Integer namespace_id) {
-        this.namespace_id = namespace_id;
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
-    public Long getGroup_id() {
-        return group_id;
+    public Long getGroupId() {
+        return groupId;
     }
 
-    public void setGroup_id(Long group_id) {
-        this.group_id = group_id;
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
     }
 
-    public Long getApplicant_uid() {
-        return applicant_uid;
+    public Long getApplicantUid() {
+        return applicantUid;
     }
 
-    public void setApplicant_uid(Long applicant_uid) {
-        this.applicant_uid = applicant_uid;
+    public void setApplicantUid(Long applicantUid) {
+        this.applicantUid = applicantUid;
     }
 
     public String getName() {
@@ -106,20 +106,20 @@ public class GuildApplyDTO {
         this.email = email;
     }
 
-    public String getOrganization_name() {
-        return organization_name;
+    public String getOrganizationName() {
+        return organizationName;
     }
 
-    public void setOrganization_name(String organization_name) {
-        this.organization_name = organization_name;
+    public void setOrganizationName(String organizationName) {
+        this.organizationName = organizationName;
     }
 
-    public String getRegistered_capital() {
-        return registered_capital;
+    public String getRegisteredCapital() {
+        return registeredCapital;
     }
 
-    public void setRegistered_capital(String registered_capital) {
-        this.registered_capital = registered_capital;
+    public void setRegisteredCapital(String registeredCapital) {
+        this.registeredCapital = registeredCapital;
     }
 
     public String getIndustryType() {
@@ -130,28 +130,28 @@ public class GuildApplyDTO {
         this.industryType = industryType;
     }
 
-    public Timestamp getCreate_time() {
-        return create_time;
+    public Timestamp getCreateTime() {
+        return createTime;
     }
 
-    public void setCreate_time(Timestamp create_time) {
-        this.create_time = create_time;
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
     }
 
-    public Timestamp getUpdate_time() {
-        return update_time;
+    public Timestamp getUpdateTime() {
+        return updateTime;
     }
 
-    public void setUpdate_time(Timestamp update_time) {
-        this.update_time = update_time;
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 
-    public Long getUpdate_uid() {
-        return update_uid;
+    public Long getUpdateUid() {
+        return updateUid;
     }
 
-    public void setUpdate_uid(Long update_uid) {
-        this.update_uid = update_uid;
+    public void setUpdateUid(Long updateUid) {
+        this.updateUid = updateUid;
     }
 
     public Byte getStatus() {

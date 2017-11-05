@@ -10,17 +10,17 @@ import java.sql.Timestamp;
  * <ul>
  *     <li>id: id</li>
  *     <li>uuid: uuid</li>
- *     <li>namespace_id: namespace_id</li>
+ *     <li>namespaceId: namespaceId</li>
  *     <li>name: name</li>
- *     <li>create_time: create_time</li>
+ *     <li>createTime: createTime</li>
  * </ul>
  */
 public class IndustryTypeDTO {
     private Long id;
     private String uuid;
-    private Integer namespace_id;
+    private Integer namespaceId;
     private String name;
-    private Timestamp create_time;
+    private Timestamp createTime;
 
     public Long getId() {
         return id;
@@ -38,12 +38,12 @@ public class IndustryTypeDTO {
         this.uuid = uuid;
     }
 
-    public Integer getNamespace_id() {
-        return namespace_id;
+    public Integer getNamespaceId() {
+        return namespaceId;
     }
 
-    public void setNamespace_id(Integer namespace_id) {
-        this.namespace_id = namespace_id;
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public String getName() {
@@ -54,12 +54,12 @@ public class IndustryTypeDTO {
         this.name = name;
     }
 
-    public Timestamp getCreate_time() {
-        return create_time;
+    public Timestamp getCreateTime() {
+        return createTime;
     }
 
-    public void setCreate_time(Timestamp create_time) {
-        this.create_time = create_time;
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
     }
 
     @Override
