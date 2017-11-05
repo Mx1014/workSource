@@ -923,6 +923,11 @@ public class GroupProviderImpl implements GroupProvider {
 	}
 
     @Override
+    public void createGuildApply(GuildApply guildApply) {
+
+    }
+
+    @Override
     public GuildApply findGuildApplyById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGuildApplies.class, id));
         EhGuildAppliesDao dao = new EhGuildAppliesDao(context.configuration());

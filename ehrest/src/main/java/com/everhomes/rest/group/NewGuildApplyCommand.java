@@ -5,7 +5,14 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>id: id</li>
+ *     <li>namespace_id: namespace_id</li>
+ *     <li>group_id: group_id</li>
+ *     <li>name: name</li>
+ *     <li>phone: phone</li>
+ *     <li>email: email</li>
+ *     <li>organization_name: organization_name</li>
+ *     <li>registered_capital: registered_capital</li>
+ *     <li>industryType: industryType</li>
  * </ul>
  */
 public class NewGuildApplyCommand {

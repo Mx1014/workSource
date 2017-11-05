@@ -5517,6 +5517,11 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    public void newGuildApply(NewGuildApplyCommand cmd) {
+
+    }
+
+    @Override
     public GuildApplyDTO findGuildApply(FindGuildApplyCommand cmd) {
         GuildApply guildApply = groupProvider.findGuildApplyById(cmd.getId());
         return ConvertHelper.convert(guildApply, GuildApplyDTO.class);
@@ -5550,10 +5555,5 @@ public class GroupServiceImpl implements GroupService {
             response.setDtos(dtos);
         }
         return response;
-    }
-
-    @Override
-    public void newGuildApply(NewGuildApplyCommand cmd) {
-        
     }
 }

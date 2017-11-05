@@ -88,6 +88,8 @@ public interface GroupProvider {
 
     List<GroupMember> searchPublicGroupMembersByStatus(Long groupId, String keyword, Byte status, Long from, int pageSize);
 
+    void createGuildApply(GuildApply guildApply);
+
     GuildApply findGuildApplyById(Long id);
 
     IndustryType findIndustryTypeById(Long id);
